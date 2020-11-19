@@ -1,6 +1,6 @@
 import { Vector3, Box3 } from 'three';
 import { AnisotropicRawData, RawData } from '..';
-import { bufferMarker } from './line-marker';
+import voxelMarker from './voxelMarker';
 
 type FuzzySelectTarget = '3d' | 'axial' | 'sagittal' | 'coronal';
 export default function fuzzySelect(
@@ -134,10 +134,7 @@ function fuzzySelectWithFloodFill3D(
 
   const stack: Vector3[] = [startPoint];
   const { min, max } = offsetBox;
-  const { marks, marked } = bufferMarker(offsetBox);
-  // const { marks, marked } = stupidMarker();
-  // const { marks, marked } = objectMarker();
-  // const { marks, marked } = bitsMarker(offsetBox);
+  const { marks, marked } = voxelMarker(offsetBox);
 
   const stackPoints = (walker: Vector3, xend: number) => {
     let isScanLine = false;

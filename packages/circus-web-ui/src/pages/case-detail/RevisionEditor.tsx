@@ -48,7 +48,7 @@ import ViewerCluster from './ViewerCluster';
 const useComposition = (
   seriesUid: string,
   partialVolumeDescriptor: PartialVolumeDescriptor
-): Composition | undefined => {
+): { composition: Composition | undefined, volumeLoaded: boolean } => {
   const { rsHttpClient } = useContext(VolumeLoaderCacheContext)!;
 
   const volumeLoader = usePendingVolumeLoader(
@@ -74,7 +74,14 @@ const useComposition = (
     [rsHttpClient, seriesUid, pvdStr, volumeLoader]
   );
 
-  return composition;
+  const [volumeLoaded, setVolumeLoaded] = useState<boolean>(false);
+  useLayoutEffect(() => {
+    if (!composition) return;
+    const imageSource = composition.imageSource as rs.HybridMprImageSource;
+    imageSource.readyEntireVolume().then(() => setVolumeLoaded(true));
+  }, [composition]);
+
+  return { composition, volumeLoaded };
 };
 
 const RevisionEditor: React.FC<{
@@ -115,7 +122,7 @@ const RevisionEditor: React.FC<{
 
   const activeSeries =
     editingData.revision.series[editingData.activeSeriesIndex];
-  const composition = useComposition(
+  const { composition, volumeLoaded } = useComposition(
     activeSeries.seriesUid,
     activeSeries.partialVolumeDescriptor
   );
@@ -126,13 +133,6 @@ const RevisionEditor: React.FC<{
     { activeToolName, toolOptions },
     { setActiveTool, setToolOption }
   ] = useToolbar();
-
-  const [volumeLoaded, setVolumeLoaded] = useState<boolean>(false);
-  useLayoutEffect(() => {
-    if (!composition) return;
-    const imageSource = composition.imageSource as rs.HybridMprImageSource;
-    imageSource.readyEntireVolume().then(() => setVolumeLoaded(true));
-  }, [composition]);
 
   const handleAnnotationChange = (
     annotation: rs.VoxelCloud | rs.SolidFigure | rs.PlaneFigure
@@ -389,7 +389,6 @@ const RevisionEditor: React.FC<{
   if (!activeSeries || !composition) return null;
   const activeLabel = activeSeries.labels[activeLabelIndex];
   const brushEnabled = activeLabel ? activeLabel.type === 'voxel' : false;
-  const wandEnabled = volumeLoaded;
 
   return (
     <StyledDiv className={classNames('case-revision-data', { busy })}>
@@ -454,10 +453,9 @@ const RevisionEditor: React.FC<{
           onChangeTool={setActiveTool}
           toolOptions={toolOptions}
           setToolOption={setToolOption}
-
           viewOptions={viewOptions}
           onChangeViewOptions={setViewOptions}
-          wandEnabled={wandEnabled}
+          wandEnabled={volumeLoaded}
           windowPresets={projectData.windowPresets}
           onApplyWindow={handleApplyWindow}
           brushEnabled={brushEnabled}

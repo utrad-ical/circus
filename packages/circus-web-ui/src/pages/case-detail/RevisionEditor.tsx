@@ -3,8 +3,6 @@ import JsonSchemaEditor from '@smikitky/rb-components/lib/JsonSchemaEditor';
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
-import ToolBaseClass from '@utrad-ical/circus-rs/src/browser/tool/Tool';
-import { ToolCollection } from '@utrad-ical/circus-rs/src/browser/tool/tool-initializer';
 import classNames from 'classnames';
 import Collapser from 'components/Collapser';
 import Icon from 'components/Icon';
@@ -29,6 +27,7 @@ import {
   VolumeLoaderCacheContext
 } from 'utils/useImageSource';
 import useLocalPreference from 'utils/useLocalPreference';
+import useToolbar from 'utils/useToolbar';
 import { Modal } from '../../components/react-bootstrap';
 import * as c from './caseStore';
 import LabelMenu from './LabelMenu';
@@ -101,8 +100,6 @@ const RevisionEditor: React.FC<{
   const viewWindows = useRef<{ [seriesUid: string]: rs.ViewWindow }>({});
 
   const [touchDevice] = useState(() => isTouchDevice());
-  const toolsRef = useRef<{ [key: string]: ToolBaseClass }>({});
-  const tools = toolsRef.current;
   const stateChanger = useMemo(() => createStateChanger<rs.MprViewState>(), []);
   const [seriesDialogOpen, setSeriesDialogOpen] = useState(false);
 
@@ -116,14 +113,6 @@ const RevisionEditor: React.FC<{
     }
   );
 
-  const [lineWidth, setLineWidth] = useState(1);
-  const [wandMode, setWandMode] = useState('3d' as '2d'|'3d');
-  const [wandThreshold, setWandThreshold] = useState(450);
-  const [wandMaxDistance, setWandMaxDistance] = useState(9999);
-
-  const [toolName, setToolName] = useState('');
-  const [tool, setTool] = useState<ToolBaseClass | null>(null);
-
   const activeSeries =
     editingData.revision.series[editingData.activeSeriesIndex];
   const composition = useComposition(
@@ -131,6 +120,12 @@ const RevisionEditor: React.FC<{
     activeSeries.partialVolumeDescriptor
   );
   const { revision, activeLabelIndex } = editingData;
+
+  const [
+    activeTool,
+    { activeToolName, toolOptions },
+    { setActiveTool, setToolOption }
+  ] = useToolbar();
 
   const [volumeLoaded, setVolumeLoaded] = useState<boolean>(false);
   useLayoutEffect(() => {
@@ -270,22 +265,6 @@ const RevisionEditor: React.FC<{
     }));
   }, [stateChanger, viewOptions.interpolationMode]);
 
-  const getTool = useCallback(
-    <T extends keyof ToolCollection>(toolName: T): ToolCollection[T] => {
-      const tool = tools[toolName] || rs.toolFactory(toolName);
-      tools[toolName] = tool;
-      return tool;
-    },
-    [tools]
-  );
-
-  useEffect(() => {
-    if (composition && !tool) {
-      setToolName('pager');
-      setTool(getTool('pager'));
-    }
-  }, [composition, getTool, tool]);
-
   const labelAttributesChange = (value: any) => {
     const { activeSeriesIndex, activeLabelIndex } = editingData;
     updateEditingData(d => {
@@ -316,77 +295,9 @@ const RevisionEditor: React.FC<{
     });
   };
 
-  const changeTool = useCallback(
-    (toolName: string) => {
-      setToolName(toolName);
-      setTool(getTool(toolName));
-    },
-    [getTool]
-  );
-
   const handleApplyWindow = useCallback(
     (window: rs.ViewWindow) => stateChanger(state => ({ ...state, window })),
     [stateChanger]
-  );
-
-  const handleSetLineWidth = useCallback(
-    (lineWidth: number) => {
-      setLineWidth(lineWidth);
-      getTool('brush').setOptions({ width: lineWidth });
-      getTool('eraser').setOptions({ width: lineWidth });
-    },
-    [getTool]
-  );
-
-  const handleSetWandMode = useCallback(
-    (wandMode: '2d' | '3d') => {
-      setWandMode(wandMode);
-      getTool('wand').setOptions({
-        mode: wandMode,
-        threshold: wandThreshold,
-        maxDistance: wandMaxDistance
-      });
-      getTool('wandEraser').setOptions({
-        mode: wandMode,
-        threshold: wandThreshold,
-        maxDistance: wandMaxDistance
-      });
-    },
-    [getTool, wandMaxDistance, wandThreshold]
-  );
-
-  const handleSetWandThreshold = useCallback(
-    (wandThreshold: number) => {
-      setWandThreshold(wandThreshold);
-      getTool('wand').setOptions({
-        mode: wandMode,
-        threshold: wandThreshold,
-        maxDistance: wandMaxDistance
-      });
-      getTool('wandEraser').setOptions({
-        mode: wandMode,
-        threshold: wandThreshold,
-        maxDistance: wandMaxDistance
-      });
-    },
-    [getTool, wandMaxDistance, wandMode]
-  );
-
-  const handleSetWandMaxDistance = useCallback(
-    (wandMaxDistance: number) => {
-      setWandMaxDistance(wandMaxDistance);
-      getTool('wand').setOptions({
-        mode: wandMode,
-        threshold: wandThreshold,
-        maxDistance: wandMaxDistance
-      });
-      getTool('wandEraser').setOptions({
-        mode: wandMode,
-        threshold: wandThreshold,
-        maxDistance: wandMaxDistance
-      });
-    },
-    [getTool, wandMode, wandThreshold]
   );
 
   const handleCreateViwer = (viewer: Viewer, id?: string | number) => {
@@ -539,19 +450,14 @@ const RevisionEditor: React.FC<{
       </SideContainer>
       <div className="case-revision-main">
         <ToolBar
-          active={toolName}
-          onChangeTool={changeTool}
+          active={activeToolName}
+          onChangeTool={setActiveTool}
+          toolOptions={toolOptions}
+          setToolOption={setToolOption}
+
           viewOptions={viewOptions}
           onChangeViewOptions={setViewOptions}
-          lineWidth={lineWidth}
-          setLineWidth={handleSetLineWidth}
           wandEnabled={wandEnabled}
-          wandMode={wandMode}
-          setWandMode={handleSetWandMode}
-          wandMaxDistance={wandMaxDistance}
-          setWandMaxDistance={handleSetWandMaxDistance}
-          wandThreshold={wandThreshold}
-          setWandThreshold={handleSetWandThreshold}
           windowPresets={projectData.windowPresets}
           onApplyWindow={handleApplyWindow}
           brushEnabled={brushEnabled}
@@ -561,7 +467,7 @@ const RevisionEditor: React.FC<{
           composition={composition}
           layout={viewOptions.layout ?? 'twoByTwo'}
           stateChanger={stateChanger}
-          tool={tool!}
+          tool={activeTool}
           onCreateViewer={handleCreateViwer}
           onDestroyViewer={handleDestroyViewer}
           initialStateSetter={initialStateSetter}

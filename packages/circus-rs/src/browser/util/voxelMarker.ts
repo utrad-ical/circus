@@ -26,7 +26,7 @@ export default function voxelMarker(boundary: Box3): VoxelMarker {
   };
 
   const marked = (p: Vector3) => {
-    let offset =
+    const offset =
       (p.z - min.z) * height * width + (p.y - min.y) * width + (p.x - min.x);
     return read(offset) === 1;
   };

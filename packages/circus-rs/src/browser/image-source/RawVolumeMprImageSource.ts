@@ -1,13 +1,13 @@
-import { Vector3 } from 'three';
 import DicomVolume from '../../common/DicomVolume';
-import { Section } from '../../common/geometry';
+import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
+import ViewState from '../ViewState';
 import { convertSectionToIndex } from '../section-util';
+import { Section } from '../../common/geometry';
 import setImmediate from '../util/setImmediate';
 import Viewer from '../viewer/Viewer';
-import ViewState from '../ViewState';
 import drawToImageData from './drawToImageData';
 import MprImageSource from './MprImageSource';
-import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
+import { Vector3 } from 'three';
 
 export interface RawVolumeMprImageSourceOptions {
   volumeLoader: DicomVolumeLoader;

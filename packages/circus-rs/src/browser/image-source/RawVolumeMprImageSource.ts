@@ -28,8 +28,12 @@ export default class RawVolumeMprImageSource extends MprImageSource {
     })();
   }
 
-  public getDicomVolume(): DicomVolume {
-    if (!this.volume) throw new Error('raw volume source is not ready yet');
+  public async readyEntireVolume() {
+    await this.loadSequence!;
+  }
+
+  public getEntireVolume() {
+    if (!this.volume) throw new Error('The entire volume is not loaded yet');
     return this.volume;
   }
 

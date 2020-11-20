@@ -1,4 +1,3 @@
-import DicomVolume from 'circus-rs/src/common/DicomVolume';
 import Viewer from '../viewer/Viewer';
 import ViewState from '../ViewState';
 import DynamicMprImageSource, {
@@ -35,10 +34,6 @@ export default class HybridMprImageSource extends MprImageSource {
     });
   }
 
-  public getDicomVolume(): DicomVolume {
-    return this.volSource.getDicomVolume();
-  }
-
   public draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
     const source: MprImageSource = this.volumeReady
       ? this.volSource
@@ -50,8 +45,12 @@ export default class HybridMprImageSource extends MprImageSource {
     return this.dynSource.ready();
   }
 
-  public readyVolume(): Promise<any> {
-    return this.volSource.ready();
+  public readyEntireVolume(): Promise<any> {
+    return this.volSource.readyEntireVolume();
+  }
+
+  public getEntireVolume() {
+    return this.volSource.getEntireVolume();
   }
 
   public initialState(viewer: Viewer): ViewState {

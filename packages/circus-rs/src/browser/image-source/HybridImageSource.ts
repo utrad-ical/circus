@@ -45,7 +45,7 @@ export default class HybridMprImageSource extends MprImageSource {
     return this.dynSource.ready();
   }
 
-  public readyEntireVolume(): Promise<any> {
+  public readyEntireVolume() {
     return this.volSource.readyEntireVolume();
   }
 

@@ -11,7 +11,6 @@ import React, {
   useCallback,
   useContext,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState
@@ -75,7 +74,7 @@ const useComposition = (
   );
 
   const [volumeLoaded, setVolumeLoaded] = useState<boolean>(false);
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!composition) return;
     const imageSource = composition.imageSource as rs.HybridMprImageSource;
     imageSource.readyEntireVolume().then(() => setVolumeLoaded(true));

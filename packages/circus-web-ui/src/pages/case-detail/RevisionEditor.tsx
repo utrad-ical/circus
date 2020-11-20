@@ -128,11 +128,35 @@ const RevisionEditor: React.FC<{
   );
   const { revision, activeLabelIndex } = editingData;
 
+  if (!activeSeries || !composition) return null;
+  const activeLabel = activeSeries.labels[activeLabelIndex];
+
   const [
     activeTool,
     { activeToolName, toolOptions },
     { setActiveTool, setToolOption }
   ] = useToolbar();
+
+  const [editorEnabled, setEditorEnabled] = useState<boolean>(false);
+  const toolNameAtEditorDisabledRef = useRef<string>();
+  const activeToolIsEditor
+    = ['brush', 'eraser', 'bucket', 'wand', 'wandEraser'].some(t => t === activeToolName);
+  const activeLabelIsVoxel = activeLabel && activeLabel.type === 'voxel';
+  useEffect(() => {
+    if (!editorEnabled && activeLabelIsVoxel) {
+      setEditorEnabled(true);
+      if (toolNameAtEditorDisabledRef.current) {
+        setActiveTool(toolNameAtEditorDisabledRef.current);
+        toolNameAtEditorDisabledRef.current = undefined;
+      }
+    } else if (editorEnabled && !activeLabelIsVoxel) {
+      if (activeToolIsEditor) {
+        toolNameAtEditorDisabledRef.current = activeToolName;
+        setActiveTool('pager');
+      }
+      setEditorEnabled(false);
+    }
+  }, [activeLabelIsVoxel, activeToolIsEditor]);
 
   const handleAnnotationChange = (
     annotation: rs.VoxelCloud | rs.SolidFigure | rs.PlaneFigure
@@ -386,10 +410,6 @@ const RevisionEditor: React.FC<{
     return viewState; // do not update view state (should not happen)
   };
 
-  if (!activeSeries || !composition) return null;
-  const activeLabel = activeSeries.labels[activeLabelIndex];
-  const brushEnabled = activeLabel ? activeLabel.type === 'voxel' : false;
-
   return (
     <StyledDiv className={classNames('case-revision-data', { busy })}>
       <SideContainer>
@@ -458,7 +478,7 @@ const RevisionEditor: React.FC<{
           wandEnabled={volumeLoaded}
           windowPresets={projectData.windowPresets}
           onApplyWindow={handleApplyWindow}
-          brushEnabled={brushEnabled}
+          brushEnabled={editorEnabled}
           disabled={busy}
         />
         <ViewerCluster

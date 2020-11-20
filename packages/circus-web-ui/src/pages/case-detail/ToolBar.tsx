@@ -109,19 +109,13 @@ const ToolBar: React.FC<{
     }
   };
 
-  const brushTools = ['brush', 'eraser', 'bucket', 'wand', 'wandEraser'];
-  const activeTool =
-    !brushEnabled && brushTools.some(tool => tool === active)
-      ? 'pager'
-      : active;
-
   return (
     <StyledDiv>
       <ToolButton
         name="pager"
         icon="rs-pager"
         changeTool={onChangeTool}
-        active={activeTool}
+        active={active}
         shortcut="KeyP"
         disabled={disabled}
       />
@@ -129,7 +123,7 @@ const ToolBar: React.FC<{
         name="zoom"
         icon="rs-zoom"
         changeTool={onChangeTool}
-        active={activeTool}
+        active={active}
         shortcut="KeyZ"
         disabled={disabled}
       />
@@ -137,7 +131,7 @@ const ToolBar: React.FC<{
         name="hand"
         icon="rs-hand"
         changeTool={onChangeTool}
-        active={activeTool}
+        active={active}
         shortcut="KeyH"
         disabled={disabled}
       />
@@ -145,7 +139,7 @@ const ToolBar: React.FC<{
         name="window"
         icon="rs-window"
         changeTool={onChangeTool}
-        active={activeTool}
+        active={active}
         shortcut="KeyW"
         disabled={disabled}
       >
@@ -167,7 +161,7 @@ const ToolBar: React.FC<{
         name="brush"
         icon="rs-brush"
         changeTool={onChangeTool}
-        active={activeTool}
+        active={active}
         shortcut="KeyB"
         disabled={!brushEnabled || disabled}
       />
@@ -175,7 +169,7 @@ const ToolBar: React.FC<{
         name="eraser"
         icon="rs-eraser"
         changeTool={onChangeTool}
-        active={activeTool}
+        active={active}
         shortcut="KeyE"
         disabled={!brushEnabled || disabled}
       />
@@ -191,21 +185,21 @@ const ToolBar: React.FC<{
         name="bucket"
         icon="rs-bucket"
         changeTool={onChangeTool}
-        active={activeTool}
+        active={active}
         disabled={!brushEnabled || disabled}
       />
       <ToolButton
         name="wand"
         icon="rs-wand"
         changeTool={onChangeTool}
-        active={activeTool}
+        active={active}
         disabled={!brushEnabled || !wandEnabled || disabled}
       />
       <ToolButton
         name="wandEraser"
         icon="rs-wand-eraser"
         changeTool={onChangeTool}
-        active={activeTool}
+        active={active}
         disabled={!brushEnabled || !wandEnabled || disabled}
       />
       &thinsp;
@@ -263,7 +257,7 @@ const ToolBar: React.FC<{
           })}
         </Dropdown.Menu>
       </Dropdown>
-      {(activeTool === 'wand' || activeTool === 'wandEraser') && (
+      {(active === 'wand' || active === 'wandEraser') && (
         <StyledSpanWandOption>
           &emsp;
           <>

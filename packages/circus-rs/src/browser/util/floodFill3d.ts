@@ -43,8 +43,8 @@ export default function floodFill3d(
     if (marked(cur)) continue;
 
     // x adjacent points of scan-line's endpoint
-    let left = cur.clone();
-    let right = cur.clone();
+    const left = cur.clone();
+    const right = cur.clone();
 
     // find start of scan-line
     do {

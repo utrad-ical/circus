@@ -13,6 +13,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { WindowPreset } from 'types/Project';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
+import { ToolOptions, ToolOptionSetter } from 'utils/useToolbar';
 import { Layout } from './ViewerCluster';
 
 export interface ViewOptions {
@@ -39,18 +40,12 @@ const layoutOptions = [
 
 const ToolBar: React.FC<{
   active: string;
+  toolOptions: ToolOptions;
+  setToolOption: ToolOptionSetter;
   viewOptions: ViewOptions;
   onChangeViewOptions: (viewOptions: ViewOptions) => void;
   brushEnabled: boolean;
-  lineWidth: number;
-  setLineWidth: (lineWidth: number) => void;
   wandEnabled: boolean;
-  wandMode: string;
-  setWandMode: (wandMode: '2d' | '3d') => void;
-  wandThreshold: number;
-  setWandThreshold: (wandThreshold: number) => void;
-  wandMaxDistance: number;
-  setWandMaxDistance: (wandMaxDistance: number) => void;
   windowPresets?: WindowPreset[];
   onChangeTool: (toolName: string) => void;
   onApplyWindow: (window: any) => void;
@@ -58,18 +53,12 @@ const ToolBar: React.FC<{
 }> = React.memo(props => {
   const {
     active,
+    toolOptions,
+    setToolOption,
     viewOptions,
     onChangeViewOptions,
     brushEnabled,
-    lineWidth,
-    setLineWidth,
     wandEnabled,
-    wandMode,
-    setWandMode,
-    wandThreshold,
-    setWandThreshold,
-    wandMaxDistance,
-    setWandMaxDistance,
     windowPresets = [],
     onChangeTool,
     onApplyWindow,
@@ -105,20 +94,6 @@ const ToolBar: React.FC<{
           ? 'nearestNeighbor'
           : 'trilinear'
     });
-  };
-
-  const handleToggleWandMode = () => {
-    setWandMode(wandMode === '3d' ? '2d' : '3d');
-  };
-
-  const handleWandThreshold = (ev: React.ChangeEvent<HTMLInputElement>) => {
-    const threshold = ev.target.valueAsNumber;
-    setWandThreshold(threshold);
-  };
-
-  const handleWandMaxDistance = (ev: React.ChangeEvent<HTMLInputElement>) => {
-    const maxDistance = ev.target.valueAsNumber;
-    setWandMaxDistance(maxDistance);
   };
 
   const handleApplyWindow = async (selection: WindowPreset) => {
@@ -208,8 +183,8 @@ const ToolBar: React.FC<{
         numericalValue
         className="line-width-shrinkselect"
         options={widthOptions}
-        value={lineWidth}
-        onChange={setLineWidth}
+        value={toolOptions.lineWidth}
+        onChange={(lineWidth) => setToolOption("lineWidth", lineWidth)}
         disabled={!brushEnabled || disabled}
       />
       <ToolButton
@@ -298,8 +273,8 @@ const ToolBar: React.FC<{
               type="number"
               name="threshold"
               min="0"
-              value={wandThreshold}
-              onChange={handleWandThreshold}
+              value={toolOptions.wandThreshold}
+              onChange={(ev) => setToolOption("wandThreshold", ev.target.valueAsNumber)}
             />
           </>
           <>
@@ -310,8 +285,8 @@ const ToolBar: React.FC<{
               name="maxDistance"
               min="0"
               placeholder="mm"
-              value={wandMaxDistance}
-              onChange={handleWandMaxDistance}
+              value={toolOptions.wandMaxDistance}
+              onChange={(ev) => setToolOption("wandMaxDistance", ev.target.valueAsNumber)}
             />
           </>
           <>
@@ -319,8 +294,8 @@ const ToolBar: React.FC<{
             <ShrinkSelect
               className="wand-option-shrinkselect"
               options={wandModeOptions}
-              value={wandMode}
-              onChange={handleToggleWandMode}
+              value={toolOptions.wandMode}
+              onChange={(mode) => setToolOption("wandMode", mode)}
             />
           </>
         </StyledSpanWandOption>

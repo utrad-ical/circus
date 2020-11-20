@@ -15,31 +15,19 @@ export interface ToolOptions {
   wandMaxDistance: WandToolOptions['maxDistance'];
 }
 
-// export type ToolOptionGetter = <K extends keyof ToolOptions>(key: K) => ToolOptions[K];
 export type ToolOptionSetter = <K extends keyof ToolOptions>(
   optionName: K,
   optionValue: ToolOptions[K]
 ) => void;
 
-type ToolbarState = {
-  activeToolName: ToolName;
-  toolOptions: ToolOptions;
-};
-
-const defaultState = (): ToolbarState => ({
-  activeToolName: 'pager',
-  toolOptions: {
-    lineWidth: 1,
-    wandMode: '3d',
-    wandThreshold: 450,
-    wandMaxDistance: 9999
-  }
+const defaultToolOptions = (): ToolOptions => ({
+  lineWidth: 1,
+  wandMode: '3d',
+  wandThreshold: 450,
+  wandMaxDistance: 9999
 });
 
-const useToolbar = (initialState: ToolbarState = defaultState()) => {
-  // State
-  const [state, setState] = useState<ToolbarState>(initialState);
-
+const useToolbar = () => {
   // Tool collection
   const toolCollectionRef = useRef<Partial<ToolCollection>>({});
   const toolCollection = toolCollectionRef.current;
@@ -53,11 +41,7 @@ const useToolbar = (initialState: ToolbarState = defaultState()) => {
   );
 
   // Active tool
-  const { activeToolName } = state;
-
-  const setActiveTool: ActiveToolSetter = activeToolName =>
-    setState({ ...state, activeToolName });
-
+  const [activeToolName, setActiveTool] = useState<string>('pager');
   const [activeTool, applyActiveTool] = useState<ToolBaseClass>();
 
   useEffect(() => {
@@ -65,14 +49,15 @@ const useToolbar = (initialState: ToolbarState = defaultState()) => {
   }, [getTool, activeToolName]);
 
   // Tool options
-  const { toolOptions } = state;
+  const [toolOptions, setToolOptions] = useState<ToolOptions>(
+    defaultToolOptions()
+  );
 
-  const setToolOption: ToolOptionSetter = (optionName, optionValue) => {
-    setState({
-      ...state,
-      toolOptions: { ...state.toolOptions, [optionName]: optionValue }
-    });
-  };
+  const setToolOption: ToolOptionSetter = useCallback(
+    (optionName, optionValue) =>
+      setToolOptions(state => ({ ...state, [optionName]: optionValue })),
+    []
+  );
 
   const lastOptionsRef = useRef<ToolOptions>();
   useEffect(() => {

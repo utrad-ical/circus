@@ -2,7 +2,7 @@ import { Vector3, Box3 } from 'three';
 import createMarkedStateDumper from './createMarkedStateDumper';
 import voxelMarker, { VoxelMarker } from './voxelMarker';
 
-test.skip('voxelMarker must work exactly', () => {
+test('voxelMarker must work exactly', () => {
   for (let i = 0; i < 10; i++) {
     const [o, s, markArguments] = randArg();
     const boundary = new Box3(o, o.clone().add(s));

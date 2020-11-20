@@ -54,7 +54,7 @@ export default class WandTool extends VoxelCloudToolBase<WandToolOptions> {
       throw new Error('You cannot use Wand tool 2D on oblique MPR image.');
     }
 
-    const report = fuzzySelect(
+    fuzzySelect(
       target,
       mprRawData,
       startPoint,
@@ -63,9 +63,6 @@ export default class WandTool extends VoxelCloudToolBase<WandToolOptions> {
       cloudRawData,
       this.value
     );
-
-    console.log({ startPoint, mode, threshold, maxDistance });
-    console.log(JSON.stringify(report, null, 2));
 
     comp.annotationUpdated(ev.viewer);
   }

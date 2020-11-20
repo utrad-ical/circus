@@ -43,7 +43,7 @@ export default class WandTool extends VoxelCloudToolBase<WandToolOptions> {
 
     const { mode, threshold, maxDistance } = this.options;
 
-    const mprRawData = src.getDicomVolume();
+    const mprRawData = src.getEntireVolume();
     const cloudRawData = this.activeCloud.volume!;
 
     if (!this.activeCloud.expanded) this.activeCloud.expandToMaximum(src);

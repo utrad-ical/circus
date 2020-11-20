@@ -1,4 +1,4 @@
-import DicomVolume from 'circus-rs/src/common/DicomVolume';
+import { AnisotropicRawData } from '..';
 import { Vector2D, Vector3D } from '../../common/geometry';
 import { adjustOnResized, createOrthogonalMprSection } from '../section-util';
 import Viewer from '../viewer/Viewer';
@@ -35,8 +35,12 @@ export default abstract class MprImageSource extends ImageSource {
     await this.loadSequence;
   }
 
-  public getDicomVolume(): DicomVolume {
-    throw new Error('Method not implemented.');
+  public readyEntireVolume(): Promise<void> {
+    return Promise.reject('In this source, the entire volume will not be loaded.');
+  }
+
+  public getEntireVolume(): AnisotropicRawData {
+    throw new Error('In this source, the entire volume will not be loaded.');
   }
 
   /**

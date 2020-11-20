@@ -136,7 +136,7 @@ const RevisionEditor: React.FC<{
   useLayoutEffect(() => {
     if (!composition) return;
     const imageSource = composition.imageSource as rs.HybridMprImageSource;
-    imageSource.readyVolume().then(() => setVolumeLoaded(true));
+    imageSource.readyEntireVolume().then(() => setVolumeLoaded(true));
   }, [composition]);
 
   const handleAnnotationChange = (

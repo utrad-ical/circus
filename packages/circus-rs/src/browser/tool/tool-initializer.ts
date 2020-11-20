@@ -1,19 +1,19 @@
-import CircleTool from './annotation/CircleTool';
-import CuboidTool from './annotation/CuboidTool';
-import EllipsoidTool from './annotation/EllipsoidTool';
-import PointTool from './annotation/PointTool';
-import RectangleTool from './annotation/RectangleTool';
-import BrushTool from './cloud/BrushTool';
-import BucketTool from './cloud/BucketTool';
-import EraserTool from './cloud/EraserTool';
-import WandEraserTool from './cloud/WandEraserTool';
-import WandTool from './cloud/WandTool';
-import CelestialRotateTool from './state/CelestialRotateTool';
-import HandTool from './state/HandTool';
-import PagerTool from './state/PagerTool';
-import WindowTool from './state/WindowTool';
-import ZoomTool from './state/ZoomTool';
 import ToolBaseClass from './Tool';
+import WindowTool from './state/WindowTool';
+import HandTool from './state/HandTool';
+import ZoomTool from './state/ZoomTool';
+import PagerTool from './state/PagerTool';
+import CelestialRotateTool from './state/CelestialRotateTool';
+import BrushTool from './cloud/BrushTool';
+import EraserTool from './cloud/EraserTool';
+import BucketTool from './cloud/BucketTool';
+import CircleTool from './annotation/CircleTool';
+import RectangleTool from './annotation/RectangleTool';
+import EllipsoidTool from './annotation/EllipsoidTool';
+import CuboidTool from './annotation/CuboidTool';
+import PointTool from './annotation/PointTool';
+import WandTool from './cloud/WandTool';
+import WandEraserTool from './cloud/WandEraserTool';
 
 type ToolClass<T extends ToolBaseClass> = { new (): T };
 
@@ -95,6 +95,3 @@ export function toolFactory<K extends keyof ToolCollection>(
 ): ToolCollection[K] {
   return toolCollection[key];
 }
-
-// const mustBeHandTool = toolFactory('hand');
-// const mustBeAny = toolFactory('anyone');

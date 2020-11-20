@@ -1,4 +1,3 @@
-import IconButton from '@smikitky/rb-components/lib/IconButton';
 import JsonSchemaEditor from '@smikitky/rb-components/lib/JsonSchemaEditor';
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
@@ -8,7 +7,6 @@ import Collapser from 'components/Collapser';
 import Icon from 'components/Icon';
 import { createStateChanger } from 'components/ImageViewer';
 import produce from 'immer';
-import { debounce } from 'lodash';
 import React, {
   useCallback,
   useContext,
@@ -18,19 +16,13 @@ import React, {
   useRef,
   useState
 } from 'react';
-import styled from 'styled-components';
 import Project from 'types/Project';
-import isTouchDevice from 'utils/isTouchDevice';
 import {
   stringifyPartialVolumeDescriptor,
   usePendingVolumeLoader,
   VolumeLoaderCacheContext
 } from 'utils/useImageSource';
-import useLocalPreference from 'utils/useLocalPreference';
-import useToolbar from 'utils/useToolbar';
-import { Modal } from '../../components/react-bootstrap';
 import * as c from './caseStore';
-import LabelMenu from './LabelMenu';
 import LabelSelector from './LabelSelector';
 import {
   buildAnnotation,
@@ -40,10 +32,18 @@ import {
   labelTypes,
   SeriesEntryWithLabels
 } from './revisionData';
-import SeriesSelectorDialog from './SeriesSelectorDialog';
 import SideContainer from './SideContainer';
 import ToolBar, { ViewOptions } from './ToolBar';
 import ViewerCluster from './ViewerCluster';
+import IconButton from '@smikitky/rb-components/lib/IconButton';
+import { Modal } from '../../components/react-bootstrap';
+import SeriesSelectorDialog from './SeriesSelectorDialog';
+import styled from 'styled-components';
+import LabelMenu from './LabelMenu';
+import { debounce } from 'lodash';
+import useLocalPreference from 'utils/useLocalPreference';
+import isTouchDevice from 'utils/isTouchDevice';
+import useToolbar from 'utils/useToolbar';
 
 const useComposition = (
   seriesUid: string,

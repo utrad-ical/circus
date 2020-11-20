@@ -1,12 +1,12 @@
-import Viewer from '../viewer/Viewer';
-import ViewState from '../ViewState';
 import DynamicMprImageSource, {
   DynamicMprImageSourceOptions
 } from './DynamicMprImageSource';
-import MprImageSource from './MprImageSource';
 import RawVolumeMprImageSource, {
   RawVolumeMprImageSourceOptions
 } from './RawVolumeMprImageSource';
+import ViewState from '../ViewState';
+import Viewer from '../viewer/Viewer';
+import MprImageSource from './MprImageSource';
 
 interface HybridImageSourceOptions
   extends RawVolumeMprImageSourceOptions,

@@ -6,15 +6,15 @@ import {
   Dropdown,
   MenuItem,
   OverlayTrigger,
-  SplitButton,
-  Tooltip
+  Tooltip,
+  SplitButton
 } from 'components/react-bootstrap';
 import React from 'react';
 import styled from 'styled-components';
+import { Layout } from './ViewerCluster';
 import { WindowPreset } from 'types/Project';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
 import { ToolOptions, ToolOptionSetter } from 'utils/useToolbar';
-import { Layout } from './ViewerCluster';
 
 export interface ViewOptions {
   layout?: Layout;

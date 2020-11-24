@@ -171,20 +171,16 @@ export default abstract class SolidFigure
     };
   }
 
-  public validate(): boolean | undefined {
+  public validate(): boolean {
     const min = this.min;
     const max = this.max;
-
-    return (
-      min &&
-      max &&
-      min.some((value, index) => {
-        return value !== max[index];
-      })
-    );
+    if (!min || !max) return false;
+    return min.some((value, index) => {
+      return value !== max[index];
+    });
   }
 
-  public concreate(orientation?: OrientationString): void {
+  public concrete(orientation?: OrientationString): void {
     // boundingBox
     const min = this.min;
     const max = this.max;
@@ -193,17 +189,17 @@ export default abstract class SolidFigure
     const penddingBoundingBox = new Box3()
       .expandByPoint(new Vector3().fromArray(min))
       .expandByPoint(new Vector3().fromArray(max));
-    let concreateBoundingBox: Box3;
+    let concreteBoundingBox: Box3;
     if (this.resetDepthOfBoundingBox && orientation) {
-      concreateBoundingBox = SolidFigure.getBoundingBoxWithResetDepth(
+      concreteBoundingBox = SolidFigure.getBoundingBoxWithResetDepth(
         orientation,
         penddingBoundingBox
       );
     } else {
-      concreateBoundingBox = penddingBoundingBox;
+      concreteBoundingBox = penddingBoundingBox;
     }
-    this.min = concreateBoundingBox.min.toArray();
-    this.max = concreateBoundingBox.max.toArray();
+    this.min = concreteBoundingBox.min.toArray();
+    this.max = concreteBoundingBox.max.toArray();
     this.resetDepthOfBoundingBox = undefined;
 
     // dragInfo
@@ -425,7 +421,7 @@ export default abstract class SolidFigure
     if (viewer.getHoveringAnnotation() === this) {
       ev.stopPropagation();
       viewer.setCursorStyle('');
-      this.concreate();
+      this.concrete();
 
       const comp = viewer.getComposition();
       if (!comp) return;

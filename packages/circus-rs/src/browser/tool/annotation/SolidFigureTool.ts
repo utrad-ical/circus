@@ -1,137 +1,72 @@
-import { Vector2, Vector3 } from 'three';
+import { Annotation } from '../..';
 import Cuboid from '../../annotation/Cuboid';
 import Ellipsoid from '../../annotation/Ellipsoid';
 import SolidFigure, { FigureType } from '../../annotation/SolidFigure';
-import {
-  convertScreenCoordinateToVolumeCoordinate,
-  detectOrthogonalSection
-} from '../../section-util';
-import Viewer from '../../viewer/Viewer';
+import { detectOrthogonalSection } from '../../section-util';
 import ViewerEvent from '../../viewer/ViewerEvent';
-import ToolBaseClass, { Tool } from '../Tool';
+import { getVolumeCoordinateFromViewerEvent } from '../tool-util';
+import AnnotationToolBase from './AnnotationToolBase';
 
 /**
  * SolidFigureTool creates and edits SolidFigure.
  */
-export default class SolidFigureTool extends ToolBaseClass implements Tool {
-  private focusedFigure?: SolidFigure;
-  protected usePointerLockAPI: boolean = false;
+export default class SolidFigureTool extends AnnotationToolBase {
+  protected focusedAnnotation?: SolidFigure;
   protected figureType: FigureType = 'cuboid';
 
-  public activate(viewer: Viewer): void {
-    viewer.primaryEventTarget = this;
-  }
-
-  public deactivate(viewer: Viewer): void {
-    viewer.primaryEventTarget = undefined;
-  }
-
-  public mouseMoveHandler(ev: ViewerEvent): void {
-    ev.stopPropagation();
-  }
-  public dragStartHandler(ev: ViewerEvent): void {
-    const comp = ev.viewer.getComposition();
-    if (!comp) return;
-
+  protected createAnnotation(ev: ViewerEvent): Annotation | undefined {
     const viewState = ev.viewer.getState();
     if (!viewState || viewState.type !== 'mpr') return;
     const section = viewState.section;
     const orientation = detectOrthogonalSection(section);
-    const resolution: [number, number] = ev.viewer.getResolution();
-    const screenPoint: [number, number] = [ev.viewerX!, ev.viewerY!];
-
-    // Create figure
     if (!SolidFigure.editableOrientation.some(o => o === orientation)) return;
-    const min = convertScreenCoordinateToVolumeCoordinate(
-      section,
-      new Vector2().fromArray(resolution),
-      new Vector2().fromArray(screenPoint)
-    );
 
-    const fig = this.createFigure(min.toArray());
+    const point = getVolumeCoordinateFromViewerEvent(ev);
 
-    comp.addAnnotation(fig);
-    comp.annotationUpdated();
-    this.focusedFigure = fig;
-
-    ev.stopPropagation();
-  }
-
-  public dragHandler(ev: ViewerEvent): void {
-    const comp = ev.viewer.getComposition();
-    if (!comp) return;
-
-    const viewState = ev.viewer.getState();
-    if (!viewState || viewState.type !== 'mpr') return;
-
-    if (!this.focusedFigure) return;
-
-    const resolution: [number, number] = ev.viewer.getResolution();
-    const screenPoint: [number, number] = [ev.viewerX!, ev.viewerY!];
-
-    // Update figure
-    const max = convertScreenCoordinateToVolumeCoordinate(
-      viewState.section,
-      new Vector2().fromArray(resolution),
-      new Vector2().fromArray(screenPoint)
-    );
-
-    this.focusedFigure.max = max.toArray();
-
-    comp.annotationUpdated();
-
-    ev.stopPropagation();
-  }
-
-  public dragEndHandler(ev: ViewerEvent): void {
-    document.exitPointerLock();
-
-    const comp = ev.viewer.getComposition();
-    if (!comp) return;
-
-    const fig = this.focusedFigure;
-    if (!fig) return;
-
-    const viewState = ev.viewer.getState();
-    if (!viewState || viewState.type !== 'mpr') return;
-
-    if (fig.validate()) {
-      const orientation = detectOrthogonalSection(viewState.section);
-      fig.concreate(orientation);
-    } else {
-      comp.removeAnnotation(fig);
-    }
-
-    this.focusedFigure = undefined;
-
-    comp.annotationUpdated();
-
-    ev.stopPropagation();
-  }
-
-  private createFigure(min: number[], max?: number[]): SolidFigure {
-    const origin = new Vector3().fromArray(min);
-    const terminus = max
-      ? new Vector3().fromArray(max)
-      : new Vector3().fromArray(min);
-
-    let fig: SolidFigure;
+    let antn: SolidFigure;
     switch (this.figureType) {
       case 'ellipsoid':
-        fig = new Ellipsoid();
+        antn = new Ellipsoid();
         break;
       case 'cuboid':
       default:
-        fig = new Cuboid();
+        antn = new Cuboid();
         break;
     }
-    fig.min = origin.toArray();
-    fig.max = terminus.toArray();
-    fig.editable = true;
-    fig.resetDepthOfBoundingBox = true;
-    if (!origin.equals(terminus)) {
-      fig.concreate();
-    }
-    return fig;
+    antn.min = point.toArray();
+    antn.max = point.toArray();
+    antn.editable = true;
+    antn.resetDepthOfBoundingBox = true;
+    return antn;
+  }
+
+  protected updateAnnotation(ev: ViewerEvent): void {
+    const comp = ev.viewer.getComposition();
+    if (!comp) return;
+
+    const viewState = ev.viewer.getState();
+    if (!viewState || viewState.type !== 'mpr') return;
+
+    if (!this.focusedAnnotation) return;
+
+    const max = getVolumeCoordinateFromViewerEvent(ev);
+    const antn = this.focusedAnnotation;
+    antn.max = max.toArray();
+  }
+
+  protected concreteAnnotation(ev: ViewerEvent): void {
+    const antn = this.focusedAnnotation;
+    if (!antn) return;
+
+    const viewState = ev.viewer.getState();
+    if (!viewState || viewState.type !== 'mpr') return;
+
+    const orientation = detectOrthogonalSection(viewState.section);
+    antn.concrete(orientation);
+  }
+
+  protected validateAnnotation(): boolean {
+    if (!this.focusedAnnotation) return false;
+    return this.focusedAnnotation.validate();
   }
 }

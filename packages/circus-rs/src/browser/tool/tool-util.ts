@@ -2,6 +2,8 @@ import { Vector2, Vector3 } from 'three';
 import MprImageSource from '../image-source/MprImageSource';
 import Viewer from '../viewer/Viewer';
 import * as su from '../section-util';
+import { convertScreenCoordinateToVolumeCoordinate } from '../section-util';
+import ViewerEvent from '../viewer/ViewerEvent';
 
 /**
  * Utility method which works in the same way as Math.sign().
@@ -46,3 +48,20 @@ export function convertViewerPointToVolumeIndex(
     Math.floor(indexOfVol.z)
   );
 }
+/**
+ * Converts 2D point in viewer event (screen coordinate) to 3D point in volume coordinate space.
+ * @param ev target
+ */
+export const getVolumeCoordinateFromViewerEvent = (
+  ev: ViewerEvent
+): Vector3 => {
+  const screenPoint = [ev.viewerX!, ev.viewerY!];
+  const resolution = ev.viewer.getResolution();
+  const viewState = ev.viewer.getState();
+  const section = viewState.section;
+  return convertScreenCoordinateToVolumeCoordinate(
+    section,
+    new Vector2().fromArray(resolution),
+    new Vector2().fromArray(screenPoint)
+  );
+};

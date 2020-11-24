@@ -1,6 +1,6 @@
 export interface ConcurrencyGate {
-  wait: () => Promise<number>;
-  finish: (id: number) => void;
+  enter: () => Promise<number>;
+  exit: (id: number) => void;
   use: <T>(func: () => Promise<T>) => Promise<T>;
 }
 
@@ -8,23 +8,26 @@ export interface ConcurrencyGate {
  * Prevents too many async functoins from running at the same time.
  * You can use this typically in combination with `Promise.all`.
  * See the tests for examples.
- * @param maxConcurrency The number of functions that can pass
- *   the "gate" (`wait`) at the same time.
+ * @param maxConcurrency The number of functions that can enter
+ * the "gate" at the same time.
  */
 const concurrencyGate = (maxConcurrency: number): ConcurrencyGate => {
   let counter = 0;
   const active: number[] = [];
   const queue: { id: number; resolve: (id: number) => void }[] = [];
 
-  if (maxConcurrency < 1) throw new RangeError('maxConcurrency must be >= 1');
+  if (typeof maxConcurrency !== 'number')
+    throw new TypeError('maxConcurrency must be an integer');
+  if (maxConcurrency < 1)
+    throw new RangeError('maxConcurrency must be an integer >= 1');
 
   /**
    * Waits for "my turn". Resolves when no more than `maxConcurrency` items
-   * are active. The returned value (ID) must be passed to the `finish` when
+   * are active. The returned value (ID) must be passed to the `exit` when
    * your task is finished.
    * Prefer `use()` whenever possible.
    */
-  const wait = async () => {
+  const enter = async () => {
     const id = counter++;
     return new Promise<number>(resolve => {
       if (active.length < maxConcurrency) {
@@ -40,9 +43,9 @@ const concurrencyGate = (maxConcurrency: number): ConcurrencyGate => {
    * Marks the specified task as finished so that another async task
    * can be started.
    * Prefer `use()` whenever possible.
-   * @param id The ID returned from the corresponding `wait` call.
+   * @param id The ID returned from the corresponding `enter` call.
    */
-  const finish = (id: number) => {
+  const exit = (id: number) => {
     const idx = active.indexOf(id);
     if (idx < 0) throw new Error('This id is not active');
     active.splice(idx, 1);
@@ -54,23 +57,23 @@ const concurrencyGate = (maxConcurrency: number): ConcurrencyGate => {
   };
 
   /**
-   * A wrappter of `wait`/`finish`.
+   * A wrappter around the `enter`/`exit` pair.
    * This is the preferred approach of using concurrencyGate.
    * It waits for my turn, calls the callback,
    * and automatically calls `finish` when the callback is finished.
    * @param func The original promise to be wrapped.
    */
   const use = async <T>(func: () => Promise<T>) => {
-    const id = await wait();
+    const id = await enter();
     try {
       const result = await func();
       return result;
     } finally {
-      finish(id);
+      exit(id);
     }
   };
 
-  return { wait, finish, use };
+  return { enter, exit, use };
 };
 
 export default concurrencyGate;

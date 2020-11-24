@@ -3,9 +3,14 @@ import path from 'path';
 import fs from 'fs-extra';
 import crypto from 'crypto';
 import MultiRange, { multirange } from 'multi-integer-range';
+import concurrencyGate, { ConcurrencyGate } from '../concurrencyGate';
 
 interface Options {
   dataDir: string;
+  /**
+   * The number of load/save operations that can be executed in parallel
+   */
+  maxConcurrency?: number;
   useHash?: boolean;
   customUidDirMap?: (seriesUid: string) => string;
 }
@@ -19,7 +24,11 @@ const sha256 = (str: string) => {
 const pad8 = (num: number) => ('00000000' + num).slice(-8);
 
 export default class StaticDicomFileRepository implements DicomFileRepository {
-  constructor(private options: Options) {}
+  private concurrencyGate: ConcurrencyGate;
+
+  constructor(private options: Options) {
+    this.concurrencyGate = concurrencyGate(options.maxConcurrency ?? 30);
+  }
 
   /**
    * Read the file list of the directory and count the DICOM files.
@@ -42,7 +51,7 @@ export default class StaticDicomFileRepository implements DicomFileRepository {
     }
   }
 
-  private determinDir(seriesUid: string): string {
+  private determineDir(seriesUid: string): string {
     if (typeof this.options.customUidDirMap === 'function')
       return this.options.customUidDirMap(seriesUid);
     if (this.options.useHash) {
@@ -59,13 +68,13 @@ export default class StaticDicomFileRepository implements DicomFileRepository {
   }
 
   public async getSeries(seriesUid: string): Promise<SeriesAccessor> {
-    const dir = this.determinDir(seriesUid);
+    const dir = this.determineDir(seriesUid);
     const count = await this.scanDicomImages(dir);
 
     const load = async (image: number) => {
       const fileName = pad8(image) + '.dcm';
       const filePath = path.join(dir, fileName);
-      const data = await fs.readFile(filePath);
+      const data = await this.concurrencyGate.use(() => fs.readFile(filePath));
       return data.buffer as ArrayBuffer;
     };
 
@@ -73,7 +82,9 @@ export default class StaticDicomFileRepository implements DicomFileRepository {
       const fileName = pad8(image) + '.dcm';
       const filePath = path.join(dir, fileName);
       await fs.ensureDir(dir);
-      await fs.writeFile(filePath, Buffer.from(buffer));
+      await this.concurrencyGate.use(() =>
+        fs.writeFile(filePath, Buffer.from(buffer))
+      );
     };
 
     return {
@@ -86,7 +97,7 @@ export default class StaticDicomFileRepository implements DicomFileRepository {
   }
 
   public async deleteSeries(seriesUid: string): Promise<void> {
-    const dir = this.determinDir(seriesUid);
+    const dir = this.determineDir(seriesUid);
     await fs.remove(dir);
   }
 }

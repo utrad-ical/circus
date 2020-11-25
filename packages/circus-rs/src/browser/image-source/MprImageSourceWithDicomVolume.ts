@@ -7,5 +7,5 @@ export default interface MprImageSourceWithDicomVolume {
 export function isMprImageSourceWithVolumeLoader(
   src: any
 ): src is MprImageSourceWithDicomVolume {
-  return src.getLoadedVolume !== undefined;
+  return src.getLoadedDicomVolume !== undefined;
 }

@@ -4,7 +4,6 @@ import Viewer from '../viewer/Viewer';
 import { createOrthogonalMprSection, adjustOnResized } from '../section-util';
 import { Vector3D, Vector2D } from '../../common/geometry';
 import { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader';
-import { AnisotropicRawData } from '..';
 
 /**
  * MprImageSource is a common base class for all
@@ -33,16 +32,6 @@ export default abstract class MprImageSource extends ImageSource {
 
   public async ready(): Promise<void> {
     await this.loadSequence;
-  }
-
-  public readyEntireVolume(): Promise<void> {
-    return Promise.reject(
-      'In this source, the entire volume will not be loaded.'
-    );
-  }
-
-  public getEntireVolume(): AnisotropicRawData {
-    throw new Error('In this source, the entire volume will not be loaded.');
   }
 
   /**

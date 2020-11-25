@@ -75,10 +75,10 @@ const useComposition = (
 
   const [volumeLoaded, setVolumeLoaded] = useState<boolean>(false);
   useEffect(() => {
-    if (!composition) return;
-    const imageSource = composition.imageSource as rs.HybridMprImageSource;
-    imageSource.readyEntireVolume().then(() => setVolumeLoaded(true));
-  }, [composition]);
+    volumeLoader.loadMeta()
+      .then(() => volumeLoader.loadVolume())
+      .then(() => setVolumeLoaded(true));
+  }, [volumeLoader]);
 
   return { composition, volumeLoaded };
 };

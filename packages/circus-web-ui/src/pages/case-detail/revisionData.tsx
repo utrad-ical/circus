@@ -200,7 +200,7 @@ export const createNewLabelData = (
     case 'ellipsoid': {
       // Find the key of the first visible viewer, on which a new label is based
       const key = Object.keys(viewers).find(index =>
-        /^(axial|sagittal|coronal)$/.test(index)
+        /(axial|sagittal|coronal)$/.test(index)
       );
       return {
         type,
@@ -213,12 +213,14 @@ export const createNewLabelData = (
       };
     }
     case 'ellipse':
-    case 'rectangle':
+    case 'rectangle': {
+      // Find the key of the visible axial viewer, on which a new label is based
+      const key = Object.keys(viewers).find(index => /(axial)$/.test(index));
       return {
         type,
         data: {
-          ...(viewers.axial
-            ? rs.PlaneFigure.calculateBoundingBoxAndDepth(viewers.axial)
+          ...(key
+            ? rs.PlaneFigure.calculateBoundingBoxAndDepth(viewers[key])
             : { min: [0, 0], max: [10, 10], z: 0 }),
           ...appearance
         }

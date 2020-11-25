@@ -20,12 +20,12 @@ export type ToolOptionSetter = <K extends keyof ToolOptions>(
   optionValue: ToolOptions[K]
 ) => void;
 
-const defaultToolOptions = (): ToolOptions => ({
+const defaultToolOptions: ToolOptions = {
   lineWidth: 1,
   wandMode: '3d',
   wandThreshold: 450,
   wandMaxDistance: 9999
-});
+};
 
 const useToolbar = () => {
   // Tool collection
@@ -50,7 +50,7 @@ const useToolbar = () => {
 
   // Tool options
   const [toolOptions, setToolOptions] = useState<ToolOptions>(
-    defaultToolOptions()
+    defaultToolOptions
   );
 
   const setToolOption: ToolOptionSetter = useCallback(

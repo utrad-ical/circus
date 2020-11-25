@@ -56,7 +56,7 @@ const ImageViewer: React.FC<{
   className?: string;
   composition?: rs.Composition;
   stateChanger?: StateChanger<any>;
-  tool: ToolBaseClass;
+  tool?: ToolBaseClass;
   initialStateSetter: any;
   id?: string | number;
   onCreateViewer?: (viewer: rs.Viewer, id?: string | number) => void;

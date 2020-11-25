@@ -8,11 +8,11 @@ test('voxelMarker must work exactly', () => {
     const boundary = new Box3(o, o.clone().add(s));
 
     const marker1 = objectMarker();
-    markArguments.forEach(a => marker1.marks(...a));
+    markArguments.forEach(a => marker1.markVoxels(...a));
     const result1 = createMarkedStateDumper(marker1.marked)(boundary);
 
     const marker2 = voxelMarker(boundary);
-    markArguments.forEach(a => marker2.marks(...a));
+    markArguments.forEach(a => marker2.markVoxels(...a));
     const result2 = createMarkedStateDumper(marker2.marked)(boundary);
 
     // console.log([o, s, markArguments]);
@@ -24,7 +24,7 @@ test('voxelMarker must work exactly', () => {
 
 test.skip('voxelMarker must work speedy enough', () => {
   const boundary = new Box3(new Vector3(0, 0, 0), new Vector3(500, 500, 500));
-  const { marks, marked } = voxelMarker(boundary);
+  const { markVoxels, marked } = voxelMarker(boundary);
 
   const t0 = new Date().getTime();
 
@@ -34,7 +34,7 @@ test.skip('voxelMarker must work speedy enough', () => {
   for (let z = min.z; z <= max.z; z++) {
     for (let y = min.y; y <= max.y; y++) {
       for (let x = min.x; x <= max.x; x++) {
-        marks(new Vector3(x, y, z), x);
+        markVoxels(new Vector3(x, y, z), x);
       }
     }
   }
@@ -79,7 +79,7 @@ const objectMarker = (): VoxelMarker => {
   const key = (p: Vector3): string =>
     p.x.toString() + ',' + p.y.toString() + ',' + p.z.toString();
 
-  const marks = (p: Vector3, xend: number) => {
+  const markVoxels = (p: Vector3, xend: number) => {
     const cur = p.clone();
     for (; cur.x <= xend; cur.x++) {
       collection[key(cur)] = true;
@@ -87,5 +87,5 @@ const objectMarker = (): VoxelMarker => {
   };
   const marked = (p: Vector3) => key(p) in collection;
 
-  return { marked, marks };
+  return { marked, markVoxels: markVoxels };
 };

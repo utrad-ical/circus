@@ -22,38 +22,6 @@ test('voxelMarker must work exactly', () => {
   }
 });
 
-test.skip('voxelMarker must work speedy enough', () => {
-  const boundary = new Box3(new Vector3(0, 0, 0), new Vector3(500, 500, 500));
-  const { markVoxels, marked } = voxelMarker(boundary);
-
-  const t0 = new Date().getTime();
-
-  const { min, max } = boundary;
-
-  console.time('write');
-  for (let z = min.z; z <= max.z; z++) {
-    for (let y = min.y; y <= max.y; y++) {
-      for (let x = min.x; x <= max.x; x++) {
-        markVoxels(new Vector3(x, y, z), x);
-      }
-    }
-  }
-  console.timeEnd('write');
-
-  console.time('read');
-  for (let z = min.z; z <= max.z; z++) {
-    for (let y = min.y; y <= max.y; y++) {
-      for (let x = min.x; x <= max.x; x++) {
-        marked(new Vector3(x, y, z));
-      }
-    }
-  }
-  console.timeEnd('read');
-
-  const t1 = new Date().getTime();
-  expect(t1 - t0).toBeLessThan(1500);
-});
-
 const randArg = () => {
   const r = (min: number, max: number) =>
     min + Math.round(Math.random() * (max - min));
@@ -68,7 +36,7 @@ const randArg = () => {
     .sort((a, b) => ufo(a.z, b.z) || ufo(a.y, b.y) || ufo(a.x, b.x));
   const markArguments: [Vector3, number][] = points.map(p => [
     p,
-    r(p.x, o.x + s.x)
+    r(p.x, o.x + s.x) - p.x + 1
   ]);
 
   return [o, s, markArguments] as [typeof o, typeof s, typeof markArguments];
@@ -79,13 +47,14 @@ const objectMarker = (): VoxelMarker => {
   const key = (p: Vector3): string =>
     p.x.toString() + ',' + p.y.toString() + ',' + p.z.toString();
 
-  const markVoxels = (p: Vector3, xend: number) => {
+  const markVoxels = (p: Vector3, xLength: number = 1) => {
     const cur = p.clone();
-    for (; cur.x <= xend; cur.x++) {
+    const xEnd = p.x + xLength - 1;
+    for (; cur.x <= xEnd; cur.x++) {
       collection[key(cur)] = true;
     }
   };
   const marked = (p: Vector3) => key(p) in collection;
 
-  return { marked, markVoxels: markVoxels };
+  return { marked, markVoxels };
 };

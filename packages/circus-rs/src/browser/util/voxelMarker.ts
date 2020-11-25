@@ -2,7 +2,7 @@ import { Vector3, Box3 } from 'three';
 
 export interface VoxelMarker {
   marked(p: Vector3): boolean;
-  markVoxels(p1: Vector3, xend: number): void;
+  markVoxels(p1: Vector3, xLength?: number): void;
 }
 
 export default function voxelMarker(boundary: Box3): VoxelMarker {
@@ -17,10 +17,10 @@ export default function voxelMarker(boundary: Box3): VoxelMarker {
   const read = (pos: number) => (buffer[pos >> 3] >> (pos & 0x7)) & 1;
   const write = (pos: number) => (buffer[pos >> 3] |= 1 << (pos & 0x7));
 
-  const markVoxels = (p: Vector3, xend: number) => {
+  const markVoxels = (p: Vector3, xLength: number = 1) => {
     let offset =
       (p.z - min.z) * height * width + (p.y - min.y) * width + (p.x - min.x);
-    for (let x = p.x; x <= xend; x++) {
+    for (let i = 0; i < xLength; i++) {
       write(offset++);
     }
   };

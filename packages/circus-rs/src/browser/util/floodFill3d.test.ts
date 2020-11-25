@@ -291,7 +291,7 @@ const createUniverse = (w: number = 9, h: number = 9, d: number = 9) => {
   const marker = voxelMarker(universeBox);
   const dumper = createMarkedStateDumper(marker.marked);
   return {
-    fillLine: (p1: Vector3, p2: Vector3) => marker.marks(p1, p2.x),
+    fillLine: (p1: Vector3, p2: Vector3) => marker.markVoxels(p1, p2.x),
     dump: () => dumper(universeBox),
     dumper
   };

@@ -8,7 +8,7 @@ import voxelMarker from './voxelMarker';
  *
  * Argument points for fillLine have always same y value and same z value,
  * sometimes same x value.
- * 
+ *
  * This function does NOT take into account that the specified functions
  * might modify the argument points(Vector3).
  * DON'T DO THAT.
@@ -23,7 +23,7 @@ export default function floodFill3d(
 
   const stack: Vector3[] = [startPoint];
   const { min, max } = offsetBox;
-  const { marks, marked } = voxelMarker(offsetBox);
+  const { markVoxels, marked } = voxelMarker(offsetBox);
 
   const stackPoints = (walker: Vector3, xend: number) => {
     let isScanLine = false;
@@ -60,7 +60,7 @@ export default function floodFill3d(
     right.x--;
 
     // mark as scaned
-    marks(left, right.x);
+    markVoxels(left, right.x);
 
     // process the line
     fillLine(left, right);

@@ -127,7 +127,6 @@ const RevisionEditor: React.FC<{
   );
   const { revision, activeLabelIndex } = editingData;
 
-  if (!activeSeries || !composition) return null;
   const activeLabel = activeSeries.labels[activeLabelIndex];
 
   const [
@@ -408,6 +407,8 @@ const RevisionEditor: React.FC<{
     }
     return viewState; // do not update view state (should not happen)
   };
+
+  if (!activeSeries || !composition) return null;
 
   return (
     <StyledDiv className={classNames('case-revision-data', { busy })}>

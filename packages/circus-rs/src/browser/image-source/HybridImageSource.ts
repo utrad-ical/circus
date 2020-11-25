@@ -7,6 +7,7 @@ import RawVolumeMprImageSource, {
 import ViewState from '../ViewState';
 import Viewer from '../viewer/Viewer';
 import MprImageSource from './MprImageSource';
+import MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume';
 
 interface HybridImageSourceOptions
   extends RawVolumeMprImageSourceOptions,
@@ -17,7 +18,8 @@ interface HybridImageSourceOptions
  * It can draw MPR images as soon as the former gets ready,
  * and then switch to RawVolumeMprImageSource when it is ready.
  */
-export default class HybridMprImageSource extends MprImageSource {
+export default class HybridMprImageSource extends MprImageSource
+  implements MprImageSourceWithDicomVolume {
   private dynSource: DynamicMprImageSource;
   private volSource: RawVolumeMprImageSource;
   private volumeReady: boolean = false;
@@ -34,6 +36,10 @@ export default class HybridMprImageSource extends MprImageSource {
     });
   }
 
+  public getLoadedDicomVolume() {
+    return this.volSource.getLoadedDicomVolume();
+  }
+
   public draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
     const source: MprImageSource = this.volumeReady
       ? this.volSource
@@ -43,14 +49,6 @@ export default class HybridMprImageSource extends MprImageSource {
 
   public ready(): Promise<any> {
     return this.dynSource.ready();
-  }
-
-  public readyEntireVolume() {
-    return this.volSource.readyEntireVolume();
-  }
-
-  public getEntireVolume() {
-    return this.volSource.getEntireVolume();
   }
 
   public initialState(viewer: Viewer): ViewState {

@@ -154,7 +154,13 @@ const RevisionEditor: React.FC<{
       }
       setEditorEnabled(false);
     }
-  }, [activeLabelIsVoxel, activeToolIsEditor]);
+  }, [
+    activeLabelIsVoxel,
+    activeToolIsEditor,
+    editorEnabled,
+    activeToolName,
+    setActiveTool
+  ]);
 
   const handleAnnotationChange = (
     annotation: rs.VoxelCloud | rs.SolidFigure | rs.PlaneFigure

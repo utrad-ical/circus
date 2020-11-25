@@ -60,7 +60,7 @@ export default function floodFill3d(
     right.x--;
 
     // mark as scaned
-    markVoxels(left, right.x);
+    markVoxels(left, right.x - left.x + 1);
 
     // process the line
     fillLine(left, right);

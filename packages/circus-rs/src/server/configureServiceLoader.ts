@@ -1,7 +1,5 @@
 import {
   DicomFileRepository,
-  dicomImageExtractor,
-  DicomImageExtractor,
   Logger,
   ServiceLoader
 } from '@utrad-ical/circus-lib';
@@ -17,7 +15,7 @@ export interface RsServices {
   rsLogger: Logger;
   counter: Counter;
   dicomFileRepository: DicomFileRepository;
-  dicomImageExtractor: DicomImageExtractor;
+  dicomExtractorWorker: DicomExtractorWorker;
   imageEncoder: ImageEncoder;
   rsSeriesRoutes: Koa.Middleware;
   volumeProvider: VolumeProvider;
@@ -38,9 +36,6 @@ const configureServiceLoader = (loader: ServiceLoader<any>): void => {
   loader.registerModule(
     'counter',
     path.join(__dirname, 'helper/createCounter')
-  );
-  loader.registerFactory('dicomImageExtractor', async () =>
-    dicomImageExtractor()
   );
   loader.registerModule(
     'dicomExtractorWorker',

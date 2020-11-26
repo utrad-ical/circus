@@ -1,6 +1,6 @@
 import { Vector2 } from 'three';
 import MprImageSource from '../../image-source/MprImageSource';
-import { isMprImageSourceWithVolumeLoader } from '../../image-source/MprImageSourceWithDicomVolume';
+import { isMprImageSourceWithDicomVolume } from '../../image-source/MprImageSourceWithDicomVolume';
 import { detectOrthogonalSection } from '../../section-util';
 import fuzzySelect from '../../util/fuzzySelect';
 import ViewerEvent from '../../viewer/ViewerEvent';
@@ -33,7 +33,7 @@ export default class WandTool extends VoxelCloudToolBase<WandToolOptions> {
     const src = comp.imageSource;
     if (
       !(src instanceof MprImageSource) ||
-      !isMprImageSourceWithVolumeLoader(src)
+      !isMprImageSourceWithDicomVolume(src)
     ) {
       throw new Error('Unsupported image source');
     }

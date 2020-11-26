@@ -24,7 +24,7 @@ const defaultToolOptions: ToolOptions = {
   lineWidth: 1,
   wandMode: '3d',
   wandThreshold: 450,
-  wandMaxDistance: 9999
+  wandMaxDistance: 10
 };
 
 const useToolbar = (): [

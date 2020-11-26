@@ -20,14 +20,24 @@ export type ToolOptionSetter = <K extends keyof ToolOptions>(
   optionValue: ToolOptions[K]
 ) => void;
 
-const defaultToolOptions = (): ToolOptions => ({
+const defaultToolOptions: ToolOptions = {
   lineWidth: 1,
   wandMode: '3d',
   wandThreshold: 450,
   wandMaxDistance: 9999
-});
+};
 
-const useToolbar = () => {
+const useToolbar = (): [
+  ToolBaseClass | undefined,
+  {
+    activeToolName: string;
+    toolOptions: ToolOptions;
+  },
+  {
+    setActiveTool: ActiveToolSetter;
+    setToolOption: ToolOptionSetter;
+  }
+] => {
   // Tool collection
   const toolCollectionRef = useRef<Partial<ToolCollection>>({});
   const toolCollection = toolCollectionRef.current;
@@ -41,7 +51,9 @@ const useToolbar = () => {
   );
 
   // Active tool
-  const [activeToolName, setActiveTool] = useState<string>('pager');
+  const [activeToolName, setActiveTool] = useState<keyof ToolCollection>(
+    'pager'
+  );
   const [activeTool, applyActiveTool] = useState<ToolBaseClass>();
 
   useEffect(() => {
@@ -50,7 +62,7 @@ const useToolbar = () => {
 
   // Tool options
   const [toolOptions, setToolOptions] = useState<ToolOptions>(
-    defaultToolOptions()
+    defaultToolOptions
   );
 
   const setToolOption: ToolOptionSetter = useCallback(
@@ -89,20 +101,10 @@ const useToolbar = () => {
   return [
     activeTool,
     {
-      activeToolName,
+      activeToolName: activeToolName as string,
       toolOptions
     },
     { setActiveTool, setToolOption }
-  ] as [
-    ToolBaseClass,
-    {
-      activeToolName: string;
-      toolOptions: ToolOptions;
-    },
-    {
-      setActiveTool: ActiveToolSetter;
-      setToolOption: ToolOptionSetter;
-    }
   ];
 };
 

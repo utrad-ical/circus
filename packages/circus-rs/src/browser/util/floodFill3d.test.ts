@@ -223,25 +223,6 @@ describe('floodFill3d with separated 2 balls binarizer', () => {
   });
 });
 
-test.skip('floodFill3d must work enough speedy', () => {
-  const bigGourdShapedBinarizer = createDualBallShapedBinarizer(
-    [120, 120, 120],
-    120,
-    [240, 240, 240],
-    120
-  );
-  const { fillLine } = createUniverse(300, 300, 300);
-  const boundaryOffsetBox = new Box3().setFromArray([0, 0, 0, 300, 300, 300]); // the size is same as universe
-  const report = withReport()(floodFill3d)(
-    new Vector3(240, 240, 240),
-    boundaryOffsetBox,
-    bigGourdShapedBinarizer,
-    fillLine
-  );
-
-  expect(report.procTime).toBeLessThan(1500);
-});
-
 function withReport() {
   return (enhanced: typeof floodFill3d) => (
     startPoint: Vector3,
@@ -291,7 +272,7 @@ const createUniverse = (w: number = 9, h: number = 9, d: number = 9) => {
   const marker = voxelMarker(universeBox);
   const dumper = createMarkedStateDumper(marker.marked);
   return {
-    fillLine: (p1: Vector3, p2: Vector3) => marker.marks(p1, p2.x),
+    fillLine: (p1: Vector3, p2: Vector3) => marker.markVoxels(p1, p2.x - p1.x + 1),
     dump: () => dumper(universeBox),
     dumper
   };

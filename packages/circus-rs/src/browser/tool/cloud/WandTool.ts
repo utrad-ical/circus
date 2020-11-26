@@ -1,5 +1,6 @@
 import { Vector2 } from 'three';
-import { MprImageSource } from '../..';
+import MprImageSource from '../../image-source/MprImageSource';
+import { isMprImageSourceWithDicomVolume } from '../../image-source/MprImageSourceWithDicomVolume';
 import { detectOrthogonalSection } from '../../section-util';
 import fuzzySelect from '../../util/fuzzySelect';
 import ViewerEvent from '../../viewer/ViewerEvent';
@@ -30,8 +31,12 @@ export default class WandTool extends VoxelCloudToolBase<WandToolOptions> {
     if (!comp) throw new Error('Composition not initialized'); // should not happen
 
     const src = comp.imageSource;
-    if (!(src instanceof MprImageSource))
+    if (
+      !(src instanceof MprImageSource) ||
+      !isMprImageSourceWithDicomVolume(src)
+    ) {
       throw new Error('Unsupported image source');
+    }
 
     const { type, section } = viewer.getState();
     if (type !== 'mpr') throw new Error('Unsupported view state');
@@ -43,7 +48,8 @@ export default class WandTool extends VoxelCloudToolBase<WandToolOptions> {
 
     const { mode, threshold, maxDistance } = this.options;
 
-    const mprRawData = src.getEntireVolume();
+    const mprRawData = src.getLoadedDicomVolume();
+    if (mprRawData === undefined) throw new Error('The volume is not loaded.');
     const cloudRawData = this.activeCloud.volume!;
 
     if (!this.activeCloud.expanded) this.activeCloud.expandToMaximum(src);

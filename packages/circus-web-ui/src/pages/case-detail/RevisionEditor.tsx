@@ -42,7 +42,7 @@ import LabelMenu from './LabelMenu';
 import { debounce } from 'lodash';
 import useLocalPreference from 'utils/useLocalPreference';
 import isTouchDevice from 'utils/isTouchDevice';
-import useToolbar from 'utils/useToolbar';
+import useToolbar from 'pages/case-detail/useToolbar';
 
 const useComposition = (
   seriesUid: string,

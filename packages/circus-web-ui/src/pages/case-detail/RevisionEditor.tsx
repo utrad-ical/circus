@@ -2,7 +2,6 @@ import JsonSchemaEditor from '@smikitky/rb-components/lib/JsonSchemaEditor';
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
-import ToolBaseClass from '@utrad-ical/circus-rs/src/browser/tool/Tool';
 import classNames from 'classnames';
 import Collapser from 'components/Collapser';
 import Icon from 'components/Icon';
@@ -43,11 +42,12 @@ import LabelMenu from './LabelMenu';
 import { debounce } from 'lodash';
 import useLocalPreference from 'utils/useLocalPreference';
 import isTouchDevice from 'utils/isTouchDevice';
+import useToolbar from 'pages/case-detail/useToolbar';
 
 const useComposition = (
   seriesUid: string,
   partialVolumeDescriptor: PartialVolumeDescriptor
-): Composition | undefined => {
+): { composition: Composition | undefined; volumeLoaded: boolean } => {
   const { rsHttpClient } = useContext(VolumeLoaderCacheContext)!;
 
   const volumeLoader = usePendingVolumeLoader(
@@ -73,7 +73,15 @@ const useComposition = (
     [rsHttpClient, seriesUid, pvdStr, volumeLoader]
   );
 
-  return composition;
+  const [volumeLoaded, setVolumeLoaded] = useState<boolean>(false);
+  useEffect(() => {
+    volumeLoader
+      .loadMeta()
+      .then(() => volumeLoader.loadVolume())
+      .then(() => setVolumeLoaded(true));
+  }, [volumeLoader]);
+
+  return { composition, volumeLoaded };
 };
 
 const RevisionEditor: React.FC<{
@@ -99,8 +107,6 @@ const RevisionEditor: React.FC<{
   const viewWindows = useRef<{ [seriesUid: string]: rs.ViewWindow }>({});
 
   const [touchDevice] = useState(() => isTouchDevice());
-  const toolsRef = useRef<{ [key: string]: ToolBaseClass }>({});
-  const tools = toolsRef.current;
   const stateChanger = useMemo(() => createStateChanger<rs.MprViewState>(), []);
   const [seriesDialogOpen, setSeriesDialogOpen] = useState(false);
 
@@ -114,17 +120,53 @@ const RevisionEditor: React.FC<{
     }
   );
 
-  const [lineWidth, setLineWidth] = useState(1);
-  const [toolName, setToolName] = useState('');
-  const [tool, setTool] = useState<ToolBaseClass | null>(null);
-
   const activeSeries =
     editingData.revision.series[editingData.activeSeriesIndex];
-  const composition = useComposition(
+  const { composition, volumeLoaded } = useComposition(
     activeSeries.seriesUid,
     activeSeries.partialVolumeDescriptor
   );
   const { revision, activeLabelIndex } = editingData;
+
+  const activeLabel = activeSeries.labels[activeLabelIndex];
+
+  const [
+    activeTool,
+    { activeToolName, toolOptions },
+    { setActiveTool, setToolOption }
+  ] = useToolbar();
+
+  const [editorEnabled, setEditorEnabled] = useState<boolean>(false);
+  const toolNameAtEditorDisabledRef = useRef<string>();
+  const activeToolIsEditor = [
+    'brush',
+    'eraser',
+    'bucket',
+    'wand',
+    'wandEraser'
+  ].some(t => t === activeToolName);
+  const activeLabelIsVoxel = activeLabel && activeLabel.type === 'voxel';
+  useEffect(() => {
+    if (!editorEnabled && activeLabelIsVoxel) {
+      setEditorEnabled(true);
+      if (toolNameAtEditorDisabledRef.current) {
+        setActiveTool(toolNameAtEditorDisabledRef.current);
+        toolNameAtEditorDisabledRef.current = undefined;
+      }
+    } else if (editorEnabled && !activeLabelIsVoxel) {
+      if (activeToolIsEditor) {
+        toolNameAtEditorDisabledRef.current = activeToolName;
+        setActiveTool('pager');
+      }
+      setEditorEnabled(false);
+    }
+  }, [
+    activeLabelIsVoxel,
+    activeToolIsEditor,
+    editorEnabled,
+    activeToolName,
+    setActiveTool
+  ]);
 
   const handleAnnotationChange = (
     annotation: rs.VoxelCloud | rs.SolidFigure | rs.PlaneFigure
@@ -257,22 +299,6 @@ const RevisionEditor: React.FC<{
     }));
   }, [stateChanger, viewOptions.interpolationMode]);
 
-  const getTool = useCallback(
-    (toolName: string): ToolBaseClass => {
-      const tool = tools[toolName] || rs.toolFactory(toolName);
-      tools[toolName] = tool;
-      return tool;
-    },
-    [tools]
-  );
-
-  useEffect(() => {
-    if (composition && !tool) {
-      setToolName('pager');
-      setTool(getTool('pager'));
-    }
-  }, [composition, getTool, tool]);
-
   const labelAttributesChange = (value: any) => {
     const { activeSeriesIndex, activeLabelIndex } = editingData;
     updateEditingData(d => {
@@ -303,26 +329,9 @@ const RevisionEditor: React.FC<{
     });
   };
 
-  const changeTool = useCallback(
-    (toolName: string) => {
-      setToolName(toolName);
-      setTool(getTool(toolName));
-    },
-    [getTool]
-  );
-
   const handleApplyWindow = useCallback(
     (window: rs.ViewWindow) => stateChanger(state => ({ ...state, window })),
     [stateChanger]
-  );
-
-  const handleSetLineWidth = useCallback(
-    (lineWidth: number) => {
-      setLineWidth(lineWidth);
-      getTool('brush').setOptions({ width: lineWidth });
-      getTool('eraser').setOptions({ width: lineWidth });
-    },
-    [getTool]
   );
 
   const handleCreateViwer = (viewer: Viewer, id?: string | number) => {
@@ -412,8 +421,6 @@ const RevisionEditor: React.FC<{
   };
 
   if (!activeSeries || !composition) return null;
-  const activeLabel = activeSeries.labels[activeLabelIndex];
-  const brushEnabled = activeLabel ? activeLabel.type === 'voxel' : false;
 
   return (
     <StyledDiv className={classNames('case-revision-data', { busy })}>
@@ -474,22 +481,23 @@ const RevisionEditor: React.FC<{
       </SideContainer>
       <div className="case-revision-main">
         <ToolBar
-          active={toolName}
-          onChangeTool={changeTool}
+          active={activeToolName}
+          onChangeTool={setActiveTool}
+          toolOptions={toolOptions}
+          setToolOption={setToolOption}
           viewOptions={viewOptions}
           onChangeViewOptions={setViewOptions}
-          lineWidth={lineWidth}
-          setLineWidth={handleSetLineWidth}
+          wandEnabled={volumeLoaded}
           windowPresets={projectData.windowPresets}
           onApplyWindow={handleApplyWindow}
-          brushEnabled={brushEnabled}
+          brushEnabled={editorEnabled}
           disabled={busy}
         />
         <ViewerCluster
           composition={composition}
           layout={viewOptions.layout ?? 'twoByTwo'}
           stateChanger={stateChanger}
-          tool={tool!}
+          tool={activeTool}
           onCreateViewer={handleCreateViwer}
           onDestroyViewer={handleDestroyViewer}
           initialStateSetter={initialStateSetter}

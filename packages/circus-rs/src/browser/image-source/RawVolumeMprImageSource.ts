@@ -8,6 +8,7 @@ import Viewer from '../viewer/Viewer';
 import drawToImageData from './drawToImageData';
 import MprImageSource from './MprImageSource';
 import { Vector3 } from 'three';
+import MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume';
 
 export interface RawVolumeMprImageSourceOptions {
   volumeLoader: DicomVolumeLoader;
@@ -17,7 +18,8 @@ export interface RawVolumeMprImageSourceOptions {
  * RawVolumeMprImageSource holds an entire 3D volume in memory and
  * renders MPR image form the volume.
  */
-export default class RawVolumeMprImageSource extends MprImageSource {
+export default class RawVolumeMprImageSource extends MprImageSource
+  implements MprImageSourceWithDicomVolume {
   private volume: DicomVolume | undefined;
 
   constructor({ volumeLoader }: RawVolumeMprImageSourceOptions) {
@@ -26,6 +28,10 @@ export default class RawVolumeMprImageSource extends MprImageSource {
       this.metadata = await volumeLoader.loadMeta();
       this.volume = await volumeLoader.loadVolume();
     })();
+  }
+
+  public getLoadedDicomVolume() {
+    return this.volume;
   }
 
   public draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {

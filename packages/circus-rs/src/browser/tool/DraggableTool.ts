@@ -1,4 +1,4 @@
-import ToolBaseClass from '../../browser/tool/Tool';
+import ToolBaseClass, { ToolOptions } from '../../browser/tool/Tool';
 import ViewerEvent from '../../browser/viewer/ViewerEvent';
 
 /**
@@ -32,7 +32,9 @@ export interface DragInfo {
  * This class manages a protected member "dragInfo", which holds handy values
  * such as the total mouse move distance from the drag start point.
  */
-export default abstract class DraggableTool extends ToolBaseClass {
+export default abstract class DraggableTool<
+  T extends ToolOptions = ToolOptions
+> extends ToolBaseClass<T> {
   protected usePointerLockAPI: boolean = true;
 
   /**

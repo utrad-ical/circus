@@ -6,6 +6,7 @@ import Viewer from '../viewer/Viewer';
 import handlePageBy from './state/handlePageBy';
 import handleZoomBy from './state/handleZoomBy';
 
+export interface ToolOptions {}
 export interface Tool extends ViewerEventTarget {
   activate(viewer: Viewer): void;
   deactivate(viewer: Viewer): void;
@@ -15,8 +16,10 @@ export interface Tool extends ViewerEventTarget {
  * A tool determines how a viewer intersects with various UI events.
  * An active tool will change the active view state of each viewer.
  */
-export default class ToolBaseClass extends EventEmitter implements Tool {
-  protected options: object = {};
+export default class ToolBaseClass<T extends ToolOptions = {}>
+  extends EventEmitter
+  implements Tool {
+  protected options: T = {} as T;
 
   constructor() {
     super();
@@ -26,8 +29,8 @@ export default class ToolBaseClass extends EventEmitter implements Tool {
   public activate(viewer: Viewer): void {}
   public deactivate(viewer: Viewer): void {}
 
-  public setOptions(options: object): void {
-    this.options = { ...this.setOptions, ...options };
+  public setOptions(options: Partial<T>): void {
+    this.options = { ...this.options, ...options };
   }
 
   public mouseUpHandler(viewerEvent: ViewerEvent): void {}

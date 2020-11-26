@@ -4,7 +4,7 @@ import { convertScreenCoordinateToVolumeCoordinate } from '../../section-util';
 import Viewer from '../../viewer/Viewer';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import DraggableTool from '../DraggableTool';
-import ViewState, { MprViewState } from '../../ViewState';
+import { MprViewState } from '../../ViewState';
 
 /**
  * PointTool makes a Point annotation on a mouse click.

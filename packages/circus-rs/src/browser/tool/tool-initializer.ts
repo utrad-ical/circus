@@ -12,10 +12,37 @@ import RectangleTool from './annotation/RectangleTool';
 import EllipsoidTool from './annotation/EllipsoidTool';
 import CuboidTool from './annotation/CuboidTool';
 import PointTool from './annotation/PointTool';
+import WandTool from './cloud/WandTool';
+import WandEraserTool from './cloud/WandEraserTool';
 
-const toolCollection: { [toolName: string]: ToolBaseClass } = {};
+type ToolClass<T extends ToolBaseClass> = { new (): T };
 
-const defaultTools: { [toolName: string]: typeof ToolBaseClass } = {
+interface AnyToolClasses {
+  [toolName: string]: ToolClass<any>;
+}
+
+interface ToolClasses extends AnyToolClasses {
+  hand: ToolClass<HandTool>;
+  window: ToolClass<WindowTool>;
+  zoom: ToolClass<ZoomTool>;
+  pager: ToolClass<PagerTool>;
+  celestialRotate: ToolClass<CelestialRotateTool>;
+
+  circle: ToolClass<CircleTool>;
+  rectangle: ToolClass<RectangleTool>;
+  point: ToolClass<PointTool>;
+
+  ellipsoid: ToolClass<EllipsoidTool>;
+  cuboid: ToolClass<CuboidTool>;
+
+  brush: ToolClass<BrushTool>;
+  eraser: ToolClass<EraserTool>;
+  bucket: ToolClass<BucketTool>;
+  wand: ToolClass<WandTool>;
+  wandEraser: ToolClass<WandEraserTool>;
+}
+
+const defaultTools: ToolClasses & { null: ToolClass<ToolBaseClass> } = {
   null: ToolBaseClass, // Null tool that ignores all UI events only to show a static image
   hand: HandTool,
   window: WindowTool,
@@ -32,13 +59,26 @@ const defaultTools: { [toolName: string]: typeof ToolBaseClass } = {
 
   brush: BrushTool,
   eraser: EraserTool,
-  bucket: BucketTool
+  bucket: BucketTool,
+  wand: WandTool,
+  wandEraser: WandEraserTool
 };
 
-Object.keys(defaultTools).forEach(key => {
-  const toolClass = defaultTools[key];
-  toolCollection[key] = new toolClass();
-});
+type ToolInstance<T> = T extends ToolClass<infer I> ? I : never;
+type AnyTool<T> = T extends keyof ToolClasses
+  ? ToolInstance<ToolClasses[T]>
+  : any;
+
+export type ToolCollection = {
+  [K in keyof ToolClasses]: AnyTool<K>;
+};
+const toolCollection = Object.entries(defaultTools).reduce(
+  (collection, [toolName, toolClass]) => ({
+    ...collection,
+    [toolName]: new toolClass()
+  }),
+  {} as ToolCollection
+);
 
 export function registerTool(
   toolName: string,
@@ -50,6 +90,8 @@ export function registerTool(
   toolCollection[toolName] = new toolClass();
 }
 
-export function toolFactory(key: string): ToolBaseClass {
+export function toolFactory<K extends keyof ToolCollection>(
+  key: K
+): ToolCollection[K] {
   return toolCollection[key];
 }

@@ -31,6 +31,10 @@ export interface VolumeAccessor {
   images: MultiRange;
 }
 
+interface OptionsWithoutCache {
+  maxConcurrency?: number;
+}
+
 /**
  * Creates a priority loader that can be injected to Koa's context.
  */
@@ -39,9 +43,11 @@ const createUncachedVolumeProvider: FunctionService<
   {
     dicomFileRepository: DicomFileRepository;
     dicomExtractorWorker: DicomExtractorWorker;
-  }
+  },
+  OptionsWithoutCache
 > = async (opts, deps) => {
   const { dicomFileRepository, dicomExtractorWorker } = deps;
+  const { maxConcurrency = 32 } = opts;
   return async (seriesUid): Promise<VolumeAccessor> => {
     const { load, images } = await dicomFileRepository.getSeries(seriesUid);
     const imageRange = new MultiRange(images);
@@ -87,7 +93,7 @@ const createUncachedVolumeProvider: FunctionService<
     };
     const priorityLoader = new PriorityIntegerCaller(processor, {
       initialResolved: topImageNo,
-      maxConcurrency: 32
+      maxConcurrency
     });
 
     // start loading immediately
@@ -132,25 +138,29 @@ const createUncachedVolumeProvider: FunctionService<
   };
 };
 
+interface Options extends OptionsWithoutCache {
+  cache?: {
+    memoryThreshold?: number;
+    maxAge?: number;
+  };
+}
+
 const createVolumeProvider: FunctionService<
   VolumeProvider,
   {
     dicomFileRepository: DicomFileRepository;
     dicomExtractorWorker: DicomExtractorWorker;
-  }
+  },
+  Options
 > = async (opts, deps) => {
-  const { cache: cacheOpts, ...restOpts } = opts || { cache: {} };
+  const { cache: cacheOpts = {}, ...restOpts } = opts || {};
   const rawVolumeProvider = await createUncachedVolumeProvider(restOpts, deps);
-  if (cacheOpts) {
-    const { memoryThreshold = 2147483648, maxAge = 3600 } = cacheOpts;
-    return asyncMemoize(rawVolumeProvider, {
-      max: memoryThreshold,
-      maxAge: maxAge * 1000,
-      length: accessor => accessor.volume.data.byteLength
-    });
-  } else {
-    return rawVolumeProvider;
-  }
+  const { memoryThreshold = 2147483648, maxAge = 3600 } = cacheOpts;
+  return asyncMemoize(rawVolumeProvider, {
+    max: memoryThreshold,
+    maxAge: maxAge * 1000,
+    length: accessor => accessor.volume.data.byteLength
+  });
 };
 
 createVolumeProvider.dependencies = [

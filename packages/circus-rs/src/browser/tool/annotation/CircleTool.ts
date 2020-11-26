@@ -1,8 +1,9 @@
+import { FigureType } from '../../annotation/PlaneFigure';
 import PlaneFigureTool from './PlaneFigureTool';
 
+/**
+ * CircleTool
+ */
 export default class CircleTool extends PlaneFigureTool {
-  constructor() {
-    super();
-    this.figureType = 'circle';
-  }
+  protected figureType: FigureType = 'circle';
 }

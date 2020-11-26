@@ -7,11 +7,14 @@ import * as su from '../../section-util';
 import { draw3DLine } from '../../volume-util';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { Vector2, Vector3 } from 'three';
+import { ToolOptions } from '../Tool';
 
 /**
  * VoxelCloudToolBase is a base tool that affects VoxelCloud annotations.
  */
-export default class VoxelCloudToolBase extends DraggableTool {
+export default class VoxelCloudToolBase<
+  T extends ToolOptions = ToolOptions
+> extends DraggableTool<T> {
   // Disable pointer lock API
   protected usePointerLockAPI: boolean = false;
 
@@ -19,11 +22,6 @@ export default class VoxelCloudToolBase extends DraggableTool {
 
   protected pX: number | undefined;
   protected pY: number | undefined;
-
-  constructor() {
-    super();
-    this.options = { width: 1 };
-  }
 
   public activate(viewer: Viewer): void {
     viewer.primaryEventTarget = this;
@@ -151,7 +149,7 @@ export default class VoxelCloudToolBase extends DraggableTool {
       new Vector2(this.pX, this.pY),
       new Vector2(ev.viewerX, ev.viewerY),
       value,
-      (this.options as any).width || 1
+      width || 1
     );
 
     this.pX = ev.viewerX;

@@ -45,7 +45,7 @@ export type Layout = 'twoByTwo' | 'axial' | 'sagittal' | 'coronal';
 
 const ViewerCluster: React.FC<{
   composition: Composition;
-  tool: Tool;
+  tool?: Tool;
   stateChanger: StateChanger<MprViewState>;
   layout: Layout;
   onCreateViewer: (viewer: Viewer, id?: string | number) => void;

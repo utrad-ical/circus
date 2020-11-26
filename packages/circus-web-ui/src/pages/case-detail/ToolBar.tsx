@@ -178,7 +178,7 @@ const ToolBar: React.FC<{
         className="line-width-shrinkselect"
         options={widthOptions}
         value={toolOptions.lineWidth}
-        onChange={(lineWidth) => setToolOption("lineWidth", lineWidth)}
+        onChange={lineWidth => setToolOption('lineWidth', lineWidth)}
         disabled={!brushEnabled || disabled}
       />
       <ToolButton
@@ -268,7 +268,9 @@ const ToolBar: React.FC<{
               name="threshold"
               min="0"
               value={toolOptions.wandThreshold}
-              onChange={(ev) => setToolOption("wandThreshold", ev.target.valueAsNumber)}
+              onChange={ev =>
+                setToolOption('wandThreshold', ev.target.valueAsNumber)
+              }
             />
           </>
           <>
@@ -280,7 +282,9 @@ const ToolBar: React.FC<{
               min="0"
               placeholder="mm"
               value={toolOptions.wandMaxDistance}
-              onChange={(ev) => setToolOption("wandMaxDistance", ev.target.valueAsNumber)}
+              onChange={ev =>
+                setToolOption('wandMaxDistance', ev.target.valueAsNumber)
+              }
             />
           </>
           <>
@@ -289,7 +293,7 @@ const ToolBar: React.FC<{
               className="wand-option-shrinkselect"
               options={wandModeOptions}
               value={toolOptions.wandMode}
-              onChange={(mode) => setToolOption("wandMode", mode)}
+              onChange={mode => setToolOption('wandMode', mode)}
             />
           </>
         </StyledSpanWandOption>

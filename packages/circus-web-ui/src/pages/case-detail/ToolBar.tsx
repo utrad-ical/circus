@@ -66,7 +66,7 @@ const ToolBar: React.FC<{
   } = props;
 
   const widthOptions = ['1', '3', '5', '7'];
-  const wandModeOptions = ['3d', '2d'];
+  const wandModeOptions = { '3d': '3D', '2d': '2D' };
 
   const handleToggleReferenceLine = () => {
     onChangeViewOptions({
@@ -261,7 +261,7 @@ const ToolBar: React.FC<{
         <StyledSpanWandOption>
           &emsp;
           <>
-            <label>threshold: </label>
+            <label>Threshold: </label>
             <input
               className="wand-threshold-input"
               type="number"
@@ -274,7 +274,7 @@ const ToolBar: React.FC<{
             />
           </>
           <>
-            <label>max distance: </label>
+            <label>Max distance: </label>
             <input
               className="wand-max-distance-input"
               type="number"
@@ -288,7 +288,7 @@ const ToolBar: React.FC<{
             />
           </>
           <>
-            <label>mode: </label>
+            <label>Mode: </label>
             <ShrinkSelect
               className="wand-option-shrinkselect"
               options={wandModeOptions}

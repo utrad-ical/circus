@@ -14,7 +14,7 @@ import styled from 'styled-components';
 import { Layout } from './ViewerCluster';
 import { WindowPreset } from 'types/Project';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
-import { ToolOptions, ToolOptionSetter } from 'utils/useToolbar';
+import { ToolOptions, ToolOptionSetter } from 'pages/case-detail/useToolbar';
 
 export interface ViewOptions {
   layout?: Layout;

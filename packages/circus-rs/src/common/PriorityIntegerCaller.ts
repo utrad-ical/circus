@@ -19,6 +19,10 @@ type Options = {
  * Asynchronously invokes the specified callback function
  * for each integer specified via append().
  * The callback is invoked only once for each integer.
+ * You can increase the number of parallel execution
+ * using the `maxConcurrency` option. The default is `maxConcurrency = 1`,
+ * which means callbacks are called one by one.
+ *
  * This class is backed by PriorityIntegerQueue.
  */
 export default class PriorityIntegerCaller {
@@ -49,7 +53,7 @@ export default class PriorityIntegerCaller {
     const range = new MultiRange(target)
       .subtract(this.resolvedRange)
       .subtract(this.rejectedRange)
-      .subtract(this.processing || []);
+      .subtract(this.processing);
 
     if (0 < range.segmentLength()) {
       this.queue.append(range, priority);

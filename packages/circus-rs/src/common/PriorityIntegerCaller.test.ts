@@ -1,4 +1,4 @@
-import AsyncPriorityCaller from './PriorityIntegerCaller';
+import PriorityIntegerCaller from './PriorityIntegerCaller';
 import { multirange } from 'multi-integer-range';
 
 const sleep = () => new Promise(resolve => setTimeout(resolve, 10));
@@ -9,7 +9,7 @@ test('must support priority according to PriorityIntegerQueue algorithm', async 
     await sleep();
     result.push(index);
   };
-  const loader = new AsyncPriorityCaller(callback);
+  const loader = new PriorityIntegerCaller(callback);
   loader.append('1', 10);
   loader.append('2', 20);
   loader.append('3', 30);
@@ -36,13 +36,13 @@ test('must invoke the callback only once for each integer', async () => {
     await sleep();
     result.push(index);
   };
-  const loader = new AsyncPriorityCaller(callback);
+  const loader = new PriorityIntegerCaller(callback);
 
   loader.append('1');
   loader.append('2');
   loader.append('1');
   loader.append('2');
-  await loader.waitFor('2');
+  await loader.waitFor('1,2');
   expect(result).toEqual([1, 2]);
 });
 
@@ -53,7 +53,7 @@ test('must handle rejection', async () => {
     if (index % 7 === 0) throw new Error('Rejected multiples of 7');
     result.push(index);
   };
-  const loader = new AsyncPriorityCaller(callback);
+  const loader = new PriorityIntegerCaller(callback);
   loader.append('1-10');
   await loader.waitFor('1-6');
   expect(multirange(result).has('1-6')).toBe(true);
@@ -69,10 +69,30 @@ test('must accept initial resolved range', async () => {
     if (index % 7 === 0) throw new Error('Rejected multiples of 7');
     result.push(index);
   };
-  const loader = new AsyncPriorityCaller(callback, { resolved: '5-8' });
+  const loader = new PriorityIntegerCaller(callback, {
+    initialResolved: '5-8'
+  });
 
   loader.append('1-10');
   await loader.waitFor('1-10'); // must not throw
   expect(multirange(result).has('5-8')).toBe(false);
   expect(multirange(result).has('1-4, 9-10')).toBe(true);
+});
+
+test('can call waitFor before appending', done => {
+  const loader = new PriorityIntegerCaller(async () => {});
+  loader.waitFor('1-10').then(done);
+  loader.append('1-10');
+});
+
+test('must accept maxConcurrency', async () => {
+  const result: number[] = [];
+  const callback = async (index: number) => {
+    await sleep();
+  };
+  const loader = new PriorityIntegerCaller(callback, { maxConcurrency: 999 });
+  loader.append('1-100'); // All callbacks wil be called concurrently
+  const start = new Date().getTime();
+  await loader.waitFor('1-100');
+  expect(new Date().getTime() - start).toBeLessThan(300);
 });

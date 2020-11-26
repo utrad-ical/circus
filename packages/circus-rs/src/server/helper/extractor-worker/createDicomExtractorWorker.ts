@@ -28,7 +28,7 @@ const createDicomExtractorWorker: FunctionService<
   const pool = new Pool({
     create: () => new Worker(workerMain),
     destroy: async (worker: Worker) => await worker.terminate(),
-    min: 0,
+    min: 1, // always keep at least one thread
     max: maxConcurrency,
     propagateCreateError: true
   });

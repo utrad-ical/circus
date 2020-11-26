@@ -7,16 +7,18 @@ import ViewerEvent from '../../viewer/ViewerEvent';
 import { ToolOptions } from '../Tool';
 import VoxelCloudToolBase from './VoxelCloudToolBase';
 
+export type WandToolMode = '2d' | '3d';
+
 export interface WandToolOptions extends ToolOptions {
-  mode: '2d' | '3d';
+  mode: WandToolMode;
   threshold: number;
   maxDistance: number;
 }
 
 export default class WandTool extends VoxelCloudToolBase<WandToolOptions> {
   protected fillValue = 1;
-  protected options = {
-    mode: '3d' as '2d' | '3d',
+  protected options: WandToolOptions = {
+    mode: '3d',
     threshold: 450,
     maxDistance: 500
   };

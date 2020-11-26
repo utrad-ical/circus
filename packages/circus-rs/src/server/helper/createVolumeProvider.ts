@@ -1,6 +1,5 @@
 import {
   DicomFileRepository,
-  DicomImageExtractor,
   DicomMetadata,
   FunctionService
 } from '@utrad-ical/circus-lib';
@@ -12,6 +11,7 @@ import RawData from '../../common/RawData';
 import PriorityIntegerCaller from '../../common/PriorityIntegerCaller';
 import DicomVolume from '../../common/DicomVolume';
 import asyncMemoize from '../../common/asyncMemoize';
+import { DicomExtractorWorker } from './extractor-worker/createDicomExtractorWorker';
 
 export type VolumeProvider = (seriesUid: string) => Promise<VolumeAccessor>;
 
@@ -38,10 +38,10 @@ const createUncachedVolumeProvider: FunctionService<
   VolumeProvider,
   {
     dicomFileRepository: DicomFileRepository;
-    dicomImageExtractor: DicomImageExtractor;
+    dicomExtractorWorker: DicomExtractorWorker;
   }
 > = async (opts, deps) => {
-  const { dicomFileRepository, dicomImageExtractor } = deps;
+  const { dicomFileRepository, dicomExtractorWorker } = deps;
   return async (seriesUid): Promise<VolumeAccessor> => {
     const { load, images } = await dicomFileRepository.getSeries(seriesUid);
     const imageRange = new MultiRange(images);
@@ -61,7 +61,9 @@ const createUncachedVolumeProvider: FunctionService<
     const imageMetadata: Map<number, DicomMetadata> = new Map();
     const fetch = async (imageNo: number) => {
       const unparsedBuffer = await load(imageNo);
-      const { metadata, pixelData } = dicomImageExtractor(unparsedBuffer);
+      const { metadata, pixelData } = await dicomExtractorWorker(
+        unparsedBuffer
+      );
       imageMetadata.set(imageNo, metadata);
       return pixelData!;
     };
@@ -133,7 +135,7 @@ const createVolumeProvider: FunctionService<
   VolumeProvider,
   {
     dicomFileRepository: DicomFileRepository;
-    dicomImageExtractor: DicomImageExtractor;
+    dicomExtractorWorker: DicomExtractorWorker;
   }
 > = async (opts, deps) => {
   const { cache: cacheOpts, ...restOpts } = opts || { cache: {} };
@@ -152,7 +154,7 @@ const createVolumeProvider: FunctionService<
 
 createVolumeProvider.dependencies = [
   'dicomFileRepository',
-  'dicomImageExtractor'
+  'dicomExtractorWorker'
 ];
 
 export default createVolumeProvider;

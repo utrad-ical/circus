@@ -10,6 +10,7 @@ import path from 'path';
 import { Counter } from './helper/createCounter';
 import { VolumeProvider } from './helper/createVolumeProvider';
 import ImageEncoder from './helper/image-encoder/ImageEncoder';
+import { DicomExtractorWorker } from './helper/extractor-worker/createDicomExtractorWorker';
 
 export interface RsServices {
   rsServer: Koa;
@@ -40,6 +41,10 @@ const configureServiceLoader = (loader: ServiceLoader<any>): void => {
   );
   loader.registerFactory('dicomImageExtractor', async () =>
     dicomImageExtractor()
+  );
+  loader.registerModule(
+    'dicomExtractorWorker',
+    path.join(__dirname, 'helper/extractor-worker/createDicomExtractorWorker')
   );
   loader.registerModule(
     'rsSeriesRoutes',

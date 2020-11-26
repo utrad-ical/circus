@@ -141,7 +141,8 @@ const LabelMenu: React.FC<{
       ellipsoid: '3D Shape',
       cuboid: '3D Shape',
       ellipse: '2D Shape',
-      rectangle: '2D Shape'
+      rectangle: '2D Shape',
+      point: 'Point'
     };
     const name = getUniqueLabelName(labelNames[type]);
     const data = createNewLabelData(type, { color, alpha }, viewers);

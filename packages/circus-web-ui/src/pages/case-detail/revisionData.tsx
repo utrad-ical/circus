@@ -64,7 +64,8 @@ export type LabelType =
   | 'cuboid'
   | 'ellipsoid'
   | 'rectangle'
-  | 'ellipse';
+  | 'ellipse'
+  | 'point';
 
 interface InternalVoxelLabelData {
   /**
@@ -104,6 +105,10 @@ type PlaneFigureLabelData = LabelAppearance & {
   z: number;
 };
 
+type PointLabelData = LabelAppearance & {
+  origin: Vector3D;
+};
+
 type TaggedLabelData =
   | {
       type: 'voxel';
@@ -116,6 +121,10 @@ type TaggedLabelData =
   | {
       type: 'cuboid' | 'ellipsoid';
       data: SolidFigureLabelData;
+    }
+  | {
+      type: 'point';
+      data: PointLabelData;
     };
 
 /**
@@ -151,6 +160,10 @@ export type ExternalLabel = {
       type: 'cuboid' | 'ellipsoid';
       data: SolidFigureLabelData;
     }
+  | {
+      type: 'point';
+      data: PointLabelData;
+    }
 );
 
 export const labelTypes: {
@@ -160,7 +173,8 @@ export const labelTypes: {
   cuboid: { icon: 'circus-annotation-cuboid', canConvertTo: 'ellipsoid' },
   ellipsoid: { icon: 'circus-annotation-ellipsoid', canConvertTo: 'cuboid' },
   rectangle: { icon: 'circus-annotation-rectangle', canConvertTo: 'ellipse' },
-  ellipse: { icon: 'circus-annotation-ellipse', canConvertTo: 'rectangle' }
+  ellipse: { icon: 'circus-annotation-ellipse', canConvertTo: 'rectangle' },
+  point: { icon: 'circus-annotation-point' }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -225,6 +239,22 @@ export const createNewLabelData = (
           ...appearance
         }
       };
+    }
+    case 'point': {
+      // Find the key of the first visible viewer, on which a new label is based
+      const key = Object.keys(viewers).find(index =>
+        /(axial|sagittal|coronal|oblique)$/.test(index)
+      );
+      return {
+        type,
+        data: {
+          ...(key
+            ? rs.Point.calculateDefaultPoint(viewers[key])
+            : { origin: [0, 0, 0] }),
+          ...appearance
+        }
+      };
+    }
   }
 };
 
@@ -408,6 +438,14 @@ export const buildAnnotation = (
       fig.id = label.temporaryKey;
       return fig;
     }
+    case 'point': {
+      const point = new rs.Point();
+      point.id = label.temporaryKey;
+      point.editable = true;
+      point.color = rgbaColor(appearance.color, appearance.alpha);
+      point.origin = label.data.origin;
+      return point;
+    }
   }
 };
 
@@ -431,6 +469,8 @@ export const getCenterOfLabel = (
     case 'rectangle':
     case 'ellipse':
       return getBoxCenter(rs.PlaneFigure.getOutline(label.data));
+    case 'point':
+      return label.data.origin;
     default:
       throw new Error('Undefined label type');
   }

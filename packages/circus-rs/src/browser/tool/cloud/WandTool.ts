@@ -14,7 +14,7 @@ export interface WandToolOptions extends ToolOptions {
 }
 
 export default class WandTool extends VoxelCloudToolBase<WandToolOptions> {
-  protected value = 1;
+  protected fillValue = 1;
   protected options = {
     mode: '3d' as '2d' | '3d',
     threshold: 450,
@@ -67,7 +67,7 @@ export default class WandTool extends VoxelCloudToolBase<WandToolOptions> {
       threshold,
       maxDistance,
       cloudRawData,
-      this.value
+      this.fillValue
     );
 
     comp.annotationUpdated(ev.viewer);

@@ -1,5 +1,5 @@
 import WandTool from './WandTool';
 
 export default class WandEraserTool extends WandTool {
-  protected value = 0;
+  protected fillValue = 0;
 }

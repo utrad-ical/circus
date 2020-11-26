@@ -76,6 +76,8 @@ export default function getHandleType(
     yCenter - handleSize <= point.y && point.y <= yCenter + handleSize;
 
   switch (true) {
+    case onLeftEdge && onRightEdge && onTopEdge && onBottomEdge:
+      return 'move';
     case onLeftEdge && onTopEdge:
       return 'nw-resize';
     case onTopEdge && onHorizontalCenter:

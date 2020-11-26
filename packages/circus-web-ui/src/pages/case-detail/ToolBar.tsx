@@ -15,6 +15,8 @@ import { Layout } from './ViewerCluster';
 import { WindowPreset } from 'types/Project';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
 import { ToolOptions, ToolOptionSetter } from 'pages/case-detail/useToolbar';
+import { ReferenceValueOption } from '@utrad-ical/circus-rs/src/browser/tool/cloud/WandTool';
+import { Editor } from '@smikitky/rb-components/lib/editor-types';
 
 export interface ViewOptions {
   layout?: Layout;
@@ -259,9 +261,8 @@ const ToolBar: React.FC<{
       </Dropdown>
       {(active === 'wand' || active === 'wandEraser') && (
         <StyledSpanWandOption>
-          &emsp;
-          <>
-            <label>Threshold: </label>
+          <label>
+            Threshold:
             <input
               className="wand-threshold-input"
               type="number"
@@ -272,9 +273,9 @@ const ToolBar: React.FC<{
                 setToolOption('wandThreshold', ev.target.valueAsNumber)
               }
             />
-          </>
-          <>
-            <label>Max distance: </label>
+          </label>
+          <label>
+            Max distance:
             <input
               className="wand-max-distance-input"
               type="number"
@@ -286,16 +287,20 @@ const ToolBar: React.FC<{
                 setToolOption('wandMaxDistance', ev.target.valueAsNumber)
               }
             />
-          </>
-          <>
-            <label>Mode: </label>
+          </label>
+          <label>
+            Mode:
             <ShrinkSelect
               className="wand-option-shrinkselect"
               options={wandModeOptions}
               value={toolOptions.wandMode}
               onChange={mode => setToolOption('wandMode', mode)}
-            />
-          </>
+            />{' '}
+          </label>
+          <WandBaseValueEditor
+            value={toolOptions.wandBaseValue}
+            onChange={value => setToolOption('wandBaseValue', value)}
+          />
         </StyledSpanWandOption>
       )}
     </StyledDiv>
@@ -323,15 +328,22 @@ const StyledDiv = styled.div`
 `;
 
 const StyledSpanWandOption = styled.span`
+  margin-left: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
   label {
-    color: #fff;
-    margin: 0px 4px 0px 20px;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
   }
 
   input {
     font-size: 100%;
     height: 28.4px;
-    paddiing: 1px 2px;
+    padding: 1px 2px;
+    color: black;
   }
 
   .wand-threshold-input {
@@ -341,10 +353,15 @@ const StyledSpanWandOption = styled.span`
   .wand-max-distance-input {
     width: 4em;
   }
+
+  .wand-base-value-input {
+    width: 4em;
+  }
+
   .wand-option-shrinkselect > button {
     font-size: 100%;
     height: 28.4px;
-    paddiing: 1px 2px;
+    padding: 1px 2px;
   }
 `;
 
@@ -410,4 +427,41 @@ const ToolButton: React.FC<{
       </OverlayTrigger>
     );
   }
+};
+
+const WandBaseValueEditor: Editor<ReferenceValueOption> = props => {
+  const { value, onChange } = props;
+
+  const onAutoChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    const isAuto = ev.target.checked;
+    onChange(isAuto ? 'clickPoint' : 0);
+  };
+
+  const onNumberChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(Number(ev.target.value));
+  };
+
+  return (
+    <>
+      <label>
+        Reference value:
+        {typeof value === 'number' && (
+          <input
+            className="wand-base-value-input"
+            type="number"
+            value={value}
+            onChange={onNumberChange}
+          />
+        )}
+        <label>
+          <input
+            type="checkbox"
+            checked={value === 'clickPoint'}
+            onChange={onAutoChange}
+          />
+          Auto
+        </label>
+      </label>
+    </>
+  );
 };

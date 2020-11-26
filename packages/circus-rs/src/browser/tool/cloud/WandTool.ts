@@ -8,11 +8,13 @@ import { ToolOptions } from '../Tool';
 import VoxelCloudToolBase from './VoxelCloudToolBase';
 
 export type WandToolMode = '2d' | '3d';
+export type ReferenceValueOption = 'clickPoint' | number;
 
 export interface WandToolOptions extends ToolOptions {
   mode: WandToolMode;
   threshold: number;
   maxDistance: number;
+  baseValue: ReferenceValueOption;
 }
 
 export default class WandTool extends VoxelCloudToolBase<WandToolOptions> {
@@ -20,7 +22,8 @@ export default class WandTool extends VoxelCloudToolBase<WandToolOptions> {
   protected options: WandToolOptions = {
     mode: '3d',
     threshold: 450,
-    maxDistance: 500
+    maxDistance: 500,
+    baseValue: 'clickPoint'
   };
 
   public dragStartHandler(ev: ViewerEvent): void {
@@ -48,10 +51,10 @@ export default class WandTool extends VoxelCloudToolBase<WandToolOptions> {
       viewer
     );
 
-    const { mode, threshold, maxDistance } = this.options;
+    const { mode, threshold, maxDistance, baseValue } = this.options;
 
-    const mprRawData = src.getLoadedDicomVolume();
-    if (mprRawData === undefined) throw new Error('The volume is not loaded.');
+    const rawData = src.getLoadedDicomVolume();
+    if (rawData === undefined) throw new Error('The volume is not loaded.');
     const cloudRawData = this.activeCloud.volume!;
 
     if (!this.activeCloud.expanded) this.activeCloud.expandToMaximum(src);
@@ -62,10 +65,16 @@ export default class WandTool extends VoxelCloudToolBase<WandToolOptions> {
       throw new Error('You cannot use Wand tool 2D on oblique MPR image.');
     }
 
+    const actualBaseValue =
+      typeof baseValue === 'number'
+        ? baseValue
+        : rawData.getPixelAt(startPoint.x, startPoint.y, startPoint.z);
+
     fuzzySelect(
       target,
-      mprRawData,
+      rawData,
       startPoint,
+      actualBaseValue,
       threshold,
       maxDistance,
       cloudRawData,

@@ -13,6 +13,7 @@ export interface ToolOptions {
   wandMode: WandToolOptions['mode'];
   wandThreshold: WandToolOptions['threshold'];
   wandMaxDistance: WandToolOptions['maxDistance'];
+  wandBaseValue: WandToolOptions['baseValue'];
 }
 
 export type ToolOptionSetter = <K extends keyof ToolOptions>(
@@ -24,7 +25,8 @@ const defaultToolOptions: ToolOptions = {
   lineWidth: 1,
   wandMode: '3d',
   wandThreshold: 450,
-  wandMaxDistance: 10
+  wandMaxDistance: 10,
+  wandBaseValue: 'clickPoint'
 };
 
 const useToolbar = (): [
@@ -72,6 +74,7 @@ const useToolbar = (): [
   );
 
   const lastOptionsRef = useRef<ToolOptions>();
+
   useEffect(() => {
     const lastOptions = lastOptionsRef.current || ({} as ToolOptions);
 
@@ -84,12 +87,14 @@ const useToolbar = (): [
     if (
       toolOptions['wandMode'] !== lastOptions['wandMode'] ||
       toolOptions['wandThreshold'] !== lastOptions['wandThreshold'] ||
-      toolOptions['wandMaxDistance'] !== lastOptions['wandMaxDistance']
+      toolOptions['wandMaxDistance'] !== lastOptions['wandMaxDistance'] ||
+      toolOptions['wandBaseValue'] !== lastOptions['wandBaseValue']
     ) {
       const wandOptions = {
         mode: toolOptions.wandMode,
         threshold: toolOptions.wandThreshold,
-        maxDistance: toolOptions.wandMaxDistance
+        maxDistance: toolOptions.wandMaxDistance,
+        baseValue: toolOptions.wandBaseValue
       };
       getTool('wand').setOptions(wandOptions);
       getTool('wandEraser').setOptions(wandOptions);

@@ -86,7 +86,8 @@ const createUncachedVolumeProvider: FunctionService<
       volume.insertSingleImage(zIndices.get(imageNo)!, buffer);
     };
     const priorityLoader = new PriorityIntegerCaller(processor, {
-      resolved: topImageNo
+      initialResolved: topImageNo,
+      maxConcurrency: 32
     });
 
     // start loading immediately

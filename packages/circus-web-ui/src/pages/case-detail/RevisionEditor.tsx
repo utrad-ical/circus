@@ -172,7 +172,7 @@ const RevisionEditor: React.FC<{
   ]);
 
   const handleAnnotationChange = (
-    annotation: rs.VoxelCloud | rs.SolidFigure | rs.PlaneFigure
+    annotation: rs.VoxelCloud | rs.SolidFigure | rs.PlaneFigure | rs.Point
   ) => {
     const { revision, activeSeriesIndex } = editingData;
     const labelIndex = revision.series[activeSeriesIndex].labels.findIndex(
@@ -203,6 +203,10 @@ const RevisionEditor: React.FC<{
           l.data.min = annotation.min;
           l.data.max = annotation.max;
           l.data.z = annotation.z;
+        });
+      } else if (annotation instanceof rs.Point && annotation.validate()) {
+        return produce(label, (l: any) => {
+          l.data.origin = annotation.origin;
         });
       } else {
         return label;

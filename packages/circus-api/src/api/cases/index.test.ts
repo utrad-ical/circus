@@ -251,6 +251,15 @@ describe('add revision', () => {
                   z: 5
                 },
                 name: ''
+              },
+              {
+                type: 'point',
+                data: {
+                  color: '#00ff00',
+                  alpha: 1,
+                  origin: [224, 183, 50]
+                },
+                name: ''
               }
             ]
           }

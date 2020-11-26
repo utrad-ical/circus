@@ -47,7 +47,7 @@ import useToolbar from 'utils/useToolbar';
 const useComposition = (
   seriesUid: string,
   partialVolumeDescriptor: PartialVolumeDescriptor
-): { composition: Composition | undefined, volumeLoaded: boolean } => {
+): { composition: Composition | undefined; volumeLoaded: boolean } => {
   const { rsHttpClient } = useContext(VolumeLoaderCacheContext)!;
 
   const volumeLoader = usePendingVolumeLoader(
@@ -75,7 +75,8 @@ const useComposition = (
 
   const [volumeLoaded, setVolumeLoaded] = useState<boolean>(false);
   useEffect(() => {
-    volumeLoader.loadMeta()
+    volumeLoader
+      .loadMeta()
       .then(() => volumeLoader.loadVolume())
       .then(() => setVolumeLoaded(true));
   }, [volumeLoader]);
@@ -137,8 +138,13 @@ const RevisionEditor: React.FC<{
 
   const [editorEnabled, setEditorEnabled] = useState<boolean>(false);
   const toolNameAtEditorDisabledRef = useRef<string>();
-  const activeToolIsEditor
-    = ['brush', 'eraser', 'bucket', 'wand', 'wandEraser'].some(t => t === activeToolName);
+  const activeToolIsEditor = [
+    'brush',
+    'eraser',
+    'bucket',
+    'wand',
+    'wandEraser'
+  ].some(t => t === activeToolName);
   const activeLabelIsVoxel = activeLabel && activeLabel.type === 'voxel';
   useEffect(() => {
     if (!editorEnabled && activeLabelIsVoxel) {

@@ -478,8 +478,6 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
     const min = this.min;
     const max = this.max;
     if (!min || !max) return false;
-    return min.some((value, index) => {
-      return value !== max[index];
-    });
+    return min.some((value, index) => value !== max[index]);
   }
 }

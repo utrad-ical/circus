@@ -3,6 +3,7 @@ import { confirm, prompt } from '@smikitky/rb-components/lib/modal';
 import Slider from '@smikitky/rb-components/lib/Slider';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
+import { detectOrthogonalSection } from '@utrad-ical/circus-rs/src/browser/section-util';
 import focusBy from '@utrad-ical/circus-rs/src/browser/tool/state/focusBy';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
@@ -102,7 +103,25 @@ const LabelMenu: React.FC<{
       case 'reveal': {
         if (!activeLabel) return;
         const center = getCenterOfLabel(composition, activeLabel);
-        Object.values(viewers).forEach(viewer => focusBy(viewer, center));
+        const reproduceSection =
+          'section' in activeLabel.data ? activeLabel.data.section : undefined;
+        const reproduceOrientation = reproduceSection
+          ? detectOrthogonalSection(reproduceSection)
+          : undefined;
+
+        const getReproduceSection = (viewer: Viewer) => {
+          if (!reproduceSection) return;
+          if (
+            detectOrthogonalSection(viewer.getState().section) !==
+            reproduceOrientation
+          )
+            return;
+          return reproduceSection;
+        };
+
+        Object.values(viewers).forEach(viewer => {
+          focusBy(viewer, center, getReproduceSection(viewer));
+        });
       }
     }
   };
@@ -142,7 +161,8 @@ const LabelMenu: React.FC<{
       cuboid: '3D Shape',
       ellipse: '2D Shape',
       rectangle: '2D Shape',
-      point: 'Point'
+      point: 'Point',
+      ruler: 'Ruler'
     };
     const name = getUniqueLabelName(labelNames[type]);
     const data = createNewLabelData(type, { color, alpha }, viewers);

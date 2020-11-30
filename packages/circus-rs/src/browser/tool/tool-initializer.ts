@@ -1,19 +1,20 @@
-import ToolBaseClass from './Tool';
-import WindowTool from './state/WindowTool';
-import HandTool from './state/HandTool';
-import ZoomTool from './state/ZoomTool';
-import PagerTool from './state/PagerTool';
-import CelestialRotateTool from './state/CelestialRotateTool';
-import BrushTool from './cloud/BrushTool';
-import EraserTool from './cloud/EraserTool';
-import BucketTool from './cloud/BucketTool';
 import CircleTool from './annotation/CircleTool';
-import RectangleTool from './annotation/RectangleTool';
-import EllipsoidTool from './annotation/EllipsoidTool';
 import CuboidTool from './annotation/CuboidTool';
+import EllipsoidTool from './annotation/EllipsoidTool';
 import PointTool from './annotation/PointTool';
-import WandTool from './cloud/WandTool';
+import RectangleTool from './annotation/RectangleTool';
+import RulerTool from './annotation/RulerTool';
+import BrushTool from './cloud/BrushTool';
+import BucketTool from './cloud/BucketTool';
+import EraserTool from './cloud/EraserTool';
 import WandEraserTool from './cloud/WandEraserTool';
+import WandTool from './cloud/WandTool';
+import CelestialRotateTool from './state/CelestialRotateTool';
+import HandTool from './state/HandTool';
+import PagerTool from './state/PagerTool';
+import WindowTool from './state/WindowTool';
+import ZoomTool from './state/ZoomTool';
+import ToolBaseClass from './Tool';
 
 type ToolClass<T extends ToolBaseClass> = { new (): T };
 
@@ -27,6 +28,7 @@ interface ToolClasses extends AnyToolClasses {
   zoom: ToolClass<ZoomTool>;
   pager: ToolClass<PagerTool>;
   celestialRotate: ToolClass<CelestialRotateTool>;
+  ruler: ToolClass<RulerTool>;
 
   circle: ToolClass<CircleTool>;
   rectangle: ToolClass<RectangleTool>;
@@ -49,6 +51,7 @@ const defaultTools: ToolClasses & { null: ToolClass<ToolBaseClass> } = {
   zoom: ZoomTool,
   pager: PagerTool,
   celestialRotate: CelestialRotateTool,
+  ruler: RulerTool,
 
   circle: CircleTool,
   rectangle: RectangleTool,

@@ -1,12 +1,13 @@
 import { Vector2 } from 'three';
-import { Vector3D } from '../../../common/geometry';
+import { Section, Vector3D } from '../../../common/geometry';
 import MprImageSource from '../../image-source/MprImageSource';
 import { translateOriginToCenter } from '../../section-util';
 import Viewer from '../../viewer/Viewer';
 
 export default function focusby(
   viewer: Viewer,
-  focusPoint: Vector3D | undefined
+  focusPoint: Vector3D | undefined,
+  reproduceSection: Section | undefined
 ) {
   if (!focusPoint) return;
   const comp = viewer.getComposition();
@@ -15,7 +16,7 @@ export default function focusby(
   if (!(src instanceof MprImageSource)) return;
 
   const prevState = viewer.getState();
-  const prevSection = prevState.section;
+  const prevSection = reproduceSection ? reproduceSection : prevState.section;
   const resolution = new Vector2().fromArray(viewer.getResolution());
   const section = translateOriginToCenter(
     {

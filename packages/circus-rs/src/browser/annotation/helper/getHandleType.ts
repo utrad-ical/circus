@@ -1,6 +1,6 @@
 import { Vector2, Vector3 } from 'three';
-import Viewer from '../../viewer/Viewer';
 import { convertVolumeCoordinateToScreenCoordinate } from '../../section-util';
+import Viewer from '../../viewer/Viewer';
 import { defaultHandleSize } from './drawHandleFrame';
 
 export type HandleType =
@@ -13,6 +13,8 @@ export type HandleType =
   | 'sw-resize'
   | 'w-resize'
   | 'move';
+
+export type HandleTypeForLine = 'start-reset' | 'end-reset' | 'line-move';
 
 export const cursorSettableHandleType = [
   'nw-resize',
@@ -36,40 +38,94 @@ export default function getHandleType(
   if (!viewer || !viewState) return;
   if (viewState.type !== 'mpr') return;
 
+  const section = viewState.section;
   const resolution = new Vector2().fromArray(viewer.getResolution());
 
-  const origin = convertVolumeCoordinateToScreenCoordinate(
-    viewState.section,
-    resolution,
-    new Vector3().fromArray(min)
+  return _getHandleType(
+    point,
+    convertVolumeCoordinateToScreenCoordinate(
+      section,
+      resolution,
+      new Vector3().fromArray(min)
+    ),
+    convertVolumeCoordinateToScreenCoordinate(
+      section,
+      resolution,
+      new Vector3().fromArray(max)
+    )
   );
-  const terminus = convertVolumeCoordinateToScreenCoordinate(
+}
+
+export function getHandleTypeForLine(
+  viewer: Viewer,
+  point: Vector2,
+  line: { start: Vector3; end: Vector3 },
+  resizable: boolean = true
+): HandleTypeForLine | undefined {
+  const handleSize = defaultHandleSize;
+
+  const viewState = viewer.getState();
+  if (!viewer || !viewState) return;
+  if (viewState.type !== 'mpr') return;
+
+  const resolution = new Vector2().fromArray(viewer.getResolution());
+
+  const start = convertVolumeCoordinateToScreenCoordinate(
     viewState.section,
     resolution,
-    new Vector3().fromArray(max)
+    line.start
+  );
+  const end = convertVolumeCoordinateToScreenCoordinate(
+    viewState.section,
+    resolution,
+    line.end
   );
 
+  if (resizable) {
+    if (_getHandleType(point, start, start)) return 'start-reset';
+    if (_getHandleType(point, end, end)) return 'end-reset';
+  }
+
+  const delta = new Vector2(end.x - start.x, end.y - start.y);
+  const nu = delta.clone().normalize();
+  const nv = new Vector2(delta.y, delta.x * -1).normalize();
+
+  const o = start.clone().add(nv.clone().multiplyScalar(-handleSize));
+  const p = point.clone().sub(o);
+  const pu = p.dot(nu);
+  const pv = p.dot(nv);
+
+  return pu >= 0 && pv >= 0 && pu <= delta.length() && pv <= handleSize * 2
+    ? 'line-move'
+    : undefined;
+}
+
+const _getHandleType = (
+  point: Vector2,
+  min: Vector2,
+  max: Vector2
+): HandleType | undefined => {
   const handleSize = defaultHandleSize;
 
   const inBoundingBox =
-    origin.x - handleSize <= point.x &&
-    point.x <= terminus.x + handleSize &&
-    origin.y - handleSize <= point.y &&
-    point.y <= terminus.y + handleSize;
+    min.x - handleSize <= point.x &&
+    point.x <= max.x + handleSize &&
+    min.y - handleSize <= point.y &&
+    point.y <= max.y + handleSize;
 
   if (!inBoundingBox) return;
 
   const onLeftEdge =
-    origin.x - handleSize <= point.x && point.x <= origin.x + handleSize;
+    min.x - handleSize <= point.x && point.x <= min.x + handleSize;
   const onRightEdge =
-    terminus.x - handleSize <= point.x && point.x <= terminus.x + handleSize;
+    max.x - handleSize <= point.x && point.x <= max.x + handleSize;
   const onTopEdge =
-    origin.y - handleSize <= point.y && point.y <= origin.y + handleSize;
+    min.y - handleSize <= point.y && point.y <= min.y + handleSize;
   const onBottomEdge =
-    terminus.y - handleSize <= point.y && point.y <= terminus.y + handleSize;
+    max.y - handleSize <= point.y && point.y <= max.y + handleSize;
 
-  const xCenter = origin.x + (terminus.x - origin.x) / 2;
-  const yCenter = origin.y + (terminus.y - origin.y) / 2;
+  const xCenter = min.x + (max.x - min.x) / 2;
+  const yCenter = min.y + (max.y - min.y) / 2;
   const onHorizontalCenter =
     xCenter - handleSize <= point.x && point.x <= xCenter + handleSize;
   const onVertialCenter =
@@ -99,4 +155,4 @@ export default function getHandleType(
     default:
       return undefined;
   }
-}
+};

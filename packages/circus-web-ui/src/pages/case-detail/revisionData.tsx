@@ -3,6 +3,7 @@ import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import {
   getBoxCenter,
+  Section,
   Vector2D,
   Vector3D
 } from '@utrad-ical/circus-rs/src/browser';
@@ -65,7 +66,8 @@ export type LabelType =
   | 'ellipsoid'
   | 'rectangle'
   | 'ellipse'
-  | 'point';
+  | 'point'
+  | 'ruler';
 
 interface InternalVoxelLabelData {
   /**
@@ -109,6 +111,13 @@ type PointLabelData = LabelAppearance & {
   origin: Vector3D;
 };
 
+type RulerLabelData = LabelAppearance & {
+  section: Section;
+  start: Vector3D;
+  end: Vector3D;
+  labelPosition?: Vector2D;
+};
+
 type TaggedLabelData =
   | {
       type: 'voxel';
@@ -125,6 +134,10 @@ type TaggedLabelData =
   | {
       type: 'point';
       data: PointLabelData;
+    }
+  | {
+      type: 'ruler';
+      data: RulerLabelData;
     };
 
 /**
@@ -164,6 +177,10 @@ export type ExternalLabel = {
       type: 'point';
       data: PointLabelData;
     }
+  | {
+      type: 'ruler';
+      data: RulerLabelData;
+    }
 );
 
 export const labelTypes: {
@@ -174,7 +191,8 @@ export const labelTypes: {
   ellipsoid: { icon: 'circus-annotation-ellipsoid', canConvertTo: 'cuboid' },
   rectangle: { icon: 'circus-annotation-rectangle', canConvertTo: 'ellipse' },
   ellipse: { icon: 'circus-annotation-ellipse', canConvertTo: 'rectangle' },
-  point: { icon: 'circus-annotation-point' }
+  point: { icon: 'circus-annotation-point' },
+  ruler: { icon: 'circus-annotation-ruler' }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -251,6 +269,24 @@ export const createNewLabelData = (
           ...(key
             ? rs.Point.calculateDefaultPoint(viewers[key])
             : { origin: [0, 0, 0] }),
+          ...appearance
+        }
+      };
+    }
+    case 'ruler': {
+      // Find the key of the first visible viewer, on which a new label is based
+      const key = Object.keys(viewers).find(index =>
+        /(axial|sagittal|coronal|oblique)$/.test(index)
+      );
+      const section = key
+        ? viewers[key].getState().section
+        : { origin: [0, 0, 0], xAxis: [10, 0, 0], yAxis: [0, 10, 0] };
+      return {
+        type,
+        data: {
+          ...(key
+            ? rs.Ruler.calculateDefaultRuler(viewers[key])
+            : { section, start: [0, 0, 0], end: [10, 10, 0] }),
           ...appearance
         }
       };
@@ -446,6 +482,19 @@ export const buildAnnotation = (
       point.origin = label.data.origin;
       return point;
     }
+
+    case 'ruler': {
+      const ruler = new rs.Ruler();
+      ruler.id = label.temporaryKey;
+      ruler.editable = true;
+      ruler.color = rgbaColor(appearance.color, appearance.alpha);
+      ruler.section = label.data.section;
+      ruler.start = label.data.start;
+      ruler.end = label.data.end;
+      if (label.data.labelPosition)
+        ruler.labelPosition = label.data.labelPosition;
+      return ruler;
+    }
   }
 };
 
@@ -471,6 +520,9 @@ export const getCenterOfLabel = (
       return getBoxCenter(rs.PlaneFigure.getOutline(label.data));
     case 'point':
       return label.data.origin;
+    case 'ruler':
+      return getBoxCenter(rs.Ruler.getOutline(label.data));
+
     default:
       throw new Error('Undefined label type');
   }

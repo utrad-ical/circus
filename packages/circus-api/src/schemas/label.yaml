@@ -124,4 +124,58 @@ oneOf:
             description: >
               Origin of the point, the volume Coordinates (measured in mm).
         required: ['origin']
+  - properties:
+      type:
+        enum: ['ruler']
+      data:
+        type: object
+        properties:
+          section:
+            type: object
+            properties:
+              origin:
+                type: array
+                items:
+                  [
+                    { type: 'integer' },
+                    { type: 'integer' },
+                    { type: 'integer' },
+                  ]
+              xAxis:
+                type: array
+                items:
+                  [
+                    { type: 'integer' },
+                    { type: 'integer' },
+                    { type: 'integer' },
+                  ]
+              yAxis:
+                type: array
+                items:
+                  [
+                    { type: 'integer' },
+                    { type: 'integer' },
+                    { type: 'integer' },
+                  ]
+            description: >
+              Section
+          start:
+            type: array
+            items:
+              [{ type: 'integer' }, { type: 'integer' }, { type: 'integer' }]
+            description: >
+              Start of the Line, the volume Coordinates (measured in mm).
+          end:
+            type: array
+            items:
+              [{ type: 'integer' }, { type: 'integer' }, { type: 'integer' }]
+            description: >
+              End of the Line, the volume Coordinates (measured in mm).
+          labelPosition:
+            type: array
+            items: [{ type: 'integer' }, { type: 'integer' }]
+            description: >
+              Lower left position of label, the screen Coordinates (measured in mm).
+        required: ['section', 'start', 'end']
+
 additionalProperties: false

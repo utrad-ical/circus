@@ -1,5 +1,6 @@
 import { Box2, Vector2 } from 'three';
 import { DirectedSegment } from '../../../common/geometry/Line';
+import { FontStyle } from './fontStyle';
 
 /**
  * Draw a point.
@@ -243,5 +244,43 @@ export function drawSimpleFigure(
       // draw Polygon
       drawPolygon(ctx, vertices, style);
       return;
+  }
+}
+
+export function drawFillText(
+  ctx: CanvasRenderingContext2D,
+  text: string | undefined,
+  origin: Vector2 | undefined,
+  style: FontStyle
+): { textBoundaryHitTest: (p: Vector2) => boolean } {
+  if (!text) text = '';
+  if (!origin) origin = new Vector2();
+  ctx.save();
+  try {
+    let [fontSize, fontFamily] = ctx.font.split(' ');
+    if (style.fontSize) fontSize = style.fontSize;
+    if (style.fontFamily) fontFamily = style.fontFamily;
+    ctx.font = fontSize + ' ' + fontFamily;
+    if (style.color) ctx.fillStyle = style.color;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText(text, origin.x, origin.y);
+
+    const textMetrics = ctx.measureText(text);
+    const {
+      width,
+      actualBoundingBoxAscent,
+      actualBoundingBoxDescent
+    } = textMetrics;
+    const height = actualBoundingBoxAscent + actualBoundingBoxDescent;
+
+    const box = new Box2(
+      new Vector2(0, -height),
+      new Vector2(width, 0)
+    ).translate(origin);
+
+    return { textBoundaryHitTest: (p: Vector2) => box.containsPoint(p) };
+  } finally {
+    ctx.restore();
   }
 }

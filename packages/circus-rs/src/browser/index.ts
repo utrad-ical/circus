@@ -27,6 +27,7 @@ export { default as Point } from './annotation/Point';
 export { default as SolidFigure } from './annotation/SolidFigure';
 export { default as Cuboid } from './annotation/Cuboid';
 export { default as Ellipsoid } from './annotation/Ellipsoid';
+export { default as Ruler } from './annotation/Ruler';
 
 export { default as RawData } from '../common/RawData';
 export { default as AnisotropicRawData } from '../common/AnisotropicRawData';

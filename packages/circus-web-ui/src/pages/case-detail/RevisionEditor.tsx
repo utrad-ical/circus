@@ -208,6 +208,13 @@ const RevisionEditor: React.FC<{
         return produce(label, (l: any) => {
           l.data.origin = annotation.origin;
         });
+      } else if (annotation instanceof rs.Ruler && annotation.validate()) {
+        return produce(label, (l: any) => {
+          l.data.section = annotation.section;
+          l.data.start = annotation.start;
+          l.data.end = annotation.end;
+          l.data.labelPosition = annotation.labelPosition;
+        });
       } else {
         return label;
       }

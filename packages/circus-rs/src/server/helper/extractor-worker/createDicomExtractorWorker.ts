@@ -4,9 +4,10 @@ import { Pool } from 'tarn';
 import path from 'path';
 import os from 'os';
 
-export type DicomExtractorWorker = (
-  input: ArrayBuffer
-) => Promise<DicomImageData>;
+interface DicomExtractorWorker {
+  (input: ArrayBuffer): Promise<DicomImageData>;
+  dispose: () => Promise<void>;
+}
 
 interface Options {
   /**
@@ -33,11 +34,16 @@ const createDicomExtractorWorker: FunctionService<
     propagateCreateError: true
   });
 
-  return (input: ArrayBuffer) => {
+  const extract = (input: ArrayBuffer) => {
     return new Promise<DicomImageData>((resolve, reject) => {
       pool.acquire().promise.then(worker => {
-        const cb = (result: DicomImageData) => {
-          resolve(result);
+        const cb = (result: DicomImageData | string) => {
+          if (typeof result === 'string') {
+            // string result means an error
+            reject(new Error(result));
+          } else {
+            resolve(result);
+          }
           worker.off('message', cb);
           pool.release(worker);
         };
@@ -46,6 +52,12 @@ const createDicomExtractorWorker: FunctionService<
       });
     });
   };
+
+  extract.dispose = async () => {
+    await pool.destroy();
+  };
+
+  return extract;
 };
 
 export default createDicomExtractorWorker;

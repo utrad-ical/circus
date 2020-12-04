@@ -1,10 +1,10 @@
-import { DicomImageData, FunctionService } from '@utrad-ical/circus-lib';
+import { DicomImageData, NoDepFunctionService } from '@utrad-ical/circus-lib';
 import { Worker } from 'worker_threads';
 import { Pool } from 'tarn';
 import path from 'path';
 import os from 'os';
 
-interface DicomExtractorWorker {
+export interface DicomExtractorWorker {
   (input: ArrayBuffer): Promise<DicomImageData>;
   dispose: () => Promise<void>;
 }
@@ -19,9 +19,8 @@ interface Options {
 
 const workerMain = path.join(__dirname, 'workerMain.js');
 
-const createDicomExtractorWorker: FunctionService<
+const createDicomExtractorWorker: NoDepFunctionService<
   DicomExtractorWorker,
-  {},
   Options
 > = async (options = {}) => {
   const { maxConcurrency = os.cpus().length } = options;

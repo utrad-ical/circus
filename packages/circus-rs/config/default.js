@@ -7,6 +7,7 @@
 
 'use strict';
 const path = require('path');
+const os = require('os');
 
 module.exports.default = {
   // DICOM file repository is a loader that fetches the content of a DICOM file
@@ -66,6 +67,13 @@ module.exports.default = {
         // upper limit seconds of heap.
         maxAge: 3600
       }
+    }
+  },
+
+  dicomExtractorWorker: {
+    options: {
+      // Controls the number of maximum threds to parse DICOM files.
+      maxConcurrency: os.cpus().length
     }
   }
 };

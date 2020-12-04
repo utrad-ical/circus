@@ -66,6 +66,91 @@ export function scanBoundingBox(
  * Voxels are filled when the line only "glances" them.
  * TODO: Introduce edge-overflow detection for all directions to reduce unnecessary calls to writePixelAt
  */
+export function draw3DLineFast(
+  volume: RawData,
+  start: Vector3, // offset (not mm!)
+  end: Vector3, // offset (not mm!)
+  value: number = 1
+): void {
+  if (volume.getPixelFormat() !== 'binary') {
+    throw new Error('This function only supports binary format.');
+  }
+  const _bin_size = 1;
+
+  const ray = new Vector3().subVectors(end, start);
+
+  const currentVoxel = new Vector3(
+    Math.floor(start.x / _bin_size),
+    Math.floor(start.y / _bin_size),
+    Math.floor(start.z / _bin_size)
+  );
+
+  const lastVoxel = new Vector3(
+    Math.floor(end.x / _bin_size),
+    Math.floor(end.y / _bin_size),
+    Math.floor(end.z / _bin_size)
+  );
+
+  const step = new Vector3(
+    ray.x < 0 ? -1 : 1,
+    ray.y < 0 ? -1 : 1,
+    ray.z < 0 ? -1 : 1
+  );
+
+  const nextVoxelBoundary = new Vector3(
+    (currentVoxel.x + step.x) * _bin_size,
+    (currentVoxel.y + step.y) * _bin_size,
+    (currentVoxel.z + step.z) * _bin_size
+  );
+
+  const delta = new Vector3(
+    ray.x != 0 ? (_bin_size / ray.x) * step.x : Number.POSITIVE_INFINITY,
+    ray.y != 0 ? (_bin_size / ray.y) * step.y : Number.POSITIVE_INFINITY,
+    ray.z != 0 ? (_bin_size / ray.z) * step.z : Number.POSITIVE_INFINITY
+  );
+
+  const t = new Vector3(
+    ray.x != 0
+      ? (nextVoxelBoundary.x - start.x) / ray.x
+      : Number.POSITIVE_INFINITY,
+    ray.y != 0
+      ? (nextVoxelBoundary.y - start.y) / ray.y
+      : Number.POSITIVE_INFINITY,
+    ray.z != 0
+      ? (nextVoxelBoundary.z - start.z) / ray.z
+      : Number.POSITIVE_INFINITY
+  );
+
+  volume.writePixelAt(value, currentVoxel.x, currentVoxel.y, currentVoxel.z);
+
+  while (!lastVoxel.equals(currentVoxel)) {
+    if (t.x < t.y) {
+      if (t.x < t.z) {
+        currentVoxel.x += step.x;
+        t.x += delta.x;
+      } else {
+        currentVoxel.z += step.z;
+        t.z += delta.z;
+      }
+    } else {
+      if (t.y < t.z) {
+        currentVoxel.y += step.y;
+        t.y += delta.y;
+      } else {
+        currentVoxel.z += step.z;
+        t.z += delta.z;
+      }
+    }
+    volume.writePixelAt(value, currentVoxel.x, currentVoxel.y, currentVoxel.z);
+  }
+}
+
+/**
+ * Fill all voxels with the given value when it intersects with the line segment
+ * specified by the two points.
+ * Voxels are filled when the line only "glances" them.
+ * TODO: Introduce edge-overflow detection for all directions to reduce unnecessary calls to writePixelAt
+ */
 export function draw3DLine(
   volume: RawData,
   p0: Vector3, // offset (not mm!)

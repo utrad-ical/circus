@@ -6,6 +6,8 @@
 // and specify the settings. Items in your setting file
 // will be merged recursively.
 
+import os from 'os';
+
 export interface Configuration {
   [service: string]: {
     type?: string;
@@ -52,6 +54,12 @@ const defaults: Configuration = {
     options: {
       downloadFileDirectory: '/var/circus/data/downloads',
       timeoutMs: 60 * 60 * 1000 // 1 hour
+    }
+  },
+  dicomExtractorWorker: {
+    options: {
+      // Controls the number of maximum threds to parse DICOM files.
+      maxConcurrency: os.cpus().length
     }
   }
 };

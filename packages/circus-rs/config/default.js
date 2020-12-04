@@ -6,7 +6,8 @@
  */
 
 'use strict';
-var path = require('path');
+const path = require('path');
+const os = require('os');
 
 module.exports.default = {
   // DICOM file repository is a loader that fetches the content of a DICOM file
@@ -57,6 +58,8 @@ module.exports.default = {
 
   volumeProvider: {
     options: {
+      // Controls how many DICOM files can be loaded simultaneouly.
+      maxConcurrency: 32,
       // Controls how long the series data are kept in memory.
       cache: {
         // threshold: upper limit of heap memory size. (in bytes)
@@ -64,6 +67,13 @@ module.exports.default = {
         // upper limit seconds of heap.
         maxAge: 3600
       }
+    }
+  },
+
+  dicomExtractorWorker: {
+    options: {
+      // Controls the number of maximum threds to parse DICOM files.
+      maxConcurrency: os.cpus().length
     }
   }
 };

@@ -43,6 +43,7 @@
     "multi-integer-range": "^4.0.8",
     "pngjs": "^3.4.0",
     "style-loader": "^1.2.1",
+    "tarn": "2.0.0",
     "three": "^0.98.0",
     "tinycolor2": "^1.4.1",
     "tslib": "^1.11.2",

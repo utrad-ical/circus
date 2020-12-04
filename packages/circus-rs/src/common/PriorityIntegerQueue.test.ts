@@ -37,5 +37,14 @@ test('do not overwrite high-priority queue items', () => {
   const queue = new PriorityIntegerQueue();
   queue.append('3-5', 3);
   queue.append('1-6', 1);
+  queue.append('4', 0);
   expect(extract(queue)).toEqual([3, 4, 5, 1, 2, 6]);
+});
+
+test('clear', () => {
+  const queue = new PriorityIntegerQueue();
+  queue.append('1-10');
+  queue.clear();
+  queue.append('30');
+  expect(extract(queue)).toEqual([30]);
 });

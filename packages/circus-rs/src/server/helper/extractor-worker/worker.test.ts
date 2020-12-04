@@ -21,7 +21,7 @@ const dicomImage = (file = 'CT-MONO2-16-brain') => {
 };
 
 test('dicomExtractorWorker', async () => {
-  const extract = await createDicomExtractorWorker({ maxConcurrency: 1 }, {});
+  const extract = await createDicomExtractorWorker({ maxConcurrency: 1 });
   const data = await extract((await dicomImage()).buffer);
   expect(data).toHaveProperty('metadata');
   expect(data).toHaveProperty('pixelData');

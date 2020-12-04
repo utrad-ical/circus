@@ -223,22 +223,18 @@ const emptyVoxelLabelData = (
 export const createNewLabelData = (
   type: LabelType,
   appearance: LabelAppearance,
-  viewers: { [index: string]: rs.Viewer }
+  viewer?: rs.Viewer
 ): TaggedLabelData => {
   switch (type) {
     case 'voxel':
       return { type, data: emptyVoxelLabelData(appearance) };
     case 'cuboid':
     case 'ellipsoid': {
-      // Find the key of the first visible viewer, on which a new label is based
-      const key = Object.keys(viewers).find(index =>
-        /(axial|sagittal|coronal)$/.test(index)
-      );
       return {
         type,
         data: {
-          ...(key
-            ? rs.SolidFigure.calculateBoundingBoxWithDefaultDepth(viewers[key])
+          ...(viewer
+            ? rs.SolidFigure.calculateBoundingBoxWithDefaultDepth(viewer)
             : { min: [0, 0, 0], max: [10, 10, 10] }),
           ...appearance
         }
@@ -246,47 +242,42 @@ export const createNewLabelData = (
     }
     case 'ellipse':
     case 'rectangle': {
-      // Find the key of the visible axial viewer, on which a new label is based
-      const key = Object.keys(viewers).find(index => /(axial)$/.test(index));
       return {
         type,
         data: {
-          ...(key
-            ? rs.PlaneFigure.calculateBoundingBoxAndDepth(viewers[key])
+          ...(viewer
+            ? rs.PlaneFigure.calculateBoundingBoxAndDepth(viewer)
             : { min: [0, 0], max: [10, 10], z: 0 }),
           ...appearance
         }
       };
     }
     case 'point': {
-      // Find the key of the first visible viewer, on which a new label is based
-      const key = Object.keys(viewers).find(index =>
-        /(axial|sagittal|coronal|oblique)$/.test(index)
-      );
       return {
         type,
         data: {
-          ...(key
-            ? rs.Point.calculateDefaultPoint(viewers[key])
+          ...(viewer
+            ? rs.Point.calculateDefaultPoint(viewer)
             : { origin: [0, 0, 0] }),
           ...appearance
         }
       };
     }
     case 'ruler': {
-      // Find the key of the first visible viewer, on which a new label is based
-      const key = Object.keys(viewers).find(index =>
-        /(axial|sagittal|coronal|oblique)$/.test(index)
-      );
-      const section = key
-        ? viewers[key].getState().section
-        : { origin: [0, 0, 0], xAxis: [10, 0, 0], yAxis: [0, 10, 0] };
       return {
         type,
         data: {
-          ...(key
-            ? rs.Ruler.calculateDefaultRuler(viewers[key])
-            : { section, start: [0, 0, 0], end: [10, 10, 0] }),
+          ...(viewer
+            ? rs.Ruler.calculateDefaultRuler(viewer)
+            : {
+                section: {
+                  origin: [0, 0, 0],
+                  xAxis: [10, 0, 0],
+                  yAxis: [0, 10, 0]
+                },
+                start: [0, 0, 0],
+                end: [10, 10, 0]
+              }),
           ...appearance
         }
       };

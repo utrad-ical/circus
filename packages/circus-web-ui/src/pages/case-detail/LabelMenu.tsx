@@ -1,9 +1,12 @@
 import { ColorPalette } from '@smikitky/rb-components/lib/ColorPicker';
-import { confirm, prompt } from '@smikitky/rb-components/lib/modal';
+import { choice, confirm, prompt } from '@smikitky/rb-components/lib/modal';
 import Slider from '@smikitky/rb-components/lib/Slider';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
-import { detectOrthogonalSection } from '@utrad-ical/circus-rs/src/browser/section-util';
+import {
+  detectOrthogonalSection,
+  OrientationString
+} from '@utrad-ical/circus-rs/src/browser/section-util';
 import focusBy from '@utrad-ical/circus-rs/src/browser/tool/state/focusBy';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
@@ -151,7 +154,10 @@ const LabelMenu: React.FC<{
     }
   };
 
-  const createNewLabel = (type: LabelType): InternalLabel => {
+  const createNewLabel = (
+    type: LabelType,
+    viewer: Viewer | undefined
+  ): InternalLabel => {
     const color = '#ff0000';
     const alpha = 1;
     const temporaryKey = generateUniqueId();
@@ -165,13 +171,59 @@ const LabelMenu: React.FC<{
       ruler: 'Ruler'
     };
     const name = getUniqueLabelName(labelNames[type]);
-    const data = createNewLabelData(type, { color, alpha }, viewers);
+    const data = createNewLabelData(type, { color, alpha }, viewer);
     return { temporaryKey, name, ...data, attributes: {}, hidden: false };
   };
 
-  const addLabel = (type: LabelType) => {
+  const editableOrientations: { [key in LabelType]: OrientationString[] } = {
+    voxel: ['axial', 'sagittal', 'coronal'],
+    cuboid: ['axial', 'sagittal', 'coronal'],
+    ellipsoid: ['axial', 'sagittal', 'coronal'],
+    ellipse: ['axial'],
+    rectangle: ['axial'],
+    point: ['axial', 'sagittal', 'coronal', 'oblique'],
+    ruler: ['axial', 'sagittal', 'coronal', 'oblique']
+  };
+
+  const choiceAddLabelSection = (
+    selectableOrientations: OrientationString[]
+  ) => {
+    const title = 'Message';
+    const text = 'Select the section to add the label.';
+    const icon = 'info-sign';
+    const cancelable = false;
+    const bsSize = 'lg';
+    const choices = selectableOrientations
+      .map(i => ({ [i]: i }))
+      .reduce((prev, cur) => Object.assign(prev, cur), {});
+
+    return choice(text, choices, {
+      title,
+      icon,
+      cancelable,
+      bsSize
+    }) as Promise<string>;
+  };
+
+  const selectAddLabelViewer = async (type: LabelType) => {
+    if (type === 'voxel') return;
+
+    if (type === 'ruler' && Object.keys(viewers).length > 1) {
+      // Show the dialog to select target view
+      const key = await choiceAddLabelSection(editableOrientations[type]);
+      return viewers[key];
+    } else {
+      // Find the key of the first visible viewer, on which a new label is based
+      const reg = new RegExp('(' + editableOrientations[type].join('|') + ')$');
+      const key = Object.keys(viewers).find(index => index.match(reg));
+      return key ? viewers[key] : undefined;
+    }
+  };
+
+  const addLabel = async (type: LabelType) => {
     setNewLabelType(type);
-    const newLabel = createNewLabel(type);
+    const viewer = await selectAddLabelViewer(type);
+    const newLabel = createNewLabel(type, viewer);
     updateCurrentLabels(labels => {
       labels.push(newLabel);
     });

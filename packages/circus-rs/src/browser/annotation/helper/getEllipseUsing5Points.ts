@@ -48,13 +48,15 @@ export default function intersectEllipsoidAndSection(
 
   // get axis vector on canvas
   const [a, b] = (() => {
+    // Stretch the line segment enough to avoid the cancellation of significant digits in calculation
+    const k = 100000000;
     const aLine = new Line3().set(
       ES_o,
-      ES_o.clone().add(p2to3(eigenVector1.multiplyScalar(10000)))
+      ES_o.clone().add(p2to3(eigenVector1.multiplyScalar(k)))
     );
     const bLine = new Line3().set(
       ES_o,
-      ES_o.clone().add(p2to3(eigenVector2.multiplyScalar(10000)))
+      ES_o.clone().add(p2to3(eigenVector2.multiplyScalar(k)))
     );
 
     const [a1] = intersectionOfEllipsoidAndLine(ellipsoid, aLine);
@@ -85,7 +87,7 @@ function get5PointsOnEllipseOutline(
 ) {
   const points: Vector3[] = [];
 
-  const r = (Math.PI * 2) / 72;
+  const r = (Math.PI * 2) / 5;
 
   for (let i = 0; i < 5; i++) {
     const v = S_u.clone().applyAxisAngle(S_nv, r * i);

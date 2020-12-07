@@ -64,18 +64,12 @@ export function scanBoundingBox(
  * Apply specified closure for all voxels on the line segment
  * which is defined by two points.
  * Voxels are processed when the line only "glances" them.
- * TODO: Introduce edge-overflow detection for all directions to
- * reduce unnecessary calls to the closure.
  */
 export function processVoxelsOnLine(
-  volume: RawData,
   start: Vector3, // offset (not mm!)
   end: Vector3, // offset (not mm!)
   process: (point: Vector3) => void
 ): void {
-  if (volume.getPixelFormat() !== 'binary') {
-    throw new Error('This function only supports binary format.');
-  }
   const grid = 1;
   const ray = new Vector3().subVectors(end, start);
 

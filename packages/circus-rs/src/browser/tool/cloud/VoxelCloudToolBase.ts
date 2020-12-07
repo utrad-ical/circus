@@ -6,7 +6,7 @@ import MprImageSource from '../../image-source/MprImageSource';
 import * as su from '../../section-util';
 import { processVoxelsOnLine } from '../../volume-util';
 import ViewerEvent from '../../viewer/ViewerEvent';
-import { Vector2, Vector3 } from 'three';
+import { Box3, Vector2, Vector3 } from 'three';
 import { ToolOptions } from '../Tool';
 
 /**
@@ -83,6 +83,8 @@ export default class VoxelCloudToolBase<
 
     const src = comp.imageSource as MprImageSource;
     const voxelSize = new Vector3().fromArray(src.metadata!.voxelSize);
+    const voxelCount = new Vector3().fromArray(src.metadata!.voxelCount);
+    const volumeBox = new Box3(new Vector3(0, 0, 0), voxelCount);
     const section = state.section;
     const resolution = viewer.getResolution();
 
@@ -115,19 +117,17 @@ export default class VoxelCloudToolBase<
     const p0 = convertCoordinate(start.x - pen, start.y - pen);
     const p1 = convertCoordinate(start.x + pen, start.y - pen);
     const p2 = convertCoordinate(start.x - pen, start.y + pen);
-    const u = new Vector3(
-      p2.x - p0.x,
-      p2.y - p0.y,
-      p2.z - p0.z
-    );
+    const u = new Vector3(p2.x - p0.x, p2.y - p0.y, p2.z - p0.z);
 
     // p0 to p1
-    processVoxelsOnLine(volume, p0, p1, a => {
+    processVoxelsOnLine(p0, p1, a => {
       // p0 to p2
-      processVoxelsOnLine(volume, a, a.clone().add(u), b => {
+      processVoxelsOnLine(a, a.clone().add(u), b => {
         // Stroke
-        processVoxelsOnLine(volume, b, b.clone().add(v), voxel => {
-          volume.writePixelAt(value, voxel.x, voxel.y, voxel.z);
+        processVoxelsOnLine(b, b.clone().add(v), voxel => {
+          if (volumeBox.containsPoint(voxel)) {
+            volume.writePixelAt(value, voxel.x, voxel.y, voxel.z);
+          }
         });
       });
     });

@@ -61,26 +61,11 @@ export function scanBoundingBox(
 }
 
 /**
- * Fill all voxels with the given value when it intersects with the line segment
- * specified by the two points.
- * Voxels are filled when the line only "glances" them.
- * TODO: Introduce edge-overflow detection for all directions to reduce unnecessary calls to writePixelAt
- */
-export function draw3DLineFast(
-  volume: RawData,
-  start: Vector3, // offset (not mm!)
-  end: Vector3, // offset (not mm!)
-  value: number = 1
-): void {
-  processVoxelsOnLine(volume, start, end, p =>
-    volume.writePixelAt(value, p.x, p.y, p.z)
-  );
-}
-
-/**
- * Apply specified closure for all voxels on the line segment which is defined by two points.
+ * Apply specified closure for all voxels on the line segment
+ * which is defined by two points.
  * Voxels are processed when the line only "glances" them.
- * TODO: Introduce edge-overflow detection for all directions to reduce unnecessary calls to the closure.
+ * TODO: Introduce edge-overflow detection for all directions to
+ * reduce unnecessary calls to the closure.
  */
 export function processVoxelsOnLine(
   volume: RawData,
@@ -138,7 +123,6 @@ export function processVoxelsOnLine(
 
   process(currentVoxel);
 
-  let prevDist = currentVoxel.distanceTo(lastVoxel);
   while (!lastVoxel.equals(currentVoxel)) {
     if (t.x < t.y) {
       if (t.x < t.z) {
@@ -158,113 +142,8 @@ export function processVoxelsOnLine(
       }
     }
 
-    // TODO: Remove this distance check after test that ensure the code is not required.
-    const dist = currentVoxel.distanceTo(lastVoxel);
-    if (prevDist < dist) {
-      console.log(
-        'Unexpected suspention ' +
-          currentVoxel.toArray().toString() +
-          ' / ' +
-          lastVoxel.toArray().toString()
-      );
-      return;
-    }
-    prevDist = dist;
     process(currentVoxel);
   }
-}
-
-/**
- * Fill all voxels with the given value when it intersects with the line segment
- * specified by the two points.
- * Voxels are filled when the line only "glances" them.
- * TODO: Introduce edge-overflow detection for all directions to reduce unnecessary calls to writePixelAt
- */
-export function draw3DLine(
-  volume: RawData,
-  p0: Vector3, // offset (not mm!)
-  p1: Vector3, // offset (not mm!)
-  value: number = 1
-): void {
-  if (volume.getPixelFormat() !== 'binary') {
-    throw new Error('This function only supports binary format.');
-  }
-
-  const diff = new Vector3().subVectors(p1, p0);
-  const distance = diff.length();
-  const e = diff.normalize();
-  let walked = 0.0;
-
-  const pi = p0.clone(); // clone
-
-  type Trimmer = (i: number) => number;
-  const trim_x: Trimmer =
-    e.x < 0
-      ? i => {
-          return i === Math.floor(i) ? i - 1 : Math.floor(i);
-        }
-      : i => Math.floor(i);
-  const trim_y: Trimmer =
-    e.y < 0
-      ? i => {
-          return i === Math.floor(i) ? i - 1 : Math.floor(i);
-        }
-      : i => Math.floor(i);
-  const trim_z: Trimmer =
-    e.z < 0
-      ? i => {
-          return i === Math.floor(i) ? i - 1 : Math.floor(i);
-        }
-      : i => Math.floor(i);
-
-  do {
-    volume.writePixelAt(value, trim_x(pi.x), trim_y(pi.y), trim_z(pi.z));
-    const step = getStepToNeighbor(pi, e);
-    pi.add(step);
-    walked += step.length();
-  } while (walked < distance);
-
-  volume.writePixelAt(
-    value,
-    Math.floor(p1.x),
-    Math.floor(p1.y),
-    Math.floor(p1.z)
-  );
-}
-
-/**
- * Calculates the nearest voxel, starting from the `pos`, and in the direction specified by `e`.
- * @param pos The starting point from which the calculation is done.
- * @param e An unit vector that represents the direction.
- * @return neighbor pos.
- * TODO: this function may be slow due to the use of reduce.
- */
-function getStepToNeighbor(pos: Vector3, e: Vector3): Vector3 {
-  const stepLengthEntry: number[] = [
-    nextLatticeDistance(pos.x, e.x),
-    nextLatticeDistance(pos.y, e.y),
-    nextLatticeDistance(pos.z, e.z)
-  ].filter(i => i !== null) as number[];
-
-  const stepLength = stepLengthEntry.reduce((prev, cur) => {
-    return cur === null ? prev : prev < cur ? prev : cur;
-  }, Number.POSITIVE_INFINITY);
-
-  // console.log( stepLength.toString() + ' / ' + vec3.str( stepLengthEntry) );
-  return new Vector3(e.x * stepLength, e.y * stepLength, e.z * stepLength);
-}
-
-/**
- * Calculates the 1/distance to the next lattice point. (one dimensional)
- * @param p starting point
- * @param u the direction
- */
-function nextLatticeDistance(p: number, u: number): number | null {
-  if (u === 0) return null;
-  const i = u < 0 ? Math.floor(p) : Math.ceil(p);
-  if (p === i) return Math.abs(1 / u);
-
-  return Math.abs((p - i) / u);
 }
 
 /**

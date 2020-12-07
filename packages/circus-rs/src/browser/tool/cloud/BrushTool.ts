@@ -1,3 +1,4 @@
+import { Vector2 } from 'three';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { ToolOptions } from '../Tool';
 import VoxelCloudToolBase from './VoxelCloudToolBase';
@@ -16,6 +17,17 @@ export default class BrushTool extends VoxelCloudToolBase<BrushToolOptions> {
   protected options = {
     width: 1
   };
+
+  public dragStartHandler(ev: ViewerEvent): void {
+    super.dragStartHandler(ev);
+    this.draw3DLineWithValueAndWidth(
+      ev.viewer,
+      new Vector2(ev.viewerX, ev.viewerY),
+      new Vector2(ev.viewerX, ev.viewerY),
+      this.value,
+      this.options.width
+    );
+  }
 
   public dragHandler(ev: ViewerEvent): void {
     super.dragHandler(ev);

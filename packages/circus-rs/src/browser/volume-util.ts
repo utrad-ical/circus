@@ -72,23 +72,38 @@ export function draw3DLineFast(
   end: Vector3, // offset (not mm!)
   value: number = 1
 ): void {
+  processVoxelsOnLine(volume, start, end, p =>
+    volume.writePixelAt(value, p.x, p.y, p.z)
+  );
+}
+
+/**
+ * Apply specified closure for all voxels on the line segment which is defined by two points.
+ * Voxels are processed when the line only "glances" them.
+ * TODO: Introduce edge-overflow detection for all directions to reduce unnecessary calls to the closure.
+ */
+export function processVoxelsOnLine(
+  volume: RawData,
+  start: Vector3, // offset (not mm!)
+  end: Vector3, // offset (not mm!)
+  process: (point: Vector3) => void
+): void {
   if (volume.getPixelFormat() !== 'binary') {
     throw new Error('This function only supports binary format.');
   }
-  const _bin_size = 1;
-
+  const grid = 1;
   const ray = new Vector3().subVectors(end, start);
 
   const currentVoxel = new Vector3(
-    Math.floor(start.x / _bin_size),
-    Math.floor(start.y / _bin_size),
-    Math.floor(start.z / _bin_size)
+    Math.floor(start.x / grid),
+    Math.floor(start.y / grid),
+    Math.floor(start.z / grid)
   );
 
   const lastVoxel = new Vector3(
-    Math.floor(end.x / _bin_size),
-    Math.floor(end.y / _bin_size),
-    Math.floor(end.z / _bin_size)
+    Math.floor(end.x / grid),
+    Math.floor(end.y / grid),
+    Math.floor(end.z / grid)
   );
 
   const step = new Vector3(
@@ -98,15 +113,15 @@ export function draw3DLineFast(
   );
 
   const nextVoxelBoundary = new Vector3(
-    (currentVoxel.x + step.x) * _bin_size,
-    (currentVoxel.y + step.y) * _bin_size,
-    (currentVoxel.z + step.z) * _bin_size
+    (currentVoxel.x + step.x) * grid,
+    (currentVoxel.y + step.y) * grid,
+    (currentVoxel.z + step.z) * grid
   );
 
   const delta = new Vector3(
-    ray.x != 0 ? (_bin_size / ray.x) * step.x : Number.POSITIVE_INFINITY,
-    ray.y != 0 ? (_bin_size / ray.y) * step.y : Number.POSITIVE_INFINITY,
-    ray.z != 0 ? (_bin_size / ray.z) * step.z : Number.POSITIVE_INFINITY
+    ray.x != 0 ? (grid / ray.x) * step.x : Number.POSITIVE_INFINITY,
+    ray.y != 0 ? (grid / ray.y) * step.y : Number.POSITIVE_INFINITY,
+    ray.z != 0 ? (grid / ray.z) * step.z : Number.POSITIVE_INFINITY
   );
 
   const t = new Vector3(
@@ -121,8 +136,9 @@ export function draw3DLineFast(
       : Number.POSITIVE_INFINITY
   );
 
-  volume.writePixelAt(value, currentVoxel.x, currentVoxel.y, currentVoxel.z);
+  process(currentVoxel);
 
+  let prevDist = currentVoxel.distanceTo(lastVoxel);
   while (!lastVoxel.equals(currentVoxel)) {
     if (t.x < t.y) {
       if (t.x < t.z) {
@@ -141,7 +157,20 @@ export function draw3DLineFast(
         t.z += delta.z;
       }
     }
-    volume.writePixelAt(value, currentVoxel.x, currentVoxel.y, currentVoxel.z);
+
+    // TODO: Remove this distance check after test that ensure the code is not required.
+    const dist = currentVoxel.distanceTo(lastVoxel);
+    if (prevDist < dist) {
+      console.log(
+        'Unexpected suspention ' +
+          currentVoxel.toArray().toString() +
+          ' / ' +
+          lastVoxel.toArray().toString()
+      );
+      return;
+    }
+    prevDist = dist;
+    process(currentVoxel);
   }
 }
 

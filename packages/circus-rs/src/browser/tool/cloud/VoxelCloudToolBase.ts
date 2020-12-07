@@ -4,7 +4,7 @@ import DraggableTool from '../DraggableTool';
 import Viewer from '../../viewer/Viewer';
 import MprImageSource from '../../image-source/MprImageSource';
 import * as su from '../../section-util';
-import { draw3DLine } from '../../volume-util';
+import { processVoxelsOnLine } from '../../volume-util';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { Vector2, Vector3 } from 'three';
 import { ToolOptions } from '../Tool';
@@ -64,31 +64,6 @@ export default class VoxelCloudToolBase<
     );
   }
 
-  protected draw3DLineWithValue(
-    viewer: Viewer,
-    start: Vector2,
-    end: Vector2,
-    value: number
-  ): void {
-    const comp = viewer.getComposition();
-    if (!comp) throw new Error('Composition not initialized'); // should not happen
-
-    const src = comp.imageSource as MprImageSource;
-
-    if (!this.activeCloud) return; // no cloud to paint on
-    const activeCloud = this.activeCloud;
-
-    // Expand the target volume so that it covers the source image
-    activeCloud.expandToMaximum(src);
-
-    // convert mouse cursor location to cloud's local coordinate
-    const start3D = this.convertViewerPoint(start, viewer);
-    const end3D = this.convertViewerPoint(end, viewer);
-
-    // draw a 3D line segment over a volume
-    draw3DLine(activeCloud.volume!, start3D, end3D, value);
-  }
-
   protected draw3DLineWithValueAndWidth(
     viewer: Viewer,
     start: Vector2,
@@ -96,14 +71,66 @@ export default class VoxelCloudToolBase<
     value: number,
     width: number = 1
   ): void {
-    const ds = -Math.floor((width - 1) / 2);
-    for (let x = ds; x < ds + width; x++) {
-      for (let y = ds; y < ds + width; y++) {
-        const deltaStart = new Vector2(start.x + x, start.y + y);
-        const deltaEnd = new Vector2(end.x + x, end.y + y);
-        this.draw3DLineWithValue(viewer, deltaStart, deltaEnd, value);
-      }
-    }
+    const comp = viewer.getComposition();
+    if (!comp) throw new Error('Composition not initialized'); // should not happen
+
+    const state = viewer.getState();
+    if (state.type !== 'mpr') throw new Error('Unsupported view state.');
+
+    const activeCloud = this.activeCloud;
+    if (!activeCloud) return; // no cloud to paint on
+    const volume = activeCloud.volume!;
+
+    const src = comp.imageSource as MprImageSource;
+    const voxelSize = new Vector3().fromArray(src.metadata!.voxelSize);
+    const section = state.section;
+    const resolution = viewer.getResolution();
+
+    // Expand the target volume so that it covers the source image
+    activeCloud.expandToMaximum(src);
+
+    const convertCoordinate = (px: number, py: number) => {
+      const mmPoint = su.convertScreenCoordinateToVolumeCoordinate(
+        section,
+        new Vector2(resolution[0], resolution[1]),
+        new Vector2(px, py)
+      );
+      const indexPoint = su.convertPointToIndex(mmPoint, voxelSize);
+      return new Vector3(
+        Math.floor(indexPoint.x),
+        Math.floor(indexPoint.y),
+        Math.floor(indexPoint.z)
+      );
+    };
+    const s = convertCoordinate(start.x, start.y);
+    const e = convertCoordinate(end.x, end.y);
+    const v = new Vector3(e.x - s.x, e.y - s.y, e.z - s.z);
+    const pen = Math.floor(0.5 * (width - 1));
+    //  < width >
+    // p0 ------ p1
+    // |           ^
+    // |    C      width
+    // |           v
+    // p2
+    const p0 = convertCoordinate(start.x - pen, start.y - pen);
+    const p1 = convertCoordinate(start.x + pen, start.y - pen);
+    const p2 = convertCoordinate(start.x - pen, start.y + pen);
+    const u = new Vector3(
+      p2.x - p0.x,
+      p2.y - p0.y,
+      p2.z - p0.z
+    );
+
+    // p0 to p1
+    processVoxelsOnLine(volume, p0, p1, a => {
+      // p0 to p2
+      processVoxelsOnLine(volume, a, a.clone().add(u), b => {
+        // Stroke
+        processVoxelsOnLine(volume, b, b.clone().add(v), voxel => {
+          volume.writePixelAt(value, voxel.x, voxel.y, voxel.z);
+        });
+      });
+    });
   }
 
   /**

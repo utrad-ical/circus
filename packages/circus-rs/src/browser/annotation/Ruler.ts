@@ -81,11 +81,18 @@ export default class Ruler implements Annotation, ViewerEventTarget {
       }
     | undefined;
 
+  private drawnInfo:
+    | {
+        drawnLine3: () => Line3;
+      }
+    | undefined;
+
   private textBoundaryHitTest:
     | ((p: Vector2) => boolean)
     | undefined = undefined;
 
   public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
+    this.drawnInfo = undefined;
     if (!viewer || !viewState) return;
     if (!this.start || !this.end) return;
     const canvas = viewer.canvas;
@@ -113,6 +120,9 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     if (!color) return;
 
     const resolution = new Vector2().fromArray(viewer.getResolution());
+    const section = viewState.section;
+    const p3to2 = (p: Vector3) =>
+      convertVolumeCoordinateToScreenCoordinate(section, resolution, p);
 
     const line = new Line3(
       new Vector3(...this.start),
@@ -128,17 +138,9 @@ export default class Ruler implements Annotation, ViewerEventTarget {
       strokeStyle: color
     };
 
-    const start = convertVolumeCoordinateToScreenCoordinate(
-      viewState.section,
-      resolution,
-      line.start
-    );
-
-    const end = convertVolumeCoordinateToScreenCoordinate(
-      viewState.section,
-      resolution,
-      line.end
-    );
+    const start = p3to2(line.start);
+    const end = p3to2(line.end);
+    const labelOrigin = start.clone().add(new Vector2(...this.labelPosition));
 
     drawPoint(ctx, start, pointStyle);
     drawPoint(ctx, end, pointStyle);
@@ -146,10 +148,17 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     const { textBoundaryHitTest } = drawFillText(
       ctx,
       label,
-      start.add(new Vector2(...this.labelPosition)),
+      labelOrigin,
       this.labelFontStyle
     );
     this.textBoundaryHitTest = textBoundaryHitTest;
+
+    const p2to3 = (p: Vector2) =>
+      convertScreenCoordinateToVolumeCoordinate(section, resolution, p);
+
+    this.drawnInfo = {
+      drawnLine3: () => new Line3(p2to3(start), p2to3(end))
+    };
   }
 
   public validate(): boolean {
@@ -189,31 +198,52 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     if (!viewer || !viewState) return;
     if (viewState.type !== 'mpr') return;
     if (!this.editable) return;
-    if (!this.start || !this.end) return;
+    if (!this.start || !this.end || !this.section) return;
 
     if (viewer.getHoveringAnnotation() === this) {
       ev.stopPropagation();
 
-      const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
       const resolution = new Vector2().fromArray(viewer.getResolution());
+      const state = viewer.getState() as MprViewState;
+      const section = state.section;
+
+      const dragStartScreenPoint2 = new Vector2(ev.viewerX!, ev.viewerY!);
+      const dragStartVolumePoint3 = convertScreenCoordinateToVolumeCoordinate(
+        section,
+        resolution,
+        dragStartScreenPoint2
+      );
+
       const handleType = this.handleType;
-      if (handleType) {
-        const state = viewer.getState() as MprViewState;
-        this.section = state.section;
-        this.dragInfo = {
-          originalLine3: new Line3(
-            new Vector3(...this.start),
-            new Vector3(...this.end)
-          ),
-          dragStartVolumePoint3: convertScreenCoordinateToVolumeCoordinate(
-            state.section,
-            resolution,
-            point.clone()
-          ),
-          dragStartScreenPoint2: point.clone(),
-          originalLabelPosition: new Vector2(...this.labelPosition)
-        };
+
+      const originalLine3 = new Line3(
+        new Vector3(...this.start),
+        new Vector3(...this.end)
+      );
+
+      if (handleType === 'start-reset' || handleType === 'end-reset') {
+        if (!this.drawnInfo) return;
+        const drawnLine3 = this.drawnInfo.drawnLine3();
+        if (!originalLine3.equals(drawnLine3)) {
+          const [start, end] = (() =>
+            handleType === 'start-reset'
+              ? [dragStartVolumePoint3, drawnLine3.end]
+              : [drawnLine3.start, dragStartVolumePoint3])();
+          this.section = section;
+          this.start = start.toArray() as Vector3D;
+          this.end = end.toArray() as Vector3D;
+          originalLine3.start = start;
+          originalLine3.end = end;
+        }
       }
+
+      const originalLabelPosition = new Vector2(...this.labelPosition);
+      this.dragInfo = {
+        originalLine3,
+        dragStartVolumePoint3,
+        dragStartScreenPoint2,
+        originalLabelPosition
+      };
     }
   }
 
@@ -238,6 +268,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
       const delta = draggedPoint3.sub(this.dragInfo.dragStartVolumePoint3);
 
       const handleType = this.handleType;
+      if (!this.handleType) return;
       const originalLine3 = this.dragInfo.originalLine3;
 
       const translatePoint = (p: Vector3) =>

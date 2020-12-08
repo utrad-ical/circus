@@ -454,34 +454,41 @@ const RevisionEditor: React.FC<{
             </IconButton>
           </div>
 
-          {activeLabel && (
-            <div className="label-attributes">
-              <b>Attributes for</b>:{' '}
-              <Icon icon={labelTypes[activeLabel.type].icon} />{' '}
-              <span className="label-name">{activeLabel.name}</span>
-              <JsonSchemaEditor
-                key={activeLabel.temporaryKey + ':' + refreshCounter}
-                schema={projectData.labelAttributesSchema}
-                value={activeLabel.attributes || {}}
-                onChange={labelAttributesChange}
-                onValidate={valid =>
-                  caseDispatch(c.validateLabelAttributes(valid))
-                }
-                disabled={busy}
-              />
-            </div>
-          )}
+          {activeLabel &&
+            Object.keys(projectData.labelAttributesSchema.properties || {})
+              .length > 0 && (
+              <div className="label-attributes">
+                <b>Attributes for</b>:{' '}
+                <Icon icon={labelTypes[activeLabel.type].icon} />{' '}
+                <span className="label-name">{activeLabel.name}</span>
+                <JsonSchemaEditor
+                  key={activeLabel.temporaryKey + ':' + refreshCounter}
+                  schema={projectData.labelAttributesSchema}
+                  value={activeLabel.attributes || {}}
+                  onChange={labelAttributesChange}
+                  onValidate={valid =>
+                    caseDispatch(c.validateLabelAttributes(valid))
+                  }
+                  disabled={busy}
+                />
+              </div>
+            )}
         </Collapser>
-        <Collapser title="Case Attributes" className="case-attributes">
-          <JsonSchemaEditor
-            key={refreshCounter}
-            schema={projectData.caseAttributesSchema}
-            value={revision.attributes}
-            onChange={caseAttributesChange}
-            onValidate={valid => caseDispatch(c.validateCaseAttributes(valid))}
-            disabled={busy}
-          />
-        </Collapser>
+        {Object.keys(projectData.caseAttributesSchema.properties || {}).length >
+          0 && (
+          <Collapser title="Case Attributes" className="case-attributes">
+            <JsonSchemaEditor
+              key={refreshCounter}
+              schema={projectData.caseAttributesSchema}
+              value={revision.attributes}
+              onChange={caseAttributesChange}
+              onValidate={valid =>
+                caseDispatch(c.validateCaseAttributes(valid))
+              }
+              disabled={busy}
+            />
+          </Collapser>
+        )}
       </SideContainer>
       <div className="case-revision-main">
         <ToolBar

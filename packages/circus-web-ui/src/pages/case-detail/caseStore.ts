@@ -55,8 +55,8 @@ const slice = createSlice({
     history: [],
     currentHistoryIndex: 0,
     refreshCounter: 0,
-    caseAttributesAreValid: false,
-    labelAttributesAreValid: false
+    caseAttributesAreValid: true,
+    labelAttributesAreValid: true
   } as CaseDetailState,
   reducers: {
     setBusy: (s, action: PayloadAction<boolean>) => {

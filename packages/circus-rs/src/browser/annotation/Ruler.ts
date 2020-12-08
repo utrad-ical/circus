@@ -27,8 +27,8 @@ type HandleTypeForRuler = HandleTypeForLine | 'label-move';
 const cursorTypes: {
   [key in HandleTypeForRuler]: { cursor: string };
 } = {
-  'start-reset': { cursor: 'nw-resize' },
-  'end-reset': { cursor: 'se-resize' },
+  'start-reset': { cursor: 'crosshair' },
+  'end-reset': { cursor: 'crosshair' },
   'line-move': { cursor: 'move' },
   'label-move': { cursor: 'move' }
 };

@@ -119,7 +119,6 @@ export default class Ruler implements Annotation, ViewerEventTarget {
       new Vector3(...this.end)
     );
 
-    // TODO: This is prototype code. The code that measures the distance between two points is instructed to be an external function and needs improvement.
     const distance = Math.round(line.distance() * 10) / 10;
     const label = distance + 'mm';
 

@@ -19,6 +19,7 @@ import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import Series from 'types/Series';
 import { useApi } from 'utils/api';
 import caseStoreReducer, * as c from './caseStore';
 import {
@@ -38,7 +39,7 @@ const CaseDetail: React.FC<{}> = props => {
   );
   const api = useApi();
 
-  const { busy, caseData, projectData, refreshCounter } = caseStore;
+  const { busy, caseData, seriesData, projectData, refreshCounter } = caseStore;
   const editingData = c.current(caseStore);
 
   const [tags, setTags] = useState<string[]>([]);
@@ -54,10 +55,21 @@ const CaseDetail: React.FC<{}> = props => {
       const project = accessibleProjects.find(
         (p: { projectId: string }) => p.projectId === caseData.projectId
       );
-      const seriesUid =
-        caseData.revisions[caseData.revisions.length - 1].series[0].seriesUid;
-      const firstSeries = await api('series/' + seriesUid);
-      const patientInfo = firstSeries.patientInfo;
+      const latestRevision = caseData.revisions[caseData.revisions.length - 1];
+      const seriesUids = Array.from(
+        new Set(latestRevision.series.map((s: any) => s.seriesUid)).values()
+      ) as string[]; // holds unique series uids
+      const seriesData = Object.fromEntries(
+        await Promise.all(
+          seriesUids.map(async seriesUid => [
+            seriesUid,
+            await api('series/' + seriesUid)
+          ])
+        )
+      ) as { [seriesUid: string]: Series };
+
+      const patientInfo =
+        seriesData[latestRevision.series[0].seriesUid].patientInfo;
       if (!project) {
         throw new Error('You do not have access to this project.');
       }
@@ -65,6 +77,7 @@ const CaseDetail: React.FC<{}> = props => {
         c.loadInitialCaseData({
           caseData,
           patientInfo,
+          seriesData,
           projectData: project.project
         })
       );
@@ -165,7 +178,7 @@ const CaseDetail: React.FC<{}> = props => {
     }
   };
 
-  if (!caseData || !projectData || !editingData) {
+  if (!caseData || !projectData || !seriesData || !editingData) {
     return busy ? <LoadingIndicator /> : null;
   }
 
@@ -212,6 +225,7 @@ const CaseDetail: React.FC<{}> = props => {
         busy={busy}
         caseDispatch={caseDispatch}
         editingData={editingData}
+        seriesData={seriesData}
         projectData={projectData}
         refreshCounter={refreshCounter}
         updateEditingData={updateEditingData}

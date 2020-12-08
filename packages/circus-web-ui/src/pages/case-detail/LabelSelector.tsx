@@ -1,22 +1,29 @@
+import PartialVolumeDescriptor, {
+  describePartialVolumeDescriptor
+} from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
 import classNames from 'classnames';
 import Icon from 'components/Icon';
+import IconButton from 'components/IconButton';
+import { Modal } from 'components/react-bootstrap';
 import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import { mostReadable } from 'tinycolor2';
+import Series from 'types/Series';
 import {
   EditingData,
   EditingDataUpdater,
   InternalLabel,
-  labelTypes,
-  SeriesEntryWithLabels
+  labelTypes
 } from './revisionData';
+import { multirange } from 'multi-integer-range';
 
 const LabelSelector: React.FC<{
   editingData: EditingData;
+  seriesData: { [seriesUid: string]: Series };
   updateEditingData: EditingDataUpdater;
   disabled?: boolean;
 }> = props => {
-  const { editingData, updateEditingData, disabled } = props;
+  const { editingData, updateEditingData, seriesData, disabled } = props;
 
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
   const activeSeries = revision.series[activeSeriesIndex];
@@ -25,18 +32,17 @@ const LabelSelector: React.FC<{
 
   return (
     <StyledSeriesUl>
-      {revision.series.map(
-        (series: SeriesEntryWithLabels, seriesIndex: number) => (
-          <SeriesItem
-            key={`${seriesIndex}:${series.seriesUid}`}
-            editingData={editingData}
-            updateEditingData={updateEditingData}
-            seriesIndex={seriesIndex}
-            activeLabel={activeLabel}
-            disabled={disabled}
-          />
-        )
-      )}
+      {revision.series.map((series, seriesIndex) => (
+        <SeriesItem
+          key={`${seriesIndex}:${series.seriesUid}`}
+          seriesInfo={seriesData[series.seriesUid]}
+          editingData={editingData}
+          updateEditingData={updateEditingData}
+          seriesIndex={seriesIndex}
+          activeLabel={activeLabel}
+          disabled={disabled}
+        />
+      ))}
     </StyledSeriesUl>
   );
 };
@@ -66,6 +72,7 @@ export default LabelSelector;
 const SeriesItem: React.FC<{
   editingData: EditingData;
   updateEditingData: EditingDataUpdater;
+  seriesInfo: Series;
   seriesIndex: number;
   activeLabel: InternalLabel | null;
   disabled?: boolean;
@@ -74,6 +81,7 @@ const SeriesItem: React.FC<{
     seriesIndex,
     editingData,
     updateEditingData,
+    seriesInfo,
     activeLabel,
     disabled
   } = props;
@@ -110,7 +118,15 @@ const SeriesItem: React.FC<{
       onClick={handleSeriesClick}
     >
       <span className="series-head">
-        <Icon icon="circus-series" /> Series #{seriesIndex}
+        <div>
+          <Icon icon="circus-series" /> Series #{seriesIndex}
+        </div>
+        <div onClick={ev => ev.stopPropagation()}>
+          <SeriesInfo
+            series={seriesInfo}
+            pvd={series.partialVolumeDescriptor}
+          />
+        </div>
       </span>
       <ul className="case-label-list">
         {series.labels.map((label, labelIndex) => (
@@ -136,6 +152,10 @@ const StyledSeriesLi = styled.li`
   margin-top: 10px;
   padding-left: 10px;
   list-style-type: none;
+  .series-head {
+    display: flex;
+    justify-content: space-between;
+  }
   .series-head .circus-icon {
     font-size: 130%;
   }
@@ -143,6 +163,63 @@ const StyledSeriesLi = styled.li`
     font-weight: bold;
   }
 `;
+
+////////////////////////////////////////////////////////////////////////////////
+
+const SeriesInfo: React.FC<{
+  series: Series;
+  pvd: PartialVolumeDescriptor;
+}> = React.memo(props => {
+  const { series, pvd } = props;
+  const [showModal, setShowModal] = useState(false);
+
+  const mr = multirange(series.images);
+  const noPvd =
+    !pvd || (mr.min() === pvd.start && mr.max() === pvd.end && pvd.delta === 1);
+
+  const data: { [key: string]: string } = {
+    Modality: series.modality,
+    Description: series.seriesDescription,
+    Images:
+      series.images +
+      (noPvd
+        ? ' (Full)'
+        : ` (Partial: ${describePartialVolumeDescriptor(pvd)})`),
+    'Series Instance UID': series.seriesUid,
+    'Study Instance UID': series.studyUid,
+    'Series Date': series.seriesDate
+  };
+
+  return (
+    <div>
+      <IconButton
+        bsStyle="link"
+        icon="glyphicon-info-sign"
+        onClick={() => setShowModal(true)}
+      />
+      <Modal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        bsSize="lg"
+        restoreFocus
+      >
+        <Modal.Header closeButton>Series Information</Modal.Header>
+        <Modal.Body>
+          <table className="table table-striped">
+            <tbody>
+              {Object.keys(data).map(k => (
+                <tr key={k}>
+                  <th>{k}</th>
+                  <td>{data[k]}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Modal.Body>
+      </Modal>
+    </div>
+  );
+});
 
 ////////////////////////////////////////////////////////////////////////////////
 

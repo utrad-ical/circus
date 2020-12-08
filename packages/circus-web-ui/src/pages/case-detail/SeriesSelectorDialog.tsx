@@ -49,7 +49,7 @@ const SeriesSelectorDialog: React.FC<{
         <SeriesSelector
           value={entries}
           onChange={setEntries}
-          alwaysShowRelevaltSeries
+          alwaysShowRelevantSeries
           onRemoving={handleRemovingOrEditing}
           onPvdEditing={handleRemovingOrEditing}
         />

@@ -344,6 +344,15 @@ export default class VoxelCloud implements Annotation {
       max: [max.x, max.y, max.z]
     };
   }
+
+  public getInternalIndexFromVolumeCoordinate(volumeCoord: Vector3D): Vector3D {
+    const origin = this.origin ? this.origin : [0, 0, 0];
+    return [
+      volumeCoord[0] - origin[0],
+      volumeCoord[1] - origin[1],
+      volumeCoord[2] - origin[2]
+    ];
+  }
 }
 /**
  * For debugging

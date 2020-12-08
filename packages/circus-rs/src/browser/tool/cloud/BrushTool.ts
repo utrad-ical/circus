@@ -1,4 +1,3 @@
-import { Vector2 } from 'three';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { ToolOptions } from '../Tool';
 import VoxelCloudToolBase from './VoxelCloudToolBase';

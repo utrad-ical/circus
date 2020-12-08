@@ -1,5 +1,5 @@
 import { Vector2, Vector3 } from 'three';
-import { Viewer } from '../..';
+import Viewer from '../../viewer/Viewer';
 import { convertVolumeCoordinateToScreenCoordinate } from '../../section-util';
 import { defaultHandleSize } from './drawHandleFrame';
 

@@ -1,4 +1,4 @@
-import { Annotation } from '../..';
+import Annotation from '../../annotation/Annotation';
 import PlaneFigure, { FigureType } from '../../annotation/PlaneFigure';
 import { detectOrthogonalSection } from '../../section-util';
 import ViewerEvent from '../../viewer/ViewerEvent';

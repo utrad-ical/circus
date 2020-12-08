@@ -1,4 +1,4 @@
-import { Annotation } from '../..';
+import Annotation from '../../annotation/Annotation';
 import Viewer from '../../viewer/Viewer';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import ToolBaseClass, { ToolOptions } from '../Tool';

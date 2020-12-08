@@ -17,6 +17,17 @@ export default class BrushTool extends VoxelCloudToolBase<BrushToolOptions> {
     width: 1
   };
 
+  public dragStartHandler(ev: ViewerEvent): void {
+    super.dragStartHandler(ev);
+    this.draw3DLineWithValueAndWidth(
+      ev.viewer,
+      [ev.viewerX!, ev.viewerY!],
+      [ev.viewerX!, ev.viewerY!],
+      this.value,
+      this.options.width
+    );
+  }
+
   public dragHandler(ev: ViewerEvent): void {
     super.dragHandler(ev);
     this.dragDraw(ev, this.value, this.options.width);

@@ -5,6 +5,7 @@ import { detectOrthogonalSection } from '../../section-util';
 import fuzzySelect from '../../util/fuzzySelect';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { ToolOptions } from '../Tool';
+import { convertViewerPointToVolumeIndex } from '../tool-util';
 import VoxelCloudToolBase from './VoxelCloudToolBase';
 
 export type WandToolMode = '2d' | '3d';
@@ -46,10 +47,7 @@ export default class WandTool extends VoxelCloudToolBase<WandToolOptions> {
     const { type, section } = viewer.getState();
     if (type !== 'mpr') throw new Error('Unsupported view state');
 
-    const startPoint = this.convertViewerPoint(
-      new Vector2(this.pX, this.pY),
-      viewer
-    );
+    const startPoint = convertViewerPointToVolumeIndex(viewer, this.pX!, this.pY!);
 
     const { mode, threshold, maxDistance, baseValue } = this.options;
 

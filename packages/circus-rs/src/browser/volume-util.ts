@@ -61,96 +61,83 @@ export function scanBoundingBox(
 }
 
 /**
- * Fill all voxels with the given value when it intersects with the line segment
- * specified by the two points.
- * Voxels are filled when the line only "glances" them.
- * TODO: Introduce edge-overflow detection for all directions to reduce unnecessary calls to writePixelAt
+ * Apply specified closure for all voxels on the line segment
+ * which is defined by two points.
+ * Voxels are processed when the line only "glances" them.
  */
-export function draw3DLine(
-  volume: RawData,
-  p0: Vector3, // offset (not mm!)
-  p1: Vector3, // offset (not mm!)
-  value: number = 1
+export function processVoxelsOnLine(
+  start: Vector3, // offset (not mm!)
+  end: Vector3, // offset (not mm!)
+  process: (point: Vector3) => void
 ): void {
-  if (volume.getPixelFormat() !== 'binary') {
-    throw new Error('This function only supports binary format.');
-  }
+  const grid = 1;
+  const ray = new Vector3().subVectors(end, start);
 
-  const diff = new Vector3().subVectors(p1, p0);
-  const distance = diff.length();
-  const e = diff.normalize();
-  let walked = 0.0;
-
-  const pi = p0.clone(); // clone
-
-  type Trimmer = (i: number) => number;
-  const trim_x: Trimmer =
-    e.x < 0
-      ? i => {
-          return i === Math.floor(i) ? i - 1 : Math.floor(i);
-        }
-      : i => Math.floor(i);
-  const trim_y: Trimmer =
-    e.y < 0
-      ? i => {
-          return i === Math.floor(i) ? i - 1 : Math.floor(i);
-        }
-      : i => Math.floor(i);
-  const trim_z: Trimmer =
-    e.z < 0
-      ? i => {
-          return i === Math.floor(i) ? i - 1 : Math.floor(i);
-        }
-      : i => Math.floor(i);
-
-  do {
-    volume.writePixelAt(value, trim_x(pi.x), trim_y(pi.y), trim_z(pi.z));
-    const step = getStepToNeighbor(pi, e);
-    pi.add(step);
-    walked += step.length();
-  } while (walked < distance);
-
-  volume.writePixelAt(
-    value,
-    Math.floor(p1.x),
-    Math.floor(p1.y),
-    Math.floor(p1.z)
+  const currentVoxel = new Vector3(
+    Math.floor(start.x / grid),
+    Math.floor(start.y / grid),
+    Math.floor(start.z / grid)
   );
-}
 
-/**
- * Calculates the nearest voxel, starting from the `pos`, and in the direction specified by `e`.
- * @param pos The starting point from which the calculation is done.
- * @param e An unit vector that represents the direction.
- * @return neighbor pos.
- * TODO: this function may be slow due to the use of reduce.
- */
-function getStepToNeighbor(pos: Vector3, e: Vector3): Vector3 {
-  const stepLengthEntry: number[] = [
-    nextLatticeDistance(pos.x, e.x),
-    nextLatticeDistance(pos.y, e.y),
-    nextLatticeDistance(pos.z, e.z)
-  ].filter(i => i !== null) as number[];
+  const lastVoxel = new Vector3(
+    Math.floor(end.x / grid),
+    Math.floor(end.y / grid),
+    Math.floor(end.z / grid)
+  );
 
-  const stepLength = stepLengthEntry.reduce((prev, cur) => {
-    return cur === null ? prev : prev < cur ? prev : cur;
-  }, Number.POSITIVE_INFINITY);
+  const step = new Vector3(
+    ray.x < 0 ? -1 : 1,
+    ray.y < 0 ? -1 : 1,
+    ray.z < 0 ? -1 : 1
+  );
 
-  // console.log( stepLength.toString() + ' / ' + vec3.str( stepLengthEntry) );
-  return new Vector3(e.x * stepLength, e.y * stepLength, e.z * stepLength);
-}
+  const nextVoxelBoundary = new Vector3(
+    (currentVoxel.x + step.x) * grid,
+    (currentVoxel.y + step.y) * grid,
+    (currentVoxel.z + step.z) * grid
+  );
 
-/**
- * Calculates the 1/distance to the next lattice point. (one dimensional)
- * @param p starting point
- * @param u the direction
- */
-function nextLatticeDistance(p: number, u: number): number | null {
-  if (u === 0) return null;
-  const i = u < 0 ? Math.floor(p) : Math.ceil(p);
-  if (p === i) return Math.abs(1 / u);
+  const delta = new Vector3(
+    ray.x != 0 ? (grid / ray.x) * step.x : Number.POSITIVE_INFINITY,
+    ray.y != 0 ? (grid / ray.y) * step.y : Number.POSITIVE_INFINITY,
+    ray.z != 0 ? (grid / ray.z) * step.z : Number.POSITIVE_INFINITY
+  );
 
-  return Math.abs((p - i) / u);
+  const t = new Vector3(
+    ray.x != 0
+      ? (nextVoxelBoundary.x - start.x) / ray.x
+      : Number.POSITIVE_INFINITY,
+    ray.y != 0
+      ? (nextVoxelBoundary.y - start.y) / ray.y
+      : Number.POSITIVE_INFINITY,
+    ray.z != 0
+      ? (nextVoxelBoundary.z - start.z) / ray.z
+      : Number.POSITIVE_INFINITY
+  );
+
+  process(currentVoxel);
+
+  while (!lastVoxel.equals(currentVoxel)) {
+    if (t.x < t.y) {
+      if (t.x < t.z) {
+        currentVoxel.x += step.x;
+        t.x += delta.x;
+      } else {
+        currentVoxel.z += step.z;
+        t.z += delta.z;
+      }
+    } else {
+      if (t.y < t.z) {
+        currentVoxel.y += step.y;
+        t.y += delta.y;
+      } else {
+        currentVoxel.z += step.z;
+        t.z += delta.z;
+      }
+    }
+
+    process(currentVoxel);
+  }
 }
 
 /**

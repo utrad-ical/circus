@@ -4,6 +4,7 @@ import PartialVolumeDescriptor, {
 import classNames from 'classnames';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
+import { Button } from 'components/react-bootstrap';
 import { Modal } from 'components/react-bootstrap';
 import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
@@ -177,17 +178,27 @@ const SeriesInfo: React.FC<{
   const noPvd =
     !pvd || (mr.min() === pvd.start && mr.max() === pvd.end && pvd.delta === 1);
 
-  const data: { [key: string]: string } = {
+  const data: { [key: string]: React.ReactChild } = {
     Modality: series.modality,
-    Description: series.seriesDescription,
-    Images:
-      series.images +
-      (noPvd
-        ? ' (Full)'
-        : ` (Partial: ${describePartialVolumeDescriptor(pvd)})`),
+    'Series Description': series.seriesDescription,
+    'Width / Height': `${series.width} / ${series.height}`,
+    Images: (
+      <>
+        {series.images}
+        {noPvd ? (
+          <> (Full)</>
+        ) : (
+          <>
+            {' '}
+            (<b>Partial:</b> {describePartialVolumeDescriptor(pvd)})
+          </>
+        )}
+      </>
+    ),
     'Series Instance UID': series.seriesUid,
     'Study Instance UID': series.studyUid,
-    'Series Date': series.seriesDate
+    'Series Date': series.seriesDate,
+    Model: `${series.modelName} (${series.manufacturer})`
   };
 
   return (
@@ -197,25 +208,23 @@ const SeriesInfo: React.FC<{
         icon="glyphicon-info-sign"
         onClick={() => setShowModal(true)}
       />
-      <Modal
-        show={showModal}
-        onHide={() => setShowModal(false)}
-        bsSize="lg"
-        restoreFocus
-      >
+      <Modal show={showModal} onHide={() => setShowModal(false)} bsSize="lg">
         <Modal.Header closeButton>Series Information</Modal.Header>
-        <Modal.Body>
-          <table className="table table-striped">
-            <tbody>
-              {Object.keys(data).map(k => (
-                <tr key={k}>
-                  <th>{k}</th>
-                  <td>{data[k]}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Modal.Body>
+        <table className="table table-striped">
+          <tbody>
+            {Object.keys(data).map(k => (
+              <tr key={k}>
+                <th>{k}</th>
+                <td>{data[k]}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <Modal.Footer>
+          <Button bsStyle="primary" onClick={() => setShowModal(false)}>
+            OK
+          </Button>
+        </Modal.Footer>
       </Modal>
     </div>
   );

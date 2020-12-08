@@ -43,6 +43,7 @@ import { debounce } from 'lodash';
 import useLocalPreference from 'utils/useLocalPreference';
 import isTouchDevice from 'utils/isTouchDevice';
 import useToolbar from 'pages/case-detail/useToolbar';
+import Series from 'types/Series';
 
 const useComposition = (
   seriesUid: string,
@@ -88,6 +89,7 @@ const RevisionEditor: React.FC<{
   editingData: EditingData;
   updateEditingData: EditingDataUpdater;
   caseDispatch: React.Dispatch<any>;
+  seriesData: { [seriesUid: string]: Series };
   projectData: Project;
   refreshCounter: number;
   busy: boolean;
@@ -96,6 +98,7 @@ const RevisionEditor: React.FC<{
     editingData,
     updateEditingData,
     caseDispatch,
+    seriesData,
     projectData,
     refreshCounter,
     busy
@@ -434,6 +437,7 @@ const RevisionEditor: React.FC<{
             disabled={busy}
           />
           <LabelSelector
+            seriesData={seriesData}
             editingData={editingData}
             updateEditingData={updateEditingData}
             disabled={busy}

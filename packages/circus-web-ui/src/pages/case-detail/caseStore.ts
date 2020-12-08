@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { EditingData, Revision, ExternalLabel } from './revisionData';
 import PatientInfo from '../../types/PatientInfo';
 import Project from 'types/Project';
+import Series from 'types/Series';
 
 interface CaseData {
   caseId: string;
@@ -18,6 +19,7 @@ export interface CaseDetailState {
   patientInfo?: PatientInfo;
   editingRevisionIndex: number;
   projectData?: Project;
+  seriesData?: { [seriesUid: string]: Series };
   history: EditingData[];
   /**
    * Used to remember the type of the last operation and
@@ -65,12 +67,14 @@ const slice = createSlice({
       action: PayloadAction<{
         caseData: any;
         patientInfo?: PatientInfo;
+        seriesData: { [seriesUid: string]: Series };
         projectData: Project;
       }>
     ) => {
-      const { caseData, patientInfo, projectData } = action.payload;
+      const { caseData, patientInfo, seriesData, projectData } = action.payload;
       s.caseData = caseData;
       s.patientInfo = patientInfo;
+      s.seriesData = seriesData;
       s.projectData = projectData;
     },
     loadRevisions: (s, action: PayloadAction<Revision<ExternalLabel>[]>) => {

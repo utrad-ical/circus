@@ -97,7 +97,7 @@ export interface SeriesEntry {
 
 const SeriesSelector: React.FC<{
   value: SeriesEntry[];
-  onChange: any;
+  onChange: (value: SeriesEntry[]) => void;
   onRemoving?: (index: number) => Promise<boolean>;
   onPvdEditing?: (index: number) => Promise<boolean>;
   alwaysShowRelevantSeries?: boolean;

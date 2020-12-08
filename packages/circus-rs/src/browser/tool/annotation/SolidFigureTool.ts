@@ -1,4 +1,4 @@
-import { Annotation } from '../..';
+import Annotation from '../../annotation/Annotation';
 import Cuboid from '../../annotation/Cuboid';
 import Ellipsoid from '../../annotation/Ellipsoid';
 import SolidFigure, { FigureType } from '../../annotation/SolidFigure';

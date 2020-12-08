@@ -1,4 +1,4 @@
-import { Annotation } from '../..';
+import Annotation from '../../annotation/Annotation';
 import Point from '../../annotation/Point';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { getVolumeCoordinateFromViewerEvent } from '../tool-util';

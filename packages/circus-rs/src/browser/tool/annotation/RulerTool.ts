@@ -1,4 +1,4 @@
-import { Annotation } from '../..';
+import Annotation from '../../annotation/Annotation';
 import Ruler from '../../annotation/Ruler';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { getVolumeCoordinateFromViewerEvent } from '../tool-util';
@@ -38,11 +38,7 @@ export default class RulerTool extends AnnotationToolBase {
   }
 
   protected concreteAnnotation(ev: ViewerEvent): void {
-    const antn = this.focusedAnnotation;
-    if (!antn) return;
-
-    const viewState = ev.viewer.getState();
-    if (!viewState || viewState.type !== 'mpr') return;
+    // Nothing to do
   }
 
   protected validateAnnotation(): boolean {

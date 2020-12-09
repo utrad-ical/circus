@@ -178,7 +178,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
 
     const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
 
-    this.handleType = this.getHandleTypeForRuler(viewer, point);
+    this.handleType = this.getHandleType(viewer, point);
     const handleType = this.handleType;
     if (handleType) {
       ev.stopPropagation();
@@ -330,21 +330,17 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     }
   }
 
-  private getHandleTypeForRuler(
+  private getHandleType(
     viewer: Viewer,
     point: Vector2
   ): HandleTypeForRuler | undefined {
     const origin = this.start;
     const end = this.end;
     if (!origin || !end) return;
-    const line = {
-      start: new Vector3(...origin),
-      end: new Vector3(...end)
-    };
     const handleType: HandleTypeForRuler | undefined = getHandleTypeForLine(
       viewer,
       point,
-      line
+      new Line3(new Vector3(...origin), new Vector3(...end))
     );
     if (handleType) return handleType;
     if (!this.textBoundaryHitTest) return;

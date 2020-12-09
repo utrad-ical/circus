@@ -1,7 +1,7 @@
 import Annotation from '../../annotation/Annotation';
 import Point from '../../annotation/Point';
 import ViewerEvent from '../../viewer/ViewerEvent';
-import { getVolumeCoordinateFromViewerEvent } from '../tool-util';
+import { convertViewerPointToVolumePoint } from '../tool-util';
 import AnnotationToolBase from './AnnotationToolBase';
 
 /**
@@ -11,7 +11,11 @@ export default class PointTool extends AnnotationToolBase {
   protected focusedAnnotation?: Point;
 
   protected createAnnotation(ev: ViewerEvent): Annotation | undefined {
-    const point = getVolumeCoordinateFromViewerEvent(ev);
+    const point = convertViewerPointToVolumePoint(
+      ev.viewer,
+      ev.viewerX!,
+      ev.viewerY!
+    );
     const antn = new Point();
     antn.origin = [point.x, point.y, point.z];
     return antn;
@@ -19,7 +23,11 @@ export default class PointTool extends AnnotationToolBase {
 
   protected updateAnnotation(ev: ViewerEvent): void {
     if (!this.focusedAnnotation) return;
-    const point = getVolumeCoordinateFromViewerEvent(ev);
+    const point = convertViewerPointToVolumePoint(
+      ev.viewer,
+      ev.viewerX!,
+      ev.viewerY!
+    );
     const antn = this.focusedAnnotation;
     antn.origin = [point.x, point.y, point.z];
   }

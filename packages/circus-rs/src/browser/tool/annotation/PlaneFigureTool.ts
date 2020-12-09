@@ -2,7 +2,7 @@ import Annotation from '../../annotation/Annotation';
 import PlaneFigure, { FigureType } from '../../annotation/PlaneFigure';
 import { detectOrthogonalSection } from '../../section-util';
 import ViewerEvent from '../../viewer/ViewerEvent';
-import { getVolumeCoordinateFromViewerEvent } from '../tool-util';
+import { convertViewerPointToVolumePoint } from '../tool-util';
 import AnnotationToolBase from './AnnotationToolBase';
 
 /**
@@ -19,7 +19,11 @@ export default class PlaneFigureTool extends AnnotationToolBase {
     const orientation = detectOrthogonalSection(section);
     if (orientation !== 'axial') return;
 
-    const point = getVolumeCoordinateFromViewerEvent(ev);
+    const point = convertViewerPointToVolumePoint(
+      ev.viewer,
+      ev.viewerX!,
+      ev.viewerY!
+    );
 
     const antn = new PlaneFigure();
     antn.type = this.figureType;
@@ -36,7 +40,11 @@ export default class PlaneFigureTool extends AnnotationToolBase {
 
     if (!this.focusedAnnotation) return;
 
-    const point = getVolumeCoordinateFromViewerEvent(ev);
+    const point = convertViewerPointToVolumePoint(
+      ev.viewer,
+      ev.viewerX!,
+      ev.viewerY!
+    );
     const antn = this.focusedAnnotation;
     antn.max = [point.x, point.y];
   }

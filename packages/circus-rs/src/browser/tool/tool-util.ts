@@ -1,9 +1,10 @@
 import { Vector2, Vector3 } from 'three';
 import MprImageSource from '../image-source/MprImageSource';
 import Viewer from '../viewer/Viewer';
-import * as su from '../section-util';
-import { convertScreenCoordinateToVolumeCoordinate } from '../section-util';
-import ViewerEvent from '../viewer/ViewerEvent';
+import {
+  convertPointToIndex,
+  convertScreenCoordinateToVolumeCoordinate
+} from '../section-util';
 
 /**
  * Utility method which works in the same way as Math.sign().
@@ -17,30 +18,43 @@ export function sign(val: number): number {
   return val > 0 ? 1 : -1;
 }
 
+/**
+ * from screen 2D coordinate to volume coordinate in millimeter
+ */
+export function convertViewerPointToVolumePoint(
+  viewer: Viewer,
+  px: number,
+  py: number
+): Vector3 {
+  const { type, section } = viewer.getState();
+  if (type !== 'mpr') throw new Error('Unsupported view state.');
+
+  const resolution = viewer.getResolution();
+  return convertScreenCoordinateToVolumeCoordinate(
+    section,
+    new Vector2(resolution[0], resolution[1]),
+    new Vector2(px, py)
+  );
+}
+
+/**
+ * from screen 2D coordinate to volume index
+ */
 export function convertViewerPointToVolumeIndex(
   viewer: Viewer,
   px: number,
   py: number
 ): Vector3 {
-  const state = viewer.getState();
-  if (state.type !== 'mpr') throw new Error('Unsupported view state.');
-  const section = state.section;
-
   const comp = viewer.getComposition();
   if (!comp) throw new Error('Composition not initialized'); // should not happen
 
-  const resolution = viewer.getResolution();
+  const point3inMillimeter = convertViewerPointToVolumePoint(viewer, px, py);
+
+  // from volume coordinate in millimeter to index coordinate
   const src = comp.imageSource as MprImageSource;
   const voxelSize = new Vector3().fromArray(src.metadata!.voxelSize);
+  const indexOfVol = convertPointToIndex(point3inMillimeter, voxelSize);
 
-  // from screen 2D coordinate to volume coordinate in millimeter
-  const mmOfVol = su.convertScreenCoordinateToVolumeCoordinate(
-    section,
-    new Vector2(resolution[0], resolution[1]),
-    new Vector2(px, py)
-  );
-  // from volume coordinate in millimeter to index coordinate
-  const indexOfVol = su.convertPointToIndex(mmOfVol, voxelSize);
   // floor
   return new Vector3(
     Math.floor(indexOfVol.x),
@@ -48,20 +62,3 @@ export function convertViewerPointToVolumeIndex(
     Math.floor(indexOfVol.z)
   );
 }
-/**
- * Converts 2D point in viewer event (screen coordinate) to 3D point in volume coordinate space.
- * @param ev target
- */
-export const getVolumeCoordinateFromViewerEvent = (
-  ev: ViewerEvent
-): Vector3 => {
-  const screenPoint = [ev.viewerX!, ev.viewerY!];
-  const resolution = ev.viewer.getResolution();
-  const viewState = ev.viewer.getState();
-  const section = viewState.section;
-  return convertScreenCoordinateToVolumeCoordinate(
-    section,
-    new Vector2().fromArray(resolution),
-    new Vector2().fromArray(screenPoint)
-  );
-};

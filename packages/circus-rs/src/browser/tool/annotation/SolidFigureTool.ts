@@ -4,7 +4,7 @@ import Ellipsoid from '../../annotation/Ellipsoid';
 import SolidFigure, { FigureType } from '../../annotation/SolidFigure';
 import { detectOrthogonalSection } from '../../section-util';
 import ViewerEvent from '../../viewer/ViewerEvent';
-import { getVolumeCoordinateFromViewerEvent } from '../tool-util';
+import { convertViewerPointToVolumePoint } from '../tool-util';
 import AnnotationToolBase from './AnnotationToolBase';
 
 /**
@@ -21,7 +21,11 @@ export default class SolidFigureTool extends AnnotationToolBase {
     const orientation = detectOrthogonalSection(section);
     if (!SolidFigure.editableOrientation.some(o => o === orientation)) return;
 
-    const point = getVolumeCoordinateFromViewerEvent(ev);
+    const point = convertViewerPointToVolumePoint(
+      ev.viewer,
+      ev.viewerX!,
+      ev.viewerY!
+    );
 
     let antn: SolidFigure;
     switch (this.figureType) {
@@ -49,7 +53,11 @@ export default class SolidFigureTool extends AnnotationToolBase {
 
     if (!this.focusedAnnotation) return;
 
-    const max = getVolumeCoordinateFromViewerEvent(ev);
+    const max = convertViewerPointToVolumePoint(
+      ev.viewer,
+      ev.viewerX!,
+      ev.viewerY!
+    );
     const antn = this.focusedAnnotation;
     antn.max = max.toArray();
   }

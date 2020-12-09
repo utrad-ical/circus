@@ -112,18 +112,13 @@ const LabelMenu: React.FC<{
           ? detectOrthogonalSection(reproduceSection)
           : undefined;
 
-        const getReproduceSection = (viewer: Viewer) => {
-          if (!reproduceSection) return;
-          if (
-            detectOrthogonalSection(viewer.getState().section) !==
-            reproduceOrientation
-          )
-            return;
-          return reproduceSection;
-        };
-
-        Object.values(viewers).forEach(viewer => {
-          focusBy(viewer, center, getReproduceSection(viewer));
+        Object.keys(viewers).forEach(index => {
+          const viewer = viewers[index];
+          const section =
+            reproduceOrientation && index.includes(reproduceOrientation)
+              ? reproduceSection
+              : undefined;
+          focusBy(viewer, center, section);
         });
       }
     }

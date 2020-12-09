@@ -1,4 +1,4 @@
-import { Vector2, Vector3 } from 'three';
+import { Line3, Vector2, Vector3 } from 'three';
 import { convertVolumeCoordinateToScreenCoordinate } from '../../section-util';
 import Viewer from '../../viewer/Viewer';
 import { defaultHandleSize } from './drawHandleFrame';
@@ -41,7 +41,7 @@ export default function getHandleType(
   const section = viewState.section;
   const resolution = new Vector2().fromArray(viewer.getResolution());
 
-  return _getHandleType(
+  return detectHandleTypeInBoundingBox(
     point,
     convertVolumeCoordinateToScreenCoordinate(
       section,
@@ -59,7 +59,7 @@ export default function getHandleType(
 export function getHandleTypeForLine(
   viewer: Viewer,
   point: Vector2,
-  line: { start: Vector3; end: Vector3 },
+  line: Line3,
   resizable: boolean = true
 ): HandleTypeForLine | undefined {
   const handleSize = defaultHandleSize;
@@ -82,8 +82,9 @@ export function getHandleTypeForLine(
   );
 
   if (resizable) {
-    if (_getHandleType(point, start, start)) return 'start-reset';
-    if (_getHandleType(point, end, end)) return 'end-reset';
+    if (detectHandleTypeInBoundingBox(point, start, start))
+      return 'start-reset';
+    if (detectHandleTypeInBoundingBox(point, end, end)) return 'end-reset';
   }
 
   const delta = new Vector2(end.x - start.x, end.y - start.y);
@@ -100,7 +101,7 @@ export function getHandleTypeForLine(
     : undefined;
 }
 
-const _getHandleType = (
+const detectHandleTypeInBoundingBox = (
   point: Vector2,
   min: Vector2,
   max: Vector2

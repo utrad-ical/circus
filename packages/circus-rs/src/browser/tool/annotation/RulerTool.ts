@@ -1,7 +1,7 @@
 import Annotation from '../../annotation/Annotation';
 import Ruler from '../../annotation/Ruler';
 import ViewerEvent from '../../viewer/ViewerEvent';
-import { getVolumeCoordinateFromViewerEvent } from '../tool-util';
+import { convertViewerPointToVolumePoint } from '../tool-util';
 import AnnotationToolBase from './AnnotationToolBase';
 
 /**
@@ -13,7 +13,11 @@ export default class RulerTool extends AnnotationToolBase {
   protected createAnnotation(ev: ViewerEvent): Annotation | undefined {
     const viewState = ev.viewer.getState();
     const section = viewState.section;
-    const origin = getVolumeCoordinateFromViewerEvent(ev);
+    const origin = convertViewerPointToVolumePoint(
+      ev.viewer,
+      ev.viewerX!,
+      ev.viewerY!
+    );
 
     const antn = new Ruler();
     antn.section = { ...section };
@@ -32,7 +36,11 @@ export default class RulerTool extends AnnotationToolBase {
 
     if (!this.focusedAnnotation) return;
 
-    const end = getVolumeCoordinateFromViewerEvent(ev);
+    const end = convertViewerPointToVolumePoint(
+      ev.viewer,
+      ev.viewerX!,
+      ev.viewerY!
+    );
     const antn = this.focusedAnnotation;
     antn.end = [end.x, end.y, end.z];
   }

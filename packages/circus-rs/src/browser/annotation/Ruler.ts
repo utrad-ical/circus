@@ -81,18 +81,14 @@ export default class Ruler implements Annotation, ViewerEventTarget {
       }
     | undefined;
 
-  private drawnInfo:
-    | {
-        drawnLine3: () => Line3;
-      }
-    | undefined;
+  private drawnLine3: (() => Line3) | undefined;
 
   private textBoundaryHitTest:
     | ((p: Vector2) => boolean)
     | undefined = undefined;
 
   public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
-    this.drawnInfo = undefined;
+    this.drawnLine3 = undefined;
     if (!viewer || !viewState) return;
     if (!this.start || !this.end) return;
     const canvas = viewer.canvas;
@@ -153,12 +149,11 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     );
     this.textBoundaryHitTest = textBoundaryHitTest;
 
-    const p2to3 = (p: Vector2) =>
-      convertScreenCoordinateToVolumeCoordinate(section, resolution, p);
-
-    this.drawnInfo = {
-      drawnLine3: () => new Line3(p2to3(start), p2to3(end))
-    };
+    this.drawnLine3 = () =>
+      new Line3(
+        convertScreenCoordinateToVolumeCoordinate(section, resolution, start),
+        convertScreenCoordinateToVolumeCoordinate(section, resolution, end)
+      );
   }
 
   public validate(): boolean {
@@ -222,8 +217,8 @@ export default class Ruler implements Annotation, ViewerEventTarget {
       );
 
       if (handleType === 'start-reset' || handleType === 'end-reset') {
-        if (!this.drawnInfo) return;
-        const drawnLine3 = this.drawnInfo.drawnLine3();
+        if (!this.drawnLine3) return;
+        const drawnLine3 = this.drawnLine3();
         if (!originalLine3.equals(drawnLine3)) {
           const [start, end] = (() =>
             handleType === 'start-reset'

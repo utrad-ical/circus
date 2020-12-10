@@ -14,8 +14,6 @@ export type HandleType =
   | 'w-resize'
   | 'move';
 
-export type HandleTypeForLine = 'start-reset' | 'end-reset' | 'line-move';
-
 export const cursorSettableHandleType = [
   'nw-resize',
   'n-resize',
@@ -54,51 +52,6 @@ export default function getHandleType(
       new Vector3().fromArray(max)
     )
   );
-}
-
-export function getHandleTypeForLine(
-  viewer: Viewer,
-  point: Vector2,
-  line: Line3,
-  resizable: boolean = true
-): HandleTypeForLine | undefined {
-  const handleSize = defaultHandleSize;
-
-  const viewState = viewer.getState();
-  if (!viewer || !viewState) return;
-  if (viewState.type !== 'mpr') return;
-
-  const resolution = new Vector2().fromArray(viewer.getResolution());
-
-  const start = convertVolumeCoordinateToScreenCoordinate(
-    viewState.section,
-    resolution,
-    line.start
-  );
-  const end = convertVolumeCoordinateToScreenCoordinate(
-    viewState.section,
-    resolution,
-    line.end
-  );
-
-  if (resizable) {
-    if (detectHandleTypeInBoundingBox(point, start, start))
-      return 'start-reset';
-    if (detectHandleTypeInBoundingBox(point, end, end)) return 'end-reset';
-  }
-
-  const delta = new Vector2(end.x - start.x, end.y - start.y);
-  const nu = delta.clone().normalize();
-  const nv = new Vector2(delta.y, delta.x * -1).normalize();
-
-  const o = start.clone().add(nv.clone().multiplyScalar(-handleSize));
-  const p = point.clone().sub(o);
-  const pu = p.dot(nu);
-  const pv = p.dot(nv);
-
-  return pu >= 0 && pv >= 0 && pu <= delta.length() && pv <= handleSize * 2
-    ? 'line-move'
-    : undefined;
 }
 
 const detectHandleTypeInBoundingBox = (

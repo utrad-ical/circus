@@ -1,4 +1,4 @@
-import { Box3, Line3, Vector2, Vector3 } from 'three';
+import { Box2, Box3, Line3, Vector2, Vector3 } from 'three';
 import {
   distanceFromPointToSection,
   Section,
@@ -17,15 +17,16 @@ import ViewState, { MprViewState } from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
 import { drawFillText, drawLine, drawPoint } from './helper/drawObject';
 import { FontStyle } from './helper/fontStyle';
-import {
-  getHandleTypeForLine,
-  HandleTypeForLine
-} from './helper/getHandleType';
 import resize from './helper/resize';
 
-type HandleTypeForRuler = HandleTypeForLine | 'label-move';
+type HitType =
+  | 'start-reset'
+  | 'end-reset'
+  | 'line-move'
+  | 'label-move';
+
 const cursorTypes: {
-  [key in HandleTypeForRuler]: { cursor: string };
+  [key in HitType]: { cursor: string };
 } = {
   'start-reset': { cursor: 'crosshair' },
   'end-reset': { cursor: 'crosshair' },
@@ -60,6 +61,8 @@ export default class Ruler implements Annotation, ViewerEventTarget {
    */
   public labelPosition: Vector2D = defaultLabelPosition;
 
+  private textBoundingBox: Box2 | undefined = undefined;
+
   /**
    * The marker cirlce will be drawn when the distance between the point
    * and the section is smaller than this value.
@@ -71,7 +74,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
   public editable: boolean = true;
   public id?: string;
 
-  private handleType: HandleTypeForRuler | undefined = undefined;
+  private handleType: HitType | undefined = undefined;
   private dragInfo:
     | {
         originalLine3: Line3;
@@ -83,9 +86,6 @@ export default class Ruler implements Annotation, ViewerEventTarget {
 
   private drawnLine3: (() => Line3) | undefined;
 
-  private textBoundaryHitTest:
-    | ((p: Vector2) => boolean)
-    | undefined = undefined;
 
   public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
     this.drawnLine3 = undefined;
@@ -129,8 +129,12 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     const label = this.getDistance()! + 'mm';
     const [px, py] = this.labelPosition;
     const position = new Vector2(start.x + px, start.y + py);
-    const textBox = drawFillText(ctx, label, position, this.labelFontStyle);
-    this.textBoundaryHitTest = (p: Vector2) => textBox.containsPoint(p);
+    this.textBoundingBox = drawFillText(
+      ctx,
+      label,
+      position,
+      this.labelFontStyle
+    );
 
     this.drawnLine3 = () =>
       new Line3(
@@ -182,13 +186,10 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     if (viewState.type !== 'mpr') return;
     if (!this.editable) return;
 
-    const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
-
-    this.handleType = this.getHandleType(viewer, point);
-    const handleType = this.handleType;
-    if (handleType) {
+    this.handleType = this.hitTest(ev);
+    if (this.handleType) {
       ev.stopPropagation();
-      viewer.setCursorStyle(cursorTypes[handleType].cursor);
+      viewer.setCursorStyle(cursorTypes[this.handleType].cursor);
       viewer.setHoveringAnnotation(this);
       viewer.renderAnnotations();
     } else if (viewer.getHoveringAnnotation() === this) {
@@ -204,6 +205,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     if (!viewer || !viewState) return;
     if (viewState.type !== 'mpr') return;
     if (!this.editable) return;
+
     if (!this.start || !this.end || !this.section) return;
 
     if (viewer.getHoveringAnnotation() === this) {
@@ -336,21 +338,48 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     }
   }
 
-  private getHandleType(
-    viewer: Viewer,
-    point: Vector2
-  ): HandleTypeForRuler | undefined {
-    const origin = this.start;
-    const end = this.end;
-    if (!origin || !end) return;
-    const handleType: HandleTypeForRuler | undefined = getHandleTypeForLine(
+  private hitTest(ev: ViewerEvent): HitType | undefined {
+    if (!this.validate()) return;
+
+    const viewer = ev.viewer;
+    const point = new Vector2(ev.viewerX!, ev.viewerY!);
+
+    if (hitRectangle(point, this.textBoundingBox!)) {
+      return 'label-move';
+    }
+
+    const start = convertVolumePointToViewerPoint(
       viewer,
-      point,
-      new Line3(new Vector3(...origin), new Vector3(...end))
+      this.start![0],
+      this.start![1],
+      this.start![2]
     );
-    if (handleType) return handleType;
-    if (!this.textBoundaryHitTest) return;
-    if (this.textBoundaryHitTest(point)) return 'label-move';
+    const startHitBox = new Box2(
+      new Vector2(start.x - this.radius, start.y - this.radius),
+      new Vector2(start.x + this.radius, start.y + this.radius)
+    );
+    if (hitRectangle(point, startHitBox, 5)) {
+      return 'start-reset';
+    }
+
+    const end = convertVolumePointToViewerPoint(
+      viewer,
+      this.end![0],
+      this.end![1],
+      this.end![2]
+    );
+    const endHitBox = new Box2(
+      new Vector2(end.x - this.radius, end.y - this.radius),
+      new Vector2(end.x + this.radius, end.y + this.radius)
+    );
+    if (hitRectangle(point, endHitBox, 5)) {
+      return 'end-reset';
+    }
+
+    if (hitLineSegment(point, { start, end })) {
+      return 'line-move';
+    }
+
     return;
   }
 
@@ -410,4 +439,34 @@ export default class Ruler implements Annotation, ViewerEventTarget {
       end: [end.x, end.y, end.z]
     };
   }
+}
+
+type LineSegment = { start: Vector2; end: Vector2 };
+function hitLineSegment(
+  point: Vector2,
+  { start, end }: LineSegment,
+  margin: number = 5
+) {
+  const lv = new Vector2(end.x - start.x, end.y - start.y);
+  const nu = lv.clone().normalize();
+  const nv = new Vector2(lv.y, lv.x * -1).normalize();
+
+  const pv = point.clone().sub(start);
+  const uDot = pv.dot(nu);
+  const vDot = pv.dot(nv);
+
+  const uDotMin = -margin;
+  const uDotMax = lv.length() + margin;
+  const vDotMin = -margin;
+  const vDotMax = margin;
+
+  return (
+    uDotMin <= uDot && uDot <= uDotMax && vDotMin <= vDot && vDot <= vDotMax
+  );
+}
+function hitRectangle(point: Vector2, rect: Box2, margin: number = 0) {
+  return new Box2(
+    rect.min.clone().subScalar(margin),
+    rect.max.clone().addScalar(margin)
+  ).containsPoint(point);
 }

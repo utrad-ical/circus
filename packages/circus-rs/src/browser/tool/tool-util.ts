@@ -3,7 +3,8 @@ import MprImageSource from '../image-source/MprImageSource';
 import Viewer from '../viewer/Viewer';
 import {
   convertPointToIndex,
-  convertScreenCoordinateToVolumeCoordinate
+  convertScreenCoordinateToVolumeCoordinate,
+  convertVolumeCoordinateToScreenCoordinate
 } from '../section-util';
 
 /**
@@ -34,6 +35,26 @@ export function convertViewerPointToVolumePoint(
     section,
     new Vector2(resolution[0], resolution[1]),
     new Vector2(px, py)
+  );
+}
+
+/**
+ * from volume coordinate in millimeter to screen 2D coordinate
+ */
+export function convertVolumePointToViewerPoint(
+  viewer: Viewer,
+  px: number,
+  py: number,
+  pz: number
+): Vector2 {
+  const { type, section } = viewer.getState();
+  if (type !== 'mpr') throw new Error('Unsupported view state.');
+
+  const resolution = viewer.getResolution();
+  return convertVolumeCoordinateToScreenCoordinate(
+    section,
+    new Vector2(resolution[0], resolution[1]),
+    new Vector3(px, py, pz)
   );
 }
 

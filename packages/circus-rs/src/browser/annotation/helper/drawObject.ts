@@ -250,11 +250,11 @@ export function drawSimpleFigure(
 export function drawFillText(
   ctx: CanvasRenderingContext2D,
   text: string | undefined,
-  origin: Vector2 | undefined,
+  position: Vector2 | undefined,
   style: FontStyle
-): { textBoundaryHitTest: (p: Vector2) => boolean } {
+): Box2 {
   if (!text) text = '';
-  if (!origin) origin = new Vector2();
+  if (!position) position = new Vector2();
   ctx.save();
   try {
     let [fontSize, fontFamily] = ctx.font.split(' ');
@@ -264,22 +264,21 @@ export function drawFillText(
     if (style.color) ctx.fillStyle = style.color;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
-    ctx.fillText(text, origin.x, origin.y);
 
     const textMetrics = ctx.measureText(text);
-    const {
-      width,
-      actualBoundingBoxAscent,
-      actualBoundingBoxDescent
-    } = textMetrics;
-    const height = actualBoundingBoxAscent + actualBoundingBoxDescent;
+    const width = textMetrics.width;
+    const height =
+      textMetrics.actualBoundingBoxAscent +
+      textMetrics.actualBoundingBoxDescent;
 
-    const box = new Box2(
-      new Vector2(0, -height),
-      new Vector2(width, 0)
-    ).translate(origin);
+    const textBox = new Box2(
+      new Vector2(position.x, position.y),
+      new Vector2(position.x + width, position.y + height)
+    );
 
-    return { textBoundaryHitTest: (p: Vector2) => box.containsPoint(p) };
+    ctx.fillText(text, position.x, position.y + textMetrics.actualBoundingBoxAscent);
+
+    return textBox;
   } finally {
     ctx.restore();
   }

@@ -249,18 +249,19 @@ export function drawSimpleFigure(
 
 export function drawFillText(
   ctx: CanvasRenderingContext2D,
-  text: string | undefined,
-  position: Vector2 | undefined,
+  text: string,
+  position: Vector2,
   style: FontStyle
 ): Box2 {
-  if (!text) text = '';
-  if (!position) position = new Vector2();
   ctx.save();
   try {
-    let [fontSize, fontFamily] = ctx.font.split(' ');
-    if (style.fontSize) fontSize = style.fontSize;
-    if (style.fontFamily) fontFamily = style.fontFamily;
-    ctx.font = fontSize + ' ' + fontFamily;
+    if (style.fontSize || style.fontFamily) {
+      const [currentFontSize, currentFontFamily] = ctx.font.split(' ');
+      ctx.font = [
+        style.fontSize || currentFontSize,
+        style.fontFamily || currentFontFamily
+      ].join(' ');
+    }
     if (style.color) ctx.fillStyle = style.color;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
@@ -276,7 +277,11 @@ export function drawFillText(
       new Vector2(position.x + width, position.y + height)
     );
 
-    ctx.fillText(text, position.x, position.y + textMetrics.actualBoundingBoxAscent);
+    ctx.fillText(
+      text,
+      position.x,
+      position.y + textMetrics.actualBoundingBoxAscent
+    );
 
     return textBox;
   } finally {

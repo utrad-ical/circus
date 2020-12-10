@@ -54,7 +54,7 @@ const SearchPanel: <T extends {}>(props: {
   const api = useApi();
   const dispatch = useDispatch();
   const loginManager = useLoginManager();
-  const search = useSelector(state => state.searches[searchName]);
+  const search = useSelector(state => state.searches.searches[searchName]);
 
   const [condition, setCondition] = useState(() => {
     // Determine initial condition

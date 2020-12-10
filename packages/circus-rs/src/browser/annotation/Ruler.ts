@@ -18,6 +18,7 @@ import ViewState, { MprViewState } from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
 import { drawFillText, drawLine, drawPoint } from './helper/drawObject';
 import { FontStyle } from './helper/fontStyle';
+import { hitLineSegment, hitRectangle } from './helper/hit-test';
 
 type RulerHitType = 'start-reset' | 'end-reset' | 'line-move' | 'label-move';
 
@@ -106,18 +107,8 @@ export default class Ruler implements Annotation, ViewerEventTarget {
       viewer.getHoveringAnnotation() === this ? this.handleType : undefined;
 
     // Points on screen for each end
-    const start = convertVolumePointToViewerPoint(
-      viewer,
-      this.start![0],
-      this.start![1],
-      this.start![2]
-    );
-    const end = convertVolumePointToViewerPoint(
-      viewer,
-      this.end![0],
-      this.end![1],
-      this.end![2]
-    );
+    const start = convertVolumePointToViewerPoint(viewer, ...this.start!);
+    const end = convertVolumePointToViewerPoint(viewer, ...this.end!);
 
     // Draw the line connects start point to end point.
     const lineStyle = {
@@ -141,7 +132,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     });
 
     // Draw label text for distance.
-    const label = this.getDistance()! + 'mm';
+    const label = this.getLengthInMillimeter()! + 'mm';
     if (this.labelPosition) {
       const [px, py] = this.labelPosition;
       const position = new Vector2(start.x + px, start.y + py);
@@ -177,7 +168,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
   /**
    * return the ruler length in millimeter
    */
-  private getDistance(): number | undefined {
+  private getLengthInMillimeter(): number | undefined {
     if (!this.start || !this.end) return;
     const line = new Line3(
       new Vector3(...this.start),
@@ -273,9 +264,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     if (['start-reset', 'line-move'].some(t => t === this.handleType)) {
       const originalStartOnScreen = convertVolumePointToViewerPoint(
         ev.viewer,
-        this.original.start[0],
-        this.original.start[1],
-        this.original.start[2]
+        ...this.original.start
       );
       this.start = convertViewerPointToVolumePoint(
         ev.viewer,
@@ -287,9 +276,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     if (['end-reset', 'line-move'].some(t => t === this.handleType)) {
       const originalEndOnScreen = convertVolumePointToViewerPoint(
         ev.viewer,
-        this.original.end[0],
-        this.original.end[1],
-        this.original.end[2]
+        ...this.original.end
       );
       this.end = convertViewerPointToVolumePoint(
         ev.viewer,
@@ -349,12 +336,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
       return 'label-move';
     }
 
-    const start = convertVolumePointToViewerPoint(
-      viewer,
-      this.start![0],
-      this.start![1],
-      this.start![2]
-    );
+    const start = convertVolumePointToViewerPoint(viewer, ...this.start!);
     const startHitBox = new Box2(
       new Vector2(start.x - this.radius, start.y - this.radius),
       new Vector2(start.x + this.radius, start.y + this.radius)
@@ -363,12 +345,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
       return 'start-reset';
     }
 
-    const end = convertVolumePointToViewerPoint(
-      viewer,
-      this.end![0],
-      this.end![1],
-      this.end![2]
-    );
+    const end = convertVolumePointToViewerPoint(viewer, ...this.end!);
     const endHitBox = new Box2(
       new Vector2(end.x - this.radius, end.y - this.radius),
       new Vector2(end.x + this.radius, end.y + this.radius)
@@ -440,38 +417,6 @@ export default class Ruler implements Annotation, ViewerEventTarget {
       end: [end.x, end.y, end.z]
     };
   }
-}
-
-type LineSegment = { start: Vector2; end: Vector2 };
-function hitLineSegment(
-  point: Vector2,
-  { start, end }: LineSegment,
-  margin: number = 5
-) {
-  if (start.equals(end)) return false;
-
-  const lv = new Vector2(end.x - start.x, end.y - start.y);
-  const nu = lv.clone().normalize();
-  const nv = new Vector2(lv.y, lv.x * -1).normalize();
-
-  const pv = point.clone().sub(start);
-  const uDot = pv.dot(nu);
-  const vDot = pv.dot(nv);
-
-  const uDotMin = -margin;
-  const uDotMax = lv.length() + margin;
-  const vDotMin = -margin;
-  const vDotMax = margin;
-
-  return (
-    uDotMin <= uDot && uDot <= uDotMax && vDotMin <= vDot && vDot <= vDotMax
-  );
-}
-function hitRectangle(point: Vector2, rect: Box2, margin: number = 0) {
-  return new Box2(
-    rect.min.clone().subScalar(margin),
-    rect.max.clone().addScalar(margin)
-  ).containsPoint(point);
 }
 
 function getOrthogonalProjectedPoint(section: Section, point: Vector3) {

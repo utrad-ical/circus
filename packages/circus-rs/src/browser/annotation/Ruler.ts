@@ -8,9 +8,9 @@ import {
 import ViewerEventTarget from '../interface/ViewerEventTarget';
 import {
   convertScreenCoordinateToVolumeCoordinate,
-  convertVolumeCoordinateToScreenCoordinate,
   detectOrthogonalSection
 } from '../section-util';
+import { convertVolumePointToViewerPoint } from '../tool/tool-util';
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState, { MprViewState } from '../ViewState';
@@ -89,71 +89,82 @@ export default class Ruler implements Annotation, ViewerEventTarget {
 
   public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
     this.drawnLine3 = undefined;
-    if (!viewer || !viewState) return;
-    if (!this.start || !this.end) return;
-    const canvas = viewer.canvas;
-    if (!canvas) return;
-    if (viewState.type !== 'mpr') return;
-    const ctx = canvas.getContext('2d');
+    if (!viewer || !viewState || viewState.type !== 'mpr') return;
+    const ctx = viewer.canvas?.getContext('2d');
     if (!ctx) return;
 
-    const color = (() => {
-      const distanceStart = distanceFromPointToSection(
-        viewState.section,
-        new Vector3(...this.start)
-      );
-      const distanceEnd = distanceFromPointToSection(
-        viewState.section,
-        new Vector3(...this.end)
-      );
-      if (distanceStart > this.distanceDimmedThreshold) return;
-      if (distanceEnd > this.distanceDimmedThreshold) return;
-      return distanceStart > this.distanceThreshold ||
-        distanceEnd > this.distanceThreshold
-        ? this.dimmedColor
-        : this.color;
-    })();
-    if (!color) return;
+    if (!this.validate()) return;
 
     const resolution = new Vector2().fromArray(viewer.getResolution());
     const section = viewState.section;
-    const p3to2 = (p: Vector3) =>
-      convertVolumeCoordinateToScreenCoordinate(section, resolution, p);
 
-    const line = new Line3(
-      new Vector3(...this.start),
-      new Vector3(...this.end)
+    const color = this.getStrokeColor(section);
+    if (!color) return;
+
+    // Draw points, start, end
+    const start = convertVolumePointToViewerPoint(
+      viewer,
+      this.start![0],
+      this.start![1],
+      this.start![2]
     );
-
-    const distance = Math.round(line.distance() * 10) / 10;
-    const label = distance + 'mm';
-
+    const end = convertVolumePointToViewerPoint(
+      viewer,
+      this.end![0],
+      this.end![1],
+      this.end![2]
+    );
     const pointStyle = { color, radius: this.radius };
+    drawPoint(ctx, start, pointStyle);
+    drawPoint(ctx, end, pointStyle);
+
+    // Draw the line connects start to end.
     const lineStyle = {
       lineWidth: this.width,
       strokeStyle: color
     };
-
-    const start = p3to2(line.start);
-    const end = p3to2(line.end);
-    const labelOrigin = start.clone().add(new Vector2(...this.labelPosition));
-
-    drawPoint(ctx, start, pointStyle);
-    drawPoint(ctx, end, pointStyle);
     drawLine(ctx, { from: start, to: end }, lineStyle);
-    const { textBoundaryHitTest } = drawFillText(
-      ctx,
-      label,
-      labelOrigin,
-      this.labelFontStyle
-    );
-    this.textBoundaryHitTest = textBoundaryHitTest;
+
+    // Draw label for distance.
+    const label = this.getDistance()! + 'mm';
+    const [px, py] = this.labelPosition;
+    const position = new Vector2(start.x + px, start.y + py);
+    const textBox = drawFillText(ctx, label, position, this.labelFontStyle);
+    this.textBoundaryHitTest = (p: Vector2) => textBox.containsPoint(p);
 
     this.drawnLine3 = () =>
       new Line3(
         convertScreenCoordinateToVolumeCoordinate(section, resolution, start),
         convertScreenCoordinateToVolumeCoordinate(section, resolution, end)
       );
+  }
+
+  private getStrokeColor(section: Section): string | undefined {
+    const maxDistance = Math.max(
+      distanceFromPointToSection(section, new Vector3(...this.start!)),
+      distanceFromPointToSection(section, new Vector3(...this.end!))
+    );
+
+    switch (true) {
+      case maxDistance <= this.distanceThreshold:
+        return this.color;
+      case maxDistance <= this.distanceDimmedThreshold:
+        return this.dimmedColor;
+      default:
+        return;
+    }
+  }
+
+  /**
+   * return the ruler length in millimeter
+   */
+  private getDistance(): number | undefined {
+    if (!this.validate()) return;
+    const line = new Line3(
+      new Vector3(...this.start!),
+      new Vector3(...this.end!)
+    );
+    return Math.round(line.distance() * 10) / 10;
   }
 
   public validate(): boolean {

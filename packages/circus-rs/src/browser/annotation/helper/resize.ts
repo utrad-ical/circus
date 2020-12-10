@@ -1,9 +1,9 @@
 import { Vector3 } from 'three';
 import { OrientationString } from '../../section-util';
-import { HandleType } from './getHandleType';
+import { BoundingRectWithHandleHitType } from './hit-test';
 
 export default function resize(
-  handleType: HandleType | undefined,
+  handleType: BoundingRectWithHandleHitType | undefined,
   orientation: OrientationString,
   originalBoundingBox3: [number[], number[]],
   delta: Vector3
@@ -16,31 +16,31 @@ export default function resize(
   let newMax: Vector3;
 
   switch (handleType) {
-    case 'nw-resize':
+    case 'north-west-handle':
       [newMin, newMax] = _nwResize(orientation, min, max, delta);
       break;
-    case 'n-resize':
+    case 'north-handle':
       [newMin, newMax] = _nResize(orientation, min, max, delta);
       break;
-    case 'ne-resize':
+    case 'north-east-handle':
       [newMin, newMax] = _neResize(orientation, min, max, delta);
       break;
-    case 'e-resize':
+    case 'east-handle':
       [newMin, newMax] = _eResize(orientation, min, max, delta);
       break;
-    case 'se-resize':
+    case 'south-east-handle':
       [newMin, newMax] = _seResize(orientation, min, max, delta);
       break;
-    case 's-resize':
+    case 'south-handle':
       [newMin, newMax] = _sResize(orientation, min, max, delta);
       break;
-    case 'sw-resize':
+    case 'south-west-handle':
       [newMin, newMax] = _swResize(orientation, min, max, delta);
       break;
-    case 'w-resize':
+    case 'west-handle':
       [newMin, newMax] = _wResize(orientation, min, max, delta);
       break;
-    case 'move':
+    case 'rect-outline':
       [newMin, newMax] = _move(min, max, delta);
       break;
     default:

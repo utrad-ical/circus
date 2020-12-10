@@ -1,21 +1,29 @@
-import { Vector2, Vector3 } from 'three';
-import { distanceFromPointToSection, Vector3D } from '../../common/geometry';
-import ViewerEventTarget from '../interface/ViewerEventTarget';
+import { Box2, Vector2, Vector3 } from 'three';
 import {
-  convertScreenCoordinateToVolumeCoordinate,
-  convertVolumeCoordinateToScreenCoordinate,
-  detectOrthogonalSection
-} from '../section-util';
+  distanceFromPointToSection,
+  Section,
+  Vector3D
+} from '../../common/geometry';
+import ViewerEventTarget from '../interface/ViewerEventTarget';
+import { convertScreenCoordinateToVolumeCoordinate } from '../section-util';
+import {
+  convertViewerPointToVolumePoint,
+  convertVolumePointToViewerPoint
+} from '../tool/tool-util';
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
-import ViewState, { MprViewState } from '../ViewState';
+import ViewState from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
 import { drawPoint } from './helper/drawObject';
-import getHandleType, {
-  cursorSettableHandleType,
-  HandleType
-} from './helper/getHandleType';
-import resize from './helper/resize';
+import { hitRectangle } from './helper/hit-test';
+
+type PointHitType = 'point-move';
+
+const cursorTypes: {
+  [key in PointHitType]: { cursor: string };
+} = {
+  'point-move': { cursor: 'move' }
+};
 
 export default class Point implements Annotation, ViewerEventTarget {
   /**
@@ -40,13 +48,13 @@ export default class Point implements Annotation, ViewerEventTarget {
   public editable: boolean = true;
   public id?: string;
 
-  private handleType: HandleType | undefined = undefined;
-  private dragInfo:
+  private handleType: PointHitType | undefined = undefined;
+  private dragStartPointOnScreen: Vector2 | undefined = undefined;
+  private original:
     | {
-        originalBoundingBox3: [number[], number[]];
-        dragStartVolumePoint3: number[];
+        origin: Vector3D;
       }
-    | undefined;
+    | undefined = undefined;
 
   public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
     if (!viewer || !viewState) return;
@@ -57,28 +65,31 @@ export default class Point implements Annotation, ViewerEventTarget {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const color = (() => {
-      const distance = distanceFromPointToSection(
-        viewState.section,
-        new Vector3(...this.origin)
-      );
-      if (distance > this.distanceDimmedThreshold) return;
-      return distance > this.distanceThreshold ? this.dimmedColor : this.color;
-    })();
+    const color = this.getColor(viewState.section);
     if (!color) return;
 
-    const screenPoint = convertVolumeCoordinateToScreenCoordinate(
-      viewState.section,
-      new Vector2().fromArray(viewer.getResolution()),
-      new Vector3(...this.origin)
-    );
-
+    const screenPoint = convertVolumePointToViewerPoint(viewer, ...this.origin);
     drawPoint(ctx, screenPoint, { radius: this.radius, color });
   }
 
+  private getColor(section: Section): string | undefined {
+    const distance = distanceFromPointToSection(
+      section,
+      new Vector3(...this.origin!)
+    );
+
+    switch (true) {
+      case distance <= this.distanceThreshold:
+        return this.color;
+      case distance <= this.distanceDimmedThreshold:
+        return this.dimmedColor;
+      default:
+        return;
+    }
+  }
+
   public validate(): boolean {
-    const origin = this.origin;
-    return !!origin;
+    return !!this.origin;
   }
 
   public mouseMoveHandler(ev: ViewerEvent): void {
@@ -87,19 +98,12 @@ export default class Point implements Annotation, ViewerEventTarget {
     if (!viewer || !viewState) return;
     if (viewState.type !== 'mpr') return;
     if (!this.editable) return;
+    if (!this.origin) return;
 
-    const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
-
-    const origin = this.origin;
-    if (!origin) return;
-
-    const handleType = getHandleType(viewer, point, origin, origin);
-    if (handleType) {
+    this.handleType = this.hitTest(ev);
+    if (this.handleType) {
       ev.stopPropagation();
-      if (cursorSettableHandleType.some(type => type === handleType)) {
-        viewer.setCursorStyle(handleType);
-      }
-      this.handleType = handleType;
+      viewer.setCursorStyle(cursorTypes[this.handleType].cursor);
       viewer.setHoveringAnnotation(this);
       viewer.renderAnnotations();
     } else if (viewer.getHoveringAnnotation() === this) {
@@ -115,28 +119,34 @@ export default class Point implements Annotation, ViewerEventTarget {
     if (!viewer || !viewState) return;
     if (viewState.type !== 'mpr') return;
     if (!this.editable) return;
+    if (!this.origin) return;
 
-    if (viewer.getHoveringAnnotation() === this) {
+    if (viewer.getHoveringAnnotation() === this && this.handleType) {
       ev.stopPropagation();
 
-      const origin = this.origin;
-      if (!origin) return;
-      const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
-      const handleType = getHandleType(viewer, point, origin, origin);
-      if (handleType) {
-        const state = viewer.getState() as MprViewState;
-        const resolution: [number, number] = viewer.getResolution();
-        this.handleType = handleType;
-        this.dragInfo = {
-          originalBoundingBox3: [origin.concat(), origin.concat()],
-          dragStartVolumePoint3: convertScreenCoordinateToVolumeCoordinate(
-            state.section,
-            new Vector2().fromArray(resolution),
-            point.clone()
-          ).toArray()
-        };
-      }
+      this.dragStartPointOnScreen = new Vector2(ev.viewerX!, ev.viewerY!);
+      this.original = {
+        origin: this.origin
+      };
     }
+  }
+
+  private hitTest(ev: ViewerEvent): PointHitType | undefined {
+    if (!this.origin) return;
+
+    const viewer = ev.viewer;
+    const point = new Vector2(ev.viewerX!, ev.viewerY!);
+
+    const hitPoint = convertVolumePointToViewerPoint(viewer, ...this.origin);
+    const hitBox = new Box2(
+      new Vector2(hitPoint.x - this.radius, hitPoint.y - this.radius),
+      new Vector2(hitPoint.x + this.radius, hitPoint.y + this.radius)
+    );
+    if (hitRectangle(point, hitBox, 5)) {
+      return 'point-move';
+    }
+
+    return;
   }
 
   public dragHandler(ev: ViewerEvent): void {
@@ -145,32 +155,22 @@ export default class Point implements Annotation, ViewerEventTarget {
     if (!viewer || !viewState) return;
     if (viewState.type !== 'mpr') return;
 
-    if (viewer.getHoveringAnnotation() === this) {
+    if (viewer.getHoveringAnnotation() === this && this.handleType) {
       ev.stopPropagation();
-      const draggedPoint: [number, number] = [ev.viewerX!, ev.viewerY!];
 
-      const viewState = viewer.getState() as MprViewState;
-      const resolution: [number, number] = viewer.getResolution();
-      const orientation = detectOrthogonalSection(viewState.section);
-      const draggedPoint3 = convertScreenCoordinateToVolumeCoordinate(
-        viewState.section,
-        new Vector2().fromArray(resolution),
-        new Vector2().fromArray(draggedPoint)
+      const draggedTotal = new Vector2(
+        ev.viewerX! - this.dragStartPointOnScreen!.x,
+        ev.viewerY! - this.dragStartPointOnScreen!.y
       );
-      const delta = draggedPoint3.sub(
-        new Vector3().fromArray(this.dragInfo!.dragStartVolumePoint3!)
+      const originalPointOnScreen = convertVolumePointToViewerPoint(
+        ev.viewer,
+        ...this.original!.origin
       );
-
-      const handleType = this.handleType;
-      const originalBoundingBox3 = this.dragInfo!.originalBoundingBox3!;
-      const newBoundingBox3 = resize(
-        handleType,
-        orientation,
-        originalBoundingBox3,
-        delta
-      );
-      const point = newBoundingBox3[0];
-      this.origin = [...point] as Vector3D;
+      this.origin = convertViewerPointToVolumePoint(
+        ev.viewer,
+        originalPointOnScreen.x + draggedTotal.x,
+        originalPointOnScreen.y + draggedTotal.y
+      ).toArray() as Vector3D;
 
       const comp = viewer.getComposition();
       if (!comp) return;
@@ -187,6 +187,8 @@ export default class Point implements Annotation, ViewerEventTarget {
 
     if (viewer.getHoveringAnnotation() === this) {
       ev.stopPropagation();
+      this.dragStartPointOnScreen = undefined;
+      this.original = undefined;
       viewer.setCursorStyle('');
 
       const comp = viewer.getComposition();
@@ -197,7 +199,6 @@ export default class Point implements Annotation, ViewerEventTarget {
       } else {
         comp.removeAnnotation(this);
       }
-      this.dragInfo = undefined;
     }
   }
 

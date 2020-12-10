@@ -19,10 +19,10 @@ import Annotation, { DrawOption } from './Annotation';
 import { drawFillText, drawLine, drawPoint } from './helper/drawObject';
 import { FontStyle } from './helper/fontStyle';
 
-type HitType = 'start-reset' | 'end-reset' | 'line-move' | 'label-move';
+type RulerHitType = 'start-reset' | 'end-reset' | 'line-move' | 'label-move';
 
 const cursorTypes: {
-  [key in HitType]: { cursor: string };
+  [key in RulerHitType]: { cursor: string };
 } = {
   'start-reset': { cursor: 'crosshair' },
   'end-reset': { cursor: 'crosshair' },
@@ -30,16 +30,25 @@ const cursorTypes: {
   'label-move': { cursor: 'move' }
 };
 
-const defaultLabelPosition: Vector2D = [5, -5];
-
 export default class Ruler implements Annotation, ViewerEventTarget {
   /**
    * Color of the outline.
    */
   public color: string = '#ff8800';
+
+  /**
+   * Width of the line that connects each end.
+   */
   public width: number = 3;
+
+  /**
+   * Radius of the each end circle.
+   */
   public radius: number = 3;
 
+  /**
+   * Section for retrieving the view same as when edited one.
+   */
   public section?: Section;
 
   /**
@@ -53,11 +62,11 @@ export default class Ruler implements Annotation, ViewerEventTarget {
   public end?: Vector3D;
 
   /**
-   * Radius of the marker circle .
+   * Position of the label text.
+   * Specify the relative position from the start point rendered in viewer.
+   * The left-top corner of the text bounding box comes to this position.
    */
-  public labelPosition: Vector2D = defaultLabelPosition;
-
-  private textBoundingBox: Box2 | undefined = undefined;
+  public labelPosition?: Vector2D = [0, 10];
 
   /**
    * The marker cirlce will be drawn when the distance between the point
@@ -70,14 +79,14 @@ export default class Ruler implements Annotation, ViewerEventTarget {
   public editable: boolean = true;
   public id?: string;
 
-  private handleType: HitType | undefined = undefined;
-
+  private textBoundingBox: Box2 | undefined = undefined;
+  private handleType: RulerHitType | undefined = undefined;
   private dragStartPointOnScreen: Vector2 | undefined = undefined;
   private original:
     | {
         start: Vector3D;
         end: Vector3D;
-        labelPosition: Vector2D;
+        labelPosition?: Vector2D;
       }
     | undefined = undefined;
 
@@ -92,6 +101,9 @@ export default class Ruler implements Annotation, ViewerEventTarget {
 
     const color = this.getStrokeColor(section);
     if (!color) return;
+
+    const handleType =
+      viewer.getHoveringAnnotation() === this ? this.handleType : undefined;
 
     // Points on screen for each end
     const start = convertVolumePointToViewerPoint(
@@ -110,36 +122,40 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     // Draw the line connects start point to end point.
     const lineStyle = {
       lineWidth: this.width,
-      strokeStyle: ['line-move'].some(t => t === this.handleType)
-        ? 'red'
-        : color
+      strokeStyle: ['line-move'].some(t => t === handleType) ? 'red' : color
     };
     drawLine(ctx, { from: start, to: end }, lineStyle);
 
     // Draw each end point as a filled circle.
     drawPoint(ctx, start, {
       radius: this.radius,
-      color: ['line-move', 'start-reset'].some(t => t === this.handleType)
+      color: ['line-move', 'start-reset'].some(t => t === handleType)
         ? 'red'
         : color
     });
     drawPoint(ctx, end, {
       radius: this.radius,
-      color: ['line-move', 'end-reset'].some(t => t === this.handleType)
+      color: ['line-move', 'end-reset'].some(t => t === handleType)
         ? 'red'
         : color
     });
 
     // Draw label text for distance.
     const label = this.getDistance()! + 'mm';
-    const [px, py] = this.labelPosition;
-    const position = new Vector2(start.x + px, start.y + py);
-    this.textBoundingBox = drawFillText(ctx, label, position, {
-      ...this.labelFontStyle,
-      color: ['line-move', 'label-move'].some(t => t === this.handleType)
-        ? 'red'
-        : this.labelFontStyle.color
-    });
+    if (this.labelPosition) {
+      const [px, py] = this.labelPosition;
+      const position = new Vector2(start.x + px, start.y + py);
+      this.textBoundingBox = drawFillText(ctx, label, position, {
+        ...this.labelFontStyle,
+        color: ['line-move', 'label-move', 'start-reset'].some(
+          t => t === handleType
+        )
+          ? 'red'
+          : this.labelFontStyle.color
+      });
+    } else {
+      this.textBoundingBox = undefined;
+    }
   }
 
   private getStrokeColor(section: Section): string | undefined {
@@ -185,6 +201,9 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     if (viewState.type !== 'mpr') return;
     if (!this.editable) return;
 
+    // to prevent to edit unvisible ruler.
+    if (!this.getStrokeColor(viewState.section)) return;
+
     this.handleType = this.hitTest(ev);
     if (this.handleType) {
       ev.stopPropagation();
@@ -206,6 +225,9 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     if (!this.editable) return;
 
     if (!this.start || !this.end || !this.section) return;
+
+    // to prevent to edit unvisible ruler.
+    if (!this.getStrokeColor(viewState.section)) return;
 
     if (viewer.getHoveringAnnotation() === this) {
       ev.stopPropagation();
@@ -276,7 +298,10 @@ export default class Ruler implements Annotation, ViewerEventTarget {
       ).toArray() as Vector3D;
     }
 
-    if (['label-move'].some(t => t === this.handleType)) {
+    if (
+      this.original.labelPosition &&
+      ['label-move'].some(t => t === this.handleType)
+    ) {
       const originalLabelPosition = this.original.labelPosition;
       this.labelPosition = [
         originalLabelPosition[0] + draggedTotal.x,
@@ -314,13 +339,13 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     }
   }
 
-  private hitTest(ev: ViewerEvent): HitType | undefined {
+  private hitTest(ev: ViewerEvent): RulerHitType | undefined {
     if (!this.validate()) return;
 
     const viewer = ev.viewer;
     const point = new Vector2(ev.viewerX!, ev.viewerY!);
 
-    if (hitRectangle(point, this.textBoundingBox!)) {
+    if (this.textBoundingBox && hitRectangle(point, this.textBoundingBox)) {
       return 'label-move';
     }
 

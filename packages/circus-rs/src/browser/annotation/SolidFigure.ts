@@ -8,17 +8,18 @@ import {
   polygonVerticesOfBoxAndSection,
   sectionOverlapsPolygon
 } from '../section-util';
+import { convertVolumePointToViewerPoint } from '../tool/tool-util';
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState, { MprViewState } from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
 import drawBoundingBoxCrossHair from './helper/drawBoundingBoxCrossHair';
 import drawBoundingBoxOutline from './helper/drawBoundingBoxOutline';
-import drawHandleFrame from './helper/drawHandleFrame';
-import getHandleType, {
-  cursorSettableHandleType,
-  HandleType
-} from './helper/getHandleType';
+import drawHandleFrame, { defaultHandleSize } from './helper/drawHandleFrame';
+import {
+  BoundingRectWithHandleHitType,
+  hitBoundingRectWithHandles
+} from './helper/hit-test';
 import resize from './helper/resize';
 
 export type FigureType = 'cuboid' | 'ellipsoid';
@@ -28,18 +29,32 @@ export interface LineDrawStyle {
   color: string;
 }
 
+const cursorTypes: {
+  [key in BoundingRectWithHandleHitType]: { cursor: string };
+} = {
+  'north-west-handle': { cursor: 'nw-resize' },
+  'north-handle': { cursor: 'n-resize' },
+  'north-east-handle': { cursor: 'ne-resize' },
+  'east-handle': { cursor: 'e-resize' },
+  'south-east-handle': { cursor: 'se-resize' },
+  'south-handle': { cursor: 's-resize' },
+  'south-west-handle': { cursor: 'sw-resize' },
+  'west-handle': { cursor: 'w-resize' },
+  'rect-outline': { cursor: 'move' }
+};
+
 export default abstract class SolidFigure
   implements Annotation, ViewerEventTarget {
   public abstract type: FigureType;
   /**
    * Boundary of the outline, measured in mm.
    */
-  public min?: number[];
+  public min?: Vector3D;
 
   /**
    * Boundary of the outline, measured in mm.
    */
-  public max?: number[];
+  public max?: Vector3D;
 
   public color: string = '#ff88ff';
   public width: number = 3;
@@ -70,7 +85,7 @@ export default abstract class SolidFigure
     | undefined;
 
   // handleInfo
-  private handleType: HandleType | undefined = undefined;
+  private handleType: BoundingRectWithHandleHitType | undefined = undefined;
 
   protected drawFigureParams:
     | {
@@ -198,8 +213,8 @@ export default abstract class SolidFigure
     } else {
       concreteBoundingBox = penddingBoundingBox;
     }
-    this.min = concreteBoundingBox.min.toArray();
-    this.max = concreteBoundingBox.max.toArray();
+    this.min = concreteBoundingBox.min.toArray() as Vector3D;
+    this.max = concreteBoundingBox.max.toArray() as Vector3D;
     this.resetDepthOfBoundingBox = undefined;
 
     // dragInfo
@@ -319,19 +334,15 @@ export default abstract class SolidFigure
     if (viewState.type !== 'mpr') return;
     if (!this.editable) return;
 
-    const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
-
     const min = this.min;
     const max = this.max;
     if (!min || !max) return;
 
-    const handleType = getHandleType(viewer, point, min, max);
+    const handleType = this.hitTest(ev);
     if (handleType) {
       ev.stopPropagation();
-      if (cursorSettableHandleType.some(type => type === handleType)) {
-        viewer.setCursorStyle(handleType);
-      }
       this.handleType = handleType;
+      viewer.setCursorStyle(cursorTypes[handleType].cursor);
       viewer.setHoveringAnnotation(this);
       viewer.renderAnnotations();
     } else if (viewer.getHoveringAnnotation() === this) {
@@ -339,6 +350,22 @@ export default abstract class SolidFigure
       viewer.setCursorStyle('');
       viewer.renderAnnotations();
     }
+  }
+
+  private hitTest(ev: ViewerEvent): BoundingRectWithHandleHitType | undefined {
+    const viewer = ev.viewer;
+    const point = new Vector2(ev.viewerX!, ev.viewerY!);
+
+    const viewState = viewer.getState();
+    if (!viewer || !viewState) return;
+    if (viewState.type !== 'mpr') return;
+    if (!this.min || !this.max) return;
+
+    const minPoint = convertVolumePointToViewerPoint(viewer, ...this.min);
+    const maxPoint = convertVolumePointToViewerPoint(viewer, ...this.max);
+    const BoundingBox = new Box2(minPoint, maxPoint);
+
+    return hitBoundingRectWithHandles(point, BoundingBox, defaultHandleSize);
   }
 
   public dragStartHandler(ev: ViewerEvent): void {
@@ -355,7 +382,7 @@ export default abstract class SolidFigure
       const max = this.max;
       if (!min || !max) return;
       const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
-      const handleType = getHandleType(viewer, point, min, max);
+      const handleType = this.hitTest(ev);
       if (handleType) {
         const state = viewer.getState() as MprViewState;
         const resolution: [number, number] = viewer.getResolution();
@@ -402,8 +429,8 @@ export default abstract class SolidFigure
         originalBoundingBox3,
         delta
       );
-      this.min = newBoundingBox3[0];
-      this.max = newBoundingBox3[1];
+      this.min = newBoundingBox3[0] as Vector3D;
+      this.max = newBoundingBox3[1] as Vector3D;
 
       const comp = viewer.getComposition();
       if (!comp) return;

@@ -82,12 +82,12 @@ export default class Ruler implements Annotation, ViewerEventTarget {
 
   private textBoundingBox: Box2 | undefined = undefined;
   private handleType: RulerHitType | undefined = undefined;
-  private dragStartPointOnScreen: Vector2 | undefined = undefined;
-  private original:
+  private dragInfo:
     | {
-        start: Vector3D;
-        end: Vector3D;
-        labelPosition?: Vector2D;
+        dragStartPoint3: Vector3;
+        originalStart: Vector3D;
+        originalEnd: Vector3D;
+        labelPositionFromCursor: Vector2;
       }
     | undefined = undefined;
 
@@ -223,11 +223,22 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     if (viewer.getHoveringAnnotation() === this) {
       ev.stopPropagation();
 
-      this.dragStartPointOnScreen = new Vector2(ev.viewerX!, ev.viewerY!);
-      this.original = {
-        start: this.start,
-        end: this.end,
-        labelPosition: this.labelPosition
+      this.dragInfo = {
+        dragStartPoint3: convertViewerPointToVolumePoint(
+          viewer,
+          ev.viewerX!,
+          ev.viewerY!
+        ),
+        originalStart: this.start,
+        originalEnd: this.end,
+        labelPositionFromCursor: new Vector2().subVectors(
+          convertVolumePointToViewerPoint(viewer, ...this.start!).add(
+            this.labelPosition
+              ? new Vector2(this.labelPosition[0], this.labelPosition[1])
+              : new Vector2(0, 0)
+          ),
+          new Vector2(ev.viewerX!, ev.viewerY!)
+        )
       };
 
       if (['start-reset', 'end-reset'].some(t => t === this.handleType)) {
@@ -251,49 +262,44 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     const viewState = viewer.getState();
     if (!viewer || !viewState) return;
     if (viewState.type !== 'mpr') return;
-    if (!this.dragStartPointOnScreen || !this.original) return;
+    if (!this.dragInfo) return;
     if (viewer.getHoveringAnnotation() !== this) return;
 
     ev.stopPropagation();
 
-    const draggedTotal = new Vector2(
-      ev.viewerX! - this.dragStartPointOnScreen!.x,
-      ev.viewerY! - this.dragStartPointOnScreen!.y
+    const draggedPoint3 = convertViewerPointToVolumePoint(
+      ev.viewer,
+      ev.viewerX!,
+      ev.viewerY!
+    );
+    const draggedTotal3 = new Vector3().subVectors(
+      draggedPoint3,
+      this.dragInfo.dragStartPoint3
     );
 
     if (['start-reset', 'line-move'].some(t => t === this.handleType)) {
-      const originalStartOnScreen = convertVolumePointToViewerPoint(
-        ev.viewer,
-        ...this.original.start
-      );
-      this.start = convertViewerPointToVolumePoint(
-        ev.viewer,
-        originalStartOnScreen.x + draggedTotal.x,
-        originalStartOnScreen.y + draggedTotal.y
-      ).toArray() as Vector3D;
+      this.start = [
+        this.dragInfo.originalStart[0] + draggedTotal3.x,
+        this.dragInfo.originalStart[1] + draggedTotal3.y,
+        this.dragInfo.originalStart[2] + draggedTotal3.z
+      ];
     }
 
     if (['end-reset', 'line-move'].some(t => t === this.handleType)) {
-      const originalEndOnScreen = convertVolumePointToViewerPoint(
-        ev.viewer,
-        ...this.original.end
-      );
-      this.end = convertViewerPointToVolumePoint(
-        ev.viewer,
-        originalEndOnScreen.x + draggedTotal.x,
-        originalEndOnScreen.y + draggedTotal.y
-      ).toArray() as Vector3D;
+      this.end = [
+        this.dragInfo.originalEnd[0] + draggedTotal3.x,
+        this.dragInfo.originalEnd[1] + draggedTotal3.y,
+        this.dragInfo.originalEnd[2] + draggedTotal3.z
+      ];
     }
 
-    if (
-      this.original.labelPosition &&
-      ['label-move'].some(t => t === this.handleType)
-    ) {
-      const originalLabelPosition = this.original.labelPosition;
-      this.labelPosition = [
-        originalLabelPosition[0] + draggedTotal.x,
-        originalLabelPosition[1] + draggedTotal.y
-      ];
+    if (['label-move'].some(t => t === this.handleType)) {
+      this.labelPosition = new Vector2(
+        ev.viewerX! + this.dragInfo.labelPositionFromCursor.x,
+        ev.viewerY! + this.dragInfo.labelPositionFromCursor.y
+      )
+        .sub(convertVolumePointToViewerPoint(viewer, ...this.start!))
+        .toArray() as Vector2D;
     }
 
     const comp = viewer.getComposition();
@@ -310,8 +316,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
 
     if (viewer.getHoveringAnnotation() === this) {
       ev.stopPropagation();
-      this.dragStartPointOnScreen = undefined;
-      this.original = undefined;
+      this.dragInfo = undefined;
 
       viewer.setCursorStyle('');
 

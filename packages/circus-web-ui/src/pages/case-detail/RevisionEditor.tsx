@@ -206,7 +206,7 @@ const RevisionEditor: React.FC<{
         });
       } else if (annotation instanceof rs.Point && annotation.validate()) {
         return produce(label, (l: any) => {
-          l.data.origin = annotation.origin;
+          l.data.origin = annotation.point;
         });
       } else if (annotation instanceof rs.Ruler && annotation.validate()) {
         return produce(label, (l: any) => {
@@ -487,19 +487,19 @@ const RevisionEditor: React.FC<{
         </Collapser>
         {Object.keys(projectData.caseAttributesSchema.properties || {}).length >
           0 && (
-          <Collapser title="Case Attributes" className="case-attributes">
-            <JsonSchemaEditor
-              key={refreshCounter}
-              schema={projectData.caseAttributesSchema}
-              value={revision.attributes}
-              onChange={caseAttributesChange}
-              onValidate={valid =>
-                caseDispatch(c.validateCaseAttributes(valid))
-              }
-              disabled={busy}
-            />
-          </Collapser>
-        )}
+            <Collapser title="Case Attributes" className="case-attributes">
+              <JsonSchemaEditor
+                key={refreshCounter}
+                schema={projectData.caseAttributesSchema}
+                value={revision.attributes}
+                onChange={caseAttributesChange}
+                onValidate={valid =>
+                  caseDispatch(c.validateCaseAttributes(valid))
+                }
+                disabled={busy}
+              />
+            </Collapser>
+          )}
       </SideContainer>
       <div className="case-revision-main">
         <ToolBar

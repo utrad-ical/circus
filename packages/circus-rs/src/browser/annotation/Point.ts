@@ -33,7 +33,7 @@ export default class Point implements Annotation, ViewerEventTarget {
   /**
    * Coordinate of the point, measured in mm.
    */
-  public origin?: Vector3D;
+  public point?: Vector3D;
   /**
    * Radius of the marker circle.
    */
@@ -49,16 +49,21 @@ export default class Point implements Annotation, ViewerEventTarget {
   public id?: string;
 
   private handleType: PointHitType | undefined = undefined;
-  private dragStartPointOnScreen: Vector2 | undefined = undefined;
-  private original:
+
+  /**
+   * Drag data for modifying the annotation when dragging.
+   * This should not be depended the view state at drag started.
+   */
+  private dragInfo:
     | {
-        origin: Vector3D;
+        dragStartPoint3: Vector3;
+        originalPoint: Vector3D;
       }
     | undefined = undefined;
 
   public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
     if (!viewer || !viewState) return;
-    if (!this.origin) return;
+    if (!this.point) return;
     const canvas = viewer.canvas;
     if (!canvas) return;
     if (viewState.type !== 'mpr') return;
@@ -68,14 +73,14 @@ export default class Point implements Annotation, ViewerEventTarget {
     const color = this.getColor(viewState.section);
     if (!color) return;
 
-    const screenPoint = convertVolumePointToViewerPoint(viewer, ...this.origin);
+    const screenPoint = convertVolumePointToViewerPoint(viewer, ...this.point);
     drawPoint(ctx, screenPoint, { radius: this.radius, color });
   }
 
   private getColor(section: Section): string | undefined {
     const distance = distanceFromPointToSection(
       section,
-      new Vector3(...this.origin!)
+      new Vector3(...this.point!)
     );
 
     switch (true) {
@@ -89,7 +94,7 @@ export default class Point implements Annotation, ViewerEventTarget {
   }
 
   public validate(): boolean {
-    return !!this.origin;
+    return !!this.point;
   }
 
   public mouseMoveHandler(ev: ViewerEvent): void {
@@ -98,7 +103,7 @@ export default class Point implements Annotation, ViewerEventTarget {
     if (!viewer || !viewState) return;
     if (viewState.type !== 'mpr') return;
     if (!this.editable) return;
-    if (!this.origin) return;
+    if (!this.point) return;
 
     this.handleType = this.hitTest(ev);
     if (this.handleType) {
@@ -119,30 +124,34 @@ export default class Point implements Annotation, ViewerEventTarget {
     if (!viewer || !viewState) return;
     if (viewState.type !== 'mpr') return;
     if (!this.editable) return;
-    if (!this.origin) return;
+    if (!this.point) return;
 
     if (viewer.getHoveringAnnotation() === this && this.handleType) {
       ev.stopPropagation();
 
-      this.dragStartPointOnScreen = new Vector2(ev.viewerX!, ev.viewerY!);
-      this.original = {
-        origin: this.origin
+      this.dragInfo = {
+        dragStartPoint3: convertViewerPointToVolumePoint(
+          viewer,
+          ev.viewerX!,
+          ev.viewerY!
+        ),
+        originalPoint: this.point
       };
     }
   }
 
   private hitTest(ev: ViewerEvent): PointHitType | undefined {
-    if (!this.origin) return;
+    if (!this.point) return;
 
     const viewer = ev.viewer;
-    const point = new Vector2(ev.viewerX!, ev.viewerY!);
+    const evPoint = new Vector2(ev.viewerX!, ev.viewerY!);
 
-    const hitPoint = convertVolumePointToViewerPoint(viewer, ...this.origin);
+    const hitPoint = convertVolumePointToViewerPoint(viewer, ...this.point);
     const hitBox = new Box2(
       new Vector2(hitPoint.x - this.radius, hitPoint.y - this.radius),
       new Vector2(hitPoint.x + this.radius, hitPoint.y + this.radius)
     );
-    if (hitRectangle(point, hitBox, 5)) {
+    if (hitRectangle(evPoint, hitBox, 5)) {
       return 'point-move';
     }
 
@@ -154,23 +163,26 @@ export default class Point implements Annotation, ViewerEventTarget {
     const viewState = viewer.getState();
     if (!viewer || !viewState) return;
     if (viewState.type !== 'mpr') return;
+    if (!this.dragInfo) return;
 
     if (viewer.getHoveringAnnotation() === this && this.handleType) {
       ev.stopPropagation();
 
-      const draggedTotal = new Vector2(
-        ev.viewerX! - this.dragStartPointOnScreen!.x,
-        ev.viewerY! - this.dragStartPointOnScreen!.y
-      );
-      const originalPointOnScreen = convertVolumePointToViewerPoint(
+      const draggedPoint3 = convertViewerPointToVolumePoint(
         ev.viewer,
-        ...this.original!.origin
+        ev.viewerX!,
+        ev.viewerY!
       );
-      this.origin = convertViewerPointToVolumePoint(
-        ev.viewer,
-        originalPointOnScreen.x + draggedTotal.x,
-        originalPointOnScreen.y + draggedTotal.y
-      ).toArray() as Vector3D;
+      const draggedTotal3 = new Vector3().subVectors(
+        draggedPoint3,
+        this.dragInfo.dragStartPoint3
+      );
+
+      this.point = [
+        this.dragInfo.originalPoint[0] + draggedTotal3.x,
+        this.dragInfo.originalPoint[1] + draggedTotal3.y,
+        this.dragInfo.originalPoint[2] + draggedTotal3.z
+      ];
 
       const comp = viewer.getComposition();
       if (!comp) return;
@@ -187,8 +199,7 @@ export default class Point implements Annotation, ViewerEventTarget {
 
     if (viewer.getHoveringAnnotation() === this) {
       ev.stopPropagation();
-      this.dragStartPointOnScreen = undefined;
-      this.original = undefined;
+      this.dragInfo = undefined;
       viewer.setCursorStyle('');
 
       const comp = viewer.getComposition();
@@ -202,7 +213,7 @@ export default class Point implements Annotation, ViewerEventTarget {
     }
   }
 
-  public static calculateDefaultPoint(viewer: Viewer): { origin: Vector3D } {
+  public static calculateDefaultPoint(viewer: Viewer): { point: Vector3D } {
     const section = viewer.getState().section;
     const resolution = new Vector2().fromArray(viewer.getResolution());
     const screenCenter = new Vector2().fromArray([
@@ -214,6 +225,6 @@ export default class Point implements Annotation, ViewerEventTarget {
       resolution,
       new Vector2().fromArray([screenCenter.x, screenCenter.y])
     );
-    return { origin: [centerPoint.x, centerPoint.y, centerPoint.z] };
+    return { point: [centerPoint.x, centerPoint.y, centerPoint.z] };
   }
 }

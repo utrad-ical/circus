@@ -2,6 +2,7 @@ import { Box3, Vector2, Vector3 } from 'three';
 import {
   fitRectangle,
   intersectionOfBoxAndPlane,
+  normalVector,
   projectPointOntoSection,
   Section,
   translateSection,
@@ -479,4 +480,20 @@ export function translateOriginToCenter(
     xAxis: mmSection.xAxis,
     yAxis: mmSection.yAxis
   };
+}
+
+/**
+ * Return the point orthogonal projected to the specified section.
+ */
+export function getOrthogonalProjectedPoint(section: Section, point: Vector3) {
+  const normal = normalVector(section);
+  const p = new Vector3().subVectors(
+    point,
+    new Vector3().fromArray(section.origin)
+  );
+  const zDist = normal.dot(p);
+
+  return zDist !== 0
+    ? point.sub(normal.clone().multiplyScalar(zDist))
+    : point.clone();
 }

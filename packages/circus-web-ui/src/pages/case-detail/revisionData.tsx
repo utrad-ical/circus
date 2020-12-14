@@ -43,7 +43,7 @@ export type EditingDataUpdater = (
 
 export interface Revision<
   L extends InternalLabel | ExternalLabel = InternalLabel
-> {
+  > {
   creator: string;
   date: string;
   description: string;
@@ -54,7 +54,7 @@ export interface Revision<
 
 export interface SeriesEntryWithLabels<
   L extends InternalLabel | ExternalLabel = InternalLabel
-> {
+  > {
   seriesUid: string;
   partialVolumeDescriptor: PartialVolumeDescriptor;
   labels: L[];
@@ -108,7 +108,7 @@ type PlaneFigureLabelData = LabelAppearance & {
 };
 
 type PointLabelData = LabelAppearance & {
-  origin: Vector3D;
+  point: Vector3D;
 };
 
 type RulerLabelData = LabelAppearance & {
@@ -120,25 +120,25 @@ type RulerLabelData = LabelAppearance & {
 
 type TaggedLabelData =
   | {
-      type: 'voxel';
-      data: InternalVoxelLabelData;
-    }
+    type: 'voxel';
+    data: InternalVoxelLabelData;
+  }
   | {
-      type: 'rectangle' | 'ellipse';
-      data: PlaneFigureLabelData;
-    }
+    type: 'rectangle' | 'ellipse';
+    data: PlaneFigureLabelData;
+  }
   | {
-      type: 'cuboid' | 'ellipsoid';
-      data: SolidFigureLabelData;
-    }
+    type: 'cuboid' | 'ellipsoid';
+    data: SolidFigureLabelData;
+  }
   | {
-      type: 'point';
-      data: PointLabelData;
-    }
+    type: 'point';
+    data: PointLabelData;
+  }
   | {
-      type: 'ruler';
-      data: RulerLabelData;
-    };
+    type: 'ruler';
+    data: RulerLabelData;
+  };
 
 /**
  * InternalLabel resresents one label data stored in browser memory.
@@ -161,27 +161,27 @@ export type ExternalLabel = {
   name?: string;
   attributes: object;
 } & (
-  | {
+    | {
       type: 'voxel';
       data: ExternalVoxelLabelData;
     }
-  | {
+    | {
       type: 'rectangle' | 'ellipse';
       data: PlaneFigureLabelData;
     }
-  | {
+    | {
       type: 'cuboid' | 'ellipsoid';
       data: SolidFigureLabelData;
     }
-  | {
+    | {
       type: 'point';
       data: PointLabelData;
     }
-  | {
+    | {
       type: 'ruler';
       data: RulerLabelData;
     }
-);
+  );
 
 export const labelTypes: {
   [key in LabelType]: { icon: string; canConvertTo?: LabelType };
@@ -258,7 +258,7 @@ export const createNewLabelData = (
         data: {
           ...(viewer
             ? rs.Point.calculateDefaultPoint(viewer)
-            : { origin: [0, 0, 0] }),
+            : { point: [0, 0, 0] }),
           ...appearance
         }
       };
@@ -270,14 +270,14 @@ export const createNewLabelData = (
           ...(viewer
             ? rs.Ruler.calculateDefaultRuler(viewer)
             : {
-                section: {
-                  origin: [0, 0, 0],
-                  xAxis: [10, 0, 0],
-                  yAxis: [0, 10, 0]
-                },
-                start: [0, 0, 0],
-                end: [10, 10, 0]
-              }),
+              section: {
+                origin: [0, 0, 0],
+                xAxis: [10, 0, 0],
+                yAxis: [0, 10, 0]
+              },
+              start: [0, 0, 0],
+              end: [10, 10, 0]
+            }),
           ...appearance
         }
       };
@@ -470,7 +470,7 @@ export const buildAnnotation = (
       point.id = label.temporaryKey;
       point.editable = true;
       point.color = rgbaColor(appearance.color, appearance.alpha);
-      point.origin = label.data.origin;
+      point.point = label.data.point;
       return point;
     }
 
@@ -510,7 +510,7 @@ export const getCenterOfLabel = (
     case 'ellipse':
       return getBoxCenter(rs.PlaneFigure.getOutline(label.data));
     case 'point':
-      return label.data.origin;
+      return label.data.point;
     case 'ruler':
       return getBoxCenter(rs.Ruler.getOutline(label.data));
 

@@ -190,9 +190,7 @@ export default abstract class SolidFigure
     const min = this.min;
     const max = this.max;
     if (!min || !max) return false;
-    return min.some((value, index) => {
-      return value !== max[index];
-    });
+    return min.some((value, index) => value !== max[index]);
   }
 
   public concrete(orientation?: OrientationString): void {

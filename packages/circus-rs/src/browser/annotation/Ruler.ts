@@ -1,7 +1,6 @@
 import { Box2, Box3, Line3, Vector2, Vector3 } from 'three';
 import {
   distanceFromPointToSection,
-  normalVector,
   Section,
   Vector2D,
   Vector3D

@@ -180,36 +180,34 @@ const LabelMenu: React.FC<{
     ruler: ['axial', 'sagittal', 'coronal', 'oblique']
   };
 
-  const choiceAddLabelSection = (
-    selectableOrientations: OrientationString[]
-  ) => {
-    const title = 'Message';
-    const text = 'Select the section to add the label.';
-    const icon = 'info-sign';
-    const cancelable = false;
-    const bsSize = 'lg';
-    const choices = selectableOrientations
-      .map(i => ({ [i]: i }))
-      .reduce((prev, cur) => Object.assign(prev, cur), {});
-
-    return choice(text, choices, {
-      title,
-      icon,
-      cancelable,
-      bsSize
-    }) as Promise<string>;
-  };
-
   const selectAddLabelViewer = async (type: LabelType) => {
     if (type === 'voxel') return;
 
-    if (type === 'ruler' && Object.keys(viewers).length > 1) {
+    const reg = new RegExp('(' + editableOrientations[type].join('|') + ')$');
+
+    if (type === 'ruler') {
       // Show the dialog to select target view
-      const key = await choiceAddLabelSection(editableOrientations[type]);
-      return viewers[key];
+      const viewerOptions = Object.keys(viewers).filter((index) => index.match(reg));
+      if (viewerOptions.length === 0) {
+        return;
+      } else if (viewerOptions.length === 1) {
+        const key = viewerOptions[0];
+        return viewers[key];
+      } else {
+        const choices = viewerOptions.reduce<{ [key: string]: string }>(
+          (options, key) => ({ ...options, [key]: key }),
+          {}
+        );
+        const key = await choice(
+          'Select a viewer to add a ruler label.',
+          choices,
+          { icon: 'info-sign', cancelable: true, bsSize: 'lg' }
+        ) as string | undefined;
+
+        return key ? viewers[key] : undefined;
+      }
     } else {
       // Find the key of the first visible viewer, on which a new label is based
-      const reg = new RegExp('(' + editableOrientations[type].join('|') + ')$');
       const key = Object.keys(viewers).find(index => index.match(reg));
       return key ? viewers[key] : undefined;
     }
@@ -218,6 +216,7 @@ const LabelMenu: React.FC<{
   const addLabel = async (type: LabelType) => {
     setNewLabelType(type);
     const viewer = await selectAddLabelViewer(type);
+    if (!viewer) return;
     const newLabel = createNewLabel(type, viewer);
     updateCurrentLabels(labels => {
       labels.push(newLabel);
@@ -230,9 +229,9 @@ const LabelMenu: React.FC<{
         appearance={
           activeLabel
             ? {
-                color: activeLabel.data.color,
-                alpha: activeLabel.data.alpha
-              }
+              color: activeLabel.data.color,
+              alpha: activeLabel.data.alpha
+            }
             : undefined
         }
         hidden={!!activeLabel?.hidden}

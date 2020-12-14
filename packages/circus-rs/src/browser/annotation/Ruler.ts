@@ -7,7 +7,10 @@ import {
   Vector3D
 } from '../../common/geometry';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
-import { convertScreenCoordinateToVolumeCoordinate } from '../section-util';
+import {
+  convertScreenCoordinateToVolumeCoordinate,
+  getOrthogonalProjectedPoint
+} from '../section-util';
 import {
   convertViewerPointToVolumePoint,
   convertVolumePointToViewerPoint
@@ -103,9 +106,6 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     const color = this.getStrokeColor(section);
     if (!color) return;
 
-    const handleType =
-      viewer.getHoveringAnnotation() === this ? this.handleType : undefined;
-
     // Points on screen for each end
     const start = convertVolumePointToViewerPoint(viewer, ...this.start!);
     const end = convertVolumePointToViewerPoint(viewer, ...this.end!);
@@ -113,37 +113,25 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     // Draw the line connects start point to end point.
     const lineStyle = {
       lineWidth: this.width,
-      strokeStyle: ['line-move'].some(t => t === handleType) ? 'red' : color
+      strokeStyle: color
     };
     drawLine(ctx, { from: start, to: end }, lineStyle);
 
     // Draw each end point as a filled circle.
-    drawPoint(ctx, start, {
-      radius: this.radius,
-      color: ['line-move', 'start-reset'].some(t => t === handleType)
-        ? 'red'
-        : color
-    });
-    drawPoint(ctx, end, {
-      radius: this.radius,
-      color: ['line-move', 'end-reset'].some(t => t === handleType)
-        ? 'red'
-        : color
-    });
+    drawPoint(ctx, start, { radius: this.radius, color });
+    drawPoint(ctx, end, { radius: this.radius, color });
 
     // Draw label text for distance.
     const label = this.getLengthInMillimeter()! + 'mm';
     if (this.labelPosition) {
       const [px, py] = this.labelPosition;
       const position = new Vector2(start.x + px, start.y + py);
-      this.textBoundingBox = drawFillText(ctx, label, position, {
-        ...this.labelFontStyle,
-        color: ['line-move', 'label-move', 'start-reset'].some(
-          t => t === handleType
-        )
-          ? 'red'
-          : this.labelFontStyle.color
-      });
+      this.textBoundingBox = drawFillText(
+        ctx,
+        label,
+        position,
+        this.labelFontStyle
+      );
     } else {
       this.textBoundingBox = undefined;
     }
@@ -422,17 +410,4 @@ export default class Ruler implements Annotation, ViewerEventTarget {
       end: [end.x, end.y, end.z]
     };
   }
-}
-
-function getOrthogonalProjectedPoint(section: Section, point: Vector3) {
-  const normal = normalVector(section);
-  const p = new Vector3().subVectors(
-    point,
-    new Vector3().fromArray(section.origin)
-  );
-  const zDist = normal.dot(p);
-
-  return zDist !== 0
-    ? point.sub(normal.clone().multiplyScalar(zDist))
-    : point.clone();
 }

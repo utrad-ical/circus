@@ -19,7 +19,6 @@ import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState, { MprViewState } from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
 import { drawFillText, drawLine, drawPoint } from './helper/drawObject';
-import { FontStyle } from './helper/fontStyle';
 import { hitLineSegment, hitRectangle } from './helper/hit-test';
 
 type RulerHitType = 'start-reset' | 'end-reset' | 'line-move' | 'label-move';
@@ -65,6 +64,17 @@ export default class Ruler implements Annotation, ViewerEventTarget {
   public end?: Vector3D;
 
   /**
+   * Color of the label text.
+   */
+  public labelColor: string = '#ff8800';
+
+  /**
+   * Font of the label text.
+   * Specify the CSS font value used as the CanvasRenderingContext2D.font.
+   */
+  public labelFont: string = '16px sans-serif';
+
+  /**
    * Position of the label text.
    * Specify the relative position from the start point rendered in viewer.
    * The left-top corner of the text bounding box comes to this position.
@@ -78,7 +88,6 @@ export default class Ruler implements Annotation, ViewerEventTarget {
   public distanceThreshold: number = 0.1;
   public dimmedColor: string = '#ff880055';
   public distanceDimmedThreshold: number = 3;
-  public labelFontStyle: FontStyle = { fontSize: '16px', color: this.color };
   public editable: boolean = true;
   public id?: string;
 
@@ -129,7 +138,8 @@ export default class Ruler implements Annotation, ViewerEventTarget {
         ctx,
         label,
         position,
-        this.labelFontStyle
+        this.labelColor,
+        this.labelFont
       );
     } else {
       this.textBoundingBox = undefined;

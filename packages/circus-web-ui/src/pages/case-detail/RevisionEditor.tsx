@@ -23,14 +23,8 @@ import {
 } from 'utils/useImageSource';
 import * as c from './caseStore';
 import LabelSelector from './LabelSelector';
-import {
-  buildAnnotation,
-  EditingData,
-  EditingDataUpdater,
-  InternalLabel,
-  labelTypes,
-  SeriesEntryWithLabels
-} from './revisionData';
+import { EditingData, EditingDataUpdater, SeriesEntryWithLabels } from './revisionData';
+import { InternalLabel, buildAnnotation, labelTypes } from './labelData';
 import SideContainer from './SideContainer';
 import ToolBar, { ViewOptions } from './ToolBar';
 import ViewerCluster from './ViewerCluster';

@@ -40,7 +40,7 @@ export type EditingDataUpdater = (
 
 export interface Revision<
   L extends InternalLabel | ExternalLabel = InternalLabel
-  > {
+> {
   creator: string;
   date: string;
   description: string;
@@ -51,7 +51,7 @@ export interface Revision<
 
 export interface SeriesEntryWithLabels<
   L extends InternalLabel | ExternalLabel = InternalLabel
-  > {
+> {
   seriesUid: string;
   partialVolumeDescriptor: PartialVolumeDescriptor;
   labels: L[];

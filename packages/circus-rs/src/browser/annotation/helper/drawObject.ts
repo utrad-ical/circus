@@ -1,6 +1,5 @@
 import { Box2, Vector2 } from 'three';
 import { DirectedSegment } from '../../../common/geometry/Line';
-import { FontStyle } from './fontStyle';
 
 /**
  * Draw a point.
@@ -251,18 +250,13 @@ export function drawFillText(
   ctx: CanvasRenderingContext2D,
   text: string,
   position: Vector2,
-  style: FontStyle
+  color?: string,
+  font?: string
 ): Box2 {
   ctx.save();
   try {
-    if (style.fontSize || style.fontFamily) {
-      const [currentFontSize, currentFontFamily] = ctx.font.split(' ');
-      ctx.font = [
-        style.fontSize || currentFontSize,
-        style.fontFamily || currentFontFamily
-      ].join(' ');
-    }
-    if (style.color) ctx.fillStyle = style.color;
+    if (color) ctx.fillStyle = color;
+    if (font) ctx.font = font;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
 

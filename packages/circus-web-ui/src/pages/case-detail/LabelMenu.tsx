@@ -5,7 +5,6 @@ import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
 import {
   detectOrthogonalSection,
-  OrientationString
 } from '@utrad-ical/circus-rs/src/browser/section-util';
 import focusBy from '@utrad-ical/circus-rs/src/browser/tool/state/focusBy';
 import Icon from 'components/Icon';
@@ -170,54 +169,50 @@ const LabelMenu: React.FC<{
     return { temporaryKey, name, ...data, attributes: {}, hidden: false };
   };
 
-  const editableOrientations: { [key in LabelType]: OrientationString[] } = {
-    voxel: ['axial', 'sagittal', 'coronal'],
-    cuboid: ['axial', 'sagittal', 'coronal'],
-    ellipsoid: ['axial', 'sagittal', 'coronal'],
-    ellipse: ['axial'],
-    rectangle: ['axial'],
-    point: ['axial', 'sagittal', 'coronal', 'oblique'],
-    ruler: ['axial', 'sagittal', 'coronal', 'oblique']
-  };
+  const addLabel = async (type: LabelType) => {
+    setNewLabelType(type);
 
-  const selectAddLabelViewer = async (type: LabelType) => {
-    if (type === 'voxel') return;
+    const additionalPossibleViewerIds: { [key in LabelType]: string[] } = {
+      voxel: [],
+      cuboid: ['axial', 'one-axial', 'sagittal', 'one-sagittal', 'coronal', 'one-coronal'],
+      ellipsoid: ['axial', 'one-axial', 'sagittal', 'one-sagittal', 'coronal', 'one-coronal'],
+      ellipse: ['axial', 'one-axial'],
+      rectangle: ['axial', 'one-axial'],
+      point: ['axial', 'one-axial', 'sagittal', 'one-sagittal', 'coronal', 'one-coronal', 'oblique'],
+      ruler: ['axial', 'one-axial', 'sagittal', 'one-sagittal', 'coronal', 'one-coronal', 'oblique']
+    };
+    const viewerIdOptions = Object.keys(viewers).filter(
+      (viewerId) => additionalPossibleViewerIds[type].some(t => viewerId === t)
+    );
 
-    const reg = new RegExp('(' + editableOrientations[type].join('|') + ')$');
+    const selectTargetViewerId = async (
+      type: LabelType,
+      viewerIdOptions: string[]
+    ) => {
+      if (viewerIdOptions.length === 0) return;
+      if (viewerIdOptions.length === 1) return viewerIdOptions[0];
 
-    if (type === 'ruler') {
-      // Show the dialog to select target view
-      const viewerOptions = Object.keys(viewers).filter((index) => index.match(reg));
-      if (viewerOptions.length === 0) {
-        return;
-      } else if (viewerOptions.length === 1) {
-        const key = viewerOptions[0];
-        return viewers[key];
-      } else {
-        const choices = viewerOptions.reduce<{ [key: string]: string }>(
+      if (type === 'ruler') {
+        // Display a dialog box to select the viewer to add the label to.
+        const choices = viewerIdOptions.reduce<{ [key: string]: string }>(
           (options, key) => ({ ...options, [key]: key }),
           {}
         );
-        const key = await choice(
-          'Select a viewer to add a ruler label.',
+        return await choice(
+          'Select the viewer to add a ruler label.',
           choices,
           { icon: 'info-sign', cancelable: true, bsSize: 'lg' }
         ) as string | undefined;
-
-        return key ? viewers[key] : undefined;
+      } else {
+        // Return the first entry of the visible viewers as the target for adding the label.
+        return viewerIdOptions[0];
       }
-    } else {
-      // Find the key of the first visible viewer, on which a new label is based
-      const key = Object.keys(viewers).find(index => index.match(reg));
-      return key ? viewers[key] : undefined;
-    }
-  };
+    };
 
-  const addLabel = async (type: LabelType) => {
-    setNewLabelType(type);
-    const viewer = await selectAddLabelViewer(type);
-    if (!viewer) return;
-    const newLabel = createNewLabel(type, viewer);
+    const viewerId = await selectTargetViewerId(type, viewerIdOptions);
+    if (!viewerId) return;
+
+    const newLabel = createNewLabel(type, viewers[viewerId]);
     updateCurrentLabels(labels => {
       labels.push(newLabel);
     });

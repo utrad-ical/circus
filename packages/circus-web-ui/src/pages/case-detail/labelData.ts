@@ -70,25 +70,25 @@ type RulerLabelData = LabelAppearance & {
 
 type TaggedLabelData =
   | {
-    type: 'voxel';
-    data: InternalVoxelLabelData;
-  }
+      type: 'voxel';
+      data: InternalVoxelLabelData;
+    }
   | {
-    type: 'rectangle' | 'ellipse';
-    data: PlaneFigureLabelData;
-  }
+      type: 'rectangle' | 'ellipse';
+      data: PlaneFigureLabelData;
+    }
   | {
-    type: 'cuboid' | 'ellipsoid';
-    data: SolidFigureLabelData;
-  }
+      type: 'cuboid' | 'ellipsoid';
+      data: SolidFigureLabelData;
+    }
   | {
-    type: 'point';
-    data: PointLabelData;
-  }
+      type: 'point';
+      data: PointLabelData;
+    }
   | {
-    type: 'ruler';
-    data: RulerLabelData;
-  };
+      type: 'ruler';
+      data: RulerLabelData;
+    };
 
 /**
  * InternalLabel resresents one label data stored in browser memory.
@@ -111,27 +111,27 @@ export type ExternalLabel = {
   name?: string;
   attributes: object;
 } & (
-    | {
+  | {
       type: 'voxel';
       data: ExternalVoxelLabelData;
     }
-    | {
+  | {
       type: 'rectangle' | 'ellipse';
       data: PlaneFigureLabelData;
     }
-    | {
+  | {
       type: 'cuboid' | 'ellipsoid';
       data: SolidFigureLabelData;
     }
-    | {
+  | {
       type: 'point';
       data: PointLabelData;
     }
-    | {
+  | {
       type: 'ruler';
       data: RulerLabelData;
     }
-  );
+);
 
 export const labelTypes: {
   [key in LabelType]: { icon: string; canConvertTo?: LabelType };
@@ -220,14 +220,14 @@ export const createNewLabelData = (
           ...(viewer
             ? rs.Ruler.calculateDefaultRuler(viewer)
             : {
-              section: {
-                origin: [0, 0, 0],
-                xAxis: [10, 0, 0],
-                yAxis: [0, 10, 0]
-              },
-              start: [0, 0, 0],
-              end: [10, 10, 0]
-            }),
+                section: {
+                  origin: [0, 0, 0],
+                  xAxis: [10, 0, 0],
+                  yAxis: [0, 10, 0]
+                },
+                start: [0, 0, 0],
+                end: [10, 10, 0]
+              }),
           ...appearance
         }
       };

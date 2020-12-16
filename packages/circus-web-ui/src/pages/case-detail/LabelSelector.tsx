@@ -10,12 +10,8 @@ import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import { mostReadable } from 'tinycolor2';
 import Series from 'types/Series';
-import {
-  EditingData,
-  EditingDataUpdater,
-  InternalLabel,
-  labelTypes
-} from './revisionData';
+import { EditingData, EditingDataUpdater } from './revisionData';
+import { InternalLabel, labelTypes } from './labelData';
 import { multirange } from 'multi-integer-range';
 
 const LabelSelector: React.FC<{
@@ -188,11 +184,11 @@ const SeriesInfo: React.FC<{
         {noPvd ? (
           <> (Full)</>
         ) : (
-          <>
-            {' '}
+            <>
+              {' '}
             (<b>Partial:</b> {describePartialVolumeDescriptor(pvd)})
-          </>
-        )}
+            </>
+          )}
       </>
     ),
     'Series Instance UID': series.seriesUid,

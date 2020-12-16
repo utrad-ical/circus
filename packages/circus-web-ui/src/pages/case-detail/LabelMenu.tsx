@@ -21,16 +21,15 @@ import React from 'react';
 import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
 import useLocalPreference from 'utils/useLocalPreference';
+import { EditingData, EditingDataUpdater } from './revisionData';
 import {
-  createNewLabelData,
-  EditingData,
-  EditingDataUpdater,
-  getCenterOfLabel,
-  InternalLabel,
-  LabelAppearance,
   LabelType,
-  labelTypes
-} from './revisionData';
+  InternalLabel,
+  labelTypes,
+  getCenterOfLabel,
+  LabelAppearance,
+  createNewLabelData
+} from './labelData';
 
 type LabelCommand = 'rename' | 'remove' | 'convertType' | 'reveal';
 

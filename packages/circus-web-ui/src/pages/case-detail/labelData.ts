@@ -51,7 +51,8 @@ type SolidFigureLabelData = LabelAppearance & {
   max: Vector3D;
 };
 
-type PlaneFigureLabelData = LabelAppearance & {
+type PlaneFigureLabelData = LabelAppearance & PlaneFigureAnnotationData;
+type PlaneFigureAnnotationData = {
   min: Vector2D;
   max: Vector2D;
   z: number;
@@ -192,13 +193,15 @@ export const createNewLabelData = (
     }
     case 'ellipse':
     case 'rectangle': {
+      const planeFigureAnnotaion = rs.createDefaultPlaneFigureFromViewer(
+        viewer,
+        { type: type === 'ellipse' ? 'circle' : 'rectangle' }
+      );
       return {
         type,
         data: {
-          ...(viewer
-            ? rs.PlaneFigure.calculateBoundingBoxAndDepth(viewer)
-            : { min: [0, 0], max: [10, 10], z: 0 }),
-          ...appearance
+          ...appearance,
+          ...extractPlaneFigureAnnotationData(planeFigureAnnotaion)
         }
       };
     }
@@ -413,3 +416,10 @@ export const getCenterOfLabel = (
       throw new Error('Undefined label type');
   }
 };
+
+function extractPlaneFigureAnnotationData(
+  fig: rs.PlaneFigure
+): PlaneFigureAnnotationData {
+  const { min, max, z } = fig;
+  return { min: min! as Vector2D, max: max as Vector2D, z: z! };
+}

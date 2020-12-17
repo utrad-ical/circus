@@ -212,19 +212,4 @@ export default class Point implements Annotation, ViewerEventTarget {
       }
     }
   }
-
-  public static calculateDefaultPoint(viewer: Viewer): { point: Vector3D } {
-    const section = viewer.getState().section;
-    const resolution = new Vector2().fromArray(viewer.getResolution());
-    const screenCenter = new Vector2().fromArray([
-      resolution.x * 0.5,
-      resolution.y * 0.5
-    ]);
-    const centerPoint = convertScreenCoordinateToVolumeCoordinate(
-      section,
-      resolution,
-      new Vector2().fromArray([screenCenter.x, screenCenter.y])
-    );
-    return { point: [centerPoint.x, centerPoint.y, centerPoint.z] };
-  }
 }

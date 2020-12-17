@@ -362,48 +362,4 @@ export default class Ruler implements Annotation, ViewerEventTarget {
 
     return;
   }
-
-  public static calculateDefaultRuler(
-    viewer: Viewer
-  ): {
-    section: Section;
-    start: Vector3D;
-    end: Vector3D;
-  } {
-    const ratio = 0.25;
-    const section = viewer.getState().section;
-
-    const resolution = new Vector2().fromArray(viewer.getResolution());
-
-    const halfLength = Math.min(resolution.x, resolution.y) * ratio * 0.5;
-
-    const screenCenter = new Vector2().fromArray([
-      resolution.x * 0.5,
-      resolution.y * 0.5
-    ]);
-
-    const start = convertScreenCoordinateToVolumeCoordinate(
-      section,
-      resolution,
-      new Vector2().fromArray([
-        screenCenter.x - halfLength,
-        screenCenter.y - halfLength
-      ])
-    );
-
-    const end = convertScreenCoordinateToVolumeCoordinate(
-      section,
-      resolution,
-      new Vector2().fromArray([
-        screenCenter.x + halfLength,
-        screenCenter.y + halfLength
-      ])
-    );
-
-    return {
-      section,
-      start: [start.x, start.y, start.z],
-      end: [end.x, end.y, end.z]
-    };
-  }
 }

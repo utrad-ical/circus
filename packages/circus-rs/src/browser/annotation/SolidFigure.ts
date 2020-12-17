@@ -105,87 +105,6 @@ export default abstract class SolidFigure
     'sagittal'
   ];
 
-  private static getBoundingBoxWithResetDepth(
-    orientation: OrientationString,
-    penddingBoundingBox: Box3
-  ): Box3 {
-    const min = penddingBoundingBox.min;
-    const max = penddingBoundingBox.max;
-    let newMin: Vector3;
-    let newMax: Vector3;
-    let adjustedValue;
-    switch (orientation) {
-      case 'axial':
-        adjustedValue = Math.min(max.x - min.x, max.y - min.y) / 2;
-        newMin = new Vector3(min.x, min.y, min.z - adjustedValue);
-        newMax = new Vector3(max.x, max.y, max.z + adjustedValue);
-        break;
-
-      case 'sagittal':
-        adjustedValue = Math.min(max.y - min.y, max.z - min.z) / 2;
-        newMin = new Vector3(min.x - adjustedValue, min.y, min.z);
-        newMax = new Vector3(max.x + adjustedValue, max.y, max.z);
-        break;
-
-      case 'coronal':
-        adjustedValue = Math.min(max.x - min.x, max.z - min.z) / 2;
-        newMin = new Vector3(min.x, min.y - adjustedValue, min.z);
-        newMax = new Vector3(max.x, max.y + adjustedValue, max.z);
-        break;
-
-      default:
-        newMin = min;
-        newMax = max;
-        break;
-    }
-
-    return new Box3().expandByPoint(newMin).expandByPoint(newMax);
-  }
-
-  public static calculateBoundingBoxWithDefaultDepth(
-    viewer: Viewer
-  ): { min: Vector3D; max: Vector3D } {
-    const ratio = 0.25;
-    const section = viewer.getState().section;
-    const orientation = detectOrthogonalSection(section);
-    const resolution = new Vector2().fromArray(viewer.getResolution());
-
-    const halfLength = Math.min(resolution.x, resolution.y) * ratio * 0.5;
-
-    const screenCenter = new Vector2().fromArray([
-      resolution.x * 0.5,
-      resolution.y * 0.5
-    ]);
-
-    const min = convertScreenCoordinateToVolumeCoordinate(
-      section,
-      resolution,
-      new Vector2().fromArray([
-        screenCenter.x - halfLength,
-        screenCenter.y - halfLength
-      ])
-    );
-
-    const max = convertScreenCoordinateToVolumeCoordinate(
-      section,
-      resolution,
-      new Vector2().fromArray([
-        screenCenter.x + halfLength,
-        screenCenter.y + halfLength
-      ])
-    );
-
-    const boundingBox = SolidFigure.getBoundingBoxWithResetDepth(
-      orientation,
-      new Box3().expandByPoint(min).expandByPoint(max)
-    );
-
-    return {
-      min: [boundingBox.min.x, boundingBox.min.y, boundingBox.min.z],
-      max: [boundingBox.max.x, boundingBox.max.y, boundingBox.max.z]
-    };
-  }
-
   public validate(): boolean {
     const min = this.min;
     const max = this.max;
@@ -204,7 +123,7 @@ export default abstract class SolidFigure
       .expandByPoint(new Vector3().fromArray(max));
     let concreteBoundingBox: Box3;
     if (this.resetDepthOfBoundingBox && orientation) {
-      concreteBoundingBox = SolidFigure.getBoundingBoxWithResetDepth(
+      concreteBoundingBox = getSolidFigureBoundingBoxWithResetDepth(
         orientation,
         penddingBoundingBox
       );
@@ -458,4 +377,41 @@ export default abstract class SolidFigure
       }
     }
   }
+}
+
+export function getSolidFigureBoundingBoxWithResetDepth(
+  orientation: OrientationString,
+  penddingBoundingBox: Box3
+): Box3 {
+  const min = penddingBoundingBox.min;
+  const max = penddingBoundingBox.max;
+  let newMin: Vector3;
+  let newMax: Vector3;
+  let adjustedValue;
+  switch (orientation) {
+    case 'axial':
+      adjustedValue = Math.min(max.x - min.x, max.y - min.y) / 2;
+      newMin = new Vector3(min.x, min.y, min.z - adjustedValue);
+      newMax = new Vector3(max.x, max.y, max.z + adjustedValue);
+      break;
+
+    case 'sagittal':
+      adjustedValue = Math.min(max.y - min.y, max.z - min.z) / 2;
+      newMin = new Vector3(min.x - adjustedValue, min.y, min.z);
+      newMax = new Vector3(max.x + adjustedValue, max.y, max.z);
+      break;
+
+    case 'coronal':
+      adjustedValue = Math.min(max.x - min.x, max.z - min.z) / 2;
+      newMin = new Vector3(min.x, min.y - adjustedValue, min.z);
+      newMax = new Vector3(max.x, max.y + adjustedValue, max.z);
+      break;
+
+    default:
+      newMin = min;
+      newMax = max;
+      break;
+  }
+
+  return new Box3().expandByPoint(newMin).expandByPoint(newMax);
 }

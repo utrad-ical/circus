@@ -422,39 +422,3 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
     return min.some((value, index) => value !== max[index]);
   }
 }
-
-interface CreateDefaultPlaneFigureFromViewerOption {
-  type?: FigureType;
-  sizeRatio?: number;
-}
-export function createDefaultPlaneFigureFromViewer(
-  viewer: Viewer | undefined,
-  {
-    type = 'circle',
-    sizeRatio = 0.25
-  }: CreateDefaultPlaneFigureFromViewerOption
-): PlaneFigure {
-  const anno = new PlaneFigure();
-
-  if (!viewer) return anno;
-  const viewState = viewer.getState();
-
-  const { section } = viewState;
-  const orientation = detectOrthogonalSection(section);
-  if (orientation !== 'axial') return anno;
-
-  const { origin, xAxis, yAxis } = section;
-  const center = [
-    origin[0] + (xAxis[0] + yAxis[0]) * 0.5,
-    origin[1] + (xAxis[1] + yAxis[1]) * 0.5,
-    origin[2] + (xAxis[2] + yAxis[2]) * 0.5
-  ];
-  const dist = Math.min(xAxis[0], yAxis[1]) * 0.5 * sizeRatio;
-
-  anno.type = type;
-  anno.min = [center[0] - dist, center[1] - dist];
-  anno.max = [center[0] + dist, center[1] + dist];
-  anno.z = origin[2];
-
-  return anno;
-}

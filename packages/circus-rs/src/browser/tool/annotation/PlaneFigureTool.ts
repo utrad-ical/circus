@@ -1,3 +1,4 @@
+import { Vector2D } from 'circus-rs/src/common/geometry';
 import Annotation from '../../annotation/Annotation';
 import PlaneFigure, { FigureType } from '../../annotation/PlaneFigure';
 import { detectOrthogonalSection } from '../../section-util';
@@ -60,11 +61,11 @@ export default class PlaneFigureTool extends AnnotationToolBase {
       antn.min[0] !== antn.max[0] &&
       antn.min[1] !== antn.max[1]
     ) {
-      const newMin = [
+      const newMin: Vector2D = [
         Math.min(antn.min[0], antn.max[0]),
         Math.min(antn.min[1], antn.max[1])
       ];
-      const newMax = [
+      const newMax: Vector2D = [
         Math.max(antn.min[0], antn.max[0]),
         Math.max(antn.min[1], antn.max[1])
       ];

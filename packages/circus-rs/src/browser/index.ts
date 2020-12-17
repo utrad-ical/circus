@@ -22,12 +22,18 @@ export { default as CornerText } from './annotation/CornerText';
 export { default as VoxelCloud } from './annotation/VoxelCloud';
 export { default as ReferenceLine } from './annotation/ReferenceLine';
 export { default as Scrollbar } from './annotation/Scrollbar';
-export { default as PlaneFigure, createDefaultPlaneFigureFromViewer } from './annotation/PlaneFigure';
+export { default as PlaneFigure } from './annotation/PlaneFigure';
 export { default as Point } from './annotation/Point';
 export { default as SolidFigure } from './annotation/SolidFigure';
 export { default as Cuboid } from './annotation/Cuboid';
 export { default as Ellipsoid } from './annotation/Ellipsoid';
 export { default as Ruler } from './annotation/Ruler';
+export {
+  createDefaultPlaneFigureFromViewer,
+  createDefaultSolidFigureFromViewer,
+  createDefaultRulerFromViewer,
+  createDefaultPointFromViewer
+} from './annotation/helper/createDefaultAnnotationFromViewer';
 
 export { default as RawData } from '../common/RawData';
 export { default as AnisotropicRawData } from '../common/AnisotropicRawData';

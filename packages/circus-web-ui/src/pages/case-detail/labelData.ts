@@ -46,7 +46,8 @@ interface InternalVoxelLabelData {
 type ExternalVoxelLabelData = LabelAppearance &
   ({ voxels: null } | { voxels: string; origin: Vector3D; size: Vector3D });
 
-type SolidFigureLabelData = LabelAppearance & {
+type SolidFigureLabelData = LabelAppearance & SolidFigureAnnotationData;
+type SolidFigureAnnotationData = {
   min: Vector3D;
   max: Vector3D;
 };
@@ -58,11 +59,13 @@ type PlaneFigureAnnotationData = {
   z: number;
 };
 
-type PointLabelData = LabelAppearance & {
+type PointLabelData = LabelAppearance & PointAnnotationData;
+type PointAnnotationData = {
   point: Vector3D;
 };
 
-type RulerLabelData = LabelAppearance & {
+type RulerLabelData = LabelAppearance & RulerAnnotationData;
+type RulerAnnotationData = {
   section: Section;
   start: Vector3D;
   end: Vector3D;
@@ -174,13 +177,15 @@ export const createNewLabelData = (
       return { type, data: emptyVoxelLabelData(appearance) };
     case 'cuboid':
     case 'ellipsoid': {
+      const solidFigureAnnotaion = rs.createDefaultSolidFigureFromViewer(
+        viewer,
+        { type: type === 'ellipsoid' ? 'ellipsoid' : 'cuboid' }
+      );
       return {
         type,
         data: {
-          ...(viewer
-            ? rs.SolidFigure.calculateBoundingBoxWithDefaultDepth(viewer)
-            : { min: [0, 0, 0], max: [10, 10, 10] }),
-          ...appearance
+          ...appearance,
+          ...extractSolidFigureAnnotationData(solidFigureAnnotaion)
         }
       };
     }
@@ -199,32 +204,22 @@ export const createNewLabelData = (
       };
     }
     case 'point': {
+      const pointAnnotaion = rs.createDefaultPointFromViewer(viewer, {});
       return {
         type,
         data: {
-          ...(viewer
-            ? rs.Point.calculateDefaultPoint(viewer)
-            : { point: [0, 0, 0] }),
-          ...appearance
+          ...appearance,
+          ...extractPointAnnotationData(pointAnnotaion)
         }
       };
     }
     case 'ruler': {
+      const rulerAnnotaion = rs.createDefaultRulerFromViewer(viewer, {});
       return {
         type,
         data: {
-          ...(viewer
-            ? rs.Ruler.calculateDefaultRuler(viewer)
-            : {
-                section: {
-                  origin: [0, 0, 0],
-                  xAxis: [10, 0, 0],
-                  yAxis: [0, 10, 0]
-                },
-                start: [0, 0, 0],
-                end: [10, 10, 0]
-              }),
-          ...appearance
+          ...appearance,
+          ...extractRulerAnnotationData(rulerAnnotaion)
         }
       };
     }
@@ -462,9 +457,30 @@ export const setRecommendedDisplay = (
   }
 };
 
+function extractSolidFigureAnnotationData(
+  fig: rs.SolidFigure
+): SolidFigureAnnotationData {
+  const { min, max } = fig;
+  return { min: min! as Vector3D, max: max as Vector3D };
+}
+
 function extractPlaneFigureAnnotationData(
   fig: rs.PlaneFigure
 ): PlaneFigureAnnotationData {
   const { min, max, z } = fig;
   return { min: min! as Vector2D, max: max as Vector2D, z: z! };
+}
+
+function extractPointAnnotationData(fig: rs.Point): PointAnnotationData {
+  const { point } = fig;
+  return { point: point! as Vector3D };
+}
+
+function extractRulerAnnotationData(fig: rs.Ruler): RulerAnnotationData {
+  const { section, start, end } = fig;
+  return {
+    section: section! as Section,
+    start: start! as Vector3D,
+    end: end! as Vector3D
+  };
 }

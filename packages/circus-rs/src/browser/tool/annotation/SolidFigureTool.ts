@@ -1,3 +1,4 @@
+import { Vector3D } from 'circus-rs/src/common/geometry';
 import Annotation from '../../annotation/Annotation';
 import Cuboid from '../../annotation/Cuboid';
 import Ellipsoid from '../../annotation/Ellipsoid';
@@ -37,8 +38,8 @@ export default class SolidFigureTool extends AnnotationToolBase {
         antn = new Cuboid();
         break;
     }
-    antn.min = point.toArray();
-    antn.max = point.toArray();
+    antn.min = point.toArray() as Vector3D;
+    antn.max = point.toArray() as Vector3D;
     antn.editable = true;
     antn.resetDepthOfBoundingBox = true;
     return antn;
@@ -59,7 +60,7 @@ export default class SolidFigureTool extends AnnotationToolBase {
       ev.viewerY!
     );
     const antn = this.focusedAnnotation;
-    antn.max = max.toArray();
+    antn.max = max.toArray() as Vector3D;
   }
 
   protected concreteAnnotation(ev: ViewerEvent): void {

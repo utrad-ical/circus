@@ -459,9 +459,10 @@ export const setRecommendedDisplay = (
       });
       break;
     }
-    default:
+    default: {
       const center = getCenterOfLabel(composition, label);
       viewers.forEach(viewer => focusBy(viewer, center));
+    }
   }
 };
 

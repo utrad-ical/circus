@@ -200,7 +200,7 @@ const RevisionEditor: React.FC<{
         });
       } else if (annotation instanceof rs.Point && annotation.validate()) {
         return produce(label, (l: any) => {
-          l.data.origin = annotation.point;
+          l.data.point = annotation.point;
         });
       } else if (annotation instanceof rs.Ruler && annotation.validate()) {
         return produce(label, (l: any) => {

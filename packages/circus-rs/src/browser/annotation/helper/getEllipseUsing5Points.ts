@@ -87,7 +87,7 @@ function get5PointsOnEllipseOutline(
 ) {
   const points: Vector3[] = [];
 
-  const r = (Math.PI * 2) / 5;
+  const r = (Math.PI * 2) / 72;
 
   for (let i = 0; i < 5; i++) {
     const v = S_u.clone().applyAxisAngle(S_nv, r * i);

@@ -415,54 +415,6 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
     }
   }
 
-  public static calculateBoundingBoxAndDepth(
-    viewer: Viewer
-  ): { min: Vector2D; max: Vector2D; z: number } {
-    const ratio = 0.25;
-    const section = viewer.getState().section;
-    const orientation = detectOrthogonalSection(section);
-    if (orientation !== 'axial') {
-      return {
-        min: [0, 0],
-        max: [0, 0],
-        z: 0
-      };
-    }
-
-    const resolution = new Vector2().fromArray(viewer.getResolution());
-
-    const halfLength = Math.min(resolution.x, resolution.y) * ratio * 0.5;
-
-    const screenCenter = new Vector2().fromArray([
-      resolution.x * 0.5,
-      resolution.y * 0.5
-    ]);
-
-    const min = convertScreenCoordinateToVolumeCoordinate(
-      section,
-      resolution,
-      new Vector2().fromArray([
-        screenCenter.x - halfLength,
-        screenCenter.y - halfLength
-      ])
-    );
-
-    const max = convertScreenCoordinateToVolumeCoordinate(
-      section,
-      resolution,
-      new Vector2().fromArray([
-        screenCenter.x + halfLength,
-        screenCenter.y + halfLength
-      ])
-    );
-
-    return {
-      min: [min.x, min.y],
-      max: [max.x, max.y],
-      z: min.z
-    };
-  }
-
   public static getOutline(data: {
     min: Vector2D | number[];
     max: Vector2D | number[];
@@ -480,4 +432,40 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
     if (!min || !max) return false;
     return min.some((value, index) => value !== max[index]);
   }
+}
+
+interface CreateDefaultPlaneFigureFromViewerOption {
+  type?: FigureType;
+  sizeRatio?: number;
+}
+export function createDefaultPlaneFigureFromViewer(
+  viewer: Viewer | undefined,
+  {
+    type = 'circle',
+    sizeRatio = 0.25
+  }: CreateDefaultPlaneFigureFromViewerOption
+): PlaneFigure {
+  const anno = new PlaneFigure();
+
+  if(!viewer) return anno;
+  const viewState = viewer.getState();
+
+  const { section } = viewState;
+  const orientation = detectOrthogonalSection(section);
+  if (orientation !== 'axial') return anno;
+
+  const { origin, xAxis, yAxis } = section;
+  const center = [
+    origin[0] + (xAxis[0] + yAxis[0]) * 0.5,
+    origin[1] + (xAxis[1] + yAxis[1]) * 0.5,
+    origin[2] + (xAxis[2] + yAxis[2]) * 0.5
+  ];
+  const dist = Math.min(xAxis[0], yAxis[1]) * 0.5 * sizeRatio;
+
+  anno.type = type;
+  anno.min = [center[0] - dist, center[1] - dist];
+  anno.max = [center[0] + dist, center[1] + dist];
+  anno.z = origin[2];
+
+  return anno;
 }

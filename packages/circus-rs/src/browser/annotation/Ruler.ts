@@ -363,19 +363,6 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     return;
   }
 
-  public static getOutline(data: {
-    start: Vector3D | number[];
-    end: Vector3D | number[];
-  }): { min: Vector3D; max: Vector3D } {
-    const box = new Box3()
-      .expandByPoint(new Vector3(...data.start))
-      .expandByPoint(new Vector3(...data.end));
-    return {
-      min: [box.min.x, box.min.y, box.min.z],
-      max: [box.max.x, box.max.y, box.max.z]
-    };
-  }
-
   public static calculateDefaultRuler(
     viewer: Viewer
   ): {

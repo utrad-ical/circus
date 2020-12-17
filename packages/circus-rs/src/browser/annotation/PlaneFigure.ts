@@ -415,17 +415,6 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
     }
   }
 
-  public static getOutline(data: {
-    min: Vector2D | number[];
-    max: Vector2D | number[];
-    z: number;
-  }): { min: Vector3D; max: Vector3D } {
-    return {
-      min: [data.min[0], data.min[1], data.z],
-      max: [data.max[0], data.max[1], data.z]
-    };
-  }
-
   public validate(): boolean {
     const min = this.min;
     const max = this.max;
@@ -447,7 +436,7 @@ export function createDefaultPlaneFigureFromViewer(
 ): PlaneFigure {
   const anno = new PlaneFigure();
 
-  if(!viewer) return anno;
+  if (!viewer) return anno;
   const viewState = viewer.getState();
 
   const { section } = viewState;

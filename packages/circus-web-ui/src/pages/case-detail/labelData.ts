@@ -1,11 +1,8 @@
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
-import {
-  getBoxCenter,
-  Section,
-  Vector2D,
-  Vector3D
-} from '@utrad-ical/circus-rs/src/browser';
+import { Section, Vector2D, Vector3D } from '@utrad-ical/circus-rs/src/browser';
+import { detectOrthogonalSection } from '@utrad-ical/circus-rs/src/browser/section-util';
+import focusBy from '@utrad-ical/circus-rs/src/browser/tool/state/focusBy';
 import produce from 'immer';
 import { ApiCaller } from 'utils/api';
 import { sha1 } from 'utils/util';
@@ -387,33 +384,84 @@ export const buildAnnotation = (
   }
 };
 
-export const getCenterOfLabel = (
+const getCenterOfLabel = (
   composition: rs.Composition,
+  label: InternalLabel
+): Vector3D | undefined => {
+  switch (label.type) {
+    case 'voxel': {
+      const src = composition.imageSource as rs.MprImageSource;
+      if (!src.metadata) return;
+
+      const shrinkResult = voxelShrinkToMinimum(label.data);
+      if (shrinkResult === null) return;
+
+      const origin = shrinkResult.origin;
+      const size = shrinkResult.rawData.getDimension();
+      const { voxelSize } = src.metadata;
+
+      return [
+        (origin[0] + size[0]) * voxelSize[0],
+        (origin[1] + size[1]) * voxelSize[1],
+        (origin[2] + size[2]) * voxelSize[2]
+      ];
+    }
+    case 'cuboid':
+    case 'ellipsoid': {
+      const { min, max } = label.data;
+      return [
+        min[0] + (max[0] - min[0]) * 0.5,
+        min[1] + (max[1] - min[1]) * 0.5,
+        min[2] + (max[2] - min[2]) * 0.5
+      ];
+    }
+    case 'rectangle':
+    case 'ellipse': {
+      const { min, max, z } = label.data;
+      return [
+        min[0] + (max[0] - min[0]) * 0.5,
+        min[1] + (max[1] - min[1]) * 0.5,
+        z
+      ];
+    }
+    case 'point':
+      return label.data.point;
+    case 'ruler': {
+      const { start, end } = label.data;
+      return [
+        start[0] + (end[0] - start[0]) * 0.5,
+        start[1] + (end[1] - start[1]) * 0.5,
+        start[2] + (end[2] - start[2]) * 0.5
+      ];
+    }
+    default:
+      throw new Error('Undefined label type');
+  }
+};
+
+export const setRecommendedDisplay = (
+  composition: rs.Composition,
+  viewers: rs.Viewer[],
   label: InternalLabel
 ) => {
   switch (label.type) {
-    case 'voxel': {
-      const shrinkResult = voxelShrinkToMinimum(label.data);
-      if (shrinkResult === null) return;
-      const origin = shrinkResult.origin;
-      const size = shrinkResult.rawData.getDimension();
-      return getBoxCenter(
-        rs.VoxelCloud.getBoundingBox(composition, { origin, size })
-      );
+    case 'ruler': {
+      const center = getCenterOfLabel(composition, label);
+      const reproduceSection = label.data.section;
+      const reproduceOrientation = detectOrthogonalSection(reproduceSection);
+      viewers.forEach(viewer => {
+        const orientation = detectOrthogonalSection(viewer.getState().section);
+        if (orientation === reproduceOrientation) {
+          viewer.setState({ ...viewer.getState(), section: reproduceSection });
+        } else {
+          focusBy(viewer, center);
+        }
+      });
+      break;
     }
-    case 'cuboid':
-    case 'ellipsoid':
-      return getBoxCenter(label.data);
-    case 'rectangle':
-    case 'ellipse':
-      return getBoxCenter(rs.PlaneFigure.getOutline(label.data));
-    case 'point':
-      return label.data.point;
-    case 'ruler':
-      return getBoxCenter(rs.Ruler.getOutline(label.data));
-
     default:
-      throw new Error('Undefined label type');
+      const center = getCenterOfLabel(composition, label);
+      viewers.forEach(viewer => focusBy(viewer, center));
   }
 };
 

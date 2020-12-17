@@ -9,7 +9,7 @@ type HoleFilling3D = (
   height: number,
   nSlices: number,
   neighbor: number
-) => Uint8Array;
+) => { result: Uint8Array; holeNum: number; holeVolume: number };
 
 /**
  * @param array input binary image
@@ -27,7 +27,8 @@ const HoleFilling2D: HoleFilling3D = (
 ) => {
   let pos1 = 0;
   const result = array.slice();
-
+  let holeNum = 0;
+  let holeVolume = 0;
   const tmp = new Uint8Array((width + 2) * (height + 2)).map(() => 1);
   for (let k = 0; k < nSlices; k++) {
     for (let j = 1; j < height + 1; j++) {
@@ -41,17 +42,19 @@ const HoleFilling2D: HoleFilling3D = (
         : CCL2D8(tmp, width + 2, height + 2);
     if (hole.labelNum === 1) continue;
     let pos2 = k * width * height;
+    holeNum += hole.labelNum - 1;
     for (let j = 1; j < height + 1; j++) {
       for (let i = 1; i < width + 1; i++) {
         if (1 < hole.labelMap[i + j * (width + 2)]) {
           result[pos2] = 1;
+          holeVolume++;
         }
         pos2++;
       }
     }
   }
 
-  return result;
+  return { result: result, holeNum: holeNum, holeVolume: holeVolume };
 };
 
 const HoleFilling3D: HoleFilling3D = (
@@ -62,6 +65,8 @@ const HoleFilling3D: HoleFilling3D = (
   neighbor
 ) => {
   let pos = 0;
+  let holeNum = 0;
+  let holeVolume = 0;
   const result = array.slice();
 
   const tmp = new Uint8Array((width + 2) * (height + 2) * (nSlices + 2)).map(
@@ -81,8 +86,9 @@ const HoleFilling3D: HoleFilling3D = (
       ? CCL3D6(tmp, width + 2, height + 2, nSlices + 2)
       : CCL3D26(tmp, width + 2, height + 2, nSlices + 2);
   if (hole.labelNum === 1) {
-    return result;
+    return { result: result, holeNum: holeNum, holeVolume: holeVolume };
   }
+  holeNum = hole.labelNum - 1;
   pos = 0;
   for (let k = 1; k < nSlices + 1; k++) {
     for (let j = 1; j < height + 1; j++) {
@@ -92,13 +98,14 @@ const HoleFilling3D: HoleFilling3D = (
           hole.labelMap[i + j * (width + 2) + k * (width + 2) * (height + 2)]
         ) {
           result[pos] = 1;
+          holeVolume++;
         }
         pos++;
       }
     }
   }
 
-  return result;
+  return { result: result, holeNum: holeNum, holeVolume: holeVolume };
 };
 export default HoleFilling2D;
 export { HoleFilling3D };

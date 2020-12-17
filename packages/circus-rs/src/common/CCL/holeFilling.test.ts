@@ -5,8 +5,9 @@ const mosaic = (
   height: number,
   NSlice: number,
   neightbor: 4 | 6 | 8 | 26
-): [Uint8Array, Uint8Array] => {
+): [Uint8Array, Uint8Array, number] => {
   const img = new Uint8Array(width * height * NSlice);
+  let holeNum = 0;
 
   for (let k = 0; k < NSlice; k++) {
     for (let j = 0; j < height; j++) {
@@ -22,7 +23,7 @@ const mosaic = (
   }
 
   if (neightbor === 8 || neightbor === 26) {
-    return [img, img];
+    return [img, img, holeNum];
   }
 
   const answer = img.slice();
@@ -31,6 +32,7 @@ const mosaic = (
       for (let j = 1; j < height - 1; j++) {
         for (let i = 1; i < width - 1; i++) {
           answer[i + j * width + k * width * height] = 1;
+          if (img[i + j * width + k * width * height] === 0) holeNum++;
         }
       }
     }
@@ -40,12 +42,13 @@ const mosaic = (
       for (let j = 1; j < height - 1; j++) {
         for (let i = 1; i < width - 1; i++) {
           answer[i + j * width + k * width * height] = 1;
+          if (img[i + j * width + k * width * height] === 0) holeNum++;
         }
       }
     }
   }
 
-  return [img, answer];
+  return [img, answer, holeNum];
 };
 
 function HolleFillingTest(
@@ -54,6 +57,8 @@ function HolleFillingTest(
   height: number,
   NSlice: number,
   answer: Uint8Array,
+  holeNum: number,
+  holeVolume: number,
   dimension: number,
   neighbor: number
 ) {
@@ -62,11 +67,18 @@ function HolleFillingTest(
       dimension === 3
         ? HoleFilling3D(array, width, height, NSlice, neighbor === 26 ? 26 : 6)
         : HoleFilling2D(array, width, height, NSlice, neighbor === 8 ? 8 : 4);
-    let flag = false;
-    for (let i = 0; i < width * height * NSlice; i++) {
-      if (holeFillingResult[i] !== answer[i]) {
-        flag = true;
-        break;
+    let flag =
+      holeNum === holeFillingResult.holeNum
+        ? holeVolume === holeFillingResult.holeVolume
+          ? false
+          : true
+        : true;
+    if (!flag) {
+      for (let i = 0; i < width * height * NSlice; i++) {
+        if (holeFillingResult.result[i] !== answer[i]) {
+          flag = true;
+          break;
+        }
       }
     }
     expect(flag).toBe(false);
@@ -77,30 +89,32 @@ describe('holeFilling: frame', () => {
   const [width, height, nSLices] = [5, 5, 5];
   const img = new Uint8Array(width * height * nSLices).map(() => 1);
   const answer = img.slice();
+  let holeVolume = 0;
 
   for (let k = 1; k < nSLices - 1; k++) {
     for (let j = 1; j < height - 1; j++) {
       for (let i = 1; i < width - 1; i++) {
         img[i + j * width + k * width * height] = 0;
+        holeVolume++;
       }
     }
   }
 
   test(
     '3D 6-neighbor',
-    HolleFillingTest(img, width, height, nSLices, answer, 3, 6)
+    HolleFillingTest(img, width, height, nSLices, answer, 1, holeVolume, 3, 6)
   );
   test(
     '3D 26-neighbor',
-    HolleFillingTest(img, width, height, nSLices, answer, 3, 26)
+    HolleFillingTest(img, width, height, nSLices, answer, 1, holeVolume, 3, 26)
   );
   test(
     '2D 4-neighbor',
-    HolleFillingTest(img, width, height, nSLices, answer, 2, 4)
+    HolleFillingTest(img, width, height, nSLices, answer, 3, holeVolume, 2, 4)
   );
   test(
     '2D 8-neighbor',
-    HolleFillingTest(img, width, height, nSLices, answer, 2, 8)
+    HolleFillingTest(img, width, height, nSLices, answer, 3, holeVolume, 2, 8)
   );
 });
 
@@ -111,43 +125,63 @@ describe('holeFilling: white', () => {
 
   test(
     '3D 6-neighbor',
-    HolleFillingTest(img, width, height, nSLices, answer, 3, 6)
+    HolleFillingTest(img, width, height, nSLices, answer, 0, 0, 3, 6)
   );
   test(
     '3D 26-neighbor',
-    HolleFillingTest(img, width, height, nSLices, answer, 3, 26)
+    HolleFillingTest(img, width, height, nSLices, answer, 0, 0, 3, 26)
   );
   test(
     '2D 4-neighbor',
-    HolleFillingTest(img, width, height, nSLices, answer, 2, 4)
+    HolleFillingTest(img, width, height, nSLices, answer, 0, 0, 2, 4)
   );
   test(
     '2D 8-neighbor',
-    HolleFillingTest(img, width, height, nSLices, answer, 2, 8)
+    HolleFillingTest(img, width, height, nSLices, answer, 0, 0, 2, 8)
   );
 });
 
 describe('holeFilling: mosaic', () => {
   const [width, height, nSLices] = [5, 5, 5];
 
-  const [img6, answer6] = mosaic(width, height, nSLices, 6);
+  const [img6, answer6, holeNum6] = mosaic(width, height, nSLices, 6);
   test(
     '3D 6-neighbor',
-    HolleFillingTest(img6, width, height, nSLices, answer6, 3, 6)
+    HolleFillingTest(
+      img6,
+      width,
+      height,
+      nSLices,
+      answer6,
+      holeNum6,
+      holeNum6,
+      3,
+      6
+    )
   );
-  const [img26, answer26] = mosaic(width, height, nSLices, 26);
+  const [img26, answer26, holeNum26] = mosaic(width, height, nSLices, 26);
   test(
     '3D 26-neighbor',
-    HolleFillingTest(img26, width, height, nSLices, answer26, 3, 26)
+    HolleFillingTest(img26, width, height, nSLices, answer26, 0, 0, 3, 26)
   );
-  const [img4, answer4] = mosaic(width, height, nSLices, 4);
+  const [img4, answer4, holeNum4] = mosaic(width, height, nSLices, 4);
   test(
     '2D 4-neighbor',
-    HolleFillingTest(img4, width, height, nSLices, answer4, 2, 4)
+    HolleFillingTest(
+      img4,
+      width,
+      height,
+      nSLices,
+      answer4,
+      holeNum4,
+      holeNum4,
+      2,
+      4
+    )
   );
-  const [img8, answer8] = mosaic(width, height, nSLices, 8);
+  const [img8, answer8, holeNum8] = mosaic(width, height, nSLices, 8);
   test(
     '2D 8-neighbor',
-    HolleFillingTest(img8, width, height, nSLices, answer8, 2, 8)
+    HolleFillingTest(img8, width, height, nSLices, answer8, 0, 0, 2, 8)
   );
 });

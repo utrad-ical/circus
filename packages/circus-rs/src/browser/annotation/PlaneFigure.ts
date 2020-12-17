@@ -46,12 +46,12 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
   /**
    * Boundary of the outline, measured in mm.
    */
-  public min?: number[];
+  public min?: Vector2D;
 
   /**
    * Boundary of the outline, measured in mm.
    */
-  public max?: number[];
+  public max?: Vector2D;
 
   /**
    * The Z coordinate of the outline.
@@ -309,11 +309,11 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
         this.min[0] !== this.max[0] &&
         this.min[1] !== this.max[1]
       ) {
-        const newMin = [
+        const newMin: Vector2D = [
           Math.min(this.min[0], this.max[0]),
           Math.min(this.min[1], this.max[1])
         ];
-        const newMax = [
+        const newMax: Vector2D = [
           Math.max(this.min[0], this.max[0]),
           Math.max(this.min[1], this.max[1])
         ];

@@ -3,10 +3,6 @@ import { choice, confirm, prompt } from '@smikitky/rb-components/lib/modal';
 import Slider from '@smikitky/rb-components/lib/Slider';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
-import {
-  detectOrthogonalSection,
-} from '@utrad-ical/circus-rs/src/browser/section-util';
-import focusBy from '@utrad-ical/circus-rs/src/browser/tool/state/focusBy';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import {
@@ -26,9 +22,9 @@ import {
   LabelType,
   InternalLabel,
   labelTypes,
-  getCenterOfLabel,
   LabelAppearance,
-  createNewLabelData
+  createNewLabelData,
+  setRecommendedDisplay
 } from './labelData';
 
 type LabelCommand = 'rename' | 'remove' | 'convertType' | 'reveal';
@@ -103,21 +99,8 @@ const LabelMenu: React.FC<{
       }
       case 'reveal': {
         if (!activeLabel) return;
-        const center = getCenterOfLabel(composition, activeLabel);
-        const reproduceSection =
-          'section' in activeLabel.data ? activeLabel.data.section : undefined;
-        const reproduceOrientation = reproduceSection
-          ? detectOrthogonalSection(reproduceSection)
-          : undefined;
-
-        Object.keys(viewers).forEach(index => {
-          const viewer = viewers[index];
-          const section =
-            reproduceOrientation && index.includes(reproduceOrientation)
-              ? reproduceSection
-              : undefined;
-          focusBy(viewer, center, section);
-        });
+        setRecommendedDisplay(composition, Object.values(viewers), activeLabel);
+        break;
       }
     }
   };
@@ -172,7 +155,7 @@ const LabelMenu: React.FC<{
     setNewLabelType(type);
 
     const additionalPossibleViewerIds: { [key in LabelType]: string[] } = {
-      voxel: [],
+      voxel: ['axial', 'one-axial', 'sagittal', 'one-sagittal', 'coronal', 'one-coronal'],
       cuboid: ['axial', 'one-axial', 'sagittal', 'one-sagittal', 'coronal', 'one-coronal'],
       ellipsoid: ['axial', 'one-axial', 'sagittal', 'one-sagittal', 'coronal', 'one-coronal'],
       ellipse: ['axial', 'one-axial'],

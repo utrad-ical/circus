@@ -7,14 +7,28 @@ import produce from 'immer';
 import { ApiCaller } from 'utils/api';
 import { sha1 } from 'utils/util';
 
-export type LabelType =
-  | 'voxel'
-  | 'cuboid'
-  | 'ellipsoid'
-  | 'rectangle'
-  | 'ellipse'
-  | 'point'
-  | 'ruler';
+type InternalLabelDataIndex = {
+  voxel: InternalVoxelLabelData; // internal | external
+  rectangle: PlaneFigureLabelData;
+  ellipse: PlaneFigureLabelData;
+  cuboid: SolidFigureLabelData;
+  ellipsoid: SolidFigureLabelData;
+  point: PointLabelData;
+  ruler: RulerLabelData;
+};
+
+export type LabelType = keyof InternalLabelDataIndex;
+
+export interface LabelAppearance {
+  /**
+   * Hexadeciaml string like '#ff00ff'.
+   */
+  color: string;
+  /**
+   * A float from 0 (transparent) to 1.0 (opaque).
+   */
+  alpha: number;
+}
 
 interface InternalVoxelLabelData {
   /**
@@ -26,17 +40,6 @@ interface InternalVoxelLabelData {
   origin?: Vector3D;
   size?: Vector3D;
   color: string;
-  alpha: number;
-}
-
-export interface LabelAppearance {
-  /**
-   * Hexadeciaml string like '#ff00ff'.
-   */
-  color: string;
-  /**
-   * A float from 0 (transparent) to 1.0 (opaque).
-   */
   alpha: number;
 }
 
@@ -66,27 +69,25 @@ type RulerLabelData = LabelAppearance & {
   labelPosition?: Vector2D;
 };
 
+type TaggedLabelDataCollection = {
+  [K in keyof InternalLabelDataIndex]: {
+    type: K;
+    data: InternalLabelDataIndex[K];
+  };
+};
+
+export type TaggedLabelDataOf<
+  T extends keyof InternalLabelDataIndex
+> = TaggedLabelDataCollection[T];
+
 type TaggedLabelData =
-  | {
-      type: 'voxel';
-      data: InternalVoxelLabelData;
-    }
-  | {
-      type: 'rectangle' | 'ellipse';
-      data: PlaneFigureLabelData;
-    }
-  | {
-      type: 'cuboid' | 'ellipsoid';
-      data: SolidFigureLabelData;
-    }
-  | {
-      type: 'point';
-      data: PointLabelData;
-    }
-  | {
-      type: 'ruler';
-      data: RulerLabelData;
-    };
+  | TaggedLabelDataOf<'voxel'>
+  | TaggedLabelDataOf<'ellipse'>
+  | TaggedLabelDataOf<'rectangle'>
+  | TaggedLabelDataOf<'ellipsoid'>
+  | TaggedLabelDataOf<'cuboid'>
+  | TaggedLabelDataOf<'point'>
+  | TaggedLabelDataOf<'ruler'>;
 
 /**
  * InternalLabel resresents one label data stored in browser memory.
@@ -99,7 +100,15 @@ export type InternalLabel = {
    */
   temporaryKey: string;
   hidden: boolean;
-} & TaggedLabelData;
+} & (
+  | { type: 'voxel'; data: InternalVoxelLabelData }
+  | TaggedLabelDataOf<'ellipse'>
+  | TaggedLabelDataOf<'rectangle'>
+  | TaggedLabelDataOf<'ellipsoid'>
+  | TaggedLabelDataOf<'cuboid'>
+  | TaggedLabelDataOf<'point'>
+  | TaggedLabelDataOf<'ruler'>
+);
 
 /**
  * ExternalLabel resresents the label data
@@ -109,26 +118,13 @@ export type ExternalLabel = {
   name?: string;
   attributes: object;
 } & (
-  | {
-      type: 'voxel';
-      data: ExternalVoxelLabelData;
-    }
-  | {
-      type: 'rectangle' | 'ellipse';
-      data: PlaneFigureLabelData;
-    }
-  | {
-      type: 'cuboid' | 'ellipsoid';
-      data: SolidFigureLabelData;
-    }
-  | {
-      type: 'point';
-      data: PointLabelData;
-    }
-  | {
-      type: 'ruler';
-      data: RulerLabelData;
-    }
+  | { type: 'voxel'; data: ExternalVoxelLabelData }
+  | TaggedLabelDataOf<'ellipse'>
+  | TaggedLabelDataOf<'rectangle'>
+  | TaggedLabelDataOf<'ellipsoid'>
+  | TaggedLabelDataOf<'cuboid'>
+  | TaggedLabelDataOf<'point'>
+  | TaggedLabelDataOf<'ruler'>
 );
 
 export const labelTypes: {

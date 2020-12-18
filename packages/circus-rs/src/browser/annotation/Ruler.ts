@@ -1,4 +1,4 @@
-import { Box2, Box3, Line3, Vector2, Vector3 } from 'three';
+import { Box2, Line3, Vector2, Vector3 } from 'three';
 import {
   distanceFromPointToSection,
   Section,
@@ -6,10 +6,7 @@ import {
   Vector3D
 } from '../../common/geometry';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
-import {
-  convertScreenCoordinateToVolumeCoordinate,
-  getOrthogonalProjectedPoint
-} from '../section-util';
+import { getOrthogonalProjectedPoint } from '../section-util';
 import {
   convertViewerPointToVolumePoint,
   convertVolumePointToViewerPoint

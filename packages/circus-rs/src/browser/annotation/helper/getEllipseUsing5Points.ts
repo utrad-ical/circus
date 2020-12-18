@@ -87,10 +87,13 @@ function get5PointsOnEllipseOutline(
 ) {
   const points: Vector3[] = [];
 
-  const r = (Math.PI * 2) / 72;
+  const magicValue1 = 17.3;
+  const magicValue2 = 0.07;
+
+  const r = (Math.PI * 2) / magicValue1;
 
   for (let i = 0; i < 5; i++) {
-    const v = S_u.clone().applyAxisAngle(S_nv, r * i);
+    const v = S_u.clone().applyAxisAngle(S_nv, r * i + magicValue2);
     const L = new Line3().set(ES_o, ES_o.clone().add(v));
     const [p1] = intersectionOfEllipsoidAndLine(E, L);
     if (p1 && points.length < 5) points.push(p1);

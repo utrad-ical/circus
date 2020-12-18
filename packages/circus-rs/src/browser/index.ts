@@ -33,7 +33,7 @@ export {
   createDefaultSolidFigureFromViewer,
   createDefaultRulerFromViewer,
   createDefaultPointFromViewer
-} from './annotation/helper/createDefaultAnnotationFromViewer';
+} from './annotation/helper/create-annotation';
 
 export { default as RawData } from '../common/RawData';
 export { default as AnisotropicRawData } from '../common/AnisotropicRawData';

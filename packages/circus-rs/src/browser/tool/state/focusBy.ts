@@ -4,7 +4,7 @@ import MprImageSource from '../../image-source/MprImageSource';
 import { translateOriginToCenter } from '../../section-util';
 import Viewer from '../../viewer/Viewer';
 
-export default function focusby(
+export default function focusBy(
   viewer: Viewer,
   focusPoint: Vector3D | undefined
 ) {

@@ -133,6 +133,7 @@ const toolbar = rs.createToolbar(container, [
   'zoom',
   'pager',
   'celestialRotate',
+  'ruler',
   'brush',
   'eraser',
   'bucket',

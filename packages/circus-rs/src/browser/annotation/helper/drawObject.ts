@@ -245,3 +245,40 @@ export function drawSimpleFigure(
       return;
   }
 }
+
+export function drawFillText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  position: Vector2,
+  color?: string,
+  font?: string
+): Box2 {
+  ctx.save();
+  try {
+    if (color) ctx.fillStyle = color;
+    if (font) ctx.font = font;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+
+    const textMetrics = ctx.measureText(text);
+    const width = textMetrics.width;
+    const height =
+      textMetrics.actualBoundingBoxAscent +
+      textMetrics.actualBoundingBoxDescent;
+
+    const textBox = new Box2(
+      new Vector2(position.x, position.y),
+      new Vector2(position.x + width, position.y + height)
+    );
+
+    ctx.fillText(
+      text,
+      position.x,
+      position.y + textMetrics.actualBoundingBoxAscent
+    );
+
+    return textBox;
+  } finally {
+    ctx.restore();
+  }
+}

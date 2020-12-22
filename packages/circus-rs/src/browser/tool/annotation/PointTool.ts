@@ -1,70 +1,43 @@
-import { Vector2, Vector3 } from 'three';
+import Annotation from '../../annotation/Annotation';
 import Point from '../../annotation/Point';
-import { convertScreenCoordinateToVolumeCoordinate } from '../../section-util';
-import Viewer from '../../viewer/Viewer';
 import ViewerEvent from '../../viewer/ViewerEvent';
-import DraggableTool from '../DraggableTool';
-import { MprViewState } from '../../ViewState';
+import { convertViewerPointToVolumePoint } from '../tool-util';
+import AnnotationToolBase from './AnnotationToolBase';
 
 /**
  * PointTool makes a Point annotation on a mouse click.
  */
-export default class PointTool extends DraggableTool {
-  protected usePointerLockAPI: boolean = false;
-  private drawing: Point | null = null;
+export default class PointTool extends AnnotationToolBase {
+  protected focusedAnnotation?: Point;
 
-  public activate(viewer: Viewer): void {
-    viewer.backgroundEventTarget = this;
-  }
-
-  public deactivate(viewer: Viewer): void {
-    viewer.backgroundEventTarget = null;
-  }
-
-  private toVolumeCoordinate(
-    viewState: MprViewState,
-    ev: ViewerEvent
-  ): Vector3 {
-    const screenPoint = [ev.viewerX!, ev.viewerY!];
-    const resolution = ev.viewer.getResolution();
-    const section = viewState.section;
-    return convertScreenCoordinateToVolumeCoordinate(
-      section,
-      new Vector2().fromArray(resolution),
-      new Vector2().fromArray(screenPoint)
+  protected createAnnotation(ev: ViewerEvent): Annotation | undefined {
+    const point = convertViewerPointToVolumePoint(
+      ev.viewer,
+      ev.viewerX!,
+      ev.viewerY!
     );
+    const antn = new Point();
+    antn.point = [point.x, point.y, point.z];
+    return antn;
   }
 
-  public dragStartHandler(ev: ViewerEvent): void {
-    super.dragStartHandler(ev);
-    const comp = ev.viewer.getComposition();
-    if (!comp) return;
-    const viewState = ev.viewer.getState();
-    if (!viewState || viewState.type !== 'mpr') return;
-
-    const point = new Point();
-    const location = this.toVolumeCoordinate(viewState, ev);
-    point.x = location.x;
-    point.y = location.y;
-    point.z = location.z;
-    comp.addAnnotation(point);
-    this.drawing = point;
-    comp.annotationUpdated();
+  protected updateAnnotation(ev: ViewerEvent): void {
+    if (!this.focusedAnnotation) return;
+    const point = convertViewerPointToVolumePoint(
+      ev.viewer,
+      ev.viewerX!,
+      ev.viewerY!
+    );
+    const antn = this.focusedAnnotation;
+    antn.point = [point.x, point.y, point.z];
   }
 
-  public dragHandler(ev: ViewerEvent): void {
-    if (!this.drawing) return;
-    const point = this.drawing;
-    const comp = ev.viewer.getComposition()!;
-    const viewState = ev.viewer.getState() as MprViewState;
-    const location = this.toVolumeCoordinate(viewState, ev);
-    point.x = location.x;
-    point.y = location.y;
-    point.z = location.z;
-    comp.annotationUpdated();
+  protected concreteAnnotation(ev: ViewerEvent): void {
+    // Nothing to do
   }
 
-  public dragEndHandler(ev: ViewerEvent): void {
-    this.drawing = null;
+  protected validateAnnotation(): boolean {
+    if (!this.focusedAnnotation) return false;
+    return this.focusedAnnotation.validate();
   }
 }

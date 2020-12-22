@@ -8,17 +8,18 @@ import {
   polygonVerticesOfBoxAndSection,
   sectionOverlapsPolygon
 } from '../section-util';
+import { convertVolumePointToViewerPoint } from '../tool/tool-util';
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState, { MprViewState } from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
 import drawBoundingBoxCrossHair from './helper/drawBoundingBoxCrossHair';
 import drawBoundingBoxOutline from './helper/drawBoundingBoxOutline';
-import drawHandleFrame from './helper/drawHandleFrame';
-import getHandleType, {
-  cursorSettableHandleType,
-  HandleType
-} from './helper/getHandleType';
+import drawHandleFrame, { defaultHandleSize } from './helper/drawHandleFrame';
+import {
+  BoundingRectWithHandleHitType,
+  hitBoundingRectWithHandles
+} from './helper/hit-test';
 import resize from './helper/resize';
 
 export type FigureType = 'cuboid' | 'ellipsoid';
@@ -28,18 +29,32 @@ export interface LineDrawStyle {
   color: string;
 }
 
+const cursorTypes: {
+  [key in BoundingRectWithHandleHitType]: { cursor: string };
+} = {
+  'north-west-handle': { cursor: 'nw-resize' },
+  'north-handle': { cursor: 'n-resize' },
+  'north-east-handle': { cursor: 'ne-resize' },
+  'east-handle': { cursor: 'e-resize' },
+  'south-east-handle': { cursor: 'se-resize' },
+  'south-handle': { cursor: 's-resize' },
+  'south-west-handle': { cursor: 'sw-resize' },
+  'west-handle': { cursor: 'w-resize' },
+  'rect-outline': { cursor: 'move' }
+};
+
 export default abstract class SolidFigure
   implements Annotation, ViewerEventTarget {
   public abstract type: FigureType;
   /**
    * Boundary of the outline, measured in mm.
    */
-  public min?: number[];
+  public min?: Vector3D;
 
   /**
    * Boundary of the outline, measured in mm.
    */
-  public max?: number[];
+  public max?: Vector3D;
 
   public color: string = '#ff88ff';
   public width: number = 3;
@@ -70,7 +85,7 @@ export default abstract class SolidFigure
     | undefined;
 
   // handleInfo
-  private handleType: HandleType | undefined = undefined;
+  private handleType: BoundingRectWithHandleHitType | undefined = undefined;
 
   protected drawFigureParams:
     | {
@@ -90,101 +105,14 @@ export default abstract class SolidFigure
     'sagittal'
   ];
 
-  private static getBoundingBoxWithResetDepth(
-    orientation: OrientationString,
-    penddingBoundingBox: Box3
-  ): Box3 {
-    const min = penddingBoundingBox.min;
-    const max = penddingBoundingBox.max;
-    let newMin: Vector3;
-    let newMax: Vector3;
-    let adjustedValue;
-    switch (orientation) {
-      case 'axial':
-        adjustedValue = Math.min(max.x - min.x, max.y - min.y) / 2;
-        newMin = new Vector3(min.x, min.y, min.z - adjustedValue);
-        newMax = new Vector3(max.x, max.y, max.z + adjustedValue);
-        break;
-
-      case 'sagittal':
-        adjustedValue = Math.min(max.y - min.y, max.z - min.z) / 2;
-        newMin = new Vector3(min.x - adjustedValue, min.y, min.z);
-        newMax = new Vector3(max.x + adjustedValue, max.y, max.z);
-        break;
-
-      case 'coronal':
-        adjustedValue = Math.min(max.x - min.x, max.z - min.z) / 2;
-        newMin = new Vector3(min.x, min.y - adjustedValue, min.z);
-        newMax = new Vector3(max.x, max.y + adjustedValue, max.z);
-        break;
-
-      default:
-        newMin = min;
-        newMax = max;
-        break;
-    }
-
-    return new Box3().expandByPoint(newMin).expandByPoint(newMax);
-  }
-
-  public static calculateBoundingBoxWithDefaultDepth(
-    viewer: Viewer
-  ): { min: Vector3D; max: Vector3D } {
-    const ratio = 0.25;
-    const section = viewer.getState().section;
-    const orientation = detectOrthogonalSection(section);
-    const resolution = new Vector2().fromArray(viewer.getResolution());
-
-    const halfLength = Math.min(resolution.x, resolution.y) * ratio * 0.5;
-
-    const screenCenter = new Vector2().fromArray([
-      resolution.x * 0.5,
-      resolution.y * 0.5
-    ]);
-
-    const min = convertScreenCoordinateToVolumeCoordinate(
-      section,
-      resolution,
-      new Vector2().fromArray([
-        screenCenter.x - halfLength,
-        screenCenter.y - halfLength
-      ])
-    );
-
-    const max = convertScreenCoordinateToVolumeCoordinate(
-      section,
-      resolution,
-      new Vector2().fromArray([
-        screenCenter.x + halfLength,
-        screenCenter.y + halfLength
-      ])
-    );
-
-    const boundingBox = SolidFigure.getBoundingBoxWithResetDepth(
-      orientation,
-      new Box3().expandByPoint(min).expandByPoint(max)
-    );
-
-    return {
-      min: [boundingBox.min.x, boundingBox.min.y, boundingBox.min.z],
-      max: [boundingBox.max.x, boundingBox.max.y, boundingBox.max.z]
-    };
-  }
-
-  public validate(): boolean | undefined {
+  public validate(): boolean {
     const min = this.min;
     const max = this.max;
-
-    return (
-      min &&
-      max &&
-      min.some((value, index) => {
-        return value !== max[index];
-      })
-    );
+    if (!min || !max) return false;
+    return min.some((value, index) => value !== max[index]);
   }
 
-  public concreate(orientation?: OrientationString): void {
+  public concrete(orientation?: OrientationString): void {
     // boundingBox
     const min = this.min;
     const max = this.max;
@@ -193,17 +121,17 @@ export default abstract class SolidFigure
     const penddingBoundingBox = new Box3()
       .expandByPoint(new Vector3().fromArray(min))
       .expandByPoint(new Vector3().fromArray(max));
-    let concreateBoundingBox: Box3;
+    let concreteBoundingBox: Box3;
     if (this.resetDepthOfBoundingBox && orientation) {
-      concreateBoundingBox = SolidFigure.getBoundingBoxWithResetDepth(
+      concreteBoundingBox = getSolidFigureBoundingBoxWithResetDepth(
         orientation,
         penddingBoundingBox
       );
     } else {
-      concreateBoundingBox = penddingBoundingBox;
+      concreteBoundingBox = penddingBoundingBox;
     }
-    this.min = concreateBoundingBox.min.toArray();
-    this.max = concreateBoundingBox.max.toArray();
+    this.min = concreteBoundingBox.min.toArray() as Vector3D;
+    this.max = concreteBoundingBox.max.toArray() as Vector3D;
     this.resetDepthOfBoundingBox = undefined;
 
     // dragInfo
@@ -323,19 +251,15 @@ export default abstract class SolidFigure
     if (viewState.type !== 'mpr') return;
     if (!this.editable) return;
 
-    const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
-
     const min = this.min;
     const max = this.max;
     if (!min || !max) return;
 
-    const handleType = getHandleType(viewer, point, min, max);
+    const handleType = this.hitTest(ev);
     if (handleType) {
       ev.stopPropagation();
-      if (cursorSettableHandleType.some(type => type === handleType)) {
-        viewer.setCursorStyle(handleType);
-      }
       this.handleType = handleType;
+      viewer.setCursorStyle(cursorTypes[handleType].cursor);
       viewer.setHoveringAnnotation(this);
       viewer.renderAnnotations();
     } else if (viewer.getHoveringAnnotation() === this) {
@@ -343,6 +267,22 @@ export default abstract class SolidFigure
       viewer.setCursorStyle('');
       viewer.renderAnnotations();
     }
+  }
+
+  private hitTest(ev: ViewerEvent): BoundingRectWithHandleHitType | undefined {
+    const viewer = ev.viewer;
+    const point = new Vector2(ev.viewerX!, ev.viewerY!);
+
+    const viewState = viewer.getState();
+    if (!viewer || !viewState) return;
+    if (viewState.type !== 'mpr') return;
+    if (!this.min || !this.max) return;
+
+    const minPoint = convertVolumePointToViewerPoint(viewer, ...this.min);
+    const maxPoint = convertVolumePointToViewerPoint(viewer, ...this.max);
+    const BoundingBox = new Box2(minPoint, maxPoint);
+
+    return hitBoundingRectWithHandles(point, BoundingBox, defaultHandleSize);
   }
 
   public dragStartHandler(ev: ViewerEvent): void {
@@ -359,7 +299,7 @@ export default abstract class SolidFigure
       const max = this.max;
       if (!min || !max) return;
       const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
-      const handleType = getHandleType(viewer, point, min, max);
+      const handleType = this.hitTest(ev);
       if (handleType) {
         const state = viewer.getState() as MprViewState;
         const resolution: [number, number] = viewer.getResolution();
@@ -406,8 +346,8 @@ export default abstract class SolidFigure
         originalBoundingBox3,
         delta
       );
-      this.min = newBoundingBox3[0];
-      this.max = newBoundingBox3[1];
+      this.min = newBoundingBox3[0] as Vector3D;
+      this.max = newBoundingBox3[1] as Vector3D;
 
       const comp = viewer.getComposition();
       if (!comp) return;
@@ -425,7 +365,7 @@ export default abstract class SolidFigure
     if (viewer.getHoveringAnnotation() === this) {
       ev.stopPropagation();
       viewer.setCursorStyle('');
-      this.concreate();
+      this.concrete();
 
       const comp = viewer.getComposition();
       if (!comp) return;
@@ -437,4 +377,41 @@ export default abstract class SolidFigure
       }
     }
   }
+}
+
+export function getSolidFigureBoundingBoxWithResetDepth(
+  orientation: OrientationString,
+  penddingBoundingBox: Box3
+): Box3 {
+  const min = penddingBoundingBox.min;
+  const max = penddingBoundingBox.max;
+  let newMin: Vector3;
+  let newMax: Vector3;
+  let adjustedValue;
+  switch (orientation) {
+    case 'axial':
+      adjustedValue = Math.min(max.x - min.x, max.y - min.y) / 2;
+      newMin = new Vector3(min.x, min.y, min.z - adjustedValue);
+      newMax = new Vector3(max.x, max.y, max.z + adjustedValue);
+      break;
+
+    case 'sagittal':
+      adjustedValue = Math.min(max.y - min.y, max.z - min.z) / 2;
+      newMin = new Vector3(min.x - adjustedValue, min.y, min.z);
+      newMax = new Vector3(max.x + adjustedValue, max.y, max.z);
+      break;
+
+    case 'coronal':
+      adjustedValue = Math.min(max.x - min.x, max.z - min.z) / 2;
+      newMin = new Vector3(min.x, min.y - adjustedValue, min.z);
+      newMax = new Vector3(max.x, max.y + adjustedValue, max.z);
+      break;
+
+    default:
+      newMin = min;
+      newMax = max;
+      break;
+  }
+
+  return new Box3().expandByPoint(newMin).expandByPoint(newMax);
 }

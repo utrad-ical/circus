@@ -23,14 +23,13 @@ import {
 } from 'utils/useImageSource';
 import * as c from './caseStore';
 import LabelSelector from './LabelSelector';
+import { EditingData, EditingDataUpdater, SeriesEntryWithLabels } from './revisionData';
 import {
-  buildAnnotation,
-  EditingData,
-  EditingDataUpdater,
   InternalLabel,
+  buildAnnotation,
   labelTypes,
-  SeriesEntryWithLabels
-} from './revisionData';
+  TaggedLabelDataOf
+} from './labelData';
 import SideContainer from './SideContainer';
 import ToolBar, { ViewOptions } from './ToolBar';
 import ViewerCluster from './ViewerCluster';
@@ -172,7 +171,7 @@ const RevisionEditor: React.FC<{
   ]);
 
   const handleAnnotationChange = (
-    annotation: rs.VoxelCloud | rs.SolidFigure | rs.PlaneFigure
+    annotation: rs.VoxelCloud | rs.SolidFigure | rs.PlaneFigure | rs.Point | rs.Ruler
   ) => {
     const { revision, activeSeriesIndex } = editingData;
     const labelIndex = revision.series[activeSeriesIndex].labels.findIndex(
@@ -182,7 +181,7 @@ const RevisionEditor: React.FC<{
     const newLabel = () => {
       const label = revision.series[activeSeriesIndex].labels[labelIndex];
       if (annotation instanceof rs.VoxelCloud && annotation.volume) {
-        return produce(label, (l: any) => {
+        return produce(label, (l: TaggedLabelDataOf<'voxel'>) => {
           l.data.origin = annotation.origin;
           l.data.size = annotation.volume!.getDimension();
           l.data.volumeArrayBuffer = annotation.volume!.data;
@@ -191,18 +190,29 @@ const RevisionEditor: React.FC<{
         annotation instanceof rs.SolidFigure &&
         annotation.validate()
       ) {
-        return produce(label, (l: any) => {
-          l.data.min = annotation.min;
-          l.data.max = annotation.max;
+        return produce(label, (l: TaggedLabelDataOf<'ellipsoid' | 'cuboid'>) => {
+          l.data.min = annotation.min!;
+          l.data.max = annotation.max!;
         });
       } else if (
         annotation instanceof rs.PlaneFigure &&
         annotation.validate()
       ) {
-        return produce(label, (l: any) => {
-          l.data.min = annotation.min;
-          l.data.max = annotation.max;
-          l.data.z = annotation.z;
+        return produce(label, (l: TaggedLabelDataOf<'rectangle' | 'ellipse'>) => {
+          l.data.min = annotation.min!;
+          l.data.max = annotation.max!;
+          l.data.z = annotation.z as number
+        });
+      } else if (annotation instanceof rs.Point && annotation.validate()) {
+        return produce(label, (l: TaggedLabelDataOf<'point'>) => {
+          l.data.point = annotation.point!;
+        });
+      } else if (annotation instanceof rs.Ruler && annotation.validate()) {
+        return produce(label, (l: TaggedLabelDataOf<'ruler'>) => {
+          l.data.section = annotation.section!;
+          l.data.start = annotation.start!;
+          l.data.end = annotation.end!;
+          l.data.labelPosition = annotation.labelPosition;
         });
       } else {
         return label;
@@ -476,19 +486,19 @@ const RevisionEditor: React.FC<{
         </Collapser>
         {Object.keys(projectData.caseAttributesSchema.properties || {}).length >
           0 && (
-          <Collapser title="Case Attributes" className="case-attributes">
-            <JsonSchemaEditor
-              key={refreshCounter}
-              schema={projectData.caseAttributesSchema}
-              value={revision.attributes}
-              onChange={caseAttributesChange}
-              onValidate={valid =>
-                caseDispatch(c.validateCaseAttributes(valid))
-              }
-              disabled={busy}
-            />
-          </Collapser>
-        )}
+            <Collapser title="Case Attributes" className="case-attributes">
+              <JsonSchemaEditor
+                key={refreshCounter}
+                schema={projectData.caseAttributesSchema}
+                value={revision.attributes}
+                onChange={caseAttributesChange}
+                onValidate={valid =>
+                  caseDispatch(c.validateCaseAttributes(valid))
+                }
+                disabled={busy}
+              />
+            </Collapser>
+          )}
       </SideContainer>
       <div className="case-revision-main">
         <ToolBar

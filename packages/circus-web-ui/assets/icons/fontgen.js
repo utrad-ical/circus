@@ -33,7 +33,7 @@ async function create(iconPath, fontName, prefix) {
   let codepoint = 0xe600;
   files.sort();
   files.forEach(file => {
-    const name = file.match(/([a-z\-]+)\.svg/)[1].replace(/^\-/, '');
+    const name = file.match(/([a-z-]+)\.svg/)[1].replace(/^-/, '');
     glyphs.push({
       file,
       name,

@@ -1,7 +1,7 @@
 import { Vector2, Vector3, Line3, Plane } from 'three';
 
 /**
- * Section determines the MRP section of a volume.
+ * Section determines the MPR section of a volume.
  */
 export interface Section {
   readonly origin: number[];

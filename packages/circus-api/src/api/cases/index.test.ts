@@ -251,6 +251,31 @@ describe('add revision', () => {
                   z: 5
                 },
                 name: ''
+              },
+              {
+                type: 'point',
+                data: {
+                  color: '#00ff00',
+                  alpha: 1,
+                  origin: [224, 183, 50]
+                },
+                name: ''
+              },
+
+              {
+                type: 'ruler',
+                data: {
+                  color: '#00ff00',
+                  alpha: 1,
+                  section: {
+                    origin: [0, 0, 30],
+                    xAxis: [50, 0, 0],
+                    yAxis: [0, 50, 0]
+                  },
+                  start: [10, 10, 30],
+                  end: [30, 30, 30]
+                },
+                name: ''
               }
             ]
           }

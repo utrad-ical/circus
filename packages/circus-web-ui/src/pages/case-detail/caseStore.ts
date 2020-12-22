@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { EditingData, Revision, ExternalLabel } from './revisionData';
+import { EditingData, Revision } from './revisionData';
+import { ExternalLabel } from './labelData';
 import PatientInfo from '../../types/PatientInfo';
 import Project from 'types/Project';
 import Series from 'types/Series';

@@ -1,128 +1,81 @@
-import { Vector2 } from 'three';
-import ViewerEvent from '../../viewer/ViewerEvent';
-import ToolBaseClass, { Tool } from '../Tool';
-import { MprViewState } from '../../ViewState';
-import {
-  convertScreenCoordinateToVolumeCoordinate,
-  detectOrthogonalSection
-} from '../../section-util';
+import { Vector2D } from 'circus-rs/src/common/geometry';
+import Annotation from '../../annotation/Annotation';
 import PlaneFigure, { FigureType } from '../../annotation/PlaneFigure';
-import Viewer from '../../viewer/Viewer';
+import { detectOrthogonalSection } from '../../section-util';
+import ViewerEvent from '../../viewer/ViewerEvent';
+import { convertViewerPointToVolumePoint } from '../tool-util';
+import AnnotationToolBase from './AnnotationToolBase';
 
 /**
  * PlaneFigureTool creates and edits PlaneFigure.
  */
-export default class PlaneFigureTool extends ToolBaseClass implements Tool {
-  private focusedFigure?: PlaneFigure;
-  protected usePointerLockAPI: boolean = false;
+export default class PlaneFigureTool extends AnnotationToolBase {
+  protected focusedAnnotation?: PlaneFigure;
   protected figureType: FigureType = 'circle';
 
-  public activate(viewer: Viewer): void {
-    viewer.primaryEventTarget = this;
-  }
-
-  public deactivate(viewer: Viewer): void {
-    viewer.primaryEventTarget = undefined;
-  }
-
-  public mouseMoveHandler(ev: ViewerEvent): void {
-    ev.stopPropagation();
-  }
-  public dragStartHandler(ev: ViewerEvent): void {
-    const comp = ev.viewer.getComposition();
-    if (!comp) return;
-
+  protected createAnnotation(ev: ViewerEvent): Annotation | undefined {
     const viewState = ev.viewer.getState();
     if (!viewState || viewState.type !== 'mpr') return;
-
     const section = viewState.section;
     const orientation = detectOrthogonalSection(section);
     if (orientation !== 'axial') return;
 
-    const resolution: [number, number] = ev.viewer.getResolution();
-    const screenPoint: [number, number] = [ev.viewerX!, ev.viewerY!];
-
-    // Create figure
-    const fig = new PlaneFigure();
-    fig.type = this.figureType;
-    fig.editable = true;
-    const min = convertScreenCoordinateToVolumeCoordinate(
-      section,
-      new Vector2().fromArray(resolution),
-      new Vector2().fromArray(screenPoint)
+    const point = convertViewerPointToVolumePoint(
+      ev.viewer,
+      ev.viewerX!,
+      ev.viewerY!
     );
-    fig.min = [min.x, min.y];
-    fig.max = [min.x, min.y];
-    fig.z = min.z;
 
-    comp.addAnnotation(fig);
-    comp.annotationUpdated();
-    this.focusedFigure = fig;
-
-    ev.stopPropagation();
+    const antn = new PlaneFigure();
+    antn.type = this.figureType;
+    antn.editable = true;
+    antn.min = [point.x, point.y];
+    antn.max = [point.x, point.y];
+    antn.z = point.z;
+    return antn;
   }
 
-  public dragHandler(ev: ViewerEvent): void {
-    const comp = ev.viewer.getComposition();
-    if (!comp) return;
-
+  protected updateAnnotation(ev: ViewerEvent): void {
     const viewState = ev.viewer.getState();
     if (!viewState || viewState.type !== 'mpr') return;
 
-    const section = viewState.section;
-    const orientation = detectOrthogonalSection(section);
-    if (orientation !== 'axial') return;
+    if (!this.focusedAnnotation) return;
 
-    if (!this.focusedFigure) return;
-
-    const resolution: [number, number] = ev.viewer.getResolution();
-    const screenPoint: [number, number] = [ev.viewerX!, ev.viewerY!];
-
-    // Update figure
-    const max = convertScreenCoordinateToVolumeCoordinate(
-      (ev.viewer.getState() as MprViewState).section,
-      new Vector2().fromArray(resolution),
-      new Vector2().fromArray(screenPoint)
+    const point = convertViewerPointToVolumePoint(
+      ev.viewer,
+      ev.viewerX!,
+      ev.viewerY!
     );
-    this.focusedFigure.max = [max.x, max.y];
-    comp.annotationUpdated();
-
-    ev.stopPropagation();
+    const antn = this.focusedAnnotation;
+    antn.max = [point.x, point.y];
   }
 
-  public dragEndHandler(ev: ViewerEvent): void {
-    document.exitPointerLock();
+  protected concreteAnnotation(ev: ViewerEvent): void {
+    if (!this.focusedAnnotation) return;
 
-    const comp = ev.viewer.getComposition();
-    if (!comp) return;
-
-    const fig = this.focusedFigure;
-    if (!fig) return;
+    const antn = this.focusedAnnotation;
 
     if (
-      fig.min &&
-      fig.max &&
-      fig.min[0] !== fig.max[0] &&
-      fig.min[1] !== fig.max[1]
+      antn.min &&
+      antn.max &&
+      antn.min[0] !== antn.max[0] &&
+      antn.min[1] !== antn.max[1]
     ) {
-      const newMin = [
-        Math.min(fig.min[0], fig.max[0]),
-        Math.min(fig.min[1], fig.max[1])
+      const newMin: Vector2D = [
+        Math.min(antn.min[0], antn.max[0]),
+        Math.min(antn.min[1], antn.max[1])
       ];
-      const newMax = [
-        Math.max(fig.min[0], fig.max[0]),
-        Math.max(fig.min[1], fig.max[1])
+      const newMax: Vector2D = [
+        Math.max(antn.min[0], antn.max[0]),
+        Math.max(antn.min[1], antn.max[1])
       ];
-      fig.min = newMin;
-      fig.max = newMax;
-    } else {
-      comp.removeAnnotation(fig);
+      antn.min = newMin;
+      antn.max = newMax;
     }
+  }
 
-    this.focusedFigure = undefined;
-
-    comp.annotationUpdated();
-
-    ev.stopPropagation();
+  protected validateAnnotation(): boolean {
+    if (!this.focusedAnnotation) return false;
+    return this.focusedAnnotation.validate();
   }
 }

@@ -1,9 +1,8 @@
 import { ColorPalette } from '@smikitky/rb-components/lib/ColorPicker';
-import { confirm, prompt } from '@smikitky/rb-components/lib/modal';
+import { choice, confirm, prompt } from '@smikitky/rb-components/lib/modal';
 import Slider from '@smikitky/rb-components/lib/Slider';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
-import focusBy from '@utrad-ical/circus-rs/src/browser/tool/state/focusBy';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import {
@@ -18,16 +17,15 @@ import React from 'react';
 import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
 import useLocalPreference from 'utils/useLocalPreference';
+import { EditingData, EditingDataUpdater } from './revisionData';
 import {
-  createNewLabelData,
-  EditingData,
-  EditingDataUpdater,
-  getCenterOfLabel,
-  InternalLabel,
-  LabelAppearance,
   LabelType,
-  labelTypes
-} from './revisionData';
+  InternalLabel,
+  labelTypes,
+  LabelAppearance,
+  createNewLabelData,
+  setRecommendedDisplay
+} from './labelData';
 
 type LabelCommand = 'rename' | 'remove' | 'convertType' | 'reveal';
 
@@ -101,8 +99,8 @@ const LabelMenu: React.FC<{
       }
       case 'reveal': {
         if (!activeLabel) return;
-        const center = getCenterOfLabel(composition, activeLabel);
-        Object.values(viewers).forEach(viewer => focusBy(viewer, center));
+        setRecommendedDisplay(composition, Object.values(viewers), activeLabel);
+        break;
       }
     }
   };
@@ -132,7 +130,10 @@ const LabelMenu: React.FC<{
     }
   };
 
-  const createNewLabel = (type: LabelType): InternalLabel => {
+  const createNewLabel = (
+    type: LabelType,
+    viewer: Viewer | undefined
+  ): InternalLabel => {
     const color = '#ff0000';
     const alpha = 1;
     const temporaryKey = generateUniqueId();
@@ -141,16 +142,59 @@ const LabelMenu: React.FC<{
       ellipsoid: '3D Shape',
       cuboid: '3D Shape',
       ellipse: '2D Shape',
-      rectangle: '2D Shape'
+      rectangle: '2D Shape',
+      point: 'Point',
+      ruler: 'Ruler'
     };
     const name = getUniqueLabelName(labelNames[type]);
-    const data = createNewLabelData(type, { color, alpha }, viewers);
+    const data = createNewLabelData(type, { color, alpha }, viewer);
     return { temporaryKey, name, ...data, attributes: {}, hidden: false };
   };
 
-  const addLabel = (type: LabelType) => {
+  const addLabel = async (type: LabelType) => {
     setNewLabelType(type);
-    const newLabel = createNewLabel(type);
+
+    const additionalPossibleViewerIds: { [key in LabelType]: string[] } = {
+      voxel: ['axial', 'one-axial', 'sagittal', 'one-sagittal', 'coronal', 'one-coronal'],
+      cuboid: ['axial', 'one-axial', 'sagittal', 'one-sagittal', 'coronal', 'one-coronal'],
+      ellipsoid: ['axial', 'one-axial', 'sagittal', 'one-sagittal', 'coronal', 'one-coronal'],
+      ellipse: ['axial', 'one-axial'],
+      rectangle: ['axial', 'one-axial'],
+      point: ['axial', 'one-axial', 'sagittal', 'one-sagittal', 'coronal', 'one-coronal', 'oblique'],
+      ruler: ['axial', 'one-axial', 'sagittal', 'one-sagittal', 'coronal', 'one-coronal', 'oblique']
+    };
+    const viewerIdOptions = Object.keys(viewers).filter(
+      (viewerId) => additionalPossibleViewerIds[type].some(t => viewerId === t)
+    );
+
+    const selectTargetViewerId = async (
+      type: LabelType,
+      viewerIdOptions: string[]
+    ) => {
+      if (viewerIdOptions.length === 0) return;
+      if (viewerIdOptions.length === 1) return viewerIdOptions[0];
+
+      if (type === 'ruler') {
+        // Display a dialog box to select the viewer to add the label to.
+        const choices = viewerIdOptions.reduce<{ [key: string]: string }>(
+          (options, key) => ({ ...options, [key]: key }),
+          {}
+        );
+        return await choice(
+          'Select the viewer to add a ruler label.',
+          choices,
+          { icon: 'info-sign', cancelable: true, bsSize: 'lg' }
+        ) as string | undefined;
+      } else {
+        // Return the first entry of the visible viewers as the target for adding the label.
+        return viewerIdOptions[0];
+      }
+    };
+
+    const viewerId = await selectTargetViewerId(type, viewerIdOptions);
+    if (!viewerId) return;
+
+    const newLabel = createNewLabel(type, viewers[viewerId]);
     updateCurrentLabels(labels => {
       labels.push(newLabel);
     });
@@ -162,9 +206,9 @@ const LabelMenu: React.FC<{
         appearance={
           activeLabel
             ? {
-                color: activeLabel.data.color,
-                alpha: activeLabel.data.alpha
-              }
+              color: activeLabel.data.color,
+              alpha: activeLabel.data.alpha
+            }
             : undefined
         }
         hidden={!!activeLabel?.hidden}

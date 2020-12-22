@@ -46,12 +46,12 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
   /**
    * Boundary of the outline, measured in mm.
    */
-  public min?: number[];
+  public min?: Vector2D;
 
   /**
    * Boundary of the outline, measured in mm.
    */
-  public max?: number[];
+  public max?: Vector2D;
 
   /**
    * The Z coordinate of the outline.
@@ -309,11 +309,11 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
         this.min[0] !== this.max[0] &&
         this.min[1] !== this.max[1]
       ) {
-        const newMin = [
+        const newMin: Vector2D = [
           Math.min(this.min[0], this.max[0]),
           Math.min(this.min[1], this.max[1])
         ];
-        const newMax = [
+        const newMax: Vector2D = [
           Math.max(this.min[0], this.max[0]),
           Math.max(this.min[1], this.max[1])
         ];
@@ -415,75 +415,10 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
     }
   }
 
-  public static calculateBoundingBoxAndDepth(
-    viewer: Viewer
-  ): { min: Vector2D; max: Vector2D; z: number } {
-    const ratio = 0.25;
-    const section = viewer.getState().section;
-    const orientation = detectOrthogonalSection(section);
-    if (orientation !== 'axial') {
-      return {
-        min: [0, 0],
-        max: [0, 0],
-        z: 0
-      };
-    }
-
-    const resolution = new Vector2().fromArray(viewer.getResolution());
-
-    const halfLength = Math.min(resolution.x, resolution.y) * ratio * 0.5;
-
-    const screenCenter = new Vector2().fromArray([
-      resolution.x * 0.5,
-      resolution.y * 0.5
-    ]);
-
-    const min = convertScreenCoordinateToVolumeCoordinate(
-      section,
-      resolution,
-      new Vector2().fromArray([
-        screenCenter.x - halfLength,
-        screenCenter.y - halfLength
-      ])
-    );
-
-    const max = convertScreenCoordinateToVolumeCoordinate(
-      section,
-      resolution,
-      new Vector2().fromArray([
-        screenCenter.x + halfLength,
-        screenCenter.y + halfLength
-      ])
-    );
-
-    return {
-      min: [min.x, min.y],
-      max: [max.x, max.y],
-      z: min.z
-    };
-  }
-
-  public static getOutline(data: {
-    min: Vector2D | number[];
-    max: Vector2D | number[];
-    z: number;
-  }): { min: Vector3D; max: Vector3D } {
-    return {
-      min: [data.min[0], data.min[1], data.z],
-      max: [data.max[0], data.max[1], data.z]
-    };
-  }
-
-  public validate(): boolean | undefined {
+  public validate(): boolean {
     const min = this.min;
     const max = this.max;
-
-    return (
-      min &&
-      max &&
-      min.some((value, index) => {
-        return value !== max[index];
-      })
-    );
+    if (!min || !max) return false;
+    return min.some((value, index) => value !== max[index]);
   }
 }

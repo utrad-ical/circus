@@ -1,70 +1,34 @@
-import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
-import {
-  getBoxCenter,
-  Vector2D,
-  Vector3D
-} from '@utrad-ical/circus-rs/src/browser';
+import { Section, Vector2D, Vector3D } from '@utrad-ical/circus-rs/src/browser';
+import { detectOrthogonalSection } from '@utrad-ical/circus-rs/src/browser/section-util';
+import focusBy from '@utrad-ical/circus-rs/src/browser/tool/state/focusBy';
 import produce from 'immer';
 import { ApiCaller } from 'utils/api';
 import { sha1 } from 'utils/util';
-import asyncMap from '../../utils/asyncMap';
 
-/**
- * EditingData represents one revision data with some meta data,
- * and forms the unit for history handling.
- */
-export interface EditingData {
-  revision: Revision<InternalLabel>;
+type InternalLabelDataIndex = {
+  voxel: InternalVoxelLabelData; // internal | external
+  rectangle: PlaneFigureLabelData;
+  ellipse: PlaneFigureLabelData;
+  cuboid: SolidFigureLabelData;
+  ellipsoid: SolidFigureLabelData;
+  point: PointLabelData;
+  ruler: RulerLabelData;
+};
+
+export type LabelType = keyof InternalLabelDataIndex;
+
+export interface LabelAppearance {
   /**
-   * The index of the active series. Always >= 0.
+   * Hexadeciaml string like '#ff00ff'.
    */
-  activeSeriesIndex: number;
+  color: string;
   /**
-   * The index of the active label in the active series.
-   * May be `-1`, which means the current series has no label.
+   * A float from 0 (transparent) to 1.0 (opaque).
    */
-  activeLabelIndex: number;
+  alpha: number;
 }
-
-/**
- * Immer-backed update function used to modify the current EditingData.
- * @param update The updater function that takes the 'draft' state.
- * @param tag Used for history handling. If similar small operations happen
- * many times, giving the same string as a tag will make them coalesce.
- * Don't give tags for important operations that can be undone individually.
- */
-export type EditingDataUpdater = (
-  updater: (current: EditingData) => EditingData | void,
-  tag?: string
-) => void;
-
-export interface Revision<
-  L extends InternalLabel | ExternalLabel = InternalLabel
-> {
-  creator: string;
-  date: string;
-  description: string;
-  attributes: object;
-  series: SeriesEntryWithLabels<L>[];
-  status: string;
-}
-
-export interface SeriesEntryWithLabels<
-  L extends InternalLabel | ExternalLabel = InternalLabel
-> {
-  seriesUid: string;
-  partialVolumeDescriptor: PartialVolumeDescriptor;
-  labels: L[];
-}
-
-export type LabelType =
-  | 'voxel'
-  | 'cuboid'
-  | 'ellipsoid'
-  | 'rectangle'
-  | 'ellipse';
 
 interface InternalVoxelLabelData {
   /**
@@ -79,44 +43,54 @@ interface InternalVoxelLabelData {
   alpha: number;
 }
 
-export interface LabelAppearance {
-  /**
-   * Hexadeciaml string like '#ff00ff'.
-   */
-  color: string;
-  /**
-   * A float from 0 (transparent) to 1.0 (opaque).
-   */
-  alpha: number;
-}
-
 type ExternalVoxelLabelData = LabelAppearance &
   ({ voxels: null } | { voxels: string; origin: Vector3D; size: Vector3D });
 
-type SolidFigureLabelData = LabelAppearance & {
+type SolidFigureLabelData = LabelAppearance & SolidFigureAnnotationData;
+type SolidFigureAnnotationData = {
   min: Vector3D;
   max: Vector3D;
 };
 
-type PlaneFigureLabelData = LabelAppearance & {
+type PlaneFigureLabelData = LabelAppearance & PlaneFigureAnnotationData;
+type PlaneFigureAnnotationData = {
   min: Vector2D;
   max: Vector2D;
   z: number;
 };
 
+type PointLabelData = LabelAppearance & PointAnnotationData;
+type PointAnnotationData = {
+  point: Vector3D;
+};
+
+type RulerLabelData = LabelAppearance & RulerAnnotationData;
+type RulerAnnotationData = {
+  section: Section;
+  start: Vector3D;
+  end: Vector3D;
+  labelPosition?: Vector2D;
+};
+
+type TaggedLabelDataCollection = {
+  [K in keyof InternalLabelDataIndex]: {
+    type: K;
+    data: InternalLabelDataIndex[K];
+  };
+};
+
+export type TaggedLabelDataOf<
+  T extends keyof InternalLabelDataIndex
+> = TaggedLabelDataCollection[T];
+
 type TaggedLabelData =
-  | {
-      type: 'voxel';
-      data: InternalVoxelLabelData;
-    }
-  | {
-      type: 'rectangle' | 'ellipse';
-      data: PlaneFigureLabelData;
-    }
-  | {
-      type: 'cuboid' | 'ellipsoid';
-      data: SolidFigureLabelData;
-    };
+  | TaggedLabelDataOf<'voxel'>
+  | TaggedLabelDataOf<'ellipse'>
+  | TaggedLabelDataOf<'rectangle'>
+  | TaggedLabelDataOf<'ellipsoid'>
+  | TaggedLabelDataOf<'cuboid'>
+  | TaggedLabelDataOf<'point'>
+  | TaggedLabelDataOf<'ruler'>;
 
 /**
  * InternalLabel resresents one label data stored in browser memory.
@@ -129,7 +103,15 @@ export type InternalLabel = {
    */
   temporaryKey: string;
   hidden: boolean;
-} & TaggedLabelData;
+} & (
+  | { type: 'voxel'; data: InternalVoxelLabelData }
+  | TaggedLabelDataOf<'ellipse'>
+  | TaggedLabelDataOf<'rectangle'>
+  | TaggedLabelDataOf<'ellipsoid'>
+  | TaggedLabelDataOf<'cuboid'>
+  | TaggedLabelDataOf<'point'>
+  | TaggedLabelDataOf<'ruler'>
+);
 
 /**
  * ExternalLabel resresents the label data
@@ -139,18 +121,13 @@ export type ExternalLabel = {
   name?: string;
   attributes: object;
 } & (
-  | {
-      type: 'voxel';
-      data: ExternalVoxelLabelData;
-    }
-  | {
-      type: 'rectangle' | 'ellipse';
-      data: PlaneFigureLabelData;
-    }
-  | {
-      type: 'cuboid' | 'ellipsoid';
-      data: SolidFigureLabelData;
-    }
+  | { type: 'voxel'; data: ExternalVoxelLabelData }
+  | TaggedLabelDataOf<'ellipse'>
+  | TaggedLabelDataOf<'rectangle'>
+  | TaggedLabelDataOf<'ellipsoid'>
+  | TaggedLabelDataOf<'cuboid'>
+  | TaggedLabelDataOf<'point'>
+  | TaggedLabelDataOf<'ruler'>
 );
 
 export const labelTypes: {
@@ -160,7 +137,9 @@ export const labelTypes: {
   cuboid: { icon: 'circus-annotation-cuboid', canConvertTo: 'ellipsoid' },
   ellipsoid: { icon: 'circus-annotation-ellipsoid', canConvertTo: 'cuboid' },
   rectangle: { icon: 'circus-annotation-rectangle', canConvertTo: 'ellipse' },
-  ellipse: { icon: 'circus-annotation-ellipse', canConvertTo: 'rectangle' }
+  ellipse: { icon: 'circus-annotation-ellipse', canConvertTo: 'rectangle' },
+  point: { icon: 'circus-annotation-point' },
+  ruler: { icon: 'circus-annotation-ruler' }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -191,38 +170,59 @@ const emptyVoxelLabelData = (
 export const createNewLabelData = (
   type: LabelType,
   appearance: LabelAppearance,
-  viewers: { [index: string]: rs.Viewer }
+  viewer?: rs.Viewer
 ): TaggedLabelData => {
   switch (type) {
     case 'voxel':
       return { type, data: emptyVoxelLabelData(appearance) };
     case 'cuboid':
     case 'ellipsoid': {
-      // Find the key of the first visible viewer, on which a new label is based
-      const key = Object.keys(viewers).find(index =>
-        /^(axial|sagittal|coronal)$/.test(index)
+      const solidFigureAnnotaion = rs.createDefaultSolidFigureFromViewer(
+        viewer,
+        { type: type === 'ellipsoid' ? 'ellipsoid' : 'cuboid' }
       );
       return {
         type,
         data: {
-          ...(key
-            ? rs.SolidFigure.calculateBoundingBoxWithDefaultDepth(viewers[key])
-            : { min: [0, 0, 0], max: [10, 10, 10] }),
-          ...appearance
+          ...appearance,
+          ...extractSolidFigureAnnotationData(solidFigureAnnotaion)
         }
       };
     }
     case 'ellipse':
-    case 'rectangle':
+    case 'rectangle': {
+      const planeFigureAnnotaion = rs.createDefaultPlaneFigureFromViewer(
+        viewer,
+        { type: type === 'ellipse' ? 'circle' : 'rectangle' }
+      );
       return {
         type,
         data: {
-          ...(viewers.axial
-            ? rs.PlaneFigure.calculateBoundingBoxAndDepth(viewers.axial)
-            : { min: [0, 0], max: [10, 10], z: 0 }),
-          ...appearance
+          ...appearance,
+          ...extractPlaneFigureAnnotationData(planeFigureAnnotaion)
         }
       };
+    }
+    case 'point': {
+      const pointAnnotaion = rs.createDefaultPointFromViewer(viewer, {});
+      return {
+        type,
+        data: {
+          ...appearance,
+          ...extractPointAnnotationData(pointAnnotaion)
+        }
+      };
+    }
+    case 'ruler': {
+      const rulerAnnotaion = rs.createDefaultRulerFromViewer(viewer, {});
+      return {
+        type,
+        data: {
+          ...appearance,
+          ...extractRulerAnnotationData(rulerAnnotaion)
+        }
+      };
+    }
   }
 };
 
@@ -231,7 +231,7 @@ export const createNewLabelData = (
  * 1. Adds `temporaryKey` for identify each label.
  * 2. Loads and assigns an array buffer for each voxel label.
  */
-const externalLabelToInternal = async (
+export const externalLabelToInternal = async (
   label: ExternalLabel,
   api: ApiCaller
 ): Promise<InternalLabel> => {
@@ -262,7 +262,7 @@ const externalLabelToInternal = async (
   }
 };
 
-const internalLabelToExternal = async (
+export const internalLabelToExternal = async (
   label: InternalLabel,
   api: ApiCaller
 ): Promise<ExternalLabel> => {
@@ -297,61 +297,6 @@ const internalLabelToExternal = async (
     delete (label as any).temporaryKey;
     delete (label as any).hidden;
     return label as ExternalLabel;
-  });
-};
-
-/**
- * Takes the revision data fetched from the API server and converts them
- * to the internal representation with temporary keys and array buffers.
- */
-export const externalRevisionToInternal = async (
-  revision: Revision<ExternalLabel>,
-  api: ApiCaller
-): Promise<Revision<InternalLabel>> => {
-  return await produce(revision, async revision => {
-    for (const series of revision.series) {
-      (series as any).labels = await asyncMap(series.labels, label =>
-        externalLabelToInternal(label, api)
-      );
-    }
-    return revision as Revision<InternalLabel>;
-  });
-};
-
-const internalSeriesToExternal = async (
-  series: SeriesEntryWithLabels<InternalLabel>,
-  api: ApiCaller
-): Promise<SeriesEntryWithLabels<ExternalLabel>> => {
-  const newLabels = await asyncMap(series.labels, async label =>
-    internalLabelToExternal(label, api)
-  );
-  return produce(series, series => {
-    (series as any).labels = newLabels;
-    return series as SeriesEntryWithLabels<ExternalLabel>;
-  });
-};
-
-/**
- * Saves a new revision data on the API server.
- */
-export const saveRevision = async (
-  caseId: string,
-  revision: Revision,
-  description: string,
-  api: ApiCaller
-) => {
-  const saveData: Partial<Revision<ExternalLabel>> = {
-    description,
-    attributes: revision.attributes,
-    series: await asyncMap(revision.series, async series =>
-      internalSeriesToExternal(series, api)
-    ),
-    status: 'approved'
-  };
-
-  await api(`cases/${caseId}/revision`, {
-    method: 'post',
-    data: saveData
   });
 };
 
@@ -406,30 +351,136 @@ export const buildAnnotation = (
       fig.id = label.temporaryKey;
       return fig;
     }
+    case 'point': {
+      const point = new rs.Point();
+      point.id = label.temporaryKey;
+      point.editable = true;
+      point.color = rgbaColor(appearance.color, appearance.alpha);
+      point.point = label.data.point;
+      return point;
+    }
+
+    case 'ruler': {
+      const ruler = new rs.Ruler();
+      ruler.id = label.temporaryKey;
+      ruler.editable = true;
+      ruler.color = rgbaColor(appearance.color, appearance.alpha);
+      ruler.section = label.data.section;
+      ruler.start = label.data.start;
+      ruler.end = label.data.end;
+      if (label.data.labelPosition)
+        ruler.labelPosition = label.data.labelPosition;
+      return ruler;
+    }
   }
 };
 
-export const getCenterOfLabel = (
+const getCenterOfLabel = (
   composition: rs.Composition,
   label: InternalLabel
-) => {
+): Vector3D | undefined => {
   switch (label.type) {
     case 'voxel': {
+      const src = composition.imageSource as rs.MprImageSource;
+      if (!src.metadata) return;
+
       const shrinkResult = voxelShrinkToMinimum(label.data);
       if (shrinkResult === null) return;
+
       const origin = shrinkResult.origin;
       const size = shrinkResult.rawData.getDimension();
-      return getBoxCenter(
-        rs.VoxelCloud.getBoundingBox(composition, { origin, size })
-      );
+      const { voxelSize } = src.metadata;
+
+      return [
+        (origin[0] + size[0]) * voxelSize[0],
+        (origin[1] + size[1]) * voxelSize[1],
+        (origin[2] + size[2]) * voxelSize[2]
+      ];
     }
     case 'cuboid':
-    case 'ellipsoid':
-      return getBoxCenter(label.data);
+    case 'ellipsoid': {
+      const { min, max } = label.data;
+      return [
+        min[0] + (max[0] - min[0]) * 0.5,
+        min[1] + (max[1] - min[1]) * 0.5,
+        min[2] + (max[2] - min[2]) * 0.5
+      ];
+    }
     case 'rectangle':
-    case 'ellipse':
-      return getBoxCenter(rs.PlaneFigure.getOutline(label.data));
+    case 'ellipse': {
+      const { min, max, z } = label.data;
+      return [
+        min[0] + (max[0] - min[0]) * 0.5,
+        min[1] + (max[1] - min[1]) * 0.5,
+        z
+      ];
+    }
+    case 'point':
+      return label.data.point;
+    case 'ruler': {
+      const { start, end } = label.data;
+      return [
+        start[0] + (end[0] - start[0]) * 0.5,
+        start[1] + (end[1] - start[1]) * 0.5,
+        start[2] + (end[2] - start[2]) * 0.5
+      ];
+    }
     default:
       throw new Error('Undefined label type');
   }
 };
+
+export const setRecommendedDisplay = (
+  composition: rs.Composition,
+  viewers: rs.Viewer[],
+  label: InternalLabel
+) => {
+  switch (label.type) {
+    case 'ruler': {
+      const center = getCenterOfLabel(composition, label);
+      const reproduceSection = label.data.section;
+      const reproduceOrientation = detectOrthogonalSection(reproduceSection);
+      viewers.forEach(viewer => {
+        const orientation = detectOrthogonalSection(viewer.getState().section);
+        if (orientation === reproduceOrientation) {
+          viewer.setState({ ...viewer.getState(), section: reproduceSection });
+        } else {
+          focusBy(viewer, center);
+        }
+      });
+      break;
+    }
+    default: {
+      const center = getCenterOfLabel(composition, label);
+      viewers.forEach(viewer => focusBy(viewer, center));
+    }
+  }
+};
+
+function extractSolidFigureAnnotationData(
+  fig: rs.SolidFigure
+): SolidFigureAnnotationData {
+  const { min, max } = fig;
+  return { min: min! as Vector3D, max: max as Vector3D };
+}
+
+function extractPlaneFigureAnnotationData(
+  fig: rs.PlaneFigure
+): PlaneFigureAnnotationData {
+  const { min, max, z } = fig;
+  return { min: min! as Vector2D, max: max as Vector2D, z: z! };
+}
+
+function extractPointAnnotationData(fig: rs.Point): PointAnnotationData {
+  const { point } = fig;
+  return { point: point! as Vector3D };
+}
+
+function extractRulerAnnotationData(fig: rs.Ruler): RulerAnnotationData {
+  const { section, start, end } = fig;
+  return {
+    section: section! as Section,
+    start: start! as Vector3D,
+    end: end! as Vector3D
+  };
+}

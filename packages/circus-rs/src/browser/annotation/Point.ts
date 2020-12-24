@@ -5,7 +5,6 @@ import {
   Vector3D
 } from '../../common/geometry';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
-import { convertScreenCoordinateToVolumeCoordinate } from '../section-util';
 import {
   convertViewerPointToVolumePoint,
   convertVolumePointToViewerPoint
@@ -33,7 +32,7 @@ export default class Point implements Annotation, ViewerEventTarget {
   /**
    * Coordinate of the point, measured in mm.
    */
-  public point?: Vector3D;
+  public location?: Vector3D;
   /**
    * Radius of the marker circle.
    */
@@ -57,13 +56,13 @@ export default class Point implements Annotation, ViewerEventTarget {
   private dragInfo:
     | {
         dragStartPoint3: Vector3;
-        originalPoint: Vector3D;
+        originalLocation: Vector3D;
       }
     | undefined = undefined;
 
   public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
     if (!viewer || !viewState) return;
-    if (!this.point) return;
+    if (!this.location) return;
     const canvas = viewer.canvas;
     if (!canvas) return;
     if (viewState.type !== 'mpr') return;
@@ -73,14 +72,17 @@ export default class Point implements Annotation, ViewerEventTarget {
     const color = this.getColor(viewState.section);
     if (!color) return;
 
-    const screenPoint = convertVolumePointToViewerPoint(viewer, ...this.point);
+    const screenPoint = convertVolumePointToViewerPoint(
+      viewer,
+      ...this.location
+    );
     drawPoint(ctx, screenPoint, { radius: this.radius, color });
   }
 
   private getColor(section: Section): string | undefined {
     const distance = distanceFromPointToSection(
       section,
-      new Vector3(...this.point!)
+      new Vector3(...this.location!)
     );
 
     switch (true) {
@@ -94,7 +96,7 @@ export default class Point implements Annotation, ViewerEventTarget {
   }
 
   public validate(): boolean {
-    return !!this.point;
+    return !!this.location;
   }
 
   public mouseMoveHandler(ev: ViewerEvent): void {
@@ -103,7 +105,7 @@ export default class Point implements Annotation, ViewerEventTarget {
     if (!viewer || !viewState) return;
     if (viewState.type !== 'mpr') return;
     if (!this.editable) return;
-    if (!this.point) return;
+    if (!this.location) return;
 
     this.handleType = this.hitTest(ev);
     if (this.handleType) {
@@ -124,7 +126,7 @@ export default class Point implements Annotation, ViewerEventTarget {
     if (!viewer || !viewState) return;
     if (viewState.type !== 'mpr') return;
     if (!this.editable) return;
-    if (!this.point) return;
+    if (!this.location) return;
 
     if (viewer.getHoveringAnnotation() === this && this.handleType) {
       ev.stopPropagation();
@@ -135,18 +137,18 @@ export default class Point implements Annotation, ViewerEventTarget {
           ev.viewerX!,
           ev.viewerY!
         ),
-        originalPoint: this.point
+        originalLocation: this.location
       };
     }
   }
 
   private hitTest(ev: ViewerEvent): PointHitType | undefined {
-    if (!this.point) return;
+    if (!this.location) return;
 
     const viewer = ev.viewer;
     const evPoint = new Vector2(ev.viewerX!, ev.viewerY!);
 
-    const hitPoint = convertVolumePointToViewerPoint(viewer, ...this.point);
+    const hitPoint = convertVolumePointToViewerPoint(viewer, ...this.location);
     const hitBox = new Box2(
       new Vector2(hitPoint.x - this.radius, hitPoint.y - this.radius),
       new Vector2(hitPoint.x + this.radius, hitPoint.y + this.radius)
@@ -178,10 +180,10 @@ export default class Point implements Annotation, ViewerEventTarget {
         this.dragInfo.dragStartPoint3
       );
 
-      this.point = [
-        this.dragInfo.originalPoint[0] + draggedTotal3.x,
-        this.dragInfo.originalPoint[1] + draggedTotal3.y,
-        this.dragInfo.originalPoint[2] + draggedTotal3.z
+      this.location = [
+        this.dragInfo.originalLocation[0] + draggedTotal3.x,
+        this.dragInfo.originalLocation[1] + draggedTotal3.y,
+        this.dragInfo.originalLocation[2] + draggedTotal3.z
       ];
 
       const comp = viewer.getComposition();

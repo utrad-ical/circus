@@ -61,7 +61,7 @@ type PlaneFigureAnnotationData = {
 
 type PointLabelData = LabelAppearance & PointAnnotationData;
 type PointAnnotationData = {
-  point: Vector3D;
+  location: Vector3D;
 };
 
 type RulerLabelData = LabelAppearance & RulerAnnotationData;
@@ -356,10 +356,9 @@ export const buildAnnotation = (
       point.id = label.temporaryKey;
       point.editable = true;
       point.color = rgbaColor(appearance.color, appearance.alpha);
-      point.point = label.data.point;
+      point.location = label.data.location;
       return point;
     }
-
     case 'ruler': {
       const ruler = new rs.Ruler();
       ruler.id = label.temporaryKey;
@@ -416,7 +415,7 @@ const getCenterOfLabel = (
       ];
     }
     case 'point':
-      return label.data.point;
+      return label.data.location;
     case 'ruler': {
       const { start, end } = label.data;
       return [
@@ -457,30 +456,30 @@ export const setRecommendedDisplay = (
   }
 };
 
-function extractSolidFigureAnnotationData(
+const extractSolidFigureAnnotationData = (
   fig: rs.SolidFigure
-): SolidFigureAnnotationData {
+): SolidFigureAnnotationData => {
   const { min, max } = fig;
   return { min: min! as Vector3D, max: max as Vector3D };
-}
+};
 
-function extractPlaneFigureAnnotationData(
+const extractPlaneFigureAnnotationData = (
   fig: rs.PlaneFigure
-): PlaneFigureAnnotationData {
+): PlaneFigureAnnotationData => {
   const { min, max, z } = fig;
   return { min: min! as Vector2D, max: max as Vector2D, z: z! };
-}
+};
 
-function extractPointAnnotationData(fig: rs.Point): PointAnnotationData {
-  const { point } = fig;
-  return { point: point! as Vector3D };
-}
+const extractPointAnnotationData = (fig: rs.Point): PointAnnotationData => {
+  const { location } = fig;
+  return { location: location! as Vector3D };
+};
 
-function extractRulerAnnotationData(fig: rs.Ruler): RulerAnnotationData {
+const extractRulerAnnotationData = (fig: rs.Ruler): RulerAnnotationData => {
   const { section, start, end } = fig;
   return {
     section: section! as Section,
     start: start! as Vector3D,
     end: end! as Vector3D
   };
-}
+};

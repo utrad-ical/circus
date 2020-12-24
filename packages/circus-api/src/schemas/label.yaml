@@ -115,15 +115,15 @@ oneOf:
       data:
         type: object
         properties:
-          origin:
+          location:
             type: array
             items:
               type: 'number'
             minItems: 3
             maxItems: 3
             description: >
-              Origin of the point, the volume Coordinates (measured in mm).
-        required: ['origin']
+              Location of the point, the volume Coordinates (measured in mm).
+        required: ['location']
   - properties:
       type:
         enum: ['ruler']

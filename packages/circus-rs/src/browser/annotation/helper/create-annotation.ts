@@ -132,7 +132,7 @@ export function createDefaultPointFromViewer(
     new Vector2().fromArray([screenCenter.x, screenCenter.y])
   );
   if (radius && radius > 0) anno.radius = radius;
-  anno.point = [centerPoint.x, centerPoint.y, centerPoint.z];
+  anno.location = [centerPoint.x, centerPoint.y, centerPoint.z];
   return anno;
 }
 

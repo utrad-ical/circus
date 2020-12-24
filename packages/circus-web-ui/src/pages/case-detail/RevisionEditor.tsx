@@ -23,7 +23,11 @@ import {
 } from 'utils/useImageSource';
 import * as c from './caseStore';
 import LabelSelector from './LabelSelector';
-import { EditingData, EditingDataUpdater, SeriesEntryWithLabels } from './revisionData';
+import {
+  EditingData,
+  EditingDataUpdater,
+  SeriesEntryWithLabels
+} from './revisionData';
 import {
   InternalLabel,
   buildAnnotation,
@@ -171,7 +175,12 @@ const RevisionEditor: React.FC<{
   ]);
 
   const handleAnnotationChange = (
-    annotation: rs.VoxelCloud | rs.SolidFigure | rs.PlaneFigure | rs.Point | rs.Ruler
+    annotation:
+      | rs.VoxelCloud
+      | rs.SolidFigure
+      | rs.PlaneFigure
+      | rs.Point
+      | rs.Ruler
   ) => {
     const { revision, activeSeriesIndex } = editingData;
     const labelIndex = revision.series[activeSeriesIndex].labels.findIndex(
@@ -190,22 +199,28 @@ const RevisionEditor: React.FC<{
         annotation instanceof rs.SolidFigure &&
         annotation.validate()
       ) {
-        return produce(label, (l: TaggedLabelDataOf<'ellipsoid' | 'cuboid'>) => {
-          l.data.min = annotation.min!;
-          l.data.max = annotation.max!;
-        });
+        return produce(
+          label,
+          (l: TaggedLabelDataOf<'ellipsoid' | 'cuboid'>) => {
+            l.data.min = annotation.min!;
+            l.data.max = annotation.max!;
+          }
+        );
       } else if (
         annotation instanceof rs.PlaneFigure &&
         annotation.validate()
       ) {
-        return produce(label, (l: TaggedLabelDataOf<'rectangle' | 'ellipse'>) => {
-          l.data.min = annotation.min!;
-          l.data.max = annotation.max!;
-          l.data.z = annotation.z as number
-        });
+        return produce(
+          label,
+          (l: TaggedLabelDataOf<'rectangle' | 'ellipse'>) => {
+            l.data.min = annotation.min!;
+            l.data.max = annotation.max!;
+            l.data.z = annotation.z as number;
+          }
+        );
       } else if (annotation instanceof rs.Point && annotation.validate()) {
         return produce(label, (l: TaggedLabelDataOf<'point'>) => {
-          l.data.point = annotation.point!;
+          l.data.location = annotation.location!;
         });
       } else if (annotation instanceof rs.Ruler && annotation.validate()) {
         return produce(label, (l: TaggedLabelDataOf<'ruler'>) => {
@@ -486,19 +501,19 @@ const RevisionEditor: React.FC<{
         </Collapser>
         {Object.keys(projectData.caseAttributesSchema.properties || {}).length >
           0 && (
-            <Collapser title="Case Attributes" className="case-attributes">
-              <JsonSchemaEditor
-                key={refreshCounter}
-                schema={projectData.caseAttributesSchema}
-                value={revision.attributes}
-                onChange={caseAttributesChange}
-                onValidate={valid =>
-                  caseDispatch(c.validateCaseAttributes(valid))
-                }
-                disabled={busy}
-              />
-            </Collapser>
-          )}
+          <Collapser title="Case Attributes" className="case-attributes">
+            <JsonSchemaEditor
+              key={refreshCounter}
+              schema={projectData.caseAttributesSchema}
+              value={revision.attributes}
+              onChange={caseAttributesChange}
+              onValidate={valid =>
+                caseDispatch(c.validateCaseAttributes(valid))
+              }
+              disabled={busy}
+            />
+          </Collapser>
+        )}
       </SideContainer>
       <div className="case-revision-main">
         <ToolBar

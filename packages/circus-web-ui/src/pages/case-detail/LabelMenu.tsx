@@ -76,7 +76,6 @@ const LabelMenu: React.FC<{
         break;
       }
       case 'remove': {
-        if (!(await confirm('Delete this label?'))) return;
         updateEditingData(editingData => {
           const series = editingData.revision.series[activeSeriesIndex];
           series.labels.splice(activeLabelIndex, 1);
@@ -155,16 +154,53 @@ const LabelMenu: React.FC<{
     setNewLabelType(type);
 
     const additionalPossibleViewerIds: { [key in LabelType]: string[] } = {
-      voxel: ['axial', 'one-axial', 'sagittal', 'one-sagittal', 'coronal', 'one-coronal'],
-      cuboid: ['axial', 'one-axial', 'sagittal', 'one-sagittal', 'coronal', 'one-coronal'],
-      ellipsoid: ['axial', 'one-axial', 'sagittal', 'one-sagittal', 'coronal', 'one-coronal'],
+      voxel: [
+        'axial',
+        'one-axial',
+        'sagittal',
+        'one-sagittal',
+        'coronal',
+        'one-coronal'
+      ],
+      cuboid: [
+        'axial',
+        'one-axial',
+        'sagittal',
+        'one-sagittal',
+        'coronal',
+        'one-coronal'
+      ],
+      ellipsoid: [
+        'axial',
+        'one-axial',
+        'sagittal',
+        'one-sagittal',
+        'coronal',
+        'one-coronal'
+      ],
       ellipse: ['axial', 'one-axial'],
       rectangle: ['axial', 'one-axial'],
-      point: ['axial', 'one-axial', 'sagittal', 'one-sagittal', 'coronal', 'one-coronal', 'oblique'],
-      ruler: ['axial', 'one-axial', 'sagittal', 'one-sagittal', 'coronal', 'one-coronal', 'oblique']
+      point: [
+        'axial',
+        'one-axial',
+        'sagittal',
+        'one-sagittal',
+        'coronal',
+        'one-coronal',
+        'oblique'
+      ],
+      ruler: [
+        'axial',
+        'one-axial',
+        'sagittal',
+        'one-sagittal',
+        'coronal',
+        'one-coronal',
+        'oblique'
+      ]
     };
-    const viewerIdOptions = Object.keys(viewers).filter(
-      (viewerId) => additionalPossibleViewerIds[type].some(t => viewerId === t)
+    const viewerIdOptions = Object.keys(viewers).filter(viewerId =>
+      additionalPossibleViewerIds[type].some(t => viewerId === t)
     );
 
     const selectTargetViewerId = async (
@@ -180,11 +216,11 @@ const LabelMenu: React.FC<{
           (options, key) => ({ ...options, [key]: key }),
           {}
         );
-        return await choice(
+        return (await choice(
           'Select the viewer to add a ruler label.',
           choices,
           { icon: 'info-sign', cancelable: true, bsSize: 'lg' }
-        ) as string | undefined;
+        )) as string | undefined;
       } else {
         // Return the first entry of the visible viewers as the target for adding the label.
         return viewerIdOptions[0];
@@ -206,9 +242,9 @@ const LabelMenu: React.FC<{
         appearance={
           activeLabel
             ? {
-              color: activeLabel.data.color,
-              alpha: activeLabel.data.alpha
-            }
+                color: activeLabel.data.color,
+                alpha: activeLabel.data.alpha
+              }
             : undefined
         }
         hidden={!!activeLabel?.hidden}

@@ -36,7 +36,7 @@ import {
 } from './labelData';
 import SideContainer from './SideContainer';
 import ToolBar, { ViewOptions } from './ToolBar';
-import ViewerCluster from './ViewerCluster';
+import ViewerGrid from './ViewerGrid';
 import IconButton from '@smikitky/rb-components/lib/IconButton';
 import { Modal } from '../../components/react-bootstrap';
 import SeriesSelectorDialog from './SeriesSelectorDialog';
@@ -529,7 +529,7 @@ const RevisionEditor: React.FC<{
           brushEnabled={editorEnabled}
           disabled={busy}
         />
-        <ViewerCluster
+        <ViewerGrid
           composition={composition}
           layout={viewOptions.layout ?? 'twoByTwo'}
           stateChanger={stateChanger}

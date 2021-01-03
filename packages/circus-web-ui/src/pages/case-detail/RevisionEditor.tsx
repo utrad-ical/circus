@@ -35,7 +35,7 @@ import {
 } from './labelData';
 import SideContainer from './SideContainer';
 import ToolBar, { ViewOptions } from './ToolBar';
-import ViewerGrid from './ViewerGrid';
+import ViewerGrid, { ViewerDef } from './ViewerGrid';
 import IconButton from '@smikitky/rb-components/lib/IconButton';
 import { Modal } from '../../components/react-bootstrap';
 import SeriesSelectorDialog from './SeriesSelectorDialog';
@@ -46,6 +46,8 @@ import useLocalPreference from 'utils/useLocalPreference';
 import isTouchDevice from 'utils/isTouchDevice';
 import useToolbar from 'pages/case-detail/useToolbar';
 import Series from 'types/Series';
+import { LayoutInfo, layoutReducer } from 'components/GridContainer';
+import { OrientationString } from 'circus-rs/section-util';
 
 const useCompositions = (
   series: {
@@ -154,6 +156,13 @@ const RevisionEditor: React.FC<{
     }
   }, [allSeries, editingData.revision.series]);
 
+  const [layoutableItems, setLayoutableItems] = useState<ViewerDef[]>([]);
+  const [layout, setLayout] = useState<LayoutInfo>({
+    columns: 2,
+    rows: 2,
+    positions: {}
+  });
+
   const activeSeries =
     editingData.revision.series[editingData.activeSeriesIndex];
 
@@ -161,6 +170,49 @@ const RevisionEditor: React.FC<{
   const { composition, volumeLoaded } = compositions[
     editingData.activeSeriesIndex
   ];
+
+  const registerNewViewerCellKey = useCallback(
+    (volumeId: number, orientation: OrientationString) => {
+      const key = new Array(8)
+        .fill(0)
+        .map(() => String.fromCharCode(97 + Math.floor(Math.random() * 26)))
+        .join('');
+      if (!compositions[volumeId].composition) return;
+      setLayoutableItems(layoutableItems =>
+        produce(layoutableItems, draft => {
+          draft.push({
+            key,
+            orientation,
+            celestialRotateMode: true,
+            composition: compositions[volumeId].composition as any
+          });
+        })
+      );
+      return key;
+    },
+    [compositions]
+  );
+
+  // Performs initial viewer layout
+  useEffect(() => {
+    if (Object.keys(layout.positions).length) return;
+    const orientations: OrientationString[] = [
+      'axial',
+      'sagittal',
+      'coronal',
+      'oblique'
+    ];
+    let tmp = layout;
+    orientations.forEach(orientation => {
+      const key = registerNewViewerCellKey(0, orientation);
+      if (!key) return;
+      tmp = layoutReducer(tmp, {
+        type: 'insertItemToEmptyCell',
+        payload: { key }
+      });
+    });
+    setLayout(tmp);
+  }, [compositions, layout, registerNewViewerCellKey]);
 
   const { revision, activeLabelIndex } = editingData;
 
@@ -560,8 +612,9 @@ const RevisionEditor: React.FC<{
           disabled={busy}
         />
         <ViewerGrid
-          composition={composition}
-          layout={viewOptions.layout ?? 'twoByTwo'}
+          items={layoutableItems}
+          layout={layout}
+          setLayout={setLayout}
           stateChanger={stateChanger}
           tool={activeTool}
           onCreateViewer={handleCreateViwer}

@@ -22,6 +22,7 @@ export interface ViewerDef {
 interface ViewerGridContextValue {
   compositions: { composition?: Composition }[];
   tool: Tool;
+  activeSeriesIndex: number;
   stateChanger: StateChanger<MprViewState>;
   onCreateViewer: (viewer: Viewer, id?: string | number) => void;
   onDestroyViewer: (viewer: Viewer) => void;
@@ -41,9 +42,11 @@ const ViewerGridContext = React.createContext<ViewerGridContextValue | null>(
 );
 
 const Header: React.FC<{ value: ViewerDef }> = props => {
-  const { key, orientation, celestialRotateMode } = props.value;
+  const { key, volumeId, orientation, celestialRotateMode } = props.value;
 
-  const { updateViewerCellKey } = useContext(ViewerGridContext)!;
+  const { updateViewerCellKey, activeSeriesIndex } = useContext(
+    ViewerGridContext
+  )!;
 
   const handleRotateClick = () => {
     updateViewerCellKey(key, current => {
@@ -58,10 +61,12 @@ const Header: React.FC<{ value: ViewerDef }> = props => {
     });
   };
 
+  const active = volumeId === activeSeriesIndex;
+
   return (
-    <HeaderDiv>
+    <HeaderDiv className={active ? 'active' : ''}>
       <span>
-        Viewer: {key} Series #{props.value.volumeId} {props.value.orientation}
+        Viewer: Series #{volumeId} {orientation}
       </span>
       <span>
         {orientation === 'oblique' && (
@@ -100,6 +105,10 @@ const Header: React.FC<{ value: ViewerDef }> = props => {
 };
 
 const HeaderDiv = styled.div`
+  &.active {
+    background-color: #555500;
+  }
+
   display: flex;
   justify-content: space-between;
   height: 27px;
@@ -195,6 +204,7 @@ const ViewerGrid: React.FC<{
   layout: LayoutInfo;
   setLayout: (layout: LayoutInfo) => void;
   tool?: Tool;
+  activeSeriesIndex: number;
   stateChanger: StateChanger<MprViewState>;
   onCreateViewer: (viewer: Viewer, id?: string | number) => void;
   onDestroyViewer: (viewer: Viewer) => void;
@@ -209,6 +219,7 @@ const ViewerGrid: React.FC<{
     items,
     compositions,
     tool,
+    activeSeriesIndex,
     stateChanger,
     layout,
     setLayout,
@@ -223,6 +234,7 @@ const ViewerGrid: React.FC<{
     () => ({
       compositions,
       tool: tool!,
+      activeSeriesIndex,
       stateChanger,
       onCreateViewer,
       onDestroyViewer,
@@ -233,6 +245,7 @@ const ViewerGrid: React.FC<{
     [
       compositions,
       tool,
+      activeSeriesIndex,
       stateChanger,
       onCreateViewer,
       onDestroyViewer,

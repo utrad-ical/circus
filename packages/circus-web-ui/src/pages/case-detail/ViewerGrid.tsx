@@ -10,7 +10,7 @@ import { Button } from 'components/react-bootstrap';
 import React, { useContext, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 
-interface ViewerDef {
+export interface ViewerDef {
   key: string;
   orientation: 'axial' | 'sagittal' | 'coronal' | 'oblique';
   celestialRotateMode: boolean; // only applicable for oblique view
@@ -37,7 +37,9 @@ const Header: React.FC<{ value: ViewerDef }> = props => {
   const { orientation, celestialRotateMode } = props.value;
   return (
     <HeaderDiv>
-      <span>Viewer: {props.value.orientation}</span>
+      <span>
+        Viewer: {props.value.key} {props.value.orientation}
+      </span>
       <span>
         {orientation === 'oblique' && (
           <Button
@@ -117,48 +119,27 @@ const orientationInitialStateSetters: {
 export type Layout = 'twoByTwo' | 'axial' | 'sagittal' | 'coronal';
 
 const ViewerGrid: React.FC<{
-  composition: Composition;
+  items: ViewerDef[];
+  layout: LayoutInfo;
+  setLayout: (layout: LayoutInfo) => void;
   tool?: Tool;
   stateChanger: StateChanger<MprViewState>;
-  layout: Layout;
   onCreateViewer: (viewer: Viewer, id?: string | number) => void;
   onDestroyViewer: (viewer: Viewer) => void;
   initialStateSetter: (viewer: Viewer, viewState: ViewState) => ViewState;
   onViewStateChange: (viewer: Viewer, id?: string | number) => void;
 }> = props => {
   const {
-    composition,
+    items,
     tool,
     stateChanger,
     layout,
+    setLayout,
     onCreateViewer,
     onDestroyViewer,
     onViewStateChange,
     initialStateSetter
   } = props;
-
-  const gridLayout = useMemo<LayoutInfo>(() => {
-    if (layout === 'twoByTwo') {
-      return {
-        columns: 2,
-        rows: 2,
-        positions: { axial: 0, sagittal: 1, coronal: 2, oblique: 3 }
-      };
-    } else {
-      return { columns: 1, rows: 1, positions: { [layout]: 1 } };
-    }
-  }, [layout]);
-
-  const items = useMemo<ViewerDef[]>(() => {
-    const keys: any[] = ['axial', 'sagittal', 'coronal', 'oblique'];
-    return keys.map(k => ({
-      key: k,
-      orientation: k,
-      composition,
-      celestialRotateMode: true,
-      initialStateSetter
-    }));
-  }, [composition, initialStateSetter]);
 
   const gridContext: ViewerGridContextValue = useMemo(
     () => ({
@@ -183,10 +164,10 @@ const ViewerGrid: React.FC<{
     <ViewerGridContext.Provider value={gridContext}>
       <GridContainer<ViewerDef>
         items={items}
-        layout={gridLayout}
+        layout={layout}
         renderHeader={Header}
         renderItem={Content}
-        onLayoutChange={() => {}}
+        onLayoutChange={setLayout}
         dragRemovable={false}
       />
     </ViewerGridContext.Provider>

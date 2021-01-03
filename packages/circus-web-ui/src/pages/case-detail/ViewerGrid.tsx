@@ -1,22 +1,24 @@
 import { Composition, MprViewState, Tool, Viewer, ViewState } from 'circus-rs';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
 import GridContainer, { LayoutInfo } from 'components/GridContainer';
+import IconButton from 'components/IconButton';
 import ImageViewer, {
   setOrthogonalOrientation,
   StateChanger
 } from 'components/ImageViewer';
-import React, { useContext, useMemo } from 'react';
+import { Button } from 'components/react-bootstrap';
+import React, { useContext, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 
 interface ViewerDef {
   key: string;
   orientation: 'axial' | 'sagittal' | 'coronal' | 'oblique';
+  celestialRotateMode: boolean; // only applicable for oblique view
   composition: Composition;
-  tool?: Tool;
-  initialStateSetter: (viewer: Viewer, viewState: ViewState) => ViewState;
 }
 
 interface ViewerGridContextValue {
+  tool: Tool;
   stateChanger: StateChanger<MprViewState>;
   onCreateViewer: (viewer: Viewer, id?: string | number) => void;
   onDestroyViewer: (viewer: Viewer) => void;
@@ -32,22 +34,45 @@ const ViewerGridContext = React.createContext<ViewerGridContextValue | null>(
 );
 
 const Header: React.FC<{ value: ViewerDef }> = props => {
-  return <HeaderDiv>Viewer: {props.value.orientation}</HeaderDiv>;
+  const { orientation, celestialRotateMode } = props.value;
+  return (
+    <HeaderDiv>
+      <span>Viewer: {props.value.orientation}</span>
+      <span>
+        {orientation === 'oblique' && (
+          <Button
+            bsSize="xs"
+            bsStyle={celestialRotateMode ? 'primary' : 'default'}
+          >
+            Rotate
+          </Button>
+        )}
+        <IconButton bsSize="xs" icon="glyphicon-option-horizontal" />
+      </span>
+    </HeaderDiv>
+  );
 };
 
 const HeaderDiv = styled.div`
+  display: flex;
+  justify-content: space-between;
+  height: 27px;
+  font-size: 15px;
+  line-height: 25px;
   color: white;
   padding: 0 3px;
   background-color: #444444;
   border: 1px solid #888888;
-  font-size: 80%;
   cursor: pointer;
 `;
 
+const celestialRotate = toolFactory('celestialRotate');
+
 const Content: React.FC<{ value: ViewerDef }> = props => {
-  const { key, orientation, composition, tool } = props.value;
+  const { key, orientation, composition, celestialRotateMode } = props.value;
 
   const {
+    tool,
     stateChanger,
     initialStateSetter,
     onCreateViewer,
@@ -70,7 +95,7 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
       key={key}
       className={`viewer-${orientation}`}
       composition={composition}
-      tool={tool}
+      tool={celestialRotateMode ? tool : celestialRotate}
       initialStateSetter={combinedInitialStateSetter}
       stateChanger={stateChanger}
       onCreateViewer={onCreateViewer}
@@ -80,14 +105,13 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
   );
 };
 
-const celestialRotate = toolFactory('celestialRotate');
-
 const orientationInitialStateSetters: {
   [orientatin: string]: ReturnType<typeof setOrthogonalOrientation>;
 } = {
   axial: setOrthogonalOrientation('axial'),
   sagittal: setOrthogonalOrientation('sagittal'),
-  coronal: setOrthogonalOrientation('coronal')
+  coronal: setOrthogonalOrientation('coronal'),
+  oblique: setOrthogonalOrientation('axial')
 };
 
 export type Layout = 'twoByTwo' | 'axial' | 'sagittal' | 'coronal';
@@ -131,13 +155,14 @@ const ViewerGrid: React.FC<{
       key: k,
       orientation: k,
       composition,
-      tool,
+      celestialRotateMode: true,
       initialStateSetter
     }));
-  }, [composition, tool, initialStateSetter]);
+  }, [composition, initialStateSetter]);
 
   const gridContext: ViewerGridContextValue = useMemo(
     () => ({
+      tool: tool!,
       stateChanger,
       onCreateViewer,
       onDestroyViewer,
@@ -145,6 +170,7 @@ const ViewerGrid: React.FC<{
       initialStateSetter
     }),
     [
+      tool,
       stateChanger,
       onCreateViewer,
       onDestroyViewer,
@@ -161,6 +187,7 @@ const ViewerGrid: React.FC<{
         renderHeader={Header}
         renderItem={Content}
         onLayoutChange={() => {}}
+        dragRemovable={false}
       />
     </ViewerGridContext.Provider>
   );

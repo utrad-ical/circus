@@ -13,14 +13,25 @@ import Series from 'types/Series';
 import { EditingData, EditingDataUpdater } from './revisionData';
 import { InternalLabel, labelTypes } from './labelData';
 import { multirange } from 'multi-integer-range';
+import { OrientationString } from 'circus-rs/section-util';
 
 const LabelSelector: React.FC<{
   editingData: EditingData;
   seriesData: { [seriesUid: string]: Series };
+  registerNewViewerCellKey: (
+    volumeId: number,
+    orientation: OrientationString
+  ) => string;
   updateEditingData: EditingDataUpdater;
   disabled?: boolean;
 }> = props => {
-  const { editingData, updateEditingData, seriesData, disabled } = props;
+  const {
+    editingData,
+    registerNewViewerCellKey,
+    updateEditingData,
+    seriesData,
+    disabled
+  } = props;
 
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
   const activeSeries = revision.series[activeSeriesIndex];
@@ -35,6 +46,7 @@ const LabelSelector: React.FC<{
           seriesInfo={seriesData[series.seriesUid]}
           editingData={editingData}
           updateEditingData={updateEditingData}
+          registerNewViewerCellKey={registerNewViewerCellKey}
           seriesIndex={seriesIndex}
           activeLabel={activeLabel}
           disabled={disabled}
@@ -69,6 +81,10 @@ export default LabelSelector;
 const SeriesItem: React.FC<{
   editingData: EditingData;
   updateEditingData: EditingDataUpdater;
+  registerNewViewerCellKey: (
+    volumeId: number,
+    orientation: OrientationString
+  ) => string;
   seriesInfo: Series;
   seriesIndex: number;
   activeLabel: InternalLabel | null;
@@ -78,6 +94,7 @@ const SeriesItem: React.FC<{
     seriesIndex,
     editingData,
     updateEditingData,
+    registerNewViewerCellKey,
     seriesInfo,
     activeLabel,
     disabled
@@ -107,12 +124,21 @@ const SeriesItem: React.FC<{
     changeLabel(seriesIndex, labelIndex);
   };
 
+  const handleDragStart = (ev: React.DragEvent) => {
+    const key = registerNewViewerCellKey(seriesIndex, 'axial');
+    ev.dataTransfer.setData('text/x-circusdb-viewergrid', key);
+    ev.dataTransfer.effectAllowed = 'move';
+    ev.stopPropagation();
+  };
+
   return (
     <StyledSeriesLi
       className={classNames({
         active: seriesIndex === editingData.activeSeriesIndex
       })}
       onClick={handleSeriesClick}
+      onDragStart={handleDragStart}
+      draggable
     >
       <span className="series-head">
         <div>
@@ -184,11 +210,11 @@ const SeriesInfo: React.FC<{
         {noPvd ? (
           <> (Full)</>
         ) : (
-            <>
-              {' '}
+          <>
+            {' '}
             (<b>Partial:</b> {describePartialVolumeDescriptor(pvd)})
-            </>
-          )}
+          </>
+        )}
       </>
     ),
     'Series Instance UID': series.seriesUid,
@@ -275,6 +301,7 @@ export const Label: React.FC<{
     ev.dataTransfer.setData('text/x-circusdb-label', '');
     dragData = { seriesIndex, labelIndex };
     ev.dataTransfer.effectAllowed = 'move';
+    ev.stopPropagation();
   };
 
   const handleDragOver = (ev: React.DragEvent) => {

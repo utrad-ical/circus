@@ -168,7 +168,7 @@ const ViewerGrid: React.FC<{
         renderHeader={Header}
         renderItem={Content}
         onLayoutChange={setLayout}
-        dragRemovable={false}
+        dragDataMimeType="text/x-circusdb-viewergrid"
       />
     </ViewerGridContext.Provider>
   );

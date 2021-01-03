@@ -634,6 +634,7 @@ const RevisionEditor: React.FC<{
           setLayout={setLayout}
           stateChanger={stateChanger}
           tool={activeTool}
+          activeSeriesIndex={editingData.activeSeriesIndex}
           onCreateViewer={handleCreateViwer}
           onDestroyViewer={handleDestroyViewer}
           initialStateSetter={initialStateSetter}

@@ -28,7 +28,10 @@ export const setOrthogonalOrientation = (orientation: OrientationString) => {
 
 const defaultTool = toolFactory('pager');
 
-export type StateChangerFunc<T extends rs.ViewState> = (state: T) => T;
+export type StateChangerFunc<T extends rs.ViewState> = (
+  state: T,
+  viewer: rs.Viewer
+) => T;
 
 /**
  * StateChanger is used to change the view state of a Viewer imperatively.
@@ -140,7 +143,7 @@ const ImageViewer: React.FC<{
     const handleChangeState = (changer: StateChangerFunc<rs.ViewState>) => {
       if (!viewer) return;
       const state = viewer.getState();
-      viewer.setState(changer(state));
+      viewer.setState(changer(state, viewer));
     };
     stateChanger.on(handleChangeState);
     return () => {

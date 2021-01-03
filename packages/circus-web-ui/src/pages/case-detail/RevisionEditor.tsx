@@ -181,15 +181,30 @@ const RevisionEditor: React.FC<{
         produce(layoutableItems, draft => {
           draft.push({
             key,
+            volumeId,
             orientation,
-            celestialRotateMode: true,
-            composition: compositions[volumeId].composition as any
+            celestialRotateMode: orientation === 'oblique'
           });
         })
       );
       return key;
     },
-    [compositions]
+    []
+  );
+
+  const updateViewerCellKey = useCallback(
+    (key: string, update: (current: ViewerDef) => ViewerDef | void) => {
+      setLayoutableItems(layoutableItems => {
+        const index = layoutableItems.findIndex(item => item.key === key);
+        if (index < 0) return layoutableItems;
+        const item = layoutableItems[index];
+        const newItem = produce(item, update);
+        return produce(layoutableItems, draft => {
+          draft[index] = newItem;
+        });
+      });
+    },
+    []
   );
 
   // Performs initial viewer layout
@@ -614,6 +629,7 @@ const RevisionEditor: React.FC<{
         />
         <ViewerGrid
           items={layoutableItems}
+          compositions={compositions}
           layout={layout}
           setLayout={setLayout}
           stateChanger={stateChanger}
@@ -622,6 +638,7 @@ const RevisionEditor: React.FC<{
           onDestroyViewer={handleDestroyViewer}
           initialStateSetter={initialStateSetter}
           onViewStateChange={handleViewStateChange}
+          updateViewerCellKey={updateViewerCellKey}
         />
       </div>
       <Modal show={seriesDialogOpen} bsSize="lg">

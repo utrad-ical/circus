@@ -177,7 +177,6 @@ const RevisionEditor: React.FC<{
         .fill(0)
         .map(() => String.fromCharCode(97 + Math.floor(Math.random() * 26)))
         .join('');
-      if (!compositions[volumeId].composition) return;
       setLayoutableItems(layoutableItems =>
         produce(layoutableItems, draft => {
           draft.push({
@@ -196,6 +195,7 @@ const RevisionEditor: React.FC<{
   // Performs initial viewer layout
   useEffect(() => {
     if (Object.keys(layout.positions).length) return;
+    if (compositions.some(c => !c.composition)) return;
     const orientations: OrientationString[] = [
       'axial',
       'sagittal',
@@ -544,6 +544,7 @@ const RevisionEditor: React.FC<{
             disabled={busy}
           />
           <LabelSelector
+            registerNewViewerCellKey={registerNewViewerCellKey}
             seriesData={seriesData}
             editingData={editingData}
             updateEditingData={updateEditingData}

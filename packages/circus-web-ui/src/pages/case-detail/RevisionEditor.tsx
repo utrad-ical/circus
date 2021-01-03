@@ -17,8 +17,7 @@ import React, {
 } from 'react';
 import Project from 'types/Project';
 import {
-  stringifyPartialVolumeDescriptor,
-  usePendingVolumeLoader,
+  usePendingVolumeLoaders,
   VolumeLoaderCacheContext
 } from 'utils/useImageSource';
 import * as c from './caseStore';
@@ -48,44 +47,48 @@ import isTouchDevice from 'utils/isTouchDevice';
 import useToolbar from 'pages/case-detail/useToolbar';
 import Series from 'types/Series';
 
-const useComposition = (
-  seriesUid: string,
-  partialVolumeDescriptor: PartialVolumeDescriptor
-): { composition: Composition | undefined; volumeLoaded: boolean } => {
+const useCompositions = (
+  series: {
+    seriesUid: string;
+    partialVolumeDescriptor: PartialVolumeDescriptor;
+  }[]
+): { composition?: Composition; volumeLoaded: boolean }[] => {
   const { rsHttpClient } = useContext(VolumeLoaderCacheContext)!;
+  const [results, setResults] = useState<
+    { composition?: Composition; volumeLoaded: boolean }[]
+  >(() => series.map(() => ({ composition: undefined, volumeLoaded: false })));
 
-  const volumeLoader = usePendingVolumeLoader(
-    seriesUid,
-    partialVolumeDescriptor
-  );
+  const volumeLoaders = usePendingVolumeLoaders(series);
 
-  const pvdStr = stringifyPartialVolumeDescriptor(partialVolumeDescriptor);
-
-  const composition = useMemo(
-    () => {
-      const imageSource = new rs.HybridMprImageSource({
-        rsHttpClient,
-        seriesUid,
-        partialVolumeDescriptor,
-        volumeLoader,
-        estimateWindowType: 'none'
-      });
-      const composition = new Composition(imageSource);
-      return composition;
-    },
-    // eslint-disable-next-line
-    [rsHttpClient, seriesUid, pvdStr, volumeLoader]
-  );
-
-  const [volumeLoaded, setVolumeLoaded] = useState<boolean>(false);
   useEffect(() => {
-    volumeLoader
-      .loadMeta()
-      .then(() => volumeLoader.loadVolume())
-      .then(() => setVolumeLoaded(true));
-  }, [volumeLoader]);
+    const comps = series.map(
+      ({ seriesUid, partialVolumeDescriptor }, volId) => {
+        const volumeLoader = volumeLoaders[volId];
+        const imageSource = new rs.HybridMprImageSource({
+          rsHttpClient,
+          seriesUid,
+          partialVolumeDescriptor,
+          volumeLoader,
+          estimateWindowType: 'none'
+        });
+        volumeLoader
+          .loadMeta()
+          .then(() => volumeLoader.loadVolume())
+          .then(() => {
+            setResults(results =>
+              produce(results, draft => {
+                draft[volId].volumeLoaded = true;
+              })
+            );
+          });
+        const composition = new Composition(imageSource);
+        return { composition, volumeLoaded: false };
+      }
+    );
+    setResults(comps);
+  }, [rsHttpClient, series, volumeLoaders]);
 
-  return { composition, volumeLoaded };
+  return results;
 };
 
 const RevisionEditor: React.FC<{
@@ -126,12 +129,39 @@ const RevisionEditor: React.FC<{
     }
   );
 
+  // Keeps track of stable seriesUid-PVD pairs to avoid frequent comp changes
+  const [allSeries, setAllSeries] = useState<
+    {
+      seriesUid: string;
+      partialVolumeDescriptor: PartialVolumeDescriptor;
+    }[]
+  >(editingData.revision.series);
+  useEffect(() => {
+    const series = editingData.revision.series;
+    if (
+      series.some(
+        (s, i) =>
+          s.seriesUid !== allSeries[i].seriesUid ||
+          s.partialVolumeDescriptor !== allSeries[i].partialVolumeDescriptor
+      )
+    ) {
+      setAllSeries(
+        series.map(({ seriesUid, partialVolumeDescriptor }) => ({
+          seriesUid,
+          partialVolumeDescriptor
+        }))
+      );
+    }
+  }, [allSeries, editingData.revision.series]);
+
   const activeSeries =
     editingData.revision.series[editingData.activeSeriesIndex];
-  const { composition, volumeLoaded } = useComposition(
-    activeSeries.seriesUid,
-    activeSeries.partialVolumeDescriptor
-  );
+
+  const compositions = useCompositions(allSeries);
+  const { composition, volumeLoaded } = compositions[
+    editingData.activeSeriesIndex
+  ];
+
   const { revision, activeLabelIndex } = editingData;
 
   const activeLabel = activeSeries.labels[activeLabelIndex];

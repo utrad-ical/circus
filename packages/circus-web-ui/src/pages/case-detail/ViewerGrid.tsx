@@ -1,29 +1,36 @@
 import { Composition, MprViewState, Tool, Viewer, ViewState } from 'circus-rs';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
 import GridContainer, { LayoutInfo } from 'components/GridContainer';
-import IconButton from 'components/IconButton';
+import Icon from 'components/Icon';
 import ImageViewer, {
+  createStateChanger,
   setOrthogonalOrientation,
   StateChanger
 } from 'components/ImageViewer';
-import { Button } from 'components/react-bootstrap';
-import React, { useContext, useEffect, useMemo } from 'react';
+import { Button, DropdownButton, MenuItem } from 'components/react-bootstrap';
+import React, { useContext, useEffect, useRef, useMemo } from 'react';
 import styled from 'styled-components';
+import { OrientationString } from 'circus-rs/section-util';
 
 export interface ViewerDef {
   key: string;
+  volumeId: number;
   orientation: 'axial' | 'sagittal' | 'coronal' | 'oblique';
   celestialRotateMode: boolean; // only applicable for oblique view
-  composition: Composition;
 }
 
 interface ViewerGridContextValue {
+  compositions: { composition?: Composition }[];
   tool: Tool;
   stateChanger: StateChanger<MprViewState>;
   onCreateViewer: (viewer: Viewer, id?: string | number) => void;
   onDestroyViewer: (viewer: Viewer) => void;
   initialStateSetter: (viewer: Viewer, viewState: ViewState) => ViewState;
   onViewStateChange: (viewer: Viewer, id?: string | number) => void;
+  updateViewerCellKey: (
+    key: string,
+    update: (current: ViewerDef) => ViewerDef | void
+  ) => void;
 }
 
 /**
@@ -34,22 +41,59 @@ const ViewerGridContext = React.createContext<ViewerGridContextValue | null>(
 );
 
 const Header: React.FC<{ value: ViewerDef }> = props => {
-  const { orientation, celestialRotateMode } = props.value;
+  const { key, orientation, celestialRotateMode } = props.value;
+
+  const { updateViewerCellKey } = useContext(ViewerGridContext)!;
+
+  const handleRotateClick = () => {
+    updateViewerCellKey(key, current => {
+      current.celestialRotateMode = !current.celestialRotateMode;
+    });
+  };
+
+  const handleSelect = (orienatation: string) => {
+    updateViewerCellKey(key, current => {
+      current.orientation = orienatation as OrientationString;
+      current.celestialRotateMode = orientation === 'oblique';
+    });
+  };
+
   return (
     <HeaderDiv>
       <span>
-        Viewer: {props.value.key} {props.value.orientation}
+        Viewer: {key} Series #{props.value.volumeId} {props.value.orientation}
       </span>
       <span>
         {orientation === 'oblique' && (
           <Button
             bsSize="xs"
             bsStyle={celestialRotateMode ? 'primary' : 'default'}
+            onClick={handleRotateClick}
           >
             Rotate
           </Button>
         )}
-        <IconButton bsSize="xs" icon="glyphicon-option-horizontal" />
+        <DropdownButton
+          bsSize="xs"
+          title={<Icon icon="glyphicon-option-horizontal" />}
+          id={`viewergrid-header-dropdown-${key}`}
+          pullRight
+          noCaret
+          onSelect={handleSelect}
+        >
+          <MenuItem eventKey="axial">
+            <Icon icon="circus-orientation-axial" /> Axial
+          </MenuItem>
+          <MenuItem eventKey="sagittal">
+            <Icon icon="circus-orientation-sagittal" /> Sagittal
+          </MenuItem>
+          <MenuItem eventKey="coronal">
+            <Icon icon="circus-orientation-coronal" /> Coronal
+          </MenuItem>
+          <MenuItem eventKey="oblique">
+            <Icon icon="circus-orientation-oblique" /> Oblique
+          </MenuItem>
+        </DropdownButton>
       </span>
     </HeaderDiv>
   );
@@ -71,9 +115,10 @@ const HeaderDiv = styled.div`
 const celestialRotate = toolFactory('celestialRotate');
 
 const Content: React.FC<{ value: ViewerDef }> = props => {
-  const { key, orientation, composition, celestialRotateMode } = props.value;
+  const { key, volumeId, orientation, celestialRotateMode } = props.value;
 
   const {
+    compositions,
     tool,
     stateChanger,
     initialStateSetter,
@@ -81,6 +126,8 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
     onDestroyViewer,
     onViewStateChange
   } = useContext(ViewerGridContext)!;
+
+  const composition = compositions[volumeId].composition;
 
   const combinedInitialStateSetter = (
     viewer: Viewer,
@@ -91,15 +138,39 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
     return s2;
   };
 
+  const localStateChanger = useMemo(
+    () => createStateChanger<MprViewState>(),
+    []
+  );
+
+  useEffect(() => {
+    stateChanger.on(localStateChanger);
+    () => {
+      stateChanger.off(localStateChanger);
+    };
+  }, [localStateChanger, stateChanger]);
+
+  const initialRender = useRef<boolean>(true);
+  useEffect(() => {
+    if (initialRender.current) {
+      initialRender.current = false;
+      return;
+    }
+    // Triggers only when orientation changes after initial render
+    localStateChanger((state, viewer) => {
+      return orientationInitialStateSetters[orientation](viewer, state)!;
+    });
+  }, [orientation, localStateChanger, key]);
+
   return (
     <ImageViewer
       id={key}
       key={key}
       className={`viewer-${orientation}`}
       composition={composition}
-      tool={celestialRotateMode ? tool : celestialRotate}
+      tool={celestialRotateMode ? celestialRotate : tool}
       initialStateSetter={combinedInitialStateSetter}
-      stateChanger={stateChanger}
+      stateChanger={localStateChanger}
       onCreateViewer={onCreateViewer}
       onDestroyViewer={onDestroyViewer}
       onViewStateChange={onViewStateChange}
@@ -120,6 +191,7 @@ export type Layout = 'twoByTwo' | 'axial' | 'sagittal' | 'coronal';
 
 const ViewerGrid: React.FC<{
   items: ViewerDef[];
+  compositions: { composition?: Composition }[];
   layout: LayoutInfo;
   setLayout: (layout: LayoutInfo) => void;
   tool?: Tool;
@@ -128,35 +200,45 @@ const ViewerGrid: React.FC<{
   onDestroyViewer: (viewer: Viewer) => void;
   initialStateSetter: (viewer: Viewer, viewState: ViewState) => ViewState;
   onViewStateChange: (viewer: Viewer, id?: string | number) => void;
+  updateViewerCellKey: (
+    key: string,
+    update: (current: ViewerDef) => ViewerDef | void
+  ) => void;
 }> = props => {
   const {
     items,
+    compositions,
     tool,
     stateChanger,
     layout,
     setLayout,
     onCreateViewer,
     onDestroyViewer,
+    initialStateSetter,
     onViewStateChange,
-    initialStateSetter
+    updateViewerCellKey
   } = props;
 
   const gridContext: ViewerGridContextValue = useMemo(
     () => ({
+      compositions,
       tool: tool!,
       stateChanger,
       onCreateViewer,
       onDestroyViewer,
       onViewStateChange,
-      initialStateSetter
+      initialStateSetter,
+      updateViewerCellKey
     }),
     [
+      compositions,
       tool,
       stateChanger,
       onCreateViewer,
       onDestroyViewer,
       onViewStateChange,
-      initialStateSetter
+      initialStateSetter,
+      updateViewerCellKey
     ]
   );
 
@@ -169,6 +251,7 @@ const ViewerGrid: React.FC<{
         renderItem={Content}
         onLayoutChange={setLayout}
         dragDataMimeType="text/x-circusdb-viewergrid"
+        dragRemovable={true}
       />
     </ViewerGridContext.Provider>
   );

@@ -406,11 +406,19 @@ const RevisionEditor: React.FC<{
       });
 
       if (viewOptions.showReferenceLine) {
-        Object.keys(viewers).forEach(k => {
-          composition.addAnnotation(
-            new rs.ReferenceLine(viewers[k], { color: orientationColor(k) })
-          );
-        });
+        Object.keys(viewers)
+          .filter(key => {
+            const item = layoutableItems.find(item => item.key === key);
+            return item && item.volumeId === seriesIndex;
+          })
+          .forEach(key => {
+            const item = layoutableItems.find(item => item.key === key);
+            composition.addAnnotation(
+              new rs.ReferenceLine(viewers[key], {
+                color: orientationColor(item!.orientation)
+              })
+            );
+          });
       }
 
       if (viewOptions.scrollbar !== 'none') {

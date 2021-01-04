@@ -34,7 +34,7 @@ import {
   TaggedLabelDataOf
 } from './labelData';
 import SideContainer from './SideContainer';
-import ToolBar, { ViewOptions } from './ToolBar';
+import ToolBar, { LayoutKind, ViewOptions } from './ToolBar';
 import ViewerGrid, { ViewerDef } from './ViewerGrid';
 import IconButton from '@smikitky/rb-components/lib/IconButton';
 import { Modal } from '../../components/react-bootstrap';
@@ -124,7 +124,6 @@ const RevisionEditor: React.FC<{
   const [viewOptions, setViewOptions] = useLocalPreference<ViewOptions>(
     'dbViewOptions',
     {
-      layout: 'twoByTwo',
       showReferenceLine: false,
       scrollbar: 'none',
       interpolationMode: 'nearestNeighbor'
@@ -207,28 +206,6 @@ const RevisionEditor: React.FC<{
     []
   );
 
-  // Performs initial viewer layout
-  useEffect(() => {
-    if (Object.keys(layout.positions).length) return;
-    if (compositions.some(c => !c.composition)) return;
-    const orientations: OrientationString[] = [
-      'axial',
-      'sagittal',
-      'coronal',
-      'oblique'
-    ];
-    let tmp = layout;
-    orientations.forEach(orientation => {
-      const key = registerNewViewerCellKey(0, orientation);
-      if (!key) return;
-      tmp = layoutReducer(tmp, {
-        type: 'insertItemToEmptyCell',
-        payload: { key }
-      });
-    });
-    setLayout(tmp);
-  }, [compositions, layout, registerNewViewerCellKey]);
-
   const { revision, activeLabelIndex } = editingData;
 
   const activeLabel = activeSeries.labels[activeLabelIndex];
@@ -270,6 +247,42 @@ const RevisionEditor: React.FC<{
     activeToolName,
     setActiveTool
   ]);
+
+  const performLayout = useCallback(
+    (kind: LayoutKind, seriesIndex) => {
+      if (compositions.some(c => !c.composition)) return;
+      const layout: LayoutInfo = {
+        columns: kind === 'twoByTwo' ? 2 : 1,
+        rows: kind === 'twoByTwo' ? 2 : 1,
+        positions: {}
+      };
+      const orientations: OrientationString[] =
+        kind === 'twoByTwo'
+          ? ['axial', 'sagittal', 'coronal', 'oblique']
+          : [kind];
+      let tmp = layout;
+      orientations.forEach(orientation => {
+        const key = registerNewViewerCellKey(seriesIndex, orientation);
+        if (!key) return;
+        tmp = layoutReducer(tmp, {
+          type: 'insertItemToEmptyCell',
+          payload: { key }
+        });
+      });
+      setLayout(tmp);
+    },
+    [compositions, registerNewViewerCellKey]
+  );
+
+  // Performs initial viewer layout
+  useEffect(() => {
+    if (Object.keys(layout.positions).length) return;
+    performLayout('twoByTwo', 0);
+  }, [layout.positions, performLayout]);
+
+  const handleChangeLayoutKind = (kind: LayoutKind) => {
+    performLayout(kind, editingData.activeSeriesIndex);
+  };
 
   const handleAnnotationChange = (
     annotation:
@@ -412,7 +425,6 @@ const RevisionEditor: React.FC<{
     editingData,
     viewOptions.showReferenceLine,
     viewOptions.scrollbar,
-    viewOptions.layout,
     touchDevice,
     viewers
   ]);
@@ -621,6 +633,7 @@ const RevisionEditor: React.FC<{
           setToolOption={setToolOption}
           viewOptions={viewOptions}
           onChangeViewOptions={setViewOptions}
+          onChangeLayoutKind={handleChangeLayoutKind}
           wandEnabled={volumeLoaded}
           windowPresets={projectData.windowPresets}
           onApplyWindow={handleApplyWindow}

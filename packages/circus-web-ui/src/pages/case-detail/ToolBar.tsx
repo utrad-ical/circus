@@ -11,7 +11,6 @@ import {
 } from 'components/react-bootstrap';
 import React from 'react';
 import styled from 'styled-components';
-import { Layout } from './ViewerCluster';
 import { WindowPreset } from 'types/Project';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
 import { ToolOptions, ToolOptionSetter } from 'pages/case-detail/useToolbar';
@@ -19,7 +18,6 @@ import { ReferenceValueOption } from '@utrad-ical/circus-rs/src/browser/tool/clo
 import { Editor } from '@smikitky/rb-components/lib/editor-types';
 
 export interface ViewOptions {
-  layout?: Layout;
   showReferenceLine?: boolean;
   scrollbar?: ScrollbarOptions;
   interpolationMode?: InterpolationMode;
@@ -33,7 +31,8 @@ const scrollbarOptions: { key: ScrollbarOptions; caption: string }[] = [
   { key: 'large', caption: 'Large' }
 ];
 
-const layoutOptions = [
+export type LayoutKind = 'twoByTwo' | 'axial' | 'sagittal' | 'coronal';
+const layoutOptions: { key: LayoutKind; caption: string; icon: string }[] = [
   { key: 'twoByTwo', caption: '2 x 2', icon: 'circus-layout-four' },
   { key: 'axial', caption: 'Axial', icon: 'circus-orientation-axial' },
   { key: 'sagittal', caption: 'Sagittal', icon: 'circus-orientation-sagittal' },
@@ -46,6 +45,7 @@ const ToolBar: React.FC<{
   setToolOption: ToolOptionSetter;
   viewOptions: ViewOptions;
   onChangeViewOptions: (viewOptions: ViewOptions) => void;
+  onChangeLayoutKind: (kind: LayoutKind) => void;
   brushEnabled: boolean;
   wandEnabled: boolean;
   windowPresets?: WindowPreset[];
@@ -59,6 +59,7 @@ const ToolBar: React.FC<{
     setToolOption,
     viewOptions,
     onChangeViewOptions,
+    onChangeLayoutKind,
     brushEnabled,
     wandEnabled,
     windowPresets = [],
@@ -82,10 +83,6 @@ const ToolBar: React.FC<{
       ...viewOptions,
       scrollbar: selection
     });
-  };
-
-  const handleChangeLayout = (selection: Layout) => {
-    onChangeViewOptions({ ...viewOptions, layout: selection });
   };
 
   const handleToggleInterpolationMode = () => {
@@ -211,15 +208,10 @@ const ToolBar: React.FC<{
             icon={layoutOptions.find(l => l.key === viewOptions.layout)?.icon}
           />
         </Dropdown.Toggle>
-        <Dropdown.Menu>
+        <Dropdown.Menu onSelect={onChangeLayoutKind}>
           {layoutOptions.map(l => {
             return (
-              <MenuItem
-                key={l.key}
-                eventKey={l.key}
-                onSelect={handleChangeLayout}
-              >
-                <CheckMark checked={viewOptions.layout === l.key} />
+              <MenuItem key={l.key} eventKey={l.key}>
                 <Icon icon={l.icon} />
                 {l.caption}
               </MenuItem>

@@ -41,7 +41,7 @@ const ViewerGridContext = React.createContext<ViewerGridContextValue | null>(
   null
 );
 
-const Header: React.FC<{ value: ViewerDef }> = props => {
+const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
   const { key, volumeId, orientation, celestialRotateMode } = props.value;
 
   const { updateViewerCellKey, activeSeriesIndex } = useContext(
@@ -54,10 +54,10 @@ const Header: React.FC<{ value: ViewerDef }> = props => {
     });
   };
 
-  const handleSelect = (orienatation: string) => {
+  const handleSelect = (selected: string) => {
     updateViewerCellKey(key, current => {
-      current.orientation = orienatation as OrientationString;
-      current.celestialRotateMode = orientation === 'oblique';
+      current.orientation = selected as OrientationString;
+      current.celestialRotateMode = selected === 'oblique';
     });
   };
 
@@ -102,7 +102,7 @@ const Header: React.FC<{ value: ViewerDef }> = props => {
       </span>
     </HeaderDiv>
   );
-};
+});
 
 const HeaderDiv = styled.div`
   &.active {

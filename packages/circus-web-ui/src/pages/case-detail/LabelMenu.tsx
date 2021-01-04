@@ -47,7 +47,7 @@ const LabelMenu: React.FC<{
   const activeLabel =
     activeLabelIndex >= 0 ? activeSeries.labels[activeLabelIndex] : null;
 
-  const updateCurrentLabels = (updater: (laels: InternalLabel[]) => void) => {
+  const updateCurrentLabels = (updater: (labels: InternalLabel[]) => void) => {
     // Small wrapper around updateEditingData
     const labels = editingData.revision.series[activeSeriesIndex].labels;
     const newLabels = produce(labels, updater);

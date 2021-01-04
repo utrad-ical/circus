@@ -446,7 +446,8 @@ const RevisionEditor: React.FC<{
     viewOptions.showReferenceLine,
     viewOptions.scrollbar,
     touchDevice,
-    viewers
+    viewers,
+    layoutableItems
   ]);
 
   useEffect(() => {

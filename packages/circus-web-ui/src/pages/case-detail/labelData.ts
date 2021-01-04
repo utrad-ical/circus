@@ -439,19 +439,28 @@ export const setRecommendedDisplay = (
       const center = getCenterOfLabel(composition, label);
       const reproduceSection = label.data.section;
       const reproduceOrientation = detectOrthogonalSection(reproduceSection);
-      viewers.forEach(viewer => {
-        const orientation = detectOrthogonalSection(viewer.getState().section);
-        if (orientation === reproduceOrientation) {
-          viewer.setState({ ...viewer.getState(), section: reproduceSection });
-        } else {
-          focusBy(viewer, center);
-        }
-      });
+      viewers
+        .filter(viewer => viewer.getComposition() === composition)
+        .forEach(viewer => {
+          const orientation = detectOrthogonalSection(
+            viewer.getState().section
+          );
+          if (orientation === reproduceOrientation) {
+            viewer.setState({
+              ...viewer.getState(),
+              section: reproduceSection
+            });
+          } else {
+            focusBy(viewer, center);
+          }
+        });
       break;
     }
     default: {
       const center = getCenterOfLabel(composition, label);
-      viewers.forEach(viewer => focusBy(viewer, center));
+      viewers
+        .filter(viewer => viewer.getComposition() === composition)
+        .forEach(viewer => focusBy(viewer, center));
     }
   }
 };

@@ -1,8 +1,8 @@
 import { ColorPalette } from '@smikitky/rb-components/lib/ColorPicker';
-import { choice, confirm, prompt } from '@smikitky/rb-components/lib/modal';
+import { choice, prompt } from '@smikitky/rb-components/lib/modal';
 import Slider from '@smikitky/rb-components/lib/Slider';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
-import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
+import { Viewer } from '@utrad-ical/circus-rs/src/browser';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import {
@@ -23,26 +23,19 @@ import {
   InternalLabel,
   labelTypes,
   LabelAppearance,
-  createNewLabelData,
-  setRecommendedDisplay
+  createNewLabelData
 } from './labelData';
 
 type LabelCommand = 'rename' | 'remove' | 'convertType' | 'reveal';
 
 const LabelMenu: React.FC<{
   editingData: EditingData;
-  composition: Composition;
+  onReveal: () => void;
   updateEditingData: EditingDataUpdater;
   viewers: { [index: string]: Viewer };
   disabled?: boolean;
 }> = props => {
-  const {
-    editingData,
-    composition,
-    updateEditingData,
-    viewers,
-    disabled
-  } = props;
+  const { editingData, onReveal, updateEditingData, viewers, disabled } = props;
 
   const [newLabelType, setNewLabelType] = useLocalPreference<LabelType>(
     'newLabelType',
@@ -98,7 +91,7 @@ const LabelMenu: React.FC<{
       }
       case 'reveal': {
         if (!activeLabel) return;
-        setRecommendedDisplay(composition, Object.values(viewers), activeLabel);
+        onReveal();
         break;
       }
     }
@@ -222,7 +215,7 @@ const LabelMenu: React.FC<{
           { icon: 'info-sign', cancelable: true, bsSize: 'lg' }
         )) as string | undefined;
       } else {
-        // Return the first entry of the visible viewers as the target for adding the label.
+        // Return the first entry of the visible viewers as the target for adding the label
         return viewerIdOptions[0];
       }
     };

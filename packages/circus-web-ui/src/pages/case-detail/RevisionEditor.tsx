@@ -31,7 +31,8 @@ import {
   InternalLabel,
   buildAnnotation,
   labelTypes,
-  TaggedLabelDataOf
+  TaggedLabelDataOf,
+  setRecommendedDisplay
 } from './labelData';
 import SideContainer from './SideContainer';
 import ToolBar, { LayoutKind, ViewOptions } from './ToolBar';
@@ -166,13 +167,15 @@ const RevisionEditor: React.FC<{
     editingData.revision.series[editingData.activeSeriesIndex];
 
   const compositions = useCompositions(allSeries);
-  const { composition, volumeLoaded } = compositions[
-    editingData.activeSeriesIndex
-  ];
+  // const { composition, volumeLoaded } = compositions[
+  //   editingData.activeSeriesIndex
+  // ];
+  const activeVolumeLoaded =
+    compositions[editingData.activeSeriesIndex].volumeLoaded;
 
   const registerNewViewerCellKey = useCallback(
     (volumeId: number, orientation: OrientationString) => {
-      const key = new Array(8)
+      const key = new Array(16)
         .fill(0)
         .map(() => String.fromCharCode(97 + Math.floor(Math.random() * 26)))
         .join('');
@@ -292,13 +295,16 @@ const RevisionEditor: React.FC<{
       | rs.Point
       | rs.Ruler
   ) => {
-    const { revision, activeSeriesIndex } = editingData;
-    const labelIndex = revision.series[activeSeriesIndex].labels.findIndex(
+    const { revision } = editingData;
+    const seriesIndex = revision.series.findIndex(
+      s => s.labels.findIndex(v => v.temporaryKey === annotation.id) >= 0
+    );
+    const labelIndex = revision.series[seriesIndex].labels.findIndex(
       v => v.temporaryKey === annotation.id
     );
 
     const newLabel = () => {
-      const label = revision.series[activeSeriesIndex].labels[labelIndex];
+      const label = revision.series[seriesIndex].labels[labelIndex];
       if (annotation instanceof rs.VoxelCloud && annotation.volume) {
         return produce(label, (l: TaggedLabelDataOf<'voxel'>) => {
           l.data.origin = annotation.origin;
@@ -345,7 +351,7 @@ const RevisionEditor: React.FC<{
     };
 
     updateEditingData(d => {
-      d.revision.series[activeSeriesIndex].labels[labelIndex] = newLabel();
+      d.revision.series[seriesIndex].labels[labelIndex] = newLabel();
     });
   };
 
@@ -365,63 +371,69 @@ const RevisionEditor: React.FC<{
   };
 
   useEffect(() => {
-    if (!composition) return;
+    compositions.forEach((entry, seriesIndex) => {
+      const composition = entry.composition;
+      if (!composition) return;
 
-    composition.on('annotationChange', annotation =>
-      latestHandleAnnotationChange.current(annotation)
-    );
-
-    const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
-    const activeSeries = revision.series[activeSeriesIndex];
-    const activeLabel = activeSeries.labels[activeLabelIndex];
-
-    composition.annotations.forEach(antn => {
-      if (antn instanceof rs.ReferenceLine) antn.dispose();
-      if (antn instanceof rs.Scrollbar) antn.dispose();
-    });
-    composition.removeAllAnnotations();
-
-    activeSeries.labels.forEach((label: InternalLabel) => {
-      const isActive = activeLabel && label === activeLabel;
-      if (label.hidden) return;
-      composition.addAnnotation(
-        buildAnnotation(
-          label,
-          {
-            color: label.data.color ?? '#ff0000',
-            alpha: label.data.alpha ?? 1
-          },
-          isActive
-        )
+      composition.on('annotationChange', annotation =>
+        latestHandleAnnotationChange.current(annotation)
       );
+
+      const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
+      const activeLabel =
+        revision.series[activeSeriesIndex].labels[activeLabelIndex];
+      const series = revision.series[seriesIndex];
+
+      composition.annotations.forEach(antn => {
+        if (antn instanceof rs.ReferenceLine) antn.dispose();
+        if (antn instanceof rs.Scrollbar) antn.dispose();
+      });
+      composition.removeAllAnnotations();
+
+      series.labels.forEach((label: InternalLabel) => {
+        const isActive = activeLabel && label === activeLabel;
+        if (label.hidden) return;
+        composition.addAnnotation(
+          buildAnnotation(
+            label,
+            {
+              color: label.data.color ?? '#ff0000',
+              alpha: label.data.alpha ?? 1
+            },
+            isActive
+          )
+        );
+      });
+
+      if (viewOptions.showReferenceLine) {
+        Object.keys(viewers).forEach(k => {
+          composition.addAnnotation(
+            new rs.ReferenceLine(viewers[k], { color: orientationColor(k) })
+          );
+        });
+      }
+
+      if (viewOptions.scrollbar !== 'none') {
+        Object.keys(viewers).forEach(k => {
+          composition.addAnnotation(
+            new rs.Scrollbar(viewers[k], {
+              color: orientationColor(k),
+              size: viewOptions.scrollbar === 'large' ? 30 : 20,
+              visibility: touchDevice ? 'always' : 'hover'
+            })
+          );
+        });
+      }
+
+      composition.annotationUpdated();
     });
-
-    if (viewOptions.showReferenceLine) {
-      Object.keys(viewers).forEach(k => {
-        composition.addAnnotation(
-          new rs.ReferenceLine(viewers[k], { color: orientationColor(k) })
-        );
-      });
-    }
-
-    if (viewOptions.scrollbar !== 'none') {
-      Object.keys(viewers).forEach(k => {
-        composition.addAnnotation(
-          new rs.Scrollbar(viewers[k], {
-            color: orientationColor(k),
-            size: viewOptions.scrollbar === 'large' ? 30 : 20,
-            visibility: touchDevice ? 'always' : 'hover'
-          })
-        );
-      });
-    }
-
-    composition.annotationUpdated();
     return () => {
-      composition.removeAllListeners('annotationChange');
+      compositions.forEach(entry =>
+        entry.composition?.removeAllListeners('annotationChange')
+      );
     };
   }, [
-    composition,
+    compositions,
     editingData,
     viewOptions.showReferenceLine,
     viewOptions.scrollbar,
@@ -479,6 +491,14 @@ const RevisionEditor: React.FC<{
     Object.keys(viewers).forEach(k => {
       if (viewers[k] === viewer) delete viewers[k];
     });
+  };
+
+  const handleReveal = () => {
+    setRecommendedDisplay(
+      compositions[editingData.activeSeriesIndex].composition!,
+      Object.values(viewers),
+      activeLabel
+    );
   };
 
   const propagateWindowState = useMemo(
@@ -557,7 +577,7 @@ const RevisionEditor: React.FC<{
     return viewState; // do not update view state (should not happen)
   };
 
-  if (!activeSeries || !composition) return null;
+  if (!activeSeries) return null;
 
   return (
     <StyledDiv className={classNames('case-revision-data', { busy })}>
@@ -565,7 +585,7 @@ const RevisionEditor: React.FC<{
         <Collapser title="Series / Labels" className="labels" noPadding>
           <LabelMenu
             editingData={editingData}
-            composition={composition}
+            onReveal={handleReveal}
             updateEditingData={updateEditingData}
             viewers={viewers}
             disabled={busy}
@@ -634,7 +654,7 @@ const RevisionEditor: React.FC<{
           viewOptions={viewOptions}
           onChangeViewOptions={setViewOptions}
           onChangeLayoutKind={handleChangeLayoutKind}
-          wandEnabled={volumeLoaded}
+          wandEnabled={activeVolumeLoaded}
           windowPresets={projectData.windowPresets}
           onApplyWindow={handleApplyWindow}
           brushEnabled={editorEnabled}

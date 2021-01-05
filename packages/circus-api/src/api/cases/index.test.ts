@@ -257,11 +257,10 @@ describe('add revision', () => {
                 data: {
                   color: '#00ff00',
                   alpha: 1,
-                  origin: [224, 183, 50]
+                  location: [224, 183, 50]
                 },
                 name: ''
               },
-
               {
                 type: 'ruler',
                 data: {

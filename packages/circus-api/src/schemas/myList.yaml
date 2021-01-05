@@ -1,0 +1,21 @@
+$schema: 'http://json-schema.org/schema#'
+$async: true
+title: MyList
+type: object
+properties:
+  myListId:
+    type: string
+  items:
+    type: array
+    items:
+      type: object
+      properties:
+        resourceId:
+          type: string
+          description: >
+            One of jobId, seriesId, caseId
+        createdAt:
+          date: true
+      required: ['resourceId', 'createdAt']
+    maxLength: 1000
+additionalProperties: false

@@ -172,7 +172,7 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
   }, [orientation, localStateChanger, key]);
 
   return (
-    <ImageViewer
+    <StyledImageViewer
       id={key}
       key={key}
       className={`viewer-${orientation}`}
@@ -186,6 +186,10 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
     />
   );
 };
+
+const StyledImageViewer = styled(ImageViewer)`
+  overflow: hidden;
+`;
 
 const orientationInitialStateSetters: {
   [orientatin: string]: ReturnType<typeof setOrthogonalOrientation>;

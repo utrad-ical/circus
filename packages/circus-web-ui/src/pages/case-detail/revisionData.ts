@@ -1,4 +1,5 @@
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import { LayoutInfo } from 'components/GridContainer';
 import produce from 'immer';
 import { ApiCaller } from 'utils/api';
 import asyncMap from '../../utils/asyncMap';
@@ -8,6 +9,7 @@ import {
   InternalLabel,
   internalLabelToExternal
 } from './labelData';
+import { ViewerDef } from './ViewerGrid';
 
 /**
  * EditingData represents one revision data with some meta data,
@@ -24,6 +26,14 @@ export interface EditingData {
    * May be `-1`, which means the current series has no label.
    */
   activeLabelIndex: number;
+  /**
+   * Holds the viewer grid layout.
+   */
+  layout: LayoutInfo;
+  /**
+   * Holds the list of layoutable items.
+   */
+  layoutItems: ViewerDef[];
 }
 
 /**

@@ -35,8 +35,8 @@ import {
   setRecommendedDisplay
 } from './labelData';
 import SideContainer from './SideContainer';
-import ToolBar, { LayoutKind, ViewOptions } from './ToolBar';
-import ViewerGrid, { ViewerDef } from './ViewerGrid';
+import ToolBar, { ViewOptions } from './ToolBar';
+import ViewerGrid from './ViewerGrid';
 import IconButton from '@smikitky/rb-components/lib/IconButton';
 import { Modal } from '../../components/react-bootstrap';
 import SeriesSelectorDialog from './SeriesSelectorDialog';
@@ -156,58 +156,13 @@ const RevisionEditor: React.FC<{
     }
   }, [allSeries, editingData.revision.series]);
 
-  const [layoutableItems, setLayoutableItems] = useState<ViewerDef[]>([]);
-  const [layout, setLayout] = useState<LayoutInfo>({
-    columns: 2,
-    rows: 2,
-    positions: {}
-  });
-
   const activeSeries =
     editingData.revision.series[editingData.activeSeriesIndex];
 
   const compositions = useCompositions(allSeries);
-  // const { composition, volumeLoaded } = compositions[
-  //   editingData.activeSeriesIndex
-  // ];
+
   const activeVolumeLoaded =
     compositions[editingData.activeSeriesIndex].volumeLoaded;
-
-  const registerNewViewerCellKey = useCallback(
-    (volumeId: number, orientation: OrientationString) => {
-      const key = new Array(16)
-        .fill(0)
-        .map(() => String.fromCharCode(97 + Math.floor(Math.random() * 26)))
-        .join('');
-      setLayoutableItems(layoutableItems =>
-        produce(layoutableItems, draft => {
-          draft.push({
-            key,
-            volumeId,
-            orientation,
-            celestialRotateMode: orientation === 'oblique'
-          });
-        })
-      );
-      return key;
-    },
-    []
-  );
-
-  const updateViewerCellKey = useCallback(
-    (key: string, update: (current: ViewerDef) => ViewerDef | void) => {
-      setLayoutableItems(layoutableItems => {
-        const index = layoutableItems.findIndex(item => item.key === key);
-        if (index < 0) return layoutableItems;
-        const item = layoutableItems[index];
-        const newItem = produce(item, update);
-        return produce(layoutableItems, draft => {
-          draft[index] = newItem;
-        });
-      });
-    },
-    []
-  );
 
   const { revision, activeLabelIndex } = editingData;
 
@@ -251,40 +206,21 @@ const RevisionEditor: React.FC<{
     setActiveTool
   ]);
 
-  const performLayout = useCallback(
-    (kind: LayoutKind, seriesIndex) => {
-      if (compositions.some(c => !c.composition)) return;
-      const layout: LayoutInfo = {
-        columns: kind === 'twoByTwo' ? 2 : 1,
-        rows: kind === 'twoByTwo' ? 2 : 1,
-        positions: {}
-      };
-      const orientations: OrientationString[] =
-        kind === 'twoByTwo'
-          ? ['axial', 'sagittal', 'coronal', 'oblique']
-          : [kind];
-      let tmp = layout;
-      orientations.forEach(orientation => {
-        const key = registerNewViewerCellKey(seriesIndex, orientation);
-        if (!key) return;
-        tmp = layoutReducer(tmp, {
-          type: 'insertItemToEmptyCell',
-          payload: { key }
-        });
-      });
-      setLayout(tmp);
-    },
-    [compositions, registerNewViewerCellKey]
-  );
+  const handleChangeLayoutKind = (kind: c.LayoutKind) => {
+    updateEditingData(d => {
+      const [layoutItems, layout] = c.performLayout(
+        kind,
+        editingData.activeSeriesIndex
+      );
+      d.layoutItems = layoutItems;
+      d.layout = layout;
+    });
+  };
 
-  // Performs initial viewer layout
-  useEffect(() => {
-    if (Object.keys(layout.positions).length) return;
-    performLayout('twoByTwo', 0);
-  }, [layout.positions, performLayout]);
-
-  const handleChangeLayoutKind = (kind: LayoutKind) => {
-    performLayout(kind, editingData.activeSeriesIndex);
+  const handleLayoutChange = (layout: LayoutInfo) => {
+    updateEditingData(d => {
+      d.layout = layout;
+    });
   };
 
   const handleAnnotationChange = (
@@ -406,13 +342,14 @@ const RevisionEditor: React.FC<{
       });
 
       if (viewOptions.showReferenceLine) {
+        const layoutItems = editingData.layoutItems;
         Object.keys(viewers)
           .filter(key => {
-            const item = layoutableItems.find(item => item.key === key);
-            return item && item.volumeId === seriesIndex;
+            const item = layoutItems.find(item => item.key === key);
+            return item && item.seriesIndex === seriesIndex;
           })
           .forEach(key => {
-            const item = layoutableItems.find(item => item.key === key);
+            const item = layoutItems.find(item => item.key === key);
             composition.addAnnotation(
               new rs.ReferenceLine(viewers[key], {
                 color: orientationColor(item!.orientation)
@@ -446,8 +383,7 @@ const RevisionEditor: React.FC<{
     viewOptions.showReferenceLine,
     viewOptions.scrollbar,
     touchDevice,
-    viewers,
-    layoutableItems
+    viewers
   ]);
 
   useEffect(() => {
@@ -600,7 +536,6 @@ const RevisionEditor: React.FC<{
             disabled={busy}
           />
           <LabelSelector
-            registerNewViewerCellKey={registerNewViewerCellKey}
             seriesData={seriesData}
             editingData={editingData}
             updateEditingData={updateEditingData}
@@ -670,10 +605,10 @@ const RevisionEditor: React.FC<{
           disabled={busy}
         />
         <ViewerGrid
-          items={layoutableItems}
+          items={editingData.layoutItems}
+          layout={editingData.layout}
           compositions={compositions}
-          layout={layout}
-          setLayout={setLayout}
+          onLayoutChange={handleLayoutChange}
           stateChanger={stateChanger}
           tool={activeTool}
           activeSeriesIndex={editingData.activeSeriesIndex}
@@ -681,7 +616,7 @@ const RevisionEditor: React.FC<{
           onDestroyViewer={handleDestroyViewer}
           initialStateSetter={initialStateSetter}
           onViewStateChange={handleViewStateChange}
-          updateViewerCellKey={updateViewerCellKey}
+          updateEditingData={updateEditingData}
         />
       </div>
       <Modal show={seriesDialogOpen} bsSize="lg">

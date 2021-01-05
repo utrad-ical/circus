@@ -16,6 +16,7 @@ import useKeyboardShortcut from 'utils/useKeyboardShortcut';
 import { ToolOptions, ToolOptionSetter } from 'pages/case-detail/useToolbar';
 import { ReferenceValueOption } from '@utrad-ical/circus-rs/src/browser/tool/cloud/WandTool';
 import { Editor } from '@smikitky/rb-components/lib/editor-types';
+import { LayoutKind } from './caseStore';
 
 export interface ViewOptions {
   showReferenceLine?: boolean;
@@ -31,7 +32,6 @@ const scrollbarOptions: { key: ScrollbarOptions; caption: string }[] = [
   { key: 'large', caption: 'Large' }
 ];
 
-export type LayoutKind = 'twoByTwo' | 'axial' | 'sagittal' | 'coronal';
 const layoutOptions: { key: LayoutKind; caption: string; icon: string }[] = [
   { key: 'twoByTwo', caption: '2 x 2', icon: 'circus-layout-four' },
   { key: 'axial', caption: 'Axial', icon: 'circus-orientation-axial' },
@@ -204,9 +204,7 @@ const ToolBar: React.FC<{
       &thinsp;
       <Dropdown id="layout-dropdown" disabled={disabled}>
         <Dropdown.Toggle>
-          <Icon
-            icon={layoutOptions.find(l => l.key === viewOptions.layout)?.icon}
-          />
+          <Icon icon="circus-layout-four" />
         </Dropdown.Toggle>
         <Dropdown.Menu onSelect={onChangeLayoutKind}>
           {layoutOptions.map(l => {

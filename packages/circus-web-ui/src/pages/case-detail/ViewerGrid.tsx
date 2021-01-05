@@ -285,7 +285,6 @@ const ViewerGrid: React.FC<{
         renderItem={Content}
         onLayoutChange={handleLayoutChange}
         dragDataMimeType="text/x-circusdb-viewergrid"
-        dragRemovable={true}
       />
     </ViewerGridContext.Provider>
   );

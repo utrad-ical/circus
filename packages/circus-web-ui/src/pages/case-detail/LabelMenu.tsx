@@ -1,5 +1,5 @@
 import { ColorPalette } from '@smikitky/rb-components/lib/ColorPicker';
-import { choice, prompt } from '@smikitky/rb-components/lib/modal';
+import { alert, prompt } from '@smikitky/rb-components/lib/modal';
 import Slider from '@smikitky/rb-components/lib/Slider';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import { Viewer } from '@utrad-ical/circus-rs/src/browser';
@@ -25,6 +25,7 @@ import {
   LabelAppearance,
   createNewLabelData
 } from './labelData';
+import { OrientationString } from 'circus-rs/section-util';
 
 type LabelCommand = 'rename' | 'remove' | 'convertType' | 'reveal';
 
@@ -47,8 +48,8 @@ const LabelMenu: React.FC<{
   const activeLabel =
     activeLabelIndex >= 0 ? activeSeries.labels[activeLabelIndex] : null;
 
+  // Small wrapper around updateEditingData
   const updateCurrentLabels = (updater: (labels: InternalLabel[]) => void) => {
-    // Small wrapper around updateEditingData
     const labels = editingData.revision.series[activeSeriesIndex].labels;
     const newLabels = produce(labels, updater);
     updateEditingData(editingData => {
@@ -146,83 +147,38 @@ const LabelMenu: React.FC<{
   const addLabel = async (type: LabelType) => {
     setNewLabelType(type);
 
-    const additionalPossibleViewerIds: { [key in LabelType]: string[] } = {
-      voxel: [
-        'axial',
-        'one-axial',
-        'sagittal',
-        'one-sagittal',
-        'coronal',
-        'one-coronal'
-      ],
-      cuboid: [
-        'axial',
-        'one-axial',
-        'sagittal',
-        'one-sagittal',
-        'coronal',
-        'one-coronal'
-      ],
-      ellipsoid: [
-        'axial',
-        'one-axial',
-        'sagittal',
-        'one-sagittal',
-        'coronal',
-        'one-coronal'
-      ],
-      ellipse: ['axial', 'one-axial'],
-      rectangle: ['axial', 'one-axial'],
-      point: [
-        'axial',
-        'one-axial',
-        'sagittal',
-        'one-sagittal',
-        'coronal',
-        'one-coronal',
-        'oblique'
-      ],
-      ruler: [
-        'axial',
-        'one-axial',
-        'sagittal',
-        'one-sagittal',
-        'coronal',
-        'one-coronal',
-        'oblique'
-      ]
-    };
-    const viewerIdOptions = Object.keys(viewers).filter(viewerId =>
-      additionalPossibleViewerIds[type].some(t => viewerId === t)
-    );
-
-    const selectTargetViewerId = async (
-      type: LabelType,
-      viewerIdOptions: string[]
-    ) => {
-      if (viewerIdOptions.length === 0) return;
-      if (viewerIdOptions.length === 1) return viewerIdOptions[0];
-
-      if (type === 'ruler') {
-        // Display a dialog box to select the viewer to add the label to.
-        const choices = viewerIdOptions.reduce<{ [key: string]: string }>(
-          (options, key) => ({ ...options, [key]: key }),
-          {}
-        );
-        return (await choice(
-          'Select the viewer to add a ruler label.',
-          choices,
-          { icon: 'info-sign', cancelable: true, bsSize: 'lg' }
-        )) as string | undefined;
-      } else {
-        // Return the first entry of the visible viewers as the target for adding the label
-        return viewerIdOptions[0];
-      }
+    const basic: OrientationString[] = ['axial', 'sagittal', 'coronal'];
+    const allowedOrientations: { [key in LabelType]: OrientationString[] } = {
+      voxel: basic,
+      cuboid: basic,
+      ellipsoid: basic,
+      ellipse: ['axial'],
+      rectangle: ['axial'],
+      point: [...basic, 'oblique'],
+      ruler: [...basic, 'oblique']
     };
 
-    const viewerId = await selectTargetViewerId(type, viewerIdOptions);
-    if (!viewerId) return;
+    const viewerId = editingData.activeLayoutKey;
 
+    if (!viewerId) {
+      await alert(
+        'Select the viewer on which you want to place the new label. ' +
+          'Click the header.'
+      );
+      return;
+    }
+
+    const orientation = editingData.layoutItems.find(
+      item => item.key === viewerId
+    )!.orientation;
+    if (allowedOrientations[type].indexOf(orientation) < 0) {
+      await alert(
+        'The orientation of the selected viewer must be ' +
+          allowedOrientations[type].join(' or ') +
+          '.'
+      );
+      return;
+    }
     const newLabel = createNewLabel(type, viewers[viewerId]);
     updateCurrentLabels(labels => {
       labels.push(newLabel);

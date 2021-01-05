@@ -214,6 +214,7 @@ const RevisionEditor: React.FC<{
       );
       d.layoutItems = layoutItems;
       d.layout = layout;
+      d.activeLayoutKey = layoutItems[0].key;
     });
   };
 

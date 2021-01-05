@@ -13,7 +13,7 @@ import Series from 'types/Series';
 import { EditingData, EditingDataUpdater } from './revisionData';
 import { InternalLabel, labelTypes } from './labelData';
 import { multirange } from 'multi-integer-range';
-import { newViewerCellItem } from './caseStore';
+import { newViewerCellItem, performLayout } from './caseStore';
 
 const LabelSelector: React.FC<{
   editingData: EditingData;
@@ -85,7 +85,7 @@ const SeriesItem: React.FC<{
   } = props;
   const series = editingData.revision.series[seriesIndex];
 
-  const changeLabel = async (seriesIndex: number, labelIndex: number) => {
+  const changeLabel = (seriesIndex: number, labelIndex: number) => {
     if (
       editingData.activeSeriesIndex !== seriesIndex ||
       editingData.activeLabelIndex !== labelIndex
@@ -112,6 +112,17 @@ const SeriesItem: React.FC<{
     changeLabel(seriesIndex, series.labels.length ? 0 : -1);
   };
 
+  const handleSeriesDoubleClick = () => {
+    if (disabled) return;
+    if (editingData.activeSeriesIndex !== seriesIndex) return;
+    const [layoutItems, layout] = performLayout('twoByTwo', seriesIndex);
+    updateEditingData(d => {
+      d.layoutItems = layoutItems;
+      d.layout = layout;
+      d.activeLayoutKey = layoutItems[0].key;
+    });
+  };
+
   const handleLabelClick = (labelIndex: number) => {
     changeLabel(seriesIndex, labelIndex);
   };
@@ -132,6 +143,7 @@ const SeriesItem: React.FC<{
         active: seriesIndex === editingData.activeSeriesIndex
       })}
       onClick={handleSeriesClick}
+      onDoubleClick={handleSeriesDoubleClick}
       onDragStart={handleDragStart}
       draggable
     >
@@ -352,6 +364,7 @@ export const Label: React.FC<{
         'dragging-bottom': isDraggingOver === 'bottom'
       })}
       onClick={handleClick}
+      onDoubleClick={(ev: React.MouseEvent) => ev.stopPropagation()}
       draggable
       onDragStart={handleDragStart}
       onDrop={handleDrop}

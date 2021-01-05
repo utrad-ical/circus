@@ -11,7 +11,7 @@ import { Button, DropdownButton, MenuItem } from 'components/react-bootstrap';
 import React, { useContext, useEffect, useRef, useMemo } from 'react';
 import styled from 'styled-components';
 import { OrientationString } from 'circus-rs/section-util';
-import { EditingDataUpdater } from './revisionData';
+import { EditingData, EditingDataUpdater } from './revisionData';
 import classnames from 'classnames';
 
 export interface ViewerDef {
@@ -22,16 +22,15 @@ export interface ViewerDef {
 }
 
 interface ViewerGridContextValue {
+  editingData: EditingData;
+  updateEditingData: EditingDataUpdater;
   compositions: { composition?: Composition }[];
   tool: Tool;
-  activeSeriesIndex: number;
   stateChanger: StateChanger<MprViewState>;
   onCreateViewer: (viewer: Viewer, id?: string | number) => void;
   onDestroyViewer: (viewer: Viewer) => void;
   initialStateSetter: (viewer: Viewer, viewState: ViewState) => ViewState;
   onViewStateChange: (viewer: Viewer, id?: string | number) => void;
-  updateEditingData: EditingDataUpdater;
-  activeKey: string | null;
 }
 
 /**
@@ -43,14 +42,17 @@ const ViewerGridContext = React.createContext<ViewerGridContextValue | null>(
 
 const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
   const { key, seriesIndex, orientation, celestialRotateMode } = props.value;
-
-  const { updateEditingData, activeSeriesIndex, activeKey } = useContext(
-    ViewerGridContext
-  )!;
+  const { updateEditingData, editingData } = useContext(ViewerGridContext)!;
+  const { activeSeriesIndex, activeLayoutKey, revision } = editingData;
 
   const handleClick = () => {
     updateEditingData(d => {
       d.activeLayoutKey = key;
+      if (d.activeSeriesIndex !== seriesIndex) {
+        d.activeSeriesIndex = seriesIndex;
+        d.activeLabelIndex =
+          revision.series[seriesIndex].labels.length > 0 ? 0 : -1;
+      }
     }, 'select active editor');
   };
 
@@ -71,7 +73,7 @@ const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
     ev.stopPropagation();
   };
 
-  const active = key === activeKey;
+  const active = key === activeLayoutKey;
   const selectedSeries = seriesIndex === activeSeriesIndex;
 
   return (
@@ -221,71 +223,67 @@ const orientationInitialStateSetters: {
 export type Layout = 'twoByTwo' | 'axial' | 'sagittal' | 'coronal';
 
 const ViewerGrid: React.FC<{
-  items: ViewerDef[];
-  layout: LayoutInfo;
-  onLayoutChange: (layout: LayoutInfo) => void;
-  activeKey: string | null;
+  editingData: EditingData;
+  updateEditingData: EditingDataUpdater;
   compositions: { composition?: Composition }[];
   tool?: Tool;
-  activeSeriesIndex: number;
   stateChanger: StateChanger<MprViewState>;
   onCreateViewer: (viewer: Viewer, id?: string | number) => void;
   onDestroyViewer: (viewer: Viewer) => void;
   initialStateSetter: (viewer: Viewer, viewState: ViewState) => ViewState;
   onViewStateChange: (viewer: Viewer, id?: string | number) => void;
-  updateEditingData: EditingDataUpdater;
 }> = props => {
   const {
-    items,
-    layout,
-    onLayoutChange,
-    activeKey,
+    editingData,
+    updateEditingData,
     compositions,
     tool,
-    activeSeriesIndex,
     stateChanger,
     onCreateViewer,
     onDestroyViewer,
     initialStateSetter,
-    onViewStateChange,
-    updateEditingData
+    onViewStateChange
   } = props;
 
   const gridContext: ViewerGridContextValue = useMemo(
     () => ({
+      editingData,
+      updateEditingData,
       compositions,
       tool: tool!,
-      activeSeriesIndex,
       stateChanger,
       onCreateViewer,
       onDestroyViewer,
       onViewStateChange,
-      initialStateSetter,
-      updateEditingData,
-      activeKey
+      initialStateSetter
     }),
     [
+      editingData,
+      updateEditingData,
       compositions,
       tool,
-      activeSeriesIndex,
       stateChanger,
       onCreateViewer,
       onDestroyViewer,
       onViewStateChange,
-      initialStateSetter,
-      updateEditingData,
-      activeKey
+      initialStateSetter
     ]
   );
+
+  const handleLayoutChange = (layout: LayoutInfo) => {
+    updateEditingData(d => {
+      d.layout = layout;
+    }, 'layout');
+  };
 
   return (
     <ViewerGridContext.Provider value={gridContext}>
       <GridContainer<ViewerDef>
-        items={items}
-        layout={layout}
+        items={editingData.layoutItems}
+        layout={editingData.layout}
         renderHeader={Header}
         renderItem={Content}
-        onLayoutChange={onLayoutChange}
+        onLayoutChange={handleLayoutChange}
         dragDataMimeType="text/x-circusdb-viewergrid"
         dragRemovable={true}
       />

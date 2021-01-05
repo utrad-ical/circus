@@ -217,12 +217,6 @@ const RevisionEditor: React.FC<{
     });
   };
 
-  const handleLayoutChange = (layout: LayoutInfo) => {
-    updateEditingData(d => {
-      d.layout = layout;
-    }, 'layout');
-  };
-
   const handleAnnotationChange = (
     annotation:
       | rs.VoxelCloud
@@ -605,19 +599,15 @@ const RevisionEditor: React.FC<{
           disabled={busy}
         />
         <ViewerGrid
-          items={editingData.layoutItems}
-          layout={editingData.layout}
-          onLayoutChange={handleLayoutChange}
-          activeKey={editingData.activeLayoutKey}
+          editingData={editingData}
+          updateEditingData={updateEditingData}
           compositions={compositions}
           stateChanger={stateChanger}
           tool={activeTool}
-          activeSeriesIndex={editingData.activeSeriesIndex}
           onCreateViewer={handleCreateViwer}
           onDestroyViewer={handleDestroyViewer}
           initialStateSetter={initialStateSetter}
           onViewStateChange={handleViewStateChange}
-          updateEditingData={updateEditingData}
         />
       </div>
       <Modal show={seriesDialogOpen} bsSize="lg">

@@ -166,7 +166,8 @@ const slice = createSlice({
         activeSeriesIndex: 0,
         activeLabelIndex: (revision.series[0].labels || []).length > 0 ? 0 : -1,
         layout,
-        layoutItems
+        layoutItems,
+        activeLayoutKey: layoutItems[0].key
       };
       s.history = [editingData];
       s.currentHistoryIndex = 0;

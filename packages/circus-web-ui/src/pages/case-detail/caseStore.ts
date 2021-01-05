@@ -4,6 +4,10 @@ import { ExternalLabel } from './labelData';
 import PatientInfo from '../../types/PatientInfo';
 import Project from 'types/Project';
 import Series from 'types/Series';
+import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import { LayoutInfo, layoutReducer } from 'components/GridContainer';
+import { OrientationString } from 'circus-rs/section-util';
+import { ViewerDef } from './ViewerGrid';
 
 interface CaseData {
   caseId: string;
@@ -45,6 +49,54 @@ export const canUndo = (s: CaseDetailState) => s.currentHistoryIndex > 0;
 
 export const canRedo = (s: CaseDetailState) =>
   s.currentHistoryIndex < s.history.length - 1;
+
+export type LayoutKind = 'twoByTwo' | 'axial' | 'sagittal' | 'coronal';
+
+export const performLayout = (
+  kind: LayoutKind,
+  seriesIndex: number = 0
+): [ViewerDef[], LayoutInfo] => {
+  const layout: LayoutInfo = {
+    columns: kind === 'twoByTwo' ? 2 : 1,
+    rows: kind === 'twoByTwo' ? 2 : 1,
+    positions: {}
+  };
+  const orientations: OrientationString[] =
+    kind === 'twoByTwo' ? ['axial', 'sagittal', 'coronal', 'oblique'] : [kind];
+  let tmp = layout;
+  const items: ViewerDef[] = [];
+  orientations.forEach(orientation => {
+    const item = newViewerCellItem(seriesIndex, orientation);
+    items.push(item);
+    tmp = layoutReducer(tmp, {
+      type: 'insertItemToEmptyCell',
+      payload: { key: item.key }
+    });
+  });
+  return [items, tmp];
+};
+
+const alphaNum = (length: number = 16) =>
+  new Array(length)
+    .fill(0)
+    .map(() => String.fromCharCode(97 + Math.floor(Math.random() * 26)))
+    .join('');
+
+export const newViewerCellItem = (
+  seriesIndex: number,
+  orientation: OrientationString
+): ViewerDef => {
+  const key = alphaNum();
+  return {
+    key,
+    seriesIndex,
+    orientation,
+    celestialRotateMode: orientation === 'oblique'
+  };
+};
+
+const pvdEquals = (a: PartialVolumeDescriptor, b: PartialVolumeDescriptor) =>
+  a && b && a.start === b.start && a.end === b.end && a.delta === b.delta;
 
 const slice = createSlice({
   name: 'caseData',
@@ -93,10 +145,28 @@ const slice = createSlice({
     },
     loadRevision: (s, action: PayloadAction<{ revision: Revision }>) => {
       const { revision } = action.payload;
+      const prev = s.history[s.currentHistoryIndex];
+      const sameSeriesSet =
+        prev &&
+        prev.revision.series.every(
+          (s, i) =>
+            s.seriesUid === revision.series[i]?.seriesUid &&
+            pvdEquals(
+              s.partialVolumeDescriptor,
+              revision.series[i]?.partialVolumeDescriptor
+            )
+        );
+
+      const [layoutItems, layout] = sameSeriesSet
+        ? [prev.layoutItems, prev.layout]
+        : performLayout('twoByTwo', 0);
+
       const editingData: EditingData = {
         revision,
         activeSeriesIndex: 0,
-        activeLabelIndex: (revision.series[0].labels || []).length > 0 ? 0 : -1
+        activeLabelIndex: (revision.series[0].labels || []).length > 0 ? 0 : -1,
+        layout,
+        layoutItems
       };
       s.history = [editingData];
       s.currentHistoryIndex = 0;
@@ -153,10 +223,10 @@ const slice = createSlice({
   }
 });
 
-export default slice.reducer as (
-  state: CaseDetailState,
-  action: any
-) => CaseDetailState;
+const reducer: (state: CaseDetailState, action: any) => CaseDetailState =
+  slice.reducer;
+
+export default reducer;
 
 export const {
   setBusy,

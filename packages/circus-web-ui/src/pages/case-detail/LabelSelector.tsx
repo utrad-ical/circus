@@ -91,6 +91,14 @@ const SeriesItem: React.FC<{
       editingData.activeLabelIndex !== labelIndex
     ) {
       updateEditingData(editingData => {
+        if (editingData.activeSeriesIndex !== seriesIndex) {
+          const viewerKeys = editingData.layoutItems.filter(
+            item => item.seriesIndex === seriesIndex
+          );
+          editingData.activeLayoutKey = viewerKeys[0]
+            ? viewerKeys[0].key
+            : null;
+        }
         editingData.activeSeriesIndex = seriesIndex;
         editingData.activeLabelIndex = labelIndex;
       }, 'Change active series');

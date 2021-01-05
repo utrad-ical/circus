@@ -220,7 +220,7 @@ const RevisionEditor: React.FC<{
   const handleLayoutChange = (layout: LayoutInfo) => {
     updateEditingData(d => {
       d.layout = layout;
-    });
+    }, 'layout');
   };
 
   const handleAnnotationChange = (
@@ -607,8 +607,9 @@ const RevisionEditor: React.FC<{
         <ViewerGrid
           items={editingData.layoutItems}
           layout={editingData.layout}
-          compositions={compositions}
           onLayoutChange={handleLayoutChange}
+          activeKey={editingData.activeLayoutKey}
+          compositions={compositions}
           stateChanger={stateChanger}
           tool={activeTool}
           activeSeriesIndex={editingData.activeSeriesIndex}

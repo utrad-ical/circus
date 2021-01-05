@@ -31,9 +31,10 @@ export interface EditingData {
    */
   layout: LayoutInfo;
   /**
-   * Holds the list of layoutable items.
+   * Holds the list of layoutable items passed to the grid container.
    */
   layoutItems: ViewerDef[];
+  activeLayoutKey: string | null;
 }
 
 /**

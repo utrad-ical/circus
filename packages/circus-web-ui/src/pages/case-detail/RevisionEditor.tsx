@@ -216,6 +216,13 @@ const RevisionEditor: React.FC<{
     });
   };
 
+  const multipleSeriesShown = useMemo(() => {
+    const seriesIndexes = Object.keys(editingData.layout.positions).map(
+      key => editingData.layoutItems.find(item => item.key === key)!.seriesIndex
+    );
+    return new Set(seriesIndexes).size > 1;
+  }, [editingData.layout, editingData.layoutItems]);
+
   const handleAnnotationChange = (
     annotation:
       | rs.VoxelCloud
@@ -534,6 +541,7 @@ const RevisionEditor: React.FC<{
             editingData={editingData}
             updateEditingData={updateEditingData}
             disabled={busy}
+            multipleSeriesShown={multipleSeriesShown}
           />
           <div className="add-series-pane">
             <IconButton
@@ -607,6 +615,7 @@ const RevisionEditor: React.FC<{
           onDestroyViewer={handleDestroyViewer}
           initialStateSetter={initialStateSetter}
           onViewStateChange={handleViewStateChange}
+          multipleSeriesShown={multipleSeriesShown}
         />
       </div>
       <Modal show={seriesDialogOpen} bsSize="lg">

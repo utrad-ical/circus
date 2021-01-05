@@ -11,7 +11,7 @@ import { Button, DropdownButton, MenuItem } from 'components/react-bootstrap';
 import React, { useContext, useEffect, useRef, useMemo } from 'react';
 import styled from 'styled-components';
 import { OrientationString } from 'circus-rs/section-util';
-import { EditingData, EditingDataUpdater } from './revisionData';
+import { EditingData, EditingDataUpdater, seriesColors } from './revisionData';
 import classnames from 'classnames';
 
 export interface ViewerDef {
@@ -31,6 +31,7 @@ interface ViewerGridContextValue {
   onDestroyViewer: (viewer: Viewer) => void;
   initialStateSetter: (viewer: Viewer, viewState: ViewState) => ViewState;
   onViewStateChange: (viewer: Viewer, id?: string | number) => void;
+  multipleSeriesShown: boolean;
 }
 
 /**
@@ -42,7 +43,9 @@ const ViewerGridContext = React.createContext<ViewerGridContextValue | null>(
 
 const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
   const { key, seriesIndex, orientation, celestialRotateMode } = props.value;
-  const { updateEditingData, editingData } = useContext(ViewerGridContext)!;
+  const { updateEditingData, editingData, multipleSeriesShown } = useContext(
+    ViewerGridContext
+  )!;
   const { activeSeriesIndex, activeLayoutKey, revision } = editingData;
 
   const handleClick = () => {
@@ -76,13 +79,18 @@ const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
   const active = key === activeLayoutKey;
   const selectedSeries = seriesIndex === activeSeriesIndex;
 
+  const color = multipleSeriesShown
+    ? seriesColors[Math.min(seriesIndex, seriesColors.length - 1)]
+    : '#ffffff';
+
   return (
     <HeaderDiv
       className={classnames({ active, 'selected-series': selectedSeries })}
       onClick={handleClick}
     >
       <span>
-        Viewer: Series #{seriesIndex} {orientation}
+        <div className="box" style={{ backgroundColor: color }} />
+        Series #{seriesIndex} {orientation}
       </span>
       <span>
         {orientation === 'oblique' && (
@@ -131,6 +139,7 @@ const HeaderDiv = styled.div`
 
   display: flex;
   justify-content: space-between;
+  align-items: center;
   height: 27px;
   font-size: 15px;
   line-height: 25px;
@@ -139,6 +148,14 @@ const HeaderDiv = styled.div`
   background-color: #333333;
   border: 1px solid #888888;
   cursor: pointer;
+
+  .box {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    margin-right: 3px;
+  }
 `;
 
 const celestialRotate = toolFactory('celestialRotate');
@@ -232,6 +249,7 @@ const ViewerGrid: React.FC<{
   onDestroyViewer: (viewer: Viewer) => void;
   initialStateSetter: (viewer: Viewer, viewState: ViewState) => ViewState;
   onViewStateChange: (viewer: Viewer, id?: string | number) => void;
+  multipleSeriesShown: boolean;
 }> = props => {
   const {
     editingData,
@@ -242,7 +260,8 @@ const ViewerGrid: React.FC<{
     onCreateViewer,
     onDestroyViewer,
     initialStateSetter,
-    onViewStateChange
+    onViewStateChange,
+    multipleSeriesShown
   } = props;
 
   const gridContext: ViewerGridContextValue = useMemo(
@@ -255,7 +274,8 @@ const ViewerGrid: React.FC<{
       onCreateViewer,
       onDestroyViewer,
       onViewStateChange,
-      initialStateSetter
+      initialStateSetter,
+      multipleSeriesShown
     }),
     [
       editingData,
@@ -266,7 +286,8 @@ const ViewerGrid: React.FC<{
       onCreateViewer,
       onDestroyViewer,
       onViewStateChange,
-      initialStateSetter
+      initialStateSetter,
+      multipleSeriesShown
     ]
   );
 

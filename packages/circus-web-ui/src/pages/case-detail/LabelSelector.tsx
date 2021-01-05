@@ -10,7 +10,7 @@ import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import { mostReadable } from 'tinycolor2';
 import Series from 'types/Series';
-import { EditingData, EditingDataUpdater } from './revisionData';
+import { EditingData, EditingDataUpdater, seriesColors } from './revisionData';
 import { InternalLabel, labelTypes } from './labelData';
 import { multirange } from 'multi-integer-range';
 import { newViewerCellItem, performLayout } from './caseStore';
@@ -22,13 +22,15 @@ const LabelSelector: React.FC<{
   seriesData: { [seriesUid: string]: Series };
   volumeLoadedStatus: boolean[];
   disabled?: boolean;
+  multipleSeriesShown: boolean;
 }> = props => {
   const {
     editingData,
     updateEditingData,
     seriesData,
     volumeLoadedStatus,
-    disabled
+    disabled,
+    multipleSeriesShown
   } = props;
 
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
@@ -48,6 +50,7 @@ const LabelSelector: React.FC<{
           seriesIndex={seriesIndex}
           activeLabel={activeLabel}
           disabled={disabled}
+          multipleSeriesShown={multipleSeriesShown}
         />
       ))}
     </StyledSeriesUl>
@@ -84,6 +87,7 @@ const SeriesItem: React.FC<{
   seriesIndex: number;
   activeLabel: InternalLabel | null;
   disabled?: boolean;
+  multipleSeriesShown: boolean;
 }> = props => {
   const {
     seriesIndex,
@@ -92,7 +96,8 @@ const SeriesItem: React.FC<{
     seriesInfo,
     volumeLoaded,
     activeLabel,
-    disabled
+    disabled,
+    multipleSeriesShown
   } = props;
   const series = editingData.revision.series[seriesIndex];
 
@@ -148,6 +153,15 @@ const SeriesItem: React.FC<{
     ev.stopPropagation();
   };
 
+  const shown = Object.keys(editingData.layout.positions).some(
+    key =>
+      editingData.layoutItems.find(item => item.key === key)!.seriesIndex ===
+      seriesIndex
+  );
+  const color = multipleSeriesShown
+    ? seriesColors[Math.min(seriesIndex, seriesColors.length - 1)]
+    : '#000000';
+
   return (
     <StyledSeriesLi
       className={classNames({
@@ -160,7 +174,9 @@ const SeriesItem: React.FC<{
     >
       <span className="series-head">
         <div>
-          <Icon icon="circus-series" /> Series #{seriesIndex}
+          <Icon icon="circus-series" />
+          {shown && <div className="box" style={{ backgroundColor: color }} />}
+          Series #{seriesIndex}
           {!volumeLoaded && (
             <span className="series-loading">
               <LoadingIndicator delay={300} /> loading...
@@ -212,6 +228,13 @@ const StyledSeriesLi = styled.li`
     padding-left: 15px;
     color: gray;
     font-weight: normal;
+  }
+  .box {
+    display: inline-box;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    margin-right: 5px;
   }
 `;
 

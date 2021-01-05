@@ -122,3 +122,12 @@ export const saveRevision = async (
     data: saveData
   });
 };
+
+export const seriesColors = [
+  '#ff0000',
+  '#00aaff',
+  '#00bbbb',
+  '#00bb00',
+  '#dddd00',
+  '#dd00dd'
+];

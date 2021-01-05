@@ -1,0 +1,29 @@
+name: MyLists
+description: >
+  Pick out the items and save them.
+routes:
+  - verb: get
+    path: /mylists
+    handler: handleSearch
+    description: Performs search and retrieves a list of the current user's my lists.
+    responseSchema: ''
+  - verb: get
+    path: /mylists/:myListId
+    description: Returns information about the specified list.
+  - verb: post
+    path: /mylists
+    description: Creates a new my list.
+  - verb: post
+    path: /mylists/:myListId/items
+    handler: handlePostItem
+    description: Creates a new item in the specified my list.
+  - verb: put
+    path: /mylists/:myListId/name
+    description: Renames the specified my list.
+  - verb: delete
+    path: /mylists/:myListId
+    description: Deletes the specified my list.
+  - verb: delete
+    path: /mylists/:myListId/items/:itemId
+    handler: handleDeleteItem
+    description: Deletes the specified item in the specified my list.

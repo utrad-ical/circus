@@ -27,6 +27,7 @@ export interface ModelEntries {
   task: any;
   plugin: any;
   pluginJob: any;
+  myList: any;
 }
 
 export type Models = {

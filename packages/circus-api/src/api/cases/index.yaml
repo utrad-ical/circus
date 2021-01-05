@@ -7,6 +7,10 @@ routes:
     handler: handleSearch
     description: Performs search and retrieves a list of cases.
     responseSchema: clinicalCaseSearchResult|searchResult
+  - verb: get
+    path: /cases/list/:myListId
+    description: Peforms search based on a my list ID.
+    responseSchema: clinicalCaseSearchResult|searchResult
   - verb: post
     path: /cases
     # TODO: Security: Determine how to detect target project

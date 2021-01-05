@@ -47,8 +47,6 @@ import useLocalPreference from 'utils/useLocalPreference';
 import isTouchDevice from 'utils/isTouchDevice';
 import useToolbar from 'pages/case-detail/useToolbar';
 import Series from 'types/Series';
-import { LayoutInfo, layoutReducer } from 'components/GridContainer';
-import { OrientationString } from 'circus-rs/section-util';
 
 const useCompositions = (
   series: {
@@ -161,8 +159,8 @@ const RevisionEditor: React.FC<{
 
   const compositions = useCompositions(allSeries);
 
-  const activeVolumeLoaded =
-    compositions[editingData.activeSeriesIndex].volumeLoaded;
+  const volumeLoadedStatus = compositions.map(entry => entry.volumeLoaded);
+  const activeVolumeLoaded = volumeLoadedStatus[editingData.activeSeriesIndex];
 
   const { revision, activeLabelIndex } = editingData;
 
@@ -532,11 +530,11 @@ const RevisionEditor: React.FC<{
           />
           <LabelSelector
             seriesData={seriesData}
+            volumeLoadedStatus={volumeLoadedStatus}
             editingData={editingData}
             updateEditingData={updateEditingData}
             disabled={busy}
           />
-
           <div className="add-series-pane">
             <IconButton
               bsSize="xs"
@@ -634,6 +632,7 @@ const StyledDiv = styled.div`
     flex: 1 0 0;
     display: flex;
     flex-direction: column;
+    background-color: #333333;
   }
 
   &.busy {

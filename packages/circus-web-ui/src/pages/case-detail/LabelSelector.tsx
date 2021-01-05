@@ -14,14 +14,22 @@ import { EditingData, EditingDataUpdater } from './revisionData';
 import { InternalLabel, labelTypes } from './labelData';
 import { multirange } from 'multi-integer-range';
 import { newViewerCellItem, performLayout } from './caseStore';
+import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 
 const LabelSelector: React.FC<{
   editingData: EditingData;
-  seriesData: { [seriesUid: string]: Series };
   updateEditingData: EditingDataUpdater;
+  seriesData: { [seriesUid: string]: Series };
+  volumeLoadedStatus: boolean[];
   disabled?: boolean;
 }> = props => {
-  const { editingData, updateEditingData, seriesData, disabled } = props;
+  const {
+    editingData,
+    updateEditingData,
+    seriesData,
+    volumeLoadedStatus,
+    disabled
+  } = props;
 
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
   const activeSeries = revision.series[activeSeriesIndex];
@@ -34,6 +42,7 @@ const LabelSelector: React.FC<{
         <SeriesItem
           key={`${seriesIndex}:${series.seriesUid}`}
           seriesInfo={seriesData[series.seriesUid]}
+          volumeLoaded={volumeLoadedStatus[seriesIndex]}
           editingData={editingData}
           updateEditingData={updateEditingData}
           seriesIndex={seriesIndex}
@@ -71,6 +80,7 @@ const SeriesItem: React.FC<{
   editingData: EditingData;
   updateEditingData: EditingDataUpdater;
   seriesInfo: Series;
+  volumeLoaded: boolean;
   seriesIndex: number;
   activeLabel: InternalLabel | null;
   disabled?: boolean;
@@ -80,6 +90,7 @@ const SeriesItem: React.FC<{
     editingData,
     updateEditingData,
     seriesInfo,
+    volumeLoaded,
     activeLabel,
     disabled
   } = props;
@@ -120,7 +131,7 @@ const SeriesItem: React.FC<{
       d.layoutItems = layoutItems;
       d.layout = layout;
       d.activeLayoutKey = layoutItems[0].key;
-    });
+    }, 'layout');
   };
 
   const handleLabelClick = (labelIndex: number) => {
@@ -150,6 +161,11 @@ const SeriesItem: React.FC<{
       <span className="series-head">
         <div>
           <Icon icon="circus-series" /> Series #{seriesIndex}
+          {!volumeLoaded && (
+            <span className="series-loading">
+              <LoadingIndicator delay={300} /> loading...
+            </span>
+          )}
         </div>
         <div onClick={ev => ev.stopPropagation()}>
           <SeriesInfo
@@ -191,6 +207,11 @@ const StyledSeriesLi = styled.li`
   }
   &.active .series-head {
     font-weight: bold;
+  }
+  .series-loading {
+    padding-left: 15px;
+    color: gray;
+    font-weight: normal;
   }
 `;
 

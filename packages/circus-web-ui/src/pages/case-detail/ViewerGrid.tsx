@@ -8,7 +8,13 @@ import ImageViewer, {
   StateChanger
 } from 'components/ImageViewer';
 import { Button, DropdownButton, MenuItem } from 'components/react-bootstrap';
-import React, { useContext, useEffect, useRef, useMemo } from 'react';
+import React, {
+  useContext,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback
+} from 'react';
 import styled from 'styled-components';
 import { OrientationString } from 'circus-rs/section-util';
 import { EditingData, EditingDataUpdater, seriesColors } from './revisionData';
@@ -175,14 +181,14 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
 
   const composition = compositions[seriesIndex].composition;
 
-  const combinedInitialStateSetter = (
-    viewer: Viewer,
-    viewState: MprViewState
-  ) => {
-    const s1 = orientationInitialStateSetters[orientation](viewer, viewState);
-    const s2 = initialStateSetter(viewer, s1!);
-    return s2;
-  };
+  const combinedInitialStateSetter = useCallback(
+    (viewer: Viewer, viewState: MprViewState) => {
+      const s1 = orientationInitialStateSetters[orientation](viewer, viewState);
+      const s2 = initialStateSetter(viewer, s1!);
+      return s2;
+    },
+    [initialStateSetter, orientation]
+  );
 
   const localStateChanger = useMemo(
     () => createStateChanger<MprViewState>(),
@@ -191,10 +197,10 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
 
   useEffect(() => {
     stateChanger.on(localStateChanger);
-    () => {
+    return () => {
       stateChanger.off(localStateChanger);
     };
-  }, [localStateChanger, stateChanger]);
+  }, [localStateChanger, stateChanger, key]);
 
   const initialRender = useRef<boolean>(true);
   useEffect(() => {

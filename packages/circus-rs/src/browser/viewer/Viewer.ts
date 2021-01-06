@@ -388,6 +388,7 @@ export default class Viewer extends EventEmitter {
 
     // Wait for image source to be ready
     composition.imageSource.ready().then(() => {
+      if (this.composition !== composition) return; // ignore stale source
       this.imageReady = true;
       this.setState(composition.imageSource.initialState(this));
       this.viewStateResizeTransformer = composition.imageSource.getResizeTransformer();

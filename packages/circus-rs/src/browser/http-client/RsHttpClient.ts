@@ -20,23 +20,31 @@ export default class RsHttpClient {
     this.token = token;
   }
 
-  public request(
+  public async request(
     command: string,
     params: any,
-    responseType: ResponseType = 'json'
+    responseType: ResponseType = 'json',
+    abortSignal?: AbortSignal
   ): Promise<any> {
     const url = `${this.host}/${command}`;
+
+    const source = axios.CancelToken.source();
+    if (abortSignal) {
+      abortSignal.addEventListener('abort', () => source.cancel());
+    }
 
     const config: AxiosRequestConfig = {
       method: 'get',
       url,
       params,
-      responseType
+      responseType,
+      cancelToken: source.token
     };
 
     if (typeof this.token === 'string') {
       config.headers = { Authorization: `Bearer ${this.token}` };
     }
-    return (axios(config).then(res => res.data) as any) as Promise<any>;
+    const res = await axios(config);
+    return res.data;
   }
 }

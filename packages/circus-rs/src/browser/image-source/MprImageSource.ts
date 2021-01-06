@@ -14,7 +14,7 @@ export default abstract class MprImageSource extends ImageSource {
   protected loadSequence: Promise<void> | undefined;
 
   public initialState(viewer: Viewer): ViewState {
-    if (!this.metadata) throw new Error('Metadata now loaded');
+    if (!this.metadata) throw new Error('Metadata not loaded');
     const metadata = this.metadata;
     const window = metadata.dicomWindow
       ? { ...metadata.dicomWindow }
@@ -38,7 +38,7 @@ export default abstract class MprImageSource extends ImageSource {
    * Calculates the source volume size in millimeters.
    */
   public mmDim(): Vector3D {
-    if (!this.metadata) throw new Error('Metadata now loaded');
+    if (!this.metadata) throw new Error('Metadata not loaded');
     const voxelCount = this.metadata.voxelCount;
     const voxelSize = this.metadata.voxelSize;
     return [

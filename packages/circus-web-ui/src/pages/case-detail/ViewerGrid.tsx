@@ -1,6 +1,9 @@
 import { Composition, MprViewState, Tool, Viewer, ViewState } from 'circus-rs';
 import { toolFactory } from 'circus-rs/tool/tool-initializer';
-import GridContainer, { LayoutInfo } from 'components/GridContainer';
+import GridContainer, {
+  LayoutInfo,
+  layoutReducer
+} from 'components/GridContainer';
 import Icon from 'components/Icon';
 import ImageViewer, {
   createStateChanger,
@@ -19,6 +22,7 @@ import styled from 'styled-components';
 import { OrientationString } from 'circus-rs/section-util';
 import { EditingData, EditingDataUpdater, seriesColors } from './revisionData';
 import classnames from 'classnames';
+import IconButton from 'components/IconButton';
 
 export interface ViewerDef {
   key: string;
@@ -82,6 +86,38 @@ const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
     ev.stopPropagation();
   };
 
+  const handleRemoveClick = (ev: React.MouseEvent) => {
+    updateEditingData(d => {
+      if (Object.keys(d.layout.positions).length <= 1) return;
+      delete d.layout.positions[key];
+      const idx = d.layoutItems.findIndex(item => item.key === key);
+      const removed = d.layoutItems.splice(idx, 1)[0];
+      if (d.activeLayoutKey === key) {
+        // Choose next selected item as follows
+        // 1. First item of the same series
+        // 2. First item in the layout
+        const sameSeriesKeys = Object.keys(d.layout.positions).filter(
+          key =>
+            d.layoutItems.find(item => item.key === key)!.seriesIndex ===
+            removed.seriesIndex
+        );
+        const keys =
+          sameSeriesKeys.length > 0 ? sameSeriesKeys : Object.keys(d.layout);
+        const first = keys
+          .map(k => [k, d.layout.positions[k]] as const)
+          .sort((a, b) => a[1] - b[1])[0];
+        d.activeLayoutKey = first[0];
+        d.activeSeriesIndex = d.layoutItems.find(
+          item => item.key === first[0]
+        )!.seriesIndex;
+        d.activeLabelIndex =
+          d.revision.series[d.activeSeriesIndex].labels.length > 0 ? 0 : -1;
+      }
+      d.layout = layoutReducer(d.layout, { type: 'pruneEmptyTracks' });
+    });
+    ev.stopPropagation();
+  };
+
   const active = key === activeLayoutKey;
   const selectedSeries = seriesIndex === activeSeriesIndex;
 
@@ -95,7 +131,9 @@ const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
       onClick={handleClick}
     >
       <span>
-        <div className="box" style={{ backgroundColor: color }} />
+        {multipleSeriesShown && (
+          <div className="box" style={{ backgroundColor: color }} />
+        )}
         Series #{seriesIndex} {orientation}
       </span>
       <span>
@@ -129,6 +167,12 @@ const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
             <Icon icon="circus-orientation-oblique" /> Oblique
           </MenuItem>
         </DropdownButton>
+        <IconButton
+          bsSize="xs"
+          icon="glyphicon-remove"
+          onClick={handleRemoveClick}
+          disabled={Object.keys(editingData.layout.positions).length <= 1}
+        />
       </span>
     </HeaderDiv>
   );

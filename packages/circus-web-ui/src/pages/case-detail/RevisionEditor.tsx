@@ -53,7 +53,7 @@ const useCompositions = (
     seriesUid: string;
     partialVolumeDescriptor: PartialVolumeDescriptor;
   }[]
-): { composition?: Composition; volumeLoaded: boolean }[] => {
+) => {
   const { rsHttpClient } = useContext(VolumeLoaderCacheContext)!;
   const [results, setResults] = useState<
     { composition?: Composition; volumeLoaded: boolean }[]
@@ -62,7 +62,7 @@ const useCompositions = (
   const volumeLoaders = usePendingVolumeLoaders(series);
 
   useEffect(() => {
-    const comps = series.map(
+    const compositions = series.map(
       ({ seriesUid, partialVolumeDescriptor }, volId) => {
         const volumeLoader = volumeLoaders[volId];
         const imageSource = new rs.HybridMprImageSource({
@@ -86,7 +86,7 @@ const useCompositions = (
         return { composition, volumeLoaded: false };
       }
     );
-    setResults(comps);
+    setResults(compositions);
   }, [rsHttpClient, series, volumeLoaders]);
 
   return results;
@@ -141,8 +141,8 @@ const RevisionEditor: React.FC<{
     if (
       series.some(
         (s, i) =>
-          s.seriesUid !== allSeries[i].seriesUid ||
-          s.partialVolumeDescriptor !== allSeries[i].partialVolumeDescriptor
+          s.seriesUid !== allSeries[i]?.seriesUid ||
+          s.partialVolumeDescriptor !== allSeries[i]?.partialVolumeDescriptor
       )
     ) {
       setAllSeries(
@@ -417,9 +417,13 @@ const RevisionEditor: React.FC<{
   ) => {
     if (busy) return;
     setSeriesDialogOpen(false);
-    if (result === null) return;
+    if (result === null) return; // dialog cancelled
     updateEditingData(d => {
       d.revision.series = result;
+      const [layoutItems, layout] = c.performLayout('twoByTwo', 0);
+      d.layoutItems = layoutItems;
+      d.layout = layout;
+      d.activeLayoutKey = layoutItems[0].key;
     });
   };
 
@@ -428,15 +432,21 @@ const RevisionEditor: React.FC<{
     [stateChanger]
   );
 
-  const handleCreateViwer = (viewer: Viewer, id?: string | number) => {
-    viewers[id!] = viewer;
-  };
+  const handleCreateViwer = useCallback(
+    (viewer: Viewer, id?: string | number) => {
+      viewers[id!] = viewer;
+    },
+    [viewers]
+  );
 
-  const handleDestroyViewer = (viewer: Viewer) => {
-    Object.keys(viewers).forEach(k => {
-      if (viewers[k] === viewer) delete viewers[k];
-    });
-  };
+  const handleDestroyViewer = useCallback(
+    (viewer: Viewer) => {
+      Object.keys(viewers).forEach(k => {
+        if (viewers[k] === viewer) delete viewers[k];
+      });
+    },
+    [viewers]
+  );
 
   const handleReveal = () => {
     setRecommendedDisplay(

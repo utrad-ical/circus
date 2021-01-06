@@ -126,8 +126,8 @@ export const saveRevision = async (
 export const seriesColors = [
   '#ff0000',
   '#00aaff',
-  '#00bbbb',
-  '#00bb00',
+  '#00ff00',
   '#dddd00',
-  '#dd00dd'
+  '#dd00dd',
+  '#0000ff'
 ];

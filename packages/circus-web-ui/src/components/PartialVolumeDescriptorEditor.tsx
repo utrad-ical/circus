@@ -18,7 +18,6 @@ const PartialVolumeDescriptorEditor: React.FC<{
   images: MultiRange;
 }> = props => {
   const { onResolve, images, initialValue } = props;
-  console.log('I', initialValue);
   const [descriptor, setDescriptor] = useState<PartialVolumeDescriptor>(() => {
     return (
       initialValue ?? { start: images.min()!, end: images.max()!, delta: 1 }

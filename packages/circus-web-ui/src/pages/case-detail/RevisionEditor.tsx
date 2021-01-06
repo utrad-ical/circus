@@ -307,6 +307,9 @@ const RevisionEditor: React.FC<{
   };
 
   useEffect(() => {
+    const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
+    // wait until composition is synced
+    if (compositions.length !== revision.series.length) return;
     compositions.forEach((entry, seriesIndex) => {
       const composition = entry.composition;
       if (!composition) return;
@@ -315,7 +318,6 @@ const RevisionEditor: React.FC<{
         latestHandleAnnotationChange.current(annotation)
       );
 
-      const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
       const activeLabel =
         revision.series[activeSeriesIndex].labels[activeLabelIndex];
       const series = revision.series[seriesIndex];
@@ -420,6 +422,8 @@ const RevisionEditor: React.FC<{
     if (result === null) return; // dialog cancelled
     updateEditingData(d => {
       d.revision.series = result;
+      d.activeSeriesIndex = 0;
+      d.activeLabelIndex = d.revision.series[0].labels.length > 0 ? 0 : -1;
       const [layoutItems, layout] = c.performLayout('twoByTwo', 0);
       d.layoutItems = layoutItems;
       d.layout = layout;

@@ -6,7 +6,7 @@ import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import { Button } from 'components/react-bootstrap';
 import { Modal } from 'components/react-bootstrap';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { mostReadable } from 'tinycolor2';
 import Series from 'types/Series';
@@ -399,6 +399,36 @@ export const Label: React.FC<{
     setIsDragingOver(false);
   };
 
+  const hint = useMemo(() => {
+    switch (label.type) {
+      case 'ellipse':
+      case 'rectangle': {
+        const xs = Math.abs(label.data.max[0] - label.data.min[0]).toFixed(1);
+        const ys = Math.abs(label.data.max[1] - label.data.min[1]).toFixed(1);
+        return `${xs} x ${ys}`;
+      }
+      case 'cuboid':
+      case 'ellipsoid': {
+        const xs = Math.abs(label.data.max[0] - label.data.min[0]).toFixed(1);
+        const ys = Math.abs(label.data.max[1] - label.data.min[1]).toFixed(1);
+        const zs = Math.abs(label.data.max[2] - label.data.min[2]).toFixed(1);
+        return `${xs} x ${ys} x ${zs}`;
+      }
+      case 'point': {
+        const x = label.data.location[0].toFixed(1);
+        const y = label.data.location[1].toFixed(1);
+        const z = label.data.location[2].toFixed(1);
+        return `(${x}, ${y}, ${z})`;
+      }
+      case 'ruler': {
+        const xs = label.data.start[0] - label.data.end[0];
+        const ys = label.data.start[1] - label.data.end[1];
+        const zs = label.data.start[2] - label.data.end[2];
+        return `${Math.sqrt(xs * xs + ys * ys + zs * zs).toFixed(1)} mm`;
+      }
+    }
+  }, [label]);
+
   return (
     <StyledLabelLi
       ref={liRef}
@@ -432,6 +462,9 @@ export const Label: React.FC<{
         <Icon icon={labelTypes[label.type].icon} />
         &nbsp;
         {label.name ?? <span className="no-name">Label</span>}
+        <span className="hint" title={hint}>
+          {hint}
+        </span>
       </div>
     </StyledLabelLi>
   );
@@ -463,12 +496,20 @@ const StyledLabelLi = styled.li`
       color: gray;
     }
   }
+  .hint {
+    margin-left: 10px;
+    color: silver;
+    font-size: 80%;
+  }
   &:hover {
     background-color: #eeeeee;
   }
   &.active {
     background-color: silver;
     font-weight: bold;
+    .hint {
+      color: white;
+    }
   }
   &.dragging-top {
     border-top: 3px solid gray;

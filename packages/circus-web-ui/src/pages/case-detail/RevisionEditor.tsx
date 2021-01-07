@@ -114,7 +114,7 @@ const RevisionEditor: React.FC<{
   const viewersRef = useRef<{ [key: string]: Viewer }>({});
   const viewers = viewersRef.current;
 
-  const viewWindows = useRef<{ [seriesUid: string]: rs.ViewWindow }>({});
+  const viewWindows = useRef<rs.ViewWindow[]>([]);
 
   const [touchDevice] = useState(() => isTouchDevice());
   const stateChanger = useMemo(() => createStateChanger<rs.MprViewState>(), []);
@@ -462,45 +462,55 @@ const RevisionEditor: React.FC<{
 
   const propagateWindowState = useMemo(
     () =>
-      debounce((viewer: Viewer) => {
+      debounce((viewer: Viewer, id: string) => {
         const window = (viewer.getState() as rs.MprViewState).window;
-        stateChanger(state => {
+        const seriesIndex = editingData.layoutItems.find(
+          item => item.key === id
+        )!.seriesIndex;
+        const targetKeys = editingData.layoutItems
+          .filter(item => item.seriesIndex === seriesIndex)
+          .map(item => item.key);
+        stateChanger((state, viewer, id) => {
+          if (targetKeys.indexOf(id as string) < 0) return state;
           if (
             state.window.width !== window.width ||
             state.window.level !== window.level
           ) {
             return { ...state, window };
-          } else {
-            return state;
           }
+          return state;
         });
       }, 500),
-    [stateChanger]
+    [editingData.layoutItems, stateChanger]
   );
 
   const handleViewStateChange = useCallback(
-    (viewer: Viewer) => {
-      viewWindows.current[
-        activeSeries.seriesUid
-      ] = (viewer.getState() as rs.MprViewState).window;
-      propagateWindowState(viewer);
+    (viewer: Viewer, id?: string | number) => {
+      const seriesIndex = editingData.layoutItems.find(item => item.key === id)!
+        .seriesIndex;
+      const window = (viewer.getState() as rs.MprViewState).window;
+      viewWindows.current[seriesIndex] = window;
+      propagateWindowState(viewer, id as string);
     },
-    [propagateWindowState, activeSeries.seriesUid, viewWindows]
+    [editingData.layoutItems, propagateWindowState]
   );
 
   const initialStateSetter = (
     viewer: Viewer,
-    viewState: rs.ViewState
+    viewState: rs.ViewState,
+    id: string | number | undefined
   ): rs.MprViewState => {
     const src = viewer.getComposition()!.imageSource as rs.MprImageSource;
     if (!src.metadata || viewState.type !== 'mpr') throw new Error();
     const windowPriority = projectData.windowPriority || 'auto';
     const interpolationMode =
       viewOptions.interpolationMode ?? 'nearestNeighbor';
-    if (viewWindows.current[activeSeries.seriesUid]) {
+    const seriesIndex = editingData.layoutItems.find(item => item.key === id)!
+      .seriesIndex;
+    if (viewWindows.current[seriesIndex]) {
       return {
         ...viewState,
-        window: viewWindows.current[activeSeries.seriesUid],
+        window: viewWindows.current[seriesIndex],
         interpolationMode
       };
     }
@@ -530,7 +540,7 @@ const RevisionEditor: React.FC<{
       return undefined;
     })();
     if (window) {
-      viewWindows.current[activeSeries.seriesUid] = window;
+      viewWindows.current[seriesIndex] = window;
       return { ...viewState, window, interpolationMode };
     }
     return viewState; // do not update view state (should not happen)

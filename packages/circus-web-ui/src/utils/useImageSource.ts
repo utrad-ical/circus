@@ -12,6 +12,38 @@ export const VolumeLoaderCacheContext = React.createContext<{
 export const stringifyPartialVolumeDescriptor = (d: PartialVolumeDescriptor) =>
   `${d.start}:${d.end}:${d.delta}`;
 
+export const usePendingVolumeLoaders = (
+  series: {
+    seriesUid: string;
+    partialVolumeDescriptor: PartialVolumeDescriptor;
+  }[]
+) => {
+  const { rsHttpClient, map } = useContext(VolumeLoaderCacheContext)!;
+
+  return useMemo(
+    () =>
+      series.map(({ seriesUid, partialVolumeDescriptor }) => {
+        if (!isValidPartialVolumeDescriptor(partialVolumeDescriptor))
+          throw new Error('Invalid partial volume descriptor');
+        const key =
+          seriesUid +
+          '&' +
+          stringifyPartialVolumeDescriptor(partialVolumeDescriptor);
+
+        if (map.has(key)) return map.get(key)!;
+
+        const volumeLoader = new rs.RsVolumeLoader({
+          rsHttpClient,
+          seriesUid,
+          partialVolumeDescriptor
+        });
+        map.set(key, volumeLoader);
+        return volumeLoader;
+      }),
+    [map, rsHttpClient, series]
+  );
+};
+
 /**
  * Returns a cached RsVolumeLoader instance for the specified series.
  * The returned source may not be "ready" yet.
@@ -20,23 +52,7 @@ export const usePendingVolumeLoader = (
   seriesUid: string,
   partialVolumeDescriptor: PartialVolumeDescriptor
 ) => {
-  const { rsHttpClient, map } = useContext(VolumeLoaderCacheContext)!;
-
-  if (!isValidPartialVolumeDescriptor(partialVolumeDescriptor))
-    throw new Error('Invalid partial volume descriptor');
-
-  const key =
-    seriesUid + '&' + stringifyPartialVolumeDescriptor(partialVolumeDescriptor);
-
-  if (map.has(key)) return map.get(key)!;
-
-  const volumeLoader = new rs.RsVolumeLoader({
-    rsHttpClient,
-    seriesUid,
-    partialVolumeDescriptor
-  });
-  map.set(key, volumeLoader);
-  return volumeLoader;
+  return usePendingVolumeLoaders([{ seriesUid, partialVolumeDescriptor }])[0];
 };
 
 /**

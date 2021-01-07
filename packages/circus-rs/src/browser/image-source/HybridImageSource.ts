@@ -8,6 +8,7 @@ import ViewState from '../ViewState';
 import Viewer from '../viewer/Viewer';
 import MprImageSource from './MprImageSource';
 import MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume';
+import { DrawResult } from './ImageSource';
 
 interface HybridImageSourceOptions
   extends RawVolumeMprImageSourceOptions,
@@ -40,11 +41,15 @@ export default class HybridMprImageSource extends MprImageSource
     return this.volSource.getLoadedDicomVolume();
   }
 
-  public draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
+  public draw(
+    viewer: Viewer,
+    viewState: ViewState,
+    abortSignal: AbortSignal
+  ): Promise<DrawResult> {
     const source: MprImageSource = this.volumeReady
       ? this.volSource
       : this.dynSource;
-    return source.draw(viewer, viewState);
+    return source.draw(viewer, viewState, abortSignal);
   }
 
   public ready(): Promise<any> {

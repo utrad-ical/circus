@@ -28,7 +28,10 @@ export const setOrthogonalOrientation = (orientation: OrientationString) => {
 
 const defaultTool = toolFactory('pager');
 
-export type StateChangerFunc<T extends rs.ViewState> = (state: T) => T;
+export type StateChangerFunc<T extends rs.ViewState> = (
+  state: T,
+  viewer: rs.Viewer
+) => T;
 
 /**
  * StateChanger is used to change the view state of a Viewer imperatively.
@@ -81,29 +84,30 @@ const ImageViewer: React.FC<{
   const containerRef = useRef<HTMLDivElement>(null);
   const initialStateSet = useRef<boolean>(false);
 
+  const savedInitialStateSetter = useRef(initialStateSetter);
+  useEffect(() => {
+    savedInitialStateSetter.current = initialStateSetter;
+  }, [initialStateSetter]);
+
   // Handle creation of viewer
-  useEffect(
-    () => {
-      const viewer = new rs.Viewer(containerRef.current!);
-      onCreateViewer(viewer, id);
-      setViewer(viewer);
-      viewer.on('imageReady', () => {
-        if (typeof initialStateSetter === 'function') {
-          const state = viewer.getState();
-          const newState = initialStateSetter(viewer, state);
-          viewer.setState(newState);
-        }
-        initialStateSet.current = true;
-      });
-      return () => {
-        onDestroyViewer(viewer);
-        viewer.removeAllListeners();
-        viewer.dispose();
-      };
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  useEffect(() => {
+    const viewer = new rs.Viewer(containerRef.current!);
+    onCreateViewer(viewer, id);
+    setViewer(viewer);
+    viewer.on('imageReady', () => {
+      if (typeof savedInitialStateSetter.current === 'function') {
+        const state = viewer.getState();
+        const newState = savedInitialStateSetter.current(viewer, state);
+        viewer.setState(newState);
+      }
+      initialStateSet.current = true;
+    });
+    return () => {
+      onDestroyViewer(viewer);
+      viewer.removeAllListeners();
+      viewer.dispose();
+    };
+  }, [id, onCreateViewer, onDestroyViewer]);
 
   // Handle view state change
   useEffect(() => {
@@ -140,7 +144,7 @@ const ImageViewer: React.FC<{
     const handleChangeState = (changer: StateChangerFunc<rs.ViewState>) => {
       if (!viewer) return;
       const state = viewer.getState();
-      viewer.setState(changer(state));
+      viewer.setState(changer(state, viewer));
     };
     stateChanger.on(handleChangeState);
     return () => {

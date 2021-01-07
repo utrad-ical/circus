@@ -10,17 +10,28 @@ import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import { mostReadable } from 'tinycolor2';
 import Series from 'types/Series';
-import { EditingData, EditingDataUpdater } from './revisionData';
+import { EditingData, EditingDataUpdater, seriesColors } from './revisionData';
 import { InternalLabel, labelTypes } from './labelData';
 import { multirange } from 'multi-integer-range';
+import { newViewerCellItem, performLayout } from './caseStore';
+import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 
 const LabelSelector: React.FC<{
   editingData: EditingData;
-  seriesData: { [seriesUid: string]: Series };
   updateEditingData: EditingDataUpdater;
+  seriesData: { [seriesUid: string]: Series };
+  volumeLoadedStatus: boolean[];
   disabled?: boolean;
+  multipleSeriesShown: boolean;
 }> = props => {
-  const { editingData, updateEditingData, seriesData, disabled } = props;
+  const {
+    editingData,
+    updateEditingData,
+    seriesData,
+    volumeLoadedStatus,
+    disabled,
+    multipleSeriesShown
+  } = props;
 
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
   const activeSeries = revision.series[activeSeriesIndex];
@@ -33,11 +44,13 @@ const LabelSelector: React.FC<{
         <SeriesItem
           key={`${seriesIndex}:${series.seriesUid}`}
           seriesInfo={seriesData[series.seriesUid]}
+          volumeLoaded={volumeLoadedStatus[seriesIndex]}
           editingData={editingData}
           updateEditingData={updateEditingData}
           seriesIndex={seriesIndex}
           activeLabel={activeLabel}
           disabled={disabled}
+          multipleSeriesShown={multipleSeriesShown}
         />
       ))}
     </StyledSeriesUl>
@@ -70,26 +83,38 @@ const SeriesItem: React.FC<{
   editingData: EditingData;
   updateEditingData: EditingDataUpdater;
   seriesInfo: Series;
+  volumeLoaded: boolean;
   seriesIndex: number;
   activeLabel: InternalLabel | null;
   disabled?: boolean;
+  multipleSeriesShown: boolean;
 }> = props => {
   const {
     seriesIndex,
     editingData,
     updateEditingData,
     seriesInfo,
+    volumeLoaded,
     activeLabel,
-    disabled
+    disabled,
+    multipleSeriesShown
   } = props;
   const series = editingData.revision.series[seriesIndex];
 
-  const changeLabel = async (seriesIndex: number, labelIndex: number) => {
+  const changeLabel = (seriesIndex: number, labelIndex: number) => {
     if (
       editingData.activeSeriesIndex !== seriesIndex ||
       editingData.activeLabelIndex !== labelIndex
     ) {
       updateEditingData(editingData => {
+        if (editingData.activeSeriesIndex !== seriesIndex) {
+          const viewerKeys = editingData.layoutItems.filter(
+            item => item.seriesIndex === seriesIndex
+          );
+          editingData.activeLayoutKey = viewerKeys[0]
+            ? viewerKeys[0].key
+            : null;
+        }
         editingData.activeSeriesIndex = seriesIndex;
         editingData.activeLabelIndex = labelIndex;
       }, 'Change active series');
@@ -103,9 +128,39 @@ const SeriesItem: React.FC<{
     changeLabel(seriesIndex, series.labels.length ? 0 : -1);
   };
 
+  const handleSeriesDoubleClick = () => {
+    if (disabled) return;
+    if (editingData.activeSeriesIndex !== seriesIndex) return;
+    const [layoutItems, layout] = performLayout('twoByTwo', seriesIndex);
+    updateEditingData(d => {
+      d.layoutItems = layoutItems;
+      d.layout = layout;
+      d.activeLayoutKey = layoutItems[0].key;
+    }, 'layout');
+  };
+
   const handleLabelClick = (labelIndex: number) => {
     changeLabel(seriesIndex, labelIndex);
   };
+
+  const handleDragStart = (ev: React.DragEvent) => {
+    const item = newViewerCellItem(seriesIndex, 'axial');
+    updateEditingData(d => {
+      d.layoutItems.push(item);
+    }, 'layout');
+    ev.dataTransfer.setData('text/x-circusdb-viewergrid', item.key);
+    ev.dataTransfer.effectAllowed = 'move';
+    ev.stopPropagation();
+  };
+
+  const shown = Object.keys(editingData.layout.positions).some(
+    key =>
+      editingData.layoutItems.find(item => item.key === key)!.seriesIndex ===
+      seriesIndex
+  );
+  const color = multipleSeriesShown
+    ? seriesColors[Math.min(seriesIndex, seriesColors.length - 1)]
+    : '#000000';
 
   return (
     <StyledSeriesLi
@@ -113,10 +168,20 @@ const SeriesItem: React.FC<{
         active: seriesIndex === editingData.activeSeriesIndex
       })}
       onClick={handleSeriesClick}
+      onDoubleClick={handleSeriesDoubleClick}
+      onDragStart={handleDragStart}
+      draggable
     >
       <span className="series-head">
         <div>
-          <Icon icon="circus-series" /> Series #{seriesIndex}
+          <Icon icon="circus-series" />
+          {shown && <div className="box" style={{ backgroundColor: color }} />}
+          Series #{seriesIndex}
+          {!volumeLoaded && (
+            <span className="series-loading">
+              <LoadingIndicator delay={300} /> loading...
+            </span>
+          )}
         </div>
         <div onClick={ev => ev.stopPropagation()}>
           <SeriesInfo
@@ -159,6 +224,18 @@ const StyledSeriesLi = styled.li`
   &.active .series-head {
     font-weight: bold;
   }
+  .series-loading {
+    padding-left: 15px;
+    color: gray;
+    font-weight: normal;
+  }
+  .box {
+    display: inline-box;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    margin-right: 5px;
+  }
 `;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -184,11 +261,11 @@ const SeriesInfo: React.FC<{
         {noPvd ? (
           <> (Full)</>
         ) : (
-            <>
-              {' '}
+          <>
+            {' '}
             (<b>Partial:</b> {describePartialVolumeDescriptor(pvd)})
-            </>
-          )}
+          </>
+        )}
       </>
     ),
     'Series Instance UID': series.seriesUid,
@@ -275,6 +352,7 @@ export const Label: React.FC<{
     ev.dataTransfer.setData('text/x-circusdb-label', '');
     dragData = { seriesIndex, labelIndex };
     ev.dataTransfer.effectAllowed = 'move';
+    ev.stopPropagation();
   };
 
   const handleDragOver = (ev: React.DragEvent) => {
@@ -330,6 +408,7 @@ export const Label: React.FC<{
         'dragging-bottom': isDraggingOver === 'bottom'
       })}
       onClick={handleClick}
+      onDoubleClick={(ev: React.MouseEvent) => ev.stopPropagation()}
       draggable
       onDragStart={handleDragStart}
       onDrop={handleDrop}

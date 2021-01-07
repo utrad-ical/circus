@@ -17,8 +17,7 @@ import React, {
 } from 'react';
 import Project from 'types/Project';
 import {
-  stringifyPartialVolumeDescriptor,
-  usePendingVolumeLoader,
+  usePendingVolumeLoaders,
   VolumeLoaderCacheContext
 } from 'utils/useImageSource';
 import * as c from './caseStore';
@@ -32,11 +31,12 @@ import {
   InternalLabel,
   buildAnnotation,
   labelTypes,
-  TaggedLabelDataOf
+  TaggedLabelDataOf,
+  setRecommendedDisplay
 } from './labelData';
 import SideContainer from './SideContainer';
 import ToolBar, { ViewOptions } from './ToolBar';
-import ViewerCluster from './ViewerCluster';
+import ViewerGrid from './ViewerGrid';
 import IconButton from '@smikitky/rb-components/lib/IconButton';
 import { Modal } from '../../components/react-bootstrap';
 import SeriesSelectorDialog from './SeriesSelectorDialog';
@@ -48,44 +48,48 @@ import isTouchDevice from 'utils/isTouchDevice';
 import useToolbar from 'pages/case-detail/useToolbar';
 import Series from 'types/Series';
 
-const useComposition = (
-  seriesUid: string,
-  partialVolumeDescriptor: PartialVolumeDescriptor
-): { composition: Composition | undefined; volumeLoaded: boolean } => {
+const useCompositions = (
+  series: {
+    seriesUid: string;
+    partialVolumeDescriptor: PartialVolumeDescriptor;
+  }[]
+) => {
   const { rsHttpClient } = useContext(VolumeLoaderCacheContext)!;
+  const [results, setResults] = useState<
+    { composition?: Composition; volumeLoaded: boolean }[]
+  >(() => series.map(() => ({ composition: undefined, volumeLoaded: false })));
 
-  const volumeLoader = usePendingVolumeLoader(
-    seriesUid,
-    partialVolumeDescriptor
-  );
+  const volumeLoaders = usePendingVolumeLoaders(series);
 
-  const pvdStr = stringifyPartialVolumeDescriptor(partialVolumeDescriptor);
-
-  const composition = useMemo(
-    () => {
-      const imageSource = new rs.HybridMprImageSource({
-        rsHttpClient,
-        seriesUid,
-        partialVolumeDescriptor,
-        volumeLoader,
-        estimateWindowType: 'none'
-      });
-      const composition = new Composition(imageSource);
-      return composition;
-    },
-    // eslint-disable-next-line
-    [rsHttpClient, seriesUid, pvdStr, volumeLoader]
-  );
-
-  const [volumeLoaded, setVolumeLoaded] = useState<boolean>(false);
   useEffect(() => {
-    volumeLoader
-      .loadMeta()
-      .then(() => volumeLoader.loadVolume())
-      .then(() => setVolumeLoaded(true));
-  }, [volumeLoader]);
+    const compositions = series.map(
+      ({ seriesUid, partialVolumeDescriptor }, volId) => {
+        const volumeLoader = volumeLoaders[volId];
+        const imageSource = new rs.HybridMprImageSource({
+          rsHttpClient,
+          seriesUid,
+          partialVolumeDescriptor,
+          volumeLoader,
+          estimateWindowType: 'none'
+        });
+        volumeLoader
+          .loadMeta()
+          .then(() => volumeLoader.loadVolume())
+          .then(() => {
+            setResults(results =>
+              produce(results, draft => {
+                draft[volId].volumeLoaded = true;
+              })
+            );
+          });
+        const composition = new Composition(imageSource);
+        return { composition, volumeLoaded: false };
+      }
+    );
+    setResults(compositions);
+  }, [rsHttpClient, series, volumeLoaders]);
 
-  return { composition, volumeLoaded };
+  return results;
 };
 
 const RevisionEditor: React.FC<{
@@ -119,19 +123,45 @@ const RevisionEditor: React.FC<{
   const [viewOptions, setViewOptions] = useLocalPreference<ViewOptions>(
     'dbViewOptions',
     {
-      layout: 'twoByTwo',
       showReferenceLine: false,
       scrollbar: 'none',
       interpolationMode: 'nearestNeighbor'
     }
   );
 
+  // Keeps track of stable seriesUid-PVD pairs to avoid frequent comp changes
+  const [allSeries, setAllSeries] = useState<
+    {
+      seriesUid: string;
+      partialVolumeDescriptor: PartialVolumeDescriptor;
+    }[]
+  >(editingData.revision.series);
+  useEffect(() => {
+    const series = editingData.revision.series;
+    if (
+      series.some(
+        (s, i) =>
+          s.seriesUid !== allSeries[i]?.seriesUid ||
+          s.partialVolumeDescriptor !== allSeries[i]?.partialVolumeDescriptor
+      )
+    ) {
+      setAllSeries(
+        series.map(({ seriesUid, partialVolumeDescriptor }) => ({
+          seriesUid,
+          partialVolumeDescriptor
+        }))
+      );
+    }
+  }, [allSeries, editingData.revision.series]);
+
   const activeSeries =
     editingData.revision.series[editingData.activeSeriesIndex];
-  const { composition, volumeLoaded } = useComposition(
-    activeSeries.seriesUid,
-    activeSeries.partialVolumeDescriptor
-  );
+
+  const compositions = useCompositions(allSeries);
+
+  const volumeLoadedStatus = compositions.map(entry => entry.volumeLoaded);
+  const activeVolumeLoaded = volumeLoadedStatus[editingData.activeSeriesIndex];
+
   const { revision, activeLabelIndex } = editingData;
 
   const activeLabel = activeSeries.labels[activeLabelIndex];
@@ -174,6 +204,25 @@ const RevisionEditor: React.FC<{
     setActiveTool
   ]);
 
+  const handleChangeLayoutKind = (kind: c.LayoutKind) => {
+    updateEditingData(d => {
+      const [layoutItems, layout] = c.performLayout(
+        kind,
+        editingData.activeSeriesIndex
+      );
+      d.layoutItems = layoutItems;
+      d.layout = layout;
+      d.activeLayoutKey = layoutItems[0].key;
+    });
+  };
+
+  const multipleSeriesShown = useMemo(() => {
+    const seriesIndexes = Object.keys(editingData.layout.positions).map(
+      key => editingData.layoutItems.find(item => item.key === key)!.seriesIndex
+    );
+    return new Set(seriesIndexes).size > 1;
+  }, [editingData.layout, editingData.layoutItems]);
+
   const handleAnnotationChange = (
     annotation:
       | rs.VoxelCloud
@@ -182,13 +231,16 @@ const RevisionEditor: React.FC<{
       | rs.Point
       | rs.Ruler
   ) => {
-    const { revision, activeSeriesIndex } = editingData;
-    const labelIndex = revision.series[activeSeriesIndex].labels.findIndex(
+    const { revision } = editingData;
+    const seriesIndex = revision.series.findIndex(
+      s => s.labels.findIndex(v => v.temporaryKey === annotation.id) >= 0
+    );
+    const labelIndex = revision.series[seriesIndex].labels.findIndex(
       v => v.temporaryKey === annotation.id
     );
 
     const newLabel = () => {
-      const label = revision.series[activeSeriesIndex].labels[labelIndex];
+      const label = revision.series[seriesIndex].labels[labelIndex];
       if (annotation instanceof rs.VoxelCloud && annotation.volume) {
         return produce(label, (l: TaggedLabelDataOf<'voxel'>) => {
           l.data.origin = annotation.origin;
@@ -235,7 +287,7 @@ const RevisionEditor: React.FC<{
     };
 
     updateEditingData(d => {
-      d.revision.series[activeSeriesIndex].labels[labelIndex] = newLabel();
+      d.revision.series[seriesIndex].labels[labelIndex] = newLabel();
     });
   };
 
@@ -255,67 +307,83 @@ const RevisionEditor: React.FC<{
   };
 
   useEffect(() => {
-    if (!composition) return;
-
-    composition.on('annotationChange', annotation =>
-      latestHandleAnnotationChange.current(annotation)
-    );
-
     const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
-    const activeSeries = revision.series[activeSeriesIndex];
-    const activeLabel = activeSeries.labels[activeLabelIndex];
+    // wait until composition is synced
+    if (compositions.length !== revision.series.length) return;
+    compositions.forEach((entry, seriesIndex) => {
+      const composition = entry.composition;
+      if (!composition) return;
 
-    composition.annotations.forEach(antn => {
-      if (antn instanceof rs.ReferenceLine) antn.dispose();
-      if (antn instanceof rs.Scrollbar) antn.dispose();
-    });
-    composition.removeAllAnnotations();
-
-    activeSeries.labels.forEach((label: InternalLabel) => {
-      const isActive = activeLabel && label === activeLabel;
-      if (label.hidden) return;
-      composition.addAnnotation(
-        buildAnnotation(
-          label,
-          {
-            color: label.data.color ?? '#ff0000',
-            alpha: label.data.alpha ?? 1
-          },
-          isActive
-        )
+      composition.on('annotationChange', annotation =>
+        latestHandleAnnotationChange.current(annotation)
       );
-    });
 
-    if (viewOptions.showReferenceLine) {
-      Object.keys(viewers).forEach(k => {
+      const activeLabel =
+        revision.series[activeSeriesIndex].labels[activeLabelIndex];
+      const series = revision.series[seriesIndex];
+
+      composition.annotations.forEach(antn => {
+        if (antn instanceof rs.ReferenceLine) antn.dispose();
+        if (antn instanceof rs.Scrollbar) antn.dispose();
+      });
+      composition.removeAllAnnotations();
+
+      series.labels.forEach((label: InternalLabel) => {
+        const isActive = activeLabel && label === activeLabel;
+        if (label.hidden) return;
         composition.addAnnotation(
-          new rs.ReferenceLine(viewers[k], { color: orientationColor(k) })
+          buildAnnotation(
+            label,
+            {
+              color: label.data.color ?? '#ff0000',
+              alpha: label.data.alpha ?? 1
+            },
+            isActive
+          )
         );
       });
-    }
 
-    if (viewOptions.scrollbar !== 'none') {
-      Object.keys(viewers).forEach(k => {
-        composition.addAnnotation(
-          new rs.Scrollbar(viewers[k], {
-            color: orientationColor(k),
-            size: viewOptions.scrollbar === 'large' ? 30 : 20,
-            visibility: touchDevice ? 'always' : 'hover'
+      if (viewOptions.showReferenceLine) {
+        const layoutItems = editingData.layoutItems;
+        Object.keys(viewers)
+          .filter(key => {
+            const item = layoutItems.find(item => item.key === key);
+            return item && item.seriesIndex === seriesIndex;
           })
-        );
-      });
-    }
+          .forEach(key => {
+            const item = layoutItems.find(item => item.key === key);
+            composition.addAnnotation(
+              new rs.ReferenceLine(viewers[key], {
+                color: orientationColor(item!.orientation)
+              })
+            );
+          });
+      }
 
-    composition.annotationUpdated();
+      if (viewOptions.scrollbar !== 'none') {
+        Object.keys(viewers).forEach(k => {
+          composition.addAnnotation(
+            new rs.Scrollbar(viewers[k], {
+              color: orientationColor(k),
+              size: viewOptions.scrollbar === 'large' ? 30 : 20,
+              visibility: touchDevice ? 'always' : 'hover'
+            })
+          );
+        });
+      }
+
+      composition.annotationUpdated();
+    });
     return () => {
-      composition.removeAllListeners('annotationChange');
+      compositions.forEach(entry =>
+        entry.composition?.removeAllListeners('annotationChange')
+      );
     };
   }, [
-    composition,
+    compositions,
     editingData,
     viewOptions.showReferenceLine,
     viewOptions.scrollbar,
-    viewOptions.layout,
     touchDevice,
     viewers
   ]);
@@ -351,9 +419,15 @@ const RevisionEditor: React.FC<{
   ) => {
     if (busy) return;
     setSeriesDialogOpen(false);
-    if (result === null) return;
+    if (result === null) return; // dialog cancelled
     updateEditingData(d => {
       d.revision.series = result;
+      d.activeSeriesIndex = 0;
+      d.activeLabelIndex = d.revision.series[0].labels.length > 0 ? 0 : -1;
+      const [layoutItems, layout] = c.performLayout('twoByTwo', 0);
+      d.layoutItems = layoutItems;
+      d.layout = layout;
+      d.activeLayoutKey = layoutItems[0].key;
     });
   };
 
@@ -362,14 +436,28 @@ const RevisionEditor: React.FC<{
     [stateChanger]
   );
 
-  const handleCreateViwer = (viewer: Viewer, id?: string | number) => {
-    viewers[id!] = viewer;
-  };
+  const handleCreateViwer = useCallback(
+    (viewer: Viewer, id?: string | number) => {
+      viewers[id!] = viewer;
+    },
+    [viewers]
+  );
 
-  const handleDestroyViewer = (viewer: Viewer) => {
-    Object.keys(viewers).forEach(k => {
-      if (viewers[k] === viewer) delete viewers[k];
-    });
+  const handleDestroyViewer = useCallback(
+    (viewer: Viewer) => {
+      Object.keys(viewers).forEach(k => {
+        if (viewers[k] === viewer) delete viewers[k];
+      });
+    },
+    [viewers]
+  );
+
+  const handleReveal = () => {
+    setRecommendedDisplay(
+      compositions[editingData.activeSeriesIndex].composition!,
+      Object.values(viewers),
+      activeLabel
+    );
   };
 
   const propagateWindowState = useMemo(
@@ -448,7 +536,7 @@ const RevisionEditor: React.FC<{
     return viewState; // do not update view state (should not happen)
   };
 
-  if (!activeSeries || !composition) return null;
+  if (!activeSeries) return null;
 
   return (
     <StyledDiv className={classNames('case-revision-data', { busy })}>
@@ -456,18 +544,19 @@ const RevisionEditor: React.FC<{
         <Collapser title="Series / Labels" className="labels" noPadding>
           <LabelMenu
             editingData={editingData}
-            composition={composition}
+            onReveal={handleReveal}
             updateEditingData={updateEditingData}
             viewers={viewers}
             disabled={busy}
           />
           <LabelSelector
             seriesData={seriesData}
+            volumeLoadedStatus={volumeLoadedStatus}
             editingData={editingData}
             updateEditingData={updateEditingData}
             disabled={busy}
+            multipleSeriesShown={multipleSeriesShown}
           />
-
           <div className="add-series-pane">
             <IconButton
               bsSize="xs"
@@ -523,21 +612,24 @@ const RevisionEditor: React.FC<{
           setToolOption={setToolOption}
           viewOptions={viewOptions}
           onChangeViewOptions={setViewOptions}
-          wandEnabled={volumeLoaded}
+          onChangeLayoutKind={handleChangeLayoutKind}
+          wandEnabled={activeVolumeLoaded}
           windowPresets={projectData.windowPresets}
           onApplyWindow={handleApplyWindow}
           brushEnabled={editorEnabled}
           disabled={busy}
         />
-        <ViewerCluster
-          composition={composition}
-          layout={viewOptions.layout ?? 'twoByTwo'}
+        <ViewerGrid
+          editingData={editingData}
+          updateEditingData={updateEditingData}
+          compositions={compositions}
           stateChanger={stateChanger}
           tool={activeTool}
           onCreateViewer={handleCreateViwer}
           onDestroyViewer={handleDestroyViewer}
           initialStateSetter={initialStateSetter}
           onViewStateChange={handleViewStateChange}
+          multipleSeriesShown={multipleSeriesShown}
         />
       </div>
       <Modal show={seriesDialogOpen} bsSize="lg">
@@ -563,6 +655,7 @@ const StyledDiv = styled.div`
     flex: 1 0 0;
     display: flex;
     flex-direction: column;
+    background-color: #333333;
   }
 
   &.busy {

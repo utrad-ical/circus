@@ -52,7 +52,8 @@ export default class DynamicMprImageSource extends MprImageSource {
     section: Section,
     useInterpolation: boolean,
     window: ViewWindow,
-    size: Vector2D
+    size: Vector2D,
+    abortSignal: AbortSignal
   ): Promise<Uint8Array> {
     const res = await this.rsHttpClient.request(
       `series/${series}/scan`,
@@ -66,12 +67,17 @@ export default class DynamicMprImageSource extends MprImageSource {
         ww: window.width,
         wl: window.level
       },
-      'arraybuffer'
+      'arraybuffer',
+      abortSignal
     );
     return new Uint8Array(res);
   }
 
-  public async draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
+  public async draw(
+    viewer: Viewer,
+    viewState: ViewState,
+    abortSignal: AbortSignal
+  ): Promise<ImageData> {
     // convert from mm-coordinate to index-coordinate
     if (viewState.type !== 'mpr') throw new Error('Unsupported view state.');
     const section = viewState.section;
@@ -87,7 +93,8 @@ export default class DynamicMprImageSource extends MprImageSource {
       indexSection,
       viewState.interpolationMode === 'trilinear',
       viewWindow,
-      outSize
+      outSize,
+      abortSignal
     );
     return drawToImageData(viewer, outSize, buffer);
   }

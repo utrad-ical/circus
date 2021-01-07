@@ -28,9 +28,16 @@ export const setOrthogonalOrientation = (orientation: OrientationString) => {
 
 const defaultTool = toolFactory('pager');
 
+export type InitialStateSetterFunc<T extends rs.ViewState> = (
+  viewer: rs.Viewer,
+  state: T,
+  id?: string | number
+) => T;
+
 export type StateChangerFunc<T extends rs.ViewState> = (
   state: T,
-  viewer: rs.Viewer
+  viewer: rs.Viewer,
+  id?: string | number
 ) => T;
 
 /**
@@ -60,7 +67,7 @@ const ImageViewer: React.FC<{
   composition?: rs.Composition;
   stateChanger?: StateChanger<any>;
   tool?: ToolBaseClass;
-  initialStateSetter: any;
+  initialStateSetter: InitialStateSetterFunc<any>;
   id?: string | number;
   onCreateViewer?: (viewer: rs.Viewer, id?: string | number) => void;
   onDestroyViewer?: (viewer: rs.Viewer) => void;
@@ -97,7 +104,7 @@ const ImageViewer: React.FC<{
     viewer.on('imageReady', () => {
       if (typeof savedInitialStateSetter.current === 'function') {
         const state = viewer.getState();
-        const newState = savedInitialStateSetter.current(viewer, state);
+        const newState = savedInitialStateSetter.current(viewer, state, id);
         viewer.setState(newState);
       }
       initialStateSet.current = true;
@@ -144,13 +151,13 @@ const ImageViewer: React.FC<{
     const handleChangeState = (changer: StateChangerFunc<rs.ViewState>) => {
       if (!viewer) return;
       const state = viewer.getState();
-      viewer.setState(changer(state, viewer));
+      viewer.setState(changer(state, viewer, id));
     };
     stateChanger.on(handleChangeState);
     return () => {
       stateChanger.off(handleChangeState);
     };
-  }, [viewer, stateChanger]);
+  }, [viewer, stateChanger, id]);
 
   // Handle tool change
   useEffect(() => {

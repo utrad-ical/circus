@@ -7,6 +7,7 @@ import GridContainer, {
 import Icon from 'components/Icon';
 import ImageViewer, {
   createStateChanger,
+  InitialStateSetterFunc,
   setOrthogonalOrientation,
   StateChanger
 } from 'components/ImageViewer';
@@ -39,7 +40,7 @@ interface ViewerGridContextValue {
   stateChanger: StateChanger<MprViewState>;
   onCreateViewer: (viewer: Viewer, id?: string | number) => void;
   onDestroyViewer: (viewer: Viewer) => void;
-  initialStateSetter: (viewer: Viewer, viewState: ViewState) => ViewState;
+  initialStateSetter: InitialStateSetterFunc<MprViewState>;
   onViewStateChange: (viewer: Viewer, id?: string | number) => void;
   multipleSeriesShown: boolean;
 }
@@ -228,10 +229,10 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
   const combinedInitialStateSetter = useCallback(
     (viewer: Viewer, viewState: MprViewState) => {
       const s1 = orientationInitialStateSetters[orientation](viewer, viewState);
-      const s2 = initialStateSetter(viewer, s1!);
+      const s2 = initialStateSetter(viewer, s1!, key);
       return s2;
     },
-    [initialStateSetter, orientation]
+    [initialStateSetter, orientation, key]
   );
 
   const localStateChanger = useMemo(
@@ -297,7 +298,7 @@ const ViewerGrid: React.FC<{
   stateChanger: StateChanger<MprViewState>;
   onCreateViewer: (viewer: Viewer, id?: string | number) => void;
   onDestroyViewer: (viewer: Viewer) => void;
-  initialStateSetter: (viewer: Viewer, viewState: ViewState) => ViewState;
+  initialStateSetter: InitialStateSetterFunc<MprViewState>;
   onViewStateChange: (viewer: Viewer, id?: string | number) => void;
   multipleSeriesShown: boolean;
 }> = props => {

@@ -5,6 +5,8 @@ import { BoundingRectWithHandleHitType } from './hit-test';
 type BoundingBox = [Vector3, Vector3];
 type Axis = 'x' | 'y' | 'z';
 
+const allAxes: Axis[] = ['x', 'y', 'z'];
+
 const resize = (
   handleType: BoundingRectWithHandleHitType,
   orientation: OrientationString,
@@ -19,6 +21,8 @@ const resize = (
     new Vector3().fromArray(originalBoundingBox3[0]),
     new Vector3().fromArray(originalBoundingBox3[1])
   ];
+
+  const newBb: BoundingBox = [bb[0].clone(), bb[1].clone()];
 
   const toArray = (bb: BoundingBox) =>
     [bb[0].toArray(), bb[1].toArray()] as [number[], number[]];
@@ -39,12 +43,55 @@ const resize = (
   if (/east/.test(handleType)) fixedSide.add('west');
   if (/west/.test(handleType)) fixedSide.add('east');
 
-  if (fixedSide.has('north')) bb[1][nsAxis] += nsDelta;
-  if (fixedSide.has('south')) bb[0][nsAxis] += nsDelta;
-  if (fixedSide.has('west')) bb[1][ewAxis] += ewDelta;
-  if (fixedSide.has('east')) bb[0][ewAxis] += ewDelta;
+  if (fixedSide.has('north')) newBb[1][nsAxis] += nsDelta;
+  if (fixedSide.has('south')) newBb[0][nsAxis] += nsDelta;
+  if (fixedSide.has('west')) newBb[1][ewAxis] += ewDelta;
+  if (fixedSide.has('east')) newBb[0][ewAxis] += ewDelta;
 
-  return toArray(bb);
+  if (!maintainAspectRatio) return toArray(newBb);
+
+  //
+  // Maintain aspect ratio mode (Shift + Drag)
+  //
+
+  // dragging axes (x, y or z) on the screen
+  // the length can be 1 (dragging on the side) or 2 (dragging on the corner)
+  const refAxes: Axis[] = [];
+  if (fixedSide.has('north') || fixedSide.has('south')) refAxes.push(nsAxis);
+  if (fixedSide.has('east') || fixedSide.has('west')) refAxes.push(ewAxis);
+
+  const originalSizes = refAxes.map(ax => Math.abs(bb[0][ax] - bb[1][ax]));
+  const newSizes = refAxes.map(ax => Math.abs(newBb[0][ax] - newBb[1][ax]));
+  const ratios = originalSizes.map((s, i) => newSizes[i] / s);
+  const winningRatio = Math.max(...ratios);
+  const winningAxis = refAxes.find((_, i) => ratios[i] === winningRatio);
+  const nsSize = Math.abs(bb[1][nsAxis] - bb[0][nsAxis]);
+  const ewSize = Math.abs(bb[1][ewAxis] - bb[0][ewAxis]);
+  allAxes
+    .filter(ax => ax !== winningAxis)
+    .forEach(ax => {
+      if (refAxes.indexOf(ax) >= 0) {
+        // "lost" axes on the section, when refAxes.length === 2:
+        // its size will be recalculated
+        if (fixedSide.has('north'))
+          newBb[1][nsAxis] = bb[0][nsAxis] + winningRatio * nsSize;
+        if (fixedSide.has('south'))
+          newBb[0][nsAxis] = bb[1][nsAxis] - winningRatio * nsSize;
+        if (fixedSide.has('west'))
+          newBb[1][ewAxis] = bb[0][ewAxis] + winningRatio * ewSize;
+        if (fixedSide.has('east'))
+          newBb[0][ewAxis] = bb[1][ewAxis] - winningRatio * ewSize;
+      } else {
+        // "free" axes that will be scaled evenly
+        // toward the plus and minus directions
+        newBb[0][ax] =
+          (bb[0][ax] * (1 + winningRatio) + bb[1][ax] * (1 - winningRatio)) / 2;
+        newBb[1][ax] =
+          (bb[0][ax] * (1 - winningRatio) + bb[1][ax] * (1 + winningRatio)) / 2;
+      }
+    });
+
+  return toArray(newBb);
 };
 
 export default resize;

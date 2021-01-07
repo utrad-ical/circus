@@ -199,6 +199,8 @@ export default class Viewer extends EventEmitter {
     }
 
     const event = new ViewerEvent(this, eventType, originalEvent);
+    event.shiftKey = originalEvent.shiftKey;
+    event.ctrlKey = originalEvent.ctrlKey;
 
     // Cancel default behavior by default for wheel and touchmove events
     if (eventType === 'wheel') originalEvent.preventDefault();

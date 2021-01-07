@@ -246,47 +246,89 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
       const screenPoint: [number, number] = [ev.viewerX!, ev.viewerY!];
       const state = viewer.getState() as MprViewState;
       const resolution: [number, number] = viewer.getResolution();
-      const draggedPoint3 = convertScreenCoordinateToVolumeCoordinate(
+      const dragPoint = convertScreenCoordinateToVolumeCoordinate(
         state.section,
         new Vector2().fromArray(resolution),
         new Vector2().fromArray(screenPoint)
       );
 
-      const [startMin, startMax] = this.originalBoundingBox3!;
-      const dist = draggedPoint3.sub(this.dragStartPoint3!);
+      const maintainAspectRatio = !!ev.shiftKey;
 
-      switch (this.handleType) {
-        case 'nw-resize':
-          this.min = [startMin.x + dist.x, startMin.y + dist.y];
-          break;
-        case 'n-resize':
-          this.min = [startMin.x, startMin.y + dist.y];
-          break;
-        case 'ne-resize':
-          this.min = [startMin.x, startMin.y + dist.y];
-          this.max = [startMax.x + dist.x, startMax.y];
-          break;
-        case 'e-resize':
-          this.max = [startMax.x + dist.x, startMax.y];
-          break;
-        case 'se-resize':
-          this.max = [startMax.x + dist.x, startMax.y + dist.y];
-          break;
-        case 's-resize':
-          this.max = [startMax.x, startMax.y + dist.y];
-          break;
-        case 'sw-resize':
-          this.min = [startMin.x + dist.x, startMin.y];
-          this.max = [startMax.x, startMax.y + dist.y];
-          break;
-        case 'w-resize':
-          this.min = [startMin.x + dist.x, startMin.y];
-          break;
-        case 'move':
-          this.min = [startMin.x + dist.x, startMin.y + dist.y];
-          this.max = [startMax.x + dist.x, startMax.y + dist.y];
-          break;
+      const bb = {
+        min: this.originalBoundingBox3![0].clone(),
+        max: this.originalBoundingBox3![1].clone()
+      };
+      const newBb = { min: bb.min.clone(), max: bb.max.clone() };
+      const handleType = this.handleType!;
+      const startPoint = this.dragStartPoint3!;
+      const xDelta = dragPoint.x - startPoint.x;
+      const yDelta = dragPoint.y - startPoint.y;
+
+      if (handleType === 'move') {
+        newBb.min.x = bb.min.x + xDelta;
+        newBb.min.y = bb.min.y + yDelta;
+        newBb.max.x = bb.max.x + xDelta;
+        newBb.max.y = bb.max.y + yDelta;
       }
+
+      const fixedSide = new Set<'north' | 'south' | 'east' | 'west'>();
+      if (/^s.?/.test(handleType)) fixedSide.add('north');
+      if (/^n.?/.test(handleType)) fixedSide.add('south');
+      if (/^.?e/.test(handleType)) fixedSide.add('west');
+      if (/^.?w/.test(handleType)) fixedSide.add('east');
+
+      if (fixedSide.has('north')) newBb.max.y += yDelta;
+      if (fixedSide.has('south')) newBb.min.y += yDelta;
+      if (fixedSide.has('west')) newBb.max.x += xDelta;
+      if (fixedSide.has('east')) newBb.min.x += xDelta;
+
+      if (maintainAspectRatio) {
+        const refAxes: ('x' | 'y')[] = [];
+        if (fixedSide.has('north') || fixedSide.has('south')) refAxes.push('y');
+        if (fixedSide.has('east') || fixedSide.has('west')) refAxes.push('x');
+
+        const originalSizes = refAxes.map(ax =>
+          Math.abs(bb.min[ax] - bb.max[ax])
+        );
+        const newSizes = refAxes.map(ax =>
+          Math.abs(newBb.min[ax] - newBb.max[ax])
+        );
+        const ratios = originalSizes.map((s, i) => newSizes[i] / s);
+        const winningRatio = Math.max(...ratios);
+        const winningAxis = refAxes.find((_, i) => ratios[i] === winningRatio);
+        const xOrgSize = Math.abs(bb.max.x - bb.min.x);
+        const yOrgSize = Math.abs(bb.max.y - bb.min.y);
+        (['x', 'y'] as ('x' | 'y')[])
+          .filter(ax => ax !== winningAxis)
+          .forEach(ax => {
+            if (refAxes.indexOf(ax) >= 0) {
+              // "lost" axes on the section, when refAxes.length === 2:
+              // its size will be recalculated
+              if (fixedSide.has('north'))
+                newBb.max.y = bb.min.y + winningRatio * yOrgSize;
+              if (fixedSide.has('south'))
+                newBb.min.y = bb.max.y - winningRatio * yOrgSize;
+              if (fixedSide.has('west'))
+                newBb.max.x = bb.min.x + winningRatio * xOrgSize;
+              if (fixedSide.has('east'))
+                newBb.min.x = bb.max.x - winningRatio * xOrgSize;
+            } else {
+              // "free" axes that will be scaled evenly
+              // toward the plus and minus directions
+              newBb.min[ax] =
+                (bb.min[ax] * (1 + winningRatio) +
+                  bb.max[ax] * (1 - winningRatio)) /
+                2;
+              newBb.max[ax] =
+                (bb.min[ax] * (1 - winningRatio) +
+                  bb.max[ax] * (1 + winningRatio)) /
+                2;
+            }
+          });
+      }
+
+      this.min = [newBb.min.x, newBb.min.y];
+      this.max = [newBb.max.x, newBb.max.y];
 
       const comp = viewer.getComposition();
       if (!comp) return;

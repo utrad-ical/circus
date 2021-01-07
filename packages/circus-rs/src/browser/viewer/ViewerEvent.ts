@@ -10,6 +10,8 @@ export default class ViewerEvent {
   public viewerHeight?: number;
   public movementX?: number;
   public movementY?: number;
+  public shiftKey?: boolean;
+  public ctrlKey?: boolean;
 
   public viewer: Viewer;
 

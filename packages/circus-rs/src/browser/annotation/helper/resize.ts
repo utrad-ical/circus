@@ -2,273 +2,96 @@ import { Vector3 } from 'three';
 import { OrientationString } from '../../section-util';
 import { BoundingRectWithHandleHitType } from './hit-test';
 
-export default function resize(
-  handleType: BoundingRectWithHandleHitType | undefined,
+type BoundingBox = [Vector3, Vector3];
+type Axis = 'x' | 'y' | 'z';
+
+const allAxes: Axis[] = ['x', 'y', 'z'];
+
+const resize = (
+  handleType: BoundingRectWithHandleHitType,
   orientation: OrientationString,
   originalBoundingBox3: [number[], number[]],
-  delta: Vector3
-): [number[], number[]] {
-  const [min, max] = [
+  startPoint: Vector3,
+  dragPoint: Vector3,
+  maintainAspectRatio: boolean
+): [number[], number[]] => {
+  if (orientation === 'oblique') throw new Error('Invalid orientation');
+
+  const bb: BoundingBox = [
     new Vector3().fromArray(originalBoundingBox3[0]),
     new Vector3().fromArray(originalBoundingBox3[1])
   ];
-  let newMin: Vector3;
-  let newMax: Vector3;
 
-  switch (handleType) {
-    case 'north-west-handle':
-      [newMin, newMax] = _nwResize(orientation, min, max, delta);
-      break;
-    case 'north-handle':
-      [newMin, newMax] = _nResize(orientation, min, max, delta);
-      break;
-    case 'north-east-handle':
-      [newMin, newMax] = _neResize(orientation, min, max, delta);
-      break;
-    case 'east-handle':
-      [newMin, newMax] = _eResize(orientation, min, max, delta);
-      break;
-    case 'south-east-handle':
-      [newMin, newMax] = _seResize(orientation, min, max, delta);
-      break;
-    case 'south-handle':
-      [newMin, newMax] = _sResize(orientation, min, max, delta);
-      break;
-    case 'south-west-handle':
-      [newMin, newMax] = _swResize(orientation, min, max, delta);
-      break;
-    case 'west-handle':
-      [newMin, newMax] = _wResize(orientation, min, max, delta);
-      break;
-    case 'rect-outline':
-      [newMin, newMax] = _move(min, max, delta);
-      break;
-    default:
-      [newMin, newMax] = [min.clone(), max.clone()];
-      break;
+  const newBb: BoundingBox = [bb[0].clone(), bb[1].clone()];
+
+  const toArray = (bb: BoundingBox) =>
+    [bb[0].toArray(), bb[1].toArray()] as [number[], number[]];
+
+  if (handleType === 'rect-outline') {
+    const delta = dragPoint.clone().sub(startPoint);
+    return toArray([bb[0].add(delta), bb[1].add(delta)]);
   }
 
-  return [newMin.toArray(), newMax.toArray()];
-}
+  const nsAxis: Axis = orientation === 'axial' ? 'y' : 'z';
+  const ewAxis: Axis = orientation === 'sagittal' ? 'y' : 'x';
+  const nsDelta = dragPoint[nsAxis] - startPoint[nsAxis];
+  const ewDelta = dragPoint[ewAxis] - startPoint[ewAxis];
 
-function _eResize(
-  orientation: OrientationString,
-  originalMin: Vector3,
-  originalMax: Vector3,
-  delta: Vector3
-): [Vector3, Vector3] {
-  const newMin = originalMin.clone();
-  const newMax = originalMax.clone();
-  switch (orientation) {
-    case 'axial':
-      newMax.x += delta.x;
-      break;
-    case 'sagittal':
-      newMax.y += delta.y;
-      break;
-    case 'coronal':
-      newMax.x += delta.x;
-      break;
-    default:
-      break;
-  }
-  return [newMin, newMax];
-}
+  const fixedSide = new Set<'north' | 'south' | 'east' | 'west'>();
+  if (/south/.test(handleType)) fixedSide.add('north');
+  if (/north/.test(handleType)) fixedSide.add('south');
+  if (/east/.test(handleType)) fixedSide.add('west');
+  if (/west/.test(handleType)) fixedSide.add('east');
 
-function _wResize(
-  orientation: OrientationString,
-  originalMin: Vector3,
-  originalMax: Vector3,
-  delta: Vector3
-): [Vector3, Vector3] {
-  const newMin = originalMin.clone();
-  const newMax = originalMax.clone();
-  switch (orientation) {
-    case 'axial':
-      newMin.x += delta.x;
-      break;
-    case 'sagittal':
-      newMin.y += delta.y;
-      break;
-    case 'coronal':
-      newMin.x += delta.x;
-      break;
-    default:
-      break;
-  }
-  return [newMin, newMax];
-}
+  if (fixedSide.has('north')) newBb[1][nsAxis] += nsDelta;
+  if (fixedSide.has('south')) newBb[0][nsAxis] += nsDelta;
+  if (fixedSide.has('west')) newBb[1][ewAxis] += ewDelta;
+  if (fixedSide.has('east')) newBb[0][ewAxis] += ewDelta;
 
-function _sResize(
-  orientation: OrientationString,
-  originalMin: Vector3,
-  originalMax: Vector3,
-  delta: Vector3
-): [Vector3, Vector3] {
-  const newMin = originalMin.clone();
-  const newMax = originalMax.clone();
-  switch (orientation) {
-    case 'axial':
-      newMax.y += delta.y;
-      break;
-    case 'sagittal':
-      newMax.z += delta.z;
-      break;
-    case 'coronal':
-      newMax.z += delta.z;
-      break;
-    default:
-      break;
-  }
-  return [newMin, newMax];
-}
+  if (!maintainAspectRatio) return toArray(newBb);
 
-function _nResize(
-  orientation: OrientationString,
-  originalMin: Vector3,
-  originalMax: Vector3,
-  delta: Vector3
-): [Vector3, Vector3] {
-  const newMin = originalMin.clone();
-  const newMax = originalMax.clone();
-  switch (orientation) {
-    case 'axial':
-      newMin.y += delta.y;
-      break;
-    case 'sagittal':
-      newMin.z += delta.z;
-      break;
-    case 'coronal':
-      newMin.z += delta.z;
-      break;
-    default:
-      break;
-  }
-  return [newMin, newMax];
-}
+  //
+  // Maintain aspect ratio mode (Shift + Drag)
+  //
 
-function _seResize(
-  orientation: OrientationString,
-  originalMin: Vector3,
-  originalMax: Vector3,
-  delta: Vector3
-): [Vector3, Vector3] {
-  const newMin = originalMin.clone();
-  const newMax = originalMax.clone();
-  switch (orientation) {
-    case 'axial':
-      newMax.x += delta.x;
-      newMax.y += delta.y;
-      break;
-    case 'sagittal':
-      newMax.y += delta.y;
-      newMax.z += delta.z;
-      break;
-    case 'coronal':
-      newMax.x += delta.x;
-      newMax.z += delta.z;
-      break;
-    default:
-      break;
-  }
-  return [newMin, newMax];
-}
+  // dragging axes (x, y or z) on the screen
+  // the length can be 1 (dragging on the side) or 2 (dragging on the corner)
+  const refAxes: Axis[] = [];
+  if (fixedSide.has('north') || fixedSide.has('south')) refAxes.push(nsAxis);
+  if (fixedSide.has('east') || fixedSide.has('west')) refAxes.push(ewAxis);
 
-function _swResize(
-  orientation: OrientationString,
-  originalMin: Vector3,
-  originalMax: Vector3,
-  delta: Vector3
-): [Vector3, Vector3] {
-  const newMin = originalMin.clone();
-  const newMax = originalMax.clone();
-  switch (orientation) {
-    case 'axial':
-      newMin.x += delta.x;
-      newMax.y += delta.y;
-      break;
-    case 'sagittal':
-      newMin.y += delta.y;
-      newMax.z += delta.z;
-      break;
-    case 'coronal':
-      newMin.x += delta.x;
-      newMax.z += delta.z;
-      break;
-    default:
-      break;
-  }
-  return [newMin, newMax];
-}
+  const originalSizes = refAxes.map(ax => Math.abs(bb[0][ax] - bb[1][ax]));
+  const newSizes = refAxes.map(ax => Math.abs(newBb[0][ax] - newBb[1][ax]));
+  const ratios = originalSizes.map((s, i) => newSizes[i] / s);
+  const winningRatio = Math.max(...ratios);
+  const winningAxis = refAxes.find((_, i) => ratios[i] === winningRatio);
+  const nsSize = Math.abs(bb[1][nsAxis] - bb[0][nsAxis]);
+  const ewSize = Math.abs(bb[1][ewAxis] - bb[0][ewAxis]);
+  allAxes
+    .filter(ax => ax !== winningAxis)
+    .forEach(ax => {
+      if (refAxes.indexOf(ax) >= 0) {
+        // "lost" axes on the section, when refAxes.length === 2:
+        // its size will be recalculated
+        if (fixedSide.has('north'))
+          newBb[1][nsAxis] = bb[0][nsAxis] + winningRatio * nsSize;
+        if (fixedSide.has('south'))
+          newBb[0][nsAxis] = bb[1][nsAxis] - winningRatio * nsSize;
+        if (fixedSide.has('west'))
+          newBb[1][ewAxis] = bb[0][ewAxis] + winningRatio * ewSize;
+        if (fixedSide.has('east'))
+          newBb[0][ewAxis] = bb[1][ewAxis] - winningRatio * ewSize;
+      } else {
+        // "free" axes that will be scaled evenly
+        // toward the plus and minus directions
+        newBb[0][ax] =
+          (bb[0][ax] * (1 + winningRatio) + bb[1][ax] * (1 - winningRatio)) / 2;
+        newBb[1][ax] =
+          (bb[0][ax] * (1 - winningRatio) + bb[1][ax] * (1 + winningRatio)) / 2;
+      }
+    });
 
-function _neResize(
-  orientation: OrientationString,
-  originalMin: Vector3,
-  originalMax: Vector3,
-  delta: Vector3
-): [Vector3, Vector3] {
-  const newMin = originalMin.clone();
-  const newMax = originalMax.clone();
-  switch (orientation) {
-    case 'axial':
-      newMin.y += delta.y;
-      newMax.x += delta.x;
-      break;
-    case 'sagittal':
-      newMin.z += delta.z;
-      newMax.y += delta.y;
-      break;
-    case 'coronal':
-      newMin.z += delta.z;
-      newMax.x += delta.x;
-      break;
-    default:
-      break;
-  }
-  return [newMin, newMax];
-}
+  return toArray(newBb);
+};
 
-function _nwResize(
-  orientation: OrientationString,
-  originalMin: Vector3,
-  originalMax: Vector3,
-  delta: Vector3
-): [Vector3, Vector3] {
-  const newMin = originalMin.clone();
-  const newMax = originalMax.clone();
-  switch (orientation) {
-    case 'axial':
-      newMin.x += delta.x;
-      newMin.y += delta.y;
-      break;
-    case 'sagittal':
-      newMin.y += delta.y;
-      newMin.z += delta.z;
-      break;
-    case 'coronal':
-      newMin.x += delta.x;
-      newMin.z += delta.z;
-      break;
-    default:
-      break;
-  }
-  return [newMin, newMax];
-}
-
-function _move(
-  originalMin: Vector3,
-  originalMax: Vector3,
-  delta: Vector3
-): [Vector3, Vector3] {
-  const newMin = new Vector3(
-    originalMin.x + delta.x,
-    originalMin.y + delta.y,
-    originalMin.z + delta.z
-  );
-  const newMax = new Vector3(
-    originalMax.x + delta.x,
-    originalMax.y + delta.y,
-    originalMax.z + delta.z
-  );
-  return [newMin, newMax];
-}
+export default resize;

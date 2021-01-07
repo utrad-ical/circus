@@ -334,17 +334,16 @@ export default abstract class SolidFigure
         new Vector2().fromArray(resolution),
         new Vector2().fromArray(draggedPoint)
       );
-      const delta = draggedPoint3.sub(
-        new Vector3().fromArray(this.dragInfo!.dragStartVolumePoint3!)
-      );
 
-      const handleType = this.handleType;
       const originalBoundingBox3 = this.dragInfo!.originalBoundingBox3!;
+      const maintainAspectRatio = !!ev.shiftKey;
       const newBoundingBox3 = resize(
-        handleType,
+        this.handleType!,
         orientation,
         originalBoundingBox3,
-        delta
+        new Vector3().fromArray(this.dragInfo!.dragStartVolumePoint3!),
+        draggedPoint3,
+        maintainAspectRatio
       );
       this.min = newBoundingBox3[0] as Vector3D;
       this.max = newBoundingBox3[1] as Vector3D;

@@ -19,6 +19,7 @@ routes:
     description: Creates a new item in the specified my list.
   - verb: put
     path: /mylists/:myListId/name
+    handler: handleChangeName
     description: Renames the specified my list.
   - verb: delete
     path: /mylists/:myListId

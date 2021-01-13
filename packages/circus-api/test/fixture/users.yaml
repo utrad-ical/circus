@@ -29,7 +29,19 @@
     pluginJobSearchPresets: []
   loginEnabled: true
   groups: [2] # power user
-  myLists: []
+  myLists:
+    [
+      {
+        myListId: 'myList1',
+        name: 'BobMyList',
+        createdAt: { $date: 1405266782000 },
+      },
+      {
+        myListId: 'myList2',
+        name: 'BobMyList2',
+        createdAt: { $date: 1405266782000 },
+      },
+    ]
 - userEmail: guest@example.com
   loginId: guest
   # password is 'guestSecret'

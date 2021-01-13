@@ -81,7 +81,8 @@ export const setUpAppForRoutesTest = async () => {
     'tokens',
     'tasks',
     'pluginJobs',
-    'pluginDefinitions'
+    'pluginDefinitions',
+    'myLists'
   ]);
 
   const validator = await createValidator(undefined);

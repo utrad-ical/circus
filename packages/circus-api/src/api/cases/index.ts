@@ -172,6 +172,61 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
   };
 };
 
+export const handleSearchByMyListId: RouteMiddleware = ({ models }) => {
+  return async (ctx, next) => {
+    const myListId = ctx.params.myListId;
+    const filter = { myListId };
+
+    await performAggregationSearch(
+      models.myList,
+      filter,
+      ctx,
+      [
+        {
+          $lookup: {
+            from: 'clinicalCases',
+            localField: 'items.resourceId',
+            foreignField: 'caseId',
+            as: 'caseDetail'
+          }
+        },
+        {
+          $unwind: {
+            path: '$caseDetail',
+            includeArrayIndex: 'caseDetailIndex'
+          }
+        },
+        {
+          $addFields: {
+            itemData: { $arrayElemAt: ['$items', '$caseDetailIndex'] }
+          }
+        },
+        {
+          $addFields: {
+            caseId: '$caseDetail.caseId',
+            itemCreatedAt: '$itemData.createdAt'
+          }
+        }
+      ],
+      [
+        {
+          $project: {
+            _id: false,
+            caseDetail: false,
+            myListId: false,
+            items: false,
+            caseDetailIndex: false,
+            itemData: false
+          }
+        }
+      ],
+      {
+        defaultSort: { itemCreatedAt: -1 }
+      }
+    );
+  };
+};
+
 export const handleExportAsMhd: RouteMiddleware = deps => {
   return async (ctx, next) => {
     const caseId = ctx.case.caseId;

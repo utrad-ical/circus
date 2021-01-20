@@ -45,7 +45,12 @@ export const handlePostItem: RouteMiddleware = ({ models }) => {
     });
 
     const myList = await models.myList.findByIdOrFail(myListId);
-    // TODO: 重複チェック
+    if (
+      myList.items.some(i =>
+        resourceIds.find(r => r.resourceId === i.resourceId)
+      )
+    )
+      ctx.throw(400, 'There is a duplicate item that is already registered.');
 
     const myLists = [...myList.items, ...resourceIds];
 

@@ -20,7 +20,7 @@ test('create new list', async () => {
 });
 
 test('create new item', async () => {
-  const myListId = 'myList1';
+  const myListId = '01ewetw0chv8v5vxdtjdf6x9rk';
   const res = await ax.bob.request({
     url: `api/mylists/${myListId}/items`,
     method: 'post',
@@ -32,7 +32,7 @@ test('create new item', async () => {
 });
 
 test('change list name', async () => {
-  const myListId = 'myList1';
+  const myListId = '01ewetw0chv8v5vxdtjdf6x9rk';
   const res = await ax.bob.request({
     url: `api/mylists/${myListId}/name`,
     method: 'put',
@@ -50,7 +50,7 @@ test('change list name', async () => {
 
 test('delete list', async () => {
   const userEmail = 'bob@example.com';
-  const myListId = 'myList2';
+  const myListId = '01ewetywx9q6s2n5s03y3219ka';
   const res = await ax.bob.request({
     url: `api/mylists/${myListId}`,
     method: 'delete'
@@ -66,8 +66,9 @@ test('delete list', async () => {
 });
 
 test('delete list item', async () => {
-  const myListId = 'myList1';
-  const resourceId = 'resource1';
+  const myListId = '01ewetw0chv8v5vxdtjdf6x9rk';
+  const resourceId =
+    'gfdrjivu4w8p57nv95p7n485n3p891ygy6543wedfuyt67oiulkjhtrw312wergr';
   const res = await ax.bob.request({
     url: `api/mylists/${myListId}/items/${resourceId}`,
     method: 'delete'

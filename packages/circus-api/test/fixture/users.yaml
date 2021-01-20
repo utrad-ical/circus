@@ -32,13 +32,13 @@
   myLists:
     [
       {
-        myListId: 'myList1',
-        name: 'BobMyList',
+        myListId: '01ewetw0chv8v5vxdtjdf6x9rk',
+        name: 'MyList1',
         createdAt: { $date: 1405266782000 },
       },
       {
-        myListId: 'myList2',
-        name: 'BobMyList2',
+        myListId: '01ewetywx9q6s2n5s03y3219ka',
+        name: 'MyList2',
         createdAt: { $date: 1405266782000 },
       },
     ]

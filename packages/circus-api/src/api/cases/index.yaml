@@ -9,8 +9,9 @@ routes:
     responseSchema: clinicalCaseSearchResult|searchResult
   - verb: get
     path: /cases/list/:myListId
+    handler: handleSearchByMyListId
     description: Peforms search based on a my list ID.
-    responseSchema: clinicalCaseSearchResult|searchResult
+    responseSchema: clinicalCaseSearchByMyListResult|searchResult
   - verb: post
     path: /cases
     # TODO: Security: Determine how to detect target project

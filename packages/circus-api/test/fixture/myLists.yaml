@@ -1,8 +1,14 @@
-- myListId: myList1
+- myListId: 01ewetw0chv8v5vxdtjdf6x9rk
   items:
-    - resourceId: resource1
+    - resourceId: gfdrjivu4w8p57nv95p7n485n3p891ygy6543wedfuyt67oiulkjhtrw312wergr
       createdAt: { $date: '2021-01-01T09:00:00.000Z' }
-- myListId: myList2
+- myListId: 01ewetywx9q6s2n5s03y3219ka
   items:
-    - resourceId: resource2
+    - resourceId: ankutrdbn53780cmm3489yxj01cmrm0cregtjcmveuhbi987gdhbtrdc780yn3er
       createdAt: { $date: '2021-01-01T09:00:00.000Z' }
+- myListId: 01ewes10a08z21bjnysd4p1m3f
+  items:
+    - resourceId: gfdrjivu4w8p57nv95p7n485n3p891ygy6543wedfuyt67oiulkjhtrw312wergr
+      createdAt: { $date: '2020-01-01T09:00:00.000Z' }
+    - resourceId: ankutrdbn53780cmm3489yxj01cmrm0cregtjcmveuhbi987gdhbtrdc780yn3er
+      createdAt: { $date: '2021-01-01T09:01:00.000Z' }

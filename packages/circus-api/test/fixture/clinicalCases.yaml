@@ -70,3 +70,63 @@
           labels: []
   tags: []
   domains: []
+- caseId: gfdrjivu4w8p57nv95p7n485n3p891ygy6543wedfuyt67oiulkjhtrw312wergr
+  projectId: 8883fdef6f5144f50eb2a83cd34baa44
+  latestRevision:
+    creator: bob@example.com
+    date: { $date: '2020-01-01T12:00:00Z' }
+    description: Created
+    attributes: {}
+    status: draft
+    series:
+      - seriesUid: 111.222.333.444.888
+        partialVolumeDescriptor:
+          start: 1
+          end: 100
+          delta: 1
+        labels: []
+  revisions:
+    - creator: bob@example.com
+      date: { $date: '2020-01-01T12:00:00Z' }
+      description: Created
+      attributes: {}
+      status: draft
+      series:
+        - seriesUid: 111.222.333.444.888
+          partialVolumeDescriptor:
+            start: 1
+            end: 100
+            delta: 1
+          labels: []
+  tags: []
+  domains: []
+- caseId: ankutrdbn53780cmm3489yxj01cmrm0cregtjcmveuhbi987gdhbtrdc780yn3er
+  projectId: 8883fdef6f5144f50eb2a83cd34baa44
+  latestRevision:
+    creator: bob@example.com
+    date: { $date: '2000-01-01T12:00:00Z' }
+    description: Created
+    attributes: {}
+    status: draft
+    series:
+      - seriesUid: 111.222.333.444.888
+        partialVolumeDescriptor:
+          start: 1
+          end: 100
+          delta: 1
+        labels: []
+  revisions:
+    - creator: bob@example.com
+      date: { $date: '2000-01-01T12:00:00Z' }
+      description: Created
+      attributes: {}
+      status: draft
+      series:
+        - seriesUid: 111.222.333.444.888
+          partialVolumeDescriptor:
+            start: 1
+            end: 100
+            delta: 1
+          labels: []
+  tags: []
+  domains: []

@@ -192,13 +192,19 @@ export const handleSearchByMyListId: RouteMiddleware = ({ models }) => {
         },
         {
           $unwind: {
-            path: '$caseDetail',
-            includeArrayIndex: 'caseDetailIndex'
+            path: '$caseDetail'
           }
         },
         {
           $addFields: {
-            itemData: { $arrayElemAt: ['$items', '$caseDetailIndex'] }
+            indexInItems: {
+              $indexOfArray: ['$items.resourceId', '$caseDetail.caseId']
+            }
+          }
+        },
+        {
+          $addFields: {
+            itemData: { $arrayElemAt: ['$items', '$indexInItems'] }
           }
         },
         {
@@ -215,7 +221,7 @@ export const handleSearchByMyListId: RouteMiddleware = ({ models }) => {
             caseDetail: false,
             myListId: false,
             items: false,
-            caseDetailIndex: false,
+            indexInItems: false,
             itemData: false
           }
         }

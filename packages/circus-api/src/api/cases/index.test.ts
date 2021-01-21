@@ -1,5 +1,4 @@
 import { setUpAppForRoutesTest, ApiTest } from '../../../test/util-routes';
-import generateUniqueId from '../../utils/generateUniqueId';
 
 let apiTest: ApiTest, ax: typeof apiTest.axiosInstances;
 beforeAll(async () => {
@@ -337,8 +336,9 @@ describe('search by mylist', () => {
       method: 'get'
     });
     expect(res.status).toBe(200);
+    console.log(res.data.items);
     expect(res.data.items[0].caseId).toBe(
-      'gfdrjivu4w8p57nv95p7n485n3p891ygy6543wedfuyt67oiulkjhtrw312wergr'
+      'ankutrdbn53780cmm3489yxj01cmrm0cregtjcmveuhbi987gdhbtrdc780yn3er'
     );
   });
 });

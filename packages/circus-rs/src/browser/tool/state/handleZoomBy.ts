@@ -1,5 +1,5 @@
 import { Vector2, Vector3 } from 'three';
-import { Section, vectorizeSection } from '../../../common/geometry';
+import { scaleSection, Section } from '../../../common/geometry';
 import MprImageSource from '../../image-source/MprImageSource';
 import {
   convertScreenCoordinateToVolumeCoordinate,
@@ -59,15 +59,5 @@ function scaleSectionBy(
     new Vector2(resolution[0], resolution[1]),
     new Vector2().fromArray(zoomingPointOnScreen)
   );
-
-  const vSection = vectorizeSection(section);
-  return {
-    origin: vSection.origin
-      .sub(zoomingPointOnVolume)
-      .multiplyScalar(scale)
-      .add(zoomingPointOnVolume)
-      .toArray(),
-    xAxis: vSection.xAxis.multiplyScalar(scale).toArray(),
-    yAxis: vSection.yAxis.multiplyScalar(scale).toArray()
-  };
+  return scaleSection(section, scale, zoomingPointOnVolume.toArray());
 }

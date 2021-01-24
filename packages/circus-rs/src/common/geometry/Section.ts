@@ -79,6 +79,36 @@ export function translateSection(section: Section, delta: Vector3): Section {
 }
 
 /**
+ * Performs a zooming translation on a given section.
+ * @param section
+ * @param scale
+ */
+export function scaleSectionFromCenter(
+  section: Section,
+  scale: number
+): Section {
+  return scaleSection(section, scale, sectionCenter(section).toArray());
+}
+
+export function scaleSection(
+  section: Section,
+  scale: number,
+  center: number[]
+) {
+  const vSection = vectorizeSection(section);
+  const vCenter = new Vector3().fromArray(center);
+  return {
+    origin: vSection.origin
+      .sub(vCenter)
+      .multiplyScalar(scale)
+      .add(vCenter)
+      .toArray(),
+    xAxis: vSection.xAxis.multiplyScalar(scale).toArray(),
+    yAxis: vSection.yAxis.multiplyScalar(scale).toArray()
+  };
+}
+
+/**
  * Calculates the intersection point of the given line segment and the plane.
  * This does not check if the intersection is within the section
  * (i.e., section is treated as a plane that extends infinitely).

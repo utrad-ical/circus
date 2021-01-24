@@ -51,6 +51,7 @@ const ToolBar: React.FC<{
   windowPresets?: WindowPreset[];
   onChangeTool: (toolName: string) => void;
   onApplyWindow: (window: any) => void;
+  onMagnify: (magnitude: number) => void;
   disabled?: boolean;
 }> = React.memo(props => {
   const {
@@ -65,6 +66,7 @@ const ToolBar: React.FC<{
     windowPresets = [],
     onChangeTool,
     onApplyWindow,
+    onMagnify,
     disabled
   } = props;
 
@@ -125,7 +127,20 @@ const ToolBar: React.FC<{
         active={active}
         shortcut="KeyZ"
         disabled={disabled}
-      />
+      >
+        <MenuItem eventKey="x2" onClick={() => onMagnify(0.25)}>
+          x4
+        </MenuItem>
+        <MenuItem eventKey="x2" onClick={() => onMagnify(0.5)}>
+          x2
+        </MenuItem>
+        <MenuItem eventKey="x1/2" onClick={() => onMagnify(2)}>
+          x1/2
+        </MenuItem>
+        <MenuItem eventKey="x1/2" onClick={() => onMagnify(4)}>
+          x1/4
+        </MenuItem>
+      </ToolButton>
       <ToolButton
         name="hand"
         icon="rs-hand"

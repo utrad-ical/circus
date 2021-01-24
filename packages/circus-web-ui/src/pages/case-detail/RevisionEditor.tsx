@@ -436,6 +436,15 @@ const RevisionEditor: React.FC<{
     [stateChanger]
   );
 
+  const handleMagnify = useCallback(
+    (magnitude: number) =>
+      stateChanger(state => {
+        const section = rs.scaleSectionFromCenter(state.section, magnitude);
+        return { ...state, section };
+      }),
+    [stateChanger]
+  );
+
   const handleCreateViwer = useCallback(
     (viewer: Viewer, id?: string | number) => {
       viewers[id!] = viewer;
@@ -626,6 +635,7 @@ const RevisionEditor: React.FC<{
           wandEnabled={activeVolumeLoaded}
           windowPresets={projectData.windowPresets}
           onApplyWindow={handleApplyWindow}
+          onMagnify={handleMagnify}
           brushEnabled={editorEnabled}
           disabled={busy}
         />

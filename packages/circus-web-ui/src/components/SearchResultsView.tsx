@@ -42,33 +42,35 @@ const ResultPagination: React.FC<{
   };
   for (let i = firstItem; i <= lastItem; i++) pageItems.push(i);
   return (
-    <Pagination disabled={disabled || pages <= 0 || true}>
-      <Pagination.First
-        onClick={() => handleClick(1)}
-        disabled={activePage == 1}
-      />
-      <Pagination.Prev
-        onClick={() => handleClick(activePage - 1)}
-        disabled={activePage == 1}
-      />
-      {pageItems.map(i => (
-        <Pagination.Item
-          key={i}
-          active={i == activePage}
-          onClick={() => handleClick(i)}
-        >
-          {i}
-        </Pagination.Item>
-      ))}
-      <Pagination.Next
-        onClick={() => handleClick(activePage + 1)}
-        disabled={pages <= 0 || activePage == pages}
-      />
-      <Pagination.Last
-        onClick={() => handleClick(pages)}
-        disabled={pages <= 0 || activePage == pages}
-      />
-    </Pagination>
+    <div className="search-results-pager">
+      <Pagination disabled={disabled || pages <= 0 || true}>
+        <Pagination.First
+          onClick={() => handleClick(1)}
+          disabled={activePage == 1}
+        />
+        <Pagination.Prev
+          onClick={() => handleClick(activePage - 1)}
+          disabled={activePage == 1}
+        />
+        {pageItems.map(i => (
+          <Pagination.Item
+            key={i}
+            active={i == activePage}
+            onClick={() => handleClick(i)}
+          >
+            {i}
+          </Pagination.Item>
+        ))}
+        <Pagination.Next
+          onClick={() => handleClick(activePage + 1)}
+          disabled={pages <= 0 || activePage == pages}
+        />
+        <Pagination.Last
+          onClick={() => handleClick(pages)}
+          disabled={pages <= 0 || activePage == pages}
+        />
+      </Pagination>
+    </div>
   );
 };
 
@@ -190,17 +192,23 @@ const SearchResultsView: React.FC<{
           </Fragment>
         )}
       </div>
+      {pages >= 2 && (
+        <ResultPagination
+          pages={pages}
+          activePage={page}
+          onSelect={handlePageClick}
+          disabled={isFetching}
+        />
+      )}
       <DataView value={items} active={active} />
-      <div className="search-results-pager">
-        {pages >= 2 && (
-          <ResultPagination
-            pages={pages}
-            activePage={page}
-            onSelect={handlePageClick}
-            disabled={isFetching}
-          />
-        )}
-      </div>
+      {pages >= 2 && (
+        <ResultPagination
+          pages={pages}
+          activePage={page}
+          onSelect={handlePageClick}
+          disabled={isFetching}
+        />
+      )}
     </StyledDiv>
   );
 };

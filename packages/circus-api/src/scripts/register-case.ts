@@ -2,7 +2,7 @@ import Command from './Command';
 import { Models } from '../interface';
 import makeNewCase from '../case/makeNewCase';
 import { determineUserAccessInfo } from '../privilegeUtils';
-import MultiRange from 'multi-integer-range';
+import { toEntry } from './toEntry';
 
 export const options = () => {
   return [
@@ -28,27 +28,6 @@ export const help = () => {
   );
 };
 
-const toEntry = async (uidStr: string, models: Models) => {
-  const [seriesUid, ...pvdStrs] = uidStr.split(':');
-  const partialVolumeDescriptor =
-    pvdStrs.length === 3
-      ? {
-          start: Number(pvdStrs[0]),
-          end: Number(pvdStrs[1]),
-          delta: Number(pvdStrs[2])
-        }
-      : await (async () => {
-          const seriesData = await models.series.findByIdOrFail(seriesUid);
-          const firstSegment = new MultiRange(seriesData.images).getRanges()[0];
-          return {
-            start: firstSegment[0],
-            end: firstSegment[1],
-            delta: 1
-          };
-        })();
-  return { seriesUid, partialVolumeDescriptor };
-};
-
 interface Args {
   _args: string[];
   user?: string;
@@ -69,7 +48,7 @@ export const command: Command<{ models: Models }> = async (_, { models }) => {
       $or: [{ projectId: projectIdOrName }, { projectName: projectIdOrName }]
     });
     if (!projectDocs.length)
-      throw new Error('Specified porject does not exist.');
+      throw new Error('Specified project does not exist.');
     const project = projectDocs[0];
 
     const series = await Promise.all(seriesUids.map(s => toEntry(s, models)));

@@ -16,7 +16,7 @@ describe('search', () => {
       method: 'get'
     });
     expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(2);
+    expect(res.data.items).toHaveLength(4);
   });
 
   test('search with patient name', async () => {
@@ -349,5 +349,20 @@ describe('put tags', () => {
     const res = await ax.guest.put(`api/cases/${cid}/tags`, []);
     expect(res.status).toBe(401);
     expect(res.data.error).toMatch(/write/);
+  });
+});
+
+describe('search by mylist', () => {
+  const myListId = '01ewes10a08z21bjnysd4p1m3f';
+  test('search', async () => {
+    const res = await ax.bob.request({
+      url: `api/cases/list/${myListId}`,
+      method: 'get'
+    });
+    expect(res.status).toBe(200);
+    console.log(res.data.items);
+    expect(res.data.items[0].caseId).toBe(
+      'ankutrdbn53780cmm3489yxj01cmrm0cregtjcmveuhbi987gdhbtrdc780yn3er'
+    );
   });
 });

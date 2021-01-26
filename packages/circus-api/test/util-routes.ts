@@ -81,7 +81,8 @@ export const setUpAppForRoutesTest = async () => {
     'tokens',
     'tasks',
     'pluginJobs',
-    'pluginDefinitions'
+    'pluginDefinitions',
+    'myLists'
   ]);
 
   const validator = await createValidator(undefined);
@@ -106,7 +107,7 @@ export const setUpAppForRoutesTest = async () => {
       downloadFileDirectory: path.join(__dirname, 'download-test'),
       timeoutMs: 3600 * 1000
     },
-    { models }
+    { models, apiLogger }
   );
 
   const app = await createApp(

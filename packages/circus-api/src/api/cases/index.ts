@@ -178,6 +178,12 @@ export const handleSearchByMyListId: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const myListId = ctx.params.myListId;
     const filter = { myListId };
+    const user = ctx.user;
+
+    const myList = user.myLists.find((list: any) => myListId === list.myListId);
+    if (!myList) ctx.throw(status.NOT_FOUND, 'This my list does not exist');
+    if (myList.resourceType !== 'clinicalCases')
+      ctx.throw(status.BAD_REQUEST, 'This my list is not for cases');
 
     await performAggregationSearch(
       models.myList,

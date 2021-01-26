@@ -28,7 +28,7 @@ export const handlePost: RouteMiddleware = ({ models }) => {
 
     const myLists = [
       ...ctx.user.myLists,
-      { myListId, name, createdAt: new Date() }
+      { myListId, resourceType: 'clinicalCases', name, createdAt: new Date() }
     ];
     await models.user.modifyOne(userEmail, { myLists });
 

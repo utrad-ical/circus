@@ -361,11 +361,12 @@ describe('search by mylist', () => {
       method: 'get'
     });
     expect(res.status).toBe(200);
-    console.log(res.data.items);
     expect(res.data.items[0].caseId).toBe(
       'ankutrdbn53780cmm3489yxj01cmrm0cregtjcmveuhbi987gdhbtrdc780yn3er'
     );
   });
+
+  test.skip('returns 404 for my list of another user', () => {});
 });
 
 describe('patch tags', () => {

@@ -58,10 +58,17 @@ properties:
       properties:
         myListId:
           type: string
+        resourceType:
+          type: string
+          enum:
+            - series
+            - clinicalCases
+            - jobs
         name:
           type: string
           minLength: 1
           maxLength: 64
         createdAt:
           date: true
+      required: ['myListId', 'resourceType', 'name', 'createdAt']
 additionalProperties: false

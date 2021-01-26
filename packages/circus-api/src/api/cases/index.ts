@@ -144,28 +144,11 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
             as: 'seriesDetail'
           }
         },
-        {
-          $unwind: {
-            path: '$seriesDetail',
-            includeArrayIndex: 'volId'
-          }
-        },
-        {
-          $match: { volId: 0 }
-        },
-        {
-          $addFields: { patientInfo: '$seriesDetail.patientInfo' }
-        }
+        { $unwind: { path: '$seriesDetail', includeArrayIndex: 'volId' } },
+        { $match: { volId: 0 } },
+        { $addFields: { patientInfo: '$seriesDetail.patientInfo' } }
       ],
-      [
-        {
-          $project: {
-            _id: false,
-            seriesDetail: false,
-            volId: false
-          }
-        }
-      ],
+      [{ $project: { _id: false, seriesDetail: false, volId: false } }],
       {
         defaultSort: { createdAt: -1 },
         transform: maskPatientInfo(ctx)
@@ -198,45 +181,24 @@ export const handleSearchByMyListId: RouteMiddleware = ({ models }) => {
             as: 'caseDetail'
           }
         },
-        {
-          $unwind: {
-            path: '$caseDetail'
-          }
-        },
-        {
-          $addFields: {
-            indexInItems: {
-              $indexOfArray: ['$items.resourceId', '$caseDetail.caseId']
-            }
-          }
-        },
-        {
-          $addFields: {
-            itemData: { $arrayElemAt: ['$items', '$indexInItems'] }
-          }
-        },
-        {
-          $addFields: {
-            caseId: '$caseDetail.caseId',
-            itemCreatedAt: '$itemData.createdAt'
-          }
-        }
+        { $unwind: { path: '$caseDetail' } }
       ],
       [
+        { $replaceWith: '$caseDetail' },
         {
-          $project: {
-            _id: false,
-            caseDetail: false,
-            myListId: false,
-            items: false,
-            indexInItems: false,
-            itemData: false
+          $lookup: {
+            from: 'series',
+            localField: 'revisions.series.seriesUid',
+            foreignField: 'seriesUid',
+            as: 'seriesDetail'
           }
-        }
+        },
+        { $unwind: { path: '$seriesDetail', includeArrayIndex: 'volId' } },
+        { $match: { volId: 0 } },
+        { $addFields: { patientInfo: '$seriesDetail.patientInfo' } },
+        { $project: { _id: false, seriesDetail: false, volId: false } }
       ],
-      {
-        defaultSort: { itemCreatedAt: -1 }
-      }
+      { defaultSort: { itemCreatedAt: -1 } }
     );
   };
 };

@@ -10,7 +10,7 @@ const CaseSearch: React.FC<{}> = props => {
         <Icon icon="circus-case" /> Case Search
       </h1>
       <CaseSearchCondition />
-      <CaseSearchResults />
+      <CaseSearchResults searchName="case" />
     </div>
   );
 };

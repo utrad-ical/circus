@@ -3,7 +3,7 @@ import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import PatientInfoBox from 'components/PatientInfoBox';
 import ProjectDisplay from 'components/ProjectDisplay';
-import { Dropdown, DropdownButton, MenuItem } from 'components/react-bootstrap';
+import { DropdownButton, MenuItem } from 'components/react-bootstrap';
 import SearchResultsView, {
   makeSortOptions
 } from 'components/SearchResultsView';
@@ -12,9 +12,9 @@ import TimeDisplay from 'components/TimeDisplay';
 import React, { Fragment, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import useLoginUser from 'utils/useLoginUser';
-import * as s from 'store/searches';
+import { updateSearch } from 'store/searches';
 import { useApi } from 'utils/api';
+import useLoginUser from 'utils/useLoginUser';
 
 const Operation: React.FC<{
   value: any;
@@ -102,8 +102,12 @@ const sortOptions = makeSortOptions({
   projectId: 'project'
 });
 
-const CaseSearchResultsView: React.FC<{}> = props => {
-  const search = useSelector(state => state.searches.searches.case);
+const CaseSearchResultsView: React.FC<{
+  searchName: string;
+  refreshable?: boolean;
+}> = props => {
+  const { searchName, refreshable = true } = props;
+  const search = useSelector(state => state.searches.searches[searchName]);
   const items = useSelector(state => state.searches.items.cases);
   const selected = search?.selected ?? [];
   const { accessibleProjects } = useLoginUser()!;
@@ -139,15 +143,15 @@ const CaseSearchResultsView: React.FC<{}> = props => {
         tags: op === 'clear' ? [] : [tag!]
       }
     });
-    dispatch(s.updateSearch(api, 'case', {}));
+    dispatch(updateSearch(api, 'case', {}));
   };
 
   return (
     <SearchResultsView
       sortOptions={sortOptions}
       dataView={DataView}
-      refreshable
-      name="case"
+      refreshable={refreshable}
+      name={searchName}
     >
       <DropdownButton
         id="case-menu-dropdown"

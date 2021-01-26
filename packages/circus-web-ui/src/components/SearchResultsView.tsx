@@ -124,9 +124,12 @@ const SearchResultsView: React.FC<{
   const api = useApi();
   const dispatch = useDispatch();
   const search = useSelector(state => state.searches.searches[name]);
-  const dic = useSelector(state =>
-    search ? state.searches.items[search.params.resource.endPoint] : undefined
-  );
+  const dic = useSelector(state => {
+    if (!search) return undefined;
+    const resourceType =
+      search.params.resource.resourceType ?? search.params.resource.endPoint;
+    return state.searches.items[resourceType];
+  });
 
   if (!search) return null;
 
@@ -137,6 +140,7 @@ const SearchResultsView: React.FC<{
   } = search;
 
   if (isFetching && !dic) return <LoadingIndicator delay={1000} />;
+
   if (!dic || !results) return null; // Should not happen
 
   const { indexes, totalItems } = results;

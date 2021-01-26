@@ -11,6 +11,7 @@ import HomePage from 'pages/HomePage';
 import SeriesSearch from 'pages/search/SeriesSearch';
 import CreateNewCase from 'pages/CreateNewCase';
 import CaseSearch from 'pages/search/CaseSearch';
+import MyCaseList from 'pages/MyCaseList';
 import CaseDetail from 'pages/case-detail/CaseDetail';
 import CreateNewJob from 'pages/CreateNewJob';
 import PluginJobSearch from 'pages/search/PluginJobSearch';
@@ -58,19 +59,20 @@ const theme = {
 const AppRoutes: React.FC<{}> = () => {
   return (
     <Application>
-      <Route path="/home" component={HomePage} />
-      <Route path="/browse/series/:presetName?" component={SeriesSearch} />
-      <Route path="/browse/case/:presetName?" component={CaseSearch} />
-      <Route
-        path="/browse/plugin-jobs/:presetName?"
-        component={PluginJobSearch}
-      />
-      <Route path="/plugin-job-queue" component={PluginJobQueueSearch} />
-      <Route path="/import-series" component={ImportSeries} />
-      <Route path="/import-case" component={ImportCase} />
-      <Route path="/new-case/:seriesUid" component={CreateNewCase} />
-      <Route path="/new-job/:seriesUid" component={CreateNewJob} />
       <Switch>
+        <Route path="/home" component={HomePage} />
+        <Route path="/browse/series/:presetName?" component={SeriesSearch} />
+        <Route path="/browse/case/mylist/:myListId?" component={MyCaseList} />
+        <Route path="/browse/case/:presetName?" component={CaseSearch} />
+        <Route
+          path="/browse/plugin-jobs/:presetName?"
+          component={PluginJobSearch}
+        />
+        <Route path="/plugin-job-queue" component={PluginJobQueueSearch} />
+        <Route path="/import-series" component={ImportSeries} />
+        <Route path="/import-case" component={ImportCase} />
+        <Route path="/new-case/:seriesUid" component={CreateNewCase} />
+        <Route path="/new-job/:seriesUid" component={CreateNewJob} />
         <Route path="/admin/general" component={GeneralAdmin} />
         <Route path="/admin/group" component={GroupAdmin} />
         <Route path="/admin/user" component={UserAdmin} />
@@ -82,12 +84,12 @@ const AppRoutes: React.FC<{}> = () => {
         <Route path="/admin/plugins" component={PluginAdmin} />
         <Route path="/admin/plugin-job-queue" component={PluginJobQueueAdmin} />
         <Route path="/admin" exact component={AdminIndex} />
+        <Route path="/series/:uid" component={SeriesDetail} />
+        <Route path="/case/:caseId" component={CaseDetail} />
+        <Route path="/plugin-job/:jobId" component={PluginJobDetail} />
+        <Route path="/task-list" component={TaskList} />
+        <Route path="/preference" component={Preferences} />
       </Switch>
-      <Route path="/series/:uid" component={SeriesDetail} />
-      <Route path="/case/:caseId" component={CaseDetail} />
-      <Route path="/plugin-job/:jobId" component={PluginJobDetail} />
-      <Route path="/task-list" component={TaskList} />
-      <Route path="/preference" component={Preferences} />
     </Application>
   );
 };

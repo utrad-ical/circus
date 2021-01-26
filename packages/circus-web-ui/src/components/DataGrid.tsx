@@ -103,8 +103,8 @@ const DataGrid: <T extends {}>(
             item => (item[itemPrimaryKey!] as any) as string
           );
           const selected = allIds.filter(id => selectedItems.indexOf(id) >= 0);
-          if (selected.length === allIds.length) return true;
           if (selected.length === 0) return false;
+          if (selected.length === allIds.length) return true;
           return 'indeterminate';
         })();
 

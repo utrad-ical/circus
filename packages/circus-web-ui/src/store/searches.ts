@@ -8,6 +8,7 @@ import Task from 'types/Task';
 export interface SearchResource {
   endPoint: string;
   primaryKey: string;
+  resourceType?: string;
 }
 
 interface SearchParams {
@@ -115,11 +116,12 @@ const slice = createSlice({
         data: { items: rawItems, page, totalItems }
       } = action.payload;
       const search = state.searches[searchName]!;
-      const { endPoint, primaryKey } = search.params.resource;
+      const { endPoint, resourceType, primaryKey } = search.params.resource;
+      const rType = resourceType || endPoint;
       search.isFetching = false;
       search.params.page = page;
-      const items = state.items[endPoint] ?? {};
-      state.items[endPoint] = items;
+      const items = state.items[rType] ?? {};
+      state.items[rType] = items;
       rawItems.forEach(i => (items[String(i[primaryKey])] = i));
       search.results = {
         indexes: rawItems.map(i => i[primaryKey]),

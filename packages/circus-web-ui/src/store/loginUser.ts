@@ -20,6 +20,12 @@ export interface UserPreferences {
   theme?: string;
 }
 
+export interface MyList {
+  myListId: string;
+  name: string;
+  createdAt: Date;
+}
+
 export interface LoginUser {
   isFetching: boolean;
   data: null | {
@@ -38,6 +44,7 @@ export interface LoginUser {
     uploadFileMax: number;
     uploadFileSizeMaxBytes: number;
     userEmail: string;
+    myLists: MyList[];
     preferences: UserPreferences;
     accessibleProjects: Array<{
       projectId: string;

@@ -41,3 +41,24 @@ routes:
       items:
         type: string
     handler: handlePutTags
+  - verb: patch
+    path: /cases/tags
+    handler: handlePatchTags
+    requestSchema:
+      type: object
+      properties:
+        operation:
+          enum:
+            - add
+            - remove
+            - set
+        tags:
+          type: array
+          items:
+            type: string
+        caseIds:
+          type: array
+          items:
+            type: string
+          minItems: 1
+      required: ['operation', 'tags', 'caseIds']

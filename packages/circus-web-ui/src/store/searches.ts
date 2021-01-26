@@ -29,6 +29,10 @@ interface SearchParams {
 type NewSearchParams = Partial<Pick<SearchParams, 'page' | 'limit'>> &
   Omit<SearchParams, 'page' | 'limit'>;
 
+export interface SearchedResource<T> {
+  [id: string]: T;
+}
+
 interface SearchState {
   searches: {
     [searchName: string]: SearchResult;
@@ -48,10 +52,6 @@ export interface SearchResult {
     totalItems: number;
   };
   selected: string[];
-}
-
-export interface SearchedResource<T> {
-  [id: string]: T;
 }
 
 const slice = createSlice({
@@ -84,6 +84,24 @@ const slice = createSlice({
     ) => {
       const { searchName, ids } = action.payload;
       state.searches[searchName].selected = ids;
+    },
+    selectionStatusChanged: (
+      state,
+      action: PayloadAction<{
+        searchName: string;
+        id: string;
+        isSelected: boolean;
+      }>
+    ) => {
+      const { searchName, id, isSelected } = action.payload;
+      const items = state.searches[searchName].selected;
+      if (isSelected && items.indexOf(id) < 0) {
+        items.push(id);
+      }
+      if (!isSelected) {
+        const index = items.indexOf(id);
+        if (index >= 0) items.splice(index, 1);
+      }
     },
     searchResultLoaded: (
       state,
@@ -121,9 +139,18 @@ const slice = createSlice({
 });
 
 // We will not export these "primitive" actions for now
-const { startSearch, setBusy, searchResultLoaded } = slice.actions;
-// But we export this one
-export const { changeSelection, deleteSearch, dismissTask } = slice.actions;
+const {
+  startSearch,
+  changeSelection,
+  setBusy,
+  searchResultLoaded
+} = slice.actions;
+// But we export these ones
+export const {
+  selectionStatusChanged,
+  deleteSearch,
+  dismissTask
+} = slice.actions;
 
 export default slice.reducer;
 
@@ -160,6 +187,9 @@ export const newSearch = (
     const state = getState();
     if (state.searches.searches[searchName]?.isFetching)
       throw new Error('Previous search has not finished.');
+    if (getState().searches.searches[searchName]) {
+      dispatch(changeSelection({ searchName, ids: [] }));
+    }
     await executeQuery(dispatch, api, searchName, useParams);
   };
 };

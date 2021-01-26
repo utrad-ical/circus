@@ -51,4 +51,17 @@ properties:
       The group ID of groups which this user belongs to.
       The set of previleges the user has is deteremined as
       the union of the privileges of the groups the user belongs to.
+  myLists:
+    type: array
+    items:
+      type: object
+      properties:
+        myListId:
+          type: string
+        name:
+          type: string
+          minLength: 1
+          maxLength: 64
+        createdAt:
+          date: true
 additionalProperties: false

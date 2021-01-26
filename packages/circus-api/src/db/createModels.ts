@@ -20,7 +20,8 @@ const createModels: FunctionService<
     token: { col: 'tokens', pk: 'accessToken' },
     task: { col: 'tasks', pk: 'taskId' },
     plugin: { col: 'pluginDefinitions', pk: 'pluginId' },
-    pluginJob: { col: 'pluginJobs', pk: 'jobId' }
+    pluginJob: { col: 'pluginJobs', pk: 'jobId' },
+    myList: { col: 'myLists', pk: 'myListId' }
   };
 
   const models: any = {};

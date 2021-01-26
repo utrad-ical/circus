@@ -102,12 +102,6 @@ const sortOptions = makeSortOptions({
   projectId: 'project'
 });
 
-const TagSetEditor: React.FC<{
-  onAction: (tag: string, isAdd: boolean) => void;
-}> = props => {
-  return <Dropdown.Toggle></Dropdown.Toggle>;
-};
-
 const CaseSearchResultsView: React.FC<{}> = props => {
   const search = useSelector(state => state.searches.searches.case);
   const items = useSelector(state => state.searches.items.cases);

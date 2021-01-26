@@ -111,7 +111,8 @@ const DataGrid: <T extends {}>(
   const allCheckRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     // `indeterminate` cannot be set via HTML attributes
-    allCheckRef.current!.indeterminate = allCheckStatus === 'indeterminate';
+    if (!allCheckRef.current) return;
+    allCheckRef.current.indeterminate = allCheckStatus === 'indeterminate';
   }, [allCheckStatus]);
 
   return (

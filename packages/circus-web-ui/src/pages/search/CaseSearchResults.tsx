@@ -3,7 +3,7 @@ import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import PatientInfoBox from 'components/PatientInfoBox';
 import ProjectDisplay from 'components/ProjectDisplay';
-import { DropdownButton, MenuItem } from 'components/react-bootstrap';
+import { Dropdown, DropdownButton, MenuItem } from 'components/react-bootstrap';
 import SearchResultsView, {
   makeSortOptions
 } from 'components/SearchResultsView';
@@ -102,6 +102,12 @@ const sortOptions = makeSortOptions({
   projectId: 'project'
 });
 
+const TagSetEditor: React.FC<{
+  onAction: (tag: string, isAdd: boolean) => void;
+}> = props => {
+  return <Dropdown.Toggle></Dropdown.Toggle>;
+};
+
 const CaseSearchResultsView: React.FC<{}> = props => {
   const search = useSelector(state => state.searches.searches.case);
   const items = useSelector(state => state.searches.items.cases);
@@ -127,13 +133,16 @@ const CaseSearchResultsView: React.FC<{}> = props => {
     );
   }, [accessibleProjects, items, selected]);
 
-  const handleSetTags = async (tag: string, isAdd: boolean) => {
+  const handleSetTags = async (
+    op: 'add' | 'remove' | 'clear',
+    tag?: string
+  ) => {
     await api('cases/tags', {
       method: 'patch',
       data: {
-        operation: isAdd ? 'add' : 'remove',
+        operation: op === 'clear' ? 'set' : op,
         caseIds: selected,
-        tags: [tag]
+        tags: op === 'clear' ? [] : [tag!]
       }
     });
     dispatch(s.updateSearch(api, 'case', {}));
@@ -157,24 +166,35 @@ const CaseSearchResultsView: React.FC<{}> = props => {
           </>
         }
       >
-        <MenuItem header>Add tags</MenuItem>
-        {availableTags.map(tag => (
-          <MenuItem
-            key={tag.name}
-            onClick={() => handleSetTags(tag.name, true)}
-          >
-            Add <PhysicalTag name={tag.name} color={tag.color} />
-          </MenuItem>
-        ))}
-        <MenuItem header>Remove tags</MenuItem>
-        {availableTags.map(tag => (
-          <MenuItem
-            key={tag.name}
-            onClick={() => handleSetTags(tag.name, false)}
-          >
-            Remove <PhysicalTag name={tag.name} color={tag.color} />
-          </MenuItem>
-        ))}
+        {availableTags.map(tag => {
+          const count = selected.filter(
+            cid => items[cid]!.tags.indexOf(tag.name) >= 0
+          ).length;
+          return (
+            <MenuItem key={tag.name}>
+              <IconButton
+                bsSize="xs"
+                bsStyle="default"
+                icon="glyphicon-plus"
+                onClick={() => handleSetTags('add', tag.name)}
+                disabled={count === selected.length}
+              />
+              &thinsp;
+              <IconButton
+                bsSize="xs"
+                bsStyle="default"
+                icon="glyphicon-remove"
+                onClick={() => handleSetTags('remove', tag.name)}
+                disabled={count === 0}
+              />
+              &nbsp;
+              <PhysicalTag name={tag.name} color={tag.color} />
+            </MenuItem>
+          );
+        })}
+        <MenuItem onClick={() => handleSetTags('clear')}>
+          Clear all tags
+        </MenuItem>
       </DropdownButton>
     </SearchResultsView>
   );

@@ -1,15 +1,20 @@
-import React, { Fragment } from 'react';
+import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
+import Icon from 'components/Icon';
+import IconButton from 'components/IconButton';
+import PatientInfoBox from 'components/PatientInfoBox';
+import ProjectDisplay from 'components/ProjectDisplay';
+import { DropdownButton, MenuItem } from 'components/react-bootstrap';
 import SearchResultsView, {
   makeSortOptions
 } from 'components/SearchResultsView';
-import { Link } from 'react-router-dom';
-import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
-import PatientInfoBox from 'components/PatientInfoBox';
-import ProjectDisplay from 'components/ProjectDisplay';
-import { TagList } from 'components/Tag';
+import { PhysicalTag, TagList } from 'components/Tag';
 import TimeDisplay from 'components/TimeDisplay';
-import IconButton from 'components/IconButton';
-import { useDispatch } from 'react-redux';
+import React, { Fragment, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import useLoginUser from 'utils/useLoginUser';
+import * as s from 'store/searches';
+import { useApi } from 'utils/api';
 
 const Operation: React.FC<{
   value: any;
@@ -98,13 +103,80 @@ const sortOptions = makeSortOptions({
 });
 
 const CaseSearchResultsView: React.FC<{}> = props => {
+  const search = useSelector(state => state.searches.searches.case);
+  const items = useSelector(state => state.searches.items.cases);
+  const selected = search?.selected ?? [];
+  const { accessibleProjects } = useLoginUser()!;
+  const api = useApi();
+  const dispatch = useDispatch();
+
+  const availableTags = useMemo(() => {
+    const projectIds = Array.from(
+      new Set(selected.map(caseId => items[caseId].projectId)).values()
+    );
+    return Array.from(
+      new Map(
+        projectIds
+          .map(
+            pid =>
+              accessibleProjects.find(p => p.projectId === pid)!.project.tags
+          )
+          .flat(1)
+          .map(tag => [tag.name, tag])
+      ).values()
+    );
+  }, [accessibleProjects, items, selected]);
+
+  const handleSetTags = async (tag: string, isAdd: boolean) => {
+    await api('cases/tags', {
+      method: 'patch',
+      data: {
+        operation: isAdd ? 'add' : 'remove',
+        caseIds: selected,
+        tags: [tag]
+      }
+    });
+    dispatch(s.updateSearch(api, 'case', {}));
+  };
+
   return (
     <SearchResultsView
       sortOptions={sortOptions}
       dataView={DataView}
       refreshable
       name="case"
-    />
+    >
+      <DropdownButton
+        id="case-menu-dropdown"
+        bsSize="sm"
+        disabled={selected.length === 0}
+        title={
+          <>
+            <Icon icon="glyphicon-tag" />
+            {selected.length > 0 && ` ${selected.length} selected`}
+          </>
+        }
+      >
+        <MenuItem header>Add tags</MenuItem>
+        {availableTags.map(tag => (
+          <MenuItem
+            key={tag.name}
+            onClick={() => handleSetTags(tag.name, true)}
+          >
+            Add <PhysicalTag name={tag.name} color={tag.color} />
+          </MenuItem>
+        ))}
+        <MenuItem header>Remove tags</MenuItem>
+        {availableTags.map(tag => (
+          <MenuItem
+            key={tag.name}
+            onClick={() => handleSetTags(tag.name, false)}
+          >
+            Remove <PhysicalTag name={tag.name} color={tag.color} />
+          </MenuItem>
+        ))}
+      </DropdownButton>
+    </SearchResultsView>
   );
 };
 

@@ -76,7 +76,8 @@ const ResultPagination: React.FC<{
 
 const StyledDiv = styled.div`
   .search-results-header {
-    text-align: right;
+    display: flex;
+    justify-content: space-between;
     margin: 0.5em 0 0.3em;
   }
 
@@ -111,7 +112,14 @@ const SearchResultsView: React.FC<{
   active?: any;
   refreshable?: boolean;
 }> = props => {
-  const { name, sortOptions, dataView: DataView, active, refreshable } = props;
+  const {
+    name,
+    sortOptions,
+    dataView: DataView,
+    active,
+    refreshable,
+    children
+  } = props;
 
   const api = useApi();
   const dispatch = useDispatch();
@@ -165,41 +173,44 @@ const SearchResultsView: React.FC<{
   return (
     <StyledDiv className={classnames({ busy: isFetching })}>
       <div className="search-results-header">
-        {totalItems + ' Result' + (totalItems > 1 ? 's' : '')}
-        &emsp;
-        <ShrinkSelect
-          bsSize="sm"
-          options={limitOptions}
-          value={limit}
-          onChange={handleLimitChange}
-          disabled={isFetching}
-          renderer={ItemsPerPageOptionRenderer}
-          numericalValue
-        />
-        {refreshable && (
-          <Fragment>
-            &emsp;
-            <AutoReloadSwitch
-              bsSize="sm"
-              onRefresh={handleRefresh}
-              disabled={isFetching}
-            />
-          </Fragment>
-        )}
-        {sortOptions && (
-          <Fragment>
-            &emsp;
-            <Icon icon="sort" />
-            &ensp;
-            <ShrinkSelect
-              bsSize="sm"
-              options={sortOptions}
-              value={sort}
-              onChange={handleSortChange}
-              disabled={isFetching}
-            />
-          </Fragment>
-        )}
+        <div>{children}</div>
+        <div>
+          {totalItems + ' Result' + (totalItems > 1 ? 's' : '')}
+          &emsp;
+          <ShrinkSelect
+            bsSize="sm"
+            options={limitOptions}
+            value={limit}
+            onChange={handleLimitChange}
+            disabled={isFetching}
+            renderer={ItemsPerPageOptionRenderer}
+            numericalValue
+          />
+          {refreshable && (
+            <Fragment>
+              &emsp;
+              <AutoReloadSwitch
+                bsSize="sm"
+                onRefresh={handleRefresh}
+                disabled={isFetching}
+              />
+            </Fragment>
+          )}
+          {sortOptions && (
+            <Fragment>
+              &emsp;
+              <Icon icon="sort" />
+              &ensp;
+              <ShrinkSelect
+                bsSize="sm"
+                options={sortOptions}
+                value={sort}
+                onChange={handleSortChange}
+                disabled={isFetching}
+              />
+            </Fragment>
+          )}
+        </div>
       </div>
       {pages >= 2 && (
         <ResultPagination

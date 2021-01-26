@@ -1,3 +1,4 @@
+import { setUpMongoFixture } from '../../../test/util-mongo';
 import { setUpAppForRoutesTest, ApiTest } from '../../../test/util-routes';
 
 let apiTest: ApiTest, ax: typeof apiTest.axiosInstances;
@@ -364,5 +365,70 @@ describe('search by mylist', () => {
     expect(res.data.items[0].caseId).toBe(
       'ankutrdbn53780cmm3489yxj01cmrm0cregtjcmveuhbi987gdhbtrdc780yn3er'
     );
+  });
+});
+
+describe('patch tags', () => {
+  beforeEach(async () => {
+    await setUpMongoFixture(apiTest.db, ['clinicalCases']);
+  });
+
+  test('add tags', async () => {
+    const res = await ax.bob.patch('api/cases/tags', {
+      operation: 'add',
+      caseIds: [cid],
+      tags: ['ufo', 'party']
+    });
+    expect(res.status).toBe(204);
+    const res2 = await ax.bob.get(`api/cases/${cid}`);
+    expect(res2.data.tags).toEqual(['happy', 'ufo', 'party']);
+  });
+
+  test('remove tags', async () => {
+    const res = await ax.bob.patch('api/cases/tags', {
+      operation: 'remove',
+      caseIds: [cid],
+      tags: ['happy']
+    });
+    expect(res.status).toBe(204);
+    const res2 = await ax.bob.get(`api/cases/${cid}`);
+    expect(res2.data.tags).toEqual([]);
+  });
+
+  test('set tags', async () => {
+    const res = await ax.bob.patch('api/cases/tags', {
+      operation: 'set',
+      caseIds: [cid],
+      tags: ['check']
+    });
+    expect(res.status).toBe(204);
+    const res2 = await ax.bob.get(`api/cases/${cid}`);
+    expect(res2.data.tags).toEqual(['check']);
+  });
+
+  test('throw for bad operation', async () => {
+    const res = await ax.bob.patch('api/cases/tags', {
+      caseIds: [cid],
+      tags: ['check']
+    });
+    expect(res.status).toBe(400);
+  });
+
+  test('throw 404 for nonexistent case', async () => {
+    const res = await ax.bob.patch('api/cases/tags', {
+      operation: 'remove',
+      caseIds: ['thisCaseDoesNotExist'],
+      tags: ['check']
+    });
+    expect(res.status).toBe(404);
+  });
+
+  test('reject add-tags from unauthoried user', async () => {
+    const res = await ax.guest.patch('api/cases/tags', {
+      operation: 'add',
+      caseIds: [cid],
+      tags: ['check']
+    });
+    expect(res.status).toBe(401);
   });
 });

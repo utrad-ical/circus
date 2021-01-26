@@ -6,6 +6,8 @@ import checkFilter from '../../utils/checkFilter';
 import { RouteMiddleware, CircusContext } from '../../typings/middlewares';
 import makeNewCase from '../../case/makeNewCase';
 
+const maxTagLength = 32;
+
 const maskPatientInfo = (ctx: CircusContext) => {
   return (caseData: any) => {
     const wantToView = ctx.user.preferences.personalInfoView;
@@ -244,8 +246,53 @@ export const handleExportAsMhd: RouteMiddleware = deps => {
 export const handlePutTags: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const aCase = ctx.case;
-    const tags = ctx.request.body;
+    const tags: string[] = ctx.request.body;
+    if (tags.some(t => t.length > maxTagLength))
+      ctx.throw(status.BAD_REQUEST, 'Tag length is too large');
     await models.clinicalCase.modifyOne(aCase.caseId, { tags });
     ctx.body = null; // No Content
+  };
+};
+
+export const handlePatchTags: RouteMiddleware = ({ models }) => {
+  return async (ctx, next) => {
+    const { operation, tags, caseIds } = ctx.request.body as {
+      operation: 'add' | 'remove' | 'set';
+      tags: string[];
+      caseIds: string[];
+    };
+    if (caseIds.length > 1000)
+      ctx.throw(status.BAD_REQUEST, 'Too many case IDs');
+    if (tags.length > 10) ctx.throw(status.BAD_REQUEST, 'Too many tags.');
+    if (operation !== 'set' && tags.length === 0)
+      ctx.throw(status.BAD_REQUEST, 'You must specify at least one tag.');
+    if (tags.some(t => t.length > maxTagLength))
+      ctx.throw(status.BAD_REQUEST, 'The specified tag is too long.');
+
+    // first, ensure we have write access to all cases
+    const writableProjectIds = ctx.userPrivileges.accessibleProjects
+      .filter(p => p.roles.indexOf('write') >= 0)
+      .map(p => p.projectId);
+    for (const caseId of caseIds) {
+      const aCase = await models.clinicalCase.findById(caseId);
+      if (!aCase) ctx.throw(status.NOT_FOUND, 'Some case does not exist');
+      if (writableProjectIds.indexOf(aCase.projectId) < 0) {
+        ctx.throw(
+          status.UNAUTHORIZED,
+          'You do not have write access to some of the specified cases.'
+        );
+      }
+    }
+    const updateOp =
+      operation === 'add'
+        ? { $addToSet: { tags: { $each: tags } } }
+        : operation === 'remove'
+        ? { $pull: { tags: { $in: tags } } }
+        : { $set: { tags: tags } };
+    await models.clinicalCase.unsafe_updateMany(
+      { caseId: { $in: caseIds } },
+      updateOp
+    );
+    ctx.body = null;
   };
 };

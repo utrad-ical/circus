@@ -20,8 +20,11 @@ export interface UserPreferences {
   theme?: string;
 }
 
+export type MyListResourceType = 'series' | 'clinicalCases' | 'jobs';
+
 export interface MyList {
   myListId: string;
+  resourceType: MyListResourceType;
   name: string;
   createdAt: Date;
 }

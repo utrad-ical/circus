@@ -241,15 +241,17 @@ const MainNav: React.FC<{}> = props => {
               name="My List"
               link="/browse/case/mylist"
             />
-            {myLists.map(l => (
-              <SubMenu
-                key={l.myListId}
-                sub
-                icon="chevron-right"
-                name={l.name}
-                link={`/browse/case/mylist/${l.myListId}`}
-              />
-            ))}
+            {myLists
+              .filter(l => l.resourceType === 'clinicalCases')
+              .map(l => (
+                <SubMenu
+                  key={l.myListId}
+                  sub
+                  icon="chevron-right"
+                  name={l.name}
+                  link={`/browse/case/mylist/${l.myListId}`}
+                />
+              ))}
             <SubMenu icon="open" name="Case Import" link="/import-case" />
           </Menu>
           <Menu name="CAD" icon="circus-icon-job" link="/browse/plugin-jobs">

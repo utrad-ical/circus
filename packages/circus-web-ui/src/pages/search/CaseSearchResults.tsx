@@ -109,6 +109,7 @@ const CaseSearchResultsView: React.FC<{
   const { searchName, refreshable = true } = props;
   const search = useSelector(state => state.searches.searches[searchName]);
   const items = useSelector(state => state.searches.items.cases);
+  const user = useLoginUser()!;
   const selected = search?.selected ?? [];
   const { accessibleProjects } = useLoginUser()!;
   const api = useApi();
@@ -143,7 +144,17 @@ const CaseSearchResultsView: React.FC<{
         tags: op === 'clear' ? [] : [tag!]
       }
     });
-    dispatch(updateSearch(api, 'case', {}));
+    dispatch(updateSearch(api, searchName, {}));
+  };
+
+  const handleMyList = async (op: 'add' | 'remove', myListId: string) => {
+    const items = selected.map(resourceId => ({ resourceId }));
+    if (op === 'add') {
+      await api(`mylists/${myListId}/items`, { data: { items } });
+    } else {
+      // await api('')
+    }
+    dispatch(updateSearch(api, searchName, {}));
   };
 
   return (
@@ -154,15 +165,10 @@ const CaseSearchResultsView: React.FC<{
       name={searchName}
     >
       <DropdownButton
-        id="case-menu-dropdown"
+        id="case-tags-dropdown"
         bsSize="sm"
         disabled={selected.length === 0}
-        title={
-          <>
-            <Icon icon="glyphicon-tag" />
-            {selected.length > 0 && ` ${selected.length} selected`}
-          </>
-        }
+        title={<Icon icon="glyphicon-tag" />}
       >
         {availableTags.map(tag => {
           const count = selected.filter(
@@ -194,6 +200,35 @@ const CaseSearchResultsView: React.FC<{
           Clear all tags
         </MenuItem>
       </DropdownButton>
+      <DropdownButton
+        id="case-list-dropdown"
+        bsSize="sm"
+        disabled={selected.length === 0}
+        title={<Icon icon="glyphicon-folder-open" />}
+      >
+        {user.myLists
+          .filter(list => list.resourceType === 'clinicalCases')
+          .map(list => (
+            <MenuItem key={list.myListId}>
+              <IconButton
+                bsSize="xs"
+                bsStyle="default"
+                icon="glyphicon-plus"
+                onClick={() => handleMyList('add', list.myListId)}
+              />
+              &thinsp;
+              <IconButton
+                bsSize="xs"
+                bsStyle="default"
+                icon="glyphicon-remove"
+                onClick={() => handleMyList('remove', list.myListId)}
+              />
+              &nbsp;
+              {list.name}
+            </MenuItem>
+          ))}
+      </DropdownButton>
+      {selected.length > 0 && <> {selected.length} selected</>}
     </SearchResultsView>
   );
 };

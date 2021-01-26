@@ -30,18 +30,18 @@
   loginEnabled: true
   groups: [2] # power user
   myLists:
-    [
-      {
-        myListId: '01ewetw0chv8v5vxdtjdf6x9rk',
-        name: 'MyList1',
-        createdAt: { $date: 1405266782000 },
-      },
-      {
-        myListId: '01ewetywx9q6s2n5s03y3219ka',
-        name: 'MyList2',
-        createdAt: { $date: 1405266782000 },
-      },
-    ]
+    - myListId: 01ewes10a08z21bjnysd4p1m3f
+      resourceType: clinicalCases
+      name: "Bob's MyList"
+      createdAt: { $date: 1405266783000 }
+    - myListId: 01ewetw0chv8v5vxdtjdf6x9rk
+      resourceType: clinicalCases
+      name: MyList1
+      createdAt: { $date: 1405266782000 }
+    - myListId: 01ewetywx9q6s2n5s03y3219ka
+      resourceType: clinicalCases
+      name: MyList2
+      createdAt: { $date: 1405266782000 }
 - userEmail: guest@example.com
   loginId: guest
   # password is 'guestSecret'

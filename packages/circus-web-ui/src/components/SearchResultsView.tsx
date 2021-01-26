@@ -104,6 +104,8 @@ const SearchResultsView: React.FC<{
   sortOptions?: any;
   dataView: React.FC<{
     value: any[];
+    selected: string[];
+    onSelectionChange: (id: string, isSelected: boolean) => void;
     active: any;
   }>;
   active?: any;
@@ -131,6 +133,7 @@ const SearchResultsView: React.FC<{
 
   const { indexes, totalItems } = results;
   const items = indexes.map(index => dic[index]);
+  const selected = search.selected;
 
   const handleSortChange = (newSort: string) => {
     if (newSort === sort) return;
@@ -150,6 +153,12 @@ const SearchResultsView: React.FC<{
   const handleRefresh = () => {
     if (isFetching) return;
     dispatch(searches.updateSearch(api, name, {}));
+  };
+
+  const handleSelectionChange = (id: string, isSelected: boolean) => {
+    dispatch(
+      searches.selectionStatusChanged({ searchName: name, id, isSelected })
+    );
   };
 
   const pages = Math.ceil(totalItems / limit);
@@ -200,7 +209,12 @@ const SearchResultsView: React.FC<{
           disabled={isFetching}
         />
       )}
-      <DataView value={items} active={active} />
+      <DataView
+        value={items}
+        selected={selected}
+        onSelectionChange={handleSelectionChange}
+        active={active}
+      />
       {pages >= 2 && (
         <ResultPagination
           pages={pages}

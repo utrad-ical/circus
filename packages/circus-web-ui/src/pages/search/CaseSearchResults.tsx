@@ -9,6 +9,7 @@ import ProjectDisplay from 'components/ProjectDisplay';
 import { TagList } from 'components/Tag';
 import TimeDisplay from 'components/TimeDisplay';
 import IconButton from 'components/IconButton';
+import { useDispatch } from 'react-redux';
 
 const Operation: React.FC<{
   value: any;
@@ -70,14 +71,22 @@ const columns: DataGridColumnDefinition<any>[] = [
   { caption: '', className: 'operation', renderer: Operation }
 ];
 
-const DataView: React.FC<{ value: any[] }> = props => {
-  const { value } = props;
+const DataView: React.FC<{
+  value: any[];
+  selected: string[];
+  onSelectionChange: (id: string, isSelected: boolean) => void;
+}> = props => {
+  const { value, selected, onSelectionChange } = props;
+
   return (
     <DataGrid
       className="case-search-result"
       itemPrimaryKey="caseId"
       columns={columns}
       value={value}
+      itemSelectable={true}
+      selectedItems={selected}
+      onSelectionChange={onSelectionChange}
     />
   );
 };

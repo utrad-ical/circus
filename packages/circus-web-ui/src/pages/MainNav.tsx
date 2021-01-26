@@ -192,6 +192,7 @@ const MainNav: React.FC<{}> = props => {
   const caseSearchPresets = user.preferences?.caseSearchPresets ?? [];
   const seriesSearchPresets = user.preferences?.seriesSearchPresets ?? [];
   const pluginJobSearchPresets = user.preferences?.pluginJobSearchPresets ?? [];
+  const myLists = user.myLists ?? [];
 
   const onLogout = async () => {
     await loginManager.logout();
@@ -233,6 +234,20 @@ const MainNav: React.FC<{}> = props => {
                 icon="chevron-right"
                 name={preset.name}
                 link={`/browse/case/${encodeURIComponent(preset.name)}`}
+              />
+            ))}
+            <SubMenu
+              icon="glyphicon-folder-open"
+              name="My List"
+              link="/browse/case/mylist"
+            />
+            {myLists.map(l => (
+              <SubMenu
+                key={l.myListId}
+                sub
+                icon="chevron-right"
+                name={l.name}
+                link={`/browse/case/mylist/${l.myListId}`}
               />
             ))}
             <SubMenu icon="open" name="Case Import" link="/import-case" />

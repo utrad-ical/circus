@@ -39,20 +39,20 @@ export const handlePost: RouteMiddleware = ({ models }) => {
 export const handlePostItem: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const myListId = ctx.params.myListId;
-    const resourceIds = ctx.request.body.items;
-    resourceIds.map(r => {
-      r.createdAt = new Date();
+    const resourceIds: { resourceId: string }[] = ctx.request.body.items;
+    const newItems = resourceIds.map(r => {
+      return { resourceId: r.resourceId, createdAt: new Date() };
     });
 
     const myList = await models.myList.findByIdOrFail(myListId);
     if (
-      myList.items.some(i =>
-        resourceIds.find(r => r.resourceId === i.resourceId)
+      myList.items.some((item: any) =>
+        newItems.find(r => r.resourceId === item.resourceId)
       )
     )
       ctx.throw(400, 'There is a duplicate item that is already registered.');
 
-    const myLists = [...myList.items, ...resourceIds];
+    const myLists = [...myList.items, ...newItems];
 
     await models.myList.modifyOne(myListId, { items: myLists });
     ctx.body = null;
@@ -63,15 +63,15 @@ export const handleChangeName: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const userEmail = ctx.user.userEmail;
     const userMyLists = ctx.user.myLists;
-    const changedNameListId = ctx.params.myListId;
+    const targetListId = ctx.params.myListId;
     const newName = ctx.request.body.name;
-    const changedNameList = ctx.user.myLists.find(
-      ({ myListId }) => myListId === changedNameListId
+    const targetList = ctx.user.myLists.find(
+      (myList: any) => myList.myListId === targetListId
     );
 
-    if (!changedNameList) ctx.throw(400, '');
+    if (!targetList) ctx.throw(404, 'No such list');
 
-    changedNameList.name = newName;
+    targetList.name = newName;
 
     await models.user.modifyOne(userEmail, { myLists: userMyLists });
     ctx.body = null;
@@ -81,12 +81,16 @@ export const handleChangeName: RouteMiddleware = ({ models }) => {
 export const handleDelete: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const userEmail = ctx.user.userEmail;
-    const deletedListId = ctx.params.myListId;
-    const newLists = ctx.user.myLists.filter(
-      ({ myListId }) => myListId !== deletedListId
+    const targetListId = ctx.params.myListId;
+    const targetList = ctx.user.myLists.find(
+      (myList: any) => myList.myListId === targetListId
     );
+    if (!targetList) ctx.throw(404, 'No such list');
 
-    await models.myList.deleteOne({ myListId: deletedListId });
+    const newLists = ctx.user.myLists.filter(
+      (myList: any) => myList.myListId !== targetListId
+    );
+    await models.myList.deleteOne({ myListId: targetListId });
     await models.user.modifyOne(userEmail, { myLists: newLists });
     ctx.body = null;
   };
@@ -98,7 +102,7 @@ export const handleDeleteItem: RouteMiddleware = ({ models }) => {
     const deletedResourceId = ctx.params.itemId;
     const myList = await models.myList.findByIdOrFail(myListId);
     const newItems = myList.items.filter(
-      ({ resourceId }) => resourceId !== deletedResourceId
+      (item: any) => item.resourceId !== deletedResourceId
     );
 
     await models.myList.modifyOne(myListId, { items: newItems });

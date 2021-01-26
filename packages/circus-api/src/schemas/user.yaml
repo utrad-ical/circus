@@ -60,6 +60,8 @@ properties:
           type: string
         name:
           type: string
+          minLength: 1
+          maxLength: 64
         createdAt:
           date: true
 additionalProperties: false

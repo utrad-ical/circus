@@ -1,14 +1,15 @@
-import React, { useEffect } from 'react';
-import Icon from 'components/Icon';
-import useLoginUser from 'utils/useLoginUser';
-import { Link, useParams } from 'react-router-dom';
 import IconButton from '@smikitky/rb-components/lib/IconButton';
 import { prompt } from '@smikitky/rb-components/lib/modal';
+import Icon from 'components/Icon';
+import MyListArray from 'components/MyListArray';
+import React, { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { useParams } from 'react-router-dom';
+import * as s from 'store/searches';
 import { useApi } from 'utils/api';
 import { useLoginManager } from 'utils/loginManager';
+import useLoginUser from 'utils/useLoginUser';
 import CaseSearchResultsView from './search/CaseSearchResults';
-import { useDispatch } from 'react-redux';
-import * as s from 'store/searches';
 
 const MyCaseListHome: React.FC<{}> = props => {
   const user = useLoginUser()!;
@@ -27,13 +28,10 @@ const MyCaseListHome: React.FC<{}> = props => {
       <h1>
         <Icon icon="glyphicon-folder-open" /> My Case Lists
       </h1>
-      <ul>
-        {user.myLists.map(l => (
-          <li key={l.myListId}>
-            <Link to={`/browse/case/mylist/${l.myListId}`}>{l.name}</Link>
-          </li>
-        ))}
-      </ul>
+      <MyListArray
+        value={user.myLists}
+        toUrl={list => `/browse/case/mylist/${list.myListId}`}
+      />
       {user.myLists.length === 0 && (
         <div className="alert alert-info">You have no my list.</div>
       )}

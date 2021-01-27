@@ -1,10 +1,12 @@
 import IconButton from '@smikitky/rb-components/lib/IconButton';
-import { prompt } from '@smikitky/rb-components/lib/modal';
+import { prompt, confirm } from '@smikitky/rb-components/lib/modal';
 import Icon from 'components/Icon';
 import MyListArray from 'components/MyListArray';
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import { dispatch } from 'store';
+import { showMessage } from 'store/messages';
 import * as s from 'store/searches';
 import { useApi } from 'utils/api';
 import { useLoginManager } from 'utils/loginManager';
@@ -16,10 +18,64 @@ const MyCaseListHome: React.FC<{}> = props => {
   const api = useApi();
   const loginmanager = useLoginManager();
 
+  const lists = user.myLists.filter(
+    list => list.resourceType === 'clinicalCases'
+  );
+
   const handleCreateNew = async () => {
     const name = await prompt('Enter new list name');
     if (!name) return;
     await api('/mylists', { method: 'post', data: { name } });
+    dispatch(
+      showMessage(
+        <>
+          Created <b>{name}</b>.
+        </>,
+        'success',
+        { short: true }
+      )
+    );
+    loginmanager.refreshUserInfo(true);
+  };
+
+  const handleRename = async (myListId: string) => {
+    const list = lists.find(list => myListId === list.myListId)!;
+    const name = await prompt('New name', list.name);
+    if (name === null || name === list.name) return;
+    await api(`/mylists/${list.myListId}/name`, {
+      method: 'put',
+      data: { name }
+    });
+    dispatch(
+      showMessage(
+        <>
+          Renamed <b>{list.name}</b> to <b>{name}</b>.
+        </>,
+        'success',
+        { short: true, tag: 'mylist-rename' }
+      )
+    );
+    loginmanager.refreshUserInfo(true);
+  };
+
+  const handleDelete = async (myListId: string) => {
+    const list = lists.find(list => myListId === list.myListId)!;
+    const ans = await confirm(
+      <>
+        Delete <b>{list.name}</b>? This cannot be undone.
+      </>
+    );
+    if (!ans) return;
+    await api(`/mylists/${list.myListId}`, { method: 'delete' });
+    dispatch(
+      showMessage(
+        <>
+          Deleted <b>{list.name}</b>.
+        </>,
+        'warning',
+        { short: true }
+      )
+    );
     loginmanager.refreshUserInfo(true);
   };
 
@@ -31,6 +87,8 @@ const MyCaseListHome: React.FC<{}> = props => {
       <MyListArray
         value={user.myLists}
         toUrl={list => `/browse/case/mylist/${list.myListId}`}
+        onRenameClick={handleRename}
+        onDeleteClick={handleDelete}
       />
       {user.myLists.length === 0 && (
         <div className="alert alert-info">You have no my list.</div>
@@ -66,7 +124,7 @@ const MyListDetail: React.FC<{
       condition: {},
       sort: JSON.stringify({ createdAt: -1 })
     };
-    dispatch(s.newSearch(api, 'myCaseList', params));
+    dispatch(s.newSearch(api, 'myCaseList', params, true));
   }, [api, dispatch, myListId]);
 
   if (!list) return <div>Not found</div>;

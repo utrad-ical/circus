@@ -21,6 +21,7 @@ export const store = configureStore({ reducer });
 export const dispatch = store.dispatch;
 
 export type RootState = ReturnType<typeof reducer>;
+export type AppDispatch = typeof dispatch;
 
 /**
  * The thunk action type. See the advanced tutorial of Redux Toolkit.

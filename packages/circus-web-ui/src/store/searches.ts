@@ -1,6 +1,6 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, ThunkDispatch } from '@reduxjs/toolkit';
 import { confirm, prompt } from '@smikitky/rb-components/lib/modal';
-import { AppThunk } from 'store';
+import { AppDispatch, AppThunk } from 'store';
 import { ApiCaller } from 'utils/api';
 import Series from 'types/Series';
 import Task from 'types/Task';
@@ -71,6 +71,11 @@ const slice = createSlice({
         state.searches[searchName] = { params, isFetching: true, selected: [] };
       state.searches[searchName].isFetching = true;
       state.searches[searchName].params = params;
+    },
+    clearSearch: (state, action: PayloadAction<{ searchName: string }>) => {
+      const { searchName } = action.payload;
+      if (state.searches[searchName])
+        state.searches[searchName].results = undefined;
     },
     setBusy: (
       state,
@@ -143,6 +148,7 @@ const slice = createSlice({
 // We will not export these "primitive" actions for now
 const {
   startSearch,
+  clearSearch,
   changeSelection,
   setBusy,
   searchResultLoaded
@@ -158,7 +164,7 @@ export default slice.reducer;
 
 // internal
 const executeQuery = async (
-  dispatch: any,
+  dispatch: AppDispatch,
   api: ApiCaller,
   searchName: string,
   params: SearchParams
@@ -182,13 +188,15 @@ const executeQuery = async (
 export const newSearch = (
   api: ApiCaller,
   searchName: string,
-  params: NewSearchParams
+  params: NewSearchParams,
+  clearPrevious?: boolean
 ): AppThunk => {
   const useParams: SearchParams = { limit: 20, page: 1, ...params };
   return async (dispatch, getState) => {
     const state = getState();
-    if (state.searches.searches[searchName]?.isFetching)
-      throw new Error('Previous search has not finished.');
+    // if (state.searches.searches[searchName]?.isFetching)
+    //   throw new Error('Previous search has not finished.');
+    if (clearPrevious) dispatch(clearSearch({ searchName }));
     if (getState().searches.searches[searchName]) {
       dispatch(changeSelection({ searchName, ids: [] }));
     }

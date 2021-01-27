@@ -3,12 +3,16 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { MyList } from 'store/loginUser';
 import styled from 'styled-components';
+import { Button } from 'components/react-bootstrap';
 
 const MyListArray: React.FC<{
   value: MyList[];
   toUrl: (list: MyList) => string;
+  onRenameClick: (myListId: string) => void;
+  onDeleteClick: (myListId: string) => void;
 }> = props => {
-  const { value, toUrl } = props;
+  const { value, toUrl, onRenameClick, onDeleteClick } = props;
+
   return (
     <StyledUl>
       {value.map(list => (
@@ -16,6 +20,29 @@ const MyListArray: React.FC<{
           <Link to={toUrl(list)}>
             <Icon bsSize="xl" icon="glyphicon-folder-open" />
             <span className="name">{list.name}</span>
+            <div className="menu">
+              <Button
+                bsSize="xs"
+                bsStyle="primary"
+                onClick={(ev: React.MouseEvent) => {
+                  ev.preventDefault();
+                  onRenameClick(list.myListId);
+                }}
+              >
+                Rename
+              </Button>
+              &ensp;
+              <Button
+                bsSize="xs"
+                bsStyle="danger"
+                onClick={(ev: React.MouseEvent) => {
+                  ev.preventDefault();
+                  onDeleteClick(list.myListId);
+                }}
+              >
+                Delete
+              </Button>
+            </div>
           </Link>
         </li>
       ))}
@@ -31,8 +58,8 @@ const StyledUl = styled.ul`
     list-style-type: none;
     border: 1px solid silver;
     background: #eeeeee;
-    width: 180px;
-    height: 180px;
+    width: 200px;
+    height: 200px;
     margin: 5px;
     > a {
       display: flex;
@@ -51,6 +78,9 @@ const StyledUl = styled.ul`
       .name {
         margin-top: 5px;
         font-size: 120%;
+      }
+      .menu {
+        margin-top: 15px;
       }
     }
   }

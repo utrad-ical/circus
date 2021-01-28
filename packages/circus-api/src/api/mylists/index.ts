@@ -7,11 +7,21 @@ export interface MyListItem {
 }
 
 export const handleSearch: RouteMiddleware = () => {
-  return async (ctx, next) => {};
+  return async (ctx, next) => {
+    ctx.body = ctx.user.myLists;
+  };
 };
 
-export const handleGet: RouteMiddleware = () => {
-  return async (ctx, next) => {};
+export const handleGet: RouteMiddleware = ({ models }) => {
+  return async (ctx, next) => {
+    const myListId = ctx.params.myListId;
+    const list = ctx.user.myLists.find(
+      (list: any) => (list.myListId = myListId)
+    );
+    const docs = await models.myList.findById(myListId);
+    if (!list || !docs) ctx.throw(404, 'This my list does not exist');
+    ctx.body = list;
+  };
 };
 
 export const handlePost: RouteMiddleware = ({ models }) => {

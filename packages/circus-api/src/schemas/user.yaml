@@ -54,21 +54,5 @@ properties:
   myLists:
     type: array
     items:
-      type: object
-      properties:
-        myListId:
-          type: string
-        resourceType:
-          type: string
-          enum:
-            - series
-            - clinicalCases
-            - jobs
-        name:
-          type: string
-          minLength: 1
-          maxLength: 64
-        createdAt:
-          date: true
-      required: ['myListId', 'resourceType', 'name', 'createdAt']
+      $ref: userMyList
 additionalProperties: false

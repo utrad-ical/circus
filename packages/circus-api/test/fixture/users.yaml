@@ -42,6 +42,10 @@
       resourceType: clinicalCases
       name: MyList2
       createdAt: { $date: 1405266782000 }
+    - myListId: 01ex36wt9c94s93j0rmk98nsj0
+      resourceType: series
+      name: My Series List
+      createdAt: { $date: 1405266976000 }
 - userEmail: guest@example.com
   loginId: guest
   # password is 'guestSecret'
@@ -73,4 +77,8 @@
     pluginJobSearchPresets: []
   loginEnabled: true
   groups: [4] # power user 2
-  myLists: []
+  myLists:
+    - myListId: 01ex36f2n99kjaqvpfrerrsryp
+      resourceType: clinicalCases
+      name: Carol's list
+      createdAt: { $date: 1405266782123 }

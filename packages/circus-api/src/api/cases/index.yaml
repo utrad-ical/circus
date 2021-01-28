@@ -41,6 +41,7 @@ routes:
       items:
         type: string
     handler: handlePutTags
+    description: Updates the tags of the specified case.
   - verb: patch
     path: /cases/tags
     handler: handlePatchTags
@@ -62,3 +63,4 @@ routes:
             type: string
           minItems: 1
       required: ['operation', 'tags', 'caseIds']
+    description: Manages the tags of multiple cases.

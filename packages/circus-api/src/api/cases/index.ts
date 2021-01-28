@@ -160,7 +160,7 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
 export const handleSearchByMyListId: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const myListId = ctx.params.myListId;
-    const filter = { myListId };
+    const filter = {};
     const user = ctx.user;
 
     const myList = user.myLists.find((list: any) => myListId === list.myListId);
@@ -174,6 +174,8 @@ export const handleSearchByMyListId: RouteMiddleware = ({ models }) => {
       filter,
       ctx,
       [
+        { $match: { myListId } },
+        { $unwind: { path: '$items' } },
         {
           $lookup: {
             from: 'clinicalCases',
@@ -182,10 +184,16 @@ export const handleSearchByMyListId: RouteMiddleware = ({ models }) => {
             as: 'caseDetail'
           }
         },
-        { $unwind: { path: '$caseDetail' } }
+        {
+          $replaceWith: {
+            $mergeObjects: [
+              { $arrayElemAt: ['$caseDetail', 0] },
+              { addedToListAt: '$items.createdAt' }
+            ]
+          }
+        }
       ],
       [
-        { $replaceWith: '$caseDetail' },
         {
           $lookup: {
             from: 'series',
@@ -197,7 +205,14 @@ export const handleSearchByMyListId: RouteMiddleware = ({ models }) => {
         { $unwind: { path: '$seriesDetail', includeArrayIndex: 'volId' } },
         { $match: { volId: 0 } },
         { $addFields: { patientInfo: '$seriesDetail.patientInfo' } },
-        { $project: { _id: false, seriesDetail: false, volId: false } }
+        {
+          $project: {
+            _id: false,
+            seriesDetail: false,
+            volId: false,
+            addedToListAt: false
+          }
+        }
       ],
       { defaultSort: { itemCreatedAt: -1 } }
     );

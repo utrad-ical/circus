@@ -21,11 +21,14 @@ routes:
       properties:
         name:
           type: string
+          minLength: 1
+          maxLength: 64
+      required: ['name']
     responseSchema:
       properties:
         myListId:
           type: string
-      additionalProperties: false
+      required: ['myListId']
   - verb: put
     path: /mylists/:myListId/name
     handler: handleChangeName
@@ -49,6 +52,8 @@ routes:
           items:
             type: string
           minItems: 1
+          maxItems: 1000
+      required: ['operation', 'resourceIds']
     responseSchema:
       type: object
       properties:

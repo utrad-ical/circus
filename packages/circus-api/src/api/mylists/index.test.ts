@@ -7,6 +7,25 @@ beforeAll(async () => {
 });
 afterAll(() => apiTest.tearDown());
 
+test('list all my lists', async () => {
+  const res = await ax.bob.get('api/mylists');
+  expect(res.status).toBe(200);
+  expect(res.data instanceof Array).toBe(true);
+});
+
+describe('get one my list', () => {
+  test('get', async () => {
+    const res = await ax.bob.get('api/mylists/01ewetw0chv8v5vxdtjdf6x9rk');
+    expect(res.status).toBe(200);
+    expect(res.data).toHaveProperty('name');
+  });
+
+  test('404', async () => {
+    const res = await ax.bob.get('api/mylists/dummy');
+    expect(res.status).toBe(404);
+  });
+});
+
 describe('create new list', () => {
   test('create new list', async () => {
     const res = await ax.bob.request({

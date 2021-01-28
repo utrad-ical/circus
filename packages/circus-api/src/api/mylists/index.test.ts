@@ -170,6 +170,7 @@ describe('patch list item', () => {
 
   test('throw 404 for nonexistent my list id', async () => {
     const res = await ax.bob.patch(`api/mylists/dummyId/items`, {
+      operation: 'add',
       resourceIds: [
         'bfaeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715'
       ]

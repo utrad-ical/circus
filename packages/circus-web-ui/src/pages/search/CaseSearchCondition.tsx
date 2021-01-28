@@ -116,8 +116,8 @@ const ConditionEditor: React.FC<{
       },
       createdAt: { caption: 'create time', type: 'date' },
       updatedAt: { caption: 'update time', type: 'date' },
-      tag: {
-        caption: 'Tag',
+      tags: {
+        caption: 'tag',
         type: 'select',
         spec: { options: Object.keys(availableTags) }
       }

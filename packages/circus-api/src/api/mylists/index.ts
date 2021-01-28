@@ -1,4 +1,5 @@
-import { RouteMiddleware } from '../../typings/middlewares';
+import { Models } from 'circus-api/src/interface';
+import { CircusContext, RouteMiddleware } from '../../typings/middlewares';
 import generateUniqueId from '../../utils/generateUniqueId';
 
 export interface MyListItem {
@@ -12,15 +13,22 @@ export const handleSearch: RouteMiddleware = () => {
   };
 };
 
+const getList = async (
+  ctx: CircusContext,
+  models: Models,
+  myListId: string
+) => {
+  const list = ctx.user.myLists.find((list: any) => (list.myListId = myListId));
+  const doc = await models.myList.findById(myListId);
+  if (!list || !doc) ctx.throw(404, 'This my list does not exist');
+  return { userList: list, list: doc };
+};
+
 export const handleGet: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const myListId = ctx.params.myListId;
-    const list = ctx.user.myLists.find(
-      (list: any) => (list.myListId = myListId)
-    );
-    const docs = await models.myList.findById(myListId);
-    if (!list || !docs) ctx.throw(404, 'This my list does not exist');
-    ctx.body = list;
+    const { userList } = await getList(ctx, models, myListId);
+    ctx.body = userList;
   };
 };
 
@@ -43,29 +51,6 @@ export const handlePost: RouteMiddleware = ({ models }) => {
     await models.user.modifyOne(userEmail, { myLists });
 
     ctx.body = { myListId };
-  };
-};
-
-export const handlePostItem: RouteMiddleware = ({ models }) => {
-  return async (ctx, next) => {
-    const myListId = ctx.params.myListId;
-    const resourceIds: { resourceId: string }[] = ctx.request.body.items;
-    const newItems = resourceIds.map(r => {
-      return { resourceId: r.resourceId, createdAt: new Date() };
-    });
-
-    const myList = await models.myList.findByIdOrFail(myListId);
-    if (
-      myList.items.some((item: any) =>
-        newItems.find(r => r.resourceId === item.resourceId)
-      )
-    )
-      ctx.throw(400, 'There is a duplicate item that is already registered.');
-
-    const myLists = [...myList.items, ...newItems];
-
-    await models.myList.modifyOne(myListId, { items: myLists });
-    ctx.body = null;
   };
 };
 
@@ -106,16 +91,50 @@ export const handleDelete: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handleDeleteItem: RouteMiddleware = ({ models }) => {
+type ListCol = 'series' | 'clinicalCase' | 'pluginJob';
+const collMap: { [key: string]: ListCol } = {
+  series: 'series',
+  clinicalCases: 'clinicalCase',
+  pluginJobs: 'pluginJob'
+};
+
+export const handlePatchItems: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const myListId = ctx.params.myListId;
-    const deletedResourceId = ctx.params.itemId;
-    const myList = await models.myList.findByIdOrFail(myListId);
-    const newItems = myList.items.filter(
-      (item: any) => item.resourceId !== deletedResourceId
-    );
+    const resourceIds: string[] = ctx.request.body.resourceIds;
+    const operation: 'add' | 'remove' = ctx.request.body.operation;
+    const now = new Date();
+    const { userList, list } = await getList(ctx, models, myListId);
+    const coll = collMap[userList.resourceType];
+    const items = list.items;
+    let changedCount = 0;
 
-    await models.myList.modifyOne(myListId, { items: newItems });
-    ctx.body = null;
+    for (const resourceId of resourceIds) {
+      switch (operation) {
+        case 'add':
+          await models[coll].findByIdOrFail(resourceId);
+          if (
+            items.findIndex((item: any) => item.resourceId === resourceId) < 0
+          ) {
+            items.push({ resourceId, createdAt: now });
+            changedCount++;
+          }
+          break;
+        case 'remove': {
+          const index = items.findIndex(
+            (item: any) => item.resourceId === resourceId
+          );
+          if (index >= 0) {
+            items.splice(index, 1);
+            changedCount++;
+          }
+        }
+      }
+    }
+
+    if (operation === 'add' && items.length > 1000)
+      ctx.throw(400, 'The number of items cannot exceed 1000');
+    if (changedCount > 0) await models.myList.modifyOne(myListId, { items });
+    ctx.body = { changedCount };
   };
 };

@@ -13,6 +13,7 @@ describe('checkFilter', () => {
     );
     expect(checkFilter({ valid: true }, fields)).toBe(true);
     expect(checkFilter({ name: { $in: ['Alice', 'Bob'] } }, fields)).toBe(true);
+    expect(checkFilter({ name: { $all: ['Ann', 'Bob'] } }, fields)).toBe(true);
     expect(checkFilter({ sex: 'F' }, fields)).toBe(false);
     expect(checkFilter({ age: { $gg: 5 } }, fields)).toBe(false);
     expect(checkFilter({ name: /Bob/ }, fields)).toBe(false);

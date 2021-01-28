@@ -41,9 +41,9 @@ const checkFilter: (filter: object, fields: string[]) => boolean = (
         // Checks { $gt: 5 }, { $ne: 'A' }, etc.
         const keys = Object.keys(value);
         return keys.every(k => {
-          const ops = ['$gt', '$gte', '$lt', '$lte', '$ne', '$in'];
+          const ops = ['$gt', '$gte', '$lt', '$lte', '$ne', '$in', '$all'];
           if (ops.indexOf(k) < 0) return false;
-          return k === '$in'
+          return k === '$in' || k === '$all'
             ? Array.isArray(value[k])
             : isScalarOrDate(value[k]);
         });

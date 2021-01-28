@@ -32,7 +32,7 @@ const basicConditionToMongoQuery = (condition: Condition['basic']) => {
         break;
       }
       case 'tags':
-        if (val.length) members.push({ tags: { $in: val } });
+        if (val.length) members.push({ tags: { $all: val } });
         break;
       default:
         if (key.match(/^(patient(.+))$/)) {

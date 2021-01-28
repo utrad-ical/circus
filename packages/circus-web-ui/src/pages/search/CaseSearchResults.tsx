@@ -12,6 +12,7 @@ import TimeDisplay from 'components/TimeDisplay';
 import React, { Fragment, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { showMessage } from 'store/messages';
 import { updateSearch } from 'store/searches';
 import { useApi } from 'utils/api';
 import useLoginUser from 'utils/useLoginUser';
@@ -147,13 +148,24 @@ const CaseSearchResultsView: React.FC<{
     dispatch(updateSearch(api, searchName, {}));
   };
 
-  const handleMyList = async (op: 'add' | 'remove', myListId: string) => {
-    const items = selected.map(resourceId => ({ resourceId }));
-    if (op === 'add') {
-      await api(`mylists/${myListId}/items`, { data: { items } });
-    } else {
-      // await api('')
-    }
+  const handleMyList = async (
+    operation: 'add' | 'remove',
+    myListId: string
+  ) => {
+    const res = await api(`mylists/${myListId}/items`, {
+      method: 'patch',
+      data: { operation, resourceIds: selected }
+    });
+    const changedCount = res.changedCount;
+    dispatch(
+      showMessage(
+        `${changedCount}${changedCount === 1 ? ' item was' : ' items were'} ${
+          operation === 'add' ? 'added to the list.' : 'removed from the list.'
+        }`,
+        'info',
+        { short: true }
+      )
+    );
     dispatch(updateSearch(api, searchName, {}));
   };
 

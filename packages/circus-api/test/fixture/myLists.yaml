@@ -12,3 +12,7 @@
       createdAt: { $date: '2020-01-01T09:00:00.000Z' }
     - resourceId: ankutrdbn53780cmm3489yxj01cmrm0cregtjcmveuhbi987gdhbtrdc780yn3er
       createdAt: { $date: '2021-01-01T09:01:00.000Z' }
+- myListId: 01ex36wt9c94s93j0rmk98nsj0
+  items: []
+- myListId: 01ex36f2n99kjaqvpfrerrsryp
+  items: []

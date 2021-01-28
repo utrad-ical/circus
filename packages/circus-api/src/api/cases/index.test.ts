@@ -356,17 +356,31 @@ describe('put tags', () => {
 describe('search by mylist', () => {
   const myListId = '01ewes10a08z21bjnysd4p1m3f';
   test('search', async () => {
-    const res = await ax.bob.request({
-      url: `api/cases/list/${myListId}`,
-      method: 'get'
-    });
+    const res = await ax.bob.get(`api/cases/list/${myListId}`);
     expect(res.status).toBe(200);
-    expect(res.data.items[0].caseId).toBe(
-      'ankutrdbn53780cmm3489yxj01cmrm0cregtjcmveuhbi987gdhbtrdc780yn3er'
-    );
+    expect(
+      res.data.items.some(
+        (item: any) =>
+          item.caseId ===
+          'ankutrdbn53780cmm3489yxj01cmrm0cregtjcmveuhbi987gdhbtrdc780yn3er'
+      )
+    ).toBe(true);
   });
 
-  test.skip('returns 404 for my list of another user', () => {});
+  test('return 404 for nonexistent list id', async () => {
+    const res = await ax.bob.get('api/cases/list/dummy');
+    expect(res.status).toBe(404);
+  });
+
+  test('returns 404 for my list of another user', async () => {
+    const res = await ax.bob.get('api/cases/list/01ex36f2n99kjaqvpfrerrsryp');
+    expect(res.status).toBe(404);
+  });
+
+  test('return 400 for my list for different resource type', async () => {
+    const res = await ax.bob.get('api/cases/list/01ex36wt9c94s93j0rmk98nsj0');
+    expect(res.status).toBe(400);
+  });
 });
 
 describe('patch tags', () => {

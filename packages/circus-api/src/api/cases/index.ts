@@ -165,6 +165,7 @@ export const handleSearchByMyListId: RouteMiddleware = ({ models }) => {
 
     const myList = user.myLists.find((list: any) => myListId === list.myListId);
     if (!myList) ctx.throw(status.NOT_FOUND, 'This my list does not exist');
+
     if (myList.resourceType !== 'clinicalCases')
       ctx.throw(status.BAD_REQUEST, 'This my list is not for cases');
 

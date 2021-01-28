@@ -6,7 +6,7 @@ routes:
     path: /mylists
     handler: handleSearch
     description: Performs search and retrieves a list of the current user's my lists.
-    responseSchema: ''
+    # responseSchema: ''
   - verb: get
     path: /mylists/:myListId
     description: Returns information about the specified list.

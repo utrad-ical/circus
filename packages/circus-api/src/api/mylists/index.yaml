@@ -21,10 +21,11 @@ routes:
       properties:
         name:
           type: string
-  - verb: post
-    path: /mylists/:myListId/items
-    handler: handlePostItem
-    description: Creates a new item in the specified my list.
+    responseSchema:
+      properties:
+        myListId:
+          type: string
+      additionalProperties: false
   - verb: put
     path: /mylists/:myListId/name
     handler: handleChangeName
@@ -32,7 +33,25 @@ routes:
   - verb: delete
     path: /mylists/:myListId
     description: Deletes the specified my list.
-  - verb: delete
-    path: /mylists/:myListId/items/:itemId
-    handler: handleDeleteItem
-    description: Deletes the specified item in the specified my list.
+  - verb: patch
+    path: /mylists/:myListId/items
+    handler: handlePatchItems
+    description: Adds or removes multiple items on the specified my list.
+    requestSchema:
+      type: object
+      properties:
+        operation:
+          enum:
+            - add
+            - remove
+        resourceIds:
+          type: array
+          items:
+            type: string
+          minItems: 1
+    responseSchema:
+      type: object
+      properties:
+        changedCount:
+          type: number
+      required: ['changedCount']

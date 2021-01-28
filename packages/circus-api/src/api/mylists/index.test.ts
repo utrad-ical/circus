@@ -1,3 +1,4 @@
+import { setUpMongoFixture } from '../../../test/util-mongo';
 import { setUpAppForRoutesTest, ApiTest } from '../../../test/util-routes';
 
 let apiTest: ApiTest, ax: typeof apiTest.axiosInstances;
@@ -38,51 +39,6 @@ describe('create new list', () => {
   });
 
   test.skip('throw 400 when the list name is invalid', () => {});
-});
-
-describe('post list item', () => {
-  test('create new item', async () => {
-    const myListId = '01ewetw0chv8v5vxdtjdf6x9rk';
-    const res = await ax.bob.request({
-      url: `api/mylists/${myListId}/items`,
-      method: 'post',
-      data: {
-        items: [{ resourceId: 'resourceA' }, { resourceId: 'resourceB' }]
-      }
-    });
-    expect(res.status).toBe(204);
-  });
-
-  test('throw 404 for nonexistent my list id', async () => {
-    const myListId = 'dummyid';
-    const res = await ax.bob.request({
-      url: `api/mylists/${myListId}/items`,
-      method: 'post',
-      data: {
-        items: [{ resourceId: 'resourceA' }]
-      }
-    });
-    expect(res.status).toBe(404);
-  });
-
-  test.skip('throw 401 for my list the user does not own', () => {});
-
-  test('throw 400 for duplicate item in the same my list', async () => {
-    const myListId = '01ewetw0chv8v5vxdtjdf6x9rk';
-    const res = await ax.bob.request({
-      url: `api/mylists/${myListId}/items`,
-      method: 'post',
-      data: {
-        items: [
-          {
-            resourceId:
-              'gfdrjivu4w8p57nv95p7n485n3p891ygy6543wedfuyt67oiulkjhtrw312wergr'
-          }
-        ]
-      }
-    });
-    expect(res.status).toBe(400);
-  });
 });
 
 describe('put name', () => {
@@ -150,41 +106,73 @@ describe('delete list', () => {
   });
 });
 
-describe('delete list item', () => {
-  test('delete list item', async () => {
-    const myListId = '01ewetw0chv8v5vxdtjdf6x9rk';
-    const resourceId =
-      'gfdrjivu4w8p57nv95p7n485n3p891ygy6543wedfuyt67oiulkjhtrw312wergr';
-    const res = await ax.bob.request({
-      url: `api/mylists/${myListId}/items/${resourceId}`,
-      method: 'delete'
-    });
-    expect(res.status).toBe(204);
+describe('patch list item', () => {
+  const myListId = '01ewetw0chv8v5vxdtjdf6x9rk';
+  const url = `api/mylists/${myListId}/items`;
 
-    const myList = await apiTest.db.collection('myLists').findOne({ myListId });
-    const result = myList.items.find((i: any) => i === resourceId);
-    expect(result).toStrictEqual(undefined);
+  beforeEach(async () => {
+    await setUpMongoFixture(apiTest.db, ['myLists']);
   });
 
-  test('throw 404 for nonexistent my list id', async () => {
-    const myListId = 'dummyid';
-    const resourceId =
-      'gfdrjivu4w8p57nv95p7n485n3p891ygy6543wedfuyt67oiulkjhtrw312wergr';
-    const res = await ax.bob.request({
-      url: `api/mylists/${myListId}/items/${resourceId}`,
-      method: 'delete'
+  test('insert new item into a mylist', async () => {
+    const res = await ax.bob.patch(url, {
+      operation: 'add',
+      resourceIds: [
+        'bfaeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715'
+      ]
+    });
+    expect(res.status).toBe(200);
+    expect(res.data.changedCount).toBe(1);
+  });
+
+  test('inserting an nonexistent item should cause 404 error', async () => {
+    const res = await ax.bob.patch(url, {
+      operation: 'add',
+      resourceIds: ['this-id-does-not-exist']
     });
     expect(res.status).toBe(404);
   });
 
-  test.skip('throw 401 for my list the user does not own', () => {});
+  test('inserting a duplicate item must be ignored', async () => {
+    const res = await ax.bob.patch(url, {
+      operation: 'add',
+      resourceIds: [
+        'gfdrjivu4w8p57nv95p7n485n3p891ygy6543wedfuyt67oiulkjhtrw312wergr',
+        'gfdrjivu4w8p57nv95p7n485n3p891ygy6543wedfuyt67oiulkjhtrw312wergr'
+      ]
+    });
+    expect(res.status).toBe(200);
+    expect(res.data.changedCount).toBe(0);
+  });
 
-  test.skip('throw 404 for nonexistent resource ID', async () => {
-    const myListId = '01ewetw0chv8v5vxdtjdf6x9rk';
-    const resourceId = 'dummyid';
-    const res = await ax.bob.request({
-      url: `api/mylists/${myListId}/items/${resourceId}`,
-      method: 'delete'
+  test('remove item from a mylist', async () => {
+    const res = await ax.bob.patch(url, {
+      operation: 'remove',
+      resourceIds: [
+        'gfdrjivu4w8p57nv95p7n485n3p891ygy6543wedfuyt67oiulkjhtrw312wergr'
+      ]
+    });
+    expect(res.status).toBe(200);
+    expect(res.data.changedCount).toBe(1);
+  });
+
+  test('removeing a nonexistent item should cause no effect', async () => {
+    const res = await ax.bob.patch(url, {
+      operation: 'remove',
+      resourceIds: [
+        'bfaeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715',
+        'bfaeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715'
+      ]
+    });
+    expect(res.status).toBe(200);
+    expect(res.data.changedCount).toBe(0);
+  });
+
+  test('throw 404 for nonexistent my list id', async () => {
+    const res = await ax.bob.patch(`api/mylists/dummyId/items`, {
+      resourceIds: [
+        'bfaeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715'
+      ]
     });
     expect(res.status).toBe(404);
   });

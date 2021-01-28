@@ -12,7 +12,7 @@ properties:
     enum:
       - series
       - clinicalCases
-      - jobs
+      - pluginJobs
   name:
     type: string
     minLength: 1

@@ -92,6 +92,18 @@ export const handlePostRevision: RouteMiddleware = ({ models }) => {
   };
 };
 
+const searchableFields = [
+  'projectId',
+  'caseId',
+  'patientInfo.patientId',
+  'patientInfo.patientName',
+  'patientInfo.age',
+  'patientInfo.sex',
+  'tags',
+  'createdAt',
+  'updatedAt'
+];
+
 export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const urlQuery = ctx.request.query;
@@ -101,18 +113,7 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
     } catch (err) {
       ctx.throw(status.BAD_REQUEST, 'Invalid JSON was passed as the filter.');
     }
-    const fields = [
-      'projectId',
-      'caseId',
-      'patientInfo.patientId',
-      'patientInfo.patientName',
-      'patientInfo.age',
-      'patientInfo.sex',
-      'tags',
-      'createdAt',
-      'updatedAt'
-    ];
-    if (!checkFilter(customFilter!, fields))
+    if (!checkFilter(customFilter!, searchableFields))
       ctx.throw(status.BAD_REQUEST, 'Bad filter.');
 
     // const domainFilter = {};
@@ -148,7 +149,16 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
         { $match: { volId: 0 } },
         { $addFields: { patientInfo: '$seriesDetail.patientInfo' } }
       ],
-      [{ $project: { _id: false, seriesDetail: false, volId: false } }],
+      [
+        {
+          $project: {
+            _id: false,
+            revisions: false,
+            seriesDetail: false,
+            volId: false
+          }
+        }
+      ],
       {
         defaultSort: { createdAt: -1 },
         transform: maskPatientInfo(ctx)
@@ -208,6 +218,7 @@ export const handleSearchByMyListId: RouteMiddleware = ({ models }) => {
         {
           $project: {
             _id: false,
+            revisions: false,
             seriesDetail: false,
             volId: false,
             addedToListAt: false

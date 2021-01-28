@@ -18,6 +18,7 @@ describe('search', () => {
     });
     expect(res.status).toBe(200);
     expect(res.data.items).toHaveLength(4);
+    expect(res.data.items.some((item: any) => item.revisions)).toBe(false);
   });
 
   test('search with patient name', async () => {
@@ -163,17 +164,16 @@ describe('create', () => {
   // TODO: more checks regarding security
 });
 
-describe('search', () => {
+describe('get one case', () => {
   test('return single case information', async () => {
     const res = await ax.bob.request({
       url: `api/cases/${cid}`,
       method: 'get'
     });
     expect(res.data.projectId).toBe('8883fdef6f5144f50eb2a83cd34baa44');
+    expect(res.data).toHaveProperty('revisions');
   });
-});
 
-describe('get one', () => {
   test('return 404 for nonexistent case', async () => {
     const res = await ax.bob.request({
       url: 'api/cases/thiscaseisinvalid'
@@ -365,6 +365,7 @@ describe('search by mylist', () => {
           'ankutrdbn53780cmm3489yxj01cmrm0cregtjcmveuhbi987gdhbtrdc780yn3er'
       )
     ).toBe(true);
+    expect(res.data.items.some((item: any) => item.revisions)).toBe(false);
   });
 
   test('return 404 for nonexistent list id', async () => {

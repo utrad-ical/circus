@@ -1,6 +1,10 @@
 $schema: 'http://json-schema.org/schema#'
 $async: true
-title: Case
+title: AbbreviatedCase
+description: >
+  This is a variation of clinicalCase returned by the
+  endpoints of fetching a list of cases.
+  This does not have the `revisions` field but has the `patientInfo` field.
 type: object
 properties:
   caseId:
@@ -17,10 +21,6 @@ properties:
       type: string
   latestRevision:
     $ref: revision
-  revisions:
-    type: array
-    items:
-      $ref: revision
   domains:
     type: array
     items:

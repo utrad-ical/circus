@@ -1,6 +1,6 @@
 $schema: 'http://json-schema.org/schema#'
 $async: true
-title: Case
+title: CaseCreate
 type: object
 properties:
   projectId:

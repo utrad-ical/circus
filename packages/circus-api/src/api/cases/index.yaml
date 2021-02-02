@@ -9,7 +9,7 @@ routes:
     responseSchema: clinicalCaseSearchResult|searchResult
   - verb: get
     path: /cases/list/:myListId
-    handler: handleSearchByMyListId
+    handler: handleSearch
     description: Peforms search based on a my list ID.
     responseSchema: clinicalCaseSearchResult|searchResult
   - verb: post

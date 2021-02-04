@@ -6,6 +6,7 @@ import generateUniqueId from '../src/utils/generateUniqueId';
 import { Writable, PassThrough } from 'stream';
 import fs from 'fs';
 import _ from 'lodash';
+import mime from 'mime';
 import { CircusContext } from './typings/middlewares';
 
 export type TaskEventEmitter = StrictEventEmitter<EventEmitter, TaskEvents>;
@@ -243,6 +244,8 @@ const createTaskManager: FunctionService<
     const task = await models.task.findByIdOrFail(taskId);
     const fileName = downloadFileName(taskId);
     const stream = fs.createReadStream(fileName);
+    const ext = mime.getExtension(task.downloadFileType);
+    ctx.set('Content-Deposition', `attachment; filename="download.${ext}"`);
     ctx.type = task.downloadFileType;
     ctx.body = stream;
   };

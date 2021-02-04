@@ -69,9 +69,19 @@ const columns: DataGridColumnDefinition<Task>[] = [
   {
     caption: 'Download',
     key: 'download',
-    renderer: ({ value }) => {
+    renderer: function DownloadLink({ value }) {
+      const api = useApi();
+      const taskId = value.taskId;
+      const handleClick = () => {
+        //
+      };
       return value.status === 'finished' && value.downloadFileType ? (
-        <IconButton bsStyle="success" bsSize="sm" icon="glyphicon-download" />
+        <IconButton
+          bsStyle="success"
+          bsSize="sm"
+          icon="glyphicon-download"
+          onClick={handleClick}
+        />
       ) : (
         <>-</>
       );

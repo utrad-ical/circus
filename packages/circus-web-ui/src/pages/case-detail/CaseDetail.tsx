@@ -1,5 +1,6 @@
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import { alert, confirm, prompt } from '@smikitky/rb-components/lib/modal';
+import CaseExportModal from 'components/CaseExportModal';
 import Collapser from 'components/Collapser';
 import FullSpanContainer from 'components/FullSpanContainer';
 import Icon from 'components/Icon';
@@ -10,7 +11,8 @@ import {
   Button,
   DropdownButton,
   Glyphicon,
-  MenuItem
+  MenuItem,
+  Modal
 } from 'components/react-bootstrap';
 import Tag from 'components/Tag';
 import TimeDisplay from 'components/TimeDisplay';
@@ -43,6 +45,7 @@ const CaseDetail: React.FC<{}> = props => {
   const editingData = c.current(caseStore);
 
   const [tags, setTags] = useState<string[]>([]);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
 
   const accessibleProjects = useSelector(
     state => state.loginUser.data!.accessibleProjects
@@ -163,17 +166,7 @@ const CaseDetail: React.FC<{}> = props => {
         break;
       }
       case 'exportMhd': {
-        const blob = await api(`cases/${caseId}/export-mhd`, {
-          responseType: 'blob'
-        });
-        const a = document.createElement('a');
-        document.body.appendChild(a);
-        const url = window.URL.createObjectURL(blob);
-        a.href = url;
-        a.download = 'export.zip';
-        a.click();
-        window.URL.revokeObjectURL(url);
-        break;
+        setExportDialogOpen(true);
       }
     }
   };
@@ -230,6 +223,14 @@ const CaseDetail: React.FC<{}> = props => {
         refreshCounter={refreshCounter}
         updateEditingData={updateEditingData}
       />
+      {exportDialogOpen && (
+        <Modal show>
+          <CaseExportModal
+            caseIds={[caseId]}
+            onClose={() => setExportDialogOpen(false)}
+          />
+        </Modal>
+      )}
     </FullSpanContainer>
   );
 };

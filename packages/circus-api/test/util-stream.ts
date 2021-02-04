@@ -22,3 +22,16 @@ export const readFromStreamTillEnd = (stream: Readable) => {
     stream.on('end', () => resolve(data));
   });
 };
+
+export const readFromStreamToBufferTillEnd = (stream: Readable) => {
+  return new Promise<ArrayBuffer>(resolve => {
+    const buffers: any[] = [];
+    stream.on('data', chunk => {
+      buffers.push(chunk);
+    });
+    stream.on('end', () => {
+      const combined = Buffer.concat(buffers);
+      resolve(combined.buffer);
+    });
+  });
+};

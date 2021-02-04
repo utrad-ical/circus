@@ -1,7 +1,6 @@
 import status from 'http-status';
 import { performAggregationSearch } from '../performSearch';
 import { EJSON } from 'bson';
-import { packAsMhd } from '../../case/packAsMhd';
 import checkFilter from '../../utils/checkFilter';
 import { RouteMiddleware, CircusContext } from '../../typings/middlewares';
 import makeNewCase from '../../case/makeNewCase';
@@ -230,11 +229,19 @@ export const handleSearchByMyListId: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handleExportAsMhd: RouteMiddleware = deps => {
+export const handleExportAsMhd: RouteMiddleware = ({
+  taskManager,
+  mhdPacker
+}) => {
   return async (ctx, next) => {
     const caseId = ctx.case.caseId;
-    ctx.type = 'application/zip';
-    ctx.body = await packAsMhd(deps, caseId);
+    const userEmail = ctx.user.userEmail;
+    const { emitter, downloadFileStream } = await taskManager.register(ctx, {
+      name: 'Export case as MHD',
+      userEmail,
+      downloadFileType: 'application/zip'
+    });
+    mhdPacker.packAsMhd(emitter, downloadFileStream!, [caseId]);
   };
 };
 

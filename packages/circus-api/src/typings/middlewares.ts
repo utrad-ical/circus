@@ -8,6 +8,7 @@ import { UserPrivilegeInfo } from '../privilegeUtils';
 import { CsCore } from '@utrad-ical/circus-cs-core';
 import { Logger, DicomFileRepository } from '@utrad-ical/circus-lib';
 import { TaskManager } from '../createTaskManager';
+import { MhdPacker } from '../case/createMhdPacker';
 
 export interface Deps {
   validator: Validator;
@@ -23,6 +24,7 @@ export interface Deps {
   uploadFileSizeMaxBytes: number;
   dicomImageServerUrl: string;
   taskManager: TaskManager;
+  mhdPacker: MhdPacker;
 }
 
 interface CustomCtxMembers {

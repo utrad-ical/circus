@@ -19,6 +19,7 @@ import createDicomUtilityRunner, {
   DicomUtilityRunner
 } from './utils/createDicomUtilityRunner';
 import { TaskManager } from './createTaskManager';
+import { MhdPacker } from './case/createMhdPacker';
 
 export type Services = CsCoreServices &
   RsServices & {
@@ -32,6 +33,7 @@ export type Services = CsCoreServices &
     dicomTagReader: DicomTagReader;
     dicomUtilityRunner: DicomUtilityRunner;
     taskManager: TaskManager;
+    mhdPacker: MhdPacker;
   };
 
 export type ApiServiceLoader = ServiceLoader<Services>;
@@ -42,19 +44,19 @@ const createServiceLoader = async (config: any) => {
   configureCsCoreServiceLoader(loader as any);
   configureRsServiceLoader(loader);
   // Register our modules
-  loader.registerModule('apiServer', path.join(__dirname, '/createApp'));
-  loader.registerModule('db', path.join(__dirname, './db/connectDb'));
+  loader.registerModule('apiServer', path.join(__dirname, 'createApp'));
+  loader.registerModule('db', path.join(__dirname, 'db/connectDb'));
   loader.registerDirectory('apiLogger', '<circus-lib>/logger', 'NullLogger');
-  loader.registerModule('validator', path.join(__dirname, '/createValidator'));
-  loader.registerModule('models', path.join(__dirname, './db/createModels'));
+  loader.registerModule('validator', path.join(__dirname, 'createValidator'));
+  loader.registerModule('models', path.join(__dirname, 'db/createModels'));
   loader.registerModule(
     'dicomImporter',
-    path.join(__dirname, './createDicomImporter')
+    path.join(__dirname, 'createDicomImporter')
   );
-  loader.registerModule('rs', path.join(__dirname, './createCircusRs'));
+  loader.registerModule('rs', path.join(__dirname, 'createCircusRs'));
   loader.registerModule(
     'dicomTagReader',
-    path.join(__dirname, './utils/createDicomTagReader')
+    path.join(__dirname, 'utils/createDicomTagReader')
   );
   loader.register('dicomUtilityRunner', createDicomUtilityRunner);
 
@@ -65,7 +67,11 @@ const createServiceLoader = async (config: any) => {
   );
   loader.registerModule(
     'taskManager',
-    path.join(__dirname, './createTaskManager')
+    path.join(__dirname, 'createTaskManager')
+  );
+  loader.registerModule(
+    'mhdPacker',
+    path.join(__dirname, 'case/createMhdPacker')
   );
   return loader as ApiServiceLoader;
 };

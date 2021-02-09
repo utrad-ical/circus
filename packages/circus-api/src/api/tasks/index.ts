@@ -67,7 +67,7 @@ export const handleDownload: RouteMiddleware = ({ models, taskManager }) => {
         'This task is not associated with a downloadable file.'
       );
     if (task.status !== 'finished')
-      ctx.throw(httpStatus.CONFLICT, 'This task has not finished.');
+      ctx.throw(httpStatus.CONFLICT, 'This task has not been completed.');
     await taskManager.download(ctx, taskId);
   };
 };

@@ -1,9 +1,12 @@
-import IconButton from './IconButton';
 import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useSelector } from 'react-redux';
 import { useApi } from 'utils/api';
 import { Modal, Button, ProgressBar } from './react-bootstrap';
+import classnames from 'classnames';
+import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
+import useTaskDownloadHandler from 'utils/useTaskDownloadHandler';
+import Icon from './Icon';
 
 const CaseExportModal: React.FC<{
   caseIds: string[];
@@ -20,6 +23,8 @@ const CaseExportModal: React.FC<{
 
   const caption = `${caseIds.length} case${caseIds.length !== 1 ? 's' : ''}`;
 
+  const downloadTask = useTaskDownloadHandler(taskId!);
+
   const modalRoot = useRef<HTMLDivElement>(document.createElement('div'));
 
   useEffect(() => {
@@ -35,9 +40,9 @@ const CaseExportModal: React.FC<{
     setTaskId(res.taskId);
   };
 
-  const handleDownloadClick = async () => {
+  const handleDownloadClick = () => {
     setCloseTitle('Close');
-    await api(`/tasks/${taskId}/download`);
+    downloadTask();
   };
 
   const dialog = (
@@ -46,7 +51,6 @@ const CaseExportModal: React.FC<{
         <Modal.Title>Export {caption}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        Voxel label output type:
         <label>
           <input
             type="checkbox"
@@ -54,51 +58,52 @@ const CaseExportModal: React.FC<{
             disabled={!!taskId}
             checked={combinedMode}
           />{' '}
-          Combined
+          Combine labels
         </label>
-        {!taskId && (
-          <div>
-            <ProgressBar now={0} />
-            <Button bsStyle="primary" onClick={handleStartClick}>
-              Start download...
-            </Button>
-          </div>
-        )}
-        {taskProgress?.status === 'processing' && (
-          <div>
-            <ProgressBar
-              active
-              bsStyle="success"
-              now={taskProgress.finished}
-              max={taskProgress.total}
-            />
-            <Button bsStyle="primary" disabled>
-              Please wait...
-            </Button>
-            <div>{taskProgress.message}</div>
-          </div>
-        )}
-        {taskProgress?.status === 'error' && (
-          <div className="alert alert-danger">{taskProgress.message}</div>
-        )}
-        {taskProgress?.status === 'finished' && (
-          <div>
-            <div className="text-success">Export finished.</div>
-            <IconButton
-              bsSize="sm"
-              bsStyle="success"
-              icon="glyphicon-download"
-              onClick={handleDownloadClick}
-            >
-              Download
-            </IconButton>
-          </div>
-        )}
+        <div>
+          <ProgressBar
+            active={taskProgress?.status === 'processing'}
+            bsStyle={taskProgress?.status === 'error' ? 'danger' : 'success'}
+            now={
+              taskProgress
+                ? taskProgress.status === 'processing'
+                  ? Math.max(1, taskProgress.finished ?? 0)
+                  : 100
+                : 0
+            }
+            max={taskProgress?.total ?? 100}
+          />
+        </div>
+        <div
+          className={classnames('message', {
+            'text-mute': !taskProgress,
+            'text-danger': taskProgress?.status === 'error',
+            'text-success': taskProgress?.status === 'finished'
+          })}
+        >
+          {taskProgress?.message ?? 'Not started'}
+        </div>
       </Modal.Body>
       <Modal.Footer>
         <Button bsStyle="default" onClick={onClose}>
           {closeTitle}
         </Button>
+        {!taskProgress && (
+          <Button bsStyle="primary" onClick={handleStartClick}>
+            Start download
+          </Button>
+        )}
+        {taskProgress?.status === 'processing' && (
+          <Button bsStyle="primary" disabled>
+            <LoadingIndicator /> Please wait...
+          </Button>
+        )}
+        {taskProgress?.status === 'finished' && (
+          <Button bsStyle="success" onClick={handleDownloadClick}>
+            <Icon icon="glyphicon-download" />
+            Download
+          </Button>
+        )}
       </Modal.Footer>
     </Modal.Dialog>
   );

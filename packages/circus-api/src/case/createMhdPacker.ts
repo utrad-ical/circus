@@ -5,7 +5,7 @@ import RawData from '@utrad-ical/circus-rs/src/common/RawData';
 import { Vector3D } from '@utrad-ical/circus-rs/src/common/geometry';
 import { TaskEventEmitter } from '../createTaskManager';
 import { Writable } from 'stream';
-import { FunctionService } from '@utrad-ical/circus-lib';
+import { FunctionService, Logger } from '@utrad-ical/circus-lib';
 import { VolumeProvider } from 'circus-rs/src/server/helper/createVolumeProvider';
 import { Models } from '../interface';
 import Storage from '../storage/Storage';
@@ -14,9 +14,18 @@ export interface MhdPacker {
   packAsMhd: (
     taskEmitter: TaskEventEmitter,
     downloadFileStream: Writable,
-    caseIds: string[]
+    caseIds: string[],
+    options?: PackOptions
   ) => void;
 }
+
+export type LabelPackType = 'isolated' | 'combined';
+
+export interface PackOptions {
+  labelPackType: LabelPackType;
+}
+
+const defaultLabelPackOptions: PackOptions = { labelPackType: 'isolated' };
 
 const createMhdPacker: FunctionService<
   MhdPacker,
@@ -24,14 +33,19 @@ const createMhdPacker: FunctionService<
     models: Models;
     volumeProvider: VolumeProvider;
     blobStorage: Storage;
+    apiLogger: Logger;
   }
 > = async (opts, deps) => {
-  const { models, volumeProvider, blobStorage } = deps;
+  const { models, volumeProvider, blobStorage, apiLogger } = deps;
 
   /**
    * Inserts a single case data into a root zip foler or a subdirectory.
    */
-  const putCaseData = async (caseId: string, zip: JSZip) => {
+  const putCaseData = async (
+    caseId: string,
+    zip: JSZip,
+    options: PackOptions
+  ) => {
     const caseData = await models.clinicalCase.findByIdOrFail(caseId);
     const rev = caseData.latestRevision;
     zip.file(
@@ -101,27 +115,44 @@ const createMhdPacker: FunctionService<
   const packAsMhd = async (
     taskEmitter: TaskEventEmitter,
     downloadFileStream: Writable,
-    caseIds: string[]
+    caseIds: string[],
+    packOptions: PackOptions = defaultLabelPackOptions
   ) => {
     const zip = new JSZip();
-    for (let i = 0; i < caseIds.length; i++) {
-      const caseId = caseIds[i];
+    try {
+      for (let i = 0; i < caseIds.length; i++) {
+        const caseId = caseIds[i];
+        taskEmitter.emit(
+          'progress',
+          `Packing data for ${caseId}`,
+          i,
+          caseIds.length
+        );
+        await putCaseData(caseId, zip, packOptions);
+      }
+      zip.generateNodeStream().pipe(downloadFileStream);
+      downloadFileStream.on('close', () => {
+        taskEmitter.emit('finish', `Exported ${caseIds.length} case(s).`);
+      });
+    } catch (err) {
+      apiLogger.error('Case export error');
+      apiLogger.error(err.message);
       taskEmitter.emit(
-        'progress',
-        `Packing data for ${caseId}`,
-        i,
-        caseIds.length
+        'error',
+        'An internal error occurred while processing the case data.'
       );
-      await putCaseData(caseId, zip);
     }
-    taskEmitter.emit('finish', `Exported ${caseIds.length} case(s).`);
-    zip.generateNodeStream().pipe(downloadFileStream);
   };
 
   return { packAsMhd };
 };
 
-createMhdPacker.dependencies = ['models', 'volumeProvider', 'blobStorage'];
+createMhdPacker.dependencies = [
+  'models',
+  'volumeProvider',
+  'blobStorage',
+  'apiLogger'
+];
 
 export default createMhdPacker;
 

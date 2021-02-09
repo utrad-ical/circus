@@ -4,6 +4,7 @@ import { EJSON } from 'bson';
 import checkFilter from '../../utils/checkFilter';
 import { RouteMiddleware, CircusContext } from '../../typings/middlewares';
 import makeNewCase from '../../case/makeNewCase';
+import { LabelPackType } from 'circus-api/src/case/createMhdPacker';
 
 const maxTagLength = 32;
 
@@ -236,12 +237,16 @@ export const handleExportAsMhd: RouteMiddleware = ({
   return async (ctx, next) => {
     const caseId = ctx.case.caseId;
     const userEmail = ctx.user.userEmail;
+    const labelPackType: LabelPackType =
+      ctx.params.label_pack_type === 'combined' ? 'combined' : 'isolated';
     const { emitter, downloadFileStream } = await taskManager.register(ctx, {
       name: 'Export case as MHD',
       userEmail,
       downloadFileType: 'application/zip'
     });
-    mhdPacker.packAsMhd(emitter, downloadFileStream!, [caseId]);
+    mhdPacker.packAsMhd(emitter, downloadFileStream!, [caseId], {
+      labelPackType
+    });
   };
 };
 

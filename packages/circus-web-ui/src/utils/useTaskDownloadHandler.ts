@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { useApi } from './api';
+import streamSaver from 'streamsaver';
 
 /**
  * Returns a new mouse event handler that triggers a download from a task.
@@ -10,16 +11,19 @@ const useTaskDownloadHandler = (taskId: string) => {
   const api = useApi();
 
   const cb = useCallback(async () => {
-    const blob = await api(`tasks/${taskId}/download`, {
-      responseType: 'blob'
+    const response = await fetch(
+      api.getBaseUrl() + `tasks/${taskId}/download`,
+      {
+        headers: { Authorization: `Bearer ${api.getToken()}` }
+      }
+    );
+    const size = Number(response.headers.get('content-length')) || undefined;
+    const cd = response.headers.get('content-deposition');
+    const fileName = cd?.match(/filename="(.+)"/)?.[1] ?? 'download';
+    const fileStream = streamSaver.createWriteStream(fileName, {
+      size
     });
-    const a = document.createElement('a');
-    document.body.appendChild(a);
-    const url = window.URL.createObjectURL(blob);
-    a.href = url;
-    a.download = 'export.zip';
-    a.click();
-    window.URL.revokeObjectURL(url);
+    response.body?.pipeTo(fileStream);
   }, [api, taskId]);
 
   return cb;

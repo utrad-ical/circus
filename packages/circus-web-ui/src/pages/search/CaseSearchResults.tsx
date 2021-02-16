@@ -1,3 +1,4 @@
+import CaseExportModal from 'components/CaseExportModal';
 import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
@@ -9,7 +10,7 @@ import SearchResultsView, {
 } from 'components/SearchResultsView';
 import { PhysicalTag, TagList } from 'components/Tag';
 import TimeDisplay from 'components/TimeDisplay';
-import React, { Fragment, useMemo } from 'react';
+import React, { Fragment, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { showMessage } from 'store/messages';
@@ -115,6 +116,7 @@ const CaseSearchResultsView: React.FC<{
   const { accessibleProjects } = useLoginUser()!;
   const api = useApi();
   const dispatch = useDispatch();
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const availableTags = useMemo(() => {
     const projectIds = Array.from(
@@ -167,6 +169,10 @@ const CaseSearchResultsView: React.FC<{
       )
     );
     dispatch(updateSearch(api, searchName, {}));
+  };
+
+  const handleExportMhd = () => {
+    setShowExportModal(true);
   };
 
   return (
@@ -240,6 +246,22 @@ const CaseSearchResultsView: React.FC<{
             </MenuItem>
           ))}
       </DropdownButton>
+      <DropdownButton
+        id="case-export-dropdown"
+        bsSize="sm"
+        disabled={selected.length === 0}
+        title={<Icon icon="glyphicon-option-horizontal" />}
+      >
+        <MenuItem eventKey="mhd" onClick={handleExportMhd}>
+          Export as MHD...
+        </MenuItem>
+      </DropdownButton>
+      {showExportModal && (
+        <CaseExportModal
+          caseIds={selected}
+          onClose={() => setShowExportModal(false)}
+        />
+      )}
       {selected.length > 0 && <> {selected.length} selected</>}
     </SearchResultsView>
   );

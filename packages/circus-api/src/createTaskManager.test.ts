@@ -33,7 +33,7 @@ afterAll(async () => {
   await fs.remove(downloadTestDir);
 });
 
-const newDummyCtx = () => ({ body: null } as any);
+const newDummyCtx = () => ({ body: null, set: jest.fn() } as any);
 
 describe('register', () => {
   test('without download file', async () => {
@@ -172,6 +172,7 @@ test('download', async () => {
   await fs.writeFile(path.join(downloadTestDir, taskId), 'test');
   await manager.download(ctx, taskId);
   expect(ctx.type).toBe('application/zip');
+  expect(ctx.set).toHaveBeenCalled();
   const string = await readFromStreamTillEnd(ctx.body);
   expect(string).toBe('test');
 });

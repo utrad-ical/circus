@@ -13,6 +13,7 @@ import { newSearch } from '../store/searches';
 import Task from 'types/Task';
 import useTaskDismisser from 'utils/useTaskDismisser';
 import { capitalize } from 'utils/util';
+import useTaskDownloadHandler from 'utils/useTaskDownloadHandler';
 
 const sortOptions = makeSortOptions({
   createdAt: 'task create time',
@@ -69,9 +70,16 @@ const columns: DataGridColumnDefinition<Task>[] = [
   {
     caption: 'Download',
     key: 'download',
-    renderer: ({ value }) => {
-      return value.status === 'finished' && value.downloadFileType ? (
-        <IconButton bsStyle="success" bsSize="sm" icon="glyphicon-download" />
+    renderer: function DownloadLink({ value }) {
+      const { status, taskId, downloadFileType } = value;
+      const handleClick = useTaskDownloadHandler(taskId);
+      return status === 'finished' && downloadFileType ? (
+        <IconButton
+          bsStyle="success"
+          bsSize="sm"
+          icon="glyphicon-download"
+          onClick={handleClick}
+        />
       ) : (
         <>-</>
       );

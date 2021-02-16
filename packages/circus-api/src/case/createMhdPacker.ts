@@ -131,6 +131,7 @@ const createMhdPacker: FunctionService<
         await putCaseData(caseId, zip, packOptions);
       }
       zip.generateNodeStream().pipe(downloadFileStream);
+      taskEmitter.emit('progress', 'Performing ZIP compression...');
       downloadFileStream.on('close', () => {
         taskEmitter.emit('finish', `Exported ${caseIds.length} case(s).`);
       });

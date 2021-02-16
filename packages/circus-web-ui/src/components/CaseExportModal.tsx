@@ -35,7 +35,10 @@ const CaseExportModal: React.FC<{
   }, []);
 
   const handleStartClick = async () => {
-    const res = await api(`/cases/${caseIds[0]}/export-mhd`);
+    const res = await api(`/cases/export-mhd`, {
+      method: 'post',
+      data: { caseIds }
+    });
     setCloseTitle('Dismiss');
     setTaskId(res.taskId);
   };

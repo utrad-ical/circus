@@ -23,6 +23,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import Series from 'types/Series';
 import { useApi } from 'utils/api';
+import useKeyboardShortcut from 'utils/useKeyboardShortcut';
 import caseStoreReducer, * as c from './caseStore';
 import {
   EditingDataUpdater,
@@ -267,6 +268,17 @@ const MenuBar: React.FC<{
   busy: boolean;
 }> = React.memo(props => {
   const { caseStore, onCommand, onRevisionSelect, busy } = props;
+
+  useKeyboardShortcut('Ctrl+Z', () => {
+    c.canUndo(caseStore) && onCommand('undo');
+  });
+
+  useKeyboardShortcut('Ctrl+Shift+Z', () => {
+    c.canRedo(caseStore) && onCommand('redo');
+  });
+
+  useKeyboardShortcut('Ctrl+S', () => onCommand('save'));
+
   return (
     <StyledMenuBarDiv>
       <div className="left">

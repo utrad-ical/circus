@@ -87,6 +87,7 @@ const ToolBar: React.FC<{
       showReferenceLine: !viewOptions.showReferenceLine
     });
   };
+  useKeyboardShortcut(';', handleToggleReferenceLine);
 
   const handleToggleScrollbar = (selection: ScrollbarOptions) => {
     onChangeViewOptions({
@@ -125,7 +126,7 @@ const ToolBar: React.FC<{
         icon="rs-pager"
         changeTool={onChangeTool}
         active={active}
-        shortcut="KeyP"
+        shortcut="P"
         disabled={disabled}
       />
       <ToolButton
@@ -133,7 +134,7 @@ const ToolBar: React.FC<{
         icon="rs-zoom"
         changeTool={onChangeTool}
         active={active}
-        shortcut="KeyZ"
+        shortcut="Z"
         disabled={disabled}
       >
         {Object.entries(instantZoomLevels).map(([label, level]) => (
@@ -147,7 +148,7 @@ const ToolBar: React.FC<{
         icon="rs-hand"
         changeTool={onChangeTool}
         active={active}
-        shortcut="KeyH"
+        shortcut="H"
         disabled={disabled}
       />
       <ToolButton
@@ -155,7 +156,7 @@ const ToolBar: React.FC<{
         icon="rs-window"
         changeTool={onChangeTool}
         active={active}
-        shortcut="KeyW"
+        shortcut="W"
         disabled={disabled}
       >
         {windowPresets.map((p: WindowPreset, i) => (
@@ -177,7 +178,7 @@ const ToolBar: React.FC<{
         icon="rs-brush"
         changeTool={onChangeTool}
         active={active}
-        shortcut="KeyB"
+        shortcut="B"
         disabled={!brushEnabled || disabled}
       />
       <ToolButton
@@ -185,7 +186,7 @@ const ToolBar: React.FC<{
         icon="rs-eraser"
         changeTool={onChangeTool}
         active={active}
-        shortcut="KeyE"
+        shortcut="E"
         disabled={!brushEnabled || disabled}
       />
       <ShrinkSelect
@@ -201,6 +202,7 @@ const ToolBar: React.FC<{
         icon="rs-bucket"
         changeTool={onChangeTool}
         active={active}
+        shortcut="Shift+B"
         disabled={!brushEnabled || disabled}
       />
       <ToolButton
@@ -208,7 +210,7 @@ const ToolBar: React.FC<{
         icon="rs-wand"
         changeTool={onChangeTool}
         active={active}
-        shortcut="keyM"
+        shortcut="M"
         disabled={!brushEnabled || !wandEnabled || disabled}
       />
       <ToolButton
@@ -216,6 +218,7 @@ const ToolBar: React.FC<{
         icon="rs-wand-eraser"
         changeTool={onChangeTool}
         active={active}
+        shortcut="Shift+M"
         disabled={!brushEnabled || !wandEnabled || disabled}
       />
       &thinsp;
@@ -407,7 +410,7 @@ const ToolButton: React.FC<{
     <Tooltip id="case-detail-toolbar-tooltip">
       {name[0].toUpperCase() +
         name.slice(1) +
-        (shortcut ? ' (' + shortcut[3] + ')' : '')}
+        (shortcut ? ' (' + shortcut + ')' : '')}
     </Tooltip>
   );
 

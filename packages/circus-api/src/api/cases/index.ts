@@ -230,21 +230,45 @@ export const handleSearchByMyListId: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handleExportAsMhd: RouteMiddleware = ({
+export const handlePostExportJob: RouteMiddleware = ({
   taskManager,
-  mhdPacker
+  mhdPacker,
+  models
 }) => {
   return async (ctx, next) => {
-    const caseId = ctx.case.caseId;
+    const caseIds: string[] = ctx.request.body.caseIds;
     const userEmail = ctx.user.userEmail;
     const labelPackType: LabelPackType =
       ctx.params.label_pack_type === 'combined' ? 'combined' : 'isolated';
+
+    // check read privileges
+    const cursor = models.clinicalCase.findAsCursor({
+      caseId: { $in: caseIds }
+    });
+    const pidSet = new Set<string>();
+    while (await cursor.hasNext()) {
+      const c = await cursor.next();
+      pidSet.add(c.projectId);
+    }
+    const projectIds = Array.from(pidSet.values());
+    const { accessibleProjects } = ctx.userPrivileges;
+    for (const projectId of projectIds) {
+      const project = accessibleProjects.find(p => p.projectId === projectId);
+      if (!project || project.roles.indexOf('read') < 0) {
+        ctx.throw(
+          status.UNAUTHORIZED,
+          'You do not have enough read privilege.'
+        );
+      }
+    }
+
+    const target = caseIds.length === 1 ? 'a case' : `${caseIds.length} cases`;
     const { emitter, downloadFileStream } = await taskManager.register(ctx, {
-      name: 'Export case as MHD',
+      name: `Export ${target} as MHD`,
       userEmail,
       downloadFileType: 'application/zip'
     });
-    mhdPacker.packAsMhd(emitter, downloadFileStream!, [caseId], {
+    mhdPacker.packAsMhd(emitter, downloadFileStream!, caseIds, {
       labelPackType
     });
   };

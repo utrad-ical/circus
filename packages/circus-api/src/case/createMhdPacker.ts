@@ -38,6 +38,73 @@ const createMhdPacker: FunctionService<
 > = async (opts, deps) => {
   const { models, volumeProvider, blobStorage, apiLogger } = deps;
 
+  const putLabelData = async ({
+    labelFileBaseName,
+    series,
+    dimension,
+    elementSpacing,
+    zip,
+    options
+  }: {
+    labelFileBaseName: string;
+    series: any;
+    dimension: Vector3D;
+    elementSpacing: Vector3D;
+    zip: JSZip;
+    options: PackOptions;
+  }) => {
+    let combinedVolume: RawData | undefined;
+    if (
+      options.labelPackType === 'combined' &&
+      series.labels.some((l: any) => l.type === 'voxel')
+    ) {
+      combinedVolume = new RawData(dimension, 'uint8');
+    }
+    for (let labelId = 0; labelId < series.labels.length; labelId++) {
+      const label = series.labels[labelId];
+      if (label.type !== 'voxel') continue;
+      const labelName = labelFileBaseName + `${pad(labelId)}`;
+      const hash = label.data.voxels;
+      if (!hash) continue; // empty voxels
+      const labelBuffer = await blobStorage.read(hash);
+      const labelVol = new RawData(label.data.size, 'binary');
+      labelVol.assign(labelBuffer.buffer);
+      if (options.labelPackType === 'combined') {
+        combinedVolume!.copy(
+          labelVol,
+          undefined,
+          label.data.origin,
+          (srcValue, destValue) => (srcValue > 0 ? labelId + 1 : destValue)
+        );
+      } else {
+        const vol = new RawData(dimension, 'uint8');
+        vol.copy(labelVol, undefined, label.data.origin);
+        zip.file(labelName + '.raw', vol.data);
+        zip.file(
+          labelName + '.mhd',
+          prepareMhdHeaderAsString(
+            'uint8',
+            dimension,
+            elementSpacing,
+            labelName + '.raw'
+          )
+        );
+      }
+    }
+    if (options.labelPackType === 'combined' && combinedVolume) {
+      zip.file(labelFileBaseName + '.raw', combinedVolume!.data);
+      zip.file(
+        labelFileBaseName + '.mhd',
+        prepareMhdHeaderAsString(
+          'uint8',
+          dimension,
+          elementSpacing,
+          labelFileBaseName + '.raw'
+        )
+      );
+    }
+  };
+
   /**
    * Inserts a single case data into a root zip foler or a subdirectory.
    */
@@ -80,35 +147,15 @@ const createMhdPacker: FunctionService<
           rawFileBaseName + '.raw'
         )
       );
-      for (let labelId = 0; labelId < series.labels.length; labelId++) {
-        const label = series.labels[labelId];
-        switch (label.type) {
-          case 'voxel': {
-            const labelFileBaseName = `${caseId}/vol${pad(volId)}-label${pad(
-              labelId
-            )}`;
-            const hash = label.data.voxels;
-            if (!hash) break; // empty voxels
-            const labelBuffer = await blobStorage.read(hash);
-            const labelVolume = createLabelVolume(
-              dimension,
-              label.data,
-              labelBuffer
-            );
-            zip.file(labelFileBaseName + '.raw', labelVolume);
-            zip.file(
-              labelFileBaseName + '.mhd',
-              prepareMhdHeaderAsString(
-                'uint8',
-                dimension,
-                elementSpacing,
-                labelFileBaseName + '.raw'
-              )
-            );
-            break;
-          }
-        }
-      }
+      const labelFileBaseName = `${caseId}/vol${pad(volId)}-label`;
+      await putLabelData({
+        labelFileBaseName,
+        series,
+        dimension,
+        elementSpacing,
+        zip,
+        options
+      });
     }
   };
 
@@ -131,7 +178,12 @@ const createMhdPacker: FunctionService<
         await putCaseData(caseId, zip, packOptions);
       }
       zip.generateNodeStream().pipe(downloadFileStream);
-      taskEmitter.emit('progress', 'Performing ZIP compression...');
+      taskEmitter.emit(
+        'progress',
+        'Performing ZIP compression...',
+        undefined,
+        undefined
+      );
       downloadFileStream.on('close', () => {
         taskEmitter.emit('finish', `Exported ${caseIds.length} case(s).`);
       });
@@ -162,21 +214,6 @@ export default createMhdPacker;
  * @param num A nonnegative integer
  */
 const pad = (num: number) => zeroPad(3, num);
-
-/**
- * Converts internal label format to (large) raw format
- */
-const createLabelVolume = (
-  dimension: Vector3D,
-  labelData: any,
-  labelBuffer: Buffer
-) => {
-  const vol = new RawData(dimension, 'uint8');
-  const labelVol = new RawData(labelData.size, 'binary');
-  labelVol.assign(labelBuffer.buffer);
-  vol.copy(labelVol, undefined, labelData.origin);
-  return vol.data;
-};
 
 const pixelFormatMap: { [format: string]: string } = {
   uint8: 'MET_UCHAR',

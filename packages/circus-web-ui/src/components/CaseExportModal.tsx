@@ -37,7 +37,7 @@ const CaseExportModal: React.FC<{
   const handleStartClick = async () => {
     const res = await api(`/cases/export-mhd`, {
       method: 'post',
-      data: { caseIds }
+      data: { caseIds, labelPackType: combinedMode ? 'combined' : 'isolated' }
     });
     setCloseTitle('Dismiss');
     setTaskId(res.taskId);
@@ -70,7 +70,7 @@ const CaseExportModal: React.FC<{
             now={
               taskProgress
                 ? taskProgress.status === 'processing'
-                  ? Math.max(1, taskProgress.finished ?? 0)
+                  ? Math.max(1, taskProgress.finished ?? 100)
                   : 100
                 : 0
             }

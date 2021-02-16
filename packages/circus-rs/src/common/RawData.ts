@@ -515,8 +515,14 @@ export default class RawData {
    * @param destOffset The point of this instance where
    *     the source is started to be copied.
    *     If unspecified, origin (0, 0, 0) is used.
+   * @param valueFunc Optional function to filter the source voxel value.
    */
-  public copy(src: RawData, srcBox?: Box, offset?: Vector3D): void {
+  public copy(
+    src: RawData,
+    srcBox?: Box,
+    offset?: Vector3D,
+    valueFunc?: (srcValue: number, destValue: number) => number
+  ): void {
     if (src === this) throw new TypeError('Cannot copy from self');
     if (!srcBox) srcBox = { origin: [0, 0, 0], size: src.getDimension() };
 
@@ -535,7 +541,12 @@ export default class RawData {
       for (let y = ymin; y < ymax; y++) {
         for (let x = xmin; x < xmax; x++) {
           // TODO: Optimize if src and this share the same pixel format
-          const val = src.getPixelAt(ox + x, oy + y, oz + z);
+          const val = valueFunc
+            ? valueFunc(
+                src.getPixelAt(ox + x, oy + y, oz + z),
+                this.getPixelAt(offset[0] + x, offset[1] + y, offset[2] + z)
+              )
+            : src.getPixelAt(ox + x, oy + y, oz + z);
           this.writePixelAt(val, offset[0] + x, offset[1] + y, offset[2] + z);
         }
       }

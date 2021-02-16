@@ -439,7 +439,7 @@ const RevisionEditor: React.FC<{
   const handleMagnify = useCallback(
     (magnitude: number) =>
       stateChanger(state => {
-        const section = rs.scaleSectionFromCenter(state.section, magnitude);
+        const section = rs.scaleSectionFromCenter(state.section, 1 / magnitude);
         return { ...state, section };
       }),
     [stateChanger]

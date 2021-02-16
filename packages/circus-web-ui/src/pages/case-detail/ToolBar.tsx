@@ -72,6 +72,14 @@ const ToolBar: React.FC<{
 
   const widthOptions = ['1', '3', '5', '7'];
   const wandModeOptions = { '3d': '3D', '2d': '2D' };
+  const instantZoomLevels: { [key: string]: number } = {
+    x8: 8,
+    x4: 4,
+    x2: 2,
+    'x1/2': 0.5,
+    'x1/4': 0.25,
+    'x1/8': 0.125
+  };
 
   const handleToggleReferenceLine = () => {
     onChangeViewOptions({
@@ -128,18 +136,11 @@ const ToolBar: React.FC<{
         shortcut="KeyZ"
         disabled={disabled}
       >
-        <MenuItem eventKey="x2" onClick={() => onMagnify(0.25)}>
-          x4
-        </MenuItem>
-        <MenuItem eventKey="x2" onClick={() => onMagnify(0.5)}>
-          x2
-        </MenuItem>
-        <MenuItem eventKey="x1/2" onClick={() => onMagnify(2)}>
-          x1/2
-        </MenuItem>
-        <MenuItem eventKey="x1/2" onClick={() => onMagnify(4)}>
-          x1/4
-        </MenuItem>
+        {Object.entries(instantZoomLevels).map(([label, level]) => (
+          <MenuItem key={label} onClick={() => onMagnify(level)}>
+            {label}
+          </MenuItem>
+        ))}
       </ToolButton>
       <ToolButton
         name="hand"

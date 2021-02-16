@@ -38,6 +38,8 @@ routes:
           type: array
           items:
             type: string
+        labelPackType:
+          enum: ['isolated', 'combined']
       required: ['caseIds']
   - verb: put
     path: /cases/:caseId/tags

@@ -236,10 +236,10 @@ export const handlePostExportJob: RouteMiddleware = ({
   models
 }) => {
   return async (ctx, next) => {
-    const caseIds: string[] = ctx.request.body.caseIds;
     const userEmail = ctx.user.userEmail;
+    const caseIds: string[] = ctx.request.body.caseIds;
     const labelPackType: LabelPackType =
-      ctx.params.label_pack_type === 'combined' ? 'combined' : 'isolated';
+      ctx.request.body.labelPackType === 'combined' ? 'combined' : 'isolated';
 
     // check read privileges
     const cursor = models.clinicalCase.findAsCursor({

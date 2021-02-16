@@ -8,6 +8,7 @@ import { useContext, createContext } from 'react';
 export interface ApiCaller {
   (command: string, options?: any, cancelToken?: CancelToken): Promise<any>;
   getToken: () => string;
+  getBaseUrl: () => string;
 }
 
 /**
@@ -46,6 +47,8 @@ const createApiCaller = (initialCredentials: any, apiServer: string) => {
     return formatCredentials(res.data);
   };
 
+  const baseURL = apiServer + 'api/';
+
   const api: ApiCaller = async (
     command: string,
     options = {},
@@ -74,7 +77,7 @@ const createApiCaller = (initialCredentials: any, apiServer: string) => {
       }
 
       const res = await axios({
-        baseURL: apiServer + 'api/',
+        baseURL,
         cached: false,
         withCredentials: true,
         ...params,
@@ -100,6 +103,7 @@ const createApiCaller = (initialCredentials: any, apiServer: string) => {
     }
   };
   api.getToken = () => credentials.accessToken;
+  api.getBaseUrl = () => baseURL;
   saveCredentialData(credentials);
   return api;
 };

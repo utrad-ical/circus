@@ -2,11 +2,14 @@ import { DicomFileRepository } from '@utrad-ical/circus-lib';
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
-import stream from 'stream';
+import { Writable } from 'stream';
 import { Models } from '../interface';
 import Command from './Command';
 import Storage from '../storage/Storage';
 import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
+import { MhdPacker } from '../case/createMhdPacker';
+import { EventEmitter } from 'events';
+import { TaskEventEmitter } from '../createTaskManager';
 
 export const help = () => {
   return (
@@ -38,12 +41,22 @@ export const options = () => {
   ];
 };
 
-const writeStreamToFile = (file: string, stream: stream.Readable) => {
-  return new Promise((resolve, reject) => {
-    const outStream = fs.createWriteStream(file);
-    stream.pipe(outStream);
-    outStream.on('finish', resolve);
-    outStream.on('error', reject);
+const waitForStream = (stream: Writable) => {
+  return new Promise<void>((resolve, reject) => {
+    const off = () => {
+      stream.off('close', handleClose);
+      stream.off('error', handleError);
+    };
+    const handleClose = () => {
+      off();
+      resolve();
+    };
+    const handleError = (err: Error) => {
+      off();
+      reject(err);
+    };
+    stream.on('close', handleClose);
+    stream.on('error', handleError);
   });
 };
 
@@ -52,7 +65,8 @@ export const command: Command<{
   dicomFileRepository: DicomFileRepository;
   blobStorage: Storage;
   volumeProvider: VolumeProvider;
-}> = async (opts, { models, blobStorage, volumeProvider }) => {
+  mhdPacker: MhdPacker;
+}> = async (opts, { models, blobStorage, volumeProvider, mhdPacker }) => {
   return async (options: any) => {
     const {
       out: outDir = path.join(process.cwd(), 'case-exports'),
@@ -68,8 +82,6 @@ export const command: Command<{
       throw new Error("Currently the type argument must be 'mhd'.");
     }
 
-    const { packAsMhd } = require('../case/packAsMhd');
-
     await fs.ensureDir(outDir);
     for (const caseId of caseIds) {
       try {
@@ -79,8 +91,12 @@ export const command: Command<{
           volumeProvider,
           blobStorage
         };
-        const stream = await packAsMhd(deps, caseId);
-        await writeStreamToFile(path.join(outDir, `${caseId}.zip`), stream);
+        const stream = fs.createWriteStream(path.join(outDir, `${caseId}.zip`));
+        const emitter: TaskEventEmitter = new EventEmitter();
+        emitter.on('progress', message => console.log(message));
+        emitter.on('error', message => console.log('Error:', message));
+        mhdPacker.packAsMhd(emitter, stream, [caseId]);
+        await waitForStream(stream);
         console.log(chalk.green('Exported '), caseId);
       } catch (err) {
         if (continueOnError) {
@@ -98,5 +114,6 @@ command.dependencies = [
   'models',
   'dicomFileRepository',
   'volumeProvider',
-  'blobStorage'
+  'blobStorage',
+  'mhdPacker'
 ];

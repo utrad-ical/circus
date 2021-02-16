@@ -9,6 +9,7 @@ import styled, { keyframes } from 'styled-components';
 import Task from 'types/Task';
 import { useApi } from 'utils/api';
 import useTaskDismisser from 'utils/useTaskDismisser';
+import useTaskDownloadHandler from 'utils/useTaskDownloadHandler';
 import { TaskProgress } from '../store/taskProgress';
 import Icon from './Icon';
 
@@ -108,6 +109,7 @@ const TaskDisplay: React.FC<{
 }> = props => {
   const { task, progress, onDismissClick } = props;
 
+  const handleDownloadClick = useTaskDownloadHandler(task.taskId);
   const status = progress?.status ?? task.status;
 
   const message =
@@ -126,7 +128,12 @@ const TaskDisplay: React.FC<{
           <div className="task-message">{message}</div>
         </div>
         {task.downloadFileType && task.status === 'finished' && (
-          <IconButton bsSize="sm" bsStyle="success" icon="glyphicon-download" />
+          <IconButton
+            bsSize="sm"
+            bsStyle="success"
+            icon="glyphicon-download"
+            onClick={handleDownloadClick}
+          />
         )}
         <IconButton
           title="Dismiss"

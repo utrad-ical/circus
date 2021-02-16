@@ -308,6 +308,10 @@ test('#copy', () => {
   expect(dest.getPixelAt(4, 4, 4)).toBe(27);
   expect(dest.getPixelAt(5, 4, 4)).toBe(0);
 
+  dest.fillAll(10);
+  dest.copy(src, undefined, undefined, (s, d) => s + d);
+  expect(dest.getPixelAt(3, 10, 7)).toBe(30);
+
   expect(() => dest.copy(dest)).toThrow(TypeError);
 });
 

@@ -27,6 +27,7 @@ import Storage from './storage/Storage';
 import { Deps } from './typings/middlewares';
 import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
 import { TaskManager } from './createTaskManager';
+import { MhdPacker } from './case/createMhdPacker';
 
 function handlerName(route: Route) {
   if (route.handler) return route.handler;
@@ -120,6 +121,7 @@ export const createApp: FunctionService<
     dicomFileRepository: DicomFileRepository;
     dicomImporter: DicomImporter;
     taskManager: TaskManager;
+    mhdPacker: MhdPacker;
   },
   CreateAppOptions
 > = async (
@@ -135,7 +137,8 @@ export const createApp: FunctionService<
     volumeProvider,
     dicomImporter,
     dicomFileRepository,
-    taskManager
+    taskManager,
+    mhdPacker
   }
 ) => {
   const {
@@ -162,7 +165,8 @@ export const createApp: FunctionService<
     volumeProvider,
     uploadFileSizeMaxBytes,
     dicomImageServerUrl,
-    taskManager
+    taskManager,
+    mhdPacker
   };
 
   const apiDir = path.resolve(__dirname, 'api/**/*.yaml');
@@ -221,7 +225,8 @@ createApp.dependencies = [
   'volumeProvider',
   'dicomFileRepository',
   'dicomImporter',
-  'taskManager'
+  'taskManager',
+  'mhdPacker'
 ];
 
 export default createApp;

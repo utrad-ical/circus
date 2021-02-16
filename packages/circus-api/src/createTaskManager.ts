@@ -4,8 +4,9 @@ import { EventEmitter } from 'events';
 import { Models } from './interface';
 import generateUniqueId from '../src/utils/generateUniqueId';
 import { Writable, PassThrough } from 'stream';
-import fs from 'fs';
+import fs from 'fs-extra';
 import _ from 'lodash';
+import mime from 'mime';
 import { CircusContext } from './typings/middlewares';
 
 export type TaskEventEmitter = StrictEventEmitter<EventEmitter, TaskEvents>;
@@ -243,6 +244,10 @@ const createTaskManager: FunctionService<
     const task = await models.task.findByIdOrFail(taskId);
     const fileName = downloadFileName(taskId);
     const stream = fs.createReadStream(fileName);
+    const stat = await fs.stat(fileName);
+    const ext = mime.getExtension(task.downloadFileType);
+    ctx.set('Content-Deposition', `attachment; filename="download.${ext}"`);
+    ctx.set('Content-Length', String(stat.size));
     ctx.type = task.downloadFileType;
     ctx.body = stream;
   };

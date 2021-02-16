@@ -208,6 +208,7 @@ const ToolBar: React.FC<{
         icon="rs-wand"
         changeTool={onChangeTool}
         active={active}
+        shortcut="keyM"
         disabled={!brushEnabled || !wandEnabled || disabled}
       />
       <ToolButton

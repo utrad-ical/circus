@@ -22,7 +22,7 @@ const StyledMenu = styled.div`
 `;
 
 const SeriesDetail: React.FC<{}> = props => {
-  const seriesUid = useParams<any>().uid as string;
+  const seriesUid = useParams<{ uid: string }>().uid;
   const [composition, setComposition] = useState<rs.Composition | null>(null);
   const loginUser = useLoginUser()!;
   const api = useApi();
@@ -94,6 +94,7 @@ const SeriesDetail: React.FC<{}> = props => {
       <Row>
         <Col lg={6}>
           <StyledImageViewer
+            id="series-detail"
             composition={composition}
             tool={pagerTool}
             initialTool={pagerTool}

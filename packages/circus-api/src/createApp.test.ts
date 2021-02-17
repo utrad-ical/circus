@@ -29,6 +29,8 @@ beforeAll(async () => {
       dicomImporter: null as any,
       rsSeriesRoutes: async () => {},
       volumeProvider: null as any, // dummy
+      taskManager: null as any, // dummy
+      mhdPacker: null as any, // dummy
       core: null as any // dummy
     }
   );

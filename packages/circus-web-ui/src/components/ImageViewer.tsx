@@ -59,6 +59,8 @@ export const createStateChanger = <T extends rs.ViewState = rs.ViewState>() => {
   return changer;
 };
 
+const noop = () => {};
+
 /**
  * Wraps CIRCUS RS Dicom Viewer.
  */
@@ -81,10 +83,10 @@ const ImageViewer: React.FC<{
     tool = defaultTool,
     id,
     initialStateSetter,
-    onCreateViewer = () => {},
-    onDestroyViewer = () => {},
-    onViewStateChange = () => {},
-    onMouseUp = () => {}
+    onCreateViewer = noop,
+    onDestroyViewer = noop,
+    onViewStateChange = noop,
+    onMouseUp = noop
   } = props;
 
   const [viewer, setViewer] = useState<rs.Viewer | null>(null);

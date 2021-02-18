@@ -182,6 +182,7 @@ const createTaskManager: FunctionService<
 
   const report = (ctx: CircusContext, userEmail: string) => {
     ctx.type = 'text/event-stream';
+    ctx.set('X-Accel-Buffering', 'no'); // Disables nginx buffering
     const stream = new PassThrough();
     ctx.body = stream;
     stream.write('\n'); // send first byte to ensure the stream is live
@@ -248,7 +249,6 @@ const createTaskManager: FunctionService<
     const ext = mime.getExtension(task.downloadFileType);
     ctx.set('Content-Deposition', `attachment; filename="download.${ext}"`);
     ctx.set('Content-Length', String(stat.size));
-    ctx.set('X-Accel-Buffering', 'no'); // Disables nginx buffering
     ctx.type = task.downloadFileType;
     ctx.body = stream;
   };

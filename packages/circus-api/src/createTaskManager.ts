@@ -248,6 +248,7 @@ const createTaskManager: FunctionService<
     const ext = mime.getExtension(task.downloadFileType);
     ctx.set('Content-Deposition', `attachment; filename="download.${ext}"`);
     ctx.set('Content-Length', String(stat.size));
+    ctx.set('X-Accel-Buffering', 'no'); // Disables nginx buffering
     ctx.type = task.downloadFileType;
     ctx.body = stream;
   };

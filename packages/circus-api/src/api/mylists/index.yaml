@@ -31,6 +31,13 @@ routes:
       required: ['myListId']
   - verb: put
     path: /mylists/:myListId/name
+    requestSchema:
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 64
+      required: ['name']
     handler: handleChangeName
     description: Renames the specified my list.
   - verb: delete

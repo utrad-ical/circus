@@ -38,7 +38,14 @@ describe('create new list', () => {
     expect(res.data.myListId).toHaveLength(26);
   });
 
-  test.skip('throw 400 when the list name is invalid', () => {});
+  test('throw 400 when the list name is invalid', async () => {
+    const res = await ax.bob.request({
+      url: 'api/mylists',
+      method: 'post',
+      data: { name: '' }
+    });
+    expect(res.status).toBe(400);
+  });
 });
 
 describe('put name', () => {
@@ -61,7 +68,36 @@ describe('put name', () => {
     expect(newList.name).toBe('new name');
   });
 
-  test.skip('throw 401 for my list the user does not own', () => {});
+  test('throw 404 for my list the user does not own', async () => {
+    const myListId = '01ex36f2n99kjaqvpfrerrsryp';
+    const res = await ax.bob.request({
+      url: `api/mylists/${myListId}/name`,
+      method: 'put',
+      data: { name: 'new name' }
+    });
+    expect(res.status).toBe(404);
+  });
+
+  test('throw 400 when the new list name is empty text', async () => {
+    const myListId = '01ewetw0chv8v5vxdtjdf6x9rk';
+    const res = await ax.bob.request({
+      url: `api/mylists/${myListId}/name`,
+      method: 'put',
+      data: { name: '' }
+    });
+    expect(res.status).toBe(400);
+  });
+
+  test('throw 400 when the new list name is too long', async () => {
+    const myListId = '01ewetw0chv8v5vxdtjdf6x9rk';
+    const name = 'a'.repeat(65);
+    const res = await ax.bob.request({
+      url: `api/mylists/${myListId}/name`,
+      method: 'put',
+      data: { name }
+    });
+    expect(res.status).toBe(400);
+  });
 
   test('throw 404 for nonexistent my list id', async () => {
     const myListId = 'dummyid';

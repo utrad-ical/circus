@@ -180,8 +180,10 @@ const LabelMenu: React.FC<{
       return;
     }
     const newLabel = createNewLabel(type, viewers[viewerId]);
-    updateCurrentLabels(labels => {
+    updateEditingData(editingData => {
+      const labels = editingData.revision.series[activeSeriesIndex].labels;
       labels.push(newLabel);
+      editingData.activeLabelIndex = labels.length - 1;
     });
   };
 

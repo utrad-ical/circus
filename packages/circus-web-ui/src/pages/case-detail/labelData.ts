@@ -7,7 +7,7 @@ import produce from 'immer';
 import { ApiCaller } from 'utils/api';
 import { sha1 } from 'utils/util';
 
-type InternalLabelDataIndex = {
+type InternalLabelDataMap = {
   voxel: InternalVoxelLabelData; // internal | external
   rectangle: PlaneFigureLabelData;
   ellipse: PlaneFigureLabelData;
@@ -17,7 +17,7 @@ type InternalLabelDataIndex = {
   ruler: RulerLabelData;
 };
 
-export type LabelType = keyof InternalLabelDataIndex;
+export type LabelType = keyof InternalLabelDataMap;
 
 export interface LabelAppearance {
   /**
@@ -73,24 +73,17 @@ type RulerAnnotationData = {
 };
 
 type TaggedLabelDataCollection = {
-  [K in keyof InternalLabelDataIndex]: {
+  [K in keyof InternalLabelDataMap]: {
     type: K;
-    data: InternalLabelDataIndex[K];
+    data: InternalLabelDataMap[K];
   };
 };
 
 export type TaggedLabelDataOf<
-  T extends keyof InternalLabelDataIndex
+  T extends keyof InternalLabelDataMap
 > = TaggedLabelDataCollection[T];
 
-type TaggedLabelData =
-  | TaggedLabelDataOf<'voxel'>
-  | TaggedLabelDataOf<'ellipse'>
-  | TaggedLabelDataOf<'rectangle'>
-  | TaggedLabelDataOf<'ellipsoid'>
-  | TaggedLabelDataOf<'cuboid'>
-  | TaggedLabelDataOf<'point'>
-  | TaggedLabelDataOf<'ruler'>;
+type TaggedLabelData = TaggedLabelDataCollection[keyof TaggedLabelDataCollection];
 
 /**
  * InternalLabel resresents one label data stored in browser memory.

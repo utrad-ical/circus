@@ -84,7 +84,7 @@ test('pack', async () => {
     'ElementType = MET_UCHAR',
     'ElementSpacing = 2 3 2.5',
     'ElementByteOrderMSB = False',
-    'ElementDataFile = my-case-id/vol000.raw'
+    'ElementDataFile = vol000.raw'
   ];
   lines.forEach(line => expect(mhd).toContain(line));
 });

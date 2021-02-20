@@ -9,6 +9,7 @@ import { FunctionService, Logger } from '@utrad-ical/circus-lib';
 import { VolumeProvider } from 'circus-rs/src/server/helper/createVolumeProvider';
 import { Models } from '../interface';
 import Storage from '../storage/Storage';
+import path from 'path';
 
 export interface MhdPacker {
   packAsMhd: (
@@ -86,7 +87,7 @@ const createMhdPacker: FunctionService<
             'uint8',
             dimension,
             elementSpacing,
-            labelName + '.raw'
+            path.basename(labelName + '.raw')
           )
         );
       }
@@ -99,7 +100,7 @@ const createMhdPacker: FunctionService<
           'uint8',
           dimension,
           elementSpacing,
-          labelFileBaseName + '.raw'
+          path.basename(labelFileBaseName + '.raw')
         )
       );
     }
@@ -144,7 +145,7 @@ const createMhdPacker: FunctionService<
           volume.getPixelFormat(),
           dimension,
           elementSpacing,
-          rawFileBaseName + '.raw'
+          path.basename(rawFileBaseName + '.raw')
         )
       );
       const labelFileBaseName = `${caseId}/vol${pad(volId)}-label`;
@@ -235,7 +236,7 @@ const prepareMhdHeaderAsString = (
         .join('\n') + '\n'
     );
   };
-  const obj = {
+  const obj: { [key: string]: string | number } = {
     ObjectType: 'Image',
     NDims: 3,
     DimSize: dimSize.join(' '),
@@ -243,7 +244,7 @@ const prepareMhdHeaderAsString = (
     ElementSpacing: elementSpacing.join(' '),
     ElementByteOrderMSB: 'False',
     ElementDataFile: elementDataFile
-  } as { [key: string]: string | number };
+  };
   return stringifyObjet(obj);
 };
 

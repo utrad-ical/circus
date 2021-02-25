@@ -50,3 +50,13 @@
   userId: carol@example.com
   permanentTokenId: null
   permanentTokenDescription: null
+- accessToken: 98uijkgfhgty43gccccf54rfdvupiazmvr3nwcko
+  accessTokenExpiresAt:
+    $date: 4102412399000
+  refreshToken: nhy6det4ocv3640reup07v437msvbyny04vbntef
+  refreshTokenExpiresAt:
+    $date: 4102412399000
+  clientId: CIRCUS Front UI
+  userId: dave@example.com
+  permanentTokenId: null
+  permanentTokenDescription: null

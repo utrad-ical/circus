@@ -82,3 +82,31 @@
       resourceType: clinicalCases
       name: Carol's list
       createdAt: { $date: 1405266782123 }
+- userEmail: dave@example.com
+  loginId: dave
+  # password is 'daveSecret'
+  password: '$2y$10$gO2IrI9gwYm5Ygu/MLTCHebT7xNEYhhwK1KmGCk5qMIImhLVj47Ei'
+  description: Dave
+  lastLoginTime: { $date: 1405266782000 }
+  lastLoginIp: '0.0.0.0'
+  preferences:
+    theme: mode_white
+    personalInfoView: true
+    seriesSearchPresets: []
+    caseSearchPresets: []
+    pluginJobSearchPresets: []
+  loginEnabled: true
+  groups: [1, 4] # admin & power user 2
+  myLists:
+    - myListId: 01ez9knaakz9tgd2hpyceagj11
+      resourceType: series
+      name: Dave's series list
+      createdAt: { $date: 1405266782123 }
+    - myListId: 01ezab6xqfac7hvm5s09yw1g1j
+      resourceType: clinicalCases
+      name: Dave's case list
+      createdAt: { $date: 1405266782123 }
+    - myListId: 01ezahm939cbyfk73g3jhw1d0b
+      resourceType: pluginJobs
+      name: Dave's plugin job list
+      createdAt: { $date: 1405266782123 }

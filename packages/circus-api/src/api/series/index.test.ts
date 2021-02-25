@@ -4,6 +4,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import FormData from 'form-data';
 import delay from '../../utils/delay';
+import { setUpMongoFixture } from '../../../test/util-mongo';
 
 let apiTest: ApiTest, ax: typeof apiTest.axiosInstances;
 beforeAll(async () => {
@@ -156,7 +157,11 @@ describe('Delete file', () => {
 describe('search by my list', () => {
   const myListId = '01ez9knaakz9tgd2hpyceagj11'; // Dave's
 
-  test('search', async () => {
+  beforeEach(async () => {
+    await setUpMongoFixture(apiTest.db, ['users']);
+  });
+
+  test('search succeeds', async () => {
     const res = await ax.dave.request({
       url: `api/series/list/${myListId}`,
       method: 'get'
@@ -167,13 +172,12 @@ describe('search by my list', () => {
   });
 
   test('should not return patient info when personalInfoView = false', async () => {
-    apiTest.db
+    await apiTest.db
       .collection('users')
       .updateOne(
         { userEmail: 'dave@example.com' },
         { $set: { 'preferences.personalInfoView': false } }
       );
-
     const res = await ax.dave.request({
       url: `api/series/list/${myListId}`,
       method: 'get'
@@ -181,37 +185,6 @@ describe('search by my list', () => {
     expect(res.status).toBe(200);
     expect(res.data.items).toHaveLength(1);
     expect(res.data.items[0].patientInfo).toBe(undefined);
-
-    apiTest.db
-      .collection('users')
-      .updateOne(
-        { userEmail: 'dave@example.com' },
-        { $set: { 'preferences.personalInfoView': true } }
-      );
-  });
-
-  test('should not return patient info when personalInfoView = false', async () => {
-    apiTest.db
-      .collection('users')
-      .updateOne(
-        { userEmail: 'dave@example.com' },
-        { $set: { 'preferences.personalInfoView': false } }
-      );
-
-    const res = await ax.dave.request({
-      url: `api/series/list/${myListId}`,
-      method: 'get'
-    });
-    expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(1);
-    expect(res.data.items[0].patientInfo).toBe(undefined);
-
-    apiTest.db
-      .collection('users')
-      .updateOne(
-        { userEmail: 'dave@example.com' },
-        { $set: { 'preferences.personalInfoView': true } }
-      );
   });
 
   test('can not search when use nonexistent myListId in myList', async () => {
@@ -224,23 +197,15 @@ describe('search by my list', () => {
   });
 
   test('should not return results if domain check fails', async () => {
-    apiTest.db
+    await apiTest.db
       .collection('users')
       .updateOne({ userEmail: 'dave@example.com' }, { $set: { groups: [] } });
-
     const res = await ax.dave.request({
       url: `api/series/list/${myListId}`,
       method: 'get'
     });
     expect(res.status).toBe(200);
     expect(res.data.items).toHaveLength(0);
-
-    apiTest.db
-      .collection('users')
-      .updateOne(
-        { userEmail: 'dave@example.com' },
-        { $set: { groups: [1, 4] } }
-      );
   });
 
   test('should throw 400 for non-series mylist type', async () => {

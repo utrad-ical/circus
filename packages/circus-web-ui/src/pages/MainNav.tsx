@@ -161,9 +161,8 @@ const StyledNav = styled.nav`
           &.sub {
             /* sub-sub menu indent */
             a {
-              padding-left: 20px;
-              height: 30px;
-              line-height: 30px;
+              padding: 2px 0 2px 20px;
+              line-height: 25px;
             }
           }
         }

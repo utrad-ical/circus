@@ -14,11 +14,11 @@ beforeEach(async () => {
 test('delete only non-permanent tokens', async () => {
   const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
   await commandFunc({});
-  expect(spy).toBeCalledWith('Deleted 4 access token(s).');
+  expect(spy).toBeCalledWith('Deleted 5 access token(s).');
 });
 
 test('delete all tokens including permanent ones', async () => {
   const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
   await commandFunc({ all: true });
-  expect(spy).toBeCalledWith('Deleted 4 access token(s).');
+  expect(spy).toBeCalledWith('Deleted 5 access token(s).');
 });

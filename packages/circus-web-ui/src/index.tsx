@@ -130,13 +130,15 @@ const TheApp: React.FC<{}> = () => {
 
   useEffect(() => {
     // Handles history change
-    browserHistory.listen(() => {
+    browserHistory.listen(location => {
       // Hide message boxes which should not persist across page changes
       store.dispatch(dismissMessageOnPageChange());
       // Load user information again to check login status
-      manager && manager.refreshUserInfo(false);
+      if (location.pathname !== '/') {
+        manager?.refreshUserInfo(false);
+      }
     });
-  });
+  }, [manager]);
 
   if (!manager) return null;
 

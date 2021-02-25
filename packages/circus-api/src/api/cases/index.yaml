@@ -40,6 +40,8 @@ routes:
             type: string
         labelPackType:
           enum: ['isolated', 'combined']
+        mhdLineEnding:
+          enum: ['lf', 'crlf']
       required: ['caseIds']
   - verb: put
     path: /cases/:caseId/tags

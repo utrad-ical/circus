@@ -4,7 +4,10 @@ import { EJSON } from 'bson';
 import checkFilter from '../../utils/checkFilter';
 import { RouteMiddleware, CircusContext } from '../../typings/middlewares';
 import makeNewCase from '../../case/makeNewCase';
-import { LabelPackType } from 'circus-api/src/case/createMhdPacker';
+import {
+  LabelPackType,
+  LineEndingType
+} from 'circus-api/src/case/createMhdPacker';
 
 const maxTagLength = 32;
 
@@ -218,6 +221,8 @@ export const handlePostExportJob: RouteMiddleware = ({
     const caseIds: string[] = ctx.request.body.caseIds;
     const labelPackType: LabelPackType =
       ctx.request.body.labelPackType === 'combined' ? 'combined' : 'isolated';
+    const mhdLineEnding: LineEndingType =
+      ctx.request.body.mhdLineEnding === 'crlf' ? 'crlf' : 'lf';
 
     // check read privileges
     const cursor = models.clinicalCase.findAsCursor({
@@ -247,7 +252,8 @@ export const handlePostExportJob: RouteMiddleware = ({
       downloadFileType: 'application/zip'
     });
     mhdPacker.packAsMhd(emitter, downloadFileStream!, caseIds, {
-      labelPackType
+      labelPackType,
+      mhdLineEnding
     });
   };
 };

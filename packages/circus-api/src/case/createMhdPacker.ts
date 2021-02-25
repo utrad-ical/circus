@@ -21,12 +21,17 @@ export interface MhdPacker {
 }
 
 export type LabelPackType = 'isolated' | 'combined';
+export type LineEndingType = 'lf' | 'crlf';
 
 export interface PackOptions {
   labelPackType: LabelPackType;
+  mhdLineEnding: LineEndingType;
 }
 
-const defaultLabelPackOptions: PackOptions = { labelPackType: 'isolated' };
+const defaultLabelPackOptions: PackOptions = {
+  labelPackType: 'isolated',
+  mhdLineEnding: 'lf'
+};
 
 const createMhdPacker: FunctionService<
   MhdPacker,
@@ -87,7 +92,8 @@ const createMhdPacker: FunctionService<
             'uint8',
             dimension,
             elementSpacing,
-            path.basename(labelName + '.raw')
+            path.basename(labelName + '.raw'),
+            options.mhdLineEnding
           )
         );
       }
@@ -100,7 +106,8 @@ const createMhdPacker: FunctionService<
           'uint8',
           dimension,
           elementSpacing,
-          path.basename(labelFileBaseName + '.raw')
+          path.basename(labelFileBaseName + '.raw'),
+          options.mhdLineEnding
         )
       );
     }
@@ -145,7 +152,8 @@ const createMhdPacker: FunctionService<
           volume.getPixelFormat(),
           dimension,
           elementSpacing,
-          path.basename(rawFileBaseName + '.raw')
+          path.basename(rawFileBaseName + '.raw'),
+          options.mhdLineEnding
         )
       );
       const labelFileBaseName = `${caseId}/vol${pad(volId)}-label`;
@@ -227,13 +235,15 @@ const prepareMhdHeaderAsString = (
   pixelFormat: PixelFormat,
   dimSize: Vector3D,
   elementSpacing: Vector3D,
-  elementDataFile: string
+  elementDataFile: string,
+  lineEnding: LineEndingType
 ) => {
   const stringifyObjet = (obj: { [key: string]: string | number }) => {
+    const br = lineEnding === 'crlf' ? '\r\n' : '\n';
     return (
       Object.keys(obj)
         .map(k => `${k} = ${obj[k]}`)
-        .join('\n') + '\n'
+        .join(br) + br
     );
   };
   const obj: { [key: string]: string | number } = {

@@ -7,6 +7,14 @@ import classnames from 'classnames';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import useTaskDownloadHandler from 'utils/useTaskDownloadHandler';
 import Icon from './Icon';
+import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import styled from 'styled-components';
+
+const labelPackTypeOptions = {
+  isolated: 'Isolated (one raw file per label)',
+  combined: 'Combined'
+};
+const mhdLineEndingOptions = { lf: 'LF', crlf: 'CR + LF (Windows)' };
 
 const CaseExportModal: React.FC<{
   caseIds: string[];
@@ -14,7 +22,10 @@ const CaseExportModal: React.FC<{
 }> = props => {
   const { caseIds, onClose } = props;
   const [closeTitle, setCloseTitle] = useState('Cancel');
-  const [combinedMode, setCombinedMode] = useState(false);
+  const [labelPackType, setLabelPackType] = useState<'combined' | 'isolated'>(
+    'isolated'
+  );
+  const [mhdLineEnding, setMhdLineEnding] = useState('lf');
   const [taskId, setTaskId] = useState<string | null>(null);
   const api = useApi();
   const taskProgress = useSelector(state =>
@@ -37,7 +48,7 @@ const CaseExportModal: React.FC<{
   const handleStartClick = async () => {
     const res = await api(`/cases/export-mhd`, {
       method: 'post',
-      data: { caseIds, labelPackType: combinedMode ? 'combined' : 'isolated' }
+      data: { caseIds, labelPackType, mhdLineEnding }
     });
     setCloseTitle('Dismiss');
     setTaskId(res.taskId);
@@ -53,17 +64,24 @@ const CaseExportModal: React.FC<{
       <Modal.Header>
         <Modal.Title>Export {caption}</Modal.Title>
       </Modal.Header>
-      <Modal.Body>
-        <label>
-          <input
-            type="checkbox"
-            onChange={() => setCombinedMode(x => !x)}
-            disabled={!!taskId}
-            checked={combinedMode}
-          />{' '}
-          Combine labels
-        </label>
-        <div>
+      <StyledModalBody>
+        <div className="row">
+          Voxel labels:{' '}
+          <ShrinkSelect
+            options={labelPackTypeOptions}
+            value={labelPackType}
+            onChange={setLabelPackType}
+          />
+        </div>
+        <div className="row">
+          MHD file line endings:{' '}
+          <ShrinkSelect
+            options={mhdLineEndingOptions}
+            value={mhdLineEnding}
+            onChange={setMhdLineEnding}
+          />
+        </div>
+        <div className="row">
           <ProgressBar
             active={taskProgress?.status === 'processing'}
             bsStyle={taskProgress?.status === 'error' ? 'danger' : 'success'}
@@ -78,7 +96,7 @@ const CaseExportModal: React.FC<{
           />
         </div>
         <div
-          className={classnames('message', {
+          className={classnames('message', 'row', {
             'text-mute': !taskProgress,
             'text-danger': taskProgress?.status === 'error',
             'text-success': taskProgress?.status === 'finished'
@@ -86,7 +104,7 @@ const CaseExportModal: React.FC<{
         >
           {taskProgress?.message ?? 'Not started'}
         </div>
-      </Modal.Body>
+      </StyledModalBody>
       <Modal.Footer>
         <Button bsStyle="default" onClick={onClose}>
           {closeTitle}
@@ -113,5 +131,11 @@ const CaseExportModal: React.FC<{
 
   return createPortal(dialog, modalRoot.current);
 };
+
+const StyledModalBody = styled(Modal.Body)`
+  .row {
+    margin: 8px 0;
+  }
+`;
 
 export default CaseExportModal;

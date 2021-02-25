@@ -96,7 +96,7 @@ const fetchEventSource = async function* (url: string, options: Options = {}) {
         yield event;
       }
     } catch (err) {
-      console.error(err);
+      // ignore all errors (including abort error)
     }
     if (signal?.aborted) return;
     await delay(retryWait);

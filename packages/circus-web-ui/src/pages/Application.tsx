@@ -11,13 +11,14 @@ import { taskUpdate, taskFinish, taskError } from '../store/taskProgress';
 
 const useTaskProgress = () => {
   const api = useApi();
-  const token = api.getToken();
   const dispatch = useDispatch();
   // Listens to the SSE and updates the redux store
   // during the lifecycle of this component.
+  const token = api?.getToken();
   useEffect(() => {
     const abortController = new AbortController();
     const load = async () => {
+      if (!token) return;
       const generator = fetchEventSource('/api/tasks/report', {
         headers: { Authorization: `Bearer ${token}` },
         signal: abortController.signal

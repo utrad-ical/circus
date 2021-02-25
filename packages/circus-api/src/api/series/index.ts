@@ -3,7 +3,7 @@ import status from 'http-status';
 import { CircusContext, RouteMiddleware } from '../../typings/middlewares';
 import checkFilter from '../../utils/checkFilter';
 import { fileOrZipIterator } from '../../utils/directoryIterator';
-import performSearch from '../performSearch';
+import { performAggregationSearch } from '../performSearch';
 
 const maskPatientInfo = (ctx: CircusContext) => {
   return (series: any) => {
@@ -116,13 +116,58 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
     };
     const filter = { $and: [customFilter!, domainFilter] };
 
+    const myListId = ctx.params.myListId;
+    const user = ctx.user;
+
+    if (myListId) {
+      const myList = user.myLists.find(
+        (list: any) => myListId === list.myListId
+      );
+      if (!myList) ctx.throw(status.NOT_FOUND, 'This my list does not exist');
+
+      if (myList.resourceType !== 'series')
+        ctx.throw(status.BAD_REQUEST, 'This my list is not for series');
+    }
+
+    const searchByMyListStage: object[] = [
+      { $match: { myListId } },
+      { $unwind: { path: '$items' } },
+      {
+        $lookup: {
+          from: 'series',
+          localField: 'items.resourceId',
+          foreignField: 'seriesUid',
+          as: 'seriesDetail'
+        }
+      },
+      {
+        $replaceWith: {
+          $mergeObjects: [
+            { $arrayElemAt: ['$seriesDetail', 0] },
+            { addedToListAt: '$items.createdAt' }
+          ]
+        }
+      }
+    ];
+
+    const startModel = myListId ? models.myList : models.series;
+    const lookupStages = myListId ? searchByMyListStage : [];
+    const defaultSort = myListId ? { addedToListAt: -1 } : { createdAt: -1 };
+
     // Removes patient info according to the preference
     const transform = maskPatientInfo(ctx);
 
-    await performSearch(models.series, filter, ctx, {
-      transform,
-      defaultSort: { createdAt: -1 }
-    });
+    await performAggregationSearch(
+      startModel,
+      filter,
+      ctx,
+      lookupStages,
+      [{ $project: { _id: false, addedToListAt: false } }],
+      {
+        transform,
+        defaultSort
+      }
+    );
   };
 };
 

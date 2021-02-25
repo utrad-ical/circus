@@ -13,6 +13,20 @@
     - resourceId: ankutrdbn53780cmm3489yxj01cmrm0cregtjcmveuhbi987gdhbtrdc780yn3er
       createdAt: { $date: '2021-01-01T09:01:00.000Z' }
 - myListId: 01ex36wt9c94s93j0rmk98nsj0
-  items: []
+  items:
+    - resourceId: 111.222.333.444.888
+      createdAt: { $date: '2021-02-01T09:00:00.000Z' }
 - myListId: 01ex36f2n99kjaqvpfrerrsryp
   items: []
+- myListId: 01ez9knaakz9tgd2hpyceagj11
+  items:
+    - resourceId: 111.222.333.444.888
+      createdAt: { $date: '2021-02-01T09:00:00.000Z' }
+- myListId: 01ezab6xqfac7hvm5s09yw1g1j
+  items:
+    - resourceId: gfdrjivu4w8p57nv95p7n485n3p891ygy6543wedfuyt67oiulkjhtrw312wergr
+      createdAt: { $date: '2021-01-01T09:00:00.000Z' }
+- myListId: 01ezahm939cbyfk73g3jhw1d0b
+  items:
+    - resourceId: 01dxgwv3k0medrvhdag4mpw9wa
+      createdAt: { $date: '2021-01-01T09:00:00.000Z' }

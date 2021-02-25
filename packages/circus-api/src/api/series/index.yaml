@@ -9,6 +9,11 @@ routes:
     handler: handleSearch
     description: Retrieves the list of DICOM series.
     responseSchema: series|searchResult
+  - verb: get
+    path: /series/list/:myListId
+    handler: handleSearch
+    description: Performs search based on a my list ID.
+    responseSchema: series|searchResult
   - verb: post
     path: /series/domain/:domain
     expectedContentType: multipart/form-data

@@ -132,89 +132,67 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
       $and: [customFilter!, accessibleProjectFilter /* domainFilter */]
     };
 
-    await performAggregationSearch(
-      models.clinicalCase,
-      filter,
-      ctx,
-      [
-        {
-          $lookup: {
-            from: 'series',
-            localField: 'revisions.series.seriesUid',
-            foreignField: 'seriesUid',
-            as: 'seriesDetail'
-          }
-        },
-        { $unwind: { path: '$seriesDetail', includeArrayIndex: 'volId' } },
-        { $match: { volId: 0 } },
-        { $addFields: { patientInfo: '$seriesDetail.patientInfo' } }
-      ],
-      [
-        {
-          $project: {
-            _id: false,
-            revisions: false,
-            seriesDetail: false,
-            volId: false
-          }
-        }
-      ],
-      {
-        defaultSort: { createdAt: -1 },
-        transform: maskPatientInfo(ctx)
-      }
-    );
-  };
-};
-
-export const handleSearchByMyListId: RouteMiddleware = ({ models }) => {
-  return async (ctx, next) => {
     const myListId = ctx.params.myListId;
-    const filter = {};
     const user = ctx.user;
 
-    const myList = user.myLists.find((list: any) => myListId === list.myListId);
-    if (!myList) ctx.throw(status.NOT_FOUND, 'This my list does not exist');
+    if (myListId) {
+      const myList = user.myLists.find(
+        (list: any) => myListId === list.myListId
+      );
+      if (!myList) ctx.throw(status.NOT_FOUND, 'This my list does not exist');
 
-    if (myList.resourceType !== 'clinicalCases')
-      ctx.throw(status.BAD_REQUEST, 'This my list is not for cases');
+      if (myList.resourceType !== 'clinicalCases')
+        ctx.throw(status.BAD_REQUEST, 'This my list is not for cases');
+    }
+
+    const baseStage: object[] = [
+      {
+        $lookup: {
+          from: 'series',
+          localField: 'revisions.series.seriesUid',
+          foreignField: 'seriesUid',
+          as: 'seriesDetail'
+        }
+      },
+      { $unwind: { path: '$seriesDetail', includeArrayIndex: 'volId' } },
+      { $match: { volId: 0 } },
+      { $addFields: { patientInfo: '$seriesDetail.patientInfo' } }
+    ];
+
+    const searchByMyListStage: object[] = [
+      { $match: { myListId } },
+      { $unwind: { path: '$items' } },
+      {
+        $lookup: {
+          from: 'clinicalCases',
+          localField: 'items.resourceId',
+          foreignField: 'caseId',
+          as: 'caseDetail'
+        }
+      },
+      {
+        $replaceWith: {
+          $mergeObjects: [
+            { $arrayElemAt: ['$caseDetail', 0] },
+            { addedToListAt: '$items.createdAt' }
+          ]
+        }
+      }
+    ];
+
+    const lookupStages = myListId
+      ? [...searchByMyListStage, ...baseStage]
+      : baseStage;
+    const startModel = myListId ? models.myList : models.clinicalCase;
+
+    const defaultSort = myListId ? { addedToListAt: -1 } : { createdAt: -1 };
 
     await performAggregationSearch(
-      models.myList,
+      startModel,
       filter,
       ctx,
+      lookupStages,
       [
-        { $match: { myListId } },
-        { $unwind: { path: '$items' } },
-        {
-          $lookup: {
-            from: 'clinicalCases',
-            localField: 'items.resourceId',
-            foreignField: 'caseId',
-            as: 'caseDetail'
-          }
-        },
-        {
-          $replaceWith: {
-            $mergeObjects: [
-              { $arrayElemAt: ['$caseDetail', 0] },
-              { addedToListAt: '$items.createdAt' }
-            ]
-          }
-        }
-      ],
-      [
-        {
-          $lookup: {
-            from: 'series',
-            localField: 'revisions.series.seriesUid',
-            foreignField: 'seriesUid',
-            as: 'seriesDetail'
-          }
-        },
-        { $unwind: { path: '$seriesDetail', includeArrayIndex: 'volId' } },
-        { $match: { volId: 0 } },
-        { $addFields: { patientInfo: '$seriesDetail.patientInfo' } },
         {
           $project: {
             _id: false,
@@ -225,7 +203,7 @@ export const handleSearchByMyListId: RouteMiddleware = ({ models }) => {
           }
         }
       ],
-      { defaultSort: { itemCreatedAt: -1 } }
+      { defaultSort, transform: maskPatientInfo(ctx) }
     );
   };
 };

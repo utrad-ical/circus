@@ -37,7 +37,7 @@ export const handlePost: RouteMiddleware = ({ models }) => {
     const myListId = generateUniqueId();
     const items: MyListItem[] = [];
     const userEmail = ctx.user.userEmail;
-    const name = ctx.request.body.name;
+    const { name, resourceType } = ctx.request.body;
 
     await models.myList.insert({
       myListId,
@@ -46,7 +46,7 @@ export const handlePost: RouteMiddleware = ({ models }) => {
 
     const myLists = [
       ...ctx.user.myLists,
-      { myListId, resourceType: 'clinicalCases', name, createdAt: new Date() }
+      { myListId, resourceType, name, createdAt: new Date() }
     ];
     await models.user.modifyOne(userEmail, { myLists });
 

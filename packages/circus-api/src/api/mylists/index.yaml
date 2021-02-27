@@ -23,7 +23,12 @@ routes:
           type: string
           minLength: 1
           maxLength: 64
-      required: ['name']
+        resourceType:
+          enum:
+            - series
+            - clinicalCases
+            - pluginJobs
+      required: ['name', 'resourceType']
     responseSchema:
       properties:
         myListId:

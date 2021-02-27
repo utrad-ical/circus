@@ -1,7 +1,10 @@
 import MultiRange from 'multi-integer-range';
 import { Models } from './interface';
 import { SeriesEntry } from './typings/circus';
-import { isValidPartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import {
+  isValidPartialVolumeDescriptor,
+  partialVolumeDescriptorToArray
+} from '@utrad-ical/circus-lib';
 
 interface ProjectPrivilege {
   projectId: string;
@@ -93,19 +96,14 @@ export const fetchAccessibleSeries = async (
           JSON.stringify(partialVolumeDescriptor)
       );
     }
-    const { start, end, delta } = partialVolumeDescriptor;
-    if (start != end) {
-      if (delta === 0) throwError(400, 'Specified range is invalid.');
-      const partialImages = [];
-      for (let i = start; i <= end; i += delta) {
-        partialImages.push(i);
-      }
-      if (
-        partialImages.length === 0 ||
-        !new MultiRange(item.images).has(partialImages)
-      ) {
-        throwError(400, 'Specified range is invalid.');
-      }
+    const partialImages = partialVolumeDescriptorToArray(
+      partialVolumeDescriptor
+    );
+    if (
+      partialImages.length === 0 ||
+      !new MultiRange(item.images).has(partialImages)
+    ) {
+      throwError(400, 'Specified range is invalid.');
     }
     seriesData.push({ ...item, partialVolumeDescriptor });
     if (userPrivileges.domains.indexOf(item.domain) < 0) {

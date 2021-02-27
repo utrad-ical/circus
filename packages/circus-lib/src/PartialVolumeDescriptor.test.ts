@@ -1,7 +1,8 @@
 import PartialVolumeDescriptor, {
   describePartialVolumeDescriptor,
   isValidPartialVolumeDescriptor,
-  rangeHasPartialVolume
+  rangeHasPartialVolume,
+  partialVolumeDescriptorToArray
 } from './PartialVolumeDescriptor';
 import { multirange } from 'multi-integer-range';
 
@@ -71,4 +72,17 @@ describe('rangeHasPartialVolume', () => {
       })
     ).toThrow('Invalid');
   });
+});
+
+describe('partialVolumeDescriptorToArray', () => {
+  test.each([
+    [1, 5, 2, [1, 3, 5]],
+    [5, 1, -2, [5, 3, 1]]
+  ])(
+    'partialVolumeDescriptorToArray (%d, %d, %d)',
+    (start, end, delta, expected) => {
+      const pvd = { start, end, delta };
+      expect(partialVolumeDescriptorToArray(pvd)).toEqual(expected);
+    }
+  );
 });

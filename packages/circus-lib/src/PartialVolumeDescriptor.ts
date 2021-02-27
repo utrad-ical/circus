@@ -81,3 +81,18 @@ export const rangeHasPartialVolume = (
   }
   return false;
 };
+
+export const partialVolumeDescriptorToArray = (
+  descriptor: PartialVolumeDescriptor
+) => {
+  if (!isValidPartialVolumeDescriptor(descriptor))
+    throw new Error('Invalid partial volume descriptor');
+  const { start, end, delta } = descriptor;
+  const result: number[] = [];
+  let i = start;
+  while ((delta > 0 && i <= end) || (delta < 0 && i >= end)) {
+    result.push(i);
+    i += delta;
+  }
+  return result;
+};

@@ -182,80 +182,81 @@ const CaseSearchResultsView: React.FC<{
       refreshable={refreshable}
       name={searchName}
     >
-      <DropdownButton
-        id="case-tags-dropdown"
-        bsSize="sm"
-        disabled={selected.length === 0}
-        title={<Icon icon="glyphicon-tag" />}
-      >
-        {availableTags.map(tag => {
-          const count = selected.filter(
-            cid => items[cid]!.tags.indexOf(tag.name) >= 0
-          ).length;
-          return (
-            <MenuItem key={tag.name}>
-              <IconButton
-                bsSize="xs"
-                bsStyle="default"
-                icon="glyphicon-plus"
-                onClick={() => handleSetTags('add', tag.name)}
-                disabled={count === selected.length}
-              />
-              &thinsp;
-              <IconButton
-                bsSize="xs"
-                bsStyle="default"
-                icon="glyphicon-remove"
-                onClick={() => handleSetTags('remove', tag.name)}
-                disabled={count === 0}
-              />
-              &nbsp;
-              <PhysicalTag name={tag.name} color={tag.color} />
+      {selected.length > 0 && (
+        <>
+          <DropdownButton
+            id="case-tags-dropdown"
+            bsSize="sm"
+            title={<Icon icon="glyphicon-tag" />}
+          >
+            {availableTags.map(tag => {
+              const count = selected.filter(
+                cid => items[cid]!.tags.indexOf(tag.name) >= 0
+              ).length;
+              return (
+                <MenuItem key={tag.name}>
+                  <IconButton
+                    bsSize="xs"
+                    bsStyle="default"
+                    icon="glyphicon-plus"
+                    onClick={() => handleSetTags('add', tag.name)}
+                    disabled={count === selected.length}
+                  />
+                  &thinsp;
+                  <IconButton
+                    bsSize="xs"
+                    bsStyle="default"
+                    icon="glyphicon-remove"
+                    onClick={() => handleSetTags('remove', tag.name)}
+                    disabled={count === 0}
+                  />
+                  &nbsp;
+                  <PhysicalTag name={tag.name} color={tag.color} />
+                </MenuItem>
+              );
+            })}
+            <MenuItem onClick={() => handleSetTags('clear')}>
+              Clear all tags
             </MenuItem>
-          );
-        })}
-        <MenuItem onClick={() => handleSetTags('clear')}>
-          Clear all tags
-        </MenuItem>
-      </DropdownButton>
-      <DropdownButton
-        id="case-list-dropdown"
-        bsSize="sm"
-        disabled={selected.length === 0}
-        title={<Icon icon="glyphicon-folder-open" />}
-      >
-        {user.myLists
-          .filter(list => list.resourceType === 'clinicalCases')
-          .map(list => (
-            <MenuItem key={list.myListId}>
-              <IconButton
-                bsSize="xs"
-                bsStyle="default"
-                icon="glyphicon-plus"
-                onClick={() => handleMyList('add', list.myListId)}
-              />
-              &thinsp;
-              <IconButton
-                bsSize="xs"
-                bsStyle="default"
-                icon="glyphicon-remove"
-                onClick={() => handleMyList('remove', list.myListId)}
-              />
-              &nbsp;
-              {list.name}
+          </DropdownButton>
+          <DropdownButton
+            id="case-list-dropdown"
+            bsSize="sm"
+            title={<Icon icon="glyphicon-folder-open" />}
+          >
+            {user.myLists
+              .filter(list => list.resourceType === 'clinicalCases')
+              .map(list => (
+                <MenuItem key={list.myListId}>
+                  <IconButton
+                    bsSize="xs"
+                    bsStyle="default"
+                    icon="glyphicon-plus"
+                    onClick={() => handleMyList('add', list.myListId)}
+                  />
+                  &thinsp;
+                  <IconButton
+                    bsSize="xs"
+                    bsStyle="default"
+                    icon="glyphicon-remove"
+                    onClick={() => handleMyList('remove', list.myListId)}
+                  />
+                  &nbsp;
+                  {list.name}
+                </MenuItem>
+              ))}
+          </DropdownButton>
+          <DropdownButton
+            id="case-export-dropdown"
+            bsSize="sm"
+            title={<Icon icon="glyphicon-option-horizontal" />}
+          >
+            <MenuItem eventKey="mhd" onClick={handleExportMhd}>
+              Export as MHD
             </MenuItem>
-          ))}
-      </DropdownButton>
-      <DropdownButton
-        id="case-export-dropdown"
-        bsSize="sm"
-        disabled={selected.length === 0}
-        title={<Icon icon="glyphicon-option-horizontal" />}
-      >
-        <MenuItem eventKey="mhd" onClick={handleExportMhd}>
-          Export as MHD...
-        </MenuItem>
-      </DropdownButton>
+          </DropdownButton>
+        </>
+      )}
       {showExportModal && (
         <CaseExportModal
           caseIds={selected}

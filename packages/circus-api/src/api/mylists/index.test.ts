@@ -32,7 +32,7 @@ describe('create new list', () => {
     const res = await ax.bob.request({
       url: 'api/mylists',
       method: 'post',
-      data: { name: 'test' }
+      data: { name: 'test', resourceType: 'clinicalCases' }
     });
     expect(res.status).toBe(200);
     expect(res.data.myListId).toHaveLength(26);

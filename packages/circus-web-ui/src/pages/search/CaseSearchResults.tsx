@@ -17,6 +17,7 @@ import { Link } from 'react-router-dom';
 import { updateSearch } from 'store/searches';
 import { useApi } from 'utils/api';
 import useLoginUser from 'utils/useLoginUser';
+import { confirm } from '@smikitky/rb-components/lib/modal';
 
 const Operation: React.FC<{
   value: any;
@@ -138,6 +139,11 @@ const CaseSearchResultsView: React.FC<{
     op: 'add' | 'remove' | 'clear',
     tag?: string
   ) => {
+    if (
+      op === 'clear' &&
+      !(await confirm('Do you really want to clear all tags?'))
+    )
+      return;
     await api('cases/tags', {
       method: 'patch',
       data: {

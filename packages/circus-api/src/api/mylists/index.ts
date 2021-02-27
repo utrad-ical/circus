@@ -18,7 +18,7 @@ const getList = async (
   models: Models,
   myListId: string
 ) => {
-  const list = ctx.user.myLists.find((list: any) => (list.myListId = myListId));
+  const list = ctx.user.myLists.find((list: any) => list.myListId === myListId);
   const doc = await models.myList.findById(myListId);
   if (!list || !doc) ctx.throw(404, 'This my list does not exist');
   return { userList: list, list: doc };

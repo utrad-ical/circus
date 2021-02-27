@@ -1,18 +1,20 @@
-import React, { Fragment } from 'react';
-import SearchResultsView, {
-  makeSortOptions
-} from 'components/SearchResultsView';
-import styled from 'styled-components';
-import { Link } from 'react-router-dom';
 import DataGrid, {
   DataGridColumnDefinition,
   DataGridRenderer
 } from 'components/DataGrid';
-import PatientInfoBox from 'components/PatientInfoBox';
-import TimeDisplay from 'components/TimeDisplay';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
+import MyListDropdown from 'components/MyListDropdown';
+import PatientInfoBox from 'components/PatientInfoBox';
 import { DropdownButton, MenuItem } from 'components/react-bootstrap';
+import SearchResultsView, {
+  makeSortOptions
+} from 'components/SearchResultsView';
+import TimeDisplay from 'components/TimeDisplay';
+import React, { Fragment } from 'react';
+import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import styled from 'styled-components';
 
 const ModalitySpan = styled.span`
   display: inline-block;
@@ -84,14 +86,21 @@ const columns: DataGridColumnDefinition<any>[] = [
   { caption: '', className: 'operation', renderer: Operation }
 ];
 
-const DataView: React.FC<{ value: any[] }> = props => {
-  const { value } = props;
+const DataView: React.FC<{
+  value: any[];
+  selected: string[];
+  onSelectionChange: (id: string, isSelected: boolean) => void;
+}> = props => {
+  const { value, selected, onSelectionChange } = props;
   return (
     <DataGrid
       className="series-search-result"
-      columns={columns}
       itemPrimaryKey="seriesUid"
+      columns={columns}
       value={value}
+      itemSelectable={true}
+      selectedItems={selected}
+      onSelectionChange={onSelectionChange}
     />
   );
 };
@@ -103,14 +112,31 @@ const sortOptions = makeSortOptions({
   modality: 'modality'
 });
 
-const SeriesSearchResults: React.FC<{}> = props => {
+const SeriesSearchResults: React.FC<{
+  searchName: string;
+  refreshable?: boolean;
+}> = props => {
+  const { searchName, refreshable = true } = props;
+  const search = useSelector(state => state.searches.searches[searchName]);
+  const selected = search?.selected ?? [];
+
   return (
     <SearchResultsView
       sortOptions={sortOptions}
       dataView={DataView}
-      refreshable
-      name="series"
-    />
+      refreshable={refreshable}
+      name={searchName}
+    >
+      {selected.length > 0 && (
+        <>
+          <MyListDropdown
+            resourceType="series"
+            resourceIds={selected}
+            searchName={searchName}
+          />
+        </>
+      )}
+    </SearchResultsView>
   );
 };
 

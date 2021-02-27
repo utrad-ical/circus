@@ -10,7 +10,7 @@ const SeriesSearch: React.FC<{}> = props => {
         <Icon icon="circus-series" /> Series Search
       </h1>
       <SeriesSearchCondition />
-      <SeriesSearchResults />
+      <SeriesSearchResults searchName="series" />
     </div>
   );
 };

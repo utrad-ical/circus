@@ -2,6 +2,7 @@ import CaseExportModal from 'components/CaseExportModal';
 import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
+import MyListDropdown from 'components/MyListDropdown';
 import PatientInfoBox from 'components/PatientInfoBox';
 import ProjectDisplay from 'components/ProjectDisplay';
 import { DropdownButton, MenuItem } from 'components/react-bootstrap';
@@ -13,7 +14,6 @@ import TimeDisplay from 'components/TimeDisplay';
 import React, { Fragment, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { showMessage } from 'store/messages';
 import { updateSearch } from 'store/searches';
 import { useApi } from 'utils/api';
 import useLoginUser from 'utils/useLoginUser';
@@ -111,7 +111,6 @@ const CaseSearchResultsView: React.FC<{
   const { searchName, refreshable = true } = props;
   const search = useSelector(state => state.searches.searches[searchName]);
   const items = useSelector(state => state.searches.items.cases);
-  const user = useLoginUser()!;
   const selected = search?.selected ?? [];
   const { accessibleProjects } = useLoginUser()!;
   const api = useApi();
@@ -147,27 +146,6 @@ const CaseSearchResultsView: React.FC<{
         tags: op === 'clear' ? [] : [tag!]
       }
     });
-    dispatch(updateSearch(api, searchName, {}));
-  };
-
-  const handleMyList = async (
-    operation: 'add' | 'remove',
-    myListId: string
-  ) => {
-    const res = await api(`mylists/${myListId}/items`, {
-      method: 'patch',
-      data: { operation, resourceIds: selected }
-    });
-    const changedCount = res.changedCount;
-    dispatch(
-      showMessage(
-        `${changedCount}${changedCount === 1 ? ' item was' : ' items were'} ${
-          operation === 'add' ? 'added to the list.' : 'removed from the list.'
-        }`,
-        'info',
-        { short: true }
-      )
-    );
     dispatch(updateSearch(api, searchName, {}));
   };
 
@@ -219,33 +197,11 @@ const CaseSearchResultsView: React.FC<{
               Clear all tags
             </MenuItem>
           </DropdownButton>
-          <DropdownButton
-            id="case-list-dropdown"
-            bsSize="sm"
-            title={<Icon icon="glyphicon-folder-open" />}
-          >
-            {user.myLists
-              .filter(list => list.resourceType === 'clinicalCases')
-              .map(list => (
-                <MenuItem key={list.myListId}>
-                  <IconButton
-                    bsSize="xs"
-                    bsStyle="default"
-                    icon="glyphicon-plus"
-                    onClick={() => handleMyList('add', list.myListId)}
-                  />
-                  &thinsp;
-                  <IconButton
-                    bsSize="xs"
-                    bsStyle="default"
-                    icon="glyphicon-remove"
-                    onClick={() => handleMyList('remove', list.myListId)}
-                  />
-                  &nbsp;
-                  {list.name}
-                </MenuItem>
-              ))}
-          </DropdownButton>
+          <MyListDropdown
+            resourceType="clinicalCases"
+            resourceIds={selected}
+            searchName={searchName}
+          />
           <DropdownButton
             id="case-export-dropdown"
             bsSize="sm"

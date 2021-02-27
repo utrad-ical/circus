@@ -7,7 +7,7 @@ import { Button } from 'components/react-bootstrap';
 
 const MyListArray: React.FC<{
   value: MyList[];
-  toUrl: (list: MyList) => string;
+  toUrl: (myListId: string) => string;
   onRenameClick: (myListId: string) => void;
   onDeleteClick: (myListId: string) => void;
 }> = props => {
@@ -17,7 +17,7 @@ const MyListArray: React.FC<{
     <StyledUl>
       {value.map(list => (
         <li key={list.myListId}>
-          <Link to={toUrl(list)}>
+          <Link to={toUrl(list.myListId)}>
             <Icon bsSize="xl" icon="glyphicon-folder-open" />
             <span className="name">{list.name}</span>
             <div className="menu">

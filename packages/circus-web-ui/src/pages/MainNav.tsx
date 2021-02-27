@@ -219,6 +219,22 @@ const MainNav: React.FC<{}> = props => {
               />
             ))}
             <SubMenu
+              icon="glyphicon-folder-open"
+              name="My List"
+              link="/browse/series/mylist"
+            />
+            {myLists
+              .filter(l => l.resourceType === 'series')
+              .map(l => (
+                <SubMenu
+                  key={l.myListId}
+                  sub
+                  icon="chevron-right"
+                  name={l.name}
+                  link={`/browse/series/mylist/${l.myListId}`}
+                />
+              ))}
+            <SubMenu
               icon="circus-series-import"
               name="Series Import"
               link="/import-series"

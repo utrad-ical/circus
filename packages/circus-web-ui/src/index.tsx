@@ -11,7 +11,8 @@ import HomePage from 'pages/HomePage';
 import SeriesSearch from 'pages/search/SeriesSearch';
 import CreateNewCase from 'pages/CreateNewCase';
 import CaseSearch from 'pages/search/CaseSearch';
-import MyCaseList from 'pages/MyCaseList';
+import MyCaseList from 'pages/mylist/MyCaseList';
+import MySeriesList from 'pages/mylist/MySeriesList';
 import CaseDetail from 'pages/case-detail/CaseDetail';
 import CreateNewJob from 'pages/CreateNewJob';
 import PluginJobSearch from 'pages/search/PluginJobSearch';
@@ -61,8 +62,12 @@ const AppRoutes: React.FC<{}> = () => {
     <Application>
       <Switch>
         <Route path="/home" component={HomePage} />
-        <Route path="/browse/series/:presetName?" component={SeriesSearch} />
+        <Route
+          path="/browse/series/mylist/:myListId?"
+          component={MySeriesList}
+        />
         <Route path="/browse/case/mylist/:myListId?" component={MyCaseList} />
+        <Route path="/browse/series/:presetName?" component={SeriesSearch} />
         <Route path="/browse/case/:presetName?" component={CaseSearch} />
         <Route
           path="/browse/plugin-jobs/:presetName?"

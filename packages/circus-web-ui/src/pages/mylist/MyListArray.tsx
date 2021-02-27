@@ -51,16 +51,16 @@ const MyListArray: React.FC<{
 };
 
 const StyledUl = styled.ul`
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 200px);
+  gap: 8px;
   padding: 0;
   margin: 15 0;
   > li {
     list-style-type: none;
     border: 1px solid silver;
     background: #eeeeee;
-    width: 200px;
-    height: 200px;
-    margin: 5px;
+    min-height: 200px;
     > a {
       display: flex;
       flex-flow: column;

@@ -63,8 +63,8 @@ export default function drawHandleFrame(
           to.y += handleSize;
         }
         lines.push({ from, to });
-        lines.forEach(i => drawLine(ctx, i, drawStyle));
       }
+      lines.forEach(i => drawLine(ctx, i, drawStyle));
     } else {
       drawPolygon(ctx, polygon.vertices, drawStyle);
     }

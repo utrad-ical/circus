@@ -298,12 +298,14 @@ comp.annotationUpdated();
 @title Add PlaneFigure Annotation
 --*/
 
+const viewState = viewer.getState();
 const fig = new rs.PlaneFigure();
 fig.color = '#ff0000';
 fig.type = 'circle';
 fig.width = 3;
 fig.min = [10, 10];
 fig.max = [100, 100];
+fig.z = viewState.section.origin[2];
 
 const comp = viewer.getComposition();
 comp.addAnnotation(fig);

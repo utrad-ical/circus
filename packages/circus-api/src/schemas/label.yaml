@@ -111,6 +111,25 @@ oneOf:
         required: ['min', 'max', 'z']
   - properties:
       type:
+        enum: ['polyline']
+      data:
+        type: object
+        properties:
+          points:
+            type: array
+            items:
+                type: array
+                items: [{ type: 'number' }, { type: 'number' }]
+            minItems: 1
+            description: >
+              Boundary of the outline, the volume Coordinates (measured in mm).
+          z:
+            type: number
+            description: >
+              The Z coordinate of the outline.
+        required: ['points', 'z']
+  - properties:
+      type:
         enum: ['point']
       data:
         type: object

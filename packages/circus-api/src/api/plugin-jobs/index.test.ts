@@ -1,14 +1,19 @@
 import { setUpAppForRoutesTest, ApiTest } from '../../../test/util-routes';
 import { AxiosInstance } from 'axios';
+import { setUpMongoFixture } from '../../../test/util-mongo';
 
 let apiTest: ApiTest, axios: AxiosInstance;
 beforeAll(async () => {
   apiTest = await setUpAppForRoutesTest();
-  axios = apiTest.axiosInstances.alice;
+});
+beforeEach(() => {
+  axios = apiTest.axiosInstances.dave;
 });
 afterAll(async () => await apiTest.tearDown());
 
-// (alice has sirius.org domain)
+// (dave has sirius.org and vega.org domain)
+// (bob has vega.org domain)
+// (guest has no domain)
 // 111.222.333.444.444: (  1) [sirius.org]
 // 111.222.333.444.555: (150) [sirius.org]
 // 111.222.333.444.666: (100) [sirius.org]
@@ -37,7 +42,6 @@ describe('plugin-job search', () => {
     const res = await axios.get('api/plugin-jobs');
     expect(res.status).toBe(200);
     expect(res.data.items).toHaveLength(1);
-    axios = apiTest.axiosInstances.alice;
   });
 
   test('Filter by guest domain', async () => {
@@ -45,7 +49,67 @@ describe('plugin-job search', () => {
     const res = await axios.get('api/plugin-jobs');
     expect(res.status).toBe(200);
     expect(res.data.items).toHaveLength(0);
-    axios = apiTest.axiosInstances.alice;
+  });
+});
+
+describe('search by mylist', () => {
+  beforeEach(async () => {
+    await setUpMongoFixture(apiTest.db, ['users']);
+  });
+  const myListId = '01ezahm939cbyfk73g3jhw1d0b';
+  test('search succeeds', async () => {
+    const res = await axios.get(`api/plugin-jobs/list/${myListId}`);
+    expect(res.status).toBe(200);
+    expect(res.data.items[0].patientInfo.patientName).toBe('Koume');
+  });
+
+  test('throw 404 if use nonexistent myListId in my list', async () => {
+    const nonexistentMyListId = '11111111111111111111111111';
+    const res = await axios.get(`api/plugin-jobs/list/${nonexistentMyListId}`);
+    expect(res.status).toBe(404);
+    expect(res.data.error).toBe('This my list does not exist');
+  });
+
+  test('should throw 400 for non-plugin-job mylist type', async () => {
+    const caseMyListId = '01ezab6xqfac7hvm5s09yw1g1j';
+    const res = await axios.get(`api/plugin-jobs/list/${caseMyListId}`);
+    expect(res.status).toBe(400);
+    expect(res.data.error).toBe('This my list is not for plugin jobs');
+  });
+
+  test('should not return results if domain check fails', async () => {
+    await apiTest.db
+      .collection('users')
+      .updateOne({ userEmail: 'dave@example.com' }, { $set: { groups: [] } });
+    const res = await axios.get(`api/plugin-jobs/list/${myListId}`);
+    expect(res.status).toBe(200);
+    expect(res.data.items).toHaveLength(0);
+  });
+
+  test('should not return patient info when personalInfoView = false', async () => {
+    await apiTest.db
+      .collection('users')
+      .updateOne(
+        { userEmail: 'dave@example.com' },
+        { $set: { 'preferences.personalInfoView': false } }
+      );
+    const res = await axios.get(`api/plugin-jobs/list/${myListId}`);
+    expect(res.status).toBe(200);
+    expect(res.data.items).toHaveLength(1);
+    expect(res.data.items[0].patientInfo).toBe(undefined);
+  });
+
+  test('should not return patient info when there is no privileges', async () => {
+    await apiTest.db
+      .collection('groups')
+      .updateMany(
+        { $or: [{ groupId: 1 }, { groupId: 4 }] },
+        { $set: { privileges: [] } }
+      );
+    const res = await axios.get(`api/plugin-jobs/list/${myListId}`);
+    expect(res.status).toBe(200);
+    expect(res.data.items).toHaveLength(1);
+    expect(res.data.items[0].patientInfo).toBe(undefined);
   });
 });
 

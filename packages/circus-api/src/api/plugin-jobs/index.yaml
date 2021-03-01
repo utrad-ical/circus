@@ -40,6 +40,12 @@ routes:
       Performs search for the plug-in job.
     responseSchema: pluginJobSearchResult|addProperty patientInfo patientInfo|searchResult
   - verb: get
+    path: /plugin-jobs/list/:myListId
+    handler: handleSearch
+    description: >
+      Performs search based on a my list ID.
+    responseSchema: pluginJobSearchResult|addProperty patientInfo patientInfo|searchResult
+  - verb: get
     path: /plugin-jobs/:jobId
     requiredSeriesDomainCheck: true
     description: >

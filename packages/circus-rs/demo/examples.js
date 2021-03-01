@@ -141,6 +141,7 @@ const toolbar = rs.createToolbar(container, [
   'wandEraser',
   'circle',
   'rectangle',
+  'polyline',
   'point',
   'ellipsoid',
   'cuboid'
@@ -306,6 +307,30 @@ fig.width = 3;
 fig.min = [10, 10];
 fig.max = [100, 100];
 fig.z = viewState.section.origin[2];
+
+const comp = viewer.getComposition();
+comp.addAnnotation(fig);
+comp.annotationUpdated();
+
+/*--
+@title Add Polyline Annotation
+--*/
+
+const viewState = viewer.getState();
+const fig = new rs.Polyline();
+fig.color = '#ff0000';
+fig.fillColor = '#ff000050';
+fig.width = 3;
+fig.points = [
+  [60, 10],
+  [10, 100],
+  [140, 30],
+  [20, 30],
+  [120, 120]
+];
+fig.z = viewState.section.origin[2];
+fig.closed = true;
+fig.fillMode = 'evenodd'; // 'evenodd' or 'nonzero' or undefinde (='evenodd');
 
 const comp = viewer.getComposition();
 comp.addAnnotation(fig);

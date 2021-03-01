@@ -85,6 +85,49 @@ export function drawPolygon(
 }
 
 /**
+ * Draw a path.
+ */
+export function drawPath(
+  ctx: CanvasRenderingContext2D,
+  vertices: Vector2[],
+  style: {
+    closePath: boolean;
+    lineWidth: number;
+    strokeStyle: string;
+    fillStyle: string;
+    fillRule: CanvasFillRule;
+  }
+): void {
+  if (vertices.length === 0) return;
+
+  ctx.save();
+  try {
+    ctx.beginPath();
+    ctx.moveTo(vertices[0].x, vertices[0].y);
+    vertices.forEach(p => {
+      ctx.lineTo(p.x, p.y);
+    });
+
+    if (style.closePath === true) {
+      ctx.closePath();
+    }
+
+    if (style.lineWidth > 0) {
+      ctx.lineWidth = style.lineWidth;
+      ctx.strokeStyle = style.strokeStyle;
+      ctx.stroke();
+    }
+
+    if (style.fillStyle && vertices.length > 2) {
+      ctx.fillStyle = style.fillStyle;
+      ctx.fill(style.fillRule);
+    }
+  } finally {
+    ctx.restore();
+  }
+}
+
+/**
  * Draw a rectangle.
  */
 export function drawRectangle(

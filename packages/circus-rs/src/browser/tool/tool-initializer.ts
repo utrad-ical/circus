@@ -2,6 +2,7 @@ import CircleTool from './annotation/CircleTool';
 import CuboidTool from './annotation/CuboidTool';
 import EllipsoidTool from './annotation/EllipsoidTool';
 import PointTool from './annotation/PointTool';
+import PolylineTool from './annotation/PolylineTool';
 import RectangleTool from './annotation/RectangleTool';
 import RulerTool from './annotation/RulerTool';
 import BrushTool from './cloud/BrushTool';
@@ -32,6 +33,7 @@ interface ToolClasses extends AnyToolClasses {
 
   circle: ToolClass<CircleTool>;
   rectangle: ToolClass<RectangleTool>;
+  polyline: ToolClass<PolylineTool>;
   point: ToolClass<PointTool>;
 
   ellipsoid: ToolClass<EllipsoidTool>;
@@ -55,6 +57,7 @@ const defaultTools: ToolClasses & { null: ToolClass<ToolBaseClass> } = {
 
   circle: CircleTool,
   rectangle: RectangleTool,
+  polyline: PolylineTool,
   point: PointTool,
 
   ellipsoid: EllipsoidTool,

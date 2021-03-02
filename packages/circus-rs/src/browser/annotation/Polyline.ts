@@ -1,5 +1,5 @@
 import { Vector2D, Vector3D } from 'circus-rs/src/common/geometry';
-import { Box2, Vector2, Vector3 } from 'three';
+import { Box2, Box3, Vector2, Vector3 } from 'three';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
 import {
   convertVolumeCoordinateToScreenCoordinate,
@@ -10,6 +10,7 @@ import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
+import drawBoundingBoxOutline from './helper/drawBoundingBoxOutline';
 import { drawPath, drawPoint } from './helper/drawObject';
 import { hitRectangle } from './helper/hit-test';
 
@@ -57,6 +58,14 @@ export default class Polyline implements Annotation, ViewerEventTarget {
   public closed: boolean = false;
   public fillMode: 'nonzero' | 'evenodd' = 'evenodd';
   public id?: string;
+
+  public boundingBoxOutline?: {
+    width: number;
+    color: string;
+  } = {
+    width: 1,
+    color: 'rgba(255,255,255,0.5)'
+  };
 
   public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
     if (!viewer || !viewState) return;
@@ -108,8 +117,24 @@ export default class Polyline implements Annotation, ViewerEventTarget {
         color
       });
     });
-  }
 
+    // Draw bounding box outline
+    const boundingBox = (points: Vector2D[]) => {
+      const box = new Box3().makeEmpty();
+      points.forEach(point => box.expandByPoint(new Vector3(...point, this.z)));
+      return box;
+    };
+    const drawBoundingBoxOutlineStyle = this.boundingBoxOutline;
+    if (drawBoundingBoxOutlineStyle && this.points.length > 1) {
+      drawBoundingBoxOutline(
+        ctx,
+        boundingBox(this.points),
+        resolution,
+        viewState.section,
+        drawBoundingBoxOutlineStyle
+      );
+    }
+  }
   public validate(): boolean {
     if (this.points.length === 0 || !this.z) return false;
     return true;

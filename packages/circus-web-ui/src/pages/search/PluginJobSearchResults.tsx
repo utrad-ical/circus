@@ -15,6 +15,8 @@ import browserHistory from 'browserHistory';
 import styled from 'styled-components';
 import Icon from '@smikitky/rb-components/lib/Icon';
 import UserDisplay from 'components/UserDisplay';
+import { useSelector } from 'react-redux';
+import MyListDropdown from 'components/MyListDropdown';
 
 const Operation: DataGridRenderer<any> = props => {
   const { value: job } = props;
@@ -140,13 +142,21 @@ const StyledDataGrid = styled(DataGrid)`
   }
 `;
 
-const DataView: React.FC<{ value: any[] }> = props => {
-  const { value } = props;
+const DataView: React.FC<{
+  value: any[];
+  selected: string[];
+  onSelectionChange: (id: string, isSelected: boolean) => void;
+}> = props => {
+  const { value, selected, onSelectionChange } = props;
   return (
     <StyledDataGrid
       className="plugin-job-search-result"
       columns={columns}
+      itemPrimaryKey="jobId"
       value={value}
+      itemSelectable={true}
+      selectedItems={selected}
+      onSelectionChange={onSelectionChange}
     />
   );
 };
@@ -155,14 +165,31 @@ const sortOptions = makeSortOptions({
   createdAt: 'job date'
 });
 
-const PluginSearchResults: React.FC<{}> = props => {
+const PluginSearchResults: React.FC<{
+  searchName: string;
+  refreshable?: boolean;
+}> = props => {
+  const { searchName, refreshable = true } = props;
+  const search = useSelector(state => state.searches.searches[searchName]);
+  const selected = search?.selected ?? [];
+
   return (
     <SearchResultsView
       sortOptions={sortOptions}
       dataView={DataView}
-      refreshable
-      name="pluginJob"
-    />
+      refreshable={refreshable}
+      name={searchName}
+    >
+      {selected.length > 0 && (
+        <>
+          <MyListDropdown
+            resourceType="pluginJobs"
+            resourceIds={selected}
+            searchName={searchName}
+          />
+        </>
+      )}
+    </SearchResultsView>
   );
 };
 

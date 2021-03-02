@@ -7,6 +7,7 @@ import { useLoginManager } from 'utils/loginManager';
 import browserHistory from 'browserHistory';
 import useLoginUser from 'utils/useLoginUser';
 import TaskNotifier from 'components/TaskNotifier';
+import { MyList } from 'store/loginUser';
 
 const MainMenu: React.FC<{}> = props => <ul>{props.children}</ul>;
 
@@ -180,6 +181,34 @@ const StyledNav = styled.nav`
   }
 `;
 
+const MyListMenuItems: React.FC<{
+  myLists: MyList[];
+  resourceType: string;
+  endPoint: string;
+}> = props => {
+  const { myLists, resourceType, endPoint } = props;
+  return (
+    <React.Fragment>
+      <SubMenu
+        icon="glyphicon-folder-open"
+        name="My List"
+        link={`/browse/${endPoint}/mylist`}
+      />
+      {myLists
+        .filter(l => l.resourceType === resourceType)
+        .map(l => (
+          <SubMenu
+            key={l.myListId}
+            sub
+            icon="chevron-right"
+            name={l.name}
+            link={`/browse/${endPoint}/mylist/${l.myListId}`}
+          />
+        ))}
+    </React.Fragment>
+  );
+};
+
 const MainNav: React.FC<{}> = props => {
   const user = useLoginUser();
   const loginManager = useLoginManager();
@@ -218,22 +247,11 @@ const MainNav: React.FC<{}> = props => {
                 link={`/browse/series/${encodeURIComponent(preset.name)}`}
               />
             ))}
-            <SubMenu
-              icon="glyphicon-folder-open"
-              name="My List"
-              link="/browse/series/mylist"
+            <MyListMenuItems
+              myLists={myLists}
+              resourceType="series"
+              endPoint="series"
             />
-            {myLists
-              .filter(l => l.resourceType === 'series')
-              .map(l => (
-                <SubMenu
-                  key={l.myListId}
-                  sub
-                  icon="chevron-right"
-                  name={l.name}
-                  link={`/browse/series/mylist/${l.myListId}`}
-                />
-              ))}
             <SubMenu
               icon="circus-series-import"
               name="Series Import"
@@ -251,22 +269,11 @@ const MainNav: React.FC<{}> = props => {
                 link={`/browse/case/${encodeURIComponent(preset.name)}`}
               />
             ))}
-            <SubMenu
-              icon="glyphicon-folder-open"
-              name="My List"
-              link="/browse/case/mylist"
+            <MyListMenuItems
+              myLists={myLists}
+              resourceType="clinicalCases"
+              endPoint="case"
             />
-            {myLists
-              .filter(l => l.resourceType === 'clinicalCases')
-              .map(l => (
-                <SubMenu
-                  key={l.myListId}
-                  sub
-                  icon="chevron-right"
-                  name={l.name}
-                  link={`/browse/case/mylist/${l.myListId}`}
-                />
-              ))}
             <SubMenu icon="open" name="Case Import" link="/import-case" />
           </Menu>
           <Menu name="CAD" icon="circus-icon-job" link="/browse/plugin-jobs">
@@ -284,6 +291,11 @@ const MainNav: React.FC<{}> = props => {
                 link={`/browse/plugin-jobs/${encodeURIComponent(preset.name)}`}
               />
             ))}
+            <MyListMenuItems
+              myLists={myLists}
+              resourceType="pluginJobs"
+              endPoint="plugin-jobs"
+            />
             <SubMenu
               icon="tasks"
               name="Show Job Queue"

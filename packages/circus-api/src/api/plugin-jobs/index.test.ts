@@ -2,18 +2,22 @@ import { setUpAppForRoutesTest, ApiTest } from '../../../test/util-routes';
 import { AxiosInstance } from 'axios';
 import { setUpMongoFixture } from '../../../test/util-mongo';
 
-let apiTest: ApiTest, axios: AxiosInstance;
+let apiTest: ApiTest,
+  bob: AxiosInstance,
+  guest: AxiosInstance,
+  dave: AxiosInstance;
+
 beforeAll(async () => {
   apiTest = await setUpAppForRoutesTest();
+  ({ bob, guest, dave } = apiTest.axiosInstances);
 });
-beforeEach(() => {
-  axios = apiTest.axiosInstances.dave;
-});
+
 afterAll(async () => await apiTest.tearDown());
 
-// (dave belongs to sirius.org and vega.org domain)
 // (bob belongs to vega.org domain)
 // (guest belongs to no domain)
+// (dave belongs to sirius.org and vega.org domain)
+
 // 111.222.333.444.444: (  1) [sirius.org]
 // 111.222.333.444.555: (150) [sirius.org]
 // 111.222.333.444.666: (100) [sirius.org]
@@ -21,13 +25,13 @@ afterAll(async () => await apiTest.tearDown());
 
 describe('plugin-job search', () => {
   test('List plug-in jobs', async () => {
-    const res = await axios.get('api/plugin-jobs');
+    const res = await dave.get('api/plugin-jobs');
     expect(res.status).toBe(200);
     expect(Array.isArray(res.data.items)).toBe(true);
   });
 
   test('Filter by patientInfo', async () => {
-    const res = await axios.get('api/plugin-jobs', {
+    const res = await dave.get('api/plugin-jobs', {
       params: {
         filter: JSON.stringify({ 'patientInfo.patientName': 'Sakura' })
       }
@@ -38,15 +42,13 @@ describe('plugin-job search', () => {
   });
 
   test('Filter by power user domain', async () => {
-    axios = apiTest.axiosInstances.bob;
-    const res = await axios.get('api/plugin-jobs');
+    const res = await bob.get('api/plugin-jobs');
     expect(res.status).toBe(200);
     expect(res.data.items).toHaveLength(1);
   });
 
   test('Filter by guest domain', async () => {
-    axios = apiTest.axiosInstances.guest;
-    const res = await axios.get('api/plugin-jobs');
+    const res = await guest.get('api/plugin-jobs');
     expect(res.status).toBe(200);
     expect(res.data.items).toHaveLength(0);
   });
@@ -58,21 +60,22 @@ describe('search by mylist', () => {
   });
   const myListId = '01ezahm939cbyfk73g3jhw1d0b';
   test('search succeeds', async () => {
-    const res = await axios.get(`api/plugin-jobs/list/${myListId}`);
+    const res = await dave.get(`api/plugin-jobs/list/${myListId}`);
     expect(res.status).toBe(200);
+    expect(res.data.items).toHaveLength(1);
     expect(res.data.items[0].patientInfo.patientName).toBe('Koume');
   });
 
   test('throw 404 if use nonexistent myListId in my list', async () => {
     const nonexistentMyListId = '11111111111111111111111111';
-    const res = await axios.get(`api/plugin-jobs/list/${nonexistentMyListId}`);
+    const res = await dave.get(`api/plugin-jobs/list/${nonexistentMyListId}`);
     expect(res.status).toBe(404);
     expect(res.data.error).toBe('This my list does not exist');
   });
 
   test('should throw 400 for non-plugin-job mylist type', async () => {
     const caseMyListId = '01ezab6xqfac7hvm5s09yw1g1j';
-    const res = await axios.get(`api/plugin-jobs/list/${caseMyListId}`);
+    const res = await dave.get(`api/plugin-jobs/list/${caseMyListId}`);
     expect(res.status).toBe(400);
     expect(res.data.error).toBe('This my list is not for plugin jobs');
   });
@@ -81,7 +84,7 @@ describe('search by mylist', () => {
     await apiTest.db
       .collection('users')
       .updateOne({ userEmail: 'dave@example.com' }, { $set: { groups: [] } });
-    const res = await axios.get(`api/plugin-jobs/list/${myListId}`);
+    const res = await dave.get(`api/plugin-jobs/list/${myListId}`);
     expect(res.status).toBe(200);
     expect(res.data.items).toHaveLength(0);
   });
@@ -93,7 +96,7 @@ describe('search by mylist', () => {
         { userEmail: 'dave@example.com' },
         { $set: { 'preferences.personalInfoView': false } }
       );
-    const res = await axios.get(`api/plugin-jobs/list/${myListId}`);
+    const res = await dave.get(`api/plugin-jobs/list/${myListId}`);
     expect(res.status).toBe(200);
     expect(res.data.items).toHaveLength(1);
     expect(res.data.items[0].patientInfo).toBe(undefined);
@@ -106,7 +109,7 @@ describe('search by mylist', () => {
         { $or: [{ groupId: 1 }, { groupId: 4 }] },
         { $set: { privileges: [] } }
       );
-    const res = await axios.get(`api/plugin-jobs/list/${myListId}`);
+    const res = await dave.get(`api/plugin-jobs/list/${myListId}`);
     expect(res.status).toBe(200);
     expect(res.data.items).toHaveLength(1);
     expect(res.data.items[0].patientInfo).toBe(undefined);
@@ -115,7 +118,7 @@ describe('search by mylist', () => {
 
 describe('plugin-job registration', () => {
   test('should register a new plug-in job', async () => {
-    const res = await axios.request({
+    const res = await dave.request({
       method: 'post',
       url: 'api/plugin-jobs',
       data: {
@@ -134,7 +137,7 @@ describe('plugin-job registration', () => {
 
   test('should reject if series image out of range', async () => {
     // Series image out of range
-    const res = await axios.request({
+    const res = await dave.request({
       method: 'post',
       url: 'api/plugin-jobs',
       data: {
@@ -154,7 +157,7 @@ describe('plugin-job registration', () => {
 
   test('should reject if series lacks PVD', async () => {
     // Lacks partial volume descriptor
-    const res = await axios.request({
+    const res = await dave.request({
       method: 'post',
       url: 'api/plugin-jobs',
       data: {
@@ -168,7 +171,6 @@ describe('plugin-job registration', () => {
   });
 
   test('should reject if difference series domain', async () => {
-    const bob = apiTest.axiosInstances.bob;
     const res = await bob.request({
       method: 'post',
       url: 'api/plugin-jobs',
@@ -192,7 +194,7 @@ describe('plugin-job registration', () => {
   });
 
   test('should return a finished plug-in job', async () => {
-    const res = await axios.request({
+    const res = await dave.request({
       url: 'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa'
     });
     expect(res.status).toBe(200);
@@ -203,7 +205,7 @@ describe('plugin-job registration', () => {
 
 describe('feedback', () => {
   test('should register a new feedback entry', async () => {
-    const res = await axios.request({
+    const res = await dave.request({
       url: 'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/feedback/personal',
       method: 'post',
       data: { lesionCandidates: [] }
@@ -212,7 +214,7 @@ describe('feedback', () => {
   });
 
   test('should return a list of feedback entries', async () => {
-    const res = await axios.request({
+    const res = await dave.request({
       url: 'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/feedback',
       method: 'get'
     });

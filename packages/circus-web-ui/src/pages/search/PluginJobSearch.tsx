@@ -10,7 +10,7 @@ const PluginSearch: React.FC<{}> = props => {
         <Icon icon="circus-job" /> Plug-in Job Search
       </h1>
       <PluginJobSearchCondition />
-      <PluginJobSearchResults />
+      <PluginJobSearchResults searchName="pluginJob" />
     </div>
   );
 };

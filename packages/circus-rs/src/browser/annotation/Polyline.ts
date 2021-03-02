@@ -95,10 +95,8 @@ export default class Polyline implements Annotation, ViewerEventTarget {
     );
 
     // Draw lines
-    if (screenPoints.length > 2) {
+    if (screenPoints.length > 1) {
       drawPath(ctx, screenPoints, drawStyle);
-    } else if (screenPoints.length === 1) {
-
     }
 
     // Draw points

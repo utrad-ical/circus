@@ -88,14 +88,6 @@ export default class Polyline implements Annotation, ViewerEventTarget {
     const color = zDiff > this.zThreshold ? this.dimmedColor : this.color;
     const fillColor =
       zDiff > this.zThreshold ? this.dimmedFillColor : this.fillColor;
-    const drawStyle = {
-      lineWidth: this.width,
-      closePath: this.closed,
-      strokeStyle: color,
-      fillStyle: fillColor,
-      fillRule: this.fillMode,
-      markerSize: this.radius
-    };
 
     const screenPoints = this.points.map(p =>
       convertVolumeCoordinateToScreenCoordinate(
@@ -105,18 +97,21 @@ export default class Polyline implements Annotation, ViewerEventTarget {
       )
     );
 
-    // Draw lines
+    // Draw a polyline or point
     if (screenPoints.length > 1) {
-      drawPath(ctx, screenPoints, drawStyle);
-    }
-
-    // Draw points
-    screenPoints.forEach(screenPoint => {
-      drawPoint(ctx, screenPoint, {
+      drawPath(ctx, screenPoints, {
+        lineWidth: this.width,
+        closePath: this.closed,
+        strokeStyle: color,
+        fillStyle: fillColor,
+        fillRule: this.fillMode
+      });
+    } else if (screenPoints.length === 1) {
+      drawPoint(ctx, screenPoints[0], {
         radius: this.radius,
         color
       });
-    });
+    }
 
     // Draw bounding box outline
     const boundingBox = (points: Vector2D[]) => {

@@ -5,8 +5,21 @@ import { EJSON } from 'bson';
 import path from 'path';
 import fs from 'fs';
 import mime from 'mime';
-import { RouteMiddleware } from '../../typings/middlewares';
+import { RouteMiddleware, CircusContext } from '../../typings/middlewares';
 import makeNewPluginJob from '../../plugin-job/makeNewPluginJob';
+
+const maskPatientInfo = (ctx: CircusContext) => {
+  return (pluginJobData: any) => {
+    const canView = ctx.userPrivileges.globalPrivileges.some(
+      p => p === 'personalInfoView'
+    );
+    const wantToView = ctx.user.preferences.personalInfoView;
+    if (!canView || !wantToView) {
+      delete pluginJobData.patientInfo;
+    }
+    return pluginJobData;
+  };
+};
 
 export const handlePost: RouteMiddleware = ({ models, cs }) => {
   return async (ctx, next) => {
@@ -67,38 +80,81 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
       domain: { $in: ctx.userPrivileges.domains }
     };
     const filter = { $and: [customFilter!, domainFilter] };
+
+    const myListId = ctx.params.myListId;
+    const user = ctx.user;
+
+    if (myListId) {
+      const myList = user.myLists.find(
+        (list: any) => myListId === list.myListId
+      );
+      if (!myList) ctx.throw(status.NOT_FOUND, 'This my list does not exist');
+
+      if (myList.resourceType !== 'pluginJobs')
+        ctx.throw(status.BAD_REQUEST, 'This my list is not for plugin jobs');
+    }
+
+    const baseStage: object[] = [
+      {
+        // Performs the 'JOIN'.
+        $lookup: {
+          from: 'series',
+          localField: 'series.seriesUid',
+          foreignField: 'seriesUid',
+          as: 'seriesDetail'
+        }
+      },
+      {
+        $unwind: {
+          path: '$seriesDetail',
+          includeArrayIndex: 'volId'
+        }
+      },
+      {
+        // Removes results from non-primary (volId > 0) series
+        $match: { volId: 0 }
+      },
+      {
+        // Appends "patientInfo" field
+        $addFields: {
+          patientInfo: '$seriesDetail.patientInfo',
+          domain: '$seriesDetail.domain'
+        }
+      }
+    ];
+
+    const searchByMyListStage: object[] = [
+      { $match: { myListId } },
+      { $unwind: { path: '$items' } },
+      {
+        $lookup: {
+          from: 'pluginJobs',
+          localField: 'items.resourceId',
+          foreignField: 'jobId',
+          as: 'pluginJobDetail'
+        }
+      },
+      {
+        $replaceWith: {
+          $mergeObjects: [
+            { $arrayElemAt: ['$pluginJobDetail', 0] },
+            { addedToListAt: '$items.createdAt' }
+          ]
+        }
+      }
+    ];
+
+    const startModel = myListId ? models.myList : models.pluginJob;
+    const lookupStages = myListId
+      ? [...searchByMyListStage, ...baseStage]
+      : baseStage;
+    const defaultSort = myListId ? { addedToListAt: -1 } : { createdAt: -1 };
+
     await performAggregationSearch(
-      models.pluginJob,
+      startModel,
       filter,
       ctx,
-      [
-        {
-          // Performs the 'JOIN'.
-          $lookup: {
-            from: 'series',
-            localField: 'series.seriesUid',
-            foreignField: 'seriesUid',
-            as: 'seriesDetail'
-          }
-        },
-        {
-          $unwind: {
-            path: '$seriesDetail',
-            includeArrayIndex: 'volId'
-          }
-        },
-        {
-          // Removes results from non-primary (volId > 0) series
-          $match: { volId: 0 }
-        },
-        {
-          // Appends "patientInfo" field
-          $addFields: {
-            patientInfo: '$seriesDetail.patientInfo',
-            domain: '$seriesDetail.domain'
-          }
-        }
-      ],
+      lookupStages,
       [
         {
           $project: {
@@ -106,11 +162,12 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
             volId: false,
             results: false,
             primarySeries: false,
-            seriesDetail: false
+            seriesDetail: false,
+            addedToListAt: false
           }
         }
       ],
-      { defaultSort: { createdAt: -1 } }
+      { defaultSort, transform: maskPatientInfo(ctx) }
     );
   };
 };

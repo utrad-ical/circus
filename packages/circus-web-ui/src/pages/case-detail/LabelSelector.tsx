@@ -502,10 +502,10 @@ const StyledLabelLi = styled.li`
     font-size: 80%;
   }
   &:hover {
-    background-color: #eeeeee;
+    background-color: ${(props: any) => props.theme.secondaryBackground};
   }
   &.active {
-    background-color: silver;
+    background-color: ${(props: any) => props.theme.activeBackground};
     font-weight: bold;
     .hint {
       color: white;

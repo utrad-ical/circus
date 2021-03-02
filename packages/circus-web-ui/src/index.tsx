@@ -39,6 +39,7 @@ import tinycolor from 'tinycolor2';
 import { dismissMessageOnPageChange } from 'store/messages';
 import PluginJobQueueSearch from './pages/search/PluginJobQueueSearch';
 import browserHistory from 'browserHistory';
+import GlobalStyle from './theme';
 import * as rs from 'circus-rs';
 
 import { ApiContext, ApiCaller } from 'utils/api';
@@ -51,10 +52,17 @@ require('bootstrap/fonts/glyphicons-halflings-regular.woff');
 require('bootstrap/fonts/glyphicons-halflings-regular.woff2');
 require('bootstrap/fonts/glyphicons-halflings-regular.ttf');
 
+const brandPrimary = '#168477';
+
 const theme = {
-  brandPrimary: '#168477',
-  brandDark: tinycolor('#168477').darken(10).toString(),
-  brandDarker: tinycolor('#168477').darken(20).toString(),
+  background: 'white',
+  secondaryBackground: '#eeeeee',
+  border: 'silver',
+  activeBackground: '#dddddd',
+  primaryText: 'black',
+  brandPrimary,
+  brandDark: tinycolor(brandPrimary).darken(10).toString(),
+  brandDarker: tinycolor(brandPrimary).darken(20).toString(),
   highlightColor: '#fd3164'
 };
 
@@ -158,6 +166,7 @@ const TheApp: React.FC<{}> = () => {
         <ReduxStoreProvider store={store}>
           <VolumeCacheProvider>
             <ThemeProvider theme={theme}>
+              <GlobalStyle />
               <Router history={browserHistory}>
                 <Switch>
                   <Route exact path="/" component={LoginScreen} />

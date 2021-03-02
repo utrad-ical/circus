@@ -11,9 +11,9 @@ beforeEach(() => {
 });
 afterAll(async () => await apiTest.tearDown());
 
-// (dave has sirius.org and vega.org domain)
-// (bob has vega.org domain)
-// (guest has no domain)
+// (dave belongs to sirius.org and vega.org domain)
+// (bob belongs to vega.org domain)
+// (guest belongs to no domain)
 // 111.222.333.444.444: (  1) [sirius.org]
 // 111.222.333.444.555: (150) [sirius.org]
 // 111.222.333.444.666: (100) [sirius.org]

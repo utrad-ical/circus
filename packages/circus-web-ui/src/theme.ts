@@ -33,7 +33,7 @@ const GlobalStyle = createGlobalStyle`
     color: ${(props: any) => props.theme.brandPrimary};
   }
   .btn.btn-default {
-    background-color: ${(props: any) => props.theme.secondaryBackground};
+    background-color: ${(props: any) => props.theme.background};
     color: ${(props: any) => props.theme.primaryText};
   }
 
@@ -48,7 +48,7 @@ const GlobalStyle = createGlobalStyle`
 
   // DROPDOWNS
   .dropdown-menu {
-    background-color: ${(props: any) => props.theme.secondaryBackground};
+    background-color: ${(props: any) => props.theme.background};
   }
 
   // TABLES
@@ -59,14 +59,14 @@ const GlobalStyle = createGlobalStyle`
   // TABS
   .nav-tabs > li.active {
     a, a:hover, a:focus {
-      background-color: ${(props: any) => props.theme.secondaryBackground};
+      background-color: ${(props: any) => props.theme.background};
       color: ${(props: any) => props.theme.primaryText};
     }
   }
 
   // FORM CONTROLS
   .form-control {
-    background-color: ${(props: any) => props.theme.secondaryBackground};
+    background-color: ${(props: any) => props.theme.background};
     color: ${(props: any) => props.theme.primaryText};
   }
 

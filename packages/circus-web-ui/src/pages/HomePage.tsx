@@ -33,14 +33,15 @@ const HomeMenu = styled.ul`
     > a {
       display: block;
       border-radius: 10px;
-      background-color: white;
+      background-color: ${(props: any) => props.theme.background};
       text-decoration: none;
       font-size: 24px;
       font-weight: bolder;
       padding: 16px 0;
+      color: ${(props: any) => props.theme.brandPrimary};
       &:hover {
         color: ${(props: any) => props.theme.highlightColor};
-        background-color: #eee;
+        background-color: ${(props: any) => props.theme.secondaryBackground};
       }
     }
   }

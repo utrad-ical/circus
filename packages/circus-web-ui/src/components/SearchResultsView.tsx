@@ -174,6 +174,7 @@ const SearchResultsView: React.FC<{
   };
 
   const pages = Math.ceil(totalItems / limit);
+  const showPagenation = pages >= 2 || page >= 2;
   return (
     <StyledDiv className={classnames({ busy: isFetching })}>
       <div className="search-results-header">
@@ -216,7 +217,7 @@ const SearchResultsView: React.FC<{
           )}
         </div>
       </div>
-      {pages >= 2 && (
+      {showPagenation && (
         <ResultPagination
           pages={pages}
           activePage={page}
@@ -230,7 +231,7 @@ const SearchResultsView: React.FC<{
         onSelectionChange={handleSelectionChange}
         active={active}
       />
-      {pages >= 2 && (
+      {showPagenation && (
         <ResultPagination
           pages={pages}
           activePage={page}

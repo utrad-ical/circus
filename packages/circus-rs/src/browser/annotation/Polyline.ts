@@ -1,15 +1,17 @@
-import { Vector2D } from 'circus-rs/src/common/geometry';
-import { Vector2, Vector3 } from 'three';
+import { Vector2D, Vector3D } from 'circus-rs/src/common/geometry';
+import { Box2, Vector2, Vector3 } from 'three';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
 import {
   convertVolumeCoordinateToScreenCoordinate,
   detectOrthogonalSection
 } from '../section-util';
+import { convertVolumePointToViewerPoint } from '../tool/tool-util';
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
 import { drawPath, drawPoint } from './helper/drawObject';
+import { hitRectangle } from './helper/hit-test';
 
 const handleSize = 5;
 
@@ -127,5 +129,35 @@ export default class Polyline implements Annotation, ViewerEventTarget {
 
   public dragEndHandler(ev: ViewerEvent): void {
     // TODO: doramari
+  }
+
+  private hitTest(viewer: Viewer, evPoint: Vector2, point: Vector3D): boolean {
+    const hitPoint = convertVolumePointToViewerPoint(viewer, ...point);
+    const hitBox = new Box2(
+      new Vector2(hitPoint.x - this.radius, hitPoint.y - this.radius),
+      new Vector2(hitPoint.x + this.radius, hitPoint.y + this.radius)
+    );
+    return hitRectangle(evPoint, hitBox, handleSize);
+  }
+
+  public findHitPointIndex(ev: ViewerEvent): number {
+    if (this.points.length === 0) return -1;
+
+    const viewer = ev.viewer;
+    const evPoint = new Vector2(ev.viewerX!, ev.viewerY!);
+
+    return this.points.findIndex(point =>
+      this.hitTest(viewer, evPoint, [...point, this.z!])
+    );
+  }
+
+  public isHitFirstPoint(ev: ViewerEvent): boolean {
+    if (this.points.length === 0) return false;
+
+    const viewer = ev.viewer;
+    const evPoint = new Vector2(ev.viewerX!, ev.viewerY!);
+    const point = [...this.points[0], this.z!] as Vector3D;
+
+    return this.hitTest(viewer, evPoint, point);
   }
 }

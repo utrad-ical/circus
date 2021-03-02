@@ -39,6 +39,7 @@ export default class ToolBaseClass<T extends ToolOptions = {}>
   public dragStartHandler(viewerEvent: ViewerEvent): void {}
   public dragHandler(viewerEvent: ViewerEvent): void {}
   public dragEndHandler(viewerEvent: ViewerEvent): void {}
+  public dblClickHandler(viewerEvent: ViewerEvent): void {}
   public wheelHandler(viewerEvent: ViewerEvent): void {}
 }
 

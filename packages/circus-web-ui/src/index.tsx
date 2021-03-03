@@ -34,12 +34,10 @@ import Preferences from 'pages/Preferences';
 
 import { store } from './store';
 import { Provider as ReduxStoreProvider, useSelector } from 'react-redux';
-import { ThemeProvider } from 'styled-components';
-import tinycolor from 'tinycolor2';
 import { dismissMessageOnPageChange } from 'store/messages';
 import PluginJobQueueSearch from './pages/search/PluginJobQueueSearch';
 import browserHistory from 'browserHistory';
-import GlobalStyle from './theme';
+import GlobalStyle, { CircusThemeProvider } from './theme';
 import * as rs from 'circus-rs';
 
 import { ApiContext, ApiCaller } from 'utils/api';
@@ -51,20 +49,6 @@ require('./styles/main.less');
 require('bootstrap/fonts/glyphicons-halflings-regular.woff');
 require('bootstrap/fonts/glyphicons-halflings-regular.woff2');
 require('bootstrap/fonts/glyphicons-halflings-regular.ttf');
-
-const brandPrimary = '#168477';
-
-const theme = {
-  background: 'white',
-  secondaryBackground: '#eeeeee',
-  border: 'silver',
-  activeBackground: '#dddddd',
-  primaryText: 'black',
-  brandPrimary,
-  brandDark: tinycolor(brandPrimary).darken(10).toString(),
-  brandDarker: tinycolor(brandPrimary).darken(20).toString(),
-  highlightColor: '#fd3164'
-};
 
 const AppRoutes: React.FC<{}> = () => {
   return (
@@ -165,7 +149,7 @@ const TheApp: React.FC<{}> = () => {
       <ApiContext.Provider value={api}>
         <ReduxStoreProvider store={store}>
           <VolumeCacheProvider>
-            <ThemeProvider theme={theme}>
+            <CircusThemeProvider>
               <GlobalStyle />
               <Router history={browserHistory}>
                 <Switch>
@@ -173,7 +157,7 @@ const TheApp: React.FC<{}> = () => {
                   <AppRoutes />
                 </Switch>
               </Router>
-            </ThemeProvider>
+            </CircusThemeProvider>
           </VolumeCacheProvider>
         </ReduxStoreProvider>
       </ApiContext.Provider>

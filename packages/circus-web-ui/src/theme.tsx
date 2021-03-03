@@ -1,4 +1,53 @@
-import { createGlobalStyle } from 'styled-components';
+import React from 'react';
+import { createGlobalStyle, ThemeProvider } from 'styled-components';
+import tinycolor from 'tinycolor2';
+import useLoginUser from 'utils/useLoginUser';
+
+const brandPrimary = '#168477';
+
+interface CircusTheme {
+  background: string;
+  secondaryBackground: string;
+  primaryText: string;
+  border: string;
+  activeBackground: string;
+  brandPrimary: string;
+  brandDark: string;
+  brandDarker: string;
+  highlightColor: string;
+}
+
+const lightTheme: CircusTheme = {
+  background: 'white',
+  secondaryBackground: '#eeeeee',
+  primaryText: 'black',
+  border: 'silver',
+  activeBackground: '#dddddd',
+  brandPrimary,
+  brandDark: tinycolor(brandPrimary).darken(10).toString(),
+  brandDarker: tinycolor(brandPrimary).darken(20).toString(),
+  highlightColor: '#fd3164'
+};
+
+const darkTheme: CircusTheme = {
+  background: 'black',
+  secondaryBackground: '#222222',
+  primaryText: 'white',
+  border: 'gray',
+  activeBackground: '#444444',
+  brandPrimary,
+  brandDark: tinycolor(brandPrimary).darken(10).toString(),
+  brandDarker: tinycolor(brandPrimary).darken(20).toString(),
+  highlightColor: '#fd3164'
+};
+
+export const CircusThemeProvider: React.FC<{}> = props => {
+  const { children } = props;
+  const user = useLoginUser();
+  const theme =
+    user && user.preferences.theme === 'mode_black' ? darkTheme : lightTheme;
+  return <ThemeProvider theme={theme}>{children}</ThemeProvider>;
+};
 
 // This file overrides bootstrap's default styles to support dynamic theming
 

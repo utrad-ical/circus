@@ -1,6 +1,7 @@
 import status from 'http-status';
 import { CollectionAccessor } from '../db/createCollectionAccessor';
 import { CircusContext } from '../typings/middlewares';
+import { isPlainObject } from 'lodash';
 
 interface SearchQuery {
   sort: object;
@@ -22,8 +23,11 @@ const extractSearchOptions = (ctx: CircusContext, defaultSort: object) => {
     } catch (err) {
       ctx.throw(status.BAD_REQUEST, 'Bad sort parameter. Invalid JSON.');
     }
-    if (typeof sort !== 'object' || sort === null) {
+    if (!isPlainObject(sort)) {
       ctx.throw(status.BAD_REQUEST, 'Bad sort parameter. Non-object passed.');
+    }
+    if (Object.keys(sort).length < 1) {
+      ctx.throw(status.BAD_REQUEST, 'Bad sort parameter. Empty object passed.');
     }
     for (const k in sort) {
       if (sort[k] !== 1 && sort[k] !== -1) {

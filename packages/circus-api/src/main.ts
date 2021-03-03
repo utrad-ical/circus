@@ -127,7 +127,7 @@ const main = async () => {
       const setupInfo: { [key: string]: string | number } = {
         'Label storage': blobStorage.toString(),
         'DICOM storage': util.inspect(dicomFileRepository),
-        'Plug-in results dir': appOptions.pluginResultsDir,
+        'Plug-in results dir': appOptions.pluginResultsPath,
         'CORS origin': appOptions.corsOrigin,
         'Process ID': process.pid
       };

@@ -161,7 +161,7 @@ const SeriesSelector: React.FC<{
         resource: { endPoint: 'series', primaryKey: 'seriesUid' },
         filter,
         condition: {},
-        sort: '{}'
+        sort: '{"seriesDate":-1}'
       })
     );
   }, [api, dispatch, primarySeries, showRelevantSeries]);

@@ -3,13 +3,14 @@ import { AxiosInstance } from 'axios';
 import { setUpMongoFixture } from '../../../test/util-mongo';
 
 let apiTest: ApiTest,
+  alice: AxiosInstance,
   bob: AxiosInstance,
   guest: AxiosInstance,
   dave: AxiosInstance;
 
 beforeAll(async () => {
   apiTest = await setUpAppForRoutesTest();
-  ({ bob, guest, dave } = apiTest.axiosInstances);
+  ({ alice, bob, guest, dave } = apiTest.axiosInstances);
 });
 
 afterAll(async () => await apiTest.tearDown());
@@ -220,5 +221,37 @@ describe('feedback', () => {
     });
     expect(res.status).toBe(200);
     expect(res.data).toHaveLength(1);
+  });
+});
+
+describe('download plugin job attachment files', () => {
+  test('return existing file', async () => {
+    const res = await alice.get(
+      'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/attachment/test.txt'
+    );
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toMatch('text/plain');
+    expect(res.data).toBe('This is a test file');
+  });
+
+  test('return 404 for nonexistent file', async () => {
+    const res = await alice.get(
+      'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/attachment/dummy.txt'
+    );
+    expect(res.status).toBe(404);
+  });
+
+  test('block directory traversal', async () => {
+    const res = await alice.get(
+      'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/attachment/../something'
+    );
+    expect(res.status).toBe(400);
+  });
+
+  test('reject unauthorized user', async () => {
+    const res = await guest.get(
+      'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/attachment/../something'
+    );
+    expect(res.status).toBe(401);
   });
 });

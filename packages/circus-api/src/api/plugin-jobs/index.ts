@@ -192,9 +192,19 @@ export const handleGetAttachment: RouteMiddleware = ({
     }
     await models.pluginJob.findByIdOrFail(jobId);
     const file = path.join(pluginResultsPath, jobId, filePath);
-    const read = fs.createReadStream(file);
-    ctx.type = mime.getType(file) || 'application/octet-stream';
-    ctx.body = read;
+    const stream = fs.createReadStream(file);
+
+    try {
+      await new Promise<void>((resolve, reject) => {
+        stream.once('readable', resolve); // file opened
+        stream.once('error', reject);
+      });
+      ctx.type = mime.getType(file) || 'application/octet-stream';
+      ctx.body = stream;
+    } catch (err) {
+      if (err.code === 'ENOENT') ctx.throw(status.NOT_FOUND);
+      throw err;
+    }
   };
 };
 

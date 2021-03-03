@@ -26,8 +26,8 @@ const extractSearchOptions = (ctx: CircusContext, defaultSort: object) => {
     if (!isPlainObject(sort)) {
       ctx.throw(status.BAD_REQUEST, 'Bad sort parameter. Non-object passed.');
     }
-    if (Object.keys(sort).length < 1) {
-      ctx.throw(status.BAD_REQUEST, 'Bad sort parameter. Empty object passed.');
+    if (Object.keys(sort).length > 5) {
+      ctx.throw(status.BAD_REQUEST, 'Bad sort parameter. Too many sort keys.');
     }
     for (const k in sort) {
       if (sort[k] !== 1 && sort[k] !== -1) {
@@ -88,7 +88,7 @@ export const runAggregation = async (
   const rawItems = await model.aggregate([
     ...lookupStages,
     ...(filter ? [{ $match: filter }] : []),
-    ...(sort ? [{ $sort: sort }] : []),
+    ...(sort && Object.keys(sort).length >= 1 ? [{ $sort: sort }] : []),
     ...(skip ? [{ $skip: skip }] : []),
     ...(limit ? [{ $limit: limit }] : []),
     ...modifyStages

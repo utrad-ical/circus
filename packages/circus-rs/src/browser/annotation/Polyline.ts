@@ -301,12 +301,25 @@ export default class Polyline implements Annotation, ViewerEventTarget {
   }
 
   public dragEndHandler(ev: ViewerEvent): void {
-    // TODO: doramari
+    const viewer = ev.viewer;
+    const viewState = viewer.getState();
+    if (!viewer || !viewState) return;
+    if (viewState.type !== 'mpr') return;
+    if (!this.editable) return;
+    if (viewer.getHoveringAnnotation() !== this) return;
+
+    ev.stopPropagation();
+
+    this.annotationUpdated(viewer);
+    this.handleType = undefined;
   }
 
   protected annotationUpdated(viewer: Viewer): void {
     const comp = viewer.getComposition();
     if (!comp) return;
+    if (!this.validate()) {
+      if (comp) comp.removeAnnotation(this);
+    }
     comp.dispatchAnnotationChanging(this);
     comp.annotationUpdated();
   }

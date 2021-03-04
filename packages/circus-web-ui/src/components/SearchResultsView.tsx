@@ -85,13 +85,6 @@ const StyledDiv = styled.div`
     text-align: center;
   }
 
-  .table.data-grid {
-    tbody tr td {
-      vertical-align: middle;
-    }
-    border-bottom: 2px solid #ddd;
-  }
-
   &.busy {
     opacity: 0.7;
   }

@@ -1,42 +1,67 @@
-import { Vector2D, Vector3D } from 'circus-rs/src/common/geometry';
+import {
+  Section,
+  Vector2D,
+  Vector3D
+} from 'circus-rs/src/common/geometry';
 import { Box2, Box3, Vector2, Vector3 } from 'three';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
 import {
+  convertScreenCoordinateToVolumeCoordinate,
   convertVolumeCoordinateToScreenCoordinate,
   detectOrthogonalSection
 } from '../section-util';
-import { convertVolumePointToViewerPoint } from '../tool/tool-util';
+import {
+  convertViewerPointToVolumePoint,
+  convertVolumePointToViewerPoint
+} from '../tool/tool-util';
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
 import drawBoundingBoxOutline from './helper/drawBoundingBoxOutline';
+import drawHandleFrame from './helper/drawHandleFrame';
 import { drawPath, drawPoint } from './helper/drawObject';
-import { hitRectangle } from './helper/hit-test';
+import {
+  BoundingRectWithHandleHitType,
+  hitBoundingRectWithHandles,
+  hitRectangle
+} from './helper/hit-test';
 
 const handleSize = 5;
+
+type PolylineHitType = BoundingRectWithHandleHitType | 'point-move';
+
+const cursorTypes: {
+  [key in PolylineHitType]: { cursor: string };
+} = {
+  'north-west-handle': { cursor: 'nw-resize' },
+  'north-handle': { cursor: 'n-resize' },
+  'north-east-handle': { cursor: 'ne-resize' },
+  'east-handle': { cursor: 'e-resize' },
+  'south-east-handle': { cursor: 'se-resize' },
+  'south-handle': { cursor: 's-resize' },
+  'south-west-handle': { cursor: 'sw-resize' },
+  'west-handle': { cursor: 'w-resize' },
+  'rect-outline': { cursor: 'move' },
+  'point-move': { cursor: 'crosshair' }
+};
 
 export default class Polyline implements Annotation, ViewerEventTarget {
   /**
    * Color of the outline.
    */
-  public color: string = '#ff8800';
+  public color: string = '#ff88ff';
   public dimmedColor: string = '#ff88ff55';
 
   /**
    * Color of the fill.
    */
-  public fillColor: string = '#ff880050'; //TODO: Check the default settings
+  public fillColor: string = '#ff88ff75'; //TODO: Check the default settings
   public dimmedFillColor: string = '#ff88ff25'; //TODO: Check the default settings
   /**
    * Width of the line that connects each end.
    */
   public width: number = 3;
-
-  /**
-   * Radius of the connector circle.
-   */
-  public radius: number = 3; //TODO: Check the default settings
 
   /**
    * Coordinate of the points, measured in mm.
@@ -67,7 +92,38 @@ export default class Polyline implements Annotation, ViewerEventTarget {
     color: 'rgba(255,255,255,0.5)'
   };
 
+  private handleType:
+    | { hitType: PolylineHitType; findHitPointIndex: number }
+    | undefined = undefined;
+
+  private dragInfo:
+    | {
+        dragStartPoint3: Vector3D;
+        originalPoints: Vector2D[];
+        originalBoundingBox: [Vector3D, Vector3D] | undefined;
+      }
+    | undefined = undefined;
+
+  private getDrawingColor(
+    section: Section
+  ): { color?: string; fillColor?: string } {
+    // Displays only when the volume is displayed as an axial slice
+    const orientation = detectOrthogonalSection(section);
+    if (orientation !== 'axial') return {};
+
+    if (!this.z) return {};
+
+    const zDiff = Math.abs(this.z - section.origin[2]);
+    if (zDiff > this.zDimmedThreshold) return {};
+
+    return zDiff > this.zThreshold
+      ? { color: this.dimmedColor, fillColor: this.dimmedFillColor }
+      : { color: this.color, fillColor: this.fillColor };
+  }
+
   public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
+    if (this.points.length === 0 || !this.z) return;
+
     if (!viewer || !viewState) return;
     const canvas = viewer.canvas;
     if (!canvas) return;
@@ -75,20 +131,10 @@ export default class Polyline implements Annotation, ViewerEventTarget {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Displays only when the volume is displayed as an axial slice
-    const orientation = detectOrthogonalSection(viewState.section);
-    if (orientation !== 'axial') return;
+    const { color, fillColor } = this.getDrawingColor(viewState.section);
+    if (!color && !fillColor) return;
 
     const resolution = new Vector2().fromArray(viewer.getResolution());
-    if (!this.color || this.points.length === 0) return;
-
-    if (this.z === undefined) return;
-    const zDiff = Math.abs(this.z - viewState.section.origin[2]);
-    if (zDiff > this.zDimmedThreshold) return;
-    const color = zDiff > this.zThreshold ? this.dimmedColor : this.color;
-    const fillColor =
-      zDiff > this.zThreshold ? this.dimmedFillColor : this.fillColor;
-
     const screenPoints = this.points.map(p =>
       convertVolumeCoordinateToScreenCoordinate(
         viewState.section,
@@ -108,76 +154,222 @@ export default class Polyline implements Annotation, ViewerEventTarget {
       });
     } else if (screenPoints.length === 1) {
       drawPoint(ctx, screenPoints[0], {
-        radius: this.radius,
-        color
+        radius: this.width,
+        color: color ?? fillColor!
       });
     }
 
+    if (!this.handleType) return;
+
     // Draw bounding box outline
-    const boundingBox = (points: Vector2D[]) => {
-      const box = new Box3().makeEmpty();
-      points.forEach(point => box.expandByPoint(new Vector3(...point, this.z)));
-      return box;
-    };
     const drawBoundingBoxOutlineStyle = this.boundingBoxOutline;
     if (drawBoundingBoxOutlineStyle && this.points.length > 1) {
       drawBoundingBoxOutline(
         ctx,
-        boundingBox(this.points),
+        this.boundingBox3(),
         resolution,
         viewState.section,
         drawBoundingBoxOutlineStyle
       );
     }
+
+    // Draw handle frame
+    drawHandleFrame(ctx, screenPoints, { invalidSegmentCenter: true });
   }
+
   public validate(): boolean {
     if (this.points.length === 0 || !this.z) return false;
     return true;
   }
 
   public mouseMoveHandler(ev: ViewerEvent): void {
-    // TODO: doramari
+    const viewer = ev.viewer;
+    const viewState = viewer.getState();
+    if (!viewer || !viewState) return;
+    if (viewState.type !== 'mpr') return;
+    if (!this.editable) return;
+
+    // to prevent to edit unvisible polyline.
+    const drawingColor = this.getDrawingColor(viewState.section);
+    if (Object.values(drawingColor).length === 0) return;
+
+    this.handleType = this.hitTest(ev);
+    if (this.handleType) {
+      ev.stopPropagation();
+      viewer.setCursorStyle(cursorTypes[this.handleType.hitType].cursor);
+      viewer.setHoveringAnnotation(this);
+      viewer.renderAnnotations();
+    } else if (viewer.getHoveringAnnotation() === this) {
+      viewer.setHoveringAnnotation(undefined);
+      viewer.setCursorStyle('');
+      viewer.renderAnnotations();
+    }
   }
 
   public dragStartHandler(ev: ViewerEvent): void {
-    // TODO: doramari
+    const viewer = ev.viewer;
+    const viewState = viewer.getState();
+    if (!viewer || !viewState) return;
+    if (viewState.type !== 'mpr') return;
+    if (!this.editable) return;
+
+    if (viewer.getHoveringAnnotation() !== this) return;
+    ev.stopPropagation();
+
+    this.handleType = this.hitTest(ev);
+    if (!this.handleType) return;
+
+    const originalBoundingBox = this.boundingBox3();
+
+    this.dragInfo = {
+      dragStartPoint3: convertViewerPointToVolumePoint(
+        viewer,
+        ev.viewerX!,
+        ev.viewerY!
+      ).toArray() as Vector3D,
+      originalPoints: [...this.points],
+      originalBoundingBox: [
+        originalBoundingBox.min.toArray() as Vector3D,
+        originalBoundingBox.max.toArray() as Vector3D
+      ]
+    };
   }
 
   public dragHandler(ev: ViewerEvent): void {
-    // TODO: doramari
+    const viewer = ev.viewer;
+    const viewState = viewer.getState();
+    if (!viewer || !viewState) return;
+    if (viewState.type !== 'mpr') return;
+    if (!this.dragInfo) return;
+
+    if (viewer.getHoveringAnnotation() !== this) return;
+    ev.stopPropagation();
+
+    const evPoint: [number, number] = [ev.viewerX!, ev.viewerY!];
+
+    const resolution: [number, number] = viewer.getResolution();
+
+    const {
+      dragStartPoint3,
+      originalPoints,
+      originalBoundingBox
+    } = this.dragInfo;
+
+    const draggedPoint3 = convertScreenCoordinateToVolumeCoordinate(
+      viewState.section,
+      new Vector2().fromArray(resolution),
+      new Vector2().fromArray(evPoint)
+    );
+
+    const draggedTotal3 = new Vector3().subVectors(
+      draggedPoint3,
+      new Vector3(...dragStartPoint3)
+    );
+
+    if (!this.handleType) return;
+    const { hitType, findHitPointIndex } = this.handleType;
+    if (hitType === 'point-move') {
+      // Move a point
+      const targetOriginalPoint = [...originalPoints[findHitPointIndex]];
+      this.points[findHitPointIndex] = [
+        targetOriginalPoint[0] + draggedTotal3.x,
+        targetOriginalPoint[1] + draggedTotal3.y
+      ];
+    } else {
+      // Resize
+    }
+
+    this.annotationUpdated(viewer);
+  }
+
+  protected annotationUpdated(viewer: Viewer): void {
+    const comp = viewer.getComposition();
+    if (!comp) return;
+    comp.dispatchAnnotationChanging(this);
+    comp.annotationUpdated();
   }
 
   public dragEndHandler(ev: ViewerEvent): void {
     // TODO: doramari
   }
 
-  private hitTest(viewer: Viewer, evPoint: Vector2, point: Vector3D): boolean {
+  protected boundingBox3() {
+    const points = this.points;
+    const box = new Box3().makeEmpty();
+    points.forEach(point => box.expandByPoint(new Vector3(...point, this.z)));
+    return box;
+  }
+
+  protected boundingBox2(viewer: Viewer) {
+    const box3 = this.boundingBox3();
+    const minPoint = convertVolumePointToViewerPoint(
+      viewer,
+      ...(box3.min.toArray() as Vector3D)
+    );
+    const maxPoint = convertVolumePointToViewerPoint(
+      viewer,
+      ...(box3.max.toArray() as Vector3D)
+    );
+    const box = new Box2(minPoint, maxPoint);
+    return box;
+  }
+
+  protected hitTest(
+    ev: ViewerEvent
+  ): { hitType: PolylineHitType; findHitPointIndex: number } | undefined {
+    const viewer = ev.viewer;
+    const evPoint = new Vector2(ev.viewerX!, ev.viewerY!);
+
+    const findHitPointIndex = this.findHitPointIndex(viewer, evPoint);
+    if (findHitPointIndex > -1) {
+      return { hitType: 'point-move', findHitPointIndex };
+    }
+
+    const hitType = hitBoundingRectWithHandles(
+      evPoint,
+      this.boundingBox2(viewer),
+      handleSize
+    );
+    return hitType
+      ? {
+          hitType,
+          findHitPointIndex
+        }
+      : undefined;
+  }
+
+  protected hitPointTest(
+    viewer: Viewer,
+    evPoint: Vector2,
+    point: Vector3D
+  ): boolean {
     const hitPoint = convertVolumePointToViewerPoint(viewer, ...point);
     const hitBox = new Box2(
-      new Vector2(hitPoint.x - this.radius, hitPoint.y - this.radius),
-      new Vector2(hitPoint.x + this.radius, hitPoint.y + this.radius)
+      new Vector2(hitPoint.x - handleSize, hitPoint.y - handleSize),
+      new Vector2(hitPoint.x + handleSize, hitPoint.y + handleSize)
     );
     return hitRectangle(evPoint, hitBox, handleSize);
   }
 
-  public findHitPointIndex(ev: ViewerEvent): number {
-    if (this.points.length === 0) return -1;
-
-    const viewer = ev.viewer;
-    const evPoint = new Vector2(ev.viewerX!, ev.viewerY!);
-
+  protected findHitPointIndex(viewer: Viewer, evPoint: Vector2): number {
     return this.points.findIndex(point =>
-      this.hitTest(viewer, evPoint, [...point, this.z!])
+      this.hitPointTest(viewer, evPoint, [...point, this.z!])
     );
   }
 
-  public isHitFirstPoint(ev: ViewerEvent): boolean {
-    if (this.points.length === 0) return false;
+  public equalsPoint(ev: ViewerEvent, targetPointIndex: number): boolean {
+    if (
+      !this.z ||
+      targetPointIndex < 0 ||
+      targetPointIndex >= this.points.length
+    )
+      return false;
 
     const viewer = ev.viewer;
     const evPoint = new Vector2(ev.viewerX!, ev.viewerY!);
-    const point = [...this.points[0], this.z!] as Vector3D;
-
-    return this.hitTest(viewer, evPoint, point);
+    const targetPoint = [...this.points[targetPointIndex], this.z] as Vector3D;
+    return this.hitPointTest(viewer, evPoint, targetPoint);
   }
+
+
 }

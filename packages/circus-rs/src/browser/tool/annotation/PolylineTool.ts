@@ -44,7 +44,17 @@ export default class PolylineTool extends ToolBaseClass<ToolOptions> {
   };
 
   public mouseMoveHandler(ev: ViewerEvent): void {
-    ev.stopPropagation();
+    switch (this.mode) {
+      case 'readOnly':
+        // ignore
+        return;
+      case 'creation':
+        ev.stopPropagation();
+        break;
+      case 'deformation':
+        // TODO:doramari
+        break;
+    }
   }
 
   public dragStartHandler(ev: ViewerEvent): void {
@@ -92,6 +102,8 @@ export default class PolylineTool extends ToolBaseClass<ToolOptions> {
     // TODO: Check the Tool default settings
     const antn = new Polyline();
     antn.editable = true;
+    // antn.fillMode = 'nonzero';
+    // antn.boundingBoxOutline = undefined;
     return antn;
   }
 
@@ -111,10 +123,10 @@ export default class PolylineTool extends ToolBaseClass<ToolOptions> {
       antn.z = evPoint.z;
     }
 
-    if (antn.isHitFirstPoint(ev)) {
+    if (antn.equalsPoint(ev, 0)) {
       antn.closed = true;
       this.concreteAnnotation();
-    } else {
+    } else if (!antn.equalsPoint(ev, antn.points.length - 1)) {
       antn.points.push(point);
     }
 

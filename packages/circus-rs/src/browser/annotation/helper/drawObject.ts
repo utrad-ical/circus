@@ -93,9 +93,9 @@ export function drawPath(
   style: {
     closePath: boolean;
     lineWidth: number;
-    strokeStyle: string;
-    fillStyle: string;
-    fillRule: CanvasFillRule;
+    strokeStyle?: string;
+    fillStyle?: string;
+    fillRule?: CanvasFillRule;
   }
 ): void {
   if (vertices.length === 0) return;
@@ -112,7 +112,7 @@ export function drawPath(
       ctx.closePath();
     }
 
-    if (style.lineWidth > 0) {
+    if (style.strokeStyle && style.lineWidth > 0) {
       ctx.lineWidth = style.lineWidth;
       ctx.strokeStyle = style.strokeStyle;
       ctx.stroke();

@@ -300,6 +300,10 @@ export default class Polyline implements Annotation, ViewerEventTarget {
     this.annotationUpdated(viewer);
   }
 
+  public dragEndHandler(ev: ViewerEvent): void {
+    // TODO: doramari
+  }
+
   protected annotationUpdated(viewer: Viewer): void {
     const comp = viewer.getComposition();
     if (!comp) return;
@@ -307,8 +311,18 @@ export default class Polyline implements Annotation, ViewerEventTarget {
     comp.annotationUpdated();
   }
 
-  public dragEndHandler(ev: ViewerEvent): void {
-    // TODO: doramari
+  public equalsPoint(ev: ViewerEvent, targetPointIndex: number): boolean {
+    if (
+      !this.z ||
+      targetPointIndex < 0 ||
+      targetPointIndex >= this.points.length
+    )
+      return false;
+
+    const viewer = ev.viewer;
+    const evPoint = new Vector2(ev.viewerX!, ev.viewerY!);
+    const targetPoint = [...this.points[targetPointIndex], this.z] as Vector3D;
+    return this.hitPointTest(viewer, evPoint, targetPoint);
   }
 
   protected boundingBox3() {
@@ -373,19 +387,5 @@ export default class Polyline implements Annotation, ViewerEventTarget {
     return this.points.findIndex(point =>
       this.hitPointTest(viewer, evPoint, [...point, this.z!])
     );
-  }
-
-  public equalsPoint(ev: ViewerEvent, targetPointIndex: number): boolean {
-    if (
-      !this.z ||
-      targetPointIndex < 0 ||
-      targetPointIndex >= this.points.length
-    )
-      return false;
-
-    const viewer = ev.viewer;
-    const evPoint = new Vector2(ev.viewerX!, ev.viewerY!);
-    const targetPoint = [...this.points[targetPointIndex], this.z] as Vector3D;
-    return this.hitPointTest(viewer, evPoint, targetPoint);
   }
 }

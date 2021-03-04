@@ -19,11 +19,13 @@ describe('get one my list', () => {
     const res = await ax.bob.get('api/mylists/01ewetw0chv8v5vxdtjdf6x9rk');
     expect(res.status).toBe(200);
     expect(res.data).toHaveProperty('name');
+    expect(res.data).toHaveProperty('resourceIds');
   });
 
-  test('404', async () => {
+  test('throw 404 for nonexistent list id', async () => {
     const res = await ax.bob.get('api/mylists/dummy');
     expect(res.status).toBe(404);
+    expect(res.data.error).toBe('This my list does not exist');
   });
 });
 

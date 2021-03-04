@@ -27,8 +27,10 @@ const getList = async (
 export const handleGet: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const myListId = ctx.params.myListId;
-    const { userList } = await getList(ctx, models, myListId);
-    ctx.body = userList;
+    const { userList, list } = await getList(ctx, models, myListId);
+    const resourceIds = list.items.map((item: any) => item.resourceId);
+    const userListWithResourceIds = { ...userList, resourceIds };
+    ctx.body = userListWithResourceIds;
   };
 };
 

@@ -8,25 +8,22 @@ import ViewerEvent from '../../viewer/ViewerEvent';
 import ToolBaseClass, { ToolOptions } from '../Tool';
 import { convertViewerPointToVolumePoint } from '../tool-util';
 
-type PolylineToolMode = 'readOnly' | 'creation' | 'deformation';
-
 /**
- * PolylineTool creates and edits Polyline.
+ * PolylineTool
  */
 export default class PolylineTool extends ToolBaseClass<ToolOptions> {
   protected focusedAnnotation?: Polyline;
 
-  protected mode: PolylineToolMode = 'creation';
+  protected mode: 'open' | 'closed' = 'open';
 
   public activate(viewer: Viewer): void {
-    this.mode = 'creation';
-    this.focusedAnnotation = this.createAnnotation();
+    this.initializeAnnotation();
     viewer.primaryEventTarget = this;
     window.addEventListener('keydown', this.keyDownHandler);
   }
 
   public deactivate(viewer: Viewer): void {
-    this.focusedAnnotation = undefined;
+    this.concreteAnnotation();
     window.removeEventListener('keydown', this.keyDownHandler);
     viewer.primaryEventTarget = undefined;
   }
@@ -44,17 +41,7 @@ export default class PolylineTool extends ToolBaseClass<ToolOptions> {
   };
 
   public mouseMoveHandler(ev: ViewerEvent): void {
-    switch (this.mode) {
-      case 'readOnly':
-        // ignore
-        return;
-      case 'creation':
-        ev.stopPropagation();
-        break;
-      case 'deformation':
-        // TODO:doramari
-        break;
-    }
+    ev.stopPropagation();
   }
 
   public dragStartHandler(ev: ViewerEvent): void {
@@ -65,27 +52,22 @@ export default class PolylineTool extends ToolBaseClass<ToolOptions> {
     const section = viewState.section;
     const orientation = detectOrthogonalSection(section);
     if (orientation !== 'axial') return;
-    if (!this.focusedAnnotation) return;
 
-    switch (this.mode) {
-      case 'readOnly':
-        return;
-      case 'creation':
-        const antn = this.creationHandler(ev, this.focusedAnnotation);
-        this.annotationUpdated(comp, antn);
-        break;
-      case 'deformation':
-        // TODO:doramari
-        break;
+    if (this.mode === 'closed') {
+      this.initializeAnnotation();
     }
+
+    if (!this.focusedAnnotation) return;
+    const antn = this.creationHandler(ev, this.focusedAnnotation);
+    this.annotationUpdated(comp, antn);
   }
 
   public dragHandler(ev: ViewerEvent): void {
-    // TODO:doramari
+    ev.stopPropagation();
   }
 
   public dragEndHandler(ev: ViewerEvent): void {
-    // TODO:doramari
+    ev.stopPropagation();
   }
 
   public dblClickHandler(ev: ViewerEvent): void {
@@ -102,8 +84,6 @@ export default class PolylineTool extends ToolBaseClass<ToolOptions> {
     // TODO: Check the Tool default settings
     const antn = new Polyline();
     antn.editable = true;
-    // antn.fillMode = 'nonzero';
-    // antn.boundingBoxOutline = undefined;
     return antn;
   }
 
@@ -133,12 +113,13 @@ export default class PolylineTool extends ToolBaseClass<ToolOptions> {
     return antn;
   }
 
-  protected concreteAnnotation(): void {
-    this.mode = 'readOnly';
+  protected initializeAnnotation(): void {
+    this.mode = 'open';
+    this.focusedAnnotation = this.createAnnotation();
   }
 
-  protected validateAnnotation(): boolean {
-    if (!this.focusedAnnotation) return false;
-    return this.focusedAnnotation.validate();
+  protected concreteAnnotation(): void {
+    this.mode = 'closed';
+    this.focusedAnnotation = undefined;
   }
 }

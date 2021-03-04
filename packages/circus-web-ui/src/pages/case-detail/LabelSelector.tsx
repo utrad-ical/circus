@@ -59,13 +59,13 @@ const LabelSelector: React.FC<{
 
 const StyledSeriesUl = styled.ul`
   padding: 0;
-  border-top: 1px solid silver;
+  border-top: 1px solid ${(props: any) => props.theme.border};
 
   ul.case-label-list {
     margin: 0;
     padding-left: 10px;
     &.active {
-      background-color: silver;
+      background-color: ${(props: any) => props.theme.activeBackground};
     }
   }
 
@@ -476,13 +476,13 @@ const StyledLabelLi = styled.li`
   flex-direction: row;
   align-items: center;
   padding: 3px 0px 3px 10px;
-  border-bottom: 1px solid silver;
+  border-bottom: 1px solid ${(props: any) => props.theme.border};
   .color-preview {
     display: block;
     flex: 0 0 25px;
     height: 20px;
     text-align: center;
-    border: 1px solid silver;
+    border: 1px solid ${(props: any) => props.theme.border};
   }
   .caption {
     pointer-events: none; /* Needed for drag & drop */
@@ -498,7 +498,7 @@ const StyledLabelLi = styled.li`
   }
   .hint {
     margin-left: 10px;
-    color: silver;
+    opacity: 0.7;
     font-size: 80%;
   }
   &:hover {

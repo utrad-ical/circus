@@ -1,8 +1,9 @@
 import {
   Section,
   Vector2D,
-  Vector3D
-} from 'circus-rs/src/common/geometry';
+  Vector3D,
+  verticesOfBox
+} from '../../common/geometry';
 import { Box2, Box3, Vector2, Vector3 } from 'three';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
 import {
@@ -159,8 +160,6 @@ export default class Polyline implements Annotation, ViewerEventTarget {
       });
     }
 
-    if (!this.handleType) return;
-
     // Draw bounding box outline
     const drawBoundingBoxOutlineStyle = this.boundingBoxOutline;
     if (drawBoundingBoxOutlineStyle && this.points.length > 1) {
@@ -173,8 +172,20 @@ export default class Polyline implements Annotation, ViewerEventTarget {
       );
     }
 
+    if (!this.handleType) return;
+
     // Draw handle frame
-    drawHandleFrame(ctx, screenPoints, { invalidSegmentCenter: true });
+    if (this.points.length > 1) {
+      drawHandleFrame(ctx, verticesOfBox(this.boundingBox2(viewer)), {
+        handleSize,
+        strokeStyle: '#ffff00'
+      });
+    }
+
+    drawHandleFrame(ctx, screenPoints, {
+      handleSize,
+      invalidSegmentCenter: true
+    });
   }
 
   public validate(): boolean {
@@ -275,8 +286,15 @@ export default class Polyline implements Annotation, ViewerEventTarget {
         targetOriginalPoint[0] + draggedTotal3.x,
         targetOriginalPoint[1] + draggedTotal3.y
       ];
+    } else if (hitType === 'rect-outline') {
+      // Move
+      const targetOriginalPoints = [...originalPoints];
+      this.points = targetOriginalPoints.map(targetOriginalPoint => [
+        targetOriginalPoint[0] + draggedTotal3.x,
+        targetOriginalPoint[1] + draggedTotal3.y
+      ]);
     } else {
-      // Resize
+      //TODO: Resize
     }
 
     this.annotationUpdated(viewer);
@@ -370,6 +388,4 @@ export default class Polyline implements Annotation, ViewerEventTarget {
     const targetPoint = [...this.points[targetPointIndex], this.z] as Vector3D;
     return this.hitPointTest(viewer, evPoint, targetPoint);
   }
-
-
 }

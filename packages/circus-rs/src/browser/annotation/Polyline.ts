@@ -1,10 +1,10 @@
+import { Box2, Box3, Vector2, Vector3 } from 'three';
 import {
   Section,
   Vector2D,
   Vector3D,
   verticesOfBox
 } from '../../common/geometry';
-import { Box2, Box3, Vector2, Vector3 } from 'three';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
 import {
   convertScreenCoordinateToVolumeCoordinate,
@@ -27,6 +27,7 @@ import {
   hitBoundingRectWithHandles,
   hitRectangle
 } from './helper/hit-test';
+import relocation from './helper/relocation';
 
 const handleSize = 5;
 
@@ -99,9 +100,9 @@ export default class Polyline implements Annotation, ViewerEventTarget {
 
   private dragInfo:
     | {
-        dragStartPoint3: Vector3D;
+        dragStartVolumePoint3: Vector3D;
         originalPoints: Vector2D[];
-        originalBoundingBox: [Vector3D, Vector3D] | undefined;
+        originalBoundingBox: [number[], number[]] | undefined;
       }
     | undefined = undefined;
 
@@ -233,15 +234,15 @@ export default class Polyline implements Annotation, ViewerEventTarget {
     const originalBoundingBox = this.boundingBox3();
 
     this.dragInfo = {
-      dragStartPoint3: convertViewerPointToVolumePoint(
+      dragStartVolumePoint3: convertViewerPointToVolumePoint(
         viewer,
         ev.viewerX!,
         ev.viewerY!
       ).toArray() as Vector3D,
       originalPoints: [...this.points],
       originalBoundingBox: [
-        originalBoundingBox.min.toArray() as Vector3D,
-        originalBoundingBox.max.toArray() as Vector3D
+        originalBoundingBox.min.toArray(),
+        originalBoundingBox.max.toArray()
       ]
     };
   }
@@ -261,11 +262,12 @@ export default class Polyline implements Annotation, ViewerEventTarget {
     const resolution: [number, number] = viewer.getResolution();
 
     const {
-      dragStartPoint3,
+      dragStartVolumePoint3,
       originalPoints,
       originalBoundingBox
     } = this.dragInfo;
 
+    const dragStartPoint3 = new Vector3(...dragStartVolumePoint3);
     const draggedPoint3 = convertScreenCoordinateToVolumeCoordinate(
       viewState.section,
       new Vector2().fromArray(resolution),
@@ -274,7 +276,7 @@ export default class Polyline implements Annotation, ViewerEventTarget {
 
     const draggedTotal3 = new Vector3().subVectors(
       draggedPoint3,
-      new Vector3(...dragStartPoint3)
+      dragStartPoint3
     );
 
     if (!this.handleType) return;
@@ -286,15 +288,24 @@ export default class Polyline implements Annotation, ViewerEventTarget {
         targetOriginalPoint[0] + draggedTotal3.x,
         targetOriginalPoint[1] + draggedTotal3.y
       ];
-    } else if (hitType === 'rect-outline') {
-      // Move
+    } else if (hitType as BoundingRectWithHandleHitType) {
+      // Move or Resize
       const targetOriginalPoints = [...originalPoints];
-      this.points = targetOriginalPoints.map(targetOriginalPoint => [
-        targetOriginalPoint[0] + draggedTotal3.x,
-        targetOriginalPoint[1] + draggedTotal3.y
-      ]);
+      const maintainAspectRatio = !!ev.shiftKey;
+      this.points = relocation(
+        hitType,
+        'axial',
+        targetOriginalPoints.map(targetOriginalPoint => [
+          ...targetOriginalPoint,
+          this.z!
+        ]),
+        originalBoundingBox!,
+        dragStartPoint3,
+        draggedPoint3,
+        maintainAspectRatio
+      ).map(p => [p[0], p[1]]);
     } else {
-      //TODO: Resize
+      throw new Error('Unsupported PolylineHitType');
     }
 
     this.annotationUpdated(viewer);

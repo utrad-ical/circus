@@ -1,12 +1,10 @@
 import { Vector3D } from 'circus-rs/src/common/geometry';
-import { Vector3 } from 'three';
+import { Box3, Vector3 } from 'three';
 import { OrientationString } from '../../section-util';
 import { BoundingRectWithHandleHitType } from './hit-test';
 
 type BoundingBox = [Vector3, Vector3];
 type Axis = 'x' | 'y' | 'z';
-
-const allAxes: Axis[] = ['x', 'y', 'z'];
 
 const relocation = (
   handleType: BoundingRectWithHandleHitType,
@@ -59,22 +57,17 @@ const relocation = (
   const newBbSizes = refAxes.map(ax => Math.abs(newBb[0][ax] - newBb[1][ax]));
   const ratios = originalBbSizes.map((s, i) => newBbSizes[i] / s);
 
-  if (!maintainAspectRatio)
+  if (!maintainAspectRatio) {
+    const nsAxisOrigin = fixedSide.has('south') ? bb[1][nsAxis] : bb[0][nsAxis];
+    const ewAxisOrigin = fixedSide.has('east') ? bb[1][ewAxis] : bb[0][ewAxis];
+    const nsInverted = draggedPoint[nsAxis] - nsAxisOrigin > 0;
+    const ewInverted = draggedPoint[ewAxis] - ewAxisOrigin > 0;
     return originalPoints.map(originalPoint => {
       const p = new Vector3(...originalPoint);
-      const nsAxisOrigin = fixedSide.has('south')
-        ? bb[1][nsAxis]
-        : bb[0][nsAxis];
-      const ewAxisOrigin = fixedSide.has('east')
-        ? bb[1][ewAxis]
-        : bb[0][ewAxis];
       const nsSize = Math.abs(p[nsAxis] - nsAxisOrigin);
       const ewSize = Math.abs(p[ewAxis] - ewAxisOrigin);
       const nsNewSize = nsSize * ratios[0];
       const ewNewSize = ewSize * (ratios.length == 1 ? ratios[0] : ratios[1]);
-      const nsInverted = draggedPoint[nsAxis] - nsAxisOrigin > 0;
-      const ewInverted = draggedPoint[ewAxis] - ewAxisOrigin > 0;
-
       const newP = p.clone();
       if (fixedSide.has('north') || fixedSide.has('south')) {
         newP[nsAxis] = nsAxisOrigin + nsNewSize * (nsInverted ? 1 : -1);
@@ -84,6 +77,7 @@ const relocation = (
       }
       return newP.toArray() as Vector3D;
     });
+  }
 
   //
   //TODO: Maintain aspect ratio mode (Shift + Drag)

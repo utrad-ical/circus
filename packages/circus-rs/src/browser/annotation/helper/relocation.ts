@@ -55,36 +55,33 @@ const relocation = (
   if (fixedSide.has('north') || fixedSide.has('south')) refAxes.push(nsAxis);
   if (fixedSide.has('east') || fixedSide.has('west')) refAxes.push(ewAxis);
 
-  const originalSizes = refAxes.map(ax => Math.abs(bb[0][ax] - bb[1][ax]));
-  const newSizes = refAxes.map(ax => Math.abs(newBb[0][ax] - newBb[1][ax]));
-  const ratios = originalSizes.map((s, i) => newSizes[i] / s);
+  const originalBbSizes = refAxes.map(ax => Math.abs(bb[0][ax] - bb[1][ax]));
+  const newBbSizes = refAxes.map(ax => Math.abs(newBb[0][ax] - newBb[1][ax]));
+  const ratios = originalBbSizes.map((s, i) => newBbSizes[i] / s);
 
   if (!maintainAspectRatio)
     return originalPoints.map(originalPoint => {
       const p = new Vector3(...originalPoint);
-      const nsAxisOrigin = fixedSide.has('north')
-        ? bb[0][nsAxis]
-        : fixedSide.has('south')
+      const nsAxisOrigin = fixedSide.has('south')
         ? bb[1][nsAxis]
         : bb[0][nsAxis];
-
-      const ewAxisOrigin = fixedSide.has('west')
-        ? bb[0][ewAxis]
-        : fixedSide.has('east')
+      const ewAxisOrigin = fixedSide.has('east')
         ? bb[1][ewAxis]
         : bb[0][ewAxis];
-
       const nsSize = Math.abs(p[nsAxis] - nsAxisOrigin);
       const ewSize = Math.abs(p[ewAxis] - ewAxisOrigin);
-      const nsDelta = nsSize * ratios[0];
-      const ewDelta = ewSize * (ratios.length == 1 ? ratios[0] : ratios[1]);
+      const nsNewSize = nsSize * ratios[0];
+      const ewNewSize = ewSize * (ratios.length == 1 ? ratios[0] : ratios[1]);
+      const nsInverted = draggedPoint[nsAxis] - nsAxisOrigin > 0;
+      const ewInverted = draggedPoint[ewAxis] - ewAxisOrigin > 0;
 
       const newP = p.clone();
-      if (fixedSide.has('north')) newP[nsAxis] = nsAxisOrigin + nsDelta;
-      else if (fixedSide.has('south')) newP[nsAxis] = nsAxisOrigin - nsDelta;
-      if (fixedSide.has('west')) newP[ewAxis] = ewAxisOrigin + ewDelta;
-      else if (fixedSide.has('east')) newP[ewAxis] = ewAxisOrigin - ewDelta;
-
+      if (fixedSide.has('north') || fixedSide.has('south')) {
+        newP[nsAxis] = nsAxisOrigin + nsNewSize * (nsInverted ? 1 : -1);
+      }
+      if (fixedSide.has('west') || fixedSide.has('east')) {
+        newP[ewAxis] = ewAxisOrigin + ewNewSize * (ewInverted ? 1 : -1);
+      }
       return newP.toArray() as Vector3D;
     });
 
@@ -92,7 +89,6 @@ const relocation = (
   //TODO: Maintain aspect ratio mode (Shift + Drag)
   //
   return [];
-
 };
 
 export default relocation;

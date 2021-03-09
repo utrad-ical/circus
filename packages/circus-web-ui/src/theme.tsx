@@ -128,7 +128,7 @@ const GlobalStyle = createGlobalStyle`
   .dropdown-menu {
     background-color: ${(props: any) => props.theme.background};
     border-color: ${(props: any) => props.theme.border};
-    li > a {
+    > li > a {
       color: ${(props: any) => props.theme.primaryText};
       &:hover, &:focus {
         background-color: ${(props: any) => props.theme.secondaryBackground};
@@ -173,6 +173,10 @@ const GlobalStyle = createGlobalStyle`
     background-color: ${(props: any) => props.theme.background};
     color: ${(props: any) => props.theme.primaryText};
     border-color: ${(props: any) => props.theme.border};
+  }
+  textarea {
+    background-color: ${(props: any) => props.theme.background};
+    color: ${(props: any) => props.theme.primaryText};
   }
 
   // WELL

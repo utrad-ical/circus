@@ -61,16 +61,14 @@ const FatVolumetry = React.forwardRef<any, FeedbackListenerProps<never, any>>(
       options
     } = props;
 
-    const {
-      jobId,
-      results: { results }
-    } = job;
+    const { jobId, results } = job;
 
     const ctImgRef = useRef<HTMLImageElement>(null);
     const resultImgRef = useRef<HTMLImageElement>(null);
 
     const detectedSlice = () => {
-      const sliceNum = results.umbilicusPos[2];
+      const sliceNum =
+        results.umbilicusPos?.[2] ?? results.sliceResults[0].sliceNum;
       return results.sliceResults.find((s: any) => s.sliceNum == sliceNum).rank;
     };
     const [slice, setSlice] = useState(detectedSlice);
@@ -90,8 +88,8 @@ const FatVolumetry = React.forwardRef<any, FeedbackListenerProps<never, any>>(
         const url = URL.createObjectURL(blob);
         element.current!.src = url;
       };
-      load(`ct${slice}.png`, ctImgRef);
-      load(`result${slice}.png`, resultImgRef);
+      load(`mr${String(slice).padStart(3, '0')}.png`, ctImgRef);
+      load(`result${String(slice).padStart(3, '0')}.png`, resultImgRef);
       const sliceInfo = results.sliceResults.find((s: any) => s.rank === slice);
       setSliceInfo(sliceInfo || {});
     }, [slice, jobId, api, results]);
@@ -132,14 +130,28 @@ const FatVolumetry = React.forwardRef<any, FeedbackListenerProps<never, any>>(
           <p>Summary</p>
           <table className="summary table table-hover">
             <tbody>
-              {row('SAT Volume', round(results.satVolume), '[cm3]', 'sat')}
-              {row('VAT Volume', round(results.vatVolume), '[cm3]', 'vat')}
-              {row('VAT volume/SAT volume', round(results.volRatio))}
-              {row('Bone volume', round(results.boneVolume), '[cm3]')}
-              {row('Muscle volume', round(results.muscleVolume), '[cm3]')}
               {row(
+                'SAT Volume',
+                round(results.results.satVolume),
+                '[cm3]',
+                'sat'
+              )}
+              {row(
+                'VAT Volume',
+                round(results.results.vatVolume),
+                '[cm3]',
+                'vat'
+              )}
+              {row('VAT volume/SAT volume', round(results.results.volRatio))}
+              {/* row('Bone volume', round(results.results.boneVolume), '[cm3]') */}
+              {/* row(
+                'Muscle volume',
+                round(results.results.muscleVolume),
+                '[cm3]'
+              ) */}
+              {/* row(
                 'Detected umblicus slice',
-                results.umbilicusPos[2],
+                results.umbilicusPos?.[2],
                 <IconButton
                   bsStyle="primary"
                   bsSize="xs"
@@ -148,19 +160,19 @@ const FatVolumetry = React.forwardRef<any, FeedbackListenerProps<never, any>>(
                 >
                   Jump
                 </IconButton>
-              )}
+              ) */}
             </tbody>
           </table>
           <p>Slice Information</p>
           <table className="table table-hover">
             <tbody>
               {row('Slice number', sliceInfo.sliceNum)}
-              {row('Slice location', sliceInfo.sliceLocation)}
+              {/* row('Slice location', sliceInfo.sliceLocation) */}
               {row('SAT area', round(sliceInfo.areaSAT), '[cm2]', 'sat')}
               {row('VAT area', round(sliceInfo.areaVAT), '[cm2]', 'vat')}
               {row('VAT area/SAT area', round(sliceInfo.areaRatio))}
-              {row('Bone area', round(sliceInfo.areaBone), '[cm2]')}
-              {row('Muscle area', round(sliceInfo.areaMuscle), '[cm2]')}
+              {/* row('Bone area', round(sliceInfo.areaBone), '[cm2]') */}
+              {/* row('Muscle area', round(sliceInfo.areaMuscle), '[cm2]') */}
               {row(
                 'Body contour length',
                 round(sliceInfo.bodyContourLength),

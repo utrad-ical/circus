@@ -91,10 +91,46 @@ const relocation = (
   }
 
   /**
-   * TODO: Maintain aspect ratio mode (Shift + Drag)
+   * Maintain aspect ratio mode (Shift + Drag)
    */
 
-  return [];
+  // dragging axes (x, y or z) on the screen
+  // the length can be 1 (dragging on the side) or 2 (dragging on the corner)
+  const refAxes = (() => {
+    const refs: Axis[] = [];
+    if (fixedSide.has('north') || fixedSide.has('south')) refs.push(nsAxis);
+    if (fixedSide.has('east') || fixedSide.has('west')) refs.push(ewAxis);
+    return refs;
+  })();
+  const draggingCorner = refAxes.length === 2;
+
+  const winningRatio = draggingCorner
+    ? Math.max(...Object.values(sizeRatios))
+    : sizeRatios[refAxes[0]];
+
+  const deltaOrigin = (() => {
+    const delta = {
+      [nsAxis]: 0,
+      [ewAxis]: 0
+    };
+    if (draggingCorner) return delta;
+
+    if (fixedSide.has('east') || fixedSide.has('west')) {
+      delta[nsAxis] = (originalBbSize(nsAxis) * (1 - winningRatio)) / 2;
+    }
+    if (fixedSide.has('south') || fixedSide.has('north')) {
+      delta[ewAxis] = (originalBbSize(ewAxis) * (1 - winningRatio)) / 2;
+    }
+    return delta;
+  })();
+
+  return originalPoints.map(originalPoint => {
+    const p = new Vector3(...originalPoint);
+    const newP = p.clone();
+    newP[nsAxis] = newLocation(nsAxis, p, winningRatio) + deltaOrigin[nsAxis];
+    newP[ewAxis] = newLocation(ewAxis, p, winningRatio) + deltaOrigin[ewAxis];
+    return newP.toArray() as Vector3D;
+  });
 };
 
 export default relocation;

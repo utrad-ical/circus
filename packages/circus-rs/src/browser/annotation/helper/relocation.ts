@@ -1,5 +1,5 @@
 import { Vector3D } from 'circus-rs/src/common/geometry';
-import { Box3, Vector3 } from 'three';
+import { Vector3 } from 'three';
 import { OrientationString } from '../../section-util';
 import { BoundingRectWithHandleHitType } from './hit-test';
 
@@ -28,60 +28,72 @@ const relocation = (
   const nsAxis: Axis = orientation === 'axial' ? 'y' : 'z';
   const ewAxis: Axis = orientation === 'sagittal' ? 'y' : 'x';
 
-  const nsDelta = draggedPoint[nsAxis] - dragStartPoint[nsAxis];
-  const ewDelta = draggedPoint[ewAxis] - dragStartPoint[ewAxis];
-
-  const fixedSide = new Set<'north' | 'south' | 'east' | 'west'>();
-  if (/south/.test(handleType)) fixedSide.add('north');
-  else if (/north/.test(handleType)) fixedSide.add('south');
-  if (/east/.test(handleType)) fixedSide.add('west');
-  else if (/west/.test(handleType)) fixedSide.add('east');
+  const fixedSide = (() => {
+    const set = new Set<'north' | 'south' | 'east' | 'west'>();
+    if (/south/.test(handleType)) set.add('north');
+    else if (/north/.test(handleType)) set.add('south');
+    if (/east/.test(handleType)) set.add('west');
+    else if (/west/.test(handleType)) set.add('east');
+    return set;
+  })();
 
   const bb: BoundingBox = [
     new Vector3().fromArray(originalBoundingBox3[0]),
     new Vector3().fromArray(originalBoundingBox3[1])
   ];
-  const newBb: BoundingBox = [bb[0].clone(), bb[1].clone()];
-  if (fixedSide.has('north')) newBb[1][nsAxis] += nsDelta;
-  else if (fixedSide.has('south')) newBb[0][nsAxis] += nsDelta;
-  if (fixedSide.has('west')) newBb[1][ewAxis] += ewDelta;
-  else if (fixedSide.has('east')) newBb[0][ewAxis] += ewDelta;
 
-  // dragging axes (x, y or z) on the screen
-  // the length can be 1 (dragging on the side) or 2 (dragging on the corner)
-  const refAxes: Axis[] = [];
-  if (fixedSide.has('north') || fixedSide.has('south')) refAxes.push(nsAxis);
-  if (fixedSide.has('east') || fixedSide.has('west')) refAxes.push(ewAxis);
+  const newBb: BoundingBox = (() => {
+    const nsDelta = draggedPoint[nsAxis] - dragStartPoint[nsAxis];
+    const ewDelta = draggedPoint[ewAxis] - dragStartPoint[ewAxis];
+    const boundingBox: BoundingBox = [bb[0].clone(), bb[1].clone()];
+    if (fixedSide.has('north')) boundingBox[1][nsAxis] += nsDelta;
+    else if (fixedSide.has('south')) boundingBox[0][nsAxis] += nsDelta;
+    if (fixedSide.has('west')) boundingBox[1][ewAxis] += ewDelta;
+    else if (fixedSide.has('east')) boundingBox[0][ewAxis] += ewDelta;
+    return boundingBox;
+  })();
 
-  const originalBbSizes = refAxes.map(ax => Math.abs(bb[0][ax] - bb[1][ax]));
-  const newBbSizes = refAxes.map(ax => Math.abs(newBb[0][ax] - newBb[1][ax]));
-  const ratios = originalBbSizes.map((s, i) => newBbSizes[i] / s);
+  const locationAxisOrigin = {
+    [nsAxis]: fixedSide.has('south') ? bb[1][nsAxis] : bb[0][nsAxis],
+    [ewAxis]: fixedSide.has('east') ? bb[1][ewAxis] : bb[0][ewAxis]
+  };
+
+  const originalBbSize = (ax: Axis) => Math.abs(bb[0][ax] - bb[1][ax]);
+  const newBbSize = (ax: Axis) => Math.abs(newBb[0][ax] - newBb[1][ax]);
+  const sizeRatio = (ax: Axis) => newBbSize(ax) / originalBbSize(ax);
+  const sizeRatios = {
+    [nsAxis]: sizeRatio(nsAxis),
+    [ewAxis]: sizeRatio(ewAxis)
+  };
+
+  const locationInverted = {
+    [nsAxis]: draggedPoint[nsAxis] - locationAxisOrigin[nsAxis] > 0,
+    [ewAxis]: draggedPoint[ewAxis] - locationAxisOrigin[ewAxis] > 0
+  };
+
+  const newLocation = (ax: Axis, originalPoint: Vector3, sizeRatio: number) => {
+    return (
+      locationAxisOrigin[ax] +
+      sizeRatio *
+        Math.abs(locationAxisOrigin[ax] - originalPoint[ax]) *
+        (locationInverted[ax] ? 1 : -1)
+    );
+  };
 
   if (!maintainAspectRatio) {
-    const nsAxisOrigin = fixedSide.has('south') ? bb[1][nsAxis] : bb[0][nsAxis];
-    const ewAxisOrigin = fixedSide.has('east') ? bb[1][ewAxis] : bb[0][ewAxis];
-    const nsInverted = draggedPoint[nsAxis] - nsAxisOrigin > 0;
-    const ewInverted = draggedPoint[ewAxis] - ewAxisOrigin > 0;
     return originalPoints.map(originalPoint => {
       const p = new Vector3(...originalPoint);
-      const nsSize = Math.abs(p[nsAxis] - nsAxisOrigin);
-      const ewSize = Math.abs(p[ewAxis] - ewAxisOrigin);
-      const nsNewSize = nsSize * ratios[0];
-      const ewNewSize = ewSize * (ratios.length == 1 ? ratios[0] : ratios[1]);
       const newP = p.clone();
-      if (fixedSide.has('north') || fixedSide.has('south')) {
-        newP[nsAxis] = nsAxisOrigin + nsNewSize * (nsInverted ? 1 : -1);
-      }
-      if (fixedSide.has('west') || fixedSide.has('east')) {
-        newP[ewAxis] = ewAxisOrigin + ewNewSize * (ewInverted ? 1 : -1);
-      }
+      newP[nsAxis] = newLocation(nsAxis, p, sizeRatios[nsAxis]);
+      newP[ewAxis] = newLocation(ewAxis, p, sizeRatios[ewAxis]);
       return newP.toArray() as Vector3D;
     });
   }
 
-  //
-  //TODO: Maintain aspect ratio mode (Shift + Drag)
-  //
+  /**
+   * TODO: Maintain aspect ratio mode (Shift + Drag)
+   */
+
   return [];
 };
 

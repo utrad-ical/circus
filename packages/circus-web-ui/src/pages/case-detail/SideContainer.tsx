@@ -25,7 +25,7 @@ const StyledSideBar = styled.div`
       text-align: right;
       flex: 0 0 auto;
       color: ${(props: any) => props.theme.brandPrimary};
-      background: white;
+      background: ${(props: any) => props.theme.background};
       .triangle {
         transform: rotate(180deg);
       }

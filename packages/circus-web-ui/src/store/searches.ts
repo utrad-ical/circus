@@ -191,16 +191,16 @@ export const newSearch = (
   params: NewSearchParams,
   clearPrevious?: boolean
 ): AppThunk => {
-  const useParams: SearchParams = { limit: 20, page: 1, ...params };
+  const theParams: SearchParams = { limit: 20, page: 1, ...params };
   return async (dispatch, getState) => {
     const state = getState();
     // if (state.searches.searches[searchName]?.isFetching)
     //   throw new Error('Previous search has not finished.');
     if (clearPrevious) dispatch(clearSearch({ searchName }));
-    if (getState().searches.searches[searchName]) {
+    if (state.searches.searches[searchName]) {
       dispatch(changeSelection({ searchName, ids: [] }));
     }
-    await executeQuery(dispatch, api, searchName, useParams);
+    await executeQuery(dispatch, api, searchName, theParams);
   };
 };
 

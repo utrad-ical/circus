@@ -6,12 +6,18 @@ import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import MyListDropdown from 'components/MyListDropdown';
 import PatientInfoBox from 'components/PatientInfoBox';
-import { DropdownButton, MenuItem } from 'components/react-bootstrap';
+import {
+  DropdownButton,
+  MenuItem,
+  OverlayTrigger,
+  Popover
+} from 'components/react-bootstrap';
 import SearchResultsView, {
   makeSortOptions
 } from 'components/SearchResultsView';
 import TimeDisplay from 'components/TimeDisplay';
-import React, { Fragment } from 'react';
+import { multirange } from 'multi-integer-range';
+import React, { useState, Fragment } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
@@ -25,6 +31,11 @@ const ModalitySpan = styled.span`
   text-align: center;
   background-color: #777777;
   color: white;
+`;
+
+const SeriesPopover = styled(Popover)`
+  font-size: 80%;
+  max-width: none;
 `;
 
 const Modality: DataGridRenderer<any> = props => {
@@ -63,6 +74,40 @@ const Operation: DataGridRenderer<any> = props => {
   );
 };
 
+const UidDisplay: React.FC<{
+  value: { seriesUid: string; studyUid: string };
+}> = React.memo(props => {
+  const { seriesUid, studyUid } = props.value;
+
+  const overlay = (
+    <SeriesPopover
+      className="series-popover"
+      id={`series-popover-${seriesUid.replace(/\./g, '-')}`}
+    >
+      <b>Study UID:</b> {studyUid}
+      <IconButton
+        icon="glyphicon-copy"
+        bsSize="xs"
+        bsStyle="link"
+        onClick={() => navigator.clipboard.writeText(studyUid)}
+      />
+      <br />
+      <b>Series UID:</b> {seriesUid}
+      <IconButton
+        icon="glyphicon-copy"
+        bsSize="xs"
+        bsStyle="link"
+        onClick={() => navigator.clipboard.writeText(seriesUid)}
+      />
+    </SeriesPopover>
+  );
+  return (
+    <OverlayTrigger trigger="click" rootClose placement="top" overlay={overlay}>
+      <IconButton icon="glyphicon-zoom-in" bsStyle="link" bsSize="xs" />
+    </OverlayTrigger>
+  );
+});
+
 const columns: DataGridColumnDefinition<any>[] = [
   { caption: '', className: 'modality', renderer: Modality },
   {
@@ -73,15 +118,35 @@ const columns: DataGridColumnDefinition<any>[] = [
     }
   },
   { caption: 'Series Desc', key: 'seriesDescription' },
+  { caption: 'UID', key: 'seriesUid', renderer: UidDisplay },
   {
-    caption: 'Series Date',
-    className: 'series-date',
-    renderer: props => <TimeDisplay value={props.value.seriesDate} />
+    caption: 'Images',
+    key: 'images',
+    renderer: props => {
+      const { images } = props.value;
+      const mr = multirange(images);
+      const count = mr.length();
+      if (mr.min() === 1 && mr.max() === count) {
+        return <>{count}</>;
+      } else {
+        return (
+          <>
+            {count} ({mr.min()}-{mr.max()})
+          </>
+        );
+      }
+    }
   },
   {
-    caption: 'Import date',
-    className: 'created-at',
-    renderer: props => <TimeDisplay value={props.value.createdAt} />
+    caption: 'Series/Import date',
+    className: 'series-import',
+    renderer: props => (
+      <>
+        <TimeDisplay value={props.value.seriesDate} />
+        <br />
+        <TimeDisplay value={props.value.createdAt} />
+      </>
+    )
   },
   { caption: '', className: 'operation', renderer: Operation }
 ];

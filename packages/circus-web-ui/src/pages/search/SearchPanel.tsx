@@ -85,7 +85,9 @@ const SearchPanel: <T extends {}>(props: {
         resource,
         condition,
         filter: conditionToFilter(condition),
-        sort: defaultSort
+        sort: search?.params?.sort ?? defaultSort,
+        ...(search?.params?.limit > 0 ? { limit: search.params.limit } : {}),
+        ...(search?.params?.page > 0 ? { page: search.params.page } : {})
       })
     );
   }, [
@@ -95,6 +97,7 @@ const SearchPanel: <T extends {}>(props: {
     defaultSort,
     dispatch,
     resource,
+    search,
     searchName
   ]);
 

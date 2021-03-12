@@ -2,9 +2,7 @@ import { Vector3D } from 'circus-rs/src/common/geometry';
 import { Vector3 } from 'three';
 import { OrientationString } from '../../section-util';
 import { BoundingRectWithHandleHitType } from './hit-test';
-
-type BoundingBox = [Vector3, Vector3];
-type Axis = 'x' | 'y' | 'z';
+import { Axis, BoundingBox } from './resize';
 
 const relocatePointsByBoxes = (
   handleType: BoundingRectWithHandleHitType,

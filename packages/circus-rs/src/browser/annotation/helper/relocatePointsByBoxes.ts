@@ -6,7 +6,7 @@ import { BoundingRectWithHandleHitType } from './hit-test';
 type BoundingBox = [Vector3, Vector3];
 type Axis = 'x' | 'y' | 'z';
 
-const relocation = (
+const relocatePointsByBoxes = (
   handleType: BoundingRectWithHandleHitType,
   orientation: OrientationString,
   originalPoints: Vector3D[],
@@ -133,4 +133,4 @@ const relocation = (
   });
 };
 
-export default relocation;
+export default relocatePointsByBoxes;

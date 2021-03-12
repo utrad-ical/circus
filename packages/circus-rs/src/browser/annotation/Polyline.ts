@@ -27,7 +27,7 @@ import {
   hitBoundingRectWithHandles,
   hitRectangle
 } from './helper/hit-test';
-import relocation from './helper/relocation';
+import relocatePointsByBoxes from './helper/relocatePointsByBoxes';
 
 const handleSize = 5;
 
@@ -292,7 +292,7 @@ export default class Polyline implements Annotation, ViewerEventTarget {
       // Move or Resize
       const targetOriginalPoints = [...originalPoints];
       const maintainAspectRatio = !!ev.shiftKey;
-      this.points = relocation(
+      this.points = relocatePointsByBoxes(
         hitType,
         'axial',
         targetOriginalPoints.map(targetOriginalPoint => [

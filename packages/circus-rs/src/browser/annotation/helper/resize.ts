@@ -2,10 +2,10 @@ import { Vector3 } from 'three';
 import { OrientationString } from '../../section-util';
 import { BoundingRectWithHandleHitType } from './hit-test';
 
-type BoundingBox = [Vector3, Vector3];
-type Axis = 'x' | 'y' | 'z';
+export type BoundingBox = [Vector3, Vector3];
+export type Axis = 'x' | 'y' | 'z';
 
-const allAxes: Axis[] = ['x', 'y', 'z'];
+export const allAxes: Axis[] = ['x', 'y', 'z'];
 
 const resize = (
   handleType: BoundingRectWithHandleHitType,

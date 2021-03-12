@@ -83,7 +83,7 @@ export default class Polyline implements Annotation, ViewerEventTarget {
 
   public editable: boolean = true;
   public closed: boolean = false;
-  public fillMode: 'nonzero' | 'evenodd' = 'evenodd';
+  public fillRule: CanvasFillRule = 'evenodd';
   public id?: string;
 
   public boundingBoxOutline?: {
@@ -152,7 +152,7 @@ export default class Polyline implements Annotation, ViewerEventTarget {
         closePath: this.closed,
         strokeStyle: color,
         fillStyle: fillColor,
-        fillRule: this.fillMode
+        fillRule: this.fillRule
       });
     } else if (screenPoints.length === 1) {
       drawPoint(ctx, screenPoints[0], {

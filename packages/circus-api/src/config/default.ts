@@ -23,7 +23,7 @@ const defaults: Configuration = {
     options: {
       host: 'localhost',
       port: 8080,
-      pluginResultsDir: '/var/circus/data/plugin-results',
+      pluginResultsPath: '/var/circus/data/plugin-results',
       dicomImageServerUrl: 'http://localhost:8080/rs',
       debug: false,
       uploadFileSizeMaxBytes: 200 * 1024 * 1024

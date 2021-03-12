@@ -30,7 +30,7 @@ export interface ApiTest {
    */
   db: mongo.Db;
   /**
-   * Holds three `AxiosInstance`s that represent three API
+   * Holds several `AxiosInstance`s that represent three API
    * users with different privileges.
    * Its `baseURL` is configured to point to the test sever,
    * and its `validateStatus` is configured not to throw on any 4xx/5xx errors.
@@ -117,7 +117,7 @@ export const setUpAppForRoutesTest = async () => {
   const app = await createApp(
     {
       debug: true,
-      pluginResultsPath: '', // dummy
+      pluginResultsPath: path.join(__dirname, 'plugin-results'),
       uploadFileSizeMaxBytes: 200 * 1024 * 1024,
       dicomImageServerUrl: '' // dummy
     },
@@ -130,6 +130,7 @@ export const setUpAppForRoutesTest = async () => {
       dicomFileRepository,
       dicomImporter,
       core: csCore,
+      mhdPacker: null as any, // dummy
       rsSeriesRoutes: async () => {}, // dummy
       volumeProvider: null as any, // dummy
       taskManager

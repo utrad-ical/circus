@@ -11,8 +11,9 @@ import HomePage from 'pages/HomePage';
 import SeriesSearch from 'pages/search/SeriesSearch';
 import CreateNewCase from 'pages/CreateNewCase';
 import CaseSearch from 'pages/search/CaseSearch';
-import MyCaseList from 'pages/mylist/MyCaseList';
 import MySeriesList from 'pages/mylist/MySeriesList';
+import MyCaseList from 'pages/mylist/MyCaseList';
+import MyPluginJobList from 'pages/mylist/MyPluginJobList';
 import CaseDetail from 'pages/case-detail/CaseDetail';
 import CreateNewJob from 'pages/CreateNewJob';
 import PluginJobSearch from 'pages/search/PluginJobSearch';
@@ -33,11 +34,10 @@ import Preferences from 'pages/Preferences';
 
 import { store } from './store';
 import { Provider as ReduxStoreProvider, useSelector } from 'react-redux';
-import { ThemeProvider } from 'styled-components';
-import tinycolor from 'tinycolor2';
 import { dismissMessageOnPageChange } from 'store/messages';
 import PluginJobQueueSearch from './pages/search/PluginJobQueueSearch';
 import browserHistory from 'browserHistory';
+import GlobalStyle, { CircusThemeProvider } from './theme';
 import * as rs from 'circus-rs';
 
 import { ApiContext, ApiCaller } from 'utils/api';
@@ -50,13 +50,6 @@ require('bootstrap/fonts/glyphicons-halflings-regular.woff');
 require('bootstrap/fonts/glyphicons-halflings-regular.woff2');
 require('bootstrap/fonts/glyphicons-halflings-regular.ttf');
 
-const theme = {
-  brandPrimary: '#168477',
-  brandDark: tinycolor('#168477').darken(10).toString(),
-  brandDarker: tinycolor('#168477').darken(20).toString(),
-  highlightColor: '#fd3164'
-};
-
 const AppRoutes: React.FC<{}> = () => {
   return (
     <Application>
@@ -67,6 +60,10 @@ const AppRoutes: React.FC<{}> = () => {
           component={MySeriesList}
         />
         <Route path="/browse/case/mylist/:myListId?" component={MyCaseList} />
+        <Route
+          path="/browse/plugin-jobs/mylist/:myListId?"
+          component={MyPluginJobList}
+        />
         <Route path="/browse/series/:presetName?" component={SeriesSearch} />
         <Route path="/browse/case/:presetName?" component={CaseSearch} />
         <Route
@@ -152,14 +149,15 @@ const TheApp: React.FC<{}> = () => {
       <ApiContext.Provider value={api}>
         <ReduxStoreProvider store={store}>
           <VolumeCacheProvider>
-            <ThemeProvider theme={theme}>
+            <CircusThemeProvider>
+              <GlobalStyle />
               <Router history={browserHistory}>
                 <Switch>
                   <Route exact path="/" component={LoginScreen} />
                   <AppRoutes />
                 </Switch>
               </Router>
-            </ThemeProvider>
+            </CircusThemeProvider>
           </VolumeCacheProvider>
         </ReduxStoreProvider>
       </ApiContext.Provider>

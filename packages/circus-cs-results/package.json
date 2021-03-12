@@ -1,0 +1,16 @@
+{
+  "name": "@utrad-ical/circus-cs-results",
+  "version": "0.1.0",
+  "description": "React components used to display CIRCUS CS job results",
+  "main": "src/index.ts",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/utrad-ical/circus.git",
+    "directory": "packages/circus-cs-results"
+  },
+  "author": "Soichiro Miki <smiki-tky@umin.ac.jp>",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}

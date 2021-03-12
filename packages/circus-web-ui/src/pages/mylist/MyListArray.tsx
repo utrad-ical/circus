@@ -59,7 +59,7 @@ const StyledUl = styled.ul`
   > li {
     list-style-type: none;
     border: 1px solid silver;
-    background: #eeeeee;
+    background: ${(props: any) => props.theme.secondaryBackground};
     min-height: 200px;
     > a {
       display: flex;

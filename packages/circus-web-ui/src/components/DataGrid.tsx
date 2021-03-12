@@ -7,6 +7,13 @@ const StyledTable = styled.table.attrs((props: any) => ({
     'data-grid-row-clickable': !!props.onItemClick
   })
 }))`
+  tbody tr td {
+    vertical-align: middle;
+  }
+  tbody > tr:last-of-type > td {
+    border-bottom-style: solid;
+    border-bottom-width: 2px;
+  }
   &.data-grid-row-clickable {
     tbody tr {
       cursor: pointer;

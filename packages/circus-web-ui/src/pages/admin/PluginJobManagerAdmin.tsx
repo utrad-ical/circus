@@ -40,7 +40,7 @@ const PluginJobManagerAdmin: React.FC<{}> = props => {
 
   return (
     <AdminContainer title="Plugin Job Manager" icon="th-large">
-      <Panel>
+      <Panel bsStyle="primary">
         <Panel.Heading>Status</Panel.Heading>
         <Panel.Body>{busy ? <LoadingIndicator /> : status}</Panel.Body>
         <Panel.Footer>

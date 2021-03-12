@@ -85,13 +85,6 @@ const StyledDiv = styled.div`
     text-align: center;
   }
 
-  .table.data-grid {
-    tbody tr td {
-      vertical-align: middle;
-    }
-    border-bottom: 2px solid #ddd;
-  }
-
   &.busy {
     opacity: 0.7;
   }
@@ -174,6 +167,7 @@ const SearchResultsView: React.FC<{
   };
 
   const pages = Math.ceil(totalItems / limit);
+  const showPagenation = pages >= 2 || page >= 2;
   return (
     <StyledDiv className={classnames({ busy: isFetching })}>
       <div className="search-results-header">
@@ -216,7 +210,7 @@ const SearchResultsView: React.FC<{
           )}
         </div>
       </div>
-      {pages >= 2 && (
+      {showPagenation && (
         <ResultPagination
           pages={pages}
           activePage={page}
@@ -230,7 +224,7 @@ const SearchResultsView: React.FC<{
         onSelectionChange={handleSelectionChange}
         active={active}
       />
-      {pages >= 2 && (
+      {showPagenation && (
         <ResultPagination
           pages={pages}
           activePage={page}

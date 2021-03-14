@@ -20,7 +20,7 @@ import {
   BoundingRectWithHandleHitType,
   hitBoundingRectWithHandles
 } from './helper/hit-test';
-import resize from './helper/resize';
+import relocate from './helper/relocate';
 
 export type FigureType = 'cuboid' | 'ellipsoid';
 
@@ -337,9 +337,13 @@ export default abstract class SolidFigure
 
       const originalBoundingBox3 = this.dragInfo!.originalBoundingBox3!;
       const maintainAspectRatio = !!ev.shiftKey;
-      const newBoundingBox3 = resize(
+      const newBoundingBox3 = relocate(
         this.handleType!,
         orientation,
+        [
+          originalBoundingBox3[0] as Vector3D,
+          originalBoundingBox3[1] as Vector3D
+        ],
         originalBoundingBox3,
         new Vector3().fromArray(this.dragInfo!.dragStartVolumePoint3!),
         draggedPoint3,

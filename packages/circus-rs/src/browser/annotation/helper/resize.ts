@@ -7,6 +7,16 @@ export type Axis = 'x' | 'y' | 'z';
 
 export const allAxes: Axis[] = ['x', 'y', 'z'];
 
+/**
+ * @deprecated Use relocate().
+ * @param handleType
+ * @param orientation
+ * @param originalBoundingBox3
+ * @param startPoint
+ * @param dragPoint
+ * @param maintainAspectRatio
+ * @returns
+ */
 const resize = (
   handleType: BoundingRectWithHandleHitType,
   orientation: OrientationString,

@@ -54,6 +54,9 @@ const resize = (
   // Maintain aspect ratio mode (Shift + Drag)
   //
 
+  // TODO: It still contains a maintain aspect ratio mode bug.
+  // In some cases, the annotation of 3d disappears when the image is reduced.
+
   // dragging axes (x, y or z) on the screen
   // the length can be 1 (dragging on the side) or 2 (dragging on the corner)
   const refAxes: Axis[] = [];
@@ -65,8 +68,16 @@ const resize = (
   const ratios = originalSizes.map((s, i) => newSizes[i] / s);
   const winningRatio = Math.max(...ratios);
   const winningAxis = refAxes.find((_, i) => ratios[i] === winningRatio);
-  const nsSize = Math.abs(bb[1][nsAxis] - bb[0][nsAxis]);
-  const ewSize = Math.abs(bb[1][ewAxis] - bb[0][ewAxis]);
+
+  const translate = (fixedPoint: Vector3, ax: Axis, ratio: number) => {
+    return (
+      fixedPoint[ax] +
+      ratio *
+        Math.abs(bb[1][ax] - bb[0][ax]) *
+        (dragPoint[ax] - fixedPoint[ax] > 0 ? 1 : -1)
+    );
+  };
+
   allAxes
     .filter(ax => ax !== winningAxis)
     .forEach(ax => {
@@ -74,13 +85,13 @@ const resize = (
         // "lost" axes on the section, when refAxes.length === 2:
         // its size will be recalculated
         if (fixedSide.has('north'))
-          newBb[1][nsAxis] = bb[0][nsAxis] + winningRatio * nsSize;
+          newBb[1][nsAxis] = translate(bb[0], nsAxis, winningRatio);
         if (fixedSide.has('south'))
-          newBb[0][nsAxis] = bb[1][nsAxis] - winningRatio * nsSize;
+          newBb[0][nsAxis] = translate(bb[1], nsAxis, winningRatio);
         if (fixedSide.has('west'))
-          newBb[1][ewAxis] = bb[0][ewAxis] + winningRatio * ewSize;
+          newBb[1][ewAxis] = translate(bb[0], ewAxis, winningRatio);
         if (fixedSide.has('east'))
-          newBb[0][ewAxis] = bb[1][ewAxis] - winningRatio * ewSize;
+          newBb[0][ewAxis] = translate(bb[1], ewAxis, winningRatio);
       } else {
         // "free" axes that will be scaled evenly
         // toward the plus and minus directions

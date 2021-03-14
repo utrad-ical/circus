@@ -4,19 +4,7 @@ import { OrientationString } from '../../section-util';
 import { BoundingRectWithHandleHitType } from './hit-test';
 import { Axis, BoundingBox } from './resize';
 
-// TODO: Delete file
-/**
- * @deprecated Temporary files during the implementation process.
- * @param handleType
- * @param orientation
- * @param originalPoints
- * @param originalBoundingBox3
- * @param dragStartPoint
- * @param draggedPoint
- * @param maintainAspectRatio
- * @returns
- */
-const relocatePointsByBoxes = (
+const relocate = (
   handleType: BoundingRectWithHandleHitType,
   orientation: OrientationString,
   originalPoints: Vector3D[],
@@ -143,4 +131,4 @@ const relocatePointsByBoxes = (
   });
 };
 
-export default relocatePointsByBoxes;
+export default relocate;

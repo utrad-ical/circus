@@ -2,7 +2,154 @@ import { Vector3D } from 'circus-rs/src/common/geometry';
 import { Vector3 } from 'three';
 import { OrientationString } from '../../section-util';
 import { BoundingRectWithHandleHitType } from './hit-test';
-import { Axis, BoundingBox } from './resize';
+import resize from './resize';
+
+type BoundingBox = [Vector3, Vector3];
+type Axis = 'x' | 'y' | 'z';
+type Axes = {
+  xAxis: Axis;
+  yAxis: Axis;
+  zAxis: Axis;
+};
+
+const judgeAxes = (orientation: OrientationString) => {
+  const xAxis = (orientation === 'sagittal' ? 'y' : 'x') as Axis;
+  const yAxis = (orientation === 'axial' ? 'y' : 'z') as Axis;
+  const zAxis = ['x', 'y', 'z'].find(v => v != xAxis && v != yAxis) as Axis;
+  return { xAxis, yAxis, zAxis };
+};
+
+const judgeWinningAxes = (
+  handleType: BoundingRectWithHandleHitType,
+  axes: Axes
+) => {
+  switch (handleType) {
+    case 'north-west-handle':
+    case 'south-east-handle':
+    case 'north-east-handle':
+    case 'south-west-handle':
+      return [axes.xAxis, axes.yAxis];
+
+    case 'north-handle':
+    case 'south-handle':
+      return [axes.yAxis];
+
+    case 'east-handle':
+    case 'west-handle':
+      return [axes.xAxis];
+
+    default:
+      throw new Error('Invalid handleType');
+  }
+};
+
+const getDragDelta = (
+  handleType: BoundingRectWithHandleHitType,
+  dragStartPoint: Vector3,
+  draggedPoint: Vector3,
+  axes: Axes
+): Vector3 => {
+  const dragDelta = draggedPoint.clone().sub(dragStartPoint);
+  switch (handleType) {
+    case 'north-handle':
+    case 'south-handle':
+      dragDelta[axes.xAxis] = 0;
+      break;
+    case 'east-handle':
+    case 'west-handle':
+      dragDelta[axes.yAxis] = 0;
+      break;
+  }
+  return dragDelta;
+};
+
+const toBoundingBox = (bb: [number[], number[]]): BoundingBox => [
+  new Vector3().fromArray(bb[0]),
+  new Vector3().fromArray(bb[1])
+];
+
+const resizeBoundingBox = (
+  handleType: BoundingRectWithHandleHitType,
+  axes: Axes,
+  delta: Vector3,
+  originalBb: BoundingBox
+) => {
+  const boundingBox: BoundingBox = [
+    originalBb[0].clone(),
+    originalBb[1].clone()
+  ];
+  if (handleType.includes('north'))
+    boundingBox[0][axes.yAxis] += delta[axes.yAxis];
+  else if (handleType.includes('south'))
+    boundingBox[1][axes.yAxis] += delta[axes.yAxis];
+  if (handleType.includes('west'))
+    boundingBox[0][axes.xAxis] += delta[axes.xAxis];
+  else if (handleType.includes('east'))
+    boundingBox[1][axes.xAxis] += delta[axes.xAxis];
+  return boundingBox;
+};
+
+const getResizeRatios = (
+  handleType: BoundingRectWithHandleHitType,
+  axes: Axes,
+  originalBb: BoundingBox,
+  resizedBb: BoundingBox,
+  maintainAspectRatio: boolean
+) => {
+  const originalBbSize = originalBb[1].clone().sub(originalBb[0]).toArray();
+  const scaledBbSize = resizedBb[1].clone().sub(resizedBb[0]).toArray();
+  const ratioBbSize = scaledBbSize.map((v, i) => v / originalBbSize[i]);
+  const resizeRatios = new Vector3(...ratioBbSize);
+  if (maintainAspectRatio) {
+    const winningRatio = judgeWinningAxes(handleType, axes)
+      .map(ax => resizeRatios[ax])
+      .sort((a, b) => a - b)[0];
+    resizeRatios[axes.xAxis] = winningRatio;
+    resizeRatios[axes.yAxis] = winningRatio;
+  }
+  return resizeRatios.toArray() as Vector3D;
+};
+
+const judgeScaleOrigin = (
+  handleType: BoundingRectWithHandleHitType,
+  axes: Axes,
+  originalBb: BoundingBox
+): Vector3D => {
+  switch (handleType) {
+    case 'north-west-handle':
+      return originalBb[1].toArray() as Vector3D;
+    case 'south-east-handle':
+      return originalBb[0].toArray() as Vector3D;
+  }
+
+  const originalBbSize = originalBb[1].clone().sub(originalBb[0]);
+  const scaleOrigin = originalBb[0].clone();
+  switch (handleType) {
+    case 'north-east-handle':
+      scaleOrigin[axes.yAxis] = originalBb[1][axes.yAxis];
+      break;
+    case 'south-west-handle':
+      scaleOrigin[axes.xAxis] = originalBb[1][axes.xAxis];
+      break;
+    case 'south-handle':
+      scaleOrigin[axes.xAxis] += originalBbSize[axes.xAxis] / 2;
+      break;
+    case 'east-handle':
+      scaleOrigin[axes.yAxis] += originalBbSize[axes.yAxis] / 2;
+      break;
+    case 'north-handle':
+      scaleOrigin[axes.xAxis] += originalBbSize[axes.xAxis] / 2;
+      scaleOrigin[axes.yAxis] = originalBb[1][axes.yAxis];
+      break;
+    case 'west-handle':
+      scaleOrigin[axes.xAxis] = originalBb[1][axes.xAxis];
+      scaleOrigin[axes.yAxis] += originalBbSize[axes.yAxis] / 2;
+      break;
+    default:
+      throw new Error('Invalid handleType');
+  }
+  return scaleOrigin.toArray() as Vector3D;
+};
 
 const relocate = (
   handleType: BoundingRectWithHandleHitType,
@@ -15,120 +162,33 @@ const relocate = (
 ): Vector3D[] => {
   if (orientation === 'oblique') throw new Error('Invalid orientation');
 
+  const axes = judgeAxes(orientation);
+  const delta = getDragDelta(handleType, dragStartPoint, draggedPoint, axes);
+
   if (handleType === 'rect-outline') {
-    const delta = draggedPoint.clone().sub(dragStartPoint);
+    // Relocate points as the bounding box moves
     return originalPoints.map(
-      originalPoint =>
-        new Vector3(...originalPoint).add(delta).toArray() as Vector3D
+      p => new Vector3(...p).add(delta).toArray() as Vector3D
+    );
+  } else {
+    // Relocate points as the bounding box resizes
+    const originalBb = toBoundingBox(originalBoundingBox3);
+    const resizedBb = resizeBoundingBox(handleType, axes, delta, originalBb);
+    const scaleOrigin = judgeScaleOrigin(handleType, axes, originalBb);
+    const resizeRatios = getResizeRatios(
+      handleType,
+      axes,
+      originalBb,
+      resizedBb,
+      maintainAspectRatio
+    );
+    return originalPoints.map(
+      p =>
+        resizeRatios.map(
+          (r, i) => (p[i] - scaleOrigin[i]) * r + scaleOrigin[i]
+        ) as Vector3D
     );
   }
-
-  const nsAxis: Axis = orientation === 'axial' ? 'y' : 'z';
-  const ewAxis: Axis = orientation === 'sagittal' ? 'y' : 'x';
-
-  const fixedSide = (() => {
-    const set = new Set<'north' | 'south' | 'east' | 'west'>();
-    if (/south/.test(handleType)) set.add('north');
-    else if (/north/.test(handleType)) set.add('south');
-    if (/east/.test(handleType)) set.add('west');
-    else if (/west/.test(handleType)) set.add('east');
-    return set;
-  })();
-
-  const bb: BoundingBox = [
-    new Vector3().fromArray(originalBoundingBox3[0]),
-    new Vector3().fromArray(originalBoundingBox3[1])
-  ];
-
-  const newBb: BoundingBox = (() => {
-    const nsDelta = draggedPoint[nsAxis] - dragStartPoint[nsAxis];
-    const ewDelta = draggedPoint[ewAxis] - dragStartPoint[ewAxis];
-    const boundingBox: BoundingBox = [bb[0].clone(), bb[1].clone()];
-    if (fixedSide.has('north')) boundingBox[1][nsAxis] += nsDelta;
-    else if (fixedSide.has('south')) boundingBox[0][nsAxis] += nsDelta;
-    if (fixedSide.has('west')) boundingBox[1][ewAxis] += ewDelta;
-    else if (fixedSide.has('east')) boundingBox[0][ewAxis] += ewDelta;
-    return boundingBox;
-  })();
-
-  const locationAxisOrigin = {
-    [nsAxis]: fixedSide.has('south') ? bb[1][nsAxis] : bb[0][nsAxis],
-    [ewAxis]: fixedSide.has('east') ? bb[1][ewAxis] : bb[0][ewAxis]
-  };
-
-  const originalBbSize = (ax: Axis) => Math.abs(bb[0][ax] - bb[1][ax]);
-  const newBbSize = (ax: Axis) => Math.abs(newBb[0][ax] - newBb[1][ax]);
-  const sizeRatio = (ax: Axis) => newBbSize(ax) / originalBbSize(ax);
-  const sizeRatios = {
-    [nsAxis]: sizeRatio(nsAxis),
-    [ewAxis]: sizeRatio(ewAxis)
-  };
-
-  const locationInverted = {
-    [nsAxis]: draggedPoint[nsAxis] - locationAxisOrigin[nsAxis] > 0,
-    [ewAxis]: draggedPoint[ewAxis] - locationAxisOrigin[ewAxis] > 0
-  };
-
-  const newLocation = (ax: Axis, originalPoint: Vector3, sizeRatio: number) => {
-    return (
-      locationAxisOrigin[ax] +
-      sizeRatio *
-        Math.abs(locationAxisOrigin[ax] - originalPoint[ax]) *
-        (locationInverted[ax] ? 1 : -1)
-    );
-  };
-
-  if (!maintainAspectRatio) {
-    return originalPoints.map(originalPoint => {
-      const p = new Vector3(...originalPoint);
-      const newP = p.clone();
-      newP[nsAxis] = newLocation(nsAxis, p, sizeRatios[nsAxis]);
-      newP[ewAxis] = newLocation(ewAxis, p, sizeRatios[ewAxis]);
-      return newP.toArray() as Vector3D;
-    });
-  }
-
-  /**
-   * Maintain aspect ratio mode (Shift + Drag)
-   */
-
-  // dragging axes (x, y or z) on the screen
-  // the length can be 1 (dragging on the side) or 2 (dragging on the corner)
-  const refAxes = (() => {
-    const refs: Axis[] = [];
-    if (fixedSide.has('north') || fixedSide.has('south')) refs.push(nsAxis);
-    if (fixedSide.has('east') || fixedSide.has('west')) refs.push(ewAxis);
-    return refs;
-  })();
-  const draggingCorner = refAxes.length === 2;
-
-  const winningRatio = draggingCorner
-    ? Math.max(...Object.values(sizeRatios))
-    : sizeRatios[refAxes[0]];
-
-  const deltaOrigin = (() => {
-    const delta = {
-      [nsAxis]: 0,
-      [ewAxis]: 0
-    };
-    if (draggingCorner) return delta;
-
-    if (fixedSide.has('east') || fixedSide.has('west')) {
-      delta[nsAxis] = (originalBbSize(nsAxis) * (1 - winningRatio)) / 2;
-    }
-    if (fixedSide.has('south') || fixedSide.has('north')) {
-      delta[ewAxis] = (originalBbSize(ewAxis) * (1 - winningRatio)) / 2;
-    }
-    return delta;
-  })();
-
-  return originalPoints.map(originalPoint => {
-    const p = new Vector3(...originalPoint);
-    const newP = p.clone();
-    newP[nsAxis] = newLocation(nsAxis, p, winningRatio) + deltaOrigin[nsAxis];
-    newP[ewAxis] = newLocation(ewAxis, p, winningRatio) + deltaOrigin[ewAxis];
-    return newP.toArray() as Vector3D;
-  });
 };
 
 export default relocate;

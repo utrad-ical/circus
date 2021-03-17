@@ -1,6 +1,6 @@
 import { Box2, Vector2, Vector3 } from 'three';
 import { Vector2D } from '..';
-import { Vector3D, verticesOfBox } from '../../common/geometry';
+import { verticesOfBox } from '../../common/geometry';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
 import {
   convertScreenCoordinateToVolumeCoordinate,
@@ -17,7 +17,7 @@ import {
   BoundingRectWithHandleHitType,
   hitBoundingRectWithHandles
 } from './helper/hit-test';
-import relocate from './helper/relocate';
+import resize from './helper/resize';
 
 export type FigureType = 'rectangle' | 'circle';
 
@@ -244,13 +244,9 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
       const maintainAspectRatio = !!ev.shiftKey;
 
       const originalBoundingBox3 = this.dragInfo!.originalBoundingBox3!;
-      const newBoundingBox3 = relocate(
+      const newBoundingBox3 = resize(
         this.handleType!,
         orientation,
-        [
-          originalBoundingBox3[0] as Vector3D,
-          originalBoundingBox3[1] as Vector3D
-        ],
         originalBoundingBox3,
         new Vector3().fromArray(this.dragInfo!.dragStartVolumePoint3!),
         draggedPoint3,

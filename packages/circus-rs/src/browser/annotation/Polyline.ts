@@ -58,8 +58,9 @@ export default class Polyline implements Annotation, ViewerEventTarget {
   /**
    * Color of the fill.
    */
-  public fillColor: string = '#ff88ff75'; //TODO: Check the default settings
-  public dimmedFillColor: string = '#ff88ff25'; //TODO: Check the default settings
+  public fillColor: string | undefined = undefined;
+  public dimmedFillColor: string | undefined = undefined;
+
   /**
    * Width of the line that connects each end.
    */

@@ -118,8 +118,8 @@ oneOf:
           points:
             type: array
             items:
-                type: array
-                items: [{ type: 'number' }, { type: 'number' }]
+              type: array
+              items: [{ type: 'number' }, { type: 'number' }]
             minItems: 1
             description: >
               Boundary of the outline, the volume coordinates (measured in mm).

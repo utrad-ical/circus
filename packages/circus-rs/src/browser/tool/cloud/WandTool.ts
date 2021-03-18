@@ -47,7 +47,11 @@ export default class WandTool extends VoxelCloudToolBase<WandToolOptions> {
     const { type, section } = viewer.getState();
     if (type !== 'mpr') throw new Error('Unsupported view state');
 
-    const startPoint = convertViewerPointToVolumeIndex(viewer, this.pX!, this.pY!);
+    const startPoint = convertViewerPointToVolumeIndex(
+      viewer,
+      this.pX!,
+      this.pY!
+    );
 
     const { mode, threshold, maxDistance, baseValue } = this.options;
 

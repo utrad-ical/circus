@@ -2,7 +2,6 @@ import { Vector3D } from 'circus-rs/src/common/geometry';
 import { Vector3 } from 'three';
 import { OrientationString } from '../../section-util';
 import { BoundingRectWithHandleHitType } from './hit-test';
-import resize from './resize';
 
 type BoundingBox = [Vector3, Vector3];
 type Axis = 'x' | 'y' | 'z';

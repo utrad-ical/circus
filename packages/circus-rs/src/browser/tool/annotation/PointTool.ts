@@ -17,7 +17,7 @@ export default class PointTool extends AnnotationToolBase {
       ev.viewerY!
     );
     const antn = new Point();
-    antn.point = [point.x, point.y, point.z];
+    antn.location = [point.x, point.y, point.z];
     return antn;
   }
 
@@ -29,7 +29,7 @@ export default class PointTool extends AnnotationToolBase {
       ev.viewerY!
     );
     const antn = this.focusedAnnotation;
-    antn.point = [point.x, point.y, point.z];
+    antn.location = [point.x, point.y, point.z];
   }
 
   protected concreteAnnotation(ev: ViewerEvent): void {

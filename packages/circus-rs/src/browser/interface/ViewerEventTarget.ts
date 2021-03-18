@@ -7,5 +7,6 @@ export default interface ViewerEventTarget {
   dragStartHandler?: (viewerEvent: ViewerEvent) => any;
   dragHandler?: (viewerEvent: ViewerEvent) => any;
   dragEndHandler?: (viewerEvent: ViewerEvent) => any;
+  dblClickHandler?: (viewerEvent: ViewerEvent) => any;
   wheelHandler?: (viewerEvent: ViewerEvent) => any;
 }

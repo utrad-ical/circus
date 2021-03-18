@@ -254,6 +254,22 @@ describe('add revision', () => {
                 name: ''
               },
               {
+                type: 'polyline',
+                data: {
+                  color: '#ff00ff',
+                  alpha: 0,
+                  points: [
+                    [60, 10],
+                    [10, 100],
+                    [140, 30],
+                    [20, 30],
+                    [120, 120]
+                  ],
+                  z: 30
+                },
+                name: ''
+              },
+              {
                 type: 'point',
                 data: {
                   color: '#00ff00',

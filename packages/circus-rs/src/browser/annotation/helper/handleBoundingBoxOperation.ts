@@ -12,17 +12,17 @@ type Axes = {
   zAxis: Axis;
 };
 
-const judgeAxes = (orientation: OrientationString) => {
+const getAxes = (orientation: OrientationString): Axes => {
   const xAxis = (orientation === 'sagittal' ? 'y' : 'x') as Axis;
   const yAxis = (orientation === 'axial' ? 'y' : 'z') as Axis;
   const zAxis = ['x', 'y', 'z'].find(v => v != xAxis && v != yAxis) as Axis;
   return { xAxis, yAxis, zAxis };
 };
 
-const judgeWinningAxes = (
+const getWinningAxes = (
   handleType: BoundingRectWithHandleHitType,
   axes: Axes
-) => {
+): Axis[] => {
   switch (handleType) {
     case 'north-west-handle':
     case 'south-east-handle':
@@ -73,19 +73,38 @@ const resizeBoundingBox = (
   axes: Axes,
   delta: Vector3,
   originalBb: BoundingBox
-) => {
+): BoundingBox => {
   const boundingBox: BoundingBox = [
     originalBb[0].clone(),
     originalBb[1].clone()
   ];
-  if (handleType.includes('north'))
-    boundingBox[0][axes.yAxis] += delta[axes.yAxis];
-  else if (handleType.includes('south'))
-    boundingBox[1][axes.yAxis] += delta[axes.yAxis];
-  if (handleType.includes('west'))
-    boundingBox[0][axes.xAxis] += delta[axes.xAxis];
-  else if (handleType.includes('east'))
-    boundingBox[1][axes.xAxis] += delta[axes.xAxis];
+
+  switch (handleType) {
+    case 'north-handle':
+    case 'north-west-handle':
+    case 'north-east-handle':
+      boundingBox[0][axes.yAxis] += delta[axes.yAxis];
+      break;
+    case 'south-handle':
+    case 'south-west-handle':
+    case 'south-east-handle':
+      boundingBox[1][axes.yAxis] += delta[axes.yAxis];
+      break;
+  }
+
+  switch (handleType) {
+    case 'west-handle':
+    case 'north-west-handle':
+    case 'south-west-handle':
+      boundingBox[0][axes.xAxis] += delta[axes.xAxis];
+      break;
+    case 'east-handle':
+    case 'north-east-handle':
+    case 'south-east-handle':
+      boundingBox[1][axes.xAxis] += delta[axes.xAxis];
+      break;
+  }
+
   return boundingBox;
 };
 
@@ -95,22 +114,32 @@ const getResizeRatios = (
   originalBb: BoundingBox,
   resizedBb: BoundingBox,
   maintainAspectRatio: boolean
-) => {
+): Vector3D => {
   const originalBbSize = originalBb[1].clone().sub(originalBb[0]).toArray();
   const scaledBbSize = resizedBb[1].clone().sub(resizedBb[0]).toArray();
   const ratioBbSize = scaledBbSize.map((v, i) => v / originalBbSize[i]);
   const resizeRatios = new Vector3(...ratioBbSize);
   if (maintainAspectRatio) {
-    const winningRatio = judgeWinningAxes(handleType, axes)
+    const winningRatio = getWinningAxes(handleType, axes)
       .map(ax => resizeRatios[ax])
       .sort((a, b) => a - b)[0];
-    resizeRatios[axes.xAxis] = winningRatio;
-    resizeRatios[axes.yAxis] = winningRatio;
+
+    resizeRatios[axes.xAxis] = ['north-handle', 'south-handle'].some(
+      v => v === handleType
+    )
+      ? Math.abs(winningRatio)
+      : winningRatio;
+
+    resizeRatios[axes.yAxis] = ['west-handle', 'east-handle'].some(
+      v => v === handleType
+    )
+      ? Math.abs(winningRatio)
+      : winningRatio;
   }
   return resizeRatios.toArray() as Vector3D;
 };
 
-const judgeScaleOrigin = (
+const getScaleOrigin = (
   handleType: BoundingRectWithHandleHitType,
   axes: Axes,
   originalBb: BoundingBox
@@ -151,18 +180,18 @@ const judgeScaleOrigin = (
   return scaleOrigin.toArray() as Vector3D;
 };
 
-const relocate = (
-  handleType: BoundingRectWithHandleHitType,
-  orientation: OrientationString,
-  originalPoints: Vector3D[],
+const handleBoundingBoxOperation = (
   originalBoundingBox3: [number[], number[]],
+  orientation: OrientationString,
+  handleType: BoundingRectWithHandleHitType,
   dragStartPoint: Vector3,
   draggedPoint: Vector3,
-  maintainAspectRatio: boolean
+  maintainAspectRatio: boolean,
+  originalPoints: Vector3D[]
 ): Vector3D[] => {
   if (orientation === 'oblique') throw new Error('Invalid orientation');
 
-  const axes = judgeAxes(orientation);
+  const axes = getAxes(orientation);
   const delta = getDragDelta(handleType, dragStartPoint, draggedPoint, axes);
 
   if (handleType === 'rect-outline') {
@@ -174,7 +203,7 @@ const relocate = (
     // Relocate points as the bounding box resizes
     const originalBb = toBoundingBox(originalBoundingBox3);
     const resizedBb = resizeBoundingBox(handleType, axes, delta, originalBb);
-    const scaleOrigin = judgeScaleOrigin(handleType, axes, originalBb);
+    const scaleOrigin = getScaleOrigin(handleType, axes, originalBb);
     const resizeRatios = getResizeRatios(
       handleType,
       axes,
@@ -191,4 +220,4 @@ const relocate = (
   }
 };
 
-export default relocate;
+export default handleBoundingBoxOperation;

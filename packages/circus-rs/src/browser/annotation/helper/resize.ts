@@ -2,8 +2,7 @@ import { Vector3D } from 'circus-rs/src/common/geometry';
 import { Vector3 } from 'three';
 import { OrientationString } from '../../section-util';
 import { BoundingRectWithHandleHitType } from './hit-test';
-import relocate from './relocate';
-
+import handleBoundingBoxOperation from './handleBoundingBoxOperation';
 
 const resize = (
   handleType: BoundingRectWithHandleHitType,
@@ -13,20 +12,19 @@ const resize = (
   draggedPoint: Vector3,
   maintainAspectRatio: boolean
 ): [Vector3D, Vector3D] => {
-
   const originalPoints: Vector3D[] = [
     originalBoundingBox3[0] as Vector3D,
     originalBoundingBox3[1] as Vector3D
   ];
 
-  return relocate(
-    handleType,
-    orientation,
-    originalPoints,
+  return handleBoundingBoxOperation(
     originalBoundingBox3,
+    orientation,
+    handleType,
     dragStartPoint,
     draggedPoint,
-    maintainAspectRatio
+    maintainAspectRatio,
+    originalPoints
   ) as [Vector3D, Vector3D];
 };
 

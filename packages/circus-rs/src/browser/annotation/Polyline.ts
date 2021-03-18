@@ -22,12 +22,12 @@ import Annotation, { DrawOption } from './Annotation';
 import drawBoundingBoxOutline from './helper/drawBoundingBoxOutline';
 import drawHandleFrame from './helper/drawHandleFrame';
 import { drawPath, drawPoint } from './helper/drawObject';
+import handleBoundingBoxOperation from './helper/handleBoundingBoxOperation';
 import {
   BoundingRectWithHandleHitType,
   hitBoundingRectWithHandles,
   hitRectangle
 } from './helper/hit-test';
-import relocate from './helper/relocate';
 
 const handleSize = 5;
 
@@ -292,17 +292,17 @@ export default class Polyline implements Annotation, ViewerEventTarget {
       // Move or Resize
       const targetOriginalPoints = [...originalPoints];
       const maintainAspectRatio = !!ev.shiftKey;
-      this.points = relocate(
-        hitType,
+      this.points = handleBoundingBoxOperation(
+        originalBoundingBox!,
         'axial',
+        hitType,
+        dragStartPoint3,
+        draggedPoint3,
+        maintainAspectRatio,
         targetOriginalPoints.map(targetOriginalPoint => [
           ...targetOriginalPoint,
           this.z!
-        ]),
-        originalBoundingBox!,
-        dragStartPoint3,
-        draggedPoint3,
-        maintainAspectRatio
+        ])
       ).map(p => [p[0], p[1]]);
     } else {
       throw new Error('Unsupported PolylineHitType');

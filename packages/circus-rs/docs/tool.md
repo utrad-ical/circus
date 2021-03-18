@@ -66,13 +66,14 @@ Tool は既存のツールクラスを拡張するか、基底クラスである
 
 ```
 interface ViewerEventTarget {
-    mouseUpHandler: (viewerEvent: ViewerEvent) => any;
-    mouseDownHandler: (viewerEvent: ViewerEvent) =>  any;
-    mouseMoveHandler: (viewerEvent: ViewerEvent) =>  any;
-    dragStartHandler: (viewerEvent: ViewerEvent) =>  any;
-    dragHandler: (viewerEvent: ViewerEvent) =>  any;
-    dragEndHandler: (viewerEvent: ViewerEvent) =>  any;
-    wheelHandler: (viewerEvent: ViewerEvent) =>  any;
+  mouseUpHandler?: (viewerEvent: ViewerEvent) => any;
+  mouseDownHandler?: (viewerEvent: ViewerEvent) => any;
+  mouseMoveHandler?: (viewerEvent: ViewerEvent) => any;
+  dragStartHandler?: (viewerEvent: ViewerEvent) => any;
+  dragHandler?: (viewerEvent: ViewerEvent) => any;
+  dragEndHandler?: (viewerEvent: ViewerEvent) => any;
+  dblClickHandler?: (viewerEvent: ViewerEvent) => any;
+  wheelHandler?: (viewerEvent: ViewerEvent) => any;
 }
 ```
 

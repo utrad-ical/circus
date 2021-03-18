@@ -66,7 +66,7 @@ export default class ViewerEvent {
     if (!this.propagation) return;
 
     const normalizedEventName = this.type.replace(
-      /^(mouse|drag|touch)([a-z])/,
+      /^(mouse|drag|dbl|touch)([a-z])/,
       (m, p1, p2) => p1 + p2.toUpperCase()
     );
     const handler = normalizedEventName + 'Handler';

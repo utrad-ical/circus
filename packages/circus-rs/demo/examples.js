@@ -141,6 +141,7 @@ const toolbar = rs.createToolbar(container, [
   'wandEraser',
   'circle',
   'rectangle',
+  'polyline',
   'point',
   'ellipsoid',
   'cuboid'
@@ -298,12 +299,40 @@ comp.annotationUpdated();
 @title Add PlaneFigure Annotation
 --*/
 
+const viewState = viewer.getState();
 const fig = new rs.PlaneFigure();
 fig.color = '#ff0000';
 fig.type = 'circle';
 fig.width = 3;
 fig.min = [10, 10];
 fig.max = [100, 100];
+fig.z = viewState.section.origin[2];
+
+const comp = viewer.getComposition();
+comp.addAnnotation(fig);
+comp.annotationUpdated();
+
+/*--
+@title Add Polyline Annotation
+--*/
+
+const viewState = viewer.getState();
+const fig = new rs.Polyline();
+fig.color = '#ff0000';
+fig.dimmedColor = '#ff000055';
+// fig.fillColor = '#ff990075';
+// fig.dimmedFillColor = '#ff990040';
+fig.fillRule = 'evenodd'; // 'evenodd' or 'nonzero'
+fig.width = 3;
+fig.closed = true;
+fig.points = [
+  [60, 10],
+  [10, 100],
+  [140, 30],
+  [20, 30],
+  [120, 120]
+];
+fig.z = viewState.section.origin[2];
 
 const comp = viewer.getComposition();
 comp.addAnnotation(fig);

@@ -106,6 +106,7 @@ export default class Viewer extends EventEmitter {
     canvas.addEventListener('mousedown', this.boundEventHandler);
     canvas.addEventListener('mouseup', this.boundEventHandler);
     canvas.addEventListener('mousemove', this.boundEventHandler);
+    canvas.addEventListener('dblclick', this.boundEventHandler);
     canvas.addEventListener('wheel', this.boundEventHandler);
 
     this.boundRender = this.render.bind(this);
@@ -202,8 +203,9 @@ export default class Viewer extends EventEmitter {
     event.shiftKey = originalEvent.shiftKey;
     event.ctrlKey = originalEvent.ctrlKey;
 
-    // Cancel default behavior by default for wheel and touchmove events
+    // Cancel default behavior by default for wheel, dblclick and touchmove events
     if (eventType === 'wheel') originalEvent.preventDefault();
+    if (eventType === 'dblclick') originalEvent.preventDefault();
     if (originalEvent.type === 'touchmove') originalEvent.preventDefault();
 
     if (this.primaryEventTarget) {

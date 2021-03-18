@@ -319,8 +319,12 @@ comp.annotationUpdated();
 const viewState = viewer.getState();
 const fig = new rs.Polyline();
 fig.color = '#ff0000';
-fig.fillColor = '#ff000050';
+fig.dimmedColor = '#ff000055';
+// fig.fillColor = '#ff990075';
+// fig.dimmedFillColor = '#ff990040';
+fig.fillRule = 'evenodd'; // 'evenodd' or 'nonzero'
 fig.width = 3;
+fig.closed = true;
 fig.points = [
   [60, 10],
   [10, 100],
@@ -329,8 +333,6 @@ fig.points = [
   [120, 120]
 ];
 fig.z = viewState.section.origin[2];
-fig.closed = true;
-fig.fillMode = 'evenodd'; // 'evenodd' or 'nonzero' or undefinde (='evenodd');
 
 const comp = viewer.getComposition();
 comp.addAnnotation(fig);

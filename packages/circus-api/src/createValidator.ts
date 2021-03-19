@@ -19,7 +19,10 @@ const loadSchemaFiles = async (schemaRoot: string) => {
         `Schemas "${basename}" must be async and have no $id field`
       );
     }
-    if (!schemaData.properties || schemaData.additionalProperties !== false) {
+    if (
+      !schemaData.oneOf &&
+      (!schemaData.properties || schemaData.additionalProperties !== false)
+    ) {
       throw new TypeError(
         `Schema "${basename}" must have properties.additionalProperties set to false`
       );

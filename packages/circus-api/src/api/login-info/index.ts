@@ -13,7 +13,6 @@ export const handleGet: RouteMiddleware = () => {
 };
 
 export const handleGetFull: RouteMiddleware = ({
-  db,
   models,
   dicomImageServerUrl,
   uploadFileSizeMaxBytes
@@ -33,35 +32,11 @@ export const handleGetFull: RouteMiddleware = ({
       ctx.userPrivileges.domains.indexOf(defaultDomainValue) >= 0
         ? defaultDomainValue
         : null;
-
-    const sharedMyLists = await db
-      .collection('users')
-      .aggregate([
-        { $unwind: { path: '$myLists' } },
-        {
-          $match: {
-            $or: [
-              { 'myLists.editors.userEmail': user.userEmail },
-              { 'myLists.editors.groupId': { $in: [user.groups] } }
-            ]
-          }
-        },
-        {
-          $project: {
-            _id: false,
-            owner: '$userEmail',
-            sharedMyList: '$myLists'
-          }
-        }
-      ])
-      .toArray();
-
     ctx.body = {
       ...user,
       ...ctx.userPrivileges,
       groups,
       defaultDomain,
-      sharedMyLists,
       dicomImageServer: dicomImageServerUrl,
       uploadFileMax: 30,
       uploadFileSizeMaxBytes

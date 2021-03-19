@@ -4,23 +4,24 @@ import { AxiosInstance } from 'axios';
 let apiTest: ApiTest, axios: AxiosInstance;
 beforeAll(async () => {
   apiTest = await setUpAppForRoutesTest();
-  axios = apiTest.axiosInstances.alice;
+  axios = apiTest.axiosInstances.bob;
 });
 afterAll(async () => await apiTest.tearDown());
 
 test('short', async () => {
   const res = await axios.get('api/login-info');
   expect(res.data).toEqual({
-    userEmail: 'alice@example.com',
-    loginId: 'alice'
+    userEmail: 'bob@example.com',
+    loginId: 'bob'
   });
 });
 
 test('full', async () => {
   const res = await axios.get('api/login-info/full');
   expect(res.data).toMatchObject({
-    userEmail: 'alice@example.com',
-    loginId: 'alice',
-    description: 'Alice'
+    userEmail: 'bob@example.com',
+    loginId: 'bob',
+    description: 'Bob'
   });
+  expect(res.data.sharedMyLists).toHaveLength(1);
 });

@@ -347,8 +347,8 @@ const MenuBar: React.FC<{
 });
 
 const StyledMenuBarDiv = styled.div`
-  border-bottom: 1px solid silver;
-  border-top: 1px solid silver;
+  border-bottom: 1px solid ${(props: any) => props.theme.border};
+  border-top: 1px solid ${(props: any) => props.theme.border};
   display: flex;
   flex-flow: row wrap;
   justify-content: space-between;

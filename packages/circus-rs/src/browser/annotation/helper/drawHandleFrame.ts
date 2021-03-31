@@ -17,7 +17,8 @@ export default function drawHandleFrame(
     handleSize?: number;
     lineWidth?: number;
     strokeStyle?: string;
-  } = {}
+    invalidSegmentCenter?: boolean;
+  }
 ): void {
   const polygon = toPolygon(frameVertices);
   if (!polygon) return;
@@ -31,7 +32,8 @@ export default function drawHandleFrame(
   const drawHandlePoints: Vector2[] = [];
   polygon.sides.forEach(i => {
     drawHandlePoints.push(i.from);
-    drawHandlePoints.push(centerDirectedSegment(i));
+    if (!option.invalidSegmentCenter)
+      drawHandlePoints.push(centerDirectedSegment(i));
   });
 
   ctx.save();
@@ -63,8 +65,8 @@ export default function drawHandleFrame(
           to.y += handleSize;
         }
         lines.push({ from, to });
-        lines.forEach(i => drawLine(ctx, i, drawStyle));
       }
+      lines.forEach(i => drawLine(ctx, i, drawStyle));
     } else {
       drawPolygon(ctx, polygon.vertices, drawStyle);
     }

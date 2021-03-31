@@ -12,6 +12,7 @@ import { Link, useParams } from 'react-router-dom';
 import IconButton from 'components/IconButton';
 
 const StyledImageViewer = styled(ImageViewer)`
+  background: black;
   width: 512px;
   height: 512px;
 `;

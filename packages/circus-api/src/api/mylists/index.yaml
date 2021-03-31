@@ -28,23 +28,33 @@ routes:
             - series
             - clinicalCases
             - pluginJobs
-      required: ['name', 'resourceType']
+        public:
+          type: boolean
+      required: ['name', 'resourceType', 'public']
     responseSchema:
       properties:
         myListId:
           type: string
       required: ['myListId']
-  - verb: put
-    path: /mylists/:myListId/name
+  - verb: patch
+    path: /mylists/:myListId
     requestSchema:
+      type: object
       properties:
         name:
           type: string
           minLength: 1
           maxLength: 64
-      required: ['name']
-    handler: handleChangeName
-    description: Renames the specified my list.
+        public:
+          type: boolean
+        editors:
+          type: array
+          items:
+            $ref: myListEditor
+      additionalProperties: false
+      minProperties: 1
+    handler: handlePatchList
+    description: Change name, public status, and editors of the specified my list.
   - verb: delete
     path: /mylists/:myListId
     description: Deletes the specified my list.

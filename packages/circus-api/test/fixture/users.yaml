@@ -32,19 +32,27 @@
   myLists:
     - myListId: 01ewes10a08z21bjnysd4p1m3f
       resourceType: clinicalCases
-      name: "Bob's MyList"
+      name: Bob's MyList
+      public: true
+      editors: []
       createdAt: { $date: 1405266783000 }
     - myListId: 01ewetw0chv8v5vxdtjdf6x9rk
       resourceType: clinicalCases
       name: MyList1
+      public: false
+      editors: []
       createdAt: { $date: 1405266782000 }
     - myListId: 01ewetywx9q6s2n5s03y3219ka
       resourceType: clinicalCases
       name: MyList2
+      public: false
+      editors: []
       createdAt: { $date: 1405266782000 }
     - myListId: 01ex36wt9c94s93j0rmk98nsj0
       resourceType: series
       name: My Series List
+      public: false
+      editors: []
       createdAt: { $date: 1405266976000 }
 - userEmail: guest@example.com
   loginId: guest
@@ -81,6 +89,8 @@
     - myListId: 01ex36f2n99kjaqvpfrerrsryp
       resourceType: clinicalCases
       name: Carol's list
+      public: false
+      editors: []
       createdAt: { $date: 1405266782123 }
 - userEmail: dave@example.com
   loginId: dave
@@ -101,12 +111,22 @@
     - myListId: 01ez9knaakz9tgd2hpyceagj11
       resourceType: series
       name: Dave's series list
+      public: false
+      editors: []
       createdAt: { $date: 1405266782123 }
     - myListId: 01ezab6xqfac7hvm5s09yw1g1j
       resourceType: clinicalCases
       name: Dave's case list
+      public: true
+      editors:
+        [
+          { type: user, userEmail: 'dave@example.com' },
+          { type: user, userEmail: 'bob@example.com' },
+        ]
       createdAt: { $date: 1405266782123 }
     - myListId: 01ezahm939cbyfk73g3jhw1d0b
       resourceType: pluginJobs
       name: Dave's plugin job list
+      public: false
+      editors: []
       createdAt: { $date: 1405266782123 }

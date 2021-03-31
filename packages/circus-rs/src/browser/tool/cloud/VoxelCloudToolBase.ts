@@ -61,7 +61,11 @@ export default class VoxelCloudToolBase<
 
     const edge0 = convertViewerPointToVolumeIndex(viewer, sx, sy);
     const edge1 = convertViewerPointToVolumeIndex(viewer, ex, ey);
-    const v = new Vector3(edge1.x - edge0.x, edge1.y - edge0.y, edge1.z - edge0.z);
+    const v = new Vector3(
+      edge1.x - edge0.x,
+      edge1.y - edge0.y,
+      edge1.z - edge0.z
+    );
     const pen = Math.floor(0.5 * (width - 1));
     //  < width >
     // p0 ------ p1

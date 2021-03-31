@@ -345,8 +345,8 @@ export default abstract class SolidFigure
         draggedPoint3,
         maintainAspectRatio
       );
-      this.min = newBoundingBox3[0] as Vector3D;
-      this.max = newBoundingBox3[1] as Vector3D;
+      this.min = newBoundingBox3[0];
+      this.max = newBoundingBox3[1];
 
       const comp = viewer.getComposition();
       if (!comp) return;

@@ -13,7 +13,7 @@ routes:
   - verb: get
     path: /mylists/:myListId
     description: Returns information about the specified list.
-    responseSchema: userMyList
+    responseSchema: userMyList|addProperty resourceIds
   - verb: post
     path: /mylists
     description: Creates a new my list.

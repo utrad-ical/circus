@@ -1,5 +1,5 @@
 import React, { useReducer } from 'react';
-import { FeedbackEntry } from './types';
+import { FeedbackEntry } from '@utrad-ical/circus-cs-results';
 import moment from 'moment';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import UserDisplay from 'components/UserDisplay';
@@ -20,7 +20,7 @@ interface FeedbackState {
   isConsensual: boolean;
   currentData: { [feedbackKey: string]: any };
   registeredTargetCount: number;
-  canRegister: boolean;
+  valid: boolean;
   disabled: boolean;
   message?: React.ReactNode;
   feedbacks: FeedbackEntry<any>[];
@@ -31,7 +31,7 @@ const initialState: FeedbackState = {
   isConsensual: false,
   currentData: {},
   registeredTargetCount: 0,
-  canRegister: false,
+  valid: false,
   disabled: true,
   message: null,
   feedbacks: [],
@@ -72,36 +72,36 @@ const slice = createSlice({
       // 3. Otherwise, enter personal mode and show empty feedback
       state.disabled = false;
     },
-    changeFeedback: (state, action: PayloadAction<any>) => {
-      state.currentData = action.payload.value;
-      state.registeredTargetCount = action.payload.registeredTargetCount;
-      state.canRegister = action.payload.canRegister;
-    },
-    enterConsensualMode: (
+    changeFeedback: (
       state,
       action: PayloadAction<{
-        canRegister: boolean;
-        registeredTargetCount: number;
         value: any;
       }>
     ) => {
-      const consensual = state.feedbacks.find(f => f.isConsensual);
-      state.isConsensual = true;
-      state.disabled = !!consensual;
-      state.canRegister = !consensual && action.payload.canRegister;
-      state.registeredTargetCount = action.payload.registeredTargetCount;
-      state.currentData = consensual ? consensual.data : action.payload.value;
-      state.message = consensual ? registeredMessage(consensual) : '';
+      const { value } = action.payload;
+      state.currentData = value;
     },
-    enterPersonalMode: state => {
-      const myPersonal = state.feedbacks.find(
-        f => !f.isConsensual && f.userEmail === state.myUserEmail
-      );
+    changeValidStatus: (state, action: PayloadAction<{ valid: boolean }>) => {
+      const { valid } = action.payload;
+      state.valid = valid;
+    },
+    enterConsensualMode: (state, action: PayloadAction<{}>) => {
+      state.isConsensual = true;
+      // state.disabled = !!consensual;
+      // state.canRegister = !consensual && action.payload.canRegister;
+      // state.registeredTargetCount = action.payload.registeredTargetCount;
+      // state.currentData = consensual ? consensual.data : action.payload.value;
+      // state.message = consensual ? registeredMessage(consensual) : '';
+    },
+    enterPersonalMode: (state, action: PayloadAction<{}>) => {
+      // const myPersonal = state.feedbacks.find(
+      //   f => !f.isConsensual && f.userEmail === state.myUserEmail
+      // );
       state.isConsensual = false;
-      state.disabled = !!myPersonal;
-      state.canRegister = false;
-      state.currentData = myPersonal ? myPersonal.data : {};
-      state.message = myPersonal ? registeredMessage(myPersonal) : '';
+      // state.disabled = !!myPersonal;
+      // state.canRegister = false;
+      // state.currentData = myPersonal ? myPersonal.data : {};
+      // state.message = myPersonal ? registeredMessage(myPersonal) : '';
     }
   }
 });

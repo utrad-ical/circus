@@ -1,24 +1,8 @@
-import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
-
-export interface FeedbackEntry<T> {
-  userEmail: string;
-  isConsensual: boolean;
-  createdAt: string;
-  data: T;
-}
+import { FeedbackEntry } from '@utrad-ical/circus-cs-results';
 
 export interface ImperativeFeedbackRef<T> {
   mergePersonalFeedback: (personalFeedback: T[]) => T;
   validate: (value: T) => boolean;
-}
-
-export interface Job {
-  jobId: string;
-  results: any;
-  series: {
-    seriesUid: string;
-    partialVolumeDescriptor: PartialVolumeDescriptor;
-  }[];
 }
 
 /**

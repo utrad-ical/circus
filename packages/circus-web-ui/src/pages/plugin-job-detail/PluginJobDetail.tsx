@@ -1,4 +1,10 @@
-import React, { Fragment, useState, useMemo, useCallback, useRef } from 'react';
+import React, {
+  Fragment,
+  useState,
+  useMemo,
+  useContext,
+  useCallback
+} from 'react';
 import { useApi } from 'utils/api';
 import PatientInfoBox from 'components/PatientInfoBox';
 import FullSpanContainer from 'components/FullSpanContainer';
@@ -10,17 +16,23 @@ import styled from 'styled-components';
 import useFeedback, { actions } from './useFeedback';
 import PersonalConsensualSwitch from './PersonalConsensualSwitch';
 import useLoadData from 'utils/useLoadData';
-import { VolumeLoaderCacheContext } from 'utils/useImageSource';
-import * as rs from 'circus-rs';
+import {
+  stringifyPartialVolumeDescriptor,
+  VolumeLoaderCacheContext
+} from 'utils/useImageSource';
 import PieProgress from 'components/PieProgress';
-import createDynamicComponent from './createDynamicComponent';
-import Section from './Section';
 import useLoginUser from 'utils/useLoginUser';
 import { DropdownButton, MenuItem } from 'components/react-bootstrap';
 import Icon from 'components/Icon';
 import { useParams } from 'react-router-dom';
-import { SeriesEntry } from 'components/SeriesSelector';
-import { FeedbackEntry } from './types';
+import MainDisplay from './MainDisplay';
+import {
+  Job,
+  Plugin,
+  CsResultsContext,
+  CsResultsContextType
+} from '@utrad-ical/circus-cs-results';
+import { RsVolumeLoader } from '@utrad-ical/circus-rs/src/browser';
 
 const StyledDiv = styled.div`
   display: flex;
@@ -57,26 +69,6 @@ const StyledDiv = styled.div`
   }
 `;
 
-interface DisplayStrategy {
-  feedbackKey: string;
-  caption: string;
-  type: string;
-  options: any;
-}
-
-const createFeedbackTargets = (displayStrategy: DisplayStrategy[]) => {
-  const feedbackTargets = [];
-  for (const strategy of displayStrategy) {
-    const render = createDynamicComponent(strategy.type, strategy.options);
-    feedbackTargets.push({
-      feedbackKey: strategy.feedbackKey,
-      caption: strategy.caption,
-      render
-    });
-  }
-  return feedbackTargets;
-};
-
 const Menu: React.FC<{
   onMenuSelect: (selected: string) => void;
 }> = React.memo(props => {
@@ -97,13 +89,6 @@ const Menu: React.FC<{
   );
 });
 
-interface Job {
-  jobId: string;
-  pluginId: string;
-  series: SeriesEntry[];
-  feedbacks: FeedbackEntry<any>[];
-}
-
 const PluginJobDetail: React.FC<any> = props => {
   const api = useApi();
   const jobId: string = useParams<any>().jobId;
@@ -112,12 +97,15 @@ const PluginJobDetail: React.FC<any> = props => {
   const server = user.dicomImageServer;
   const [busy, setBusy] = useState(false);
   const [feedbackState, dispatch] = useFeedback();
+  const { map: volumeLoaderMap, rsHttpClient } = useContext(
+    VolumeLoaderCacheContext
+  )!;
 
   const loadJob = useCallback(async () => {
     setBusy(true);
     try {
       const job = (await api(`plugin-jobs/${jobId}`)) as Job;
-      const pluginData = await api(`plugins/${job.pluginId}`);
+      const pluginData = (await api(`plugins/${job.pluginId}`)) as Plugin;
       const seriesData: { [seriesUid: string]: any } = {};
       for (const s of job.series) {
         const seriesUid = s.seriesUid;
@@ -134,11 +122,6 @@ const PluginJobDetail: React.FC<any> = props => {
   }, [api, dispatch, jobId, user.userEmail]);
 
   const [jobData, , reloadJob] = useLoadData(loadJob);
-
-  const feedbackTargets = useMemo(
-    () => jobData && createFeedbackTargets(jobData.pluginData.displayStrategy),
-    [jobData]
-  );
 
   const handleMenuSelect = useCallback(
     async selected => {
@@ -167,8 +150,41 @@ const PluginJobDetail: React.FC<any> = props => {
     [api, jobId, reloadJob]
   );
 
-  // Keeps track of multiple refs using Map
-  const listenerRefs = useRef<Map<string, any>>(new Map());
+  const resultsContext = useMemo<CsResultsContextType | undefined>(() => {
+    if (!jobData) return undefined;
+    const { job, pluginData } = jobData;
+    return {
+      consensual: feedbackState.isConsensual,
+      editable: true,
+      job,
+      plugin: pluginData,
+      eventLogger: (message: string) => {},
+      getVolumeLoader: series => {
+        const { seriesUid, partialVolumeDescriptor } = series;
+        const key =
+          seriesUid +
+          '&' +
+          stringifyPartialVolumeDescriptor(partialVolumeDescriptor);
+        if (volumeLoaderMap.has(key)) return volumeLoaderMap.get(key)!;
+        const volumeLoader = new RsVolumeLoader({
+          rsHttpClient,
+          seriesUid,
+          partialVolumeDescriptor
+        });
+        volumeLoaderMap.set(key, volumeLoader);
+        return volumeLoader;
+      },
+      loadAttachment: (path, signal) => {
+        const url = `/api/plugin-jobs/${job.jobId}/attachment/${path}`;
+        const token = api.getToken();
+        return fetch(url, {
+          signal,
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      },
+      rsHttpClient
+    };
+  }, [api, feedbackState.isConsensual, jobData, rsHttpClient, volumeLoaderMap]);
 
   if (!jobData) {
     return <LoadingIndicator />;
@@ -178,55 +194,22 @@ const PluginJobDetail: React.FC<any> = props => {
     return <div className="alert alert-danger">{jobData.message}</div>;
   }
 
-  const { job, seriesData } = jobData;
+  const { job, seriesData, pluginData } = jobData;
   const primarySeriesUid = job.series[0].seriesUid;
 
-  const validate = (value: any): [boolean, number] => {
-    const finished = feedbackTargets.filter(
-      t =>
-        listenerRefs.current
-          .get(t.feedbackKey)
-          .validate(value[t.feedbackKey]) === true
-    );
-    return [finished.length === feedbackTargets.length, finished.length];
+  const handleFeedbackChange = (value: any) => {
+    dispatch(actions.changeFeedback({ value }));
   };
 
-  const handleChange = (feedbackKey: string, value: any) => {
-    const newFeedback = {
-      ...feedbackState.currentData,
-      [feedbackKey]: value
-    };
-    const [isValid, registeredTargetCount] = validate(newFeedback);
-    dispatch(
-      actions.changeFeedback({
-        value: newFeedback,
-        registeredTargetCount,
-        canRegister: isValid
-      })
-    );
+  const handleFeedbackValidate = (valid: boolean) => {
+    dispatch(actions.changeValidStatus({ valid }));
   };
 
   const handleChangeFeedbackMode = (isConsensual: boolean) => {
     if (isConsensual) {
-      const mergedFeedback: { [feedbackKey: string]: any } = {};
-      feedbackTargets.forEach(({ feedbackKey }) => {
-        const pfbs = job.feedbacks
-          .filter(fb => !fb.isConsensual)
-          .map(fb => fb.data[feedbackKey]);
-        mergedFeedback[feedbackKey] = listenerRefs.current
-          .get(feedbackKey)
-          .mergePersonalFeedback(pfbs);
-      });
-      const [canRegister, registeredTargetCount] = validate(mergedFeedback);
-      dispatch(
-        actions.enterConsensualMode({
-          value: mergedFeedback,
-          registeredTargetCount,
-          canRegister
-        })
-      );
+      dispatch(actions.enterConsensualMode({}));
     } else {
-      dispatch(actions.enterPersonalMode());
+      dispatch(actions.enterPersonalMode({}));
     }
   };
 
@@ -246,20 +229,6 @@ const PluginJobDetail: React.FC<any> = props => {
 
   const modeText = feedbackState.isConsensual ? 'consensual' : 'personal';
 
-  const personalOpinionsForKey = (
-    key: string
-  ): FeedbackEntry<any>[] | undefined => {
-    if (!feedbackState.isConsensual) return undefined;
-    return job.feedbacks
-      .filter(f => !f.isConsensual)
-      .map(f => {
-        return {
-          ...f,
-          data: f.data[key]
-        };
-      });
-  };
-
   return (
     <FullSpanContainer>
       <StyledDiv>
@@ -278,33 +247,20 @@ const PluginJobDetail: React.FC<any> = props => {
           <PluginDisplay pluginId={job.pluginId} size="xl" />
           <Menu onMenuSelect={handleMenuSelect} />
         </div>
-        <div className="job-detail-main">
-          <div className="feedback-targets">
-            {feedbackTargets.map(target => {
-              const Render = target.render;
-              const key = target.feedbackKey;
-              const feedback = feedbackState.currentData[key];
-              const personalOpinions = feedbackState.isConsensual
-                ? personalOpinionsForKey(key)
-                : undefined;
-              return (
-                <Section key={key} title={target.caption}>
-                  <Render
-                    ref={(ref: any) => listenerRefs.current.set(key, ref)}
-                    job={job}
-                    value={feedback}
-                    personalOpinions={personalOpinions}
-                    onChange={(value: any) => handleChange(key, value)}
-                    isConsensual={feedbackState.isConsensual}
-                    disabled={feedbackState.disabled}
-                  />
-                </Section>
-              );
-            })}
-          </div>
-        </div>
+        <CsResultsContext.Provider value={resultsContext!}>
+          <MainDisplay
+            initialFeedbackValue={feedbackState.currentData}
+            options={pluginData.displayStrategy}
+            personalOpinions={
+              feedbackState.isConsensual
+                ? feedbackState.feedbacks.filter(fb => !fb.isConsensual)
+                : []
+            }
+            onFeedbackChange={handleFeedbackChange}
+            onFeedbackValidate={handleFeedbackValidate}
+          />
+        </CsResultsContext.Provider>
         <div className="job-detail-footer">
-          {/* <pre>{JSON.stringify(feedbackState.currentData)}</pre> */}
           {feedbackState.message && (
             <span className="regisiter-message text-success">
               {feedbackState.message}
@@ -312,16 +268,13 @@ const PluginJobDetail: React.FC<any> = props => {
           )}
           {!feedbackState.disabled && (
             <Fragment>
-              <PieProgress
-                max={feedbackTargets.length}
-                value={feedbackState.registeredTargetCount}
-              />
+              <PieProgress max={3} value={1} />
               &ensp;
             </Fragment>
           )}
           <IconButton
             icon={feedbackState.isConsensual ? 'tower' : 'user'}
-            disabled={!feedbackState.canRegister || busy}
+            disabled={!feedbackState.valid || busy}
             onClick={handleRegisterClick}
           >
             Register {modeText} feedback

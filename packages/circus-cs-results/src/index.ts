@@ -1,4 +1,5 @@
 export * from './usePluginAttachment';
 export * from './CsResultsContext';
 export * from './Display';
-export * from './blocks/ToggleButton';
+export * from './displays/Choice';
+export * from './displays/LesionCandidates';

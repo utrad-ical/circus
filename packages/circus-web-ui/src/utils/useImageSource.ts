@@ -3,6 +3,7 @@ import * as rs from 'circus-rs';
 import PartialVolumeDescriptor, {
   isValidPartialVolumeDescriptor
 } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
+import { SeriesEntry } from 'components/SeriesSelector';
 
 export const VolumeLoaderCacheContext = React.createContext<{
   rsHttpClient: rs.RsHttpClient;

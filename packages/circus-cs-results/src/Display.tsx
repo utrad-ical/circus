@@ -1,6 +1,11 @@
 import React from 'react';
 import { FeedbackEntry } from './CsResultsContext';
 
+export interface DisplayDefinition {
+  type: string;
+  options: any;
+}
+
 interface DisplayProps<O extends object, F extends unknown> {
   /**
    * The results data this Display is expected to show.

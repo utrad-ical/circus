@@ -80,7 +80,6 @@ export const Choice: Display<ChoiceOptions, string | number> = props => {
 
   return (
     <div>
-      <pre>{JSON.stringify(job.results, null, '  ')}</pre>
       <UI
         choices={buttons}
         onSelect={handleSelect}

@@ -33,6 +33,7 @@ import {
   CsResultsContextType
 } from '@utrad-ical/circus-cs-results';
 import { RsVolumeLoader } from '@utrad-ical/circus-rs/src/browser';
+import loadDisplay from './loadDisplay';
 
 const StyledDiv = styled.div`
   display: flex;
@@ -182,7 +183,8 @@ const PluginJobDetail: React.FC<any> = props => {
           headers: { Authorization: `Bearer ${token}` }
         });
       },
-      rsHttpClient
+      rsHttpClient,
+      loadDisplay
     };
   }, [api, feedbackState.isConsensual, jobData, rsHttpClient, volumeLoaderMap]);
 

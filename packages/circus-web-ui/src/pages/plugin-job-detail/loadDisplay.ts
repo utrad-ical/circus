@@ -4,14 +4,16 @@ import {
   LesionCandidates
 } from '@utrad-ical/circus-cs-results';
 
-const map: { [name: string]: Display<any, any> } = {
+const builtInDisplays: { [name: string]: Display<any, any> } = {
   Choice,
   LesionCandidates
 };
 
-const loadDisplay = async (name: string): Promise<Display<any, any>> => {
-  if (name in map) {
-    return map[name];
+const loadDisplay = async <O extends object, F>(
+  name: string
+): Promise<Display<O, F>> => {
+  if (name in builtInDisplays) {
+    return builtInDisplays[name];
   } else {
     return (await import(/* webpackIgnore: true */ name)).default;
   }

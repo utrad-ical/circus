@@ -43,6 +43,7 @@ export * from '../common/geometry';
 
 export { default as RsHttpClient } from './http-client/RsHttpClient';
 
+export { default as ImageSource } from './image-source/ImageSource';
 export { default as MprImageSource } from './image-source/MprImageSource';
 export { default as DynamicMprImageSource } from './image-source/DynamicMprImageSource';
 export { default as RawVolumeMprImageSource } from './image-source/RawVolumeMprImageSource';

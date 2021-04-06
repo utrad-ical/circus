@@ -22,11 +22,13 @@ const DisplayTester: React.FC<{
   const ctx = useMemo(() => {
     return {
       job: null as any,
+      plugin: null as any,
       consensual,
       editable,
       eventLogger: () => {},
       loadAttachment: mockAttachmentLoader,
-      rsHttpClient: null as any
+      rsHttpClient: null as any,
+      getVolumeLoader: null as any
     };
   }, [consensual, editable]);
 

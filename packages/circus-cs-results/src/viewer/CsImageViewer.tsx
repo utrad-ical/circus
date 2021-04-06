@@ -5,6 +5,7 @@ import {
   ViewState
 } from '@utrad-ical/circus-rs/src/browser';
 import React, { useEffect, useRef, useState } from 'react';
+import classnames from 'classnames';
 
 export type StateChangerFunc<T extends ViewState> = (
   state: T,
@@ -51,8 +52,9 @@ export const ImageViewer: React.FC<{
   composition: Composition;
   tool: Tool;
   stateChanger?: StateChanger<any>;
+  className?: string;
 }> = props => {
-  const { composition, tool, stateChanger } = props;
+  const { composition, tool, stateChanger, className } = props;
   const viewerDivRef = useRef<HTMLDivElement>(null);
   const [viewer, setViewer] = useState<Viewer | null>(null);
 
@@ -66,7 +68,7 @@ export const ImageViewer: React.FC<{
   useEffect(() => {
     if (!viewer) return;
     viewer.setActiveTool(tool);
-  }, [tool]);
+  }, [viewer, tool]);
 
   useEffect(() => {
     if (stateChanger) {
@@ -81,5 +83,7 @@ export const ImageViewer: React.FC<{
     }
   }, [stateChanger]);
 
-  return <div ref={viewerDivRef} />;
+  return (
+    <div className={classnames('image-viewer', className)} ref={viewerDivRef} />
+  );
 };

@@ -4,6 +4,7 @@ import {
   DicomVolumeLoader
 } from '@utrad-ical/circus-rs/src/browser';
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import { Display } from './Display';
 
 export interface FeedbackEntry<T> {
   userEmail: string;
@@ -79,6 +80,10 @@ export interface CsResultsContextType {
    * Returns access to cached volume loader.
    */
   getVolumeLoader: (series: SeriesDefinition) => DicomVolumeLoader;
+  /**
+   * Dynamically loads a display.
+   */
+  loadDisplay: <O extends object, F>(name: string) => Promise<Display<O, F>>;
 }
 
 export const CsResultsContext = React.createContext<CsResultsContextType>(

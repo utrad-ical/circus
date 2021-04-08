@@ -15,7 +15,7 @@ export async function up(db) {
     if (myLists.length === 0) continue;
     for (const myList of myLists) {
       if (myList.public === undefined) myList.public = false;
-      if (!myList.editor) myList.editor = [];
+      if (!myList.editors) myList.editors = [];
     }
     db.collection('users').updateOne({ userEmail }, { $set: { myLists } });
   }

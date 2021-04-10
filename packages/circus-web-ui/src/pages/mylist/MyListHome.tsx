@@ -24,7 +24,7 @@ const MyListHome: React.FC<{
   const handleCreateNew = async () => {
     const name = await prompt('Enter new list name');
     if (!name) return;
-    await api('/mylists', { method: 'post', data: { name, resourceType } });
+    await api('/mylists', { method: 'post', data: { name, resourceType, public: false } });
     dispatch(
       showMessage(
         <>

@@ -23,7 +23,7 @@ const pluginJobRunner: FunctionService<
   PluginJobRunner,
   {
     jobReporter: circus.PluginJobReporter;
-    dicomRepository: DicomFileRepository;
+    dicomFileRepository: DicomFileRepository;
     pluginDefinitionAccessor: circus.PluginDefinitionAccessor;
     dockerRunner: DockerRunner;
   }
@@ -36,7 +36,7 @@ const pluginJobRunner: FunctionService<
 ) => {
   const { workingDirectory, removeTemporaryDirectory } = options;
   const {
-    dicomRepository,
+    dicomFileRepository,
     pluginDefinitionAccessor,
     jobReporter,
     dockerRunner
@@ -74,7 +74,11 @@ const pluginJobRunner: FunctionService<
       const seriesUid = series[volId].seriesUid;
       const dicomDir = path.join(workDir(jobId, 'dicom'), seriesUid);
       if (!createdSeries[seriesUid]) {
-        await fetchSeriesFromRepository(dicomRepository, seriesUid, dicomDir);
+        await fetchSeriesFromRepository(
+          dicomFileRepository,
+          seriesUid,
+          dicomDir
+        );
         createdSeries[seriesUid] = true;
       }
       await buildDicomVolumes(dockerRunner, [dicomDir], inDir);
@@ -104,7 +108,7 @@ const pluginJobRunner: FunctionService<
   const run = async (
     jobId: string,
     job: circus.PluginJobRequest,
-    logStream: stream.Writable = new stream.PassThrough()
+    logStream: stream.Writable = process.stdout
   ) => {
     const writeLog = (log: string) => {
       const timeStamp = '[' + new Date().toISOString() + ']';
@@ -162,17 +166,17 @@ export default pluginJobRunner;
 /**
  * Extracts the entire series from DICOM repository
  * into the speicied path on the local file system.
- * @param dicomRepository The DICOM repositoty from which the series is fetched.
+ * @param dicomFileRepository The DICOM repositoty from which the series is fetched.
  * @param seriesUid The series instance UID.
  * @param destDir The path to the destination directory.
  */
 export async function fetchSeriesFromRepository(
-  dicomRepository: DicomFileRepository,
+  dicomFileRepository: DicomFileRepository,
   seriesUid: string,
   destDir: string
 ) {
   await fs.ensureDir(destDir);
-  const { load, images } = await dicomRepository.getSeries(seriesUid);
+  const { load, images } = await dicomFileRepository.getSeries(seriesUid);
   const it = new MultiRange(images).getIterator();
   let next;
   while (!(next = it.next()).done) {

@@ -41,7 +41,7 @@ describe('pluginJobRunner', () => {
     };
 
     // Mock Dicom repository
-    const dicomRepository: DicomFileRepository = {
+    const dicomFileRepository: DicomFileRepository = {
       getSeries: async seriesUid => ({
         save: async (i, data) => {},
         load: async i => {
@@ -72,7 +72,7 @@ describe('pluginJobRunner', () => {
       {
         jobReporter,
         dockerRunner,
-        dicomRepository,
+        dicomFileRepository,
         pluginDefinitionAccessor
       }
     );

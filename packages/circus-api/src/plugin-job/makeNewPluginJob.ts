@@ -13,12 +13,11 @@ const makeNewPluginJob = async (
   cs: CsCore,
   priority: any
 ) => {
-  if (await duplicateJobExists(models, request))
-    throw new Error('There is a duplicate job that is already registered.');
-
   const plugin = await models.plugin.findByIdOrFail(request.pluginId);
 
   try {
+    if (await duplicateJobExists(models, request))
+      throw new Error('There is a duplicate job that is already registered.');
     const seriesData = await fetchAccessibleSeries(
       models,
       userPrivileges,

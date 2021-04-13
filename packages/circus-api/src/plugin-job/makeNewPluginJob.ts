@@ -24,7 +24,7 @@ const makeNewPluginJob = async (
       request.series
     );
     if (seriesData.slice(1).some(s => s.domain !== seriesData[0].domain))
-      throw new Error('Series must be the same domain.');
+      throw new Error('All series must belong to the same domain.');
   } catch (err) {
     err.status = status.BAD_REQUEST;
     err.expose = true;

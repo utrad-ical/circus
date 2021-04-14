@@ -67,7 +67,7 @@ const createMongoPluginJobReporter: FunctionService<
   };
 
   const packDir = (jobId: string, stream: NodeJS.ReadableStream) => {
-    return new Promise(resolve => {
+    return new Promise<void>((resolve, reject) => {
       const outDir = path.join(resultsDirectory, jobId);
       const extract = tarfs.extract(outDir, {
         dmode: 0o555, // all dirs should be readable
@@ -75,7 +75,8 @@ const createMongoPluginJobReporter: FunctionService<
       });
       stream.pipe(extract);
       extract.on('finish', resolve);
-    }) as Promise<void>;
+      extract.on('error', reject);
+    });
   };
 
   return { report, packDir };

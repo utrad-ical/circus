@@ -50,6 +50,7 @@ export const handlePost: RouteMiddleware = ({ models }) => {
     }
     const inserting = {
       ...ctx.request.body,
+      myLists: [],
       password: nodepass.hash(ctx.request.body.password),
       lastLoginTime: new Date(0),
       lastLoginIp: ''

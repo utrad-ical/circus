@@ -171,7 +171,7 @@ describe('plugin-job registration', () => {
     expect(res.status).toBe(400);
   });
 
-  test('should reject if difference series domain', async () => {
+  test('should reject for unmatched series domain', async () => {
     const res = await bob.request({
       method: 'post',
       url: 'api/plugin-jobs',
@@ -191,7 +191,9 @@ describe('plugin-job registration', () => {
       }
     });
     expect(res.status).toBe(400);
-    expect(res.data.error).toMatch('Series must be the same domain.');
+    expect(res.data.error).toMatch(
+      'All series must belong to the same domain.'
+    );
   });
 
   test('should return a finished plug-in job', async () => {

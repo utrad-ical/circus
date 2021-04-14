@@ -31,7 +31,7 @@ const defaults: circus.Configuration = {
     options: {
       mongoUrl: 'mongodb://localhost:27017/circus-api',
       collectionName: 'pluginJobs',
-      pluginResultsDir: '/var/circus/plugin-results'
+      resultsDirectory: '/var/circus/plugin-results'
     }
   },
 

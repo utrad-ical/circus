@@ -51,24 +51,59 @@ export const createStateChanger = <T extends ViewState = ViewState>() => {
 export const ImageViewer: React.FC<{
   composition: Composition;
   tool: Tool;
+  initialStateSetter?: StateChangerFunc<any>;
   stateChanger?: StateChanger<any>;
   className?: string;
+  onMouseUp?: (ev: MouseEvent) => any;
 }> = props => {
-  const { composition, tool, stateChanger, className } = props;
+  const {
+    composition,
+    tool,
+    initialStateSetter,
+    stateChanger,
+    className,
+    onMouseUp
+  } = props;
   const viewerDivRef = useRef<HTMLDivElement>(null);
   const [viewer, setViewer] = useState<Viewer | null>(null);
 
   useEffect(() => {
     if (!composition) return;
-    const viewer = new Viewer(viewerDivRef.current!);
-    viewer.setComposition(composition);
-    setViewer(viewer);
-  }, [composition]);
+    setViewer(viewer => {
+      if (viewer) {
+        if (viewer.getComposition() !== composition) {
+          viewer.setComposition(composition);
+        }
+        return viewer;
+      } else {
+        const newViewer = new Viewer(viewerDivRef.current!);
+        newViewer.setComposition(composition);
+        if (typeof initialStateSetter === 'function') {
+          newViewer.on('imageReady', () => {
+            const state = newViewer.getState();
+            const newState = initialStateSetter(state, newViewer);
+            newViewer.setState(newState);
+          });
+        }
+        return newViewer;
+      }
+    });
+  }, [composition, initialStateSetter]);
 
   useEffect(() => {
     if (!viewer) return;
     viewer.setActiveTool(tool);
   }, [viewer, tool]);
+
+  // Handle onMouseUp
+  useEffect(() => {
+    if (!onMouseUp) return;
+    const container = viewerDivRef.current!;
+    container.addEventListener('mouseup', onMouseUp);
+    return () => {
+      container.removeEventListener('mouseup', onMouseUp);
+    };
+  }, [onMouseUp]);
 
   useEffect(() => {
     if (stateChanger) {
@@ -81,7 +116,7 @@ export const ImageViewer: React.FC<{
         stateChanger.off(cb);
       };
     }
-  }, [stateChanger]);
+  }, [stateChanger, viewer]);
 
   return (
     <div className={classnames('image-viewer', className)} ref={viewerDivRef} />

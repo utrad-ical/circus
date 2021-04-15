@@ -1,11 +1,13 @@
 import {
   Display,
   Choice,
+  Locator,
   LesionCandidates
 } from '@utrad-ical/circus-cs-results';
 
 const builtInDisplays: { [name: string]: Display<any, any> } = {
   Choice,
+  Locator,
   LesionCandidates
 };
 

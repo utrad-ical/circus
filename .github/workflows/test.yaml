@@ -32,7 +32,6 @@ jobs:
           docker pull hello-world
           docker pull circuscad/dicom_utility:2.0.0-beta3
           docker pull circuscad/dicom_voxel_dump:1.0.0
-          docker tag circuscad/dicom_voxel_dump:1.0.0 circus/dicom_voxel_dump:1.0
           cd packages/circus-cs-core/test/docker
           node build.js
       - name: Build modules

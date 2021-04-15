@@ -1,8 +1,8 @@
-import classNames from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useCsResults } from '../CsResultsContext';
 import { Display } from '../Display';
+import { Button } from './Button';
 
 interface Choice {
   value: number | string;
@@ -99,52 +99,6 @@ type ChoiceUI = React.FC<{
   disabled: boolean;
 }>;
 
-const Button: React.FC<{
-  caption: string;
-  color?: string;
-  selected: boolean;
-  disabled: boolean;
-  count?: number;
-  onClick: React.MouseEventHandler;
-}> = props => {
-  const { caption, color, selected, disabled, count, onClick } = props;
-  return (
-    <StyledButton
-      color={color}
-      onClick={onClick}
-      disabled={disabled}
-      className={classNames({ selected })}
-    >
-      {typeof count === 'number' && <span className="opinions">{count}</span>}
-      {caption}
-    </StyledButton>
-  );
-};
-
-const StyledButton = styled.button`
-  padding: 5px;
-  border: 1px solid gray;
-  background-color: ${(props: any) => props.theme.background ?? 'transparent'};
-  color: ${(props: any) => props.color ?? props.theme.brandPrimary};
-  &.selected {
-    background-color: ${(props: any) =>
-      props.color ?? props.theme.brandPrimary};
-    color: ${(props: any) => props.theme.background ?? 'white'};
-  }
-  &:hover {
-    filter: brightness(80%);
-  }
-  &:disabled {
-    opacity: 0.5;
-  }
-  .opinions {
-    border: 1px solid gray;
-    border-radius: 5px;
-    font-size: 80%;
-    margin-right: 3px;
-  }
-`;
-
 const ToggleButtons: ChoiceUI = props => {
   const { choices, onSelect, opinions, selected, disabled } = props;
   return (
@@ -155,14 +109,13 @@ const ToggleButtons: ChoiceUI = props => {
           onClick={() => onSelect(choice.value)}
           disabled={disabled}
           color={choice.color}
-          caption={choice.caption}
           selected={choice.value === selected}
-          count={
-            (opinions?.get(choice.value) ?? 0) > 0
-              ? opinions!.get(choice.value)!
-              : undefined
-          }
-        />
+        >
+          {(opinions?.get(choice.value) ?? 0) > 0 && (
+            <span className="opinions">{opinions?.get(choice.value)}</span>
+          )}
+          {choice.caption}
+        </Button>
       ))}
     </StyledDiv>
   );

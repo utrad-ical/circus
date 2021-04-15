@@ -12,7 +12,7 @@ const buildDicomVolumes = async (
   srcDirs: string[],
   destDir: string
 ) => {
-  const dockerImage = 'circus/dicom_voxel_dump:1.0';
+  const dockerImage = 'circuscad/dicom_voxel_dump:1.0.0';
 
   for (let i = 0; i < srcDirs.length; i++) {
     const srcDir = srcDirs[i];

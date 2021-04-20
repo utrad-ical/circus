@@ -24,7 +24,10 @@ const MyListHome: React.FC<{
   const handleCreateNew = async () => {
     const name = await prompt('Enter new list name');
     if (!name) return;
-    await api('/mylists', { method: 'post', data: { name, resourceType, public: false } });
+    await api('/mylists', {
+      method: 'post',
+      data: { name, resourceType, public: false }
+    });
     dispatch(
       showMessage(
         <>
@@ -41,8 +44,8 @@ const MyListHome: React.FC<{
     const list = lists.find(list => myListId === list.myListId)!;
     const name = await prompt('New name', list.name);
     if (name === null || name === list.name) return;
-    await api(`/mylists/${list.myListId}/name`, {
-      method: 'put',
+    await api(`/mylists/${list.myListId}`, {
+      method: 'patch',
       data: { name }
     });
     dispatch(

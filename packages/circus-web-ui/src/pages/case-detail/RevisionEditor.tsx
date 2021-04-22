@@ -573,6 +573,7 @@ const RevisionEditor: React.FC<{
             volumeLoadedStatus={volumeLoadedStatus}
             editingData={editingData}
             updateEditingData={updateEditingData}
+            viewers={viewers}
             disabled={busy}
             multipleSeriesShown={multipleSeriesShown}
           />

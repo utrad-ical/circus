@@ -15,12 +15,16 @@ import { InternalLabel, labelTypes } from './labelData';
 import { multirange } from 'multi-integer-range';
 import { newViewerCellItem, performLayout } from './caseStore';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
+// import ConnectecComponentLabelingTool from '@utrad-ical/circus-rs/src/browser/tool/cloud/ConnectedComponentLabelingTool';
+import CreateConnectedComponentLabel from '../../components/CreateConnectedComponentLabel';
+import { Viewer } from '@utrad-ical/circus-rs/src/browser';
 
 const LabelSelector: React.FC<{
   editingData: EditingData;
   updateEditingData: EditingDataUpdater;
   seriesData: { [seriesUid: string]: Series };
   volumeLoadedStatus: boolean[];
+  viewers: { [index: string]: Viewer };
   disabled?: boolean;
   multipleSeriesShown: boolean;
 }> = props => {
@@ -29,6 +33,7 @@ const LabelSelector: React.FC<{
     updateEditingData,
     seriesData,
     volumeLoadedStatus,
+    viewers,
     disabled,
     multipleSeriesShown
   } = props;
@@ -49,6 +54,7 @@ const LabelSelector: React.FC<{
           updateEditingData={updateEditingData}
           seriesIndex={seriesIndex}
           activeLabel={activeLabel}
+          viewers={viewers}
           disabled={disabled}
           multipleSeriesShown={multipleSeriesShown}
         />
@@ -86,6 +92,7 @@ const SeriesItem: React.FC<{
   volumeLoaded: boolean;
   seriesIndex: number;
   activeLabel: InternalLabel | null;
+  viewers: { [index: string]: Viewer };
   disabled?: boolean;
   multipleSeriesShown: boolean;
 }> = props => {
@@ -96,6 +103,7 @@ const SeriesItem: React.FC<{
     seriesInfo,
     volumeLoaded,
     activeLabel,
+    viewers,
     disabled,
     multipleSeriesShown
   } = props;
@@ -199,6 +207,8 @@ const SeriesItem: React.FC<{
             seriesIndex={seriesIndex}
             labelIndex={labelIndex}
             updateEditingData={updateEditingData}
+            editingData={editingData}
+            viewers={viewers}
             disabled={disabled}
             onClick={handleLabelClick}
           />
@@ -315,6 +325,8 @@ export const Label: React.FC<{
   seriesIndex: number;
   activeLabel: InternalLabel | null;
   updateEditingData: EditingDataUpdater;
+  editingData: EditingData;
+  viewers: { [index: string]: Viewer };
   disabled?: boolean;
   onClick: (labelIndex: number) => void;
 }> = props => {
@@ -324,6 +336,8 @@ export const Label: React.FC<{
     labelIndex,
     activeLabel,
     updateEditingData,
+    editingData,
+    viewers,
     disabled,
     onClick
   } = props;
@@ -466,6 +480,8 @@ export const Label: React.FC<{
           {hint}
         </span>
       </div>
+      {label.type === 'voxel' && <button onClick={() =>!disabled && CreateConnectedComponentLabel(editingData, updateEditingData, viewers, label)}>CCL</button>}
+      {/* {label.type === 'voxel' && <button onClick={()=>console.log(editingData, label.data.origin, label.data.voxels, label.data.size)}>CCL</button>} */}
     </StyledLabelLi>
   );
 };

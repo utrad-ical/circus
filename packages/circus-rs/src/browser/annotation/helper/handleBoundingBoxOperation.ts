@@ -12,13 +12,13 @@ type Axes = {
 };
 
 const getAxes = (orientation: OrientationString): Axes => {
-  const xAxis = (orientation === 'sagittal' ? 'y' : 'x') as Axis;
-  const yAxis = (orientation === 'axial' ? 'y' : 'z') as Axis;
+  const xAxis: Axis = orientation === 'sagittal' ? 'y' : 'x';
+  const yAxis: Axis = orientation === 'axial' ? 'y' : 'z';
   const zAxis = ['x', 'y', 'z'].find(v => v != xAxis && v != yAxis) as Axis;
   return { xAxis, yAxis, zAxis };
 };
 
-const getWinningAxes = (
+const winningAxes = (
   handleType: BoundingRectWithHandleHitType,
   axes: Axes
 ): Axis[] => {
@@ -119,7 +119,7 @@ const getResizeRatios = (
   const ratioBbSize = scaledBbSize.map((v, i) => v / originalBbSize[i]);
   const resizeRatios = new Vector3(...ratioBbSize);
   if (maintainAspectRatio) {
-    const winningRatio = getWinningAxes(handleType, axes)
+    const winningRatio = winningAxes(handleType, axes)
       .map(ax => resizeRatios[ax])
       .sort((a, b) => a - b)[0];
 
@@ -134,6 +134,8 @@ const getResizeRatios = (
     )
       ? Math.abs(winningRatio)
       : winningRatio;
+
+    resizeRatios[axes.zAxis] = winningRatio;
   }
   return resizeRatios.toArray() as Vector3D;
 };

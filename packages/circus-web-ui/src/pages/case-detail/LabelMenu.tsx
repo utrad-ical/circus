@@ -7,6 +7,7 @@ import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import {
   Button,
+  DropdownButton, 
   MenuItem,
   OverlayTrigger,
   Popover,
@@ -26,6 +27,7 @@ import {
   createNewLabelData
 } from './labelData';
 import { OrientationString } from 'circus-rs/section-util';
+import CreateConnectedComponentLabel from '../../components/CreateConnectedComponentLabel';
 
 type LabelCommand = 'rename' | 'remove' | 'convertType' | 'reveal';
 
@@ -226,6 +228,32 @@ const LabelMenu: React.FC<{
         disabled={!activeLabel || disabled}
         onClick={() => handleCommand('reveal')}
       />
+      <DropdownButton
+        bsSize="xs"
+        title={<Icon icon="glyphicon-option-horizontal" />}
+        id={`labelmenu-header-dropdown`}
+        pullRight
+        noCaret
+      >
+        <MenuItem 
+          eventKey="ccl"
+          disabled={!activeLabel || activeLabel.type !== 'voxel'}
+          onClick={() => CreateConnectedComponentLabel(editingData, 
+                                                       updateEditingData, 
+                                                       viewers, 
+                                                       editingData.revision.series[activeSeriesIndex].labels[activeLabelIndex], 
+                                                       labelColors)}
+        >
+          CCL
+        </MenuItem>
+        <MenuItem 
+          eventKey="fillng"
+          disabled={!activeLabel || activeLabel.type !== 'voxel'}
+          onClick={()=>{console.log("filling")}}
+        >
+          Hole filling
+        </MenuItem>
+      </DropdownButton>
       <IconButton
         bsSize="xs"
         title="Remove"

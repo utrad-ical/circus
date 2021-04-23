@@ -1,6 +1,6 @@
 import { Viewer } from '@utrad-ical/circus-rs/src/browser';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
-import { InternalLabel, LabelType } from '../pages/case-detail/labelData';
+import { InternalLabel } from '../pages/case-detail/labelData';
 import {
   EditingData,
   EditingDataUpdater
@@ -17,7 +17,8 @@ const CreateConnectedComponentLabel = async (
   editingData: EditingData,
   updateEditingData: EditingDataUpdater,
   viewers: { [index: string]: Viewer },
-  label: InternalLabel
+  label: InternalLabel,
+  labelColors: string[]
 ) => {
   const createNewLabel = (viewer: Viewer, color: string, name: string): InternalLabel => {
     const alpha = 1;
@@ -25,23 +26,6 @@ const CreateConnectedComponentLabel = async (
     console.log(name, temporaryKey);
     const data = createNewLabelData('voxel', { color, alpha }, viewer);
     return { temporaryKey, name, ...data, attributes: {}, hidden: false };
-  };
-
-  const getUniqueLabelName = (name: string) => {
-    console.log(
-      'editingData.activeSeriesIndex',
-      editingData.activeSeriesIndex,
-      editingData.revision.series[editingData.activeSeriesIndex].labels
-    );
-    const nameExists = (name: string) =>
-      editingData.revision.series[editingData.activeSeriesIndex].labels.some(
-        label => label.name === name
-      );
-    if (!nameExists(name)) return name;
-    for (let index = 2; ; index++) {
-      const newName = name + ' ' + index;
-      if (!nameExists(newName)) return newName;
-    }
   };
 
   const basic: OrientationString[] = ['axial', 'sagittal', 'coronal'];
@@ -167,24 +151,3 @@ const CreateConnectedComponentLabel = async (
 };
 
 export default CreateConnectedComponentLabel;
-
-////////////////////////////////////////////////////////////////////////////////
-
-const labelColors = [
-  '#ff0000',
-  '#00ff00',
-  '#ffff00',
-  '#0000ff',
-  '#ff00ff',
-  '#00ffff',
-  '#ff4400',
-  '#ff0044',
-  '#88ff00',
-  '#afc6fc',
-  '#ff5e6e',
-  '#aa4433',
-  '#ff8888',
-  '#ffff88',
-  '#aaffaa',
-  '#ff88ff'
-];

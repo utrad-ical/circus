@@ -161,7 +161,8 @@ const CreateConnectedComponentLabel = async (
     ];
   }
   updateCurrentLabels(labels => {
-    labels.push(...newLabel);
+    // labels.push(...newLabel);
+    labels.splice(editingData.activeLabelIndex + 1, 0, ...newLabel);
   });
 };
 

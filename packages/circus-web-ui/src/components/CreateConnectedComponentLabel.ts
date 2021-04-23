@@ -13,25 +13,6 @@ import { pixelFormatInfo } from '@utrad-ical/circus-lib/src/PixelFormat';
 import * as rs from 'circus-rs';
 import CCL from '../../../circus-rs/src/common/CCL/ConnectedComponentLabeling3D26';
 
-const labelColors = [
-  '#ff0000',
-  '#00ff00',
-  '#ffff00',
-  '#0000ff',
-  '#ff00ff',
-  '#00ffff',
-  '#ff4400',
-  '#ff0044',
-  '#88ff00',
-  '#afc6fc',
-  '#ff5e6e',
-  '#aa4433',
-  '#ff8888',
-  '#ffff88',
-  '#aaffaa',
-  '#ff88ff'
-];
-
 const CreateConnectedComponentLabel = async (
   editingData: EditingData,
   updateEditingData: EditingDataUpdater,
@@ -145,41 +126,14 @@ const CreateConnectedComponentLabel = async (
     }
   }
   
-
-  console.log(order)
+  console.log(label.data.color, labelColors.indexOf(label.data.color))
   for (let i = 0; i < Math.min(dispLabelNumber, labelingResults.labelNum); i++) {
     const num = order[i];
     const [ULx, ULy, ULz] = labelingResults.labels[num].min;
     const [LRx, LRy, LRz] = labelingResults.labels[num].max;
     console.log(ULx, ULy, ULz, LRx, LRy, LRz);
-    const hue = 360 / (Math.min(dispLabelNumber, labelingResults.labelNum) + 1) * (i + 1);
-    let [R, G, B] = [0, 0, 0];
-    if (hue < 60) {
-      R = 255;
-      G = (hue / 60) * (R - B) + B
-    } else if (hue < 120) {
-      G = 255;
-      R = ((120 - hue) / 60) * (G - B) + B
-    } else if (hue < 180) {
-      G = 255;
-      B = ((hue - 120) / 60) * (G - R) + R
-    } else if (hue < 240) {
-      B = 255;
-      G = ((240 - hue) / 60) * (B - R) + R
-    } else if (hue < 300) {
-      B = 255;
-      R = ((hue - 240) / 60) * (B - G) + G
-    } else if (hue < 360) {
-      R = 255;
-      B = ((360 - hue) / 60) * (R - G) + G
-    }
-    const cov16 = (n: number) => {
-      const sin = "0123456789abcdef";
-      if(n>255)return 'ff';
-      if(n<0) return '00';
-      return sin.charAt(Math.floor(n/16))+sin.charAt(n%16);
-    }
-    newLabel.push(createNewLabel(viewers[viewerId], `#${cov16(R)}${cov16(G)}${cov16(B)}`, `${label.name}: the ${name[i]} CCLs`));
+    const color = labelColors[(labelColors.indexOf(label.data.color) + i + 1)%labelColors.length];
+    newLabel.push(createNewLabel(viewers[viewerId], color, `${label.name}: the ${name[i]} CCLs`));
     const [sizex, sizey, sizez] =
       (LRx - ULx + 1) * (LRy - ULy + 1) * (LRz - ULz + 1) >= 8
         ? [LRx - ULx + 1, LRy - ULy + 1, LRz - ULz + 1]
@@ -212,3 +166,24 @@ const CreateConnectedComponentLabel = async (
 };
 
 export default CreateConnectedComponentLabel;
+
+////////////////////////////////////////////////////////////////////////////////
+
+const labelColors = [
+  '#ff0000',
+  '#00ff00',
+  '#ffff00',
+  '#0000ff',
+  '#ff00ff',
+  '#00ffff',
+  '#ff4400',
+  '#ff0044',
+  '#88ff00',
+  '#afc6fc',
+  '#ff5e6e',
+  '#aa4433',
+  '#ff8888',
+  '#ffff88',
+  '#aaffaa',
+  '#ff88ff'
+];

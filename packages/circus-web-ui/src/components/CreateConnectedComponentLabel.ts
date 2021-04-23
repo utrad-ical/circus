@@ -78,76 +78,83 @@ const CreateConnectedComponentLabel = async (
     }
   }
   console.log('準備完了', input, width, height, nSlices);
-  const labelingResults = CCL(input, width, height, nSlices);
-  console.log('CCL完了');
-  const newLabel: InternalLabel[] = [];
-  const order = [...Array(labelingResults.labelNum)].map((_, i) => i + 1);
-  const dispLabelNumber = 8;
-  const name = ["largest", "2nd largest", "3rd largest", "4th largest", "5th largest", "6th largest", "7th largest", "rest"];
-  order.sort((a, b) => {
-    return labelingResults.labels[b].volume - labelingResults.labels[a].volume;
-  });
+  try {
+    const labelingResults = CCL(input, width, height, nSlices);
+    console.log('CCL完了');
+    const newLabel: InternalLabel[] = [];
+    const order = [...Array(labelingResults.labelNum)].map((_, i) => i + 1);
+    const dispLabelNumber = 8;
+    const name = ["largest", "2nd largest", "3rd largest", "4th largest", "5th largest", "6th largest", "7th largest", "rest"];
+    order.sort((a, b) => {
+      return labelingResults.labels[b].volume - labelingResults.labels[a].volume;
+    });
 
-  for (let num = dispLabelNumber; num < labelingResults.labelNum; num++) {
-    for (let i = 0; i < 3; i++){
-      if (labelingResults.labels[order[num]].min[i] < labelingResults.labels[order[dispLabelNumber - 1]].min[i]) {
-        labelingResults.labels[order[dispLabelNumber - 1]].min[i] = labelingResults.labels[order[num]].min[i];
+    for (let num = dispLabelNumber; num < labelingResults.labelNum; num++) {
+      for (let i = 0; i < 3; i++){
+        if (labelingResults.labels[order[num]].min[i] < labelingResults.labels[order[dispLabelNumber - 1]].min[i]) {
+          labelingResults.labels[order[dispLabelNumber - 1]].min[i] = labelingResults.labels[order[num]].min[i];
+        }
+        if (labelingResults.labels[order[dispLabelNumber - 1]].max[i] < labelingResults.labels[order[num]].max[i]) {
+          labelingResults.labels[order[dispLabelNumber - 1]].max[i] = labelingResults.labels[order[num]].max[i];
+        }
       }
-      if (labelingResults.labels[order[dispLabelNumber - 1]].max[i] < labelingResults.labels[order[num]].max[i]) {
-        labelingResults.labels[order[dispLabelNumber - 1]].max[i] = labelingResults.labels[order[num]].max[i];
-      }
-    }
-    labelingResults.labels[order[dispLabelNumber - 1]].volume += labelingResults.labels[order[num]].volume
-    for (let k = labelingResults.labels[order[num]].min[2]; k <= labelingResults.labels[order[num]].max[2]; k++) {
-      for (let j = labelingResults.labels[order[num]].min[1]; j <= labelingResults.labels[order[num]].max[1]; j++) {
-        for (let i = labelingResults.labels[order[num]].min[0]; i <= labelingResults.labels[order[num]].max[0]; i++) {
-          const pos = i + j * width + k * width * height;
-          if (labelingResults.labelMap[pos] === order[num]) {
-            labelingResults.labelMap[pos] = order[dispLabelNumber - 1];
+      labelingResults.labels[order[dispLabelNumber - 1]].volume += labelingResults.labels[order[num]].volume
+      for (let k = labelingResults.labels[order[num]].min[2]; k <= labelingResults.labels[order[num]].max[2]; k++) {
+        for (let j = labelingResults.labels[order[num]].min[1]; j <= labelingResults.labels[order[num]].max[1]; j++) {
+          for (let i = labelingResults.labels[order[num]].min[0]; i <= labelingResults.labels[order[num]].max[0]; i++) {
+            const pos = i + j * width + k * width * height;
+            if (labelingResults.labelMap[pos] === order[num]) {
+              labelingResults.labelMap[pos] = order[dispLabelNumber - 1];
+            }
           }
         }
       }
     }
-  }
-  
-  console.log(label.data.color, labelColors.indexOf(label.data.color))
-  for (let i = 0; i < Math.min(dispLabelNumber, labelingResults.labelNum); i++) {
-    const num = order[i];
-    const [ULx, ULy, ULz] = labelingResults.labels[num].min;
-    const [LRx, LRy, LRz] = labelingResults.labels[num].max;
-    console.log(ULx, ULy, ULz, LRx, LRy, LRz);
-    const color = labelColors[(labelColors.indexOf(label.data.color) + i + 1)%labelColors.length];
-    newLabel.push(createNewLabel(viewers[viewerId], color, `${label.name}: the ${name[i]} CCLs`));
-    const [sizex, sizey, sizez] =
-      (LRx - ULx + 1) * (LRy - ULy + 1) * (LRz - ULz + 1) >= 8
-        ? [LRx - ULx + 1, LRy - ULy + 1, LRz - ULz + 1]
-        : [8, 8, 8];
-    newLabel[i].data.size = [sizex, sizey, sizez];
-    const volume = new rs.RawData([sizex, sizey, sizez], 'binary');
+    
+    console.log(label.data.color, labelColors.indexOf(label.data.color))
+    for (let i = 0; i < Math.min(dispLabelNumber, labelingResults.labelNum); i++) {
+      const num = order[i];
+      const [ULx, ULy, ULz] = labelingResults.labels[num].min;
+      const [LRx, LRy, LRz] = labelingResults.labels[num].max;
+      console.log(ULx, ULy, ULz, LRx, LRy, LRz);
+      const color = labelColors[(labelColors.indexOf(label.data.color) + i + 1)%labelColors.length];
+      newLabel.push(createNewLabel(viewers[viewerId], color, `${label.name}: the ${name[i]} CCLs`));
+      const [sizex, sizey, sizez] =
+        (LRx - ULx + 1) * (LRy - ULy + 1) * (LRz - ULz + 1) >= 8
+          ? [LRx - ULx + 1, LRy - ULy + 1, LRz - ULz + 1]
+          : [8, 8, 8];
+      newLabel[i].data.size = [sizex, sizey, sizez];
+      const volume = new rs.RawData([sizex, sizey, sizez], 'binary');
 
-    for (let k = ULz; k <= LRz; k++) {
-      for (let j = ULy; j <= LRy; j++) {
-        for (let i = ULx; i <= LRx; i++) {
-          const pos = i + j * width + k * width * height;
-          const volume_pos =
-            i - ULx + (j - ULy) * sizex + (k - ULz) * sizex * sizey;
-          if (labelingResults.labelMap[pos] === num) {
-            volume.write(1, volume_pos);
+      for (let k = ULz; k <= LRz; k++) {
+        for (let j = ULy; j <= LRy; j++) {
+          for (let i = ULx; i <= LRx; i++) {
+            const pos = i + j * width + k * width * height;
+            const volume_pos =
+              i - ULx + (j - ULy) * sizex + (k - ULz) * sizex * sizey;
+            if (labelingResults.labelMap[pos] === num) {
+              volume.write(1, volume_pos);
+            }
           }
         }
       }
+      newLabel[i].data.volumeArrayBuffer = volume.data;
+      newLabel[i].data.origin = [
+        ULx + label.data.origin[0],
+        ULy + label.data.origin[1],
+        ULz + label.data.origin[2]
+      ];
     }
-    newLabel[i].data.volumeArrayBuffer = volume.data;
-    newLabel[i].data.origin = [
-      ULx + label.data.origin[0],
-      ULy + label.data.origin[1],
-      ULz + label.data.origin[2]
-    ];
+    updateCurrentLabels(labels => {
+      // labels.push(...newLabel);
+      labels.splice(editingData.activeLabelIndex + 1, 0, ...newLabel);
+    });
+  } catch (err) {
+    console.log("error", err.message)
+    alert(
+      `${label.name} is too complex.\nPlease modify ${label.name}.`
+    );
   }
-  updateCurrentLabels(labels => {
-    // labels.push(...newLabel);
-    labels.splice(editingData.activeLabelIndex + 1, 0, ...newLabel);
-  });
 };
 
 export default CreateConnectedComponentLabel;

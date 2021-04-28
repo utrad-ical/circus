@@ -11,8 +11,8 @@ import { TaggedLabelDataOf } from '../pages/case-detail/labelData';
 import produce from 'immer';
 import { pixelFormatInfo } from '@utrad-ical/circus-lib/src/PixelFormat';
 import * as rs from 'circus-rs';
-import CCL6 from '../../../circus-rs/src/common/CCL/ConnectedComponentLabeling3D6';
-import CCL26 from '../../../circus-rs/src/common/CCL/ConnectedComponentLabeling3D26';
+import CCL6 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D6';
+import CCL26 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D26';
 
 const CreateConnectedComponentLabel = async (
   editingData: EditingData,

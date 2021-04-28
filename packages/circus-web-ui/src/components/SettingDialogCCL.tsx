@@ -1,7 +1,7 @@
 import { Button, Modal } from 'components/react-bootstrap';
 import React, { useState } from 'react';
 
-const SettingDialog: React.FC<{
+const SettingDialogCCL: React.FC<{
   onHide: () => void;
   onClick: (dispLabelNumber: number, neighbors: 6 | 26) => void;
 }> = props => {
@@ -66,4 +66,4 @@ const SettingDialog: React.FC<{
   );
 };
 
-export default SettingDialog;
+export default SettingDialogCCL;

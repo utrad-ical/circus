@@ -29,7 +29,9 @@ import {
 } from './labelData';
 import { OrientationString } from 'circus-rs/section-util';
 import CreateConnectedComponentLabel from '../../components/CreateConnectedComponentLabel';
-import SettingDialog from '../../components/SettingDialog';
+import CreateHoleFilledLabel from '../../components/CreateHoleFilledLabel';
+import SettingDialogCCL from '../../components/SettingDialogCCL';
+import SettingDialogHoleFilling from '../../components/SettingDialogHoleFilling';
 
 type LabelCommand = 'rename' | 'remove' | 'convertType' | 'reveal';
 
@@ -47,7 +49,8 @@ const LabelMenu: React.FC<{
     'voxel'
   );
 
-  const [SettingDialogOpen, setSettingDialogOpen] = useState(false);
+  const [cclDialogOpen, setCclDialogOpen] = useState(false);
+  const [holeFillingDialogOpen, setHoleFillingDialogOpen] = useState(false);
 
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
   const activeSeries = revision.series[activeSeriesIndex];
@@ -242,13 +245,8 @@ const LabelMenu: React.FC<{
         <MenuItem
           eventKey="ccl"
           disabled={!activeLabel || activeLabel.type !== 'voxel'}
-          // onClick={() => CreateConnectedComponentLabel(editingData,
-          //                                              updateEditingData,
-          //                                              viewers,
-          //                                              editingData.revision.series[activeSeriesIndex].labels[activeLabelIndex],
-          //                                              labelColors)}
           onClick={() => {
-            setSettingDialogOpen(true);
+            setCclDialogOpen(true);
           }}
         >
           CCL
@@ -257,7 +255,7 @@ const LabelMenu: React.FC<{
           eventKey="fillng"
           disabled={!activeLabel || activeLabel.type !== 'voxel'}
           onClick={() => {
-            console.log('filling');
+            setHoleFillingDialogOpen(true);
           }}
         >
           Hole filling
@@ -298,12 +296,12 @@ const LabelMenu: React.FC<{
         })}
       </SplitButton>
       <Modal
-        show={SettingDialogOpen}
-        onHide={() => setSettingDialogOpen(false)}
+        show={cclDialogOpen}
+        onHide={() => setCclDialogOpen(false)}
         bsSize="lg"
       >
-        <SettingDialog
-          onHide={() => setSettingDialogOpen(false)}
+        <SettingDialogCCL
+          onHide={() => setCclDialogOpen(false)}
           onClick={(dispLabelNumber: number, neighbors: 6 | 26) => {
             console.log(dispLabelNumber, neighbors);
             CreateConnectedComponentLabel(
@@ -317,7 +315,36 @@ const LabelMenu: React.FC<{
               dispLabelNumber,
               neighbors
             );
-            setSettingDialogOpen(false);
+            setCclDialogOpen(false);
+          }}
+        />
+      </Modal>
+      <Modal
+        show={holeFillingDialogOpen}
+        onHide={() => setHoleFillingDialogOpen(false)}
+        bsSize="lg"
+      >
+        <SettingDialogHoleFilling
+          onHide={() => setHoleFillingDialogOpen(false)}
+          onClick={(
+            dimension3: boolean,
+            holeFillingOrientation: string,
+            neighbors4or6: boolean
+          ) => {
+            console.log(dimension3, neighbors4or6, holeFillingOrientation);
+            CreateHoleFilledLabel(
+              editingData,
+              updateEditingData,
+              viewers,
+              editingData.revision.series[activeSeriesIndex].labels[
+                activeLabelIndex
+              ],
+              labelColors,
+              dimension3,
+              holeFillingOrientation,
+              neighbors4or6
+            );
+            setHoleFillingDialogOpen(false);
           }}
         />
       </Modal>

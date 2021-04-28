@@ -7,14 +7,15 @@ import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import {
   Button,
-  DropdownButton, 
+  DropdownButton,
   MenuItem,
   OverlayTrigger,
   Popover,
-  SplitButton
+  SplitButton,
+  Modal
 } from 'components/react-bootstrap';
 import produce from 'immer';
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
 import useLocalPreference from 'utils/useLocalPreference';
@@ -28,6 +29,7 @@ import {
 } from './labelData';
 import { OrientationString } from 'circus-rs/section-util';
 import CreateConnectedComponentLabel from '../../components/CreateConnectedComponentLabel';
+import SettingDialog from '../../components/SettingDialog';
 
 type LabelCommand = 'rename' | 'remove' | 'convertType' | 'reveal';
 
@@ -44,6 +46,8 @@ const LabelMenu: React.FC<{
     'newLabelType',
     'voxel'
   );
+
+  const [SettingDialogOpen, setSettingDialogOpen] = useState(false);
 
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
   const activeSeries = revision.series[activeSeriesIndex];
@@ -235,21 +239,26 @@ const LabelMenu: React.FC<{
         pullRight
         noCaret
       >
-        <MenuItem 
+        <MenuItem
           eventKey="ccl"
           disabled={!activeLabel || activeLabel.type !== 'voxel'}
-          onClick={() => CreateConnectedComponentLabel(editingData, 
-                                                       updateEditingData, 
-                                                       viewers, 
-                                                       editingData.revision.series[activeSeriesIndex].labels[activeLabelIndex], 
-                                                       labelColors)}
+          // onClick={() => CreateConnectedComponentLabel(editingData,
+          //                                              updateEditingData,
+          //                                              viewers,
+          //                                              editingData.revision.series[activeSeriesIndex].labels[activeLabelIndex],
+          //                                              labelColors)}
+          onClick={() => {
+            setSettingDialogOpen(true);
+          }}
         >
           CCL
         </MenuItem>
-        <MenuItem 
+        <MenuItem
           eventKey="fillng"
           disabled={!activeLabel || activeLabel.type !== 'voxel'}
-          onClick={()=>{console.log("filling")}}
+          onClick={() => {
+            console.log('filling');
+          }}
         >
           Hole filling
         </MenuItem>
@@ -288,6 +297,30 @@ const LabelMenu: React.FC<{
           );
         })}
       </SplitButton>
+      <Modal
+        show={SettingDialogOpen}
+        onHide={() => setSettingDialogOpen(false)}
+        bsSize="lg"
+      >
+        <SettingDialog
+          onHide={() => setSettingDialogOpen(false)}
+          onClick={(dispLabelNumber: number, neighbors: 6 | 26) => {
+            console.log(dispLabelNumber, neighbors);
+            CreateConnectedComponentLabel(
+              editingData,
+              updateEditingData,
+              viewers,
+              editingData.revision.series[activeSeriesIndex].labels[
+                activeLabelIndex
+              ],
+              labelColors,
+              dispLabelNumber,
+              neighbors
+            );
+            setSettingDialogOpen(false);
+          }}
+        />
+      </Modal>
     </StyledButtonsDiv>
   );
 };

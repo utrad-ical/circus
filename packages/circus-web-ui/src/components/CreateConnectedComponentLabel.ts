@@ -11,16 +11,23 @@ import { TaggedLabelDataOf } from '../pages/case-detail/labelData';
 import produce from 'immer';
 import { pixelFormatInfo } from '@utrad-ical/circus-lib/src/PixelFormat';
 import * as rs from 'circus-rs';
-import CCL from '../../../circus-rs/src/common/CCL/ConnectedComponentLabeling3D26';
+import CCL6 from '../../../circus-rs/src/common/CCL/ConnectedComponentLabeling3D6';
+import CCL26 from '../../../circus-rs/src/common/CCL/ConnectedComponentLabeling3D26';
 
 const CreateConnectedComponentLabel = async (
   editingData: EditingData,
   updateEditingData: EditingDataUpdater,
   viewers: { [index: string]: Viewer },
   label: InternalLabel,
-  labelColors: string[]
+  labelColors: string[],
+  dispLabelNumber: number,
+  neighbors: 6 | 26
 ) => {
-  const createNewLabel = (viewer: Viewer, color: string, name: string): InternalLabel => {
+  const createNewLabel = (
+    viewer: Viewer,
+    color: string,
+    name: string
+  ): InternalLabel => {
     const alpha = 1;
     const temporaryKey = generateUniqueId();
     console.log(name, temporaryKey);
@@ -79,46 +86,93 @@ const CreateConnectedComponentLabel = async (
   }
   console.log('準備完了', input, width, height, nSlices);
   try {
-    const labelingResults = CCL(input, width, height, nSlices);
+    const labelingResults =
+      neighbors === 6
+        ? CCL6(input, width, height, nSlices)
+        : CCL26(input, width, height, nSlices);
     console.log('CCL完了');
     const newLabel: InternalLabel[] = [];
     const order = [...Array(labelingResults.labelNum)].map((_, i) => i + 1);
-    const dispLabelNumber = 8;
-    const name = ["largest", "2nd largest", "3rd largest", "4th largest", "5th largest", "6th largest", "7th largest", "rest"];
+    const name = [
+      'largest',
+      '2nd largest',
+      '3rd largest',
+      '4th largest',
+      '5th largest',
+      '6th largest',
+      '7th largest',
+      '8th largest',
+      '9th largest',
+      '10th largest',
+      'rest'
+    ];
     order.sort((a, b) => {
-      return labelingResults.labels[b].volume - labelingResults.labels[a].volume;
+      return (
+        labelingResults.labels[b].volume - labelingResults.labels[a].volume
+      );
     });
-
-    for (let num = dispLabelNumber; num < labelingResults.labelNum; num++) {
-      for (let i = 0; i < 3; i++){
-        if (labelingResults.labels[order[num]].min[i] < labelingResults.labels[order[dispLabelNumber - 1]].min[i]) {
-          labelingResults.labels[order[dispLabelNumber - 1]].min[i] = labelingResults.labels[order[num]].min[i];
+    for (let num = dispLabelNumber + 1; num < labelingResults.labelNum; num++) {
+      for (let i = 0; i < 3; i++) {
+        if (
+          labelingResults.labels[order[num]].min[i] <
+          labelingResults.labels[order[dispLabelNumber]].min[i]
+        ) {
+          labelingResults.labels[order[dispLabelNumber]].min[i] =
+            labelingResults.labels[order[num]].min[i];
         }
-        if (labelingResults.labels[order[dispLabelNumber - 1]].max[i] < labelingResults.labels[order[num]].max[i]) {
-          labelingResults.labels[order[dispLabelNumber - 1]].max[i] = labelingResults.labels[order[num]].max[i];
+        if (
+          labelingResults.labels[order[dispLabelNumber]].max[i] <
+          labelingResults.labels[order[num]].max[i]
+        ) {
+          labelingResults.labels[order[dispLabelNumber]].max[i] =
+            labelingResults.labels[order[num]].max[i];
         }
       }
-      labelingResults.labels[order[dispLabelNumber - 1]].volume += labelingResults.labels[order[num]].volume
-      for (let k = labelingResults.labels[order[num]].min[2]; k <= labelingResults.labels[order[num]].max[2]; k++) {
-        for (let j = labelingResults.labels[order[num]].min[1]; j <= labelingResults.labels[order[num]].max[1]; j++) {
-          for (let i = labelingResults.labels[order[num]].min[0]; i <= labelingResults.labels[order[num]].max[0]; i++) {
+      labelingResults.labels[order[dispLabelNumber]].volume +=
+        labelingResults.labels[order[num]].volume;
+      for (
+        let k = labelingResults.labels[order[num]].min[2];
+        k <= labelingResults.labels[order[num]].max[2];
+        k++
+      ) {
+        for (
+          let j = labelingResults.labels[order[num]].min[1];
+          j <= labelingResults.labels[order[num]].max[1];
+          j++
+        ) {
+          for (
+            let i = labelingResults.labels[order[num]].min[0];
+            i <= labelingResults.labels[order[num]].max[0];
+            i++
+          ) {
             const pos = i + j * width + k * width * height;
             if (labelingResults.labelMap[pos] === order[num]) {
-              labelingResults.labelMap[pos] = order[dispLabelNumber - 1];
+              labelingResults.labelMap[pos] = order[dispLabelNumber];
             }
           }
         }
       }
     }
-    
-    console.log(label.data.color, labelColors.indexOf(label.data.color))
-    for (let i = 0; i < Math.min(dispLabelNumber, labelingResults.labelNum); i++) {
+
+    console.log(label.data.color, labelColors.indexOf(label.data.color));
+    const maxI = Math.min(dispLabelNumber, labelingResults.labelNum - 1);
+    for (let i = 0; i <= maxI; i++) {
       const num = order[i];
       const [ULx, ULy, ULz] = labelingResults.labels[num].min;
       const [LRx, LRy, LRz] = labelingResults.labels[num].max;
       console.log(ULx, ULy, ULz, LRx, LRy, LRz);
-      const color = labelColors[(labelColors.indexOf(label.data.color) + i + 1)%labelColors.length];
-      newLabel.push(createNewLabel(viewers[viewerId], color, `${label.name}: the ${name[i]} CCLs`));
+      const color =
+        labelColors[
+          (labelColors.indexOf(label.data.color) + i + 1) % labelColors.length
+        ];
+      const flag = i === maxI && maxI < labelingResults.labelNum - 1;
+      newLabel.push(
+        createNewLabel(
+          viewers[viewerId],
+          color,
+          `${label.name}: the ${flag ? name[10] : name[i]} CCLs`
+        )
+      );
       const [sizex, sizey, sizez] =
         (LRx - ULx + 1) * (LRy - ULy + 1) * (LRz - ULz + 1) >= 8
           ? [LRx - ULx + 1, LRy - ULy + 1, LRz - ULz + 1]
@@ -150,10 +204,8 @@ const CreateConnectedComponentLabel = async (
       labels.splice(editingData.activeLabelIndex + 1, 0, ...newLabel);
     });
   } catch (err) {
-    console.log("error", err.message)
-    alert(
-      `${label.name} is too complex.\nPlease modify ${label.name}.`
-    );
+    console.log('error', err.message);
+    alert(`${label.name} is too complex.\nPlease modify ${label.name}.`);
   }
 };
 

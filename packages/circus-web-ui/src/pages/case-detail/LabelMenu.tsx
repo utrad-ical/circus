@@ -187,6 +187,14 @@ const LabelMenu: React.FC<{
     });
   };
 
+  const hideAllLabels = () => {
+    updateEditingData(editingData => {
+      editingData.revision.series[activeSeriesIndex].labels.map(label => {
+        label.hidden = true;
+      });
+    });
+  };
+
   return (
     <StyledButtonsDiv>
       <AppearanceEditor
@@ -201,6 +209,12 @@ const LabelMenu: React.FC<{
         hidden={!!activeLabel?.hidden}
         disabled={!activeLabel || disabled}
         onChange={handleAppearanceChange}
+      />
+      <IconButton
+        icon="eye-close"
+        bsStyle="link"
+        bsSize="xs"
+        onClick={hideAllLabels}
       />
       <div className="spacer" />
       {activeLabel && labelTypes[activeLabel.type].canConvertTo && (

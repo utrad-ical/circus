@@ -187,10 +187,10 @@ const LabelMenu: React.FC<{
     });
   };
 
-  const hideAllLabels = () => {
+  const hideAllLabels = (hideFlag: boolean) => {
     updateEditingData(editingData => {
       editingData.revision.series[activeSeriesIndex].labels.map(label => {
-        label.hidden = true;
+        label.hidden = hideFlag;
       });
     });
   };
@@ -214,7 +214,13 @@ const LabelMenu: React.FC<{
         icon="eye-close"
         bsStyle="link"
         bsSize="xs"
-        onClick={hideAllLabels}
+        onClick={() => hideAllLabels(true)}
+      />
+      <IconButton
+        icon="eye-open"
+        bsStyle="link"
+        bsSize="xs"
+        onClick={() => hideAllLabels(false)}
       />
       <div className="spacer" />
       {activeLabel && labelTypes[activeLabel.type].canConvertTo && (

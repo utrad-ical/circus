@@ -34,9 +34,19 @@ const LabelMenu: React.FC<{
   onReveal: () => void;
   updateEditingData: EditingDataUpdater;
   viewers: { [index: string]: Viewer };
+  onAllLabelsHidden: () => void;
+  allLabelsHidden: boolean;
   disabled?: boolean;
 }> = props => {
-  const { editingData, onReveal, updateEditingData, viewers, disabled } = props;
+  const {
+    editingData,
+    onReveal,
+    updateEditingData,
+    viewers,
+    onAllLabelsHidden,
+    allLabelsHidden,
+    disabled
+  } = props;
 
   const [newLabelType, setNewLabelType] = useLocalPreference<LabelType>(
     'newLabelType',
@@ -187,14 +197,6 @@ const LabelMenu: React.FC<{
     });
   };
 
-  const hideAllLabels = (hideFlag: boolean) => {
-    updateEditingData(editingData => {
-      editingData.revision.series[activeSeriesIndex].labels.map(label => {
-        label.hidden = hideFlag;
-      });
-    });
-  };
-
   return (
     <StyledButtonsDiv>
       <AppearanceEditor
@@ -211,16 +213,10 @@ const LabelMenu: React.FC<{
         onChange={handleAppearanceChange}
       />
       <IconButton
-        icon="eye-close"
+        icon={allLabelsHidden ? 'eye-open' : 'eye-close'}
         bsStyle="link"
         bsSize="xs"
-        onClick={() => hideAllLabels(true)}
-      />
-      <IconButton
-        icon="eye-open"
-        bsStyle="link"
-        bsSize="xs"
-        onClick={() => hideAllLabels(false)}
+        onClick={onAllLabelsHidden}
       />
       <div className="spacer" />
       {activeLabel && labelTypes[activeLabel.type].canConvertTo && (

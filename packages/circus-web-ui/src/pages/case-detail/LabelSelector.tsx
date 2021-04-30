@@ -21,6 +21,7 @@ const LabelSelector: React.FC<{
   updateEditingData: EditingDataUpdater;
   seriesData: { [seriesUid: string]: Series };
   volumeLoadedStatus: boolean[];
+  allLabelsHidden: boolean;
   disabled?: boolean;
   multipleSeriesShown: boolean;
 }> = props => {
@@ -29,6 +30,7 @@ const LabelSelector: React.FC<{
     updateEditingData,
     seriesData,
     volumeLoadedStatus,
+    allLabelsHidden,
     disabled,
     multipleSeriesShown
   } = props;
@@ -49,6 +51,7 @@ const LabelSelector: React.FC<{
           updateEditingData={updateEditingData}
           seriesIndex={seriesIndex}
           activeLabel={activeLabel}
+          allLabelsHidden={allLabelsHidden}
           disabled={disabled}
           multipleSeriesShown={multipleSeriesShown}
         />
@@ -86,6 +89,7 @@ const SeriesItem: React.FC<{
   volumeLoaded: boolean;
   seriesIndex: number;
   activeLabel: InternalLabel | null;
+  allLabelsHidden: boolean;
   disabled?: boolean;
   multipleSeriesShown: boolean;
 }> = props => {
@@ -96,6 +100,7 @@ const SeriesItem: React.FC<{
     seriesInfo,
     volumeLoaded,
     activeLabel,
+    allLabelsHidden,
     disabled,
     multipleSeriesShown
   } = props;
@@ -199,6 +204,7 @@ const SeriesItem: React.FC<{
             seriesIndex={seriesIndex}
             labelIndex={labelIndex}
             updateEditingData={updateEditingData}
+            allLabelsHidden={allLabelsHidden}
             disabled={disabled}
             onClick={handleLabelClick}
           />
@@ -315,6 +321,7 @@ export const Label: React.FC<{
   seriesIndex: number;
   activeLabel: InternalLabel | null;
   updateEditingData: EditingDataUpdater;
+  allLabelsHidden: boolean;
   disabled?: boolean;
   onClick: (labelIndex: number) => void;
 }> = props => {
@@ -324,6 +331,7 @@ export const Label: React.FC<{
     labelIndex,
     activeLabel,
     updateEditingData,
+    allLabelsHidden,
     disabled,
     onClick
   } = props;
@@ -456,7 +464,7 @@ export const Label: React.FC<{
           ]).toHexString()
         }}
       >
-        {label.hidden && <Icon icon="eye-close" />}
+        {(label.hidden || allLabelsHidden) && <Icon icon="eye-close" />}
       </div>
       <div className="caption">
         <Icon icon={labelTypes[label.type].icon} />

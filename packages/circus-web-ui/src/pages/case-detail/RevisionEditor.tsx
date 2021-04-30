@@ -120,6 +120,8 @@ const RevisionEditor: React.FC<{
   const stateChanger = useMemo(() => createStateChanger<rs.MprViewState>(), []);
   const [seriesDialogOpen, setSeriesDialogOpen] = useState(false);
 
+  const [allLabelsHidden, setAllLabelsHidden] = useState(false);
+
   const [viewOptions, setViewOptions] = useLocalPreference<ViewOptions>(
     'dbViewOptions',
     {
@@ -330,7 +332,7 @@ const RevisionEditor: React.FC<{
 
       series.labels.forEach((label: InternalLabel) => {
         const isActive = activeLabel && label === activeLabel;
-        if (label.hidden) return;
+        if (label.hidden || allLabelsHidden) return;
         composition.addAnnotation(
           buildAnnotation(
             label,
@@ -385,7 +387,8 @@ const RevisionEditor: React.FC<{
     viewOptions.showReferenceLine,
     viewOptions.scrollbar,
     touchDevice,
-    viewers
+    viewers,
+    allLabelsHidden
   ]);
 
   useEffect(() => {
@@ -566,6 +569,10 @@ const RevisionEditor: React.FC<{
             onReveal={handleReveal}
             updateEditingData={updateEditingData}
             viewers={viewers}
+            onAllLabelsHidden={() => {
+              setAllLabelsHidden(!allLabelsHidden);
+            }}
+            allLabelsHidden={allLabelsHidden}
             disabled={busy}
           />
           <LabelSelector
@@ -573,6 +580,7 @@ const RevisionEditor: React.FC<{
             volumeLoadedStatus={volumeLoadedStatus}
             editingData={editingData}
             updateEditingData={updateEditingData}
+            allLabelsHidden={allLabelsHidden}
             disabled={busy}
             multipleSeriesShown={multipleSeriesShown}
           />

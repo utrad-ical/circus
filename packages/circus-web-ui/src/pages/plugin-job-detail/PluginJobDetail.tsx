@@ -157,7 +157,7 @@ const PluginJobDetail: React.FC<any> = props => {
     const { job, pluginData } = jobData;
     return {
       consensual: feedbackState.isConsensual,
-      editable: true,
+      editable: feedbackState.editable,
       job,
       plugin: pluginData,
       eventLogger: (message: string) => {},
@@ -187,7 +187,14 @@ const PluginJobDetail: React.FC<any> = props => {
       rsHttpClient,
       loadDisplay
     };
-  }, [api, feedbackState.isConsensual, jobData, rsHttpClient, volumeLoaderMap]);
+  }, [
+    api,
+    feedbackState.isConsensual,
+    feedbackState.editable,
+    jobData,
+    rsHttpClient,
+    volumeLoaderMap
+  ]);
 
   const handleFeedbackChange = useCallback(
     (state: FeedbackReport<unknown>) => {
@@ -278,7 +285,7 @@ const PluginJobDetail: React.FC<any> = props => {
               {feedbackState.message}
             </span>
           )}
-          {!feedbackState.disabled && (
+          {!feedbackState.editable && (
             <Fragment>
               <PieProgress
                 max={feedbackState.count.total}

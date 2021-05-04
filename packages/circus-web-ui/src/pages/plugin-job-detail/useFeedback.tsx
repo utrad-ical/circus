@@ -22,7 +22,7 @@ interface FeedbackState {
   valid: boolean;
   count: { total: number; finished: number };
   feedbacks: FeedbackEntry<any>[];
-  disabled: boolean;
+  editable: boolean;
   message?: React.ReactNode;
   myUserEmail: string;
 }
@@ -32,7 +32,7 @@ const initialState: FeedbackState = {
   currentData: {},
   valid: false,
   count: { total: 1, finished: 0 },
-  disabled: true,
+  editable: false,
   message: null,
   feedbacks: [],
   myUserEmail: ''
@@ -61,16 +61,18 @@ const slice = createSlice({
         state.isConsensual = true;
         state.currentData = consensual.data;
         state.message = registeredMessage(consensual);
+        state.editable = false;
         return;
       }
       // 2. If current user's personal feedback is registered, show it
       if (myPersonal) {
         state.currentData = myPersonal.data;
         state.message = registeredMessage(myPersonal);
+        state.editable = false;
         return;
       }
       // 3. Otherwise, enter personal mode and show empty feedback
-      state.disabled = false;
+      state.editable = true;
     },
     validFeedbackEntered: (state, action: PayloadAction<{ value?: any }>) => {
       const { value } = action.payload;

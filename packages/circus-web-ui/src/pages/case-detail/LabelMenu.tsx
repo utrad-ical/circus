@@ -34,7 +34,7 @@ const LabelMenu: React.FC<{
   onReveal: () => void;
   updateEditingData: EditingDataUpdater;
   viewers: { [index: string]: Viewer };
-  onAllLabelsHidden: () => void;
+  onToggleAllLabelsClick: () => void;
   allLabelsHidden: boolean;
   disabled?: boolean;
 }> = props => {
@@ -43,7 +43,7 @@ const LabelMenu: React.FC<{
     onReveal,
     updateEditingData,
     viewers,
-    onAllLabelsHidden,
+    onToggleAllLabelsClick,
     allLabelsHidden,
     disabled
   } = props;
@@ -216,7 +216,7 @@ const LabelMenu: React.FC<{
         icon={allLabelsHidden ? 'eye-open' : 'eye-close'}
         bsStyle="link"
         bsSize="xs"
-        onClick={onAllLabelsHidden}
+        onClick={onToggleAllLabelsClick}
       />
       <div className="spacer" />
       {activeLabel && labelTypes[activeLabel.type].canConvertTo && (

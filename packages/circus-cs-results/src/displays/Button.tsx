@@ -2,35 +2,55 @@ import classNames from 'classnames';
 import React, { forwardRef } from 'react';
 import styled from 'styled-components';
 
+type Size = 'sm' | 'lg' | 'xs';
+
 /**
  * This is a styled button that renders according to the CIRCUS theme.
- * You can optionally pass a background color.
+ * You can optionally pass a background color and an icon.
  */
 export const Button: React.FC<{
   color?: string;
+  icon?: string;
+  size?: Size;
   selected?: boolean;
   disabled?: boolean;
   onClick?: React.MouseEventHandler;
 }> = forwardRef((props, ref) => {
-  const { color, selected, disabled, onClick, children } = props;
+  const { color, icon, size, selected, disabled, onClick, children } = props;
+
   return (
     <StyledButton
       ref={ref}
       color={color}
+      size={size}
       onClick={onClick}
       disabled={disabled}
       className={classNames({ selected })}
     >
+      {icon && <span className={`db-icons db-icons-${icon}`} />}
       {children}
     </StyledButton>
   );
 });
 
+const paddings: { [size: string]: string } = {
+  xs: '1px 5px',
+  sm: '5px 10px',
+  default: '6px 12px'
+};
+
+const fontSizes: { [size: string]: string } = {
+  xs: '12px',
+  sm: '12px',
+  default: 'inherit'
+};
+
 const StyledButton = styled.button`
-  padding: 5px;
+  padding: ${(props: any) => paddings[props.size] ?? paddings.default};
   border: 1px solid gray;
   background-color: ${(props: any) => props.theme.background ?? 'transparent'};
   color: ${(props: any) => props.color ?? props.theme.textColor};
+  font-size: ${(props: any) => fontSizes[props.size] ?? fontSizes.default};
   &.selected {
     background-color: ${(props: any) =>
       props.color ?? props.theme.brandPrimary};

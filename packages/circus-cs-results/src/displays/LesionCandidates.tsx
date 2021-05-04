@@ -19,6 +19,7 @@ import styled from 'styled-components';
 import { useCsResults } from '../CsResultsContext';
 import { Display, DisplayDefinition } from '../Display';
 import { createStateChanger, ImageViewer } from '../viewer/CsImageViewer';
+import { Button } from './Button';
 
 interface LesionCandidate {
   id: number;
@@ -101,7 +102,9 @@ const Candidate: React.FC<{
           <div>Confidence: {item.confidence}</div>
         </div>
         <div>
-          <button onClick={handleCenterizeClick}>Center</button>
+          <Button onClick={handleCenterizeClick} size="xs">
+            Center
+          </Button>
         </div>
       </div>
       <ImageViewer

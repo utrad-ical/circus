@@ -119,7 +119,7 @@ const MainDisplay: Display<FeedbackTarget[], any> = props => {
             feedbackKey
           ].display!;
           return (
-            <Section key={feedbackKey} title={caption}>
+            <Section key={feedbackKey} title={caption ?? feedbackKey ?? ''}>
               <Display
                 initialFeedbackValue={initialFeedbackValue[feedbackKey]}
                 personalOpinions={personalOpinionsForKey(feedbackKey)}

@@ -307,7 +307,12 @@ const RevisionEditor: React.FC<{
   };
 
   useEffect(() => {
-    const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
+    const {
+      revision,
+      activeSeriesIndex,
+      activeLabelIndex,
+      allLabelsHidden
+    } = editingData;
     // wait until composition is synced
     if (compositions.length !== revision.series.length) return;
     compositions.forEach((entry, seriesIndex) => {
@@ -330,7 +335,7 @@ const RevisionEditor: React.FC<{
 
       series.labels.forEach((label: InternalLabel) => {
         const isActive = activeLabel && label === activeLabel;
-        if (label.hidden) return;
+        if (label.hidden || allLabelsHidden) return;
         composition.addAnnotation(
           buildAnnotation(
             label,

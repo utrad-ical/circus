@@ -198,6 +198,7 @@ const SeriesItem: React.FC<{
             activeLabel={activeLabel}
             seriesIndex={seriesIndex}
             labelIndex={labelIndex}
+            editingData={editingData}
             updateEditingData={updateEditingData}
             disabled={disabled}
             onClick={handleLabelClick}
@@ -314,6 +315,7 @@ export const Label: React.FC<{
   labelIndex: number;
   seriesIndex: number;
   activeLabel: InternalLabel | null;
+  editingData: EditingData;
   updateEditingData: EditingDataUpdater;
   disabled?: boolean;
   onClick: (labelIndex: number) => void;
@@ -323,6 +325,7 @@ export const Label: React.FC<{
     seriesIndex,
     labelIndex,
     activeLabel,
+    editingData,
     updateEditingData,
     disabled,
     onClick
@@ -339,6 +342,7 @@ export const Label: React.FC<{
     updateEditingData(editingData => {
       const label = editingData.revision.series[seriesIndex].labels[labelIndex];
       label.hidden = !label.hidden;
+      editingData.allLabelsHidden = false;
     }, 'Label visibility ' + label.temporaryKey);
   };
 
@@ -450,13 +454,19 @@ export const Label: React.FC<{
         onClick={handleColorPreviewClick}
         style={{
           backgroundColor: label.data.color,
-          color: mostReadable(label.data.color, [
-            '#000000',
-            '#ffffff'
-          ]).toHexString()
+          color: mostReadable(
+            label.data.color,
+            editingData.allLabelsHidden
+              ? ['#666600', '#ffff00']
+              : ['#000000', '#ffffff']
+          ).toHexString()
         }}
       >
-        {label.hidden && <Icon icon="eye-close" />}
+        {editingData.allLabelsHidden ? (
+          <Icon icon="glyphicon-remove-circle" />
+        ) : label.hidden ? (
+          <Icon icon="eye-close" />
+        ) : undefined}
       </div>
       <div className="caption">
         <Icon icon={labelTypes[label.type].icon} />

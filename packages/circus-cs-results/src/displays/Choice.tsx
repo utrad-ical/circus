@@ -32,11 +32,11 @@ export const Choice: Display<ChoiceOptions, string | number> = props => {
     onFeedbackChange,
     options: { personal: personalButtons, consensual: consensualButtons }
   } = props;
-  const { consensual, editable, job } = useCsResults();
+  const { consensual, editable } = useCsResults();
 
   const buttons = useMemo(
     () =>
-      (consensual ? personalButtons : consensualButtons).map(
+      (consensual ? consensualButtons : personalButtons).map(
         normalizeChoiceOption
       ),
     [consensual]

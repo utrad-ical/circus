@@ -126,4 +126,12 @@ const ToggleButtons: ChoiceUI = props => {
 export const StyledDiv = styled.div`
   display: flex;
   gap: 2px;
+  .opinions {
+    border: 1px solid gray;
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 2px 4px;
+    border-radius: 5px;
+    font-size: 80%;
+    margin-right: 3px;
+  }
 `;

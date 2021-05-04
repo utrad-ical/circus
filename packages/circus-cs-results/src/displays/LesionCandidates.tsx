@@ -140,9 +140,16 @@ export const LesionCandidates: Display<
       maxDisplay,
       feedbackListener
     },
+    personalOpinions,
     onFeedbackChange
   } = props;
-  const { job, getVolumeLoader, rsHttpClient, loadDisplay } = useCsResults();
+  const {
+    consensual,
+    job,
+    getVolumeLoader,
+    rsHttpClient,
+    loadDisplay
+  } = useCsResults();
   const { results } = job;
   const [composition, setComposition] = useState<Composition | null>(null);
 
@@ -261,12 +268,18 @@ export const LesionCandidates: Display<
       <div className="entries">
         {visibleCandidates.map(cand => {
           const feedbackItem = currentFeedback.find(
-            item => item.id === cand.rank
+            item => item.id === cand.id
           );
+          const candPersonalOpinions = consensual
+            ? personalOpinions.map(fb => {
+                const target = fb.data.find(c => c.id === cand.id);
+                return { ...fb, data: target?.value };
+              })
+            : [];
           const tool = tools.current!.find(t => t.name === toolName)?.tool!;
           return (
             <Candidate
-              key={cand.rank}
+              key={cand.id}
               item={cand}
               tool={tool}
               imageSource={imageSourceForVolumeId(cand.volumeId ?? 0)}
@@ -275,7 +288,7 @@ export const LesionCandidates: Display<
                 <div className="feedback-listener">
                   <FeedbackListener
                     initialFeedbackValue={feedbackItem?.value}
-                    personalOpinions={[]}
+                    personalOpinions={candPersonalOpinions}
                     options={feedbackListener.options}
                     onFeedbackChange={status =>
                       handleFeedbackChange(cand.id, status)

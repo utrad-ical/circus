@@ -62,10 +62,4 @@ const StyledButton = styled.button`
   &:disabled {
     opacity: 0.5;
   }
-  .opinions {
-    border: 1px solid gray;
-    border-radius: 5px;
-    font-size: 80%;
-    margin-right: 3px;
-  }
 `;

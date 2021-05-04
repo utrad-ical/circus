@@ -47,9 +47,10 @@ const slice = createSlice({
       action: PayloadAction<{
         feedbacks: FeedbackEntry<any>[];
         myUserEmail: string;
+        preferConsensual: boolean;
       }>
     ) => {
-      const { feedbacks, myUserEmail } = action.payload;
+      const { feedbacks, myUserEmail, preferConsensual } = action.payload;
       state.feedbacks = feedbacks;
       state.myUserEmail = myUserEmail;
       const consensual = action.payload.feedbacks.find(f => f.isConsensual);
@@ -72,6 +73,7 @@ const slice = createSlice({
         return;
       }
       // 3. Otherwise, enter personal mode and show empty feedback
+      if (preferConsensual) state.isConsensual = true;
       state.editable = true;
     },
     validFeedbackEntered: (state, action: PayloadAction<{ value?: any }>) => {
@@ -88,22 +90,20 @@ const slice = createSlice({
       state.count = action.payload;
     },
     enterConsensualMode: (state, action: PayloadAction<{}>) => {
+      const consensual = state.feedbacks.find(f => f.isConsensual);
       state.isConsensual = true;
-      // state.disabled = !!consensual;
-      // state.canRegister = !consensual && action.payload.canRegister;
-      // state.registeredTargetCount = action.payload.registeredTargetCount;
-      // state.currentData = consensual ? consensual.data : action.payload.value;
-      // state.message = consensual ? registeredMessage(consensual) : '';
+      state.editable = !consensual;
+      state.currentData = consensual ? consensual.data : {};
+      state.message = consensual ? registeredMessage(consensual) : '';
     },
     enterPersonalMode: (state, action: PayloadAction<{}>) => {
-      // const myPersonal = state.feedbacks.find(
-      //   f => !f.isConsensual && f.userEmail === state.myUserEmail
-      // );
+      const myPersonal = state.feedbacks.find(
+        f => !f.isConsensual && f.userEmail === state.myUserEmail
+      );
       state.isConsensual = false;
-      // state.disabled = !!myPersonal;
-      // state.canRegister = false;
-      // state.currentData = myPersonal ? myPersonal.data : {};
-      // state.message = myPersonal ? registeredMessage(myPersonal) : '';
+      state.editable = !myPersonal;
+      state.currentData = myPersonal ? myPersonal.data : {};
+      state.message = myPersonal ? registeredMessage(myPersonal) : '';
     }
   }
 });

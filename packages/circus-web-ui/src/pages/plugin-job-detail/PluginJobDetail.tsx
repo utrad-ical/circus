@@ -96,7 +96,6 @@ const PluginJobDetail: React.FC<any> = props => {
   const jobId: string = useParams<any>().jobId;
 
   const user = useLoginUser();
-  const server = user.dicomImageServer;
   const [busy, setBusy] = useState(false);
   const [feedbackState, dispatch] = useFeedback();
   const { map: volumeLoaderMap, rsHttpClient } = useContext(
@@ -115,7 +114,11 @@ const PluginJobDetail: React.FC<any> = props => {
         seriesData[seriesUid] = await api(`series/${seriesUid}`);
       }
       dispatch(
-        actions.reset({ feedbacks: job.feedbacks, myUserEmail: user.userEmail })
+        actions.reset({
+          feedbacks: job.feedbacks,
+          myUserEmail: user.userEmail,
+          preferConsensual: false
+        })
       );
       return { job, pluginData, seriesData };
     } finally {
@@ -269,6 +272,7 @@ const PluginJobDetail: React.FC<any> = props => {
         </div>
         <CsResultsContext.Provider value={resultsContext!}>
           <MainDisplay
+            key={feedbackState.isConsensual ? 'consensual' : 'personal'}
             initialFeedbackValue={feedbackState.currentData}
             options={pluginData.displayStrategy}
             personalOpinions={
@@ -285,7 +289,7 @@ const PluginJobDetail: React.FC<any> = props => {
               {feedbackState.message}
             </span>
           )}
-          {!feedbackState.editable && (
+          {feedbackState.editable && (
             <Fragment>
               <PieProgress
                 max={feedbackState.count.total}

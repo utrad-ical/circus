@@ -27,26 +27,21 @@ import {
 } from './labelData';
 import { OrientationString } from 'circus-rs/section-util';
 
-type LabelCommand = 'rename' | 'remove' | 'convertType' | 'reveal';
+type LabelCommand =
+  | 'rename'
+  | 'remove'
+  | 'convertType'
+  | 'reveal'
+  | 'toggleHideAllLabels';
 
 const LabelMenu: React.FC<{
   editingData: EditingData;
   onReveal: () => void;
   updateEditingData: EditingDataUpdater;
   viewers: { [index: string]: Viewer };
-  onToggleAllLabelsClick: () => void;
-  allLabelsHidden: boolean;
   disabled?: boolean;
 }> = props => {
-  const {
-    editingData,
-    onReveal,
-    updateEditingData,
-    viewers,
-    onToggleAllLabelsClick,
-    allLabelsHidden,
-    disabled
-  } = props;
+  const { editingData, onReveal, updateEditingData, viewers, disabled } = props;
 
   const [newLabelType, setNewLabelType] = useLocalPreference<LabelType>(
     'newLabelType',
@@ -104,6 +99,11 @@ const LabelMenu: React.FC<{
         if (!activeLabel) return;
         onReveal();
         break;
+      }
+      case 'toggleHideAllLabels': {
+        updateEditingData(editingData => {
+          editingData.allLabelsHidden = !editingData.allLabelsHidden;
+        }, 'hide all labels');
       }
     }
   };
@@ -213,11 +213,13 @@ const LabelMenu: React.FC<{
         onChange={handleAppearanceChange}
       />
       <IconButton
-        icon={allLabelsHidden ? 'eye-open' : 'eye-close'}
+        icon={editingData.allLabelsHidden ? 'eye-open' : 'eye-close'}
         bsStyle="link"
         bsSize="xs"
-        onClick={onToggleAllLabelsClick}
-      />
+        onClick={() => handleCommand('toggleHideAllLabels')}
+      >
+        All
+      </IconButton>
       <div className="spacer" />
       {activeLabel && labelTypes[activeLabel.type].canConvertTo && (
         <IconButton

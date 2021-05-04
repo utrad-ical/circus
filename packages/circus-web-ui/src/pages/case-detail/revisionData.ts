@@ -35,6 +35,10 @@ export interface EditingData {
    */
   layoutItems: ViewerDef[];
   activeLayoutKey: string | null;
+  /**
+   * Holds the "all labels hidden" status.
+   */
+  allLabelsHidden: boolean;
 }
 
 /**

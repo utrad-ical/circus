@@ -17,7 +17,7 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 import { useCsResults } from '../CsResultsContext';
-import { Display, DisplayDefinition } from '../Display';
+import { Display, DisplayDefinition, FeedbackReport } from '../Display';
 import { createStateChanger, ImageViewer } from '../viewer/CsImageViewer';
 import { Button } from './Button';
 
@@ -37,6 +37,14 @@ interface LesionCandidatesOptions {
   confidenceThreshold?: number;
   sortBy: [keyof LesionCandidate, 'asc' | 'desc'];
 }
+
+const normalizeCandidates = (input: any): LesionCandidate[] => {
+  if (!Array.isArray(input)) throw new Error();
+  return input.map((item, index) => {
+    if ('id' in item) return item;
+    return { id: index, ...item };
+  });
+};
 
 const Candidate: React.FC<{
   imageSource: MprImageSource;
@@ -132,8 +140,7 @@ export const LesionCandidates: Display<
       maxDisplay,
       feedbackListener
     },
-    onFeedbackChange,
-    onFeedbackValidate
+    onFeedbackChange
   } = props;
   const { job, getVolumeLoader, rsHttpClient, loadDisplay } = useCsResults();
   const { results } = job;
@@ -142,12 +149,11 @@ export const LesionCandidates: Display<
   const [currentFeedback, setCurrentFeedback] = useState<
     LesionCandidateFeedback
   >(initialFeedbackValue ?? []);
-  const [validateState, setValidateState] = useState<{ [id: number]: boolean }>(
-    {}
+
+  const allCandidates = useMemo(
+    () => normalizeCandidates(get(results.results, dataPath)),
+    [results.results, dataPath]
   );
-
-  const allCandidates = get(results.results, dataPath) as LesionCandidate[];
-
   const visibleCandidates = useMemo(
     () =>
       allCandidates
@@ -203,23 +209,28 @@ export const LesionCandidates: Display<
     return imageSource;
   };
 
-  const handleFeedbackChange = (id: number, value: any) => {
-    setCurrentFeedback(fb =>
-      fb.filter(item => item.id !== id).concat({ id, value })
-    );
-  };
-
-  const handleFeedbackValidate = (id: number, valid: boolean) => {
-    setValidateState(vs => ({ ...vs, [id]: valid }));
+  const handleFeedbackChange = (id: number, status: FeedbackReport<any>) => {
+    if (status.valid) {
+      setCurrentFeedback(fb =>
+        fb.filter(item => item.id !== id).concat({ id, value: status.value })
+      );
+    } else if (currentFeedback.some(item => item.id === id)) {
+      // remove invalid feedback
+      setCurrentFeedback(fb => fb.filter(item => item.id !== id));
+    }
   };
 
   useEffect(() => {
-    const allValid = false;
-    onFeedbackValidate(allValid);
+    const allValid = visibleCandidates.every(
+      cand => currentFeedback.findIndex(item => item.id === cand.id) >= 0
+    );
+    console.log(visibleCandidates, allValid);
     if (allValid) {
-      onFeedbackChange(currentFeedback);
+      onFeedbackChange({ valid: true, value: currentFeedback });
+    } else {
+      onFeedbackChange({ valid: false, error: 'Feedback incomplete' });
     }
-  }, [currentFeedback, validateState]);
+  }, [currentFeedback]);
 
   const [FeedbackListener, setFeedbackListener] = useState<
     Display<any, any> | undefined
@@ -267,9 +278,8 @@ export const LesionCandidates: Display<
                     initialFeedbackValue={feedbackItem?.value}
                     personalOpinions={[]}
                     options={feedbackListener.options}
-                    onFeedbackChange={val => handleFeedbackChange(cand.id, val)}
-                    onFeedbackValidate={valid =>
-                      handleFeedbackValidate(cand.id, valid)
+                    onFeedbackChange={status =>
+                      handleFeedbackChange(cand.id, status)
                     }
                   />
                 </div>

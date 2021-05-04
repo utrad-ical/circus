@@ -19,19 +19,19 @@ const registeredMessage = (feedback: FeedbackEntry<any>) => {
 interface FeedbackState {
   isConsensual: boolean;
   currentData: { [feedbackKey: string]: any };
-  registeredTargetCount: number;
   valid: boolean;
+  count: { total: number; finished: number };
+  feedbacks: FeedbackEntry<any>[];
   disabled: boolean;
   message?: React.ReactNode;
-  feedbacks: FeedbackEntry<any>[];
   myUserEmail: string;
 }
 
 const initialState: FeedbackState = {
   isConsensual: false,
   currentData: {},
-  registeredTargetCount: 0,
   valid: false,
+  count: { total: 1, finished: 0 },
   disabled: true,
   message: null,
   feedbacks: [],
@@ -72,18 +72,18 @@ const slice = createSlice({
       // 3. Otherwise, enter personal mode and show empty feedback
       state.disabled = false;
     },
-    changeFeedback: (
-      state,
-      action: PayloadAction<{
-        value: any;
-      }>
-    ) => {
+    validFeedbackEntered: (state, action: PayloadAction<{ value?: any }>) => {
       const { value } = action.payload;
+      state.valid = true;
+      state.count = { total: 1, finished: 1 };
       state.currentData = value;
     },
-    changeValidStatus: (state, action: PayloadAction<{ valid: boolean }>) => {
-      const { valid } = action.payload;
-      state.valid = valid;
+    invalidFeedbackEntered: (
+      state,
+      action: PayloadAction<{ total: number; finished: number }>
+    ) => {
+      state.valid = false;
+      state.count = action.payload;
     },
     enterConsensualMode: (state, action: PayloadAction<{}>) => {
       state.isConsensual = true;

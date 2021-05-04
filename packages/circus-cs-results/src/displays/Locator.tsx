@@ -60,12 +60,7 @@ const applyDisplayOptions = (
 };
 
 export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
-  const {
-    options,
-    initialFeedbackValue,
-    onFeedbackChange,
-    onFeedbackValidate
-  } = props;
+  const { options, initialFeedbackValue, onFeedbackChange } = props;
   const {
     job,
     consensual,
@@ -145,8 +140,7 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
   const handleYesClick = () => {
     setNoConfirmed(false);
     setShowViewer(true);
-    onFeedbackChange([]);
-    onFeedbackValidate(true);
+    onFeedbackChange({ valid: false, error: 'No locations have been input' });
   };
 
   const handleNoClick = () => {
@@ -157,9 +151,10 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
 
   useEffect(() => {
     const valid = (showViewer && currentFeedback.length > 0) || noConfirmed;
-    onFeedbackValidate(valid);
     if (valid) {
-      onFeedbackChange(currentFeedback);
+      onFeedbackChange({ valid: true, value: currentFeedback });
+    } else {
+      onFeedbackChange({ valid: false });
     }
   }, [currentFeedback, noConfirmed, showViewer]);
 
@@ -226,9 +221,11 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
                   <td>{JSON.stringify(item.location)}</td>
                   {consensual && <td />}
                   <td>
-                    <Button onClick={() => handleReveal(i)}>Reveal</Button>
+                    <Button size="xs" onClick={() => handleReveal(i)}>
+                      Reveal
+                    </Button>
                     {editable && (
-                      <Button onClick={() => handleRemovePoint(i)}>
+                      <Button size="xs" onClick={() => handleRemovePoint(i)}>
                         Remove
                       </Button>
                     )}

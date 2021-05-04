@@ -3,7 +3,8 @@ import {
   Display,
   useCsResults,
   FeedbackEntry,
-  FeedbackTarget
+  FeedbackTarget,
+  FeedbackReport
 } from '@utrad-ical/circus-cs-results';
 import Section from './Section';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
@@ -14,8 +15,7 @@ const MainDisplay: Display<FeedbackTarget[], any> = props => {
   const {
     initialFeedbackValue,
     options: displayStrategy,
-    onFeedbackChange,
-    onFeedbackValidate
+    onFeedbackChange
   } = props;
   const { job, consensual } = useCsResults();
 
@@ -30,29 +30,30 @@ const MainDisplay: Display<FeedbackTarget[], any> = props => {
 
   const [feedbackMeta, setFeedbackMeta] = useState<{
     [feedbackKey: string]: {
-      valid: boolean;
+      valid: boolean | 'no-feedback';
       display: Display<any, any> | undefined;
     };
   }>(() =>
     Object.fromEntries(
       displayStrategy.map(s => [
         s.feedbackKey,
-        { valid: false, display: undefined }
+        { valid: 'no-feedback', display: undefined }
       ])
     )
   );
 
-  const handleChange = (feedbackKey: string, value: any) => {
-    const newFeedback = { ...feedback, [feedbackKey]: value };
-    setFeedback(newFeedback);
-  };
-
-  const handleValidate = (feedbackKey: string, valid: boolean) => {
+  const handleChange = (
+    feedbackKey: string,
+    state: FeedbackReport<unknown>
+  ) => {
     setFeedbackMeta(
-      produce(draft => {
-        draft[feedbackKey].valid = valid;
+      produce((draft: typeof feedbackMeta) => {
+        draft[feedbackKey].valid = state.valid;
       })
     );
+    if (state.valid) {
+      setFeedback({ ...feedback, [feedbackKey]: state.value });
+    }
   };
 
   useEffect(() => {
@@ -72,19 +73,25 @@ const MainDisplay: Display<FeedbackTarget[], any> = props => {
   }, [displayStrategy]);
 
   useEffect(() => {
-    const valids = displayStrategy.filter(
-      s => feedbackMeta[s.feedbackKey].valid
+    const requiredDisplays = displayStrategy.filter(
+      s => feedbackMeta[s.feedbackKey].valid !== 'no-feedback'
     );
-    const valid = valids.length === displayStrategy.length;
-    onFeedbackValidate(valid);
-    if (valid) onFeedbackChange(feedback);
-  }, [
-    displayStrategy,
-    feedback,
-    feedbackMeta,
-    onFeedbackChange,
-    onFeedbackValidate
-  ]);
+    const unfinishedDisplays = displayStrategy.filter(
+      s => feedbackMeta[s.feedbackKey].valid === false
+    );
+    const valid = unfinishedDisplays.length === 0;
+    if (valid) {
+      onFeedbackChange({ valid: true, value: feedback });
+    } else {
+      onFeedbackChange({
+        valid: false,
+        error: {
+          total: requiredDisplays.length,
+          finished: requiredDisplays.length - unfinishedDisplays.length
+        }
+      });
+    }
+  }, [displayStrategy, feedback, feedbackMeta, onFeedbackChange]);
 
   const personalOpinionsForKey = (key: string): FeedbackEntry<any>[] => {
     if (!consensual) return [];
@@ -108,15 +115,16 @@ const MainDisplay: Display<FeedbackTarget[], any> = props => {
       <div className="feedback-targets">
         {displayStrategy.map(strategy => {
           const { feedbackKey, caption, options } = strategy;
-          const Display = feedbackMeta[feedbackKey].display!;
+          const Display: Display<typeof options, any> = feedbackMeta[
+            feedbackKey
+          ].display!;
           return (
             <Section key={feedbackKey} title={caption}>
               <Display
                 initialFeedbackValue={initialFeedbackValue[feedbackKey]}
-                onFeedbackValidate={valid => handleValidate(feedbackKey, valid)}
                 personalOpinions={personalOpinionsForKey(feedbackKey)}
                 options={options}
-                onFeedbackChange={value => handleChange(feedbackKey, value)}
+                onFeedbackChange={state => handleChange(feedbackKey, state)}
               />
             </Section>
           );

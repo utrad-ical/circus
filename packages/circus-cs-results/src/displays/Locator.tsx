@@ -99,6 +99,7 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
   const stateChanger = useMemo(() => createStateChanger<rs.MprViewState>(), []);
 
   useEffect(() => {
+    if (!editable && currentFeedback.length === 0) return;
     const targetSeries = job.series[volumeId];
     const volumeLoader = getVolumeLoader(targetSeries);
     const imageSource = new rs.HybridMprImageSource({
@@ -179,6 +180,8 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
     (state, viewer) => applyDisplayOptions(state, job, volumeId),
     [volumeId, job]
   );
+
+  if (!editable && currentFeedback.length === 0) return <div>No Input</div>;
 
   if (!showViewer) {
     return (

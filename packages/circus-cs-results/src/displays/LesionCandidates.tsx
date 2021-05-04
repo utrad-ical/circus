@@ -224,7 +224,6 @@ export const LesionCandidates: Display<
     const allValid = visibleCandidates.every(
       cand => currentFeedback.findIndex(item => item.id === cand.id) >= 0
     );
-    console.log(visibleCandidates, allValid);
     if (allValid) {
       onFeedbackChange({ valid: true, value: currentFeedback });
     } else {

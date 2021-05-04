@@ -569,7 +569,7 @@ const RevisionEditor: React.FC<{
             onReveal={handleReveal}
             updateEditingData={updateEditingData}
             viewers={viewers}
-            onAllLabelsHidden={() => {
+            onToggleAllLabelsClick={() => {
               setAllLabelsHidden(!allLabelsHidden);
             }}
             allLabelsHidden={allLabelsHidden}

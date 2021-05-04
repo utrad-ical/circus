@@ -454,15 +454,19 @@ export const Label: React.FC<{
         onClick={handleColorPreviewClick}
         style={{
           backgroundColor: label.data.color,
-          color: mostReadable(label.data.color, [
-            '#000000',
-            '#ffffff'
-          ]).toHexString()
+          color: mostReadable(
+            label.data.color,
+            editingData.allLabelsHidden
+              ? ['#666600', '#ffff00']
+              : ['#000000', '#ffffff']
+          ).toHexString()
         }}
       >
-        {(label.hidden || editingData.allLabelsHidden) && (
+        {editingData.allLabelsHidden ? (
+          <Icon icon="glyphicon-remove-circle" />
+        ) : label.hidden ? (
           <Icon icon="eye-close" />
-        )}
+        ) : undefined}
       </div>
       <div className="caption">
         <Icon icon={labelTypes[label.type].icon} />

@@ -120,8 +120,6 @@ const RevisionEditor: React.FC<{
   const stateChanger = useMemo(() => createStateChanger<rs.MprViewState>(), []);
   const [seriesDialogOpen, setSeriesDialogOpen] = useState(false);
 
-  const [allLabelsHidden, setAllLabelsHidden] = useState(false);
-
   const [viewOptions, setViewOptions] = useLocalPreference<ViewOptions>(
     'dbViewOptions',
     {
@@ -309,7 +307,12 @@ const RevisionEditor: React.FC<{
   };
 
   useEffect(() => {
-    const { revision, activeSeriesIndex, activeLabelIndex } = editingData;
+    const {
+      revision,
+      activeSeriesIndex,
+      activeLabelIndex,
+      allLabelsHidden
+    } = editingData;
     // wait until composition is synced
     if (compositions.length !== revision.series.length) return;
     compositions.forEach((entry, seriesIndex) => {
@@ -387,8 +390,7 @@ const RevisionEditor: React.FC<{
     viewOptions.showReferenceLine,
     viewOptions.scrollbar,
     touchDevice,
-    viewers,
-    allLabelsHidden
+    viewers
   ]);
 
   useEffect(() => {
@@ -569,10 +571,6 @@ const RevisionEditor: React.FC<{
             onReveal={handleReveal}
             updateEditingData={updateEditingData}
             viewers={viewers}
-            onToggleAllLabelsClick={() => {
-              setAllLabelsHidden(!allLabelsHidden);
-            }}
-            allLabelsHidden={allLabelsHidden}
             disabled={busy}
           />
           <LabelSelector
@@ -580,7 +578,6 @@ const RevisionEditor: React.FC<{
             volumeLoadedStatus={volumeLoadedStatus}
             editingData={editingData}
             updateEditingData={updateEditingData}
-            allLabelsHidden={allLabelsHidden}
             disabled={busy}
             multipleSeriesShown={multipleSeriesShown}
           />

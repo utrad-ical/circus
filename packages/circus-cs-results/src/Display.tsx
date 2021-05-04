@@ -6,6 +6,23 @@ export interface DisplayDefinition {
   options: any;
 }
 
+interface ValidFeedbackReport<T> {
+  valid: true;
+  value: T;
+}
+
+interface InvalidFeedbackReport {
+  valid: false;
+  error?: any;
+}
+
+/**
+ * Object to report current feedback entering status.
+ * - `valid: true` means this feedback can be registered.
+ * - `valid: false` means this feedback is not ready to be registered.
+ */
+export type FeedbackReport<T> = ValidFeedbackReport<T> | InvalidFeedbackReport;
+
 interface DisplayProps<O extends object, F extends unknown> {
   /**
    * The results data this Display is expected to show.
@@ -18,8 +35,14 @@ interface DisplayProps<O extends object, F extends unknown> {
    */
   personalOpinions: readonly FeedbackEntry<F>[];
   options: O;
-  onFeedbackChange: (value: F) => void;
-  onFeedbackValidate: (valid: boolean, errors?: string[]) => void;
+  /**
+   * Triggers when the feedback data is changed.
+   * The display must call this on initial render to declare
+   * this display required feedback registration.
+   * Not calling this on initial render means this display do not
+   * collect user feedback.
+   */
+  onFeedbackChange: (status: FeedbackReport<F>) => void;
   children?: React.ReactNode;
 }
 

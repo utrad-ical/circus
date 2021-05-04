@@ -30,7 +30,6 @@ export const Choice: Display<ChoiceOptions, string | number> = props => {
     initialFeedbackValue,
     personalOpinions,
     onFeedbackChange,
-    onFeedbackValidate,
     options: { personal: personalButtons, consensual: consensualButtons }
   } = props;
   const { consensual, editable, job } = useCsResults();
@@ -68,12 +67,15 @@ export const Choice: Display<ChoiceOptions, string | number> = props => {
     const valid =
       typeof selected === 'number' &&
       buttons.find(def => def.value === selected) !== undefined;
-    onFeedbackValidate(valid);
+    if (valid) {
+      onFeedbackChange({ valid: true, value: selected! });
+    } else {
+      onFeedbackChange({ valid: false, error: 'Not selected' });
+    }
   }, [selected]);
 
   const handleSelect = (selection: string | number) => {
     setSelected(selection);
-    onFeedbackChange(selection);
   };
 
   const UI: ChoiceUI = ToggleButtons;

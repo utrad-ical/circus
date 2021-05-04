@@ -30,7 +30,8 @@ import {
   Job,
   Plugin,
   CsResultsContext,
-  CsResultsContextType
+  CsResultsContextType,
+  FeedbackReport
 } from '@utrad-ical/circus-cs-results';
 import { RsVolumeLoader } from '@utrad-ical/circus-rs/src/browser';
 import loadDisplay from './loadDisplay';
@@ -188,6 +189,22 @@ const PluginJobDetail: React.FC<any> = props => {
     };
   }, [api, feedbackState.isConsensual, jobData, rsHttpClient, volumeLoaderMap]);
 
+  const handleFeedbackChange = useCallback(
+    (state: FeedbackReport<unknown>) => {
+      if (state.valid) {
+        dispatch(actions.validFeedbackEntered({ value: state.value }));
+      } else {
+        dispatch(
+          actions.invalidFeedbackEntered({
+            total: state.error.total,
+            finished: state.error.finished
+          })
+        );
+      }
+    },
+    [dispatch]
+  );
+
   if (!jobData) {
     return <LoadingIndicator />;
   }
@@ -198,14 +215,6 @@ const PluginJobDetail: React.FC<any> = props => {
 
   const { job, seriesData, pluginData } = jobData;
   const primarySeriesUid = job.series[0].seriesUid;
-
-  const handleFeedbackChange = (value: any) => {
-    dispatch(actions.changeFeedback({ value }));
-  };
-
-  const handleFeedbackValidate = (valid: boolean) => {
-    dispatch(actions.changeValidStatus({ valid }));
-  };
 
   const handleChangeFeedbackMode = (isConsensual: boolean) => {
     if (isConsensual) {
@@ -230,6 +239,8 @@ const PluginJobDetail: React.FC<any> = props => {
   };
 
   const modeText = feedbackState.isConsensual ? 'consensual' : 'personal';
+
+  // console.log(feedbackState.count);
 
   return (
     <FullSpanContainer>
@@ -259,7 +270,6 @@ const PluginJobDetail: React.FC<any> = props => {
                 : []
             }
             onFeedbackChange={handleFeedbackChange}
-            onFeedbackValidate={handleFeedbackValidate}
           />
         </CsResultsContext.Provider>
         <div className="job-detail-footer">
@@ -270,7 +280,10 @@ const PluginJobDetail: React.FC<any> = props => {
           )}
           {!feedbackState.disabled && (
             <Fragment>
-              <PieProgress max={3} value={1} />
+              <PieProgress
+                max={feedbackState.count.total}
+                value={feedbackState.count.finished}
+              />
               &ensp;
             </Fragment>
           )}

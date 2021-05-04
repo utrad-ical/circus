@@ -342,6 +342,7 @@ export const Label: React.FC<{
     updateEditingData(editingData => {
       const label = editingData.revision.series[seriesIndex].labels[labelIndex];
       label.hidden = !label.hidden;
+      editingData.allLabelsHidden = false;
     }, 'Label visibility ' + label.temporaryKey);
   };
 

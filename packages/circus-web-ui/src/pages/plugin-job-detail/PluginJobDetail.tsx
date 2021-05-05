@@ -155,6 +155,19 @@ const PluginJobDetail: React.FC<any> = props => {
     [api, jobId, reloadJob]
   );
 
+  const insertLog = useCallback(
+    (action: string, data?: any) => {
+      dispatch(
+        actions.logEventHappened({
+          date: new Date().toISOString(),
+          action,
+          data
+        })
+      );
+    },
+    [dispatch]
+  );
+
   const resultsContext = useMemo<CsResultsContextType | undefined>(() => {
     if (!jobData) return undefined;
     const { job, pluginData } = jobData;
@@ -163,7 +176,7 @@ const PluginJobDetail: React.FC<any> = props => {
       editable: feedbackState.editable,
       job,
       plugin: pluginData,
-      eventLogger: (message: string) => {},
+      eventLogger: insertLog,
       getVolumeLoader: series => {
         const { seriesUid, partialVolumeDescriptor } = series;
         const key =
@@ -191,12 +204,13 @@ const PluginJobDetail: React.FC<any> = props => {
       loadDisplay
     };
   }, [
-    api,
+    jobData,
     feedbackState.isConsensual,
     feedbackState.editable,
-    jobData,
+    insertLog,
     rsHttpClient,
-    volumeLoaderMap
+    volumeLoaderMap,
+    api
   ]);
 
   const handleFeedbackChange = useCallback(
@@ -240,7 +254,10 @@ const PluginJobDetail: React.FC<any> = props => {
       const mode = feedbackState.isConsensual ? 'consensual' : 'personal';
       await api(`plugin-jobs/${jobId}/feedback/${mode}`, {
         method: 'POST',
-        data: feedbackState.currentData
+        data: {
+          data: feedbackState.currentData,
+          actionLog: feedbackState.actionLog
+        }
       });
       reloadJob();
     } finally {
@@ -249,8 +266,6 @@ const PluginJobDetail: React.FC<any> = props => {
   };
 
   const modeText = feedbackState.isConsensual ? 'consensual' : 'personal';
-
-  // console.log(feedbackState.count);
 
   return (
     <FullSpanContainer>

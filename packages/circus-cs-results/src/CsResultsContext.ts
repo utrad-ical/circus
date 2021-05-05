@@ -44,7 +44,7 @@ export type PluginAttachmentLoader = (
   signal?: AbortSignal
 ) => Promise<Response>;
 
-export type EventLogger = (message: string) => void;
+export type EventLogger = (action: string, data?: any) => void;
 
 export interface CsResultsContextType {
   /**

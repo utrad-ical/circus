@@ -4,6 +4,13 @@ import styled from 'styled-components';
 
 type Size = 'sm' | 'lg' | 'xs';
 
+const iconPrefixMap: { [prefix: string]: string } = {
+  'glyphicon-': 'glyphicon glyphicon-',
+  'circus-': 'circus-icon circus-icon-',
+  'rs-': 'rs-icon-',
+  default: 'glyphicon glyphicon-'
+};
+
 /**
  * This is a styled button that renders according to the CIRCUS theme.
  * You can optionally pass a background color and an icon.
@@ -12,11 +19,27 @@ export const Button: React.FC<{
   color?: string;
   icon?: string;
   size?: Size;
+  className?: string;
   selected?: boolean;
   disabled?: boolean;
   onClick?: React.MouseEventHandler;
 }> = forwardRef((props, ref) => {
-  const { color, icon, size, selected, disabled, onClick, children } = props;
+  const {
+    color,
+    icon,
+    size,
+    className,
+    selected,
+    disabled,
+    onClick,
+    children
+  } = props;
+
+  const matchedPrefix =
+    Object.keys(iconPrefixMap).find(p => icon?.startsWith(p)) ?? 'default';
+  const iconClass = icon
+    ? iconPrefixMap[matchedPrefix] + icon.replace(matchedPrefix, '')
+    : undefined;
 
   return (
     <StyledButton
@@ -25,9 +48,9 @@ export const Button: React.FC<{
       size={size}
       onClick={onClick}
       disabled={disabled}
-      className={classNames({ selected })}
+      className={classNames(className, { selected })}
     >
-      {icon && <span className={`db-icons db-icons-${icon}`} />}
+      {icon && <span className={iconClass} />}
       {children}
     </StyledButton>
   );

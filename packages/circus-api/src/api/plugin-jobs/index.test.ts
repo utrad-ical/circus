@@ -211,7 +211,7 @@ describe('feedback', () => {
     const res = await dave.request({
       url: 'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/feedback/personal',
       method: 'post',
-      data: { lesionCandidates: [] }
+      data: { data: { lesionCandidates: [] }, actionLog: [] }
     });
     expect(res.status).toBe(200);
   });

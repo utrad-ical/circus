@@ -265,7 +265,7 @@ export const internalLabelToExternal = async (
     if (shrinkResult === null) {
       return { voxels: null, alpha: data.alpha, color: data.color };
     } else {
-      const hash = sha1(shrinkResult.rawData.data);
+      const hash = await sha1(shrinkResult.rawData.data);
       if (hash !== data.voxels) {
         // Voxel data has changed
         await api('blob/' + hash, {

@@ -53,6 +53,12 @@ module.exports = {
       {
         test: /\.(frag|vert)$/,
         use: ['webpack-glsl-loader']
+      },
+      {
+        test: /\.m?js/,
+        resolve: {
+          fullySpecified: false
+        }
       }
     ]
   },

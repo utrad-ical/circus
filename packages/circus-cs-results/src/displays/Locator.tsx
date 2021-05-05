@@ -85,6 +85,7 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
   const [currentFeedback, setCurrentFeedback] = useState<LocatorFeedback>(
     initialFeedbackValue ?? []
   );
+  const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
 
   const [composition, setComposition] = useState<rs.Composition | undefined>(
     undefined
@@ -126,11 +127,13 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
     const newFeedback = currentFeedback.slice();
     newFeedback.splice(index, 1);
     setCurrentFeedback(newFeedback);
+    setActiveIndex(undefined);
     log('Locator: remove location');
   };
 
   const handleReveal = (index: number) => {
     const item = currentFeedback[index];
+    setActiveIndex(index);
     stateChanger(state => {
       const voxelSize = voxelSizeRef.current!;
       const newOrigin = [
@@ -168,6 +171,23 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
     }
   }, [currentFeedback, noConfirmed, showViewer]);
 
+  useEffect(() => {
+    if (!composition) return;
+    composition.removeAllAnnotations();
+    const voxelSize = voxelSizeRef.current!;
+    currentFeedback.forEach((item, i) => {
+      const point = new rs.Point();
+      point.location = [
+        item.location[0] * voxelSize[0],
+        item.location[1] * voxelSize[1],
+        item.location[2] * voxelSize[2]
+      ];
+      point.color = i === activeIndex ? '#ff0000' : '#ff00ff';
+      composition.addAnnotation(point);
+    });
+    composition.annotationUpdated();
+  }, [composition, currentFeedback, activeIndex]);
+
   const handleMouseUp = () => {
     if (!editable || !composition) return;
     const newValue: Location[] = [];
@@ -183,6 +203,7 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
       });
     });
     setCurrentFeedback(newValue);
+    setActiveIndex(newValue.length - 1);
     log('Locator: add location');
   };
 

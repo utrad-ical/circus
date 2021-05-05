@@ -17,7 +17,7 @@ const MainDisplay: Display<FeedbackTarget[], any> = props => {
     options: displayStrategy,
     onFeedbackChange
   } = props;
-  const { job, consensual } = useCsResults();
+  const { job, consensual, eventLogger } = useCsResults();
 
   const [feedback, setFeedback] = useState<{ [feedbackKey: string]: any }>(() =>
     Object.fromEntries(
@@ -103,12 +103,18 @@ const MainDisplay: Display<FeedbackTarget[], any> = props => {
   const displayReady = displayStrategy.every(
     s => feedbackMeta[s.feedbackKey].display !== undefined
   );
-  if (!displayReady)
+
+  useEffect(() => {
+    if (displayReady) eventLogger('Show plug-in results');
+  }, [displayReady, eventLogger]);
+
+  if (!displayReady) {
     return (
       <div className="job-detail-main">
         <LoadingIndicator />
       </div>
     );
+  }
 
   return (
     <div className="job-detail-main">

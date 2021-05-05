@@ -36,6 +36,7 @@ interface LesionCandidatesOptions {
   maxDisplay?: number;
   confidenceThreshold?: number;
   sortBy: [keyof LesionCandidate, 'asc' | 'desc'];
+  excludeFromActionLog?: boolean;
 }
 
 const normalizeCandidates = (input: any): LesionCandidate[] => {
@@ -138,7 +139,8 @@ export const LesionCandidates: Display<
       dataPath = 'lesionCandidates',
       sortBy: [sortKey, sortOrder] = ['rank', 'asc'],
       maxDisplay,
-      feedbackListener
+      feedbackListener,
+      excludeFromActionLog
     },
     personalOpinions,
     onFeedbackChange
@@ -148,7 +150,8 @@ export const LesionCandidates: Display<
     job,
     getVolumeLoader,
     rsHttpClient,
-    loadDisplay
+    loadDisplay,
+    eventLogger
   } = useCsResults();
   const { results } = job;
   const [composition, setComposition] = useState<Composition | null>(null);
@@ -221,6 +224,9 @@ export const LesionCandidates: Display<
       setCurrentFeedback(fb =>
         fb.filter(item => item.id !== id).concat({ id, value: status.value })
       );
+      if (!excludeFromActionLog) {
+        eventLogger('LesionCandidates feedback', { id, value: status.value });
+      }
     } else if (currentFeedback.some(item => item.id === id)) {
       // remove invalid feedback
       setCurrentFeedback(fb => fb.filter(item => item.id !== id));

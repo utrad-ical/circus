@@ -18,7 +18,8 @@ interface ChoiceOptions {
   ui?: 'toggleButtons' | 'dropdown';
   multiple?: boolean;
   personal: (string | PersonalChoice)[];
-  consensual: (string | Choice)[];
+  consensual?: (string | Choice)[];
+  excludeFromActionLog?: boolean;
 }
 
 const normalizeChoiceOption = (def: string | Choice, index: number): Choice => {
@@ -30,15 +31,20 @@ export const Choice: Display<ChoiceOptions, string | number> = props => {
     initialFeedbackValue,
     personalOpinions,
     onFeedbackChange,
-    options: { personal: personalButtons, consensual: consensualButtons }
+    options: {
+      personal: personalButtons,
+      consensual: consensualButtons,
+      excludeFromActionLog
+    }
   } = props;
-  const { consensual, editable } = useCsResults();
+  const { consensual, editable, eventLogger } = useCsResults();
 
   const buttons = useMemo(
     () =>
-      (consensual ? consensualButtons : personalButtons).map(
-        normalizeChoiceOption
-      ),
+      (consensual && consensualButtons
+        ? consensualButtons
+        : personalButtons
+      ).map(normalizeChoiceOption),
     [consensual]
   );
 
@@ -76,10 +82,12 @@ export const Choice: Display<ChoiceOptions, string | number> = props => {
 
   const handleSelect = (selection: string | number) => {
     setSelected(selection);
+    if (!excludeFromActionLog) {
+      eventLogger(`Choice selection: ${selection}`, { selection });
+    }
   };
 
   const UI: ChoiceUI = ToggleButtons;
-
   return (
     <div>
       <UI

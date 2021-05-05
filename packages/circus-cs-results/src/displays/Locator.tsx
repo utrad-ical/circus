@@ -16,6 +16,7 @@ import { Job } from '../CsResultsContext';
 
 export interface LocatorOptions {
   volumeId?: number;
+  excludeFromActionLog?: boolean;
 }
 
 export interface Location {
@@ -66,10 +67,11 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
     consensual,
     editable,
     rsHttpClient,
-    getVolumeLoader
+    getVolumeLoader,
+    eventLogger
   } = useCsResults();
 
-  const { volumeId = 0 } = options;
+  const { volumeId = 0, excludeFromActionLog } = options;
   const [noConfirmed, setNoConfirmed] = useState(false);
   const [showViewer, setShowViewer] = useState(
     initialFeedbackValue?.length ?? 0 > 0
@@ -115,11 +117,16 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
     setCurrentFeedback([]);
   }, [job.series, volumeId]);
 
+  const log = (action: string, data?: any) => {
+    if (!excludeFromActionLog) eventLogger(action, data);
+  };
+
   const handleRemovePoint = (index: number) => {
     if (!editable) return;
     const newFeedback = currentFeedback.slice();
     newFeedback.splice(index, 1);
     setCurrentFeedback(newFeedback);
+    log('Locator: remove location');
   };
 
   const handleReveal = (index: number) => {
@@ -142,12 +149,14 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
     setNoConfirmed(false);
     setShowViewer(true);
     onFeedbackChange({ valid: false, error: 'No locations have been input' });
+    log('Locator: open viewer');
   };
 
   const handleNoClick = () => {
     setNoConfirmed(true);
     setCurrentFeedback([]);
     setShowViewer(false);
+    log('Locator: close viewer');
   };
 
   useEffect(() => {
@@ -174,6 +183,7 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
       });
     });
     setCurrentFeedback(newValue);
+    log('Locator: add location');
   };
 
   const initialStateSetter = useCallback(

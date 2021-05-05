@@ -160,12 +160,13 @@ const readElement = (
     case 'SS':
       return readNumberList(dataSet, key, 'int16', 2);
     case 'DS':
-    case 'IS':
+    case 'IS': {
       const text = dataSet.string(key);
       if (text?.includes('\\')) {
         return text.split('\\').map(Number);
       }
       return text !== undefined ? Number(text) : undefined;
+    }
     default: {
       // Other string VRs which use ASCII chars, such as DT
       const text = dataSet.string(key);

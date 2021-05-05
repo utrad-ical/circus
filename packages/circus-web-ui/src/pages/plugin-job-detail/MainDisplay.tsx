@@ -8,7 +8,6 @@ import {
 } from '@utrad-ical/circus-cs-results';
 import Section from './Section';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
-import loadDisplay from './loadDisplay';
 import produce from 'immer';
 
 const MainDisplay: Display<FeedbackTarget[], any> = props => {
@@ -17,7 +16,7 @@ const MainDisplay: Display<FeedbackTarget[], any> = props => {
     options: displayStrategy,
     onFeedbackChange
   } = props;
-  const { job, consensual, eventLogger } = useCsResults();
+  const { job, consensual, eventLogger, loadDisplay } = useCsResults();
 
   const [feedback, setFeedback] = useState<{ [feedbackKey: string]: any }>(() =>
     Object.fromEntries(
@@ -70,7 +69,7 @@ const MainDisplay: Display<FeedbackTarget[], any> = props => {
       );
     };
     load();
-  }, [displayStrategy]);
+  }, [displayStrategy, loadDisplay]);
 
   useEffect(() => {
     const requiredDisplays = displayStrategy.filter(

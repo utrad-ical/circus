@@ -1,0 +1,10 @@
+name: PluginJobs
+description: >
+  Dynamically provides CIRCUS CS displays.
+routes:
+  # Job Management
+  - verb: get
+    path: /plugin-displays/:path+
+    noAuthentication: true
+    description: >
+      Returns the display using Webpack Module Federation.

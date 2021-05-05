@@ -16,9 +16,25 @@ const registeredMessage = (feedback: FeedbackEntry<any>) => {
   );
 };
 
+interface ActionLogEntry {
+  /**
+   * ISO date representing when this event happened.
+   */
+  date: string;
+  /**
+   * Short description of what happened.
+   */
+  action: string;
+  /**
+   * Optional JSON-serializable data.
+   */
+  data?: any;
+}
+
 interface FeedbackState {
   isConsensual: boolean;
   currentData: { [feedbackKey: string]: any };
+  actionLog: ActionLogEntry[];
   valid: boolean;
   count: { total: number; finished: number };
   feedbacks: FeedbackEntry<any>[];
@@ -30,6 +46,7 @@ interface FeedbackState {
 const initialState: FeedbackState = {
   isConsensual: false,
   currentData: {},
+  actionLog: [],
   valid: false,
   count: { total: 1, finished: 0 },
   editable: false,
@@ -53,6 +70,7 @@ const slice = createSlice({
       const { feedbacks, myUserEmail, preferConsensual } = action.payload;
       state.feedbacks = feedbacks;
       state.myUserEmail = myUserEmail;
+      state.actionLog = [];
       const consensual = action.payload.feedbacks.find(f => f.isConsensual);
       const myPersonal = feedbacks.find(
         f => !f.isConsensual && f.userEmail === myUserEmail
@@ -95,6 +113,7 @@ const slice = createSlice({
       state.editable = !consensual;
       state.currentData = consensual ? consensual.data : {};
       state.message = consensual ? registeredMessage(consensual) : '';
+      state.actionLog = [];
     },
     enterPersonalMode: (state, action: PayloadAction<{}>) => {
       const myPersonal = state.feedbacks.find(
@@ -104,6 +123,20 @@ const slice = createSlice({
       state.editable = !myPersonal;
       state.currentData = myPersonal ? myPersonal.data : {};
       state.message = myPersonal ? registeredMessage(myPersonal) : '';
+      state.actionLog = [];
+    },
+    logEventHappened: (
+      state,
+      action: PayloadAction<{
+        date: string;
+        action: string;
+        data?: any;
+      }>
+    ) => {
+      const { date, action: logAction, data } = action.payload;
+      const entry: ActionLogEntry = { date, action: logAction };
+      if (data) entry.data = data;
+      state.actionLog.push(entry);
     }
   }
 });

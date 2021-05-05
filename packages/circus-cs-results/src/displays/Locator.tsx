@@ -234,13 +234,19 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
                   <td>{JSON.stringify(item.location)}</td>
                   {consensual && <td />}
                   <td>
-                    <Button size="xs" onClick={() => handleReveal(i)}>
+                    <Button
+                      size="xs"
+                      icon="circus-focus"
+                      onClick={() => handleReveal(i)}
+                    >
                       Reveal
                     </Button>
                     {editable && (
-                      <Button size="xs" onClick={() => handleRemovePoint(i)}>
-                        Remove
-                      </Button>
+                      <Button
+                        size="xs"
+                        icon="glyphicon-remove"
+                        onClick={() => handleRemovePoint(i)}
+                      />
                     )}
                   </td>
                 </tr>

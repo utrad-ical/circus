@@ -262,13 +262,13 @@ export const LesionCandidates: Display<
     <StyledDiv>
       <div className="tools">
         {tools.current!.map(t => (
-          <button
+          <Button
             key={t.name}
+            size="sm"
             className={classnames('tool', { active: t.name === toolName })}
+            icon={t.icon}
             onClick={() => setToolName(t.name)}
-          >
-            {t.name}
-          </button>
+          />
         ))}
       </div>
       <div className="entries">

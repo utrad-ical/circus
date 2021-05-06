@@ -5,24 +5,16 @@ import { DicomFileRepository } from 'circus-lib/src/dicom-file-repository';
 import createDicomVoxelDumper from './createDicomVoxelDumper';
 import { PassThrough } from 'stream';
 
-// const testDir = path.resolve(__dirname, '../../test/');
-// const repositoryDir = path.join(testDir, 'repository/');
-// const seriesUid = 'dicom';
-const testDir = path.resolve(__dirname, '../../../../../data/');
-const repositoryDir = path.join(testDir, 'dicom/');
-const seriesUid = 'test';
-
 const mockDicomFileRepository: DicomFileRepository = {
   getSeries: async (seriesUid: string) => {
-    const testDir = '/var/circus/support-files/dixon-head-t1'; // path.join(__dirname, '../../../../../data/dicom/test');
+    const testDir = path.join(__dirname, '../../test/repository/dicom');
     return {
       load: async (image: number) => {
-        const fileName = String(image).padStart(8, '0');
-        const buffer = await fs.readFile(path.join(testDir, `${fileName}.dcm`));
+        const buffer = await fs.readFile(path.join(testDir, `00000001.dcm`));
         return buffer.buffer;
       },
       save: async () => {},
-      images: '1-344'
+      images: '1-10'
     };
   },
   deleteSeries: async () => {}
@@ -30,22 +22,20 @@ const mockDicomFileRepository: DicomFileRepository = {
 
 describe('buildDicomVolume', () => {
   test('craetes raw volume file', async () => {
-    const srcDir = path.join(repositoryDir, seriesUid);
     const dicomVoxelDumper = await createDicomVoxelDumper(
       {},
       { dicomFileRepository: mockDicomFileRepository }
     );
-    // const tmpDestDir = path.resolve(__dirname, '../../test/dicom-out');
-    const tmpDestDir = path.resolve(__dirname, '../../../../../data2/test');
-    await fs.emptyDir(tmpDestDir);
     const logStream = new PassThrough();
+    const tmpDestDir = path.resolve(__dirname, '../../test/build-dicom-test');
+    await fs.emptyDir(tmpDestDir);
     try {
       await buildDicomVolumes(
         dicomVoxelDumper,
         [
           {
-            seriesUid: srcDir,
-            partialVolumeDescriptor: { start: 322, end: 243, delta: -1 }
+            seriesUid: '1.2.3.4.5',
+            partialVolumeDescriptor: { start: 10, end: 1, delta: -1 }
           }
         ],
         tmpDestDir,

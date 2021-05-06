@@ -1,22 +1,56 @@
 import path from 'path';
-import DockerRunner from '../util/DockerRunner';
 import fs from 'fs-extra';
 import buildDicomVolumes from './buildDicomVolumes';
+import { DicomFileRepository } from 'circus-lib/src/dicom-file-repository';
+import createDicomVoxelDumper from './createDicomVoxelDumper';
+import { PassThrough } from 'stream';
 
-const testDir = path.resolve(__dirname, '../../test/');
-const repositoryDir = path.join(testDir, 'repository/');
-const seriesUid = 'dicom';
+// const testDir = path.resolve(__dirname, '../../test/');
+// const repositoryDir = path.join(testDir, 'repository/');
+// const seriesUid = 'dicom';
+const testDir = path.resolve(__dirname, '../../../../../data/');
+const repositoryDir = path.join(testDir, 'dicom/');
+const seriesUid = 'test';
+
+const mockDicomFileRepository: DicomFileRepository = {
+  getSeries: async (seriesUid: string) => {
+    const testDir = '/var/circus/support-files/dixon-head-t1'; // path.join(__dirname, '../../../../../data/dicom/test');
+    return {
+      load: async (image: number) => {
+        const fileName = String(image).padStart(8, '0');
+        const buffer = await fs.readFile(path.join(testDir, `${fileName}.dcm`));
+        return buffer.buffer;
+      },
+      save: async () => {},
+      images: '1-344'
+    };
+  },
+  deleteSeries: async () => {}
+};
 
 describe('buildDicomVolume', () => {
-  // If this test fails, double-check 'dicom_voxel_dump' image
-  // has been correctly loaded in the Docker environment.
   test('craetes raw volume file', async () => {
     const srcDir = path.join(repositoryDir, seriesUid);
-    const tmpDestDir = path.resolve(__dirname, '../../test/dicom-out');
+    const dicomVoxelDumper = await createDicomVoxelDumper(
+      {},
+      { dicomFileRepository: mockDicomFileRepository }
+    );
+    // const tmpDestDir = path.resolve(__dirname, '../../test/dicom-out');
+    const tmpDestDir = path.resolve(__dirname, '../../../../../data2/test');
     await fs.emptyDir(tmpDestDir);
+    const logStream = new PassThrough();
     try {
-      const runner = new DockerRunner();
-      await buildDicomVolumes(runner, [srcDir], tmpDestDir);
+      await buildDicomVolumes(
+        dicomVoxelDumper,
+        [
+          {
+            seriesUid: srcDir,
+            partialVolumeDescriptor: { start: 322, end: 243, delta: -1 }
+          }
+        ],
+        tmpDestDir,
+        logStream
+      );
       const files = await fs.readdir(tmpDestDir);
       expect(files).toContain('0.mhd');
       expect(files).toContain('0.raw');

@@ -4,10 +4,10 @@ import DockerRunner from '../util/DockerRunner';
 import { DicomFileRepository, FunctionService } from '@utrad-ical/circus-lib';
 import pluginResultsValidator from './pluginResultsValidator';
 import { MultiRange } from 'multi-integer-range';
-import buildDicomVolumes from './buildDicomVolumes';
 import tarfs from 'tar-fs';
 import stream from 'stream';
 import * as circus from '../interface';
+import buildDicomVolumes2 from './buildDicomVolumes2';
 
 export interface PluginJobRunner {
   run: (
@@ -23,9 +23,9 @@ const pluginJobRunner: FunctionService<
   PluginJobRunner,
   {
     jobReporter: circus.PluginJobReporter;
-    dicomRepository: DicomFileRepository;
     pluginDefinitionAccessor: circus.PluginDefinitionAccessor;
     dockerRunner: DockerRunner;
+    dicomVoxelDumper: circus.DicomVoxelDumper;
   }
 > = async (
   options: {
@@ -36,10 +36,10 @@ const pluginJobRunner: FunctionService<
 ) => {
   const { workingDirectory, removeTemporaryDirectory } = options;
   const {
-    dicomRepository,
     pluginDefinitionAccessor,
     jobReporter,
-    dockerRunner
+    dockerRunner,
+    dicomVoxelDumper
   } = deps;
 
   if (!workingDirectory) throw new Error('Working directory is not set');
@@ -67,18 +67,8 @@ const pluginJobRunner: FunctionService<
       fs.ensureDir(workDir(jobId, 'dicom'))
     ]);
     // Fetches DICOM data from DicomFileRepository and builds raw volume
-    const createdSeries: { [uid: string]: boolean } = {};
     const inDir = workDir(jobId, 'in');
-    for (let volId = 0; volId < series.length; volId++) {
-      logStream.write(`  Building DICOM volume for vol #${volId}...\n`);
-      const seriesUid = series[volId].seriesUid;
-      const dicomDir = path.join(workDir(jobId, 'dicom'), seriesUid);
-      if (!createdSeries[seriesUid]) {
-        await fetchSeriesFromRepository(dicomRepository, seriesUid, dicomDir);
-        createdSeries[seriesUid] = true;
-      }
-      await buildDicomVolumes(dockerRunner, [dicomDir], inDir);
-    }
+    await buildDicomVolumes2(dicomVoxelDumper, series, inDir, logStream);
   };
 
   const postProcess = async (jobId: string, logStream: stream.Writable) => {
@@ -153,9 +143,9 @@ const pluginJobRunner: FunctionService<
 
 pluginJobRunner.dependencies = [
   'jobReporter',
-  'dicomFileRepository',
   'pluginDefinitionAccessor',
-  'dockerRunner'
+  'dockerRunner',
+  'dicomVoxelDumper'
 ];
 export default pluginJobRunner;
 

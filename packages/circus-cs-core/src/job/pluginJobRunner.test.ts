@@ -11,7 +11,6 @@ import memory from 'memory-streams';
 import * as circus from '../interface';
 
 const testDir = path.resolve(__dirname, '../../test/');
-const repositoryDir = path.join(testDir, 'repository/');
 const workingDirectory = path.join(testDir, 'working/');
 
 const seriesUid = 'dicom';
@@ -40,21 +39,6 @@ describe('pluginJobRunner', () => {
       }
     };
 
-    // Mock Dicom repository
-    const dicomRepository: DicomFileRepository = {
-      getSeries: async seriesUid => ({
-        save: async (i, data) => {},
-        load: async i => {
-          const file = '00000001.dcm';
-          return (await fs.readFileSync(
-            path.join(repositoryDir, seriesUid, file)
-          ).buffer) as ArrayBuffer;
-        },
-        images: '1-5'
-      }),
-      deleteSeries: async () => {}
-    };
-
     const pluginDefinitionAccessor = {
       get: async (discardPluginId: string) => {
         const fixedDefinition: circus.PluginDefinition = {
@@ -67,19 +51,26 @@ describe('pluginJobRunner', () => {
       }
     } as circus.PluginDefinitionAccessor;
 
+    const dicomVoxelDumper: circus.DicomVoxelDumper = {
+      dump: () =>
+        Promise.resolve([{ raw: new ArrayBuffer(0), mhd: '', json: '' }])
+    };
+
     const runner = await pluginJobRunner(
       { workingDirectory },
       {
         jobReporter,
         dockerRunner,
-        dicomRepository,
-        pluginDefinitionAccessor
+        pluginDefinitionAccessor,
+        dicomVoxelDumper
       }
     );
 
     const jobRequest: circus.PluginJobRequest = {
       pluginId: 'circus-mock-succeed',
-      series: [{ seriesUid }]
+      series: [
+        { seriesUid, partialVolumeDescriptor: { start: 1, end: 2, delta: 1 } }
+      ]
     };
 
     const logStream = new memory.WritableStream();

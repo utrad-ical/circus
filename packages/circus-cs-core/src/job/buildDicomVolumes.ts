@@ -3,6 +3,7 @@ import DockerRunner from '../util/DockerRunner';
 /**
  * Builds raw volume data (and associated files) from DICOM series
  * using dicom_voxel_dump.
+ * @deprecated Use buildDicomVolumes2 (Pure JS)
  * @param dockerRunner Docker runner instance.
  * @param srcDir Directory that contains a DICOM series (00000001.dcm, ...).
  * @param destDir Directory that will have the generated volume (0.vol,...).

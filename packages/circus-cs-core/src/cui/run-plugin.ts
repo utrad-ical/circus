@@ -8,6 +8,7 @@ import tarfs from 'tar-fs';
 import { DicomFileRepository } from '@utrad-ical/circus-lib';
 import StaticDicomFileRepository from '@utrad-ical/circus-lib/src/dicom-file-repository/StaticDicomFileRepository';
 import * as circus from '../interface';
+import { multirange } from 'multi-integer-range';
 
 /**
  * Directly runs the specified plug-in without using a queue system.
@@ -20,9 +21,15 @@ const runPlugin: FunctionService<
     dockerRunner: DockerRunner;
     dicomFileRepository: DicomFileRepository;
     pluginDefinitionAccessor: circus.PluginDefinitionAccessor;
+    dicomVoxelDumper: circus.DicomVoxelDumper;
   }
 > = async (options, deps) => {
-  const { dockerRunner, pluginDefinitionAccessor, dicomFileRepository } = deps;
+  const {
+    dockerRunner,
+    pluginDefinitionAccessor,
+    dicomFileRepository,
+    dicomVoxelDumper
+  } = deps;
   return async (commandName, args) => {
     const {
       _: [pluginId, ...seriesUidOrDirectories],
@@ -75,15 +82,25 @@ const runPlugin: FunctionService<
       });
     }
 
-    const series: circus.JobSeries[] = d
-      ? seriesUidOrDirectories.map((_, i) => ({ seriesUid: `${i}` }))
-      : seriesUidOrDirectories.map(s => ({ seriesUid: s }));
+    const series: circus.JobSeries[] = [];
+    for (let i = 0; i < seriesUidOrDirectories.length; i++) {
+      const item = seriesUidOrDirectories[i];
+      const seriesUid = d ? String(i) : item; // Use index as UID when directory mode
+      const seriesAccessor = await dicomRepository.getSeries(seriesUid);
+      const images = multirange(seriesAccessor.images);
+      const [start, end] = images.getRanges()[0];
+      series.push({
+        seriesUid,
+        partialVolumeDescriptor: { start, end, delta: 1 }
+      });
+    }
 
     const pjrDeps = {
       jobReporter,
       dicomRepository,
       pluginDefinitionAccessor,
-      dockerRunner
+      dockerRunner,
+      dicomVoxelDumper
     };
 
     const jobRequest: circus.PluginJobRequest = {
@@ -102,7 +119,8 @@ const runPlugin: FunctionService<
 runPlugin.dependencies = [
   'dockerRunner',
   'dicomFileRepository',
-  'pluginDefinitionAccessor'
+  'pluginDefinitionAccessor',
+  'dicomVoxelDumper'
 ];
 
 export default runPlugin;

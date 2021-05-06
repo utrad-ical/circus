@@ -32,7 +32,6 @@ const CreateHoleFilledLabel = async (
   ): InternalLabel => {
     const alpha = 1;
     const temporaryKey = generateUniqueId();
-    console.log(name, temporaryKey);
     const data = createNewLabelData('voxel', { color, alpha }, viewer);
     return { temporaryKey, name, ...data, attributes: {}, hidden: false };
   };
@@ -96,7 +95,6 @@ const CreateHoleFilledLabel = async (
       }
     }
   }
-  console.log('準備完了', input, width, height, nSlices);
   try {
     const holeFillingResult = dimension3
       ? HoleFilling3D(input, width, height, nSlices, neighbors4or6 ? 6 : 26)
@@ -105,7 +103,6 @@ const CreateHoleFilledLabel = async (
       : holeFillingOrientation === 'Sagital'
       ? HoleFilling2D(input, height, nSlices, width, neighbors4or6 ? 4 : 8)
       : HoleFilling2D(input, nSlices, width, height, neighbors4or6 ? 4 : 8);
-    console.log('穴埋め完了', holeFillingResult);
     const volume = new rs.RawData([width, height, nSlices], 'binary');
 
     for (let k = 0; k <= nSlices; k++) {
@@ -134,7 +131,6 @@ const CreateHoleFilledLabel = async (
     newLabel.data.size = label.data.size;
     newLabel.data.origin = label.data.origin;
     newLabel.data.volumeArrayBuffer = volume.data;
-    console.log('変換完了', label, newLabel);
     updateCurrentLabels(labels => {
       // labels.push(newLabel);
       labels.splice(editingData.activeLabelIndex + 1, 0, newLabel);

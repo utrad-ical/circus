@@ -33,7 +33,7 @@ interface LesionCandidate {
 interface LesionCandidatesOptions {
   dataPath?: string;
   feedbackListener?: DisplayDefinition | null;
-  maxDisplay?: number;
+  maxCandidates?: number;
   confidenceThreshold?: number;
   sortBy: [keyof LesionCandidate, 'asc' | 'desc'];
   excludeFromActionLog?: boolean;
@@ -138,7 +138,7 @@ export const LesionCandidates: Display<
     options: {
       dataPath = 'lesionCandidates',
       sortBy: [sortKey, sortOrder] = ['rank', 'asc'],
-      maxDisplay,
+      maxCandidates,
       feedbackListener,
       excludeFromActionLog
     },
@@ -174,8 +174,8 @@ export const LesionCandidates: Display<
           const bb = sortKey === 'location' ? b.location[2] : b[sortKey];
           return (aa! - bb!) * sign;
         })
-        .slice(0, maxDisplay),
-    [allCandidates, sortOrder, sortKey, maxDisplay]
+        .slice(0, maxCandidates),
+    [allCandidates, sortOrder, sortKey, maxCandidates]
   );
 
   useEffect(() => {

@@ -7,7 +7,7 @@ import { MultiRange } from 'multi-integer-range';
 import tarfs from 'tar-fs';
 import stream from 'stream';
 import * as circus from '../interface';
-import buildDicomVolumes2 from './buildDicomVolumes2';
+import buildDicomVolumes from './buildDicomVolumes';
 
 export interface PluginJobRunner {
   run: (
@@ -68,7 +68,7 @@ const pluginJobRunner: FunctionService<
     ]);
     // Fetches DICOM data from DicomFileRepository and builds raw volume
     const inDir = workDir(jobId, 'in');
-    await buildDicomVolumes2(dicomVoxelDumper, series, inDir, logStream);
+    await buildDicomVolumes(dicomVoxelDumper, series, inDir, logStream);
   };
 
   const postProcess = async (jobId: string, logStream: stream.Writable) => {

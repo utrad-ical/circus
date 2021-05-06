@@ -40,7 +40,6 @@ const loadExternalDisplay = async <O extends object, F>(
   await container.init(__webpack_share_scopes__.default);
   const factory = await container.get('Display');
   const Display = factory().default;
-  console.log({ Display });
   return Display;
 };
 

@@ -150,7 +150,8 @@ export function processVoxelsOnLine(
 export function floodFillOnSlice(
   volume: RawData,
   center: Vector3,
-  orientation: OrientationString
+  orientation: OrientationString,
+  erase = false
 ): number {
   let view: BinaryArrayView2D;
   let start: Vector2;
@@ -189,6 +190,6 @@ export function floodFillOnSlice(
   }
 
   // Applies the generic flood-fill function on a volume
-  const filledPixels = floodFill(view, start);
+  const filledPixels = floodFill(view, start, erase);
   return filledPixels;
 }

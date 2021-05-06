@@ -320,7 +320,6 @@ const LabelMenu: React.FC<{
         <SettingDialogCCL
           onHide={() => setCclDialogOpen(false)}
           onClick={(dispLabelNumber: number, neighbors: 6 | 26) => {
-            console.log(dispLabelNumber, neighbors);
             CreateConnectedComponentLabel(
               editingData,
               updateEditingData,
@@ -348,7 +347,6 @@ const LabelMenu: React.FC<{
             holeFillingOrientation: string,
             neighbors4or6: boolean
           ) => {
-            console.log(dimension3, neighbors4or6, holeFillingOrientation);
             CreateHoleFilledLabel(
               editingData,
               updateEditingData,

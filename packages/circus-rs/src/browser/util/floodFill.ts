@@ -51,7 +51,8 @@ export class BinaryArray2D implements BinaryArrayView2D {
  */
 export default function floodFill(
   grid: BinaryArrayView2D,
-  center: Vector2
+  center: Vector2,
+  erase = false
 ): number {
   // https://en.wikipedia.org/wiki/Flood_fill
   const stack: Vector2[] = [center];
@@ -67,17 +68,17 @@ export default function floodFill(
     minx = cur.x < minx ? cur.x : minx;
     maxx = cur.x > maxx ? cur.x : maxx;
 
-    if (grid.get(new Vector2(cur.x, cur.y)) === false) {
+    if (grid.get(new Vector2(cur.x, cur.y)) === erase) {
       let north = cur.y;
       let south = cur.y;
 
       do {
         north -= 1;
-      } while (grid.get(new Vector2(cur.x, north)) === false && north >= 0);
+      } while (grid.get(new Vector2(cur.x, north)) === erase && north >= 0);
       do {
         south += 1;
       } while (
-        grid.get(new Vector2(cur.x, south)) === false &&
+        grid.get(new Vector2(cur.x, south)) === erase &&
         south < grid.height
       );
 
@@ -85,14 +86,14 @@ export default function floodFill(
       maxy = south - 1 > maxy ? south - 1 : maxy;
 
       for (let n = north + 1; n < south; n++) {
-        grid.set(true, new Vector2(cur.x, n));
+        grid.set(!erase, new Vector2(cur.x, n));
         filled++;
-        if (cur.x > 0 && grid.get(new Vector2(cur.x - 1, n)) === false) {
+        if (cur.x > 0 && grid.get(new Vector2(cur.x - 1, n)) === erase) {
           stack.push(new Vector2(cur.x - 1, n));
         }
         if (
           cur.x < grid.width - 1 &&
-          grid.get(new Vector2(cur.x + 1, n)) === false
+          grid.get(new Vector2(cur.x + 1, n)) === erase
         ) {
           stack.push(new Vector2(cur.x + 1, n));
         }

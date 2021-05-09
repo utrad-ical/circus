@@ -1,33 +1,54 @@
 import React from 'react';
+import { FeedbackEntry } from './CsResultsContext';
 
-export interface PersonalOpinion<T> {
-  userEmail: string;
-  createdAt: Date;
-  feedback: T;
+export interface DisplayDefinition {
+  type: string;
+  options: any;
 }
 
-export type PersonalOpinions<T> = readonly PersonalOpinion<T>[];
+interface ValidFeedbackReport<T> {
+  valid: true;
+  value: T;
+}
 
-interface DisplayProps<D extends unknown, O extends object, F extends unknown> {
+interface InvalidFeedbackReport {
+  valid: false;
+  error?: any;
+}
+
+/**
+ * Object to report current feedback entering status.
+ * - `valid: true` means this feedback can be registered.
+ * - `valid: false` means this feedback is not ready to be registered.
+ */
+export type FeedbackReport<T> = ValidFeedbackReport<T> | InvalidFeedbackReport;
+
+interface DisplayProps<O extends object, F extends unknown> {
   /**
    * The results data this Display is expected to show.
    */
-  data: D;
   initialFeedbackValue: F | undefined;
   /**
    * Holds individual feedback data for this, from which initial
    * consensual feedback can be calculated.
    * Set to `undefined` when not in consensual mode.
    */
-  personalOpinions: PersonalOpinions<F>;
+  personalOpinions: readonly FeedbackEntry<F>[];
   options: O;
-  onFeedbackChange: (value: F) => void;
-  onFeedbackValidate: (valid: boolean, errors?: string[]) => void;
+  /**
+   * Triggers when the feedback data is changed.
+   * The display must call this on initial render to declare
+   * this display required feedback registration.
+   * Not calling this on initial render means this display do not
+   * collect user feedback.
+   */
+  onFeedbackChange: (status: FeedbackReport<F>) => void;
+  children?: React.ReactNode;
 }
 
 /**
  * Display is the main building block of CIRCUS CS job results screen.
  */
-export type Display<D extends unknown, O extends object, F extends unknown> = (
-  props: DisplayProps<D, O, F>
-) => React.ReactChild;
+export type Display<O extends object, F extends unknown> = (
+  props: DisplayProps<O, F>
+) => React.ReactElement | null;

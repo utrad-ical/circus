@@ -50,9 +50,15 @@ interface Route {
   expectedContentType?: string;
   requestSchema?: string | object;
   responseSchema?: string | object;
+  noAuthentication?: boolean;
 }
 
-async function prepareApiRouter(apiDir: string, deps: Deps, debug: boolean) {
+async function prepareApiRouter(
+  apiDir: string,
+  deps: Deps,
+  debug: boolean,
+  authMiddleware: Middleware
+) {
   const router = new Router();
   const validator = deps.validator;
 
@@ -78,6 +84,7 @@ async function prepareApiRouter(apiDir: string, deps: Deps, debug: boolean) {
         );
       }
       const middlewareStack = compose([
+        ...(route.noAuthentication ? [] : [authMiddleware]),
         typeCheck(route.expectedContentType),
         checkPrivilege(deps, route),
         validateInOut(validator, {
@@ -170,9 +177,14 @@ export const createApp: FunctionService<
   };
 
   const apiDir = path.resolve(__dirname, 'api/**/*.yaml');
-  const apiRouter = await prepareApiRouter(apiDir, deps, debug);
 
   const oauth = createOauthServer(models);
+
+  const authMiddleware = fixUser
+    ? fixUserMiddleware(deps, fixUser)
+    : oauth.authenticate();
+
+  const apiRouter = await prepareApiRouter(apiDir, deps, debug, authMiddleware);
 
   // Trust proxy headers such as X-Forwarded-For
   koa.proxy = true;
@@ -200,7 +212,7 @@ export const createApp: FunctionService<
           storage: multer.memoryStorage(),
           limits: { fileSize: deps.uploadFileSizeMaxBytes }
         }).array('files'),
-        fixUser ? fixUserMiddleware(deps, fixUser) : oauth.authenticate(),
+
         (apiRouter.routes() as any) as Middleware
       ])
     )

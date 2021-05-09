@@ -50,18 +50,33 @@ const CreateNewJob: React.FC<{}> = props => {
   }, [defaultPlugin, plugins, selectedPlugin]);
 
   const handleCreate = async () => {
+    const callApi = async (force = false) => {
+      // TODO: implement force
+      return await api('plugin-jobs', {
+        method: 'post',
+        data: {
+          pluginId: selectedPlugin,
+          series: await fillPartialVolumeDescriptors(
+            selectedSeries,
+            api,
+            appState
+          )
+        },
+        handleErrors: [400]
+      });
+    };
+
     if (!selectedPlugin) return;
-    await api('plugin-jobs', {
-      method: 'post',
-      data: {
-        pluginId: selectedPlugin,
-        series: await fillPartialVolumeDescriptors(
-          selectedSeries,
-          api,
-          appState
-        )
+    try {
+      await callApi(false);
+    } catch (err) {
+      if (/duplicate job/i.test(err?.response?.data?.error)) {
+        showMessage('There is a duplicate job similar to this one.', 'danger');
+      } else {
+        showMessage('The CIRCUS Server returned 400 Bad Request.', 'danger');
       }
-    });
+      return;
+    }
     setDefaultPlugin(selectedPlugin);
     showMessage('Job registered.');
   };

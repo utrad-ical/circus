@@ -51,13 +51,6 @@ routes:
     description: >
       Returns the detail of the specified plug-in job.
     responseSchema: pluginJob|dbEntry
-  - verb: post
-    path: /plugin-jobs/:jobId/feedback/:mode
-    requiredSeriesDomainCheck: true
-    description: >
-      Creates a new feedback entry for the specified plug-in job.
-    requestSchema: pluginJobFeedbackData
-    handler: handlePostFeedback
   # Attachment
   - verb: get
     path: /plugin-jobs/:jobId/attachment/:path+
@@ -66,6 +59,13 @@ routes:
       Returns the specified file output from the plug-in.
     handler: handleGetAttachment
   # Feedback
+  - verb: post
+    path: /plugin-jobs/:jobId/feedback/:mode
+    requiredSeriesDomainCheck: true
+    description: >
+      Creates a new feedback entry for the specified plug-in job.
+    requestSchema: pluginJobFeedback|only data,actionLog
+    handler: handlePostFeedback
   - verb: get
     path: /plugin-jobs/:jobId/feedback
     requiredSeriesDomainCheck: true

@@ -22,7 +22,10 @@ properties:
           date: true
         action:
           type: string
+        data:
+          type: object
       required: ['date', 'action']
+      additionalProperties: false
   createdAt:
     date: true
 additionalProperties: false

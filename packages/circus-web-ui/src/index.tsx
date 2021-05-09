@@ -105,7 +105,11 @@ const VolumeCacheProvider: React.FC = props => {
   const volumeLoaderCache = useMemo(() => {
     if (!server) return null;
     const rsHttpClient = new rs.RsHttpClient(server);
-    return { rsHttpClient, map: new Map<string, rs.RsVolumeLoader>() };
+    return {
+      rsHttpClient,
+      map: new Map<string, rs.RsVolumeLoader>(),
+      toKey: series => 'hoge'
+    };
   }, [server]);
 
   return (

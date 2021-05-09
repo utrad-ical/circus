@@ -21,7 +21,7 @@ Prepare docker and load image archives.
 
 ```bash
 # This is a hard-coded dependency which is always required
-$ docker load -i circus_dicom_voxel_dump_1.0.tar
+$ docker pull circuscad/dicom_voxel_dump:1.0.0
 ```
 
 ### Configuration

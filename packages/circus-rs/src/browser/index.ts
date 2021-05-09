@@ -3,7 +3,7 @@
  * which should be visible to the consumers of CIRCUS RS.
  */
 import './circus-rs.less';
-import './assets/icons/circus-rs-font-glyphs.less';
+import '@utrad-ical/circus-icons/dist/circus-rs-font-glyphs.less';
 import 'tslib';
 
 export { default as Viewer } from './viewer/Viewer';
@@ -43,6 +43,7 @@ export * from '../common/geometry';
 
 export { default as RsHttpClient } from './http-client/RsHttpClient';
 
+export { default as ImageSource } from './image-source/ImageSource';
 export { default as MprImageSource } from './image-source/MprImageSource';
 export { default as DynamicMprImageSource } from './image-source/DynamicMprImageSource';
 export { default as RawVolumeMprImageSource } from './image-source/RawVolumeMprImageSource';

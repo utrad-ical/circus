@@ -27,7 +27,12 @@ import {
 } from './labelData';
 import { OrientationString } from 'circus-rs/section-util';
 
-type LabelCommand = 'rename' | 'remove' | 'convertType' | 'reveal';
+type LabelCommand =
+  | 'rename'
+  | 'remove'
+  | 'convertType'
+  | 'reveal'
+  | 'toggleHideAllLabels';
 
 const LabelMenu: React.FC<{
   editingData: EditingData;
@@ -94,6 +99,11 @@ const LabelMenu: React.FC<{
         if (!activeLabel) return;
         onReveal();
         break;
+      }
+      case 'toggleHideAllLabels': {
+        updateEditingData(editingData => {
+          editingData.allLabelsHidden = !editingData.allLabelsHidden;
+        }, 'hide all labels');
       }
     }
   };
@@ -202,6 +212,14 @@ const LabelMenu: React.FC<{
         disabled={!activeLabel || disabled}
         onChange={handleAppearanceChange}
       />
+      <IconButton
+        icon={editingData.allLabelsHidden ? 'eye-open' : 'eye-close'}
+        bsStyle="link"
+        bsSize="xs"
+        onClick={() => handleCommand('toggleHideAllLabels')}
+      >
+        All
+      </IconButton>
       <div className="spacer" />
       {activeLabel && labelTypes[activeLabel.type].canConvertTo && (
         <IconButton

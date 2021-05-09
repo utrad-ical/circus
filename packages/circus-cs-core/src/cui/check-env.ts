@@ -55,7 +55,7 @@ const checkEnv: FunctionService<
       {
         title: 'Docker dicom_voxel_dump Image',
         fn: async () => {
-          const dockerImage = 'circus/dicom_voxel_dump:1.0';
+          const dockerImage = 'circuscad/dicom_voxel_dump:1.0.0';
           const out = await dockerRunner.run({
             Image: dockerImage,
             Cmd: ['--help'],

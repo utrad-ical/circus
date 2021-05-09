@@ -66,6 +66,11 @@ properties:
             A string value represents the ID of the schema,
             whereas an object value represents an actual JSON schema
             (you can still use `$ref` to reference external schema).
+        noAuthentication:
+          const: true
+          description: >
+            This skips the OAuth authentication and
+            exposes this route to the public.
       required: ['verb', 'path']
       additionalProperties: false
 additionalProperties: false

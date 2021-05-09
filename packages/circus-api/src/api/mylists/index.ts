@@ -7,6 +7,18 @@ export interface MyListItem {
   createdAt: Date;
 }
 
+interface EditUser {
+  type: 'user';
+  userEmail: string;
+}
+
+interface EditGroup {
+  type: 'group';
+  groupId: string;
+}
+
+type EditorEntry = EditUser | EditGroup;
+
 export const handleSearch: RouteMiddleware = () => {
   return async (ctx, next) => {
     ctx.body = ctx.user.myLists;
@@ -18,17 +30,37 @@ const getList = async (
   models: Models,
   myListId: string
 ) => {
-  const list = ctx.user.myLists.find((list: any) => list.myListId === myListId);
+  const userData = await models.user.findAll({ 'myLists.myListId': myListId });
+  const owner = userData.find(data =>
+    data.myLists.find((list: any) => list.myListId === myListId)
+  );
+  if (!owner) ctx.throw(404, 'This my list does not exist');
+
+  const list = owner.myLists.find((list: any) => list.myListId === myListId);
+  const itemReadable = owner.userEmail === ctx.user.userEmail || list.public;
+  const itemEditable =
+    list.editors.some(
+      (editor: any) => editor.userEmail === ctx.user.userEmail
+    ) ||
+    list.editors.some((editor: any) =>
+      ctx.user.groups.some((group: number) => group === editor.groupId)
+    ) ||
+    owner.userEmail === ctx.user.userEmail;
+
   const doc = await models.myList.findById(myListId);
-  if (!list || !doc) ctx.throw(404, 'This my list does not exist');
-  return { userList: list, list: doc };
+  if (!doc) ctx.throw(404, 'This my list does not exist');
+  return { userList: list, list: doc, owner, itemReadable, itemEditable };
 };
 
 export const handleGet: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const myListId = ctx.params.myListId;
-    const { userList } = await getList(ctx, models, myListId);
-    ctx.body = userList;
+    const { userList, itemReadable, list } = await getList(ctx, models, myListId);
+    if (!itemReadable)
+      ctx.throw(401, 'You cannot read the items of this my list.');
+    const resourceIds = list.items.map((item: any) => item.resourceId);
+    const userListWithResourceIds = { ...userList, resourceIds };
+    ctx.body = userListWithResourceIds;
   };
 };
 
@@ -37,7 +69,7 @@ export const handlePost: RouteMiddleware = ({ models }) => {
     const myListId = generateUniqueId();
     const items: MyListItem[] = [];
     const userEmail = ctx.user.userEmail;
-    const { name, resourceType } = ctx.request.body;
+    const { name, resourceType, public: isPublic } = ctx.request.body;
 
     await models.myList.insert({
       myListId,
@@ -46,7 +78,14 @@ export const handlePost: RouteMiddleware = ({ models }) => {
 
     const myLists = [
       ...ctx.user.myLists,
-      { myListId, resourceType, name, createdAt: new Date() }
+      {
+        myListId,
+        resourceType,
+        name,
+        public: isPublic,
+        editors: [],
+        createdAt: new Date()
+      }
     ];
     await models.user.modifyOne(userEmail, { myLists });
 
@@ -54,19 +93,36 @@ export const handlePost: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handleChangeName: RouteMiddleware = ({ models }) => {
+export const handlePatchList: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const userEmail = ctx.user.userEmail;
     const userMyLists = ctx.user.myLists;
     const targetListId = ctx.params.myListId;
-    const newName = ctx.request.body.name;
     const targetList = ctx.user.myLists.find(
       (myList: any) => myList.myListId === targetListId
     );
-
     if (!targetList) ctx.throw(404, 'No such list');
 
-    targetList.name = newName;
+    const newName: string | undefined = ctx.request.body.name;
+    if (newName) targetList.name = newName;
+
+    const isPublic: boolean | undefined = ctx.request.body.public;
+    if (isPublic !== undefined) targetList.public = isPublic;
+
+    const editors: EditorEntry[] | undefined = ctx.request.body.editors;
+    if (Array.isArray(editors)) {
+      for (const editor of editors) {
+        if (editor.type === 'user') {
+          const doc = await models.user.findById(editor.userEmail);
+          if (!doc) ctx.throw(400, 'Invalid email address is included');
+          targetList.editors.push(editor);
+        } else {
+          const doc = await models.group.findById(editor.groupId);
+          if (!doc) ctx.throw(400, 'Invalid group ID is included');
+          targetList.editors.push(editor);
+        }
+      }
+    }
 
     await models.user.modifyOne(userEmail, { myLists: userMyLists });
     ctx.body = null;
@@ -104,7 +160,14 @@ export const handlePatchItems: RouteMiddleware = ({ models }) => {
     const resourceIds: string[] = ctx.request.body.resourceIds;
     const operation: 'add' | 'remove' = ctx.request.body.operation;
     const now = new Date();
-    const { userList, list } = await getList(ctx, models, myListId);
+    const { userList, list, itemEditable } = await getList(
+      ctx,
+      models,
+      myListId
+    );
+    if (!itemEditable)
+      ctx.throw(401, 'You cannot edit the items of this my list.');
+
     const coll = collMap[userList.resourceType];
     const items = list.items;
     let changedCount = 0;

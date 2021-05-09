@@ -15,15 +15,28 @@ test('list all my lists', async () => {
 });
 
 describe('get one my list', () => {
-  test('get', async () => {
+  test("get user's own list", async () => {
     const res = await ax.bob.get('api/mylists/01ewetw0chv8v5vxdtjdf6x9rk');
     expect(res.status).toBe(200);
     expect(res.data).toHaveProperty('name');
+    expect(res.data).toHaveProperty('resourceIds');
   });
 
-  test('404', async () => {
+  test("get other user's list if granted as editor", async () => {
+    const res = await ax.bob.get('api/mylists/01ezab6xqfac7hvm5s09yw1g1j');
+    expect(res.status).toBe(200);
+    expect(res.data.name).toBe("Dave's case list");
+  });
+
+  test('throw 404 if nonextent my list id', async () => {
     const res = await ax.bob.get('api/mylists/dummy');
     expect(res.status).toBe(404);
+    expect(res.data.error).toBe('This my list does not exist');
+  });
+
+  test('throw 401 if not granted as editor', async () => {
+    const res = await ax.bob.get('api/mylists/01ez9knaakz9tgd2hpyceagj11');
+    expect(res.status).toBe(401);
   });
 });
 
@@ -32,7 +45,7 @@ describe('create new list', () => {
     const res = await ax.bob.request({
       url: 'api/mylists',
       method: 'post',
-      data: { name: 'test', resourceType: 'clinicalCases' }
+      data: { name: 'test', resourceType: 'clinicalCases', public: false }
     });
     expect(res.status).toBe(200);
     expect(res.data.myListId).toHaveLength(26);
@@ -48,31 +61,49 @@ describe('create new list', () => {
   });
 });
 
-describe('put name', () => {
+describe('patch list', () => {
+  const userEmail = 'bob@example.com';
+  const returnChangedList = async (myListId: string) => {
+    const userData = await apiTest.db
+      .collection('users')
+      .findOne({ userEmail });
+    const changedList = userData.myLists.filter(
+      (myList: any) => myList.myListId === myListId
+    )[0];
+    return changedList;
+  };
+
   test('change list name', async () => {
     const myListId = '01ewetw0chv8v5vxdtjdf6x9rk';
     const res = await ax.bob.request({
-      url: `api/mylists/${myListId}/name`,
-      method: 'put',
+      url: `api/mylists/${myListId}`,
+      method: 'patch',
       data: { name: 'new name' }
     });
     expect(res.status).toBe(204);
 
-    const userEmail = 'bob@example.com';
-    const userData = await apiTest.db
-      .collection('users')
-      .findOne({ userEmail });
-    const newList = userData.myLists.filter(
-      (myList: any) => myList.myListId === myListId
-    )[0];
-    expect(newList.name).toBe('new name');
+    const changedList = await returnChangedList(myListId);
+    expect(changedList.name).toBe('new name');
+  });
+
+  test('change public status from false to true', async () => {
+    const myListId = '01ewetw0chv8v5vxdtjdf6x9rk';
+    const res = await ax.bob.request({
+      url: `api/myLists/${myListId}`,
+      method: 'patch',
+      data: { public: true }
+    });
+    expect(res.status).toBe(204);
+
+    const changedList = await returnChangedList(myListId);
+    expect(changedList.public).toBe(true);
   });
 
   test('throw 404 for my list the user does not own', async () => {
     const myListId = '01ex36f2n99kjaqvpfrerrsryp';
     const res = await ax.bob.request({
-      url: `api/mylists/${myListId}/name`,
-      method: 'put',
+      url: `api/mylists/${myListId}`,
+      method: 'patch',
       data: { name: 'new name' }
     });
     expect(res.status).toBe(404);
@@ -81,8 +112,8 @@ describe('put name', () => {
   test('throw 400 when the new list name is empty text', async () => {
     const myListId = '01ewetw0chv8v5vxdtjdf6x9rk';
     const res = await ax.bob.request({
-      url: `api/mylists/${myListId}/name`,
-      method: 'put',
+      url: `api/mylists/${myListId}`,
+      method: 'patch',
       data: { name: '' }
     });
     expect(res.status).toBe(400);
@@ -92,8 +123,8 @@ describe('put name', () => {
     const myListId = '01ewetw0chv8v5vxdtjdf6x9rk';
     const name = 'a'.repeat(65);
     const res = await ax.bob.request({
-      url: `api/mylists/${myListId}/name`,
-      method: 'put',
+      url: `api/mylists/${myListId}`,
+      method: 'patch',
       data: { name }
     });
     expect(res.status).toBe(400);
@@ -102,11 +133,58 @@ describe('put name', () => {
   test('throw 404 for nonexistent my list id', async () => {
     const myListId = 'dummyid';
     const res = await ax.bob.request({
-      url: `api/mylists/${myListId}/name`,
-      method: 'put',
+      url: `api/mylists/${myListId}`,
+      method: 'patch',
       data: { name: 'new name' }
     });
     expect(res.status).toBe(404);
+  });
+
+  describe('patch list editors', () => {
+    const myListId = '01ewetw0chv8v5vxdtjdf6x9rk';
+
+    test('add editors', async () => {
+      const res = await ax.bob.request({
+        url: `api/myLists/${myListId}`,
+        method: 'patch',
+        data: {
+          editors: [
+            { type: 'user', userEmail: 'alice@example.com' },
+            { type: 'group', groupId: 1 }
+          ]
+        }
+      });
+      expect(res.status).toBe(204);
+
+      const userEmail = 'bob@example.com';
+      const userData = await apiTest.db
+        .collection('users')
+        .findOne({ userEmail });
+      const newList = userData.myLists.filter(
+        (myList: any) => myList.myListId === myListId
+      )[0];
+      expect(newList.editors).toHaveLength(2);
+    });
+
+    test('throw 400 if invalid E-mail address is included', async () => {
+      const res = await ax.bob.request({
+        url: `api/myLists/${myListId}`,
+        method: 'patch',
+        data: { editors: [{ type: 'user', userEmail: 'invalid@example.com' }] }
+      });
+      expect(res.status).toBe(400);
+      expect(res.data.error).toBe('Invalid email address is included');
+    });
+
+    test('throw 400 if invalid group ID is included', async () => {
+      const res = await ax.bob.request({
+        url: `api/myLists/${myListId}`,
+        method: 'patch',
+        data: { editors: [{ type: 'group', groupId: 999 }] }
+      });
+      expect(res.status).toBe(400);
+      expect(res.data.error).toBe('Invalid group ID is included');
+    });
   });
 });
 
@@ -212,5 +290,34 @@ describe('patch list item', () => {
       ]
     });
     expect(res.status).toBe(404);
+  });
+
+  describe("patch other user's list", () => {
+    test('insert new item into a mylist of another user', async () => {
+      const res = await ax.bob.patch(
+        'api/mylists/01ezab6xqfac7hvm5s09yw1g1j/items',
+        {
+          operation: 'add',
+          resourceIds: [
+            'bfaeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715'
+          ]
+        }
+      );
+      expect(res.status).toBe(200);
+      expect(res.data.changedCount).toBe(1);
+    });
+
+    test('throw 401 if not granted as editor', async () => {
+      const res = await ax.bob.patch(
+        'api/mylists/01ex36f2n99kjaqvpfrerrsryp/items',
+        {
+          operation: 'add',
+          resourceIds: [
+            'bfaeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715'
+          ]
+        }
+      );
+      expect(res.status).toBe(401);
+    });
   });
 });

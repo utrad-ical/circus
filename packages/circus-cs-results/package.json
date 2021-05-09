@@ -12,16 +12,18 @@
   "author": "Soichiro Miki <smiki-tky@umin.ac.jp>",
   "license": "MIT",
   "peerDependencies": {
-    "react": "^16.13.1",
+    "react": "16.14.0",
     "styled-components": "^5.1.0"
   },
   "devDependencies": {
-    "react": "^16.13.1",
+    "react": "^16.14.0",
     "styled-components": "^5.1.0"
   },
   "dependencies": {
+    "@utrad-ical/circus-icons": "^0.1.0",
     "@utrad-ical/circus-lib": "^0.15.3",
     "@utrad-ical/circus-rs": "^0.26.0-alpha.6",
-    "classnames": "2.2.6"
+    "classnames": "2.2.6",
+    "lodash.get": "^4.4.2"
   }
 }

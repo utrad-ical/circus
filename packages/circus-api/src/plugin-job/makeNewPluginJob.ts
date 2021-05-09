@@ -13,19 +13,18 @@ const makeNewPluginJob = async (
   cs: CsCore,
   priority: any
 ) => {
-  if (await duplicateJobExists(models, request))
-    throw new Error('There is a duplicate job that is already registered.');
-
   const plugin = await models.plugin.findByIdOrFail(request.pluginId);
 
   try {
+    if (await duplicateJobExists(models, request))
+      throw new Error('There is a duplicate job that is already registered.');
     const seriesData = await fetchAccessibleSeries(
       models,
       userPrivileges,
       request.series
     );
     if (seriesData.slice(1).some(s => s.domain !== seriesData[0].domain))
-      throw new Error('Series must be the same domain.');
+      throw new Error('All series must belong to the same domain.');
   } catch (err) {
     err.status = status.BAD_REQUEST;
     err.expose = true;

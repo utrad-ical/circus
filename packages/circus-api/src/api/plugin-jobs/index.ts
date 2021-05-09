@@ -237,13 +237,16 @@ export const handlePostFeedback: RouteMiddleware = ({ models }) => {
       );
     }
 
+    const { data, actionLog } = ctx.request.body;
+
     const feedbackId = generateUniqueId();
     const item = {
       feedbackId,
       userEmail: ctx.user.userEmail,
       isConsensual,
       createdAt: new Date(),
-      data: ctx.request.body
+      data,
+      actionLog
     };
     await models.pluginJob.modifyOne(jobId, {
       feedbacks: [...job.feedbacks, item]

@@ -53,12 +53,24 @@ module.exports = {
       {
         test: /\.(frag|vert)$/,
         use: ['webpack-glsl-loader']
+      },
+      {
+        test: /\.m?js/,
+        resolve: {
+          fullySpecified: false
+        }
       }
     ]
   },
   plugins: [
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(nodeEnv)
+    }),
+    new webpack.container.ModuleFederationPlugin({
+      shared: [
+        { react: { singleton: true, eager: true } },
+        { 'react-dom': { singleton: true, eager: true } }
+      ]
     })
   ],
   devServer: {

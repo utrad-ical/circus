@@ -150,32 +150,6 @@ pluginJobRunner.dependencies = [
 export default pluginJobRunner;
 
 /**
- * Extracts the entire series from DICOM repository
- * into the speicied path on the local file system.
- * @param dicomFileRepository The DICOM repositoty from which the series is fetched.
- * @param seriesUid The series instance UID.
- * @param destDir The path to the destination directory.
- */
-export async function fetchSeriesFromRepository(
-  dicomFileRepository: DicomFileRepository,
-  seriesUid: string,
-  destDir: string
-) {
-  await fs.ensureDir(destDir);
-  const { load, images } = await dicomFileRepository.getSeries(seriesUid);
-  const it = new MultiRange(images).getIterator();
-  let next;
-  while (!(next = it.next()).done) {
-    const i: number = next.value!;
-    const image = await load(i);
-    await fs.writeFile(
-      path.join(destDir, ('00000000' + i).slice(-8) + '.dcm'),
-      Buffer.from(image)
-    );
-  }
-}
-
-/**
  * Executes the specified plugin.
  * @param dockerRunner Docker runner instance.
  * @param pluginDefinition Plugin definition.

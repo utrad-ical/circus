@@ -9,6 +9,7 @@ import { DicomFileRepository } from '@utrad-ical/circus-lib';
 import StaticDicomFileRepository from '@utrad-ical/circus-lib/src/dicom-file-repository/StaticDicomFileRepository';
 import * as circus from '../interface';
 import { multirange } from 'multi-integer-range';
+import createDicomVoxelDumper from '../job/createDicomVoxelDumper';
 
 /**
  * Directly runs the specified plug-in without using a queue system.
@@ -21,15 +22,9 @@ const runPlugin: FunctionService<
     dockerRunner: DockerRunner;
     dicomFileRepository: DicomFileRepository;
     pluginDefinitionAccessor: circus.PluginDefinitionAccessor;
-    dicomVoxelDumper: circus.DicomVoxelDumper;
   }
 > = async (options, deps) => {
-  const {
-    dockerRunner,
-    pluginDefinitionAccessor,
-    dicomFileRepository,
-    dicomVoxelDumper
-  } = deps;
+  const { dockerRunner, pluginDefinitionAccessor, dicomFileRepository } = deps;
   return async (commandName, args) => {
     const {
       _: [pluginId, ...seriesUidOrDirectories],
@@ -65,15 +60,16 @@ const runPlugin: FunctionService<
         return new Promise((resolve, reject) => {
           const extract = tarfs.extract(resultsDir);
           extract.on('finish', resolve);
+          extract.on('error', reject);
           stream.pipe(extract);
         });
       }
     };
 
-    let dicomRepository: DicomFileRepository = dicomFileRepository;
+    let repo: DicomFileRepository = dicomFileRepository;
     if (d) {
-      // Create a temporary DicomFileRepository
-      dicomRepository = new StaticDicomFileRepository({
+      // Create a temporary DicomFileRepository in 'run with directory' mode
+      repo = new StaticDicomFileRepository({
         dataDir: seriesUidOrDirectories[0],
         customUidDirMap: (indexAsSeriesUid: string) => {
           const index = parseInt(indexAsSeriesUid);
@@ -82,11 +78,16 @@ const runPlugin: FunctionService<
       });
     }
 
+    const dicomVoxelDumper = await createDicomVoxelDumper(
+      {},
+      { dicomFileRepository: repo }
+    );
+
     const series: circus.JobSeries[] = [];
     for (let i = 0; i < seriesUidOrDirectories.length; i++) {
       const item = seriesUidOrDirectories[i];
       const seriesUid = d ? String(i) : item; // Use index as UID when directory mode
-      const seriesAccessor = await dicomRepository.getSeries(seriesUid);
+      const seriesAccessor = await repo.getSeries(seriesUid);
       const images = multirange(seriesAccessor.images);
       const [start, end] = images.getRanges()[0];
       series.push({
@@ -95,14 +96,6 @@ const runPlugin: FunctionService<
       });
     }
 
-    const pjrDeps = {
-      jobReporter,
-      dicomRepository,
-      pluginDefinitionAccessor,
-      dockerRunner,
-      dicomVoxelDumper
-    };
-
     const jobRequest: circus.PluginJobRequest = {
       pluginId,
       series
@@ -110,17 +103,16 @@ const runPlugin: FunctionService<
 
     const runner = await pluginJobRunner(
       { workingDirectory: work, removeTemporaryDirectory: !keep },
-      pjrDeps
+      { jobReporter, pluginDefinitionAccessor, dockerRunner, dicomVoxelDumper }
     );
-    runner.run('dummy', jobRequest, process.stdout);
+    await runner.run('dummy', jobRequest, process.stdout);
   };
 };
 
 runPlugin.dependencies = [
   'dockerRunner',
   'dicomFileRepository',
-  'pluginDefinitionAccessor',
-  'dicomVoxelDumper'
+  'pluginDefinitionAccessor'
 ];
 
 export default runPlugin;

@@ -45,7 +45,7 @@ describe('plugin-job search', () => {
   test('Filter by power user domain', async () => {
     const res = await bob.get('api/plugin-jobs');
     expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(1);
+    expect(res.data.items).toHaveLength(2);
   });
 
   test('Filter by guest domain', async () => {
@@ -196,14 +196,37 @@ describe('plugin-job registration', () => {
     );
   });
 
-  test('should return a finished plug-in job', async () => {
-    const res = await dave.request({
-      url: 'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa'
+  describe('duplicated jobs', () => {
+    const job = {
+      pluginId:
+        'd135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2',
+      series: [
+        {
+          seriesUid: '111.222.333.444.777',
+          partialVolumeDescriptor: { start: 3, end: 7, delta: 2 }
+        }
+      ]
+    };
+    test('should reject for duplicated job', async () => {
+      const res = await bob.post('api/plugin-jobs', job);
+      expect(res.status).toBe(400);
+      expect(res.data.error).toMatch('duplicate');
     });
-    expect(res.status).toBe(200);
-    expect(res.data.jobId).toBe('01dxgwv3k0medrvhdag4mpw9wa');
-    expect(res.data.status).toBe('finished');
+
+    test('should not reject when "force" flag is set', async () => {
+      const res = await bob.post('api/plugin-jobs', { ...job, force: true });
+      expect(res.status).toBe(200);
+    });
   });
+});
+
+test('should return a finished plug-in job', async () => {
+  const res = await dave.request({
+    url: 'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa'
+  });
+  expect(res.status).toBe(200);
+  expect(res.data.jobId).toBe('01dxgwv3k0medrvhdag4mpw9wa');
+  expect(res.data.status).toBe('finished');
 });
 
 describe('feedback', () => {

@@ -1,11 +1,6 @@
-import pluginJobRunner, {
-  fetchSeriesFromRepository,
-  executePlugin
-} from './pluginJobRunner';
-import fs from 'fs-extra';
+import pluginJobRunner, { executePlugin } from './pluginJobRunner';
 import path from 'path';
 import DockerRunner from '../util/DockerRunner';
-import { DicomFileRepository } from '@utrad-ical/circus-lib';
 import tar from 'tar-stream';
 import memory from 'memory-streams';
 import * as circus from '../interface';
@@ -85,28 +80,6 @@ describe('pluginJobRunner', () => {
     const log = logStream.toString();
     expect(log).toContain('Plug-in execution done.');
   }, 20000);
-});
-
-describe('fetchSeriesFromRepository', () => {
-  const dir = path.join(testDir, 'test-fetch');
-
-  test('fetch DICOM data from repository', async () => {
-    const repository = ({
-      getSeries: jest.fn(uid => {
-        return {
-          images: '1-5',
-          load: () => Promise.resolve('abc')
-        };
-      })
-    } as any) as DicomFileRepository;
-    await fetchSeriesFromRepository(repository, 'abc', dir);
-    const files = await fs.readdir(dir);
-    expect(files).toHaveLength(5);
-  });
-
-  afterAll(async () => {
-    await fs.remove(dir);
-  });
 });
 
 describe('executePlugin', () => {

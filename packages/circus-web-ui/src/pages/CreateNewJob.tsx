@@ -1,5 +1,6 @@
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import { confirm } from '@smikitky/rb-components/lib/modal';
 import IconButton from 'components/IconButton';
 import PluginDisplay from 'components/PluginDisplay';
 import SeriesSelector, { SeriesEntry } from 'components/SeriesSelector';
@@ -51,7 +52,6 @@ const CreateNewJob: React.FC<{}> = props => {
 
   const handleCreate = async () => {
     const callApi = async (force = false) => {
-      // TODO: implement force
       return await api('plugin-jobs', {
         method: 'post',
         data: {
@@ -60,7 +60,8 @@ const CreateNewJob: React.FC<{}> = props => {
             selectedSeries,
             api,
             appState
-          )
+          ),
+          ...(force ? { force: true } : {})
         },
         handleErrors: [400]
       });
@@ -68,13 +69,20 @@ const CreateNewJob: React.FC<{}> = props => {
 
     if (!selectedPlugin) return;
     try {
-      await callApi(false);
-    } catch (err) {
-      if (/duplicate job/i.test(err?.response?.data?.error)) {
-        showMessage('There is a duplicate job similar to this one.', 'danger');
-      } else {
-        showMessage('The CIRCUS Server returned 400 Bad Request.', 'danger');
+      try {
+        await callApi(false);
+      } catch (err) {
+        if (/duplicate job/i.test(err?.response?.data?.error)) {
+          const res = await confirm(
+            'There is a duplicate job similar to this one. ' +
+              'Do you want to register this job anyway?'
+          );
+          if (res) await callApi(true);
+          else return;
+        } else throw err;
       }
+    } catch (err) {
+      showMessage('The CIRCUS Server returned 400 Bad Request.', 'danger');
       return;
     }
     setDefaultPlugin(selectedPlugin);

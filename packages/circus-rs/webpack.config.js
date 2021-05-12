@@ -1,7 +1,7 @@
 const webpack = require('webpack');
 const path = require('path');
 
-module.exports = {
+module.exports = (env, argv) => ({
   entry: {
     'circus-rs-client': './src/browser/index.ts'
   },
@@ -22,39 +22,22 @@ module.exports = {
         loader: 'babel-loader',
         options: { rootMode: 'upward' }
       },
-      {
-        test: /\.less$/,
-        use: ['style-loader', 'css-loader', 'less-loader']
-      },
-      {
-        test: /\.css$/,
-        use: ['style-loader', 'css-loader']
-      },
-      {
-        test: /\.woff$/,
-        use: ['url-loader']
-      },
-      {
-        test: /\.frag|\.vert$/,
-        use: ['webpack-glsl-loader']
-      }
+      { test: /\.less$/, use: ['style-loader', 'css-loader', 'less-loader'] },
+      { test: /\.css$/, use: ['style-loader', 'css-loader'] },
+      { test: /\.woff$/, use: ['url-loader'] },
+      { test: /\.frag|\.vert$/, use: ['webpack-glsl-loader'] }
     ]
   },
   plugins: [
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
+      'process.env.NODE_ENV': JSON.stringify(
+        argv.mode === 'production' ? 'production' : 'development'
+      )
     })
   ],
   devServer: {
     contentBase: path.join(__dirname, 'demo'),
     disableHostCheck: true
   },
-  devtool: '#sourcemap'
-};
-
-if (process.env.NODE_ENV === 'production') {
-  module.exports.plugins.push(
-    new webpack.optimize.UglifyJsPlugin({ minimize: true })
-  );
-  delete module.exports.devtool;
-}
+  ...(argv.mode !== 'production' ? { devtool: 'source-map' } : {})
+});

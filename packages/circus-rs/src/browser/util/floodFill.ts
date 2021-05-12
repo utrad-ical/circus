@@ -55,6 +55,15 @@ export default function floodFill(
   erase = false
 ): number {
   // https://en.wikipedia.org/wiki/Flood_fill
+  if (
+    center.x < 0 ||
+    grid.width <= center.x ||
+    center.y < 0 ||
+    grid.height <= center.y
+  ) {
+    alert('You cannot use bucket tool as the first tool.');
+    return 0;
+  }
   const stack: Vector2[] = [center];
 
   let minx = center.x,

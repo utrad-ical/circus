@@ -44,7 +44,7 @@ describe('buildDicomVolume', () => {
       const files = await fs.readdir(tmpDestDir);
       expect(files).toContain('0.mhd');
       expect(files).toContain('0.raw');
-      expect(files).toContain('0.txt');
+      expect(files).toContain('0.json');
     } finally {
       await fs.remove(tmpDestDir);
     }

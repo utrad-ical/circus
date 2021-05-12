@@ -24,7 +24,7 @@ const buildDicomVolumes = async (
       path.join(destDir, `${i}.raw`),
       Buffer.from(dumpFiles[i].raw)
     );
-    await fs.writeFile(path.join(destDir, `${i}.txt`), dumpFiles[i].json);
+    await fs.writeFile(path.join(destDir, `${i}.json`), dumpFiles[i].json);
   }
 };
 

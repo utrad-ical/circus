@@ -6,10 +6,11 @@ import chalk from 'chalk';
 import DockerRunner from '../util/DockerRunner';
 import tarfs from 'tar-fs';
 import { DicomFileRepository } from '@utrad-ical/circus-lib';
-import StaticDicomFileRepository from '@utrad-ical/circus-lib/src/dicom-file-repository/StaticDicomFileRepository';
 import * as circus from '../interface';
-import { multirange } from 'multi-integer-range';
 import createDicomVoxelDumper from '../job/createDicomVoxelDumper';
+import createTmpDicomFileRepository, {
+  createJobSeries
+} from './util/tmpDicomFileRepository';
 
 /**
  * Directly runs the specified plug-in without using a queue system.
@@ -66,35 +67,16 @@ const runPlugin: FunctionService<
       }
     };
 
-    let repo: DicomFileRepository = dicomFileRepository;
-    if (d) {
-      // Create a temporary DicomFileRepository in 'run with directory' mode
-      repo = new StaticDicomFileRepository({
-        dataDir: seriesUidOrDirectories[0],
-        customUidDirMap: (indexAsSeriesUid: string) => {
-          const index = parseInt(indexAsSeriesUid);
-          return seriesUidOrDirectories[index];
-        }
-      });
-    }
+    const repo: DicomFileRepository = d
+      ? createTmpDicomFileRepository(seriesUidOrDirectories)
+      : dicomFileRepository;
 
     const dicomVoxelDumper = await createDicomVoxelDumper(
       {},
       { dicomFileRepository: repo }
     );
 
-    const series: circus.JobSeries[] = [];
-    for (let i = 0; i < seriesUidOrDirectories.length; i++) {
-      const item = seriesUidOrDirectories[i];
-      const seriesUid = d ? String(i) : item; // Use index as UID when directory mode
-      const seriesAccessor = await repo.getSeries(seriesUid);
-      const images = multirange(seriesAccessor.images);
-      const [start, end] = images.getRanges()[0];
-      series.push({
-        seriesUid,
-        partialVolumeDescriptor: { start, end, delta: 1 }
-      });
-    }
+    const series = await createJobSeries(!!d, repo, seriesUidOrDirectories);
 
     const jobRequest: circus.PluginJobRequest = {
       pluginId,

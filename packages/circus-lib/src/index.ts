@@ -11,6 +11,8 @@ export * from './PartialVolumeDescriptor';
 export { default as ServiceLoader } from './ServiceLoader';
 export * from './ServiceLoader';
 
+export { default as generateMhdHeader } from './generateMhdHeader';
+
 export { default as Logger } from './logger/Logger';
 
 export * from './dicom-file-repository';

@@ -1,26 +1,50 @@
 import path from 'path';
-import DockerRunner from '../util/DockerRunner';
 import fs from 'fs-extra';
 import buildDicomVolumes from './buildDicomVolumes';
+import { DicomFileRepository } from 'circus-lib/src/dicom-file-repository';
+import createDicomVoxelDumper from './createDicomVoxelDumper';
+import { PassThrough } from 'stream';
 
-const testDir = path.resolve(__dirname, '../../test/');
-const repositoryDir = path.join(testDir, 'repository/');
-const seriesUid = 'dicom';
+const mockDicomFileRepository: DicomFileRepository = {
+  getSeries: async (seriesUid: string) => {
+    const testDir = path.join(__dirname, '../../test/repository/dicom');
+    return {
+      load: async (image: number) => {
+        const buffer = await fs.readFile(path.join(testDir, `00000001.dcm`));
+        return buffer.buffer;
+      },
+      save: async () => {},
+      images: '1-10'
+    };
+  },
+  deleteSeries: async () => {}
+};
 
 describe('buildDicomVolume', () => {
-  // If this test fails, double-check 'dicom_voxel_dump' image
-  // has been correctly loaded in the Docker environment.
   test('craetes raw volume file', async () => {
-    const srcDir = path.join(repositoryDir, seriesUid);
-    const tmpDestDir = path.resolve(__dirname, '../../test/dicom-out');
+    const dicomVoxelDumper = await createDicomVoxelDumper(
+      {},
+      { dicomFileRepository: mockDicomFileRepository }
+    );
+    const logStream = new PassThrough();
+    const tmpDestDir = path.resolve(__dirname, '../../test/build-dicom-test');
     await fs.emptyDir(tmpDestDir);
     try {
-      const runner = new DockerRunner();
-      await buildDicomVolumes(runner, [srcDir], tmpDestDir);
+      await buildDicomVolumes(
+        dicomVoxelDumper,
+        [
+          {
+            seriesUid: '1.2.3.4.5',
+            partialVolumeDescriptor: { start: 10, end: 1, delta: -1 }
+          }
+        ],
+        tmpDestDir,
+        logStream
+      );
       const files = await fs.readdir(tmpDestDir);
       expect(files).toContain('0.mhd');
       expect(files).toContain('0.raw');
-      expect(files).toContain('0.txt');
+      expect(files).toContain('0.json');
     } finally {
       await fs.remove(tmpDestDir);
     }

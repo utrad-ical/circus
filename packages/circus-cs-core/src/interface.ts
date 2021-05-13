@@ -2,6 +2,7 @@
 // You can use them like `circus.PluginJobRequest` without `import`-ing.
 
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import { Pack as TarStream } from 'tar-stream';
 
 export type QueueState = 'wait' | 'processing';
 
@@ -170,13 +171,5 @@ export interface SeriesEntry {
 }
 
 export interface DicomVoxelDumper {
-  dump: (
-    series: SeriesEntry[]
-  ) => Promise<
-    {
-      mhd: string;
-      raw: ArrayBuffer;
-      json: string;
-    }[]
-  >;
+  dump: (series: SeriesEntry[]) => TarStream;
 }

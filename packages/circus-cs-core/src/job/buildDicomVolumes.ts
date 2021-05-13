@@ -1,36 +1,36 @@
-import DockerRunner from '../util/DockerRunner';
+import { DicomVoxelDumper, SeriesEntry } from '../interface';
+import fs from 'fs-extra';
+import path from 'path';
+import { Writable } from 'stream';
+import tarfs from 'tar-fs';
+import tar from 'tar-stream';
 
 /**
  * Builds raw volume data (and associated files) from DICOM series
  * using dicom_voxel_dump.
- * @param dockerRunner Docker runner instance.
- * @param srcDir Directory that contains a DICOM series (00000001.dcm, ...).
+ * @param dicomVoxelDumper
+ * @param seriesEntries
  * @param destDir Directory that will have the generated volume (0.vol,...).
  */
-const buildDicomVolumes = async (
-  dockerRunner: DockerRunner,
-  srcDirs: string[],
-  destDir: string
+const buildDicomVolumes = (
+  dicomVoxelDumper: DicomVoxelDumper,
+  seriesEntries: SeriesEntry[],
+  destDir: string,
+  logStream: Writable
 ) => {
-  const dockerImage = 'circuscad/dicom_voxel_dump:1.0.0';
-
-  for (let i = 0; i < srcDirs.length; i++) {
-    const srcDir = srcDirs[i];
-    const result = await dockerRunner.run({
-      Image: dockerImage,
-      HostConfig: {
-        Binds: [`${srcDir}:/circus/in`, `${destDir}:/circus/out`],
-        AutoRemove: false
-      }
+  const tarStream = dicomVoxelDumper.dump(seriesEntries);
+  return new Promise<void>((resolve, reject) => {
+    const extract = tarfs.extract(destDir, {
+      dmode: 0o555, // all dirs should be readable
+      fmode: 0o444 // all files should be readable
     });
-
-    if (!result) {
-      throw new Error('Voxel dumper did not finish correctly.');
-    }
-    if (!result.match(/Export\s+result:(\d+),(-?\d+),(\d+)\s+Succeeded/)) {
-      throw new Error('Voxel dumper returned unexpected result:\n' + result);
-    }
-  }
+    tarStream.pipe(extract);
+    extract.on('entry', (header, stream, next) => {
+      logStream.write(`  Writing: ${header.name}`);
+    });
+    extract.on('finish', resolve);
+    extract.on('error', reject);
+  });
 };
 
 export default buildDicomVolumes;

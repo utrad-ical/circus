@@ -61,8 +61,7 @@ export default function floodFill(
     center.y < 0 ||
     grid.height <= center.y
   ) {
-    alert('You cannot use bucket tool as the first tool.');
-    return 0;
+    throw new RangeError('value of center is not contained in the grid');
   }
   const stack: Vector2[] = [center];
 

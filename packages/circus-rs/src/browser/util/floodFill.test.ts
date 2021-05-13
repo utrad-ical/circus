@@ -109,3 +109,30 @@ test('must erase a filled area', () => {
   const filled = '*****\n'.repeat(5);
   t(filled, [3, 3], '     \n'.repeat(5), 25, true);
 });
+
+const t_err = (
+  pattern: string,
+  start: number[],
+  expectedErrorMessage: string,
+  erase = false
+) => {
+  const rows = pattern.replace(/\n$/, '').split(/\n/);
+  const width = Math.max.apply(
+    Math,
+    rows.map(r => r.length)
+  );
+  const arr = new BinaryArray2D(width, rows.length);
+  for (let y = 0; y < rows.length; y++) {
+    for (let x = 0; x < width; x++) {
+      if (rows[y][x] === '*') arr.set(true, new Vector2(x, y));
+    }
+  }
+  expect(() => floodFill(arr, new Vector2().fromArray(start), erase)).toThrow(
+    expectedErrorMessage
+  );
+};
+
+test('must throw error message if center value is invalid', () => {
+  const pat = '*****\n' + '*   *\n'.repeat(3) + '*****';
+  t_err(pat, [50, 50], 'value of center is not contained in the grid');
+});

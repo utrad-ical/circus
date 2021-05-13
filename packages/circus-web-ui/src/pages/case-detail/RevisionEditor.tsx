@@ -178,6 +178,7 @@ const RevisionEditor: React.FC<{
     'brush',
     'eraser',
     'bucket',
+    'bucketEraser',
     'wand',
     'wandEraser'
   ].some(t => t === activeToolName);

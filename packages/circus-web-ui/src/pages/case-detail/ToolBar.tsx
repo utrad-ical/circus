@@ -206,6 +206,14 @@ const ToolBar: React.FC<{
         disabled={!brushEnabled || disabled}
       />
       <ToolButton
+        name="bucketEraser"
+        icon="rs-bucket"
+        changeTool={onChangeTool}
+        active={active}
+        shortcut="Shift+E"
+        disabled={!brushEnabled || disabled}
+      />
+      <ToolButton
         name="wand"
         icon="rs-wand"
         changeTool={onChangeTool}

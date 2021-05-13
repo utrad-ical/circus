@@ -168,7 +168,7 @@ const CreateConnectedComponentLabel = async (
             flag
               ? name[10] + ' (' + String(labelingResults.labelNum - maxI) + ')'
               : name[i]
-          } CCLs`
+          } CC${flag ? 's' : ''}`
         )
       );
       const [sizex, sizey, sizez] =

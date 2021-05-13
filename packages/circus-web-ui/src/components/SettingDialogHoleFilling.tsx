@@ -1,5 +1,24 @@
 import { Button, Modal } from 'components/react-bootstrap';
 import React, { useState } from 'react';
+import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+
+const neighborsOptions2D = {
+  4: '4-neigobors',
+  8: '8-neigobors'
+};
+const neighborsOptions3D = {
+  6: '6-neigobors',
+  26: '26-neigobors'
+};
+const dimensionOptions = {
+  2: '2D',
+  3: '3D'
+};
+const orientationOptions = {
+  Axial: 'Axial',
+  Colonal: 'Colonal',
+  Sagital: 'Sagital'
+};
 
 const SettingDialogHoleFilling: React.FC<{
   onHide: () => void;
@@ -18,72 +37,39 @@ const SettingDialogHoleFilling: React.FC<{
     <>
       <Modal.Body>
         <p>Setting option for hole filling</p>
-        <label>
-          Dimension :{dimension3 ? 3 : 2}D
-          <ul>
-            <li>
-              <label>
-                3D
-                <input
-                  type="radio"
-                  checked={dimension3}
-                  onChange={() => setDimension3(true)}
-                ></input>
-              </label>
-            </li>
-            <li>
-              <label>
-                2D
-                <input
-                  type="radio"
-                  checked={!dimension3}
-                  onChange={() => setDimension3(false)}
-                ></input>
-              </label>
-            </li>
-          </ul>
-        </label>
-        <br />
-        {!dimension3 && (
-          <label>
-            Orientation :
-            <select
-              value={orientation}
-              onChange={e => setOrientation(e.target.value)}
-            >
-              <option>Axial</option>
-              <option>Colonal</option>
-              <option>Sagital</option>
-            </select>
-          </label>
-        )}
-        <br />
-        <label>
-          Neighbors to decide same connected component :
-          {neighbor4or6 ? (dimension3 ? 6 : 4) : dimension3 ? 26 : 8}
-          <ul>
-            <li>
-              <label>
-                {dimension3 ? 6 : 4}-neigobors
-                <input
-                  type="radio"
-                  checked={neighbor4or6}
-                  onChange={() => setNeighbor4or6(true)}
-                ></input>
-              </label>
-            </li>
-            <li>
-              <label>
-                {dimension3 ? 26 : 8}-neigobors
-                <input
-                  type="radio"
-                  checked={!neighbor4or6}
-                  onChange={() => setNeighbor4or6(false)}
-                ></input>
-              </label>
-            </li>
-          </ul>
-        </label>
+        <div>
+          Dimension: &ensp;
+          <ShrinkSelect
+            bsSize="sm"
+            options={dimensionOptions}
+            numericalValue
+            value={dimension3 ? 3 : 2}
+            onChange={(value: number) => setDimension3(value == 3)}
+          />
+          {!dimension3 && (
+            <React.Fragment>
+              &emsp; Orientation: &ensp;
+              <ShrinkSelect
+                bsSize="sm"
+                options={orientationOptions}
+                value={orientation}
+                onChange={(value: string) => setOrientation(value)}
+              />
+            </React.Fragment>
+          )}
+        </div>
+        <div>
+          Neighbors to decide same connected component: &ensp;
+          <ShrinkSelect
+            bsSize="sm"
+            options={dimension3 ? neighborsOptions3D : neighborsOptions2D}
+            numericalValue
+            value={neighbor4or6 ? (dimension3 ? 6 : 4) : dimension3 ? 26 : 8}
+            onChange={(value: number) =>
+              setNeighbor4or6(value == 6 || value == 4)
+            }
+          />
+        </div>
       </Modal.Body>
       <Modal.Footer>
         <Button bsStyle="link" onClick={() => onHide()}>

@@ -1,7 +1,7 @@
 import pluginJobRunner, { executePlugin } from './pluginJobRunner';
 import path from 'path';
 import DockerRunner from '../util/DockerRunner';
-import tar from 'tar-stream';
+import tar, { pack } from 'tar-stream';
 import memory from 'memory-streams';
 import * as circus from '../interface';
 
@@ -47,8 +47,14 @@ describe('pluginJobRunner', () => {
     } as circus.PluginDefinitionAccessor;
 
     const dicomVoxelDumper: circus.DicomVoxelDumper = {
-      dump: () =>
-        Promise.resolve([{ raw: new ArrayBuffer(0), mhd: '', json: '' }])
+      dump: () => {
+        const stream = tar.pack();
+        stream.entry({ name: '0.mhd' }, '');
+        stream.entry({ name: '0.raw' }, Buffer.alloc(10));
+        stream.entry({ name: '0.json' }, '{}');
+        stream.finalize();
+        return stream;
+      }
     };
 
     const runner = await pluginJobRunner(

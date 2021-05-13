@@ -1,5 +1,23 @@
 import { Button, Modal } from 'components/react-bootstrap';
 import React, { useState } from 'react';
+import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+
+const maximumCCNumOptions = {
+  1: '1 CC',
+  2: '2 CCs',
+  3: '3 CCs',
+  4: '4 CCs',
+  5: '5 CCs',
+  6: '6 CCs',
+  7: '7 CCs',
+  8: '8 CCs',
+  9: '9 CCs',
+  10: '10 CCs'
+};
+const neighborsOptions = {
+  6: '6-neigobors',
+  26: '26-neigobors'
+};
 
 const SettingDialogCCL: React.FC<{
   onHide: () => void;
@@ -8,48 +26,30 @@ const SettingDialogCCL: React.FC<{
   const { onHide, onClick } = props;
   const [neighbor6, setNeighbor6] = useState(false);
   const [dispLabelNumber, setDispLabelNumber] = useState(2);
-
   return (
     <>
       <Modal.Body>
         <p>Setting option for connected component labeling (CCL)</p>
-        <label>
-          Maximum number of connected component labels to display (1-10) :
-          {dispLabelNumber}
-          <input
-            type="range"
-            min="1"
-            max="10"
+        <div>
+          Maximum number of connected component (CC) to display: &ensp;
+          <ShrinkSelect
+            bsSize="sm"
+            options={maximumCCNumOptions}
+            numericalValue
             value={dispLabelNumber}
-            onChange={ev => setDispLabelNumber(Number(ev.target.value))}
-          ></input>
-        </label>
-
-        <label>
-          Neighbors to decide same connected component :{neighbor6 ? 6 : 26}
-          <ul>
-            <li>
-              <label>
-                6-neigobors
-                <input
-                  type="radio"
-                  checked={neighbor6}
-                  onChange={() => setNeighbor6(true)}
-                ></input>
-              </label>
-            </li>
-            <li>
-              <label>
-                26-neigobors
-                <input
-                  type="radio"
-                  checked={!neighbor6}
-                  onChange={() => setNeighbor6(false)}
-                ></input>
-              </label>
-            </li>
-          </ul>
-        </label>
+            onChange={(value: number) => setDispLabelNumber(value)}
+          />
+        </div>
+        <div>
+          Neighbors to decide same CC: &ensp;
+          <ShrinkSelect
+            bsSize="sm"
+            options={neighborsOptions}
+            numericalValue
+            value={neighbor6 ? 6 : 26}
+            onChange={(value: number) => setNeighbor6(value == 6)}
+          />
+        </div>
       </Modal.Body>
       <Modal.Footer>
         <Button bsStyle="link" onClick={() => onHide()}>

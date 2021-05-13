@@ -2,6 +2,8 @@ import { DicomVoxelDumper, SeriesEntry } from '../interface';
 import fs from 'fs-extra';
 import path from 'path';
 import { Writable } from 'stream';
+import tarfs from 'tar-fs';
+import tar from 'tar-stream';
 
 /**
  * Builds raw volume data (and associated files) from DICOM series
@@ -10,22 +12,25 @@ import { Writable } from 'stream';
  * @param seriesEntries
  * @param destDir Directory that will have the generated volume (0.vol,...).
  */
-const buildDicomVolumes = async (
+const buildDicomVolumes = (
   dicomVoxelDumper: DicomVoxelDumper,
   seriesEntries: SeriesEntry[],
   destDir: string,
   logStream: Writable
 ) => {
-  const dumpFiles = await dicomVoxelDumper.dump(seriesEntries);
-  for (let i = 0; i < dumpFiles.length; i++) {
-    logStream.write(`  Building DICOM volume for vol #${i}...\n`);
-    await fs.writeFile(path.join(destDir, `${i}.mhd`), dumpFiles[i].mhd);
-    await fs.writeFile(
-      path.join(destDir, `${i}.raw`),
-      Buffer.from(dumpFiles[i].raw)
-    );
-    await fs.writeFile(path.join(destDir, `${i}.json`), dumpFiles[i].json);
-  }
+  const tarStream = dicomVoxelDumper.dump(seriesEntries);
+  return new Promise<void>((resolve, reject) => {
+    const extract = tarfs.extract(destDir, {
+      dmode: 0o555, // all dirs should be readable
+      fmode: 0o444 // all files should be readable
+    });
+    tarStream.pipe(extract);
+    extract.on('entry', (header, stream, next) => {
+      logStream.write(`  Writing: ${header.name}`);
+    });
+    extract.on('finish', resolve);
+    extract.on('error', reject);
+  });
 };
 
 export default buildDicomVolumes;

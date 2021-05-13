@@ -2,6 +2,8 @@ import { DicomFileRepository } from 'circus-lib/src/dicom-file-repository';
 import fs from 'fs-extra';
 import path from 'path';
 import createDicomVoxelDumper from './createDicomVoxelDumper';
+import tar from 'tar-stream';
+import { Readable } from 'stream';
 
 test('dump json', async () => {
   const mockDicomFileRepository: DicomFileRepository = {
@@ -24,13 +26,38 @@ test('dump json', async () => {
     { dicomFileRepository: mockDicomFileRepository }
   );
 
-  const dump = await result.dump([
+  const extract = tar.extract();
+  const stream = result.dump([
     {
       seriesUid: '1.2.3.4.5',
       partialVolumeDescriptor: { start: 1, end: 5, delta: 4 }
     }
   ]);
+  stream.pipe(extract);
 
-  const parsed = JSON.parse(dump[0].json);
-  expect(parsed.common).toHaveProperty('0008,0008');
+  const readFromStreamTillEnd = (stream: Readable) => {
+    return new Promise<string>(resolve => {
+      let data = '';
+      stream.on('data', chunk => {
+        data += chunk;
+      });
+      stream.on('end', () => resolve(data));
+    });
+  };
+
+  let count = 0;
+  extract.on('entry', async (headers, stream, next) => {
+    count++;
+    expect(headers.name).toMatch(/0\.(json|mhd|raw)/);
+    const content = await readFromStreamTillEnd(stream);
+    if (headers.name === '0.json') {
+      expect(JSON.parse(content).common).toHaveProperty('0008,0008');
+    }
+    next();
+  });
+
+  await new Promise((resolve, reject) => {
+    extract.on('finish', resolve);
+  });
+  expect(count).toBe(3);
 });

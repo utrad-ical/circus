@@ -11,6 +11,7 @@ import PartialVolumeDescriptor from '@utrad-ical/circus-lib/src/PartialVolumeDes
 import parser from 'dicom-parser';
 import extractCommonValues from '../util/extractCommonValues';
 import { createEncConverter, EncConverter } from './encConverter';
+import tar from 'tar-stream';
 
 type KeyValues = { [key: string]: any };
 
@@ -49,15 +50,7 @@ interface SeriesEntry {
 }
 
 interface DicomVoxelDumper {
-  dump: (
-    series: SeriesEntry[]
-  ) => Promise<
-    {
-      mhd: string;
-      raw: ArrayBuffer;
-      json: string;
-    }[]
-  >;
+  dump: (series: SeriesEntry[]) => tar.Pack;
 }
 
 interface Options {}
@@ -144,7 +137,11 @@ const createDicomVoxelDumper: FunctionService<
   { dicomFileRepository: DicomFileRepository },
   Options
 > = async (opt, { dicomFileRepository }) => {
-  const dumpOneSeries = async (series: SeriesEntry, volId: number) => {
+  const dumpOneSeries = async (
+    series: SeriesEntry,
+    volId: number,
+    stream: tar.Pack
+  ) => {
     const seriesTagData = [];
     const seriesAccessor = await dicomFileRepository.getSeries(
       series.seriesUid
@@ -208,15 +205,21 @@ const createDicomVoxelDumper: FunctionService<
       'lf'
     );
 
-    return {
-      mhd,
-      raw: rawBuffer!.buffer,
-      json
-    };
+    const buffer = Buffer.from(rawBuffer!.buffer);
+    stream.entry({ name: `${volId}.mhd` }, mhd);
+    stream.entry({ name: `${volId}.raw` }, buffer);
+    stream.entry({ name: `${volId}.json` }, json);
   };
 
   const dump = (series: SeriesEntry[]) => {
-    return Promise.all(series.map(dumpOneSeries));
+    const stream = tar.pack();
+    (async () => {
+      for (let i = 0; i < series.length; i++) {
+        await dumpOneSeries(series[i], i, stream);
+      }
+      stream.finalize();
+    })();
+    return stream;
   };
 
   return { dump };

@@ -1,9 +1,6 @@
 import { DicomVoxelDumper, SeriesEntry } from '../interface';
-import fs from 'fs-extra';
-import path from 'path';
 import { Writable } from 'stream';
 import tarfs from 'tar-fs';
-import tar from 'tar-stream';
 
 /**
  * Builds raw volume data (and associated files) from DICOM series

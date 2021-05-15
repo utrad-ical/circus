@@ -35,6 +35,7 @@ import {
 } from '@utrad-ical/circus-cs-results';
 import { RsVolumeLoader } from '@utrad-ical/circus-rs/src/browser';
 import loadDisplay from './loadDisplay';
+import { Modal } from 'components/react-bootstrap';
 
 const StyledDiv = styled.div`
   display: flex;
@@ -80,18 +81,39 @@ const Menu: React.FC<{
       id="submenu"
       bsStyle="link"
       title={<Icon icon="menu-hamburger" />}
+      onSelect={onMenuSelect}
       pullRight
       noCaret
     >
-      <MenuItem eventKey="deleteAllFeedback" onSelect={onMenuSelect}>
+      <MenuItem eventKey="deleteAllFeedback">
         <Icon icon="remove" />
         &ensp;Delete all feedback
+      </MenuItem>
+      <MenuItem eventKey="investigate">
+        <Icon icon="search" />
+        &ensp;Investigate
       </MenuItem>
     </DropdownButton>
   );
 });
 
-const PluginJobDetail: React.FC<any> = props => {
+const InvestigateJobDialog: React.FC<{
+  results: any; // JSON-seriealizable
+  show: boolean;
+  setShow: (show: boolean) => void;
+}> = React.memo(props => {
+  const { results, show, setShow } = props;
+  return (
+    <Modal show={show} onHide={() => setShow(false)}>
+      <Modal.Header>Investigate raw job results</Modal.Header>
+      <Modal.Body>
+        <pre>{JSON.stringify(results, null, '  ')}</pre>
+      </Modal.Body>
+    </Modal>
+  );
+});
+
+const PluginJobDetail: React.FC<{}> = props => {
   const api = useApi();
   const jobId: string = useParams<any>().jobId;
 
@@ -101,6 +123,7 @@ const PluginJobDetail: React.FC<any> = props => {
   const { map: volumeLoaderMap, rsHttpClient } = useContext(
     VolumeLoaderCacheContext
   )!;
+  const [showInvestigateModal, setShowInvestigateModal] = useState(false);
 
   const loadJob = useCallback(async () => {
     setBusy(true);
@@ -148,6 +171,10 @@ const PluginJobDetail: React.FC<any> = props => {
           } finally {
             setBusy(false);
           }
+          break;
+        }
+        case 'investigate': {
+          setShowInvestigateModal(true);
           break;
         }
       }
@@ -321,6 +348,11 @@ const PluginJobDetail: React.FC<any> = props => {
             Register {modeText} feedback
           </IconButton>
         </div>
+        <InvestigateJobDialog
+          show={showInvestigateModal}
+          setShow={setShowInvestigateModal}
+          results={jobData.job.results}
+        />
       </StyledDiv>
     </FullSpanContainer>
   );

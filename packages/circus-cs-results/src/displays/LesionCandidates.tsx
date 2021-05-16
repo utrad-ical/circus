@@ -194,13 +194,14 @@ export const LesionCandidates: Display<
     () =>
       allCandidates
         .slice() // copy
+        .sort((a, b) => b.confidence - a.confidence)
+        .slice(0, maxCandidates)
         .sort((a, b) => {
           const sign = sortOrder === 'desc' ? -1 : 1;
           const aa = sortKey === 'location' ? a.location[2] : a[sortKey];
           const bb = sortKey === 'location' ? b.location[2] : b[sortKey];
           return (aa! - bb!) * sign;
-        })
-        .slice(0, maxCandidates),
+        }),
     [allCandidates, sortOrder, sortKey, maxCandidates]
   );
 
@@ -260,6 +261,7 @@ export const LesionCandidates: Display<
   };
 
   useEffect(() => {
+    if (!feedbackListener) return;
     const allValid = visibleCandidates.every(
       cand => currentFeedback.findIndex(item => item.id === cand.id) >= 0
     );

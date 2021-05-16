@@ -4,7 +4,7 @@ import {
   Dump,
   Locator,
   LesionCandidates
-} from '@utrad-ical/circus-cs-results';
+} from '@utrad-ical/circus-ui-kit';
 
 // https://github.com/module-federation/module-federation-examples/tree/master/advanced-api/dynamic-remotes
 

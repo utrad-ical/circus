@@ -4,6 +4,7 @@ import {
   HybridMprImageSource,
   MprImageSource,
   PlaneFigure,
+  MprViewState,
   Tool
 } from '@utrad-ical/circus-rs/src/browser';
 import classnames from 'classnames';
@@ -18,7 +19,11 @@ import React, {
 import styled from 'styled-components';
 import { useCsResults } from '../CsResultsContext';
 import { Display, DisplayDefinition, FeedbackReport } from '../Display';
-import { createStateChanger, ImageViewer } from '../viewer/CsImageViewer';
+import {
+  createStateChanger,
+  ImageViewer,
+  StateChangerFunc
+} from '../viewer/CsImageViewer';
 import { Button } from './Button';
 
 interface LesionCandidate {
@@ -70,7 +75,7 @@ const Candidate: React.FC<{
 }> = props => {
   const { imageSource, item, markStyle, tool, children } = props;
 
-  const stateChanger = useMemo(() => createStateChanger(), []);
+  const stateChanger = useMemo(() => createStateChanger<MprViewState>(), []);
 
   const composition = useMemo(() => new Composition(imageSource), [
     imageSource
@@ -101,7 +106,7 @@ const Candidate: React.FC<{
     addAnnotation();
   }, [composition, imageSource]);
 
-  const centerState = useCallback(
+  const centerState = useCallback<StateChangerFunc<MprViewState>>(
     state => {
       const voxelSize = (composition!.imageSource as any).metadata.voxelSize;
       const newOrigin = [
@@ -117,9 +122,7 @@ const Candidate: React.FC<{
     [composition, item.location]
   );
 
-  const handleCenterizeClick = () => {
-    stateChanger(centerState);
-  };
+  const handleCenterizeClick = () => stateChanger(centerState);
 
   return (
     <div className="lesion-candidate">
@@ -139,6 +142,7 @@ const Candidate: React.FC<{
         className="lesion-candidate-viewer"
         composition={composition}
         tool={tool}
+        initialStateSetter={centerState}
         stateChanger={stateChanger}
       />
       {children}

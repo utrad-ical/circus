@@ -23,8 +23,8 @@ import {
   createStateChanger,
   ImageViewer,
   StateChangerFunc
-} from '../viewer/CsImageViewer';
-import { Button } from './Button';
+} from '../../ui/ImageViewer';
+import { Button } from '../../ui/Button';
 
 interface LesionCandidate {
   id: number;

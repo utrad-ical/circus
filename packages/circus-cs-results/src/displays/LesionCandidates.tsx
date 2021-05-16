@@ -59,7 +59,9 @@ interface LesionCandidatesOptions {
   excludeFromActionLog?: boolean;
 }
 
-const normalizeCandidates = (input: any): LesionCandidate[] => {
+export const defaultDataPath = 'results.lesionCandidates';
+
+export const normalizeCandidates = (input: any): LesionCandidate[] => {
   if (!Array.isArray(input)) throw new Error();
   return input.map((item, index) => {
     if ('id' in item) return item;
@@ -159,7 +161,7 @@ export const LesionCandidates: Display<
   const {
     initialFeedbackValue,
     options: {
-      dataPath = 'results.lesionCandidates',
+      dataPath = defaultDataPath,
       sortBy: [sortKey, sortOrder] = ['rank', 'asc'],
       maxCandidates,
       markStyle = defaultMarkStyle,

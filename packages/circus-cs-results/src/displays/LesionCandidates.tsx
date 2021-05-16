@@ -30,10 +30,25 @@ interface LesionCandidate {
   location: [number, number, number];
 }
 
+interface MarkStyle {
+  color?: string;
+  dimmedColor?: string;
+  radius?: number;
+  width?: number;
+}
+
+const defaultMarkStyle: Required<MarkStyle> = {
+  color: '#ff00ff',
+  dimmedColor: '#ff00ff55',
+  radius: 30,
+  width: 3
+};
+
 interface LesionCandidatesOptions {
   dataPath?: string;
   feedbackListener?: DisplayDefinition | null;
   maxCandidates?: number;
+  markStyle?: MarkStyle;
   confidenceThreshold?: number;
   sortBy: [keyof LesionCandidate, 'asc' | 'desc'];
   excludeFromActionLog?: boolean;
@@ -50,9 +65,10 @@ const normalizeCandidates = (input: any): LesionCandidate[] => {
 const Candidate: React.FC<{
   imageSource: MprImageSource;
   item: LesionCandidate;
+  markStyle: MarkStyle;
   tool: Tool;
 }> = props => {
-  const { imageSource, item, tool, children } = props;
+  const { imageSource, item, markStyle, tool, children } = props;
 
   const stateChanger = useMemo(() => createStateChanger(), []);
 
@@ -65,9 +81,12 @@ const Candidate: React.FC<{
       await imageSource.ready();
       const metadata = imageSource.metadata!;
       // Add an circle annotation to this composition
-      const r = 20;
+      const r = markStyle.radius ?? defaultMarkStyle.radius;
       const annotation = new PlaneFigure();
-      annotation.color = '#ff00ff';
+      annotation.color = markStyle.color ?? defaultMarkStyle.color;
+      annotation.dimmedColor =
+        markStyle.dimmedColor ?? defaultMarkStyle.dimmedColor;
+      annotation.width = markStyle.width ?? defaultMarkStyle.width;
       annotation.min = [
         (item.location[0] - r) * metadata.voxelSize[0],
         (item.location[1] - r) * metadata.voxelSize[1]
@@ -136,9 +155,10 @@ export const LesionCandidates: Display<
   const {
     initialFeedbackValue,
     options: {
-      dataPath = 'lesionCandidates',
+      dataPath = 'results.lesionCandidates',
       sortBy: [sortKey, sortOrder] = ['rank', 'asc'],
       maxCandidates,
+      markStyle = defaultMarkStyle,
       feedbackListener,
       excludeFromActionLog
     },
@@ -161,8 +181,8 @@ export const LesionCandidates: Display<
   >(initialFeedbackValue ?? []);
 
   const allCandidates = useMemo(
-    () => normalizeCandidates(get(results.results, dataPath)),
-    [results.results, dataPath]
+    () => normalizeCandidates(get(results, dataPath)),
+    [results, dataPath]
   );
   const visibleCandidates = useMemo(
     () =>
@@ -287,6 +307,7 @@ export const LesionCandidates: Display<
             <Candidate
               key={cand.id}
               item={cand}
+              markStyle={markStyle}
               tool={tool}
               imageSource={imageSourceForVolumeId(cand.volumeId ?? 0)}
             >

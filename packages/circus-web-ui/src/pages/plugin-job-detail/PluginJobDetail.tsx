@@ -32,7 +32,7 @@ import {
   CsResultsContext,
   CsResultsContextType,
   FeedbackReport
-} from '@utrad-ical/circus-cs-results';
+} from '@utrad-ical/circus-ui-kit';
 import { RsVolumeLoader } from '@utrad-ical/circus-rs/src/browser';
 import loadDisplay from './loadDisplay';
 import { Modal } from 'components/react-bootstrap';

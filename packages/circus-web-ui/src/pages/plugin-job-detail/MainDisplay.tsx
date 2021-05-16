@@ -5,7 +5,7 @@ import {
   FeedbackEntry,
   FeedbackTarget,
   FeedbackReport
-} from '@utrad-ical/circus-cs-results';
+} from '@utrad-ical/circus-ui-kit';
 import Section from './Section';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import produce from 'immer';

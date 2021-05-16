@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useCsResults } from '../CsResultsContext';
 import { Display } from '../Display';
-import { Button } from './Button';
+import { Button } from '../../ui/Button';
 
 interface Choice {
   value: number | string;

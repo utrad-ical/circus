@@ -10,8 +10,8 @@ import React, {
 import styled from 'styled-components';
 import { FeedbackEntry, Job, useCsResults } from '../CsResultsContext';
 import { Display } from '../Display';
-import { createStateChanger, ImageViewer } from '../viewer/CsImageViewer';
-import { Button } from './Button';
+import { createStateChanger, ImageViewer } from '../../ui/ImageViewer';
+import { Button } from '../../ui/Button';
 import { defaultDataPath, normalizeCandidates } from './LesionCandidates';
 
 type IntegrationOptions = 'off' | 'snapped';

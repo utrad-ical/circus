@@ -1,11 +1,15 @@
-# CIRCUS CS Results
+# CIRCUS UI Kit
 
 This is a part of CIRCUS Project.
 
-This package contains type definitions and React components used to display plug-in results of CIRCUS CS. A developer can use this library to develop 
+This package contains the following:
+
+- Generic React UI components that works with CIRCUS Web UI
+- ImageViewer component, a React binding for CIRCUS CS's `Viewer` which let you display viewers (almost) declaratively
+- Official CIRCUS icons
 
 # Usage
 
 ```bash
-npm install @utrad-ical/circus-cs-results
+npm install @utrad-ical/circus-ui-kit
 ```

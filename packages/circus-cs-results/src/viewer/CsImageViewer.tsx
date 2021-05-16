@@ -9,7 +9,8 @@ import classnames from 'classnames';
 
 export type StateChangerFunc<T extends ViewState> = (
   state: T,
-  viewer: Viewer
+  viewer: Viewer,
+  id?: string | number
 ) => T;
 
 interface StateChangeEvent<T extends ViewState> extends Event {
@@ -49,6 +50,7 @@ export const createStateChanger = <T extends ViewState = ViewState>() => {
 };
 
 export const ImageViewer: React.FC<{
+  id?: string | number;
   composition: Composition;
   tool: Tool;
   initialStateSetter?: StateChangerFunc<any>;
@@ -57,6 +59,7 @@ export const ImageViewer: React.FC<{
   onMouseUp?: (ev: MouseEvent) => any;
 }> = props => {
   const {
+    id,
     composition,
     tool,
     initialStateSetter,
@@ -81,7 +84,7 @@ export const ImageViewer: React.FC<{
         if (typeof initialStateSetter === 'function') {
           newViewer.on('imageReady', () => {
             const state = newViewer.getState();
-            const newState = initialStateSetter(state, newViewer);
+            const newState = initialStateSetter(state, newViewer, id);
             newViewer.setState(newState);
           });
         }
@@ -109,7 +112,7 @@ export const ImageViewer: React.FC<{
     if (stateChanger) {
       const cb = (changer: StateChangerFunc<any>) => {
         if (!viewer) return;
-        viewer.setState(changer(viewer.getState(), viewer));
+        viewer.setState(changer(viewer.getState(), viewer, id));
       };
       stateChanger.on(cb);
       return () => {

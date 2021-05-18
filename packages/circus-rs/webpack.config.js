@@ -39,5 +39,11 @@ module.exports = (env, argv) => ({
     contentBase: path.join(__dirname, 'demo'),
     disableHostCheck: true
   },
-  ...(argv.mode !== 'production' ? { devtool: 'source-map' } : {})
+  ...(argv.mode !== 'production' ? { devtool: 'source-map' } : {}),
+  cache: {
+    type: 'filesystem',
+    buildDependencies: {
+      config: [__filename]
+    }
+  }
 });

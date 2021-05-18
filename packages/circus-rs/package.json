@@ -4,7 +4,7 @@
   "scripts": {
     "start": "node ./server.js",
     "debug": "nodemon --inspect ./server.js",
-    "devserver": "webpack-dev-server",
+    "devserver": "webpack serve --mode=development",
     "build": "webpack --mode=production",
     "watch": "webpack --watch",
     "build-npm": "tsc && cp src/browser/image-source/volume-rendering-image-source/*.{vert,frag} lib/browser/image-source/volume-rendering-image-source",

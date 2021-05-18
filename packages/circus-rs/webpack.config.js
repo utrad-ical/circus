@@ -37,7 +37,8 @@ module.exports = (env, argv) => ({
   ],
   devServer: {
     contentBase: path.join(__dirname, 'demo'),
-    disableHostCheck: true
+    disableHostCheck: true,
+    injectClient: false
   },
   ...(argv.mode !== 'production' ? { devtool: 'source-map' } : {}),
   cache: {

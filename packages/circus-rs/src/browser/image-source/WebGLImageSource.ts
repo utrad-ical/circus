@@ -4,13 +4,13 @@ import ViewState, { VrViewState, TransferFunction } from '../ViewState';
 import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
 import VRGLProgram, {
   Camera
-} from './volume-rendering-image-source/VRGLProgram';
+} from './webgl-image-source/VRGLProgram';
 import RawData from '../../common/RawData';
 import { LabelLoader } from './volume-loader/interface';
 import {
   windowToTransferFunction,
   mprTransferFunction
-} from './volume-rendering-image-source/transfer-function-util';
+} from './webgl-image-source/transfer-function-util';
 import MprImageSource from './MprImageSource';
 import { Section, vectorizeSection } from '../../common/geometry/Section';
 import { createOrthogonalMprSection } from '../section-util';
@@ -24,7 +24,7 @@ interface VolumeLoader {
   loadVolume(): Promise<RawData>;
 }
 
-export default class VolumeRenderingImageSource extends MprImageSource {
+export default class WebGLImageSource extends MprImageSource {
   private backCanvas: HTMLCanvasElement;
 
   private vrProgram: VRGLProgram;
@@ -78,10 +78,10 @@ export default class VolumeRenderingImageSource extends MprImageSource {
     // backCanvas.addEventListener('webglcontextrestored', _ev => {}, false);
 
     // Show the background canvas for debugging
-    if (VolumeRenderingImageSource.backCanvasElement) {
-      VolumeRenderingImageSource.backCanvasElement.insertBefore(
+    if (WebGLImageSource.backCanvasElement) {
+      WebGLImageSource.backCanvasElement.insertBefore(
         backCanvas,
-        VolumeRenderingImageSource.backCanvasElement.firstChild
+        WebGLImageSource.backCanvasElement.firstChild
       );
     }
 
@@ -125,7 +125,7 @@ export default class VolumeRenderingImageSource extends MprImageSource {
     ]).then(([volume, mask]) => this.vrProgram.setVolume(volume!, mask));
 
     // For debugging
-    if (VolumeRenderingImageSource.readyBeforeVolumeLoaded) return;
+    if (WebGLImageSource.readyBeforeVolumeLoaded) return;
 
     return loadingVolumes;
   }
@@ -237,8 +237,8 @@ export default class VolumeRenderingImageSource extends MprImageSource {
     // set debug
     if (typeof debugMode !== 'undefined') {
       this.vrProgram.setDebugMode(debugMode);
-    } else if (VolumeRenderingImageSource.defaultDebugMode) {
-      this.vrProgram.setDebugMode(VolumeRenderingImageSource.defaultDebugMode);
+    } else if (WebGLImageSource.defaultDebugMode) {
+      this.vrProgram.setDebugMode(WebGLImageSource.defaultDebugMode);
     }
 
     // set back-canvas-size

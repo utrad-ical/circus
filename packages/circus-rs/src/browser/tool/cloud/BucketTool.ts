@@ -54,7 +54,7 @@ export default class BucketTool extends VoxelCloudToolBase {
 
     const dim = this.activeCloud.volume!.getDimension();
     if (cloudIndex.some((num, index) => num < 0 || dim[index] <= num)) {
-      // alert('Click in the image.');
+      alert('Click in the image.');
       return;
     }
 

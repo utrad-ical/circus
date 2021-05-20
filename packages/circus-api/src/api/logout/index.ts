@@ -7,7 +7,10 @@ export const handleGet: RouteMiddleware = ({ models }) => {
       ctx.throw(status.UNAUTHORIZED);
     }
     const userEmail = ctx.user.userEmail;
-    await models.token.deleteMany({ userId: userEmail });
+    await models.token.deleteMany({
+      userId: userEmail,
+      permanentTokenId: null // non-permanent tokens
+    });
     ctx.body = null; // No content
   };
 };

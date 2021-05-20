@@ -1,5 +1,5 @@
 # Fixed access tokens which the test users can log-in with.
-# 4102412399000 is calculatet as `new Date('2099-12-31 23:59:59').valueOf()`
+# 4102412399000 is calculated as `new Date('2099-12-31 23:59:59').valueOf()`
 - accessToken: 2311aee0435c36ae14c39835539a931a6344714a
   accessTokenExpiresAt:
     $date: 4102412399000

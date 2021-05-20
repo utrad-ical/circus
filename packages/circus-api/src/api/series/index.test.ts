@@ -5,6 +5,11 @@ import fs from 'fs-extra';
 import FormData from 'form-data';
 import delay from '../../utils/delay';
 import { setUpMongoFixture } from '../../../test/util-mongo';
+import zlib from 'zlib';
+import tarfs from 'tar-fs';
+import { PassThrough } from 'stream';
+import { reject } from 'lodash';
+import { promises } from 'dns';
 
 let apiTest: ApiTest, ax: typeof apiTest.axiosInstances;
 beforeAll(async () => {
@@ -216,5 +221,51 @@ describe('search by my list', () => {
     });
     expect(res.status).toBe(400);
     expect(res.data.error).toBe('This my list is not for series');
+  });
+});
+
+describe('Export CS dump', () => {
+  beforeEach(async () => {
+    await fs.emptyDir(apiTest.downloadFileDirectory);
+  });
+
+  afterEach(async () => {
+    await fs.remove(apiTest.downloadFileDirectory);
+  });
+
+  test('export', async () => {
+    const res = await ax.dave.request({
+      url: 'api/series/export-cs-dump',
+      method: 'post',
+      data: {
+        series: [
+          {
+            seriesUid: '222.333.444.555.666',
+            partialVolumeDescriptor: { start: 1, end: 2, delta: 1 }
+          }
+        ],
+        format: 'tgz'
+      }
+    });
+    expect(res.status).toBe(200);
+    const taskId = res.data.taskId;
+
+    while (apiTest.taskManager.isTaskInProgress(taskId)) {
+      await new Promise(resolve => setTimeout(resolve, 10));
+    }
+
+    const file = fs.createReadStream(
+      path.join(apiTest.downloadFileDirectory, taskId)
+    );
+    const unzip = zlib.createGunzip();
+    const tarStream = tarfs.extract(apiTest.downloadFileDirectory);
+    file.pipe(unzip).pipe(tarStream);
+    await new Promise<void>(resolve => tarStream.on('finish', resolve));
+
+    const textContent = await fs.readFile(
+      path.join(apiTest.downloadFileDirectory, 'dummy.txt'),
+      'utf8'
+    );
+    expect(textContent).toBe('abc');
   });
 });

@@ -1,4 +1,8 @@
-import { DicomFileRepository } from '@utrad-ical/circus-lib';
+import {
+  DicomFileRepository,
+  isValidPartialVolumeDescriptor,
+  rangeHasPartialVolume
+} from '@utrad-ical/circus-lib';
 import MultiRange from 'multi-integer-range';
 import { FunctionService } from '@utrad-ical/circus-lib';
 import * as circus from '../../interface';
@@ -9,30 +13,6 @@ export interface PluginJobRegisterer {
     payload: circus.PluginJobRequest,
     priority?: number
   ): Promise<void>;
-}
-
-function checkSeriesImageRange(
-  imagesInSeries: MultiRange,
-  series: circus.JobSeries
-): void {
-  if (typeof series.startImgNum === 'undefined') return;
-  if (typeof series.startImgNum !== 'number') {
-    throw new TypeError('Invalid startImgNum');
-  }
-  const wantedImages = new MultiRange();
-  const endImgNum =
-    Number(series.endImgNum) || (imagesInSeries.max() as number);
-  const imageDelta = Number(series.imageDelta) || 1;
-  for (let i = series.startImgNum; i <= endImgNum; i += imageDelta) {
-    wantedImages.append(i);
-  }
-  if (!wantedImages.length() || !imagesInSeries.has(wantedImages)) {
-    throw new RangeError(
-      `Series ${series.seriesUid} does not contain enough images ` +
-        'specified by startImgNum, endImgNum, imageDelta.\n' +
-        `Images in the series: ${imagesInSeries.toString()}`
-    );
-  }
 }
 
 /**
@@ -74,7 +54,20 @@ const createPluginJobRegisterer: FunctionService<
       if (!imagesInSeries.length()) {
         throw new Error(`Series ${series.seriesUid} not found.`);
       }
-      checkSeriesImageRange(imagesInSeries, series);
+      if (!isValidPartialVolumeDescriptor(series.partialVolumeDescriptor)) {
+        throw new Error(
+          `Series ${series.seriesUid} has invalid partial volume descriptor.`
+        );
+      }
+      if (
+        !rangeHasPartialVolume(imagesInSeries, series.partialVolumeDescriptor)
+      ) {
+        throw new RangeError(
+          `Series ${series.seriesUid} does not contain enough images ` +
+            'specified by the partialVolumeDescriptor.\n' +
+            `Images in the series: ${imagesInSeries.toString()}`
+        );
+      }
     }
 
     // All check passed.

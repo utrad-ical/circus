@@ -71,7 +71,8 @@ const resizeBoundingBox = (
   handleType: BoundingRectWithHandleHitType,
   axes: Axes,
   delta: Vector3,
-  originalBb: BoundingBox
+  originalBb: BoundingBox,
+  fixCenterOfGravity: boolean
 ): BoundingBox => {
   const boundingBox: BoundingBox = [
     originalBb[0].clone(),
@@ -83,11 +84,17 @@ const resizeBoundingBox = (
     case 'north-west-handle':
     case 'north-east-handle':
       boundingBox[0][axes.yAxis] += delta[axes.yAxis];
+      if (fixCenterOfGravity) {
+        boundingBox[1][axes.yAxis] -= delta[axes.yAxis];
+      }
       break;
     case 'south-handle':
     case 'south-west-handle':
     case 'south-east-handle':
       boundingBox[1][axes.yAxis] += delta[axes.yAxis];
+      if (fixCenterOfGravity) {
+        boundingBox[0][axes.yAxis] -= delta[axes.yAxis];
+      }
       break;
   }
 
@@ -96,11 +103,17 @@ const resizeBoundingBox = (
     case 'north-west-handle':
     case 'south-west-handle':
       boundingBox[0][axes.xAxis] += delta[axes.xAxis];
+      if (fixCenterOfGravity) {
+        boundingBox[1][axes.xAxis] -= delta[axes.xAxis];
+      }
       break;
     case 'east-handle':
     case 'north-east-handle':
     case 'south-east-handle':
       boundingBox[1][axes.xAxis] += delta[axes.xAxis];
+      if (fixCenterOfGravity) {
+        boundingBox[0][axes.xAxis] -= delta[axes.xAxis];
+      }
       break;
   }
 
@@ -143,8 +156,18 @@ const getResizeRatios = (
 const getScaleOrigin = (
   handleType: BoundingRectWithHandleHitType,
   axes: Axes,
-  originalBb: BoundingBox
+  originalBb: BoundingBox,
+  fixCenterOfGravity: boolean
 ): Vector3D => {
+  if (fixCenterOfGravity) {
+    const originalBbSize = originalBb[1].clone().sub(originalBb[0]);
+    const scaleOrigin = originalBb[0].clone();
+    scaleOrigin[axes.xAxis] += originalBbSize[axes.xAxis] / 2;
+    scaleOrigin[axes.yAxis] += originalBbSize[axes.yAxis] / 2;
+    scaleOrigin[axes.zAxis] += originalBbSize[axes.zAxis] / 2;
+    return scaleOrigin.toArray() as Vector3D;
+  }
+
   switch (handleType) {
     case 'north-west-handle':
       return originalBb[1].toArray() as Vector3D;
@@ -188,6 +211,7 @@ const handleBoundingBoxOperation = (
   dragStartPoint: Vector3,
   draggedPoint: Vector3,
   maintainAspectRatio: boolean,
+  fixCenterOfGravity: boolean,
   originalPoints: Vector3D[]
 ): Vector3D[] => {
   if (orientation === 'oblique') throw new Error('Invalid orientation');
@@ -203,8 +227,19 @@ const handleBoundingBoxOperation = (
   } else {
     // Relocate points as the bounding box resizes
     const originalBb = toBoundingBox(originalBoundingBox3);
-    const resizedBb = resizeBoundingBox(handleType, axes, delta, originalBb);
-    const scaleOrigin = getScaleOrigin(handleType, axes, originalBb);
+    const resizedBb = resizeBoundingBox(
+      handleType,
+      axes,
+      delta,
+      originalBb,
+      fixCenterOfGravity
+    );
+    const scaleOrigin = getScaleOrigin(
+      handleType,
+      axes,
+      originalBb,
+      fixCenterOfGravity
+    );
     const resizeRatios = getResizeRatios(
       handleType,
       axes,

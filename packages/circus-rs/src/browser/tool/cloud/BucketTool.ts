@@ -5,6 +5,8 @@ import { detectOrthogonalSection } from '../../section-util';
 import { Vector2, Vector3 } from 'three';
 import { Vector3D } from '../../../common/geometry';
 import { convertViewerPointToVolumeIndex } from '../tool-util';
+import MprImageSource from '../../image-source/MprImageSource';
+import { isMprImageSourceWithDicomVolume } from '../../image-source/MprImageSourceWithDicomVolume';
 
 /**
  * Bucket tool performs the flood-fill operation along an orthogonal MPR plane.
@@ -41,6 +43,22 @@ export default class BucketTool extends VoxelCloudToolBase {
       alert('You cannot use bucket tool on oblique MPR image.');
       return;
     }
+
+    const src = comp.imageSource;
+    if (
+      !(src instanceof MprImageSource) ||
+      !isMprImageSourceWithDicomVolume(src)
+    ) {
+      throw new Error('Unsupported image source');
+    }
+    if (!this.activeCloud.expanded) this.activeCloud.expandToMaximum(src);
+
+    const dim = this.activeCloud.volume!.getDimension();
+    if (cloudIndex.some((num, index) => num < 0 || dim[index] <= num)) {
+      alert('Click within the image.');
+      return;
+    }
+
     // perform flood-fill on the active cloud
     floodFillOnSlice(
       this.activeCloud.volume!,

@@ -1,6 +1,10 @@
 // This *.d.ts file is recognized by the typescript compiler.
 // You can use them like `circus.PluginJobRequest` without `import`-ing.
 
+import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import { Pack as TarStream } from 'tar-stream';
+import { EventEmitter } from 'events';
+
 export type QueueState = 'wait' | 'processing';
 
 export interface Configuration {
@@ -51,11 +55,7 @@ export interface PluginJobRequest {
 
 export type PluginJobRequestQueue = Queue<PluginJobRequest>;
 
-export interface JobSeries {
-  seriesUid: string;
-  startImgNum?: number;
-  endImgNum?: number;
-  imageDelta?: number;
+export interface JobSeries extends SeriesEntry {
   requiredPrivateTags?: string[];
 }
 
@@ -164,4 +164,16 @@ export interface CsCore {
       priority?: number
     ) => Promise<void>;
   };
+}
+
+export interface SeriesEntry {
+  seriesUid: string;
+  partialVolumeDescriptor: PartialVolumeDescriptor;
+}
+
+export interface DicomVoxelDumper {
+  /**
+   * @param series The list of series to export.
+   */
+  dump: (series: SeriesEntry[]) => { stream: TarStream; events: EventEmitter };
 }

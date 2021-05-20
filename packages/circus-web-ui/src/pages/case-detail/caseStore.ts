@@ -38,7 +38,10 @@ export interface CaseDetailState {
    */
   refreshCounter: number;
   caseAttributesAreValid: boolean;
-  labelAttributesAreValid: boolean;
+  /**
+   * Holds the temporary keys of labels with invalid attributes.
+   */
+  labelsWithInvalidAttributes: string[];
 }
 
 const maxHistoryLength = 10;
@@ -109,7 +112,7 @@ const slice = createSlice({
     currentHistoryIndex: 0,
     refreshCounter: 0,
     caseAttributesAreValid: true,
-    labelAttributesAreValid: true
+    labelsWithInvalidAttributes: []
   } as CaseDetailState,
   reducers: {
     setBusy: (s, action: PayloadAction<boolean>) => {
@@ -218,9 +221,17 @@ const slice = createSlice({
       const valid = action.payload;
       s.caseAttributesAreValid = valid;
     },
-    validateLabelAttributes: (s, action: PayloadAction<boolean>) => {
-      const valid = action.payload;
-      s.labelAttributesAreValid = valid;
+    validateLabelAttributes: (
+      s,
+      action: PayloadAction<{ key: string; valid: boolean }>
+    ) => {
+      const { key, valid } = action.payload;
+      s.labelsWithInvalidAttributes = s.labelsWithInvalidAttributes.filter(
+        s => s !== key
+      );
+      if (!valid) {
+        s.labelsWithInvalidAttributes.push(key);
+      }
     }
   }
 });

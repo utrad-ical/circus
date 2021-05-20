@@ -55,6 +55,14 @@ export default function floodFill(
   erase = false
 ): number {
   // https://en.wikipedia.org/wiki/Flood_fill
+  if (
+    center.x < 0 ||
+    grid.width <= center.x ||
+    center.y < 0 ||
+    grid.height <= center.y
+  ) {
+    throw new RangeError('value of center is not contained in the grid');
+  }
   const stack: Vector2[] = [center];
 
   let minx = center.x,

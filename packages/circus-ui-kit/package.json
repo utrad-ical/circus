@@ -1,7 +1,7 @@
 {
-  "name": "@utrad-ical/circus-cs-results",
+  "name": "@utrad-ical/circus-ui-kit",
   "version": "0.1.0",
-  "description": "React components used to display CIRCUS CS job results",
+  "description": "React components used by CIRCUS projects",
   "main": "src/index.ts",
   "scripts": {},
   "repository": {

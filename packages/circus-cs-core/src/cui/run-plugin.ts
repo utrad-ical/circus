@@ -6,8 +6,11 @@ import chalk from 'chalk';
 import DockerRunner from '../util/DockerRunner';
 import tarfs from 'tar-fs';
 import { DicomFileRepository } from '@utrad-ical/circus-lib';
-import StaticDicomFileRepository from '@utrad-ical/circus-lib/src/dicom-file-repository/StaticDicomFileRepository';
 import * as circus from '../interface';
+import createDicomVoxelDumper from '../job/createDicomVoxelDumper';
+import createTmpDicomFileRepository, {
+  createJobSeries
+} from './util/tmpDicomFileRepository';
 
 /**
  * Directly runs the specified plug-in without using a queue system.
@@ -58,33 +61,22 @@ const runPlugin: FunctionService<
         return new Promise((resolve, reject) => {
           const extract = tarfs.extract(resultsDir);
           extract.on('finish', resolve);
+          extract.on('error', reject);
           stream.pipe(extract);
         });
       }
     };
 
-    let dicomRepository: DicomFileRepository = dicomFileRepository;
-    if (d) {
-      // Create a temporary DicomFileRepository
-      dicomRepository = new StaticDicomFileRepository({
-        dataDir: seriesUidOrDirectories[0],
-        customUidDirMap: (indexAsSeriesUid: string) => {
-          const index = parseInt(indexAsSeriesUid);
-          return seriesUidOrDirectories[index];
-        }
-      });
-    }
+    const repo: DicomFileRepository = d
+      ? createTmpDicomFileRepository(seriesUidOrDirectories)
+      : dicomFileRepository;
 
-    const series: circus.JobSeries[] = d
-      ? seriesUidOrDirectories.map((_, i) => ({ seriesUid: `${i}` }))
-      : seriesUidOrDirectories.map(s => ({ seriesUid: s }));
+    const dicomVoxelDumper = await createDicomVoxelDumper(
+      {},
+      { dicomFileRepository: repo }
+    );
 
-    const pjrDeps = {
-      jobReporter,
-      dicomRepository,
-      pluginDefinitionAccessor,
-      dockerRunner
-    };
+    const series = await createJobSeries(!!d, repo, seriesUidOrDirectories);
 
     const jobRequest: circus.PluginJobRequest = {
       pluginId,
@@ -93,9 +85,9 @@ const runPlugin: FunctionService<
 
     const runner = await pluginJobRunner(
       { workingDirectory: work, removeTemporaryDirectory: !keep },
-      pjrDeps
+      { jobReporter, pluginDefinitionAccessor, dockerRunner, dicomVoxelDumper }
     );
-    runner.run('dummy', jobRequest, process.stdout);
+    await runner.run('dummy', jobRequest, process.stdout);
   };
 };
 

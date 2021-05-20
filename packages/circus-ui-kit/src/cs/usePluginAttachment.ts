@@ -28,7 +28,7 @@ export const usePluginAttachment = <T extends keyof AttachmentTypeMap>(
     const load = async () => {
       loading = true;
       abortController = new AbortController();
-      const res = await loadAttachment(path, abortController);
+      const res = await loadAttachment(path, abortController.signal);
       if (type === 'text') setData(await res.text());
       else if (type === 'json') setData(await res.json());
       else setData(await res.arrayBuffer());

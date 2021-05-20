@@ -3,8 +3,9 @@ import {
   Choice,
   Dump,
   Locator,
-  LesionCandidates
-} from '@utrad-ical/circus-cs-results';
+  LesionCandidates,
+  VolumeOverlay
+} from '@utrad-ical/circus-ui-kit';
 
 // https://github.com/module-federation/module-federation-examples/tree/master/advanced-api/dynamic-remotes
 
@@ -12,7 +13,8 @@ const builtInDisplays: { [name: string]: Display<any, any> } = {
   Choice,
   Dump,
   Locator,
-  LesionCandidates
+  LesionCandidates,
+  VolumeOverlay
 };
 
 const loaded = new Map<string, true>();
@@ -40,7 +42,6 @@ const loadExternalDisplay = async <O extends object, F>(
   await container.init(__webpack_share_scopes__.default);
   const factory = await container.get('Display');
   const Display = factory().default;
-  console.log({ Display });
   return Display;
 };
 

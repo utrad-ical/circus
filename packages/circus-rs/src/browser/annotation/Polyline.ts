@@ -293,6 +293,7 @@ export default class Polyline implements Annotation, ViewerEventTarget {
       // Move or Resize
       const targetOriginalPoints = [...originalPoints];
       const maintainAspectRatio = !!ev.shiftKey;
+      const fixCenterOfGravity = !!ev.ctrlKey;
       this.points = handleBoundingBoxOperation(
         originalBoundingBox!,
         'axial',
@@ -300,6 +301,7 @@ export default class Polyline implements Annotation, ViewerEventTarget {
         dragStartPoint3,
         draggedPoint3,
         maintainAspectRatio,
+        fixCenterOfGravity,
         targetOriginalPoints.map(targetOriginalPoint => [
           ...targetOriginalPoint,
           this.z!

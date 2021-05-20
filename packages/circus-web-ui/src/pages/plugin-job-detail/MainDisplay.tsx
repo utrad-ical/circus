@@ -5,7 +5,7 @@ import {
   FeedbackEntry,
   FeedbackTarget,
   FeedbackReport
-} from '@utrad-ical/circus-cs-results';
+} from '@utrad-ical/circus-ui-kit';
 import Section from './Section';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import produce from 'immer';
@@ -119,7 +119,7 @@ const MainDisplay: Display<FeedbackTarget[], any> = props => {
     <div className="job-detail-main">
       <div className="feedback-targets">
         {displayStrategy.map(strategy => {
-          const { feedbackKey, caption, options } = strategy;
+          const { feedbackKey, caption, options = {} } = strategy;
           const Display: Display<typeof options, any> = feedbackMeta[
             feedbackKey
           ].display!;

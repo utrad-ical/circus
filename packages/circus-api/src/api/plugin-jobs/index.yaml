@@ -19,6 +19,8 @@ routes:
             $ref: pluginJobSeries
         priority:
           type: integer
+        force:
+          const: true
       required: ['pluginId', 'series']
       additionalProperties: false
     responseSchema:

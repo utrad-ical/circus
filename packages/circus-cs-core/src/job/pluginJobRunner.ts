@@ -4,10 +4,10 @@ import DockerRunner from '../util/DockerRunner';
 import { DicomFileRepository, FunctionService } from '@utrad-ical/circus-lib';
 import pluginResultsValidator from './pluginResultsValidator';
 import { MultiRange } from 'multi-integer-range';
-import buildDicomVolumes from './buildDicomVolumes';
 import tarfs from 'tar-fs';
 import stream from 'stream';
 import * as circus from '../interface';
+import buildDicomVolumes from './buildDicomVolumes';
 
 export interface PluginJobRunner {
   run: (
@@ -23,9 +23,9 @@ const pluginJobRunner: FunctionService<
   PluginJobRunner,
   {
     jobReporter: circus.PluginJobReporter;
-    dicomFileRepository: DicomFileRepository;
     pluginDefinitionAccessor: circus.PluginDefinitionAccessor;
     dockerRunner: DockerRunner;
+    dicomVoxelDumper: circus.DicomVoxelDumper;
   }
 > = async (
   options: {
@@ -36,10 +36,10 @@ const pluginJobRunner: FunctionService<
 ) => {
   const { workingDirectory, removeTemporaryDirectory } = options;
   const {
-    dicomFileRepository,
     pluginDefinitionAccessor,
     jobReporter,
-    dockerRunner
+    dockerRunner,
+    dicomVoxelDumper
   } = deps;
 
   if (!workingDirectory) throw new Error('Working directory is not set');
@@ -67,22 +67,8 @@ const pluginJobRunner: FunctionService<
       fs.ensureDir(workDir(jobId, 'dicom'))
     ]);
     // Fetches DICOM data from DicomFileRepository and builds raw volume
-    const createdSeries: { [uid: string]: boolean } = {};
     const inDir = workDir(jobId, 'in');
-    for (let volId = 0; volId < series.length; volId++) {
-      logStream.write(`  Building DICOM volume for vol #${volId}...\n`);
-      const seriesUid = series[volId].seriesUid;
-      const dicomDir = path.join(workDir(jobId, 'dicom'), seriesUid);
-      if (!createdSeries[seriesUid]) {
-        await fetchSeriesFromRepository(
-          dicomFileRepository,
-          seriesUid,
-          dicomDir
-        );
-        createdSeries[seriesUid] = true;
-      }
-      await buildDicomVolumes(dockerRunner, [dicomDir], inDir);
-    }
+    await buildDicomVolumes(dicomVoxelDumper, series, inDir, logStream);
   };
 
   const postProcess = async (jobId: string, logStream: stream.Writable) => {
@@ -157,37 +143,11 @@ const pluginJobRunner: FunctionService<
 
 pluginJobRunner.dependencies = [
   'jobReporter',
-  'dicomFileRepository',
   'pluginDefinitionAccessor',
-  'dockerRunner'
+  'dockerRunner',
+  'dicomVoxelDumper'
 ];
 export default pluginJobRunner;
-
-/**
- * Extracts the entire series from DICOM repository
- * into the speicied path on the local file system.
- * @param dicomFileRepository The DICOM repositoty from which the series is fetched.
- * @param seriesUid The series instance UID.
- * @param destDir The path to the destination directory.
- */
-export async function fetchSeriesFromRepository(
-  dicomFileRepository: DicomFileRepository,
-  seriesUid: string,
-  destDir: string
-) {
-  await fs.ensureDir(destDir);
-  const { load, images } = await dicomFileRepository.getSeries(seriesUid);
-  const it = new MultiRange(images).getIterator();
-  let next;
-  while (!(next = it.next()).done) {
-    const i: number = next.value!;
-    const image = await load(i);
-    await fs.writeFile(
-      path.join(destDir, ('00000000' + i).slice(-8) + '.dcm'),
-      Buffer.from(image)
-    );
-  }
-}
 
 /**
  * Executes the specified plugin.

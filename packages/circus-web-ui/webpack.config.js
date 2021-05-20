@@ -65,6 +65,12 @@ module.exports = {
   plugins: [
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(nodeEnv)
+    }),
+    new webpack.container.ModuleFederationPlugin({
+      shared: [
+        { react: { singleton: true, eager: true } },
+        { 'react-dom': { singleton: true, eager: true } }
+      ]
     })
   ],
   devServer: {

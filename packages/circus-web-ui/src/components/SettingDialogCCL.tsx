@@ -28,10 +28,14 @@ const SettingDialogCCL: React.FC<{
   const [dispLabelNumber, setDispLabelNumber] = useState(2);
   return (
     <>
+      <Modal.Header>
+        <Modal.Title>
+          Setting options for connected component labeling (CCL)
+        </Modal.Title>
+      </Modal.Header>
       <Modal.Body>
-        <p>Setting option for connected component labeling (CCL)</p>
         <div>
-          Maximum number of connected component (CC) to display: &ensp;
+          Maximum number of connected components (CCs) to display: &ensp;
           <ShrinkSelect
             bsSize="sm"
             options={maximumCCNumOptions}

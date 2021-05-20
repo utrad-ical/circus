@@ -4,6 +4,7 @@ import DockerRunner from '../util/DockerRunner';
 import tar, { pack } from 'tar-stream';
 import memory from 'memory-streams';
 import * as circus from '../interface';
+import { EventEmitter } from 'events';
 
 const testDir = path.resolve(__dirname, '../../test/');
 const workingDirectory = path.join(testDir, 'working/');
@@ -53,7 +54,7 @@ describe('pluginJobRunner', () => {
         stream.entry({ name: '0.raw' }, Buffer.alloc(10));
         stream.entry({ name: '0.json' }, '{}');
         stream.finalize();
-        return stream;
+        return { stream, events: new EventEmitter() };
       }
     };
 

@@ -3,6 +3,7 @@
 
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import { Pack as TarStream } from 'tar-stream';
+import { EventEmitter } from 'events';
 
 export type QueueState = 'wait' | 'processing';
 
@@ -171,5 +172,8 @@ export interface SeriesEntry {
 }
 
 export interface DicomVoxelDumper {
-  dump: (series: SeriesEntry[]) => TarStream;
+  /**
+   * @param series The list of series to export.
+   */
+  dump: (series: SeriesEntry[]) => { stream: TarStream; events: EventEmitter };
 }

@@ -5,7 +5,7 @@ import { Models } from '../interface';
 import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
 import Storage from '../storage/Storage';
 import { UserPrivilegeInfo } from '../privilegeUtils';
-import { CsCore } from '@utrad-ical/circus-cs-core';
+import { CsCore, DicomVoxelDumper } from '@utrad-ical/circus-cs-core';
 import { Logger, DicomFileRepository } from '@utrad-ical/circus-lib';
 import { TaskManager } from '../createTaskManager';
 import { MhdPacker } from '../case/createMhdPacker';
@@ -25,6 +25,7 @@ export interface Deps {
   dicomImageServerUrl: string;
   taskManager: TaskManager;
   mhdPacker: MhdPacker;
+  dicomVoxelDumper: DicomVoxelDumper;
 }
 
 interface CustomCtxMembers {

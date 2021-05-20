@@ -20,6 +20,7 @@ import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
 import useLocalPreference from 'utils/useLocalPreference';
 import { EditingData, EditingDataUpdater } from './revisionData';
+import * as c from './caseStore';
 import {
   LabelType,
   InternalLabel,
@@ -44,10 +45,18 @@ const LabelMenu: React.FC<{
   editingData: EditingData;
   onReveal: () => void;
   updateEditingData: EditingDataUpdater;
+  caseDispatch: React.Dispatch<any>;
   viewers: { [index: string]: Viewer };
   disabled?: boolean;
 }> = props => {
-  const { editingData, onReveal, updateEditingData, viewers, disabled } = props;
+  const {
+    editingData,
+    onReveal,
+    updateEditingData,
+    caseDispatch,
+    viewers,
+    disabled
+  } = props;
 
   const [newLabelType, setNewLabelType] = useLocalPreference<LabelType>(
     'newLabelType',
@@ -92,6 +101,12 @@ const LabelMenu: React.FC<{
             editingData.activeLabelIndex = series.labels.length - 1;
           }
         });
+        caseDispatch(
+          c.validateLabelAttributes({
+            key: activeLabel!.temporaryKey,
+            valid: true
+          })
+        );
         break;
       }
       case 'convertType': {

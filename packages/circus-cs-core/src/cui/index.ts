@@ -48,6 +48,9 @@ const commands: { [key: string]: any } = {
   'run-plugin': {
     help: 'Run a plug-in directly without using any queue system.'
   },
+  'dicom-voxel-dump': {
+    help: 'Exports DICOM series data for plug-in input.'
+  },
   config: {
     help: 'Prints this current config.'
   }

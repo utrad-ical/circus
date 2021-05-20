@@ -6,6 +6,7 @@ import focusBy from '@utrad-ical/circus-rs/src/browser/tool/state/focusBy';
 import produce from 'immer';
 import { ApiCaller } from 'utils/api';
 import { sha1 } from 'utils/util';
+import { gzipSync } from 'fflate';
 
 type InternalLabelDataMap = {
   voxel: InternalVoxelLabelData; // internal | external
@@ -271,8 +272,11 @@ export const internalLabelToExternal = async (
         await api('blob/' + hash, {
           method: 'put',
           handleErrors: true,
-          data: shrinkResult.rawData.data,
-          headers: { 'Content-Type': 'application/octet-stream' }
+          data: gzipSync(new Uint8Array(shrinkResult.rawData.data)),
+          headers: {
+            'Content-Type': 'application/octet-stream',
+            'Content-Encoding': 'gzip'
+          }
         });
       }
       return {

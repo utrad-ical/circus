@@ -1,4 +1,5 @@
 import * as rs from '@utrad-ical/circus-rs/src/browser';
+import get from 'lodash.get';
 import React, {
   useCallback,
   useEffect,
@@ -7,22 +8,44 @@ import React, {
   useState
 } from 'react';
 import styled from 'styled-components';
-import { useCsResults } from '../CsResultsContext';
+import { FeedbackEntry, Job, useCsResults } from '../CsResultsContext';
 import { Display } from '../Display';
-import { ImageViewer } from '../viewer/CsImageViewer';
-import { createStateChanger } from '../viewer/CsImageViewer';
-import { Button } from './Button';
-import { Job } from '../CsResultsContext';
+import { createStateChanger, ImageViewer } from '../../ui/ImageViewer';
+import { Button } from '../../ui/Button';
+import { defaultDataPath, normalizeCandidates } from './LesionCandidates';
+
+type IntegrationOptions = 'off' | 'snapped';
 
 export interface LocatorOptions {
+  /**
+   * Target volume ID. Default = 0.
+   */
   volumeId?: number;
   excludeFromActionLog?: boolean;
+  /**
+   * When turned on, the clicked location snaps to the nearest lesion candidate.
+   */
+  snapThresholdMm?: number | false;
+  /**
+   * Specify the data path of lesion candidates.
+   */
+  snapDataPath?: string;
+
+  consensualIntegration?: IntegrationOptions;
 }
+
+const enteredBy = Symbol();
 
 export interface Location {
   volumeId: number;
   location: number[];
+  snappedLesionCandidate?: number;
   data?: any;
+  /**
+   * Used in consensual feedback to track who initially input this feedback.
+   * Will be ignored on JSON-stringification.
+   */
+  [enteredBy]?: string[];
 }
 
 export type LocatorFeedback = Array<Location>;
@@ -60,8 +83,52 @@ const applyDisplayOptions = (
   return state;
 };
 
+/**
+ * Integrates personal opinions into initial consensual feedback.
+ */
+const integrateEntries = (
+  opinions: readonly FeedbackEntry<LocatorFeedback>[],
+  options?: IntegrationOptions
+): Location[] => {
+  const allLocs = opinions
+    .map(entry =>
+      entry.data.map(loc => ({ ...loc, [enteredBy]: [entry.userEmail] }))
+    )
+    .flat();
+  if (options === 'snapped') {
+    const integratedLocs: Location[] = [];
+    allLocs.forEach(loc => {
+      const idx = integratedLocs.findIndex(
+        loc => loc.snappedLesionCandidate === loc.snappedLesionCandidate
+      );
+      if (idx >= 0) {
+        integratedLocs[idx][enteredBy]!.push(loc[enteredBy]![0]);
+      } else {
+        integratedLocs.push(loc);
+      }
+    });
+    return integratedLocs;
+  }
+  return allLocs;
+};
+
+const distance = (x: number[], y: number[], vs: number[]) => {
+  const mx = [x[0] * vs[0], x[1] * vs[1], x[2] * vs[2]];
+  const my = [y[0] * vs[0], y[1] * vs[1], y[2] * vs[2]];
+  return Math.sqrt(
+    (mx[0] - my[0]) * (mx[0] - my[0]) +
+      (mx[1] - my[1]) * (mx[1] - my[1]) +
+      (mx[2] - my[2]) * (mx[2] - my[2])
+  );
+};
+
 export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
-  const { options, initialFeedbackValue, onFeedbackChange } = props;
+  const {
+    options,
+    personalOpinions,
+    initialFeedbackValue,
+    onFeedbackChange
+  } = props;
   const {
     job,
     consensual,
@@ -71,11 +138,15 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
     eventLogger
   } = useCsResults();
 
-  const { volumeId = 0, excludeFromActionLog } = options;
+  const {
+    volumeId = 0,
+    excludeFromActionLog,
+    consensualIntegration,
+    snapThresholdMm = false,
+    snapDataPath = defaultDataPath
+  } = options;
+  const { results } = job;
   const [noConfirmed, setNoConfirmed] = useState(false);
-  const [showViewer, setShowViewer] = useState(
-    initialFeedbackValue?.length ?? 0 > 0
-  );
 
   /**
    * Remembers voxel size of the current series.
@@ -83,8 +154,14 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
   const voxelSizeRef = useRef<number[]>();
 
   const [currentFeedback, setCurrentFeedback] = useState<LocatorFeedback>(
-    initialFeedbackValue ?? []
+    initialFeedbackValue ??
+      (consensual
+        ? integrateEntries(personalOpinions, consensualIntegration)
+        : [])
   );
+
+  const [showViewer, setShowViewer] = useState(currentFeedback.length > 0);
+
   const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
 
   const [composition, setComposition] = useState<rs.Composition | undefined>(
@@ -115,7 +192,6 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
       voxelSizeRef.current = imageSource.metadata!.voxelSize;
     });
     setComposition(comp);
-    setCurrentFeedback([]);
   }, [job.series, volumeId]);
 
   const log = (action: string, data?: any) => {
@@ -173,8 +249,9 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
 
   useEffect(() => {
     if (!composition) return;
+    const voxelSize = voxelSizeRef.current;
+    if (!voxelSize) return;
     composition.removeAllAnnotations();
-    const voxelSize = voxelSizeRef.current!;
     currentFeedback.forEach((item, i) => {
       const point = new rs.Point();
       point.location = [
@@ -190,25 +267,43 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
 
   const handleMouseUp = () => {
     if (!editable || !composition) return;
-    const newValue: Location[] = [];
     const voxelSize = voxelSizeRef.current!;
-    composition.annotations.forEach((point: any) => {
-      newValue.push({
-        volumeId,
-        location: [
-          Math.round(point.location[0] / voxelSize[0]),
-          Math.round(point.location[1] / voxelSize[1]),
-          Math.round(point.location[2] / voxelSize[2])
-        ]
+    const newPoint = composition.annotations[
+      composition.annotations.length - 1
+    ] as rs.Point;
+    let location = [
+      Math.round(newPoint.location![0] / voxelSize[0]),
+      Math.round(newPoint.location![1] / voxelSize[1]),
+      Math.round(newPoint.location![2] / voxelSize[2])
+    ];
+    let snappedLesionCandidate: number | undefined = undefined;
+    if (snapThresholdMm > 0) {
+      let minDistance = Infinity;
+      const candidates = normalizeCandidates(get(results, snapDataPath));
+      candidates.forEach(cand => {
+        const d = distance(cand.location, location, voxelSize);
+        if (d <= snapThresholdMm && d < minDistance) {
+          snappedLesionCandidate = cand.id;
+          location = cand.location;
+          minDistance = d;
+        }
       });
-    });
+    }
+    const newLocation: Location = {
+      volumeId,
+      location,
+      ...(typeof snappedLesionCandidate === 'number'
+        ? { snappedLesionCandidate }
+        : {})
+    };
+    const newValue = [...currentFeedback, newLocation];
     setCurrentFeedback(newValue);
     setActiveIndex(newValue.length - 1);
     log('Locator: add location');
   };
 
   const initialStateSetter = useCallback(
-    (state, viewer) => applyDisplayOptions(state, job, volumeId),
+    (state: rs.MprViewState) => applyDisplayOptions(state, job, volumeId),
     [volumeId, job]
   );
 
@@ -244,6 +339,7 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
               <tr>
                 <th>#</th>
                 <th>Position</th>
+                {typeof snapThresholdMm === 'number' && <th>Snapped to</th>}
                 {consensual && <th>Entered By</th>}
                 <th />
               </tr>
@@ -253,7 +349,10 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
                 <tr key={i}>
                   <td>{i + 1}</td>
                   <td>{JSON.stringify(item.location)}</td>
-                  {consensual && <td />}
+                  {typeof snapThresholdMm === 'number' && (
+                    <td>{item.snappedLesionCandidate ?? '-'}</td>
+                  )}
+                  {consensual && <td>{item[enteredBy]!.join(', ')}</td>}
                   <td>
                     <Button
                       size="xs"

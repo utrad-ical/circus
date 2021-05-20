@@ -15,13 +15,13 @@ const buildDicomVolumes = (
   destDir: string,
   logStream: Writable
 ) => {
-  const tarStream = dicomVoxelDumper.dump(seriesEntries);
+  const { stream } = dicomVoxelDumper.dump(seriesEntries);
   return new Promise<void>((resolve, reject) => {
     const extract = tarfs.extract(destDir, {
       dmode: 0o555, // all dirs should be readable
       fmode: 0o444 // all files should be readable
     });
-    tarStream.pipe(extract);
+    stream.pipe(extract);
     extract.on('entry', (header, stream, next) => {
       logStream.write(`  Writing: ${header.name}`);
     });

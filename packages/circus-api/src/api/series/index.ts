@@ -4,6 +4,8 @@ import { CircusContext, RouteMiddleware } from '../../typings/middlewares';
 import checkFilter from '../../utils/checkFilter';
 import { fileOrZipIterator } from '../../utils/directoryIterator';
 import { performAggregationSearch } from '../performSearch';
+import zlib from 'zlib';
+import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 
 const maskPatientInfo = (ctx: CircusContext) => {
   return (series: any) => {
@@ -199,5 +201,56 @@ export const handleDelete: RouteMiddleware = ({
     const result = await models.series.deleteOne({ seriesUid: uid });
     if (result.deletedCount !== 1) ctx.throw(status.NOT_FOUND);
     ctx.body = null;
+  };
+};
+
+interface ExportedSeries {
+  series: {
+    seriesUid: string;
+    partialVolumeDescriptor: PartialVolumeDescriptor;
+  }[];
+  format: 'zip' | 'tgz';
+}
+
+export const handlePostExportCsDump: RouteMiddleware = ({
+  taskManager,
+  dicomVoxelDumper
+}) => {
+  return async (ctx, next) => {
+    const exportedSeries: ExportedSeries = ctx.request.body;
+
+    const { stream, events } = dicomVoxelDumper.dump(exportedSeries.series);
+    const compress = zlib.createGzip();
+
+    if (exportedSeries.format === 'zip') {
+      ctx.throw(status.NOT_IMPLEMENTED, 'Zip archiving is not supported yet.');
+    }
+
+    const downloadFileType =
+      exportedSeries.format === 'tgz' ? 'application/gzip' : 'application/zip';
+    const { emitter, downloadFileStream, taskId } = await taskManager.register(
+      ctx,
+      {
+        name: 'Export DICOM data',
+        userEmail: ctx.user.userEmail,
+        downloadFileType
+      }
+    );
+
+    stream.pipe(compress).pipe(downloadFileStream!);
+
+    events.on('volume', (i: number) => {
+      emitter.emit(
+        'progress',
+        `Processing volume #${i}`,
+        i,
+        exportedSeries.series.length
+      );
+    });
+    downloadFileStream!.on('close', () => {
+      emitter.emit('finish', 'exported');
+    });
+
+    ctx.body = { taskId };
   };
 };

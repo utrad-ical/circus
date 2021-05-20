@@ -1,11 +1,14 @@
 import JSZip from 'jszip';
 import zeroPad from '../utils/zeroPad';
-import { PixelFormat } from '@utrad-ical/circus-lib/src/PixelFormat';
 import RawData from '@utrad-ical/circus-rs/src/common/RawData';
 import { Vector3D } from '@utrad-ical/circus-rs/src/common/geometry';
 import { TaskEventEmitter } from '../createTaskManager';
 import { Writable } from 'stream';
-import { FunctionService, Logger } from '@utrad-ical/circus-lib';
+import {
+  FunctionService,
+  Logger,
+  generateMhdHeader
+} from '@utrad-ical/circus-lib';
 import { VolumeProvider } from 'circus-rs/src/server/helper/createVolumeProvider';
 import { Models } from '../interface';
 import Storage from '../storage/Storage';
@@ -88,7 +91,7 @@ const createMhdPacker: FunctionService<
         zip.file(labelName + '.raw', vol.data);
         zip.file(
           labelName + '.mhd',
-          prepareMhdHeaderAsString(
+          generateMhdHeader(
             'uint8',
             dimension,
             elementSpacing,
@@ -102,7 +105,7 @@ const createMhdPacker: FunctionService<
       zip.file(labelFileBaseName + '.raw', combinedVolume!.data);
       zip.file(
         labelFileBaseName + '.mhd',
-        prepareMhdHeaderAsString(
+        generateMhdHeader(
           'uint8',
           dimension,
           elementSpacing,
@@ -148,7 +151,7 @@ const createMhdPacker: FunctionService<
       const dimension = volume.getDimension();
       zip.file(
         rawFileBaseName + '.mhd',
-        prepareMhdHeaderAsString(
+        generateMhdHeader(
           volume.getPixelFormat(),
           dimension,
           elementSpacing,
@@ -223,40 +226,6 @@ export default createMhdPacker;
  * @param num A nonnegative integer
  */
 const pad = (num: number) => zeroPad(3, num);
-
-const pixelFormatMap: { [format: string]: string } = {
-  uint8: 'MET_UCHAR',
-  int8: 'MET_CHAR',
-  uint16: 'MET_USHORT',
-  int16: 'MET_SHORT'
-};
-
-const prepareMhdHeaderAsString = (
-  pixelFormat: PixelFormat,
-  dimSize: Vector3D,
-  elementSpacing: Vector3D,
-  elementDataFile: string,
-  lineEnding: LineEndingType
-) => {
-  const stringifyObjet = (obj: { [key: string]: string | number }) => {
-    const br = lineEnding === 'crlf' ? '\r\n' : '\n';
-    return (
-      Object.keys(obj)
-        .map(k => `${k} = ${obj[k]}`)
-        .join(br) + br
-    );
-  };
-  const obj: { [key: string]: string | number } = {
-    ObjectType: 'Image',
-    NDims: 3,
-    DimSize: dimSize.join(' '),
-    ElementType: pixelFormatMap[pixelFormat],
-    ElementSpacing: elementSpacing.join(' '),
-    ElementByteOrderMSB: 'False',
-    ElementDataFile: elementDataFile
-  };
-  return stringifyObjet(obj);
-};
 
 const prepareExportObject = (caseData: any) => {
   return {

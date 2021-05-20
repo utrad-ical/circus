@@ -1,6 +1,6 @@
 $schema: 'http://json-schema.org/schema#'
 $async: true
-title: SeriesEntry
+title: RevisionSeriesEntry
 type: object
 properties:
   seriesUid:
@@ -8,5 +8,11 @@ properties:
     format: dicomUid
   partialVolumeDescriptor:
     $ref: partialVolumeDescriptor
-required: ['seriesUid', 'partialVolumeDescriptor']
+  labels:
+    type: array
+    items:
+      $ref: label
+    description: >
+      The list of labels attached to this series.
+required: ['seriesUid', 'labels']
 additionalProperties: false

@@ -4,6 +4,7 @@ import {
   HybridMprImageSource,
   MprImageSource,
   PlaneFigure,
+  MprViewState,
   Tool
 } from '@utrad-ical/circus-rs/src/browser';
 import classnames from 'classnames';
@@ -18,8 +19,12 @@ import React, {
 import styled from 'styled-components';
 import { useCsResults } from '../CsResultsContext';
 import { Display, DisplayDefinition, FeedbackReport } from '../Display';
-import { createStateChanger, ImageViewer } from '../viewer/CsImageViewer';
-import { Button } from './Button';
+import {
+  createStateChanger,
+  ImageViewer,
+  StateChangerFunc
+} from '../../ui/ImageViewer';
+import { Button } from '../../ui/Button';
 
 interface LesionCandidate {
   id: number;
@@ -30,16 +35,33 @@ interface LesionCandidate {
   location: [number, number, number];
 }
 
+interface MarkStyle {
+  color?: string;
+  dimmedColor?: string;
+  radius?: number;
+  width?: number;
+}
+
+const defaultMarkStyle: Required<MarkStyle> = {
+  color: '#ff00ff',
+  dimmedColor: '#ff00ff55',
+  radius: 30,
+  width: 3
+};
+
 interface LesionCandidatesOptions {
   dataPath?: string;
   feedbackListener?: DisplayDefinition | null;
   maxCandidates?: number;
+  markStyle?: MarkStyle;
   confidenceThreshold?: number;
   sortBy: [keyof LesionCandidate, 'asc' | 'desc'];
   excludeFromActionLog?: boolean;
 }
 
-const normalizeCandidates = (input: any): LesionCandidate[] => {
+export const defaultDataPath = 'results.lesionCandidates';
+
+export const normalizeCandidates = (input: any): LesionCandidate[] => {
   if (!Array.isArray(input)) throw new Error();
   return input.map((item, index) => {
     if ('id' in item) return item;
@@ -50,11 +72,12 @@ const normalizeCandidates = (input: any): LesionCandidate[] => {
 const Candidate: React.FC<{
   imageSource: MprImageSource;
   item: LesionCandidate;
+  markStyle: MarkStyle;
   tool: Tool;
 }> = props => {
-  const { imageSource, item, tool, children } = props;
+  const { imageSource, item, markStyle, tool, children } = props;
 
-  const stateChanger = useMemo(() => createStateChanger(), []);
+  const stateChanger = useMemo(() => createStateChanger<MprViewState>(), []);
 
   const composition = useMemo(() => new Composition(imageSource), [
     imageSource
@@ -65,9 +88,12 @@ const Candidate: React.FC<{
       await imageSource.ready();
       const metadata = imageSource.metadata!;
       // Add an circle annotation to this composition
-      const r = 20;
+      const r = markStyle.radius ?? defaultMarkStyle.radius;
       const annotation = new PlaneFigure();
-      annotation.color = '#ff00ff';
+      annotation.color = markStyle.color ?? defaultMarkStyle.color;
+      annotation.dimmedColor =
+        markStyle.dimmedColor ?? defaultMarkStyle.dimmedColor;
+      annotation.width = markStyle.width ?? defaultMarkStyle.width;
       annotation.min = [
         (item.location[0] - r) * metadata.voxelSize[0],
         (item.location[1] - r) * metadata.voxelSize[1]
@@ -82,7 +108,7 @@ const Candidate: React.FC<{
     addAnnotation();
   }, [composition, imageSource]);
 
-  const centerState = useCallback(
+  const centerState = useCallback<StateChangerFunc<MprViewState>>(
     state => {
       const voxelSize = (composition!.imageSource as any).metadata.voxelSize;
       const newOrigin = [
@@ -98,9 +124,7 @@ const Candidate: React.FC<{
     [composition, item.location]
   );
 
-  const handleCenterizeClick = () => {
-    stateChanger(centerState);
-  };
+  const handleCenterizeClick = () => stateChanger(centerState);
 
   return (
     <div className="lesion-candidate">
@@ -120,6 +144,7 @@ const Candidate: React.FC<{
         className="lesion-candidate-viewer"
         composition={composition}
         tool={tool}
+        initialStateSetter={centerState}
         stateChanger={stateChanger}
       />
       {children}
@@ -136,9 +161,10 @@ export const LesionCandidates: Display<
   const {
     initialFeedbackValue,
     options: {
-      dataPath = 'lesionCandidates',
+      dataPath = defaultDataPath,
       sortBy: [sortKey, sortOrder] = ['rank', 'asc'],
       maxCandidates,
+      markStyle = defaultMarkStyle,
       feedbackListener,
       excludeFromActionLog
     },
@@ -161,20 +187,21 @@ export const LesionCandidates: Display<
   >(initialFeedbackValue ?? []);
 
   const allCandidates = useMemo(
-    () => normalizeCandidates(get(results.results, dataPath)),
-    [results.results, dataPath]
+    () => normalizeCandidates(get(results, dataPath)),
+    [results, dataPath]
   );
   const visibleCandidates = useMemo(
     () =>
       allCandidates
         .slice() // copy
+        .sort((a, b) => b.confidence - a.confidence)
+        .slice(0, maxCandidates)
         .sort((a, b) => {
           const sign = sortOrder === 'desc' ? -1 : 1;
           const aa = sortKey === 'location' ? a.location[2] : a[sortKey];
           const bb = sortKey === 'location' ? b.location[2] : b[sortKey];
           return (aa! - bb!) * sign;
-        })
-        .slice(0, maxCandidates),
+        }),
     [allCandidates, sortOrder, sortKey, maxCandidates]
   );
 
@@ -234,6 +261,7 @@ export const LesionCandidates: Display<
   };
 
   useEffect(() => {
+    if (!feedbackListener) return;
     const allValid = visibleCandidates.every(
       cand => currentFeedback.findIndex(item => item.id === cand.id) >= 0
     );
@@ -287,6 +315,7 @@ export const LesionCandidates: Display<
             <Candidate
               key={cand.id}
               item={cand}
+              markStyle={markStyle}
               tool={tool}
               imageSource={imageSourceForVolumeId(cand.volumeId ?? 0)}
             >

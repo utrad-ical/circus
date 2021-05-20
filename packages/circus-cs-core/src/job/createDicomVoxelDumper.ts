@@ -11,7 +11,9 @@ import PartialVolumeDescriptor from '@utrad-ical/circus-lib/src/PartialVolumeDes
 import parser from 'dicom-parser';
 import extractCommonValues from '../util/extractCommonValues';
 import { createEncConverter, EncConverter } from './encConverter';
+import { DicomVoxelDumper } from '../interface';
 import tar from 'tar-stream';
+import { EventEmitter } from 'events';
 
 type KeyValues = { [key: string]: any };
 
@@ -47,10 +49,6 @@ const returnNumberOrNumberList = (
 interface SeriesEntry {
   seriesUid: string;
   partialVolumeDescriptor: PartialVolumeDescriptor;
-}
-
-interface DicomVoxelDumper {
-  dump: (series: SeriesEntry[]) => tar.Pack;
 }
 
 interface Options {}
@@ -213,13 +211,15 @@ const createDicomVoxelDumper: FunctionService<
 
   const dump = (series: SeriesEntry[]) => {
     const stream = tar.pack();
+    const events = new EventEmitter();
     (async () => {
       for (let i = 0; i < series.length; i++) {
+        events.emit('volume', i);
         await dumpOneSeries(series[i], i, stream);
       }
       stream.finalize();
     })();
-    return stream;
+    return { stream, events };
   };
 
   return { dump };

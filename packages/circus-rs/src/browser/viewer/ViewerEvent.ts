@@ -38,7 +38,7 @@ export default class ViewerEvent {
       this.movementX = original.movementX;
       this.movementY = original.movementY;
     }
-    if (original && original instanceof TouchEvent) {
+    if (window.TouchEvent && original && original instanceof TouchEvent) {
       const touch: Touch = original.changedTouches[0];
       if (touch) {
         const [viewerWidth, viewerHeight] = viewer.getResolution();

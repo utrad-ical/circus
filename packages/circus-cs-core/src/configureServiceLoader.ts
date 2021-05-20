@@ -27,6 +27,7 @@ export interface Services {
   dockerRunner: DockerRunner;
   core: circus.CsCore;
   configGetter: circus.Configuration;
+  dicomVoxelDumper: circus.DicomVoxelDumper;
   [key: string]: any; // This allows to add services outside this file
 }
 
@@ -95,6 +96,11 @@ export default function configureServiceLoader(
 
   // "the facade"
   serviceLoader.registerModule('core', path.join(__dirname, 'createCsCore'));
+
+  serviceLoader.registerModule(
+    'dicomVoxelDumper',
+    path.join(__dirname, 'job', 'createDicomVoxelDumper')
+  );
 
   return serviceLoader;
 }

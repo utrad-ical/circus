@@ -8,14 +8,7 @@ properties:
   series:
     type: array
     items:
-      type: object
-      properties:
-        seriesUid:
-          type: string
-          format: dicomUid
-        partialVolumeDescriptor:
-          $ref: partialVolumeDescriptor
-      required: ['seriesUid', 'partialVolumeDescriptor']
+      $ref: seriesEntry
     minLength: 1
   tags:
     type: array

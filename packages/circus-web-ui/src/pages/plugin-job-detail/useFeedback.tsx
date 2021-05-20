@@ -1,5 +1,5 @@
 import React, { useReducer } from 'react';
-import { FeedbackEntry } from '@utrad-ical/circus-cs-results';
+import { FeedbackEntry } from '@utrad-ical/circus-ui-kit';
 import moment from 'moment';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import UserDisplay from 'components/UserDisplay';

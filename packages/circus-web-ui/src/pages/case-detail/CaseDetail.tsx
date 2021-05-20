@@ -316,7 +316,7 @@ const MenuBar: React.FC<{
           disabled={
             busy ||
             !caseStore.caseAttributesAreValid ||
-            !caseStore.labelAttributesAreValid
+            caseStore.labelsWithInvalidAttributes.length > 0
           }
         >
           <Glyphicon glyph="save" />

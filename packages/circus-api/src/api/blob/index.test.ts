@@ -1,5 +1,7 @@
 import { setUpAppForRoutesTest, ApiTest } from '../../../test/util-routes';
 import { AxiosInstance } from 'axios';
+import rawBody from 'raw-body';
+import { createGzip } from 'zlib';
 
 let apiTest: ApiTest, axios: AxiosInstance;
 beforeAll(async () => {
@@ -25,6 +27,24 @@ it('should accept uploading and downloading a blob', async () => {
   expect(res2.data).toBe('star');
 });
 
+it('should accept gzipped data', async () => {
+  const res = await axios.request({
+    method: 'put',
+    url: 'api/blob/' + sha1,
+    headers: {
+      'Content-Type': 'application/octet-stream',
+      'Content-Encoding': 'gzip'
+    },
+    data: createGzip().end('star')
+  });
+  expect(res.status).toBe(200);
+  const res2 = await axios.request({
+    method: 'get',
+    url: 'api/blob/' + sha1
+  });
+  expect(res2.data).toBe('star');
+});
+
 it('should return 400 on hash mismatch', async () => {
   const res = await axios.request({
     method: 'put',
@@ -36,9 +56,6 @@ it('should return 400 on hash mismatch', async () => {
 });
 
 it('should return 404 for nonexistent hash', async () => {
-  const res = await axios.request({
-    method: 'get',
-    url: 'api/blob/aaabbbcccdddeeefff111222333'
-  });
+  const res = await axios.get('api/blob/aaabbbcccdddeeefff111222333');
   expect(res.status).toBe(404);
 });

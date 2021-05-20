@@ -1,20 +1,18 @@
 import { Viewer } from '@utrad-ical/circus-rs/src/browser';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
-import { InternalLabel } from '../pages/case-detail/labelData';
-import {
-  EditingData,
-  EditingDataUpdater
-} from '../pages/case-detail/revisionData';
-import { createNewLabelData } from '../pages/case-detail/labelData';
+import { InternalLabel } from './labelData';
+import { EditingData, EditingDataUpdater } from './revisionData';
+import { createNewLabelData } from './labelData';
 import { OrientationString } from 'circus-rs/section-util';
-import { TaggedLabelDataOf } from '../pages/case-detail/labelData';
+import { TaggedLabelDataOf } from './labelData';
 import produce from 'immer';
 import { pixelFormatInfo } from '@utrad-ical/circus-lib/src/PixelFormat';
 import * as rs from 'circus-rs';
 import CCL6 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D6';
 import CCL26 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D26';
+import { alert } from '@smikitky/rb-components/lib/modal';
 
-const CreateConnectedComponentLabel = async (
+const createConnectedComponentLabels = async (
   editingData: EditingData,
   updateEditingData: EditingDataUpdater,
   viewers: { [index: string]: Viewer },
@@ -23,6 +21,9 @@ const CreateConnectedComponentLabel = async (
   dispLabelNumber: number,
   neighbors: 6 | 26
 ) => {
+  if (label.type !== 'voxel' || !label.data.size)
+    throw new TypeError('Invalid label passed.');
+
   const createNewLabel = (
     viewer: Viewer,
     color: string,
@@ -90,7 +91,7 @@ const CreateConnectedComponentLabel = async (
         : CCL26(input, width, height, nSlices);
     const newLabel: InternalLabel[] = [];
     const order = [...Array(labelingResults.labelNum)].map((_, i) => i + 1);
-    const name = [
+    const names = [
       'largest',
       '2nd largest',
       '3rd largest',
@@ -166,8 +167,8 @@ const CreateConnectedComponentLabel = async (
           color,
           `${label.name}: the ${
             flag
-              ? name[10] + ' (' + String(labelingResults.labelNum - maxI) + ')'
-              : name[i]
+              ? names[10] + ' (' + String(labelingResults.labelNum - maxI) + ')'
+              : names[i]
           } CC${flag ? 's' : ''}`
         )
       );
@@ -207,4 +208,4 @@ const CreateConnectedComponentLabel = async (
   }
 };
 
-export default CreateConnectedComponentLabel;
+export default createConnectedComponentLabels;

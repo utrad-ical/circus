@@ -1,21 +1,19 @@
 import { Viewer } from '@utrad-ical/circus-rs/src/browser';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
-import { InternalLabel } from '../pages/case-detail/labelData';
-import {
-  EditingData,
-  EditingDataUpdater
-} from '../pages/case-detail/revisionData';
-import { createNewLabelData } from '../pages/case-detail/labelData';
+import { InternalLabel } from './labelData';
+import { EditingData, EditingDataUpdater } from './revisionData';
+import { createNewLabelData } from './labelData';
 import { OrientationString } from 'circus-rs/section-util';
-import { TaggedLabelDataOf } from '../pages/case-detail/labelData';
+import { TaggedLabelDataOf } from './labelData';
 import produce from 'immer';
 import { pixelFormatInfo } from '@utrad-ical/circus-lib/src/PixelFormat';
 import * as rs from 'circus-rs';
 import HoleFilling2D, {
   HoleFilling3D
 } from '@utrad-ical/circus-rs/src/common/CCL/holeFilling';
+import { alert } from '@smikitky/rb-components/lib/modal';
 
-const CreateHoleFilledLabel = async (
+const createHoleFilledLabels = async (
   editingData: EditingData,
   updateEditingData: EditingDataUpdater,
   viewers: { [index: string]: Viewer },
@@ -25,6 +23,9 @@ const CreateHoleFilledLabel = async (
   holeFillingOrientation: string,
   neighbors4or6: boolean
 ) => {
+  if (label.type !== 'voxel' || !label.data.size)
+    throw new TypeError('Invalid label passed.');
+
   const createNewLabel = (
     viewer: Viewer,
     color: string,
@@ -141,4 +142,4 @@ const CreateHoleFilledLabel = async (
   }
 };
 
-export default CreateHoleFilledLabel;
+export default createHoleFilledLabels;

@@ -29,8 +29,8 @@ import {
   createNewLabelData
 } from './labelData';
 import { OrientationString } from 'circus-rs/section-util';
-import CreateConnectedComponentLabel from '../../components/CreateConnectedComponentLabel';
-import CreateHoleFilledLabel from '../../components/CreateHoleFilledLabel';
+import createConnectedComponentLabels from './createConnectedComponentLabels';
+import createHoleFilledLabels from './createHoleFilledLabels';
 import SettingDialogCCL from './SettingDialogCCL';
 import SettingDialogHoleFilling from './SettingDialogHoleFilling';
 
@@ -334,8 +334,8 @@ const LabelMenu: React.FC<{
       >
         <SettingDialogCCL
           onHide={() => setCclDialogOpen(false)}
-          onClick={(dispLabelNumber: number, neighbors: 6 | 26) => {
-            CreateConnectedComponentLabel(
+          onOkClick={(dispLabelNumber: number, neighbors: 6 | 26) => {
+            createConnectedComponentLabels(
               editingData,
               updateEditingData,
               viewers,
@@ -357,12 +357,12 @@ const LabelMenu: React.FC<{
       >
         <SettingDialogHoleFilling
           onHide={() => setHoleFillingDialogOpen(false)}
-          onClick={(
+          onOkClick={(
             dimension3: boolean,
             holeFillingOrientation: string,
             neighbors4or6: boolean
           ) => {
-            CreateHoleFilledLabel(
+            createHoleFilledLabels(
               editingData,
               updateEditingData,
               viewers,

@@ -19,6 +19,9 @@ import {
 import createDicomTagReader from '../src/utils/createDicomTagReader';
 import createDicomUtilityRunner from '../src/utils/createDicomUtilityRunner';
 import createTaskManager, { TaskManager } from '../src/createTaskManager';
+import { DicomVoxelDumper } from '@utrad-ical/circus-cs-core';
+import tar from 'tar-stream';
+import { EventEmitter } from 'events';
 
 /**
  * Holds data used for API route testing.
@@ -70,6 +73,7 @@ export interface ApiTest {
    */
   url: string;
   taskManager: TaskManager;
+  downloadFileDirectory: string;
 }
 
 export const setUpAppForRoutesTest = async () => {
@@ -106,13 +110,28 @@ export const setUpAppForRoutesTest = async () => {
       dicomTagReader
     }
   );
+
+  const downloadFileDirectory = path.join(__dirname, 'download-test');
   const taskManager = await createTaskManager(
     {
-      downloadFileDirectory: path.join(__dirname, 'download-test'),
+      downloadFileDirectory,
       timeoutMs: 3600 * 1000
     },
     { models, apiLogger }
   );
+
+  const dicomVoxelDumper: DicomVoxelDumper = {
+    dump: () => {
+      const stream = tar.pack();
+      const events = new EventEmitter();
+      (async () => {
+        stream.entry({ name: 'dummy.txt' }, 'abc');
+        events.emit('volume', 0);
+        stream.finalize();
+      })();
+      return { stream, events };
+    }
+  };
 
   const app = await createApp(
     {
@@ -133,7 +152,8 @@ export const setUpAppForRoutesTest = async () => {
       mhdPacker: null as any, // dummy
       rsSeriesRoutes: async () => {}, // dummy
       volumeProvider: null as any, // dummy
-      taskManager
+      taskManager,
+      dicomVoxelDumper
     }
   );
   const testServer = await setUpKoaTestWith(app);
@@ -166,7 +186,8 @@ export const setUpAppForRoutesTest = async () => {
     tearDown,
     url: testServer.url,
     dicomFileRepository,
-    taskManager
+    taskManager,
+    downloadFileDirectory
   } as ApiTest;
 };
 

@@ -21,13 +21,13 @@ test('dump json', async () => {
     deleteSeries: async () => {}
   };
 
-  const result = await createDicomVoxelDumper(
+  const dumper = await createDicomVoxelDumper(
     {},
     { dicomFileRepository: mockDicomFileRepository }
   );
 
   const extract = tar.extract();
-  const stream = result.dump([
+  const { stream } = dumper.dump([
     {
       seriesUid: '1.2.3.4.5',
       partialVolumeDescriptor: { start: 1, end: 5, delta: 4 }

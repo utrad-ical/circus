@@ -16,19 +16,19 @@ const dimensionOptions = {
 };
 const orientationOptions = {
   Axial: 'Axial',
-  Colonal: 'Colonal',
+  Coronal: 'Coronal',
   Sagital: 'Sagital'
 };
 
 const SettingDialogHoleFilling: React.FC<{
   onHide: () => void;
-  onClick: (
+  onOkClick: (
     dimension3: boolean,
     orientation: string,
     neighbors4or6: boolean
   ) => void;
 }> = props => {
-  const { onHide, onClick } = props;
+  const { onHide, onOkClick } = props;
   const [neighbor4or6, setNeighbor4or6] = useState(false);
   const [dimension3, setDimension3] = useState(true);
   const [orientation, setOrientation] = useState('Axial');
@@ -36,7 +36,7 @@ const SettingDialogHoleFilling: React.FC<{
   return (
     <>
       <Modal.Header>
-        <Modal.Title>Setting options for hole filling</Modal.Title>
+        <Modal.Title>Hole filling</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div>
@@ -46,7 +46,7 @@ const SettingDialogHoleFilling: React.FC<{
             options={dimensionOptions}
             numericalValue
             value={dimension3 ? 3 : 2}
-            onChange={(value: number) => setDimension3(value == 3)}
+            onChange={(value: number) => setDimension3(value === 3)}
           />
           {!dimension3 && (
             <React.Fragment>
@@ -78,7 +78,7 @@ const SettingDialogHoleFilling: React.FC<{
           Cancel
         </Button>
         <Button
-          onClick={() => onClick(dimension3, orientation, neighbor4or6)}
+          onClick={() => onOkClick(dimension3, orientation, neighbor4or6)}
           bsStyle="primary"
         >
           OK

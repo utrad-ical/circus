@@ -21,9 +21,9 @@ const neighborsOptions = {
 
 const SettingDialogCCL: React.FC<{
   onHide: () => void;
-  onClick: (dispLabelNumber: number, neighbors: 6 | 26) => void;
+  onOkClick: (dispLabelNumber: number, neighbors: 6 | 26) => void;
 }> = props => {
-  const { onHide, onClick } = props;
+  const { onHide, onOkClick } = props;
   const [neighbor6, setNeighbor6] = useState(false);
   const [dispLabelNumber, setDispLabelNumber] = useState(2);
   return (
@@ -60,7 +60,7 @@ const SettingDialogCCL: React.FC<{
           Cancel
         </Button>
         <Button
-          onClick={() => onClick(dispLabelNumber, neighbor6 ? 6 : 26)}
+          onClick={() => onOkClick(dispLabelNumber, neighbor6 ? 6 : 26)}
           bsStyle="primary"
         >
           OK

@@ -35,8 +35,10 @@ const SettingDialogHoleFilling: React.FC<{
 
   return (
     <>
+      <Modal.Header>
+        <Modal.Title>Setting options for hole filling</Modal.Title>
+      </Modal.Header>
       <Modal.Body>
-        <p>Setting option for hole filling</p>
         <div>
           Dimension: &ensp;
           <ShrinkSelect

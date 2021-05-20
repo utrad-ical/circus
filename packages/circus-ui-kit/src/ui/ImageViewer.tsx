@@ -72,7 +72,7 @@ export const ImageViewer: React.FC<{
 
   useEffect(() => {
     if (!composition) return;
-    setViewer(viewer => {
+    setViewer((viewer: Viewer | null) => {
       if (viewer) {
         if (viewer.getComposition() !== composition) {
           viewer.setComposition(composition);

@@ -182,7 +182,7 @@ export default abstract class GLProgramBase {
     );
 
     const imageData = new ImageData(
-      Uint8ClampedArray.from(pixels),
+      new Uint8ClampedArray(pixels.buffer),
       gl.drawingBufferWidth,
       gl.drawingBufferHeight
     );

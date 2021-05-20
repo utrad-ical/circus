@@ -1,17 +1,10 @@
-import {
-  Composition,
-  HybridMprImageSource,
-  RawData,
-  toolFactory,
-  VoxelCloud
-} from '@utrad-ical/circus-rs/src/browser';
 import get from 'lodash.get';
-import React, { useEffect, useMemo, useState } from 'react';
-import { ImageViewer } from '../../ui/ImageViewer';
+import React, { useEffect, useState } from 'react';
+import { AnnotationDef, AnnotationViewer } from '../AnnotationViewer';
 import { useCsResults } from '../CsResultsContext';
 import { Display } from '../Display';
-import { ColorDefinition, normalizeColor } from './utils/color';
-import styled from 'styled-components';
+import { ColorDefinition } from './utils/color';
+import { gunzipSync } from 'fflate';
 
 export interface VolumeOverlayOptions {
   volumeId?: number;
@@ -39,7 +32,7 @@ export interface VolumeOverlayEntry {
   origin: [number, number, number];
   size: [number, number, number];
   /**
-   * Defaults to `${name}.raw`.
+   * Defaults to `${name}.raw.gz`.
    */
   rawFile?: string;
 }
@@ -60,8 +53,8 @@ export const VolumeOverlay: Display<VolumeOverlayOptions, void> = props => {
   const { job, loadAttachment, getVolumeLoader, rsHttpClient } = useCsResults();
   const { results } = job;
 
-  const [composition, setComposition] = useState<Composition | null>(null);
   const [error, setError] = useState<Error | null>(null);
+  const [annotationDefs, setAnnotationDefs] = useState<AnnotationDef[]>([]);
 
   useEffect(() => {
     const load = async () => {
@@ -74,67 +67,47 @@ export const VolumeOverlay: Display<VolumeOverlayOptions, void> = props => {
           volumeId === (v.volumeId ?? 0)
       );
       if (!volumes.length) throw new Error('There is no volume to show.');
-      const series = job.series[volumeId];
-      const volumeLoader = getVolumeLoader(series);
-      const src = new HybridMprImageSource({
-        volumeLoader,
-        rsHttpClient,
-        seriesUid: series.seriesUid
-      });
-      const composition = new Composition(src);
-      setComposition(composition);
-      const rawVolumes = await Promise.all(
+      const buffers = await Promise.all(
         volumes.map(async v => {
-          const name = v.rawFile ?? `${v.name}.raw`;
+          const name = v.rawFile ?? `${v.name}.raw.gz`;
           const res = await loadAttachment(name);
           if (res.status !== 200) {
             throw new Error(
-              `Failed to load volume file (name: ${v.name}, status: ${res.status}, file: ${name})`
+              `Failed to load volume file ` +
+                `(name: ${v.name}, status: ${res.status}, file: ${name})`
             );
           }
-          return res.arrayBuffer();
+
+          return /\.gz$/.test(name)
+            ? (gunzipSync(new Uint8Array(await res.arrayBuffer()))
+                .buffer as ArrayBuffer)
+            : await res.arrayBuffer();
         })
       );
-      volumes.forEach((v, i) => {
-        const cloud = new VoxelCloud();
-        cloud.origin = v.origin;
-        const rawData = new RawData(v.size, 'binary');
-        rawData.assign(rawVolumes[i]);
-        cloud.volume = rawData;
-        const nColor = normalizeColor(colorMap[v.name] ?? defaultColor);
-        cloud.color = nColor.color;
-        cloud.alpha = nColor.alpha;
-        composition.addAnnotation(cloud);
-      });
-      composition.annotationUpdated();
-      console.log(composition.annotations);
+      const annotationDefs = volumes.map(
+        (v, i): AnnotationDef => ({
+          type: 'voxels',
+          color: colorMap[v.name] ?? defaultColor,
+          origin: v.origin,
+          size: v.size,
+          volume: buffers[i]
+        })
+      );
+      setAnnotationDefs(annotationDefs);
     };
     load().catch(err => setError(err));
   }, []);
-
-  const tool = useMemo(() => toolFactory('pager'), []);
 
   if (error instanceof Error) {
     return <pre className="alert alert-danger">{error.message}</pre>;
   }
 
-  if (!composition) return null;
-
   return (
-    <StyledDiv>
-      <ImageViewer
-        className="volume-overlay-viewer"
-        composition={composition}
-        tool={tool}
-      />
-    </StyledDiv>
+    <AnnotationViewer
+      volumeId={volumeId}
+      annotations={annotationDefs}
+      width={512}
+      height={512}
+    />
   );
 };
-
-const StyledDiv = styled.div`
-  margin-top: 10px;
-  .volume-overlay-viewer {
-    width: 512px;
-    height: 512px;
-  }
-`;

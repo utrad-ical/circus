@@ -31,8 +31,8 @@ import {
 import { OrientationString } from 'circus-rs/section-util';
 import CreateConnectedComponentLabel from '../../components/CreateConnectedComponentLabel';
 import CreateHoleFilledLabel from '../../components/CreateHoleFilledLabel';
-import SettingDialogCCL from '../../components/SettingDialogCCL';
-import SettingDialogHoleFilling from '../../components/SettingDialogHoleFilling';
+import SettingDialogCCL from './SettingDialogCCL';
+import SettingDialogHoleFilling from './SettingDialogHoleFilling';
 
 type LabelCommand =
   | 'rename'

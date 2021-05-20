@@ -571,6 +571,7 @@ const RevisionEditor: React.FC<{
             editingData={editingData}
             onReveal={handleReveal}
             updateEditingData={updateEditingData}
+            caseDispatch={caseDispatch}
             viewers={viewers}
             disabled={busy}
           />
@@ -606,7 +607,12 @@ const RevisionEditor: React.FC<{
                   value={activeLabel.attributes || {}}
                   onChange={labelAttributesChange}
                   onValidate={valid =>
-                    caseDispatch(c.validateLabelAttributes(valid))
+                    caseDispatch(
+                      c.validateLabelAttributes({
+                        key: activeLabel.temporaryKey,
+                        valid
+                      })
+                    )
                   }
                   disabled={busy}
                 />

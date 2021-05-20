@@ -1,11 +1,19 @@
 import createPluginJobRegisterer from './createPluginJobRegisterer';
-import { DicomFileRepository } from '@utrad-ical/circus-lib';
+import {
+  DicomFileRepository,
+  PartialVolumeDescriptor
+} from '@utrad-ical/circus-lib';
 import * as circus from '../../interface';
 
 describe('createPluginJobRegisterer', () => {
   const defaultPayload: circus.PluginJobRequest = {
     pluginId: 'my-plugin-id',
-    series: [{ seriesUid: '1.2.3' }]
+    series: [
+      {
+        seriesUid: '1.2.3',
+        partialVolumeDescriptor: { start: 1, end: 5, delta: 1 }
+      }
+    ]
   };
 
   let deps: any;
@@ -87,7 +95,12 @@ describe('createPluginJobRegisterer', () => {
   test('Nonexistent series throws', async () => {
     const wrongPayload: circus.PluginJobRequest = {
       ...defaultPayload,
-      series: [{ seriesUid: '9.9.9' }]
+      series: [
+        {
+          seriesUid: '9.9.9',
+          partialVolumeDescriptor: { start: 1, end: 1, delta: 1 }
+        }
+      ]
     };
     const registerer = await createPluginJobRegisterer(undefined, deps);
     await expect(registerer.register('abc', wrongPayload, 0)).rejects.toThrow(
@@ -95,23 +108,25 @@ describe('createPluginJobRegisterer', () => {
     );
   });
 
-  test('Insufficient series throws', async () => {
+  test('Series with wrong PVD throws', async () => {
     const check = async (
-      data: object,
+      partialVolumeDescriptor: PartialVolumeDescriptor,
       expectedMessage: string = 'does not contain enough images'
     ) => {
       const wrongPayload = {
         ...defaultPayload,
-        series: [{ seriesUid: '1.2.3', ...data }]
+        series: [{ seriesUid: '1.2.3', partialVolumeDescriptor }]
       };
       const registerer = await createPluginJobRegisterer(undefined, deps);
       await expect(registerer.register('abc', wrongPayload, 0)).rejects.toThrow(
         expectedMessage
       );
     };
-    await check({ startImgNum: 999 });
-    await check({ startImgNum: 1, endImgNum: 100 });
-    await check({ startImgNum: 100, endImgNum: 1 });
-    await check({ startImgNum: '100' }, 'Invalid startImgNum');
+    await check({ start: 1, end: 999, delta: 1 });
+    await check({ start: 100, end: 1, delta: -1 });
+    await check(
+      { start: 1, end: 10, delta: 100 },
+      'invalid partial volume descriptor'
+    );
   });
 });

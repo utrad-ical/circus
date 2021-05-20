@@ -25,7 +25,7 @@ properties:
   series:
     type: array
     items:
-      $ref: seriesEntry
+      $ref: revisionSeriesEntry
     description: >
       The list of series entries.
 additionalProperties: false

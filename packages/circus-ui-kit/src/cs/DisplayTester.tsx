@@ -1,14 +1,16 @@
-import CsResultsContext, { PluginAttachmentLoader } from 'CsResultsContext';
+import CsResultsContext, { PluginAttachmentLoader } from './CsResultsContext';
 import React, { useState, useMemo } from 'react';
 
 const defaultAttachmentLoader = async () => {
-  return new Response('"Example response"');
+  return new Response();
 };
+
+// STUB: Do not use this file
 
 /**
  * This is a utility component with which you can test your own Display.
  */
-const DisplayTester: React.FC<{
+const Tester: React.FC<{
   testComponent: React.ComponentClass;
   mockAttachmentLoader?: PluginAttachmentLoader;
 }> = props => {
@@ -25,21 +27,21 @@ const DisplayTester: React.FC<{
       plugin: null as any,
       consensual,
       editable,
-      eventLogger: () => {},
       loadAttachment: mockAttachmentLoader,
+      eventLogger: () => {},
       rsHttpClient: null as any,
-      getVolumeLoader: null as any
+      getVolumeLoader: null as any,
+      loadDisplay: null as any
     };
   }, [consensual, editable]);
 
   return (
     <CsResultsContext.Provider value={ctx}>
       <div>
-        hoge
         <TestComponent />
       </div>
     </CsResultsContext.Provider>
   );
 };
 
-export default DisplayTester;
+export default Tester;

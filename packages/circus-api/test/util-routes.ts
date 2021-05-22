@@ -20,7 +20,7 @@ import createDicomTagReader from '../src/utils/createDicomTagReader';
 import createDicomUtilityRunner from '../src/utils/createDicomUtilityRunner';
 import createTaskManager, { TaskManager } from '../src/createTaskManager';
 import { DicomVoxelDumper } from '@utrad-ical/circus-cs-core';
-import tar from 'tar-stream';
+import { Archiver } from 'archiver';
 import { EventEmitter } from 'events';
 
 /**
@@ -121,15 +121,14 @@ export const setUpAppForRoutesTest = async () => {
   );
 
   const dicomVoxelDumper: DicomVoxelDumper = {
-    dump: () => {
-      const stream = tar.pack();
+    dump: (series: any, archiver: Archiver) => {
       const events = new EventEmitter();
       (async () => {
-        stream.entry({ name: 'dummy.txt' }, 'abc');
+        archiver.append('abc', { name: 'dummy.txt' });
         events.emit('volume', 0);
-        stream.finalize();
+        archiver.finalize();
       })();
-      return { stream, events };
+      return { stream: archiver, events };
     }
   };
 

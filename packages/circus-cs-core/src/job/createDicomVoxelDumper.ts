@@ -12,8 +12,8 @@ import parser from 'dicom-parser';
 import extractCommonValues from '../util/extractCommonValues';
 import { createEncConverter, EncConverter } from './encConverter';
 import { DicomVoxelDumper } from '../interface';
-import tar from 'tar-stream';
 import { EventEmitter } from 'events';
+import { Archiver } from 'archiver';
 
 type KeyValues = { [key: string]: any };
 
@@ -80,12 +80,13 @@ const dataSetToObject = (
           );
         }
         break;
-      case 'AT':
+      case 'AT': {
         const group = dataset.uint16(tag, 0) as number;
         const groupHexStr = ('0000' + group.toString(16)).substr(-4);
         const element = dataset.uint16(tag, 1) as number;
         const elementHexStr = ('0000' + element.toString(16)).substr(-4);
         return `0x${groupHexStr}${elementHexStr}`;
+      }
       case 'FL':
         return returnNumberOrNumberList(dataset, tag, 'float', 4);
       case 'FD':
@@ -138,7 +139,7 @@ const createDicomVoxelDumper: FunctionService<
   const dumpOneSeries = async (
     series: SeriesEntry,
     volId: number,
-    stream: tar.Pack
+    archiver: Archiver
   ) => {
     const seriesTagData = [];
     const seriesAccessor = await dicomFileRepository.getSeries(
@@ -204,22 +205,21 @@ const createDicomVoxelDumper: FunctionService<
     );
 
     const buffer = Buffer.from(rawBuffer!.buffer);
-    stream.entry({ name: `${volId}.mhd` }, mhd);
-    stream.entry({ name: `${volId}.raw` }, buffer);
-    stream.entry({ name: `${volId}.json` }, json);
+    archiver.append(mhd, { name: `${volId}.mhd` });
+    archiver.append(buffer, { name: `${volId}.raw` });
+    archiver.append(json, { name: `${volId}.json` });
   };
 
-  const dump = (series: SeriesEntry[]) => {
-    const stream = tar.pack();
+  const dump = (series: SeriesEntry[], archiver: Archiver) => {
     const events = new EventEmitter();
     (async () => {
       for (let i = 0; i < series.length; i++) {
         events.emit('volume', i);
-        await dumpOneSeries(series[i], i, stream);
+        await dumpOneSeries(series[i], i, archiver);
       }
-      stream.finalize();
+      archiver.finalize();
     })();
-    return { stream, events };
+    return { stream: archiver, events };
   };
 
   return { dump };

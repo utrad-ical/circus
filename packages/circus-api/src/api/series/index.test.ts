@@ -242,7 +242,7 @@ describe('Export CS volume', () => {
             partialVolumeDescriptor: { start: 1, end: 2, delta: 1 }
           }
         ],
-        format: 'tgz'
+        compressionFormat: 'tgz'
       }
     });
     expect(res.status).toBe(200);

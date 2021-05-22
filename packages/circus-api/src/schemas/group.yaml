@@ -19,6 +19,7 @@ properties:
         - deleteProject
         - manageServer
         - personalInfoView
+        - downloadVolume
   domains:
     type: array
     items:

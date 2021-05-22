@@ -9,6 +9,22 @@ import useTaskDownloadHandler from 'utils/useTaskDownloadHandler';
 import Icon from './Icon';
 import { Button, Modal, ProgressBar } from './react-bootstrap';
 
+export type CompressionFormat = 'tgz' | 'zip';
+
+export const compressionFormatOptions: {
+  [type in CompressionFormat]: string;
+} = {
+  tgz: 'tar.gz',
+  zip: 'zip'
+};
+
+export type LineEnding = 'lf' | 'crlf';
+
+export const lineEndingOptions: { [type in LineEnding]: string } = {
+  lf: 'LF',
+  crlf: 'CR + LF (Windows)'
+};
+
 const DownloadModal = <T extends any>(props: {
   onClose: () => void;
   initialOptions: T;

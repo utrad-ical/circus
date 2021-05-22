@@ -115,6 +115,7 @@ const CaseSearchResultsView: React.FC<{
   const selected = search?.selected ?? [];
   const { accessibleProjects } = useLoginUser()!;
   const api = useApi();
+  const user = useLoginUser();
   const dispatch = useDispatch();
   const [showExportModal, setShowExportModal] = useState(false);
 
@@ -156,6 +157,7 @@ const CaseSearchResultsView: React.FC<{
   };
 
   const handleExportMhd = () => {
+    if (!user.globalPrivileges.includes('downloadVolume')) return;
     setShowExportModal(true);
   };
 
@@ -213,7 +215,11 @@ const CaseSearchResultsView: React.FC<{
             bsSize="sm"
             title={<Icon icon="glyphicon-option-horizontal" />}
           >
-            <MenuItem eventKey="mhd" onClick={handleExportMhd}>
+            <MenuItem
+              eventKey="mhd"
+              onSelect={handleExportMhd}
+              disabled={!user.globalPrivileges.includes('downloadVolume')}
+            >
               Export as MHD
             </MenuItem>
           </DropdownButton>

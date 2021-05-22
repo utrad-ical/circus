@@ -84,8 +84,8 @@ const createValidator: NoDepFunctionService<
     for (const filterDef of filterDefs) {
       const [filterName, ...args] = filterDef.trim().split(/\s+/);
       const filter = ({
-        allRequired: allRequiredScheama,
-        allRequiredExcept: allRequiredScheama,
+        allRequired: allRequiredSchema,
+        allRequiredExcept: allRequiredSchema,
         only: onlySchema,
         exclude: excludeSchema,
         addProperty: addPropertySchema,
@@ -103,7 +103,7 @@ const createValidator: NoDepFunctionService<
    * The input JSON schema must be an object validator at the root level,
    * and must have a `properties` keyword.
    */
-  const allRequiredScheama: SchemaConverter = (schema, except = '') => {
+  const allRequiredSchema: SchemaConverter = (schema, except = '') => {
     if (!schema || !schema.properties) {
       throw new TypeError('Unsupported JSON schema');
     }
@@ -190,7 +190,7 @@ const createValidator: NoDepFunctionService<
   };
 
   const dbEntrySchema: SchemaConverter = schema => {
-    return withDatesSchema(allRequiredScheama(schema));
+    return withDatesSchema(allRequiredSchema(schema));
   };
 
   const sharedOpts = {

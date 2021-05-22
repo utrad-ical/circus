@@ -31,6 +31,7 @@ import PluginJobManagerAdmin from 'pages/admin/PluginJobManagerAdmin';
 import PluginJobQueueAdmin from 'pages/admin/PluginJobQueueAdmin';
 import PluginAdmin from 'pages/admin/PluginAdmin';
 import Preferences from 'pages/Preferences';
+import TokenManagement from 'pages/TokenManagement';
 
 import { store } from './store';
 import { Provider as ReduxStoreProvider, useSelector } from 'react-redux';
@@ -91,6 +92,7 @@ const AppRoutes: React.FC<{}> = () => {
         <Route path="/plugin-job/:jobId" component={PluginJobDetail} />
         <Route path="/task-list" component={TaskList} />
         <Route path="/preference" component={Preferences} />
+        <Route path="/tokens" component={TokenManagement} />
       </Switch>
     </Application>
   );
@@ -108,7 +110,7 @@ const VolumeCacheProvider: React.FC = props => {
     return {
       rsHttpClient,
       map: new Map<string, rs.RsVolumeLoader>(),
-      toKey: series => 'hoge'
+      toKey: series => 'foo'
     };
   }, [server]);
 

@@ -5,10 +5,12 @@ import cancelToken, { CancelToken } from './cancelToken';
  * Asynchronously load data from the given async loader function.
  * @param loadFunc The async loader function. The function will be passed
  * a cancel token.
- * @return A tuple containing 1) the loaded data (or undefined),
+ * @return A tuple containing 1) the loaded data (or undefined or Error),
  * 2) the boolean loading status, and 3) a function to forcibly reload the data.
  */
-const useLoadData = <T>(loadFunc: (token: CancelToken) => Promise<T>) => {
+const useLoadData = <T>(
+  loadFunc: (token: CancelToken) => Promise<T>
+): [T | Error | undefined, boolean, Function] => {
   const [data, setData] = useState<T | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -44,7 +46,7 @@ const useLoadData = <T>(loadFunc: (token: CancelToken) => Promise<T>) => {
     };
   }, [loadFunc, counter]);
 
-  return [data, isLoading, reload] as [T, boolean, Function];
+  return [data, isLoading, reload];
 };
 
 export default useLoadData;

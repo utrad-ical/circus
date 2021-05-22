@@ -2,7 +2,7 @@
 // You can use them like `circus.PluginJobRequest` without `import`-ing.
 
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
-import { Pack as TarStream } from 'tar-stream';
+import { Archiver } from 'archiver';
 import { EventEmitter } from 'events';
 
 export type QueueState = 'wait' | 'processing';
@@ -171,9 +171,18 @@ export interface SeriesEntry {
   partialVolumeDescriptor: PartialVolumeDescriptor;
 }
 
+/**
+ * DicomVoxelDumper builds DICOM volumes for CIRCUS CS plug-ins.
+ * It exports a set of files via the passed archiver.
+ */
 export interface DicomVoxelDumper {
   /**
    * @param series The list of series to export.
+   * @param archiver The archiver instance (can be configured to
+   * create a zip file, a tar+gz file or an uncompressed tar)
    */
-  dump: (series: SeriesEntry[]) => { stream: TarStream; events: EventEmitter };
+  dump: (
+    series: SeriesEntry[],
+    archiver: Archiver
+  ) => { stream: Archiver; events: EventEmitter };
 }

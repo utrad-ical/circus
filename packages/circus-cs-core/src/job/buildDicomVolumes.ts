@@ -1,6 +1,7 @@
-import { DicomVoxelDumper, SeriesEntry } from '../interface';
+import archiver from 'archiver';
 import { Writable } from 'stream';
 import tarfs from 'tar-fs';
+import { DicomVoxelDumper, SeriesEntry } from '../interface';
 
 /**
  * Builds raw volume data (and associated files) from DICOM series
@@ -15,7 +16,8 @@ const buildDicomVolumes = (
   destDir: string,
   logStream: Writable
 ) => {
-  const { stream } = dicomVoxelDumper.dump(seriesEntries);
+  const pack = archiver('tar', { gzip: false });
+  const { stream } = dicomVoxelDumper.dump(seriesEntries, pack);
   return new Promise<void>((resolve, reject) => {
     const extract = tarfs.extract(destDir, {
       dmode: 0o555, // all dirs should be readable

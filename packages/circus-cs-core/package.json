@@ -19,6 +19,7 @@
     "@babel/register": "^7.13.16",
     "@utrad-ical/circus-lib": "^0.15.2",
     "ajv": "^6.11.0",
+    "archiver": "^5.3.0",
     "argv": "0.0.2",
     "chalk": "^3.0.0",
     "dockerode": "^2.5.8",

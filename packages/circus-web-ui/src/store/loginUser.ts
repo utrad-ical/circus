@@ -5,7 +5,8 @@ type GlobalPrivileges =
   | 'createProject'
   | 'deleteProject'
   | 'manageServer'
-  | 'personalInfoView';
+  | 'personalInfoView'
+  | 'downloadVolume';
 
 export interface SearchPreset {
   name: string;

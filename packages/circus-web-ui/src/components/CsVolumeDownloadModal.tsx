@@ -3,30 +3,34 @@ import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { useApi } from 'utils/api';
 import fillPartialVolumeDescriptors from 'utils/partialVolumeDescriptor';
-import DownloadModal from './DownloadModal';
+import DownloadModal, {
+  CompressionFormat,
+  compressionFormatOptions
+} from './DownloadModal';
 import { SeriesEntry } from './SeriesSelector';
-
-type Format = 'tgz' | 'zip';
+import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 
 interface CsVolumeDownloadOptions {
   series: SeriesEntry[];
-  format: Format;
+  compressionFormat: CompressionFormat;
 }
-
-// const formatOptions: { [type in Format]: string } = {
-//   tgz: 'tar + gzip',
-//   zip: 'zip'
-// };
 
 const CsVolumeDoanloadOptionsEditor: Editor<CsVolumeDownloadOptions> = props => {
   const { value, onChange } = props;
-  // Currently no option is available
   return (
     <div>
       Exporting{' '}
       {value.series.length > 1
         ? `${value.series.length} volumes`
         : `one volume`}
+      <div className="row">
+        Compression format:{' '}
+        <ShrinkSelect
+          options={compressionFormatOptions}
+          value={value.compressionFormat}
+          onChange={v => onChange({ ...value, compressionFormat: v })}
+        />
+      </div>
     </div>
   );
 };
@@ -49,7 +53,8 @@ const CsVolumeDownloadModal: React.FC<{
             options.series,
             api,
             appState
-          )
+          ),
+          compressionFormat: options.compressionFormat
         }
       });
       return res.taskId;
@@ -62,7 +67,7 @@ const CsVolumeDownloadModal: React.FC<{
       onClose={onClose}
       caption={caption}
       onStart={onStart}
-      initialOptions={{ series, format: 'tgz' }}
+      initialOptions={{ series, compressionFormat: 'tgz' }}
       optionsEditor={CsVolumeDoanloadOptionsEditor}
     />
   );

@@ -212,7 +212,7 @@ interface ExportedSeries {
   format: 'zip' | 'tgz';
 }
 
-export const handlePostExportCsDump: RouteMiddleware = ({
+export const handlePostExportCsVolume: RouteMiddleware = ({
   taskManager,
   dicomVoxelDumper
 }) => {
@@ -227,7 +227,7 @@ export const handlePostExportCsDump: RouteMiddleware = ({
     }
 
     const downloadFileType =
-      exportedSeries.format === 'tgz' ? 'application/gzip' : 'application/zip';
+      exportedSeries.format === 'zip' ? 'application/zip' : 'application/gzip';
     const { emitter, downloadFileStream, taskId } = await taskManager.register(
       ctx,
       {

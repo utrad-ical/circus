@@ -9,7 +9,7 @@
   moderateProjects: []
 - groupId: 2 # member: bob
   groupName: powerUser
-  privileges: ['personalInfoView']
+  privileges: ['personalInfoView', 'downloadVolume']
   domains: ['vega.org', 'altair.org']
   readProjects: ['8883fdef6f5144f50eb2a83cd34baa44']
   writeProjects: ['8883fdef6f5144f50eb2a83cd34baa44']

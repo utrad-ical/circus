@@ -234,9 +234,7 @@ describe('Export CS volume', () => {
   });
 
   test('export', async () => {
-    const res = await ax.dave.request({
-      url: 'api/series/export-cs-volume',
-      method: 'post',
+    const res = await ax.bob.post('api/series/export-cs-volume', {
       data: {
         series: [
           {

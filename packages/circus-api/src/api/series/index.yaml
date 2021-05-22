@@ -26,6 +26,7 @@ routes:
   - verb: post
     path: /series/export-cs-volume
     handler: handlePostExportCsVolume
+    requiredGlobalPrivilege: downloadVolume
     requestSchema:
       type: object
       properties:

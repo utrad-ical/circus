@@ -224,7 +224,7 @@ describe('search by my list', () => {
   });
 });
 
-describe('Export CS dump', () => {
+describe('Export CS volume', () => {
   beforeEach(async () => {
     await fs.emptyDir(apiTest.downloadFileDirectory);
   });
@@ -235,7 +235,7 @@ describe('Export CS dump', () => {
 
   test('export', async () => {
     const res = await ax.dave.request({
-      url: 'api/series/export-cs-dump',
+      url: 'api/series/export-cs-volume',
       method: 'post',
       data: {
         series: [

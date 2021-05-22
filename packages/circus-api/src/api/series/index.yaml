@@ -24,8 +24,8 @@ routes:
   - verb: delete
     path: /series/:seriesUid
   - verb: post
-    path: /series/export-cs-dump
-    handler: handlePostExportCsDump
+    path: /series/export-cs-volume
+    handler: handlePostExportCsVolume
     requestSchema:
       type: object
       properties:

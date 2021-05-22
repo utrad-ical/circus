@@ -83,5 +83,9 @@ module.exports = {
       '/rs': 'http://localhost:8080'
     }
   },
-  devtool: 'source-map'
+  devtool: 'source-map',
+  cache: {
+    type: 'filesystem',
+    buildDependencies: { config: [__filename] }
+  }
 };

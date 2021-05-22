@@ -235,15 +235,13 @@ describe('Export CS volume', () => {
 
   test('export', async () => {
     const res = await ax.bob.post('api/series/export-cs-volume', {
-      data: {
-        series: [
-          {
-            seriesUid: '222.333.444.555.666',
-            partialVolumeDescriptor: { start: 1, end: 2, delta: 1 }
-          }
-        ],
-        compressionFormat: 'tgz'
-      }
+      series: [
+        {
+          seriesUid: '222.333.444.555.666',
+          partialVolumeDescriptor: { start: 1, end: 2, delta: 1 }
+        }
+      ],
+      compressionFormat: 'tgz'
     });
     expect(res.status).toBe(200);
     const taskId = res.data.taskId;

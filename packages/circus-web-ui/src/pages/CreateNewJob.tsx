@@ -89,6 +89,19 @@ const CreateNewJob: React.FC<{}> = props => {
     showMessage('Job registered.');
   };
 
+  const handleVolumeDownload = async () => {
+    await api('/series/export-cs-volume', {
+      method: 'post',
+      data: {
+        series: await fillPartialVolumeDescriptors(
+          selectedSeries,
+          api,
+          appState
+        )
+      }
+    });
+  };
+
   if (!Array.isArray(plugins)) {
     return <LoadingIndicator />;
   }
@@ -124,6 +137,14 @@ const CreateNewJob: React.FC<{}> = props => {
         />
       </div>
       <div className="text-right">
+        <IconButton
+          disabled={!canCreate}
+          icon="download"
+          bsStyle="default"
+          onClick={handleVolumeDownload}
+        >
+          Download volume
+        </IconButton>
         <IconButton
           disabled={!canCreate}
           icon="circus-b-calc"

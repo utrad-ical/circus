@@ -3,7 +3,7 @@ import RawData from '@utrad-ical/circus-rs/src/common/RawData';
 import { EventEmitter } from 'events';
 import { PassThrough } from 'stream';
 import createMhdPacker from './createMhdPacker';
-import { readFromStreamToBufferTillEnd } from '../../test/util-stream';
+import rawBody from 'raw-body';
 import zip from 'jszip';
 
 test('pack', async () => {
@@ -48,8 +48,12 @@ test('pack', async () => {
   const caseIds = ['my-case-id'];
   const downloadFileStream = new PassThrough();
   const taskEmitter = new EventEmitter();
-  packer.packAsMhd(taskEmitter, downloadFileStream, caseIds);
-  const zipFile = await readFromStreamToBufferTillEnd(downloadFileStream);
+  packer.packAsMhd(taskEmitter, downloadFileStream, caseIds, {
+    compressionFormat: 'zip',
+    labelPackType: 'isolated',
+    mhdLineEnding: 'lf'
+  });
+  const zipFile = await rawBody(downloadFileStream);
   expect(zipFile).not.toBe(undefined);
   // Validate ZIP file
   const archive = await zip.loadAsync(zipFile);

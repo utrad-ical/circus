@@ -43,6 +43,8 @@ routes:
           enum: ['isolated', 'combined']
         mhdLineEnding:
           enum: ['lf', 'crlf']
+        compressionFormat:
+          enum: ['tgz', 'zip']
       required: ['caseIds']
   - verb: put
     path: /cases/:caseId/tags

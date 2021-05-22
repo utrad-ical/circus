@@ -1,6 +1,7 @@
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
-import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import { confirm } from '@smikitky/rb-components/lib/modal';
+import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import CsVolumeDownloadModal from 'components/CsVolumeDownloadModal';
 import IconButton from 'components/IconButton';
 import PluginDisplay from 'components/PluginDisplay';
 import SeriesSelector, { SeriesEntry } from 'components/SeriesSelector';
@@ -10,6 +11,7 @@ import { useParams } from 'react-router-dom';
 import { useApi } from 'utils/api';
 import fillPartialVolumeDescriptors from 'utils/partialVolumeDescriptor';
 import useLocalPreference from 'utils/useLocalPreference';
+import useLoginUser from 'utils/useLoginUser';
 import useShowMessage from 'utils/useShowMessage';
 import Plugin from '../types/Plugin';
 
@@ -22,8 +24,11 @@ const CreateNewJob: React.FC<{}> = props => {
   const [selectedSeries, setSelectedSeries] = useState<SeriesEntry[]>([]);
   const [busy, setBusy] = useState(true);
   const [plugins, setPlugins] = useState<Plugin[] | null>(null);
+  const [showVolumeDownloadModal, setShowVolumeDownloadModal] = useState(false);
+
   const api = useApi();
   const appState = useSelector(state => state);
+  const user = useLoginUser();
   const showMessage = useShowMessage();
   const seriesUid = useParams<any>().seriesUid;
 
@@ -90,16 +95,7 @@ const CreateNewJob: React.FC<{}> = props => {
   };
 
   const handleVolumeDownload = async () => {
-    await api('/series/export-cs-volume', {
-      method: 'post',
-      data: {
-        series: await fillPartialVolumeDescriptors(
-          selectedSeries,
-          api,
-          appState
-        )
-      }
-    });
+    setShowVolumeDownloadModal(true);
   };
 
   if (!Array.isArray(plugins)) {
@@ -137,14 +133,19 @@ const CreateNewJob: React.FC<{}> = props => {
         />
       </div>
       <div className="text-right">
-        <IconButton
-          disabled={!canCreate}
-          icon="download"
-          bsStyle="default"
-          onClick={handleVolumeDownload}
-        >
-          Download volume
-        </IconButton>
+        {user.globalPrivileges.includes('downloadVolume') && (
+          <>
+            <IconButton
+              disabled={!canCreate}
+              icon="download"
+              bsStyle="default"
+              onClick={handleVolumeDownload}
+            >
+              Download volume
+            </IconButton>
+            &ensp;
+          </>
+        )}
         <IconButton
           disabled={!canCreate}
           icon="circus-b-calc"
@@ -154,6 +155,12 @@ const CreateNewJob: React.FC<{}> = props => {
           Register Job
         </IconButton>
       </div>
+      {showVolumeDownloadModal && (
+        <CsVolumeDownloadModal
+          series={selectedSeries}
+          onClose={() => setShowVolumeDownloadModal(false)}
+        />
+      )}
     </div>
   );
 };

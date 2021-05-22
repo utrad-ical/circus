@@ -227,7 +227,7 @@ export const handlePostExportCsVolume: RouteMiddleware = ({
     }
 
     const downloadFileType =
-      exportedSeries.format === 'zip' ? 'application/zip' : 'application/gzip';
+      exportedSeries.format === 'zip' ? 'application/zip' : 'application/x-tgz';
     const { emitter, downloadFileStream, taskId } = await taskManager.register(
       ctx,
       {

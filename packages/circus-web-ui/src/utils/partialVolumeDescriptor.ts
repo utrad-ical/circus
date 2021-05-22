@@ -21,8 +21,7 @@ export const defaultPvdFromSeries = async (
   state?: RootState
 ) => {
   const series =
-    state?.searches.series?.results?.items[seriesUid] ||
-    state?.searches.relevantSeries?.results?.items[seriesUid] ||
+    state?.searches.items.series?.[seriesUid] ||
     ((await api('series/' + seriesUid)) as Series);
   return defaultPvd(series.images);
 };

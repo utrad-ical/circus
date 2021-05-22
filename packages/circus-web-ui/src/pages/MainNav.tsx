@@ -309,6 +309,7 @@ const MainNav: React.FC<{}> = props => {
               name="Preference"
               link="/preference"
             />
+            <SubMenu icon="bookmark" name="Access Tokens" link="/tokens" />
           </Menu>
           {isAdmin && (
             <Menu name="Administration" link="/admin">

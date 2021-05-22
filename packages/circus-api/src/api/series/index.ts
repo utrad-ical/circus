@@ -237,12 +237,13 @@ export const handlePostExportCsVolume: RouteMiddleware = ({
       }
     );
 
+    emitter.emit('progress', 'Processing voluem #0');
     stream.pipe(compress).pipe(downloadFileStream!);
 
     events.on('volume', (i: number) => {
       emitter.emit(
         'progress',
-        `Processing volume #${i}`,
+        `Processing volume #${i + 1}`,
         i,
         exportedSeries.series.length
       );

@@ -2,11 +2,14 @@ import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import React, { useCallback } from 'react';
 import { useApi } from 'utils/api';
-import DownloadModal from './DownloadModal';
+import DownloadModal, {
+  CompressionFormat,
+  compressionFormatOptions,
+  LineEnding,
+  lineEndingOptions
+} from './DownloadModal';
 
 type LabelPackTypeOptions = 'isolated' | 'combined';
-type LineEnding = 'lf' | 'crlf';
-type CompressionFormat = 'tgz' | 'zip';
 
 interface CaseExportOptions {
   caseIds: string[];
@@ -18,16 +21,6 @@ interface CaseExportOptions {
 const labelPackTypeOptions: { [type in LabelPackTypeOptions]: string } = {
   isolated: 'Isolated (one raw file per label)',
   combined: 'Combined'
-};
-
-const mhdLineEndingOptions: { [type in LineEnding]: string } = {
-  lf: 'LF',
-  crlf: 'CR + LF (Windows)'
-};
-
-const compressionFormatOptions: { [type in CompressionFormat]: string } = {
-  tgz: 'tar.gz',
-  zip: 'zip'
 };
 
 const CaseExportOptionsEditor: Editor<CaseExportOptions> = props => {
@@ -45,7 +38,7 @@ const CaseExportOptionsEditor: Editor<CaseExportOptions> = props => {
       <div className="row">
         MHD file line endings:{' '}
         <ShrinkSelect
-          options={mhdLineEndingOptions}
+          options={lineEndingOptions}
           value={value.mhdLineEnding}
           onChange={v => onChange({ ...value, mhdLineEnding: v })}
         />

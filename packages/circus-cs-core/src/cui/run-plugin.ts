@@ -57,6 +57,9 @@ const runPlugin: FunctionService<
       report: async (jobId, type, payload) => {
         console.log(chalk.cyan('Job status changed:', type));
       },
+      logStream: async (jobId, stream) => {
+        stream.pipe(process.stdout);
+      },
       packDir: (jobId, stream) => {
         return new Promise((resolve, reject) => {
           const extract = tarfs.extract(resultsDir);
@@ -87,7 +90,7 @@ const runPlugin: FunctionService<
       { workingDirectory: work, removeTemporaryDirectory: !keep },
       { jobReporter, pluginDefinitionAccessor, dockerRunner, dicomVoxelDumper }
     );
-    await runner.run('dummy', jobRequest, process.stdout);
+    await runner.run('dummy', jobRequest);
   };
 };
 

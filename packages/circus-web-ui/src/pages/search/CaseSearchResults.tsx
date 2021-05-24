@@ -1,7 +1,9 @@
+import { confirm } from '@smikitky/rb-components/lib/modal';
 import CaseExportModal from 'components/CaseExportModal';
 import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
+import IdDisplay from 'components/IdDisplay';
 import MyListDropdown from 'components/MyListDropdown';
 import PatientInfoBox from 'components/PatientInfoBox';
 import ProjectDisplay from 'components/ProjectDisplay';
@@ -17,7 +19,6 @@ import { Link } from 'react-router-dom';
 import { updateSearch } from 'store/searches';
 import { useApi } from 'utils/api';
 import useLoginUser from 'utils/useLoginUser';
-import { confirm } from '@smikitky/rb-components/lib/modal';
 
 const Operation: React.FC<{
   value: any;
@@ -44,13 +45,13 @@ const Project: React.FC<{
 const CaseId: React.FC<{
   value: any;
 }> = props => {
-  const item = props.value;
-  return <Fragment>{item.caseId.substr(0, 8)}</Fragment>;
+  const { caseId } = props.value;
+  const ids = useMemo(() => ({ 'Case ID': caseId }), [caseId]);
+  return <IdDisplay value={ids} />;
 };
 
 const columns: DataGridColumnDefinition<any>[] = [
   { caption: 'Project', className: 'project', renderer: Project },
-  { caption: 'Case ID', className: 'caseId', renderer: CaseId },
   {
     caption: 'Patient',
     className: 'patient',
@@ -58,6 +59,7 @@ const columns: DataGridColumnDefinition<any>[] = [
       return <PatientInfoBox value={patientInfo} />;
     }
   },
+  { caption: 'Case ID', className: 'caseId', renderer: CaseId },
   {
     caption: 'Create/Update',
     className: 'created-at',

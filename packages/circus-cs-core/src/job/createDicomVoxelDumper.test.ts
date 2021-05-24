@@ -1,5 +1,5 @@
 import archiver from 'archiver';
-import { DicomFileRepository } from 'circus-lib/src/dicom-file-repository';
+import { DicomFileRepository } from '@utrad-ical/circus-lib';
 import fs from 'fs-extra';
 import path from 'path';
 import { Readable } from 'stream';

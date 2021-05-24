@@ -8,7 +8,7 @@ import {
   CompressionFormat,
   LabelPackType,
   LineEndingType
-} from 'circus-api/src/case/createMhdPacker';
+} from '../../case/createMhdPacker';
 
 const maxTagLength = 32;
 

@@ -1,4 +1,4 @@
-import { Models } from 'circus-api/src/interface';
+import { Models } from '../../interface';
 import { CircusContext, RouteMiddleware } from '../../typings/middlewares';
 import generateUniqueId from '../../utils/generateUniqueId';
 
@@ -55,7 +55,11 @@ const getList = async (
 export const handleGet: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const myListId = ctx.params.myListId;
-    const { userList, itemReadable, list } = await getList(ctx, models, myListId);
+    const { userList, itemReadable, list } = await getList(
+      ctx,
+      models,
+      myListId
+    );
     if (!itemReadable)
       ctx.throw(401, 'You cannot read the items of this my list.');
     const resourceIds = list.items.map((item: any) => item.resourceId);

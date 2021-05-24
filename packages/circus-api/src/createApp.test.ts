@@ -31,7 +31,8 @@ beforeAll(async () => {
       volumeProvider: null as any, // dummy
       taskManager: null as any, // dummy
       mhdPacker: null as any, // dummy
-      core: null as any // dummy
+      core: null as any, // dummy
+      dicomVoxelDumper: null as any // dummy
     }
   );
   testServer = await setUpKoaTestWith(koaApp);

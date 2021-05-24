@@ -24,27 +24,29 @@ const createDicomExtractorWorker: NoDepFunctionService<
   Options
 > = async (options = {}) => {
   const { maxConcurrency = os.cpus().length } = options;
+  let destroyed = false;
 
   const pool = new Pool({
     create: () => new Worker(workerMain),
     destroy: async (worker: Worker) => await worker.terminate(),
     min: 1, // always keep at least one thread
-    max: maxConcurrency,
+    max: 99, //maxConcurrency,
     propagateCreateError: true
   });
 
   const extract = (input: ArrayBuffer) => {
+    if (destroyed) return Promise.reject('Worker pool has been destroyed');
     return new Promise<DicomImageData>((resolve, reject) => {
       pool.acquire().promise.then(worker => {
         const cb = (result: DicomImageData | string) => {
+          worker.off('message', cb);
+          pool.release(worker);
           if (typeof result === 'string') {
             // string result means an error
             reject(new Error(result));
           } else {
             resolve(result);
           }
-          worker.off('message', cb);
-          pool.release(worker);
         };
         worker.on('message', cb);
         worker.postMessage(input);
@@ -53,6 +55,7 @@ const createDicomExtractorWorker: NoDepFunctionService<
   };
 
   extract.dispose = async () => {
+    destroyed = true;
     await pool.destroy();
   };
 

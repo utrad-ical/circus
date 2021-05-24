@@ -4,6 +4,7 @@
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import { Archiver } from 'archiver';
 import { EventEmitter } from 'events';
+import { Readable } from 'stream';
 
 export type QueueState = 'wait' | 'processing';
 
@@ -136,13 +137,24 @@ export interface PluginJobReporter {
   ) => Promise<void>;
 
   /**
+   * Acceepts a logging stream. A reporter must output it to somewhere.
+   * The returned promise will be resolved when the log stream is ready.
+   * Callback is called when the log is successfully closed.
+   */
+  logStream: (
+    jobId: string,
+    stream: Readable,
+    callback?: (err?: Error) => void
+  ) => Promise<void>;
+
+  /**
    * Provides the content plug-in output directory.
    * @param jobId The Job ID.
    * @param stream A `tar-stream` stream which includes all the file
    *   output from the executed plugin. You can extract it using
    *   `tar-fs` or `tar-stream`.
    */
-  packDir: (jobId: string, stream: NodeJS.ReadableStream) => Promise<void>;
+  packDir: (jobId: string, stream: Readable) => Promise<void>;
 }
 
 /**

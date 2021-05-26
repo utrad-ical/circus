@@ -1,5 +1,5 @@
 import Icon from '@smikitky/rb-components/lib/Icon';
-import browserHistory from 'browserHistory';
+import browserHistory from '../../browserHistory';
 import DataGrid, {
   DataGridColumnDefinition,
   DataGridRenderer

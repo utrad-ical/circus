@@ -1,10 +1,18 @@
-import { Composition, MprViewState, Tool, Viewer, ViewState } from 'circus-rs';
-import { toolFactory } from 'circus-rs/tool/tool-initializer';
+import {
+  Composition,
+  MprViewState,
+  Tool,
+  Viewer
+} from '@utrad-ical/circus-rs/src/browser';
+import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
+import { toolFactory } from '@utrad-ical/circus-rs/src/browser/tool/tool-initializer';
+import classnames from 'classnames';
 import GridContainer, {
   LayoutInfo,
   layoutReducer
 } from 'components/GridContainer';
 import Icon from 'components/Icon';
+import IconButton from 'components/IconButton';
 import ImageViewer, {
   createStateChanger,
   InitialStateSetterFunc,
@@ -13,17 +21,14 @@ import ImageViewer, {
 } from 'components/ImageViewer';
 import { Button, DropdownButton, MenuItem } from 'components/react-bootstrap';
 import React, {
+  useCallback,
   useContext,
   useEffect,
-  useRef,
   useMemo,
-  useCallback
+  useRef
 } from 'react';
 import styled from 'styled-components';
-import { OrientationString } from 'circus-rs/section-util';
 import { EditingData, EditingDataUpdater, seriesColors } from './revisionData';
-import classnames from 'classnames';
-import IconButton from 'components/IconButton';
 
 export interface ViewerDef {
   key: string;
@@ -70,7 +75,7 @@ const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
     }, 'select active editor');
   };
 
-  const handleRotateClick = (ev: React.MouseEvent) => {
+  const handleRotateClick: React.MouseEventHandler<Button> = ev => {
     updateEditingData(d => {
       const item = d.layoutItems.find(item => item.key === key)!;
       item.celestialRotateMode = !item.celestialRotateMode;
@@ -87,7 +92,7 @@ const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
     ev.stopPropagation();
   };
 
-  const handleRemoveClick = (ev: React.MouseEvent) => {
+  const handleRemoveClick: React.MouseEventHandler<Button> = ev => {
     updateEditingData(d => {
       if (Object.keys(d.layout.positions).length <= 1) return;
       delete d.layout.positions[key];
@@ -153,7 +158,7 @@ const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
           id={`viewergrid-header-dropdown-${key}`}
           pullRight
           noCaret
-          onSelect={handleSelectLayoutKind}
+          onSelect={handleSelectLayoutKind as any}
         >
           <MenuItem eventKey="axial">
             <Icon icon="circus-orientation-axial" /> Axial

@@ -37,9 +37,9 @@ import { store } from './store';
 import { Provider as ReduxStoreProvider, useSelector } from 'react-redux';
 import { dismissMessageOnPageChange } from 'store/messages';
 import PluginJobQueueSearch from './pages/search/PluginJobQueueSearch';
-import browserHistory from 'browserHistory';
+import browserHistory from './browserHistory';
 import GlobalStyle, { CircusThemeProvider } from './theme';
-import * as rs from 'circus-rs';
+import * as rs from '@utrad-ical/circus-rs/src/browser';
 
 import { ApiContext, ApiCaller } from 'utils/api';
 import loginManager, { LoginManagerContext } from 'utils/loginManager';
@@ -109,8 +109,7 @@ const VolumeCacheProvider: React.FC = props => {
     const rsHttpClient = new rs.RsHttpClient(server);
     return {
       rsHttpClient,
-      map: new Map<string, rs.RsVolumeLoader>(),
-      toKey: series => 'foo'
+      map: new Map<string, rs.RsVolumeLoader>()
     };
   }, [server]);
 

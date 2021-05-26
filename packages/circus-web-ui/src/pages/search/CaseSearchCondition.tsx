@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import DateRangePicker, {
   dateRangeToMongoQuery
 } from '@smikitky/rb-components/lib/DateRangePicker';
-import { modalities } from 'modalities';
+import { modalities } from '../../modalities';
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import ConditionFrame from './ConditionFrame';
 import { escapeRegExp } from 'utils/util';

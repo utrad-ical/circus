@@ -2,17 +2,17 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "lib": ["dom", "es2019"],
-    "baseUrl": "./src",
     "jsx": "react",
     "allowJs": true,
     "paths": {
-      "rb/*": ["@smikitky/rb-components/lib/*"],
-      "circus-rs": ["../../circus-rs/src/browser"],
-      "circus-rs/*": ["../../circus-rs/src/browser/*"],
-      "components/*": ["components/*"],
-      "pages/*": ["pages/*"],
-      "utils/*": ["utils/*"],
-      "store/*": ["store/*"]
-    }
-  }
+      "components/*": ["circus-web-ui/src/components/*"],
+      "pages/*": ["circus-web-ui/src/pages/*"],
+      "utils/*": ["circus-web-ui/src/utils/*"],
+      "store": ["circus-web-ui/src/store"],
+      "store/*": ["circus-web-ui/src/store/*"],
+      "types/*": ["circus-web-ui/src/types/*"]
+    },
+    "rootDir": "./src"
+  },
+  "include": ["src"]
 }

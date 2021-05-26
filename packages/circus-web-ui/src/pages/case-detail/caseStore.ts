@@ -6,7 +6,7 @@ import Project from 'types/Project';
 import Series from 'types/Series';
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import { LayoutInfo, layoutReducer } from 'components/GridContainer';
-import { OrientationString } from 'circus-rs/section-util';
+import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
 import { ViewerDef } from './ViewerGrid';
 
 interface CaseData {

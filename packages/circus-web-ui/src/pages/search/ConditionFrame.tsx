@@ -66,7 +66,7 @@ const ConditionFrame: <T extends Condition>(props: {
         animation={false}
         id="search-condition-tabs"
         activeKey={activeKey}
-        onSelect={handleChangeType}
+        onSelect={(eventKey: any) => handleChangeType(eventKey as number)}
       >
         <Tab eventKey={1} title="Basic">
           <PropertyEditor

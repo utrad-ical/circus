@@ -73,7 +73,7 @@ const StyledDiv = styled.div`
 `;
 
 const Menu: React.FC<{
-  onMenuSelect: (selected: string) => void;
+  onMenuSelect: (selected: any) => void;
 }> = React.memo(props => {
   const { onMenuSelect } = props;
   return (
@@ -196,7 +196,7 @@ const PluginJobDetail: React.FC<{}> = props => {
   );
 
   const resultsContext = useMemo<CsResultsContextType | undefined>(() => {
-    if (!jobData) return undefined;
+    if (!jobData || jobData instanceof Error) return undefined;
     const { job, pluginData } = jobData;
     return {
       consensual: feedbackState.isConsensual,

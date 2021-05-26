@@ -24,7 +24,7 @@ const MyListArray: React.FC<{
               <Button
                 bsSize="xs"
                 bsStyle="primary"
-                onClick={(ev: React.MouseEvent) => {
+                onClick={ev => {
                   ev.preventDefault();
                   onRenameClick(list.myListId);
                 }}
@@ -35,7 +35,7 @@ const MyListArray: React.FC<{
               <Button
                 bsSize="xs"
                 bsStyle="danger"
-                onClick={(ev: React.MouseEvent) => {
+                onClick={ev => {
                   ev.preventDefault();
                   onDeleteClick(list.myListId);
                 }}

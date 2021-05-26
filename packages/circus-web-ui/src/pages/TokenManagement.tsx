@@ -141,7 +141,7 @@ const TokenManagement: React.FC<{}> = props => {
           type="text"
           placeholder="Description of the new token"
           value={description}
-          onChange={(ev: React.ChangeEvent<HTMLInputElement>) =>
+          onChange={(ev: React.BaseSyntheticEvent) =>
             setDescription(ev.target.value)
           }
         ></FormControl>

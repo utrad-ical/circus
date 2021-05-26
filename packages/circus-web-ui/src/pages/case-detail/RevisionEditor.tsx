@@ -663,12 +663,14 @@ const RevisionEditor: React.FC<{
           multipleSeriesShown={multipleSeriesShown}
         />
       </div>
-      <Modal show={seriesDialogOpen} bsSize="lg">
-        <SeriesSelectorDialog
-          onResolve={handleSeriesDialogResolve}
-          initialValue={editingData.revision.series}
-        />
-      </Modal>
+      {seriesDialogOpen && (
+        <Modal show bsSize="lg" onHide={() => {}}>
+          <SeriesSelectorDialog
+            onResolve={handleSeriesDialogResolve}
+            initialValue={editingData.revision.series}
+          />
+        </Modal>
+      )}
     </StyledDiv>
   );
 };

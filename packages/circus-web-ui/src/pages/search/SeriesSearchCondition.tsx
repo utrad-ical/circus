@@ -1,5 +1,5 @@
 import React from 'react';
-import { modalities } from 'modalities';
+import { modalities } from '../../modalities';
 import ConditionFrame from './ConditionFrame';
 import { escapeRegExp } from 'utils/util';
 import * as et from '@smikitky/rb-components/lib/editor-types';

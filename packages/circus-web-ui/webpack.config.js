@@ -19,10 +19,6 @@ module.exports = {
   },
   resolve: {
     modules: [path.join(__dirname, 'src'), 'node_modules'],
-    alias: {
-      rb: '@smikitky/rb-components/lib',
-      'circus-rs': rsPath + '/src/browser'
-    },
     extensions: ['.js', '.jsx', '.ts', '.tsx']
   },
   module: {

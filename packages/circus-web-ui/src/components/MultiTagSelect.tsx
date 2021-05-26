@@ -6,10 +6,8 @@ const MultiTagSelect: React.FC<{
   tags: { name: string; color: string }[];
   value: string[];
   onChange: (value: string[]) => void;
-  bsSize?: any;
-  bsStyle?: string;
 }> = props => {
-  const { value, onChange, tags, bsSize, bsStyle } = props;
+  const { value, onChange, tags } = props;
 
   const options: any = {};
   tags.forEach(tag => {
@@ -18,15 +16,7 @@ const MultiTagSelect: React.FC<{
     };
   });
 
-  return (
-    <MultiSelect
-      value={value}
-      onChange={onChange}
-      bsSize={bsSize}
-      bsStyle={bsStyle}
-      options={options}
-    />
-  );
+  return <MultiSelect value={value} onChange={onChange} options={options} />;
 };
 
 export default MultiTagSelect;

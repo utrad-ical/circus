@@ -2,7 +2,7 @@ import DraggableTool from '../DraggableTool';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import Viewer from '../../viewer/Viewer';
 import { Tool } from '../Tool';
-import { ViewWindow } from 'circus-rs/src/common/ViewWindow';
+import { ViewWindow } from '../../../common/ViewWindow';
 
 /**
  * WindowTool handles mouse drag and modifies the window level/width accordingly.

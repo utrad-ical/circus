@@ -2,7 +2,6 @@
   "name": "@utrad-ical/circus-cs-core",
   "version": "0.18.0",
   "description": "CIRCUS CS Core: Plugin manager",
-  "main": "src/index.ts",
   "types": "src/interface.d.ts",
   "repository": {
     "type": "git",

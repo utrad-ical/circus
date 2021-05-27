@@ -120,7 +120,7 @@ it('should work with fromDate mode', async () => {
 });
 
 it('should handle allRequired option', async () => {
-  const testData = {
+  const testData: any = {
     intVal: 0,
     strVal: 'bar',
     dicomUid: '1.2.3',
@@ -134,7 +134,7 @@ it('should handle allRequired option', async () => {
 });
 
 it('should handle allRequiredExcept option', async () => {
-  const testData = { intVal: 0, strVal: 'bar', multiRange: '1' };
+  const testData: any = { intVal: 0, strVal: 'bar', multiRange: '1' };
   await validator.validate('sample|allRequiredExcept dicomUid', testData);
   delete testData.intVal;
   await expect(

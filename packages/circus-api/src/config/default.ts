@@ -38,7 +38,7 @@ const defaults: Configuration = {
   },
   blobStorage: {
     type: 'LocalStorage',
-    options: { root: '/var/circus/data/labels' }
+    options: { dataDir: '/var/circus/data/labels' }
   },
   dicomTagReader: { options: {} },
   dicomImporter: {

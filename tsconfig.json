@@ -1,18 +1,18 @@
 {
   "compilerOptions": {
     "noEmit": true,
-    // "outDir": "./lib",
-    // "declaration": true,
     "strict": true,
     "target": "es2018",
     "module": "commonjs",
     "esModuleInterop": true,
     "downlevelIteration": true,
+    "skipLibCheck": true,
+
+    // The following settings will map '@utrad-ical/foo'
+    // to './packages/foo/src'.
     "baseUrl": "./packages",
     "paths": {
       "@utrad-ical/*": ["*/src"]
     }
   }
-  // "include": ["src/**/*.ts"],
-  // "exclude": ["src/**/*.test.ts"]
 }

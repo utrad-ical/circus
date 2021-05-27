@@ -8,7 +8,7 @@ import {
   Glyphicon
 } from 'components/react-bootstrap';
 import styled from 'styled-components';
-import browserHistory from 'browserHistory';
+import browserHistory from '../browserHistory';
 import classnames from 'classnames';
 
 const StyledDiv = styled.div`
@@ -69,8 +69,9 @@ const LoginScreen: React.FC<{}> = props => {
             <FormControl
               placeholder="User ID or E-mail"
               autoFocus
+              type="text"
               value={input.id}
-              onChange={(ev: React.ChangeEvent<HTMLInputElement>) =>
+              onChange={(ev: React.BaseSyntheticEvent) =>
                 handleChange('id', ev.target.value)
               }
             />
@@ -78,12 +79,10 @@ const LoginScreen: React.FC<{}> = props => {
               placeholder="Password"
               type="password"
               value={input.password}
-              onChange={(ev: React.ChangeEvent<HTMLInputElement>) =>
+              onChange={(ev: React.BaseSyntheticEvent) =>
                 handleChange('password', ev.target.value)
               }
-              onKeyDown={(ev: React.KeyboardEvent) =>
-                ev.keyCode == 13 && handleLoginClick()
-              }
+              onKeyDown={ev => ev.keyCode == 13 && handleLoginClick()}
             />
           </FormGroup>
           {error && <p className="text-danger">{error}</p>}

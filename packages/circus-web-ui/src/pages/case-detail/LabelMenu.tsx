@@ -26,7 +26,7 @@ import {
   LabelAppearance,
   createNewLabelData
 } from './labelData';
-import { OrientationString } from 'circus-rs/section-util';
+import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
 
 type LabelCommand =
   | 'rename'

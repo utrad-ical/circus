@@ -224,7 +224,7 @@ describe('search by my list', () => {
   });
 });
 
-describe('Export CS dump', () => {
+describe('Export CS volume', () => {
   beforeEach(async () => {
     await fs.emptyDir(apiTest.downloadFileDirectory);
   });
@@ -234,18 +234,14 @@ describe('Export CS dump', () => {
   });
 
   test('export', async () => {
-    const res = await ax.dave.request({
-      url: 'api/series/export-cs-dump',
-      method: 'post',
-      data: {
-        series: [
-          {
-            seriesUid: '222.333.444.555.666',
-            partialVolumeDescriptor: { start: 1, end: 2, delta: 1 }
-          }
-        ],
-        format: 'tgz'
-      }
+    const res = await ax.bob.post('api/series/export-cs-volume', {
+      series: [
+        {
+          seriesUid: '222.333.444.555.666',
+          partialVolumeDescriptor: { start: 1, end: 2, delta: 1 }
+        }
+      ],
+      compressionFormat: 'tgz'
     });
     expect(res.status).toBe(200);
     const taskId = res.data.taskId;

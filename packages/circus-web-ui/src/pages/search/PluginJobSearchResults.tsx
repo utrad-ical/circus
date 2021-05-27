@@ -1,22 +1,23 @@
-import React, { Fragment } from 'react';
+import Icon from '@smikitky/rb-components/lib/Icon';
+import browserHistory from '../../browserHistory';
+import DataGrid, {
+  DataGridColumnDefinition,
+  DataGridRenderer
+} from 'components/DataGrid';
+import IconButton from 'components/IconButton';
+import IdDisplay from 'components/IdDisplay';
+import MyListDropdown from 'components/MyListDropdown';
+import PatientInfoBox from 'components/PatientInfoBox';
+import PluginDisplay from 'components/PluginDisplay';
+import { ProgressBar } from 'components/react-bootstrap';
 import SearchResultsView, {
   makeSortOptions
 } from 'components/SearchResultsView';
-import DataGrid, {
-  DataGridRenderer,
-  DataGridColumnDefinition
-} from 'components/DataGrid';
-import PatientInfoBox from 'components/PatientInfoBox';
 import TimeDisplay from 'components/TimeDisplay';
-import PluginDisplay from 'components/PluginDisplay';
-import IconButton from 'components/IconButton';
-import { ProgressBar } from 'components/react-bootstrap';
-import browserHistory from 'browserHistory';
-import styled from 'styled-components';
-import Icon from '@smikitky/rb-components/lib/Icon';
 import UserDisplay from 'components/UserDisplay';
+import React, { Fragment, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import MyListDropdown from 'components/MyListDropdown';
+import styled from 'styled-components';
 
 const Operation: DataGridRenderer<any> = props => {
   const { value: job } = props;
@@ -45,6 +46,14 @@ const PluginRenderer: DataGridRenderer<any> = props => {
     value: { pluginId }
   } = props;
   return <PluginDisplay size="lg" pluginId={pluginId} />;
+};
+
+const JobId: React.FC<{
+  value: any;
+}> = props => {
+  const { jobId } = props.value;
+  const ids = useMemo(() => ({ 'Job ID': jobId }), [jobId]);
+  return <IdDisplay value={ids} />;
 };
 
 const StatusRenderer: DataGridRenderer<any> = props => {
@@ -97,6 +106,11 @@ const columns: DataGridColumnDefinition<any>[] = [
     renderer: ({ value: { patientInfo } }) => {
       return <PatientInfoBox value={patientInfo} />;
     }
+  },
+  {
+    caption: 'Job ID',
+    className: 'job-id',
+    renderer: JobId
   },
   {
     caption: 'Executed by',

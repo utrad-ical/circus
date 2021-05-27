@@ -19,10 +19,6 @@ module.exports = {
   },
   resolve: {
     modules: [path.join(__dirname, 'src'), 'node_modules'],
-    alias: {
-      rb: '@smikitky/rb-components/lib',
-      'circus-rs': rsPath + '/src/browser'
-    },
     extensions: ['.js', '.jsx', '.ts', '.tsx']
   },
   module: {
@@ -83,5 +79,9 @@ module.exports = {
       '/rs': 'http://localhost:8080'
     }
   },
-  devtool: 'source-map'
+  devtool: 'source-map',
+  cache: {
+    type: 'filesystem',
+    buildDependencies: { config: [__filename] }
+  }
 };

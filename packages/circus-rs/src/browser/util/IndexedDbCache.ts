@@ -83,7 +83,7 @@ export default class IndexedDbCache<T> {
     return Promise.resolve();
   }
 
-  public get(key: string): Promise<T> {
+  public get(key: string): Promise<T | undefined> {
     return new Promise((resolve, reject) => {
       this.queue.then(() => {
         if (!this.connection) throw new Error('IndexedDB not initialized');

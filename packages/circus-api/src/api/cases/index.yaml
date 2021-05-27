@@ -31,6 +31,7 @@ routes:
   - verb: post
     path: /cases/export-mhd
     handler: handlePostExportJob
+    requiredGlobalPrivilege: downloadVolume
     description: Creates a job to export the specified cases as MHD.
     requestSchema:
       properties:
@@ -42,6 +43,8 @@ routes:
           enum: ['isolated', 'combined']
         mhdLineEnding:
           enum: ['lf', 'crlf']
+        compressionFormat:
+          enum: ['tgz', 'zip']
       required: ['caseIds']
   - verb: put
     path: /cases/:caseId/tags

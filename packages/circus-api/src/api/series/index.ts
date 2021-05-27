@@ -1,11 +1,11 @@
+import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import archiver from 'archiver';
 import { EJSON } from 'bson';
 import status from 'http-status';
 import { CircusContext, RouteMiddleware } from '../../typings/middlewares';
 import checkFilter from '../../utils/checkFilter';
 import { fileOrZipIterator } from '../../utils/directoryIterator';
 import { performAggregationSearch } from '../performSearch';
-import zlib from 'zlib';
-import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 
 const maskPatientInfo = (ctx: CircusContext) => {
   return (series: any) => {
@@ -204,30 +204,26 @@ export const handleDelete: RouteMiddleware = ({
   };
 };
 
-interface ExportedSeries {
+interface ExportRequest {
   series: {
     seriesUid: string;
     partialVolumeDescriptor: PartialVolumeDescriptor;
   }[];
-  format: 'zip' | 'tgz';
+  compressionFormat: 'tgz' | 'zip';
 }
 
-export const handlePostExportCsDump: RouteMiddleware = ({
+export const handlePostExportCsVolume: RouteMiddleware = ({
   taskManager,
   dicomVoxelDumper
 }) => {
   return async (ctx, next) => {
-    const exportedSeries: ExportedSeries = ctx.request.body;
+    const request: ExportRequest = ctx.request.body;
+    const zipMode = request.compressionFormat === 'zip';
+    const pack = zipMode ? archiver('zip') : archiver('tar', { gzip: true });
 
-    const { stream, events } = dicomVoxelDumper.dump(exportedSeries.series);
-    const compress = zlib.createGzip();
+    const { stream, events } = dicomVoxelDumper.dump(request.series, pack);
 
-    if (exportedSeries.format === 'zip') {
-      ctx.throw(status.NOT_IMPLEMENTED, 'Zip archiving is not supported yet.');
-    }
-
-    const downloadFileType =
-      exportedSeries.format === 'tgz' ? 'application/gzip' : 'application/zip';
+    const downloadFileType = zipMode ? 'application/zip' : 'application/x-tgz';
     const { emitter, downloadFileStream, taskId } = await taskManager.register(
       ctx,
       {
@@ -237,14 +233,15 @@ export const handlePostExportCsDump: RouteMiddleware = ({
       }
     );
 
-    stream.pipe(compress).pipe(downloadFileStream!);
+    emitter.emit('progress', 'Processing volume #0');
+    stream.pipe(downloadFileStream!);
 
     events.on('volume', (i: number) => {
       emitter.emit(
         'progress',
-        `Processing volume #${i}`,
+        `Processing volume #${i + 1}`,
         i,
-        exportedSeries.series.length
+        request.series.length
       );
     });
     downloadFileStream!.on('close', () => {

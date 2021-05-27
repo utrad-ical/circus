@@ -44,8 +44,8 @@ const SeriesSelectorDialog: React.FC<{
 
   return (
     <>
+      <Modal.Header>Select Series</Modal.Header>
       <Modal.Body>
-        <p>Select Series</p>
         <SeriesSelector
           value={entries}
           onChange={setEntries}

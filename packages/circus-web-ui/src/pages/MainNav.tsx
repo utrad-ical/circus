@@ -4,7 +4,7 @@ import Icon from 'components/Icon';
 import styled from 'styled-components';
 import classnames from 'classnames';
 import { useLoginManager } from 'utils/loginManager';
-import browserHistory from 'browserHistory';
+import browserHistory from '../browserHistory';
 import useLoginUser from 'utils/useLoginUser';
 import TaskNotifier from 'components/TaskNotifier';
 import { MyList } from 'store/loginUser';
@@ -309,6 +309,7 @@ const MainNav: React.FC<{}> = props => {
               name="Preference"
               link="/preference"
             />
+            <SubMenu icon="bookmark" name="Access Tokens" link="/tokens" />
           </Menu>
           {isAdmin && (
             <Menu name="Administration" link="/admin">

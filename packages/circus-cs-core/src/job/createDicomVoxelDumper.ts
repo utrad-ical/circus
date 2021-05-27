@@ -12,10 +12,32 @@ import parser from 'dicom-parser';
 import extractCommonValues from '../util/extractCommonValues';
 import { createEncConverter, EncConverter } from './encConverter';
 import { DicomVoxelDumper } from '../interface';
-import tar from 'tar-stream';
 import { EventEmitter } from 'events';
+import { Archiver } from 'archiver';
 
 type KeyValues = { [key: string]: any };
+
+const personalInfoTags: string[] = [
+  'x00080080', // Institution name
+  'x00080081', // Institution address
+  'x00080082', // Institution Code Sequence
+  'x00081040', // Institutional Department Name
+  'x00081048', // Physician(s) of Record
+  'x00081049', // Physician(s) of Record Identification Sequence
+  'x00081050', // Performing Physician's Name
+  'x00081052', // Performing Physician Identification Sequence
+  'x00081060', // Name of Physician(s) ReadingStudy
+  'x00081062', // Physician(s) Reading Study Identification Sequence
+  'x00081070', // Operators' Name
+  'x00081072', // Operator Identification Sequence
+  'x00100010', // Patient's name
+  'x00100020', // Patient's ID
+  'x00100030', // Patient's birth date
+  'x00321031', // Requesting Physician Identification Sequence
+  'x00321032', // Requesting Physician
+  'x00321033', // Requesting Service
+  'x00320030' // Patient's birth date
+];
 
 const prepareEncConverter = async (charSet: string | undefined) => {
   const defaultEncConverter: EncConverter = buf => buf.toString('latin1');
@@ -80,12 +102,13 @@ const dataSetToObject = (
           );
         }
         break;
-      case 'AT':
+      case 'AT': {
         const group = dataset.uint16(tag, 0) as number;
         const groupHexStr = ('0000' + group.toString(16)).substr(-4);
         const element = dataset.uint16(tag, 1) as number;
         const elementHexStr = ('0000' + element.toString(16)).substr(-4);
         return `0x${groupHexStr}${elementHexStr}`;
+      }
       case 'FL':
         return returnNumberOrNumberList(dataset, tag, 'float', 4);
       case 'FD':
@@ -123,6 +146,8 @@ const dataSetToObject = (
     // "Item delimitation" tag in a sequence
     if (tag === 'xfffee00d') continue;
 
+    if (personalInfoTags.includes(tag)) continue;
+
     const tagStr = tag.slice(1).replace(/^.{4}/, '$&,');
     const value = elementToValue(dataset, element);
     tagData[tagStr] = value;
@@ -138,7 +163,7 @@ const createDicomVoxelDumper: FunctionService<
   const dumpOneSeries = async (
     series: SeriesEntry,
     volId: number,
-    stream: tar.Pack
+    archiver: Archiver
   ) => {
     const seriesTagData = [];
     const seriesAccessor = await dicomFileRepository.getSeries(
@@ -204,22 +229,21 @@ const createDicomVoxelDumper: FunctionService<
     );
 
     const buffer = Buffer.from(rawBuffer!.buffer);
-    stream.entry({ name: `${volId}.mhd` }, mhd);
-    stream.entry({ name: `${volId}.raw` }, buffer);
-    stream.entry({ name: `${volId}.json` }, json);
+    archiver.append(mhd, { name: `${volId}.mhd` });
+    archiver.append(buffer, { name: `${volId}.raw` });
+    archiver.append(json, { name: `${volId}.json` });
   };
 
-  const dump = (series: SeriesEntry[]) => {
-    const stream = tar.pack();
+  const dump = (series: SeriesEntry[], archiver: Archiver) => {
     const events = new EventEmitter();
     (async () => {
       for (let i = 0; i < series.length; i++) {
         events.emit('volume', i);
-        await dumpOneSeries(series[i], i, stream);
+        await dumpOneSeries(series[i], i, archiver);
       }
-      stream.finalize();
+      archiver.finalize();
     })();
-    return { stream, events };
+    return { stream: archiver, events };
   };
 
   return { dump };

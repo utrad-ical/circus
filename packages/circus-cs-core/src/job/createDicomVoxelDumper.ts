@@ -17,6 +17,28 @@ import { Archiver } from 'archiver';
 
 type KeyValues = { [key: string]: any };
 
+const personalInfoTags: string[] = [
+  'x00080080', // Institution name
+  'x00080081', // Institution address
+  'x00080082', // Institution Code Sequence
+  'x00081040', // Institutional Department Name
+  'x00081048', // Physician(s) of Record
+  'x00081049', // Physician(s) of Record Identification Sequence
+  'x00081050', // Performing Physician's Name
+  'x00081052', // Performing Physician Identification Sequence
+  'x00081060', // Name of Physician(s) ReadingStudy
+  'x00081062', // Physician(s) Reading Study Identification Sequence
+  'x00081070', // Operators' Name
+  'x00081072', // Operator Identification Sequence
+  'x00100010', // Patient's name
+  'x00100020', // Patient's ID
+  'x00100030', // Patient's birth date
+  'x00321031', // Requesting Physician Identification Sequence
+  'x00321032', // Requesting Physician
+  'x00321033', // Requesting Service
+  'x00320030' // Patient's birth date
+];
+
 const prepareEncConverter = async (charSet: string | undefined) => {
   const defaultEncConverter: EncConverter = buf => buf.toString('latin1');
   if (!charSet) {
@@ -123,6 +145,8 @@ const dataSetToObject = (
 
     // "Item delimitation" tag in a sequence
     if (tag === 'xfffee00d') continue;
+
+    if (personalInfoTags.includes(tag)) continue;
 
     const tagStr = tag.slice(1).replace(/^.{4}/, '$&,');
     const value = elementToValue(dataset, element);

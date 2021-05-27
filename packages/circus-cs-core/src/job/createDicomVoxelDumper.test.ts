@@ -55,7 +55,8 @@ test('dump json', async () => {
     expect(headers.name).toMatch(/0\.(json|mhd|raw)/);
     const content = await readFromStreamTillEnd(stream);
     if (headers.name === '0.json') {
-      expect(JSON.parse(content).common).toHaveProperty('0008,0008');
+      expect(JSON.parse(content).common).toHaveProperty('0008,0008'); // ImageType
+      expect(JSON.parse(content).common['0010,0010']).toBeUndefined(); // PatientName
     }
     next();
   });

@@ -246,10 +246,16 @@ const createTaskManager: FunctionService<
     const fileName = downloadFileName(taskId);
     const stream = fs.createReadStream(fileName);
     const stat = await fs.stat(fileName);
-    const ext = mime.getExtension(task.downloadFileType);
+    const ext =
+      task.downloadFileType === 'application/x-tgz'
+        ? 'tar.gz'
+        : mime.getExtension(task.downloadFileType);
     ctx.set('Content-Deposition', `attachment; filename="download.${ext}"`);
     ctx.set('Content-Length', String(stat.size));
-    ctx.type = task.downloadFileType;
+    ctx.type =
+      task.downloadFileType === 'application/x-tgz'
+        ? 'application/gzip'
+        : task.downloadFileType;
     ctx.body = stream;
   };
 

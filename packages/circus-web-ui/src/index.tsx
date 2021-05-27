@@ -31,14 +31,15 @@ import PluginJobManagerAdmin from 'pages/admin/PluginJobManagerAdmin';
 import PluginJobQueueAdmin from 'pages/admin/PluginJobQueueAdmin';
 import PluginAdmin from 'pages/admin/PluginAdmin';
 import Preferences from 'pages/Preferences';
+import TokenManagement from 'pages/TokenManagement';
 
 import { store } from './store';
 import { Provider as ReduxStoreProvider, useSelector } from 'react-redux';
 import { dismissMessageOnPageChange } from 'store/messages';
 import PluginJobQueueSearch from './pages/search/PluginJobQueueSearch';
-import browserHistory from 'browserHistory';
+import browserHistory from './browserHistory';
 import GlobalStyle, { CircusThemeProvider } from './theme';
-import * as rs from 'circus-rs';
+import * as rs from '@utrad-ical/circus-rs/src/browser';
 
 import { ApiContext, ApiCaller } from 'utils/api';
 import loginManager, { LoginManagerContext } from 'utils/loginManager';
@@ -91,6 +92,7 @@ const AppRoutes: React.FC<{}> = () => {
         <Route path="/plugin-job/:jobId" component={PluginJobDetail} />
         <Route path="/task-list" component={TaskList} />
         <Route path="/preference" component={Preferences} />
+        <Route path="/tokens" component={TokenManagement} />
       </Switch>
     </Application>
   );
@@ -107,8 +109,7 @@ const VolumeCacheProvider: React.FC = props => {
     const rsHttpClient = new rs.RsHttpClient(server);
     return {
       rsHttpClient,
-      map: new Map<string, rs.RsVolumeLoader>(),
-      toKey: series => 'hoge'
+      map: new Map<string, rs.RsVolumeLoader>()
     };
   }, [server]);
 

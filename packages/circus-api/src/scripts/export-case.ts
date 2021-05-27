@@ -28,10 +28,15 @@ export const options = () => {
     },
     {
       names: ['type', 't'],
-      help: 'Export data format (default=mhd).',
+      help: 'Export data format (isolated or combined).',
       helpArg: 'TYPE',
       type: 'string',
-      default: 'mhd'
+      default: 'isolated'
+    },
+    {
+      names: ['zip'],
+      help: 'Export as *.zip instead of *.tar.gz',
+      type: 'bool'
     },
     {
       names: ['continue', 'c'],
@@ -70,7 +75,8 @@ export const command: Command<{
   return async (options: any) => {
     const {
       out: outDir = path.join(process.cwd(), 'case-exports'),
-      type,
+      type = 'isolated',
+      zip = false,
       continue: continueOnError = false,
       _args: caseIds
     } = options;
@@ -78,24 +84,25 @@ export const command: Command<{
     if (!caseIds.length) {
       throw new Error('No case IDs specified.');
     }
-    if (type !== 'mhd') {
-      throw new Error("Currently the type argument must be 'mhd'.");
+    if (!['isolated', 'combined'].includes(type)) {
+      throw new Error('Invalid export type.');
     }
 
     await fs.ensureDir(outDir);
     for (const caseId of caseIds) {
       try {
         console.log(chalk.cyan('Exporting'), caseId);
-        const deps = {
-          models,
-          volumeProvider,
-          blobStorage
-        };
-        const stream = fs.createWriteStream(path.join(outDir, `${caseId}.zip`));
+        const stream = fs.createWriteStream(
+          path.join(outDir, `${caseId}.${zip ? 'zip' : 'tar.gz'}`)
+        );
         const emitter: TaskEventEmitter = new EventEmitter();
         emitter.on('progress', message => console.log(message));
         emitter.on('error', message => console.log('Error:', message));
-        mhdPacker.packAsMhd(emitter, stream, [caseId]);
+        mhdPacker.packAsMhd(emitter, stream, [caseId], {
+          compressionFormat: zip ? 'zip' : 'tgz',
+          labelPackType: type,
+          mhdLineEnding: 'lf'
+        });
         await waitForStream(stream);
         console.log(chalk.green('Exported '), caseId);
       } catch (err) {

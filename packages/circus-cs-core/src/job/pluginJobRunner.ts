@@ -5,16 +5,12 @@ import { DicomFileRepository, FunctionService } from '@utrad-ical/circus-lib';
 import pluginResultsValidator from './pluginResultsValidator';
 import { MultiRange } from 'multi-integer-range';
 import tarfs from 'tar-fs';
-import stream from 'stream';
+import stream, { PassThrough } from 'stream';
 import * as circus from '../interface';
 import buildDicomVolumes from './buildDicomVolumes';
 
 export interface PluginJobRunner {
-  run: (
-    jobId: string,
-    job: circus.PluginJobRequest,
-    logStream?: stream.Writable
-  ) => Promise<boolean>;
+  run: (jobId: string, job: circus.PluginJobRequest) => Promise<boolean>;
 }
 
 type WorkDirType = 'in' | 'out' | 'dicom';
@@ -91,11 +87,9 @@ const pluginJobRunner: FunctionService<
   /**
    * The whole plugin job procedure.
    */
-  const run = async (
-    jobId: string,
-    job: circus.PluginJobRequest,
-    logStream: stream.Writable = process.stdout
-  ) => {
+  const run = async (jobId: string, job: circus.PluginJobRequest) => {
+    const logStream = new PassThrough();
+
     const writeLog = (log: string) => {
       const timeStamp = '[' + new Date().toISOString() + ']';
       logStream.write(timeStamp + ' ' + log);
@@ -108,7 +102,9 @@ const pluginJobRunner: FunctionService<
       if (!plugin) throw new Error(`No such plugin: ${pluginId}`);
 
       await jobReporter.report(jobId, 'processing');
+      await jobReporter.logStream(jobId, logStream);
 
+      writeLog(`Runinng job ID: ${jobId}\n`);
       writeLog('Starting pre-process...\n');
       await preProcess(jobId, series, logStream);
 
@@ -126,10 +122,10 @@ const pluginJobRunner: FunctionService<
       );
       await promise;
 
-      writeLog('Starting post-process...\n\n');
+      writeLog('\n\nPlug-in execution done. Starting post-process...\n');
       await postProcess(jobId, logStream);
       await jobReporter.report(jobId, 'finished');
-      writeLog('Plug-in execution done.\n\n');
+      writeLog('Job execution done.\n\n');
       return true;
     } catch (e) {
       writeLog('Error happened in plug-in job runner:\n' + e.stack + '\n');

@@ -24,8 +24,9 @@ routes:
   - verb: delete
     path: /series/:seriesUid
   - verb: post
-    path: /series/export-cs-dump
-    handler: handlePostExportCsDump
+    path: /series/export-cs-volume
+    handler: handlePostExportCsVolume
+    requiredGlobalPrivilege: downloadVolume
     requestSchema:
       type: object
       properties:
@@ -33,8 +34,9 @@ routes:
           type: array
           items:
             $ref: seriesEntry
-        format:
-          enum:
-            - zip
-            - tgz
+          minItems: 1
+          maxItems: 10
+        compressionFormat:
+          enum: ['tgz', 'zip']
+      required: ['series']
     description: Creates a job to export the specified series for use in CIRCUS CS.

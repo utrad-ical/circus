@@ -1,9 +1,10 @@
-import { DicomFileRepository } from 'circus-lib/src/dicom-file-repository';
+import archiver from 'archiver';
+import { DicomFileRepository } from '@utrad-ical/circus-lib';
 import fs from 'fs-extra';
 import path from 'path';
-import createDicomVoxelDumper from './createDicomVoxelDumper';
-import tar from 'tar-stream';
 import { Readable } from 'stream';
+import tar from 'tar-stream';
+import createDicomVoxelDumper from './createDicomVoxelDumper';
 
 test('dump json', async () => {
   const mockDicomFileRepository: DicomFileRepository = {
@@ -27,12 +28,15 @@ test('dump json', async () => {
   );
 
   const extract = tar.extract();
-  const { stream } = dumper.dump([
-    {
-      seriesUid: '1.2.3.4.5',
-      partialVolumeDescriptor: { start: 1, end: 5, delta: 4 }
-    }
-  ]);
+  const { stream } = dumper.dump(
+    [
+      {
+        seriesUid: '1.2.3.4.5',
+        partialVolumeDescriptor: { start: 1, end: 5, delta: 4 }
+      }
+    ],
+    archiver('tar', { gzip: false })
+  );
   stream.pipe(extract);
 
   const readFromStreamTillEnd = (stream: Readable) => {

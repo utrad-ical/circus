@@ -1,5 +1,5 @@
-import { Job } from '../types';
-import * as rs from 'circus-rs';
+import { Job } from '@utrad-ical/circus-ui-kit';
+import * as rs from '@utrad-ical/circus-rs/src/browser';
 
 const applyDisplayOptions = (
   state: rs.MprViewState,

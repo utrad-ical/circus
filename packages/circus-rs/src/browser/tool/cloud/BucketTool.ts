@@ -12,6 +12,7 @@ import { isMprImageSourceWithDicomVolume } from '../../image-source/MprImageSour
  * Bucket tool performs the flood-fill operation along an orthogonal MPR plane.
  */
 export default class BucketTool extends VoxelCloudToolBase {
+  protected erase = false;
   public dragStartHandler(ev: ViewerEvent): void {
     super.dragStartHandler(ev);
     const viewer = ev.viewer;
@@ -62,7 +63,8 @@ export default class BucketTool extends VoxelCloudToolBase {
     floodFillOnSlice(
       this.activeCloud.volume!,
       new Vector3().fromArray(cloudIndex),
-      orientation
+      orientation,
+      this.erase
     );
 
     // draw a 3D line segment over a volume

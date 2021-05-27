@@ -292,7 +292,7 @@ const SeriesSelector: React.FC<{
   ];
 
   return (
-    <Panel header="Series">
+    <Panel>
       <Panel.Heading>Series</Panel.Heading>
       <Panel.Body>
         <DataGrid columns={columns} value={value} />

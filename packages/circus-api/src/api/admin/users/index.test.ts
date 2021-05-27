@@ -58,4 +58,30 @@ it('should return error for invalid user update', async () => {
   expect(res2.data.error).toMatch(/primary key/);
 });
 
+test('should create a user', async () => {
+  const res = await axios.request({
+    method: 'post',
+    url: 'api/admin/users',
+    data: {
+      userEmail: 'test@example.com',
+      loginId: 'test',
+      password: 'test',
+      preferences: {
+        theme: 'mode_black',
+        personalInfoView: true,
+        seriesSearchPresets: [],
+        caseSearchPresets: [],
+        pluginJobSearchPresets: []
+      },
+      loginEnabled: true,
+      description: '',
+      groups: [1]
+    }
+  });
+  expect(res.status).toBe(200);
+  expect(res.data).toMatchObject({ userEmail: 'test@example.com' });
+  const res2 = await axios.get('api/admin/users/test@example.com');
+  expect(res2.data.loginId).toBe('test');
+});
+
 //  it.skip('should reject unknown field');

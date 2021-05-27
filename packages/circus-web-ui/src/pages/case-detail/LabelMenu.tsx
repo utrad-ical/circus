@@ -381,25 +381,6 @@ const LabelMenu: React.FC<{
       >
         <SettingDialogHoleFilling
           onHide={() => setHoleFillingDialogOpen(false)}
-          // onOkClick={(
-          //   dimension3: boolean,
-          //   holeFillingOrientation: string,
-          //   neighbors4or6: boolean
-          // ) => {
-          //   createHoleFilledLabels(
-          //     editingData,
-          //     updateEditingData,
-          //     viewers,
-          //     editingData.revision.series[activeSeriesIndex].labels[
-          //       activeLabelIndex
-          //     ],
-          //     labelColors,
-          //     dimension3,
-          //     holeFillingOrientation,
-          //     neighbors4or6
-          //   );
-          //   setHoleFillingDialogOpen(false);
-          // }}
           onOkClick={onOkClickDialogHoleFilling}
         />
       </Modal>

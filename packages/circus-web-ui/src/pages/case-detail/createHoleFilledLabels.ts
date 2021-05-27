@@ -3,11 +3,11 @@ import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import { InternalLabel } from './labelData';
 import { EditingData, EditingDataUpdater } from './revisionData';
 import { createNewLabelData } from './labelData';
-import { OrientationString } from 'circus-rs/section-util';
+import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
 import { TaggedLabelDataOf } from './labelData';
 import produce from 'immer';
 import { pixelFormatInfo } from '@utrad-ical/circus-lib/src/PixelFormat';
-import * as rs from 'circus-rs';
+import * as rs from '@utrad-ical/circus-rs/src/browser';
 import HoleFilling2D, {
   HoleFilling3D
 } from '@utrad-ical/circus-rs/src/common/CCL/holeFilling';

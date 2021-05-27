@@ -22,7 +22,7 @@ const neighborsOptions = {
 const SettingDialogCCL: React.FC<{
   onHide: () => void;
   onOkClick: (dispLabelNumber: number, neighbors: 6 | 26) => void;
-}> = props => {
+}> = React.memo(props => {
   const { onHide, onOkClick } = props;
   const [neighbor6, setNeighbor6] = useState(false);
   const [dispLabelNumber, setDispLabelNumber] = useState(2);
@@ -68,6 +68,6 @@ const SettingDialogCCL: React.FC<{
       </Modal.Footer>
     </>
   );
-};
+});
 
 export default SettingDialogCCL;

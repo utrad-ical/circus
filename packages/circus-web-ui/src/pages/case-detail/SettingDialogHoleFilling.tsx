@@ -27,12 +27,11 @@ const SettingDialogHoleFilling: React.FC<{
     orientation: string,
     neighbors4or6: boolean
   ) => void;
-}> = props => {
+}> = React.memo(props => {
   const { onHide, onOkClick } = props;
   const [neighbor4or6, setNeighbor4or6] = useState(false);
   const [dimension3, setDimension3] = useState(true);
   const [orientation, setOrientation] = useState('Axial');
-
   return (
     <>
       <Modal.Header>
@@ -86,6 +85,6 @@ const SettingDialogHoleFilling: React.FC<{
       </Modal.Footer>
     </>
   );
-};
+});
 
 export default SettingDialogHoleFilling;

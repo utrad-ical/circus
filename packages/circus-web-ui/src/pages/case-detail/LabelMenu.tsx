@@ -15,7 +15,7 @@ import {
   Modal
 } from 'components/react-bootstrap';
 import produce from 'immer';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
 import useLocalPreference from 'utils/useLocalPreference';
@@ -220,6 +220,43 @@ const LabelMenu: React.FC<{
     });
   };
 
+  const onOkClickDialogCCL = useCallback(
+    (dispLabelNumber: number, neighbors: 6 | 26) => {
+      createConnectedComponentLabels(
+        editingData,
+        updateEditingData,
+        viewers,
+        editingData.revision.series[activeSeriesIndex].labels[activeLabelIndex],
+        labelColors,
+        dispLabelNumber,
+        neighbors
+      );
+      setCclDialogOpen(false);
+    },
+    [editingData, updateEditingData]
+  );
+
+  const onOkClickDialogHoleFilling = useCallback(
+    (
+      dimension3: boolean,
+      holeFillingOrientation: string,
+      neighbors4or6: boolean
+    ) => {
+      createHoleFilledLabels(
+        editingData,
+        updateEditingData,
+        viewers,
+        editingData.revision.series[activeSeriesIndex].labels[activeLabelIndex],
+        labelColors,
+        dimension3,
+        holeFillingOrientation,
+        neighbors4or6
+      );
+      setHoleFillingDialogOpen(false);
+    },
+    [editingData, updateEditingData]
+  );
+
   return (
     <StyledButtonsDiv>
       <AppearanceEditor
@@ -334,20 +371,7 @@ const LabelMenu: React.FC<{
       >
         <SettingDialogCCL
           onHide={() => setCclDialogOpen(false)}
-          onOkClick={(dispLabelNumber: number, neighbors: 6 | 26) => {
-            createConnectedComponentLabels(
-              editingData,
-              updateEditingData,
-              viewers,
-              editingData.revision.series[activeSeriesIndex].labels[
-                activeLabelIndex
-              ],
-              labelColors,
-              dispLabelNumber,
-              neighbors
-            );
-            setCclDialogOpen(false);
-          }}
+          onOkClick={onOkClickDialogCCL}
         />
       </Modal>
       <Modal
@@ -357,25 +381,26 @@ const LabelMenu: React.FC<{
       >
         <SettingDialogHoleFilling
           onHide={() => setHoleFillingDialogOpen(false)}
-          onOkClick={(
-            dimension3: boolean,
-            holeFillingOrientation: string,
-            neighbors4or6: boolean
-          ) => {
-            createHoleFilledLabels(
-              editingData,
-              updateEditingData,
-              viewers,
-              editingData.revision.series[activeSeriesIndex].labels[
-                activeLabelIndex
-              ],
-              labelColors,
-              dimension3,
-              holeFillingOrientation,
-              neighbors4or6
-            );
-            setHoleFillingDialogOpen(false);
-          }}
+          // onOkClick={(
+          //   dimension3: boolean,
+          //   holeFillingOrientation: string,
+          //   neighbors4or6: boolean
+          // ) => {
+          //   createHoleFilledLabels(
+          //     editingData,
+          //     updateEditingData,
+          //     viewers,
+          //     editingData.revision.series[activeSeriesIndex].labels[
+          //       activeLabelIndex
+          //     ],
+          //     labelColors,
+          //     dimension3,
+          //     holeFillingOrientation,
+          //     neighbors4or6
+          //   );
+          //   setHoleFillingDialogOpen(false);
+          // }}
+          onOkClick={onOkClickDialogHoleFilling}
         />
       </Modal>
     </StyledButtonsDiv>

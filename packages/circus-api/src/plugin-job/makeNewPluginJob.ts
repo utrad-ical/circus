@@ -1,7 +1,7 @@
 import generateUniqueId from '../utils/generateUniqueId';
 import duplicateJobExists from '../api/duplicateJobExists';
 import { CsCore } from '@utrad-ical/circus-cs-core';
-import { Models } from 'circus-api/src/interface';
+import { Models } from '../interface';
 import { fetchAccessibleSeries, UserPrivilegeInfo } from '../privilegeUtils';
 import status from 'http-status';
 

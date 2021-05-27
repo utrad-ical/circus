@@ -39,7 +39,7 @@ const IconDisplay: React.FC<{
 
   if (toolTip) {
     const tip = (
-      <Tooltip placelemnt="top" id="icon-display-tooltip">
+      <Tooltip placement="top" id="icon-display-tooltip">
         {toolTip}
       </Tooltip>
     );

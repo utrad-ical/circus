@@ -1,0 +1,10 @@
+description: Permanent token exchanged via API.
+$async: true
+properties:
+  tokenId:
+    type: string
+    description: Optional identifier for permanent token (this is not a token itself)
+  description:
+    type: string
+    description: Free text to describe this token.
+additionalProperties: false

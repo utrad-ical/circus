@@ -7,6 +7,7 @@ import RectangleTool from './annotation/RectangleTool';
 import RulerTool from './annotation/RulerTool';
 import BrushTool from './cloud/BrushTool';
 import BucketTool from './cloud/BucketTool';
+import BucketEraserTool from './cloud/BucketEraserTool';
 import EraserTool from './cloud/EraserTool';
 import WandEraserTool from './cloud/WandEraserTool';
 import WandTool from './cloud/WandTool';
@@ -42,6 +43,7 @@ interface ToolClasses extends AnyToolClasses {
   brush: ToolClass<BrushTool>;
   eraser: ToolClass<EraserTool>;
   bucket: ToolClass<BucketTool>;
+  bucketEraser: ToolClass<BucketEraserTool>;
   wand: ToolClass<WandTool>;
   wandEraser: ToolClass<WandEraserTool>;
 }
@@ -66,6 +68,7 @@ const defaultTools: ToolClasses & { null: ToolClass<ToolBaseClass> } = {
   brush: BrushTool,
   eraser: EraserTool,
   bucket: BucketTool,
+  bucketEraser: BucketEraserTool,
   wand: WandTool,
   wandEraser: WandEraserTool
 };

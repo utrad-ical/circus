@@ -1,4 +1,3 @@
-import JSZip from 'jszip';
 import zeroPad from '../utils/zeroPad';
 import RawData from '@utrad-ical/circus-rs/src/common/RawData';
 import { Vector3D } from '@utrad-ical/circus-rs/src/common/geometry';
@@ -13,6 +12,7 @@ import { VolumeProvider } from 'circus-rs/src/server/helper/createVolumeProvider
 import { Models } from '../interface';
 import Storage from '../storage/Storage';
 import path from 'path';
+import Archiver from 'archiver';
 
 export interface MhdPacker {
   packAsMhd: (
@@ -25,15 +25,18 @@ export interface MhdPacker {
 
 export type LabelPackType = 'isolated' | 'combined';
 export type LineEndingType = 'lf' | 'crlf';
+export type CompressionFormat = 'zip' | 'tgz';
 
 export interface PackOptions {
   labelPackType: LabelPackType;
   mhdLineEnding: LineEndingType;
+  compressionFormat: CompressionFormat;
 }
 
 const defaultLabelPackOptions: PackOptions = {
   labelPackType: 'isolated',
-  mhdLineEnding: 'lf'
+  mhdLineEnding: 'lf',
+  compressionFormat: 'tgz'
 };
 
 const createMhdPacker: FunctionService<
@@ -52,14 +55,14 @@ const createMhdPacker: FunctionService<
     series,
     dimension,
     elementSpacing,
-    zip,
+    archiver,
     options
   }: {
     labelFileBaseName: string;
     series: any;
     dimension: Vector3D;
     elementSpacing: Vector3D;
-    zip: JSZip;
+    archiver: Archiver.Archiver;
     options: PackOptions;
   }) => {
     let combinedVolume: RawData | undefined;
@@ -88,30 +91,32 @@ const createMhdPacker: FunctionService<
       } else {
         const vol = new RawData(dimension, 'uint8');
         vol.copy(labelVol, undefined, label.data.origin);
-        zip.file(labelName + '.raw', vol.data);
-        zip.file(
-          labelName + '.mhd',
+        archiver.append(Buffer.from(vol.data), { name: labelName + '.raw' });
+        archiver.append(
           generateMhdHeader(
             'uint8',
             dimension,
             elementSpacing,
             path.basename(labelName + '.raw'),
             options.mhdLineEnding
-          )
+          ),
+          { name: labelName + '.mhd' }
         );
       }
     }
     if (options.labelPackType === 'combined' && combinedVolume) {
-      zip.file(labelFileBaseName + '.raw', combinedVolume!.data);
-      zip.file(
-        labelFileBaseName + '.mhd',
+      archiver.append(Buffer.from(combinedVolume!.data), {
+        name: labelFileBaseName + '.raw'
+      });
+      archiver.append(
         generateMhdHeader(
           'uint8',
           dimension,
           elementSpacing,
           path.basename(labelFileBaseName + '.raw'),
           options.mhdLineEnding
-        )
+        ),
+        { name: labelFileBaseName + '.mhd' }
       );
     }
   };
@@ -121,15 +126,14 @@ const createMhdPacker: FunctionService<
    */
   const putCaseData = async (
     caseId: string,
-    zip: JSZip,
+    archiver: Archiver.Archiver,
     options: PackOptions
   ) => {
     const caseData = await models.clinicalCase.findByIdOrFail(caseId);
     const rev = caseData.latestRevision;
-    zip.file(
-      `${caseId}/data.json`,
-      JSON.stringify(prepareExportObject(caseData), null, '  ')
-    );
+    archiver.append(JSON.stringify(prepareExportObject(caseData), null, '  '), {
+      name: `${caseId}/data.json`
+    });
     for (let volId = 0; volId < rev.series.length; volId++) {
       const series = rev.series[volId];
       const volumeAccessor = await volumeProvider(series.seriesUid);
@@ -147,17 +151,19 @@ const createMhdPacker: FunctionService<
       ] as Vector3D;
 
       const rawFileBaseName = `${caseId}/vol${pad(volId)}`;
-      zip.file(rawFileBaseName + '.raw', volume.data);
+      archiver.append(Buffer.from(volume.data), {
+        name: rawFileBaseName + '.raw'
+      });
       const dimension = volume.getDimension();
-      zip.file(
-        rawFileBaseName + '.mhd',
+      archiver.append(
         generateMhdHeader(
           volume.getPixelFormat(),
           dimension,
           elementSpacing,
           path.basename(rawFileBaseName + '.raw'),
           options.mhdLineEnding
-        )
+        ),
+        { name: rawFileBaseName + '.mhd' }
       );
       const labelFileBaseName = `${caseId}/vol${pad(volId)}-label`;
       await putLabelData({
@@ -165,7 +171,7 @@ const createMhdPacker: FunctionService<
         series,
         dimension,
         elementSpacing,
-        zip,
+        archiver,
         options
       });
     }
@@ -177,7 +183,11 @@ const createMhdPacker: FunctionService<
     caseIds: string[],
     packOptions: PackOptions = defaultLabelPackOptions
   ) => {
-    const zip = new JSZip();
+    const archiver =
+      packOptions.compressionFormat === 'zip'
+        ? Archiver('zip')
+        : Archiver('tar', { gzip: true });
+
     try {
       for (let i = 0; i < caseIds.length; i++) {
         const caseId = caseIds[i];
@@ -187,18 +197,19 @@ const createMhdPacker: FunctionService<
           i,
           caseIds.length
         );
-        await putCaseData(caseId, zip, packOptions);
+        await putCaseData(caseId, archiver, packOptions);
       }
-      zip.generateNodeStream().pipe(downloadFileStream);
+      archiver.pipe(downloadFileStream);
       taskEmitter.emit(
         'progress',
-        'Performing ZIP compression...',
+        'Performing compression...',
         undefined,
         undefined
       );
       downloadFileStream.on('close', () => {
         taskEmitter.emit('finish', `Exported ${caseIds.length} case(s).`);
       });
+      archiver.finalize();
     } catch (err) {
       apiLogger.error('Case export error');
       apiLogger.error(err.message);

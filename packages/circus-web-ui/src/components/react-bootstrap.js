@@ -11,6 +11,7 @@ export { default as ButtonToolbar } from 'react-bootstrap/lib/ButtonToolbar';
 
 export { default as Form } from 'react-bootstrap/lib/Form';
 export { default as FormGroup } from 'react-bootstrap/lib/FormGroup';
+export { default as InputGroup } from 'react-bootstrap/lib/InputGroup';
 export { default as FormControl } from 'react-bootstrap/lib/FormControl';
 export { default as Checkbox } from 'react-bootstrap/lib/Checkbox';
 export { default as ControlLabel } from 'react-bootstrap/lib/ControlLabel';

@@ -4,20 +4,16 @@ import DataGrid, {
 } from 'components/DataGrid';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
+import IdDisplay from 'components/IdDisplay';
 import MyListDropdown from 'components/MyListDropdown';
 import PatientInfoBox from 'components/PatientInfoBox';
-import {
-  DropdownButton,
-  MenuItem,
-  OverlayTrigger,
-  Popover
-} from 'components/react-bootstrap';
+import { DropdownButton, MenuItem, Popover } from 'components/react-bootstrap';
 import SearchResultsView, {
   makeSortOptions
 } from 'components/SearchResultsView';
 import TimeDisplay from 'components/TimeDisplay';
 import { multirange } from 'multi-integer-range';
-import React, { useState, Fragment } from 'react';
+import React, { Fragment, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
@@ -31,11 +27,6 @@ const ModalitySpan = styled.span`
   text-align: center;
   background-color: #777777;
   color: white;
-`;
-
-const SeriesPopover = styled(Popover)`
-  font-size: 80%;
-  max-width: none;
 `;
 
 const Modality: DataGridRenderer<any> = props => {
@@ -76,37 +67,14 @@ const Operation: DataGridRenderer<any> = props => {
 
 const UidDisplay: React.FC<{
   value: { seriesUid: string; studyUid: string };
-}> = React.memo(props => {
+}> = props => {
   const { seriesUid, studyUid } = props.value;
-
-  const overlay = (
-    <SeriesPopover
-      className="series-popover"
-      id={`series-popover-${seriesUid.replace(/\./g, '-')}`}
-    >
-      <b>Study UID:</b> {studyUid}
-      <IconButton
-        icon="glyphicon-copy"
-        bsSize="xs"
-        bsStyle="link"
-        onClick={() => navigator.clipboard.writeText(studyUid)}
-      />
-      <br />
-      <b>Series UID:</b> {seriesUid}
-      <IconButton
-        icon="glyphicon-copy"
-        bsSize="xs"
-        bsStyle="link"
-        onClick={() => navigator.clipboard.writeText(seriesUid)}
-      />
-    </SeriesPopover>
+  const ids = useMemo(
+    () => ({ 'Series UID': seriesUid, 'Study UID': studyUid }),
+    [seriesUid, studyUid]
   );
-  return (
-    <OverlayTrigger trigger="click" rootClose placement="top" overlay={overlay}>
-      <IconButton icon="glyphicon-zoom-in" bsStyle="link" bsSize="xs" />
-    </OverlayTrigger>
-  );
-});
+  return <IdDisplay value={ids} />;
+};
 
 const columns: DataGridColumnDefinition<any>[] = [
   { caption: '', className: 'modality', renderer: Modality },

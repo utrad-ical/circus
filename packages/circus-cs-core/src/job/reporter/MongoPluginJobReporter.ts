@@ -1,8 +1,10 @@
 import { FunctionService } from '@utrad-ical/circus-lib';
 import { MongoClientPool } from '../../mongoClientPool';
 import tarfs from 'tar-fs';
+import fs from 'fs-extra';
 import path from 'path';
 import * as circus from '../../interface';
+import { Readable } from 'stream';
 
 /**
  * An implementation of PluginJobReporter that writes plugin status on
@@ -66,7 +68,22 @@ const createMongoPluginJobReporter: FunctionService<
     }
   };
 
-  const packDir = (jobId: string, stream: NodeJS.ReadableStream) => {
+  const logStream = async (
+    jobId: string,
+    stream: Readable,
+    callback?: () => void
+  ) => {
+    const outFile = path.join(resultsDirectory, jobId, 'plugin-log.txt');
+    fs.ensureDir(path.dirname(outFile));
+    const fileStream = fs.createWriteStream(outFile, 'utf8');
+    stream.pipe(fileStream);
+    if (callback) {
+      fileStream.on('finish', () => callback());
+      fileStream.on('error', callback);
+    }
+  };
+
+  const packDir = (jobId: string, stream: Readable) => {
     return new Promise<void>((resolve, reject) => {
       const outDir = path.join(resultsDirectory, jobId);
       const extract = tarfs.extract(outDir, {
@@ -79,7 +96,7 @@ const createMongoPluginJobReporter: FunctionService<
     });
   };
 
-  return { report, packDir };
+  return { report, logStream, packDir };
 };
 
 createMongoPluginJobReporter.dependencies = ['mongoClientPool'];

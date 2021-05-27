@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import buildDicomVolumes from './buildDicomVolumes';
-import { DicomFileRepository } from 'circus-lib/src/dicom-file-repository';
+import { DicomFileRepository } from '@utrad-ical/circus-lib';
 import createDicomVoxelDumper from './createDicomVoxelDumper';
 import { PassThrough } from 'stream';
 

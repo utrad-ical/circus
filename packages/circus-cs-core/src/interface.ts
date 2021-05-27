@@ -2,8 +2,9 @@
 // You can use them like `circus.PluginJobRequest` without `import`-ing.
 
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
-import { Pack as TarStream } from 'tar-stream';
+import { Archiver } from 'archiver';
 import { EventEmitter } from 'events';
+import { Readable } from 'stream';
 
 export type QueueState = 'wait' | 'processing';
 
@@ -136,13 +137,24 @@ export interface PluginJobReporter {
   ) => Promise<void>;
 
   /**
+   * Acceepts a logging stream. A reporter must output it to somewhere.
+   * The returned promise will be resolved when the log stream is ready.
+   * Callback is called when the log is successfully closed.
+   */
+  logStream: (
+    jobId: string,
+    stream: Readable,
+    callback?: (err?: Error) => void
+  ) => Promise<void>;
+
+  /**
    * Provides the content plug-in output directory.
    * @param jobId The Job ID.
    * @param stream A `tar-stream` stream which includes all the file
    *   output from the executed plugin. You can extract it using
    *   `tar-fs` or `tar-stream`.
    */
-  packDir: (jobId: string, stream: NodeJS.ReadableStream) => Promise<void>;
+  packDir: (jobId: string, stream: Readable) => Promise<void>;
 }
 
 /**
@@ -171,9 +183,18 @@ export interface SeriesEntry {
   partialVolumeDescriptor: PartialVolumeDescriptor;
 }
 
+/**
+ * DicomVoxelDumper builds DICOM volumes for CIRCUS CS plug-ins.
+ * It exports a set of files via the passed archiver.
+ */
 export interface DicomVoxelDumper {
   /**
    * @param series The list of series to export.
+   * @param archiver The archiver instance (can be configured to
+   * create a zip file, a tar+gz file or an uncompressed tar)
    */
-  dump: (series: SeriesEntry[]) => { stream: TarStream; events: EventEmitter };
+  dump: (
+    series: SeriesEntry[],
+    archiver: Archiver
+  ) => { stream: Archiver; events: EventEmitter };
 }

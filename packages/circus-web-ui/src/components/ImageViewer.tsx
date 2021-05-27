@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import * as rs from 'circus-rs';
+import * as rs from '@utrad-ical/circus-rs/src/browser';
 import {
   createOrthogonalMprSection,
   OrientationString
-} from 'circus-rs/section-util';
-import { toolFactory } from 'circus-rs/tool/tool-initializer';
+} from '@utrad-ical/circus-rs/src/browser/section-util';
+import { toolFactory } from '@utrad-ical/circus-rs/src/browser/tool/tool-initializer';
 import classnames from 'classnames';
 import { EventEmitter } from 'events';
 import ToolBaseClass from '@utrad-ical/circus-rs/src/browser/tool/Tool';

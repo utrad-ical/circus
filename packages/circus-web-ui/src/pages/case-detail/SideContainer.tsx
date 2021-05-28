@@ -20,7 +20,7 @@ const StyledSideBar = styled.div`
     color: white;
   }
   &.open {
-    flex: 0 0 320px; // side bar width
+    flex: 0 0 350px; // side bar width
     > .bar {
       text-align: right;
       flex: 0 0 auto;

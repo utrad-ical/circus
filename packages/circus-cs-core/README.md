@@ -1,56 +1,12 @@
 # CIRCUS CS Core: Plugin Job Manager
 
-## Requirements
+This code contains plug-in job manager for the CIRCUS CS project.
 
-- Docker
-- Node.js
-- (MongoDB) It's possible to use non-Mongo adapters, but it's not fully supported.
+**Why is this a separate project?** Because the job manager is a separate program that can run without the API server. A user can build a separate
 
-## Getting Started
+## CUI
 
-### Install
-
-Clone the repository (Installing from NPM is not available yet).
-
-```
-$ git clone git@github.com:utrad-ical/circus-cs-core.git .
-$ npm ci
-```
-
-Prepare docker and load image archives.
-
-```bash
-# This is a hard-coded dependency which is always required
-$ docker pull circuscad/dicom_voxel_dump:1.0.0
-```
-
-### Configuration
-
-We use [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) to configure CIRCUS CS.
-
-The config file `.cscorerc.json` (or other supported file) will be searched
-from this directory (circus-cs-core repository root) up to your home directory.
-
-The content of this file would look like this:
-
-```json
-{
-  "jobRunner": {
-    "options": {
-      "pluginResultsDir": "/var/circus/plugin-results",
-      "cleanPluginWorkingDir": true
-    }
-  }
-}
-```
-
-There is no full documentation yet.
-See `src/config/default.ts` for the available options.
-
-### Run Check Command
-
-The `cui.js` is a utility command-line interfact to access
-various functions of CIRCUS CS Core. The syntax is:
+The `cui.js` is a utility command-line interface to access various functions of CIRCUS CS Core. The syntax is:
 
 ```
 node cui [subcommand]
@@ -63,19 +19,4 @@ $ node cui check-env
 Plugin working directory      : [OK]
 Docker connection             : [OK]
 MongoDB connection            : [OK]
-```
-
-## Unit Test
-
-```bash
-# Obtain official 'hello-world' docker image.
-# Used for some tests to check the connection with the Docker daemon.
-$ docker pull hello-world
-
-# Build several dummy plug-ins for testing docker integrations.
-$ cd test/docker
-$ node build.js
-
-# Run test scripts
-$ jest
 ```

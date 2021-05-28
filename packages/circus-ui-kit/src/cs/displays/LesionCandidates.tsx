@@ -27,10 +27,10 @@ import {
 import { Button } from '../../ui/Button';
 
 interface LesionCandidate {
-  id: number;
+  id?: number;
   rank: number;
   confidence: number;
-  size: number;
+  volumeSize: number;
   volumeId?: number;
   location: [number, number, number];
 }
@@ -55,7 +55,7 @@ interface LesionCandidatesOptions {
   maxCandidates?: number;
   markStyle?: MarkStyle;
   confidenceThreshold?: number;
-  sortBy: [keyof LesionCandidate, 'asc' | 'desc'];
+  sortBy?: [keyof LesionCandidate, 'asc' | 'desc'];
   excludeFromActionLog?: boolean;
 }
 
@@ -164,6 +164,7 @@ export const LesionCandidates: Display<
       dataPath = defaultDataPath,
       sortBy: [sortKey, sortOrder] = ['rank', 'asc'],
       maxCandidates,
+      confidenceThreshold,
       markStyle = defaultMarkStyle,
       feedbackListener,
       excludeFromActionLog
@@ -193,7 +194,11 @@ export const LesionCandidates: Display<
   const visibleCandidates = useMemo(
     () =>
       allCandidates
-        .slice() // copy
+        .filter(
+          c =>
+            typeof confidenceThreshold !== 'number' ||
+            c.confidence >= confidenceThreshold
+        )
         .sort((a, b) => b.confidence - a.confidence)
         .slice(0, maxCandidates)
         .sort((a, b) => {

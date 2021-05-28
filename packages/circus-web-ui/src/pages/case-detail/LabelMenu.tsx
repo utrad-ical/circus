@@ -231,42 +231,36 @@ const LabelMenu: React.FC<{
     });
   };
 
-  const onOkClickDialogCCL = useCallback(
-    (dispLabelNumber: number, neighbors: 6 | 26) => {
-      createConnectedComponentLabels(
-        editingData,
-        updateEditingData,
-        viewers,
-        editingData.revision.series[activeSeriesIndex].labels[activeLabelIndex],
-        labelColors,
-        dispLabelNumber,
-        neighbors
-      );
-      setCclDialogOpen(false);
-    },
-    [editingData, updateEditingData]
-  );
+  const onOkClickDialogCCL = (dispLabelNumber: number, neighbors: 6 | 26) => {
+    createConnectedComponentLabels(
+      editingData,
+      updateEditingData,
+      viewers,
+      editingData.revision.series[activeSeriesIndex].labels[activeLabelIndex],
+      labelColors,
+      dispLabelNumber,
+      neighbors
+    );
+    setCclDialogOpen(false);
+  };
 
-  const onOkClickDialogHoleFilling = useCallback(
-    (
-      dimension3: boolean,
-      holeFillingOrientation: string,
-      neighbors4or6: boolean
-    ) => {
-      createHoleFilledLabels(
-        editingData,
-        updateEditingData,
-        viewers,
-        editingData.revision.series[activeSeriesIndex].labels[activeLabelIndex],
-        labelColors,
-        dimension3,
-        holeFillingOrientation,
-        neighbors4or6
-      );
-      setHoleFillingDialogOpen(false);
-    },
-    [editingData, updateEditingData]
-  );
+  const onOkClickDialogHoleFilling = (
+    dimension3: boolean,
+    holeFillingOrientation: string,
+    neighbors4or6: boolean
+  ) => {
+    createHoleFilledLabels(
+      editingData,
+      updateEditingData,
+      viewers,
+      editingData.revision.series[activeSeriesIndex].labels[activeLabelIndex],
+      labelColors,
+      dimension3,
+      holeFillingOrientation,
+      neighbors4or6
+    );
+    setHoleFillingDialogOpen(false);
+  };
 
   return (
     <StyledButtonsDiv>

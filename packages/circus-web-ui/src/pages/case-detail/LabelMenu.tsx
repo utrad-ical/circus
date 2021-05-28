@@ -7,13 +7,15 @@ import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import {
   Button,
+  DropdownButton,
   MenuItem,
   OverlayTrigger,
   Popover,
-  SplitButton
+  SplitButton,
+  Modal
 } from 'components/react-bootstrap';
 import produce from 'immer';
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
 import useLocalPreference from 'utils/useLocalPreference';
@@ -27,6 +29,10 @@ import {
   createNewLabelData
 } from './labelData';
 import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
+import createConnectedComponentLabels from './createConnectedComponentLabels';
+import createHoleFilledLabels from './createHoleFilledLabels';
+import SettingDialogCCL from './SettingDialogCCL';
+import SettingDialogHoleFilling from './SettingDialogHoleFilling';
 
 type LabelCommand =
   | 'rename'
@@ -57,6 +63,8 @@ const LabelMenu: React.FC<{
     'voxel'
   );
 
+  const [cclDialogOpen, setCclDialogOpen] = useState(false);
+  const [holeFillingDialogOpen, setHoleFillingDialogOpen] = useState(false);
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
   const activeSeries = revision.series[activeSeriesIndex];
   const activeLabel =
@@ -212,6 +220,43 @@ const LabelMenu: React.FC<{
     });
   };
 
+  const onOkClickDialogCCL = useCallback(
+    (dispLabelNumber: number, neighbors: 6 | 26) => {
+      createConnectedComponentLabels(
+        editingData,
+        updateEditingData,
+        viewers,
+        editingData.revision.series[activeSeriesIndex].labels[activeLabelIndex],
+        labelColors,
+        dispLabelNumber,
+        neighbors
+      );
+      setCclDialogOpen(false);
+    },
+    [editingData, updateEditingData]
+  );
+
+  const onOkClickDialogHoleFilling = useCallback(
+    (
+      dimension3: boolean,
+      holeFillingOrientation: string,
+      neighbors4or6: boolean
+    ) => {
+      createHoleFilledLabels(
+        editingData,
+        updateEditingData,
+        viewers,
+        editingData.revision.series[activeSeriesIndex].labels[activeLabelIndex],
+        labelColors,
+        dimension3,
+        holeFillingOrientation,
+        neighbors4or6
+      );
+      setHoleFillingDialogOpen(false);
+    },
+    [editingData, updateEditingData]
+  );
+
   return (
     <StyledButtonsDiv>
       <AppearanceEditor
@@ -259,6 +304,32 @@ const LabelMenu: React.FC<{
         disabled={!activeLabel || disabled}
         onClick={() => handleCommand('reveal')}
       />
+      <DropdownButton
+        bsSize="xs"
+        title={<Icon icon="glyphicon-option-horizontal" />}
+        id={`labelmenu-header-dropdown`}
+        pullRight
+        noCaret
+      >
+        <MenuItem
+          eventKey="ccl"
+          disabled={!activeLabel || activeLabel.type !== 'voxel'}
+          onClick={() => {
+            setCclDialogOpen(true);
+          }}
+        >
+          CCL
+        </MenuItem>
+        <MenuItem
+          eventKey="fillng"
+          disabled={!activeLabel || activeLabel.type !== 'voxel'}
+          onClick={() => {
+            setHoleFillingDialogOpen(true);
+          }}
+        >
+          Hole filling
+        </MenuItem>
+      </DropdownButton>
       <IconButton
         bsSize="xs"
         title="Remove"
@@ -293,6 +364,26 @@ const LabelMenu: React.FC<{
           );
         })}
       </SplitButton>
+      <Modal
+        show={cclDialogOpen}
+        onHide={() => setCclDialogOpen(false)}
+        bsSize="lg"
+      >
+        <SettingDialogCCL
+          onHide={() => setCclDialogOpen(false)}
+          onOkClick={onOkClickDialogCCL}
+        />
+      </Modal>
+      <Modal
+        show={holeFillingDialogOpen}
+        onHide={() => setHoleFillingDialogOpen(false)}
+        bsSize="lg"
+      >
+        <SettingDialogHoleFilling
+          onHide={() => setHoleFillingDialogOpen(false)}
+          onOkClick={onOkClickDialogHoleFilling}
+        />
+      </Modal>
     </StyledButtonsDiv>
   );
 };

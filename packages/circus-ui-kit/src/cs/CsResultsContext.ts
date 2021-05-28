@@ -39,10 +39,10 @@ export interface Plugin {
   displayStrategy: FeedbackTarget[];
 }
 
-export type PluginAttachmentLoader = (
-  path: string,
-  signal?: AbortSignal
-) => Promise<Response>;
+export interface PluginAttachmentLoader {
+  (path: string, signal?: AbortSignal): Promise<Response>;
+  list: () => Promise<string[]>;
+}
 
 export type EventLogger = (action: string, data?: any) => void;
 

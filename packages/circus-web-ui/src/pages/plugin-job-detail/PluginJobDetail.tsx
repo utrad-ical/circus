@@ -198,6 +198,18 @@ const PluginJobDetail: React.FC<{}> = props => {
   const resultsContext = useMemo<CsResultsContextType | undefined>(() => {
     if (!jobData || jobData instanceof Error) return undefined;
     const { job, pluginData } = jobData;
+
+    const loadAttachment = (path: string, signal?: AbortSignal) => {
+      const url = `/api/plugin-jobs/${job.jobId}/attachment/${path}`;
+      const token = api.getToken();
+      return fetch(url, {
+        signal,
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    };
+    loadAttachment.list = () =>
+      api('/api/plugin-jobs/attachment') as Promise<string[]>;
+
     return {
       consensual: feedbackState.isConsensual,
       editable: feedbackState.editable,
@@ -219,14 +231,7 @@ const PluginJobDetail: React.FC<{}> = props => {
         volumeLoaderMap.set(key, volumeLoader);
         return volumeLoader;
       },
-      loadAttachment: (path, signal) => {
-        const url = `/api/plugin-jobs/${job.jobId}/attachment/${path}`;
-        const token = api.getToken();
-        return fetch(url, {
-          signal,
-          headers: { Authorization: `Bearer ${token}` }
-        });
-      },
+      loadAttachment,
       rsHttpClient,
       loadDisplay
     };

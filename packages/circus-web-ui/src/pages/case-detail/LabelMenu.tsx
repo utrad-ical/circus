@@ -150,9 +150,9 @@ const LabelMenu: React.FC<{
 
   const createNewLabel = (
     type: LabelType,
-    viewer: Viewer | undefined
+    viewer: Viewer | undefined,
+    color = labelColors[0]
   ): InternalLabel => {
-    const color = '#ff0000';
     const alpha = 1;
     const temporaryKey = generateUniqueId();
     const labelNames: { [key in LabelType]: string } = {
@@ -204,7 +204,18 @@ const LabelMenu: React.FC<{
       );
       return;
     }
-    const newLabel = createNewLabel(type, viewers[viewerId]);
+
+    const color = editingData.revision.series[activeSeriesIndex].labels.reduce(
+      (colors, label) => {
+        if (colors.indexOf(label.data.color) < 0) {
+          return colors;
+        }
+        colors.splice(colors.indexOf(label.data.color), 1);
+        return colors.length === 0 ? labelColors.slice() : colors;
+      },
+      labelColors.slice()
+    )[0];
+    const newLabel = createNewLabel(type, viewers[viewerId], color);
     updateEditingData(editingData => {
       const labels = editingData.revision.series[activeSeriesIndex].labels;
       labels.push(newLabel);

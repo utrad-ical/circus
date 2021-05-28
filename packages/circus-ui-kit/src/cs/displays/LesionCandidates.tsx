@@ -182,6 +182,7 @@ export const LesionCandidates: Display<
   } = useCsResults();
   const { results } = job;
   const [composition, setComposition] = useState<Composition | null>(null);
+  const [error, setError] = useState<Error | null>(null);
 
   const [currentFeedback, setCurrentFeedback] = useState<
     LesionCandidateFeedback
@@ -291,6 +292,8 @@ export const LesionCandidates: Display<
 
   if (!composition || (feedbackListener && !FeedbackListener)) return null;
 
+  if (error) return <div className="alert alert-danger">{error.message}</div>;
+
   return (
     <StyledDiv>
       <div className="tools">
@@ -305,6 +308,11 @@ export const LesionCandidates: Display<
         ))}
       </div>
       <div className="entries">
+        {visibleCandidates.length === 0 && (
+          <div className="alert alert-info">
+            There is no candidate to display.
+          </div>
+        )}
         {visibleCandidates.map(cand => {
           const feedbackItem = currentFeedback.find(
             item => item.id === cand.id
@@ -331,7 +339,7 @@ export const LesionCandidates: Display<
                     personalOpinions={candPersonalOpinions}
                     options={feedbackListener.options}
                     onFeedbackChange={status =>
-                      handleFeedbackChange(cand.id, status)
+                      handleFeedbackChange(cand.id!, status)
                     }
                   />
                 </div>

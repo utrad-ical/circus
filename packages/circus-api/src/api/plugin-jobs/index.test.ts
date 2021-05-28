@@ -249,6 +249,25 @@ describe('feedback', () => {
   });
 });
 
+describe('get plugin job attachment list', () => {
+  test('return file list', async () => {
+    const res = await alice.get(
+      'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/attachment'
+    );
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.data)).toBe(true);
+    expect(res.data).toContain('test.txt');
+    expect(res.data).toContain('sub/test2.txt');
+  });
+
+  test('reject unauthorized user', async () => {
+    const res = await guest.get(
+      'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/attachment'
+    );
+    expect(res.status).toBe(401);
+  });
+});
+
 describe('download plugin job attachment files', () => {
   test('return existing file', async () => {
     const res = await alice.get(
@@ -275,7 +294,7 @@ describe('download plugin job attachment files', () => {
 
   test('reject unauthorized user', async () => {
     const res = await guest.get(
-      'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/attachment/../something'
+      'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/attachment/test.txt'
     );
     expect(res.status).toBe(401);
   });

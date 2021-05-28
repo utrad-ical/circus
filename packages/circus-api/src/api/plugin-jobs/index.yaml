@@ -55,6 +55,12 @@ routes:
     responseSchema: pluginJob|dbEntry
   # Attachment
   - verb: get
+    path: /plugin-jobs/:jobId/attachment
+    requiredSeriesDomainCheck: true
+    description: >
+      Return the list of attachments from the plug-in.
+    handler: handleGetAttachmentList
+  - verb: get
     path: /plugin-jobs/:jobId/attachment/:path+
     requiredSeriesDomainCheck: true
     description: >

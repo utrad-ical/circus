@@ -47,7 +47,7 @@ export const Text: Display<TextOptions, string | number> = props => {
       // Join unique personal opinions
       return Array.from(
         new Set<string>(
-          ...personalOpinions.map(o => String(o.data) ?? '')
+          personalOpinions.map(o => String(o.data) ?? '')
         ).values()
       ).join(', ');
     }

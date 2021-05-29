@@ -22,7 +22,7 @@ import {
 } from 'utils/useImageSource';
 import PieProgress from 'components/PieProgress';
 import useLoginUser from 'utils/useLoginUser';
-import { DropdownButton, MenuItem } from 'components/react-bootstrap';
+import { DropdownButton, MenuItem, Modal } from 'components/react-bootstrap';
 import Icon from 'components/Icon';
 import { useParams } from 'react-router-dom';
 import MainDisplay from './MainDisplay';
@@ -35,7 +35,7 @@ import {
 } from '@utrad-ical/circus-ui-kit';
 import { RsVolumeLoader } from '@utrad-ical/circus-rs/src/browser';
 import loadDisplay from './loadDisplay';
-import { Modal } from 'components/react-bootstrap';
+import InvestigateJobModal from './InvestigateJobModal';
 
 const StyledDiv = styled.div`
   display: flex;
@@ -94,22 +94,6 @@ const Menu: React.FC<{
         &ensp;Investigate
       </MenuItem>
     </DropdownButton>
-  );
-});
-
-const InvestigateJobDialog: React.FC<{
-  results: any; // JSON-seriealizable
-  show: boolean;
-  setShow: (show: boolean) => void;
-}> = React.memo(props => {
-  const { results, show, setShow } = props;
-  return (
-    <Modal show={show} onHide={() => setShow(false)}>
-      <Modal.Header>Investigate raw job results</Modal.Header>
-      <Modal.Body>
-        <pre>{JSON.stringify(results, null, '  ')}</pre>
-      </Modal.Body>
-    </Modal>
   );
 });
 
@@ -208,7 +192,7 @@ const PluginJobDetail: React.FC<{}> = props => {
       });
     };
     loadAttachment.list = () =>
-      api('/api/plugin-jobs/attachment') as Promise<string[]>;
+      api(`plugin-jobs/${job.jobId}/attachment`) as Promise<string[]>;
 
     return {
       consensual: feedbackState.isConsensual,
@@ -353,11 +337,15 @@ const PluginJobDetail: React.FC<{}> = props => {
             Register {modeText} feedback
           </IconButton>
         </div>
-        <InvestigateJobDialog
-          show={showInvestigateModal}
-          setShow={setShowInvestigateModal}
-          results={jobData.job.results}
-        />
+        <CsResultsContext.Provider value={resultsContext!}>
+          <Modal
+            bsSize="lg"
+            show={showInvestigateModal}
+            onHide={() => setShowInvestigateModal(false)}
+          >
+            <InvestigateJobModal />
+          </Modal>
+        </CsResultsContext.Provider>
       </StyledDiv>
     </FullSpanContainer>
   );

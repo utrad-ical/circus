@@ -25,12 +25,23 @@ export interface FeedbackTarget {
   options: any;
 }
 
+export type JobStatus =
+  | 'in_queue'
+  | 'processing'
+  | 'finished'
+  | 'error'
+  | 'invalidated';
+
 export interface Job {
   jobId: string;
+  userEmail: string;
+  status: JobStatus;
   pluginId: string;
   series: SeriesDefinition[];
   feedbacks: FeedbackEntry<any>[];
   createdAt: string;
+  startedAt: string;
+  finishedAt: string;
   results: any;
 }
 

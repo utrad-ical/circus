@@ -1,10 +1,11 @@
+import { gunzipSync } from 'fflate';
 import get from 'lodash.get';
 import React, { useEffect, useState } from 'react';
 import { AnnotationDef, AnnotationViewer } from '../AnnotationViewer';
 import { useCsResults } from '../CsResultsContext';
 import { Display } from '../Display';
 import { ColorDefinition } from './utils/color';
-import { gunzipSync } from 'fflate';
+import { useErrorMessage } from './utils/useErrorMessage';
 
 export interface VolumeOverlayOptions {
   volumeId?: number;
@@ -53,7 +54,7 @@ export const VolumeOverlay: Display<VolumeOverlayOptions, void> = props => {
   const { job, loadAttachment, getVolumeLoader, rsHttpClient } = useCsResults();
   const { results } = job;
 
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useErrorMessage();
   const [annotationDefs, setAnnotationDefs] = useState<AnnotationDef[]>([]);
 
   useEffect(() => {
@@ -95,12 +96,10 @@ export const VolumeOverlay: Display<VolumeOverlayOptions, void> = props => {
       );
       setAnnotationDefs(annotationDefs);
     };
-    load().catch(err => setError(err));
+    load().catch(err => setError(err.message));
   }, []);
 
-  if (error instanceof Error) {
-    return <pre className="alert alert-danger">{error.message}</pre>;
-  }
+  if (error) return error;
 
   return (
     <AnnotationViewer

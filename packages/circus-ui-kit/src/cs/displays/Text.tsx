@@ -16,31 +16,28 @@ interface TextOptions {
    */
   maxLength?: number;
   /**
-   * The miniimum length of the input.
+   * The minimum length of the input.
    */
   minLength?: number;
   /**
    * Regular expression for validation.
    */
   pattern?: string;
-  /**
-   * If set to true, casts the returned value using `Number`.
-   */
-  asNumber?: boolean;
 }
 
 /**
- * Text display collects user feedback as string.
+ * Text display collects user feedback as a string.
  */
-export const Text: Display<TextOptions, string | number> = props => {
+export const Text: Display<TextOptions, string> = props => {
   const {
     options,
     initialFeedbackValue,
     onFeedbackChange,
     personalOpinions
   } = props;
-  const { label, maxLength, minLength, pattern, asNumber } = options;
+  const { label, maxLength = 64, minLength, pattern } = options;
   const { consensual, editable } = useCsResults();
+
   const [currentFeedback, setCurrentFeedback] = useState<string>(() => {
     if (initialFeedbackValue) return String(initialFeedbackValue);
     if (consensual && editable) {
@@ -80,15 +77,8 @@ export const Text: Display<TextOptions, string | number> = props => {
         setError('Invalid display strategy. The "pattern" property is wrong.');
       }
     }
-    if (asNumber === true && isNaN(Number(currentFeedback))) {
-      invalidate('Input a number');
-      return;
-    }
     setInvalidMessage(undefined);
-    onFeedbackChange({
-      valid: true,
-      value: asNumber === true ? Number(currentFeedback) : currentFeedback
-    });
+    onFeedbackChange({ valid: true, value: currentFeedback });
   }, [currentFeedback]);
 
   if (error) return error;

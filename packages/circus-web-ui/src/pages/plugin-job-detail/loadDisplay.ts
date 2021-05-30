@@ -4,6 +4,7 @@ import {
   Dump,
   Locator,
   LesionCandidates,
+  Numeric,
   Text,
   VolumeOverlay
 } from '@utrad-ical/circus-ui-kit';
@@ -15,6 +16,7 @@ const builtInDisplays: { [name: string]: Display<any, any> } = {
   Dump,
   Locator,
   LesionCandidates,
+  Numeric,
   Text,
   VolumeOverlay
 };

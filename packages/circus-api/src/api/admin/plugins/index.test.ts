@@ -9,12 +9,12 @@ beforeAll(async () => {
 });
 afterAll(async () => await apiTest.tearDown());
 
-describe('admin/plugins', function _adminPlugins() {
-  beforeEach(async function () {
+describe('admin/plugins', () => {
+  beforeEach(async () => {
     await setUpMongoFixture(apiTest.db, ['pluginDefinitions']);
   });
 
-  it('should return list of plugins', async function _shouldReturnListOfPlugins() {
+  test('should return list of plugins', async () => {
     const res = await axios.get('api/admin/plugins');
     expect(res.status).toBe(200);
     expect(res.data.items).toBeInstanceOf(Array);

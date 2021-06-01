@@ -12,7 +12,7 @@ routes:
     requiredGlobalPrivilege: manageServer
     description: Retrieves the specified user.
     responseSchema: user|exclude password|dbEntry
-  - verb: put
+  - verb: patch
     path: /admin/users/:userEmail
     requestSchema: user
     requiredGlobalPrivilege: manageServer

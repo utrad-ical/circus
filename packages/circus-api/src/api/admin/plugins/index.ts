@@ -9,7 +9,7 @@ export const handleGet: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handlePut: RouteMiddleware = ({ models }) => {
+export const handlePatch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const pluginId = ctx.params.pluginId;
     await models.plugin.modifyOne(pluginId, ctx.request.body);

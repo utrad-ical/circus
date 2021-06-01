@@ -12,7 +12,7 @@ routes:
     requiredGlobalPrivilege: manageServer
     description: Retrieves the specified project.
     responseSchema: project|dbEntry
-  - verb: put
+  - verb: patch
     path: /admin/projects/:projectId
     requiredGlobalPrivilege: manageServer
     requestSchema: project

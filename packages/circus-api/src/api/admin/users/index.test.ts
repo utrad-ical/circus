@@ -33,7 +33,7 @@ it('should return error for nonexistent user', async () => {
 
 it('should update a user', async () => {
   await axios.request({
-    method: 'put',
+    method: 'patch',
     url: 'api/admin/users/alice@example.com',
     data: { loginId: 'anastasia' }
   });
@@ -43,14 +43,14 @@ it('should update a user', async () => {
 
 it('should return error for invalid user update', async () => {
   const res1 = await axios.request({
-    method: 'put',
+    method: 'patch',
     url: 'api/admin/users/alice@example.com',
     data: { groups: ['this-must-not-be', 'strings'] }
   });
   expect(res1.status).toBe(400);
 
   const res2 = await axios.request({
-    method: 'put',
+    method: 'patch',
     url: 'api/admin/users/alice@example.com',
     data: { userEmail: 'alice.new.mail@example.com' }
   });

@@ -112,7 +112,7 @@ const EditorPage: React.FC<{
     }
 
     const args = {
-      method: target ? 'put' : 'post',
+      method: target ? 'patch' : 'post',
       data: item,
       handleErrors: [400]
     };

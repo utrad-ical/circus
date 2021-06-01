@@ -27,7 +27,7 @@ export const handleGet: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handlePut: RouteMiddleware = ({ models }) => {
+export const handlePatch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const userEmail = ctx.params.userEmail;
     const updating = { ...ctx.request.body };

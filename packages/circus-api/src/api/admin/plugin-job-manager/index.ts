@@ -8,7 +8,7 @@ export const handleGet: RouteMiddleware = ({ cs }) => {
   };
 };
 
-export const handlePost: RouteMiddleware = ({ cs }) => {
+export const handlePut: RouteMiddleware = ({ cs }) => {
   return async (ctx, next) => {
     const currentStatus = await cs.daemon.status();
     const newStatus = ctx.request.body.status;

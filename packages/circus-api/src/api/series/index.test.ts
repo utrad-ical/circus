@@ -74,7 +74,7 @@ describe('Uploading', () => {
     );
     const res = await uploadTest(file);
     if (res.status === 503) return;
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(201);
     expect(res.data?.taskId).toHaveLength(26);
     const taskId = res.data.taskId;
     while (apiTest.taskManager.isTaskInProgress(taskId)) {
@@ -90,7 +90,7 @@ describe('Uploading', () => {
     const file = path.join(__dirname, '../../../test/dicom/test.zip');
     const res = await uploadTest(file);
     if (res.status === 503) return;
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(201);
     expect(res.data?.taskId).toHaveLength(26);
   });
 
@@ -243,7 +243,7 @@ describe('Export CS volume', () => {
       ],
       compressionFormat: 'tgz'
     });
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(201);
     const taskId = res.data.taskId;
 
     while (apiTest.taskManager.isTaskInProgress(taskId)) {

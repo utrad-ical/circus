@@ -224,14 +224,11 @@ export const handlePostExportCsVolume: RouteMiddleware = ({
     const { stream, events } = dicomVoxelDumper.dump(request.series, pack);
 
     const downloadFileType = zipMode ? 'application/zip' : 'application/x-tgz';
-    const { emitter, downloadFileStream, taskId } = await taskManager.register(
-      ctx,
-      {
-        name: 'Export DICOM data',
-        userEmail: ctx.user.userEmail,
-        downloadFileType
-      }
-    );
+    const { emitter, downloadFileStream } = await taskManager.register(ctx, {
+      name: 'Export DICOM data',
+      userEmail: ctx.user.userEmail,
+      downloadFileType
+    });
 
     emitter.emit('progress', 'Processing volume #0');
     stream.pipe(downloadFileStream!);
@@ -247,7 +244,5 @@ export const handlePostExportCsVolume: RouteMiddleware = ({
     downloadFileStream!.on('close', () => {
       emitter.emit('finish', 'exported');
     });
-
-    ctx.body = { taskId };
   };
 };

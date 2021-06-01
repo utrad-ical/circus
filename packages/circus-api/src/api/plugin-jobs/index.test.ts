@@ -133,7 +133,7 @@ describe('plugin-job registration', () => {
         ]
       }
     });
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(201);
   });
 
   test('should reject if series image out of range', async () => {
@@ -215,7 +215,7 @@ describe('plugin-job registration', () => {
 
     test('should not reject when "force" flag is set', async () => {
       const res = await bob.post('api/plugin-jobs', { ...job, force: true });
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(201);
     });
   });
 });

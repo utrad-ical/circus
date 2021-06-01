@@ -4,7 +4,7 @@ import { InternalLabel } from './labelData';
 import { EditingData, EditingDataUpdater } from './revisionData';
 import { createNewLabelData } from './labelData';
 import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
-import { TaggedLabelDataOf } from './labelData';
+import { InternalLabelOf } from './labelData';
 import produce from 'immer';
 import { pixelFormatInfo } from '@utrad-ical/circus-lib/src/PixelFormat';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
@@ -30,7 +30,7 @@ const createHoleFilledLabels = async (
     viewer: Viewer,
     color: string,
     name: string
-  ): InternalLabel => {
+  ): InternalLabelOf<'voxel'> => {
     const alpha = 1;
     const temporaryKey = generateUniqueId();
     const data = createNewLabelData('voxel', { color, alpha }, viewer);
@@ -59,9 +59,7 @@ const createHoleFilledLabels = async (
     return;
   }
   // Small wrapper around updateEditingData
-  const updateCurrentLabels = (
-    updater: (labels: TaggedLabelDataOf<'voxel'>) => void
-  ) => {
+  const updateCurrentLabels = (updater: (labels: InternalLabel[]) => void) => {
     const labels =
       editingData.revision.series[editingData.activeSeriesIndex].labels;
     const newLabels = produce(labels, updater);
@@ -109,7 +107,6 @@ const createHoleFilledLabels = async (
     for (let k = 0; k <= nSlices; k++) {
       for (let j = 0; j <= height; j++) {
         for (let i = 0; i <= width; i++) {
-          const pos = i + j * width + k * width * height;
           const pos0 =
             holeFillingOrientation === 'Axial' || dimension3
               ? i + j * width + k * width * height
@@ -117,7 +114,7 @@ const createHoleFilledLabels = async (
               ? j + k * height + i * height * nSlices
               : k + i * nSlices + j * width * nSlices;
           if (holeFillingResult.result[pos0] > 0) {
-            volume.write(1, pos);
+            volume.writePixelAt(1, i, j, k);
           }
         }
       }

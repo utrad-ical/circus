@@ -1,10 +1,9 @@
 import { Viewer } from '@utrad-ical/circus-rs/src/browser';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
-import { InternalLabel } from './labelData';
 import { EditingData, EditingDataUpdater } from './revisionData';
 import { createNewLabelData } from './labelData';
 import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
-import { TaggedLabelDataOf } from './labelData';
+import { InternalLabelOf, InternalLabel } from './labelData';
 import produce from 'immer';
 import { pixelFormatInfo } from '@utrad-ical/circus-lib/src/PixelFormat';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
@@ -16,7 +15,7 @@ const createConnectedComponentLabels = async (
   editingData: EditingData,
   updateEditingData: EditingDataUpdater,
   viewers: { [index: string]: Viewer },
-  label: InternalLabel,
+  label: InternalLabelOf<'voxel'>,
   labelColors: string[],
   dispLabelNumber: number,
   neighbors: 6 | 26
@@ -28,7 +27,7 @@ const createConnectedComponentLabels = async (
     viewer: Viewer,
     color: string,
     name: string
-  ): InternalLabel => {
+  ): InternalLabelOf<'voxel'> => {
     const alpha = 1;
     const temporaryKey = generateUniqueId();
     const data = createNewLabelData('voxel', { color, alpha }, viewer);
@@ -57,9 +56,7 @@ const createConnectedComponentLabels = async (
     return;
   }
   // Small wrapper around updateEditingData
-  const updateCurrentLabels = (
-    updater: (labels: TaggedLabelDataOf<'voxel'>) => void
-  ) => {
+  const updateCurrentLabels = (updater: (labels: InternalLabel[]) => void) => {
     const labels =
       editingData.revision.series[editingData.activeSeriesIndex].labels;
     const newLabels = produce(labels, updater);
@@ -89,7 +86,7 @@ const createConnectedComponentLabels = async (
       neighbors === 6
         ? CCL6(input, width, height, nSlices)
         : CCL26(input, width, height, nSlices);
-    const newLabel: InternalLabel[] = [];
+    const newLabel: InternalLabelOf<'voxel'>[] = [];
     const order = [...Array(labelingResults.labelNum)].map((_, i) => i + 1);
     const names = [
       'largest',
@@ -151,6 +148,7 @@ const createConnectedComponentLabels = async (
         }
       }
     }
+
     const maxI = Math.min(dispLabelNumber, labelingResults.labelNum - 1);
     for (let i = 0; i <= maxI; i++) {
       const num = order[i];
@@ -183,19 +181,17 @@ const createConnectedComponentLabels = async (
         for (let j = ULy; j <= LRy; j++) {
           for (let i = ULx; i <= LRx; i++) {
             const pos = i + j * width + k * width * height;
-            const volume_pos =
-              i - ULx + (j - ULy) * sizex + (k - ULz) * sizex * sizey;
             if (labelingResults.labelMap[pos] === num) {
-              volume.write(1, volume_pos);
+              volume.writePixelAt(1, i - ULx, j - ULy, k - ULz);
             }
           }
         }
       }
       newLabel[i].data.volumeArrayBuffer = volume.data;
       newLabel[i].data.origin = [
-        ULx + label.data.origin[0],
-        ULy + label.data.origin[1],
-        ULz + label.data.origin[2]
+        ULx + label.data.origin![0],
+        ULy + label.data.origin![1],
+        ULz + label.data.origin![2]
       ];
     }
     updateCurrentLabels(labels => {

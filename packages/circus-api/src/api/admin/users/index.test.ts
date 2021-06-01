@@ -78,7 +78,7 @@ test('should create a user', async () => {
       groups: [1]
     }
   });
-  expect(res.status).toBe(200);
+  expect(res.status).toBe(201);
   expect(res.data).toMatchObject({ userEmail: 'test@example.com' });
   const res2 = await axios.get('api/admin/users/test@example.com');
   expect(res2.data.loginId).toBe('test');

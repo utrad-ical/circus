@@ -26,7 +26,9 @@ import {
   InternalLabel,
   labelTypes,
   LabelAppearance,
-  createNewLabelData
+  createNewLabelData,
+  InternalLabelData,
+  InternalLabelOf
 } from './labelData';
 import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
 import createConnectedComponentLabels from './createConnectedComponentLabels';
@@ -173,7 +175,11 @@ const LabelMenu: React.FC<{
       ruler: 'Ruler'
     };
     const name = getUniqueLabelName(labelNames[type]);
-    const data = createNewLabelData(type, { color, alpha }, viewer);
+    const data = createNewLabelData(
+      type,
+      { color, alpha },
+      viewer
+    ) as InternalLabelData;
     return { temporaryKey, name, ...data, attributes: {}, hidden: false };
   };
 
@@ -232,11 +238,14 @@ const LabelMenu: React.FC<{
   };
 
   const onOkClickDialogCCL = (dispLabelNumber: number, neighbors: 6 | 26) => {
+    const label = editingData.revision.series[activeSeriesIndex].labels[
+      activeLabelIndex
+    ] as InternalLabelOf<'voxel'>;
     createConnectedComponentLabels(
       editingData,
       updateEditingData,
       viewers,
-      editingData.revision.series[activeSeriesIndex].labels[activeLabelIndex],
+      label,
       labelColors,
       dispLabelNumber,
       neighbors

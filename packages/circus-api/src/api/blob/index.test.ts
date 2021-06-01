@@ -1,6 +1,5 @@
 import { setUpAppForRoutesTest, ApiTest } from '../../../test/util-routes';
 import { AxiosInstance } from 'axios';
-import rawBody from 'raw-body';
 import { createGzip } from 'zlib';
 
 let apiTest: ApiTest, axios: AxiosInstance;
@@ -19,7 +18,7 @@ it('should accept uploading and downloading a blob', async () => {
     headers: { 'Content-Type': 'application/octet-stream' },
     data: 'star'
   });
-  expect(res.status).toBe(200);
+  expect(res.status).toBe(201);
   const res2 = await axios.request({
     method: 'get',
     url: 'api/blob/' + sha1
@@ -37,7 +36,7 @@ it('should accept gzipped data', async () => {
     },
     data: createGzip().end('star')
   });
-  expect(res.status).toBe(200);
+  expect(res.status).toBe(201);
   const res2 = await axios.request({
     method: 'get',
     url: 'api/blob/' + sha1

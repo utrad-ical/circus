@@ -36,6 +36,7 @@ export const handlePost: RouteMiddleware = ({ models, cs }) => {
     );
 
     ctx.body = { jobId };
+    ctx.status = status.CREATED;
   };
 };
 

@@ -1,6 +1,7 @@
 import generatePermanentToken from '../../utils/generatePermanentToken';
 import httpStatus from 'http-status';
 import { RouteMiddleware } from '../../typings/middlewares';
+import status from 'http-status';
 
 export const handleGet: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
@@ -43,6 +44,7 @@ export const handlePost: RouteMiddleware = ({ models }) => {
       tokenId: data.permanentTokenId,
       accessToken: data.accessToken
     };
+    ctx.status = status.CREATED;
   };
 };
 

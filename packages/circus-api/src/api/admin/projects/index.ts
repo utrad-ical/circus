@@ -36,5 +36,6 @@ export const handlePost: RouteMiddleware = ({ models }) => {
     const inserting = { ...ctx.request.body, projectId };
     await models.project.insert(inserting);
     ctx.body = { projectId };
+    ctx.status = status.CREATED;
   };
 };

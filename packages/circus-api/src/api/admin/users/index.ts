@@ -57,5 +57,6 @@ export const handlePost: RouteMiddleware = ({ models }) => {
     };
     await models.user.insert(inserting);
     ctx.body = { userEmail: ctx.request.body.userEmail };
+    ctx.status = status.CREATED;
   };
 };

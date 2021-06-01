@@ -34,6 +34,7 @@ export const handlePost: RouteMiddleware = ({ models }) => {
     const inserting = { ...ctx.request.body, groupId };
     await models.group.insert(inserting);
     ctx.body = { groupId };
+    ctx.status = status.CREATED;
   };
 };
 

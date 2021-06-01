@@ -59,7 +59,7 @@ it('should add a new group', async () => {
     url: 'api/admin/groups',
     data: basicGroupData
   });
-  expect(res.status).toBe(200);
+  expect(res.status).toBe(201);
 });
 
 it('should return error for invalid group update', async () => {

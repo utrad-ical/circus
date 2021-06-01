@@ -1,6 +1,7 @@
 import { Models } from '../../interface';
 import { CircusContext, RouteMiddleware } from '../../typings/middlewares';
 import generateUniqueId from '../../utils/generateUniqueId';
+import status from 'http-status';
 
 export interface MyListItem {
   resourceId: string;
@@ -94,6 +95,7 @@ export const handlePost: RouteMiddleware = ({ models }) => {
     await models.user.modifyOne(userEmail, { myLists });
 
     ctx.body = { myListId };
+    ctx.status = status.CREATED;
   };
 };
 

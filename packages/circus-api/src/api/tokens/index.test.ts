@@ -11,7 +11,7 @@ afterAll(async () => apiTest.tearDown());
 
 test('Create / search / delete token', async () => {
   const res1 = await axios.post('/api/tokens', { description: 'stella' });
-  expect(res1.status).toBe(httpStatus.OK);
+  expect(res1.status).toBe(httpStatus.CREATED);
   const tokenId = res1.data.tokenId;
 
   const res2 = await axios.get('/api/tokens');

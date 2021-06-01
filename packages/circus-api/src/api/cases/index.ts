@@ -70,6 +70,7 @@ export const handlePost: RouteMiddleware = ({ models }) => {
       ctx.request.body.tags
     );
     ctx.body = { caseId };
+    ctx.status = status.CREATED;
   };
 };
 

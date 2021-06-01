@@ -47,7 +47,7 @@ describe('create new list', () => {
       method: 'post',
       data: { name: 'test', resourceType: 'clinicalCases', public: false }
     });
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(201);
     expect(res.data.myListId).toHaveLength(26);
   });
 

@@ -104,7 +104,7 @@ describe('create', () => {
         tags: []
       }
     });
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(201);
     expect(res.data.caseId).toHaveLength(26);
   });
 

@@ -40,6 +40,6 @@ export const handlePut: RouteMiddleware = ({ blobStorage }) => {
     }
     await blobStorage.write(hash, file);
     ctx.body = null;
-    ctx.status = status.OK;
+    ctx.status = status.CREATED;
   };
 };

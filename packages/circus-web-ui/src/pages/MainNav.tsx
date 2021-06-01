@@ -303,6 +303,12 @@ const MainNav: React.FC<{}> = props => {
             />
           </Menu>
           <Menu name="Tool">
+            <li>
+              <a href="https://circus-project.net/" target="_blank">
+                <Icon icon="search" />
+                &ensp;Documentation
+              </a>
+            </li>
             <SubMenu icon="tasks" name="Task List" link="/task-list" />
             <SubMenu
               icon="circus-preference"

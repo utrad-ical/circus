@@ -6,8 +6,8 @@ routes:
     path: /admin/plugins
     description: Gets the list of available plug-ins.
     responseSchema: plugin|searchResult
-  - verb: put
+  - verb: patch
     path: /admin/plugins/:pluginId
     requestSchema: plugin
     requiredGlobalPrivilege: manageServer
-    description: Manages plugin definition.
+    description: Updates plugin definition.

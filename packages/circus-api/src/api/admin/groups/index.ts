@@ -17,7 +17,7 @@ export const handleGet: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handlePut: RouteMiddleware = ({ models }) => {
+export const handlePatch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const groupId = parseInt(ctx.params.groupId);
     await models.group.modifyOne(groupId, ctx.request.body);

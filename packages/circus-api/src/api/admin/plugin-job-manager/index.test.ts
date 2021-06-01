@@ -20,14 +20,14 @@ it('should return the current state of a server', async () => {
 
 it('should set the state of a server', async () => {
   const res = await axios.request({
-    method: 'post',
+    method: 'put',
     url: url + '/switch',
     data: { status: 'running' }
   });
   expect(res.status).toBe(200);
   expect(res.data).toEqual({ status: 'running' });
   const res2 = await axios.request({
-    method: 'post',
+    method: 'put',
     url: url + '/switch',
     data: { status: 'stopped' }
   });
@@ -36,7 +36,7 @@ it('should set the state of a server', async () => {
 
 it('should throw for invalid status change request', async () => {
   const res = await axios.request({
-    method: 'post',
+    method: 'put',
     url: url + '/switch',
     data: { status: 'going' } // invalid status
   });

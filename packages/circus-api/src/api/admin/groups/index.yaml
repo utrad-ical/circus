@@ -11,7 +11,7 @@ routes:
     requiredGlobalPrivilege: manageServer
     description: Retrieves the specified group.
     responseSchema: group|dbEntry
-  - verb: put
+  - verb: patch
     path: /admin/groups/:groupId
     requestSchema: group
     requiredGlobalPrivilege: manageServer

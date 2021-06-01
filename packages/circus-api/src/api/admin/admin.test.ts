@@ -9,10 +9,10 @@ test('return unauthorized error for unauthorized user', async () => {
   const targets = [
     'groups',
     'groups/1',
-    'PUT groups/1',
+    'PATCH groups/1',
     'users',
     'users/alice@example.com',
-    'PUT users/alice@example.com',
+    'PATCH users/alice@example.com',
     'projects',
     'server-params'
   ];
@@ -20,7 +20,7 @@ test('return unauthorized error for unauthorized user', async () => {
   for (const target of targets) {
     const method = target.indexOf(' ') >= 0 ? target.split(' ')[0] : 'GET';
     const path = target.split(' ').pop();
-    const data = method.match(/GET|PUT/) ? { a: 10 } : undefined;
+    const data = method.match(/GET|PATCH/) ? { a: 10 } : undefined;
 
     const check = async (user: AxiosInstance) => {
       const res = await user.request({

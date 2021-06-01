@@ -208,7 +208,7 @@ const ToolBar: React.FC<{
       />
       <ToolButton
         name="bucketEraser"
-        icon="rs-bucket"
+        icon="rs-bucket-erase"
         changeTool={onChangeTool}
         active={active}
         shortcut="Shift+E"

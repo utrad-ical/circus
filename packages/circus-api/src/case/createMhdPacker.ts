@@ -8,7 +8,7 @@ import {
   Logger,
   generateMhdHeader
 } from '@utrad-ical/circus-lib';
-import { VolumeProvider } from 'circus-rs/src/server/helper/createVolumeProvider';
+import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
 import { Models } from '../interface';
 import Storage from '../storage/Storage';
 import path from 'path';

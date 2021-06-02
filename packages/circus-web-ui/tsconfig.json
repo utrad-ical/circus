@@ -1,18 +1,21 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.settings.json",
   "compilerOptions": {
     "lib": ["dom", "es2019"],
     "jsx": "react",
-    "allowJs": true,
-    "paths": {
-      "components/*": ["circus-web-ui/src/components/*"],
-      "pages/*": ["circus-web-ui/src/pages/*"],
-      "utils/*": ["circus-web-ui/src/utils/*"],
-      "store": ["circus-web-ui/src/store"],
-      "store/*": ["circus-web-ui/src/store/*"],
-      "types/*": ["circus-web-ui/src/types/*"]
-    },
-    "rootDir": "./src"
+    "rootDir": "src",
+    "baseUrl": "src",
+    "outDir": "./lib",
+    // This package is top-level and not referenced by others,
+    // so we set the following two options
+    "composite": false,
+    "noEmit": true
   },
-  "include": ["src"]
+  "include": ["src/**/*"],
+  "exclude": ["src/**/*.test.ts"],
+  "references": [
+    { "path": "../circus-lib" },
+    { "path": "../circus-rs" },
+    { "path": "../circus-ui-kit" }
+  ]
 }

@@ -1,4 +1,4 @@
-import { Vector3D } from 'circus-rs/src/common/geometry';
+import { Vector3D } from '../../../common/geometry';
 import { Vector3 } from 'three';
 import { OrientationString } from '../../section-util';
 import { BoundingRectWithHandleHitType } from './hit-test';

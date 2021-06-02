@@ -31,13 +31,7 @@ const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
   deps
 ) => {
   const { authorization, globalIpFilter } = options;
-  const {
-    rsLogger,
-    counter,
-    imageEncoder,
-    volumeProvider,
-    rsSeriesRoutes
-  } = deps;
+  const { rsLogger, counter, rsSeriesRoutes } = deps;
 
   // create server process
   const app = new koa();
@@ -83,9 +77,7 @@ const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
   }
 
   // series
-  if (volumeProvider && imageEncoder) {
-    router.use('/series/:sid', rsSeriesRoutes);
-  }
+  router.use('/series/:sid', rsSeriesRoutes);
 
   app.use(router.routes());
 
@@ -97,12 +89,6 @@ const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
   return app;
 };
 
-createServer.dependencies = [
-  'rsLogger',
-  'counter',
-  'imageEncoder',
-  'volumeProvider',
-  'rsSeriesRoutes'
-];
+createServer.dependencies = ['rsLogger', 'counter', 'rsSeriesRoutes'];
 
 export default createServer;

@@ -1,4 +1,4 @@
-import { Vector3D } from 'circus-rs/src/common/geometry';
+import { Vector3D } from '../../../common/geometry';
 import Annotation from '../../annotation/Annotation';
 import Cuboid from '../../annotation/Cuboid';
 import Ellipsoid from '../../annotation/Ellipsoid';

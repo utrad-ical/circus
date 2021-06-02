@@ -1,7 +1,20 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.settings.json",
   "compilerOptions": {
     "lib": ["dom", "es2019"],
-    "allowJs": true
-  }
+    "rootDir": "src",
+    "baseUrl": "src",
+    "outDir": "./lib",
+    // This package is top-level and not referenced by others,
+    // so we set the following two options
+    "composite": false,
+    "noEmit": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["src/**/*.test.ts"],
+  "references": [
+    { "path": "../circus-lib" },
+    { "path": "../circus-rs" },
+    { "path": "../circus-cs-core" }
+  ]
 }

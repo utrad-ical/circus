@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 const defaultAttachmentLoader = async () => {
   return new Response();
 };
+defaultAttachmentLoader.list = () => Promise.resolve([]);
 
 // STUB: Do not use this file
 

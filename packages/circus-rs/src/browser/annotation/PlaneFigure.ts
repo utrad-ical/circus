@@ -180,12 +180,14 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
 
     const minPoint = convertVolumePointToViewerPoint(
       viewer,
-      ...this.min,
+      this.min[0],
+      this.min[1],
       this.z!
     );
     const maxPoint = convertVolumePointToViewerPoint(
       viewer,
-      ...this.max,
+      this.max[0],
+      this.max[1],
       this.z!
     );
     const BoundingBox = new Box2(minPoint, maxPoint);

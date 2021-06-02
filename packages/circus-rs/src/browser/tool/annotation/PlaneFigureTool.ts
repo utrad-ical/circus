@@ -1,4 +1,4 @@
-import { Vector2D } from 'circus-rs/src/common/geometry';
+import { Vector2D } from '../../../common/geometry';
 import Annotation from '../../annotation/Annotation';
 import PlaneFigure, { FigureType } from '../../annotation/PlaneFigure';
 import { detectOrthogonalSection } from '../../section-util';

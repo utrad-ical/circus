@@ -1,7 +1,6 @@
 /src
 /coverage
 tsconfig.json
-/testdata
 *.test.ts
 .vscode
 .tgz

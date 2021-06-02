@@ -8,7 +8,7 @@ import ViewerEvent from '../../viewer/ViewerEvent';
 import { Box3, Vector3 } from 'three';
 import { ToolOptions } from '../Tool';
 import { convertViewerPointToVolumeIndex } from '../tool-util';
-import { Vector2D } from 'circus-rs/src/common/geometry';
+import { Vector2D } from '../../../common/geometry';
 
 /**
  * VoxelCloudToolBase is a base tool that affects VoxelCloud annotations.

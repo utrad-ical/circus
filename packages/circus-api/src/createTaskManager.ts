@@ -246,8 +246,21 @@ const createTaskManager: FunctionService<
   const download = async (ctx: CircusContext, taskId: string) => {
     const task = await models.task.findByIdOrFail(taskId);
     const fileName = downloadFileName(taskId);
+    let stat: fs.Stats;
+    try {
+      stat = await fs.stat(fileName);
+    } catch (err) {
+      if (err.code === 'ENOENT') {
+        ctx.throw(
+          404,
+          'The requested download file for the ' +
+            `task ${taskId} is no longer available.`
+        );
+      } else {
+        throw err;
+      }
+    }
     const stream = fs.createReadStream(fileName);
-    const stat = await fs.stat(fileName);
     const ext =
       task.downloadFileType === 'application/x-tgz'
         ? 'tar.gz'

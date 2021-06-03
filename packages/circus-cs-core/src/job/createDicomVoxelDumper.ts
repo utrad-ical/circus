@@ -54,7 +54,7 @@ const prepareEncConverter = async (charSet: string | undefined) => {
 };
 
 const returnNumberOrNumberList = (
-  dataset: parser.DicomDataset,
+  dataset: parser.DataSet,
   tag: string,
   accessor: string,
   valueBytes: number
@@ -76,14 +76,14 @@ interface SeriesEntry {
 interface Options {}
 
 const dataSetToObject = (
-  dataset: parser.DicomDataset,
+  dataset: parser.DataSet,
   encConverter: EncConverter
 ): object => {
   const tags = Object.keys(dataset.elements);
   const tagData: KeyValues = {};
 
   const elementToValue = (
-    dataset: parser.DicomDataset,
+    dataset: parser.DataSet,
     element: parser.Element
   ): any => {
     const { tag, vr, dataOffset, length, items } = element;
@@ -98,7 +98,7 @@ const dataSetToObject = (
       case 'SQ':
         if (Array.isArray(items)) {
           return items.map(element =>
-            dataSetToObject(element.dataSet, encConverter)
+            dataSetToObject(element.dataSet!, encConverter)
           );
         }
         break;
@@ -181,7 +181,7 @@ const createDicomVoxelDumper: FunctionService<
 
     for (let i = 0; i < partialImages.length; i++) {
       const buffer = await seriesAccessor.load(partialImages[i]);
-      const rootDataset: parser.DicomDataset = parser.parseDicom(
+      const rootDataset: parser.DataSet = parser.parseDicom(
         new Uint8Array(buffer)
       );
       // Process DICOM tags

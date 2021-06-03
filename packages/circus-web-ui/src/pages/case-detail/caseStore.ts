@@ -133,8 +133,17 @@ const slice = createSlice({
       s.seriesData = seriesData;
       s.projectData = projectData;
     },
-    loadRevisions: (s, action: PayloadAction<Revision<ExternalLabel>[]>) => {
-      s.caseData!.revisions = action.payload;
+    loadRevisions: (
+      s,
+      action: PayloadAction<{
+        revisions: Revision<ExternalLabel>[];
+        revisionIndex: number;
+      }>
+    ) => {
+      const { revisions, revisionIndex } = action.payload;
+      s.caseData!.revisions = revisions;
+      s.editingRevisionIndex = revisionIndex;
+      s.busy = true;
     },
     startLoadRevision: (
       s,

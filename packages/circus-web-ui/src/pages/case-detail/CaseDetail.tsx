@@ -99,14 +99,6 @@ const CaseDetail: React.FC<{}> = props => {
       const revision =
         caseStore.caseData.revisions[caseStore.editingRevisionIndex];
       const data = await externalRevisionToInternal(revision, api);
-
-      console.log('!!!!LOAD', {
-        d: caseStore.caseData,
-        ri: caseStore.editingRevisionIndex,
-        rev: revision,
-        data
-      });
-
       caseDispatch(c.loadRevision({ revision: data }));
     };
     loadRevisionData();

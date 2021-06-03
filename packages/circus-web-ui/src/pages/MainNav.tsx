@@ -274,7 +274,7 @@ const MainNav: React.FC<{}> = props => {
               resourceType="clinicalCases"
               endPoint="case"
             />
-            <SubMenu icon="open" name="Case Import" link="/import-case" />
+            {/* <SubMenu icon="open" name="Case Import" link="/import-case" /> */}
           </Menu>
           <Menu name="CAD" icon="circus-icon-job" link="/browse/plugin-jobs">
             <SubMenu

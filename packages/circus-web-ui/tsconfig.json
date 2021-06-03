@@ -12,7 +12,6 @@
     "noEmit": true
   },
   "include": ["src/**/*"],
-  "exclude": ["src/**/*.test.ts"],
   "references": [
     { "path": "../circus-lib" },
     { "path": "../circus-rs" },

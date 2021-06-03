@@ -255,7 +255,8 @@ function extractLosslessJpegPixels(
 
   const pxInfo = pixelFormatInfo(pixelFormat);
   const decompressed: ArrayBuffer = decoder.decompress(
-    (frameData as any).buffer, // looks like a mistake in dicom-parser's official d.ts
+    // https://github.com/cornerstonejs/dicomParser/issues/159
+    (frameData as any).buffer,
     (frameData as any).byteOffset,
     frameData.length
   );

@@ -25,12 +25,23 @@ export interface FeedbackTarget {
   options: any;
 }
 
+export type JobStatus =
+  | 'in_queue'
+  | 'processing'
+  | 'finished'
+  | 'error'
+  | 'invalidated';
+
 export interface Job {
   jobId: string;
+  userEmail: string;
+  status: JobStatus;
   pluginId: string;
   series: SeriesDefinition[];
   feedbacks: FeedbackEntry<any>[];
   createdAt: string;
+  startedAt: string;
+  finishedAt: string;
   results: any;
 }
 
@@ -39,10 +50,10 @@ export interface Plugin {
   displayStrategy: FeedbackTarget[];
 }
 
-export type PluginAttachmentLoader = (
-  path: string,
-  signal?: AbortSignal
-) => Promise<Response>;
+export interface PluginAttachmentLoader {
+  (path: string, signal?: AbortSignal): Promise<Response>;
+  list: () => Promise<string[]>;
+}
 
 export type EventLogger = (action: string, data?: any) => void;
 

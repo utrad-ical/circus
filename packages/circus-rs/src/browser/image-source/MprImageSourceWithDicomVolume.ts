@@ -1,4 +1,4 @@
-import DicomVolume from 'circus-rs/src/common/DicomVolume';
+import DicomVolume from '../../common/DicomVolume';
 
 export default interface MprImageSourceWithDicomVolume {
   getLoadedDicomVolume: () => DicomVolume | undefined;

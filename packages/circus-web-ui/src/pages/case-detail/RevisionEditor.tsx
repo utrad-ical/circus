@@ -31,7 +31,7 @@ import {
   InternalLabel,
   buildAnnotation,
   labelTypes,
-  TaggedLabelDataOf,
+  InternalLabelDataOf,
   setRecommendedDisplay
 } from './labelData';
 import SideContainer from './SideContainer';
@@ -178,6 +178,7 @@ const RevisionEditor: React.FC<{
     'brush',
     'eraser',
     'bucket',
+    'bucketEraser',
     'wand',
     'wandEraser'
   ].some(t => t === activeToolName);
@@ -242,7 +243,7 @@ const RevisionEditor: React.FC<{
     const newLabel = () => {
       const label = revision.series[seriesIndex].labels[labelIndex];
       if (annotation instanceof rs.VoxelCloud && annotation.volume) {
-        return produce(label, (l: TaggedLabelDataOf<'voxel'>) => {
+        return produce(label, (l: InternalLabelDataOf<'voxel'>) => {
           l.data.origin = annotation.origin;
           l.data.size = annotation.volume!.getDimension();
           l.data.volumeArrayBuffer = annotation.volume!.data;
@@ -253,7 +254,7 @@ const RevisionEditor: React.FC<{
       ) {
         return produce(
           label,
-          (l: TaggedLabelDataOf<'ellipsoid' | 'cuboid'>) => {
+          (l: InternalLabelDataOf<'ellipsoid' | 'cuboid'>) => {
             l.data.min = annotation.min!;
             l.data.max = annotation.max!;
           }
@@ -264,18 +265,18 @@ const RevisionEditor: React.FC<{
       ) {
         return produce(
           label,
-          (l: TaggedLabelDataOf<'rectangle' | 'ellipse'>) => {
+          (l: InternalLabelDataOf<'rectangle' | 'ellipse'>) => {
             l.data.min = annotation.min!;
             l.data.max = annotation.max!;
             l.data.z = annotation.z as number;
           }
         );
       } else if (annotation instanceof rs.Point && annotation.validate()) {
-        return produce(label, (l: TaggedLabelDataOf<'point'>) => {
+        return produce(label, (l: InternalLabelDataOf<'point'>) => {
           l.data.location = annotation.location!;
         });
       } else if (annotation instanceof rs.Ruler && annotation.validate()) {
-        return produce(label, (l: TaggedLabelDataOf<'ruler'>) => {
+        return produce(label, (l: InternalLabelDataOf<'ruler'>) => {
           l.data.section = annotation.section!;
           l.data.start = annotation.start!;
           l.data.end = annotation.end!;
@@ -663,12 +664,14 @@ const RevisionEditor: React.FC<{
           multipleSeriesShown={multipleSeriesShown}
         />
       </div>
-      <Modal show={seriesDialogOpen} bsSize="lg">
-        <SeriesSelectorDialog
-          onResolve={handleSeriesDialogResolve}
-          initialValue={editingData.revision.series}
-        />
-      </Modal>
+      {seriesDialogOpen && (
+        <Modal show bsSize="lg" onHide={() => {}}>
+          <SeriesSelectorDialog
+            onResolve={handleSeriesDialogResolve}
+            initialValue={editingData.revision.series}
+          />
+        </Modal>
+      )}
     </StyledDiv>
   );
 };

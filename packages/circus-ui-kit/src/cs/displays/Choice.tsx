@@ -32,6 +32,7 @@ export const Choice: Display<ChoiceOptions, string | number> = props => {
     personalOpinions,
     onFeedbackChange,
     options: {
+      ui = 'toggleButtons',
       personal: personalButtons,
       consensual: consensualButtons,
       excludeFromActionLog
@@ -87,7 +88,7 @@ export const Choice: Display<ChoiceOptions, string | number> = props => {
     }
   };
 
-  const UI: ChoiceUI = ToggleButtons;
+  const UI: ChoiceUI = ui === 'dropdown' ? Select : ToggleButtons;
   return (
     <div>
       <UI
@@ -112,7 +113,7 @@ type ChoiceUI = React.FC<{
 const ToggleButtons: ChoiceUI = props => {
   const { choices, onSelect, opinions, selected, disabled } = props;
   return (
-    <StyledDiv>
+    <ToggleButtonsContainer>
       {choices.map(choice => (
         <Button
           key={choice.value}
@@ -127,11 +128,11 @@ const ToggleButtons: ChoiceUI = props => {
           {choice.caption}
         </Button>
       ))}
-    </StyledDiv>
+    </ToggleButtonsContainer>
   );
 };
 
-export const StyledDiv = styled.div`
+const ToggleButtonsContainer = styled.div`
   display: flex;
   > * {
     flex: 1 1 auto;
@@ -146,3 +147,18 @@ export const StyledDiv = styled.div`
     margin-right: 3px;
   }
 `;
+
+const Select: ChoiceUI = props => {
+  const { choices, onSelect, opinions, selected, disabled } = props;
+  return (
+    <select
+      value={selected}
+      onChange={ev => onSelect(ev.target.value)}
+      disabled={disabled}
+    >
+      {choices.map(choice => (
+        <option value={choice.value}>{choice.caption}</option>
+      ))}
+    </select>
+  );
+};

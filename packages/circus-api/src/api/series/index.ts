@@ -1,3 +1,5 @@
+import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import archiver from 'archiver';
 import { EJSON } from 'bson';
 import status from 'http-status';
 import { CircusContext, RouteMiddleware } from '../../typings/middlewares';
@@ -199,5 +201,48 @@ export const handleDelete: RouteMiddleware = ({
     const result = await models.series.deleteOne({ seriesUid: uid });
     if (result.deletedCount !== 1) ctx.throw(status.NOT_FOUND);
     ctx.body = null;
+  };
+};
+
+interface ExportRequest {
+  series: {
+    seriesUid: string;
+    partialVolumeDescriptor: PartialVolumeDescriptor;
+  }[];
+  compressionFormat: 'tgz' | 'zip';
+}
+
+export const handlePostExportCsVolume: RouteMiddleware = ({
+  taskManager,
+  dicomVoxelDumper
+}) => {
+  return async (ctx, next) => {
+    const request: ExportRequest = ctx.request.body;
+    const zipMode = request.compressionFormat === 'zip';
+    const pack = zipMode ? archiver('zip') : archiver('tar', { gzip: true });
+
+    const { stream, events } = dicomVoxelDumper.dump(request.series, pack);
+
+    const downloadFileType = zipMode ? 'application/zip' : 'application/x-tgz';
+    const { emitter, downloadFileStream } = await taskManager.register(ctx, {
+      name: 'Export DICOM data',
+      userEmail: ctx.user.userEmail,
+      downloadFileType
+    });
+
+    emitter.emit('progress', 'Processing volume #0');
+    stream.pipe(downloadFileStream!);
+
+    events.on('volume', (i: number) => {
+      emitter.emit(
+        'progress',
+        `Processing volume #${i + 1}`,
+        i,
+        request.series.length
+      );
+    });
+    downloadFileStream!.on('close', () => {
+      emitter.emit('finish', 'exported');
+    });
   };
 };

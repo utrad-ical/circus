@@ -18,12 +18,12 @@ import Tag from 'components/Tag';
 import TimeDisplay from 'components/TimeDisplay';
 import produce from 'immer';
 import React, { useCallback, useEffect, useReducer, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import Series from 'types/Series';
 import { useApi } from 'utils/api';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
+import useLoginUser from 'utils/useLoginUser';
 import caseStoreReducer, * as c from './caseStore';
 import {
   EditingDataUpdater,
@@ -48,9 +48,8 @@ const CaseDetail: React.FC<{}> = props => {
   const [tags, setTags] = useState<string[]>([]);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
 
-  const accessibleProjects = useSelector(
-    state => state.loginUser.data!.accessibleProjects
-  );
+  const user = useLoginUser();
+  const accessibleProjects = user.accessibleProjects;
 
   useEffect(() => {
     const loadCase = async () => {
@@ -154,9 +153,9 @@ const CaseDetail: React.FC<{}> = props => {
           await saveRevision(caseId, revision, desc, api);
           await alert('Successfully registered a revision.');
           const caseData = await api('cases/' + caseId);
-          caseDispatch(c.loadRevisions(caseData.revisions));
           caseDispatch(
-            c.startLoadRevision({
+            c.loadRevisions({
+              revisions: caseData.revisions,
               revisionIndex: caseData.revisions.length - 1
             })
           );
@@ -167,6 +166,7 @@ const CaseDetail: React.FC<{}> = props => {
         break;
       }
       case 'exportMhd': {
+        if (!user.globalPrivileges.includes('downloadVolume')) return;
         setExportDialogOpen(true);
       }
     }
@@ -225,7 +225,7 @@ const CaseDetail: React.FC<{}> = props => {
         updateEditingData={updateEditingData}
       />
       {exportDialogOpen && (
-        <Modal show>
+        <Modal show onHide={() => {}}>
           <CaseExportModal
             caseIds={[caseId]}
             onClose={() => setExportDialogOpen(false)}
@@ -268,6 +268,7 @@ const MenuBar: React.FC<{
   busy: boolean;
 }> = React.memo(props => {
   const { caseStore, onCommand, onRevisionSelect, busy } = props;
+  const user = useLoginUser();
 
   useKeyboardShortcut('Ctrl+Z', () => {
     c.canUndo(caseStore) && onCommand('undo');
@@ -336,7 +337,10 @@ const MenuBar: React.FC<{
           </MenuItem>
           <MenuItem divider />
           <MenuItem header>Export</MenuItem>
-          <MenuItem onSelect={() => onCommand('exportMhd')}>
+          <MenuItem
+            disabled={!user.globalPrivileges.includes('downloadVolume')}
+            onSelect={() => onCommand('exportMhd')}
+          >
             <Icon icon="export" />
             Export as MHD
           </MenuItem>

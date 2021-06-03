@@ -25,7 +25,7 @@ const PluginJobManagerAdmin: React.FC<{}> = props => {
     setBusy(true);
     try {
       await api('admin/plugin-job-manager/switch', {
-        method: 'post',
+        method: 'put',
         data: { status: mode }
       });
       await refresh();

@@ -1,18 +1,20 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.settings.json",
   "compilerOptions": {
     "lib": ["dom", "es2019"],
-    "baseUrl": "./src",
     "jsx": "react",
-    "allowJs": true,
-    "paths": {
-      "rb/*": ["@smikitky/rb-components/lib/*"],
-      "circus-rs": ["../../circus-rs/src/browser"],
-      "circus-rs/*": ["../../circus-rs/src/browser/*"],
-      "components/*": ["components/*"],
-      "pages/*": ["pages/*"],
-      "utils/*": ["utils/*"],
-      "store/*": ["store/*"]
-    }
-  }
+    "rootDir": "src",
+    "baseUrl": "src",
+    "outDir": "./lib",
+    // This package is top-level and not referenced by others,
+    // so we set the following two options
+    "composite": false,
+    "noEmit": true
+  },
+  "include": ["src/**/*"],
+  "references": [
+    { "path": "../circus-lib" },
+    { "path": "../circus-rs" },
+    { "path": "../circus-ui-kit" }
+  ]
 }

@@ -33,7 +33,7 @@ it('should return error for nonexistent group', async () => {
 
 it('should update a group', async () => {
   const res1 = await axios.request({
-    method: 'put',
+    method: 'patch',
     url: 'api/admin/groups/1',
     data: { groupName: 'root' }
   });
@@ -59,19 +59,19 @@ it('should add a new group', async () => {
     url: 'api/admin/groups',
     data: basicGroupData
   });
-  expect(res.status).toBe(200);
+  expect(res.status).toBe(201);
 });
 
 it('should return error for invalid group update', async () => {
   const res1 = await axios.request({
-    method: 'put',
+    method: 'patch',
     url: 'api/admin/groups/1',
     data: { groupName: 72 }
   });
   expect(res1.status).toBe(400);
 
   const res2 = await axios.request({
-    method: 'put',
+    method: 'patch',
     url: 'api/admin/groups/1',
     data: { groupId: 45 }
   });

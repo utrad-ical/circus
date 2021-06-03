@@ -6,7 +6,7 @@ import Project from 'types/Project';
 import Series from 'types/Series';
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import { LayoutInfo, layoutReducer } from 'components/GridContainer';
-import { OrientationString } from 'circus-rs/section-util';
+import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
 import { ViewerDef } from './ViewerGrid';
 
 interface CaseData {
@@ -133,8 +133,17 @@ const slice = createSlice({
       s.seriesData = seriesData;
       s.projectData = projectData;
     },
-    loadRevisions: (s, action: PayloadAction<Revision<ExternalLabel>[]>) => {
-      s.caseData!.revisions = action.payload;
+    loadRevisions: (
+      s,
+      action: PayloadAction<{
+        revisions: Revision<ExternalLabel>[];
+        revisionIndex: number;
+      }>
+    ) => {
+      const { revisions, revisionIndex } = action.payload;
+      s.caseData!.revisions = revisions;
+      s.editingRevisionIndex = revisionIndex;
+      s.busy = true;
     },
     startLoadRevision: (
       s,

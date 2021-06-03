@@ -27,10 +27,10 @@ import {
 import { Button } from '../../ui/Button';
 
 interface LesionCandidate {
-  id: number;
+  id?: number;
   rank: number;
   confidence: number;
-  size: number;
+  volumeSize: number;
   volumeId?: number;
   location: [number, number, number];
 }
@@ -55,7 +55,7 @@ interface LesionCandidatesOptions {
   maxCandidates?: number;
   markStyle?: MarkStyle;
   confidenceThreshold?: number;
-  sortBy: [keyof LesionCandidate, 'asc' | 'desc'];
+  sortBy?: [keyof LesionCandidate, 'asc' | 'desc'];
   excludeFromActionLog?: boolean;
 }
 
@@ -164,6 +164,7 @@ export const LesionCandidates: Display<
       dataPath = defaultDataPath,
       sortBy: [sortKey, sortOrder] = ['rank', 'asc'],
       maxCandidates,
+      confidenceThreshold,
       markStyle = defaultMarkStyle,
       feedbackListener,
       excludeFromActionLog
@@ -181,6 +182,7 @@ export const LesionCandidates: Display<
   } = useCsResults();
   const { results } = job;
   const [composition, setComposition] = useState<Composition | null>(null);
+  const [error, setError] = useState<Error | null>(null);
 
   const [currentFeedback, setCurrentFeedback] = useState<
     LesionCandidateFeedback
@@ -193,7 +195,11 @@ export const LesionCandidates: Display<
   const visibleCandidates = useMemo(
     () =>
       allCandidates
-        .slice() // copy
+        .filter(
+          c =>
+            typeof confidenceThreshold !== 'number' ||
+            c.confidence >= confidenceThreshold
+        )
         .sort((a, b) => b.confidence - a.confidence)
         .slice(0, maxCandidates)
         .sort((a, b) => {
@@ -286,6 +292,8 @@ export const LesionCandidates: Display<
 
   if (!composition || (feedbackListener && !FeedbackListener)) return null;
 
+  if (error) return <div className="alert alert-danger">{error.message}</div>;
+
   return (
     <StyledDiv>
       <div className="tools">
@@ -300,6 +308,11 @@ export const LesionCandidates: Display<
         ))}
       </div>
       <div className="entries">
+        {visibleCandidates.length === 0 && (
+          <div className="alert alert-info">
+            There is no candidate to display.
+          </div>
+        )}
         {visibleCandidates.map(cand => {
           const feedbackItem = currentFeedback.find(
             item => item.id === cand.id
@@ -326,7 +339,7 @@ export const LesionCandidates: Display<
                     personalOpinions={candPersonalOpinions}
                     options={feedbackListener.options}
                     onFeedbackChange={status =>
-                      handleFeedbackChange(cand.id, status)
+                      handleFeedbackChange(cand.id!, status)
                     }
                   />
                 </div>

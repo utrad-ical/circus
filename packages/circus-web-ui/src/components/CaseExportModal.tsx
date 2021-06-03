@@ -1,141 +1,95 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import { useSelector } from 'react-redux';
-import { useApi } from 'utils/api';
-import { Modal, Button, ProgressBar } from './react-bootstrap';
-import classnames from 'classnames';
-import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
-import useTaskDownloadHandler from 'utils/useTaskDownloadHandler';
-import Icon from './Icon';
+import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
-import styled from 'styled-components';
+import React, { useCallback } from 'react';
+import { useApi } from 'utils/api';
+import DownloadModal, {
+  CompressionFormat,
+  compressionFormatOptions,
+  LineEnding,
+  lineEndingOptions
+} from './DownloadModal';
 
-const labelPackTypeOptions = {
+type LabelPackTypeOptions = 'isolated' | 'combined';
+
+interface CaseExportOptions {
+  caseIds: string[];
+  mhdLineEnding: LineEnding;
+  labelPackType: LabelPackTypeOptions;
+  compressionFormat: CompressionFormat;
+}
+
+const labelPackTypeOptions: { [type in LabelPackTypeOptions]: string } = {
   isolated: 'Isolated (one raw file per label)',
   combined: 'Combined'
 };
-const mhdLineEndingOptions = { lf: 'LF', crlf: 'CR + LF (Windows)' };
+
+const CaseExportOptionsEditor: Editor<CaseExportOptions> = props => {
+  const { value, onChange } = props;
+  return (
+    <div>
+      <div className="row">
+        Voxel labels:{' '}
+        <ShrinkSelect
+          options={labelPackTypeOptions}
+          value={value.labelPackType}
+          onChange={v => onChange({ ...value, labelPackType: v })}
+        />
+      </div>
+      <div className="row">
+        MHD file line endings:{' '}
+        <ShrinkSelect
+          options={lineEndingOptions}
+          value={value.mhdLineEnding}
+          onChange={v => onChange({ ...value, mhdLineEnding: v })}
+        />
+      </div>
+      <div className="row">
+        Compression format:{' '}
+        <ShrinkSelect
+          options={compressionFormatOptions}
+          value={value.compressionFormat}
+          onChange={v => onChange({ ...value, compressionFormat: v })}
+        />
+      </div>
+    </div>
+  );
+};
 
 const CaseExportModal: React.FC<{
   caseIds: string[];
   onClose: () => void;
 }> = props => {
-  const { caseIds, onClose } = props;
-  const [closeTitle, setCloseTitle] = useState('Cancel');
-  const [labelPackType, setLabelPackType] = useState<'combined' | 'isolated'>(
-    'isolated'
-  );
-  const [mhdLineEnding, setMhdLineEnding] = useState('lf');
-  const [taskId, setTaskId] = useState<string | null>(null);
+  const { onClose, caseIds } = props;
+  const caption = `Export ${caseIds.length} case${
+    caseIds.length !== 1 ? 's' : ''
+  }`;
   const api = useApi();
-  const taskProgress = useSelector(state =>
-    taskId ? state.taskProgress[taskId] : undefined
+
+  const onStart = useCallback(
+    async (options: CaseExportOptions) => {
+      const res = await api(`/cases/export-mhd`, {
+        method: 'post',
+        data: options
+      });
+      return res.taskId;
+    },
+    [api]
   );
 
-  const caption = `${caseIds.length} case${caseIds.length !== 1 ? 's' : ''}`;
-
-  const downloadTask = useTaskDownloadHandler(taskId!);
-
-  const modalRoot = useRef<HTMLDivElement>(document.createElement('div'));
-
-  useEffect(() => {
-    document.body.appendChild(modalRoot.current);
-    () => {
-      document.body.removeChild(modalRoot.current);
-    };
-  }, []);
-
-  const handleStartClick = async () => {
-    const res = await api(`/cases/export-mhd`, {
-      method: 'post',
-      data: { caseIds, labelPackType, mhdLineEnding }
-    });
-    setCloseTitle('Dismiss');
-    setTaskId(res.taskId);
-  };
-
-  const handleDownloadClick = () => {
-    setCloseTitle('Close');
-    downloadTask();
-  };
-
-  const dialog = (
-    <Modal.Dialog>
-      <Modal.Header>
-        <Modal.Title>Export {caption}</Modal.Title>
-      </Modal.Header>
-      <StyledModalBody>
-        <div className="row">
-          Voxel labels:{' '}
-          <ShrinkSelect
-            options={labelPackTypeOptions}
-            value={labelPackType}
-            onChange={setLabelPackType}
-          />
-        </div>
-        <div className="row">
-          MHD file line endings:{' '}
-          <ShrinkSelect
-            options={mhdLineEndingOptions}
-            value={mhdLineEnding}
-            onChange={setMhdLineEnding}
-          />
-        </div>
-        <div className="row">
-          <ProgressBar
-            active={taskProgress?.status === 'processing'}
-            bsStyle={taskProgress?.status === 'error' ? 'danger' : 'success'}
-            now={
-              taskProgress
-                ? taskProgress.status === 'processing'
-                  ? Math.max(1, taskProgress.finished ?? 100)
-                  : 100
-                : 0
-            }
-            max={taskProgress?.total ?? 100}
-          />
-        </div>
-        <div
-          className={classnames('message', 'row', {
-            'text-mute': !taskProgress,
-            'text-danger': taskProgress?.status === 'error',
-            'text-success': taskProgress?.status === 'finished'
-          })}
-        >
-          {taskProgress?.message ?? 'Not started'}
-        </div>
-      </StyledModalBody>
-      <Modal.Footer>
-        <Button bsStyle="default" onClick={onClose}>
-          {closeTitle}
-        </Button>
-        {!taskProgress && (
-          <Button bsStyle="primary" onClick={handleStartClick}>
-            Start download
-          </Button>
-        )}
-        {taskProgress?.status === 'processing' && (
-          <Button bsStyle="primary" disabled>
-            <LoadingIndicator /> Please wait...
-          </Button>
-        )}
-        {taskProgress?.status === 'finished' && (
-          <Button bsStyle="success" onClick={handleDownloadClick}>
-            <Icon icon="glyphicon-download" />
-            Download
-          </Button>
-        )}
-      </Modal.Footer>
-    </Modal.Dialog>
+  return (
+    <DownloadModal
+      onClose={onClose}
+      caption={caption}
+      onStart={onStart}
+      initialOptions={{
+        caseIds,
+        mhdLineEnding: 'lf',
+        labelPackType: 'isolated',
+        compressionFormat: 'tgz'
+      }}
+      optionsEditor={CaseExportOptionsEditor}
+    />
   );
-
-  return createPortal(dialog, modalRoot.current);
 };
-
-const StyledModalBody = styled(Modal.Body)`
-  .row {
-    margin: 8px 0;
-  }
-`;
 
 export default CaseExportModal;

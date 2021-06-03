@@ -5,9 +5,10 @@ import checkFilter from '../../utils/checkFilter';
 import { RouteMiddleware, CircusContext } from '../../typings/middlewares';
 import makeNewCase from '../../case/makeNewCase';
 import {
+  CompressionFormat,
   LabelPackType,
   LineEndingType
-} from 'circus-api/src/case/createMhdPacker';
+} from '../../case/createMhdPacker';
 
 const maxTagLength = 32;
 
@@ -69,6 +70,7 @@ export const handlePost: RouteMiddleware = ({ models }) => {
       ctx.request.body.tags
     );
     ctx.body = { caseId };
+    ctx.status = status.CREATED;
   };
 };
 
@@ -91,7 +93,8 @@ export const handlePostRevision: RouteMiddleware = ({ models }) => {
       latestRevision: rev,
       revisions: [...aCase.revisions, rev]
     });
-    ctx.body = null; // No Content
+    ctx.body = null;
+    ctx.status = status.CREATED;
   };
 };
 
@@ -223,6 +226,8 @@ export const handlePostExportJob: RouteMiddleware = ({
       ctx.request.body.labelPackType === 'combined' ? 'combined' : 'isolated';
     const mhdLineEnding: LineEndingType =
       ctx.request.body.mhdLineEnding === 'crlf' ? 'crlf' : 'lf';
+    const compressionFormat: CompressionFormat =
+      ctx.request.body.compressionFormat === 'zip' ? 'zip' : 'tgz';
 
     // check read privileges
     const cursor = models.clinicalCase.findAsCursor({
@@ -249,11 +254,13 @@ export const handlePostExportJob: RouteMiddleware = ({
     const { emitter, downloadFileStream } = await taskManager.register(ctx, {
       name: `Export ${target} as MHD`,
       userEmail,
-      downloadFileType: 'application/zip'
+      downloadFileType:
+        compressionFormat === 'tgz' ? 'application/x-tgz' : 'application/zip'
     });
     mhdPacker.packAsMhd(emitter, downloadFileStream!, caseIds, {
       labelPackType,
-      mhdLineEnding
+      mhdLineEnding,
+      compressionFormat
     });
   };
 };

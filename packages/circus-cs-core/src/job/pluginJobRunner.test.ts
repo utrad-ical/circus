@@ -2,8 +2,11 @@ import pluginJobRunner, { executePlugin } from './pluginJobRunner';
 import path from 'path';
 import DockerRunner from '../util/DockerRunner';
 import tar, { pack } from 'tar-stream';
+import Archiver from 'archiver';
 import memory from 'memory-streams';
 import * as circus from '../interface';
+import { EventEmitter } from 'events';
+import { Readable } from 'stream';
 
 const testDir = path.resolve(__dirname, '../../test/');
 const workingDirectory = path.join(testDir, 'working/');
@@ -15,12 +18,16 @@ describe('pluginJobRunner', () => {
 
   test('Normal run', async () => {
     const dockerRunner = new DockerRunner();
+    const logStream = new memory.WritableStream();
 
     // Mock Job Reporter
     let resultsPacked = false;
     const jobReporter = {
       report: jest.fn(),
-      packDir: (jobId: string, stream: NodeJS.ReadableStream) => {
+      logStream: async (jobId: string, stream: Readable) => {
+        stream.pipe(logStream);
+      },
+      packDir: (jobId: string, stream: Readable) => {
         return new Promise<void>(resolve => {
           expect(jobId).toBe('12345');
           const extract = tar.extract();
@@ -48,12 +55,12 @@ describe('pluginJobRunner', () => {
 
     const dicomVoxelDumper: circus.DicomVoxelDumper = {
       dump: () => {
-        const stream = tar.pack();
-        stream.entry({ name: '0.mhd' }, '');
-        stream.entry({ name: '0.raw' }, Buffer.alloc(10));
-        stream.entry({ name: '0.json' }, '{}');
+        const stream = Archiver('tar');
+        stream.append('', { name: '0.mhd' });
+        stream.append(Buffer.alloc(10), { name: '0.raw' });
+        stream.append('{}', { name: '0.json' });
         stream.finalize();
-        return stream;
+        return { stream, events: new EventEmitter() };
       }
     };
 
@@ -74,9 +81,7 @@ describe('pluginJobRunner', () => {
       ]
     };
 
-    const logStream = new memory.WritableStream();
-
-    await runner.run(jobId, jobRequest, logStream);
+    await runner.run(jobId, jobRequest);
     expect(jobReporter.report.mock.calls[0][1]).toBe('processing');
     expect(jobReporter.report.mock.calls[1][1]).toBe('results');
     expect(jobReporter.report.mock.calls[2][1]).toBe('finished');

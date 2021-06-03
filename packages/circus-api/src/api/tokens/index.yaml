@@ -1,0 +1,30 @@
+name: Tasks
+description: >
+  Retreive information about tasks.
+routes:
+  - verb: get
+    path: /tokens
+    description: Retrieves the list of permanent access tokens.
+    responseSchema: permanentToken|searchResult
+  - verb: post
+    path: /tokens
+    description: Creates a new permanent access token.
+    requestSchema:
+      type: object
+      properties:
+        description:
+          type: string
+          minLength: 1
+          maxLength: 32
+      required: ['description']
+      additionalProperties: false
+    responseSchema:
+      type: object
+      properties:
+        tokenId: { type: string }
+        accessToken: { type: string }
+      required: ['tokenId', 'accessToken']
+  - verb: delete
+    path: /tokens/:tokenId
+    handler: handleDelete
+    description: Deletes the specified permanent access token.

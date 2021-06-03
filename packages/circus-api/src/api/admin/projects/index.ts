@@ -19,7 +19,7 @@ export const handleGet: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handlePut: RouteMiddleware = ({ models }) => {
+export const handlePatch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const projectId = ctx.params.projectId;
     await models.project.modifyOne(projectId, ctx.request.body);
@@ -36,5 +36,6 @@ export const handlePost: RouteMiddleware = ({ models }) => {
     const inserting = { ...ctx.request.body, projectId };
     await models.project.insert(inserting);
     ctx.body = { projectId };
+    ctx.status = status.CREATED;
   };
 };

@@ -1,4 +1,4 @@
-import { Vector2D } from 'circus-rs/src/common/geometry';
+import { Vector2D } from '../../../common/geometry';
 import { Annotation } from '../..';
 import Polyline from '../../annotation/Polyline';
 import Composition from '../../Composition';

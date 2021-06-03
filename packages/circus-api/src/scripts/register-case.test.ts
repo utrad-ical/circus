@@ -14,7 +14,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   const { db } = await modelsPromise;
-  await setUpMongoFixture(db, ['clinicalCases']);
+  await setUpMongoFixture(db, ['clinicalCases', 'users', 'groups', 'projects']);
 });
 
 test('create new case', async () => {

@@ -1,9 +1,8 @@
 import React, { useContext, useState, useEffect, useMemo } from 'react';
-import * as rs from 'circus-rs';
+import * as rs from '@utrad-ical/circus-rs/src/browser';
 import PartialVolumeDescriptor, {
   isValidPartialVolumeDescriptor
 } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
-import { SeriesEntry } from 'components/SeriesSelector';
 
 export const VolumeLoaderCacheContext = React.createContext<{
   rsHttpClient: rs.RsHttpClient;

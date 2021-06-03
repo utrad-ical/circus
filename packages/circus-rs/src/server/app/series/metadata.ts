@@ -7,6 +7,7 @@ import { PixelFormat } from '@utrad-ical/circus-lib/src/PixelFormat';
 import { SeriesMiddlewareState } from './createSeriesRoutes';
 import MultiRange from 'multi-integer-range';
 import { VolumeAccessor } from '../../helper/createVolumeProvider';
+import { partialVolumeDescriptorToArray } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
 
 interface MetadataQuery {
   estimateWindow?: 'full' | 'first' | 'center' | 'none';
@@ -40,15 +41,9 @@ export default function metadata(): koa.Middleware {
     const { images } = state.volumeAccessor;
 
     // Modify full volume accessor to partial volume accessor
-    let loadImages: number[] = [];
-    if (state.partialVolumeDescriptor) {
-      const { start, end, delta } = state.partialVolumeDescriptor;
-      for (let i = start; i <= end; i += delta) {
-        loadImages.push(i);
-      }
-    } else {
-      loadImages = images.toArray();
-    }
+    const loadImages = state.partialVolumeDescriptor
+      ? partialVolumeDescriptorToArray(state.partialVolumeDescriptor)
+      : images.toArray();
 
     const volumeAccessor: VolumeAccessor = {
       ...state.volumeAccessor,
@@ -87,6 +82,7 @@ type VolumeMetadata = {
   dicomWindow?: ViewWindow;
   pixelFormat: PixelFormat;
 };
+
 async function extractVolumeMetadata(
   volumeAccessor: VolumeAccessor
 ): Promise<VolumeMetadata> {

@@ -4,6 +4,7 @@ import generateUniqueId from '../../utils/generateUniqueId';
 import { EJSON } from 'bson';
 import path from 'path';
 import fs from 'fs';
+import glob from 'glob-promise';
 import mime from 'mime';
 import { RouteMiddleware, CircusContext } from '../../typings/middlewares';
 import makeNewPluginJob from '../../plugin-job/makeNewPluginJob';
@@ -35,6 +36,7 @@ export const handlePost: RouteMiddleware = ({ models, cs }) => {
     );
 
     ctx.body = { jobId };
+    ctx.status = status.CREATED;
   };
 };
 
@@ -180,6 +182,20 @@ export const handleGet: RouteMiddleware = ({ models }) => {
   };
 };
 
+export const handleGetAttachmentList: RouteMiddleware = ({
+  models,
+  pluginResultsPath
+}) => {
+  return async (ctx, next) => {
+    const jobId = ctx.params.jobId;
+    const baseDir = path.resolve(pluginResultsPath, jobId);
+    await models.pluginJob.findByIdOrFail(jobId);
+    const files = await glob(baseDir + '/**/*');
+    const relatives = files.map(p => path.relative(baseDir, p));
+    ctx.body = relatives;
+  };
+};
+
 export const handleGetAttachment: RouteMiddleware = ({
   models,
   pluginResultsPath
@@ -187,11 +203,14 @@ export const handleGetAttachment: RouteMiddleware = ({
   return async (ctx, next) => {
     const jobId = ctx.params.jobId;
     const filePath = ctx.params.path;
-    if (!filePath || /\.\./.test(filePath)) {
+    const baseDir = path.resolve(pluginResultsPath, jobId);
+    const file = path.resolve(baseDir, filePath);
+    if (path.relative(baseDir, file).match(/\.\.(\/|\\)/)) {
       ctx.throw(status.BAD_REQUEST, 'Invalid path prameter.');
     }
+
     await models.pluginJob.findByIdOrFail(jobId);
-    const file = path.join(pluginResultsPath, jobId, filePath);
+
     const stream = fs.createReadStream(file);
 
     try {

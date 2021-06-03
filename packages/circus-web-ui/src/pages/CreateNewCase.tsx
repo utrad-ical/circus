@@ -1,4 +1,4 @@
-import browserHistory from 'browserHistory';
+import browserHistory from '../browserHistory';
 import IconButton from 'components/IconButton';
 import MultiTagSelect from 'components/MultiTagSelect';
 import ProjectSelector from 'components/ProjectSelector';

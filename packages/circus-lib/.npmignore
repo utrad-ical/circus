@@ -4,7 +4,4 @@ tsconfig.json
 /testdata
 *.test.ts
 .vscode
-.editorconfig
-.prettierignore
-.github
 .tgz

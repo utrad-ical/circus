@@ -1,0 +1,6 @@
+/src
+/coverage
+tsconfig.json
+*.test.ts
+.vscode
+.tgz

@@ -7,13 +7,15 @@ import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import {
   Button,
+  DropdownButton,
   MenuItem,
   OverlayTrigger,
   Popover,
-  SplitButton
+  SplitButton,
+  Modal
 } from 'components/react-bootstrap';
 import produce from 'immer';
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
 import useLocalPreference from 'utils/useLocalPreference';
@@ -24,9 +26,15 @@ import {
   InternalLabel,
   labelTypes,
   LabelAppearance,
-  createNewLabelData
+  createNewLabelData,
+  InternalLabelData,
+  InternalLabelOf
 } from './labelData';
-import { OrientationString } from 'circus-rs/section-util';
+import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
+import createConnectedComponentLabels from './createConnectedComponentLabels';
+import createHoleFilledLabels from './createHoleFilledLabels';
+import SettingDialogCCL from './SettingDialogCCL';
+import SettingDialogHoleFilling from './SettingDialogHoleFilling';
 
 type LabelCommand =
   | 'rename'
@@ -57,6 +65,8 @@ const LabelMenu: React.FC<{
     'voxel'
   );
 
+  const [cclDialogOpen, setCclDialogOpen] = useState(false);
+  const [holeFillingDialogOpen, setHoleFillingDialogOpen] = useState(false);
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
   const activeSeries = revision.series[activeSeriesIndex];
   const activeLabel =
@@ -150,9 +160,9 @@ const LabelMenu: React.FC<{
 
   const createNewLabel = (
     type: LabelType,
-    viewer: Viewer | undefined
+    viewer: Viewer | undefined,
+    color = labelColors[0]
   ): InternalLabel => {
-    const color = '#ff0000';
     const alpha = 1;
     const temporaryKey = generateUniqueId();
     const labelNames: { [key in LabelType]: string } = {
@@ -165,7 +175,11 @@ const LabelMenu: React.FC<{
       ruler: 'Ruler'
     };
     const name = getUniqueLabelName(labelNames[type]);
-    const data = createNewLabelData(type, { color, alpha }, viewer);
+    const data = createNewLabelData(
+      type,
+      { color, alpha },
+      viewer
+    ) as InternalLabelData;
     return { temporaryKey, name, ...data, attributes: {}, hidden: false };
   };
 
@@ -204,12 +218,57 @@ const LabelMenu: React.FC<{
       );
       return;
     }
-    const newLabel = createNewLabel(type, viewers[viewerId]);
+
+    const color = editingData.revision.series[activeSeriesIndex].labels.reduce(
+      (colors, label) => {
+        if (colors.indexOf(label.data.color) < 0) {
+          return colors;
+        }
+        colors.splice(colors.indexOf(label.data.color), 1);
+        return colors.length === 0 ? labelColors.slice() : colors;
+      },
+      labelColors.slice()
+    )[0];
+    const newLabel = createNewLabel(type, viewers[viewerId], color);
     updateEditingData(editingData => {
       const labels = editingData.revision.series[activeSeriesIndex].labels;
       labels.push(newLabel);
       editingData.activeLabelIndex = labels.length - 1;
     });
+  };
+
+  const onOkClickDialogCCL = (dispLabelNumber: number, neighbors: 6 | 26) => {
+    const label = editingData.revision.series[activeSeriesIndex].labels[
+      activeLabelIndex
+    ] as InternalLabelOf<'voxel'>;
+    createConnectedComponentLabels(
+      editingData,
+      updateEditingData,
+      viewers,
+      label,
+      labelColors,
+      dispLabelNumber,
+      neighbors
+    );
+    setCclDialogOpen(false);
+  };
+
+  const onOkClickDialogHoleFilling = (
+    dimension3: boolean,
+    holeFillingOrientation: string,
+    neighbors4or6: boolean
+  ) => {
+    createHoleFilledLabels(
+      editingData,
+      updateEditingData,
+      viewers,
+      editingData.revision.series[activeSeriesIndex].labels[activeLabelIndex],
+      labelColors,
+      dimension3,
+      holeFillingOrientation,
+      neighbors4or6
+    );
+    setHoleFillingDialogOpen(false);
   };
 
   return (
@@ -259,6 +318,31 @@ const LabelMenu: React.FC<{
         disabled={!activeLabel || disabled}
         onClick={() => handleCommand('reveal')}
       />
+      <DropdownButton
+        bsSize="xs"
+        title={<Icon icon="glyphicon-option-horizontal" />}
+        id={`labelmenu-header-dropdown`}
+        disabled={!activeLabel || activeLabel.type !== 'voxel'}
+        pullRight
+        noCaret
+      >
+        <MenuItem
+          eventKey="ccl"
+          onClick={() => {
+            setCclDialogOpen(true);
+          }}
+        >
+          CCL
+        </MenuItem>
+        <MenuItem
+          eventKey="fillng"
+          onClick={() => {
+            setHoleFillingDialogOpen(true);
+          }}
+        >
+          Hole filling
+        </MenuItem>
+      </DropdownButton>
       <IconButton
         bsSize="xs"
         title="Remove"
@@ -293,6 +377,26 @@ const LabelMenu: React.FC<{
           );
         })}
       </SplitButton>
+      <Modal
+        show={cclDialogOpen}
+        onHide={() => setCclDialogOpen(false)}
+        bsSize="lg"
+      >
+        <SettingDialogCCL
+          onHide={() => setCclDialogOpen(false)}
+          onOkClick={onOkClickDialogCCL}
+        />
+      </Modal>
+      <Modal
+        show={holeFillingDialogOpen}
+        onHide={() => setHoleFillingDialogOpen(false)}
+        bsSize="lg"
+      >
+        <SettingDialogHoleFilling
+          onHide={() => setHoleFillingDialogOpen(false)}
+          onOkClick={onOkClickDialogHoleFilling}
+        />
+      </Modal>
     </StyledButtonsDiv>
   );
 };

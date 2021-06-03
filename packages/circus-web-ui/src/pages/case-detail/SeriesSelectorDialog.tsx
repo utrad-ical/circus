@@ -1,5 +1,5 @@
 import { Button, Modal } from 'components/react-bootstrap';
-import SeriesSelector from 'components/SeriesSelector';
+import SeriesSelector, { SeriesEntry } from 'components/SeriesSelector';
 import produce from 'immer';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -12,12 +12,12 @@ const SeriesSelectorDialog: React.FC<{
   initialValue: SeriesEntryWithLabels[];
 }> = props => {
   const { onResolve, initialValue } = props;
-  const [entries, setEntries] = useState<SeriesEntryWithLabels[]>(initialValue);
+  const [entries, setEntries] = useState<SeriesEntry[]>(initialValue);
   const api = useApi();
   const appState = useSelector(state => state);
 
   const handleRemovingOrEditing = async (index: number) => {
-    if (entries[index].labels?.length) {
+    if ((entries[index] as SeriesEntryWithLabels).labels?.length) {
       alert(
         'You cannot edit or remove a series while it has one or more labels.'
       );
@@ -30,8 +30,9 @@ const SeriesSelectorDialog: React.FC<{
     // Fill label arrays
     const labelAdded: SeriesEntryWithLabels[] = produce(entries, entries => {
       entries.forEach(entry => {
-        if (!entry.labels) entry.labels = [];
+        if (!('labels' in entry)) (entry as any).labels = [];
       });
+      return entries as SeriesEntryWithLabels[];
     });
     // fill empty PVDs
     const pvdFilled = (await fillPartialVolumeDescriptors(
@@ -44,8 +45,8 @@ const SeriesSelectorDialog: React.FC<{
 
   return (
     <>
+      <Modal.Header>Select Series</Modal.Header>
       <Modal.Body>
-        <p>Select Series</p>
         <SeriesSelector
           value={entries}
           onChange={setEntries}

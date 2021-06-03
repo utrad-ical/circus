@@ -9,7 +9,7 @@ import { sha1 } from 'utils/util';
 import { gzipSync } from 'fflate';
 
 type InternalLabelDataMap = {
-  voxel: InternalVoxelLabelData; // internal | external
+  voxel: InternalVoxelLabelData;
   rectangle: PlaneFigureLabelData;
   ellipse: PlaneFigureLabelData;
   cuboid: SolidFigureLabelData;
@@ -31,7 +31,7 @@ export interface LabelAppearance {
   alpha: number;
 }
 
-interface InternalVoxelLabelData {
+type InternalVoxelLabelData = LabelAppearance & {
   /**
    * Contains hash. In an InternalVoxelLabel, this is used to keep track of
    * a modification. When a paint/erase happens, voxels must be set to null.
@@ -40,9 +40,7 @@ interface InternalVoxelLabelData {
   volumeArrayBuffer?: ArrayBuffer;
   origin?: Vector3D;
   size?: Vector3D;
-  color: string;
-  alpha: number;
-}
+};
 
 type ExternalVoxelLabelData = LabelAppearance &
   ({ voxels: null } | { voxels: string; origin: Vector3D; size: Vector3D });
@@ -73,39 +71,30 @@ type RulerAnnotationData = {
   labelPosition?: Vector2D;
 };
 
-type TaggedLabelDataCollection = {
-  [K in keyof InternalLabelDataMap]: {
-    type: K;
-    data: InternalLabelDataMap[K];
-  };
+export type InternalLabelDataOf<T extends keyof InternalLabelDataMap> = {
+  type: T;
+  data: InternalLabelDataMap[T];
 };
 
-export type TaggedLabelDataOf<
-  T extends keyof InternalLabelDataMap
-> = TaggedLabelDataCollection[T];
+export type InternalLabelData = {
+  [T in keyof InternalLabelDataMap]: InternalLabelDataOf<T>;
+}[keyof InternalLabelDataMap];
 
-type TaggedLabelData = TaggedLabelDataCollection[keyof TaggedLabelDataCollection];
+export type InternalLabelOf<T extends keyof InternalLabelDataMap> = {
+  type: T;
+  name?: string;
+  attributes: object;
+  temporaryKey: string;
+  hidden: boolean;
+  data: InternalLabelDataMap[T];
+};
 
 /**
  * InternalLabel resresents one label data stored in browser memory.
  */
 export type InternalLabel = {
-  name?: string;
-  attributes: object;
-  /**
-   * A string unique ID (used in web-ui only; not saved on DB)
-   */
-  temporaryKey: string;
-  hidden: boolean;
-} & (
-  | { type: 'voxel'; data: InternalVoxelLabelData }
-  | TaggedLabelDataOf<'ellipse'>
-  | TaggedLabelDataOf<'rectangle'>
-  | TaggedLabelDataOf<'ellipsoid'>
-  | TaggedLabelDataOf<'cuboid'>
-  | TaggedLabelDataOf<'point'>
-  | TaggedLabelDataOf<'ruler'>
-);
+  [T in keyof InternalLabelDataMap]: InternalLabelOf<T>;
+}[keyof InternalLabelDataMap];
 
 /**
  * ExternalLabel resresents the label data
@@ -116,12 +105,12 @@ export type ExternalLabel = {
   attributes: object;
 } & (
   | { type: 'voxel'; data: ExternalVoxelLabelData }
-  | TaggedLabelDataOf<'ellipse'>
-  | TaggedLabelDataOf<'rectangle'>
-  | TaggedLabelDataOf<'ellipsoid'>
-  | TaggedLabelDataOf<'cuboid'>
-  | TaggedLabelDataOf<'point'>
-  | TaggedLabelDataOf<'ruler'>
+  | InternalLabelDataOf<'ellipse'>
+  | InternalLabelDataOf<'rectangle'>
+  | InternalLabelDataOf<'ellipsoid'>
+  | InternalLabelDataOf<'cuboid'>
+  | InternalLabelDataOf<'point'>
+  | InternalLabelDataOf<'ruler'>
 );
 
 export const labelTypes: {
@@ -161,14 +150,17 @@ const emptyVoxelLabelData = (
   };
 };
 
-export const createNewLabelData = (
-  type: LabelType,
+export const createNewLabelData = <T extends LabelType>(
+  type: T,
   appearance: LabelAppearance,
   viewer?: rs.Viewer
-): TaggedLabelData => {
+): InternalLabelDataOf<T> => {
   switch (type) {
     case 'voxel':
-      return { type, data: emptyVoxelLabelData(appearance) };
+      return {
+        type,
+        data: emptyVoxelLabelData(appearance)
+      } as InternalLabelDataOf<T>;
     case 'cuboid':
     case 'ellipsoid': {
       const solidFigureAnnotaion = rs.createDefaultSolidFigureFromViewer(
@@ -181,7 +173,7 @@ export const createNewLabelData = (
           ...appearance,
           ...extractSolidFigureAnnotationData(solidFigureAnnotaion)
         }
-      };
+      } as InternalLabelDataOf<T>;
     }
     case 'ellipse':
     case 'rectangle': {
@@ -195,7 +187,7 @@ export const createNewLabelData = (
           ...appearance,
           ...extractPlaneFigureAnnotationData(planeFigureAnnotaion)
         }
-      };
+      } as InternalLabelDataOf<T>;
     }
     case 'point': {
       const pointAnnotaion = rs.createDefaultPointFromViewer(viewer, {});
@@ -205,7 +197,7 @@ export const createNewLabelData = (
           ...appearance,
           ...extractPointAnnotationData(pointAnnotaion)
         }
-      };
+      } as InternalLabelDataOf<T>;
     }
     case 'ruler': {
       const rulerAnnotaion = rs.createDefaultRulerFromViewer(viewer, {});
@@ -215,8 +207,10 @@ export const createNewLabelData = (
           ...appearance,
           ...extractRulerAnnotationData(rulerAnnotaion)
         }
-      };
+      } as InternalLabelDataOf<T>;
     }
+    default:
+      throw new Error('Unknown label type');
   }
 };
 
@@ -230,11 +224,11 @@ export const externalLabelToInternal = async (
   api: ApiCaller
 ): Promise<InternalLabel> => {
   const temporaryKey = generateUniqueId();
-  const internalLabel = {
+  const internalLabel: InternalLabel = {
     ...label,
     temporaryKey,
     hidden: false
-  } as InternalLabel;
+  };
 
   if (label.type === 'voxel' && internalLabel.type === 'voxel') {
     // The condition above is redundant but used to satisfy type check

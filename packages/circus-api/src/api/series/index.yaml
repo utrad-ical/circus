@@ -23,3 +23,20 @@ routes:
     description: Returns information about the specified series.
   - verb: delete
     path: /series/:seriesUid
+  - verb: post
+    path: /series/export-cs-volume
+    handler: handlePostExportCsVolume
+    requiredGlobalPrivilege: downloadVolume
+    requestSchema:
+      type: object
+      properties:
+        series:
+          type: array
+          items:
+            $ref: seriesEntry
+          minItems: 1
+          maxItems: 10
+        compressionFormat:
+          enum: ['tgz', 'zip']
+      required: ['series']
+    description: Creates a job to export the specified series for use in CIRCUS CS.

@@ -180,12 +180,14 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
 
     const minPoint = convertVolumePointToViewerPoint(
       viewer,
-      ...this.min,
+      this.min[0],
+      this.min[1],
       this.z!
     );
     const maxPoint = convertVolumePointToViewerPoint(
       viewer,
-      ...this.max,
+      this.max[0],
+      this.max[1],
       this.z!
     );
     const BoundingBox = new Box2(minPoint, maxPoint);
@@ -242,6 +244,7 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
       );
 
       const maintainAspectRatio = !!ev.shiftKey;
+      const fixCenterOfGravity = !!ev.ctrlKey;
 
       const originalBoundingBox3 = this.dragInfo!.originalBoundingBox3!;
       const newBoundingBox3 = resize(
@@ -250,7 +253,8 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
         originalBoundingBox3,
         new Vector3().fromArray(this.dragInfo!.dragStartVolumePoint3!),
         draggedPoint3,
-        maintainAspectRatio
+        maintainAspectRatio,
+        fixCenterOfGravity
       );
 
       this.min = [newBoundingBox3[0][0], newBoundingBox3[0][1]];

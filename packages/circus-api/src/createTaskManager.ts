@@ -1,12 +1,13 @@
 import { FunctionService, Logger } from '@utrad-ical/circus-lib';
-import StrictEventEmitter from 'strict-event-emitter-types';
 import { EventEmitter } from 'events';
-import { Models } from './interface';
-import generateUniqueId from '../src/utils/generateUniqueId';
-import { Writable, PassThrough } from 'stream';
 import fs from 'fs-extra';
+import status from 'http-status';
 import _ from 'lodash';
 import mime from 'mime';
+import { PassThrough, Writable } from 'stream';
+import StrictEventEmitter from 'strict-event-emitter-types';
+import generateUniqueId from '../src/utils/generateUniqueId';
+import { Models } from './interface';
 import { CircusContext } from './typings/middlewares';
 
 export type TaskEventEmitter = StrictEventEmitter<EventEmitter, TaskEvents>;
@@ -99,6 +100,7 @@ const createTaskManager: FunctionService<
     const emitter = new EventEmitter() as TaskEventEmitter;
 
     ctx.body = { taskId };
+    ctx.status = status.CREATED;
 
     // Prepare write fs stream for downloadable files (if exists)
     const downloadFileStream =
@@ -246,10 +248,16 @@ const createTaskManager: FunctionService<
     const fileName = downloadFileName(taskId);
     const stream = fs.createReadStream(fileName);
     const stat = await fs.stat(fileName);
-    const ext = mime.getExtension(task.downloadFileType);
+    const ext =
+      task.downloadFileType === 'application/x-tgz'
+        ? 'tar.gz'
+        : mime.getExtension(task.downloadFileType);
     ctx.set('Content-Deposition', `attachment; filename="download.${ext}"`);
     ctx.set('Content-Length', String(stat.size));
-    ctx.type = task.downloadFileType;
+    ctx.type =
+      task.downloadFileType === 'application/x-tgz'
+        ? 'application/gzip'
+        : task.downloadFileType;
     ctx.body = stream;
   };
 

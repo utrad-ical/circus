@@ -65,7 +65,7 @@ const GroupAdmin: React.FC<any> = props => {
     const didMount = async () => {
       const domains = await api('admin/server-params/domains');
       const privList = await api('admin/global-privileges');
-      const privileges: any = {};
+      const privileges: { [name: string]: string } = {};
       for (const p of privList) privileges[p.privilege] = p.caption;
 
       const projects = (await api('admin/projects')).items as {

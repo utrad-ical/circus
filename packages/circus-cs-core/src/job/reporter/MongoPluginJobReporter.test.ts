@@ -6,6 +6,7 @@ import tar from 'tar-stream';
 import fs from 'fs-extra';
 import path from 'path';
 import * as circus from '../../interface';
+import { PassThrough } from 'stream';
 
 describe('pluginJobReporter', () => {
   let mongoClientPool: MongoClientPool;
@@ -38,6 +39,7 @@ describe('pluginJobReporter', () => {
 
   afterAll(async () => {
     await mongoClientPool.dispose();
+    await fs.remove(path.join(resultsDirectory, jobId));
   });
 
   test('report processing', async () => {
@@ -67,6 +69,17 @@ describe('pluginJobReporter', () => {
     expect(check.results).toEqual(['a', 'b', 'c']);
   });
 
+  test('logStream', done => {
+    const stream = new PassThrough();
+    stream.end('hello');
+    reporter.logStream(jobId, stream, async () => {
+      const file = path.join(resultsDirectory, jobId, 'plugin-log.txt');
+      const result = await fs.readFile(file, 'utf8');
+      expect(result).toBe('hello');
+      done();
+    });
+  });
+
   test('packDir', async () => {
     const stream = tar.pack();
     const txt = String(Math.random());
@@ -76,6 +89,5 @@ describe('pluginJobReporter', () => {
     await reporter.packDir(jobId, stream);
     const result = await fs.readFile(file, 'utf8');
     expect(result).toBe(txt);
-    await fs.remove(path.join(resultsDirectory, jobId));
   });
 });

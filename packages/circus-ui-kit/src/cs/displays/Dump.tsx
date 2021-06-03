@@ -7,7 +7,7 @@ interface DumpOptions {
   /**
    * Maximum height of the text box in pixels.
    */
-  maxHeight: number;
+  maxHeight?: number;
 }
 
 /**

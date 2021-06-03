@@ -89,10 +89,10 @@ const ToolBar: React.FC<{
   };
   useKeyboardShortcut(';', handleToggleReferenceLine);
 
-  const handleToggleScrollbar = (selection: ScrollbarOptions) => {
+  const handleToggleScrollbar = (selection: any) => {
     onChangeViewOptions({
       ...viewOptions,
-      scrollbar: selection
+      scrollbar: selection as ScrollbarOptions
     });
   };
 
@@ -106,9 +106,10 @@ const ToolBar: React.FC<{
     });
   };
 
-  const handleApplyWindow = async (selection: WindowPreset) => {
+  const handleApplyWindow = async (selection: any) => {
     if ('level' in selection && 'width' in selection) {
-      onApplyWindow({ level: selection.level, width: selection.width });
+      const window = selection as WindowPreset;
+      onApplyWindow({ level: window.level, width: window.width });
     } else {
       const value = await prompt('Input window level/width (e.g., "20,100")');
       const [level, width] = (value ? value : '0,0')
@@ -206,6 +207,14 @@ const ToolBar: React.FC<{
         disabled={!brushEnabled || disabled}
       />
       <ToolButton
+        name="bucketEraser"
+        icon="rs-bucket-erase"
+        changeTool={onChangeTool}
+        active={active}
+        shortcut="Shift+E"
+        disabled={!brushEnabled || disabled}
+      />
+      <ToolButton
         name="wand"
         icon="rs-wand"
         changeTool={onChangeTool}
@@ -226,7 +235,9 @@ const ToolBar: React.FC<{
         <Dropdown.Toggle>
           <Icon icon="circus-layout-four" />
         </Dropdown.Toggle>
-        <Dropdown.Menu onSelect={onChangeLayoutKind}>
+        <Dropdown.Menu
+          onSelect={(sel: any) => onChangeLayoutKind(sel as LayoutKind)}
+        >
           {layoutOptions.map(l => {
             return (
               <MenuItem key={l.key} eventKey={l.key}>

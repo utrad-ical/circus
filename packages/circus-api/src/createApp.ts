@@ -1,5 +1,5 @@
 import multer from '@koa/multer';
-import { CsCore } from '@utrad-ical/circus-cs-core';
+import { CsCore, DicomVoxelDumper } from '@utrad-ical/circus-cs-core';
 import {
   FunctionService,
   Logger,
@@ -129,6 +129,7 @@ export const createApp: FunctionService<
     dicomImporter: DicomImporter;
     taskManager: TaskManager;
     mhdPacker: MhdPacker;
+    dicomVoxelDumper: DicomVoxelDumper;
   },
   CreateAppOptions
 > = async (
@@ -145,7 +146,8 @@ export const createApp: FunctionService<
     dicomImporter,
     dicomFileRepository,
     taskManager,
-    mhdPacker
+    mhdPacker,
+    dicomVoxelDumper
   }
 ) => {
   const {
@@ -173,7 +175,8 @@ export const createApp: FunctionService<
     uploadFileSizeMaxBytes,
     dicomImageServerUrl,
     taskManager,
-    mhdPacker
+    mhdPacker,
+    dicomVoxelDumper
   };
 
   const apiDir = path.resolve(__dirname, 'api/**/*.yaml');
@@ -238,7 +241,8 @@ createApp.dependencies = [
   'dicomFileRepository',
   'dicomImporter',
   'taskManager',
-  'mhdPacker'
+  'mhdPacker',
+  'dicomVoxelDumper'
 ];
 
 export default createApp;

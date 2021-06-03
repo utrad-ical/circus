@@ -122,8 +122,8 @@ const createHoleFilledLabels = async (
     const newLabel = createNewLabel(
       viewers[viewerId],
       color,
-      `${label.name}: ${dimension3 ? 3 : 2}D hole filling ${
-        !dimension3 && '(' + holeFillingOrientation + ')'
+      `${label.name}: ${dimension3 ? 3 : 2}D hole filling${
+        !dimension3 ? ' (' + holeFillingOrientation + ')' : ''
       }`
     );
     newLabel.data.size = label.data.size;

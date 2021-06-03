@@ -33,7 +33,17 @@ afterAll(async () => {
   await fs.remove(downloadTestDir);
 });
 
-const newDummyCtx = () => ({ body: null, set: jest.fn() } as any);
+const newDummyCtx = () =>
+  ({
+    body: null,
+    set: jest.fn(),
+    throw: (status: number, message?: string) => {
+      const error = new Error(message ?? `status ${status}`);
+      error.status = status;
+      error.expose = true;
+      throw error;
+    }
+  } as any);
 
 describe('register', () => {
   test('without download file', async () => {
@@ -175,4 +185,14 @@ test('download', async () => {
   expect(ctx.set).toHaveBeenCalled();
   const string = await readFromStreamTillEnd(ctx.body);
   expect(string).toBe('test');
+});
+
+test('fail download when the download file is gone', async () => {
+  const ctx = newDummyCtx();
+  const taskId = 'aaaabbbbcccc4444';
+  try {
+    await manager.download(ctx, taskId);
+  } catch (err) {
+    expect(err.status).toBe(404);
+  }
 });

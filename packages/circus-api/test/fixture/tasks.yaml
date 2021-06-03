@@ -25,6 +25,15 @@
   endedAt: null
   downloadFileType: application/zip
   dismissed: false
+- taskId: aaaabbbbcccc4444
+  userEmail: alice@example.com
+  name: Export case
+  status: finished
+  errorMessage: ''
+  finishedMessage: null
+  endedAt: null
+  downloadFileType: application/zip
+  dismissed: false
 - taskId: bbbbccccdddd1111
   userEmail: bob@example.com
   name: Importing DICOM files

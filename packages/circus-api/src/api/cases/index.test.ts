@@ -200,7 +200,7 @@ describe('add revision', () => {
         series: []
       }
     });
-    expect(res.status).toBe(204);
+    expect(res.status).toBe(201);
     const res2 = await ax.bob.get(`api/cases/${cid}`);
     expect(res2.data.revisions[1].creator).toBe('bob@example.com');
   });
@@ -299,7 +299,7 @@ describe('add revision', () => {
       }
     });
 
-    expect(res.status).toBe(204);
+    expect(res.status).toBe(201);
   });
 
   test('reject revision addition with invalid labels', async () => {

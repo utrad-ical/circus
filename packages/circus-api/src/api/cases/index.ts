@@ -93,7 +93,8 @@ export const handlePostRevision: RouteMiddleware = ({ models }) => {
       latestRevision: rev,
       revisions: [...aCase.revisions, rev]
     });
-    ctx.body = null; // No Content
+    ctx.body = null;
+    ctx.status = status.CREATED;
   };
 };
 

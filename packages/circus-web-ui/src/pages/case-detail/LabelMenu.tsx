@@ -322,12 +322,12 @@ const LabelMenu: React.FC<{
         bsSize="xs"
         title={<Icon icon="glyphicon-option-horizontal" />}
         id={`labelmenu-header-dropdown`}
+        disabled={!activeLabel || activeLabel.type !== 'voxel'}
         pullRight
         noCaret
       >
         <MenuItem
           eventKey="ccl"
-          disabled={!activeLabel || activeLabel.type !== 'voxel'}
           onClick={() => {
             setCclDialogOpen(true);
           }}
@@ -336,7 +336,6 @@ const LabelMenu: React.FC<{
         </MenuItem>
         <MenuItem
           eventKey="fillng"
-          disabled={!activeLabel || activeLabel.type !== 'voxel'}
           onClick={() => {
             setHoleFillingDialogOpen(true);
           }}

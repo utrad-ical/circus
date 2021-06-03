@@ -12,11 +12,11 @@
   "author": "Soichiro Miki <smiki-tky@umin.ac.jp>",
   "license": "MIT",
   "peerDependencies": {
-    "react": "16.14.0",
+    "react": "^17.0.2",
     "styled-components": "^5.1.0"
   },
   "devDependencies": {
-    "react": "^16.14.0",
+    "react": "^17.0.2",
     "styled-components": "^5.1.0"
   },
   "dependencies": {

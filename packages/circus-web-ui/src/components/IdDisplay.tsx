@@ -1,7 +1,8 @@
-import IconButton from 'components/IconButton';
-import { OverlayTrigger, Popover } from 'components/react-bootstrap';
 import React from 'react';
 import styled from 'styled-components';
+import CopyToClipboardButton from './CopyToClipboardButton';
+import IconButton from './IconButton';
+import { OverlayTrigger, Popover } from './react-bootstrap';
 
 const MyPopover = styled(Popover)`
   font-size: 80%;
@@ -19,12 +20,7 @@ const IdDisplay: React.FC<{
         return (
           <div key={key}>
             <b>{key}:</b> {value[key]}
-            <IconButton
-              icon="glyphicon-copy"
-              bsSize="xs"
-              bsStyle="link"
-              onClick={() => navigator.clipboard.writeText(value[key])}
-            />
+            <CopyToClipboardButton bsSize="xs" string={value[key]} />
           </div>
         );
       })}

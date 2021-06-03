@@ -15,6 +15,7 @@ import styled from 'styled-components';
 import { useApi } from 'utils/api';
 import useLoadData from 'utils/useLoadData';
 import { CancelToken } from '../utils/cancelToken';
+import CopyToClipboardButton from 'components/CopyToClipboardButton';
 
 interface Token {
   tokenId: string;
@@ -29,12 +30,7 @@ const AccessToken: React.FC<{ accessToken: string }> = props => {
       <div className="alert alert-warning">
         Your access token: <b>{accessToken}</b>
         &ensp;
-        <IconButton
-          icon="glyphicon-copy"
-          bsSize="xs"
-          bsStyle="default"
-          onClick={() => navigator.clipboard.writeText(accessToken)}
-        />
+        <CopyToClipboardButton string={accessToken} />
       </div>
       <div>
         Copy and save this token <strong>now</strong>, you cannot show this

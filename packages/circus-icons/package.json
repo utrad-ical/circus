@@ -13,7 +13,7 @@
   },
   "author": "Soichiro Miki <smiki-tky@umin.ac.jp>",
   "license": "MIT",
-  "dependencies": {
+  "devDependencies": {
     "glob": "^7.1.6",
     "glob-promise": "^4.1.0",
     "svg2ttf": "^5.2.0",

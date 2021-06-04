@@ -1,4 +1,4 @@
-name: debug
+name: Debug
 description: >
   This is a collection of several debugging routes.
   These endpoints are turned off if the environment variable `NODE_ENV` is

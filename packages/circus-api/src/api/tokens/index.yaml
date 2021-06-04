@@ -1,6 +1,6 @@
-name: Tasks
+name: Tokens
 description: >
-  Retreive information about tasks.
+  Retreive information about permanent API tokens.
 routes:
   - verb: get
     path: /tokens

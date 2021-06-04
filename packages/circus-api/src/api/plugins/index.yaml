@@ -1,6 +1,6 @@
 name: Plugin
 description: >
-  Fetches CIRCUS CS Plug-ins
+  Fetches information about CIRCUS CS Plug-ins.
 routes:
   - verb: get
     path: /plugins/:pluginId

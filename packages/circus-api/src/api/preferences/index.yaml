@@ -7,7 +7,6 @@ routes:
     responseSchema: preferences|allRequired
     description: >
       Returns the preferences object of the current user.
-      Consider using login-info instead.
   - verb: put
     path: /preferences
     requestSchema: preferences|allRequired

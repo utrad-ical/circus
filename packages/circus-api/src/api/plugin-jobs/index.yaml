@@ -1,6 +1,6 @@
-name: PluginJobs
+name: Plugin Jobs
 description: >
-  Creates and manages CIRCUS CS Plug-in jobs.
+  Creates and manages CIRCUS CS plug-in jobs.
 routes:
   # Job Management
   - verb: post

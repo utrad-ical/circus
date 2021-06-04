@@ -17,12 +17,13 @@ routes:
   - verb: post
     path: /series/domain/:domain
     expectedContentType: multipart/form-data
-    description: Uploads a new DICOM file or a series of DICOM files.
+    description: Uploads one or more DICOM files.
   - verb: get
     path: /series/:seriesUid
     description: Returns information about the specified series.
   - verb: delete
     path: /series/:seriesUid
+    description: Deletes the specified series.
   - verb: post
     path: /series/export-cs-volume
     handler: handlePostExportCsVolume
@@ -39,4 +40,5 @@ routes:
         compressionFormat:
           enum: ['tgz', 'zip']
       required: ['series']
-    description: Creates a job to export the specified series for use in CIRCUS CS.
+    description: >
+      Creates a task to export the specified series for use in CIRCUS CS.

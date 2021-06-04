@@ -4,5 +4,5 @@ description: >
 routes:
   - verb: get
     path: /users/:userEmail
-    description: Gets the specified user.
+    description: Gets the information about the specified user.
     responseSchema: user|only userEmail,description|dbEntry

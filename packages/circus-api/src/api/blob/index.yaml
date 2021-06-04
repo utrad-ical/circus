@@ -4,8 +4,10 @@ description: >
 routes:
   - verb: get
     path: /blob/:hash
-    description: Fetches a blog specified by the hash.
+    description: >
+      Fetches the blob specified by the hash.
   - verb: put
     path: /blob/:hash
-    description: Stores a new blob.
+    description: >
+      Stores a new blob. The hash is a SHA-1 of the binary to be stored.
     expectedContentType: application/octet-stream

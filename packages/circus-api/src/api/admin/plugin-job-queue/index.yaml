@@ -1,4 +1,4 @@
-name: PluginJobQueue Administration
+name: Plugin Job Queue Administration
 description: >
   Returns job queue.
 routes:

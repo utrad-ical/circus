@@ -1,3 +1,4 @@
+name: Group Administration
 description: Manages user groups.
 routes:
   - verb: get

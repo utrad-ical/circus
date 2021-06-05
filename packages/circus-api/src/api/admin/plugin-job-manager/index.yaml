@@ -1,4 +1,4 @@
-name: PluginJobManager
+name: Plugin Job Manager Administration
 description: >
   Manages CIRCUS CS Plug-in Job Manager.
 routes:

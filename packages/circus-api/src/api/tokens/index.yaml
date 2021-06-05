@@ -1,4 +1,4 @@
-name: Tokens
+name: Permanent API Tokens
 description: >
   Retreive information about permanent API tokens.
 routes:

@@ -1,6 +1,6 @@
 name: Tasks
 description: >
-  Retreive information about tasks.
+  Retreive information about tasks. A task is a potentially time-consuming operation other than plug-in jobs.
 routes:
   - verb: get
     path: /tasks

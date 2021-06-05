@@ -1,4 +1,4 @@
-name: Plugin
+name: Plugins
 description: >
   Fetches information about CIRCUS CS Plug-ins.
 routes:

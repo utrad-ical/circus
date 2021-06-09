@@ -1,207 +1,123 @@
-import { Viewer } from '@utrad-ical/circus-rs/src/browser';
-import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
-import { EditingData, EditingDataUpdater } from './revisionData';
-import { createNewLabelData } from './labelData';
-import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
-import { InternalLabelOf, InternalLabel } from './labelData';
-import produce from 'immer';
-import { pixelFormatInfo } from '@utrad-ical/circus-lib/src/PixelFormat';
-import * as rs from '@utrad-ical/circus-rs/src/browser';
 import CCL6 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D6';
 import CCL26 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D26';
 import { alert } from '@smikitky/rb-components/lib/modal';
+import { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
 
-const createConnectedComponentLabels = async (
-  editingData: EditingData,
-  updateEditingData: EditingDataUpdater,
-  viewers: { [index: string]: Viewer },
-  label: InternalLabelOf<'voxel'>,
-  labelColors: string[],
+const createConnectedComponentLabels = (
   dispLabelNumber: number,
-  neighbors: 6 | 26
+  neighbors4or6: boolean
 ) => {
-  if (label.type !== 'voxel' || !label.data.size)
-    throw new TypeError('Invalid label passed.');
-
-  const createNewLabel = (
-    viewer: Viewer,
-    color: string,
+  return async (
+    input: Uint8Array,
+    width: number,
+    height: number,
+    nSlices: number,
     name: string
-  ): InternalLabelOf<'voxel'> => {
-    const alpha = 1;
-    const temporaryKey = generateUniqueId();
-    const data = createNewLabelData('voxel', { color, alpha }, viewer);
-    return { temporaryKey, name, ...data, attributes: {}, hidden: false };
-  };
-
-  const basic: OrientationString[] = ['axial', 'sagittal', 'coronal'];
-  const viewerId = editingData.activeLayoutKey;
-  if (!viewerId) {
-    await alert(
-      'Select the viewer on which you want to place the new label. ' +
-        'Click the header.'
-    );
-    return;
-  }
-
-  const orientation = editingData.layoutItems.find(
-    item => item.key === viewerId
-  )!.orientation;
-  if (basic.indexOf(orientation) < 0) {
-    await alert(
-      'The orientation of the selected viewer must be ' +
-        basic.join(' or ') +
-        '.'
-    );
-    return;
-  }
-  // Small wrapper around updateEditingData
-  const updateCurrentLabels = (updater: (labels: InternalLabel[]) => void) => {
-    const labels =
-      editingData.revision.series[editingData.activeSeriesIndex].labels;
-    const newLabels = produce(labels, updater);
-    updateEditingData(editingData => {
-      editingData.revision.series[
-        editingData.activeSeriesIndex
-      ].labels = newLabels;
-    });
-  };
-  const pxInfo = pixelFormatInfo('binary');
-  const img = new pxInfo.arrayClass(label.data.volumeArrayBuffer);
-  const [width, height, nSlices] = label.data.size;
-
-  const input = new Uint8Array(width * height * nSlices);
-  for (let k = 0; k < nSlices; k++) {
-    for (let j = 0; j < height; j++) {
-      for (let i = 0; i < width; i++) {
-        const pos = i + j * width + k * width * height;
-        if (((img[pos >> 3] >> (7 - (pos % 8))) & 1) === 1) {
-          input[pos] = 1;
-        }
-      }
-    }
-  }
-  try {
-    const labelingResults =
-      neighbors === 6
+  ) => {
+    let labelingResults: LabelingResults3D | undefined = undefined;
+    try {
+      labelingResults = neighbors4or6
         ? CCL6(input, width, height, nSlices)
         : CCL26(input, width, height, nSlices);
-    const newLabel: InternalLabelOf<'voxel'>[] = [];
-    const order = [...Array(labelingResults.labelNum)].map((_, i) => i + 1);
-    const names = [
-      'largest',
-      '2nd largest',
-      '3rd largest',
-      '4th largest',
-      '5th largest',
-      '6th largest',
-      '7th largest',
-      '8th largest',
-      '9th largest',
-      '10th largest',
-      'rest'
+    } catch (err) {
+      console.log('error', err.message);
+      alert(`${name} is too complex.\nPlease modify ${name}.`);
+      return {
+        labelingResults: {
+          labelMap: new Uint8Array(0),
+          labelNum: 0,
+          labels: new Array(0)
+        },
+        names: ['']
+      };
+    }
+    const nameTable = [
+      'the largest CC',
+      'the 2nd largest CC',
+      'the 3rd largest CC',
+      'the 4th largest CC',
+      'the 5th largest CC',
+      'the 6th largest CC',
+      'the 7th largest CC',
+      'the 8th largest CC',
+      'the 9th largest CC',
+      'the 10th largest CC',
+      'the 11th largest CC',
+      `the rest (${labelingResults.labelNum - dispLabelNumber}) CCs`
     ];
+    const names =
+      labelingResults.labelNum <= dispLabelNumber + 1
+        ? nameTable.slice(0, labelingResults.labelNum)
+        : nameTable.slice(0, dispLabelNumber).concat(nameTable[11]);
+
+    labelingResults.labels.shift();
+    const order = [...Array(labelingResults.labelNum)].map((_, i) => i);
+
     order.sort((a, b) => {
       return (
-        labelingResults.labels[b].volume - labelingResults.labels[a].volume
+        labelingResults!.labels[b].volume - labelingResults!.labels[a].volume
       );
     });
+    const relabel = new Array(order.length);
+    for (let i = 0; i < order.length; i++) {
+      relabel[order[i]] = i + 1;
+    }
+    labelingResults.labelMap = labelingResults.labelMap.map(i => {
+      return i === 0 ? 0 : relabel[i - 1];
+    });
+    labelingResults.labels.sort((a, b) => {
+      return b.volume - a.volume;
+    });
+
     for (let num = dispLabelNumber + 1; num < labelingResults.labelNum; num++) {
       for (let i = 0; i < 3; i++) {
         if (
-          labelingResults.labels[order[num]].min[i] <
-          labelingResults.labels[order[dispLabelNumber]].min[i]
+          labelingResults.labels[num].min[i] <
+          labelingResults.labels[dispLabelNumber].min[i]
         ) {
-          labelingResults.labels[order[dispLabelNumber]].min[i] =
-            labelingResults.labels[order[num]].min[i];
+          labelingResults.labels[dispLabelNumber].min[i] =
+            labelingResults.labels[num].min[i];
         }
         if (
-          labelingResults.labels[order[dispLabelNumber]].max[i] <
-          labelingResults.labels[order[num]].max[i]
+          labelingResults.labels[dispLabelNumber].max[i] <
+          labelingResults.labels[num].max[i]
         ) {
-          labelingResults.labels[order[dispLabelNumber]].max[i] =
-            labelingResults.labels[order[num]].max[i];
+          labelingResults.labels[dispLabelNumber].max[i] =
+            labelingResults.labels[num].max[i];
         }
       }
-      labelingResults.labels[order[dispLabelNumber]].volume +=
-        labelingResults.labels[order[num]].volume;
+      labelingResults.labels[dispLabelNumber].volume +=
+        labelingResults.labels[num].volume;
       for (
-        let k = labelingResults.labels[order[num]].min[2];
-        k <= labelingResults.labels[order[num]].max[2];
+        let k = labelingResults.labels[num].min[2];
+        k <= labelingResults.labels[num].max[2];
         k++
       ) {
         for (
-          let j = labelingResults.labels[order[num]].min[1];
-          j <= labelingResults.labels[order[num]].max[1];
+          let j = labelingResults.labels[num].min[1];
+          j <= labelingResults.labels[num].max[1];
           j++
         ) {
           for (
-            let i = labelingResults.labels[order[num]].min[0];
-            i <= labelingResults.labels[order[num]].max[0];
+            let i = labelingResults.labels[num].min[0];
+            i <= labelingResults.labels[num].max[0];
             i++
           ) {
             const pos = i + j * width + k * width * height;
-            if (labelingResults.labelMap[pos] === order[num]) {
-              labelingResults.labelMap[pos] = order[dispLabelNumber];
+            if (labelingResults.labelMap[pos] === num + 1) {
+              labelingResults.labelMap[pos] = dispLabelNumber + 1;
             }
           }
         }
       }
     }
+    labelingResults.labelNum = names.length;
 
-    const maxI = Math.min(dispLabelNumber, labelingResults.labelNum - 1);
-    for (let i = 0; i <= maxI; i++) {
-      const num = order[i];
-      const [ULx, ULy, ULz] = labelingResults.labels[num].min;
-      const [LRx, LRy, LRz] = labelingResults.labels[num].max;
-      const color =
-        labelColors[
-          (labelColors.indexOf(label.data.color) + i + 1) % labelColors.length
-        ];
-      const flag = i === maxI && maxI < labelingResults.labelNum - 1;
-      newLabel.push(
-        createNewLabel(
-          viewers[viewerId],
-          color,
-          `${label.name}: the ${
-            flag
-              ? names[10] + ' (' + String(labelingResults.labelNum - maxI) + ')'
-              : names[i]
-          } CC${flag ? 's' : ''}`
-        )
-      );
-      const [sizex, sizey, sizez] =
-        (LRx - ULx + 1) * (LRy - ULy + 1) * (LRz - ULz + 1) >= 8
-          ? [LRx - ULx + 1, LRy - ULy + 1, LRz - ULz + 1]
-          : [8, 8, 8];
-      newLabel[i].data.size = [sizex, sizey, sizez];
-      const volume = new rs.RawData([sizex, sizey, sizez], 'binary');
-
-      for (let k = ULz; k <= LRz; k++) {
-        for (let j = ULy; j <= LRy; j++) {
-          for (let i = ULx; i <= LRx; i++) {
-            const pos = i + j * width + k * width * height;
-            if (labelingResults.labelMap[pos] === num) {
-              volume.writePixelAt(1, i - ULx, j - ULy, k - ULz);
-            }
-          }
-        }
-      }
-      newLabel[i].data.volumeArrayBuffer = volume.data;
-      newLabel[i].data.origin = [
-        ULx + label.data.origin![0],
-        ULy + label.data.origin![1],
-        ULz + label.data.origin![2]
-      ];
-    }
-    updateCurrentLabels(labels => {
-      // labels.push(...newLabel);
-      labels.splice(editingData.activeLabelIndex + 1, 0, ...newLabel);
-    });
-  } catch (err) {
-    console.log('error', err.message);
-    alert(`${label.name} is too complex.\nPlease modify ${label.name}.`);
-  }
+    return {
+      labelingResults: labelingResults,
+      names: names
+    };
+  };
 };
 
 export default createConnectedComponentLabels;

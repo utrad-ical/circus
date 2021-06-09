@@ -1,6 +1,5 @@
-import { Button, Modal } from 'components/react-bootstrap';
 import React, { useState } from 'react';
-import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import SettimgDialog from './SettingDialog';
 
 const maximumCCNumOptions = {
   1: '1 CC',
@@ -21,52 +20,33 @@ const neighborsOptions = {
 
 const SettingDialogCCL: React.FC<{
   onHide: () => void;
-  onOkClick: (dispLabelNumber: number, neighbors: 6 | 26) => void;
+  onOkClick: (dispLabelNumber: number, neighbors: boolean) => void;
 }> = React.memo(props => {
   const { onHide, onOkClick } = props;
   const [neighbor6, setNeighbor6] = useState(false);
   const [dispLabelNumber, setDispLabelNumber] = useState(2);
   return (
-    <>
-      <Modal.Header>
-        <Modal.Title>
-          Setting options for connected component labeling (CCL)
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <div>
-          Maximum number of connected components (CCs) to display: &ensp;
-          <ShrinkSelect
-            bsSize="sm"
-            options={maximumCCNumOptions}
-            numericalValue
-            value={dispLabelNumber}
-            onChange={(value: number) => setDispLabelNumber(value)}
-          />
-        </div>
-        <div>
-          Neighbors to decide same CC: &ensp;
-          <ShrinkSelect
-            bsSize="sm"
-            options={neighborsOptions}
-            numericalValue
-            value={neighbor6 ? 6 : 26}
-            onChange={(value: number) => setNeighbor6(value == 6)}
-          />
-        </div>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button bsStyle="link" onClick={() => onHide()}>
-          Cancel
-        </Button>
-        <Button
-          onClick={() => onOkClick(dispLabelNumber, neighbor6 ? 6 : 26)}
-          bsStyle="primary"
-        >
-          OK
-        </Button>
-      </Modal.Footer>
-    </>
+    <SettimgDialog
+      title="Setting options for connected component labeling (CCL)"
+      properties={[
+        {
+          title: 'Maximum number of connected components (CCs) to display',
+          value: dispLabelNumber,
+          numericalValue: true,
+          options: maximumCCNumOptions,
+          onChange: (value: number) => setDispLabelNumber(value)
+        },
+        {
+          title: 'Neighbors to decide same CC',
+          value: neighbor6 ? 6 : 26,
+          numericalValue: true,
+          options: neighborsOptions,
+          onChange: (value: number) => setNeighbor6(Number(value) == 6)
+        }
+      ]}
+      onHide={() => onHide()}
+      onOkClick={() => onOkClick(dispLabelNumber, neighbor6)}
+    />
   );
 });
 

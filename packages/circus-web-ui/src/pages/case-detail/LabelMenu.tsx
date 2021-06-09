@@ -14,8 +14,7 @@ import {
   SplitButton,
   Modal
 } from 'components/react-bootstrap';
-import produce from 'immer';
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
 import useLocalPreference from 'utils/useLocalPreference';
@@ -31,10 +30,12 @@ import {
   InternalLabelOf
 } from './labelData';
 import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
+import createNewLabels from './createNewLabels';
 import createConnectedComponentLabels from './createConnectedComponentLabels';
 import createHoleFilledLabels from './createHoleFilledLabels';
 import SettingDialogCCL from './SettingDialogCCL';
 import SettingDialogHoleFilling from './SettingDialogHoleFilling';
+import updateEditingDataWrapper from './updateEditingDataWrapper';
 
 type LabelCommand =
   | 'rename'
@@ -72,14 +73,10 @@ const LabelMenu: React.FC<{
   const activeLabel =
     activeLabelIndex >= 0 ? activeSeries.labels[activeLabelIndex] : null;
 
-  // Small wrapper around updateEditingData
-  const updateCurrentLabels = (updater: (labels: InternalLabel[]) => void) => {
-    const labels = editingData.revision.series[activeSeriesIndex].labels;
-    const newLabels = produce(labels, updater);
-    updateEditingData(editingData => {
-      editingData.revision.series[activeSeriesIndex].labels = newLabels;
-    });
-  };
+  const updateCurrentLabels = updateEditingDataWrapper(
+    editingData,
+    updateEditingData
+  );
 
   const handleCommand = async (command: LabelCommand) => {
     if (disabled) return;
@@ -237,36 +234,41 @@ const LabelMenu: React.FC<{
     });
   };
 
-  const onOkClickDialogCCL = (dispLabelNumber: number, neighbors: 6 | 26) => {
+  const onOkClickDialogCCL = (
+    dispLabelNumber: number,
+    neighbors4or6: boolean
+  ) => {
     const label = editingData.revision.series[activeSeriesIndex].labels[
       activeLabelIndex
     ] as InternalLabelOf<'voxel'>;
-    createConnectedComponentLabels(
+    createNewLabels(
       editingData,
       updateEditingData,
-      viewers,
       label,
       labelColors,
-      dispLabelNumber,
-      neighbors
+      null,
+      true,
+      createConnectedComponentLabels(dispLabelNumber, neighbors4or6)
     );
     setCclDialogOpen(false);
   };
 
   const onOkClickDialogHoleFilling = (
     dimension3: boolean,
-    holeFillingOrientation: string,
+    holeFillingOrientation: 'Axial' | 'Coronal' | 'Sagital' | null,
     neighbors4or6: boolean
   ) => {
-    createHoleFilledLabels(
+    const label = editingData.revision.series[activeSeriesIndex].labels[
+      activeLabelIndex
+    ] as InternalLabelOf<'voxel'>;
+    createNewLabels(
       editingData,
       updateEditingData,
-      viewers,
-      editingData.revision.series[activeSeriesIndex].labels[activeLabelIndex],
+      label,
       labelColors,
-      dimension3,
       holeFillingOrientation,
-      neighbors4or6
+      dimension3,
+      createHoleFilledLabels(dimension3, holeFillingOrientation, neighbors4or6)
     );
     setHoleFillingDialogOpen(false);
   };

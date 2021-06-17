@@ -117,4 +117,11 @@ describe('stringifyUN', () => {
     const result = stringifyUN(buf, 'x00000000');
     expect(result).toMatch('data:application/octet-stream;base64,AAECAw==');
   });
+
+  test('Rejects large binary', () => {
+    const buf = new Uint8Array(10000000).buffer;
+    expect(() => stringifyUN(buf, 'x00000000')).toThrow(
+      `Data of the private tag x00000000 is too large`
+    );
+  });
 });

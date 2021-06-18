@@ -1,13 +1,20 @@
 import React, { useState } from 'react';
 import SettimgDialog from './SettingDialog';
+import * as et from '@smikitky/rb-components/lib/editor-types';
+
+interface parameterType {
+  dimension: 2 | 3;
+  neighbors4or6: 1 | 2;
+  orientation: 'Axial' | 'Coronal' | 'Sagital';
+}
 
 const neighborsOptions2D = {
-  4: '4-neigobors',
-  8: '8-neigobors'
+  1: '4-neigobors',
+  2: '8-neigobors'
 };
 const neighborsOptions3D = {
-  6: '6-neigobors',
-  26: '26-neigobors'
+  1: '6-neigobors',
+  2: '26-neigobors'
 };
 const dimensionOptions = {
   2: '2D',
@@ -19,60 +26,87 @@ const orientationOptions = {
   Sagital: 'Sagital'
 };
 
+const initialValues = {
+  dimension: 2,
+  neighbors4or6: 1,
+  orientation: 'Axial'
+};
+
 const SettingDialogHoleFilling: React.FC<{
   onHide: () => void;
   onOkClick: (
-    dimension3: boolean,
+    dimension: number,
     orientation: 'Axial' | 'Coronal' | 'Sagital' | null,
     neighbors4or6: boolean
   ) => void;
 }> = React.memo(props => {
   const { onHide, onOkClick } = props;
-  const [neighbors4or6, setNeighbors4or6] = useState(false);
-  const [dimension3, setDimension3] = useState(true);
-  const [orientation, setOrientation] = useState<
-    'Axial' | 'Coronal' | 'Sagital' | null
-  >('Axial');
-  const properties: {
-    title: string;
-    value: any;
-    numericalValue: boolean;
-    onChange: (value: any) => void;
-    options: { [type: string]: string };
-  }[] = [
+  const [holeFillingProperties, setHoleFillingProperties] = useState([
     {
-      title: 'Dimension',
-      value: dimension3 ? 3 : 2,
-      numericalValue: true,
-      options: dimensionOptions,
-      onChange: (value: number) => setDimension3(value === 3)
+      key: 'dimension',
+      caption: 'Dimension',
+      editor: et.shrinkSelect(dimensionOptions)
+    },
+    {
+      key: 'orientation',
+      caption: 'Orientation',
+      editor: et.shrinkSelect(orientationOptions)
+    },
+    {
+      key: 'neighbors4or6',
+      caption: 'Neighbors to decide same CC',
+      editor: et.shrinkSelect(neighborsOptions2D)
     }
-  ];
-  if (!dimension3) {
-    properties.push({
-      title: 'Orientation',
-      value: orientation,
-      numericalValue: false,
-      options: orientationOptions,
-      onChange: (value: 'Axial' | 'Coronal' | 'Sagital' | null) => {
-        setOrientation(value);
-      }
-    });
-  }
-  properties.push({
-    title: 'Neighbors to decide same connected component',
-    value: neighbors4or6 ? (dimension3 ? 6 : 4) : dimension3 ? 26 : 8,
-    numericalValue: true,
-    options: dimension3 ? neighborsOptions3D : neighborsOptions2D,
-    onChange: (value: number) => setNeighbors4or6(value == 6 || value == 4)
-  });
+  ]);
+  const handlePropertiesChange = (parameters: parameterType) => {
+    setHoleFillingProperties(
+      Number(parameters.dimension) === 3
+        ? [
+            {
+              key: 'dimension',
+              caption: 'Dimension',
+              editor: et.shrinkSelect(dimensionOptions)
+            },
+            {
+              key: 'neighbors4or6',
+              caption: 'Neighbors to decide same CC',
+              editor: et.shrinkSelect(neighborsOptions3D)
+            }
+          ]
+        : [
+            {
+              key: 'dimension',
+              caption: 'Dimension',
+              editor: et.shrinkSelect(dimensionOptions)
+            },
+            {
+              key: 'orientation',
+              caption: 'Orientation',
+              editor: et.shrinkSelect(orientationOptions)
+            },
+            {
+              key: 'neighbors4or6',
+              caption: 'Neighbors to decide same CC',
+              editor: et.shrinkSelect(neighborsOptions2D)
+            }
+          ]
+    );
+  };
 
   return (
     <SettimgDialog
-      title="Hole filling"
-      properties={properties}
+      title="Setting options for connected component labeling (CCL)"
+      initialValues={initialValues}
+      properties={holeFillingProperties}
+      onChange={handlePropertiesChange}
       onHide={() => onHide()}
-      onOkClick={() => onOkClick(dimension3, orientation, neighbors4or6)}
+      onOkClick={(parameters: parameterType) => {
+        onOkClick(
+          Number(parameters.dimension),
+          parameters.orientation,
+          Number(parameters.neighbors4or6) === 1
+        );
+      }}
     />
   );
 });

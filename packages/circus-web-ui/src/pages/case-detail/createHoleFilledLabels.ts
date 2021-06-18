@@ -4,7 +4,7 @@ import HoleFilling2D, {
 import { alert } from '@smikitky/rb-components/lib/modal';
 
 const createHoleFilledLabels = (
-  dimension3: boolean,
+  dimension: number,
   orientation: 'Axial' | 'Coronal' | 'Sagital' | null,
   neighbors4or6: boolean
 ) => {
@@ -19,13 +19,14 @@ const createHoleFilledLabels = (
       | { result: Uint8Array; holeNum: number; holeVolume: number }
       | undefined = undefined;
     try {
-      holeFillingResult = dimension3
-        ? HoleFilling3D(input, width, height, nSlices, neighbors4or6 ? 6 : 26)
-        : orientation === 'Axial'
-        ? HoleFilling2D(input, width, height, nSlices, neighbors4or6 ? 4 : 8)
-        : orientation === 'Sagital'
-        ? HoleFilling2D(input, height, nSlices, width, neighbors4or6 ? 4 : 8)
-        : HoleFilling2D(input, nSlices, width, height, neighbors4or6 ? 4 : 8);
+      holeFillingResult =
+        dimension === 3
+          ? HoleFilling3D(input, width, height, nSlices, neighbors4or6 ? 6 : 26)
+          : orientation === 'Axial'
+          ? HoleFilling2D(input, width, height, nSlices, neighbors4or6 ? 4 : 8)
+          : orientation === 'Sagital'
+          ? HoleFilling2D(input, height, nSlices, width, neighbors4or6 ? 4 : 8)
+          : HoleFilling2D(input, nSlices, width, height, neighbors4or6 ? 4 : 8);
     } catch (err) {
       console.log('error', err.message);
       alert(`${name} is too complex.\nPlease modify ${name}.`);
@@ -38,7 +39,7 @@ const createHoleFilledLabels = (
         names: ['']
       };
     }
-    let output = holeFillingResult.result.slice();
+    const output = holeFillingResult.result.slice();
     return {
       labelingResults: {
         labelMap: output,
@@ -47,13 +48,13 @@ const createHoleFilledLabels = (
           {
             volume: holeFillingResult.holeVolume,
             min: [0, 0, 0],
-            max: [width, height, nSlices]
+            max: [width - 1, height - 1, nSlices - 1]
           }
         ]
       },
       names: [
-        `${name}: ${dimension3 ? 3 : 2}D hole filling${
-          !dimension3 ? ' (' + orientation + ')' : ''
+        `${name}: ${dimension}D hole filling${
+          dimension !== 3 ? ' (' + orientation + ')' : ''
         }`
       ]
     };

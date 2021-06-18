@@ -5,7 +5,7 @@ import { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-type
 
 const createConnectedComponentLabels = (
   dispLabelNumber: number,
-  neighbors4or6: boolean
+  neighbors: number
 ) => {
   return async (
     input: Uint8Array,
@@ -16,9 +16,10 @@ const createConnectedComponentLabels = (
   ) => {
     let labelingResults: LabelingResults3D | undefined = undefined;
     try {
-      labelingResults = neighbors4or6
-        ? CCL6(input, width, height, nSlices)
-        : CCL26(input, width, height, nSlices);
+      labelingResults =
+        neighbors === 6
+          ? CCL6(input, width, height, nSlices)
+          : CCL26(input, width, height, nSlices);
     } catch (err) {
       console.log('error', err.message);
       alert(`${name} is too complex.\nPlease modify ${name}.`);

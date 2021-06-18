@@ -1,48 +1,47 @@
 import { Button, Modal } from 'components/react-bootstrap';
-import React from 'react';
-import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import React, { useState } from 'react';
+import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
 
-interface property {
+const SettingDialog: (props: {
   title: string;
-  value: any;
-  numericalValue: boolean;
-  onChange: (value: any) => void;
-  options: { [type: string]: string };
-}
-
-const SettingDialog: <T extends property[]>(props: {
-  title: string;
-  properties: T;
+  initialValues: any;
+  properties: any;
   onHide: () => void;
-  onOkClick: () => void;
+  onOkClick: (parameters: any) => void;
+  onChange?: (parameters: any) => void;
 }) => React.ReactElement<any> = props => {
-  const { title, properties, onHide, onOkClick } = props;
+  const {
+    title,
+    initialValues,
+    properties,
+    onHide,
+    onOkClick,
+    onChange
+  } = props;
+  const [parameters, setParameters] = useState<typeof properties>(
+    initialValues
+  );
   return (
     <>
       <Modal.Header>
         <Modal.Title>{title}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {properties.map(p => {
-          return (
-            <div key={p.title}>
-              {`${p.title}: `}
-              <ShrinkSelect
-                bsSize="sm"
-                options={p.options}
-                value={p.value}
-                numericalValue={p.numericalValue}
-                onChange={p.onChange}
-              />
-            </div>
-          );
-        })}
+        <PropertyEditor
+          className="setting-dialog"
+          properties={properties}
+          value={parameters}
+          onChange={(parameters: any) => {
+            setParameters(parameters);
+            onChange && onChange(parameters);
+          }}
+        />
       </Modal.Body>
       <Modal.Footer>
         <Button bsStyle="link" onClick={() => onHide()}>
           Cancel
         </Button>
-        <Button onClick={() => onOkClick()} bsStyle="primary">
+        <Button onClick={() => onOkClick(parameters)} bsStyle="primary">
           OK
         </Button>
       </Modal.Footer>

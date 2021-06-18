@@ -234,10 +234,7 @@ const LabelMenu: React.FC<{
     });
   };
 
-  const onOkClickDialogCCL = (
-    dispLabelNumber: number,
-    neighbors4or6: boolean
-  ) => {
+  const onOkClickDialogCCL = (dispLabelNumber: number, neighbors: number) => {
     const label = editingData.revision.series[activeSeriesIndex].labels[
       activeLabelIndex
     ] as InternalLabelOf<'voxel'>;
@@ -248,13 +245,13 @@ const LabelMenu: React.FC<{
       labelColors,
       null,
       true,
-      createConnectedComponentLabels(dispLabelNumber, neighbors4or6)
+      createConnectedComponentLabels(dispLabelNumber, neighbors)
     );
     setCclDialogOpen(false);
   };
 
   const onOkClickDialogHoleFilling = (
-    dimension3: boolean,
+    dimension: number,
     holeFillingOrientation: 'Axial' | 'Coronal' | 'Sagital' | null,
     neighbors4or6: boolean
   ) => {
@@ -267,8 +264,8 @@ const LabelMenu: React.FC<{
       label,
       labelColors,
       holeFillingOrientation,
-      dimension3,
-      createHoleFilledLabels(dimension3, holeFillingOrientation, neighbors4or6)
+      dimension === 3,
+      createHoleFilledLabels(dimension, holeFillingOrientation, neighbors4or6)
     );
     setHoleFillingDialogOpen(false);
   };

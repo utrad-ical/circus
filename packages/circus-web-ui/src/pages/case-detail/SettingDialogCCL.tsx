@@ -1,5 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import SettimgDialog from './SettingDialog';
+import * as et from '@smikitky/rb-components/lib/editor-types';
+
+interface parameterType {
+  maximumCcNum: number;
+  neighbors: 6 | 26;
+}
 
 const maximumCCNumOptions = {
   1: '1 CC',
@@ -18,34 +24,42 @@ const neighborsOptions = {
   26: '26-neigobors'
 };
 
+const initialValues = {
+  maximumCcNum: 2,
+  neighbors: 6
+};
+
+const cclProperties = [
+  {
+    key: 'maximumCcNum',
+    caption: 'Maximum number of connected components (CCs) to display',
+    editor: et.shrinkSelect(maximumCCNumOptions)
+  },
+  {
+    key: 'neighbors',
+    caption: 'Neighbors to decide same CC',
+    editor: et.shrinkSelect(neighborsOptions)
+  }
+];
+
 const SettingDialogCCL: React.FC<{
   onHide: () => void;
-  onOkClick: (dispLabelNumber: number, neighbors: boolean) => void;
+  onOkClick: (dispLabelNumber: number, neighbors: number) => void;
 }> = React.memo(props => {
   const { onHide, onOkClick } = props;
-  const [neighbor6, setNeighbor6] = useState(false);
-  const [dispLabelNumber, setDispLabelNumber] = useState(2);
+
   return (
     <SettimgDialog
       title="Setting options for connected component labeling (CCL)"
-      properties={[
-        {
-          title: 'Maximum number of connected components (CCs) to display',
-          value: dispLabelNumber,
-          numericalValue: true,
-          options: maximumCCNumOptions,
-          onChange: (value: number) => setDispLabelNumber(value)
-        },
-        {
-          title: 'Neighbors to decide same CC',
-          value: neighbor6 ? 6 : 26,
-          numericalValue: true,
-          options: neighborsOptions,
-          onChange: (value: number) => setNeighbor6(Number(value) == 6)
-        }
-      ]}
+      initialValues={initialValues}
+      properties={cclProperties}
       onHide={() => onHide()}
-      onOkClick={() => onOkClick(dispLabelNumber, neighbor6)}
+      onOkClick={(parameters: parameterType) => {
+        onOkClick(
+          Number(parameters.maximumCcNum),
+          Number(parameters.neighbors)
+        );
+      }}
     />
   );
 });

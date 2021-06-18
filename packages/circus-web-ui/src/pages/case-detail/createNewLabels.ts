@@ -63,6 +63,7 @@ const createNewLabels = async (
   const result = imageProcessor(input, width, height, nSlices, label.name!);
 
   const { labelingResults, names } = await result;
+
   if (labelingResults.labelNum === 0) {
     return;
   }

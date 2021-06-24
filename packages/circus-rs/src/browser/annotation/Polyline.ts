@@ -292,8 +292,12 @@ export default class Polyline implements Annotation, ViewerEventTarget {
     } else if (hitType as BoundingRectWithHandleHitType) {
       // Move or Resize
       const targetOriginalPoints = [...originalPoints];
-      const maintainAspectRatio = !!ev.shiftKey;
-      const fixCenterOfGravity = !!ev.ctrlKey;
+      const maintainAspectRatio = viewer.maintainAspectRatioWithShift
+        ? !!ev.shiftKey
+        : !ev.shiftKey;
+      const fixCenterOfGravity = viewer.fixCenterOfGravityWithCtrl
+        ? !!ev.ctrlKey
+        : !ev.ctrlKey;
       this.points = handleBoundingBoxOperation(
         originalBoundingBox!,
         'axial',

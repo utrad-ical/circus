@@ -35,7 +35,7 @@ import {
   setRecommendedDisplay
 } from './labelData';
 import SideContainer from './SideContainer';
-import ToolBar, { ViewOptions } from './ToolBar';
+import ToolBar, { ViewOptions, ShapeResizeOptions } from './ToolBar';
 import ViewerGrid from './ViewerGrid';
 import IconButton from '@smikitky/rb-components/lib/IconButton';
 import { Modal } from '../../components/react-bootstrap';
@@ -128,6 +128,20 @@ const RevisionEditor: React.FC<{
       interpolationMode: 'nearestNeighbor'
     }
   );
+
+  const [shapeResizeOptions, setShapeResizeOptions] = useState({
+    maintainAspectRatioWithShift: true,
+    fixCenterOfGravityWithCtrl: true
+  });
+  const handleChangeShapeResizeOptions = (shapeResizeOptions: {
+    maintainAspectRatioWithShift: boolean;
+    fixCenterOfGravityWithCtrl: boolean;
+  }) => {
+    setShapeResizeOptions(shapeResizeOptions);
+    Object.keys(viewers).map(k => {
+      viewers[k].setShapeResizeOptions(shapeResizeOptions);
+    });
+  };
 
   // Keeps track of stable seriesUid-PVD pairs to avoid frequent comp changes
   const [allSeries, setAllSeries] = useState<
@@ -643,6 +657,8 @@ const RevisionEditor: React.FC<{
           setToolOption={setToolOption}
           viewOptions={viewOptions}
           onChangeViewOptions={setViewOptions}
+          shapeResizeOptions={shapeResizeOptions}
+          onChangeShapeResizeOptions={handleChangeShapeResizeOptions}
           onChangeLayoutKind={handleChangeLayoutKind}
           wandEnabled={activeVolumeLoaded}
           windowPresets={projectData.windowPresets}

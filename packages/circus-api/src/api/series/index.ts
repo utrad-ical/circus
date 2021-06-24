@@ -2,7 +2,7 @@ import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import archiver from 'archiver';
 import { EJSON } from 'bson';
 import status from 'http-status';
-import isLikeDicom from 'utils/isLikeDicom';
+import isLikeDicom from '../../utils/isLikeDicom';
 import { CircusContext, RouteMiddleware } from '../../typings/middlewares';
 import checkFilter from '../../utils/checkFilter';
 import { fileOrArchiveIterator } from '../../utils/directoryIterator';

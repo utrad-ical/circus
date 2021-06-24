@@ -183,6 +183,10 @@ export interface SeriesEntry {
   partialVolumeDescriptor: PartialVolumeDescriptor;
 }
 
+export interface DicomVoxelDumperOptions {
+  neededPrivateTags?: string[];
+}
+
 /**
  * DicomVoxelDumper builds DICOM volumes for CIRCUS CS plug-ins.
  * It exports a set of files via the passed archiver.
@@ -195,6 +199,7 @@ export interface DicomVoxelDumper {
    */
   dump: (
     series: SeriesEntry[],
-    archiver: Archiver
+    archiver: Archiver,
+    options?: DicomVoxelDumperOptions
   ) => { stream: Archiver; events: EventEmitter };
 }

@@ -51,8 +51,8 @@ export default class Viewer extends EventEmitter {
 
   private isDragging: boolean = false;
 
-  public maintainAspectRatioWithShift: boolean = true;
-  public fixCenterOfGravityWithCtrl: boolean = true;
+  public maintainAspectRatioWithShift: boolean | null = null;
+  public fixCenterOfGravityWithCtrl: boolean | null = null;
 
   /**
    * When render() is called while there is already another rendering procedure in progress,
@@ -446,16 +446,6 @@ export default class Viewer extends EventEmitter {
     this.detachCurrentComposition();
     this.stopResizeObserver();
     this.removeAllListeners();
-  }
-
-  public getShapeResizeOptions(): {
-    maintainAspectRatioWithShift: boolean;
-    fixCenterOfGravityWithCtrl: boolean;
-  } {
-    return {
-      maintainAspectRatioWithShift: this.maintainAspectRatioWithShift,
-      fixCenterOfGravityWithCtrl: this.fixCenterOfGravityWithCtrl
-    };
   }
 
   public setShapeResizeOptions(shapeResizeOptions: {

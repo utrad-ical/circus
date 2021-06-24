@@ -336,8 +336,12 @@ export default abstract class SolidFigure
       );
 
       const originalBoundingBox3 = this.dragInfo!.originalBoundingBox3!;
-      const maintainAspectRatio = !!ev.shiftKey;
-      const fixCenterOfGravity = !!ev.ctrlKey;
+      const maintainAspectRatio = viewer.maintainAspectRatioWithShift
+        ? !!ev.shiftKey
+        : !ev.shiftKey;
+      const fixCenterOfGravity = viewer.fixCenterOfGravityWithCtrl
+        ? !!ev.ctrlKey
+        : !ev.ctrlKey;
       const newBoundingBox3 = resize(
         this.handleType!,
         orientation,

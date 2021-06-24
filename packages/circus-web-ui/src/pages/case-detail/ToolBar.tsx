@@ -24,6 +24,11 @@ export interface ViewOptions {
   interpolationMode?: InterpolationMode;
 }
 
+export interface ShapeResizeOptions {
+  maintainAspectRatioWithShift: boolean;
+  fixCenterOfGravityWithCtrl: boolean;
+}
+
 type ScrollbarOptions = 'none' | 'large' | 'small';
 
 const scrollbarOptions: { key: ScrollbarOptions; caption: string }[] = [
@@ -46,6 +51,8 @@ const ToolBar: React.FC<{
   viewOptions: ViewOptions;
   onChangeViewOptions: (viewOptions: ViewOptions) => void;
   onChangeLayoutKind: (kind: LayoutKind) => void;
+  shapeResizeOptions: ShapeResizeOptions;
+  onChangeShapeResizeOptions: (shapeResizeOptions: ShapeResizeOptions) => void;
   brushEnabled: boolean;
   wandEnabled: boolean;
   windowPresets?: WindowPreset[];
@@ -61,6 +68,8 @@ const ToolBar: React.FC<{
     viewOptions,
     onChangeViewOptions,
     onChangeLayoutKind,
+    shapeResizeOptions,
+    onChangeShapeResizeOptions,
     brushEnabled,
     wandEnabled,
     windowPresets = [],
@@ -88,6 +97,20 @@ const ToolBar: React.FC<{
     });
   };
   useKeyboardShortcut(';', handleToggleReferenceLine);
+
+  const handleToggleMaintainAspectRatioWithShift = () => {
+    onChangeShapeResizeOptions({
+      ...shapeResizeOptions,
+      maintainAspectRatioWithShift: !shapeResizeOptions.maintainAspectRatioWithShift
+    });
+  };
+
+  const handleToggleFixCenterOfGravityWithCtrl = () => {
+    onChangeShapeResizeOptions({
+      ...shapeResizeOptions,
+      fixCenterOfGravityWithCtrl: !shapeResizeOptions.fixCenterOfGravityWithCtrl
+    });
+  };
 
   const handleToggleScrollbar = (selection: any) => {
     onChangeViewOptions({
@@ -278,6 +301,16 @@ const ToolBar: React.FC<{
               </MenuItem>
             );
           })}
+          <MenuItem divider />
+          <MenuItem header>shape resizing: option key + drag</MenuItem>
+          <MenuItem onClick={handleToggleMaintainAspectRatioWithShift}>
+            {shapeResizeOptions.maintainAspectRatioWithShift && 'shift + '}
+            drag = maintain aspect ratio
+          </MenuItem>
+          <MenuItem onClick={handleToggleFixCenterOfGravityWithCtrl}>
+            {shapeResizeOptions.fixCenterOfGravityWithCtrl && 'ctrl + '}
+            drag = resize from the center
+          </MenuItem>
         </Dropdown.Menu>
       </Dropdown>
       {(active === 'wand' || active === 'wandEraser') && (
@@ -391,6 +424,12 @@ export default ToolBar;
 const CheckMark: React.FC<{ checked: boolean }> = props => (
   <span className="checkmark">
     {props.checked && <Icon icon="glyphicon-ok" />}
+  </span>
+);
+
+const PlusMinusMark: React.FC<{ checked: boolean }> = props => (
+  <span className="plusmark">
+    <Icon icon={props.checked ? 'plus' : 'minus'} />
   </span>
 );
 

@@ -129,7 +129,10 @@ const RevisionEditor: React.FC<{
     }
   );
 
-  const [shapeResizeOptions, setShapeResizeOptions] = useState({
+  const [shapeResizeOptions, setShapeResizeOptions] = useLocalPreference<{
+    maintainAspectRatioWithShift: boolean;
+    fixCenterOfGravityWithCtrl: boolean;
+  }>('dbShapeResizeOptions', {
     maintainAspectRatioWithShift: true,
     fixCenterOfGravityWithCtrl: true
   });
@@ -138,9 +141,6 @@ const RevisionEditor: React.FC<{
     fixCenterOfGravityWithCtrl: boolean;
   }) => {
     setShapeResizeOptions(shapeResizeOptions);
-    Object.keys(viewers).map(k => {
-      viewers[k].setShapeResizeOptions(shapeResizeOptions);
-    });
   };
 
   // Keeps track of stable seriesUid-PVD pairs to avoid frequent comp changes
@@ -392,6 +392,9 @@ const RevisionEditor: React.FC<{
         });
       }
 
+      Object.keys(viewers).forEach(k => {
+        viewers[k].setShapeResizeOptions(shapeResizeOptions);
+      });
       composition.annotationUpdated();
     });
     return () => {
@@ -404,6 +407,7 @@ const RevisionEditor: React.FC<{
     editingData,
     viewOptions.showReferenceLine,
     viewOptions.scrollbar,
+    shapeResizeOptions,
     touchDevice,
     viewers
   ]);

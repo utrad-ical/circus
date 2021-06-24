@@ -31,7 +31,7 @@ test('zip file', async () => {
   expect(entries[0]).toMatchObject({
     type: 'zip',
     name: dicomName,
-    zipName: testFile
+    archiveName: testFile
   });
 });
 

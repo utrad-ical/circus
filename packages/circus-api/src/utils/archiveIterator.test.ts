@@ -16,8 +16,8 @@ describe('targzIterator', () => {
     const result = await toArray(targzIterator(buffer));
     expect(result).toHaveLength(3);
     expect(result[0]).toMatchObject({ name: 'a.txt' });
-    expect(result[0].buffer instanceof Buffer).toBe(true);
-    expect(result[0].buffer.length).toBe(3);
+    expect(result[0].buffer instanceof ArrayBuffer).toBe(true);
+    expect(result[0].buffer.byteLength).toBe(3);
   });
 
   test('corrupted gz file', async () => {

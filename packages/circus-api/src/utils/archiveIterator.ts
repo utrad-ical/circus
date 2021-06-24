@@ -83,9 +83,10 @@ export const targzIterator = async function* (
       });
     if (error) throw error;
     if (finished) return;
+    const b = await rawBody(lastStream!);
     yield {
       name: lastName!,
-      buffer: (await rawBody(lastStream!)).buffer
+      buffer: b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength)
     };
     lastStream = undefined;
     lastNext!();

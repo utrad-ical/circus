@@ -10,8 +10,8 @@ const resize = (
   originalBoundingBox3: [number[], number[]],
   dragStartPoint: Vector3,
   draggedPoint: Vector3,
-  maintainAspectRatio: boolean,
-  fixCenterOfGravity: boolean
+  lockMaintainAspectRatio: boolean,
+  lockFixCenterOfGravity: boolean
 ): [Vector3D, Vector3D] => {
   const originalPoints: Vector3D[] = [
     originalBoundingBox3[0] as Vector3D,
@@ -24,8 +24,8 @@ const resize = (
     handleType,
     dragStartPoint,
     draggedPoint,
-    maintainAspectRatio,
-    fixCenterOfGravity,
+    lockMaintainAspectRatio,
+    lockFixCenterOfGravity,
     originalPoints
   ) as [Vector3D, Vector3D];
 };

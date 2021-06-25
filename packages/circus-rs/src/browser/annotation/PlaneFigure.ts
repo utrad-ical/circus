@@ -35,14 +35,13 @@ const cursorTypes: {
   'west-handle': { cursor: 'w-resize' },
   'rect-outline': { cursor: 'move' }
 };
-export default class PlaneFigure implements Annotation, ViewerEventTarget {
+export default class PlaneFigure
+  implements Annotation, ViewerEventTarget, ModifierKeyBehaviors {
   public editable: boolean = false;
   private handleType: BoundingRectWithHandleHitType | undefined = undefined;
 
-  public modifierKeyBehaviors: ModifierKeyBehaviors = {
-    maintainAspectRatioWithShift: true,
-    fixCenterOfGravityWithCtrl: true
-  };
+  public maintainAspectRatioWithShift: boolean = true;
+  public fixCenterOfGravityWithCtrl: boolean = true;
 
   // dragInfo
   private dragInfo:
@@ -250,12 +249,10 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
         new Vector2().fromArray(draggedPoint)
       );
 
-      const maintainAspectRatio = this.modifierKeyBehaviors
-        .maintainAspectRatioWithShift
+      const maintainAspectRatio = this.maintainAspectRatioWithShift
         ? !!ev.shiftKey
         : !ev.shiftKey;
-      const fixCenterOfGravity = this.modifierKeyBehaviors
-        .fixCenterOfGravityWithCtrl
+      const fixCenterOfGravity = this.fixCenterOfGravityWithCtrl
         ? !!ev.ctrlKey
         : !ev.ctrlKey;
 

@@ -45,7 +45,7 @@ const cursorTypes: {
 };
 
 export default abstract class SolidFigure
-  implements Annotation, ViewerEventTarget {
+  implements Annotation, ViewerEventTarget, ModifierKeyBehaviors {
   public abstract type: FigureType;
   /**
    * Boundary of the outline, measured in mm.
@@ -77,10 +77,8 @@ export default abstract class SolidFigure
 
   public id?: string;
 
-  public modifierKeyBehaviors: ModifierKeyBehaviors = {
-    maintainAspectRatioWithShift: true,
-    fixCenterOfGravityWithCtrl: true
-  };
+  public maintainAspectRatioWithShift: boolean = true;
+  public fixCenterOfGravityWithCtrl: boolean = true;
 
   // dragInfo
   private dragInfo:
@@ -342,12 +340,10 @@ export default abstract class SolidFigure
       );
 
       const originalBoundingBox3 = this.dragInfo!.originalBoundingBox3!;
-      const maintainAspectRatio = this.modifierKeyBehaviors
-        .maintainAspectRatioWithShift
+      const maintainAspectRatio = this.maintainAspectRatioWithShift
         ? !!ev.shiftKey
         : !ev.shiftKey;
-      const fixCenterOfGravity = this.modifierKeyBehaviors
-        .fixCenterOfGravityWithCtrl
+      const fixCenterOfGravity = this.fixCenterOfGravityWithCtrl
         ? !!ev.ctrlKey
         : !ev.ctrlKey;
       const newBoundingBox3 = resize(

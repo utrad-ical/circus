@@ -51,9 +51,6 @@ export default class Viewer extends EventEmitter {
 
   private isDragging: boolean = false;
 
-  public maintainAspectRatioWithShift: boolean | null = null;
-  public fixCenterOfGravityWithCtrl: boolean | null = null;
-
   /**
    * When render() is called while there is already another rendering procedure in progress,
    * We will keep that render Promise with a "suspended" status.
@@ -446,15 +443,5 @@ export default class Viewer extends EventEmitter {
     this.detachCurrentComposition();
     this.stopResizeObserver();
     this.removeAllListeners();
-  }
-
-  public setShapeResizeOptions(shapeResizeOptions: {
-    maintainAspectRatioWithShift: boolean;
-    fixCenterOfGravityWithCtrl: boolean;
-  }): void {
-    this.maintainAspectRatioWithShift =
-      shapeResizeOptions.maintainAspectRatioWithShift;
-    this.fixCenterOfGravityWithCtrl =
-      shapeResizeOptions.fixCenterOfGravityWithCtrl;
   }
 }

@@ -392,9 +392,17 @@ const RevisionEditor: React.FC<{
         });
       }
 
-      Object.keys(viewers).forEach(k => {
-        viewers[k].setShapeResizeOptions(shapeResizeOptions);
+      composition.annotations.forEach(antn => {
+        if (
+          antn instanceof rs.Cuboid ||
+          antn instanceof rs.Ellipsoid ||
+          antn instanceof rs.PlaneFigure
+        ) {
+          // antn.setModifierKeyBehaviors(shapeResizeOptions);
+          antn.modifierKeyBehaviors = shapeResizeOptions;
+        }
       });
+
       composition.annotationUpdated();
     });
     return () => {

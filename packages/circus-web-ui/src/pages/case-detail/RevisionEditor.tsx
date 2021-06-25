@@ -35,7 +35,7 @@ import {
   setRecommendedDisplay
 } from './labelData';
 import SideContainer from './SideContainer';
-import ToolBar, { ViewOptions, ShapeResizeOptions } from './ToolBar';
+import ToolBar, { ViewOptions } from './ToolBar';
 import ViewerGrid from './ViewerGrid';
 import IconButton from '@smikitky/rb-components/lib/IconButton';
 import { Modal } from '../../components/react-bootstrap';
@@ -47,6 +47,7 @@ import useLocalPreference from 'utils/useLocalPreference';
 import isTouchDevice from 'utils/isTouchDevice';
 import useToolbar from 'pages/case-detail/useToolbar';
 import Series from 'types/Series';
+import ModifierKeyBehaviors from '@utrad-ical/circus-rs/src/browser/annotation/ModifierKeyBehaviors';
 
 const useCompositions = (
   series: {
@@ -129,18 +130,16 @@ const RevisionEditor: React.FC<{
     }
   );
 
-  const [shapeResizeOptions, setShapeResizeOptions] = useLocalPreference<{
-    maintainAspectRatioWithShift: boolean;
-    fixCenterOfGravityWithCtrl: boolean;
-  }>('dbShapeResizeOptions', {
-    maintainAspectRatioWithShift: true,
-    fixCenterOfGravityWithCtrl: true
+  const [modifierKeyBehaviors, setModifierKeyBehaviors] = useLocalPreference<
+    ModifierKeyBehaviors
+  >('dbModifierKeyBehaviors', {
+    lockMaintainAspectRatio: false,
+    lockFixCenterOfGravity: false
   });
-  const handleChangeShapeResizeOptions = (shapeResizeOptions: {
-    maintainAspectRatioWithShift: boolean;
-    fixCenterOfGravityWithCtrl: boolean;
-  }) => {
-    setShapeResizeOptions(shapeResizeOptions);
+  const handleChangeModifierKeyBehaviors = (
+    shapeResizeOptions: ModifierKeyBehaviors
+  ) => {
+    setModifierKeyBehaviors(shapeResizeOptions);
   };
 
   // Keeps track of stable seriesUid-PVD pairs to avoid frequent comp changes
@@ -398,10 +397,10 @@ const RevisionEditor: React.FC<{
           antn instanceof rs.Ellipsoid ||
           antn instanceof rs.PlaneFigure
         ) {
-          antn.maintainAspectRatioWithShift =
-            shapeResizeOptions.maintainAspectRatioWithShift;
-          antn.fixCenterOfGravityWithCtrl =
-            shapeResizeOptions.fixCenterOfGravityWithCtrl;
+          antn.lockMaintainAspectRatio =
+            modifierKeyBehaviors.lockMaintainAspectRatio;
+          antn.lockFixCenterOfGravity =
+            modifierKeyBehaviors.lockFixCenterOfGravity;
         }
       });
 
@@ -417,7 +416,7 @@ const RevisionEditor: React.FC<{
     editingData,
     viewOptions.showReferenceLine,
     viewOptions.scrollbar,
-    shapeResizeOptions,
+    modifierKeyBehaviors,
     touchDevice,
     viewers
   ]);
@@ -671,8 +670,8 @@ const RevisionEditor: React.FC<{
           setToolOption={setToolOption}
           viewOptions={viewOptions}
           onChangeViewOptions={setViewOptions}
-          shapeResizeOptions={shapeResizeOptions}
-          onChangeShapeResizeOptions={handleChangeShapeResizeOptions}
+          modifierKeyBehaviors={modifierKeyBehaviors}
+          onChangeModifierKeyBehaviors={handleChangeModifierKeyBehaviors}
           onChangeLayoutKind={handleChangeLayoutKind}
           wandEnabled={activeVolumeLoaded}
           windowPresets={projectData.windowPresets}

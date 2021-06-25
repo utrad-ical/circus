@@ -40,8 +40,8 @@ export default class PlaneFigure
   public editable: boolean = false;
   private handleType: BoundingRectWithHandleHitType | undefined = undefined;
 
-  public maintainAspectRatioWithShift: boolean = true;
-  public fixCenterOfGravityWithCtrl: boolean = true;
+  public lockMaintainAspectRatio: boolean = true;
+  public lockFixCenterOfGravity: boolean = true;
 
   // dragInfo
   private dragInfo:
@@ -249,10 +249,10 @@ export default class PlaneFigure
         new Vector2().fromArray(draggedPoint)
       );
 
-      const maintainAspectRatio = this.maintainAspectRatioWithShift
+      const lockMaintainAspectRatio = this.lockMaintainAspectRatio
         ? !!ev.shiftKey
         : !ev.shiftKey;
-      const fixCenterOfGravity = this.fixCenterOfGravityWithCtrl
+      const lockFixCenterOfGravity = this.lockFixCenterOfGravity
         ? !!ev.ctrlKey
         : !ev.ctrlKey;
 
@@ -263,8 +263,8 @@ export default class PlaneFigure
         originalBoundingBox3,
         new Vector3().fromArray(this.dragInfo!.dragStartVolumePoint3!),
         draggedPoint3,
-        maintainAspectRatio,
-        fixCenterOfGravity
+        lockMaintainAspectRatio,
+        lockFixCenterOfGravity
       );
 
       this.min = [newBoundingBox3[0][0], newBoundingBox3[0][1]];

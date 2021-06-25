@@ -15,6 +15,7 @@ import { WindowPreset } from 'types/Project';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
 import { ToolOptions, ToolOptionSetter } from 'pages/case-detail/useToolbar';
 import { ReferenceValueOption } from '@utrad-ical/circus-rs/src/browser/tool/cloud/WandTool';
+import ModifierKeyBehaviors from '@utrad-ical/circus-rs/src/browser/annotation/ModifierKeyBehaviors';
 import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import { LayoutKind } from './caseStore';
 
@@ -22,11 +23,6 @@ export interface ViewOptions {
   showReferenceLine?: boolean;
   scrollbar?: ScrollbarOptions;
   interpolationMode?: InterpolationMode;
-}
-
-export interface ShapeResizeOptions {
-  maintainAspectRatioWithShift: boolean;
-  fixCenterOfGravityWithCtrl: boolean;
 }
 
 type ScrollbarOptions = 'none' | 'large' | 'small';
@@ -51,8 +47,10 @@ const ToolBar: React.FC<{
   viewOptions: ViewOptions;
   onChangeViewOptions: (viewOptions: ViewOptions) => void;
   onChangeLayoutKind: (kind: LayoutKind) => void;
-  shapeResizeOptions: ShapeResizeOptions;
-  onChangeShapeResizeOptions: (shapeResizeOptions: ShapeResizeOptions) => void;
+  modifierKeyBehaviors: ModifierKeyBehaviors;
+  onChangeModifierKeyBehaviors: (
+    modifierKeyBehaviors: ModifierKeyBehaviors
+  ) => void;
   brushEnabled: boolean;
   wandEnabled: boolean;
   windowPresets?: WindowPreset[];
@@ -68,8 +66,8 @@ const ToolBar: React.FC<{
     viewOptions,
     onChangeViewOptions,
     onChangeLayoutKind,
-    shapeResizeOptions,
-    onChangeShapeResizeOptions,
+    modifierKeyBehaviors,
+    onChangeModifierKeyBehaviors,
     brushEnabled,
     wandEnabled,
     windowPresets = [],
@@ -98,17 +96,17 @@ const ToolBar: React.FC<{
   };
   useKeyboardShortcut(';', handleToggleReferenceLine);
 
-  const handleToggleMaintainAspectRatioWithShift = () => {
-    onChangeShapeResizeOptions({
-      ...shapeResizeOptions,
-      maintainAspectRatioWithShift: !shapeResizeOptions.maintainAspectRatioWithShift
+  const handleToggleLockMaintainAspectRatio = () => {
+    onChangeModifierKeyBehaviors({
+      ...modifierKeyBehaviors,
+      lockMaintainAspectRatio: !modifierKeyBehaviors.lockMaintainAspectRatio
     });
   };
 
-  const handleToggleFixCenterOfGravityWithCtrl = () => {
-    onChangeShapeResizeOptions({
-      ...shapeResizeOptions,
-      fixCenterOfGravityWithCtrl: !shapeResizeOptions.fixCenterOfGravityWithCtrl
+  const handleToggleLockFixCenterOfGravity = () => {
+    onChangeModifierKeyBehaviors({
+      ...modifierKeyBehaviors,
+      lockFixCenterOfGravity: !modifierKeyBehaviors.lockFixCenterOfGravity
     });
   };
 
@@ -303,13 +301,17 @@ const ToolBar: React.FC<{
           })}
           <MenuItem divider />
           <MenuItem header>shape resizing: option key + drag</MenuItem>
-          <MenuItem onClick={handleToggleMaintainAspectRatioWithShift}>
-            {shapeResizeOptions.maintainAspectRatioWithShift && 'shift + '}
-            drag = maintain aspect ratio
+          <MenuItem onClick={handleToggleLockMaintainAspectRatio}>
+            shift + drag ={' '}
+            {modifierKeyBehaviors.lockMaintainAspectRatio
+              ? 'maintain aspect ratio'
+              : 'free transformation'}
           </MenuItem>
-          <MenuItem onClick={handleToggleFixCenterOfGravityWithCtrl}>
-            {shapeResizeOptions.fixCenterOfGravityWithCtrl && 'ctrl + '}
-            drag = resize from the center
+          <MenuItem onClick={handleToggleLockFixCenterOfGravity}>
+            ctrl + drag = resize from the{' '}
+            {modifierKeyBehaviors.lockFixCenterOfGravity
+              ? 'center'
+              : 'corner or side'}
           </MenuItem>
         </Dropdown.Menu>
       </Dropdown>

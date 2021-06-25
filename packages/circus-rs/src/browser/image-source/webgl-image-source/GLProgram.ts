@@ -24,11 +24,13 @@ const fragmentShaderSource = [
   require('./fragment-shader/getLabeledAt.frag'),
   require('./fragment-shader/getValueAt.frag'),
   require('./fragment-shader/getColorFromPixelValue.frag'),
+  require('./fragment-shader/getColorFromPixelValueAndWindow.frag'),
   require('./fragment-shader/getVoxelValueAndMaskValueWithInterpolation.frag'),
   // If highlighting label with interporation, it seems too weak.
   // require('./fragment-shader/getLabeledValueWithInterpolation.frag'),
   require('./fragment-shader/getLabeledValueAnyNeighbor.frag'),
   require('./fragment-shader/getColorWithRayCasting.frag'),
+  require('./fragment-shader/getColorWithWindow.frag'),
   require('./fragment-shader/main.frag')
 ].join('\n');
 
@@ -45,7 +47,7 @@ type LabelTexuture = {
   color: [number, number, number, number];
 };
 
-export default class VRGLProgram extends GLProgramBase {
+export default class GLProgram extends GLProgramBase {
   protected program: WebGLProgram;
   private highlightLabelIndex: number = -1;
   private mmToWorldCoords?: number;
@@ -165,7 +167,7 @@ export default class VRGLProgram extends GLProgramBase {
         this.uDrawMode(0);
         break;
       case 'mpr':
-        this.uDrawMode(1);
+        this.uDrawMode(0);
         break;
     }
   }
@@ -212,163 +214,6 @@ export default class VRGLProgram extends GLProgramBase {
       texture,
       color
     };
-  }
-
-  public setDrawingBoundary({
-    offset,
-    dimension,
-    voxelSize
-  }: {
-    offset: [number, number, number];
-    dimension: [number, number, number];
-    voxelSize: [number, number, number];
-  }) {
-    this.uVolumeOffset(offset);
-    this.uVolumeDimension(dimension);
-    this.uVoxelSizeInverse([
-      1.0 / voxelSize[0],
-      1.0 / voxelSize[1],
-      1.0 / voxelSize[2]
-    ]);
-    this.bufferVertexPosition({ dimension, offset, voxelSize });
-    this.bufferVertexIndex();
-    this.bufferVertexColor();
-  }
-
-  private bufferVertexPosition({
-    dimension,
-    offset,
-    voxelSize
-  }: {
-    dimension: number[];
-    offset: number[];
-    voxelSize: number[];
-  }) {
-    const gl = this.gl;
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.aVertexPositionBuffer);
-
-    // Describe the layout of the buffer
-    gl.vertexAttribPointer(
-      this.aVertexPositionLocation,
-      3, // size
-      gl.FLOAT, // type
-      false, // normalized
-      0, // stride
-      0 // offset
-    );
-
-    //
-    //             1.0 y
-    //              ^  -1.0
-    //              | / z
-    //              |/       x
-    // -1.0 -----------------> +1.0
-    //            / |
-    //      +1.0 /  |
-    //           -1.0
-    //
-    //         [7]------[6]
-    //        / |      / |
-    //      [3]------[2] |
-    //       |  |     |  |
-    //       | [4]----|-[5]
-    //       |/       |/
-    //      [0]------[1]
-    //
-    const [vw, vh, vd] = voxelSize;
-    const [ox, oy, oz] = [offset[0] * vw, offset[1] * vh, offset[2] * vd];
-    const [w, h, d] = [dimension[0] * vw, dimension[1] * vh, dimension[2] * vd];
-
-    // prettier-ignore
-    const positions = [
-      // Front face
-      ox, oy, oz + d, // v0
-      ox + w, oy, oz + d, // v1
-      ox + w, oy + h, oz + d, // v2
-      ox, oy + h, oz + d, // v3
-      // Back face
-      ox, oy, oz, // v4
-      ox + w, oy, oz, // v5
-      ox + w, oy + h, oz, // v6
-      ox, oy + h, oz, // v7
-      // Top face
-      ox + w, oy + h, oz + d, // v2
-      ox, oy + h, oz + d, // v3
-      ox, oy + h, oz, // v7
-      ox + w, oy + h, oz, // v6
-      // Bottom face
-      ox, oy, oz + d, // v0
-      ox + w, oy, oz + d, // v1
-      ox + w, oy, oz, // v5
-      ox, oy, oz, // v4
-      // Right face
-      ox + w, oy, oz + d, // v1
-      ox + w, oy + h, oz + d, // v2
-      ox + w, oy + h, oz, // v6
-      ox + w, oy, oz, // v5
-      // Left face
-      ox, oy, oz + d, // v0
-      ox, oy + h, oz + d, // v3
-      ox, oy + h, oz, // v7
-      ox, oy, oz // v4
-    ];
-
-    const data = new Float32Array(positions);
-    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STREAM_DRAW);
-    // gl.bufferSubData(gl.ARRAY_BUFFER, 0, data);
-  }
-
-  private bufferVertexIndex() {
-    const gl = this.gl;
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.aVertexIndexBuffer);
-
-    // Vertex index buffer array
-    // prettier-ignore
-    const volumeVertexIndices = [
-      0, 1, 2, 0, 2, 3, // Front face
-      4, 5, 6, 4, 6, 7, // Back face
-      8, 9, 10, 8, 10, 11, // Top face
-      12, 13, 14, 12, 14, 15, // Bottom face
-      16, 17, 18, 16, 18, 19, // Right face
-      20, 21, 22, 20, 22, 23 // Left face
-    ];
-    const data = new Uint16Array(volumeVertexIndices);
-
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, data, gl.DYNAMIC_DRAW);
-  }
-
-  private bufferVertexColor() {
-    const gl = this.gl;
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.aVertexColorBuffer);
-
-    // Describe the layout of the buffer
-    gl.vertexAttribPointer(
-      this.aVertexColorLocation,
-      4, // size
-      gl.FLOAT, // type
-      false, // normalized
-      0, // stride
-      0 // offset
-    );
-
-    const colors = [
-      [1.0, 0.0, 0.0, 1.0], // Front face ... RED
-      [1.0, 1.0, 0.0, 1.0], // Back face  ... YELLOW
-      [0.0, 1.0, 0.0, 1.0], // Top face   ... GREEN
-      [0.0, 0.5, 0.5, 1.0], // Bottom face .. CYAN
-      [1.0, 0.0, 1.0, 1.0], // Right face ... PURPLE
-      [0.0, 0.0, 1.0, 1.0] // Left face  ... BLUE
-    ];
-    let volumeVertexColors: number[] = [];
-    for (let i in colors) {
-      let color = colors[i];
-      for (let j = 0; j < 4; j++) {
-        volumeVertexColors = volumeVertexColors.concat(color);
-      }
-    }
-
-    const data = new Float32Array(volumeVertexColors);
-    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
   }
 
   public setSectionBoundary(
@@ -467,16 +312,14 @@ export default class VRGLProgram extends GLProgramBase {
       0 // offset
     );
 
-    const colors = [[1.0, 0.0, 0.0, 1.0]];
-    let volumeVertexColors: number[] = [];
-    for (let i in colors) {
-      let color = colors[i];
-      for (let j = 0; j < 4; j++) {
-        volumeVertexColors = volumeVertexColors.concat(color);
-      }
-    }
+    const red = [1.0, 0.0, 0.0, 1.0];
+    const yellow = [1.0, 1.0, 0.0, 1.0];
+    const green = [0.0, 1.0, 0.0, 1.0];
+    const cyan = [0.0, 0.5, 0.5, 1.0];
+    const purple = [1.0, 0.0, 1.0, 1.0];
+    const blue = [0.0, 0.0, 1.0, 1.0];
 
-    const data = new Float32Array(volumeVertexColors);
+    const data = new Float32Array([...red, ...yellow, ...green, ...cyan]);
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
   }
 

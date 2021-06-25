@@ -2,9 +2,9 @@ import { Vector3, Vector2 } from 'three';
 import Viewer from '../viewer/Viewer';
 import ViewState, { VrViewState, TransferFunction } from '../ViewState';
 import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
-import VRGLProgram, {
+import GLProgram, {
   Camera
-} from './webgl-image-source/VRGLProgram';
+} from './webgl-image-source/GLProgram';
 import RawData from '../../common/RawData';
 import { LabelLoader } from './volume-loader/interface';
 import {
@@ -27,7 +27,7 @@ interface VolumeLoader {
 export default class WebGLImageSource extends MprImageSource {
   private backCanvas: HTMLCanvasElement;
 
-  private vrProgram: VRGLProgram;
+  private glProgram: GLProgram;
   private labelLoader?: LabelLoader;
   private loadingLabelData: Record<number, Promise<void>> = {};
 
@@ -61,7 +61,7 @@ export default class WebGLImageSource extends MprImageSource {
     const glContext = this.getWebGLContext(backCanvas);
 
     this.backCanvas = backCanvas;
-    this.vrProgram = new VRGLProgram(glContext);
+    this.glProgram = new GLProgram(glContext);
     this.loadSequence = this.load({ volumeLoader, maskLoader });
     this.labelLoader = labelLoader;
   }
@@ -116,13 +116,13 @@ export default class WebGLImageSource extends MprImageSource {
       voxelCount[2] * voxelSize[2]
     ];
     const maxSideLength = Math.max(...mmDimension);
-    this.vrProgram.setWorldCoordsBaseLength(maxSideLength);
+    this.glProgram.setWorldCoordsBaseLength(maxSideLength);
 
     // Load volume data and transfer as texture
     const loadingVolumes = Promise.all([
       volumeLoader.loadVolume() as Promise<RawData>,
       maskLoader ? maskLoader.loadVolume() : Promise.resolve(undefined)
-    ]).then(([volume, mask]) => this.vrProgram.setVolume(volume!, mask));
+    ]).then(([volume, mask]) => this.glProgram.setVolume(volume!, mask));
 
     // For debugging
     if (WebGLImageSource.readyBeforeVolumeLoaded) return;
@@ -136,8 +136,8 @@ export default class WebGLImageSource extends MprImageSource {
     const window = metadata.dicomWindow
       ? { ...metadata.dicomWindow }
       : metadata.estimatedWindow
-      ? { ...metadata.estimatedWindow }
-      : { level: 50, width: 100 };
+        ? { ...metadata.estimatedWindow }
+        : { level: 50, width: 100 };
 
     // Create initial section as axial section watched from head to toe.
     const section = createOrthogonalMprSection(
@@ -206,16 +206,16 @@ export default class WebGLImageSource extends MprImageSource {
       viewState.type === 'vr'
         ? viewState
         : {
-            ...viewState,
-            transferFunction: mprTransferFunction(viewState.window),
-            highlightedLabelIndex: undefined,
-            rayIntensity: 0.1,
-            quality: undefined,
-            subVolume: undefined,
-            background: undefined,
-            enableMask: undefined,
-            debugMode: undefined
-          };
+          ...viewState,
+          transferFunction: mprTransferFunction(viewState.window),
+          highlightedLabelIndex: undefined,
+          rayIntensity: 0.1,
+          quality: undefined,
+          subVolume: undefined,
+          background: undefined,
+          enableMask: undefined,
+          debugMode: undefined
+        };
 
     // At the first label highlighting, load and create the texture.
     // Since this process involves asynchronous processing,
@@ -226,19 +226,19 @@ export default class WebGLImageSource extends MprImageSource {
           .load(highlightedLabelIndex)
           .then(label => {
             label &&
-              this.vrProgram.appendLabelData(highlightedLabelIndex, label);
+              this.glProgram.appendLabelData(highlightedLabelIndex, label);
           });
       }
       await this.loadingLabelData[highlightedLabelIndex];
     }
 
-    this.vrProgram.setDrawMode(type);
+    this.glProgram.setDrawMode(type);
 
     // set debug
     if (typeof debugMode !== 'undefined') {
-      this.vrProgram.setDebugMode(debugMode);
+      this.glProgram.setDebugMode(debugMode);
     } else if (WebGLImageSource.defaultDebugMode) {
-      this.vrProgram.setDebugMode(WebGLImageSource.defaultDebugMode);
+      this.glProgram.setDebugMode(WebGLImageSource.defaultDebugMode);
     }
 
     // set back-canvas-size
@@ -253,75 +253,57 @@ export default class WebGLImageSource extends MprImageSource {
     }
 
     // Boundary box vertexes
-    switch (type) {
-      case 'vr':
-        if (this.lastSubVolume !== subVolume) {
-          this.vrProgram.setDrawingBoundary({
-            offset: subVolume.offset,
-            dimension: subVolume.dimension,
-            voxelSize
-          });
-          this.lastSubVolume = subVolume;
-        }
-        break;
-      case 'mpr':
-        this.vrProgram.setSectionBoundary(section, {
-          offset: [0, 0, 0],
-          dimension: voxelCount,
-          voxelSize
-        });
-        break;
-    }
+    this.glProgram.setSectionBoundary(section, {
+      offset: [0, 0, 0],
+      dimension: voxelCount,
+      voxelSize
+    });
 
     // Transfer function
     if (this.lastTransferFunction !== transferFunction && transferFunction) {
-      this.vrProgram.setTransferFunction(transferFunction);
+      this.glProgram.setTransferFunction(transferFunction);
       this.lastTransferFunction = transferFunction;
     }
 
     // Vessel mask
     if (this.lastEnableMask !== enableMask) {
-      this.vrProgram.toggleMask(!!enableMask);
+      this.glProgram.toggleMask(!!enableMask);
       this.lastEnableMask = enableMask;
     }
 
     // Highlight label
     if (this.lastHighlightedLabelIndex !== highlightedLabelIndex) {
-      this.vrProgram.setHighlightLabel(highlightedLabelIndex);
+      this.glProgram.setHighlightLabel(highlightedLabelIndex);
     }
 
     // Background
-    this.vrProgram.setBackground(background);
+    this.glProgram.setBackground(background);
 
     // Interporation
-    this.vrProgram.setInterporationMode(interpolationMode);
+    this.glProgram.setInterporationMode(interpolationMode);
 
     // Camera
-    const camera = this.createCamera(section, subVolume, type);
-    this.vrProgram.setCamera(camera);
+    const camera = this.createCamera(section, subVolume);
+    this.glProgram.setCamera(camera);
 
     // Ray configuration
     this.configureRay(camera, { quality, rayIntensity });
 
-    this.vrProgram.run();
+    this.glProgram.run();
 
-    return this.vrProgram.resolveImageData();
+    return this.glProgram.resolveImageData();
   }
 
   private setCanvasSize(width: number, height: number) {
     this.backCanvas.width = width;
     this.backCanvas.height = height;
-    this.vrProgram.setViewport(0, 0, width, height);
+    this.glProgram.setViewport(0, 0, width, height);
   }
 
-  private createCamera(
-    section: Section,
-    subVolume: SubVolume,
-    type: 'vr' | 'mpr'
-  ): Camera {
+  private createCamera(section: Section): Camera {
+    const { voxelCount } = this.metadata!;
     const { origin, xAxis, yAxis } = vectorizeSection(section);
-    const offset = new Vector3().fromArray(subVolume.offset);
-    const dim = new Vector3().fromArray(subVolume.dimension);
+    const [x, y, z] = voxelCount;
 
     // The camera target is The center of the section.
     const target = origin
@@ -332,14 +314,13 @@ export default class WebGLImageSource extends MprImageSource {
     // Ensure the camera position is outside the (sub)volume.
     // And the position is preferably close to the volume to reduce the cost in the fragment shader.
     const distancesToEachVertex = [
-      offset,
-      new Vector3().addVectors(offset, new Vector3(dim.x, 0, 0)),
-      new Vector3().addVectors(offset, new Vector3(0, dim.y, 0)),
-      new Vector3().addVectors(offset, new Vector3(0, 0, dim.z)),
-      new Vector3().addVectors(offset, new Vector3(dim.x, dim.y, 0)),
-      new Vector3().addVectors(offset, new Vector3(0, dim.y, dim.z)),
-      new Vector3().addVectors(offset, new Vector3(dim.x, 0, dim.z)),
-      new Vector3().addVectors(offset, dim)
+      new Vector3(x, 0, 0),
+      new Vector3(0, y, 0),
+      new Vector3(0, 0, z),
+      new Vector3(x, y, 0),
+      new Vector3(0, y, z),
+      new Vector3(x, 0, z),
+      new Vector3(x, y, z),
     ].map(v => v.distanceTo(target));
 
     const farEnough = distancesToEachVertex.reduce(
@@ -350,7 +331,7 @@ export default class WebGLImageSource extends MprImageSource {
     const eyeLine = new Vector3()
       .crossVectors(xAxis, yAxis)
       .normalize()
-      .multiplyScalar(type === 'mpr' ? 1 : farEnough);
+      .multiplyScalar(farEnough);
 
     const position = new Vector3().addVectors(target, eyeLine);
 
@@ -379,7 +360,7 @@ export default class WebGLImageSource extends MprImageSource {
       rayIntensity: number;
     }
   ) {
-    this.vrProgram.setRay(camera, {
+    this.glProgram.setRay(camera, {
       voxelSize: this.metadata!.voxelSize!,
 
       intensity: rayIntensity,

@@ -15,8 +15,11 @@ void main() {
       vec2(vWorldSpaceCoords.x / 256.0, vWorldSpaceCoords.y / 256.0)
     );
   }
-  // - volume rendering
   else {
-    gl_FragColor = getColorWithRayCasting(vWorldSpaceCoords);
+    // gl_FragColor = vColor;
+    // - volume rendering
+    // gl_FragColor = getColorWithRayCasting(vWorldSpaceCoords);
+    // - MPR rendering
+    gl_FragColor = getColorWithWindow(vWorldSpaceCoords);
   }
 }

@@ -11,7 +11,8 @@ vec2 getValueAt(float x, float y, float z)
   float t = y / uTextureSize[1] + sliceRowNo / uSliceGridSize[1];
 
   vec4 dataTexel = texture2D(uVolumeTextureSampler, vec2(s,t));
-  float texelValue = (dataTexel.r * 256.0 + dataTexel.g) * 256.0;
+  float texelValue = floor(dataTexel.r * 255.0) * 256.0 + floor(dataTexel.g * 255.0);
+  dataTexel.b =  floor(dataTexel.b * 255.0);
 
   // Check If the voxel is masked
   return vec2(texelValue, dataTexel.b);

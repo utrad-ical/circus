@@ -398,8 +398,10 @@ const RevisionEditor: React.FC<{
           antn instanceof rs.Ellipsoid ||
           antn instanceof rs.PlaneFigure
         ) {
-          // antn.setModifierKeyBehaviors(shapeResizeOptions);
-          antn.modifierKeyBehaviors = shapeResizeOptions;
+          antn.maintainAspectRatioWithShift =
+            shapeResizeOptions.maintainAspectRatioWithShift;
+          antn.fixCenterOfGravityWithCtrl =
+            shapeResizeOptions.fixCenterOfGravityWithCtrl;
         }
       });
 

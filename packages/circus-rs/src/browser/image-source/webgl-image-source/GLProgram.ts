@@ -21,16 +21,16 @@ export interface Camera {
 const vertexShaderSource = require('./vertex-shader.vert');
 const fragmentShaderSource = [
   require('./fragment-shader/header.frag'),
+  require('./fragment-shader/pixel-value.frag'),
+  require('./fragment-shader/pixel-color.frag'),
   require('./fragment-shader/getLabeledAt.frag'),
   require('./fragment-shader/getValueAt.frag'),
-  require('./fragment-shader/getColorFromPixelValue.frag'),
-  require('./fragment-shader/getColorFromPixelValueAndWindow.frag'),
   require('./fragment-shader/getVoxelValueAndMaskValueWithInterpolation.frag'),
   // If highlighting label with interporation, it seems too weak.
   // require('./fragment-shader/getLabeledValueWithInterpolation.frag'),
   require('./fragment-shader/getLabeledValueAnyNeighbor.frag'),
-  require('./fragment-shader/getColorWithRayCasting.frag'),
-  require('./fragment-shader/getColorWithWindow.frag'),
+  require('../volume-rendering-image-source/fragment-shader/getColorFromPixelValue.frag'),
+  require('../volume-rendering-image-source/fragment-shader/getColorWithRayCasting.frag'),
   require('./fragment-shader/main.frag')
 ].join('\n');
 

@@ -23,6 +23,9 @@ varying vec3 vWorldSpaceCoords;
 
 uniform int uDebugFlag;
 
+uniform float uWindowWidth;
+uniform float uWindowLevel;
+
 struct boundary {
   vec3 start;
   vec3 end;

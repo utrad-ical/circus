@@ -6,6 +6,7 @@ import RawData from '../../../common/RawData';
 import loadVolumeIntoTexture from './texture-loader/loadVolumeIntoTexture';
 import loadTransferFunctionIntoTexture from './texture-loader/loadTransferFunctionIntoTexture';
 import { Section, vectorizeSection } from '../../../common/geometry/Section';
+import { ViewWindow } from 'common/ViewWindow';
 
 export interface Camera {
   position: Vector3;
@@ -51,6 +52,9 @@ export default class GLProgram extends GLProgramBase {
   private uTextureSize: SetUniform['uniform2fv'];
   private uSliceGridSize: SetUniform['uniform2fv'];
 
+  private uWindowWidth: SetUniform['uniform1f'];
+  private uWindowLevel: SetUniform['uniform1f'];
+
   private transferFunctionTexture: WebGLTexture | undefined = undefined;
   private uTransferFunctionSampler: SetUniform['uniform1i'];
 
@@ -70,6 +74,9 @@ export default class GLProgram extends GLProgramBase {
     this.uMVPMatrix = this.uniformMatrix4fv('uMVPMatrix', false);
 
     this.uDebugFlag = this.uniform1i('uDebugFlag');
+
+    this.uWindowWidth = this.uniform1f('uWindowWidth');
+    this.uWindowLevel = this.uniform1f('uWindowLevel');
 
     // Buffers
     this.aVertexPositionBuffer = this.createBuffer();
@@ -121,6 +128,11 @@ export default class GLProgram extends GLProgramBase {
 
     this.uTextureSize(textureSize);
     this.uSliceGridSize(sliceGridSize);
+  }
+
+  public setViewWindow(viewWindow: ViewWindow) {
+    this.uWindowWidth(viewWindow.width);
+    this.uWindowLevel(viewWindow.level);
   }
 
   public setTransferFunction(transferFunction: TransferFunction) {

@@ -120,7 +120,8 @@ export default class WebGLImageSource extends MprImageSource {
 
     const {
       section,
-      interpolationMode = 'nearestNeighbor'
+      interpolationMode = 'nearestNeighbor',
+      window
     } = viewState;
 
     const background: RGBA = [0, 0, 0, 0xff];
@@ -164,6 +165,9 @@ export default class WebGLImageSource extends MprImageSource {
     // Camera
     const camera = this.createCamera(section);
     this.glProgram.setCamera(camera);
+
+    // View window
+    this.glProgram.setViewWindow(window);
 
     this.glProgram.run();
 

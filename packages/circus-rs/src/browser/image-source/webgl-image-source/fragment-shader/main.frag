@@ -13,9 +13,7 @@ void main() {
   // Determine the color of the fragment.
   if(uDebugFlag == 0) {
     // - use window
-    float windowWidth = 658.0;
-    float windowLevel = 329.0;
-    gl_FragColor = getColorWithWindow(pixelValue, windowWidth, windowLevel);
+    gl_FragColor = getColorWithWindow(pixelValue, uWindowWidth, uWindowLevel);
   } else if(uDebugFlag == 1) {
     // - use transfer function
     gl_FragColor = getColorWithTransferFunction(pixelValue, uTransferFunctionSampler);

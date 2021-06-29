@@ -1,30 +1,14 @@
 import { Vector3, Vector2 } from 'three';
 import Viewer from '../viewer/Viewer';
-import ViewState, { VrViewState, TransferFunction } from '../ViewState';
+import ViewState from '../ViewState';
 import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
 import GLProgram, {
   Camera
 } from './webgl-image-source/GLProgram';
-import RawData from '../../common/RawData';
-import { LabelLoader } from './volume-loader/interface';
-import {
-  windowToTransferFunction,
-  mprTransferFunction
-} from './webgl-image-source/transfer-function-util';
 import MprImageSource from './MprImageSource';
 import { Section, vectorizeSection } from '../../common/geometry/Section';
-import { createOrthogonalMprSection } from '../section-util';
 
 type RGBA = [number, number, number, number];
-
-interface SubVolume {
-  offset: [number, number, number];
-  dimension: [number, number, number];
-}
-
-interface VolumeLoader {
-  loadVolume(): Promise<RawData>;
-}
 
 interface WebGLImageSourceOptions {
   volumeLoader: DicomVolumeLoader;

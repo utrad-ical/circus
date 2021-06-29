@@ -15,6 +15,8 @@ import MprImageSource from './MprImageSource';
 import { Section, vectorizeSection } from '../../common/geometry/Section';
 import { createOrthogonalMprSection } from '../section-util';
 
+type RGBA = [number, number, number, number];
+
 interface SubVolume {
   offset: [number, number, number];
   dimension: [number, number, number];
@@ -24,15 +26,16 @@ interface VolumeLoader {
   loadVolume(): Promise<RawData>;
 }
 
+interface WebGLImageSourceOptions {
+  volumeLoader: DicomVolumeLoader;
+}
+
 export default class WebGLImageSource extends MprImageSource {
   private backCanvas: HTMLCanvasElement;
 
   private glProgram: GLProgram;
-  private labelLoader?: LabelLoader;
-  private loadingLabelData: Record<number, Promise<void>> = {};
 
   // Cache for checking update something.
-  private lastTransferFunction?: TransferFunction;
   private lastWidth?: number;
   private lastHeight?: number;
 
@@ -43,24 +46,14 @@ export default class WebGLImageSource extends MprImageSource {
   public static defaultDebugMode: number = 0;
   public static backCanvasElement?: HTMLDivElement;
 
-  constructor({
-    volumeLoader,
-    maskLoader,
-    labelLoader
-  }: {
-    volumeLoader: DicomVolumeLoader;
-    maskLoader?: VolumeLoader;
-    labelLoader?: LabelLoader;
-  }) {
+  constructor({ volumeLoader }: WebGLImageSourceOptions) {
     super();
-
     const backCanvas = this.initializeBackCanvas();
     const glContext = this.getWebGLContext(backCanvas);
 
     this.backCanvas = backCanvas;
     this.glProgram = new GLProgram(glContext);
-    this.loadSequence = this.load({ volumeLoader, maskLoader });
-    this.labelLoader = labelLoader;
+    this.loadSequence = this.load({ volumeLoader });
   }
 
   /**
@@ -95,18 +88,11 @@ export default class WebGLImageSource extends MprImageSource {
     return gl as WebGLRenderingContext;
   }
 
-  private async load({
-    volumeLoader,
-    maskLoader
-  }: {
-    volumeLoader: DicomVolumeLoader;
-    maskLoader?: VolumeLoader;
-  }) {
-    const metadata = await volumeLoader.loadMeta();
-    this.metadata = metadata;
+  private async load({ volumeLoader }: { volumeLoader: DicomVolumeLoader; }) {
+    this.metadata = await volumeLoader.loadMeta();
 
     // Set world coordinates length 1.0 as in mm
-    const { voxelCount, voxelSize } = metadata;
+    const { voxelCount, voxelSize } = this.metadata;
     const mmDimension: [number, number, number] = [
       voxelCount[0] * voxelSize[0],
       voxelCount[1] * voxelSize[1],
@@ -115,64 +101,9 @@ export default class WebGLImageSource extends MprImageSource {
     const maxSideLength = Math.max(...mmDimension);
     this.glProgram.setWorldCoordsBaseLength(maxSideLength);
 
-    // Load volume data and transfer as texture
-    const loadingVolumes = Promise.all([
-      volumeLoader.loadVolume() as Promise<RawData>,
-      maskLoader ? maskLoader.loadVolume() : Promise.resolve(undefined)
-    ]).then(([volume, mask]) => this.glProgram.setVolume(volume!, mask));
-
-    // For debugging
-    if (WebGLImageSource.readyBeforeVolumeLoaded) return;
-
-    return loadingVolumes;
-  }
-
-  public initialState(viewer: Viewer): ViewState {
-    if (!this.metadata) throw new Error('Metadata now loaded');
-    const metadata = this.metadata;
-    const window = metadata.dicomWindow
-      ? { ...metadata.dicomWindow }
-      : metadata.estimatedWindow
-        ? { ...metadata.estimatedWindow }
-        : { level: 50, width: 100 };
-
-    // Create initial section as axial section watched from head to toe.
-    const section = createOrthogonalMprSection(
-      viewer.getResolution(),
-      this.mmDim(),
-      'axial',
-      undefined,
-      true
-    );
-
-    const state: VrViewState = {
-      type: 'vr',
-      section,
-      interpolationMode: 'trilinear',
-      background: this.defaultBackground(),
-      subVolume: this.defaultSubVolume(),
-      transferFunction: windowToTransferFunction(window),
-      rayIntensity: 1.0,
-      quality: 2.0
-    };
-
-    return state;
-  }
-
-  /**
-   * Create whole of volume as initial subVolue.
-   */
-  private defaultSubVolume() {
-    const { voxelCount } = this.metadata!;
-    const subVolume: SubVolume = {
-      offset: [0, 0, 0] as [number, number, number],
-      dimension: voxelCount
-    };
-    return subVolume;
-  }
-
-  private defaultBackground(): [number, number, number, number] {
-    return [0, 0, 0, 0xff];
+    // Load volume and transfer as texture
+    const volume = await volumeLoader.loadVolume();
+    this.glProgram.setVolume(volume);
   }
 
   /**
@@ -184,42 +115,19 @@ export default class WebGLImageSource extends MprImageSource {
   public async draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
     const { voxelSize, voxelCount } = this.metadata!;
 
-    if (viewState.type !== 'vr' && viewState.type !== 'mpr')
+    if (viewState.type !== 'mpr')
       throw new Error('Unsupported view state.');
 
     const {
-      type,
       section,
-      interpolationMode = 'nearestNeighbor',
-      highlightedLabelIndex = -1,
-      rayIntensity = 1.0,
-      quality = 2.0,
-      subVolume = this.defaultSubVolume(),
-      background = this.defaultBackground(),
-      transferFunction,
-      enableMask = false,
-      debugMode = undefined
-    } =
-      viewState.type === 'vr'
-        ? viewState
-        : {
-          ...viewState,
-          transferFunction: mprTransferFunction(viewState.window),
-          highlightedLabelIndex: undefined,
-          rayIntensity: 0.1,
-          quality: undefined,
-          subVolume: undefined,
-          background: undefined,
-          enableMask: undefined,
-          debugMode: undefined
-        };
+      interpolationMode = 'nearestNeighbor'
+    } = viewState;
+
+    const background: RGBA = [0, 0, 0, 0xff];
+    const debugMode = WebGLImageSource.defaultDebugMode;
 
     // set debug
-    if (typeof debugMode !== 'undefined') {
-      this.glProgram.setDebugMode(debugMode);
-    } else if (WebGLImageSource.defaultDebugMode) {
-      this.glProgram.setDebugMode(WebGLImageSource.defaultDebugMode);
-    }
+    this.glProgram.setDebugMode(debugMode);
 
     // set back-canvas-size
     const [viewportWidth, viewportHeight] = viewer.getResolution();
@@ -240,10 +148,12 @@ export default class WebGLImageSource extends MprImageSource {
     });
 
     // Transfer function
-    if (this.lastTransferFunction !== transferFunction && transferFunction) {
-      this.glProgram.setTransferFunction(transferFunction);
-      this.lastTransferFunction = transferFunction;
-    }
+    // this.glProgram.setDebugMode(1);
+    // const transferFunction = mprTransferFunction(viewState.window);
+    // if (this.lastTransferFunction !== transferFunction && transferFunction) {
+    //   this.glProgram.setTransferFunction(transferFunction);
+    //   this.lastTransferFunction = transferFunction;
+    // }
 
     // Background
     this.glProgram.setBackground(background);

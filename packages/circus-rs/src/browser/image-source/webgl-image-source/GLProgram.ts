@@ -2,12 +2,9 @@ import { Vector3, Matrix4 } from 'three';
 import { mat4 } from 'gl-matrix';
 import { TransferFunction, InterpolationMode } from '../../ViewState';
 import GLProgramBase, { SetUniform } from './GLProgramBase';
-import { LabelData } from '../volume-loader/interface';
-import loadLabelIntoTexture from './texture-loader/loadLabelIntoTexture';
 import RawData from '../../../common/RawData';
 import loadVolumeIntoTexture from './texture-loader/loadVolumeIntoTexture';
 import loadTransferFunctionIntoTexture from './texture-loader/loadTransferFunctionIntoTexture';
-import { TextureLayout } from './texture-loader/interface';
 import { Section, vectorizeSection } from '../../../common/geometry/Section';
 
 export interface Camera {
@@ -54,7 +51,7 @@ export default class GLProgram extends GLProgramBase {
   private uTextureSize: SetUniform['uniform2fv'];
   private uSliceGridSize: SetUniform['uniform2fv'];
 
-  private transferFunctionTexture: WebGLTexture;
+  private transferFunctionTexture: WebGLTexture | undefined = undefined;
   private uTransferFunctionSampler: SetUniform['uniform1i'];
 
   constructor(gl: WebGLRenderingContext) {
@@ -89,7 +86,6 @@ export default class GLProgram extends GLProgramBase {
     this.uTextureSize = this.uniform2fv('uTextureSize');
     this.uSliceGridSize = this.uniform2fv('uSliceGridSize');
 
-    this.transferFunctionTexture = this.createTexture();
     this.uTransferFunctionSampler = this.uniform1i('uTransferFunctionSampler');
   }
 
@@ -116,12 +112,11 @@ export default class GLProgram extends GLProgramBase {
     this.mmToWorldCoords = 1.0 / mmBaseLength;
   }
 
-  public setVolume(volume: RawData, mask?: RawData) {
+  public setVolume(volume: RawData) {
     const { textureSize, sliceGridSize } = loadVolumeIntoTexture(
       this.gl,
       this.volumeTexture,
-      volume,
-      mask
+      volume
     );
 
     this.uTextureSize(textureSize);
@@ -129,6 +124,10 @@ export default class GLProgram extends GLProgramBase {
   }
 
   public setTransferFunction(transferFunction: TransferFunction) {
+    if (this.transferFunctionTexture === undefined) {
+      this.transferFunctionTexture = this.createTexture();
+    }
+
     loadTransferFunctionIntoTexture(
       this.gl,
       this.transferFunctionTexture,
@@ -355,9 +354,11 @@ export default class GLProgram extends GLProgramBase {
     gl.bindTexture(gl.TEXTURE_2D, this.volumeTexture);
 
     // Transfer function
-    // this.uTransferFunctionSampler(1);
-    // gl.activeTexture(gl.TEXTURE1);
-    // gl.bindTexture(gl.TEXTURE_2D, this.transferFunctionTexture);
+    if (this.transferFunctionTexture) {
+      this.uTransferFunctionSampler(1);
+      gl.activeTexture(gl.TEXTURE1);
+      gl.bindTexture(gl.TEXTURE_2D, this.transferFunctionTexture);
+    }
 
     // Enable attribute pointers
     gl.enableVertexAttribArray(this.aVertexColorLocation);

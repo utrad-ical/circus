@@ -125,12 +125,8 @@ export default class WebGLImageSource extends MprImageSource {
       this.lastHeight = viewportHeight;
     }
 
-    // Boundary box vertexes
-    this.glProgram.setSectionBoundary(section, {
-      offset: [0, 0, 0],
-      dimension: voxelCount,
-      voxelSize
-    });
+    this.glProgram.setVolumeInformation(voxelSize, voxelCount);
+    this.glProgram.setSection(section);
 
     // Transfer function
     // this.glProgram.setDebugMode(1);

@@ -41,11 +41,11 @@ export default class GLProgram extends GLProgramBase {
   public uMVPMatrix: SetUniform['uniformMatrix4fv'];
   private uDebugFlag: SetUniform['uniform1i'];
 
-  private aVertexPositionBuffer: WebGLBuffer;
+  private aVertexPositionBuffer: WebGLBuffer | undefined = undefined;
   private aVertexPositionLocation: number;
   private aVertexColorBuffer: WebGLBuffer;
   private aVertexColorLocation: number;
-  private aVertexIndexBuffer: WebGLBuffer;
+  private aVertexIndexBuffer: WebGLBuffer|undefined = undefined;
 
   private volumeTexture: WebGLTexture;
   private uVolumeTextureSampler: SetUniform['uniform1i'];
@@ -79,13 +79,10 @@ export default class GLProgram extends GLProgramBase {
     this.uWindowLevel = this.uniform1f('uWindowLevel');
 
     // Buffers
-    this.aVertexPositionBuffer = this.createBuffer();
     this.aVertexPositionLocation = this.getAttribLocation('aVertexPosition');
-
-    this.aVertexIndexBuffer = this.createBuffer();
+    this.aVertexColorLocation = this.getAttribLocation('aVertexColor');
 
     this.aVertexColorBuffer = this.createBuffer();
-    this.aVertexColorLocation = this.getAttribLocation('aVertexColor');
 
     // Textures
     this.volumeTexture = this.createTexture();
@@ -119,12 +116,28 @@ export default class GLProgram extends GLProgramBase {
     this.mmToWorldCoords = 1.0 / mmBaseLength;
   }
 
+  public setVolumeInformation(
+    voxelSize: [number, number, number],
+    dimension: [number, number, number],
+    offset: [number, number, number] = [0, 0, 0]
+  ) {
+    this.uVoxelSizeInverse([
+      1.0 / voxelSize[0],
+      1.0 / voxelSize[1],
+      1.0 / voxelSize[2]
+    ]);
+    this.uVolumeOffset(offset);
+    this.uVolumeDimension(dimension);
+  }
+
   public setVolume(volume: RawData) {
+    console.time('setVolume');
     const { textureSize, sliceGridSize } = loadVolumeIntoTexture(
       this.gl,
       this.volumeTexture,
       volume
     );
+    console.timeEnd('setVolume');
 
     this.uTextureSize(textureSize);
     this.uSliceGridSize(sliceGridSize);
@@ -147,36 +160,48 @@ export default class GLProgram extends GLProgramBase {
     );
   }
 
-  public setSectionBoundary(
+  public setSection(
     section: Section,
-    {
-      offset,
-      dimension,
-      voxelSize
-    }: {
-      offset: [number, number, number];
-      dimension: [number, number, number];
-      voxelSize: [number, number, number];
-    }
   ) {
-    this.uVolumeOffset(offset);
-    this.uVolumeDimension(dimension);
-    this.uVoxelSizeInverse([
-      1.0 / voxelSize[0],
-      1.0 / voxelSize[1],
-      1.0 / voxelSize[2]
-    ]);
-    this.bufferSectionPosition(section);
-    this.bufferSectionIndex();
+    const data = this.createSectionVerticesBufferData(section);
+    if (this.aVertexPositionBuffer) {
+      const gl = this.gl;
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.aVertexPositionBuffer);
+      gl.bufferSubData(gl.ARRAY_BUFFER, 0, data);
+    } else {
+      this.setupSectionVerticesBuffer(data);
+    }
     this.bufferSectionColor();
   }
 
-  private bufferSectionPosition(section: Section) {
-    const gl = this.gl;
-
+  private createSectionVerticesBufferData(section: Section) {
     const { origin, xAxis, yAxis } = vectorizeSection(section);
 
+    //      [3]------[2]
+    //       |        |
+    //       |        |
+    //       |        |
+    //      [0]------[1]
+    const v0 = origin;
+    const v1 = new Vector3().addVectors(origin, xAxis);
+    const v2 = new Vector3().addVectors(origin, xAxis).add(yAxis);
+    const v3 = new Vector3().addVectors(origin, yAxis);
+
+    const positions = [
+      v0.x, v0.y, v0.z, // v0
+      v1.x, v1.y, v1.z, // v1
+      v2.x, v2.y, v2.z, // v2
+      v3.x, v3.y, v3.z // v3
+    ];
+
+    return new Float32Array(positions);
+  }
+
+  private setupSectionVerticesBuffer(data: Float32Array) {
+    const gl = this.gl;
+    this.aVertexPositionBuffer = this.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, this.aVertexPositionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STREAM_DRAW);
 
     // Describe the layout of the buffer
     gl.vertexAttribPointer(
@@ -188,45 +213,13 @@ export default class GLProgram extends GLProgramBase {
       0 // offset
     );
 
-    //      [3]------[2]
-    //       |        |
-    //       |        |
-    //       |        |
-    //      [0]------[1]
-
-    const v0 = origin;
-    const v1 = new Vector3().addVectors(origin, xAxis);
-    const v2 = new Vector3().addVectors(origin, xAxis).add(yAxis);
-    const v3 = new Vector3().addVectors(origin, yAxis);
-    const positions = [
-      v0.x,
-      v0.y,
-      v0.z, // v0
-      v1.x,
-      v1.y,
-      v1.z, // v1
-      v2.x,
-      v2.y,
-      v2.z, // v2
-      v3.x,
-      v3.y,
-      v3.z // v3
-    ];
-
-    const data = new Float32Array(positions);
-    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STREAM_DRAW);
-    // gl.bufferSubData(gl.ARRAY_BUFFER, 0, data);
-  }
-
-  private bufferSectionIndex() {
-    const gl = this.gl;
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.aVertexIndexBuffer);
-
     // Vertex index buffer array
+    this.aVertexIndexBuffer = this.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.aVertexIndexBuffer);
     const volumeVertexIndices = [0, 1, 2, 0, 2, 3];
-    const data = new Uint16Array(volumeVertexIndices);
+    const vertexIndicesData = new Uint16Array(volumeVertexIndices);
 
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, data, gl.DYNAMIC_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, vertexIndicesData, gl.STATIC_DRAW);
   }
 
   private bufferSectionColor() {

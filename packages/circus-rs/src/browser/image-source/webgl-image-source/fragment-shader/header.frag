@@ -8,15 +8,13 @@ uniform vec3 uVolumeDimension;
 // draw volume offset (sub volume offset), on voxel coords system.
 uniform vec3 uVolumeOffset;
 
+// information of the texture for voxel values(and masks).
 uniform sampler2D uVolumeTextureSampler;
 uniform vec2 uTextureSize;
 uniform vec2 uSliceGridSize;
 
 uniform sampler2D uTransferFunctionSampler;
 
-uniform vec3 uSkipStride;
-uniform vec3 uRayStride;
-uniform float uRayIntensityCoef;
 uniform int uInterpolationMode;
 uniform vec4 uBackground;
 
@@ -24,16 +22,6 @@ varying vec4 vColor;
 varying vec3 vWorldSpaceCoords;
 
 uniform int uDebugFlag;
-
-uniform int uEnableMask;
-uniform int uEnableLabel;
-
-uniform sampler2D uLabelSampler;
-uniform vec2 uLabelTextureSize;
-uniform vec2 uLabelSliceGridSize;
-uniform vec3 uLabelBoundaryFrom;
-uniform vec3 uLabelBoundaryTo;
-uniform vec4 uLabelLabelColor;
 
 struct boundary {
   vec3 start;

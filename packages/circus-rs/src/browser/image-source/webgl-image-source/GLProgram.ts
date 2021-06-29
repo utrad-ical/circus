@@ -23,14 +23,6 @@ const fragmentShaderSource = [
   require('./fragment-shader/header.frag'),
   require('./fragment-shader/pixel-value.frag'),
   require('./fragment-shader/pixel-color.frag'),
-  require('./fragment-shader/getLabeledAt.frag'),
-  require('./fragment-shader/getValueAt.frag'),
-  require('./fragment-shader/getVoxelValueAndMaskValueWithInterpolation.frag'),
-  // If highlighting label with interporation, it seems too weak.
-  // require('./fragment-shader/getLabeledValueWithInterpolation.frag'),
-  require('./fragment-shader/getLabeledValueAnyNeighbor.frag'),
-  require('../volume-rendering-image-source/fragment-shader/getColorFromPixelValue.frag'),
-  require('../volume-rendering-image-source/fragment-shader/getColorWithRayCasting.frag'),
   require('./fragment-shader/main.frag')
 ].join('\n');
 
@@ -39,27 +31,14 @@ const fragmentShaderSource = [
 // 1: Transfer function
 // 2: Label
 
-type LabelTexuture = {
-  offset: [number, number, number];
-  size: [number, number, number];
-  textureLayout: TextureLayout;
-  texture: WebGLTexture;
-  color: [number, number, number, number];
-};
-
 export default class GLProgram extends GLProgramBase {
   protected program: WebGLProgram;
-  private highlightLabelIndex: number = -1;
   private mmToWorldCoords?: number;
-  private drawMode: 'mpr' | 'vr' = 'vr';
 
   private uVolumeOffset: SetUniform['uniform3fv'];
   private uVolumeDimension: SetUniform['uniform3fv'];
   private uVoxelSizeInverse: SetUniform['uniform3fv'];
   private uBackground: SetUniform['uniform4fv'];
-  private uRayStride: SetUniform['uniform3fv'];
-  private uSkipStride: SetUniform['uniform3fv'];
-  private uRayIntensityCoef: SetUniform['uniform1f'];
   private uInterpolationMode: SetUniform['uniform1i'];
   public uMVPMatrix: SetUniform['uniformMatrix4fv'];
   private uDebugFlag: SetUniform['uniform1i'];
@@ -78,17 +57,6 @@ export default class GLProgram extends GLProgramBase {
   private transferFunctionTexture: WebGLTexture;
   private uTransferFunctionSampler: SetUniform['uniform1i'];
 
-  private labelTextures: Record<number, LabelTexuture> = {};
-  private uLabelSampler: SetUniform['uniform1i'];
-  private uLabelTextureSize: SetUniform['uniform2fv'];
-  private uLabelSliceGridSize: SetUniform['uniform2fv'];
-  private uLabelBoundaryFrom: SetUniform['uniform3fv'];
-  private uLabelBoundaryTo: SetUniform['uniform3fv'];
-  private uLabelLabelColor: SetUniform['uniform4fv'];
-
-  private uEnableLabel: SetUniform['uniform1i'];
-  private uEnableMask: SetUniform['uniform1i'];
-
   constructor(gl: WebGLRenderingContext) {
     super(gl);
     gl.enable(gl.DEPTH_TEST);
@@ -101,9 +69,6 @@ export default class GLProgram extends GLProgramBase {
     this.uVolumeDimension = this.uniform3fv('uVolumeDimension');
     this.uVoxelSizeInverse = this.uniform3fv('uVoxelSizeInverse');
     this.uBackground = this.uniform4fv('uBackground');
-    this.uRayStride = this.uniform3fv('uRayStride');
-    this.uSkipStride = this.uniform3fv('uSkipStride');
-    this.uRayIntensityCoef = this.uniform1f('uRayIntensityCoef');
     this.uInterpolationMode = this.uniform1i('uInterpolationMode');
     this.uMVPMatrix = this.uniformMatrix4fv('uMVPMatrix', false);
 
@@ -126,17 +91,6 @@ export default class GLProgram extends GLProgramBase {
 
     this.transferFunctionTexture = this.createTexture();
     this.uTransferFunctionSampler = this.uniform1i('uTransferFunctionSampler');
-
-    this.uEnableLabel = this.uniform1i('uEnableLabel');
-    this.uEnableMask = this.uniform1i('uEnableMask');
-
-    // Labels
-    this.uLabelSampler = this.uniform1i('uLabelSampler');
-    this.uLabelTextureSize = this.uniform2fv('uLabelTextureSize');
-    this.uLabelSliceGridSize = this.uniform2fv('uLabelSliceGridSize');
-    this.uLabelBoundaryFrom = this.uniform3fv('uLabelBoundaryFrom');
-    this.uLabelBoundaryTo = this.uniform3fv('uLabelBoundaryTo');
-    this.uLabelLabelColor = this.uniform4fv('uLabelLabelColor');
   }
 
   protected activateProgram() {
@@ -180,26 +134,6 @@ export default class GLProgram extends GLProgramBase {
       this.transferFunctionTexture,
       transferFunction
     );
-  }
-
-  public appendLabelData(index: number, label: LabelData) {
-    // Check if texture is already created.
-    if (index in this.labelTextures) return;
-
-    const { offset, size } = label;
-    const texture = this.createTexture();
-    const textureLayout = loadLabelIntoTexture(this.gl, texture, label);
-
-    type RGBA = [number, number, number, number];
-    const color = [0xff, 0xff, 0, 0x80].map(v => v / 0xff) as RGBA;
-
-    this.labelTextures[index] = {
-      offset,
-      size,
-      textureLayout,
-      texture,
-      color
-    };
   }
 
   public setSectionBoundary(
@@ -330,31 +264,6 @@ export default class GLProgram extends GLProgramBase {
     this.uBackground([r / 0xff, g / 0xff, b / 0xff, a / 0xff]);
   }
 
-  public setRay(
-    camera: Camera,
-    {
-      voxelSize,
-      intensity,
-      quality
-    }: {
-      voxelSize: [number, number, number];
-      intensity: number;
-      quality: number;
-    }
-  ) {
-    const vs = new Vector3().fromArray(voxelSize);
-    const direction = new Vector3() // in voxel coords
-      .subVectors(
-        camera.target.clone().divide(vs),
-        camera.position.clone().divide(vs)
-      )
-      .normalize();
-
-    this.uSkipStride(direction.toArray());
-    this.uRayStride(direction.divideScalar(quality).toArray());
-    this.uRayIntensityCoef(1.0 / intensity / quality);
-  }
-
   public setCamera(camera: Camera) {
     const projectionMatrix = new Matrix4().fromArray(
       this.createPojectionMatrix(camera)
@@ -437,36 +346,6 @@ export default class GLProgram extends GLProgramBase {
     return modelViewMatrix;
   }
 
-  public toggleMask(enabled: boolean) {
-    this.uEnableMask(enabled ? 1 : 0);
-  }
-
-  /**
-   * Specify index of label to highlight (-1 to disable).
-   * @param index
-   */
-  public setHighlightLabel(index: number) {
-    if (index in this.labelTextures) {
-      this.uEnableLabel(1);
-
-      const { offset, size, textureLayout, color } = this.labelTextures[index];
-      const boundaryTo = [
-        offset[0] + size[0],
-        offset[1] + size[1],
-        offset[2] + size[2]
-      ];
-      this.uLabelBoundaryFrom(offset);
-      this.uLabelBoundaryTo(boundaryTo);
-      this.uLabelLabelColor(color);
-      this.uLabelTextureSize(textureLayout.textureSize);
-      this.uLabelSliceGridSize(textureLayout.sliceGridSize);
-      this.highlightLabelIndex = index;
-    } else {
-      this.uEnableLabel(0);
-      this.highlightLabelIndex = -1;
-    }
-  }
-
   public run() {
     const gl = this.gl;
 
@@ -475,16 +354,10 @@ export default class GLProgram extends GLProgramBase {
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.volumeTexture);
 
-    this.uTransferFunctionSampler(1);
-    gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, this.transferFunctionTexture);
-
-    if (this.highlightLabelIndex > -1) {
-      const { texture } = this.labelTextures[this.highlightLabelIndex];
-      this.uLabelSampler(2);
-      this.gl.activeTexture(this.gl.TEXTURE2);
-      this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-    }
+    // Transfer function
+    // this.uTransferFunctionSampler(1);
+    // gl.activeTexture(gl.TEXTURE1);
+    // gl.bindTexture(gl.TEXTURE_2D, this.transferFunctionTexture);
 
     // Enable attribute pointers
     gl.enableVertexAttribArray(this.aVertexColorLocation);

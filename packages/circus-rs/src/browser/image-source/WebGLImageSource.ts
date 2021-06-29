@@ -33,11 +33,8 @@ export default class WebGLImageSource extends MprImageSource {
 
   // Cache for checking update something.
   private lastTransferFunction?: TransferFunction;
-  private lastSubVolume?: SubVolume;
   private lastWidth?: number;
   private lastHeight?: number;
-  private lastEnableMask?: boolean;
-  private lastHighlightedLabelIndex?: number;
 
   /**
    * For debugging
@@ -217,21 +214,6 @@ export default class WebGLImageSource extends MprImageSource {
           debugMode: undefined
         };
 
-    // At the first label highlighting, load and create the texture.
-    // Since this process involves asynchronous processing,
-    // it must be performed at the beginning of drawing.
-    if (this.labelLoader && -1 < highlightedLabelIndex) {
-      if (!(highlightedLabelIndex in this.loadingLabelData)) {
-        this.loadingLabelData[highlightedLabelIndex] = this.labelLoader
-          .load(highlightedLabelIndex)
-          .then(label => {
-            label &&
-              this.glProgram.appendLabelData(highlightedLabelIndex, label);
-          });
-      }
-      await this.loadingLabelData[highlightedLabelIndex];
-    }
-
     // set debug
     if (typeof debugMode !== 'undefined') {
       this.glProgram.setDebugMode(debugMode);
@@ -263,17 +245,6 @@ export default class WebGLImageSource extends MprImageSource {
       this.lastTransferFunction = transferFunction;
     }
 
-    // Vessel mask
-    if (this.lastEnableMask !== enableMask) {
-      this.glProgram.toggleMask(!!enableMask);
-      this.lastEnableMask = enableMask;
-    }
-
-    // Highlight label
-    if (this.lastHighlightedLabelIndex !== highlightedLabelIndex) {
-      this.glProgram.setHighlightLabel(highlightedLabelIndex);
-    }
-
     // Background
     this.glProgram.setBackground(background);
 
@@ -281,11 +252,8 @@ export default class WebGLImageSource extends MprImageSource {
     this.glProgram.setInterporationMode(interpolationMode);
 
     // Camera
-    const camera = this.createCamera(section, subVolume);
+    const camera = this.createCamera(section);
     this.glProgram.setCamera(camera);
-
-    // Ray configuration
-    this.configureRay(camera, { quality, rayIntensity });
 
     this.glProgram.run();
 
@@ -346,23 +314,5 @@ export default class WebGLImageSource extends MprImageSource {
 
     // Return the camera which is adjusted the coordinate system to gl coodinate system.
     return { position, target, up, zoom };
-  }
-
-  private configureRay(
-    camera: Camera,
-    {
-      quality,
-      rayIntensity
-    }: {
-      quality: number;
-      rayIntensity: number;
-    }
-  ) {
-    this.glProgram.setRay(camera, {
-      voxelSize: this.metadata!.voxelSize!,
-
-      intensity: rayIntensity,
-      quality
-    });
   }
 }

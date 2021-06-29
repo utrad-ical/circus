@@ -22,9 +22,9 @@ const vertexShaderSource = require('./vertex-shader.vert');
 const fragmentShaderSource = [
   require('./fragment-shader/header.frag'),
   require('./fragment-shader/getLabeledAt.frag'),
-  require('../webgl-image-source/fragment-shader/getValueAt.frag'),
+  require('./fragment-shader/getValueAt.frag'),
   require('./fragment-shader/getColorFromPixelValue.frag'),
-  require('../webgl-image-source/fragment-shader/getVoxelValueAndMaskValueWithInterpolation.frag'),
+  require('./fragment-shader/getVoxelValueAndMaskValueWithInterpolation.frag'),
   // If highlighting label with interporation, it seems too weak.
   // require('./fragment-shader/getLabeledValueWithInterpolation.frag'),
   require('./fragment-shader/getLabeledValueAnyNeighbor.frag'),

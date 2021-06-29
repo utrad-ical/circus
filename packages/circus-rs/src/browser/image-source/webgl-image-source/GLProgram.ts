@@ -62,7 +62,6 @@ export default class GLProgram extends GLProgramBase {
   private uRayIntensityCoef: SetUniform['uniform1f'];
   private uInterpolationMode: SetUniform['uniform1i'];
   public uMVPMatrix: SetUniform['uniformMatrix4fv'];
-  private uDrawMode: SetUniform['uniform1i'];
   private uDebugFlag: SetUniform['uniform1i'];
 
   private aVertexPositionBuffer: WebGLBuffer;
@@ -108,7 +107,6 @@ export default class GLProgram extends GLProgramBase {
     this.uInterpolationMode = this.uniform1i('uInterpolationMode');
     this.uMVPMatrix = this.uniformMatrix4fv('uMVPMatrix', false);
 
-    this.uDrawMode = this.uniform1i('uDrawMode');
     this.uDebugFlag = this.uniform1i('uDebugFlag');
 
     // Buffers
@@ -157,18 +155,6 @@ export default class GLProgram extends GLProgramBase {
         break;
       default:
         this.uDebugFlag(0);
-    }
-  }
-
-  public setDrawMode(mode: 'vr' | 'mpr') {
-    this.drawMode = mode;
-    switch (mode) {
-      case 'vr':
-        this.uDrawMode(0);
-        break;
-      case 'mpr':
-        this.uDrawMode(0);
-        break;
     }
   }
 
@@ -505,7 +491,7 @@ export default class GLProgram extends GLProgramBase {
     gl.enableVertexAttribArray(this.aVertexPositionLocation);
 
     // Draw vertices
-    const elementCount = this.drawMode === 'vr' ? 36 : 6;
+    const elementCount = 6;
     gl.drawElements(
       gl.TRIANGLES,
       elementCount, // volumeVertexIndices.length

@@ -232,8 +232,6 @@ export default class WebGLImageSource extends MprImageSource {
       await this.loadingLabelData[highlightedLabelIndex];
     }
 
-    this.glProgram.setDrawMode(type);
-
     // set debug
     if (typeof debugMode !== 'undefined') {
       this.glProgram.setDebugMode(debugMode);

@@ -26,15 +26,12 @@ vec4 getColorWithRayCasting(vec3 frontMmCoord)
   // Proceed until into volume.
   // Rendering object(ex. specified by viewState.subVolume) is assumed
   // to be contained in the volume.
-
-  if(uDrawMode == 0) {
-    for (int i = 0; i < MAX_STEPS; i++) {
-      if(outsideOfVolume(voxelCoordCursor)) {
-        voxelCoordCursor += uSkipStride;
-        continue;
-      }
-      break;
+  for (int i = 0; i < MAX_STEPS; i++) {
+    if(outsideOfVolume(voxelCoordCursor)) {
+      voxelCoordCursor += uSkipStride;
+      continue;
     }
+    break;
   }
 
   for (int i = 0; i < MAX_STEPS; i++) {
@@ -102,19 +99,13 @@ vec4 getColorWithRayCasting(vec3 frontMmCoord)
       );
     }
 
-    if(uDrawMode == 0) {
-      // uRayIntensityCoef = 1 / intensity / quality
-      alphaSample = (colorSample.a * uRayIntensityCoef) * (1.0 - accumulatedAlpha);
+    // uRayIntensityCoef = 1 / intensity / quality
+    alphaSample = (colorSample.a * uRayIntensityCoef) * (1.0 - accumulatedAlpha);
 
-      accumulatedAlpha += alphaSample;
-      accumulatedColor += colorSample * alphaSample;
+    accumulatedAlpha += alphaSample;
+    accumulatedColor += colorSample * alphaSample;
 
-      voxelCoordCursor += uRayStride;
-    } else {
-      accumulatedAlpha = 1.0;
-      accumulatedColor = colorSample;
-      break;
-    }
+    voxelCoordCursor += uRayStride;
   }
 
   if (accumulatedAlpha == 0.0) return uBackground;

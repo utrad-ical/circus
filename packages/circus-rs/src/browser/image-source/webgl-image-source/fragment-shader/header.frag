@@ -35,8 +35,6 @@ uniform vec3 uLabelBoundaryFrom;
 uniform vec3 uLabelBoundaryTo;
 uniform vec4 uLabelLabelColor;
 
-uniform int uDrawMode;
-
 struct boundary {
   vec3 start;
   vec3 end;

@@ -1,15 +1,23 @@
 void main() {
   if(uDebugFlag == 0) {
-    // - MPR rendering
-    float pixelValue = getPixelValue(vWorldSpaceCoords);
-    float windowWidth = 658.0;
-    float windowLevel = 329.0;
-    gl_FragColor = getColorWithWindow(pixelValue, windowWidth, windowLevel);
-    
-    // gl_FragColor = getColorWithTransferFunction(pixelValue, uTransferFunctionSampler);
 
-    // gl_FragColor = getColorForDebugging(pixelValue);
+    // mm to voxel coords
+    vec3 voxelCoord = vWorldSpaceCoords * uVoxelSizeInverse;
 
+    if(outsideOfVolume(voxelCoord)) {
+      gl_FragColor = uBackground;
+      // gl_FragColor = vColor;
+    } else {
+      // - MPR rendering
+      float pixelValue = getPixelValue(voxelCoord);
+      float windowWidth = 658.0;
+      float windowLevel = 329.0;
+      gl_FragColor = getColorWithWindow(pixelValue, windowWidth, windowLevel);
+
+      // gl_FragColor = getColorWithTransferFunction(pixelValue, uTransferFunctionSampler);
+
+      // gl_FragColor = getColorForDebugging(pixelValue);
+    }
   }
   // - check volume box
   else if(uDebugFlag == 1) {

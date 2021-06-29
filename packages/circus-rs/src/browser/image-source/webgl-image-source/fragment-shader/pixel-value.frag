@@ -59,10 +59,7 @@ float getInterpolatedVoxelValueAt(vec3 p) {
 /**
 * Get the pixel value and the mask value at the specified coordinates in mm
 */
-float getPixelValue(vec3 frontMmCoord) {
-
-  // mm to voxel coords
-  vec3 voxelCoord = frontMmCoord * uVoxelSizeInverse;
+float getPixelValue(vec3 voxelCoord) {
 
   // With interporation
   if(uInterpolationMode == 1) {

@@ -35,7 +35,7 @@ import createConnectedComponentLabels from './createConnectedComponentLabels';
 import createHoleFilledLabels from './createHoleFilledLabels';
 import SettingDialogCCL from './SettingDialogCCL';
 import SettingDialogHoleFilling from './SettingDialogHoleFilling';
-import updateEditingDataWrapper from './updateEditingDataWrapper';
+import createCurrentLabelsUpdator from './createCurrentLabelsUpdator';
 
 type LabelCommand =
   | 'rename'
@@ -73,7 +73,7 @@ const LabelMenu: React.FC<{
   const activeLabel =
     activeLabelIndex >= 0 ? activeSeries.labels[activeLabelIndex] : null;
 
-  const updateCurrentLabels = updateEditingDataWrapper(
+  const updateCurrentLabels = createCurrentLabelsUpdator(
     editingData,
     updateEditingData
   );

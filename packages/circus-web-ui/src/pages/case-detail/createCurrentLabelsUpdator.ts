@@ -2,7 +2,7 @@ import { EditingData, EditingDataUpdater } from './revisionData';
 import { InternalLabel } from './labelData';
 import produce from 'immer';
 // Small wrapper around updateEditingData
-const updateEditingDataWrapper = (
+const createCurrentLabelsUpdator = (
   editingData: EditingData,
   updateEditingData: EditingDataUpdater
 ) => {
@@ -18,4 +18,4 @@ const updateEditingDataWrapper = (
   };
 };
 
-export default updateEditingDataWrapper;
+export default createCurrentLabelsUpdator;

@@ -1,12 +1,11 @@
-import { Vector3, Vector2 } from 'three';
 import Viewer from '../viewer/Viewer';
 import ViewState from '../ViewState';
 import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
-import GLProgram, {
-  Camera
-} from './webgl-image-source/GLProgram';
+import GLProgram from './webgl-image-source/GLProgram';
 import MprImageSource from './MprImageSource';
-import { Section, vectorizeSection } from '../../common/geometry/Section';
+import VolumeCubeProgram from './webgl-image-source/shader/VolumeCubeProgram';
+import { createCamera, createCameraToLookDownXYPlane, createCameraToLookSection, getWebGLContext, resolveImageData } from './webgl-image-source/webgl-util';
+// import { mprTransferFunction } from './webgl-image-source/transfer-function-util';
 
 type RGBA = [number, number, number, number];
 
@@ -16,12 +15,16 @@ interface WebGLImageSourceOptions {
 
 export default class WebGLImageSource extends MprImageSource {
   private backCanvas: HTMLCanvasElement;
+  private glContext: WebGLRenderingContext;
 
   private glProgram: GLProgram;
+  private volumeCubeProgram: VolumeCubeProgram;
 
   // Cache for checking update something.
   private lastWidth?: number;
   private lastHeight?: number;
+
+  private maxSideLength: number = 0;
 
   /**
    * For debugging
@@ -33,10 +36,18 @@ export default class WebGLImageSource extends MprImageSource {
   constructor({ volumeLoader }: WebGLImageSourceOptions) {
     super();
     const backCanvas = this.initializeBackCanvas();
-    const glContext = this.getWebGLContext(backCanvas);
+    const glContext = getWebGLContext(backCanvas);
+    this.glContext = glContext;
+
+    glContext.clearColor(0.0, 0.0, 0.0, 0.0);
+    glContext.clearDepth(1.0);
 
     this.backCanvas = backCanvas;
     this.glProgram = new GLProgram(glContext);
+    // this.glProgram.use();
+
+    this.volumeCubeProgram = new VolumeCubeProgram(glContext);
+
     this.loadSequence = this.load({ volumeLoader });
   }
 
@@ -51,25 +62,18 @@ export default class WebGLImageSource extends MprImageSource {
     // backCanvas.addEventListener('webglcontextlost', _ev => {}, false);
     // backCanvas.addEventListener('webglcontextrestored', _ev => {}, false);
 
-    // Show the background canvas for debugging
-    if (WebGLImageSource.backCanvasElement) {
-      WebGLImageSource.backCanvasElement.insertBefore(
-        backCanvas,
-        WebGLImageSource.backCanvasElement.firstChild
-      );
-    }
-
     return backCanvas;
   }
 
-  private getWebGLContext(
-    backCanvas: HTMLCanvasElement
-  ): WebGLRenderingContext {
-    const gl =
-      backCanvas.getContext('webgl') ||
-      backCanvas.getContext('experimental-webgl');
-    if (!gl) throw new Error('Failed to get WegGL context');
-    return gl as WebGLRenderingContext;
+  private debugAttachCanvas() {
+    WebGLImageSource.backCanvasElement = document.querySelector('#gl-backcanvas') as HTMLDivElement;
+    // Show the background canvas for debugging
+    if (WebGLImageSource.backCanvasElement) {
+      WebGLImageSource.backCanvasElement.insertBefore(
+        this.backCanvas,
+        WebGLImageSource.backCanvasElement.firstChild
+      );
+    }
   }
 
   private async load({ volumeLoader }: { volumeLoader: DicomVolumeLoader; }) {
@@ -82,13 +86,17 @@ export default class WebGLImageSource extends MprImageSource {
       voxelCount[1] * voxelSize[1],
       voxelCount[2] * voxelSize[2]
     ];
-    const maxSideLength = Math.max(...mmDimension);
-    this.glProgram.setWorldCoordsBaseLength(maxSideLength);
+    this.maxSideLength = Math.max(...mmDimension);
+    this.glProgram.setWorldCoordsBaseLength(this.maxSideLength);
+    this.volumeCubeProgram.setWorldCoordsBaseLength(this.maxSideLength);
 
     // Load volume and transfer as texture
     const volume = await volumeLoader.loadVolume();
+    this.glProgram.use();
     this.glProgram.setVolume(volume);
   }
+
+  private drawCounter = 0;
 
   /**
    * Performs the main rendering.
@@ -102,17 +110,19 @@ export default class WebGLImageSource extends MprImageSource {
     if (viewState.type !== 'mpr')
       throw new Error('Unsupported view state.');
 
+    this.debugAttachCanvas();
+
     const {
       section,
       interpolationMode = 'nearestNeighbor',
       window
     } = viewState;
 
-    const background: RGBA = [0, 0, 0, 0xff];
+    const background: RGBA = [0, 0, 0, 0];
     const debugMode = WebGLImageSource.defaultDebugMode;
 
-    // set debug
-    this.glProgram.setDebugMode(debugMode);
+    this.glContext.clearColor(0, 0, 1, 1);
+    this.glContext.clear(this.glContext.COLOR_BUFFER_BIT | this.glContext.DEPTH_BUFFER_BIT);
 
     // set back-canvas-size
     const [viewportWidth, viewportHeight] = viewer.getResolution();
@@ -125,88 +135,77 @@ export default class WebGLImageSource extends MprImageSource {
       this.lastHeight = viewportHeight;
     }
 
+    ////////////////////////////////////////////////
+    // volumeCubeProgram
+
+    this.volumeCubeProgram.use();
+
+    const voCamera = createCamera(
+      [128, 256, 66],
+      [0, 0, -1000],
+      0.2
+    );
+    this.volumeCubeProgram.setCamera(voCamera);
+    this.volumeCubeProgram.run();
+
+    // const voCamera2 = createCamera(
+    //   [256, 256, 66],
+    //   [1000, 1000, 1000],
+    //   0.05
+    // );
+    // this.volumeCubeProgram.setCamera(voCamera2);
+    // this.volumeCubeProgram.run();
+
+    this.volumeCubeProgram.cleanup();
+
+    ////////////////////////////////////////////////
+    // glProgram
+    this.glProgram.use();
+
+    // set debug
+    this.glProgram.setDebugMode(debugMode);
     this.glProgram.setVolumeInformation(voxelSize, voxelCount);
     this.glProgram.setSection(section);
 
     // Transfer function
-    // this.glProgram.setDebugMode(1);
-    // const transferFunction = mprTransferFunction(viewState.window);
-    // if (this.lastTransferFunction !== transferFunction && transferFunction) {
-    //   this.glProgram.setTransferFunction(transferFunction);
-    //   this.lastTransferFunction = transferFunction;
-    // }
+    // this.glProgram.setDebugMode(2);
+    // this.glProgram.setTransferFunction(mprTransferFunction(viewState.window));
 
-    // Background
-    this.glProgram.setBackground(background);
+    // Background ... fill points outside the volume but the section(=viewport).
+    this.glProgram.setBackground([1, 0, 0, 1]);
 
     // Interporation
     this.glProgram.setInterporationMode(interpolationMode);
 
     // Camera
-    const camera = this.createCamera(section);
-    this.glProgram.setCamera(camera);
+    const camera0 = createCameraToLookSection(
+      section,
+      this.metadata!.voxelCount,
+      this.metadata!.voxelSize
+    );
+    const camera1 = createCameraToLookDownXYPlane(
+      section,
+      this.metadata!.voxelCount,
+      this.metadata!.voxelSize
+    );
+    this.glProgram.setCamera(camera0);
 
     // View window
     this.glProgram.setViewWindow(window);
 
     this.glProgram.run();
+    this.glProgram.cleanup();
 
-    return this.glProgram.resolveImageData();
+    ////////////////////////////////////////////////
+    this.glContext.flush();
+
+    return resolveImageData(this.glContext);
   }
 
   private setCanvasSize(width: number, height: number) {
     this.backCanvas.width = width;
     this.backCanvas.height = height;
-    this.glProgram.setViewport(0, 0, width, height);
-  }
-
-  private createCamera(section: Section): Camera {
-    const { voxelCount } = this.metadata!;
-    const { origin, xAxis, yAxis } = vectorizeSection(section);
-    const [x, y, z] = voxelCount;
-
-    // The camera target is The center of the section.
-    const target = origin
-      .clone()
-      .addScaledVector(xAxis, 0.5)
-      .addScaledVector(yAxis, 0.5);
-
-    // Ensure the camera position is outside the (sub)volume.
-    // And the position is preferably close to the volume to reduce the cost in the fragment shader.
-    const distancesToEachVertex = [
-      new Vector3(x, 0, 0),
-      new Vector3(0, y, 0),
-      new Vector3(0, 0, z),
-      new Vector3(x, y, 0),
-      new Vector3(0, y, z),
-      new Vector3(x, 0, z),
-      new Vector3(x, y, z),
-    ].map(v => v.distanceTo(target));
-
-    const farEnough = distancesToEachVertex.reduce(
-      (dist, d) => (dist < d ? d : dist),
-      0
-    );
-
-    const eyeLine = new Vector3()
-      .crossVectors(xAxis, yAxis)
-      .normalize()
-      .multiplyScalar(farEnough);
-
-    const position = new Vector3().addVectors(target, eyeLine);
-
-    const up = yAxis.clone().normalize();
-
-    // Determine camera zoom from viewport diagonal length
-    const [mmOrigX, mmOrigY] = this.mmDim();
-    const origDiagonalLength = new Vector2(mmOrigX, mmOrigY).length();
-    const currentDiagonalLength = new Vector3()
-      .addVectors(xAxis, yAxis)
-      .length();
-
-    const zoom = origDiagonalLength / currentDiagonalLength;
-
-    // Return the camera which is adjusted the coordinate system to gl coodinate system.
-    return { position, target, up, zoom };
+    this.glContext.viewport(0, 0, width, height);
   }
 }
+

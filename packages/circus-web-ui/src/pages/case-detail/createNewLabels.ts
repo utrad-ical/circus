@@ -4,7 +4,7 @@ import { createNewLabelData } from './labelData';
 import { InternalLabelOf } from './labelData';
 import { pixelFormatInfo } from '@utrad-ical/circus-lib/src/PixelFormat';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
-import updateEditingDataWrapper from './updateEditingDataWrapper';
+import createCurrentLabelsUpdator from './createCurrentLabelsUpdator';
 import { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
 
 const createNewLabels = async (
@@ -35,7 +35,7 @@ const createNewLabels = async (
     return { temporaryKey, name, ...data, attributes: {}, hidden: false };
   };
 
-  const updateCurrentLabels = updateEditingDataWrapper(
+  const updateCurrentLabels = createCurrentLabelsUpdator(
     editingData,
     updateEditingData
   );

@@ -3,7 +3,7 @@ import buildTransferFunctionMap from './buildTransferFunctionMap';
 import {
   transferFunctionRange,
   transferFunctionTextureSize
-} from '../constants';
+} from './transfer-function-constants';
 
 export default function loadTransferFunctionIntoTexture(
   gl: WebGLRenderingContext,

@@ -1,8 +1,8 @@
 import { Vector3, Matrix4, Vector2 } from 'three';
 import { mat4 } from 'gl-matrix';
-import GLShaderProgram, { SetUniform } from '../GLShaderProgram';
-import { Section, vectorizeSection } from '../../../../common/geometry/Section';
-import { compileShader, createModelViewMatrix, createPojectionMatrix, createProgram } from '../webgl-util';
+import ShaderProgram, { SetUniform } from './ShaderProgram';
+import { Section, vectorizeSection } from '../../../common/geometry/Section';
+import { compileShader, createModelViewMatrix, createPojectionMatrix, createProgram } from './webgl-util';
 
 export interface Camera {
   position: Vector3;
@@ -12,10 +12,10 @@ export interface Camera {
 }
 
 // WebGL shader source (GLSL)
-const vertexShaderSource = require('./VolumeCube.vert');
-const fragmentShaderSource = require('./VolumeCube.frag');
+const vertexShaderSource = require('./glsl/VolumeCube.vert');
+const fragmentShaderSource = require('./glsl/VolumeCube.frag');
 
-export default class VolumeCubeProgram extends GLShaderProgram {
+export default class VolumeCubeProgram extends ShaderProgram {
   private mmToWorldCoords?: number;
 
   private uBackground: SetUniform['uniform4fv'];

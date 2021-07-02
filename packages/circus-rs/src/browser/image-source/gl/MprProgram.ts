@@ -1,29 +1,25 @@
 import { Vector3, Matrix4, Vector2 } from 'three';
 import { mat4 } from 'gl-matrix';
 import { TransferFunction, InterpolationMode } from '../../ViewState';
-import GLShaderProgram, { AttribBufferer, SetUniform, VertexElementBufferer } from './GLShaderProgram';
+import ShaderProgram, { AttribBufferer, SetUniform, VertexElementBufferer } from './ShaderProgram';
 import RawData from '../../../common/RawData';
-import loadVolumeIntoTexture from './texture-loader/loadVolumeIntoTexture';
-import loadTransferFunctionIntoTexture from './texture-loader/loadTransferFunctionIntoTexture';
+import loadVolumeIntoTexture from './texture/loadVolumeIntoTexture';
+import loadTransferFunctionIntoTexture from './texture/loadTransferFunctionIntoTexture';
 import { Section, vectorizeSection } from '../../../common/geometry/Section';
 import { ViewWindow } from 'common/ViewWindow';
-import { Camera, compileShader, createModelViewMatrix, createPojectionMatrix, createProgram } from './webgl-util';
+import { Camera, createModelViewMatrix, createPojectionMatrix } from './webgl-util';
 
 // WebGL shader source (GLSL)
-const vertexShaderSource = require('./vertex-shader.vert');
+// const vertexShaderSource = require('./vertex-shader.vert');
+const vertexShaderSource = require('./glsl/mpr-section.vert');
 const fragmentShaderSource = [
-  require('./fragment-shader/header.frag'),
-  require('./fragment-shader/pixel-value.frag'),
-  require('./fragment-shader/pixel-color.frag'),
-  require('./fragment-shader/main.frag')
+  require('./glsl/mpr-header.frag'),
+  require('./glsl/pixel-value.frag'),
+  require('./glsl/pixel-color.frag'),
+  require('./glsl/mpr-main.frag')
 ].join('\n');
 
-// [TextureIndex]
-// 0: Volume
-// 1: Transfer function
-// 2: Label
-
-export default class GLProgram extends GLShaderProgram {
+export default class MprProgram extends ShaderProgram {
   private mmToWorldCoords?: number;
 
   private uVolumeOffset: SetUniform['uniform3fv'];
@@ -231,10 +227,3 @@ export default class GLProgram extends GLShaderProgram {
     );
   }
 }
-
-// [WEbGLBuffer]
-// https://developer.mozilla.org/ja/docs/Web/API/WebGLRenderingContext/bufferData
-// target: GLenum, // ARRAY_BUFFER | ELEMENT_ARRAY_BUFFER
-// usage: GLenum, // STATIC_DRAW | DYNAMIC_DRAW | STREAM_DRAW
-// type: number, // UNSIGNED_SHORT | FLOAT
-// size: number

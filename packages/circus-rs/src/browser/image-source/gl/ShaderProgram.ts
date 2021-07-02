@@ -20,7 +20,7 @@ export type AttribBufferer = (data: BufferSource) => void;
 export type VertexElementBufferer = (indices: number[]) => void;
 
 
-export default abstract class GLShaderProgram {
+export default abstract class ShaderProgram {
   protected gl: WebGLRenderingContext;
   protected program: WebGLProgram;
 

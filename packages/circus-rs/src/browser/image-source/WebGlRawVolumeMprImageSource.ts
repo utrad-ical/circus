@@ -1,23 +1,23 @@
 import Viewer from '../viewer/Viewer';
 import ViewState from '../ViewState';
 import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
-import GLProgram from './webgl-image-source/GLProgram';
+import MprProgram from './gl/MprProgram';
 import MprImageSource from './MprImageSource';
-import VolumeCubeProgram from './webgl-image-source/shader/VolumeCubeProgram';
-import { createCamera, createCameraToLookDownXYPlane, createCameraToLookSection, getWebGLContext, resolveImageData } from './webgl-image-source/webgl-util';
+import VolumeCubeProgram from './gl/VolumeCubeProgram';
+import { createCamera, createCameraToLookDownXYPlane, createCameraToLookSection, getWebGLContext, resolveImageData } from './gl/webgl-util';
 // import { mprTransferFunction } from './webgl-image-source/transfer-function-util';
 
 type RGBA = [number, number, number, number];
 
-interface WebGLImageSourceOptions {
+interface WebGlRawVolumeMprImageSourceOptions {
   volumeLoader: DicomVolumeLoader;
 }
 
-export default class WebGLImageSource extends MprImageSource {
+export default class WebGlRawVolumeMprImageSource extends MprImageSource {
   private backCanvas: HTMLCanvasElement;
   private glContext: WebGLRenderingContext;
 
-  private glProgram: GLProgram;
+  private glProgram: MprProgram;
   private volumeCubeProgram: VolumeCubeProgram;
 
   // Cache for checking update something.
@@ -33,7 +33,7 @@ export default class WebGLImageSource extends MprImageSource {
   public static defaultDebugMode: number = 0;
   public static backCanvasElement?: HTMLDivElement;
 
-  constructor({ volumeLoader }: WebGLImageSourceOptions) {
+  constructor({ volumeLoader }: WebGlRawVolumeMprImageSourceOptions) {
     super();
     const backCanvas = this.initializeBackCanvas();
     const glContext = getWebGLContext(backCanvas);
@@ -43,7 +43,7 @@ export default class WebGLImageSource extends MprImageSource {
     glContext.clearDepth(1.0);
 
     this.backCanvas = backCanvas;
-    this.glProgram = new GLProgram(glContext);
+    this.glProgram = new MprProgram(glContext);
     // this.glProgram.use();
 
     this.volumeCubeProgram = new VolumeCubeProgram(glContext);
@@ -66,12 +66,12 @@ export default class WebGLImageSource extends MprImageSource {
   }
 
   private debugAttachCanvas() {
-    WebGLImageSource.backCanvasElement = document.querySelector('#gl-backcanvas') as HTMLDivElement;
+    WebGlRawVolumeMprImageSource.backCanvasElement = document.querySelector('#gl-backcanvas') as HTMLDivElement;
     // Show the background canvas for debugging
-    if (WebGLImageSource.backCanvasElement) {
-      WebGLImageSource.backCanvasElement.insertBefore(
+    if (WebGlRawVolumeMprImageSource.backCanvasElement) {
+      WebGlRawVolumeMprImageSource.backCanvasElement.insertBefore(
         this.backCanvas,
-        WebGLImageSource.backCanvasElement.firstChild
+        WebGlRawVolumeMprImageSource.backCanvasElement.firstChild
       );
     }
   }
@@ -96,8 +96,6 @@ export default class WebGLImageSource extends MprImageSource {
     this.glProgram.setVolume(volume);
   }
 
-  private drawCounter = 0;
-
   /**
    * Performs the main rendering.
    * @param viewer
@@ -119,7 +117,7 @@ export default class WebGLImageSource extends MprImageSource {
     } = viewState;
 
     const background: RGBA = [0, 0, 0, 0];
-    const debugMode = WebGLImageSource.defaultDebugMode;
+    const debugMode = WebGlRawVolumeMprImageSource.defaultDebugMode;
 
     this.glContext.clearColor(0, 0, 1, 1);
     this.glContext.clear(this.glContext.COLOR_BUFFER_BIT | this.glContext.DEPTH_BUFFER_BIT);
@@ -188,7 +186,7 @@ export default class WebGLImageSource extends MprImageSource {
       this.metadata!.voxelCount,
       this.metadata!.voxelSize
     );
-    this.glProgram.setCamera(camera0);
+    this.glProgram.setCamera(camera1);
 
     // View window
     this.glProgram.setViewWindow(window);

@@ -1,12 +1,15 @@
-import CCL6 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D6';
-import CCL26 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D26';
 import { alert } from '@smikitky/rb-components/lib/modal';
 import { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
+import CCL26 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D26';
+import CCL6 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D6';
+import { VoxelLabelProcessor } from './performLabelCreatingVoxelProcessing';
 
-const createConnectedComponentLabels = (
-  dispLabelNumber: number,
-  neighbors: number
-) => {
+export interface CclOptions {
+  maximumCcNum: number;
+  neighbors: 6 | 26;
+}
+
+const createCCLs = (options: CclOptions): VoxelLabelProcessor => {
   return async (
     input: Uint8Array,
     width: number,
@@ -14,6 +17,7 @@ const createConnectedComponentLabels = (
     nSlices: number,
     name: string
   ) => {
+    const { maximumCcNum, neighbors } = options;
     let labelingResults: LabelingResults3D | undefined = undefined;
     try {
       labelingResults =
@@ -44,12 +48,12 @@ const createConnectedComponentLabels = (
       'the 9th largest CC',
       'the 10th largest CC',
       'the 11th largest CC',
-      `the rest (${labelingResults.labelNum - dispLabelNumber}) CCs`
+      `the rest (${labelingResults.labelNum - maximumCcNum}) CCs`
     ];
     const names =
-      labelingResults.labelNum <= dispLabelNumber + 1
+      labelingResults.labelNum <= maximumCcNum + 1
         ? nameTable.slice(0, labelingResults.labelNum)
-        : nameTable.slice(0, dispLabelNumber).concat(nameTable[11]);
+        : nameTable.slice(0, maximumCcNum).concat(nameTable[11]);
 
     labelingResults.labels.shift();
     const order = [...Array(labelingResults.labelNum)].map((_, i) => i);
@@ -70,24 +74,24 @@ const createConnectedComponentLabels = (
       return b.volume - a.volume;
     });
 
-    for (let num = dispLabelNumber + 1; num < labelingResults.labelNum; num++) {
+    for (let num = maximumCcNum + 1; num < labelingResults.labelNum; num++) {
       for (let i = 0; i < 3; i++) {
         if (
           labelingResults.labels[num].min[i] <
-          labelingResults.labels[dispLabelNumber].min[i]
+          labelingResults.labels[maximumCcNum].min[i]
         ) {
-          labelingResults.labels[dispLabelNumber].min[i] =
+          labelingResults.labels[maximumCcNum].min[i] =
             labelingResults.labels[num].min[i];
         }
         if (
-          labelingResults.labels[dispLabelNumber].max[i] <
+          labelingResults.labels[maximumCcNum].max[i] <
           labelingResults.labels[num].max[i]
         ) {
-          labelingResults.labels[dispLabelNumber].max[i] =
+          labelingResults.labels[maximumCcNum].max[i] =
             labelingResults.labels[num].max[i];
         }
       }
-      labelingResults.labels[dispLabelNumber].volume +=
+      labelingResults.labels[maximumCcNum].volume +=
         labelingResults.labels[num].volume;
       for (
         let k = labelingResults.labels[num].min[2];
@@ -106,7 +110,7 @@ const createConnectedComponentLabels = (
           ) {
             const pos = i + j * width + k * width * height;
             if (labelingResults.labelMap[pos] === num + 1) {
-              labelingResults.labelMap[pos] = dispLabelNumber + 1;
+              labelingResults.labelMap[pos] = maximumCcNum + 1;
             }
           }
         }
@@ -121,4 +125,4 @@ const createConnectedComponentLabels = (
   };
 };
 
-export default createConnectedComponentLabels;
+export default createCCLs;

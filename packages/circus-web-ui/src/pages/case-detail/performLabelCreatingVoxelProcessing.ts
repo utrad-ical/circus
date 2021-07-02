@@ -1,26 +1,25 @@
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
-import { EditingData, EditingDataUpdater } from './revisionData';
-import { createNewLabelData } from './labelData';
-import { InternalLabelOf } from './labelData';
-import { pixelFormatInfo } from '@utrad-ical/circus-lib/src/PixelFormat';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
-import createCurrentLabelsUpdator from './createCurrentLabelsUpdator';
 import { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
+import RawData from '@utrad-ical/circus-rs/src/common/RawData';
+import createCurrentLabelsUpdator from './createCurrentLabelsUpdator';
+import { createNewLabelData, InternalLabelOf } from './labelData';
+import { EditingData, EditingDataUpdater } from './revisionData';
 
-const createNewLabels = async (
+export type VoxelLabelProcessor = (
+  input: Uint8Array,
+  width: number,
+  height: number,
+  nSlices: number,
+  name: string
+) => Promise<{ labelingResults: LabelingResults3D; names: string[] }>;
+
+const performLabelCreatingVoxelProcessing = async (
   editingData: EditingData,
   updateEditingData: EditingDataUpdater,
   label: InternalLabelOf<'voxel'>,
   labelColors: string[],
-  orientation: 'Axial' | 'Coronal' | 'Sagital' | null,
-  dimension3: boolean,
-  imageProcessor: (
-    input: Uint8Array,
-    width: number,
-    height: number,
-    nSlices: number,
-    name: string
-  ) => Promise<{ labelingResults: LabelingResults3D; names: string[] }>
+  voxelLabelProcessor: VoxelLabelProcessor
 ) => {
   if (label.type !== 'voxel' || !label.data.size)
     throw new TypeError('Invalid label passed.');
@@ -40,29 +39,20 @@ const createNewLabels = async (
     updateEditingData
   );
 
-  const pxInfo = pixelFormatInfo('binary');
-  const img = new pxInfo.arrayClass(label.data.volumeArrayBuffer);
   const [width, height, nSlices] = label.data.size;
-  const input = new Uint8Array(width * height * nSlices);
-  for (let k = 0; k < nSlices; k++) {
-    for (let j = 0; j < height; j++) {
-      for (let i = 0; i < width; i++) {
-        const pos0 = i + j * width + k * width * height;
-        const pos =
-          orientation === 'Axial' || dimension3
-            ? i + j * width + k * width * height
-            : orientation === 'Sagital'
-            ? j + k * height + i * height * nSlices
-            : k + i * nSlices + j * width * nSlices;
-        if (((img[pos0 >> 3] >> (7 - (pos0 % 8))) & 1) === 1) {
-          input[pos] = 1;
-        }
-      }
-    }
-  }
-  const result = imageProcessor(input, width, height, nSlices, label.name!);
+  const img = new RawData([width, height, nSlices], 'binary');
+  img.assign(label.data.volumeArrayBuffer!);
+  img.convert('uint8', (v: number) => {
+    return v === 1 ? 1 : 0;
+  });
 
-  const { labelingResults, names } = await result;
+  const { labelingResults, names } = await voxelLabelProcessor(
+    new Uint8Array(img.data),
+    width,
+    height,
+    nSlices,
+    label.name!
+  );
 
   if (labelingResults.labelNum === 0) {
     return;
@@ -87,12 +77,7 @@ const createNewLabels = async (
     for (let k = ULz; k <= LRz; k++) {
       for (let j = ULy; j <= LRy; j++) {
         for (let i = ULx; i <= LRx; i++) {
-          const pos =
-            orientation === 'Axial' || dimension3
-              ? i + j * width + k * width * height
-              : orientation === 'Sagital'
-              ? j + k * height + i * height * nSlices
-              : k + i * nSlices + j * width * nSlices;
+          const pos = i + j * width + k * width * height;
           if (labelingResults.labelMap[pos] === num + 1) {
             volume.writePixelAt(1, i - ULx, j - ULy, k - ULz);
           }
@@ -111,4 +96,4 @@ const createNewLabels = async (
   });
 };
 
-export default createNewLabels;
+export default performLabelCreatingVoxelProcessing;

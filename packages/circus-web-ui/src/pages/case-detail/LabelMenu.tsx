@@ -3,39 +3,39 @@ import { alert, prompt } from '@smikitky/rb-components/lib/modal';
 import Slider from '@smikitky/rb-components/lib/Slider';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import { Viewer } from '@utrad-ical/circus-rs/src/browser';
+import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import {
   Button,
   DropdownButton,
   MenuItem,
+  Modal,
   OverlayTrigger,
   Popover,
-  SplitButton,
-  Modal
+  SplitButton
 } from 'components/react-bootstrap';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
 import useLocalPreference from 'utils/useLocalPreference';
-import { EditingData, EditingDataUpdater } from './revisionData';
 import * as c from './caseStore';
-import {
-  LabelType,
-  InternalLabel,
-  labelTypes,
-  LabelAppearance,
-  createNewLabelData,
-  InternalLabelData,
-  InternalLabelOf
-} from './labelData';
-import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
-import createNewLabels from './createNewLabels';
-import createConnectedComponentLabels from './createConnectedComponentLabels';
-import createHoleFilledLabels from './createHoleFilledLabels';
-import SettingDialogCCL from './SettingDialogCCL';
-import SettingDialogHoleFilling from './SettingDialogHoleFilling';
+import createCCLs, { CclOptions } from './createCCLs';
 import createCurrentLabelsUpdator from './createCurrentLabelsUpdator';
+import createHLs, { HlOptions } from './createHLs';
+import {
+  createNewLabelData,
+  InternalLabel,
+  InternalLabelData,
+  InternalLabelOf,
+  LabelAppearance,
+  LabelType,
+  labelTypes
+} from './labelData';
+import performLabelCreatingVoxelProcessing from './performLabelCreatingVoxelProcessing';
+import { EditingData, EditingDataUpdater } from './revisionData';
+import SettingDialogCCL from './SettingDialogCCL';
+import SettingDialogHL from './SettingDialogHL';
 
 type LabelCommand =
   | 'rename'
@@ -67,7 +67,7 @@ const LabelMenu: React.FC<{
   );
 
   const [cclDialogOpen, setCclDialogOpen] = useState(false);
-  const [holeFillingDialogOpen, setHoleFillingDialogOpen] = useState(false);
+  const [hlDialogOpen, setHlDialogOpen] = useState(false);
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
   const activeSeries = revision.series[activeSeriesIndex];
   const activeLabel =
@@ -234,40 +234,32 @@ const LabelMenu: React.FC<{
     });
   };
 
-  const onOkClickDialogCCL = (dispLabelNumber: number, neighbors: number) => {
+  const onOkClickDialogCCL = (props: CclOptions) => {
     const label = editingData.revision.series[activeSeriesIndex].labels[
       activeLabelIndex
     ] as InternalLabelOf<'voxel'>;
-    createNewLabels(
+    performLabelCreatingVoxelProcessing(
       editingData,
       updateEditingData,
       label,
       labelColors,
-      null,
-      true,
-      createConnectedComponentLabels(dispLabelNumber, neighbors)
+      createCCLs(props)
     );
     setCclDialogOpen(false);
   };
 
-  const onOkClickDialogHoleFilling = (
-    dimension: number,
-    holeFillingOrientation: 'Axial' | 'Coronal' | 'Sagital' | null,
-    neighbors4or6: boolean
-  ) => {
+  const onOkClickDialogHL = (props: HlOptions) => {
     const label = editingData.revision.series[activeSeriesIndex].labels[
       activeLabelIndex
     ] as InternalLabelOf<'voxel'>;
-    createNewLabels(
+    performLabelCreatingVoxelProcessing(
       editingData,
       updateEditingData,
       label,
       labelColors,
-      holeFillingOrientation,
-      dimension === 3,
-      createHoleFilledLabels(dimension, holeFillingOrientation, neighbors4or6)
+      createHLs(props)
     );
-    setHoleFillingDialogOpen(false);
+    setHlDialogOpen(false);
   };
 
   return (
@@ -336,7 +328,7 @@ const LabelMenu: React.FC<{
         <MenuItem
           eventKey="fillng"
           onClick={() => {
-            setHoleFillingDialogOpen(true);
+            setHlDialogOpen(true);
           }}
         >
           Hole filling
@@ -387,13 +379,13 @@ const LabelMenu: React.FC<{
         />
       </Modal>
       <Modal
-        show={holeFillingDialogOpen}
-        onHide={() => setHoleFillingDialogOpen(false)}
+        show={hlDialogOpen}
+        onHide={() => setHlDialogOpen(false)}
         bsSize="lg"
       >
-        <SettingDialogHoleFilling
-          onHide={() => setHoleFillingDialogOpen(false)}
-          onOkClick={onOkClickDialogHoleFilling}
+        <SettingDialogHL
+          onHide={() => setHlDialogOpen(false)}
+          onOkClick={onOkClickDialogHL}
         />
       </Modal>
     </StyledButtonsDiv>

@@ -1,11 +1,8 @@
+import { Editor } from '@smikitky/rb-components/lib/editor-types';
+import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import React from 'react';
-import SettimgDialog from './SettingDialog';
-import * as et from '@smikitky/rb-components/lib/editor-types';
-
-interface parameterType {
-  maximumCcNum: number;
-  neighbors: 6 | 26;
-}
+import { CclOptions } from './createCCLs';
+import SettingDialog from './SettingDialog';
 
 const maximumCCNumOptions = {
   1: '1 CC',
@@ -24,44 +21,54 @@ const neighborsOptions = {
   26: '26-neigobors'
 };
 
-const initialValues = {
+const initialOptions = {
   maximumCcNum: 2,
-  neighbors: 6
+  neighbors: 26
 };
 
-const cclProperties = [
-  {
-    key: 'maximumCcNum',
-    caption: 'Maximum number of connected components (CCs) to display',
-    editor: et.shrinkSelect(maximumCCNumOptions)
-  },
-  {
-    key: 'neighbors',
-    caption: 'Neighbors to decide same CC',
-    editor: et.shrinkSelect(neighborsOptions)
-  }
-];
+const OptionsEditorForCCL: Editor<CclOptions> = props => {
+  const { value, onChange } = props;
+  return (
+    <>
+      <label>
+        Maximum number of connected components (CCs) to display&nbsp;
+        <ShrinkSelect
+          bsSize="sm"
+          options={maximumCCNumOptions}
+          value={value.maximumCcNum}
+          onChange={v => onChange({ ...value, maximumCcNum: v })}
+          numericalValue
+        />
+      </label>
+      <br />
+      <label>
+        Neighbors to decide same CC&nbsp;
+        <ShrinkSelect
+          bsSize="sm"
+          options={neighborsOptions}
+          value={value.neighbors}
+          onChange={v => onChange({ ...value, neighbors: v })}
+          numericalValue
+        />
+      </label>
+    </>
+  );
+};
 
 const SettingDialogCCL: React.FC<{
   onHide: () => void;
-  onOkClick: (dispLabelNumber: number, neighbors: number) => void;
-}> = React.memo(props => {
+  onOkClick: (props: CclOptions) => void;
+}> = props => {
   const { onHide, onOkClick } = props;
-
   return (
-    <SettimgDialog
+    <SettingDialog
       title="Setting options for connected component labeling (CCL)"
-      initialValues={initialValues}
-      properties={cclProperties}
-      onHide={() => onHide()}
-      onOkClick={(parameters: parameterType) => {
-        onOkClick(
-          Number(parameters.maximumCcNum),
-          Number(parameters.neighbors)
-        );
-      }}
+      optionsEditor={OptionsEditorForCCL}
+      initialOptions={initialOptions}
+      onHide={onHide}
+      onOkClick={onOkClick}
     />
   );
-});
+};
 
 export default SettingDialogCCL;

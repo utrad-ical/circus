@@ -1,47 +1,34 @@
 import { Button, Modal } from 'components/react-bootstrap';
 import React, { useState } from 'react';
-import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
+import { Editor } from '@smikitky/rb-components/lib/editor-types';
 
-const SettingDialog: (props: {
+const SettingDialog: React.FC<{
   title: string;
-  initialValues: any;
-  properties: any;
+  optionsEditor: Editor<any>;
+  initialOptions: any;
   onHide: () => void;
-  onOkClick: (parameters: any) => void;
-  onChange?: (parameters: any) => void;
-}) => React.ReactElement<any> = props => {
+  onOkClick: (props: any) => void;
+}> = props => {
   const {
     title,
-    initialValues,
-    properties,
+    optionsEditor: OptionsEditor,
+    initialOptions,
     onHide,
-    onOkClick,
-    onChange
+    onOkClick
   } = props;
-  const [parameters, setParameters] = useState<typeof properties>(
-    initialValues
-  );
+  const [options, setOptions] = useState(initialOptions);
+
   return (
     <>
-      <Modal.Header>
-        <Modal.Title>{title}</Modal.Title>
-      </Modal.Header>
+      <Modal.Header>{title}</Modal.Header>
       <Modal.Body>
-        <PropertyEditor
-          className="setting-dialog"
-          properties={properties}
-          value={parameters}
-          onChange={(parameters: any) => {
-            setParameters(parameters);
-            onChange && onChange(parameters);
-          }}
-        />
+        <OptionsEditor value={options} onChange={setOptions} />
       </Modal.Body>
       <Modal.Footer>
-        <Button bsStyle="link" onClick={() => onHide()}>
+        <Button bsStyle="link" onClick={onHide}>
           Cancel
         </Button>
-        <Button onClick={() => onOkClick(parameters)} bsStyle="primary">
+        <Button onClick={() => onOkClick(options)} bsStyle="primary">
           OK
         </Button>
       </Modal.Footer>

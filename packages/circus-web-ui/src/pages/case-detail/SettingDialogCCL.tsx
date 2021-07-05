@@ -1,7 +1,7 @@
 import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import React from 'react';
-import { CclOptions } from './createCCLs';
+import { CclOptions } from './createCclProcessor';
 import SettingDialog from './SettingDialog';
 
 const maximumCCNumOptions = {

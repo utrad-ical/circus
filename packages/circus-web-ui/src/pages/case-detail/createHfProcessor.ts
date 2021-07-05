@@ -4,13 +4,15 @@ import HoleFilling2D, {
 } from '@utrad-ical/circus-rs/src/common/CCL/holeFilling';
 import { VoxelLabelProcessor } from './performLabelCreatingVoxelProcessing';
 
-export interface HlOptions {
+export interface HoleFillingOptions {
   dimension: 2 | 3;
   neighbors: 4 | 8 | 6 | 26;
   orientation: 'Axial' | 'Coronal' | 'Sagital';
 }
 
-const createHLs = (options: HlOptions): VoxelLabelProcessor => {
+const createHfProcessor = (
+  options: HoleFillingOptions
+): VoxelLabelProcessor => {
   return async (
     input: Uint8Array,
     width: number,
@@ -94,4 +96,4 @@ const createHLs = (options: HlOptions): VoxelLabelProcessor => {
   };
 };
 
-export default createHLs;
+export default createHfProcessor;

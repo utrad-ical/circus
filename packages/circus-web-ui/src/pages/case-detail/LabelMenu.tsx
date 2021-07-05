@@ -20,9 +20,9 @@ import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
 import useLocalPreference from 'utils/useLocalPreference';
 import * as c from './caseStore';
-import createCCLs, { CclOptions } from './createCCLs';
+import createCclProcessor, { CclOptions } from './createCclProcessor';
 import createCurrentLabelsUpdator from './createCurrentLabelsUpdator';
-import createHLs, { HlOptions } from './createHLs';
+import createHfProcessor, { HoleFillingOptions } from './createHfProcessor';
 import {
   createNewLabelData,
   InternalLabel,
@@ -35,7 +35,7 @@ import {
 import performLabelCreatingVoxelProcessing from './performLabelCreatingVoxelProcessing';
 import { EditingData, EditingDataUpdater } from './revisionData';
 import SettingDialogCCL from './SettingDialogCCL';
-import SettingDialogHL from './SettingDialogHL';
+import SettingDialogHF from './SettingDialogHF';
 
 type LabelCommand =
   | 'rename'
@@ -67,7 +67,7 @@ const LabelMenu: React.FC<{
   );
 
   const [cclDialogOpen, setCclDialogOpen] = useState(false);
-  const [hlDialogOpen, setHlDialogOpen] = useState(false);
+  const [hfDialogOpen, setHfDialogOpen] = useState(false);
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
   const activeSeries = revision.series[activeSeriesIndex];
   const activeLabel =
@@ -243,12 +243,12 @@ const LabelMenu: React.FC<{
       updateEditingData,
       label,
       labelColors,
-      createCCLs(props)
+      createCclProcessor(props)
     );
     setCclDialogOpen(false);
   };
 
-  const onOkClickDialogHL = (props: HlOptions) => {
+  const onOkClickDialogHF = (props: HoleFillingOptions) => {
     const label = editingData.revision.series[activeSeriesIndex].labels[
       activeLabelIndex
     ] as InternalLabelOf<'voxel'>;
@@ -257,9 +257,9 @@ const LabelMenu: React.FC<{
       updateEditingData,
       label,
       labelColors,
-      createHLs(props)
+      createHfProcessor(props)
     );
-    setHlDialogOpen(false);
+    setHfDialogOpen(false);
   };
 
   return (
@@ -328,7 +328,7 @@ const LabelMenu: React.FC<{
         <MenuItem
           eventKey="fillng"
           onClick={() => {
-            setHlDialogOpen(true);
+            setHfDialogOpen(true);
           }}
         >
           Hole filling
@@ -379,13 +379,13 @@ const LabelMenu: React.FC<{
         />
       </Modal>
       <Modal
-        show={hlDialogOpen}
-        onHide={() => setHlDialogOpen(false)}
+        show={hfDialogOpen}
+        onHide={() => setHfDialogOpen(false)}
         bsSize="lg"
       >
-        <SettingDialogHL
-          onHide={() => setHlDialogOpen(false)}
-          onOkClick={onOkClickDialogHL}
+        <SettingDialogHF
+          onHide={() => setHfDialogOpen(false)}
+          onOkClick={onOkClickDialogHF}
         />
       </Modal>
     </StyledButtonsDiv>

@@ -1,7 +1,7 @@
 import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import React from 'react';
-import { HlOptions } from './createHLs';
+import { HoleFillingOptions } from './createHfProcessor';
 import SettingDialog from './SettingDialog';
 
 const neighborsOptions2D = {
@@ -31,7 +31,7 @@ const initialOptions = {
   orientation: 'Axial'
 };
 
-const OptionsEditorForHL: Editor<HlOptions> = props => {
+const OptionsEditorForHF: Editor<HoleFillingOptions> = props => {
   const { value, onChange } = props;
   return (
     <>
@@ -91,15 +91,15 @@ const OptionsEditorForHL: Editor<HlOptions> = props => {
   );
 };
 
-const SettingDialogHL: React.FC<{
+const SettingDialogHF: React.FC<{
   onHide: () => void;
-  onOkClick: (props: HlOptions) => void;
+  onOkClick: (props: HoleFillingOptions) => void;
 }> = props => {
   const { onHide, onOkClick } = props;
   return (
     <SettingDialog
       title="Hole filling"
-      optionsEditor={OptionsEditorForHL}
+      optionsEditor={OptionsEditorForHF}
       initialOptions={initialOptions}
       onHide={onHide}
       onOkClick={onOkClick}
@@ -107,4 +107,4 @@ const SettingDialogHL: React.FC<{
   );
 };
 
-export default SettingDialogHL;
+export default SettingDialogHF;

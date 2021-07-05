@@ -9,7 +9,7 @@ export interface CclOptions {
   neighbors: 6 | 26;
 }
 
-const createCCLs = (options: CclOptions): VoxelLabelProcessor => {
+const createCclProcessor = (options: CclOptions): VoxelLabelProcessor => {
   return async (
     input: Uint8Array,
     width: number,
@@ -125,4 +125,4 @@ const createCCLs = (options: CclOptions): VoxelLabelProcessor => {
   };
 };
 
-export default createCCLs;
+export default createCclProcessor;

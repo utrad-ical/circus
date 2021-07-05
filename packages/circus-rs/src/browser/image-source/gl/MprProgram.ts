@@ -1,13 +1,13 @@
-import { Vector3, Matrix4, Vector2 } from 'three';
-import { mat4 } from 'gl-matrix';
+import { Vector3, Matrix4 } from 'three';
 import { TransferFunction, InterpolationMode } from '../../ViewState';
 import ShaderProgram, { AttribBufferer, SetUniform, VertexElementBufferer } from './ShaderProgram';
-import RawData from '../../../common/RawData';
 import loadVolumeIntoTexture from './texture/loadVolumeIntoTexture';
 import loadTransferFunctionIntoTexture from './texture/loadTransferFunctionIntoTexture';
 import { Section, vectorizeSection } from '../../../common/geometry/Section';
 import { ViewWindow } from 'common/ViewWindow';
-import { Camera, createModelViewMatrix, createPojectionMatrix } from './webgl-util';
+import { Camera, createCamera, createModelViewMatrix, createPojectionMatrix } from './webgl-util';
+import DicomVolume from 'common/DicomVolume';
+import { TextureLayout } from './texture/interface';
 
 // WebGL shader source (GLSL)
 // const vertexShaderSource = require('./vertex-shader.vert');
@@ -20,7 +20,11 @@ const fragmentShaderSource = [
 ].join('\n');
 
 export default class MprProgram extends ShaderProgram {
-  private mmToWorldCoords?: number;
+
+  /**
+   * 1mm in normalized device coordinates.
+   */
+  private mmInNdc: number = 0.002;
 
   private uVolumeOffset: SetUniform['uniform3fv'];
   private uVolumeDimension: SetUniform['uniform3fv'];
@@ -31,10 +35,10 @@ export default class MprProgram extends ShaderProgram {
   private uDebugFlag: SetUniform['uniform1i'];
 
   private aVertexPositionBuffer: AttribBufferer;
-  private aVertexColorBuffer: AttribBufferer;
   private aVertexIndexBuffer: VertexElementBufferer;
 
-  private volumeTexture: WebGLTexture;
+  private volumeTexture: WebGLTexture | undefined = undefined;
+  private volumeTextureLayout: TextureLayout | undefined = undefined;
   private uVolumeTextureSampler: SetUniform['uniform1i'];
   private uTextureSize: SetUniform['uniform2fv'];
   private uSliceGridSize: SetUniform['uniform2fv'];
@@ -47,7 +51,6 @@ export default class MprProgram extends ShaderProgram {
 
   constructor(gl: WebGLRenderingContext) {
     super(gl, vertexShaderSource, fragmentShaderSource);
-    gl.enable(gl.DEPTH_TEST);
 
     // Uniforms
     this.uVolumeOffset = this.uniform3fv('uVolumeOffset');
@@ -63,10 +66,8 @@ export default class MprProgram extends ShaderProgram {
     // Buffers
     this.aVertexIndexBuffer = this.vertexElementBuffer();
     this.aVertexPositionBuffer = this.attribBuffer('aVertexPosition', { size: 3, type: gl.FLOAT });
-    this.aVertexColorBuffer = this.attribBuffer('aVertexColor', { size: 4, type: gl.FLOAT });
 
     // Textures
-    this.volumeTexture = this.createTexture();
     this.uVolumeTextureSampler = this.uniform1i('uVolumeTextureSampler');
     this.uTextureSize = this.uniform2fv('uTextureSize');
     this.uSliceGridSize = this.uniform2fv('uSliceGridSize');
@@ -74,37 +75,27 @@ export default class MprProgram extends ShaderProgram {
     this.uTransferFunctionSampler = this.uniform1i('uTransferFunctionSampler');
   }
 
-  public use() {
-    super.use();
-    this.onUseProgram();
+  public setMmInNdc(mmInNdc: number) {
+    this.mmInNdc = mmInNdc;
   }
 
-  private onUseProgram() {
-    this.aVertexIndexBuffer([0, 1, 2, 0, 2, 3]);
-
-    const red = [1.0, 0.0, 0.0, 1.0];
-    const yellow = [1.0, 1.0, 0.0, 1.0];
-    const green = [0.0, 1.0, 0.0, 1.0];
-    const cyan = [0.0, 0.5, 0.5, 1.0];
-    const purple = [1.0, 0.0, 1.0, 1.0];
-    const blue = [0.0, 0.0, 1.0, 1.0];
-    const colorData = new Float32Array([...red, ...yellow, ...green, ...cyan]);
-    this.aVertexColorBuffer(colorData);
-  }
+  // public activate() {
+  //   super.activate();
+    
+  //   // const gl = this.gl;
+  //   // gl.enable(gl.DEPTH_TEST); // There is no reason to enable the depth test.
+  // }
 
   public setDebugMode(debug: number) {
     this.uDebugFlag(debug);
   }
 
-  public setWorldCoordsBaseLength(mmBaseLength: number) {
-    this.mmToWorldCoords = 1.0 / mmBaseLength;
-  }
+  public setDicomVolume(volume: DicomVolume) {
 
-  public setVolumeInformation(
-    voxelSize: [number, number, number],
-    dimension: [number, number, number],
-    offset: [number, number, number] = [0, 0, 0]
-  ) {
+    const voxelSize = volume.getVoxelSize();
+    const dimension = volume.getDimension();
+    const offset = [0, 0, 0];
+
     this.uVoxelSizeInverse([
       1.0 / voxelSize[0],
       1.0 / voxelSize[1],
@@ -112,17 +103,19 @@ export default class MprProgram extends ShaderProgram {
     ]);
     this.uVolumeOffset(offset);
     this.uVolumeDimension(dimension);
-  }
 
-  public setVolume(volume: RawData) {
-    console.time('setVolume');
-    const { textureSize, sliceGridSize } = loadVolumeIntoTexture(
-      this.gl,
-      this.volumeTexture,
-      volume
-    );
-    console.timeEnd('setVolume');
+    if (!this.volumeTexture) {
+      console.time('loadVolumeIntoTexture');
+      this.volumeTexture = this.createTexture();
+      this.volumeTextureLayout = loadVolumeIntoTexture(
+        this.gl,
+        this.volumeTexture,
+        volume
+      );
+      console.timeEnd('loadVolumeIntoTexture');
+    }
 
+    const { textureSize, sliceGridSize } = this.volumeTextureLayout!;
     this.uTextureSize(textureSize);
     this.uSliceGridSize(sliceGridSize);
   }
@@ -169,6 +162,7 @@ export default class MprProgram extends ShaderProgram {
     const data = new Float32Array(positions);
 
     this.aVertexPositionBuffer(data);
+    this.aVertexIndexBuffer([0, 1, 2, 0, 2, 3]);
   }
 
   public setInterporationMode(interpolationMode?: InterpolationMode) {
@@ -183,28 +177,30 @@ export default class MprProgram extends ShaderProgram {
     }
   }
 
+  /** 
+   * Set the background color to fill the points outside the volume,
+   * but inside the viewport section.
+   * Specify each value as 0 to 1
+   */
   public setBackground([r, g, b, a]: [number, number, number, number]) {
     this.uBackground([r, g, b, a]);
   }
 
+  private camera: Camera = createCamera([0, 0, 0], [0, 0, 1], 1.0, [0, 1, 0]);
+
   public setCamera(camera: Camera) {
-    const projectionMatrix = new Matrix4().fromArray(
-      createPojectionMatrix(camera)
-    );
-    const modelViewMatrix = new Matrix4().fromArray(
-      createModelViewMatrix(camera, this.mmToWorldCoords!)
-    );
-    const mvpMatrix = projectionMatrix.multiply(modelViewMatrix);
-    this.uMVPMatrix(mvpMatrix.toArray());
+    this.camera = camera;
   }
 
   public run() {
     const gl = this.gl;
 
     // Activate textures
-    this.uVolumeTextureSampler(0);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, this.volumeTexture);
+    if (this.volumeTexture) {
+      this.uVolumeTextureSampler(0);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, this.volumeTexture);
+    }
 
     // Transfer function
     if (this.transferFunctionTexture) {
@@ -213,15 +209,23 @@ export default class MprProgram extends ShaderProgram {
       gl.bindTexture(gl.TEXTURE_2D, this.transferFunctionTexture);
     }
 
+    // Model/View/Projection
+    const projectionMatrix = new Matrix4().fromArray(
+      createPojectionMatrix(this.camera)
+    );
+    const modelViewMatrix = new Matrix4().fromArray(
+      createModelViewMatrix(this.camera, this.mmInNdc)
+    );
+    const mvpMatrix = projectionMatrix.multiply(modelViewMatrix);
+    this.uMVPMatrix(mvpMatrix.toArray());
+
     // Enable attribute pointers
-    gl.enableVertexAttribArray(this.getAttribLocation('aVertexColor'));
     gl.enableVertexAttribArray(this.getAttribLocation('aVertexPosition'));
 
     // Draw vertices
-    const elementCount = 6;
     gl.drawElements(
       gl.TRIANGLES,
-      elementCount, // volumeVertexIndices.length
+      6, // Length of aVertexIndexBuffer elements
       gl.UNSIGNED_SHORT, // 2 [byte]
       0
     );

@@ -47,8 +47,8 @@ export default class VolumeCubeProgram extends ShaderProgram {
 
   }
 
-  public use() {
-    super.use();
+  public activate() {
+    super.activate();
     this.aVertexPositionLocation = this.getAttribLocation('aVertexPosition');
     this.aVertexColorLocation = this.getAttribLocation('aVertexColor');
   }

@@ -199,21 +199,21 @@ export function createPojectionMatrix(camera: Camera) {
  * @param camera Camera
  * @todo use threejs
  */
-export function createModelViewMatrix(camera: Camera, mmToWorldCoords: number) {
+export function createModelViewMatrix(camera: Camera, scaleMmToNDC: number) {
     // Model to world coordinates size.
     const modelMatrix = new Matrix4()
-        .makeScale(mmToWorldCoords, mmToWorldCoords, mmToWorldCoords)
+        .makeScale(scaleMmToNDC, scaleMmToNDC, scaleMmToNDC)
         .toArray();
 
     // Prepare view matrix
     const viewMatrixWithGLMatrix = mat4.create();
     const [px, py, pz] = camera.position
         .clone()
-        .multiplyScalar(mmToWorldCoords)
+        .multiplyScalar(scaleMmToNDC)
         .toArray();
     const [tx, ty, tz] = camera.target
         .clone()
-        .multiplyScalar(mmToWorldCoords)
+        .multiplyScalar(scaleMmToNDC)
         .toArray();
     const [ux, uy, uz] = camera.up.toArray();
     try {

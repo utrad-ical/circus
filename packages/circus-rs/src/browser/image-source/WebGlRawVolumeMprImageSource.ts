@@ -1,60 +1,82 @@
 import Viewer from '../viewer/Viewer';
 import ViewState from '../ViewState';
+import DicomVolume from '../../common/DicomVolume';
 import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
 import MprProgram from './gl/MprProgram';
 import MprImageSource from './MprImageSource';
-import VolumeCubeProgram from './gl/VolumeCubeProgram';
-import { createCamera, createCameraToLookDownXYPlane, createCameraToLookSection, getWebGLContext, resolveImageData } from './gl/webgl-util';
-// import { mprTransferFunction } from './webgl-image-source/transfer-function-util';
-
-type RGBA = [number, number, number, number];
+import { createCameraToLookDownXYPlane, createCameraToLookSection, getWebGLContext, resolveImageData } from './gl/webgl-util';
+import MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume';
 
 interface WebGlRawVolumeMprImageSourceOptions {
   volumeLoader: DicomVolumeLoader;
 }
+type RGBA = [number, number, number, number];
 
-export default class WebGlRawVolumeMprImageSource extends MprImageSource {
+/**
+ * For debug
+ */
+const debugMode = 1;
+type CaptureCanvasCallback = (canvas: HTMLCanvasElement) => void;
+
+export default class WebGlRawVolumeMprImageSource extends MprImageSource
+  implements MprImageSourceWithDicomVolume {
+  private volume: DicomVolume | undefined;
+
   private backCanvas: HTMLCanvasElement;
   private glContext: WebGLRenderingContext;
 
-  private glProgram: MprProgram;
-  private volumeCubeProgram: VolumeCubeProgram;
+  private mprProgram: MprProgram;
 
-  // Cache for checking update something.
-  private lastWidth?: number;
-  private lastHeight?: number;
+  private background: RGBA = [0.0, 0.0, 0.0, 0.0];
 
-  private maxSideLength: number = 0;
-
-  /**
-   * For debugging
-   */
-  public static readyBeforeVolumeLoaded: boolean = false;
-  public static defaultDebugMode: number = 0;
-  public static backCanvasElement?: HTMLDivElement;
+  // For debug
+  public static captureCanvasCallback?: CaptureCanvasCallback;
+  public static captureCanvasElement(captureCanvasCallback: CaptureCanvasCallback) {
+    WebGlRawVolumeMprImageSource.captureCanvasCallback = captureCanvasCallback;
+  }
 
   constructor({ volumeLoader }: WebGlRawVolumeMprImageSourceOptions) {
     super();
-    const backCanvas = this.initializeBackCanvas();
-    const glContext = getWebGLContext(backCanvas);
-    this.glContext = glContext;
 
-    glContext.clearColor(0.0, 0.0, 0.0, 0.0);
+    const backCanvas = this.createBackCanvas();
+    const glContext = getWebGLContext(backCanvas);
+    glContext.clearColor(...this.background);
     glContext.clearDepth(1.0);
+    const mprProgram = new MprProgram(glContext);
 
     this.backCanvas = backCanvas;
-    this.glProgram = new MprProgram(glContext);
-    // this.glProgram.use();
+    this.glContext = glContext;
+    this.mprProgram = mprProgram;
 
-    this.volumeCubeProgram = new VolumeCubeProgram(glContext);
+    // For debug
+    WebGlRawVolumeMprImageSource.captureCanvasCallback &&
+      WebGlRawVolumeMprImageSource.captureCanvasCallback(backCanvas);
 
-    this.loadSequence = this.load({ volumeLoader });
+    this.loadSequence = (async () => {
+      this.metadata = await volumeLoader.loadMeta();
+
+      // Assign the length of the longest side of the volume to 
+      // the length of the side in normalized device coordinates.
+      const { voxelSize, voxelCount } = this.metadata!;
+      const longestSideLengthInMmOfTheVolume = Math.max(
+        voxelCount[0] * voxelSize[0],
+        voxelCount[1] * voxelSize[1],
+        voxelCount[2] * voxelSize[2]
+      );
+      mprProgram.setMmInNdc(1.0 / longestSideLengthInMmOfTheVolume);
+
+      this.volume = await volumeLoader.loadVolume();
+    })();
+  }
+
+  public getLoadedDicomVolume() {
+    return this.volume;
   }
 
   /**
    * @todo Implements webglcontextlost/webglcontextrestored
    */
-  private initializeBackCanvas() {
+  private createBackCanvas() {
     const backCanvas = document.createElement('canvas');
     backCanvas.width = 1;
     backCanvas.height = 1;
@@ -65,35 +87,12 @@ export default class WebGlRawVolumeMprImageSource extends MprImageSource {
     return backCanvas;
   }
 
-  private debugAttachCanvas() {
-    WebGlRawVolumeMprImageSource.backCanvasElement = document.querySelector('#gl-backcanvas') as HTMLDivElement;
-    // Show the background canvas for debugging
-    if (WebGlRawVolumeMprImageSource.backCanvasElement) {
-      WebGlRawVolumeMprImageSource.backCanvasElement.insertBefore(
-        this.backCanvas,
-        WebGlRawVolumeMprImageSource.backCanvasElement.firstChild
-      );
+  private updateViewportSize([width, height]: [number, number]) {
+    if (this.backCanvas.width !== width || this.backCanvas.height !== height) {
+      this.backCanvas.width = width;
+      this.backCanvas.height = height;
+      this.glContext.viewport(0, 0, width, height);
     }
-  }
-
-  private async load({ volumeLoader }: { volumeLoader: DicomVolumeLoader; }) {
-    this.metadata = await volumeLoader.loadMeta();
-
-    // Set world coordinates length 1.0 as in mm
-    const { voxelCount, voxelSize } = this.metadata;
-    const mmDimension: [number, number, number] = [
-      voxelCount[0] * voxelSize[0],
-      voxelCount[1] * voxelSize[1],
-      voxelCount[2] * voxelSize[2]
-    ];
-    this.maxSideLength = Math.max(...mmDimension);
-    this.glProgram.setWorldCoordsBaseLength(this.maxSideLength);
-    this.volumeCubeProgram.setWorldCoordsBaseLength(this.maxSideLength);
-
-    // Load volume and transfer as texture
-    const volume = await volumeLoader.loadVolume();
-    this.glProgram.use();
-    this.glProgram.setVolume(volume);
   }
 
   /**
@@ -103,107 +102,43 @@ export default class WebGlRawVolumeMprImageSource extends MprImageSource {
    * @returns {Promise<ImageData>}
    */
   public async draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
-    const { voxelSize, voxelCount } = this.metadata!;
-
     if (viewState.type !== 'mpr')
       throw new Error('Unsupported view state.');
 
-    this.debugAttachCanvas();
+    this.updateViewportSize(viewer.getResolution());
 
-    const {
-      section,
-      interpolationMode = 'nearestNeighbor',
-      window
-    } = viewState;
-
-    const background: RGBA = [0, 0, 0, 0];
-    const debugMode = WebGlRawVolumeMprImageSource.defaultDebugMode;
-
-    this.glContext.clearColor(0, 0, 1, 1);
+    this.glContext.clearColor(...this.background);
     this.glContext.clear(this.glContext.COLOR_BUFFER_BIT | this.glContext.DEPTH_BUFFER_BIT);
 
-    // set back-canvas-size
-    const [viewportWidth, viewportHeight] = viewer.getResolution();
-    if (
-      this.lastWidth !== viewportWidth ||
-      this.lastHeight !== viewportHeight
-    ) {
-      this.setCanvasSize(viewportWidth, viewportHeight);
-      this.lastWidth = viewportWidth;
-      this.lastHeight = viewportHeight;
+    // Camera
+    const camera = createCameraToLookDownXYPlane( //createCameraToLookSection( // createCameraToLookDownXYPlane
+      viewState.section,
+      this.metadata!.voxelCount,
+      this.metadata!.voxelSize
+    );
+
+    if (!this.mprProgram.isActive()) {
+      this.mprProgram.activate();
     }
 
-    ////////////////////////////////////////////////
-    // volumeCubeProgram
+    this.mprProgram.setCamera(camera);
 
-    this.volumeCubeProgram.use();
+    this.mprProgram.setDicomVolume(this.volume!);
+    this.mprProgram.setInterporationMode(viewState.interpolationMode);
+    this.mprProgram.setViewWindow(viewState.window);
 
-    const voCamera = createCamera(
-      [128, 256, 66],
-      [0, 0, -1000],
-      0.2
-    );
-    this.volumeCubeProgram.setCamera(voCamera);
-    this.volumeCubeProgram.run();
+    this.mprProgram.setSection(viewState.section);
+    // this.mprProgram.setBackground(this.background);
+    this.mprProgram.setBackground([1, 0, 0, 0.8]);
 
-    // const voCamera2 = createCamera(
-    //   [256, 256, 66],
-    //   [1000, 1000, 1000],
-    //   0.05
-    // );
-    // this.volumeCubeProgram.setCamera(voCamera2);
-    // this.volumeCubeProgram.run();
+    this.mprProgram.setDebugMode(debugMode);
 
-    this.volumeCubeProgram.cleanup();
+    this.mprProgram.run();
+    this.mprProgram.cleanup();
 
-    ////////////////////////////////////////////////
-    // glProgram
-    this.glProgram.use();
-
-    // set debug
-    this.glProgram.setDebugMode(debugMode);
-    this.glProgram.setVolumeInformation(voxelSize, voxelCount);
-    this.glProgram.setSection(section);
-
-    // Transfer function
-    // this.glProgram.setDebugMode(2);
-    // this.glProgram.setTransferFunction(mprTransferFunction(viewState.window));
-
-    // Background ... fill points outside the volume but the section(=viewport).
-    this.glProgram.setBackground([1, 0, 0, 1]);
-
-    // Interporation
-    this.glProgram.setInterporationMode(interpolationMode);
-
-    // Camera
-    const camera0 = createCameraToLookSection(
-      section,
-      this.metadata!.voxelCount,
-      this.metadata!.voxelSize
-    );
-    const camera1 = createCameraToLookDownXYPlane(
-      section,
-      this.metadata!.voxelCount,
-      this.metadata!.voxelSize
-    );
-    this.glProgram.setCamera(camera1);
-
-    // View window
-    this.glProgram.setViewWindow(window);
-
-    this.glProgram.run();
-    this.glProgram.cleanup();
-
-    ////////////////////////////////////////////////
-    this.glContext.flush();
+    // this.glContext.flush();
 
     return resolveImageData(this.glContext);
-  }
-
-  private setCanvasSize(width: number, height: number) {
-    this.backCanvas.width = width;
-    this.backCanvas.height = height;
-    this.glContext.viewport(0, 0, width, height);
   }
 }
 

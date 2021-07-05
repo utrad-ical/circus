@@ -14,7 +14,8 @@ type AttrBufferOptions = {
   type?: number; // default: gl.FLOAT
   normalized?: boolean; // default: false
   stride?: number; // default: 0
-  usage?: number; // default: gl.STREAM_DRAW;
+  // offset?: number; // default 0 // Not assuming non zero offset on current version.
+  usage?: number; // default: gl.STREAM_DRAW
 };
 export type AttribBufferer = (data: BufferSource) => void;
 export type VertexElementBufferer = (indices: number[]) => void;
@@ -27,6 +28,9 @@ export default abstract class ShaderProgram {
   protected uniformLocationCache: Record<string, WebGLUniformLocation> = {};
   protected attribLocationCache: Record<string, number> = {};
   protected markAsBuffered: Record<string, boolean> = {};
+
+  protected buffers: WebGLBuffer[] = [];
+  protected textures: WebGLTexture[] = [];
 
   protected active: boolean = false;
 
@@ -41,7 +45,11 @@ export default abstract class ShaderProgram {
     this.program = createProgram(gl, vertexShader, fragmentShader);
   }
 
-  public use() {
+  public isActive() {
+    return this.active;
+  }
+
+  public activate() {
     this.gl.useProgram(this.program);
     this.active = true;
   }
@@ -138,6 +146,7 @@ export default abstract class ShaderProgram {
   protected createBuffer() {
     const buffer = this.gl.createBuffer();
     if (!buffer) throw new Error('Cannot create buffer');
+    this.buffers.push(buffer);
     return buffer;
   }
 
@@ -158,17 +167,14 @@ export default abstract class ShaderProgram {
   /**
    * Define attribute buffer.
    */
-   protected attribBuffer(
+  protected attribBuffer(
     name: string = 'aVertexPosition',
     { size, type = this.gl.FLOAT, normalized = false, stride = 0, usage = this.gl.STREAM_DRAW }: AttrBufferOptions
   ): AttribBufferer {
     const gl = this.gl;
-    // const size = 3;
-    // const type = gl.FLOAT;
-    // const normalized = false;
-    // const stride = 0;
+
+    // Not assuming non zero offset on current version.
     const offset = 0;
-    // const usage = gl.STREAM_DRAW;
 
     const buffer = this.createBuffer();
 
@@ -194,7 +200,6 @@ export default abstract class ShaderProgram {
     };
   }
 
-  // private vertexElementBuffer(name: string, type = this.gl.STATIC_DRAW): VertexElementBufferer {
   protected vertexElementBuffer(type = this.gl.STATIC_DRAW): VertexElementBufferer {
     const gl = this.gl;
     const buffer = this.createBuffer();
@@ -211,6 +216,12 @@ export default abstract class ShaderProgram {
   protected createTexture() {
     const texture = this.gl.createTexture();
     if (!texture) throw new Error('Failed to craete transfer function texture');
+    this.textures.push(texture);
     return texture;
+  }
+
+  public dispose() {
+    this.buffers.forEach(buffer => this.gl.deleteBuffer(buffer));
+    this.textures.forEach(texture => this.gl.deleteTexture(texture));
   }
 }

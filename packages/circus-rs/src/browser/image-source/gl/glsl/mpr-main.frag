@@ -26,7 +26,6 @@ void main() {
     // - use debug
     gl_FragColor = getColorOfIdentification(pixelValue);
   } else if(uDebugFlag == 4) {
-    // - use vertex color
-    gl_FragColor = vColor;
+    gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);
   }
 }

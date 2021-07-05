@@ -300,18 +300,14 @@ const ToolBar: React.FC<{
             );
           })}
           <MenuItem divider />
-          <MenuItem header>shape resizing: option key + drag</MenuItem>
+          <MenuItem header>Shape resizing behavior</MenuItem>
           <MenuItem onClick={handleToggleLockMaintainAspectRatio}>
-            shift + drag ={' '}
-            {modifierKeyBehaviors.lockMaintainAspectRatio
-              ? 'maintain aspect ratio'
-              : 'free transformation'}
+            <CheckMark checked={modifierKeyBehaviors.lockMaintainAspectRatio} />
+            Lock Shift + Drag to maintain aspect ratio
           </MenuItem>
           <MenuItem onClick={handleToggleLockFixCenterOfGravity}>
-            ctrl + drag = resize from the{' '}
-            {modifierKeyBehaviors.lockFixCenterOfGravity
-              ? 'center'
-              : 'corner or side'}
+            <CheckMark checked={modifierKeyBehaviors.lockFixCenterOfGravity} />
+            Lock Ctrl + Drag to fix center of gravity
           </MenuItem>
         </Dropdown.Menu>
       </Dropdown>

@@ -47,6 +47,7 @@ import useLocalPreference from 'utils/useLocalPreference';
 import isTouchDevice from 'utils/isTouchDevice';
 import useToolbar from 'pages/case-detail/useToolbar';
 import Series from 'types/Series';
+import ModifierKeyBehaviors from '@utrad-ical/circus-rs/src/browser/annotation/ModifierKeyBehaviors';
 
 const useCompositions = (
   series: {
@@ -128,6 +129,18 @@ const RevisionEditor: React.FC<{
       interpolationMode: 'nearestNeighbor'
     }
   );
+
+  const [modifierKeyBehaviors, setModifierKeyBehaviors] = useLocalPreference<
+    ModifierKeyBehaviors
+  >('dbModifierKeyBehaviors', {
+    lockMaintainAspectRatio: false,
+    lockFixCenterOfGravity: false
+  });
+  const handleChangeModifierKeyBehaviors = (
+    shapeResizeOptions: ModifierKeyBehaviors
+  ) => {
+    setModifierKeyBehaviors(shapeResizeOptions);
+  };
 
   // Keeps track of stable seriesUid-PVD pairs to avoid frequent comp changes
   const [allSeries, setAllSeries] = useState<
@@ -378,6 +391,19 @@ const RevisionEditor: React.FC<{
         });
       }
 
+      composition.annotations.forEach(antn => {
+        if (
+          antn instanceof rs.Cuboid ||
+          antn instanceof rs.Ellipsoid ||
+          antn instanceof rs.PlaneFigure
+        ) {
+          antn.lockMaintainAspectRatio =
+            modifierKeyBehaviors.lockMaintainAspectRatio;
+          antn.lockFixCenterOfGravity =
+            modifierKeyBehaviors.lockFixCenterOfGravity;
+        }
+      });
+
       composition.annotationUpdated();
     });
     return () => {
@@ -390,6 +416,7 @@ const RevisionEditor: React.FC<{
     editingData,
     viewOptions.showReferenceLine,
     viewOptions.scrollbar,
+    modifierKeyBehaviors,
     touchDevice,
     viewers
   ]);
@@ -643,6 +670,8 @@ const RevisionEditor: React.FC<{
           setToolOption={setToolOption}
           viewOptions={viewOptions}
           onChangeViewOptions={setViewOptions}
+          modifierKeyBehaviors={modifierKeyBehaviors}
+          onChangeModifierKeyBehaviors={handleChangeModifierKeyBehaviors}
           onChangeLayoutKind={handleChangeLayoutKind}
           wandEnabled={activeVolumeLoaded}
           windowPresets={projectData.windowPresets}

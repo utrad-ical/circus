@@ -19,6 +19,7 @@ import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
+import ModifierKeyBehaviors from './ModifierKeyBehaviors';
 import drawBoundingBoxOutline from './helper/drawBoundingBoxOutline';
 import drawHandleFrame from './helper/drawHandleFrame';
 import { drawPath, drawPoint } from './helper/drawObject';
@@ -48,7 +49,8 @@ const cursorTypes: {
   'point-move': { cursor: 'crosshair' }
 };
 
-export default class Polyline implements Annotation, ViewerEventTarget {
+export default class Polyline
+  implements Annotation, ViewerEventTarget, ModifierKeyBehaviors {
   /**
    * Color of the outline.
    */
@@ -86,6 +88,9 @@ export default class Polyline implements Annotation, ViewerEventTarget {
   public closed: boolean = false;
   public fillRule: CanvasFillRule = 'evenodd';
   public id?: string;
+
+  public lockMaintainAspectRatio: boolean = true;
+  public lockFixCenterOfGravity: boolean = true;
 
   public boundingBoxOutline?: {
     width: number;
@@ -292,16 +297,22 @@ export default class Polyline implements Annotation, ViewerEventTarget {
     } else if (hitType as BoundingRectWithHandleHitType) {
       // Move or Resize
       const targetOriginalPoints = [...originalPoints];
-      const maintainAspectRatio = !!ev.shiftKey;
-      const fixCenterOfGravity = !!ev.ctrlKey;
+
+      const lockMaintainAspectRatio = this.lockMaintainAspectRatio
+        ? !!ev.shiftKey
+        : !ev.shiftKey;
+      const lockFixCenterOfGravity = this.lockFixCenterOfGravity
+        ? !!ev.ctrlKey
+        : !ev.ctrlKey;
+
       this.points = handleBoundingBoxOperation(
         originalBoundingBox!,
         'axial',
         hitType,
         dragStartPoint3,
         draggedPoint3,
-        maintainAspectRatio,
-        fixCenterOfGravity,
+        lockMaintainAspectRatio,
+        lockFixCenterOfGravity,
         targetOriginalPoints.map(targetOriginalPoint => [
           ...targetOriginalPoint,
           this.z!

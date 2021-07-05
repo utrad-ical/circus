@@ -35,7 +35,7 @@ const OptionsEditorForHL: Editor<HlOptions> = props => {
   const { value, onChange } = props;
   return (
     <>
-      <label>
+      <div>
         Dimension&nbsp;
         <ShrinkSelect
           bsSize="sm"
@@ -61,10 +61,9 @@ const OptionsEditorForHL: Editor<HlOptions> = props => {
           }
           numericalValue
         />
-      </label>
+      </div>
       {value.dimension === 2 && (
-        <>
-          <br />
+        <div>
           <label>
             Orientation&nbsp;
             <ShrinkSelect
@@ -74,10 +73,9 @@ const OptionsEditorForHL: Editor<HlOptions> = props => {
               onChange={v => onChange({ ...value, orientation: v })}
             />
           </label>
-        </>
+        </div>
       )}
-      <br />
-      <label>
+      <div>
         Neighbors to decide same CC&nbsp;
         <ShrinkSelect
           bsSize="sm"
@@ -88,7 +86,7 @@ const OptionsEditorForHL: Editor<HlOptions> = props => {
           onChange={v => onChange({ ...value, neighbors: v })}
           numericalValue
         />
-      </label>
+      </div>
     </>
   );
 };
@@ -100,7 +98,7 @@ const SettingDialogHL: React.FC<{
   const { onHide, onOkClick } = props;
   return (
     <SettingDialog
-      title="Setting options for hole filling"
+      title="Hole filling"
       optionsEditor={OptionsEditorForHL}
       initialOptions={initialOptions}
       onHide={onHide}

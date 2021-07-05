@@ -16,6 +16,7 @@ const maximumCCNumOptions = {
   9: '9 CCs',
   10: '10 CCs'
 };
+
 const neighborsOptions = {
   6: '6-neigobors',
   26: '26-neigobors'
@@ -30,7 +31,7 @@ const OptionsEditorForCCL: Editor<CclOptions> = props => {
   const { value, onChange } = props;
   return (
     <>
-      <label>
+      <div>
         Maximum number of connected components (CCs) to display&nbsp;
         <ShrinkSelect
           bsSize="sm"
@@ -39,9 +40,8 @@ const OptionsEditorForCCL: Editor<CclOptions> = props => {
           onChange={v => onChange({ ...value, maximumCcNum: v })}
           numericalValue
         />
-      </label>
-      <br />
-      <label>
+      </div>
+      <div>
         Neighbors to decide same CC&nbsp;
         <ShrinkSelect
           bsSize="sm"
@@ -50,7 +50,7 @@ const OptionsEditorForCCL: Editor<CclOptions> = props => {
           onChange={v => onChange({ ...value, neighbors: v })}
           numericalValue
         />
-      </label>
+      </div>
     </>
   );
 };
@@ -62,7 +62,7 @@ const SettingDialogCCL: React.FC<{
   const { onHide, onOkClick } = props;
   return (
     <SettingDialog
-      title="Setting options for connected component labeling (CCL)"
+      title="Connected component labeling (CCL)"
       optionsEditor={OptionsEditorForCCL}
       initialOptions={initialOptions}
       onHide={onHide}

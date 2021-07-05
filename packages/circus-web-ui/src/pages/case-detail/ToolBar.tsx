@@ -15,6 +15,7 @@ import { WindowPreset } from 'types/Project';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
 import { ToolOptions, ToolOptionSetter } from 'pages/case-detail/useToolbar';
 import { ReferenceValueOption } from '@utrad-ical/circus-rs/src/browser/tool/cloud/WandTool';
+import ModifierKeyBehaviors from '@utrad-ical/circus-rs/src/browser/annotation/ModifierKeyBehaviors';
 import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import { LayoutKind } from './caseStore';
 
@@ -46,6 +47,10 @@ const ToolBar: React.FC<{
   viewOptions: ViewOptions;
   onChangeViewOptions: (viewOptions: ViewOptions) => void;
   onChangeLayoutKind: (kind: LayoutKind) => void;
+  modifierKeyBehaviors: ModifierKeyBehaviors;
+  onChangeModifierKeyBehaviors: (
+    modifierKeyBehaviors: ModifierKeyBehaviors
+  ) => void;
   brushEnabled: boolean;
   wandEnabled: boolean;
   windowPresets?: WindowPreset[];
@@ -61,6 +66,8 @@ const ToolBar: React.FC<{
     viewOptions,
     onChangeViewOptions,
     onChangeLayoutKind,
+    modifierKeyBehaviors,
+    onChangeModifierKeyBehaviors,
     brushEnabled,
     wandEnabled,
     windowPresets = [],
@@ -88,6 +95,20 @@ const ToolBar: React.FC<{
     });
   };
   useKeyboardShortcut(';', handleToggleReferenceLine);
+
+  const handleToggleLockMaintainAspectRatio = () => {
+    onChangeModifierKeyBehaviors({
+      ...modifierKeyBehaviors,
+      lockMaintainAspectRatio: !modifierKeyBehaviors.lockMaintainAspectRatio
+    });
+  };
+
+  const handleToggleLockFixCenterOfGravity = () => {
+    onChangeModifierKeyBehaviors({
+      ...modifierKeyBehaviors,
+      lockFixCenterOfGravity: !modifierKeyBehaviors.lockFixCenterOfGravity
+    });
+  };
 
   const handleToggleScrollbar = (selection: any) => {
     onChangeViewOptions({
@@ -278,6 +299,16 @@ const ToolBar: React.FC<{
               </MenuItem>
             );
           })}
+          <MenuItem divider />
+          <MenuItem header>Shape resizing behavior</MenuItem>
+          <MenuItem onClick={handleToggleLockMaintainAspectRatio}>
+            <CheckMark checked={modifierKeyBehaviors.lockMaintainAspectRatio} />
+            Lock Shift + Drag to maintain aspect ratio
+          </MenuItem>
+          <MenuItem onClick={handleToggleLockFixCenterOfGravity}>
+            <CheckMark checked={modifierKeyBehaviors.lockFixCenterOfGravity} />
+            Lock Ctrl + Drag to fix center of gravity
+          </MenuItem>
         </Dropdown.Menu>
       </Dropdown>
       {(active === 'wand' || active === 'wandEraser') && (
@@ -391,6 +422,12 @@ export default ToolBar;
 const CheckMark: React.FC<{ checked: boolean }> = props => (
   <span className="checkmark">
     {props.checked && <Icon icon="glyphicon-ok" />}
+  </span>
+);
+
+const PlusMinusMark: React.FC<{ checked: boolean }> = props => (
+  <span className="plusmark">
+    <Icon icon={props.checked ? 'plus' : 'minus'} />
   </span>
 );
 

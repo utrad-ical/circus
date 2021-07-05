@@ -3,6 +3,7 @@ import nodepass from 'node-php-password';
 import { determineUserAccessInfo } from '../../privilegeUtils';
 import { Models } from '../../interface';
 import koa from 'koa';
+import { FunctionService } from '@utrad-ical/circus-lib';
 
 const debug = false;
 
@@ -15,10 +16,17 @@ interface Token {
   refreshTokenExpiresAt: Date;
 }
 
+interface Options {}
+
 /**
  * Creates an OAuth2 server that interacts with backend mongo.
  */
-export default function createOauthServer(models: Models) {
+export const createOauthServer: FunctionService<
+  KoaOAuth2Server,
+  { models: Models },
+  Options
+> = async (opt, deps) => {
+  const { models } = deps;
   const oauthModel = {
     getAccessToken: async function (bearerToken: string) {
       // debug && console.log('getAccessToken', arguments);
@@ -107,4 +115,8 @@ export default function createOauthServer(models: Models) {
     debug
   });
   return oauth;
-}
+};
+
+createOauthServer.dependencies = ['models'];
+
+export default createOauthServer;

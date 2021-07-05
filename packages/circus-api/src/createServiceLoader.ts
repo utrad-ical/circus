@@ -20,6 +20,7 @@ import createDicomUtilityRunner, {
 } from './utils/createDicomUtilityRunner';
 import { TaskManager } from './createTaskManager';
 import { MhdPacker } from './case/createMhdPacker';
+import KoaOAuth2Server from './middleware/auth/KoaOAuth2Server';
 
 export type Services = CsCoreServices &
   RsServices & {
@@ -34,6 +35,7 @@ export type Services = CsCoreServices &
     dicomUtilityRunner: DicomUtilityRunner;
     taskManager: TaskManager;
     mhdPacker: MhdPacker;
+    oauthServer: KoaOAuth2Server;
   };
 
 export type ApiServiceLoader = ServiceLoader<Services>;
@@ -72,6 +74,10 @@ const createServiceLoader = async (config: any) => {
   loader.registerModule(
     'mhdPacker',
     path.join(__dirname, 'case/createMhdPacker')
+  );
+  loader.registerModule(
+    'oauthServer',
+    path.join(__dirname, 'middleware/auth/createOauthServer')
   );
   return loader as ApiServiceLoader;
 };

@@ -77,8 +77,8 @@ export default abstract class SolidFigure
 
   public id?: string;
 
-  public lockMaintainAspectRatio: boolean = true;
-  public lockFixCenterOfGravity: boolean = true;
+  public lockMaintainAspectRatio: boolean = false;
+  public lockFixCenterOfGravity: boolean = false;
 
   // dragInfo
   private dragInfo:
@@ -341,12 +341,8 @@ export default abstract class SolidFigure
 
       const originalBoundingBox3 = this.dragInfo!.originalBoundingBox3!;
 
-      const lockMaintainAspectRatio = this.lockMaintainAspectRatio
-        ? !!ev.shiftKey
-        : !ev.shiftKey;
-      const lockFixCenterOfGravity = this.lockFixCenterOfGravity
-        ? !!ev.ctrlKey
-        : !ev.ctrlKey;
+      const maintainAspectRatio = this.lockMaintainAspectRatio !== ev.shiftKey;
+      const fixCenterOfGravity = this.lockFixCenterOfGravity !== ev.ctrlKey;
 
       const newBoundingBox3 = resize(
         this.handleType!,
@@ -354,8 +350,8 @@ export default abstract class SolidFigure
         originalBoundingBox3,
         new Vector3().fromArray(this.dragInfo!.dragStartVolumePoint3!),
         draggedPoint3,
-        lockMaintainAspectRatio,
-        lockFixCenterOfGravity
+        maintainAspectRatio,
+        fixCenterOfGravity
       );
       this.min = newBoundingBox3[0];
       this.max = newBoundingBox3[1];

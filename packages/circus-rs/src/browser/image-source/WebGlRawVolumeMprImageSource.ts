@@ -30,9 +30,9 @@ export default class WebGlRawVolumeMprImageSource extends MprImageSource
   private background: RGBA = [0.0, 0.0, 0.0, 0.0];
 
   // For debug
-  public static captureCanvasCallback?: CaptureCanvasCallback;
+  public static captureCanvasCallbacks: CaptureCanvasCallback[] = [];
   public static captureCanvasElement(captureCanvasCallback: CaptureCanvasCallback) {
-    WebGlRawVolumeMprImageSource.captureCanvasCallback = captureCanvasCallback;
+    WebGlRawVolumeMprImageSource.captureCanvasCallbacks.push(captureCanvasCallback);
   }
 
   constructor({ volumeLoader }: WebGlRawVolumeMprImageSourceOptions) {
@@ -49,8 +49,7 @@ export default class WebGlRawVolumeMprImageSource extends MprImageSource
     this.mprProgram = mprProgram;
 
     // For debug
-    WebGlRawVolumeMprImageSource.captureCanvasCallback &&
-      WebGlRawVolumeMprImageSource.captureCanvasCallback(backCanvas);
+    WebGlRawVolumeMprImageSource.captureCanvasCallbacks.forEach(handler => handler(backCanvas));
 
     this.loadSequence = (async () => {
       this.metadata = await volumeLoader.loadMeta();
@@ -134,7 +133,7 @@ export default class WebGlRawVolumeMprImageSource extends MprImageSource
     this.mprProgram.setDebugMode(debugMode);
 
     this.mprProgram.run();
-    this.mprProgram.cleanup();
+    // this.mprProgram.cleanup();
 
     // this.glContext.flush();
 

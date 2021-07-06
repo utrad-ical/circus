@@ -45,9 +45,9 @@ export default class VolumeRenderingImageSource extends MprImageSource {
   private background: RGBA = [0.0, 0.0, 0.0, 0.0];
 
   // For debug
-  public static captureCanvasCallback?: CaptureCanvasCallback;
+  public static captureCanvasCallbacks: CaptureCanvasCallback[] = [];
   public static captureCanvasElement(captureCanvasCallback: CaptureCanvasCallback) {
-    VolumeRenderingImageSource.captureCanvasCallback = captureCanvasCallback;
+    VolumeRenderingImageSource.captureCanvasCallbacks.push(captureCanvasCallback);
   }
 
   constructor({ volumeLoader, maskLoader, labelLoader }: VolumeRenderingImageSourceOptions) {
@@ -64,8 +64,7 @@ export default class VolumeRenderingImageSource extends MprImageSource {
     this.vrProgram = vrProgram;
 
     // For debug
-    VolumeRenderingImageSource.captureCanvasCallback &&
-      VolumeRenderingImageSource.captureCanvasCallback(backCanvas);
+    VolumeRenderingImageSource.captureCanvasCallbacks.forEach(handler => handler(backCanvas));
 
     this.loadSequence = (async () => {
       this.metadata = await volumeLoader.loadMeta();
@@ -248,7 +247,7 @@ export default class VolumeRenderingImageSource extends MprImageSource {
       quality
     });
 
-    this.vrProgram.run();
+    // this.vrProgram.run();
 
     return resolveImageData(this.glContext);
   }
@@ -305,4 +304,3 @@ export default class VolumeRenderingImageSource extends MprImageSource {
 //   // Return the camera which is adjusted the coordinate system to gl coodinate system.
 //   return { position, target, up, zoom };
 // }
-

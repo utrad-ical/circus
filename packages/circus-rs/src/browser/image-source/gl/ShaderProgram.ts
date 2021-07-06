@@ -143,7 +143,7 @@ export default abstract class ShaderProgram {
   // Buffer (shared)
   //
 
-  protected createBuffer() {
+  private createBuffer() {
     const buffer = this.gl.createBuffer();
     if (!buffer) throw new Error('Cannot create buffer');
     this.buffers.push(buffer);
@@ -168,7 +168,7 @@ export default abstract class ShaderProgram {
    * Define attribute buffer.
    */
   protected attribBuffer(
-    name: string = 'aVertexPosition',
+    name: string = 'position',
     { size, type = this.gl.FLOAT, normalized = false, stride = 0, usage = this.gl.STREAM_DRAW }: AttrBufferOptions
   ): AttribBufferer {
     const gl = this.gl;

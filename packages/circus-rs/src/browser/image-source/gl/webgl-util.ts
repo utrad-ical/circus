@@ -286,15 +286,15 @@ export class GLShaderProgram {
 
     protected getUniformLocation(name: string) {
         if (name in this.uniformLocationCache)
-          return this.uniformLocationCache[name];
-    
+            return this.uniformLocationCache[name];
+
         const location = this.gl.getUniformLocation(this.program, name);
         if (location === null) throw new Error('Undefined uniform: ' + name);
-    
+
         this.uniformLocationCache[name] = location;
         return location;
-      }
-    
+    }
+
     protected getAttribLocation(name: string) {
         if (name in this.attribLocationCache) return this.attribLocationCache[name];
 

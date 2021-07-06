@@ -10,7 +10,6 @@ import DicomVolume from 'common/DicomVolume';
 import { TextureLayout } from './texture/interface';
 
 // WebGL shader source (GLSL)
-// const vertexShaderSource = require('./vertex-shader.vert');
 const vertexShaderSource = require('./glsl/mpr-section.vert');
 const fragmentShaderSource = [
   require('./glsl/mpr-header.frag'),
@@ -31,7 +30,7 @@ export default class MprProgram extends ShaderProgram {
   private uVoxelSizeInverse: SetUniform['uniform3fv'];
   private uBackground: SetUniform['uniform4fv'];
   private uInterpolationMode: SetUniform['uniform1i'];
-  public uMVPMatrix: SetUniform['uniformMatrix4fv'];
+  private uMVPMatrix: SetUniform['uniformMatrix4fv'];
   private uDebugFlag: SetUniform['uniform1i'];
 
   private aVertexPositionBuffer: AttribBufferer;
@@ -75,16 +74,16 @@ export default class MprProgram extends ShaderProgram {
     this.uTransferFunctionSampler = this.uniform1i('uTransferFunctionSampler');
   }
 
-  public setMmInNdc(mmInNdc: number) {
-    this.mmInNdc = mmInNdc;
-  }
-
   // public activate() {
   //   super.activate();
-    
+
   //   // const gl = this.gl;
   //   // gl.enable(gl.DEPTH_TEST); // There is no reason to enable the depth test.
   // }
+
+  public setMmInNdc(mmInNdc: number) {
+    this.mmInNdc = mmInNdc;
+  }
 
   public setDebugMode(debug: number) {
     this.uDebugFlag(debug);

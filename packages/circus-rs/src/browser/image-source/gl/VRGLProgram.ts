@@ -1,4 +1,4 @@
-import { Vector3, Matrix4 } from 'three';
+import { Vector3, Matrix4, Quaternion, Euler } from 'three';
 import { TransferFunction, InterpolationMode } from '../../ViewState';
 import ShaderProgram, { AttribBufferer, SetUniform, VertexElementBufferer } from './ShaderProgram';
 import { LabelData } from '../volume-loader/interface';
@@ -8,7 +8,9 @@ import loadVolumeIntoTexture from '../volume-rendering-image-source/texture-load
 import loadTransferFunctionIntoTexture from '../volume-rendering-image-source/texture-loader/loadTransferFunctionIntoTexture';
 import { TextureLayout } from '../volume-rendering-image-source/texture-loader/interface';
 import DicomVolume from 'common/DicomVolume';
-import { Camera, createCamera, createModelViewMatrix, createPojectionMatrix } from './webgl-util';
+import { Camera, createCamera, createModelViewMatrix, createPojectionMatrix, tooSmallToZero } from './webgl-util';
+import { mat4, quat, vec3 } from 'gl-matrix';
+import runExample from './runExample';
 
 // WebGL shader source (GLSL)
 const vertexShaderSource = require('./glsl/vr-volume.vert');
@@ -75,10 +77,11 @@ export default class VRGLProgram extends ShaderProgram {
   private uEnableLabel: SetUniform['uniform1i'];
   private uEnableMask: SetUniform['uniform1i'];
 
+  private uProjectionMatrix: SetUniform['uniformMatrix4fv'];
+  private uModelViewMatrix: SetUniform['uniformMatrix4fv'];
+
   constructor(gl: WebGLRenderingContext) {
     super(gl, vertexShaderSource, fragmentShaderSource);
-
-    // gl.enable(gl.DEPTH_TEST);
 
     // Uniforms
     this.uVolumeOffset = this.uniform3fv('uVolumeOffset');
@@ -90,6 +93,8 @@ export default class VRGLProgram extends ShaderProgram {
     this.uRayIntensityCoef = this.uniform1f('uRayIntensityCoef');
     this.uInterpolationMode = this.uniform1i('uInterpolationMode');
     this.uMVPMatrix = this.uniformMatrix4fv('uMVPMatrix', false);
+    this.uProjectionMatrix = this.uniformMatrix4fv('uProjectionMatrix', false);
+    this.uModelViewMatrix = this.uniformMatrix4fv('uModelViewMatrix', false);
 
     this.uEnableLabel = this.uniform1i('uEnableLabel');
     this.uEnableMask = this.uniform1i('uEnableMask');
@@ -98,7 +103,7 @@ export default class VRGLProgram extends ShaderProgram {
     // Buffers
     this.aVertexIndexBuffer = this.vertexElementBuffer();
     this.aVertexPositionBuffer = this.attribBuffer('aVertexPosition', { size: 3, type: gl.FLOAT, usage: gl.STREAM_DRAW });
-    this.aVertexColorBuffer = this.attribBuffer('aVertexColor', { size: 4, type: gl.FLOAT });
+    this.aVertexColorBuffer = this.attribBuffer('aVertexColor', { size: 4, type: gl.FLOAT, usage: gl.STATIC_DRAW });
 
     // Textures
     this.uVolumeTextureSampler = this.uniform1i('uVolumeTextureSampler');
@@ -114,14 +119,13 @@ export default class VRGLProgram extends ShaderProgram {
     this.uLabelBoundaryFrom = this.uniform3fv('uLabelBoundaryFrom');
     this.uLabelBoundaryTo = this.uniform3fv('uLabelBoundaryTo');
     this.uLabelLabelColor = this.uniform4fv('uLabelLabelColor');
+
   }
 
-  // public activate() {
-  //   super.activate();
-
-  //   // const gl = this.gl;
-  //   // gl.enable(gl.DEPTH_TEST); // There is no reason to enable the depth test.
-  // }
+  public activate() {
+    super.activate();
+    this.gl.enable(this.gl.DEPTH_TEST);
+  }
 
   public setMmInNdc(mmInNdc: number) {
     this.mmInNdc = mmInNdc;
@@ -179,7 +183,6 @@ export default class VRGLProgram extends ShaderProgram {
       1.0 / voxelSize[2]
     ]);
     this.bufferVertexPosition({ dimension, offset, voxelSize });
-    this.bufferVertexIndex();
     this.bufferVertexColor();
   }
 
@@ -226,23 +229,15 @@ export default class VRGLProgram extends ShaderProgram {
     offset: number[];
     voxelSize: number[];
   }) {
-    //
-    //             1.0 y
-    //              ^  -1.0
-    //              | / z
-    //              |/       x
-    // -1.0 -----------------> +1.0
-    //            / |
-    //      +1.0 /  |
-    //           -1.0
-    //
-    //         [7]------[6]
-    //        / |      / |
-    //      [3]------[2] |
-    //       |  |     |  |
-    //       | [4]----|-[5]
-    //       |/       |/
-    //      [0]------[1]
+    //                                  |
+    //             1.0 y                |        [7]------[6]
+    //              ^  -1.0             |       / |      / |
+    //              | / z               |     [3]------[2] |
+    //              |/       x          |      |  |     |  |
+    // -1.0 -----------------> +1.0     |      | [4]----|-[5]
+    //            / |                   |      |/       |/
+    //      +1.0 /  |                   |     [0]------[1]
+    //           -1.0                   |
     //
     const [vw, vh, vd] = voxelSize;
     const [ox, oy, oz] = [offset[0] * vw, offset[1] * vh, offset[2] * vd];
@@ -284,11 +279,7 @@ export default class VRGLProgram extends ShaderProgram {
 
     const data = new Float32Array(positions);
     this.aVertexPositionBuffer(data);
-  }
 
-  private bufferVertexIndex() {
-    // Vertex index buffer array
-    // prettier-ignore
     const volumeVertexIndices = [
       0, 1, 2, 0, 2, 3, // Front face
       4, 5, 6, 4, 6, 7, // Back face
@@ -298,6 +289,7 @@ export default class VRGLProgram extends ShaderProgram {
       20, 21, 22, 20, 22, 23 // Left face
     ];
     this.aVertexIndexBuffer(volumeVertexIndices);
+
   }
 
   private bufferVertexColor() {
@@ -363,15 +355,10 @@ export default class VRGLProgram extends ShaderProgram {
     this.uRayIntensityCoef(1.0 / intensity / quality);
   }
 
+  private camera: Camera = createCamera([0, 0, 0], [0, 0, 1], 1.0, [0, 1, 0]);
+
   public setCamera(camera: Camera) {
-    const projectionMatrix = new Matrix4().fromArray(
-      createPojectionMatrix(camera)
-    );
-    const modelViewMatrix = new Matrix4().fromArray(
-      createModelViewMatrix(camera, this.mmInNdc)
-    );
-    const mvpMatrix = projectionMatrix.multiply(modelViewMatrix);
-    this.uMVPMatrix(mvpMatrix.toArray());
+    this.camera = camera;
   }
 
   public setMaskEnabled(enabled: boolean) {
@@ -404,36 +391,162 @@ export default class VRGLProgram extends ShaderProgram {
     }
   }
 
+  // public run() {
+  //   const gl = this.gl;
+
+  //   // Activate textures
+  //   if (this.volumeTexture) {
+  //     this.uVolumeTextureSampler(0);
+  //     gl.activeTexture(gl.TEXTURE0);
+  //     gl.bindTexture(gl.TEXTURE_2D, this.volumeTexture);
+  //   }
+
+  //   // Transfer function
+  //   if (this.transferFunctionTexture) {
+  //     this.uTransferFunctionSampler(1);
+  //     gl.activeTexture(gl.TEXTURE1);
+  //     gl.bindTexture(gl.TEXTURE_2D, this.transferFunctionTexture);
+  //   }
+
+  //   if (this.highlightLabelIndex > -1) {
+  //     const { texture } = this.labelTextures[this.highlightLabelIndex];
+  //     this.uLabelSampler(2);
+  //     this.gl.activeTexture(this.gl.TEXTURE2);
+  //     this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+  //   }
+
+  //   // Model/View/Projection
+  //   const projectionMatrix = new Matrix4().fromArray(
+  //     createPojectionMatrix(this.camera)
+  //   );
+  //   const modelViewMatrix = new Matrix4().fromArray(
+  //     createModelViewMatrix(this.camera, this.mmInNdc)
+  //   );
+  //   // const mvpMatrix = projectionMatrix.multiply(modelViewMatrix);
+  //   // this.uMVPMatrix(mvpMatrix.toArray());
+  //   this.uProjectionMatrix(projectionMatrix.toArray());
+  //   this.uModelViewMatrix(modelViewMatrix.toArray());
+
+  //   // Enable attribute pointers
+  //   gl.enableVertexAttribArray(this.getAttribLocation('aVertexPosition'));
+  //   gl.enableVertexAttribArray(this.getAttribLocation('aVertexColor'));
+
+  //   // Draw vertices
+  //   gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
+  // }
+
   public run() {
     const gl = this.gl;
-
-    // Activate textures
-    if (this.volumeTexture) {
-      this.uVolumeTextureSampler(0);
-      gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, this.volumeTexture);
-    }
-
-    // Transfer function
-    if (this.transferFunctionTexture) {
-      this.uTransferFunctionSampler(1);
-      gl.activeTexture(gl.TEXTURE1);
-      gl.bindTexture(gl.TEXTURE_2D, this.transferFunctionTexture);
-    }
-
-    if (this.highlightLabelIndex > -1) {
-      const { texture } = this.labelTextures[this.highlightLabelIndex];
-      this.uLabelSampler(2);
-      this.gl.activeTexture(this.gl.TEXTURE2);
-      this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-    }
+    // runExample(gl.canvas as HTMLCanvasElement);
 
     // Enable attribute pointers
     gl.enableVertexAttribArray(this.getAttribLocation('aVertexPosition'));
     gl.enableVertexAttribArray(this.getAttribLocation('aVertexColor'));
 
-    // Draw vertices
-    gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
+
+    const draw = (camera: Camera) => {
+      // Model/View/Projection
+      const projectionMatrix = new Matrix4().fromArray(
+        createPojectionMatrix(camera)
+      );
+      const modelViewMatrix = new Matrix4().fromArray(
+        createModelViewMatrix(camera, this.mmInNdc)
+      );
+      // const mvpMatrix = projectionMatrix.multiply(modelViewMatrix);
+      // this.uMVPMatrix(mvpMatrix.toArray());
+      this.uProjectionMatrix(projectionMatrix.toArray());
+      this.uModelViewMatrix(modelViewMatrix.toArray());
+
+      // Draw vertices
+      gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
+    };
+
+    const cos = (deg: number) => Math.cos(deg * Math.PI / 180);
+    const sin = (deg: number) => Math.sin(deg * Math.PI / 180);
+
+    const w = 512;
+
+    const cam = createCamera([0, 0, 0], [0, -1, 0], 1, [0, 0, 1]);
+    const cam30 = createCamera([0, 0, 0], [0.5 * w, cos(150) * w, sin(150) * w], 0.5, [0, 0, 1]);
+    const translateCamera = (camera: Camera, dx: number, dy: number, dz: number): Camera => ({
+      target: new Vector3().addVectors(camera.target, new Vector3(dx, dy, dz)),
+      position: new Vector3().addVectors(camera.position, new Vector3(dx, dy, dz)),
+      up: camera.up.clone(),
+      zoom: camera.zoom
+    });
+
+    const cameraQuat = (camera: Camera, quat: Quaternion): Camera => {
+      const targetToPosition = new Vector3().subVectors(camera.position, camera.target);
+
+      const distToTarget = targetToPosition.length();
+      const position = targetToPosition.normalize().applyQuaternion(quat)
+        .multiplyScalar(distToTarget)
+        .add(camera.target);
+      tooSmallToZero(position);
+
+      return {
+        target: camera.target.clone(),
+        position,
+        up: camera.up.clone(),
+        zoom: camera.zoom
+      }
+    };
+
+    const rotateCameraAround = (camera: Camera, axis: Vector3, deg: number): Camera => {
+      const quat = new Quaternion();
+      quat.setFromAxisAngle(axis, deg * Math.PI / 180);
+
+      return cameraQuat(camera, quat);
+    };
+
+    const wait = (ms: number) => new Promise<void>(nx => setTimeout(() => nx(), ms));
+    const metadata = { "voxelCount": [512, 512, 132], "voxelSize": [0.468748, 0.46875, 0.6], "dicomWindow": { "level": 329, "width": 658 }, "pixelFormat": "int16" };
+    (async () => {
+      const zAxis = new Vector3(0, 0, 1).normalize();
+      // let c = createCamera([0,0,0], [0.5 * w, cos(150) * w, sin(150) * w], 0.5, [0, 0, 1]);
+      const centerOfTheVolume = [
+        metadata.voxelCount[0] * metadata.voxelSize[0] / 2,
+        metadata.voxelCount[1] * metadata.voxelSize[1] / 2,
+        metadata.voxelCount[2] * metadata.voxelSize[2] / 2,
+      ];
+      // const upperOfTheCenter = [
+      //   centerOfTheVolume[0],
+      //   centerOfTheVolume[1],
+      //   centerOfTheVolume[2] + metadata.voxelCount[2] * metadata.voxelSize[2]
+      // ];
+      const pos = [
+        centerOfTheVolume[0] - 80,
+        centerOfTheVolume[1] + 80,
+        centerOfTheVolume[2] + (metadata.voxelCount[2] * metadata.voxelSize[2] * 3)
+      ];
+      let c = createCamera(centerOfTheVolume, pos, 0.5);
+      // c = translateCamera(c, w * 0.5, w * 0.5, w * 0.5);
+      // let c = { ...this.camera, zoom: 0.5 };
+      draw(c);
+
+      for (let i = 0; i < 40; i++) {
+        await wait(300);
+        c = rotateCameraAround(c, zAxis, 9);
+        // c = rotateCameraHV(c, 9);
+        draw(c);
+      }
+
+      // for (let i = 0; i < 10; i++) {
+      //   await wait(300);
+      //   c = translateCamera(c, 10, 0, 0);
+      //   draw(c);
+      // }
+    })();
+
+    // let p = Promise.resolve();
+    // for (let i = 0; i < 10; i++) {
+    //   p = p.then(
+    //     () => new Promise<void>(nx => setTimeout(() => nx(), 1500))
+    //   ).then(() => {
+    //     const cam = createCamera([0, 0, 0], [Math.random() * 512, Math.random() * 512, Math.random() * 132]);
+    //     draw(cam);
+    //   })
+    // }
   }
 }
 

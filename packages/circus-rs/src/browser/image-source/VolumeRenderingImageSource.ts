@@ -68,6 +68,7 @@ export default class VolumeRenderingImageSource extends MprImageSource {
 
     this.loadSequence = (async () => {
       this.metadata = await volumeLoader.loadMeta();
+      console.log(JSON.stringify(this.metadata), null, 2);
 
       // Assign the length of the longest side of the volume to 
       // the length of the side in normalized device coordinates.
@@ -150,6 +151,7 @@ export default class VolumeRenderingImageSource extends MprImageSource {
    * @param viewState
    * @returns {Promise<ImageData>}
    */
+
   public async draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
     if (viewState.type !== 'vr')
       throw new Error('Unsupported view state.');
@@ -158,6 +160,7 @@ export default class VolumeRenderingImageSource extends MprImageSource {
 
     this.glContext.clearColor(...this.background);
     this.glContext.clear(this.glContext.COLOR_BUFFER_BIT | this.glContext.DEPTH_BUFFER_BIT);
+    this.glContext.enable(this.glContext.DEPTH_TEST);
 
     // Camera
     const camera = createCameraToLookSection( // createCameraToLookDownXYPlane
@@ -180,19 +183,20 @@ export default class VolumeRenderingImageSource extends MprImageSource {
     // At the first label highlighting, load and create the texture.
     // Since this process involves asynchronous processing,
     // it must be performed at the beginning of drawing.
-    if (this.labelLoader && -1 < highlightedLabelIndex) {
-      if (!(highlightedLabelIndex in this.loadingLabelData)) {
-        this.loadingLabelData[highlightedLabelIndex] = this.labelLoader
-          .load(highlightedLabelIndex)
-          .then(label => {
-            label &&
-              this.vrProgram.appendLabelData(highlightedLabelIndex, label);
-          });
-      }
-      await this.loadingLabelData[highlightedLabelIndex];
-    }
+    // if (this.labelLoader && -1 < highlightedLabelIndex) {
+    //   if (!(highlightedLabelIndex in this.loadingLabelData)) {
+    //     this.loadingLabelData[highlightedLabelIndex] = this.labelLoader
+    //       .load(highlightedLabelIndex)
+    //       .then(label => {
+    //         label &&
+    //           this.vrProgram.appendLabelData(highlightedLabelIndex, label);
+    //       });
+    //   }
+    //   await this.loadingLabelData[highlightedLabelIndex];
+    // }
 
     if (!this.vrProgram.isActive()) {
+      console.log('activate');
       this.vrProgram.activate();
     }
 
@@ -203,54 +207,64 @@ export default class VolumeRenderingImageSource extends MprImageSource {
       this.vrProgram.setDebugMode(debugMode);
     }
 
-    this.vrProgram.setDicomVolume(this.volume!, this.mask);
-    this.vrProgram.setVolumeCuboid(
-      subVolume ?
-        {
-          offset: subVolume.offset,
-          dimension: subVolume.dimension,
-          voxelSize
-        } : {
-          offset: [0, 0, 0],
-          dimension: voxelCount,
-          voxelSize
-        });
-
-    // Transfer function
-    if (
-      this.lastTransferFunction !== viewState.transferFunction &&
-      viewState.transferFunction
-    ) {
-      this.vrProgram.setTransferFunction(viewState.transferFunction);
-      this.lastTransferFunction = viewState.transferFunction;
+    // this.vrProgram.setDicomVolume(this.volume!, this.mask);
+    if (!this.hoge) {
+      console.log('setVolumeCuboid');
+      this.hoge = true;
+      this.vrProgram.setVolumeCuboid(
+        subVolume ?
+          {
+            offset: subVolume.offset,
+            dimension: subVolume.dimension,
+            voxelSize
+          } : {
+            offset: [0, 0, 0],
+            dimension: voxelCount,
+            voxelSize
+          });
     }
 
-    // Vessel mask
-    this.vrProgram.setMaskEnabled(!!viewState.enableMask);
+    // // Transfer function
+    // if (
+    //   this.lastTransferFunction !== viewState.transferFunction &&
+    //   viewState.transferFunction
+    // ) {
+    //   this.vrProgram.setTransferFunction(viewState.transferFunction);
+    //   this.lastTransferFunction = viewState.transferFunction;
+    // }
 
-    // Highlight label
-    this.vrProgram.setHighlightLabel(highlightedLabelIndex);
+    // // Vessel mask
+    // this.vrProgram.setMaskEnabled(!!viewState.enableMask);
 
-    // Background
-    this.vrProgram.setBackground(background || this.background);
+    // // Highlight label
+    // this.vrProgram.setHighlightLabel(highlightedLabelIndex);
 
-    // Interporation
-    this.vrProgram.setInterporationMode(interpolationMode);
+    // // Background
+    // this.vrProgram.setBackground(background || this.background);
+
+    // // Interporation
+    // this.vrProgram.setInterporationMode(interpolationMode);
 
     // Camera
     this.vrProgram.setCamera(camera);
 
-    // Ray configuration
-    this.vrProgram.setRay(camera, {
-      voxelSize: this.metadata!.voxelSize!,
-      intensity: rayIntensity,
-      quality
-    });
+    // // Ray configuration
+    // this.vrProgram.setRay(camera, {
+    //   voxelSize: this.metadata!.voxelSize!,
+    //   intensity: rayIntensity,
+    //   quality
+    // });
 
-    // this.vrProgram.run();
+    this.vrProgram.run();
 
+    await new Promise<void>(() => { });
+    alert('Nerver here');
+
+    return emptyImageData;
     return resolveImageData(this.glContext);
   }
+
+  private hoge: boolean = false;
 }
 
 // function createCamera(section: Section, subVolume: SubVolume): Camera {
@@ -304,3 +318,5 @@ export default class VolumeRenderingImageSource extends MprImageSource {
 //   // Return the camera which is adjusted the coordinate system to gl coodinate system.
 //   return { position, target, up, zoom };
 // }
+
+const emptyImageData = new ImageData(1, 1);

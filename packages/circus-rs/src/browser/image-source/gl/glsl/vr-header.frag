@@ -20,7 +20,7 @@ uniform float uRayIntensityCoef;
 uniform int uInterpolationMode;
 uniform vec4 uBackground;
 
-varying vec4 vColor;
+varying lowp vec4 vColor;
 varying vec3 vWorldSpaceCoords;
 
 uniform int uDebugFlag;

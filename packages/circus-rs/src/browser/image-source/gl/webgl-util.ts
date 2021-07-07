@@ -10,6 +10,7 @@ export interface Camera {
 }
 
 export function resolveImageData(gl: WebGLRenderingContext) {
+    console.time('resolveImageData');
     const pixels = new Uint8Array(
         gl.drawingBufferWidth * gl.drawingBufferHeight * 4
     );
@@ -28,6 +29,7 @@ export function resolveImageData(gl: WebGLRenderingContext) {
         gl.drawingBufferWidth,
         gl.drawingBufferHeight
     );
+    console.timeEnd('resolveImageData');
 
     return imageData;
 }
@@ -304,4 +306,10 @@ export class GLShaderProgram {
         this.attribLocationCache[name] = location;
         return location;
     }
+}
+
+export const tooSmallToZero = (v: Vector3) => {
+    -0.000000000001 < v.x && v.x < 0.000000000001 && (v.x = 0);
+    -0.000000000001 < v.y && v.y < 0.000000000001 && (v.y = 0);
+    -0.000000000001 < v.z && v.z < 0.000000000001 && (v.z = 0);
 }

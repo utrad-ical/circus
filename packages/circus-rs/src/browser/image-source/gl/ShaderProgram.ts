@@ -18,8 +18,7 @@ type AttrBufferOptions = {
   usage?: number; // default: gl.STREAM_DRAW
 };
 export type AttribBufferer = (data: BufferSource) => void;
-export type VertexElementBufferer = (indices: number[]) => void;
-
+export type VertexElementBufferer = (indices?: number[]) => WebGLBuffer;
 
 export default abstract class ShaderProgram {
   protected gl: WebGLRenderingContext;
@@ -204,11 +203,14 @@ export default abstract class ShaderProgram {
     const gl = this.gl;
     const buffer = this.createBuffer();
 
-    return (indices: number[]) => {
-      // Vertex index buffer array
+    return (indices?: number[]) => {
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer);
-      const data = new Uint16Array(indices);
-      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, data, type);
+      if (indices) {
+        // Vertex index buffer array
+        const data = new Uint16Array(indices);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, data, type);
+      }
+      return buffer;
     };
   }
 

@@ -22,6 +22,8 @@ import createTaskManager, { TaskManager } from '../src/createTaskManager';
 import { DicomVoxelDumper } from '@utrad-ical/circus-cs-core';
 import { Archiver } from 'archiver';
 import { EventEmitter } from 'events';
+import createOauthServer from '../src/middleware/auth/createOauthServer';
+import createDefaultAuthProvider from '../src/middleware/auth/authProvider/DefaultAuthProvider';
 
 /**
  * Holds data used for API route testing.
@@ -132,6 +134,8 @@ export const setUpAppForRoutesTest = async () => {
     }
   };
 
+  const authProvider = await createDefaultAuthProvider({}, { models });
+
   const app = await createApp(
     {
       debug: true,
@@ -152,9 +156,11 @@ export const setUpAppForRoutesTest = async () => {
       rsSeriesRoutes: async () => {}, // dummy
       volumeProvider: null as any, // dummy
       taskManager,
-      dicomVoxelDumper
+      dicomVoxelDumper,
+      oauthServer: await createOauthServer({}, { models, authProvider })
     }
   );
+
   const testServer = await setUpKoaTestWith(app);
 
   // Prepare axios instances that kick HTTP requests as these users

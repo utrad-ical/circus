@@ -1,7 +1,6 @@
 import KoaOAuth2Server from './KoaOAuth2Server';
-import nodepass from 'node-php-password';
 import { determineUserAccessInfo } from '../../privilegeUtils';
-import { Models } from '../../interface';
+import { Models, AuthProvider } from '../../interface';
 import koa from 'koa';
 import { FunctionService } from '@utrad-ical/circus-lib';
 
@@ -23,10 +22,10 @@ interface Options {}
  */
 export const createOauthServer: FunctionService<
   KoaOAuth2Server,
-  { models: Models },
+  { models: Models; authProvider: AuthProvider },
   Options
 > = async (opt, deps) => {
-  const { models } = deps;
+  const { models, authProvider } = deps;
   const oauthModel = {
     getAccessToken: async function (bearerToken: string) {
       // debug && console.log('getAccessToken', arguments);
@@ -72,17 +71,11 @@ export const createOauthServer: FunctionService<
       });
       return result.deletedCount! > 0;
     },
-    getUser: async function (username: string, password: string) {
+    getUser: async (username: string, password: string) => {
       // debug && console.log('getting user', arguments);
-      const users = await models.user.findAll({
-        $or: [{ userEmail: username }, { loginId: username }]
-      });
-      if (!users.length) return null;
-      const user = users[0];
-      if (nodepass.verify(password, user.password)) {
-        return user;
-      }
-      return null;
+      const check = await authProvider.check(username, password);
+      if (check.result === 'NG') return null;
+      return await models.user.findById(check.authenticatedUserEmail);
     },
     saveToken: async function (token: Token, client: any, user: any) {
       // debug && console.log('saveToken', arguments);
@@ -117,6 +110,6 @@ export const createOauthServer: FunctionService<
   return oauth;
 };
 
-createOauthServer.dependencies = ['models'];
+createOauthServer.dependencies = ['models', 'authProvider'];
 
 export default createOauthServer;

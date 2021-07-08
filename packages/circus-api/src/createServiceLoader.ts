@@ -11,7 +11,8 @@ import {
   Validator,
   DicomImporter,
   DicomTagReader,
-  Models
+  Models,
+  AuthProvider
 } from './interface';
 import Storage from './storage/Storage';
 import Koa from 'koa';
@@ -36,6 +37,7 @@ export type Services = CsCoreServices &
     taskManager: TaskManager;
     mhdPacker: MhdPacker;
     oauthServer: KoaOAuth2Server;
+    authProvider: AuthProvider;
   };
 
 export type ApiServiceLoader = ServiceLoader<Services>;
@@ -78,6 +80,11 @@ const createServiceLoader = async (config: any) => {
   loader.registerModule(
     'oauthServer',
     path.join(__dirname, 'middleware/auth/createOauthServer')
+  );
+  loader.registerDirectory(
+    'authProvider',
+    path.join(__dirname, 'middleware/auth/authProvider/DefaultAuthProvider'),
+    'DefaultAuthProvider'
   );
   return loader as ApiServiceLoader;
 };

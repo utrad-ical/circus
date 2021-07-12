@@ -391,54 +391,53 @@ export default class VRGLProgram extends ShaderProgram {
     }
   }
 
-  // public run() {
-  //   const gl = this.gl;
-
-  //   // Activate textures
-  //   if (this.volumeTexture) {
-  //     this.uVolumeTextureSampler(0);
-  //     gl.activeTexture(gl.TEXTURE0);
-  //     gl.bindTexture(gl.TEXTURE_2D, this.volumeTexture);
-  //   }
-
-  //   // Transfer function
-  //   if (this.transferFunctionTexture) {
-  //     this.uTransferFunctionSampler(1);
-  //     gl.activeTexture(gl.TEXTURE1);
-  //     gl.bindTexture(gl.TEXTURE_2D, this.transferFunctionTexture);
-  //   }
-
-  //   if (this.highlightLabelIndex > -1) {
-  //     const { texture } = this.labelTextures[this.highlightLabelIndex];
-  //     this.uLabelSampler(2);
-  //     this.gl.activeTexture(this.gl.TEXTURE2);
-  //     this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-  //   }
-
-  //   // Model/View/Projection
-  //   const projectionMatrix = new Matrix4().fromArray(
-  //     createPojectionMatrix(this.camera)
-  //   );
-  //   const modelViewMatrix = new Matrix4().fromArray(
-  //     createModelViewMatrix(this.camera, this.mmInNdc)
-  //   );
-  //   // const mvpMatrix = projectionMatrix.multiply(modelViewMatrix);
-  //   // this.uMVPMatrix(mvpMatrix.toArray());
-  //   this.uProjectionMatrix(projectionMatrix.toArray());
-  //   this.uModelViewMatrix(modelViewMatrix.toArray());
-
-  //   // Enable attribute pointers
-  //   gl.enableVertexAttribArray(this.getAttribLocation('aVertexPosition'));
-  //   gl.enableVertexAttribArray(this.getAttribLocation('aVertexColor'));
-
-  //   // Draw vertices
-  //   gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
-  // }
-
   public run() {
     const gl = this.gl;
-    runExample(gl.canvas as HTMLCanvasElement);
-    return;
+
+    // Activate textures
+    if (this.volumeTexture) {
+      this.uVolumeTextureSampler(0);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, this.volumeTexture);
+    }
+
+    // Transfer function
+    if (this.transferFunctionTexture) {
+      this.uTransferFunctionSampler(1);
+      gl.activeTexture(gl.TEXTURE1);
+      gl.bindTexture(gl.TEXTURE_2D, this.transferFunctionTexture);
+    }
+
+    if (this.highlightLabelIndex > -1) {
+      const { texture } = this.labelTextures[this.highlightLabelIndex];
+      this.uLabelSampler(2);
+      this.gl.activeTexture(this.gl.TEXTURE2);
+      this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+    }
+
+    // Model/View/Projection
+    const projectionMatrix = new Matrix4().fromArray(
+      createPojectionMatrix(this.camera)
+    );
+    const modelViewMatrix = new Matrix4().fromArray(
+      createModelViewMatrix(this.camera, this.mmInNdc)
+    );
+    // const mvpMatrix = projectionMatrix.multiply(modelViewMatrix);
+    // this.uMVPMatrix(mvpMatrix.toArray());
+    this.uProjectionMatrix(projectionMatrix.toArray());
+    this.uModelViewMatrix(modelViewMatrix.toArray());
+
+    // Enable attribute pointers
+    gl.enableVertexAttribArray(this.getAttribLocation('aVertexPosition'));
+    gl.enableVertexAttribArray(this.getAttribLocation('aVertexColor'));
+
+    // Draw vertices
+    gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
+  }
+
+  public debugRun() {
+    const gl = this.gl;
+    // runExample(gl.canvas as HTMLCanvasElement); return;
 
     // Enable attribute pointers
     gl.enableVertexAttribArray(this.getAttribLocation('aVertexPosition'));

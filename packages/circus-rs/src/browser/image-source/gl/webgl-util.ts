@@ -313,3 +313,30 @@ export const tooSmallToZero = (v: Vector3) => {
     -0.000000000001 < v.y && v.y < 0.000000000001 && (v.y = 0);
     -0.000000000001 < v.z && v.z < 0.000000000001 && (v.z = 0);
 }
+
+export const runAnimation = (fn: (deltaTime: number) => void, seconds: number) => {
+    let tillMicroSeconds = seconds * 1000;
+    let start: number = 0;
+    let end: number = 0;
+    let then = 0;
+    let drawTimes = 0;
+    function render(now: number) {
+        if (!end) {
+            start = now;
+            end = now + tillMicroSeconds;
+        }
+        if (end < now) {
+            console.log((drawTimes / (tillMicroSeconds * 0.001)).toFixed(2) + ' [fps]');
+            return;
+        }
+
+        const deltaTime = now - then;
+        then = now;
+
+        fn(deltaTime);
+        ++drawTimes;
+
+        requestAnimationFrame(render);
+    }
+    requestAnimationFrame(render);
+}

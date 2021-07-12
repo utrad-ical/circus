@@ -17,19 +17,21 @@ type AttrBufferOptions = {
   // offset?: number; // default 0 // Not assuming non zero offset on current version.
   usage?: number; // default: gl.STREAM_DRAW
 };
-export type AttribBufferer = (data: BufferSource) => void;
+export type AttribBufferer = (data?: BufferSource) => void;
 export type VertexElementBufferer = (indices?: number[]) => WebGLBuffer;
+
+export type AttributeBuffer = ReturnType<ShaderProgram['attribute']>;
+export type VertexIndicesBuffer = ReturnType<ShaderProgram['vertexIndices']>;
 
 export default abstract class ShaderProgram {
   protected gl: WebGLRenderingContext;
   protected program: WebGLProgram;
+  protected buffers: WebGLBuffer[] = [];
+  protected textures: WebGLTexture[] = [];
 
   protected uniformLocationCache: Record<string, WebGLUniformLocation> = {};
   protected attribLocationCache: Record<string, number> = {};
   protected markAsBuffered: Record<string, boolean> = {};
-
-  protected buffers: WebGLBuffer[] = [];
-  protected textures: WebGLTexture[] = [];
 
   protected active: boolean = false;
 
@@ -53,11 +55,17 @@ export default abstract class ShaderProgram {
     this.active = true;
   }
 
-  public cleanup() {
-    this.uniformLocationCache = {};
-    this.attribLocationCache = {};
+  public deactivate() {
+    // this.uniformLocationCache = {};
+    // this.attribLocationCache = {};
     this.markAsBuffered = {};
     this.active = false;
+  }
+
+  public dispose() {
+    this.buffers.forEach(buffer => this.gl.deleteBuffer(buffer));
+    this.textures.forEach(texture => this.gl.deleteTexture(texture));
+    this.gl.deleteProgram(this.program);
   }
 
   //
@@ -177,24 +185,89 @@ export default abstract class ShaderProgram {
 
     const buffer = this.createBuffer();
 
-    return (data: BufferSource) => {
-      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-      if (!this.markAsBuffered[name]) {
-        // Initialize buffer
-        gl.bufferData(gl.ARRAY_BUFFER, data, usage);
-        gl.vertexAttribPointer(
-          this.getAttribLocation(name),
-          size,
-          type,
-          normalized,
-          stride,
-          offset
-        );
-        this.markAsBuffered[name] = true;
-      } else {
-        // Reuse buffer
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.bufferSubData(gl.ARRAY_BUFFER, 0, data);
+    return (data?: BufferSource) => {
+      if (data) {
+        if (!this.markAsBuffered[name]) {
+          // Initialize buffer
+          gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+          gl.bufferData(gl.ARRAY_BUFFER, data, usage);
+          this.markAsBuffered[name] = true;
+        } else {
+          // Reuse buffer
+          gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+          gl.bufferSubData(gl.ARRAY_BUFFER, 0, data);
+        }
+      }
+      const location = this.getAttribLocation(name);
+      gl.vertexAttribPointer(
+        location,
+        size,
+        type,
+        normalized,
+        stride,
+        offset
+      );
+      gl.enableVertexAttribArray(location);
+    };
+  }
+  protected attribute(
+    name: string = 'position',
+    { size, type = this.gl.FLOAT, normalized = false, stride = 0, usage = this.gl.STREAM_DRAW }: AttrBufferOptions
+  ) {
+    const gl = this.gl;
+
+    // Not assuming non zero offset on current version.
+    const offset = 0;
+
+    const buffer = this.createBuffer();
+    const location = this.getAttribLocation(name);
+
+    return {
+      buffer: (data: BufferSource) => {
+        if (!this.markAsBuffered[name]) {
+          // Initialize buffer
+          gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+          gl.bufferData(gl.ARRAY_BUFFER, data, usage);
+          this.markAsBuffered[name] = true;
+        } else {
+          // Reuse buffer
+          gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+          gl.bufferSubData(gl.ARRAY_BUFFER, 0, data);
+        }
+        return buffer;
+      },
+      bind: () => gl.bindBuffer(gl.ARRAY_BUFFER, buffer),
+      pointer: () => gl.vertexAttribPointer(
+        location,
+        size,
+        type,
+        normalized,
+        stride,
+        offset
+      ),
+      enable: () => gl.enableVertexAttribArray(location),
+      disable: () => gl.disableVertexAttribArray(location)
+    };
+  }
+
+  protected vertexIndices(type = this.gl.STATIC_DRAW) {
+    const gl = this.gl;
+    const buffer = this.createBuffer();
+
+    const offset = 0;
+    let count = 0;
+
+    return {
+      buffer: (indices: number[]) => {
+        count = indices.length;
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), type);
+      },
+      bind: () => {
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer);
+      },
+      draw: () => {
+        gl.drawElements(gl.TRIANGLES, count, gl.UNSIGNED_SHORT, offset);
       }
     };
   }
@@ -220,10 +293,5 @@ export default abstract class ShaderProgram {
     if (!texture) throw new Error('Failed to craete transfer function texture');
     this.textures.push(texture);
     return texture;
-  }
-
-  public dispose() {
-    this.buffers.forEach(buffer => this.gl.deleteBuffer(buffer));
-    this.textures.forEach(texture => this.gl.deleteTexture(texture));
   }
 }

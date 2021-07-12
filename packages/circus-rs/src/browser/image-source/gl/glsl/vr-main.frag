@@ -1,9 +1,8 @@
 void main() {
   if(uDebugFlag == 0) {
-    // - volume rendering
-    gl_FragColor = getColorWithRayCasting(vWorldSpaceCoords);
+      gl_FragColor = getColorWithRayCasting(vWorldSpaceCoords);
   } else if(uDebugFlag == 1) {
-    // - check volume box
+    // - volume rendering
     gl_FragColor = vColor;
   } else if(uDebugFlag == 2) {
     // - volume rendering with volume box

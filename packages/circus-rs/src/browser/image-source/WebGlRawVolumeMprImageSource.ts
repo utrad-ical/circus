@@ -15,7 +15,8 @@ type RGBA = [number, number, number, number];
 /**
  * For debug
  */
-const debugMode = 1;
+const debugMode = 0;
+const debugCameraMode = 0;
 type CaptureCanvasCallback = (canvas: HTMLCanvasElement) => void;
 
 export default class WebGlRawVolumeMprImageSource extends MprImageSource
@@ -110,7 +111,8 @@ export default class WebGlRawVolumeMprImageSource extends MprImageSource
     this.glContext.clear(this.glContext.COLOR_BUFFER_BIT | this.glContext.DEPTH_BUFFER_BIT);
 
     // Camera
-    const camera = createCameraToLookDownXYPlane( //createCameraToLookSection( // createCameraToLookDownXYPlane
+    const cameraCreator = debugCameraMode === 1 ? createCameraToLookDownXYPlane : createCameraToLookSection;
+    const camera = cameraCreator(
       viewState.section,
       this.metadata!.voxelCount,
       this.metadata!.voxelSize

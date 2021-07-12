@@ -8,8 +8,10 @@ import { LabelLoader } from './volume-loader/interface';
 import { windowToTransferFunction } from './volume-rendering-image-source/transfer-function-util';
 import MprImageSource from './MprImageSource';
 import { createOrthogonalMprSection } from '../section-util';
-import { Camera, createCameraToLookDownXYPlane, createCameraToLookSection, getWebGLContext, resolveImageData } from './gl/webgl-util';
+import { Camera, createCameraToLookDownXYPlane, createCameraToLookSection, getWebGLContext, resolveImageData, runAnimation } from './gl/webgl-util';
 import DicomVolume from 'common/DicomVolume';
+import VolumeCuboidProgram from './gl/VolumeCuboidProgram';
+import runExample from './gl/runExample';
 
 interface VolumeRenderingImageSourceOptions {
   volumeLoader: DicomVolumeLoader;
@@ -26,7 +28,7 @@ type RGBA = [number, number, number, number];
 /**
  * For debug
  */
-const debugMode = 1;
+const debugMode = 0;
 type CaptureCanvasCallback = (canvas: HTMLCanvasElement) => void;
 
 export default class VolumeRenderingImageSource extends MprImageSource {
@@ -152,6 +154,30 @@ export default class VolumeRenderingImageSource extends MprImageSource {
    * @returns {Promise<ImageData>}
    */
 
+  public async debugDraw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
+    this.updateViewportSize(viewer.getResolution());
+
+    // runExample(this.glContext.canvas as HTMLCanvasElement);
+    // await new Promise<void>(() => { });
+
+    const pg = new VolumeCuboidProgram(this.glContext);
+    pg.setVolumeCuboid();
+
+    let total = 0;
+    runAnimation(
+      (deltaTime) => {
+        total += deltaTime;
+        pg.run(total * 0.001);
+      },
+      30
+    );
+
+    await new Promise<void>(() => { });
+    alert('Nerver here');
+
+    return emptyImageData;
+  }
+
   public async draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
     if (viewState.type !== 'vr')
       throw new Error('Unsupported view state.');
@@ -183,20 +209,19 @@ export default class VolumeRenderingImageSource extends MprImageSource {
     // At the first label highlighting, load and create the texture.
     // Since this process involves asynchronous processing,
     // it must be performed at the beginning of drawing.
-    // if (this.labelLoader && -1 < highlightedLabelIndex) {
-    //   if (!(highlightedLabelIndex in this.loadingLabelData)) {
-    //     this.loadingLabelData[highlightedLabelIndex] = this.labelLoader
-    //       .load(highlightedLabelIndex)
-    //       .then(label => {
-    //         label &&
-    //           this.vrProgram.appendLabelData(highlightedLabelIndex, label);
-    //       });
-    //   }
-    //   await this.loadingLabelData[highlightedLabelIndex];
-    // }
+    if (this.labelLoader && -1 < highlightedLabelIndex) {
+      if (!(highlightedLabelIndex in this.loadingLabelData)) {
+        this.loadingLabelData[highlightedLabelIndex] = this.labelLoader
+          .load(highlightedLabelIndex)
+          .then(label => {
+            label &&
+              this.vrProgram.appendLabelData(highlightedLabelIndex, label);
+          });
+      }
+      await this.loadingLabelData[highlightedLabelIndex];
+    }
 
     if (!this.vrProgram.isActive()) {
-      console.log('activate');
       this.vrProgram.activate();
     }
 
@@ -208,63 +233,54 @@ export default class VolumeRenderingImageSource extends MprImageSource {
     }
 
     // this.vrProgram.setDicomVolume(this.volume!, this.mask);
-    if (!this.hoge) {
-      console.log('setVolumeCuboid');
-      this.hoge = true;
-      this.vrProgram.setVolumeCuboid(
-        subVolume ?
-          {
-            offset: subVolume.offset,
-            dimension: subVolume.dimension,
-            voxelSize
-          } : {
-            offset: [0, 0, 0],
-            dimension: voxelCount,
-            voxelSize
-          });
+    this.vrProgram.setVolumeCuboid(
+      subVolume ?
+        {
+          offset: subVolume.offset,
+          dimension: subVolume.dimension,
+          voxelSize
+        } : {
+          offset: [0, 0, 0],
+          dimension: voxelCount,
+          voxelSize
+        });
+
+    // Transfer function
+    if (
+      this.lastTransferFunction !== viewState.transferFunction &&
+      viewState.transferFunction
+    ) {
+      this.vrProgram.setTransferFunction(viewState.transferFunction);
+      this.lastTransferFunction = viewState.transferFunction;
     }
 
-    // // Transfer function
-    // if (
-    //   this.lastTransferFunction !== viewState.transferFunction &&
-    //   viewState.transferFunction
-    // ) {
-    //   this.vrProgram.setTransferFunction(viewState.transferFunction);
-    //   this.lastTransferFunction = viewState.transferFunction;
-    // }
+    // Vessel mask
+    this.vrProgram.setMaskEnabled(!!viewState.enableMask);
 
-    // // Vessel mask
-    // this.vrProgram.setMaskEnabled(!!viewState.enableMask);
+    // Highlight label
+    this.vrProgram.setHighlightLabel(highlightedLabelIndex);
 
-    // // Highlight label
-    // this.vrProgram.setHighlightLabel(highlightedLabelIndex);
+    // Background
+    this.vrProgram.setBackground(background || this.background);
 
-    // // Background
-    // this.vrProgram.setBackground(background || this.background);
-
-    // // Interporation
-    // this.vrProgram.setInterporationMode(interpolationMode);
+    // Interporation
+    this.vrProgram.setInterporationMode(interpolationMode);
 
     // Camera
     this.vrProgram.setCamera(camera);
 
-    // // Ray configuration
-    // this.vrProgram.setRay(camera, {
-    //   voxelSize: this.metadata!.voxelSize!,
-    //   intensity: rayIntensity,
-    //   quality
-    // });
+    // Ray configuration
+    this.vrProgram.setRay(camera, {
+      voxelSize: this.metadata!.voxelSize!,
+      intensity: rayIntensity,
+      quality
+    });
 
     this.vrProgram.run();
 
-    await new Promise<void>(() => { });
-    alert('Nerver here');
-
-    return emptyImageData;
+    // return emptyImageData;
     return resolveImageData(this.glContext);
   }
-
-  private hoge: boolean = false;
 }
 
 // function createCamera(section: Section, subVolume: SubVolume): Camera {

@@ -23,9 +23,12 @@ const builtInDisplays: { [name: string]: Display<any, any> } = {
 
 const loaded = new Map<string, true>();
 
-const loadDynamicScript = async (name: string): Promise<void> => {
+const loadDynamicScript = async (
+  name: string,
+  pluginId: string
+): Promise<void> => {
   if (loaded.has(name)) return;
-  const url = `/api/plugin-displays/${name}/remoteEntry.js`;
+  const url = `/api/plugin-displays/${pluginId}/${name}/remoteEntry.js`;
   const script = await (await fetch(url)).text();
   const element = document.createElement('script');
   element.text = script;
@@ -38,9 +41,10 @@ declare const __webpack_init_sharing__: any;
 declare const __webpack_share_scopes__: any;
 
 const loadExternalDisplay = async <O extends object, F>(
-  name: string
+  name: string,
+  pluginId: string
 ): Promise<Display<O, F>> => {
-  await loadDynamicScript(name);
+  await loadDynamicScript(name, pluginId);
   await __webpack_init_sharing__('default');
   const container = (window as any)[name] as any;
   await container.init(__webpack_share_scopes__.default);
@@ -49,14 +53,16 @@ const loadExternalDisplay = async <O extends object, F>(
   return Display;
 };
 
-const loadDisplay = async <O extends object, F>(
-  name: string
-): Promise<Display<O, F>> => {
-  if (name in builtInDisplays) {
-    return builtInDisplays[name];
-  } else {
-    return loadExternalDisplay(name);
-  }
+const loadDisplay = (pluginId: string) => {
+  return async <O extends object, F>(name: string): Promise<Display<O, F>> => {
+    if (name in builtInDisplays) {
+      return builtInDisplays[name];
+    } else if (name.startsWith('@')) {
+      return loadExternalDisplay(name.slice(1), pluginId);
+    } else {
+      throw new Error('Invalid display name');
+    }
+  };
 };
 
 export default loadDisplay;

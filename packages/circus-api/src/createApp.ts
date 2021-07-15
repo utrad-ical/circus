@@ -106,6 +106,7 @@ interface CreateAppOptions {
   fixUser?: string;
   corsOrigin?: string;
   pluginResultsPath: string;
+  pluginCachePath: string;
   dicomImageServerUrl: string;
   uploadFileSizeMaxBytes: number;
 }
@@ -155,6 +156,7 @@ export const createApp: FunctionService<
     debug,
     corsOrigin,
     pluginResultsPath,
+    pluginCachePath,
     uploadFileSizeMaxBytes,
     dicomImageServerUrl
   } = options;
@@ -170,6 +172,7 @@ export const createApp: FunctionService<
     dicomFileRepository,
     dicomImporter,
     pluginResultsPath,
+    pluginCachePath,
     cs: core,
     volumeProvider,
     uploadFileSizeMaxBytes,

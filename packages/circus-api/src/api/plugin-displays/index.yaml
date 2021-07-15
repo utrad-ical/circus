@@ -3,7 +3,7 @@ description: >
   Dynamically provides CIRCUS CS displays.
 routes:
   - verb: get
-    path: /plugin-displays/:path+
-    noAuthentication: true
+    path: /plugin-displays/:pluginId/:path+
+    # noAuthentication: true
     description: >
       Returns the display using Webpack Module Federation.

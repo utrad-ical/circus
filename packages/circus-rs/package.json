@@ -45,7 +45,7 @@
     "pngjs": "^3.4.0",
     "style-loader": "^1.2.1",
     "tarn": "^3.0.1",
-    "three": "^0.98.0",
+    "three": "^0.125.0",
     "tinycolor2": "^1.4.1",
     "tslib": "^1.11.2",
     "validator": "^7.0.0",

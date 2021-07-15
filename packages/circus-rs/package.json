@@ -75,7 +75,7 @@
     "http-status": "^1.4.2",
     "less": "^3.11.1",
     "less-loader": "^6.0.0",
-    "merge": "^1.2.1",
+    "merge": "^2.1.1",
     "rimraf": "^2.6.3",
     "svg2ttf": "^4.1.0",
     "svgicons2svgfont": "^5.0.2",

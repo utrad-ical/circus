@@ -19,7 +19,7 @@
     "dicom-parser": "^1.8.4",
     "fs-extra": "^9.0.0",
     "jpeg-lossless-decoder-js": "^2.0.4",
-    "merge": "^1.2.1",
+    "merge": "^2.1.1",
     "multi-integer-range": "^4.0.8",
     "recursive-readdir": "^2.2.2",
     "tar-stream": "^2.1.0",

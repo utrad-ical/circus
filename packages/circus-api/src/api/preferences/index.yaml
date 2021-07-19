@@ -10,7 +10,10 @@ routes:
       Returns the preferences object of the current user.
   - verb: patch
     path: /preferences
-    requestSchema: preferences
+    requestSchema:
+      allOf:
+        - $ref: preferences
+        - minProperties: 1
     description: >
       Patches the preferences of the current user.
       All fields are shallow-merged to the root preference object.

@@ -32,9 +32,16 @@ beforeAll(async () => {
       taskManager: null as any, // dummy
       mhdPacker: null as any, // dummy
       core: null as any, // dummy
-      dicomVoxelDumper: null as any // dummy
+      dicomVoxelDumper: null as any, // dummy
+      oauthServer: {
+        authenticate: () => async (ctx: any, next: any) => {
+          next();
+        },
+        token: () => () => {}
+      } as any
     }
   );
+
   testServer = await setUpKoaTestWith(koaApp);
   ax = axios.create({ baseURL: testServer.url, validateStatus: () => true });
 });

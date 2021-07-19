@@ -36,7 +36,16 @@ routes:
         caseIds:
           type: array
           items:
-            type: string
+            oneOf:
+              - type: string
+              - type: object
+                properties:
+                  caseId:
+                    type: string
+                  revisionIndex:
+                    type: integer
+                    minimum: 0
+          maxItems: 100
         labelPackType:
           enum: ['isolated', 'combined']
         mhdLineEnding:

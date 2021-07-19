@@ -5,6 +5,7 @@ import checkFilter from '../../utils/checkFilter';
 import { RouteMiddleware, CircusContext } from '../../typings/middlewares';
 import makeNewCase from '../../case/makeNewCase';
 import {
+  CaseExportTarget,
   CompressionFormat,
   LabelPackType,
   LineEndingType
@@ -221,7 +222,7 @@ export const handlePostExportJob: RouteMiddleware = ({
 }) => {
   return async (ctx, next) => {
     const userEmail = ctx.user.userEmail;
-    const caseIds: string[] = ctx.request.body.caseIds;
+    const caseIds: CaseExportTarget[] = ctx.request.body.caseIds;
     const labelPackType: LabelPackType =
       ctx.request.body.labelPackType === 'combined' ? 'combined' : 'isolated';
     const mhdLineEnding: LineEndingType =
@@ -229,10 +230,12 @@ export const handlePostExportJob: RouteMiddleware = ({
     const compressionFormat: CompressionFormat =
       ctx.request.body.compressionFormat === 'zip' ? 'zip' : 'tgz';
 
+    const ids = Array.from(
+      new Set(caseIds.map(i => (typeof i === 'string' ? i : i.caseId))).values()
+    );
+
     // check read privileges
-    const cursor = models.clinicalCase.findAsCursor({
-      caseId: { $in: caseIds }
-    });
+    const cursor = models.clinicalCase.findAsCursor({ caseId: { $in: ids } });
     const pidSet = new Set<string>();
     while (await cursor.hasNext()) {
       const c = await cursor.next();

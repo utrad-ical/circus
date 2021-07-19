@@ -13,31 +13,42 @@ test('return the preference of the current user', async () => {
   expect(res.data.theme).toBe('mode_white');
 });
 
-test('modify the preference of the current user using PATCH', async () => {
-  const res1 = await axios.request({
-    url: 'api/preferences',
-    method: 'patch',
-    data: { theme: 'mode_black' }
+describe('PATCH', () => {
+  test('modify the preference', async () => {
+    const res1 = await axios.request({
+      url: 'api/preferences',
+      method: 'patch',
+      data: { theme: 'mode_black' }
+    });
+    expect(res1.status).toBe(204);
+    const res2 = await axios.get('api/preferences');
+    expect(res2.data.theme).toBe('mode_black');
   });
-  expect(res1.status).toBe(204);
-  const res2 = await axios.get('api/preferences');
-  expect(res2.data.theme).toBe('mode_black');
-});
 
-test('reject invalid preference update', async () => {
-  const res = await axios.request({
-    url: 'api/preferences',
-    method: 'patch',
-    data: { theme: 'mode_pink', personalInfoView: false }
+  test('reject invalid preference update', async () => {
+    const res = await axios.request({
+      url: 'api/preferences',
+      method: 'patch',
+      data: { theme: 'mode_pink', personalInfoView: false }
+    });
+    expect(res.status).toBe(400);
   });
-  expect(res.status).toBe(400);
-});
 
-test('reject nonexistent preference key', async () => {
-  const res = await axios.request({
-    url: 'api/preferences',
-    method: 'patch',
-    data: { pineapple: true }
+  test('reject nonexistent preference key', async () => {
+    const res = await axios.request({
+      url: 'api/preferences',
+      method: 'patch',
+      data: { pineapple: true }
+    });
+    expect(res.status).toBe(400);
   });
-  expect(res.status).toBe(400);
+
+  test('reject empty object', async () => {
+    const res = await axios.request({
+      url: 'api/preferences',
+      method: 'patch',
+      data: {}
+    });
+    expect(res.status).toBe(400);
+  });
 });

@@ -14,11 +14,15 @@ import Storage from '../storage/Storage';
 import path from 'path';
 import Archiver from 'archiver';
 
+export type CaseExportTarget =
+  | string
+  | { caseId: string; revisionIndex?: number };
+
 export interface MhdPacker {
   packAsMhd: (
     taskEmitter: TaskEventEmitter,
     downloadFileStream: Writable,
-    caseIds: string[],
+    caseIds: CaseExportTarget[],
     options?: PackOptions
   ) => void;
 }
@@ -126,14 +130,19 @@ const createMhdPacker: FunctionService<
    */
   const putCaseData = async (
     caseId: string,
+    revisionIndex: number | undefined,
     archiver: Archiver.Archiver,
     options: PackOptions
   ) => {
     const caseData = await models.clinicalCase.findByIdOrFail(caseId);
-    const rev = caseData.latestRevision;
-    archiver.append(JSON.stringify(prepareExportObject(caseData), null, '  '), {
-      name: `${caseId}/data.json`
-    });
+    if ((revisionIndex ?? -1) < -caseData.revisions.length)
+      throw new Error('Invalid revision index: ' + `${revisionIndex}`);
+    const rev = caseData.revisions.slice(revisionIndex ?? -1)[0];
+    if (!rev) throw new Error('Invalid revision index');
+    archiver.append(
+      JSON.stringify(prepareExportObject(caseData, rev), null, '  '),
+      { name: `${caseId}/data.json` }
+    );
     for (let volId = 0; volId < rev.series.length; volId++) {
       const series = rev.series[volId];
       const volumeAccessor = await volumeProvider(series.seriesUid);
@@ -180,7 +189,7 @@ const createMhdPacker: FunctionService<
   const packAsMhd = async (
     taskEmitter: TaskEventEmitter,
     downloadFileStream: Writable,
-    caseIds: string[],
+    caseIds: CaseExportTarget[],
     packOptions: PackOptions = defaultLabelPackOptions
   ) => {
     const archiver =
@@ -190,14 +199,16 @@ const createMhdPacker: FunctionService<
 
     try {
       for (let i = 0; i < caseIds.length; i++) {
-        const caseId = caseIds[i];
+        const t = caseIds[i];
+        const { caseId, revisionIndex } =
+          typeof t === 'string' ? { caseId: t, revisionIndex: -1 } : t;
         taskEmitter.emit(
           'progress',
           `Packing data for ${caseId}`,
           i,
           caseIds.length
         );
-        await putCaseData(caseId, archiver, packOptions);
+        await putCaseData(caseId, revisionIndex, archiver, packOptions);
       }
       archiver.pipe(downloadFileStream);
       taskEmitter.emit(
@@ -238,12 +249,12 @@ export default createMhdPacker;
  */
 const pad = (num: number) => zeroPad(3, num);
 
-const prepareExportObject = (caseData: any) => {
+const prepareExportObject = (caseData: any, revision: any) => {
   return {
     caseId: caseData.caseId,
     createdAt: caseData.createdAt.toISOString(),
     updatedAt: caseData.updatedAt.toISOString(),
     projectId: caseData.projectId,
-    latestRevision: caseData.latestRevision
+    revision
   };
 };

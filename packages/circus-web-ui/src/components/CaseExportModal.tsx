@@ -1,6 +1,10 @@
 import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
-import React, { useCallback } from 'react';
+import produce from 'immer';
+import { ExternalLabel } from 'pages/case-detail/labelData';
+import { Revision } from 'pages/case-detail/revisionData';
+import RevisionSelector from 'pages/case-detail/RevisionSelector';
+import React, { useCallback, useMemo } from 'react';
 import { useApi } from 'utils/api';
 import DownloadModal, {
   CompressionFormat,
@@ -11,8 +15,10 @@ import DownloadModal, {
 
 type LabelPackTypeOptions = 'isolated' | 'combined';
 
+type ExportTarget = string | { caseId: string; revisionIndex: number };
+
 interface CaseExportOptions {
-  caseIds: string[];
+  caseIds: ExportTarget[];
   mhdLineEnding: LineEnding;
   labelPackType: LabelPackTypeOptions;
   compressionFormat: CompressionFormat;
@@ -23,10 +29,48 @@ const labelPackTypeOptions: { [type in LabelPackTypeOptions]: string } = {
   combined: 'Combined'
 };
 
-const CaseExportOptionsEditor: Editor<CaseExportOptions> = props => {
+const createCaseExportOptionsEditor: (
+  revisions?: Revision<ExternalLabel>[]
+) => Editor<CaseExportOptions> = revisions => props => {
   const { value, onChange } = props;
+
+  const handleRevSelectorChange = (revisionIndex: number) => {
+    onChange(
+      produce(value, draft => {
+        const caseId =
+          typeof draft.caseIds[0] === 'string'
+            ? draft.caseIds[0]
+            : draft.caseIds[0].caseId;
+        draft.caseIds[0] = { caseId, revisionIndex };
+      })
+    );
+  };
+
+  const RevSelector = useMemo<Editor<number>>(
+    () => ({ value, onChange }) => {
+      if (!revisions) return null;
+      return (
+        <RevisionSelector
+          selected={value}
+          onSelect={onChange}
+          revisions={revisions}
+        />
+      );
+    },
+    []
+  );
+
   return (
     <div>
+      {revisions && (
+        <div className="row">
+          Target revision:{' '}
+          <RevSelector
+            value={(value.caseIds[0] as any).revisionIndex}
+            onChange={handleRevSelectorChange}
+          />
+        </div>
+      )}
       <div className="row">
         Voxel labels:{' '}
         <ShrinkSelect
@@ -56,10 +100,11 @@ const CaseExportOptionsEditor: Editor<CaseExportOptions> = props => {
 };
 
 const CaseExportModal: React.FC<{
-  caseIds: string[];
+  caseIds: ExportTarget[];
   onClose: () => void;
+  revisions?: Revision<ExternalLabel>[];
 }> = props => {
-  const { onClose, caseIds } = props;
+  const { onClose, caseIds, revisions } = props;
   const caption = `Export ${caseIds.length} case${
     caseIds.length !== 1 ? 's' : ''
   }`;
@@ -76,6 +121,11 @@ const CaseExportModal: React.FC<{
     [api]
   );
 
+  const OptionsEditor = useMemo(
+    () => createCaseExportOptionsEditor(revisions),
+    [revisions]
+  );
+
   return (
     <DownloadModal
       onClose={onClose}
@@ -87,7 +137,7 @@ const CaseExportModal: React.FC<{
         labelPackType: 'isolated',
         compressionFormat: 'tgz'
       }}
-      optionsEditor={CaseExportOptionsEditor}
+      optionsEditor={OptionsEditor}
     />
   );
 };

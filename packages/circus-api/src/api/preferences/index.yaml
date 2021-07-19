@@ -1,19 +1,16 @@
 name: Preferences
 description: >
   Manages preferences of the log-in user.
+  Note that all the fields are optional.
 routes:
   - verb: get
     path: /preferences
     responseSchema: preferences|allRequired
     description: >
       Returns the preferences object of the current user.
-  - verb: put
-    path: /preferences
-    requestSchema: preferences|allRequired
-    description: >
-      Sets the preferences of the current user.
   - verb: patch
     path: /preferences
     requestSchema: preferences
     description: >
       Patches the preferences of the current user.
+      All fields are shallow-merged to the root preference object.

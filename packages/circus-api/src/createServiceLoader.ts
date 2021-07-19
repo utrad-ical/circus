@@ -83,7 +83,7 @@ const createServiceLoader = async (config: any) => {
   );
   loader.registerDirectory(
     'authProvider',
-    path.join(__dirname, 'middleware/auth/authProvider/DefaultAuthProvider'),
+    path.join(__dirname, 'middleware/auth/authProvider'),
     'DefaultAuthProvider'
   );
   return loader as ApiServiceLoader;

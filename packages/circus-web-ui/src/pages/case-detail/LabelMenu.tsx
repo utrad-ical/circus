@@ -18,6 +18,7 @@ import {
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
+import useKeyboardShortcut from 'utils/useKeyboardShortcut';
 import useLocalPreference from 'utils/useLocalPreference';
 import * as c from './caseStore';
 import createCclProcessor, { CclOptions } from './createCclProcessor';
@@ -36,6 +37,7 @@ import performLabelCreatingVoxelProcessing from './performLabelCreatingVoxelProc
 import { EditingData, EditingDataUpdater } from './revisionData';
 import SettingDialogCCL from './SettingDialogCCL';
 import SettingDialogHF from './SettingDialogHF';
+import { ButtonProps } from 'react-bootstrap';
 
 type LabelCommand =
   | 'rename'
@@ -302,9 +304,10 @@ const LabelMenu: React.FC<{
         disabled={!activeLabel || disabled}
         onClick={() => handleCommand('rename')}
       />
-      <IconButton
+      <ShortcutIconButton
+        shortcut="R"
         bsSize="xs"
-        title="Reveal in Viewer"
+        title="Reveal in Viewer (R)"
         icon="map-marker"
         disabled={!activeLabel || disabled}
         onClick={() => handleCommand('reveal')}
@@ -519,3 +522,11 @@ const StyledAppearancePopoverDiv = styled.div`
     width: 85px;
   }
 `;
+
+const ShortcutIconButton: React.FC<
+  { shortcut: string; icon: string } & ButtonProps
+> = props => {
+  const { shortcut, ...rest } = props;
+  useKeyboardShortcut(shortcut, props.onClick ?? (() => {}));
+  return <IconButton {...rest} />;
+};

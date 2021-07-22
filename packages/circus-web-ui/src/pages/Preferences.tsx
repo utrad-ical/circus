@@ -4,12 +4,12 @@ import PropertyEditor, {
 } from '@smikitky/rb-components/lib/PropertyEditor';
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import { useApi } from 'utils/api';
-import { useLoginManager } from 'utils/loginManager';
 import { Button } from 'components/react-bootstrap';
 import IconButton from 'components/IconButton';
 import Icon from 'components/Icon';
 import { SearchPreset, UserPreferences } from 'store/loginUser';
 import useShowMessage from 'utils/useShowMessage';
+import { useUserPreferences } from 'utils/useLoginUser';
 
 const PresetDeleteEditor: et.Editor<SearchPreset[] | undefined> = props => {
   const { value = [], onChange } = props;
@@ -76,10 +76,10 @@ const properties: PropertyEditorProperties<UserPreferences> = [
 ];
 
 const Preferences: React.FC<{}> = props => {
-  const [settings, setSettings] = useState<UserPreferences | null>(null);
-  const loginManager = useLoginManager();
   const api = useApi();
   const showMessage = useShowMessage();
+  const [preferences, updatePreferences] = useUserPreferences();
+  const [settings, setSettings] = useState<UserPreferences | null>(preferences);
 
   const loadSettings = useCallback(async () => {
     const settings = await api('preferences');
@@ -91,13 +91,9 @@ const Preferences: React.FC<{}> = props => {
   }, [loadSettings]);
 
   const saveClick = async () => {
-    await api('preferences', {
-      method: 'patch',
-      data: settings
-    });
+    await updatePreferences(settings!);
     showMessage('Your preference was saved.', 'success', { short: true });
     loadSettings();
-    loginManager.refreshUserInfo(true);
   };
 
   if (settings === null) return <div />;

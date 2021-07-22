@@ -7,6 +7,7 @@ import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import classnames from 'classnames';
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import { DataGridColumnDefinition } from 'components/DataGrid';
+import { UserPreferences } from 'store/loginUser';
 
 const makeEmptyItem = () => {
   return {
@@ -20,10 +21,9 @@ const makeEmptyItem = () => {
   };
 };
 
-interface Preferences {
-  theme: string;
-  personalInfoView: boolean;
-}
+type Preferences = Required<
+  Pick<UserPreferences, 'theme' | 'personalInfoView'>
+>;
 
 const PreferenceEditor: React.FC<{
   value: Preferences;

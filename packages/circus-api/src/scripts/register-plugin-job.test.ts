@@ -17,7 +17,7 @@ beforeEach(async () => {
   const registerFn = jest.fn();
   cs = { job: { register: registerFn } };
   commandFunc = await command(null, { models, cs });
-  await setUpMongoFixture(db, ['pluginJobs']);
+  await setUpMongoFixture(db, ['pluginJobs', 'users']);
 });
 
 test('create new plugin-job', async () => {

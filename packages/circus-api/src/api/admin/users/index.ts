@@ -2,6 +2,7 @@ import status from 'http-status';
 import performSearch from '../../performSearch';
 import nodepass from 'node-php-password';
 import { RouteMiddleware } from '../../../typings/middlewares';
+import { defaultPreferences } from '../../../utils/preferenceUtils';
 
 const removePassword = (input: any) => {
   const output = { ...input };
@@ -50,6 +51,10 @@ export const handlePost: RouteMiddleware = ({ models }) => {
     }
     const inserting = {
       ...ctx.request.body,
+      preferences: {
+        ...defaultPreferences(),
+        ...(ctx.request.body.preferences ?? {})
+      },
       myLists: [],
       password: nodepass.hash(ctx.request.body.password),
       lastLoginTime: new Date(0),

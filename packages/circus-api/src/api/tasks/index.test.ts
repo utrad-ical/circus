@@ -14,7 +14,7 @@ describe('search', () => {
   test('should return the list of tasks of the user', async () => {
     const res = await axios.get('api/tasks');
     expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(3);
+    expect(res.data.items).toHaveLength(4);
   });
 
   test('search with taskId', async () => {
@@ -74,5 +74,9 @@ describe('download', () => {
   test('Returns 409 when a task is still in progress', async () => {
     const res = await axios.get('api/tasks/aaaabbbbcccc3333/download');
     expect(res.status).toBe(409);
+  });
+  test('Return 404 when download file is not existence', async () => {
+    const res = await axios.get('api/tasks/aaaabbbbcccc4444/download');
+    expect(res.status).toBe(404);
   });
 });

@@ -13,6 +13,7 @@ import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState, { MprViewState } from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
+import ModifierKeyBehaviors from './ModifierKeyBehaviors';
 import drawBoundingBoxCrossHair from './helper/drawBoundingBoxCrossHair';
 import drawBoundingBoxOutline from './helper/drawBoundingBoxOutline';
 import drawHandleFrame, { defaultHandleSize } from './helper/drawHandleFrame';
@@ -44,7 +45,7 @@ const cursorTypes: {
 };
 
 export default abstract class SolidFigure
-  implements Annotation, ViewerEventTarget {
+  implements Annotation, ViewerEventTarget, ModifierKeyBehaviors {
   public abstract type: FigureType;
   /**
    * Boundary of the outline, measured in mm.
@@ -75,6 +76,9 @@ export default abstract class SolidFigure
   };
 
   public id?: string;
+
+  public lockMaintainAspectRatio: boolean = false;
+  public lockFixCenterOfGravity: boolean = false;
 
   // dragInfo
   private dragInfo:
@@ -336,8 +340,10 @@ export default abstract class SolidFigure
       );
 
       const originalBoundingBox3 = this.dragInfo!.originalBoundingBox3!;
-      const maintainAspectRatio = !!ev.shiftKey;
-      const fixCenterOfGravity = !!ev.ctrlKey;
+
+      const maintainAspectRatio = this.lockMaintainAspectRatio !== ev.shiftKey;
+      const fixCenterOfGravity = this.lockFixCenterOfGravity !== ev.ctrlKey;
+
       const newBoundingBox3 = resize(
         this.handleType!,
         orientation,

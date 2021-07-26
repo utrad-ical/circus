@@ -1,4 +1,4 @@
-name: PluginAdmin
+name: Plugin Administration
 description: >
   Manages CIRCUS CS Plug-ins
 routes:

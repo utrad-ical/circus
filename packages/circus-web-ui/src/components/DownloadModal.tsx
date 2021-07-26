@@ -73,7 +73,7 @@ const DownloadModal = <T extends any>(props: {
   };
 
   const dialog = (
-    <Modal.Dialog>
+    <Modal.Dialog bsSize="lg">
       <Modal.Header>
         <Modal.Title>{caption}</Modal.Title>
       </Modal.Header>

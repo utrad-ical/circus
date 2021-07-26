@@ -1,4 +1,4 @@
-name: PluginJobQueue
+name: Plugin Job Queue
 description: >
   Returns job queue for the job started by the current user.
 routes:

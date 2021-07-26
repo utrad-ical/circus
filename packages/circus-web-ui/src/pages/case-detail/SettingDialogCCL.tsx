@@ -1,6 +1,8 @@
-import { Button, Modal } from 'components/react-bootstrap';
-import React, { useState } from 'react';
+import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import React from 'react';
+import { CclOptions } from './createCclProcessor';
+import SettingDialog from './SettingDialog';
 
 const maximumCCNumOptions = {
   1: '1 CC',
@@ -14,60 +16,59 @@ const maximumCCNumOptions = {
   9: '9 CCs',
   10: '10 CCs'
 };
+
 const neighborsOptions = {
   6: '6-neigobors',
   26: '26-neigobors'
 };
 
-const SettingDialogCCL: React.FC<{
-  onHide: () => void;
-  onOkClick: (dispLabelNumber: number, neighbors: 6 | 26) => void;
-}> = React.memo(props => {
-  const { onHide, onOkClick } = props;
-  const [neighbor6, setNeighbor6] = useState(false);
-  const [dispLabelNumber, setDispLabelNumber] = useState(2);
+const initialOptions = {
+  maximumCcNum: 2,
+  neighbors: 26
+};
+
+const OptionsEditorForCCL: Editor<CclOptions> = props => {
+  const { value, onChange } = props;
   return (
     <>
-      <Modal.Header>
-        <Modal.Title>
-          Setting options for connected component labeling (CCL)
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <div>
-          Maximum number of connected components (CCs) to display: &ensp;
-          <ShrinkSelect
-            bsSize="sm"
-            options={maximumCCNumOptions}
-            numericalValue
-            value={dispLabelNumber}
-            onChange={(value: number) => setDispLabelNumber(value)}
-          />
-        </div>
-        <div>
-          Neighbors to decide same CC: &ensp;
-          <ShrinkSelect
-            bsSize="sm"
-            options={neighborsOptions}
-            numericalValue
-            value={neighbor6 ? 6 : 26}
-            onChange={(value: number) => setNeighbor6(value == 6)}
-          />
-        </div>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button bsStyle="link" onClick={() => onHide()}>
-          Cancel
-        </Button>
-        <Button
-          onClick={() => onOkClick(dispLabelNumber, neighbor6 ? 6 : 26)}
-          bsStyle="primary"
-        >
-          OK
-        </Button>
-      </Modal.Footer>
+      <div>
+        Maximum number of connected components (CCs) to display&nbsp;
+        <ShrinkSelect
+          bsSize="sm"
+          options={maximumCCNumOptions}
+          value={value.maximumCcNum}
+          onChange={v => onChange({ ...value, maximumCcNum: v })}
+          numericalValue
+        />
+      </div>
+      <div>
+        Neighbors to decide same CC&nbsp;
+        <ShrinkSelect
+          bsSize="sm"
+          options={neighborsOptions}
+          value={value.neighbors}
+          onChange={v => onChange({ ...value, neighbors: v })}
+          numericalValue
+        />
+      </div>
     </>
   );
-});
+};
+
+const SettingDialogCCL: React.FC<{
+  onHide: () => void;
+  onOkClick: (props: CclOptions) => void;
+}> = props => {
+  const { onHide, onOkClick } = props;
+  return (
+    <SettingDialog
+      title="Connected component labeling (CCL)"
+      optionsEditor={OptionsEditorForCCL}
+      initialOptions={initialOptions}
+      onHide={onHide}
+      onOkClick={onOkClick}
+    />
+  );
+};
 
 export default SettingDialogCCL;

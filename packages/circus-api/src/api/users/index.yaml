@@ -1,8 +1,10 @@
-name: Plugin
+name: Users
 description: >
-  Fetches CIRCUS CS Users.
+  Fetches minimum information about users.
 routes:
   - verb: get
     path: /users/:userEmail
-    description: Gets the specified user.
+    description: >
+      Gets the information about the specified user.
+      This endpoint is available to all users, but returns only minimum information about the user.
     responseSchema: user|only userEmail,description|dbEntry

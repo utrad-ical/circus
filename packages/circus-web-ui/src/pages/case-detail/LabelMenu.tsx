@@ -3,38 +3,41 @@ import { alert, prompt } from '@smikitky/rb-components/lib/modal';
 import Slider from '@smikitky/rb-components/lib/Slider';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import { Viewer } from '@utrad-ical/circus-rs/src/browser';
+import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import {
   Button,
   DropdownButton,
   MenuItem,
+  Modal,
   OverlayTrigger,
   Popover,
-  SplitButton,
-  Modal
+  SplitButton
 } from 'components/react-bootstrap';
-import produce from 'immer';
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
+import useKeyboardShortcut from 'utils/useKeyboardShortcut';
 import useLocalPreference from 'utils/useLocalPreference';
-import { EditingData, EditingDataUpdater } from './revisionData';
 import * as c from './caseStore';
+import createCclProcessor, { CclOptions } from './createCclProcessor';
+import createCurrentLabelsUpdator from './createCurrentLabelsUpdator';
+import createHfProcessor, { HoleFillingOptions } from './createHfProcessor';
 import {
-  LabelType,
-  InternalLabel,
-  labelTypes,
-  LabelAppearance,
   createNewLabelData,
+  InternalLabel,
   InternalLabelData,
-  InternalLabelOf
+  InternalLabelOf,
+  LabelAppearance,
+  LabelType,
+  labelTypes
 } from './labelData';
-import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
-import createConnectedComponentLabels from './createConnectedComponentLabels';
-import createHoleFilledLabels from './createHoleFilledLabels';
+import performLabelCreatingVoxelProcessing from './performLabelCreatingVoxelProcessing';
+import { EditingData, EditingDataUpdater } from './revisionData';
 import SettingDialogCCL from './SettingDialogCCL';
-import SettingDialogHoleFilling from './SettingDialogHoleFilling';
+import SettingDialogHF from './SettingDialogHF';
+import { ButtonProps } from 'react-bootstrap';
 
 type LabelCommand =
   | 'rename'
@@ -66,20 +69,16 @@ const LabelMenu: React.FC<{
   );
 
   const [cclDialogOpen, setCclDialogOpen] = useState(false);
-  const [holeFillingDialogOpen, setHoleFillingDialogOpen] = useState(false);
+  const [hfDialogOpen, setHfDialogOpen] = useState(false);
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
   const activeSeries = revision.series[activeSeriesIndex];
   const activeLabel =
     activeLabelIndex >= 0 ? activeSeries.labels[activeLabelIndex] : null;
 
-  // Small wrapper around updateEditingData
-  const updateCurrentLabels = (updater: (labels: InternalLabel[]) => void) => {
-    const labels = editingData.revision.series[activeSeriesIndex].labels;
-    const newLabels = produce(labels, updater);
-    updateEditingData(editingData => {
-      editingData.revision.series[activeSeriesIndex].labels = newLabels;
-    });
-  };
+  const updateCurrentLabels = createCurrentLabelsUpdator(
+    editingData,
+    updateEditingData
+  );
 
   const handleCommand = async (command: LabelCommand) => {
     if (disabled) return;
@@ -237,38 +236,32 @@ const LabelMenu: React.FC<{
     });
   };
 
-  const onOkClickDialogCCL = (dispLabelNumber: number, neighbors: 6 | 26) => {
+  const onOkClickDialogCCL = (props: CclOptions) => {
     const label = editingData.revision.series[activeSeriesIndex].labels[
       activeLabelIndex
     ] as InternalLabelOf<'voxel'>;
-    createConnectedComponentLabels(
+    performLabelCreatingVoxelProcessing(
       editingData,
       updateEditingData,
-      viewers,
       label,
       labelColors,
-      dispLabelNumber,
-      neighbors
+      createCclProcessor(props)
     );
     setCclDialogOpen(false);
   };
 
-  const onOkClickDialogHoleFilling = (
-    dimension3: boolean,
-    holeFillingOrientation: string,
-    neighbors4or6: boolean
-  ) => {
-    createHoleFilledLabels(
+  const onOkClickDialogHF = (props: HoleFillingOptions) => {
+    const label = editingData.revision.series[activeSeriesIndex].labels[
+      activeLabelIndex
+    ] as InternalLabelOf<'voxel'>;
+    performLabelCreatingVoxelProcessing(
       editingData,
       updateEditingData,
-      viewers,
-      editingData.revision.series[activeSeriesIndex].labels[activeLabelIndex],
+      label,
       labelColors,
-      dimension3,
-      holeFillingOrientation,
-      neighbors4or6
+      createHfProcessor(props)
     );
-    setHoleFillingDialogOpen(false);
+    setHfDialogOpen(false);
   };
 
   return (
@@ -311,9 +304,10 @@ const LabelMenu: React.FC<{
         disabled={!activeLabel || disabled}
         onClick={() => handleCommand('rename')}
       />
-      <IconButton
+      <ShortcutIconButton
+        shortcut="R"
         bsSize="xs"
-        title="Reveal in Viewer"
+        title="Reveal in Viewer (R)"
         icon="map-marker"
         disabled={!activeLabel || disabled}
         onClick={() => handleCommand('reveal')}
@@ -337,7 +331,7 @@ const LabelMenu: React.FC<{
         <MenuItem
           eventKey="fillng"
           onClick={() => {
-            setHoleFillingDialogOpen(true);
+            setHfDialogOpen(true);
           }}
         >
           Hole filling
@@ -388,13 +382,13 @@ const LabelMenu: React.FC<{
         />
       </Modal>
       <Modal
-        show={holeFillingDialogOpen}
-        onHide={() => setHoleFillingDialogOpen(false)}
+        show={hfDialogOpen}
+        onHide={() => setHfDialogOpen(false)}
         bsSize="lg"
       >
-        <SettingDialogHoleFilling
-          onHide={() => setHoleFillingDialogOpen(false)}
-          onOkClick={onOkClickDialogHoleFilling}
+        <SettingDialogHF
+          onHide={() => setHfDialogOpen(false)}
+          onOkClick={onOkClickDialogHF}
         />
       </Modal>
     </StyledButtonsDiv>
@@ -528,3 +522,11 @@ const StyledAppearancePopoverDiv = styled.div`
     width: 85px;
   }
 `;
+
+const ShortcutIconButton: React.FC<
+  { shortcut: string; icon: string } & ButtonProps
+> = props => {
+  const { shortcut, ...rest } = props;
+  useKeyboardShortcut(shortcut, props.onClick ?? (() => {}));
+  return <IconButton {...rest} />;
+};

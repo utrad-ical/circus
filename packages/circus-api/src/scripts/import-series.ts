@@ -3,6 +3,7 @@ import * as path from 'path';
 import { DicomImporter } from '../interface';
 import Command from './Command';
 import directoryIterator from '../utils/directoryIterator';
+import isLikeDicom from '../utils/isLikeDicom';
 
 export const help = () => {
   return (
@@ -40,10 +41,18 @@ export const command: Command<{
     for (const pathArg of paths) {
       try {
         for await (const entry of directoryIterator(pathArg)) {
+          if (entry.type === 'error') {
+            console.error(chalk.red(entry.message));
+            continue;
+          }
+          if (!isLikeDicom(entry.buffer)) {
+            console.log(`Skipping ${entry.name} (not a DICOM file)`);
+            continue;
+          }
           if (entry.type === 'fs') {
             console.log(`Importing: ${entry.name}`);
           } else {
-            console.log(`Importing ${entry.name} in ${entry.zipName}`);
+            console.log(`Importing ${entry.name} in ${entry.archiveName}`);
           }
           await dicomImporter.importDicom(entry.buffer, domain);
           count++;

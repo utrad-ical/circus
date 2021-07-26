@@ -14,8 +14,6 @@ routes:
     responseSchema: clinicalCaseSearchResult|searchResult
   - verb: post
     path: /cases
-    # TODO: Security: Determine how to detect target project
-    # requiredProjectPrivilege: write
     requestSchema: clinicalCaseCreate
     description: Creates a new case.
   - verb: get
@@ -32,13 +30,22 @@ routes:
     path: /cases/export-mhd
     handler: handlePostExportJob
     requiredGlobalPrivilege: downloadVolume
-    description: Creates a job to export the specified cases as MHD.
+    description: Creates a task to export the specified cases as MHD.
     requestSchema:
       properties:
         caseIds:
           type: array
           items:
-            type: string
+            oneOf:
+              - type: string
+              - type: object
+                properties:
+                  caseId:
+                    type: string
+                  revisionIndex:
+                    type: integer
+                    minimum: 0
+          maxItems: 100
         labelPackType:
           enum: ['isolated', 'combined']
         mhdLineEnding:

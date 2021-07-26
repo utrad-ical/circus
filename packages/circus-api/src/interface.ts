@@ -40,3 +40,12 @@ export type Models = {
 export type DisposableDb = mongo.Db & {
   dispose: () => Promise<void>;
 };
+
+type AuthResult =
+  | { result: 'OK'; authenticatedUserEmail: string }
+  | { result: 'NG' };
+
+export interface AuthProvider {
+  check(id: string, password: string): Promise<AuthResult>;
+  describe(): string;
+}

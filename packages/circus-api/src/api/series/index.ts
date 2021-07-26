@@ -2,9 +2,10 @@ import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import archiver from 'archiver';
 import { EJSON } from 'bson';
 import status from 'http-status';
+import isLikeDicom from '../../utils/isLikeDicom';
 import { CircusContext, RouteMiddleware } from '../../typings/middlewares';
 import checkFilter from '../../utils/checkFilter';
-import { fileOrZipIterator } from '../../utils/directoryIterator';
+import { fileOrArchiveIterator } from '../../utils/directoryIterator';
 import { performAggregationSearch } from '../performSearch';
 
 const maskPatientInfo = (ctx: CircusContext) => {
@@ -57,16 +58,12 @@ export const handlePost: RouteMiddleware = ({ dicomImporter, taskManager }) => {
       let dicomCount = 0;
       try {
         for (const file of sentFiles) {
-          for await (const entry of fileOrZipIterator(
+          for await (const entry of fileOrArchiveIterator(
             file.buffer.buffer,
             file.filename
           )) {
-            const signature =
-              entry.buffer.byteLength > 0x80 &&
-              new DataView(entry.buffer).getUint32(0x80, false);
-            if (signature !== 0x4449434d) {
-              continue; // Non-DICOM file
-            }
+            if (entry.type === 'error') throw new Error(entry.message);
+            if (!isLikeDicom(entry.buffer)) continue;
             await dicomImporter.importDicom(Buffer.from(entry.buffer), domain);
             dicomCount++;
             emitter.emit('progress', `Imported ${dicomCount} entities...`);
@@ -92,9 +89,11 @@ export const handlePost: RouteMiddleware = ({ dicomImporter, taskManager }) => {
 export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const urlQuery = ctx.request.query;
-    let customFilter: object;
+    let customFilter: any;
     try {
-      customFilter = urlQuery.filter ? EJSON.parse(urlQuery.filter) : {};
+      customFilter = urlQuery.filter
+        ? EJSON.parse(urlQuery.filter as string)
+        : {};
     } catch (err) {
       ctx.throw(status.BAD_REQUEST, 'Filter string could not be parsed.');
     }

@@ -1,15 +1,25 @@
 import path from 'path';
 import fs from 'fs-extra';
-import zipIterator, { isLikeZip } from './zipIterator';
+import {
+  isLikeTargz,
+  isLikeZip,
+  zipIterator,
+  targzIterator
+} from './archiveIterator';
 
-interface Entry {
-  type: 'zip' | 'fs';
-  name: string;
-  buffer: ArrayBuffer;
-  zipName?: string; // Applicable only when type is 'zip'
-}
+type Entry =
+  | {
+      type: 'fs' | 'zip' | 'targz';
+      name: string;
+      buffer: ArrayBuffer;
+      archiveName?: string; // Applicable only when file is archive
+    }
+  | {
+      type: 'error';
+      message: string;
+    };
 
-export async function* fileOrZipIterator(
+export async function* fileOrArchiveIterator(
   buffer: ArrayBuffer,
   filePath: string
 ): AsyncGenerator<Entry> {
@@ -19,7 +29,16 @@ export async function* fileOrZipIterator(
         type: 'zip',
         name: entry.name,
         buffer: entry.buffer,
-        zipName: filePath
+        archiveName: filePath
+      };
+    }
+  } else if (isLikeTargz(buffer)) {
+    for await (const entry of targzIterator(buffer)) {
+      yield {
+        type: 'targz',
+        name: entry.name,
+        buffer: entry.buffer,
+        archiveName: filePath
       };
     }
   } else {
@@ -50,6 +69,10 @@ export default async function* directoryIterator(
     }
   } else if (stat.isFile()) {
     const buffer = await fs.readFile(rootPath);
-    yield* fileOrZipIterator(buffer.buffer, rootPath);
+    try {
+      yield* fileOrArchiveIterator(buffer.buffer, rootPath);
+    } catch (err) {
+      yield { type: 'error', message: `File ${rootPath} is invalid.` };
+    }
   }
 }

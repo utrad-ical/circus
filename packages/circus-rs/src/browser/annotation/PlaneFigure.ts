@@ -12,6 +12,7 @@ import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState, { MprViewState } from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
+import ModifierKeyBehaviors from './ModifierKeyBehaviors';
 import drawHandleFrame, { defaultHandleSize } from './helper/drawHandleFrame';
 import {
   BoundingRectWithHandleHitType,
@@ -34,9 +35,14 @@ const cursorTypes: {
   'west-handle': { cursor: 'w-resize' },
   'rect-outline': { cursor: 'move' }
 };
-export default class PlaneFigure implements Annotation, ViewerEventTarget {
+export default class PlaneFigure
+  implements Annotation, ViewerEventTarget, ModifierKeyBehaviors {
   public editable: boolean = false;
   private handleType: BoundingRectWithHandleHitType | undefined = undefined;
+
+  public lockMaintainAspectRatio: boolean = false;
+  public lockFixCenterOfGravity: boolean = false;
+
   // dragInfo
   private dragInfo:
     | {
@@ -243,8 +249,8 @@ export default class PlaneFigure implements Annotation, ViewerEventTarget {
         new Vector2().fromArray(draggedPoint)
       );
 
-      const maintainAspectRatio = !!ev.shiftKey;
-      const fixCenterOfGravity = !!ev.ctrlKey;
+      const maintainAspectRatio = this.lockMaintainAspectRatio !== ev.shiftKey;
+      const fixCenterOfGravity = this.lockFixCenterOfGravity !== ev.ctrlKey;
 
       const originalBoundingBox3 = this.dragInfo!.originalBoundingBox3!;
       const newBoundingBox3 = resize(

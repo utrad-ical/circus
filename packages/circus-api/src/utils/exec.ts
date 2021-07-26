@@ -1,20 +1,32 @@
 import * as cp from 'child_process';
 
 /**
+ * Promisified cp.exec
+ */
+export const pExec = (
+  file: string,
+  args: string[],
+  options: cp.ExecFileOptions & { encoding?: string | null } = {}
+): Promise<{ stdout: string | Buffer; stderr: string | Buffer }> => {
+  return new Promise((resolve, reject) => {
+    cp.execFile(file, args, options, (err, stdout, stderr) => {
+      if (err) reject(err);
+      else resolve({ stdout, stderr });
+    });
+  });
+};
+
+/**
  * Executes a command as a child process and gets the output.
  */
-const exec = (
+const exec = async (
   command: string,
   args: string[],
   stopOnStderr: boolean = false
 ) => {
-  return new Promise<string>((resolve, reject) => {
-    cp.execFile(command, args, (err, stdout, stderr) => {
-      if (err) reject(err);
-      else if (stopOnStderr && stderr) reject(stderr);
-      else resolve(stdout);
-    });
-  });
+  const { stdout, stderr } = await pExec(command, args);
+  if (stopOnStderr && stderr) throw stderr as string;
+  return stdout as string;
 };
 
 export default exec;

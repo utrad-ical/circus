@@ -1,7 +1,7 @@
 import { PixelFormat, pixelFormatInfo } from '../PixelFormat';
 
 import lj from 'jpeg-lossless-decoder-js';
-import parser from 'dicom-parser';
+import parser, { DataSet } from 'dicom-parser';
 import { convertComplement } from './complementUtil';
 import { invertPixelValue } from './invertPixelValue';
 
@@ -66,9 +66,7 @@ const dicomImageExtractor: (options?: ExtractOptions) => DicomImageExtractor = (
   if (frame !== 1) throw new Error('Multiframe images are not supported yet.');
 
   return dicomFileBuffer => {
-    const dataset: parser.DicomDataset = parser.parseDicom(
-      new Uint8Array(dicomFileBuffer)
-    );
+    const dataset = parser.parseDicom(new Uint8Array(dicomFileBuffer));
 
     const transferSyntax = dataset.string('x00020010')!;
     const modality = dataset.string('x00080060')!;
@@ -152,7 +150,7 @@ const dicomImageExtractor: (options?: ExtractOptions) => DicomImageExtractor = (
   };
 };
 
-function determinePixelFormat(dataset: parser.DicomDataset): PixelFormat {
+function determinePixelFormat(dataset: DataSet): PixelFormat {
   const pixelRepresentation = dataset.uint16('x00280103');
   const bitsAllocated = dataset.uint16('x00280100');
   if (pixelRepresentation === 0 && bitsAllocated === 8) {
@@ -167,7 +165,7 @@ function determinePixelFormat(dataset: parser.DicomDataset): PixelFormat {
   return 'unknown';
 }
 
-function determineRescale(dataset: parser.DicomDataset): RescaleParams {
+function determineRescale(dataset: DataSet): RescaleParams {
   let [intercept, slope] = [0.0, 1.0];
   if (dataset.elements['x00281052'] && dataset.elements['x00281053']) {
     intercept = dataset.floatString('x00281052')!;
@@ -176,9 +174,7 @@ function determineRescale(dataset: parser.DicomDataset): RescaleParams {
   return { intercept, slope };
 }
 
-function determineWindow(
-  dataset: parser.DicomDataset
-): WindowParams | undefined {
+function determineWindow(dataset: DataSet): WindowParams | undefined {
   if (dataset.elements['x00281050'] && dataset.elements['x00281051']) {
     const level = dataset.floatString('x00281050')!;
     const width = dataset.floatString('x00281051')!;
@@ -187,7 +183,7 @@ function determineWindow(
   return;
 }
 
-function determinePitch(dataset: parser.DicomDataset): number | undefined {
+function determinePitch(dataset: DataSet): number | undefined {
   // [0018, 0088] Spacing between slices
   let pitch: number | undefined = undefined;
   if ('x00180088' in dataset.elements) {
@@ -198,7 +194,7 @@ function determinePitch(dataset: parser.DicomDataset): number | undefined {
 }
 
 function extractUncompressedPixels(
-  dataset: parser.DicomDataset,
+  dataset: DataSet,
   rows: number,
   columns: number,
   pixelFormat: PixelFormat,
@@ -239,7 +235,7 @@ function extractUncompressedPixels(
 }
 
 function extractLosslessJpegPixels(
-  dataset: parser.DicomDataset,
+  dataset: DataSet,
   rows: number,
   columns: number,
   pixelFormat: PixelFormat,
@@ -254,13 +250,14 @@ function extractLosslessJpegPixels(
     dataset,
     pixelDataElement,
     0,
-    pixelDataElement.fragments.length
+    pixelDataElement.fragments!.length
   );
 
   const pxInfo = pixelFormatInfo(pixelFormat);
   const decompressed: ArrayBuffer = decoder.decompress(
-    frameData.buffer,
-    frameData.byteOffset,
+    // https://github.com/cornerstonejs/dicomParser/issues/159
+    (frameData as any).buffer,
+    (frameData as any).byteOffset,
     frameData.length
   );
 
@@ -277,7 +274,7 @@ function extractLosslessJpegPixels(
 }
 
 function extractPixels(
-  dataset: parser.DicomDataset,
+  dataset: DataSet,
   transferSyntax: string,
   rows: number,
   columns: number,

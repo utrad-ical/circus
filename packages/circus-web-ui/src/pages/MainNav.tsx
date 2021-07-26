@@ -217,9 +217,11 @@ const MainNav: React.FC<{}> = props => {
 
   const loginUserName = user.description;
   const isAdmin = user.globalPrivileges.indexOf('manageServer') > -1;
-  const caseSearchPresets = user.preferences?.caseSearchPresets ?? [];
-  const seriesSearchPresets = user.preferences?.seriesSearchPresets ?? [];
-  const pluginJobSearchPresets = user.preferences?.pluginJobSearchPresets ?? [];
+  const {
+    caseSearchPresets = [],
+    seriesSearchPresets = [],
+    pluginJobSearchPresets = []
+  } = user.preferences;
   const myLists = user.myLists ?? [];
 
   const onLogout = async () => {

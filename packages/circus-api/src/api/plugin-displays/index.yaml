@@ -1,8 +1,7 @@
-name: PluginJobs
+name: Plugin Jobs
 description: >
   Dynamically provides CIRCUS CS displays.
 routes:
-  # Job Management
   - verb: get
     path: /plugin-displays/:path+
     noAuthentication: true

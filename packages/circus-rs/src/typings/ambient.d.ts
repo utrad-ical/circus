@@ -2,7 +2,6 @@
 
 declare module 'png';
 declare module 'jpeg-lossless-decoder-js';
-declare module 'dicom-parser';
 declare module 'merge';
 declare module 'extend';
 

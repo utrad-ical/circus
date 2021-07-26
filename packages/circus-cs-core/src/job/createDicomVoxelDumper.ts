@@ -7,11 +7,14 @@ import {
   partialVolumeDescriptorToArray,
   pixelFormatInfo
 } from '@utrad-ical/circus-lib';
-import PartialVolumeDescriptor from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
 import parser from 'dicom-parser';
 import extractCommonValues from '../util/extractCommonValues';
 import { createEncConverter, EncConverter } from './encConverter';
-import { DicomVoxelDumper } from '../interface';
+import {
+  DicomVoxelDumper,
+  SeriesEntry,
+  DicomVoxelDumperOptions
+} from '../interface';
 import { EventEmitter } from 'events';
 import { Archiver } from 'archiver';
 
@@ -54,7 +57,7 @@ const prepareEncConverter = async (charSet: string | undefined) => {
 };
 
 const returnNumberOrNumberList = (
-  dataset: parser.DicomDataset,
+  dataset: parser.DataSet,
   tag: string,
   accessor: string,
   valueBytes: number
@@ -68,22 +71,37 @@ const returnNumberOrNumberList = (
   return numbers.length === 1 ? numbers[0] : numbers;
 };
 
-interface SeriesEntry {
-  seriesUid: string;
-  partialVolumeDescriptor: PartialVolumeDescriptor;
-}
-
 interface Options {}
 
+export const stringifyUN = (data: ArrayBuffer, tag: string) => {
+  const arr = new Uint8Array(data);
+  if (arr.length > 5 * 1024 * 1024)
+    throw new Error(`Data of the private tag ${tag} is too large`);
+  let isAscii = true;
+  for (let i = 0; i < arr.length; i++) {
+    // check printable characters
+    if (arr[i] < 0x20 || arr[i] > 0x7e) {
+      isAscii = false;
+      break;
+    }
+  }
+  if (isAscii) return Buffer.from(data).toString('ascii');
+  return (
+    'data:application/octet-stream;base64,' +
+    Buffer.from(data).toString('base64')
+  );
+};
+
 const dataSetToObject = (
-  dataset: parser.DicomDataset,
-  encConverter: EncConverter
+  dataset: parser.DataSet,
+  encConverter: EncConverter,
+  neededPrivateTags: string[]
 ): object => {
   const tags = Object.keys(dataset.elements);
   const tagData: KeyValues = {};
 
   const elementToValue = (
-    dataset: parser.DicomDataset,
+    dataset: parser.DataSet,
     element: parser.Element
   ): any => {
     const { tag, vr, dataOffset, length, items } = element;
@@ -98,7 +116,7 @@ const dataSetToObject = (
       case 'SQ':
         if (Array.isArray(items)) {
           return items.map(element =>
-            dataSetToObject(element.dataSet, encConverter)
+            dataSetToObject(element.dataSet!, encConverter, neededPrivateTags)
           );
         }
         break;
@@ -122,7 +140,12 @@ const dataSetToObject = (
       case 'SS':
         return returnNumberOrNumberList(dataset, tag, 'int16', 2);
       case 'UN': // UNKNOWN
-        return undefined;
+        const bin = Buffer.from(
+          dataset.byteArray.buffer,
+          element.dataOffset,
+          element.length
+        );
+        return stringifyUN(bin, tag);
       case 'SH':
       case 'LO':
       case 'ST':
@@ -141,7 +164,8 @@ const dataSetToObject = (
     const element = dataset.elements[tag];
     // A tag is private if the group number is odd
     const isPrivateTag = /[13579bdf]/i.test(tag[4]);
-    if (isPrivateTag) continue;
+    const tagreg = new RegExp(`^${tag}$`, 'i');
+    if (isPrivateTag && !neededPrivateTags.some(t => tagreg.test(t))) continue;
 
     // "Item delimitation" tag in a sequence
     if (tag === 'xfffee00d') continue;
@@ -163,7 +187,8 @@ const createDicomVoxelDumper: FunctionService<
   const dumpOneSeries = async (
     series: SeriesEntry,
     volId: number,
-    archiver: Archiver
+    archiver: Archiver,
+    options?: DicomVoxelDumperOptions
   ) => {
     const seriesTagData = [];
     const seriesAccessor = await dicomFileRepository.getSeries(
@@ -172,6 +197,7 @@ const createDicomVoxelDumper: FunctionService<
     const partialImages = partialVolumeDescriptorToArray(
       series.partialVolumeDescriptor
     );
+    const neededPrivateTags = options?.neededPrivateTags ?? [];
 
     let rawBuffer: Uint8Array | undefined = undefined;
     let firstSlice: DicomImageData | undefined = undefined,
@@ -181,13 +207,15 @@ const createDicomVoxelDumper: FunctionService<
 
     for (let i = 0; i < partialImages.length; i++) {
       const buffer = await seriesAccessor.load(partialImages[i]);
-      const rootDataset: parser.DicomDataset = parser.parseDicom(
+      const rootDataset: parser.DataSet = parser.parseDicom(
         new Uint8Array(buffer)
       );
       // Process DICOM tags
       const specificCharacterSet = rootDataset.string('x00080005');
       const encConverter = await prepareEncConverter(specificCharacterSet);
-      seriesTagData.push(dataSetToObject(rootDataset, encConverter));
+      seriesTagData.push(
+        dataSetToObject(rootDataset, encConverter, neededPrivateTags)
+      );
       // Process pixel data
       const slice = pixelExtractor(buffer);
       if (i === 0) {
@@ -234,12 +262,16 @@ const createDicomVoxelDumper: FunctionService<
     archiver.append(json, { name: `${volId}.json` });
   };
 
-  const dump = (series: SeriesEntry[], archiver: Archiver) => {
+  const dump = (
+    series: SeriesEntry[],
+    archiver: Archiver,
+    options?: DicomVoxelDumperOptions
+  ) => {
     const events = new EventEmitter();
     (async () => {
       for (let i = 0; i < series.length; i++) {
         events.emit('volume', i);
-        await dumpOneSeries(series[i], i, archiver);
+        await dumpOneSeries(series[i], i, archiver, options);
       }
       archiver.finalize();
     })();

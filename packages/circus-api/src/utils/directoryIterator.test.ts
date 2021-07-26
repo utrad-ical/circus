@@ -31,7 +31,17 @@ test('zip file', async () => {
   expect(entries[0]).toMatchObject({
     type: 'zip',
     name: dicomName,
-    zipName: testFile
+    archiveName: testFile
+  });
+});
+
+test('tar.gz file', async () => {
+  const testFile = path.join(testDir, '../etc/abc.tar.gz');
+  const entries = await toArray(directoryIterator(testFile));
+  expect(entries).toHaveLength(3);
+  expect(entries[0]).toMatchObject({
+    type: 'targz',
+    name: 'a.txt'
   });
 });
 

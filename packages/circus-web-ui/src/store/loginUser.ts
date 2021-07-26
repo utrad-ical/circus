@@ -75,6 +75,16 @@ const slice = createSlice({
     loggedOut: state => {
       state.isFetching = false;
       state.data = null;
+    },
+    userPreferencesUpdated: (
+      state,
+      action: PayloadAction<{
+        updates: Partial<UserPreferences>;
+      }>
+    ) => {
+      const { updates } = action.payload;
+      if (!state.data) throw new Error('User not logged in');
+      state.data.preferences = { ...state.data.preferences, ...updates };
     }
   }
 });
@@ -85,5 +95,6 @@ export const {
   fullLoginInfoLoaded,
   loginInfoConfirmed,
   loginInfoRequest,
-  loggedOut
+  loggedOut,
+  userPreferencesUpdated
 } = slice.actions;

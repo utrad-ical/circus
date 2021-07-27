@@ -2,7 +2,11 @@ import { alert } from '@smikitky/rb-components/lib/modal';
 import { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
 import CCL26 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D26';
 import CCL6 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D6';
-import { VoxelLabelProcessor } from './performLabelCreatingVoxelProcessing';
+import {
+  VoxelLabelProcessor,
+  PostProcessor
+} from './performLabelCreatingVoxelProcessing';
+import cclWorker from 'worker-loader!./cclWorker';
 
 export interface CclOptions {
   maximumCcNum: number;
@@ -15,113 +19,127 @@ const createCclProcessor = (options: CclOptions): VoxelLabelProcessor => {
     width: number,
     height: number,
     nSlices: number,
-    name: string
+    name: string,
+    postProcessor: PostProcessor
   ) => {
     const { maximumCcNum, neighbors } = options;
-    let labelingResults: LabelingResults3D | undefined = undefined;
-    try {
-      labelingResults =
-        neighbors === 6
-          ? CCL6(input, width, height, nSlices)
-          : CCL26(input, width, height, nSlices);
-    } catch (err) {
-      console.log('error', err.message);
-      alert(`${name} is too complex.\nPlease modify ${name}.`);
-      return {
-        labelingResults: {
-          labelMap: new Uint8Array(0),
-          labelNum: 0,
-          labels: new Array(0)
-        },
-        names: ['']
-      };
-    }
-    const nameTable = [
-      'the largest CC',
-      'the 2nd largest CC',
-      'the 3rd largest CC',
-      'the 4th largest CC',
-      'the 5th largest CC',
-      'the 6th largest CC',
-      'the 7th largest CC',
-      'the 8th largest CC',
-      'the 9th largest CC',
-      'the 10th largest CC',
-      'the 11th largest CC',
-      `the rest (${labelingResults.labelNum - maximumCcNum}) CCs`
-    ];
-    const names =
-      labelingResults.labelNum <= maximumCcNum + 1
-        ? nameTable.slice(0, labelingResults.labelNum)
-        : nameTable.slice(0, maximumCcNum).concat(nameTable[11]);
+    const relabeling = (results: LabelingResults3D) => {
+      const nameTable = [
+        'the largest CC',
+        'the 2nd largest CC',
+        'the 3rd largest CC',
+        'the 4th largest CC',
+        'the 5th largest CC',
+        'the 6th largest CC',
+        'the 7th largest CC',
+        'the 8th largest CC',
+        'the 9th largest CC',
+        'the 10th largest CC',
+        'the 11th largest CC',
+        `the rest (${results.labelNum - maximumCcNum}) CCs`
+      ];
+      const names =
+        results.labelNum <= maximumCcNum + 1
+          ? nameTable.slice(0, results.labelNum)
+          : nameTable.slice(0, maximumCcNum).concat(nameTable[11]);
 
-    labelingResults.labels.shift();
-    const order = [...Array(labelingResults.labelNum)].map((_, i) => i);
+      results.labels.shift();
+      const order = [...Array(results.labelNum)].map((_, i) => i);
 
-    order.sort((a, b) => {
-      return (
-        labelingResults!.labels[b].volume - labelingResults!.labels[a].volume
-      );
-    });
-    const relabel = new Array(order.length);
-    for (let i = 0; i < order.length; i++) {
-      relabel[order[i]] = i + 1;
-    }
-    labelingResults.labelMap = labelingResults.labelMap.map(i => {
-      return i === 0 ? 0 : relabel[i - 1];
-    });
-    labelingResults.labels.sort((a, b) => {
-      return b.volume - a.volume;
-    });
-
-    for (let num = maximumCcNum + 1; num < labelingResults.labelNum; num++) {
-      for (let i = 0; i < 3; i++) {
-        if (
-          labelingResults.labels[num].min[i] <
-          labelingResults.labels[maximumCcNum].min[i]
-        ) {
-          labelingResults.labels[maximumCcNum].min[i] =
-            labelingResults.labels[num].min[i];
-        }
-        if (
-          labelingResults.labels[maximumCcNum].max[i] <
-          labelingResults.labels[num].max[i]
-        ) {
-          labelingResults.labels[maximumCcNum].max[i] =
-            labelingResults.labels[num].max[i];
-        }
+      order.sort((a, b) => {
+        return results.labels[b].volume - results!.labels[a].volume;
+      });
+      const relabel = new Array(order.length);
+      for (let i = 0; i < order.length; i++) {
+        relabel[order[i]] = i + 1;
       }
-      labelingResults.labels[maximumCcNum].volume +=
-        labelingResults.labels[num].volume;
-      for (
-        let k = labelingResults.labels[num].min[2];
-        k <= labelingResults.labels[num].max[2];
-        k++
-      ) {
+      results.labelMap = results.labelMap.map((i: number) => {
+        return i === 0 ? 0 : relabel[i - 1];
+      });
+      results.labels.sort(
+        (
+          a: LabelingResults3D['labels'][0],
+          b: LabelingResults3D['labels'][0]
+        ) => {
+          return b.volume - a.volume;
+        }
+      );
+
+      for (let num = maximumCcNum + 1; num < results.labelNum; num++) {
+        for (let i = 0; i < 3; i++) {
+          if (
+            results.labels[num].min[i] < results.labels[maximumCcNum].min[i]
+          ) {
+            results.labels[maximumCcNum].min[i] = results.labels[num].min[i];
+          }
+          if (
+            results.labels[maximumCcNum].max[i] < results.labels[num].max[i]
+          ) {
+            results.labels[maximumCcNum].max[i] = results.labels[num].max[i];
+          }
+        }
+        results.labels[maximumCcNum].volume += results.labels[num].volume;
         for (
-          let j = labelingResults.labels[num].min[1];
-          j <= labelingResults.labels[num].max[1];
-          j++
+          let k = results.labels[num].min[2];
+          k <= results.labels[num].max[2];
+          k++
         ) {
           for (
-            let i = labelingResults.labels[num].min[0];
-            i <= labelingResults.labels[num].max[0];
-            i++
+            let j = results.labels[num].min[1];
+            j <= results.labels[num].max[1];
+            j++
           ) {
-            const pos = i + j * width + k * width * height;
-            if (labelingResults.labelMap[pos] === num + 1) {
-              labelingResults.labelMap[pos] = maximumCcNum + 1;
+            for (
+              let i = results.labels[num].min[0];
+              i <= results.labels[num].max[0];
+              i++
+            ) {
+              const pos = i + j * width + k * width * height;
+              if (results.labelMap[pos] === num + 1) {
+                results.labelMap[pos] = maximumCcNum + 1;
+              }
             }
           }
         }
       }
-    }
-    labelingResults.labelNum = names.length;
-
-    return {
-      labelingResults: labelingResults,
-      names: names
+      results.labelNum = names.length;
+      return {
+        labelingResults: results,
+        names: names
+      };
     };
+
+    let labelingResults: LabelingResults3D = {
+      labelMap: new Uint8Array(0),
+      labelNum: 0,
+      labels: new Array(0)
+    };
+
+    if (window.Worker) {
+      const myWorker = new cclWorker();
+      myWorker.postMessage({ input, width, height, nSlices, neighbors });
+      myWorker.onmessage = (e: any) => {
+        if (typeof e.data === 'string') {
+          console.log('error', e.data);
+          alert(`${name} is too complex.\nPlease modify ${name}.`);
+          return;
+        }
+        postProcessor(relabeling(e.data));
+      };
+    } else {
+      console.log('× window.Worker');
+      try {
+        labelingResults =
+          neighbors === 6
+            ? CCL6(input, width, height, nSlices)
+            : CCL26(input, width, height, nSlices);
+      } catch (err) {
+        console.log('error', err.message);
+        alert(`${name} is too complex.\nPlease modify ${name}.`);
+        return;
+      }
+      postProcessor(relabeling(labelingResults));
+    }
   };
 };
 

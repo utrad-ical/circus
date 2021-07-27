@@ -6,13 +6,19 @@ import createCurrentLabelsUpdator from './createCurrentLabelsUpdator';
 import { createNewLabelData, InternalLabelOf } from './labelData';
 import { EditingData, EditingDataUpdater } from './revisionData';
 
+export type PostProcessor = (results: {
+  labelingResults: LabelingResults3D;
+  names: string[];
+}) => void;
+
 export type VoxelLabelProcessor = (
   input: Uint8Array,
   width: number,
   height: number,
   nSlices: number,
-  name: string
-) => Promise<{ labelingResults: LabelingResults3D; names: string[] }>;
+  name: string,
+  postProcessor: PostProcessor
+) => void;
 
 const performLabelCreatingVoxelProcessing = async (
   editingData: EditingData,
@@ -45,55 +51,53 @@ const performLabelCreatingVoxelProcessing = async (
   img.convert('uint8', (v: number) => {
     return v === 1 ? 1 : 0;
   });
+  const addNewLabels: PostProcessor = results => {
+    const { labelingResults, names } = results;
+    const newLabel: InternalLabelOf<'voxel'>[] = [];
+    for (let num = 0; num < labelingResults.labelNum; num++) {
+      const [ULx, ULy, ULz] = labelingResults.labels[num].min;
+      const [LRx, LRy, LRz] = labelingResults.labels[num].max;
+      const color =
+        labelColors[
+          (labelColors.indexOf(label.data.color) + num + 1) % labelColors.length
+        ];
+      newLabel.push(createNewLabel(color, names[num]));
+      const [sizex, sizey, sizez] =
+        (LRx - ULx + 1) * (LRy - ULy + 1) * (LRz - ULz + 1) >= 8 ** 3
+          ? [LRx - ULx + 1, LRy - ULy + 1, LRz - ULz + 1]
+          : [8, 8, 8];
+      newLabel[num].data.size = [sizex, sizey, sizez];
+      const volume = new rs.RawData([sizex, sizey, sizez], 'binary');
 
-  const { labelingResults, names } = await voxelLabelProcessor(
+      for (let k = ULz; k <= LRz; k++) {
+        for (let j = ULy; j <= LRy; j++) {
+          for (let i = ULx; i <= LRx; i++) {
+            const pos = i + j * width + k * width * height;
+            if (labelingResults.labelMap[pos] === num + 1) {
+              volume.writePixelAt(1, i - ULx, j - ULy, k - ULz);
+            }
+          }
+        }
+      }
+      newLabel[num].data.volumeArrayBuffer = volume.data;
+      newLabel[num].data.origin = [
+        ULx + label.data.origin![0],
+        ULy + label.data.origin![1],
+        ULz + label.data.origin![2]
+      ];
+    }
+    updateCurrentLabels(labels => {
+      labels.splice(editingData.activeLabelIndex + 1, 0, ...newLabel);
+    });
+  };
+  voxelLabelProcessor(
     new Uint8Array(img.data),
     width,
     height,
     nSlices,
-    label.name!
+    label.name!,
+    addNewLabels
   );
-
-  if (labelingResults.labelNum === 0) {
-    return;
-  }
-
-  const newLabel: InternalLabelOf<'voxel'>[] = [];
-  for (let num = 0; num < labelingResults.labelNum; num++) {
-    const [ULx, ULy, ULz] = labelingResults.labels[num].min;
-    const [LRx, LRy, LRz] = labelingResults.labels[num].max;
-    const color =
-      labelColors[
-        (labelColors.indexOf(label.data.color) + num + 1) % labelColors.length
-      ];
-    newLabel.push(createNewLabel(color, names[num]));
-    const [sizex, sizey, sizez] =
-      (LRx - ULx + 1) * (LRy - ULy + 1) * (LRz - ULz + 1) >= 8 ** 3
-        ? [LRx - ULx + 1, LRy - ULy + 1, LRz - ULz + 1]
-        : [8, 8, 8];
-    newLabel[num].data.size = [sizex, sizey, sizez];
-    const volume = new rs.RawData([sizex, sizey, sizez], 'binary');
-
-    for (let k = ULz; k <= LRz; k++) {
-      for (let j = ULy; j <= LRy; j++) {
-        for (let i = ULx; i <= LRx; i++) {
-          const pos = i + j * width + k * width * height;
-          if (labelingResults.labelMap[pos] === num + 1) {
-            volume.writePixelAt(1, i - ULx, j - ULy, k - ULz);
-          }
-        }
-      }
-    }
-    newLabel[num].data.volumeArrayBuffer = volume.data;
-    newLabel[num].data.origin = [
-      ULx + label.data.origin![0],
-      ULy + label.data.origin![1],
-      ULz + label.data.origin![2]
-    ];
-  }
-  updateCurrentLabels(labels => {
-    labels.splice(editingData.activeLabelIndex + 1, 0, ...newLabel);
-  });
 };
 
 export default performLabelCreatingVoxelProcessing;

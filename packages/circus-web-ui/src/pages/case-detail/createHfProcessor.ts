@@ -23,9 +23,12 @@ const createHfProcessor = (
     height: number,
     nSlices: number,
     name: string,
-    postProcessor: PostProcessor
+    postProcessor: PostProcessor,
+    handleProgress: (progress: { value: number; label: string }) => void
   ) => {
     const { dimension, neighbors, orientation } = options;
+
+    handleProgress({ value: 50, label: 'Hole-filling' });
 
     if (window.Worker) {
       const myWorker = new hfWorker();
@@ -40,11 +43,12 @@ const createHfProcessor = (
       });
       myWorker.onmessage = (e: any) => {
         if (typeof e.data === 'string') {
-          console.log('error', e.data);
+          handleProgress({ value: 100, label: 'Failed' });
           alert(`${name} is too complex.\nPlease modify ${name}.`);
           return;
         }
         const { result, _, holeVolume } = e.data;
+        handleProgress({ value: 90, label: 'Post processing' });
         postProcessor({
           labelingResults: {
             labelMap: result,
@@ -63,6 +67,7 @@ const createHfProcessor = (
             }`
           ]
         });
+        handleProgress({ value: 100, label: 'Completed' });
       };
     } else {
       console.log('× window.Worker');
@@ -119,6 +124,7 @@ const createHfProcessor = (
           }
         }
       }
+      handleProgress({ value: 90, label: 'Post processing' });
       postProcessor({
         labelingResults: {
           labelMap: output,
@@ -137,6 +143,7 @@ const createHfProcessor = (
           }`
         ]
       });
+      handleProgress({ value: 100, label: 'Completed' });
     }
   };
 };

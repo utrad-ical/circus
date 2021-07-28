@@ -92,15 +92,17 @@ const OptionsEditorForHF: Editor<HoleFillingOptions> = props => {
 };
 
 const SettingDialogHF: React.FC<{
+  progress: { value: number; label: string };
   onHide: () => void;
   onOkClick: (props: HoleFillingOptions) => void;
 }> = props => {
-  const { onHide, onOkClick } = props;
+  const { progress, onHide, onOkClick } = props;
   return (
     <SettingDialog
       title="Hole filling"
       optionsEditor={OptionsEditorForHF}
       initialOptions={initialOptions}
+      progress={progress}
       onHide={onHide}
       onOkClick={onOkClick}
     />

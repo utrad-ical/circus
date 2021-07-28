@@ -1,11 +1,12 @@
-import { Button, Modal } from 'components/react-bootstrap';
-import React, { useState } from 'react';
 import { Editor } from '@smikitky/rb-components/lib/editor-types';
+import { Button, Modal, ProgressBar } from 'components/react-bootstrap';
+import React, { useState } from 'react';
 
 const SettingDialog: React.FC<{
   title: string;
   optionsEditor: Editor<any>;
   initialOptions: any;
+  progress: { value: number; label: string };
   onHide: () => void;
   onOkClick: (props: any) => void;
 }> = props => {
@@ -13,6 +14,7 @@ const SettingDialog: React.FC<{
     title,
     optionsEditor: OptionsEditor,
     initialOptions,
+    progress,
     onHide,
     onOkClick
   } = props;
@@ -31,6 +33,14 @@ const SettingDialog: React.FC<{
         <Button onClick={() => onOkClick(options)} bsStyle="primary">
           OK
         </Button>
+        {progress.label !== '' && (
+          <ProgressBar
+            now={progress.value}
+            label={progress.label}
+            striped
+            active
+          />
+        )}
       </Modal.Footer>
     </>
   );

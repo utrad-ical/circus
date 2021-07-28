@@ -56,15 +56,17 @@ const OptionsEditorForCCL: Editor<CclOptions> = props => {
 };
 
 const SettingDialogCCL: React.FC<{
+  progress: { value: number; label: string };
   onHide: () => void;
   onOkClick: (props: CclOptions) => void;
 }> = props => {
-  const { onHide, onOkClick } = props;
+  const { progress, onHide, onOkClick } = props;
   return (
     <SettingDialog
       title="Connected component labeling (CCL)"
       optionsEditor={OptionsEditorForCCL}
       initialOptions={initialOptions}
+      progress={progress}
       onHide={onHide}
       onOkClick={onOkClick}
     />

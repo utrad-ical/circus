@@ -68,6 +68,7 @@ const LabelMenu: React.FC<{
 
   const [cclDialogOpen, setCclDialogOpen] = useState(false);
   const [hfDialogOpen, setHfDialogOpen] = useState(false);
+  const [progress, setProgress] = useState({ value: 0, label: '' });
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
   const activeSeries = revision.series[activeSeriesIndex];
   const activeLabel =
@@ -243,9 +244,12 @@ const LabelMenu: React.FC<{
       updateEditingData,
       label,
       labelColors,
-      createCclProcessor(props)
+      createCclProcessor(props),
+      progress => {
+        setProgress(progress);
+        progress.value === 100 && setCclDialogOpen(false);
+      }
     );
-    setCclDialogOpen(false);
   };
 
   const onOkClickDialogHF = (props: HoleFillingOptions) => {
@@ -257,9 +261,12 @@ const LabelMenu: React.FC<{
       updateEditingData,
       label,
       labelColors,
-      createHfProcessor(props)
+      createHfProcessor(props),
+      progress => {
+        setProgress(progress);
+        progress.value === 100 && setHfDialogOpen(false);
+      }
     );
-    setHfDialogOpen(false);
   };
 
   return (
@@ -321,6 +328,7 @@ const LabelMenu: React.FC<{
           eventKey="ccl"
           onClick={() => {
             setCclDialogOpen(true);
+            setProgress({ value: 0, label: '' });
           }}
         >
           CCL
@@ -329,6 +337,7 @@ const LabelMenu: React.FC<{
           eventKey="fillng"
           onClick={() => {
             setHfDialogOpen(true);
+            setProgress({ value: 0, label: '' });
           }}
         >
           Hole filling
@@ -374,6 +383,7 @@ const LabelMenu: React.FC<{
         bsSize="lg"
       >
         <SettingDialogCCL
+          progress={progress}
           onHide={() => setCclDialogOpen(false)}
           onOkClick={onOkClickDialogCCL}
         />
@@ -384,6 +394,7 @@ const LabelMenu: React.FC<{
         bsSize="lg"
       >
         <SettingDialogHF
+          progress={progress}
           onHide={() => setHfDialogOpen(false)}
           onOkClick={onOkClickDialogHF}
         />

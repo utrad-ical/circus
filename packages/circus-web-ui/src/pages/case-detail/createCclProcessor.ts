@@ -2,11 +2,11 @@ import { alert } from '@smikitky/rb-components/lib/modal';
 import { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
 import CCL26 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D26';
 import CCL6 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D6';
-import {
-  VoxelLabelProcessor,
-  PostProcessor
-} from './performLabelCreatingVoxelProcessing';
 import cclWorker from 'worker-loader!./cclWorker';
+import {
+  PostProcessor,
+  VoxelLabelProcessor
+} from './performLabelCreatingVoxelProcessing';
 
 export interface CclOptions {
   maximumCcNum: number;
@@ -20,7 +20,8 @@ const createCclProcessor = (options: CclOptions): VoxelLabelProcessor => {
     height: number,
     nSlices: number,
     name: string,
-    postProcessor: PostProcessor
+    postProcessor: PostProcessor,
+    handleProgress: (progress: { value: number; label: string }) => void
   ) => {
     const { maximumCcNum, neighbors } = options;
     const relabeling = (results: LabelingResults3D) => {
@@ -114,17 +115,19 @@ const createCclProcessor = (options: CclOptions): VoxelLabelProcessor => {
       labelNum: 0,
       labels: new Array(0)
     };
-
+    handleProgress({ value: 50, label: 'Connected-component labeling' });
     if (window.Worker) {
       const myWorker = new cclWorker();
       myWorker.postMessage({ input, width, height, nSlices, neighbors });
       myWorker.onmessage = (e: any) => {
         if (typeof e.data === 'string') {
-          console.log('error', e.data);
+          handleProgress({ value: 100, label: 'Failed' });
           alert(`${name} is too complex.\nPlease modify ${name}.`);
           return;
         }
+        handleProgress({ value: 90, label: 'Post processing' });
         postProcessor(relabeling(e.data));
+        handleProgress({ value: 100, label: 'Completed' });
       };
     } else {
       console.log('× window.Worker');
@@ -138,7 +141,9 @@ const createCclProcessor = (options: CclOptions): VoxelLabelProcessor => {
         alert(`${name} is too complex.\nPlease modify ${name}.`);
         return;
       }
+      handleProgress({ value: 90, label: 'Post processing' });
       postProcessor(relabeling(labelingResults));
+      handleProgress({ value: 100, label: 'Completed' });
     }
   };
 };

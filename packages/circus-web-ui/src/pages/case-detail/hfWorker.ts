@@ -59,7 +59,7 @@ ctx.addEventListener('message', event => {
         }
       }
     }
-    holeFillingResult.result.map((_, index) => output[index]);
+    holeFillingResult.result = output;
   } catch (err) {
     console.log(err);
     holeFillingResult = err.message;

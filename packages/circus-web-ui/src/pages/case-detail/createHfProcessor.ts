@@ -28,7 +28,7 @@ const createHfProcessor = (
   ) => {
     const { dimension, neighbors, orientation } = options;
 
-    handleProgress({ value: 50, label: 'Hole-filling' });
+    handleProgress({ value: 100, label: '' });
 
     if (window.Worker) {
       const myWorker = new hfWorker();
@@ -48,7 +48,6 @@ const createHfProcessor = (
           return;
         }
         const { result, _, holeVolume } = e.data;
-        handleProgress({ value: 90, label: 'Post processing' });
         postProcessor({
           labelingResults: {
             labelMap: result,
@@ -124,7 +123,6 @@ const createHfProcessor = (
           }
         }
       }
-      handleProgress({ value: 90, label: 'Post processing' });
       postProcessor({
         labelingResults: {
           labelMap: output,

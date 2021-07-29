@@ -115,7 +115,6 @@ const createCclProcessor = (options: CclOptions): VoxelLabelProcessor => {
       labelNum: 0,
       labels: new Array(0)
     };
-    handleProgress({ value: 50, label: 'Connected-component labeling' });
     if (window.Worker) {
       const myWorker = new cclWorker();
       myWorker.postMessage({ input, width, height, nSlices, neighbors });
@@ -125,7 +124,6 @@ const createCclProcessor = (options: CclOptions): VoxelLabelProcessor => {
           alert(`${name} is too complex.\nPlease modify ${name}.`);
           return;
         }
-        handleProgress({ value: 90, label: 'Post processing' });
         postProcessor(relabeling(e.data));
         handleProgress({ value: 100, label: 'Completed' });
       };
@@ -141,7 +139,6 @@ const createCclProcessor = (options: CclOptions): VoxelLabelProcessor => {
         alert(`${name} is too complex.\nPlease modify ${name}.`);
         return;
       }
-      handleProgress({ value: 90, label: 'Post processing' });
       postProcessor(relabeling(labelingResults));
       handleProgress({ value: 100, label: 'Completed' });
     }

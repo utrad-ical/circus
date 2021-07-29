@@ -92,7 +92,7 @@ const performLabelCreatingVoxelProcessing = async (
       labels.splice(editingData.activeLabelIndex + 1, 0, ...newLabel);
     });
   };
-  handleProgress({ value: 10, label: 'Pre processing' });
+  handleProgress({ value: 100, label: '' });
   voxelLabelProcessor(
     new Uint8Array(img.data),
     width,

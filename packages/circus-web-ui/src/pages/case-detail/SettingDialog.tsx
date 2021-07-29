@@ -33,7 +33,7 @@ const SettingDialog: React.FC<{
         <Button onClick={() => onOkClick(options)} bsStyle="primary">
           OK
         </Button>
-        {progress.label !== '' && (
+        {progress.value !== 0 && (
           <ProgressBar
             now={progress.value}
             label={progress.label}

@@ -3,7 +3,10 @@ import { alert, prompt } from '@smikitky/rb-components/lib/modal';
 import Slider from '@smikitky/rb-components/lib/Slider';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import { Viewer } from '@utrad-ical/circus-rs/src/browser';
-import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
+import {
+  getSectionFromPoints,
+  OrientationString
+} from '@utrad-ical/circus-rs/src/browser/section-util';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import {
@@ -16,6 +19,7 @@ import {
   SplitButton
 } from 'components/react-bootstrap';
 import React, { useState } from 'react';
+import { ButtonProps } from 'react-bootstrap';
 import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
@@ -24,7 +28,6 @@ import * as c from './caseStore';
 import createCclProcessor, { CclOptions } from './createCclProcessor';
 import createCurrentLabelsUpdator from './createCurrentLabelsUpdator';
 import createHfProcessor, { HoleFillingOptions } from './createHfProcessor';
-import validationSectionFromPoints from './validationSectionFromPoints';
 import {
   createNewLabelData,
   InternalLabel,
@@ -38,7 +41,7 @@ import performLabelCreatingVoxelProcessing from './performLabelCreatingVoxelProc
 import { EditingData, EditingDataUpdater } from './revisionData';
 import SettingDialogCCL from './SettingDialogCCL';
 import SettingDialogHF from './SettingDialogHF';
-import { ButtonProps } from 'react-bootstrap';
+import validationSectionFromPoints from './validationSectionFromPoints';
 
 type LabelCommand =
   | 'rename'
@@ -265,6 +268,27 @@ const LabelMenu: React.FC<{
     setHfDialogOpen(false);
   };
 
+  const onSelectThreePoints2Section = () => {
+    {
+      const prevState = viewers[Object.keys(viewers)[3]].getState();
+      const points = validationSectionFromPoints(
+        editingData.revision.series[activeSeriesIndex].labels.filter(label => {
+          return label.type === 'point';
+        }) as InternalLabelOf<'point'>[],
+        editingData.revision.series[activeSeriesIndex].labels[activeSeriesIndex]
+          .name!
+      );
+      if (typeof points === 'string') {
+        throw new Error(points);
+      }
+      const section = getSectionFromPoints(points);
+      viewers[Object.keys(viewers)[3]].setState({
+        ...prevState,
+        section
+      });
+    }
+  };
+
   return (
     <StyledButtonsDiv>
       <AppearanceEditor
@@ -340,23 +364,7 @@ const LabelMenu: React.FC<{
         </MenuItem>
         <MenuItem
           eventKey="section"
-          onSelect={() => {
-            const prevState = viewers[Object.keys(viewers)[3]].getState();
-            const section = validationSectionFromPoints(
-              editingData.revision.series[activeSeriesIndex].labels.filter(
-                label => {
-                  return label.type === 'point';
-                }
-              ) as InternalLabelOf<'point'>[],
-              editingData.revision.series[activeSeriesIndex].labels[
-                activeSeriesIndex
-              ].name!
-            );
-            viewers[Object.keys(viewers)[3]].setState({
-              ...prevState,
-              section
-            });
-          }}
+          onSelect={() => onSelectThreePoints2Section()}
           disabled={!activeLabel || activeLabel.type !== 'point'}
         >
           Three points to section

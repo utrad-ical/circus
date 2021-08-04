@@ -24,11 +24,11 @@ const createHfProcessor = (
     nSlices: number,
     name: string,
     postProcessor: PostProcessor,
-    handleProgress: (progress: { value: number; label: string }) => void
+    reportProgress: (progress: { value: number; label: string }) => void
   ) => {
     const { dimension, neighbors, orientation } = options;
 
-    handleProgress({ value: 100, label: '' });
+    reportProgress({ value: 100, label: '' });
 
     if (window.Worker) {
       const myWorker = new hfWorker();
@@ -43,7 +43,7 @@ const createHfProcessor = (
       });
       myWorker.onmessage = (e: any) => {
         if (typeof e.data === 'string') {
-          handleProgress({ value: 100, label: 'Failed' });
+          reportProgress({ value: 100, label: 'Failed' });
           alert(`${name} is too complex.\nPlease modify ${name}.`);
           return;
         }
@@ -66,7 +66,7 @@ const createHfProcessor = (
             }`
           ]
         });
-        handleProgress({ value: 100, label: 'Completed' });
+        reportProgress({ value: 100, label: 'Completed' });
       };
     } else {
       console.log('× window.Worker');
@@ -141,7 +141,7 @@ const createHfProcessor = (
           }`
         ]
       });
-      handleProgress({ value: 100, label: 'Completed' });
+      reportProgress({ value: 100, label: 'Completed' });
     }
   };
 };

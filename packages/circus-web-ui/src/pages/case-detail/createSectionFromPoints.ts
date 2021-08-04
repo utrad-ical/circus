@@ -11,7 +11,7 @@ const perpendicularLinesLeg = (
       new Vector3().fromArray(pointInSection).dot(normalVector);
     return new Vector3()
       .fromArray(point)
-      .sub(new Vector3().copy(normalVector).multiplyScalar(scale));
+      .sub(normalVector.clone().multiplyScalar(scale));
   };
 };
 
@@ -50,21 +50,17 @@ const createSectuinFromPoints = (points: number[][], side = 128): Section => {
   xAxis.sub(origin);
   const oVector = new Vector3()
     .subVectors(origin, average)
-    .normalize()
-    .multiplyScalar(side * 2 ** 0.5);
+    .setLength(side * 2 ** 0.5);
 
   origin = new Vector3().addVectors(average, oVector);
-  xAxis.normalize().multiplyScalar(side * 2);
+  xAxis.setLength(side * 2);
   if (
     new Vector3().subVectors(origin, xAxis).sub(average).lengthSq() <
     new Vector3().addVectors(origin, xAxis).sub(average).lengthSq()
   ) {
     xAxis.negate();
   }
-  const yAxis = new Vector3()
-    .crossVectors(xAxis, n)
-    .normalize()
-    .multiplyScalar(side * 2);
+  const yAxis = new Vector3().crossVectors(xAxis, n).setLength(side * 2);
   if (
     new Vector3().subVectors(origin, yAxis).sub(average).lengthSq() <
     new Vector3().addVectors(origin, yAxis).sub(average).lengthSq()

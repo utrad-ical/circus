@@ -2,23 +2,31 @@ import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import { Button, Modal, ProgressBar } from 'components/react-bootstrap';
 import React, { useState } from 'react';
 
-const SettingDialog: React.FC<{
+const ImageProcessorDialog: React.FC<{
   title: string;
   optionsEditor: Editor<any>;
   initialOptions: any;
-  progress: { value: number; label: string };
   onHide: () => void;
-  onOkClick: (props: any) => void;
+  onOkClick: (
+    props: any,
+    setImageProcessorProgress: (progress: {
+      value: number;
+      label: string;
+    }) => void
+  ) => void;
 }> = props => {
   const {
     title,
     optionsEditor: OptionsEditor,
     initialOptions,
-    progress,
     onHide,
     onOkClick
   } = props;
   const [options, setOptions] = useState(initialOptions);
+  const [imageProcessorProgress, setImageProcessorProgress] = useState({
+    value: 0,
+    label: ''
+  });
 
   return (
     <>
@@ -30,13 +38,16 @@ const SettingDialog: React.FC<{
         <Button bsStyle="link" onClick={onHide}>
           Cancel
         </Button>
-        <Button onClick={() => onOkClick(options)} bsStyle="primary">
+        <Button
+          onClick={() => onOkClick(options, setImageProcessorProgress)}
+          bsStyle="primary"
+        >
           OK
         </Button>
-        {progress.value !== 0 && (
+        {imageProcessorProgress.value !== 0 && (
           <ProgressBar
-            now={progress.value}
-            label={progress.label}
+            now={imageProcessorProgress.value}
+            label={imageProcessorProgress.label}
             striped
             active
           />
@@ -46,4 +57,4 @@ const SettingDialog: React.FC<{
   );
 };
 
-export default SettingDialog;
+export default ImageProcessorDialog;

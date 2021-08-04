@@ -24,6 +24,7 @@ import * as c from './caseStore';
 import createCclProcessor, { CclOptions } from './createCclProcessor';
 import createCurrentLabelsUpdator from './createCurrentLabelsUpdator';
 import createHfProcessor, { HoleFillingOptions } from './createHfProcessor';
+import validationSectionFromPoints from './validationSectionFromPoints';
 import {
   createNewLabelData,
   InternalLabel,
@@ -316,25 +317,49 @@ const LabelMenu: React.FC<{
         bsSize="xs"
         title={<Icon icon="glyphicon-option-horizontal" />}
         id={`labelmenu-header-dropdown`}
-        disabled={!activeLabel || activeLabel.type !== 'voxel'}
         pullRight
         noCaret
       >
         <MenuItem
           eventKey="ccl"
-          onClick={() => {
+          onSelect={() => {
             setCclDialogOpen(true);
           }}
+          disabled={!activeLabel || activeLabel.type !== 'voxel'}
         >
           CCL
         </MenuItem>
         <MenuItem
           eventKey="fillng"
-          onClick={() => {
+          onSelect={() => {
             setHfDialogOpen(true);
           }}
+          disabled={!activeLabel || activeLabel.type !== 'voxel'}
         >
           Hole filling
+        </MenuItem>
+        <MenuItem
+          eventKey="section"
+          onSelect={() => {
+            const prevState = viewers[Object.keys(viewers)[3]].getState();
+            const section = validationSectionFromPoints(
+              editingData.revision.series[activeSeriesIndex].labels.filter(
+                label => {
+                  return label.type === 'point';
+                }
+              ) as InternalLabelOf<'point'>[],
+              editingData.revision.series[activeSeriesIndex].labels[
+                activeSeriesIndex
+              ].name!
+            );
+            viewers[Object.keys(viewers)[3]].setState({
+              ...prevState,
+              section
+            });
+          }}
+          disabled={!activeLabel || activeLabel.type !== 'point'}
+        >
+          Three points to section
         </MenuItem>
       </DropdownButton>
       <IconButton

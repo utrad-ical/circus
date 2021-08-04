@@ -21,23 +21,23 @@ const createCclProcessor = (options: CclOptions): VoxelLabelProcessor => {
     nSlices: number,
     name: string,
     postProcessor: PostProcessor,
-    handleProgress: (progress: { value: number; label: string }) => void
+    reportProgress: (progress: { value: number; label: string }) => void
   ) => {
     const { maximumCcNum, neighbors } = options;
     const relabeling = (results: LabelingResults3D) => {
       const nameTable = [
-        'the largest CC',
-        'the 2nd largest CC',
-        'the 3rd largest CC',
-        'the 4th largest CC',
-        'the 5th largest CC',
-        'the 6th largest CC',
-        'the 7th largest CC',
-        'the 8th largest CC',
-        'the 9th largest CC',
-        'the 10th largest CC',
-        'the 11th largest CC',
-        `the rest (${results.labelNum - maximumCcNum}) CCs`
+        'largest CC',
+        '2nd largest CC',
+        '3rd largest CC',
+        '4th largest CC',
+        '5th largest CC',
+        '6th largest CC',
+        '7th largest CC',
+        '8th largest CC',
+        '9th largest CC',
+        '10th largest CC',
+        '11th largest CC',
+        `remaining (${results.labelNum - maximumCcNum}) CCs`
       ];
       const names =
         results.labelNum <= maximumCcNum + 1
@@ -120,12 +120,12 @@ const createCclProcessor = (options: CclOptions): VoxelLabelProcessor => {
       myWorker.postMessage({ input, width, height, nSlices, neighbors });
       myWorker.onmessage = (e: any) => {
         if (typeof e.data === 'string') {
-          handleProgress({ value: 100, label: 'Failed' });
+          reportProgress({ value: 100, label: 'Failed' });
           alert(`${name} is too complex.\nPlease modify ${name}.`);
           return;
         }
         postProcessor(relabeling(e.data));
-        handleProgress({ value: 100, label: 'Completed' });
+        reportProgress({ value: 100, label: 'Completed' });
       };
     } else {
       console.log('× window.Worker');
@@ -140,7 +140,7 @@ const createCclProcessor = (options: CclOptions): VoxelLabelProcessor => {
         return;
       }
       postProcessor(relabeling(labelingResults));
-      handleProgress({ value: 100, label: 'Completed' });
+      reportProgress({ value: 100, label: 'Completed' });
     }
   };
 };

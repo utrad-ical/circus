@@ -27,7 +27,7 @@ const performLabelCreatingVoxelProcessing = async (
   label: InternalLabelOf<'voxel'>,
   labelColors: string[],
   voxelLabelProcessor: VoxelLabelProcessor,
-  handleProgress: (progress: { value: number; label: string }) => void
+  reportProgress: (progress: { value: number; label: string }) => void
 ) => {
   if (label.type !== 'voxel' || !label.data.size)
     throw new TypeError('Invalid label passed.');
@@ -92,7 +92,7 @@ const performLabelCreatingVoxelProcessing = async (
       labels.splice(editingData.activeLabelIndex + 1, 0, ...newLabel);
     });
   };
-  handleProgress({ value: 100, label: '' });
+  reportProgress({ value: 100, label: '' });
   voxelLabelProcessor(
     new Uint8Array(img.data),
     width,
@@ -100,7 +100,7 @@ const performLabelCreatingVoxelProcessing = async (
     nSlices,
     label.name!,
     addNewLabels,
-    handleProgress
+    reportProgress
   );
 };
 

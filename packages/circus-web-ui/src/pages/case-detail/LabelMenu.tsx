@@ -34,8 +34,8 @@ import {
 } from './labelData';
 import performLabelCreatingVoxelProcessing from './performLabelCreatingVoxelProcessing';
 import { EditingData, EditingDataUpdater } from './revisionData';
-import CCLDialog from './CCLDialog';
-import HFDialog from './HFDialog';
+import SettingDialogCCL from './SettingDialogCCL';
+import SettingDialogHF from './SettingDialogHF';
 
 type LabelCommand =
   | 'rename'
@@ -68,6 +68,10 @@ const LabelMenu: React.FC<{
 
   const [cclDialogOpen, setCclDialogOpen] = useState(false);
   const [hfDialogOpen, setHfDialogOpen] = useState(false);
+  const [processorProgress, setProcessorProgress] = useState({
+    value: 0,
+    label: ''
+  });
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
   const activeSeries = revision.series[activeSeriesIndex];
   const activeLabel =
@@ -234,10 +238,7 @@ const LabelMenu: React.FC<{
     });
   };
 
-  const onOkClickDialogCCL = (
-    props: CclOptions,
-    setCclProgress: (cclProgress: { value: number; label: string }) => void
-  ) => {
+  const onOkClickDialogCCL = (props: CclOptions) => {
     const label = editingData.revision.series[activeSeriesIndex].labels[
       activeLabelIndex
     ] as InternalLabelOf<'voxel'>;
@@ -248,16 +249,13 @@ const LabelMenu: React.FC<{
       labelColors,
       createCclProcessor(props),
       cclProgress => {
-        setCclProgress(cclProgress);
+        setProcessorProgress(cclProgress);
         cclProgress.label !== '' && setCclDialogOpen(false);
       }
     );
   };
 
-  const onOkClickDialogHF = (
-    props: HoleFillingOptions,
-    setHfProgress: (hfProgress: { value: number; label: string }) => void
-  ) => {
+  const onOkClickDialogHF = (props: HoleFillingOptions) => {
     const label = editingData.revision.series[activeSeriesIndex].labels[
       activeLabelIndex
     ] as InternalLabelOf<'voxel'>;
@@ -268,7 +266,7 @@ const LabelMenu: React.FC<{
       labelColors,
       createHfProcessor(props),
       hfProgress => {
-        setHfProgress(hfProgress);
+        setProcessorProgress(hfProgress);
         hfProgress.label !== '' && setHfDialogOpen(false);
       }
     );
@@ -332,6 +330,7 @@ const LabelMenu: React.FC<{
         <MenuItem
           eventKey="ccl"
           onClick={() => {
+            setProcessorProgress({ value: 0, label: '' });
             setCclDialogOpen(true);
           }}
         >
@@ -340,6 +339,7 @@ const LabelMenu: React.FC<{
         <MenuItem
           eventKey="fillng"
           onClick={() => {
+            setProcessorProgress({ value: 0, label: '' });
             setHfDialogOpen(true);
           }}
         >
@@ -385,7 +385,8 @@ const LabelMenu: React.FC<{
         onHide={() => setCclDialogOpen(false)}
         bsSize="lg"
       >
-        <CCLDialog
+        <SettingDialogCCL
+          processorProgress={processorProgress}
           onHide={() => setCclDialogOpen(false)}
           onOkClick={onOkClickDialogCCL}
         />
@@ -395,7 +396,8 @@ const LabelMenu: React.FC<{
         onHide={() => setHfDialogOpen(false)}
         bsSize="lg"
       >
-        <HFDialog
+        <SettingDialogHF
+          processorProgress={processorProgress}
           onHide={() => setHfDialogOpen(false)}
           onOkClick={onOkClickDialogHF}
         />

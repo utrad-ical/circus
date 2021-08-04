@@ -2,31 +2,23 @@ import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import { Button, Modal, ProgressBar } from 'components/react-bootstrap';
 import React, { useState } from 'react';
 
-const ImageProcessorDialog: React.FC<{
+const SettingDialog: React.FC<{
   title: string;
   optionsEditor: Editor<any>;
   initialOptions: any;
+  processorProgress: { value: number; label: string };
   onHide: () => void;
-  onOkClick: (
-    props: any,
-    setImageProcessorProgress: (progress: {
-      value: number;
-      label: string;
-    }) => void
-  ) => void;
+  onOkClick: (props: any) => void;
 }> = props => {
   const {
     title,
     optionsEditor: OptionsEditor,
     initialOptions,
+    processorProgress,
     onHide,
     onOkClick
   } = props;
   const [options, setOptions] = useState(initialOptions);
-  const [imageProcessorProgress, setImageProcessorProgress] = useState({
-    value: 0,
-    label: ''
-  });
 
   return (
     <>
@@ -38,16 +30,13 @@ const ImageProcessorDialog: React.FC<{
         <Button bsStyle="link" onClick={onHide}>
           Cancel
         </Button>
-        <Button
-          onClick={() => onOkClick(options, setImageProcessorProgress)}
-          bsStyle="primary"
-        >
+        <Button onClick={() => onOkClick(options)} bsStyle="primary">
           OK
         </Button>
-        {imageProcessorProgress.value !== 0 && (
+        {processorProgress.value !== 0 && (
           <ProgressBar
-            now={imageProcessorProgress.value}
-            label={imageProcessorProgress.label}
+            now={processorProgress.value}
+            label={processorProgress.label}
             striped
             active
           />
@@ -57,4 +46,4 @@ const ImageProcessorDialog: React.FC<{
   );
 };
 
-export default ImageProcessorDialog;
+export default SettingDialog;

@@ -2,7 +2,7 @@ import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import React from 'react';
 import { HoleFillingOptions } from './createHfProcessor';
-import ImageProcessorDialog from './ImageProcessorDialog';
+import SettingDialog from './SettingDialog';
 
 const neighborsOptions2D = {
   4: '4-neigobors',
@@ -91,23 +91,22 @@ const OptionsEditorForHF: Editor<HoleFillingOptions> = props => {
   );
 };
 
-const HFDialog: React.FC<{
+const SettingDialogHF: React.FC<{
+  processorProgress: { value: number; label: string };
   onHide: () => void;
-  onOkClick: (
-    props: HoleFillingOptions,
-    setHfProgress: (hfProgress: { value: number; label: string }) => void
-  ) => void;
+  onOkClick: (props: HoleFillingOptions) => void;
 }> = props => {
-  const { onHide, onOkClick } = props;
+  const { processorProgress, onHide, onOkClick } = props;
   return (
-    <ImageProcessorDialog
+    <SettingDialog
       title="Hole filling"
       optionsEditor={OptionsEditorForHF}
       initialOptions={initialOptions}
+      processorProgress={processorProgress}
       onHide={onHide}
       onOkClick={onOkClick}
     />
   );
 };
 
-export default HFDialog;
+export default SettingDialogHF;

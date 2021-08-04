@@ -2,7 +2,7 @@ import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import React from 'react';
 import { CclOptions } from './createCclProcessor';
-import ImageProcessorDialog from './ImageProcessorDialog';
+import SettingDialog from './SettingDialog';
 
 const maximumCCNumOptions = {
   1: '1 CC',
@@ -55,23 +55,22 @@ const OptionsEditorForCCL: Editor<CclOptions> = props => {
   );
 };
 
-const CCLDialog: React.FC<{
+const SettingDialogCCL: React.FC<{
+  processorProgress: { value: number; label: string };
   onHide: () => void;
-  onOkClick: (
-    props: CclOptions,
-    setCclProgress: (cclProgress: { value: number; label: string }) => void
-  ) => void;
+  onOkClick: (props: CclOptions) => void;
 }> = props => {
-  const { onHide, onOkClick } = props;
+  const { processorProgress, onHide, onOkClick } = props;
   return (
-    <ImageProcessorDialog
+    <SettingDialog
       title="Connected component labeling (CCL)"
       optionsEditor={OptionsEditorForCCL}
       initialOptions={initialOptions}
+      processorProgress={processorProgress}
       onHide={onHide}
       onOkClick={onOkClick}
     />
   );
 };
 
-export default CCLDialog;
+export default SettingDialogCCL;

@@ -68,7 +68,7 @@ describe('search', () => {
       params: { filter: 'invalid-json' }
     });
     expect(res1.status).toBe(400);
-    expect(res1.data.error).toMatch('Invalid JSON was passed as the filter.');
+    expect(res1.data.error).toMatch(/Invalid JSON was passed/);
 
     const res2 = await ax.alice.get('api/cases', {
       params: { sort: 'invalid-json' }

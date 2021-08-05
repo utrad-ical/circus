@@ -1,12 +1,11 @@
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import archiver from 'archiver';
-import { EJSON } from 'bson';
 import status from 'http-status';
 import isLikeDicom from '../../utils/isLikeDicom';
 import { CircusContext, RouteMiddleware } from '../../typings/middlewares';
 import checkFilter from '../../utils/checkFilter';
 import { fileOrArchiveIterator } from '../../utils/directoryIterator';
-import { performAggregationSearch } from '../performSearch';
+import { extractFilter, performAggregationSearch } from '../performSearch';
 
 const maskPatientInfo = (ctx: CircusContext) => {
   return (series: any) => {
@@ -88,15 +87,7 @@ export const handlePost: RouteMiddleware = ({ dicomImporter, taskManager }) => {
 
 export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
-    const urlQuery = ctx.request.query;
-    let customFilter: any;
-    try {
-      customFilter = urlQuery.filter
-        ? EJSON.parse(urlQuery.filter as string)
-        : {};
-    } catch (err) {
-      ctx.throw(status.BAD_REQUEST, 'Filter string could not be parsed.');
-    }
+    const customFilter = extractFilter(ctx);
     const fields = [
       'modality',
       'seriesUid',

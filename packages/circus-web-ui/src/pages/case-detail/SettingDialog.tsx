@@ -1,6 +1,11 @@
 import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import { Button, Modal, ProgressBar } from 'components/react-bootstrap';
 import React, { useState } from 'react';
+import styled from 'styled-components';
+
+const StyledDiv = styled.div`
+  line-height: 2.5;
+`;
 
 const SettingDialog: React.FC<{
   title: string;
@@ -24,7 +29,9 @@ const SettingDialog: React.FC<{
     <>
       <Modal.Header>{title}</Modal.Header>
       <Modal.Body>
-        <OptionsEditor value={options} onChange={setOptions} />
+        <StyledDiv>
+          <OptionsEditor value={options} onChange={setOptions} />
+        </StyledDiv>
       </Modal.Body>
       <Modal.Footer>
         <Button bsStyle="link" onClick={onHide}>
@@ -34,12 +41,15 @@ const SettingDialog: React.FC<{
           OK
         </Button>
         {processorProgress.value !== 0 && (
-          <ProgressBar
-            now={processorProgress.value}
-            label={processorProgress.label}
-            striped
-            active
-          />
+          <div>
+            <span>&nbsp;</span>
+            <ProgressBar
+              now={processorProgress.value}
+              label={processorProgress.label}
+              striped
+              active
+            />
+          </div>
         )}
       </Modal.Footer>
     </>

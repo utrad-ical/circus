@@ -380,22 +380,14 @@ const LabelMenu: React.FC<{
           );
         })}
       </SplitButton>
-      <Modal
-        show={cclDialogOpen}
-        onHide={() => setCclDialogOpen(false)}
-        bsSize="lg"
-      >
+      <Modal show={cclDialogOpen} onHide={() => setCclDialogOpen(false)}>
         <SettingDialogCCL
           processorProgress={processorProgress}
           onHide={() => setCclDialogOpen(false)}
           onOkClick={onOkClickDialogCCL}
         />
       </Modal>
-      <Modal
-        show={hfDialogOpen}
-        onHide={() => setHfDialogOpen(false)}
-        bsSize="lg"
-      >
+      <Modal show={hfDialogOpen} onHide={() => setHfDialogOpen(false)}>
         <SettingDialogHF
           processorProgress={processorProgress}
           onHide={() => setHfDialogOpen(false)}

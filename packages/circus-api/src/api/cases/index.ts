@@ -1,6 +1,5 @@
 import status from 'http-status';
-import { performAggregationSearch } from '../performSearch';
-import { EJSON } from 'bson';
+import { extractFilter, performAggregationSearch } from '../performSearch';
 import checkFilter from '../../utils/checkFilter';
 import { RouteMiddleware, CircusContext } from '../../typings/middlewares';
 import makeNewCase from '../../case/makeNewCase';
@@ -113,13 +112,7 @@ const searchableFields = [
 
 export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
-    const urlQuery = ctx.request.query;
-    let customFilter: object;
-    try {
-      customFilter = urlQuery.filter ? EJSON.parse(urlQuery.filter) : {};
-    } catch (err) {
-      ctx.throw(status.BAD_REQUEST, 'Invalid JSON was passed as the filter.');
-    }
+    const customFilter = extractFilter(ctx);
     if (!checkFilter(customFilter!, searchableFields))
       ctx.throw(status.BAD_REQUEST, 'Bad filter.');
 

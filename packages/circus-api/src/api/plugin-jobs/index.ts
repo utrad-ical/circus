@@ -1,7 +1,6 @@
 import status from 'http-status';
-import { performAggregationSearch } from '../performSearch';
+import { extractFilter, performAggregationSearch } from '../performSearch';
 import generateUniqueId from '../../utils/generateUniqueId';
-import { EJSON } from 'bson';
 import path from 'path';
 import fs from 'fs';
 import glob from 'glob-promise';
@@ -71,13 +70,7 @@ export const handlePatch: RouteMiddleware = ({ models, cs }) => {
 
 export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
-    const urlQuery = ctx.request.query;
-    let customFilter: object;
-    try {
-      customFilter = urlQuery.filter ? EJSON.parse(urlQuery.filter) : {};
-    } catch (err) {
-      ctx.throw(status.BAD_REQUEST, 'Bad filter.');
-    }
+    const customFilter = extractFilter(ctx);
     const domainFilter = {
       domain: { $in: ctx.userPrivileges.domains }
     };

@@ -51,6 +51,8 @@ export default class VRGLProgram extends ShaderProgram {
   private uRayIntensityCoef: SetUniform['uniform1f'];
   private uInterpolationMode: SetUniform['uniform1i'];
   private uMVPMatrix: SetUniform['uniformMatrix4fv'];
+  // private uProjectionMatrix: SetUniform['uniformMatrix4fv'];
+  // private uModelViewMatrix: SetUniform['uniformMatrix4fv'];
   private uDebugFlag: SetUniform['uniform1i'];
 
   private aVertexIndexBuffer: VertexElementBufferer;
@@ -77,9 +79,6 @@ export default class VRGLProgram extends ShaderProgram {
   private uEnableLabel: SetUniform['uniform1i'];
   private uEnableMask: SetUniform['uniform1i'];
 
-  private uProjectionMatrix: SetUniform['uniformMatrix4fv'];
-  private uModelViewMatrix: SetUniform['uniformMatrix4fv'];
-
   constructor(gl: WebGLRenderingContext) {
     super(gl, vertexShaderSource, fragmentShaderSource);
 
@@ -93,8 +92,8 @@ export default class VRGLProgram extends ShaderProgram {
     this.uRayIntensityCoef = this.uniform1f('uRayIntensityCoef');
     this.uInterpolationMode = this.uniform1i('uInterpolationMode');
     this.uMVPMatrix = this.uniformMatrix4fv('uMVPMatrix', false);
-    this.uProjectionMatrix = this.uniformMatrix4fv('uProjectionMatrix', false);
-    this.uModelViewMatrix = this.uniformMatrix4fv('uModelViewMatrix', false);
+    // this.uProjectionMatrix = this.uniformMatrix4fv('uProjectionMatrix', false);
+    // this.uModelViewMatrix = this.uniformMatrix4fv('uModelViewMatrix', false);
 
     this.uEnableLabel = this.uniform1i('uEnableLabel');
     this.uEnableMask = this.uniform1i('uEnableMask');
@@ -422,10 +421,10 @@ export default class VRGLProgram extends ShaderProgram {
     const modelViewMatrix = new Matrix4().fromArray(
       createModelViewMatrix(this.camera, this.mmInNdc)
     );
-    // const mvpMatrix = projectionMatrix.multiply(modelViewMatrix);
-    // this.uMVPMatrix(mvpMatrix.toArray());
-    this.uProjectionMatrix(projectionMatrix.toArray());
-    this.uModelViewMatrix(modelViewMatrix.toArray());
+    const mvpMatrix = projectionMatrix.multiply(modelViewMatrix);
+    this.uMVPMatrix(mvpMatrix.toArray());
+    // this.uProjectionMatrix(projectionMatrix.toArray());
+    // this.uModelViewMatrix(modelViewMatrix.toArray());
 
     // Enable attribute pointers
     gl.enableVertexAttribArray(this.getAttribLocation('aVertexPosition'));
@@ -451,10 +450,10 @@ export default class VRGLProgram extends ShaderProgram {
       const modelViewMatrix = new Matrix4().fromArray(
         createModelViewMatrix(this.camera, this.mmInNdc)
       );
-      // const mvpMatrix = projectionMatrix.multiply(modelViewMatrix);
-      // this.uMVPMatrix(mvpMatrix.toArray());
-      this.uProjectionMatrix(projectionMatrix.toArray());
-      this.uModelViewMatrix(modelViewMatrix.toArray());
+      const mvpMatrix = projectionMatrix.multiply(modelViewMatrix);
+      this.uMVPMatrix(mvpMatrix.toArray());
+      // this.uProjectionMatrix(projectionMatrix.toArray());
+      // this.uModelViewMatrix(modelViewMatrix.toArray());
 
       // Draw vertices
       gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);

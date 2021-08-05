@@ -57,20 +57,18 @@ export default class VolumeRenderingImageSource extends MprImageSource {
 
     const backCanvas = this.createBackCanvas();
     const glContext = getWebGLContext(backCanvas);
-    glContext.clearColor(...this.background);
-    glContext.clearDepth(1.0);
     const vrProgram = new VRGLProgram(glContext);
 
     this.backCanvas = backCanvas;
     this.glContext = glContext;
     this.vrProgram = vrProgram;
+    this.vrProgram.activate();
 
     // For debug
     VolumeRenderingImageSource.captureCanvasCallbacks.forEach(handler => handler(backCanvas));
 
     this.loadSequence = (async () => {
       this.metadata = await volumeLoader.loadMeta();
-      console.log(JSON.stringify(this.metadata), null, 2);
 
       // Assign the length of the longest side of the volume to 
       // the length of the side in normalized device coordinates.
@@ -90,6 +88,8 @@ export default class VolumeRenderingImageSource extends MprImageSource {
 
       this.volume = volume;
       this.mask = mask;
+
+      vrProgram.setDicomVolume(volume, mask);
     })();
 
     this.labelLoader = labelLoader;
@@ -181,6 +181,10 @@ export default class VolumeRenderingImageSource extends MprImageSource {
   public async draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
     if (viewState.type !== 'vr')
       throw new Error('Unsupported view state.');
+    
+    // await this.debugDraw(viewer, viewState);
+    this.glContext.clearColor(...this.background);
+    this.glContext.clearDepth(1.0);
 
     this.updateViewportSize(viewer.getResolution());
 
@@ -250,6 +254,7 @@ export default class VolumeRenderingImageSource extends MprImageSource {
       this.lastTransferFunction !== viewState.transferFunction &&
       viewState.transferFunction
     ) {
+      console.log('transfer function');
       this.vrProgram.setTransferFunction(viewState.transferFunction);
       this.lastTransferFunction = viewState.transferFunction;
     }

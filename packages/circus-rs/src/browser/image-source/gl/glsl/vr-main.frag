@@ -1,6 +1,6 @@
 void main() {
   if(uDebugFlag == 0) {
-      gl_FragColor = getColorWithRayCasting(vWorldSpaceCoords);
+    gl_FragColor = getColorWithRayCasting(vWorldSpaceCoords);
   } else if(uDebugFlag == 1) {
     // - volume rendering
     gl_FragColor = vColor;

@@ -61,20 +61,18 @@ const OptionsEditorForHF: Editor<HoleFillingOptions> = props => {
           }
           numericalValue
         />
-      </div>
-      {value.dimension === 2 && (
-        <div>
-          <label>
-            Orientation&nbsp;
+        {value.dimension === 2 && (
+          <>
+            &ensp;Orientation&nbsp;
             <ShrinkSelect
               bsSize="sm"
               options={orientationOptions}
               value={value.orientation}
               onChange={v => onChange({ ...value, orientation: v })}
             />
-          </label>
-        </div>
-      )}
+          </>
+        )}
+      </div>
       <div>
         Neighbors to decide same CC&nbsp;
         <ShrinkSelect

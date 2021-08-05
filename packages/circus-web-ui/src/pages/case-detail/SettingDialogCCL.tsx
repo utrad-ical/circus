@@ -32,7 +32,7 @@ const OptionsEditorForCCL: Editor<CclOptions> = props => {
   return (
     <>
       <div>
-        Maximum number of connected components (CCs) to display&nbsp;
+        Maximum number of connected components (CCs)&nbsp;
         <ShrinkSelect
           bsSize="sm"
           options={maximumCCNumOptions}

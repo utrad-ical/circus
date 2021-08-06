@@ -10,6 +10,12 @@ import { useApi } from 'utils/api';
 import { useSelector, useDispatch } from 'react-redux';
 import * as searches from 'store/searches';
 
+export const patientInfoSearchOptions: { readonly [key: string]: string } = {
+  'patientInfo.patientName': 'patient name',
+  'patientInfo.patientId': 'patient ID',
+  'patientInfo.age': 'patient age'
+};
+
 export const makeSortOptions = (sortKeys: { [key: string]: string }) => {
   const options: { [key: string]: string } = {};
   Object.keys(sortKeys).forEach(k => {

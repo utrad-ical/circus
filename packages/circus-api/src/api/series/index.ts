@@ -10,7 +10,7 @@ import { extractFilter, performAggregationSearch } from '../performSearch';
 const maskPatientInfo = (ctx: CircusContext) => {
   return (series: any) => {
     const show =
-      ctx.userPrivileges.globalPrivileges.some(p => p === 'personalInfoView') &&
+      ctx.userPrivileges.globalPrivileges.includes('personalInfoView') &&
       ctx.user.preferences.personalInfoView;
     if (!show) {
       delete series.patientInfo;
@@ -121,6 +121,14 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
         ctx.throw(status.BAD_REQUEST, 'This my list is not for series');
     }
 
+    const canViewPersonalInfo = ctx.userPrivileges.globalPrivileges.includes(
+      'personalInfoView'
+    );
+
+    const baseStages: object[] = canViewPersonalInfo
+      ? []
+      : [{ $unset: 'personalInfo' }];
+
     const searchByMyListStage: object[] = [
       { $match: { myListId } },
       { $unwind: { path: '$items' } },
@@ -143,7 +151,9 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
     ];
 
     const startModel = myListId ? models.myList : models.series;
-    const lookupStages = myListId ? searchByMyListStage : [];
+    const lookupStages = myListId
+      ? [...searchByMyListStage, ...baseStages]
+      : baseStages;
     const defaultSort = myListId ? { addedToListAt: -1 } : { createdAt: -1 };
 
     // Removes patient info according to the preference

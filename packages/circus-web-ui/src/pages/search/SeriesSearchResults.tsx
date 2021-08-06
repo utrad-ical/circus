@@ -7,9 +7,10 @@ import IconButton from 'components/IconButton';
 import IdDisplay from 'components/IdDisplay';
 import MyListDropdown from 'components/MyListDropdown';
 import PatientInfoBox from 'components/PatientInfoBox';
-import { DropdownButton, MenuItem, Popover } from 'components/react-bootstrap';
+import { DropdownButton, MenuItem } from 'components/react-bootstrap';
 import SearchResultsView, {
-  makeSortOptions
+  makeSortOptions,
+  patientInfoSearchOptions
 } from 'components/SearchResultsView';
 import TimeDisplay from 'components/TimeDisplay';
 import { multirange } from 'multi-integer-range';
@@ -142,7 +143,8 @@ const sortOptions = makeSortOptions({
   createdAt: 'series import time',
   seriesUid: 'series instance UID',
   seriesDate: 'series date',
-  modality: 'modality'
+  modality: 'modality',
+  ...patientInfoSearchOptions
 });
 
 const SeriesSearchResults: React.FC<{

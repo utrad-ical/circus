@@ -79,6 +79,7 @@
     "typescript": "^4.2.4"
   },
   "nodemonConfig": {
-    "ext": "js,mjs,ts,json,yaml"
+    "ext": "js,mjs,ts,json,yaml",
+    "signal": "SIGTERM"
   }
 }

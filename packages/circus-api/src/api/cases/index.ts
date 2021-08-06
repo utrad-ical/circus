@@ -15,18 +15,7 @@ const maxTagLength = 32;
 const maskPatientInfo = (ctx: CircusContext) => {
   return (caseData: any) => {
     const wantToView = ctx.user.preferences.personalInfoView;
-    const accessibleProjects = ctx.userPrivileges.accessibleProjects;
-    const project = accessibleProjects.find(
-      p => caseData.projectId === p.projectId
-    );
-    if (!project) {
-      throw new Error(
-        `Project ${caseData.projectId} is not accessbible by ${ctx.user.userEmail}.`
-      );
-    }
-    const viewable = project.roles.some(r => r === 'viewPersonalInfo');
-    const view = viewable && wantToView;
-    if (!view) {
+    if (!wantToView || caseData.patientInfo === null) {
       delete caseData.patientInfo;
     }
     return caseData;
@@ -121,13 +110,20 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
     const accessibleProjectIds = ctx.userPrivileges.accessibleProjects
       .filter(
         p =>
-          p.roles.indexOf('read') >= 0 &&
-          (!patientInfoInFilter || p.roles.indexOf('viewPersonalInfo') >= 0)
+          p.roles.includes('read') &&
+          (!patientInfoInFilter || p.roles.includes('viewPersonalInfo'))
       )
       .map(p => p.projectId);
+    const patientInfoVisibleProjectIds = ctx.userPrivileges.accessibleProjects
+      .filter(
+        p => p.roles.includes('read') && p.roles.includes('viewPersonalInfo')
+      )
+      .map(p => p.projectId);
+
     const accessibleProjectFilter = {
       projectId: { $in: accessibleProjectIds }
     };
+
     const filter = {
       $and: [customFilter!, accessibleProjectFilter /* domainFilter */]
     };
@@ -156,7 +152,17 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
       },
       { $unwind: { path: '$seriesDetail', includeArrayIndex: 'volId' } },
       { $match: { volId: 0 } },
-      { $addFields: { patientInfo: '$seriesDetail.patientInfo' } }
+      {
+        $addFields: {
+          patientInfo: {
+            $cond: [
+              { $in: ['$projectId', patientInfoVisibleProjectIds] },
+              '$seriesDetail.patientInfo',
+              null
+            ]
+          }
+        }
+      }
     ];
 
     const searchByMyListStage: object[] = [

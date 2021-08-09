@@ -70,7 +70,7 @@
     "axios": "^0.19.2",
     "babel-loader": "^8.1.0",
     "benchmark": "^2.1.4",
-    "file-loader": "^1.1.6",
+    "file-loader": "^6.2.0",
     "glob-promise": "^3.4.0",
     "http-status": "^1.4.2",
     "less": "^3.11.1",

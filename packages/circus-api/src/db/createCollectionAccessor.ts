@@ -249,7 +249,7 @@ const createCollectionAccessor = <T = any>(
       {
         upsert: true,
         projection: { _id: false, value: true },
-        returnOriginal: false
+        returnDocument: 'after'
       }
     );
     if (doc.value !== null) {

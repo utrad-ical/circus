@@ -34,9 +34,9 @@ jobs:
           docker pull circuscad/dicom_voxel_dump:1.0.0
           cd packages/circus-cs-core/test/docker
           node build.js
-      # - name: Build modules
-      #   run: |
-      #     npx run build --workspaces
+      - name: Build modules
+        run: |
+          npx run build --if-present --workspaces
       - name: Run test
         run: npm test
         env:

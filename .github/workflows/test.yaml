@@ -36,7 +36,7 @@ jobs:
           node build.js
       - name: Build modules
         run: |
-          npx run build --if-present --workspaces
+          npm run build --if-present --workspaces
       - name: Run test
         run: npm test
         env:

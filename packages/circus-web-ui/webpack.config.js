@@ -34,7 +34,7 @@ module.exports = {
         use: [
           {
             loader: 'url-loader',
-            options: { limit: 1000000 }
+            options: { limit: false }
           }
         ]
       },
@@ -53,7 +53,7 @@ module.exports = {
       {
         test: /\.m?js/,
         resolve: {
-          fullySpecified: false
+          // fullySpecified: false
         }
       }
     ]

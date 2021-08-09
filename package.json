@@ -5,6 +5,15 @@
     "type": "git",
     "url": "https://github.com/utrad-ical/circus.git"
   },
+  "engines": {
+    "node": ">=12.0.0",
+    "npm": ">=7.14.0"
+  },
+  "workspaces": {
+    "packages": [
+      "./packages/*"
+    ]
+  },
   "scripts": {
     "test": "jest",
     "lint": "eslint \"packages/*/{src,test}/**/*.{js,ts,tsx}\"",
@@ -45,5 +54,6 @@
     ],
     "testEnvironment": "node",
     "testTimeout": 10000
-  }
+  },
+  "dependencies": {}
 }

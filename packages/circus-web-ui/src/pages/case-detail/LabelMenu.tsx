@@ -270,7 +270,6 @@ const LabelMenu: React.FC<{
 
   const onSelectThreePoints2Section = () => {
     {
-      const prevState = viewers[Object.keys(viewers)[3]].getState();
       const points = validationSectionFromPoints(
         editingData.revision.series[activeSeriesIndex].labels.filter(label => {
           return label.type === 'point';
@@ -282,9 +281,19 @@ const LabelMenu: React.FC<{
         throw new Error(points);
       }
       const section = getSectionFromPoints(points);
-      viewers[Object.keys(viewers)[3]].setState({
-        ...prevState,
-        section
+      let targetKey = '';
+      updateEditingData(d => {
+        const [layoutItems, layout, key] = c.addNewCellItem(
+          editingData.layoutItems,
+          editingData.layout,
+          'oblique',
+          activeSeriesIndex,
+          section
+        );
+        targetKey = key;
+        d.layoutItems = layoutItems;
+        d.layout = layout;
+        d.activeLayoutKey = key;
       });
     }
   };

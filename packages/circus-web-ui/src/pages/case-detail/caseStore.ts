@@ -8,7 +8,7 @@ import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import { LayoutInfo, layoutReducer } from 'components/GridContainer';
 import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
 import { ViewerDef } from './ViewerGrid';
-
+import { Section } from '@utrad-ical/circus-rs/src/common/geometry';
 interface CaseData {
   caseId: string;
   revisions: Revision<ExternalLabel>[];
@@ -79,6 +79,26 @@ export const performLayout = (
   return [items, tmp];
 };
 
+export const addNewCellItem = (
+  layoutItems: ViewerDef[],
+  layout: LayoutInfo,
+  orientation: OrientationString,
+  seriesIndex: number = 0,
+  section?: Section
+): [ViewerDef[], LayoutInfo, string] => {
+  let tmp = layout;
+  const items: ViewerDef[] = layoutItems.concat();
+  const item = section
+    ? newViewerCellItem(seriesIndex, orientation, section)
+    : newViewerCellItem(seriesIndex, orientation);
+  items.push(item);
+  tmp = layoutReducer(tmp, {
+    type: 'insertItemToEmptyCell',
+    payload: { key: item.key }
+  });
+  return [items, tmp, item.key];
+};
+
 const alphaNum = (length: number = 16) =>
   new Array(length)
     .fill(0)
@@ -87,14 +107,16 @@ const alphaNum = (length: number = 16) =>
 
 export const newViewerCellItem = (
   seriesIndex: number,
-  orientation: OrientationString
+  orientation: OrientationString,
+  section?: Section
 ): ViewerDef => {
   const key = alphaNum();
   return {
     key,
     seriesIndex,
     orientation,
-    celestialRotateMode: orientation === 'oblique'
+    celestialRotateMode: orientation === 'oblique',
+    section
   };
 };
 

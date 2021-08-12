@@ -20,6 +20,7 @@ import ImageViewer, {
   StateChanger
 } from 'components/ImageViewer';
 import { Button, DropdownButton, MenuItem } from 'components/react-bootstrap';
+import { size } from 'lodash';
 import React, {
   useCallback,
   useContext,
@@ -29,12 +30,14 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 import { EditingData, EditingDataUpdater, seriesColors } from './revisionData';
+import { Section } from '@utrad-ical/circus-rs/src/common/geometry';
 
 export interface ViewerDef {
   key: string;
   seriesIndex: number;
   orientation: 'axial' | 'sagittal' | 'coronal' | 'oblique';
   celestialRotateMode: boolean; // only applicable for oblique view
+  section?: Section;
 }
 
 interface ViewerGridContextValue {
@@ -217,7 +220,13 @@ const HeaderDiv = styled.div`
 const celestialRotate = toolFactory('celestialRotate');
 
 const Content: React.FC<{ value: ViewerDef }> = props => {
-  const { key, seriesIndex, orientation, celestialRotateMode } = props.value;
+  const {
+    key,
+    seriesIndex,
+    orientation,
+    celestialRotateMode,
+    section
+  } = props.value;
 
   const {
     compositions,
@@ -233,11 +242,16 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
 
   const combinedInitialStateSetter = useCallback(
     (viewer: Viewer, viewState: MprViewState) => {
-      const s1 = orientationInitialStateSetters[orientation](viewer, viewState);
+      const s1 = section
+        ? {
+            ...orientationInitialStateSetters[orientation](viewer, viewState)!,
+            section: section
+          }
+        : orientationInitialStateSetters[orientation](viewer, viewState);
       const s2 = initialStateSetter(viewer, s1!, key);
       return s2;
     },
-    [initialStateSetter, orientation, key]
+    [initialStateSetter, orientation, key, section]
   );
 
   const localStateChanger = useMemo(

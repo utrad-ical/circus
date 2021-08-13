@@ -520,6 +520,7 @@ const perpendicularLinesLeg = (
  */
 export const getSectionFromPoints = (
   points: Vector3D[],
+  targetSection: Section,
   size = 128
 ): Section => {
   const threshold0 = 10 ** -5;
@@ -553,25 +554,28 @@ export const getSectionFromPoints = (
     xAxis = leg(startingPoint);
   }
   xAxis.sub(origin);
-  const oVector = new Vector3()
-    .subVectors(origin, average)
-    .setLength(size * 2 ** 0.5);
+  // xAxis.setLength(size * 2);
+  xAxis.setLength(new Vector3().fromArray(targetSection.xAxis).length());
 
-  origin = new Vector3().addVectors(average, oVector);
-  xAxis.setLength(size * 2);
   if (
     new Vector3().subVectors(origin, xAxis).sub(average).lengthSq() <
     new Vector3().addVectors(origin, xAxis).sub(average).lengthSq()
   ) {
     xAxis.negate();
   }
-  const yAxis = new Vector3().crossVectors(xAxis, n).setLength(size * 2);
+  // const yAxis = new Vector3().crossVectors(xAxis, n).setLength(size * 2);
+  const yAxis = new Vector3()
+    .crossVectors(xAxis, n)
+    .setLength(new Vector3().fromArray(targetSection.yAxis).length());
   if (
     new Vector3().subVectors(origin, yAxis).sub(average).lengthSq() <
     new Vector3().addVectors(origin, yAxis).sub(average).lengthSq()
   ) {
     yAxis.negate();
   }
+  origin = new Vector3()
+    .subVectors(average, xAxis.clone().divideScalar(2))
+    .sub(yAxis.clone().divideScalar(2));
   return {
     origin: origin.toArray(),
     xAxis: xAxis.toArray(),

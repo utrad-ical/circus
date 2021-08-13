@@ -274,27 +274,34 @@ const LabelMenu: React.FC<{
         editingData.revision.series[activeSeriesIndex].labels.filter(label => {
           return label.type === 'point';
         }) as InternalLabelOf<'point'>[],
-        editingData.revision.series[activeSeriesIndex].labels[activeSeriesIndex]
-          .name!
+        activeLabel!.name!
       );
       if (typeof points === 'string') {
-        throw new Error(points);
+        alert(points);
+        return;
       }
-      const section = getSectionFromPoints(points);
-      let targetKey = '';
-      updateEditingData(d => {
-        const [layoutItems, layout, key] = c.addNewCellItem(
-          editingData.layoutItems,
-          editingData.layout,
-          'oblique',
-          activeSeriesIndex,
-          section
+      try {
+        const section = getSectionFromPoints(
+          points,
+          viewers[editingData.activeLayoutKey!].getState().section
         );
-        targetKey = key;
-        d.layoutItems = layoutItems;
-        d.layout = layout;
-        d.activeLayoutKey = key;
-      });
+        let targetKey = '';
+        updateEditingData(d => {
+          const [layoutItems, layout, key] = c.addNewCellItem(
+            editingData.layoutItems,
+            editingData.layout,
+            'oblique',
+            activeSeriesIndex,
+            section
+          );
+          targetKey = key;
+          d.layoutItems = layoutItems;
+          d.layout = layout;
+          d.activeLayoutKey = key;
+        });
+      } catch (err) {
+        alert(err.message);
+      }
     }
   };
 

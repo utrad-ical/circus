@@ -520,9 +520,10 @@ const perpendicularLinesLeg = (
  */
 export const getSectionFromPoints = (
   points: Vector3D[],
-  targetSection: Section,
-  size = 128
+  targetXAxis: number[],
+  targetYAxis: number[]
 ): Section => {
+  const size = 1024;
   const threshold0 = 10 ** -5;
   const average = new Vector3(0, 0, 0);
   for (const point of points) {
@@ -544,18 +545,18 @@ export const getSectionFromPoints = (
   const startingPoint = [0, 0, 0];
   let origin = leg(startingPoint);
   if (new Vector3().subVectors(origin, average).lengthSq() < threshold0) {
-    startingPoint[1] = startingPoint[1] + size * 4;
+    startingPoint[1] = startingPoint[1] + size;
     origin = leg(startingPoint);
   }
-  startingPoint[0] = startingPoint[0] + size * 4;
+  startingPoint[0] = startingPoint[0] + size;
   let xAxis = leg(startingPoint);
   if (new Vector3().subVectors(origin, xAxis).lengthSq() < threshold0) {
-    startingPoint[1] = startingPoint[1] + size * 4;
+    startingPoint[1] = startingPoint[1] + size;
     xAxis = leg(startingPoint);
   }
   xAxis.sub(origin);
   // xAxis.setLength(size * 2);
-  xAxis.setLength(new Vector3().fromArray(targetSection.xAxis).length());
+  xAxis.setLength(new Vector3().fromArray(targetXAxis).length());
 
   if (
     new Vector3().subVectors(origin, xAxis).sub(average).lengthSq() <
@@ -566,7 +567,7 @@ export const getSectionFromPoints = (
   // const yAxis = new Vector3().crossVectors(xAxis, n).setLength(size * 2);
   const yAxis = new Vector3()
     .crossVectors(xAxis, n)
-    .setLength(new Vector3().fromArray(targetSection.yAxis).length());
+    .setLength(new Vector3().fromArray(targetYAxis).length());
   if (
     new Vector3().subVectors(origin, yAxis).sub(average).lengthSq() <
     new Vector3().addVectors(origin, yAxis).sub(average).lengthSq()

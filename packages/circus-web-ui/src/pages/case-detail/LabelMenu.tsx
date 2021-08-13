@@ -281,11 +281,22 @@ const LabelMenu: React.FC<{
         return;
       }
       try {
+        const targetSection = viewers[editingData.activeLayoutKey!].getState()
+          .section;
+        const [col, row] = [
+          editingData.layout.columns,
+          editingData.layout.rows
+        ];
+        const headerHeight = 28;
         const section = getSectionFromPoints(
           points,
-          viewers[editingData.activeLayoutKey!].getState().section
+          targetSection.xAxis,
+          editingData.layoutItems.length === col * row
+            ? targetSection.yAxis.map(n => {
+                return (n * col - headerHeight) / (col + 1);
+              })
+            : targetSection.yAxis
         );
-        let targetKey = '';
         updateEditingData(d => {
           const [layoutItems, layout, key] = c.addNewCellItem(
             editingData.layoutItems,
@@ -294,7 +305,6 @@ const LabelMenu: React.FC<{
             activeSeriesIndex,
             section
           );
-          targetKey = key;
           d.layoutItems = layoutItems;
           d.layout = layout;
           d.activeLayoutKey = key;

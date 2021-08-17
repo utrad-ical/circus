@@ -48,6 +48,7 @@ import isTouchDevice from 'utils/isTouchDevice';
 import useToolbar from 'pages/case-detail/useToolbar';
 import Series from 'types/Series';
 import ModifierKeyBehaviors from '@utrad-ical/circus-rs/src/browser/annotation/ModifierKeyBehaviors';
+import ModifierPlaneFigureOption from '@utrad-ical/circus-rs/src/browser/annotation/ModifierPlaneFigureOption';
 
 const useCompositions = (
   series: {
@@ -136,10 +137,27 @@ const RevisionEditor: React.FC<{
     lockMaintainAspectRatio: false,
     lockFixCenterOfGravity: false
   });
+
+  const [
+    modifierPlaneFigureOption,
+    setModifierPlaneFigureOption
+  ] = useLocalPreference<ModifierPlaneFigureOption>(
+    'dbModifierPlaneFigureOption',
+    {
+      zDimmedThreshold: 3
+    }
+  );
+
   const handleChangeModifierKeyBehaviors = (
     shapeResizeOptions: ModifierKeyBehaviors
   ) => {
     setModifierKeyBehaviors(shapeResizeOptions);
+  };
+
+  const handleChangeModifierPlaneFigureOption = (
+    planeFigureOption: ModifierPlaneFigureOption
+  ) => {
+    setModifierPlaneFigureOption(planeFigureOption);
   };
 
   // Keeps track of stable seriesUid-PVD pairs to avoid frequent comp changes
@@ -402,6 +420,9 @@ const RevisionEditor: React.FC<{
           antn.lockFixCenterOfGravity =
             modifierKeyBehaviors.lockFixCenterOfGravity;
         }
+        if (antn instanceof rs.PlaneFigure) {
+          antn.zDimmedThreshold = modifierPlaneFigureOption.zDimmedThreshold;
+        }
       });
 
       composition.annotationUpdated();
@@ -417,6 +438,7 @@ const RevisionEditor: React.FC<{
     viewOptions.showReferenceLine,
     viewOptions.scrollbar,
     modifierKeyBehaviors,
+    modifierPlaneFigureOption,
     touchDevice,
     viewers
   ]);
@@ -672,6 +694,10 @@ const RevisionEditor: React.FC<{
           onChangeViewOptions={setViewOptions}
           modifierKeyBehaviors={modifierKeyBehaviors}
           onChangeModifierKeyBehaviors={handleChangeModifierKeyBehaviors}
+          modifierPlaneFigureOption={modifierPlaneFigureOption}
+          onChangeModifierPlaneFigureOption={
+            handleChangeModifierPlaneFigureOption
+          }
           onChangeLayoutKind={handleChangeLayoutKind}
           wandEnabled={activeVolumeLoaded}
           windowPresets={projectData.windowPresets}

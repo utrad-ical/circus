@@ -1,4 +1,4 @@
-import { Vector3, Matrix4, Quaternion, Euler } from 'three';
+import { Vector3, Matrix4, Quaternion } from 'three';
 import { TransferFunction, InterpolationMode } from '../../ViewState';
 import ShaderProgram, { AttribBufferer, SetUniform, VertexElementBufferer } from './ShaderProgram';
 import { LabelData } from '../volume-loader/interface';
@@ -8,9 +8,7 @@ import loadVolumeIntoTexture from '../volume-rendering-image-source/texture-load
 import loadTransferFunctionIntoTexture from '../volume-rendering-image-source/texture-loader/loadTransferFunctionIntoTexture';
 import { TextureLayout } from '../volume-rendering-image-source/texture-loader/interface';
 import DicomVolume from 'common/DicomVolume';
-import { Camera, createCamera, createModelViewMatrix, createPojectionMatrix, tooSmallToZero } from './webgl-util';
-import { mat4, quat, vec3 } from 'gl-matrix';
-import runExample from './runExample';
+import { Camera, createCamera, createModelViewMatrix, createPojectionMatrix, runAnimation, tooSmallToZero } from './webgl-util';
 
 // WebGL shader source (GLSL)
 const vertexShaderSource = require('./glsl/vr-volume.vert');
@@ -436,28 +434,16 @@ export default class VRGLProgram extends ShaderProgram {
 
   public debugRun() {
     const gl = this.gl;
-    // runExample(gl.canvas as HTMLCanvasElement); return;
 
-    // Enable attribute pointers
-    gl.enableVertexAttribArray(this.getAttribLocation('aVertexPosition'));
-    gl.enableVertexAttribArray(this.getAttribLocation('aVertexColor'));
+    // [debug#0]
+    // runExample(gl.canvas as HTMLCanvasElement);
+    // return new Promise<void>(()=>{});
 
-    const draw = () => {
-      // Model/View/Projection
-      const projectionMatrix = new Matrix4().fromArray(
-        createPojectionMatrix(this.camera)
-      );
-      const modelViewMatrix = new Matrix4().fromArray(
-        createModelViewMatrix(this.camera, this.mmInNdc)
-      );
-      const mvpMatrix = projectionMatrix.multiply(modelViewMatrix);
-      this.uMVPMatrix(mvpMatrix.toArray());
-      // this.uProjectionMatrix(projectionMatrix.toArray());
-      // this.uModelViewMatrix(modelViewMatrix.toArray());
+    // [debug#1]
+    // this.run();
+    // return new Promise<void>(()=>{});
 
-      // Draw vertices
-      gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
-    };
+    // [debug#2]
 
     //
     // 調査用
@@ -491,7 +477,7 @@ export default class VRGLProgram extends ShaderProgram {
 
     })();
 
-    this.camera = initialCamera;
+    // this.camera = initialCamera;
 
     // カメラ操作
     const translateCamera = (camera: Camera, dx: number, dy: number, dz: number): Camera => ({
@@ -538,38 +524,25 @@ export default class VRGLProgram extends ShaderProgram {
       return cameraQuat(camera, q);
     }
 
-    const drawScene = (deltaTime: number) => {
-      const zAxis = new Vector3(0, 0, 1).normalize();
+    const drawScene = (deltaTime: number, totalTime: number) => {
+      // const zAxis = new Vector3(0, 0, 1).normalize();
       // this.camera = rotateCameraAround(this.camera, zAxis, deltaTime * 10);
-      this.camera = rotateCameraAround(this.camera, zAxis, deltaTime * 0.006 * 3);
-      draw();
+      // this.camera = rotateCameraAround(this.camera, zAxis, deltaTime * 0.006 * 3);
+      // this.camera.position.x += 3;
+      // this.camera.target.x += 3;
+      const dx = Math.cos(totalTime * 0.001);
+      const dy = Math.sin(totalTime * 0.001);
+      this.camera.position.x += dx;
+      this.camera.position.y += dy;
+      this.camera.target.x += dx;
+      this.camera.target.y += dy;
+      this.run();
     };
 
     // Draw the scene repeatedly
-    let tillMicroSeconds = 5000;
-    let start: number = 0;
-    let end: number = 0;
-    let then = 0;
-    let drawTimes = 0;
-    function render(now: number) {
-      if (!end){
-        start = now;
-        end = now + tillMicroSeconds;
-      }
-      if (end < now) {
-        console.log((drawTimes / (tillMicroSeconds * 0.001)).toFixed(2) + ' [fps]');
-        return;
-      }
+    runAnimation(drawScene, 30000);
 
-      const deltaTime = now - then;
-      then = now;
-
-      drawScene(deltaTime);
-      ++drawTimes;
-
-      requestAnimationFrame(render);
-    }
-    requestAnimationFrame(render);
+    return new Promise<void>(() => { });
   }
 }
 

@@ -1,4 +1,3 @@
-import { Vector3, Vector2 } from 'three';
 import Viewer from '../viewer/Viewer';
 import ViewState, { VrViewState, TransferFunction } from '../ViewState';
 import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
@@ -8,10 +7,8 @@ import { LabelLoader } from './volume-loader/interface';
 import { windowToTransferFunction } from './volume-rendering-image-source/transfer-function-util';
 import MprImageSource from './MprImageSource';
 import { createOrthogonalMprSection } from '../section-util';
-import { Camera, createCameraToLookDownXYPlane, createCameraToLookSection, getWebGLContext, resolveImageData, runAnimation } from './gl/webgl-util';
+import { createCameraToLookSection, getWebGLContext, resolveImageData } from './gl/webgl-util';
 import DicomVolume from 'common/DicomVolume';
-import VolumeCuboidProgram from './gl/VolumeCuboidProgram';
-import runExample from './gl/runExample';
 
 interface VolumeRenderingImageSourceOptions {
   volumeLoader: DicomVolumeLoader;
@@ -154,35 +151,10 @@ export default class VolumeRenderingImageSource extends MprImageSource {
    * @returns {Promise<ImageData>}
    */
 
-  public async debugDraw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
-    this.updateViewportSize(viewer.getResolution());
-
-    // runExample(this.glContext.canvas as HTMLCanvasElement);
-    // await new Promise<void>(() => { });
-
-    const pg = new VolumeCuboidProgram(this.glContext);
-    pg.setVolumeCuboid();
-
-    let total = 0;
-    runAnimation(
-      (deltaTime) => {
-        total += deltaTime;
-        pg.run(total * 0.001);
-      },
-      30
-    );
-
-    await new Promise<void>(() => { });
-    alert('Nerver here');
-
-    return emptyImageData;
-  }
-
   public async draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
     if (viewState.type !== 'vr')
       throw new Error('Unsupported view state.');
-    
-    // await this.debugDraw(viewer, viewState);
+
     this.glContext.clearColor(...this.background);
     this.glContext.clearDepth(1.0);
 
@@ -193,7 +165,7 @@ export default class VolumeRenderingImageSource extends MprImageSource {
     this.glContext.enable(this.glContext.DEPTH_TEST);
 
     // Camera
-    const camera = createCameraToLookSection( // createCameraToLookDownXYPlane
+    const camera = createCameraToLookSection( // createCameraToLookDownXYPlane(
       viewState.section,
       this.metadata!.voxelCount,
       this.metadata!.voxelSize
@@ -283,61 +255,6 @@ export default class VolumeRenderingImageSource extends MprImageSource {
 
     this.vrProgram.run();
 
-    // return emptyImageData;
     return resolveImageData(this.glContext);
   }
 }
-
-// function createCamera(section: Section, subVolume: SubVolume): Camera {
-//   const { origin, xAxis, yAxis } = vectorizeSection(section);
-//   const offset = new Vector3().fromArray(subVolume.offset);
-//   const dim = new Vector3().fromArray(subVolume.dimension);
-
-//   // The camera target is The center of the section.
-//   const target = origin
-//     .clone()
-//     .addScaledVector(xAxis, 0.5)
-//     .addScaledVector(yAxis, 0.5);
-
-//   // Ensure the camera position is outside the (sub)volume.
-//   // And the position is preferably close to the volume to reduce the cost in the fragment shader.
-//   const distancesToEachVertex = [
-//     offset,
-//     new Vector3().addVectors(offset, new Vector3(dim.x, 0, 0)),
-//     new Vector3().addVectors(offset, new Vector3(0, dim.y, 0)),
-//     new Vector3().addVectors(offset, new Vector3(0, 0, dim.z)),
-//     new Vector3().addVectors(offset, new Vector3(dim.x, dim.y, 0)),
-//     new Vector3().addVectors(offset, new Vector3(0, dim.y, dim.z)),
-//     new Vector3().addVectors(offset, new Vector3(dim.x, 0, dim.z)),
-//     new Vector3().addVectors(offset, dim)
-//   ].map(v => v.distanceTo(target));
-
-//   // const farEnough = Math.max(...distancesToEachVertex);
-//   const farEnough = distancesToEachVertex.reduce(
-//     (dist, d) => (dist < d ? d : dist),
-//     0
-//   );
-
-//   const eyeLine = new Vector3()
-//     .crossVectors(xAxis, yAxis)
-//     .normalize()
-//     .multiplyScalar(farEnough);
-
-//   const position = new Vector3().addVectors(target, eyeLine);
-
-//   const up = yAxis.clone().normalize();
-
-//   // Determine camera zoom from viewport diagonal length
-//   const [mmOrigX, mmOrigY] = this.mmDim();
-//   const origDiagonalLength = new Vector2(mmOrigX, mmOrigY).length();
-//   const currentDiagonalLength = new Vector3()
-//     .addVectors(xAxis, yAxis)
-//     .length();
-
-//   const zoom = origDiagonalLength / currentDiagonalLength;
-
-//   // Return the camera which is adjusted the coordinate system to gl coodinate system.
-//   return { position, target, up, zoom };
-// }
-
-const emptyImageData = new ImageData(1, 1);

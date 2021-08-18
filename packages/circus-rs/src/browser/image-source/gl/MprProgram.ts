@@ -30,7 +30,8 @@ export default class MprProgram extends ShaderProgram {
   private uVoxelSizeInverse: SetUniform['uniform3fv'];
   private uBackground: SetUniform['uniform4fv'];
   private uInterpolationMode: SetUniform['uniform1i'];
-  private uMVPMatrix: SetUniform['uniformMatrix4fv'];
+  private uProjectionMatrix: SetUniform['uniformMatrix4fv'];
+  private uModelViewMatrix: SetUniform['uniformMatrix4fv'];
   private uDebugFlag: SetUniform['uniform1i'];
 
   private aVertexPositionBuffer: AttribBufferer;
@@ -57,7 +58,8 @@ export default class MprProgram extends ShaderProgram {
     this.uVoxelSizeInverse = this.uniform3fv('uVoxelSizeInverse');
     this.uBackground = this.uniform4fv('uBackground');
     this.uInterpolationMode = this.uniform1i('uInterpolationMode');
-    this.uMVPMatrix = this.uniformMatrix4fv('uMVPMatrix', false);
+    this.uProjectionMatrix = this.uniformMatrix4fv('uProjectionMatrix', false);
+    this.uModelViewMatrix = this.uniformMatrix4fv('uModelViewMatrix', false);
     this.uWindowWidth = this.uniform1f('uWindowWidth');
     this.uWindowLevel = this.uniform1f('uWindowLevel');
     this.uDebugFlag = this.uniform1i('uDebugFlag');
@@ -208,15 +210,16 @@ export default class MprProgram extends ShaderProgram {
       gl.bindTexture(gl.TEXTURE_2D, this.transferFunctionTexture);
     }
 
-    // Model/View/Projection
+    // Projection(Model/View)
     const projectionMatrix = new Matrix4().fromArray(
       createPojectionMatrix(this.camera)
     );
+    this.uProjectionMatrix(projectionMatrix.toArray());
+
     const modelViewMatrix = new Matrix4().fromArray(
       createModelViewMatrix(this.camera, this.mmInNdc)
     );
-    const mvpMatrix = projectionMatrix.multiply(modelViewMatrix);
-    this.uMVPMatrix(mvpMatrix.toArray());
+    this.uModelViewMatrix(modelViewMatrix.toArray());
 
     // Enable attribute pointers
     gl.enableVertexAttribArray(this.getAttribLocation('aVertexPosition'));

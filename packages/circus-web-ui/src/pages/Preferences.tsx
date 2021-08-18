@@ -44,7 +44,7 @@ const PresetDeleteEditor: et.Editor<SearchPreset[] | undefined> = props => {
   );
 };
 
-const properties: PropertyEditorProperties<UserPreferences> = [
+const appearanceProperties: PropertyEditorProperties<UserPreferences> = [
   {
     key: 'theme',
     caption: 'Color Theme',
@@ -57,7 +57,10 @@ const properties: PropertyEditorProperties<UserPreferences> = [
     key: 'personalInfoView',
     caption: 'Show Personal Info',
     editor: et.checkbox({ label: 'show' }) as et.Editor<boolean | undefined>
-  },
+  }
+];
+
+const searchProperties: PropertyEditorProperties<UserPreferences> = [
   {
     key: 'caseSearchPresets',
     caption: 'Case Search Presets',
@@ -75,12 +78,51 @@ const properties: PropertyEditorProperties<UserPreferences> = [
   }
 ];
 
+const viewerProperties: PropertyEditorProperties<UserPreferences> = [
+  {
+    key: 'referenceLine',
+    caption: 'Reference Line',
+    editor: et.checkbox({ label: 'show' }) as et.Editor<boolean | undefined>
+  },
+  {
+    key: 'interpolationMode',
+    caption: 'Interpolation Mode',
+    editor: et.shrinkSelect({
+      none: 'None',
+      trilinearFiltering: 'Trilinear filtering'
+    }) as et.Editor<string | undefined>
+  },
+  {
+    key: 'maintainAspectRatio',
+    caption: 'Shift + Drag to maintain aspect ratio',
+    editor: et.checkbox({
+      label: 'lock'
+    }) as et.Editor<boolean | undefined>
+  },
+  {
+    key: 'fixCenterOfGravity',
+    caption: 'Ctrl + Drag to fix center of gravity',
+    editor: et.checkbox({
+      label: 'lock'
+    }) as et.Editor<boolean | undefined>
+  },
+  {
+    key: 'sliceNumberFor2DShape',
+    caption: 'Number of Slices for 2D Shape',
+    editor: et.shrinkSelect({
+      '0': 'None',
+      '3': '± 2',
+      Infinity: '∞'
+    }) as et.Editor<string | undefined>
+  }
+];
+
 const Preferences: React.FC<{}> = props => {
   const api = useApi();
   const showMessage = useShowMessage();
   const [preferences, updatePreferences] = useUserPreferences();
   const [settings, setSettings] = useState<UserPreferences | null>(preferences);
-
+  console.log(settings);
   const loadSettings = useCallback(async () => {
     const settings = await api('preferences');
     setSettings(settings);
@@ -103,9 +145,22 @@ const Preferences: React.FC<{}> = props => {
       <h1>
         <Icon icon="circus-preference" /> Preferences
       </h1>
+      <h2>Appearance</h2>
       <PropertyEditor
         value={settings}
-        properties={properties}
+        properties={appearanceProperties}
+        onChange={setSettings}
+      />
+      <h2>Search</h2>
+      <PropertyEditor
+        value={settings}
+        properties={searchProperties}
+        onChange={setSettings}
+      />
+      <h2>DICOM viewer</h2>
+      <PropertyEditor
+        value={settings}
+        properties={viewerProperties}
         onChange={setSettings}
       />
       <p className="text-center">

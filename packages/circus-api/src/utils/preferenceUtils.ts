@@ -4,6 +4,11 @@ export const defaultPreferences = () => {
     personalInfoView: false,
     caseSearchPresets: [],
     seriesSearchPresets: [],
-    pluginJobSearchPresets: []
+    pluginJobSearchPresets: [],
+    referenceLine: true,
+    interpolationMode: 'None',
+    maintainAspectRatio: true,
+    fixCenterOfGravity: true,
+    sliceNumberFor2DShape: '3'
   };
 };

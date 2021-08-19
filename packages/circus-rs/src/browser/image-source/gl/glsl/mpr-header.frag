@@ -35,6 +35,11 @@ boundary volumeBoundary = boundary(
   uVolumeOffset + uVolumeDimension
 );
 
+boundary indicesBoundary = boundary(
+  uVolumeOffset,
+  uVolumeOffset + uVolumeDimension - vec3(1.0, 1.0, 1.0)
+);
+
 bool outsideOfVolume(vec3 point)
 {
   return point.x < volumeBoundary.start.x || volumeBoundary.end.x < point.x

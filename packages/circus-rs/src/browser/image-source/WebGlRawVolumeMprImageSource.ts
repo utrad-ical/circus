@@ -13,7 +13,7 @@ interface WebGlRawVolumeMprImageSourceOptions {
 type RGBA = [number, number, number, number];
 
 /**
- * For debug
+ * For debugging
  */
 const debugMode = 0;
 type CaptureCanvasCallback = (canvas: HTMLCanvasElement) => void;
@@ -29,7 +29,7 @@ export default class WebGlRawVolumeMprImageSource extends MprImageSource
 
   private background: RGBA = [0.0, 0.0, 0.0, 0.0];
 
-  // For debug
+  // For debugging
   public static captureCanvasCallbacks: CaptureCanvasCallback[] = [];
   public static captureCanvasElement(captureCanvasCallback: CaptureCanvasCallback) {
     WebGlRawVolumeMprImageSource.captureCanvasCallbacks.push(captureCanvasCallback);
@@ -48,7 +48,7 @@ export default class WebGlRawVolumeMprImageSource extends MprImageSource
     this.glContext = glContext;
     this.mprProgram = mprProgram;
 
-    // For debug
+    // For debugging
     WebGlRawVolumeMprImageSource.captureCanvasCallbacks.forEach(handler => handler(backCanvas));
 
     this.loadSequence = (async () => {

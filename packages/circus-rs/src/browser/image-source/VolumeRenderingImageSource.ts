@@ -23,7 +23,7 @@ interface VolumeLoader {
 type RGBA = [number, number, number, number];
 
 /**
- * For debug
+ * For debugging
  */
 const debugMode = 0;
 type CaptureCanvasCallback = (canvas: HTMLCanvasElement) => void;
@@ -43,7 +43,7 @@ export default class VolumeRenderingImageSource extends MprImageSource {
   private lastTransferFunction?: TransferFunction;
   private background: RGBA = [0.0, 0.0, 0.0, 0.0];
 
-  // For debug
+  // For debugging
   public static captureCanvasCallbacks: CaptureCanvasCallback[] = [];
   public static captureCanvasElement(captureCanvasCallback: CaptureCanvasCallback) {
     VolumeRenderingImageSource.captureCanvasCallbacks.push(captureCanvasCallback);
@@ -61,7 +61,7 @@ export default class VolumeRenderingImageSource extends MprImageSource {
     this.vrProgram = vrProgram;
     this.vrProgram.activate();
 
-    // For debug
+    // For debugging
     VolumeRenderingImageSource.captureCanvasCallbacks.forEach(handler => handler(backCanvas));
 
     this.loadSequence = (async () => {

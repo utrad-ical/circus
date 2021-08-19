@@ -25,24 +25,11 @@ uniform int uDebugFlag;
 uniform float uWindowWidth;
 uniform float uWindowLevel;
 
-struct boundary {
-  vec3 start;
-  vec3 end;
-};
-
-boundary volumeBoundary = boundary(
-  uVolumeOffset,
-  uVolumeOffset + uVolumeDimension
-);
-
-boundary indicesBoundary = boundary(
-  uVolumeOffset,
-  uVolumeOffset + uVolumeDimension - vec3(1.0, 1.0, 1.0)
-);
+vec3 indicesBoundary = uVolumeDimension - vec3(1.0, 1.0, 1.0);
 
 bool outsideOfVolume(vec3 point)
 {
-  return point.x < volumeBoundary.start.x || volumeBoundary.end.x < point.x
-      || point.y < volumeBoundary.start.y || volumeBoundary.end.y < point.y
-      || point.z < volumeBoundary.start.z || volumeBoundary.end.z < point.z;
+  return point.x < 0.0 || uVolumeDimension.x < point.x
+      || point.y < 0.0 || uVolumeDimension.y < point.y
+      || point.z < 0.0 || uVolumeDimension.z < point.z;
 }

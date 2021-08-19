@@ -42,21 +42,21 @@ float getInterpolatedVoxelValueAt(vec3 p) {
   if(i.x < 0.0) {
     i.x = 0.0;
     d.x = 0.0;
-  } else if (indicesBoundary.end.x <= i.x) {
+  } else if (indicesBoundary.x <= i.x) {
     d.x = 0.0;
   }
 
   if(i.y < 0.0) {
     i.y = 0.0;
     d.y = 0.0;
-  } else if (indicesBoundary.end.y <= i.y) {
+  } else if (indicesBoundary.y <= i.y) {
     d.y = 0.0;
   }
 
   if(i.z < 0.0) {
     i.z = 0.0;
     d.z = 0.0;
-  } else if (indicesBoundary.end.z <= i.z) {
+  } else if (indicesBoundary.z <= i.z) {
     d.z = 0.0;
   }
 

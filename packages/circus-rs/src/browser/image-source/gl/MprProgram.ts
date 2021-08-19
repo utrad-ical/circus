@@ -25,7 +25,6 @@ export default class MprProgram extends ShaderProgram {
    */
   private mmInNdc: number = 0.002;
 
-  private uVolumeOffset: SetUniform['uniform3fv'];
   private uVolumeDimension: SetUniform['uniform3fv'];
   private uVoxelSizeInverse: SetUniform['uniform3fv'];
   private uBackground: SetUniform['uniform4fv'];
@@ -53,7 +52,6 @@ export default class MprProgram extends ShaderProgram {
     super(gl, vertexShaderSource, fragmentShaderSource);
 
     // Uniforms
-    this.uVolumeOffset = this.uniform3fv('uVolumeOffset');
     this.uVolumeDimension = this.uniform3fv('uVolumeDimension');
     this.uVoxelSizeInverse = this.uniform3fv('uVoxelSizeInverse');
     this.uBackground = this.uniform4fv('uBackground');
@@ -88,25 +86,21 @@ export default class MprProgram extends ShaderProgram {
 
     const voxelSize = volume.getVoxelSize();
     const dimension = volume.getDimension();
-    const offset = [0, 0, 0];
 
     this.uVoxelSizeInverse([
       1.0 / voxelSize[0],
       1.0 / voxelSize[1],
       1.0 / voxelSize[2]
     ]);
-    this.uVolumeOffset(offset);
     this.uVolumeDimension(dimension);
 
     if (!this.volumeTexture) {
-      console.time('loadVolumeIntoTexture');
       this.volumeTexture = this.createTexture();
       this.volumeTextureLayout = loadVolumeIntoTexture(
         this.gl,
         this.volumeTexture,
         volume
       );
-      console.timeEnd('loadVolumeIntoTexture');
     }
 
     const { textureSize, sliceGridSize } = this.volumeTextureLayout!;

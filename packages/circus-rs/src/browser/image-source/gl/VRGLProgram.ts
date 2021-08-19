@@ -1,14 +1,14 @@
-import { Vector3, Matrix4, Quaternion } from 'three';
+import { Vector3, Matrix4 } from 'three';
 import { TransferFunction, InterpolationMode } from '../../ViewState';
 import ShaderProgram, { AttribBufferer, SetUniform, VertexElementBufferer } from './ShaderProgram';
 import { LabelData } from '../volume-loader/interface';
-import loadLabelIntoTexture from '../volume-rendering-image-source/texture-loader/loadLabelIntoTexture';
+import loadLabelIntoTexture from './texture/loadLabelIntoTexture';
 import RawData from '../../../common/RawData';
-import loadVolumeIntoTexture from '../volume-rendering-image-source/texture-loader/loadVolumeIntoTexture';
-import loadTransferFunctionIntoTexture from '../volume-rendering-image-source/texture-loader/loadTransferFunctionIntoTexture';
-import { TextureLayout } from '../volume-rendering-image-source/texture-loader/interface';
+import loadVolumeIntoTexture from './texture/loadVolumeIntoTexture';
+import loadTransferFunctionIntoTexture from './texture/loadTransferFunctionIntoTexture';
+import { TextureLayout } from './texture/interface';
 import DicomVolume from 'common/DicomVolume';
-import { Camera, createCamera, createModelViewMatrix, createPojectionMatrix, runAnimation, tooSmallToZero } from './webgl-util';
+import { Camera, createCamera, createModelViewMatrix, createPojectionMatrix } from './webgl-util';
 
 // WebGL shader source (GLSL)
 const vertexShaderSource = require('./glsl/vr-volume.vert');
@@ -428,124 +428,4 @@ export default class VRGLProgram extends ShaderProgram {
     // Draw vertices
     gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
   }
-
-  public debugRun() {
-    const gl = this.gl;
-
-    // [debug#0]
-    // runExample(gl.canvas as HTMLCanvasElement);
-    // return new Promise<void>(()=>{});
-
-    // [debug#1]
-    // this.run();
-    // return new Promise<void>(()=>{});
-
-    // [debug#2]
-
-    //
-    // 調査用
-    //
-
-    // 初期カメラ
-    const initialCamera = (() => {
-      const metadata = { "voxelCount": [512, 512, 132], "voxelSize": [0.468748, 0.46875, 0.6], "dicomWindow": { "level": 329, "width": 658 }, "pixelFormat": "int16" };
-      // let c = createCamera([0,0,0], [0.5 * w, cos(150) * w, sin(150) * w], 0.5, [0, 0, 1]);
-      const centerOfTheVolume = [
-        metadata.voxelCount[0] * metadata.voxelSize[0] / 2,
-        metadata.voxelCount[1] * metadata.voxelSize[1] / 2,
-        metadata.voxelCount[2] * metadata.voxelSize[2] / 2,
-      ];
-      // const upperOfTheCenter = [
-      //   centerOfTheVolume[0],
-      //   centerOfTheVolume[1],
-      //   centerOfTheVolume[2] + metadata.voxelCount[2] * metadata.voxelSize[2]
-      // ];
-      const pos = [
-        centerOfTheVolume[0] - 80,
-        centerOfTheVolume[1] + 80,
-        centerOfTheVolume[2] + (metadata.voxelCount[2] * metadata.voxelSize[2] * 3)
-      ];
-      return createCamera(centerOfTheVolume, pos, 0.5, [0, 0, 1]);
-
-      // const cos = (deg: number) => Math.cos(deg * Math.PI / 180);
-      // const sin = (deg: number) => Math.sin(deg * Math.PI / 180);
-      // const w = 512;
-      // const cam30 = createCamera([0, 0, 0], [0.5 * w, cos(150) * w, sin(150) * w], 0.5, [0, 0, 1]);
-
-    })();
-
-    // this.camera = initialCamera;
-
-    // カメラ操作
-    const translateCamera = (camera: Camera, dx: number, dy: number, dz: number): Camera => ({
-      target: new Vector3().addVectors(camera.target, new Vector3(dx, dy, dz)),
-      position: new Vector3().addVectors(camera.position, new Vector3(dx, dy, dz)),
-      up: camera.up.clone(),
-      zoom: camera.zoom
-    });
-
-    // 回転
-    const cameraQuat = (camera: Camera, quat: Quaternion): Camera => {
-      const targetToPosition = new Vector3().subVectors(camera.position, camera.target);
-
-      const distToTarget = targetToPosition.length();
-      const position = targetToPosition.normalize().applyQuaternion(quat)
-        .multiplyScalar(distToTarget)
-        .add(camera.target);
-      tooSmallToZero(position);
-
-      const up = camera.up.clone().normalize().applyQuaternion(quat);
-      tooSmallToZero(up);
-
-      return {
-        target: camera.target.clone(),
-        position,
-        up,
-        zoom: camera.zoom
-      }
-    };
-
-    const rotateCameraAround = (camera: Camera, axis: Vector3, deg: number): Camera => {
-      const quat = new Quaternion();
-      quat.setFromAxisAngle(axis, deg * Math.PI / 180);
-
-      return cameraQuat(camera, quat);
-    };
-
-    const rotateCameraHV = (camera: Camera, degH: number, degV: number = 0): Camera => {
-      const positionToTarget = new Vector3().subVectors(camera.target, camera.position).normalize();
-      const camUp = camera.up.clone().normalize();
-      const leftToRightAxis = new Vector3().crossVectors(positionToTarget, camUp);
-
-      const q = new Quaternion().setFromAxisAngle(leftToRightAxis, degH * Math.PI / 180);
-      return cameraQuat(camera, q);
-    }
-
-    const drawScene = (deltaTime: number, totalTime: number) => {
-      // const zAxis = new Vector3(0, 0, 1).normalize();
-      // this.camera = rotateCameraAround(this.camera, zAxis, deltaTime * 10);
-      // this.camera = rotateCameraAround(this.camera, zAxis, deltaTime * 0.006 * 3);
-      // this.camera.position.x += 3;
-      // this.camera.target.x += 3;
-      const dx = Math.cos(totalTime * 0.001);
-      const dy = Math.sin(totalTime * 0.001);
-      this.camera.position.x += dx;
-      this.camera.position.y += dy;
-      this.camera.target.x += dx;
-      this.camera.target.y += dy;
-      this.run();
-    };
-
-    // Draw the scene repeatedly
-    runAnimation(drawScene, 30000);
-
-    return new Promise<void>(() => { });
-  }
 }
-
-// [WEbGLBuffer]
-// https://developer.mozilla.org/ja/docs/Web/API/WebGLRenderingContext/bufferData
-// target: GLenum, // ARRAY_BUFFER | ELEMENT_ARRAY_BUFFER
-// usage: GLenum, // STATIC_DRAW | DYNAMIC_DRAW | STREAM_DRAW
-// type: number, // UNSIGNED_SHORT | FLOAT
-// size: number

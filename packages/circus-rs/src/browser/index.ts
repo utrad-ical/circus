@@ -75,5 +75,5 @@ export { default as moveBy } from './tool/state/handleMoveBy';
 export { default as pageBy } from './tool/state/handlePageBy';
 export { default as zoomBy } from './tool/state/handleZoomBy';
 export { default as rotateBy } from './tool/state/handleRotationBy';
-export * from './image-source/volume-rendering-image-source/transfer-function-util';
-export { default as buildTransferFunctionMap } from './image-source/volume-rendering-image-source/texture-loader/buildTransferFunctionMap';
+export * from './image-source/gl/transfer-function-util';
+export { default as buildTransferFunctionMap } from './image-source/gl/texture/buildTransferFunctionMap';

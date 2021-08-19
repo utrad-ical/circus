@@ -76,13 +76,6 @@ export default class MprProgram extends ShaderProgram {
     this.uTransferFunctionSampler = this.uniform1i('uTransferFunctionSampler');
   }
 
-  // public activate() {
-  //   super.activate();
-
-  //   // const gl = this.gl;
-  //   // gl.enable(gl.DEPTH_TEST); // There is no reason to enable the depth test.
-  // }
-
   public setMmInNdc(mmInNdc: number) {
     this.mmInNdc = mmInNdc;
   }

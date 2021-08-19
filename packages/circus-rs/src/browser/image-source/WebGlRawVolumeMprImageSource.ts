@@ -4,7 +4,7 @@ import DicomVolume from '../../common/DicomVolume';
 import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
 import MprProgram from './gl/MprProgram';
 import MprImageSource from './MprImageSource';
-import { createCameraToLookDownXYPlane, createCameraToLookSection, getWebGLContext, resolveImageData } from './gl/webgl-util';
+import { createCameraToLookSection, getWebGLContext, resolveImageData } from './gl/webgl-util';
 import MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume';
 
 interface WebGlRawVolumeMprImageSourceOptions {
@@ -16,7 +16,6 @@ type RGBA = [number, number, number, number];
  * For debug
  */
 const debugMode = 0;
-const debugCameraMode = 0;
 type CaptureCanvasCallback = (canvas: HTMLCanvasElement) => void;
 
 export default class WebGlRawVolumeMprImageSource extends MprImageSource
@@ -111,8 +110,7 @@ export default class WebGlRawVolumeMprImageSource extends MprImageSource
     this.glContext.clear(this.glContext.COLOR_BUFFER_BIT | this.glContext.DEPTH_BUFFER_BIT);
 
     // Camera
-    const cameraCreator = debugCameraMode === 1 ? createCameraToLookDownXYPlane : createCameraToLookSection;
-    const camera = cameraCreator(
+    const camera = createCameraToLookSection(
       viewState.section,
       this.metadata!.voxelCount,
       this.metadata!.voxelSize
@@ -129,15 +127,11 @@ export default class WebGlRawVolumeMprImageSource extends MprImageSource
     this.mprProgram.setViewWindow(viewState.window);
 
     this.mprProgram.setSection(viewState.section);
-    // this.mprProgram.setBackground(this.background);
-    this.mprProgram.setBackground([1, 0, 0, 0.8]);
+    this.mprProgram.setBackground(this.background);
 
     this.mprProgram.setDebugMode(debugMode);
 
     this.mprProgram.run();
-    // this.mprProgram.cleanup();
-
-    // this.glContext.flush();
 
     return resolveImageData(this.glContext);
   }

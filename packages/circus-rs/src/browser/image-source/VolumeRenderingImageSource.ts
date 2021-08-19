@@ -4,7 +4,7 @@ import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
 import VRGLProgram from './gl/VRGLProgram';
 import RawData from '../../common/RawData';
 import { LabelLoader } from './volume-loader/interface';
-import { windowToTransferFunction } from './volume-rendering-image-source/transfer-function-util';
+import { windowToTransferFunction } from './gl/transfer-function-util';
 import MprImageSource from './MprImageSource';
 import { createOrthogonalMprSection } from '../section-util';
 import { createCameraToLookSection, getWebGLContext, resolveImageData } from './gl/webgl-util';

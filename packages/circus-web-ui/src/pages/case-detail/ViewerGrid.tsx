@@ -6,6 +6,7 @@ import {
 } from '@utrad-ical/circus-rs/src/browser';
 import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
 import { toolFactory } from '@utrad-ical/circus-rs/src/browser/tool/tool-initializer';
+import { Section } from '@utrad-ical/circus-rs/src/common/geometry';
 import classnames from 'classnames';
 import GridContainer, {
   LayoutInfo,
@@ -20,7 +21,6 @@ import ImageViewer, {
   StateChanger
 } from 'components/ImageViewer';
 import { Button, DropdownButton, MenuItem } from 'components/react-bootstrap';
-import { size } from 'lodash';
 import React, {
   useCallback,
   useContext,
@@ -30,14 +30,13 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 import { EditingData, EditingDataUpdater, seriesColors } from './revisionData';
-import { Section } from '@utrad-ical/circus-rs/src/common/geometry';
 
 export interface ViewerDef {
   key: string;
   seriesIndex: number;
   orientation: 'axial' | 'sagittal' | 'coronal' | 'oblique';
   celestialRotateMode: boolean; // only applicable for oblique view
-  section?: Section;
+  initialSection?: Section;
 }
 
 interface ViewerGridContextValue {
@@ -225,7 +224,7 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
     seriesIndex,
     orientation,
     celestialRotateMode,
-    section
+    initialSection
   } = props.value;
 
   const {
@@ -242,16 +241,16 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
 
   const combinedInitialStateSetter = useCallback(
     (viewer: Viewer, viewState: MprViewState) => {
-      const s1 = section
+      const s1 = initialSection
         ? {
             ...orientationInitialStateSetters[orientation](viewer, viewState)!,
-            section: section
+            section: initialSection
           }
         : orientationInitialStateSetters[orientation](viewer, viewState);
       const s2 = initialStateSetter(viewer, s1!, key);
       return s2;
     },
-    [initialStateSetter, orientation, key, section]
+    [initialStateSetter, orientation, key, initialSection]
   );
 
   const localStateChanger = useMemo(

@@ -499,23 +499,6 @@ export function getOrthogonalProjectedPoint(section: Section, point: Vector3) {
 }
 
 /**
- * Return the coordinate of the foot of the perpendicular line.
- */
-const perpendicularLinesLeg = (
-  normalVector: Vector3,
-  pointInSection: number[]
-) => {
-  return (point: number[]) => {
-    const scale =
-      new Vector3().fromArray(point).dot(normalVector) -
-      new Vector3().fromArray(pointInSection).dot(normalVector);
-    return new Vector3()
-      .fromArray(point)
-      .sub(normalVector.clone().multiplyScalar(scale));
-  };
-};
-
-/**
  * Calculate the section passing through the three points.
  */
 export const getSectionFromPoints = (
@@ -526,6 +509,7 @@ export const getSectionFromPoints = (
   const size = 1024;
   const threshold0 = 10 ** -5;
   const average = new Vector3(0, 0, 0);
+
   for (const point of points) {
     average.add(new Vector3().fromArray(point));
   }
@@ -541,7 +525,14 @@ export const getSectionFromPoints = (
   if (n.lengthSq() < threshold0) {
     throw new Error('The three points are on the same line.');
   }
-  const leg = perpendicularLinesLeg(n, points[0]);
+
+  const leg = (point: number[]) => {
+    const scale =
+      new Vector3().fromArray(point).dot(n) -
+      new Vector3().fromArray(points[0]).dot(n);
+    return new Vector3().fromArray(point).sub(n.clone().multiplyScalar(scale));
+  };
+
   const startingPoint = [0, 0, 0];
   let origin = leg(startingPoint);
   if (new Vector3().subVectors(origin, average).lengthSq() < threshold0) {
@@ -555,7 +546,6 @@ export const getSectionFromPoints = (
     xAxis = leg(startingPoint);
   }
   xAxis.sub(origin);
-  // xAxis.setLength(size * 2);
   xAxis.setLength(new Vector3().fromArray(targetXAxis).length());
 
   if (
@@ -564,7 +554,6 @@ export const getSectionFromPoints = (
   ) {
     xAxis.negate();
   }
-  // const yAxis = new Vector3().crossVectors(xAxis, n).setLength(size * 2);
   const yAxis = new Vector3()
     .crossVectors(xAxis, n)
     .setLength(new Vector3().fromArray(targetYAxis).length());

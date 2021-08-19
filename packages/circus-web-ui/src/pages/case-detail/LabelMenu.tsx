@@ -3,10 +3,7 @@ import { alert, prompt } from '@smikitky/rb-components/lib/modal';
 import Slider from '@smikitky/rb-components/lib/Slider';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import { Viewer } from '@utrad-ical/circus-rs/src/browser';
-import {
-  getSectionFromPoints,
-  OrientationString
-} from '@utrad-ical/circus-rs/src/browser/section-util';
+import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import {
@@ -28,6 +25,7 @@ import * as c from './caseStore';
 import createCclProcessor, { CclOptions } from './createCclProcessor';
 import createCurrentLabelsUpdator from './createCurrentLabelsUpdator';
 import createHfProcessor, { HoleFillingOptions } from './createHfProcessor';
+import createSectionFromPoints from './createSectionFromPoints';
 import {
   createNewLabelData,
   InternalLabel,
@@ -41,7 +39,6 @@ import performLabelCreatingVoxelProcessing from './performLabelCreatingVoxelProc
 import { EditingData, EditingDataUpdater } from './revisionData';
 import SettingDialogCCL from './SettingDialogCCL';
 import SettingDialogHF from './SettingDialogHF';
-import validationSectionFromPoints from './validationSectionFromPoints';
 
 type LabelCommand =
   | 'rename'
@@ -269,49 +266,24 @@ const LabelMenu: React.FC<{
   };
 
   const onSelectThreePoints2Section = () => {
-    {
-      const points = validationSectionFromPoints(
+    try {
+      const [newLayoutItems, newLayout, key] = createSectionFromPoints(
         editingData.revision.series[activeSeriesIndex].labels.filter(label => {
           return label.type === 'point';
         }) as InternalLabelOf<'point'>[],
-        activeLabel!.name!
+        activeLabel!.name!,
+        viewers[editingData.activeLayoutKey!].getState().section,
+        editingData.layout,
+        editingData.layoutItems,
+        activeSeriesIndex
       );
-      if (typeof points === 'string') {
-        alert(points);
-        return;
-      }
-      try {
-        const targetSection = viewers[editingData.activeLayoutKey!].getState()
-          .section;
-        const [col, row] = [
-          editingData.layout.columns,
-          editingData.layout.rows
-        ];
-        const headerHeight = 28;
-        const section = getSectionFromPoints(
-          points,
-          targetSection.xAxis,
-          editingData.layoutItems.length === col * row
-            ? targetSection.yAxis.map(n => {
-                return (n * col - headerHeight) / (col + 1);
-              })
-            : targetSection.yAxis
-        );
-        updateEditingData(d => {
-          const [layoutItems, layout, key] = c.addNewCellItem(
-            editingData.layoutItems,
-            editingData.layout,
-            'oblique',
-            activeSeriesIndex,
-            section
-          );
-          d.layoutItems = layoutItems;
-          d.layout = layout;
-          d.activeLayoutKey = key;
-        });
-      } catch (err) {
-        alert(err.message);
-      }
+      updateEditingData(d => {
+        d.layoutItems = newLayoutItems;
+        d.layout = newLayout;
+        d.activeLayoutKey = key;
+      });
+    } catch (err) {
+      alert(err.message);
     }
   };
 

@@ -32,7 +32,7 @@ struct boundary {
 
 boundary volumeBoundary = boundary(
   uVolumeOffset,
-  uVolumeOffset + uVolumeDimension - vec3(1.0, 1.0, 1.0)
+  uVolumeOffset + uVolumeDimension
 );
 
 bool outsideOfVolume(vec3 point)

@@ -68,7 +68,7 @@ float getPixelValue(vec3 voxelCoord) {
 
   // Without interporation (Using nearest neighbor)
   else {
-    vec3 voxelIndex = floor(voxelCoord + vec3(0.5, 0.5, 0.5));
+    vec3 voxelIndex = floor(voxelCoord);
     return getVoxelValueAt(voxelIndex.x, voxelIndex.y, voxelIndex.z);
   }
 }

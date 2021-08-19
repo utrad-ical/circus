@@ -157,7 +157,7 @@ const Preferences: React.FC<{}> = props => {
         properties={searchProperties}
         onChange={setSettings}
       />
-      <h2>DICOM viewer</h2>
+      <h2>DICOM DB</h2>
       <PropertyEditor
         value={settings}
         properties={viewerProperties}

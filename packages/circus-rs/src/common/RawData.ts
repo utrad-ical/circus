@@ -169,89 +169,73 @@ export default class RawData {
       x < 0.0 ||
       y < 0.0 ||
       z < 0.0 ||
-      x >= this.size[0] ||
-      y >= this.size[1] ||
-      z >= this.virtualZSize
+      x > this.size[0] ||
+      y > this.size[1] ||
+      z > this.virtualZSize
     ) {
       return undefined;
     }
 
-    const xPixelLocation = this.getPixelLocation(x, this.size[0]);
-    const yPixelLocation = this.getPixelLocation(y, this.size[1]);
-    const zPixelLocation = this.getPixelLocation(z, this.size[2]);
-    const [pz, dz, iz0, iz1] = zPixelLocation;
+    const px = x - 0.5;
+    const py = y - 0.5;
+    const pz = z - 0.5;
 
-    // Calculate the weight of slices and determine the final value
-    const value_z0 = this.getPixelWithBilinearInterpolation(
-      xPixelLocation,
-      yPixelLocation,
-      iz0
-    );
-    const value_z1 = this.getPixelWithBilinearInterpolation(
-      xPixelLocation,
-      yPixelLocation,
-      iz1
-    );
-    return value_z0 * (1.0 - dz) + value_z1 * dz;
-  }
+    let ix = Math.floor(px);
+    let iy = Math.floor(py);
+    let iz = Math.floor(pz);
 
-  /**
-   * Do 4-neighbor pixel interpolation within a given single axial slice.
-   * @param xPixelLocation
-   * @param yPixelLocation
-   * @param iz
-   * @return n Interpolated corresponding voxel value. Returns undefined if out of bounds.
-   */
-  protected getPixelWithBilinearInterpolation(
-    xPixelLocation: [number, number, number, number],
-    yPixelLocation: [number, number, number, number],
-    iz: number
-  ): number {
-    const [px, dx, ix0, ix1] = xPixelLocation;
-    const [py, dy, iy0, iy1] = yPixelLocation;
+    const fx = px - ix;
+    const fy = py - iy;
+    const fz = pz - iz;
+
+    let dx = 1.0, dy = 1.0, dz = 1.0;
+
+    if (ix < 0) {
+      ix = 0;
+      dx = 0;
+    } else if ((this.size[0] - 1) <= ix) {
+      dx = 0;
+    }
+
+    if (iy < 0) {
+      iy = 0;
+      dy = 0;
+    } else if ((this.size[1] - 1) <= iy) {
+      dy = 0;
+    }
+
+    if (iz < 0) {
+      iz = 0;
+      dz = 0;
+    } else if ((this.size[2] - 1) <= iz) {
+      dz = 0;
+    }
 
     // p0 p1
     // p2 p3
-    const p0 = this.getPixelAt(ix0, iy0, iz);
-    const p1 = this.getPixelAt(ix1, iy0, iz);
-    const p2 = this.getPixelAt(ix0, iy1, iz);
-    const p3 = this.getPixelAt(ix1, iy1, iz);
+    const z1p0 = this.getPixelAt(ix, iy, iz);
+    const z1p1 = this.getPixelAt(ix + dx, iy, iz);
+    const z1p2 = this.getPixelAt(ix, iy + dy, iz);
+    const z1p3 = this.getPixelAt(ix + dx, iy + dy, iz);
 
-    const value =
-      (1 - dx) * (1 - dy) * p0 +
-      dx * (1 - dy) * p1 +
-      (1 - dx) * dy * p2 +
-      dx * dy * p3;
+    const z1y1 = this.mix(z1p0, z1p1, fx);
+    const z1y2 = this.mix(z1p2, z1p3, fx);
+    const z1 = this.mix(z1y1, z1y2, fy);
 
-    return value;
+    const z2p0 = this.getPixelAt(ix, iy, iz + dz);
+    const z2p1 = this.getPixelAt(ix + dx, iy, iz + dz);
+    const z2p2 = this.getPixelAt(ix, iy + dy, iz + dz);
+    const z2p3 = this.getPixelAt(ix + dx, iy + dy, iz + dz);
+
+    const z2y1 = this.mix(z2p0, z2p1, fx);
+    const z2y2 = this.mix(z2p2, z2p3, fx);
+    const z2 = this.mix(z2y1, z2y2, fy);
+
+    return this.mix(z1, z2, fz);
   }
 
-  private getPixelLocation(
-    p: number,
-    size: number
-  ): [number, number, number, number] {
-    const fp = p - Math.floor(p);
-    let dp;
-    let ip0;
-    let ip1;
-    if (p < 0.5) {
-      dp = 0.0;
-      ip0 = 0;
-      ip1 = ip0;
-    } else if (p > size - 0.5) {
-      dp = 0.0;
-      ip0 = size - 1;
-      ip1 = ip0;
-    } else if (fp < 0.5) {
-      dp = fp + 0.5;
-      ip0 = Math.floor(p) - 1;
-      ip1 = ip0 + 1;
-    } else {
-      dp = fp - 0.5;
-      ip0 = Math.floor(p);
-      ip1 = ip0 + 1;
-    }
-    return [p, dp, ip0, ip1];
+  private mix(v0: number, v1: number, a: number) {
+    return v0 * (1 - a) + v1 * a;
   }
 
   /**

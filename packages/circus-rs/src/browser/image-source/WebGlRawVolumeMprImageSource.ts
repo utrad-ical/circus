@@ -40,7 +40,6 @@ export default class WebGlRawVolumeMprImageSource extends MprImageSource
 
     const backCanvas = this.createBackCanvas();
     const glContext = getWebGLContext(backCanvas);
-    glContext.clearColor(...this.background);
     glContext.clearDepth(1.0);
     const mprProgram = new MprProgram(glContext);
 
@@ -65,6 +64,10 @@ export default class WebGlRawVolumeMprImageSource extends MprImageSource
       mprProgram.setMmInNdc(1.0 / longestSideLengthInMmOfTheVolume);
 
       this.volume = await volumeLoader.loadVolume();
+
+      mprProgram.activate();
+      mprProgram.setDicomVolume(this.volume);
+
     })();
   }
 
@@ -104,6 +107,9 @@ export default class WebGlRawVolumeMprImageSource extends MprImageSource
     if (viewState.type !== 'mpr')
       throw new Error('Unsupported view state.');
 
+    if (!this.mprProgram.isActive())
+      throw new Error('The program is not active');
+
     this.updateViewportSize(viewer.getResolution());
 
     this.glContext.clearColor(...this.background);
@@ -116,13 +122,8 @@ export default class WebGlRawVolumeMprImageSource extends MprImageSource
       this.metadata!.voxelSize
     );
 
-    if (!this.mprProgram.isActive()) {
-      this.mprProgram.activate();
-    }
-
     this.mprProgram.setCamera(camera);
 
-    this.mprProgram.setDicomVolume(this.volume!);
     this.mprProgram.setInterporationMode(viewState.interpolationMode);
     this.mprProgram.setViewWindow(viewState.window);
 

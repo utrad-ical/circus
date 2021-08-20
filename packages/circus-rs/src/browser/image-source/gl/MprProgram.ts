@@ -37,7 +37,6 @@ export default class MprProgram extends ShaderProgram {
   private aVertexIndexBuffer: VertexElementBufferer;
 
   private volumeTexture: WebGLTexture | undefined = undefined;
-  private volumeTextureLayout: TextureLayout | undefined = undefined;
   private uVolumeTextureSampler: SetUniform['uniform1i'];
   private uTextureSize: SetUniform['uniform2fv'];
   private uSliceGridSize: SetUniform['uniform2fv'];
@@ -94,16 +93,13 @@ export default class MprProgram extends ShaderProgram {
     ]);
     this.uVolumeDimension(dimension);
 
-    if (!this.volumeTexture) {
-      this.volumeTexture = this.createTexture();
-      this.volumeTextureLayout = loadVolumeIntoTexture(
-        this.gl,
-        this.volumeTexture,
-        volume
-      );
-    }
+    this.volumeTexture = this.createTexture();
+    const { textureSize, sliceGridSize } = loadVolumeIntoTexture(
+      this.gl,
+      this.volumeTexture,
+      volume
+    );
 
-    const { textureSize, sliceGridSize } = this.volumeTextureLayout!;
     this.uTextureSize(textureSize);
     this.uSliceGridSize(sliceGridSize);
   }

@@ -6,9 +6,12 @@ import MprProgram from './gl/MprProgram';
 import MprImageSource from './MprImageSource';
 import { createCameraToLookSection, getWebGLContext, resolveImageData } from './gl/webgl-util';
 import MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume';
+import PriorityIntegerCaller from '../../common/PriorityIntegerCaller';
+import { Initializer as MultiRangeInitializer } from 'multi-integer-range';
 
 interface WebGlRawVolumeMprImageSourceOptions {
   volumeLoader: DicomVolumeLoader;
+  beginTransferOnVolumeLoaded?: boolean;
 }
 type RGBA = [number, number, number, number];
 
@@ -29,13 +32,16 @@ export default class WebGlRawVolumeMprImageSource extends MprImageSource
 
   private background: RGBA = [0.0, 0.0, 0.0, 0.0];
 
+  private priorityIntegerCaller: PriorityIntegerCaller | undefined = undefined;
+  private priorityCounter: number = 0;
+
   // For debugging
   public static captureCanvasCallbacks: CaptureCanvasCallback[] = [];
   public static captureCanvasElement(captureCanvasCallback: CaptureCanvasCallback) {
     WebGlRawVolumeMprImageSource.captureCanvasCallbacks.push(captureCanvasCallback);
   }
 
-  constructor({ volumeLoader }: WebGlRawVolumeMprImageSourceOptions) {
+  constructor({ volumeLoader, beginTransferOnVolumeLoaded = false }: WebGlRawVolumeMprImageSourceOptions) {
     super();
 
     const backCanvas = this.createBackCanvas();
@@ -66,8 +72,13 @@ export default class WebGlRawVolumeMprImageSource extends MprImageSource
       this.volume = await volumeLoader.loadVolume();
 
       mprProgram.activate();
-      mprProgram.setDicomVolume(this.volume);
-
+      const { images, transfer } = mprProgram.setDicomVolume(this.volume);
+      this.priorityIntegerCaller = new PriorityIntegerCaller(
+        async (z: number) => transfer(z)
+      );
+      if (beginTransferOnVolumeLoaded) {
+        this.priorityIntegerCaller.append(images, this.priorityCounter++);
+      }
     })();
   }
 
@@ -110,6 +121,28 @@ export default class WebGlRawVolumeMprImageSource extends MprImageSource
     if (!this.mprProgram.isActive())
       throw new Error('The program is not active');
 
+    // Wait to transfer required images.
+    const sectionVertexZValues = [
+      viewState.section.origin[2],
+      viewState.section.origin[2] + viewState.section.xAxis[2],
+      viewState.section.origin[2] + viewState.section.xAxis[2] + viewState.section.yAxis[2],
+      viewState.section.origin[2] + viewState.section.yAxis[2]
+    ];
+    const minImage = Math.max(
+      0,
+      Math.floor(Math.min(...sectionVertexZValues) / this.metadata!.voxelSize[2]) - 1
+      - (viewState.interpolationMode === 'trilinear' ? 1 : 0)
+    );
+    const maxImage = Math.min(
+      this.metadata!.voxelCount[2] - 1,
+      Math.ceil(Math.max(...sectionVertexZValues) / this.metadata!.voxelSize[2]) - 1
+      + (viewState.interpolationMode === 'trilinear' ? 1 : 0)
+    );
+    const requiredRange: MultiRangeInitializer = [[minImage, maxImage]];
+    this.priorityIntegerCaller!.append(requiredRange, this.priorityCounter++);
+    await this.priorityIntegerCaller!.waitFor(requiredRange);
+
+    // Adjust viewport
     this.updateViewportSize(viewer.getResolution());
 
     this.glContext.clearColor(...this.background);

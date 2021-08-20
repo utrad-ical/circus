@@ -1,13 +1,12 @@
 import { Vector3, Matrix4 } from 'three';
 import { TransferFunction, InterpolationMode } from '../../ViewState';
 import ShaderProgram, { AttribBufferer, SetUniform, VertexElementBufferer } from './ShaderProgram';
-import loadVolumeIntoTexture from './texture/loadVolumeIntoTexture';
 import loadTransferFunctionIntoTexture from './texture/loadTransferFunctionIntoTexture';
 import { Section, vectorizeSection } from '../../../common/geometry/Section';
 import { ViewWindow } from 'common/ViewWindow';
 import { Camera, createCamera, createModelViewMatrix, createPojectionMatrix } from './webgl-util';
 import DicomVolume from 'common/DicomVolume';
-import { TextureLayout } from './texture/interface';
+import volumeTextureTransferer from './texture/volumeTextureTransferer';
 
 // WebGL shader source (GLSL)
 const vertexShaderSource = require('./glsl/mpr-section.vert');
@@ -94,14 +93,18 @@ export default class MprProgram extends ShaderProgram {
     this.uVolumeDimension(dimension);
 
     this.volumeTexture = this.createTexture();
-    const { textureSize, sliceGridSize } = loadVolumeIntoTexture(
+
+    const { images, layout, transfer } = volumeTextureTransferer(
       this.gl,
       this.volumeTexture,
       volume
     );
 
+    const { textureSize, sliceGridSize } = layout;
     this.uTextureSize(textureSize);
     this.uSliceGridSize(sliceGridSize);
+
+    return { images, transfer };
   }
 
   public setViewWindow(viewWindow: ViewWindow) {

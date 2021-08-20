@@ -9,7 +9,8 @@ import PatientInfoBox from 'components/PatientInfoBox';
 import ProjectDisplay from 'components/ProjectDisplay';
 import { DropdownButton, MenuItem } from 'components/react-bootstrap';
 import SearchResultsView, {
-  makeSortOptions
+  makeSortOptions,
+  patientInfoSearchOptions
 } from 'components/SearchResultsView';
 import { PhysicalTag, TagList } from 'components/Tag';
 import TimeDisplay from 'components/TimeDisplay';
@@ -104,7 +105,8 @@ const DataView: React.FC<{
 const sortOptions = makeSortOptions({
   createdAt: 'case create time',
   updatedAt: 'case updated time',
-  projectId: 'project'
+  projectId: 'project',
+  ...patientInfoSearchOptions
 });
 
 const CaseSearchResultsView: React.FC<{

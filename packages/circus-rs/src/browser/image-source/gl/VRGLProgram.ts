@@ -145,7 +145,6 @@ export default class VRGLProgram extends ShaderProgram {
     this.uVolumeDimension(dimension);
 
     if (!this.volumeTexture) {
-      console.time('loadVolumeIntoTexture');
       this.volumeTexture = this.createTexture();
       this.volumeTextureLayout = loadVolumeIntoTexture(
         this.gl,
@@ -153,7 +152,6 @@ export default class VRGLProgram extends ShaderProgram {
         volume,
         mask
       );
-      console.timeEnd('loadVolumeIntoTexture');
     }
 
     const { textureSize, sliceGridSize } = this.volumeTextureLayout!;
@@ -186,13 +184,11 @@ export default class VRGLProgram extends ShaderProgram {
       this.transferFunctionTexture = this.createTexture();
     }
 
-    console.time('loadTransferFunctionIntoTexture');
     loadTransferFunctionIntoTexture(
       this.gl,
       this.transferFunctionTexture,
       transferFunction
     );
-    console.timeEnd('loadTransferFunctionIntoTexture');
   }
 
   public appendLabelData(index: number, label: LabelData) {

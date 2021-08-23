@@ -226,7 +226,6 @@ export default class VolumeRenderingImageSource extends MprImageSource {
       this.lastTransferFunction !== viewState.transferFunction &&
       viewState.transferFunction
     ) {
-      console.log('transfer function');
       this.vrProgram.setTransferFunction(viewState.transferFunction);
       this.lastTransferFunction = viewState.transferFunction;
     }

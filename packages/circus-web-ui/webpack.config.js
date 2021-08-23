@@ -31,13 +31,7 @@ module.exports = {
       },
       {
         test: /\.(woff|woff2|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
-        use: [
-          {
-            loader: 'url-loader',
-            options: { limit: 1000000 }
-          }
-        ],
-        type: 'javascript/auto' // disable Webpack 5's asset modules feature
+        type: 'asset/inline'
       },
       {
         test: /\.less$/,

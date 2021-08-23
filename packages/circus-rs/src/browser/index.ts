@@ -50,6 +50,7 @@ export { default as RawVolumeMprImageSource } from './image-source/RawVolumeMprI
 export { default as HybridMprImageSource } from './image-source/HybridImageSource';
 export { default as VolumeRenderingImageSource } from './image-source/VolumeRenderingImageSource';
 export { default as WebGlRawVolumeMprImageSource } from './image-source/WebGlRawVolumeMprImageSource';
+export { default as WebGlHybridMprImageSource } from './image-source/WebGlHybridMprImageSource';
 
 export { default as DicomVolumeLoader } from './image-source/volume-loader/DicomVolumeLoader';
 export { default as MockVolumeLoader } from './image-source/volume-loader/MockVolumeLoader';

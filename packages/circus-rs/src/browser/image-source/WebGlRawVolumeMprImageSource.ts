@@ -9,7 +9,7 @@ import MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume';
 import PriorityIntegerCaller from '../../common/PriorityIntegerCaller';
 import { Initializer as MultiRangeInitializer } from 'multi-integer-range';
 
-interface WebGlRawVolumeMprImageSourceOptions {
+export interface WebGlRawVolumeMprImageSourceOptions {
   volumeLoader: DicomVolumeLoader;
   beginTransferOnVolumeLoaded?: boolean;
 }

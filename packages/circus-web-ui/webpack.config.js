@@ -36,7 +36,8 @@ module.exports = {
             loader: 'url-loader',
             options: { limit: 1000000 }
           }
-        ]
+        ],
+        type: 'javascript/auto' // disable Webpack 5's asset modules feature
       },
       {
         test: /\.less$/,
@@ -53,7 +54,7 @@ module.exports = {
       {
         test: /\.m?js/,
         resolve: {
-          fullySpecified: false
+          // fullySpecified: false
         }
       }
     ]

@@ -18,29 +18,21 @@ The easiest way to get CIRCUS working is to use our official Docker image, which
 
 ### Install Requirements
 
-- Node.js (>= 12.x) and NPM (should be installed along with Node)
+- Node.js (&ge; 12.x) and NPM (**&ge; 7.14**)
 - Docker
 - MongoDB
 
 ### Install JavaScript Dependencies
 
-We use lerna to manage the repository. First, clone the repository:
+We use [NPM's workspaces feature](https://docs.npmjs.com/cli/v7/using-npm/workspaces) to manage the monorepo. The installation of the dependencies for each package is simple:
 
-```bash
+```
 git clone git@github.com:utrad-ical/circus
 cd circus
-```
-
-Install dependency of the main monorepo itself, and then install all the dependencies of each package.
-
-```bash
 npm ci
-npx lerna bootstrap --hoist --ci
 ```
 
-**The `--hoist` flag is important**. Otherwise, two packages will see separate React installations, which ends up weird run-time errors.
-
-Try removing the `--ci` option if something went wrong.
+(Unlike Lerna, common dependencies are hoisted by default.)
 
 ### Automated Test, Lint & Code Formatting:
 
@@ -76,5 +68,6 @@ Sees `packages/*/src/config/default.ts` for the available options and defaults.
 Use this to build optimized production builds (slow). This is not necessary while you are developing CIRCUS.
 
 ```bash
-npx lerna run build
+# On monorepo root
+npm run build
 ```

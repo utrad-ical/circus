@@ -66,7 +66,7 @@ const useCompositions = (
     const compositions = series.map(
       ({ seriesUid, partialVolumeDescriptor }, volId) => {
         const volumeLoader = volumeLoaders[volId];
-        const imageSource = new rs.HybridMprImageSource({
+        const imageSource = new rs.WebGlHybridMprImageSource({
           rsHttpClient,
           seriesUid,
           partialVolumeDescriptor,

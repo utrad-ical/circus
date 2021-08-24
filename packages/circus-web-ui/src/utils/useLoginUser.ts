@@ -16,7 +16,6 @@ export const useUserPreferences = (): [
   const preferences = useSelector(state => state.loginUser.data?.preferences!);
   const api = useApi();
   const dispatch = useDispatch();
-
   const updatePreferences = useCallback(
     async (updates: Partial<UserPreferences>) => {
       dispatch(userPreferencesUpdated({ updates }));

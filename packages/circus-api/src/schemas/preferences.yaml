@@ -21,4 +21,14 @@ properties:
     type: array
     items:
       type: object
+  referenceLine:
+    type: boolean
+  interpolationMode:
+    enum: ['nearestNeighbor', 'trilinear']
+  maintainAspectRatio:
+    type: boolean
+  fixCenterOfGravity:
+    type: boolean
+  sliceNumberFor2DShape:
+    enum: ['0', '3', 'Infinity']
 additionalProperties: false

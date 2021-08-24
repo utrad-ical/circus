@@ -6,7 +6,7 @@ export const defaultPreferences = () => {
     seriesSearchPresets: [],
     pluginJobSearchPresets: [],
     referenceLine: true,
-    interpolationMode: 'None',
+    interpolationMode: 'nearestNeighbor',
     maintainAspectRatio: true,
     fixCenterOfGravity: true,
     sliceNumberFor2DShape: '3'

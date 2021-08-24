@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import * as et from '@smikitky/rb-components/lib/editor-types';
 import PropertyEditor, {
   PropertyEditorProperties
 } from '@smikitky/rb-components/lib/PropertyEditor';
-import * as et from '@smikitky/rb-components/lib/editor-types';
-import { useApi } from 'utils/api';
-import { Button } from 'components/react-bootstrap';
-import IconButton from 'components/IconButton';
 import Icon from 'components/Icon';
+import IconButton from 'components/IconButton';
+import { Button } from 'components/react-bootstrap';
+import React, { useCallback, useEffect, useState } from 'react';
 import { SearchPreset, UserPreferences } from 'store/loginUser';
-import useShowMessage from 'utils/useShowMessage';
+import { useApi } from 'utils/api';
 import { useUserPreferences } from 'utils/useLoginUser';
+import useShowMessage from 'utils/useShowMessage';
 
 const PresetDeleteEditor: et.Editor<SearchPreset[] | undefined> = props => {
   const { value = [], onChange } = props;
@@ -78,7 +78,7 @@ const searchProperties: PropertyEditorProperties<UserPreferences> = [
   }
 ];
 
-const viewerProperties: PropertyEditorProperties<UserPreferences> = [
+const circusDBProperties: PropertyEditorProperties<UserPreferences> = [
   {
     key: 'referenceLine',
     caption: 'Reference Line',
@@ -90,6 +90,15 @@ const viewerProperties: PropertyEditorProperties<UserPreferences> = [
     editor: et.shrinkSelect({
       nearestNeighbor: 'Nearest neighbor',
       trilinearFiltering: 'Trilinear filtering'
+    }) as et.Editor<string | undefined>
+  },
+  {
+    key: 'scrollBars',
+    caption: 'Scroll bars',
+    editor: et.shrinkSelect({
+      none: 'None',
+      small: 'Small',
+      large: 'Large'
     }) as et.Editor<string | undefined>
   },
   {
@@ -159,7 +168,7 @@ const Preferences: React.FC<{}> = props => {
       <h2>DICOM DB</h2>
       <PropertyEditor
         value={settings}
-        properties={viewerProperties}
+        properties={circusDBProperties}
         onChange={setSettings}
       />
       <p className="text-center">

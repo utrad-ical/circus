@@ -25,6 +25,8 @@ properties:
     type: boolean
   interpolationMode:
     enum: ['nearestNeighbor', 'trilinear']
+  scrollBars:
+    enum: ['none', 'small', 'large']
   maintainAspectRatio:
     type: boolean
   fixCenterOfGravity:

@@ -5,10 +5,11 @@ export const defaultPreferences = () => {
     caseSearchPresets: [],
     seriesSearchPresets: [],
     pluginJobSearchPresets: [],
-    referenceLine: true,
+    referenceLine: false,
     interpolationMode: 'nearestNeighbor',
-    maintainAspectRatio: true,
-    fixCenterOfGravity: true,
+    scrollBars: 'none',
+    maintainAspectRatio: false,
+    fixCenterOfGravity: false,
     sliceNumberFor2DShape: '3'
   };
 };

@@ -21,6 +21,7 @@ export interface UserPreferences {
   theme?: string;
   referenceLine?: boolean;
   interpolationMode?: string;
+  scrollBars?: string;
   maintainAspectRatio?: boolean;
   fixCenterOfGravity?: boolean;
   sliceNumberFor2DShape?: string;

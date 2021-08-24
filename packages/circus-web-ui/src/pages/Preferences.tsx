@@ -88,7 +88,7 @@ const viewerProperties: PropertyEditorProperties<UserPreferences> = [
     key: 'interpolationMode',
     caption: 'Interpolation Mode',
     editor: et.shrinkSelect({
-      none: 'None',
+      nearestNeighbor: 'Nearest neighbor',
       trilinearFiltering: 'Trilinear filtering'
     }) as et.Editor<string | undefined>
   },
@@ -122,7 +122,6 @@ const Preferences: React.FC<{}> = props => {
   const showMessage = useShowMessage();
   const [preferences, updatePreferences] = useUserPreferences();
   const [settings, setSettings] = useState<UserPreferences | null>(preferences);
-  console.log(settings);
   const loadSettings = useCallback(async () => {
     const settings = await api('preferences');
     setSettings(settings);

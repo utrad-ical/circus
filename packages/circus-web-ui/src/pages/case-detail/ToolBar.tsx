@@ -19,7 +19,7 @@ import ModifierKeyBehaviors from '@utrad-ical/circus-rs/src/browser/annotation/M
 import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import { LayoutKind } from './caseStore';
 import { MenuItemProps } from 'react-bootstrap';
-import ModifierPlaneFigureOption from '@utrad-ical/circus-rs/src/browser/annotation/ModifierPlaneFigureOption';
+import PlaneFigureOption from '@utrad-ical/circus-rs/src/browser/annotation/PlaneFigureOption';
 
 export interface ViewOptions {
   showReferenceLine?: boolean;
@@ -35,15 +35,16 @@ const scrollbarOptions: { key: ScrollbarOptions; caption: string }[] = [
   { key: 'large', caption: 'Large' }
 ];
 
-type ZDimmedThresholdOptions = '0' | '3' | 'Infinity';
+type ZDimmedThresholdOptions = 'hide' | 'show' | 'infinity';
 
-const zDimmedThresholdOptions: {
+export const zDimmedThresholdOptions: {
   key: ZDimmedThresholdOptions;
   caption: string;
+  value: number;
 }[] = [
-  { key: '0', caption: 'None' },
-  { key: '3', caption: '± 2' },
-  { key: 'Infinity', caption: '∞' }
+  { key: 'hide', caption: 'None', value: 0 },
+  { key: 'show', caption: '± 2', value: 3 },
+  { key: 'infinity', caption: '∞', value: Infinity }
 ];
 
 const layoutOptions: {
@@ -89,10 +90,8 @@ const ToolBar: React.FC<{
   onChangeModifierKeyBehaviors: (
     modifierKeyBehaviors: ModifierKeyBehaviors
   ) => void;
-  modifierPlaneFigureOption: ModifierPlaneFigureOption;
-  onChangeModifierPlaneFigureOption: (
-    modifierPlaneFigureOption: ModifierPlaneFigureOption
-  ) => void;
+  planeFigureOption: PlaneFigureOption;
+  onChangePlaneFigureOption: (planeFigureOption: PlaneFigureOption) => void;
   brushEnabled: boolean;
   wandEnabled: boolean;
   windowPresets?: WindowPreset[];
@@ -110,8 +109,8 @@ const ToolBar: React.FC<{
     onChangeLayoutKind,
     modifierKeyBehaviors,
     onChangeModifierKeyBehaviors,
-    modifierPlaneFigureOption,
-    onChangeModifierPlaneFigureOption,
+    planeFigureOption,
+    onChangePlaneFigureOption,
     brushEnabled,
     wandEnabled,
     windowPresets = [],
@@ -153,9 +152,11 @@ const ToolBar: React.FC<{
   };
 
   const handleChangeZDimmedThreshold = (selection: any) => {
-    onChangeModifierPlaneFigureOption({
-      ...modifierPlaneFigureOption,
-      zDimmedThreshold: Number(selection as ZDimmedThresholdOptions)
+    onChangePlaneFigureOption({
+      ...planeFigureOption,
+      zDimmedThreshold: zDimmedThresholdOptions.find(
+        zDimmedThresholdOption => zDimmedThresholdOption.key === selection
+      )!.value
     });
   };
 
@@ -387,9 +388,7 @@ const ToolBar: React.FC<{
                 onSelect={handleChangeZDimmedThreshold}
               >
                 <CheckMark
-                  checked={
-                    modifierPlaneFigureOption.zDimmedThreshold === Number(l.key)
-                  }
+                  checked={planeFigureOption.zDimmedThreshold === l.value}
                 />
                 {l.caption}
               </MenuItem>

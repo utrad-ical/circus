@@ -46,7 +46,7 @@ import {
 } from './revisionData';
 import SeriesSelectorDialog from './SeriesSelectorDialog';
 import SideContainer from './SideContainer';
-import ToolBar, { ViewOptions } from './ToolBar';
+import ToolBar, { ViewOptions, zDimmedThresholdOptions } from './ToolBar';
 import ViewerGrid from './ViewerGrid';
 
 const useCompositions = (
@@ -138,9 +138,12 @@ const RevisionEditor: React.FC<{
     lockFixCenterOfGravity: preferences.fixCenterOfGravity ?? false
   });
 
-  const [modifierPlaneFigureOption, setModifierPlaneFigureOption] = useState({
-    zDimmedThreshold: preferences.sliceNumberFor2DShape
-      ? Number(preferences.sliceNumberFor2DShape)
+  const [planeFigureOption, setPlaneFigureOption] = useState({
+    zDimmedThreshold: preferences.dimmedOutlineFor2DLabels
+      ? zDimmedThresholdOptions.find(
+          zDimmedThresholdOption =>
+            zDimmedThresholdOption.key === preferences.dimmedOutlineFor2DLabels
+        )!.value
       : 3
   });
   // Keeps track of stable seriesUid-PVD pairs to avoid frequent comp changes
@@ -404,7 +407,7 @@ const RevisionEditor: React.FC<{
             modifierKeyBehaviors.lockFixCenterOfGravity;
         }
         if (antn instanceof rs.PlaneFigure) {
-          antn.zDimmedThreshold = modifierPlaneFigureOption.zDimmedThreshold;
+          antn.zDimmedThreshold = planeFigureOption.zDimmedThreshold;
         }
       });
 
@@ -421,7 +424,7 @@ const RevisionEditor: React.FC<{
     viewOptions.showReferenceLine,
     viewOptions.scrollbar,
     modifierKeyBehaviors,
-    modifierPlaneFigureOption,
+    planeFigureOption,
     touchDevice,
     viewers
   ]);
@@ -677,8 +680,8 @@ const RevisionEditor: React.FC<{
           onChangeViewOptions={setViewOptions}
           modifierKeyBehaviors={modifierKeyBehaviors}
           onChangeModifierKeyBehaviors={setModifierKeyBehaviors}
-          modifierPlaneFigureOption={modifierPlaneFigureOption}
-          onChangeModifierPlaneFigureOption={setModifierPlaneFigureOption}
+          planeFigureOption={planeFigureOption}
+          onChangePlaneFigureOption={setPlaneFigureOption}
           onChangeLayoutKind={handleChangeLayoutKind}
           wandEnabled={activeVolumeLoaded}
           windowPresets={projectData.windowPresets}

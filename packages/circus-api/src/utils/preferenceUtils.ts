@@ -10,6 +10,6 @@ export const defaultPreferences = () => {
     scrollBars: 'none',
     maintainAspectRatio: false,
     fixCenterOfGravity: false,
-    sliceNumberFor2DShape: '3'
+    dimmedOutlineFor2DLabels: 'show'
   };
 };

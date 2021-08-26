@@ -24,7 +24,7 @@ export interface UserPreferences {
   scrollBars?: string;
   maintainAspectRatio?: boolean;
   fixCenterOfGravity?: boolean;
-  sliceNumberFor2DShape?: string;
+  dimmedOutlineFor2DLabels?: string;
 }
 
 export type MyListResourceType = 'series' | 'clinicalCases' | 'jobs';

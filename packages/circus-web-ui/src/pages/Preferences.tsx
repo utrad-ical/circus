@@ -116,12 +116,12 @@ const circusDBProperties: PropertyEditorProperties<UserPreferences> = [
     }) as et.Editor<boolean | undefined>
   },
   {
-    key: 'sliceNumberFor2DShape',
+    key: 'dimmedOutlineFor2DLabels',
     caption: 'Number of Slices for 2D Shape',
     editor: et.shrinkSelect({
-      '0': 'None',
-      '3': '± 2',
-      Infinity: '∞'
+      hide: 'None',
+      show: '± 2',
+      infinity: '∞'
     }) as et.Editor<string | undefined>
   }
 ];

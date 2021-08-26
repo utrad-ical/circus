@@ -31,6 +31,6 @@ properties:
     type: boolean
   fixCenterOfGravity:
     type: boolean
-  sliceNumberFor2DShape:
-    enum: ['0', '3', 'Infinity']
+  dimmedOutlineFor2DLabels:
+    enum: ['hide', 'show', 'infinity']
 additionalProperties: false

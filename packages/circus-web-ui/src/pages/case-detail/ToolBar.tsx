@@ -19,6 +19,7 @@ import ModifierKeyBehaviors from '@utrad-ical/circus-rs/src/browser/annotation/M
 import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import { LayoutKind } from './caseStore';
 import { MenuItemProps } from 'react-bootstrap';
+import PlaneFigureOption from '@utrad-ical/circus-rs/src/browser/annotation/PlaneFigureOption';
 
 export interface ViewOptions {
   showReferenceLine?: boolean;
@@ -32,6 +33,18 @@ const scrollbarOptions: { key: ScrollbarOptions; caption: string }[] = [
   { key: 'none', caption: 'None' },
   { key: 'small', caption: 'Small' },
   { key: 'large', caption: 'Large' }
+];
+
+type ZDimmedThresholdOptions = 'hide' | 'show' | 'infinity';
+
+export const zDimmedThresholdOptions: {
+  key: ZDimmedThresholdOptions;
+  caption: string;
+  value: number;
+}[] = [
+  { key: 'hide', caption: 'None', value: 0 },
+  { key: 'show', caption: '± 2', value: 3 },
+  { key: 'infinity', caption: '∞', value: Infinity }
 ];
 
 const layoutOptions: {
@@ -77,6 +90,8 @@ const ToolBar: React.FC<{
   onChangeModifierKeyBehaviors: (
     modifierKeyBehaviors: ModifierKeyBehaviors
   ) => void;
+  planeFigureOption: PlaneFigureOption;
+  onChangePlaneFigureOption: (planeFigureOption: PlaneFigureOption) => void;
   brushEnabled: boolean;
   wandEnabled: boolean;
   windowPresets?: WindowPreset[];
@@ -94,6 +109,8 @@ const ToolBar: React.FC<{
     onChangeLayoutKind,
     modifierKeyBehaviors,
     onChangeModifierKeyBehaviors,
+    planeFigureOption,
+    onChangePlaneFigureOption,
     brushEnabled,
     wandEnabled,
     windowPresets = [],
@@ -131,6 +148,15 @@ const ToolBar: React.FC<{
     onChangeModifierKeyBehaviors({
       ...modifierKeyBehaviors,
       lockMaintainAspectRatio: !modifierKeyBehaviors.lockMaintainAspectRatio
+    });
+  };
+
+  const handleChangeZDimmedThreshold = (selection: any) => {
+    onChangePlaneFigureOption({
+      ...planeFigureOption,
+      zDimmedThreshold: zDimmedThresholdOptions.find(
+        zDimmedThresholdOption => zDimmedThresholdOption.key === selection
+      )!.value
     });
   };
 
@@ -353,6 +379,21 @@ const ToolBar: React.FC<{
             <CheckMark checked={modifierKeyBehaviors.lockFixCenterOfGravity} />
             Lock Ctrl + Drag to fix center of gravity
           </MenuItem>
+          <MenuItem header>Number of slices for 2D shape</MenuItem>
+          {zDimmedThresholdOptions.map(l => {
+            return (
+              <MenuItem
+                key={l.key}
+                eventKey={l.key}
+                onSelect={handleChangeZDimmedThreshold}
+              >
+                <CheckMark
+                  checked={planeFigureOption.zDimmedThreshold === l.value}
+                />
+                {l.caption}
+              </MenuItem>
+            );
+          })}
         </Dropdown.Menu>
       </Dropdown>
       {(active === 'wand' || active === 'wandEraser') && (

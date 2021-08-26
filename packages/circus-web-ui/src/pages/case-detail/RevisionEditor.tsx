@@ -1,12 +1,16 @@
+import IconButton from '@smikitky/rb-components/lib/IconButton';
 import JsonSchemaEditor from '@smikitky/rb-components/lib/JsonSchemaEditor';
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
+import { InterpolationMode } from '@utrad-ical/circus-rs/src/browser/ViewState';
 import classNames from 'classnames';
 import Collapser from 'components/Collapser';
 import Icon from 'components/Icon';
 import { createStateChanger } from 'components/ImageViewer';
 import produce from 'immer';
+import { debounce } from 'lodash';
+import useToolbar from 'pages/case-detail/useToolbar';
 import React, {
   useCallback,
   useContext,
@@ -15,39 +19,35 @@ import React, {
   useRef,
   useState
 } from 'react';
+import styled from 'styled-components';
 import Project from 'types/Project';
+import Series from 'types/Series';
+import isTouchDevice from 'utils/isTouchDevice';
 import {
   usePendingVolumeLoaders,
   VolumeLoaderCacheContext
 } from 'utils/useImageSource';
+import useLoginUser from 'utils/useLoginUser';
+import { Modal } from '../../components/react-bootstrap';
 import * as c from './caseStore';
+import {
+  buildAnnotation,
+  InternalLabel,
+  InternalLabelDataOf,
+  labelTypes,
+  setRecommendedDisplay
+} from './labelData';
+import LabelMenu from './LabelMenu';
 import LabelSelector from './LabelSelector';
 import {
   EditingData,
   EditingDataUpdater,
   SeriesEntryWithLabels
 } from './revisionData';
-import {
-  InternalLabel,
-  buildAnnotation,
-  labelTypes,
-  InternalLabelDataOf,
-  setRecommendedDisplay
-} from './labelData';
-import SideContainer from './SideContainer';
-import ToolBar, { ViewOptions } from './ToolBar';
-import ViewerGrid from './ViewerGrid';
-import IconButton from '@smikitky/rb-components/lib/IconButton';
-import { Modal } from '../../components/react-bootstrap';
 import SeriesSelectorDialog from './SeriesSelectorDialog';
-import styled from 'styled-components';
-import LabelMenu from './LabelMenu';
-import { debounce } from 'lodash';
-import useLocalPreference from 'utils/useLocalPreference';
-import isTouchDevice from 'utils/isTouchDevice';
-import useToolbar from 'pages/case-detail/useToolbar';
-import Series from 'types/Series';
-import ModifierKeyBehaviors from '@utrad-ical/circus-rs/src/browser/annotation/ModifierKeyBehaviors';
+import SideContainer from './SideContainer';
+import ToolBar, { ViewOptions, zDimmedThresholdOptions } from './ToolBar';
+import ViewerGrid from './ViewerGrid';
 
 const useCompositions = (
   series: {
@@ -121,27 +121,31 @@ const RevisionEditor: React.FC<{
   const stateChanger = useMemo(() => createStateChanger<rs.MprViewState>(), []);
   const [seriesDialogOpen, setSeriesDialogOpen] = useState(false);
 
-  const [viewOptions, setViewOptions] = useLocalPreference<ViewOptions>(
-    'dbViewOptions',
-    {
-      showReferenceLine: false,
-      scrollbar: 'none',
-      interpolationMode: 'nearestNeighbor'
-    }
-  );
+  const preferences = useLoginUser().preferences;
 
-  const [modifierKeyBehaviors, setModifierKeyBehaviors] = useLocalPreference<
-    ModifierKeyBehaviors
-  >('dbModifierKeyBehaviors', {
-    lockMaintainAspectRatio: false,
-    lockFixCenterOfGravity: false
+  const [viewOptions, setViewOptions] = useState<ViewOptions>({
+    showReferenceLine: preferences.referenceLine ?? false,
+    scrollbar: (preferences.scrollBars ? preferences.scrollBars : 'none') as
+      | 'none'
+      | 'large'
+      | 'small',
+    interpolationMode: (preferences.interpolationMode ??
+      'nearestNeighbor') as InterpolationMode
   });
-  const handleChangeModifierKeyBehaviors = (
-    shapeResizeOptions: ModifierKeyBehaviors
-  ) => {
-    setModifierKeyBehaviors(shapeResizeOptions);
-  };
 
+  const [modifierKeyBehaviors, setModifierKeyBehaviors] = useState({
+    lockMaintainAspectRatio: preferences.maintainAspectRatio ?? false,
+    lockFixCenterOfGravity: preferences.fixCenterOfGravity ?? false
+  });
+
+  const [planeFigureOption, setPlaneFigureOption] = useState({
+    zDimmedThreshold: preferences.dimmedOutlineFor2DLabels
+      ? zDimmedThresholdOptions.find(
+          zDimmedThresholdOption =>
+            zDimmedThresholdOption.key === preferences.dimmedOutlineFor2DLabels
+        )!.value
+      : 3
+  });
   // Keeps track of stable seriesUid-PVD pairs to avoid frequent comp changes
   const [allSeries, setAllSeries] = useState<
     {
@@ -402,6 +406,9 @@ const RevisionEditor: React.FC<{
           antn.lockFixCenterOfGravity =
             modifierKeyBehaviors.lockFixCenterOfGravity;
         }
+        if (antn instanceof rs.PlaneFigure) {
+          antn.zDimmedThreshold = planeFigureOption.zDimmedThreshold;
+        }
       });
 
       composition.annotationUpdated();
@@ -417,6 +424,7 @@ const RevisionEditor: React.FC<{
     viewOptions.showReferenceLine,
     viewOptions.scrollbar,
     modifierKeyBehaviors,
+    planeFigureOption,
     touchDevice,
     viewers
   ]);
@@ -671,7 +679,9 @@ const RevisionEditor: React.FC<{
           viewOptions={viewOptions}
           onChangeViewOptions={setViewOptions}
           modifierKeyBehaviors={modifierKeyBehaviors}
-          onChangeModifierKeyBehaviors={handleChangeModifierKeyBehaviors}
+          onChangeModifierKeyBehaviors={setModifierKeyBehaviors}
+          planeFigureOption={planeFigureOption}
+          onChangePlaneFigureOption={setPlaneFigureOption}
           onChangeLayoutKind={handleChangeLayoutKind}
           wandEnabled={activeVolumeLoaded}
           windowPresets={projectData.windowPresets}

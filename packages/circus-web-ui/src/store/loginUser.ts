@@ -19,6 +19,12 @@ export interface UserPreferences {
   pluginJobSearchPresets?: SearchPreset[];
   personalInfoView?: boolean;
   theme?: string;
+  referenceLine?: boolean;
+  interpolationMode?: string;
+  scrollBars?: string;
+  maintainAspectRatio?: boolean;
+  fixCenterOfGravity?: boolean;
+  dimmedOutlineFor2DLabels?: string;
 }
 
 export type MyListResourceType = 'series' | 'clinicalCases' | 'jobs';

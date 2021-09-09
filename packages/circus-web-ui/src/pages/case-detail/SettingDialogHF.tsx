@@ -61,20 +61,18 @@ const OptionsEditorForHF: Editor<HoleFillingOptions> = props => {
           }
           numericalValue
         />
-      </div>
-      {value.dimension === 2 && (
-        <div>
-          <label>
-            Orientation&nbsp;
+        {value.dimension === 2 && (
+          <>
+            &ensp;Orientation&nbsp;
             <ShrinkSelect
               bsSize="sm"
               options={orientationOptions}
               value={value.orientation}
               onChange={v => onChange({ ...value, orientation: v })}
             />
-          </label>
-        </div>
-      )}
+          </>
+        )}
+      </div>
       <div>
         Neighbors to decide same CC&nbsp;
         <ShrinkSelect
@@ -92,15 +90,17 @@ const OptionsEditorForHF: Editor<HoleFillingOptions> = props => {
 };
 
 const SettingDialogHF: React.FC<{
+  processorProgress: { value: number; label: string };
   onHide: () => void;
   onOkClick: (props: HoleFillingOptions) => void;
 }> = props => {
-  const { onHide, onOkClick } = props;
+  const { processorProgress, onHide, onOkClick } = props;
   return (
     <SettingDialog
       title="Hole filling"
       optionsEditor={OptionsEditorForHF}
       initialOptions={initialOptions}
+      processorProgress={processorProgress}
       onHide={onHide}
       onOkClick={onOkClick}
     />

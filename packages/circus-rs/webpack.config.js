@@ -24,7 +24,7 @@ module.exports = (env, argv) => ({
       },
       { test: /\.less$/, use: ['style-loader', 'css-loader', 'less-loader'] },
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
-      { test: /\.woff$/, use: ['url-loader'] },
+      { test: /\.woff$/, type: 'asset/inline' },
       { test: /\.frag|\.vert$/, use: ['webpack-glsl-loader'] }
     ]
   },

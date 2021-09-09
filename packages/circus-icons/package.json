@@ -4,7 +4,7 @@
   "description": "Icon dataset used throughout the CIRCUS project",
   "main": "scripts/fontgen.js",
   "scripts": {
-    "build": "node scripts/fontgen"
+    "generate": "node scripts/fontgen"
   },
   "repository": {
     "type": "git",

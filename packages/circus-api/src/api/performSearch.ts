@@ -2,6 +2,7 @@ import status from 'http-status';
 import { CollectionAccessor } from '../db/createCollectionAccessor';
 import { CircusContext } from '../typings/middlewares';
 import { isPlainObject } from 'lodash';
+import { EJSON } from 'bson';
 
 interface SearchQuery {
   sort: object;
@@ -10,16 +11,32 @@ interface SearchQuery {
   skip: number;
 }
 
+export const extractFilter = (ctx: CircusContext) => {
+  const urlQuery = ctx.request.query;
+  try {
+    return urlQuery.filter
+      ? (EJSON.parse(
+          Array.isArray(urlQuery.filter) ? urlQuery.filter[0] : urlQuery.filter
+        ) as object)
+      : {};
+  } catch (err) {
+    ctx.throw(status.BAD_REQUEST, 'Invalid JSON was passed as a filter string');
+  }
+};
+
 /**
  * Parses URL parameter strings and add defaults if necessary.
  */
 const extractSearchOptions = (ctx: CircusContext, defaultSort: object) => {
   const urlQuery = ctx.request.query;
 
+  const first = (query: string[] | string) =>
+    Array.isArray(query) ? query[0] : query;
+
   let sort;
   if (urlQuery.sort) {
     try {
-      sort = JSON.parse(urlQuery.sort);
+      sort = JSON.parse(first(urlQuery.sort));
     } catch (err) {
       ctx.throw(status.BAD_REQUEST, 'Bad sort parameter. Invalid JSON.');
     }
@@ -41,7 +58,7 @@ const extractSearchOptions = (ctx: CircusContext, defaultSort: object) => {
     sort = defaultSort;
   }
 
-  const limit = parseInt(urlQuery.limit || '20', 10);
+  const limit = parseInt(first(urlQuery.limit ?? '20'), 10);
   if (limit > 200) {
     ctx.throw(
       status.BAD_REQUEST,
@@ -49,7 +66,7 @@ const extractSearchOptions = (ctx: CircusContext, defaultSort: object) => {
     );
   }
 
-  const page = parseInt(urlQuery.page || '1', 10);
+  const page = parseInt(first(urlQuery.page || '1'), 10);
   const skip = limit * (page - 1);
 
   return { sort, limit, page, skip } as SearchQuery;

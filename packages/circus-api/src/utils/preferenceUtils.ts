@@ -4,6 +4,12 @@ export const defaultPreferences = () => {
     personalInfoView: false,
     caseSearchPresets: [],
     seriesSearchPresets: [],
-    pluginJobSearchPresets: []
+    pluginJobSearchPresets: [],
+    referenceLine: false,
+    interpolationMode: 'nearestNeighbor',
+    scrollBars: 'none',
+    maintainAspectRatio: false,
+    fixCenterOfGravity: false,
+    dimmedOutlineFor2DLabels: 'show'
   };
 };

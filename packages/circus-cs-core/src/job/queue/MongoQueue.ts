@@ -40,7 +40,7 @@ const createMongoQueue: FunctionService<
       await collection.findOneAndUpdate(
         { state: 'wait' },
         { $set: { state: 'processing', startedAt: new Date() } },
-        { sort: { priority: -1, _id: 1 }, returnOriginal: false }
+        { sort: { priority: -1, _id: 1 }, returnDocument: 'after' }
       )
     ).value as circus.QueueItem<circus.PluginJobRequest> | null;
     return result;

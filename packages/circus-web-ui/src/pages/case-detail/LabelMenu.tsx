@@ -71,6 +71,10 @@ const LabelMenu: React.FC<{
 
   const [cclDialogOpen, setCclDialogOpen] = useState(false);
   const [hfDialogOpen, setHfDialogOpen] = useState(false);
+  const [processorProgress, setProcessorProgress] = useState({
+    value: 0,
+    label: ''
+  });
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
   const activeSeries = revision.series[activeSeriesIndex];
   const activeLabel =
@@ -246,9 +250,12 @@ const LabelMenu: React.FC<{
       updateEditingData,
       label,
       labelColors,
-      createCclProcessor(props)
+      createCclProcessor(props),
+      cclProgress => {
+        setProcessorProgress(cclProgress);
+        cclProgress.label !== '' && setCclDialogOpen(false);
+      }
     );
-    setCclDialogOpen(false);
   };
 
   const onOkClickDialogHF = (props: HoleFillingOptions) => {
@@ -260,9 +267,12 @@ const LabelMenu: React.FC<{
       updateEditingData,
       label,
       labelColors,
-      createHfProcessor(props)
+      createHfProcessor(props),
+      hfProgress => {
+        setProcessorProgress(hfProgress);
+        hfProgress.label !== '' && setHfDialogOpen(false);
+      }
     );
-    setHfDialogOpen(false);
   };
 
   const onSelectThreePoints2Section = () => {
@@ -402,22 +412,16 @@ const LabelMenu: React.FC<{
           );
         })}
       </SplitButton>
-      <Modal
-        show={cclDialogOpen}
-        onHide={() => setCclDialogOpen(false)}
-        bsSize="lg"
-      >
+      <Modal show={cclDialogOpen} onHide={() => setCclDialogOpen(false)}>
         <SettingDialogCCL
+          processorProgress={processorProgress}
           onHide={() => setCclDialogOpen(false)}
           onOkClick={onOkClickDialogCCL}
         />
       </Modal>
-      <Modal
-        show={hfDialogOpen}
-        onHide={() => setHfDialogOpen(false)}
-        bsSize="lg"
-      >
+      <Modal show={hfDialogOpen} onHide={() => setHfDialogOpen(false)}>
         <SettingDialogHF
+          processorProgress={processorProgress}
           onHide={() => setHfDialogOpen(false)}
           onOkClick={onOkClickDialogHF}
         />

@@ -497,3 +497,78 @@ export function getOrthogonalProjectedPoint(section: Section, point: Vector3) {
     ? point.sub(normal.clone().multiplyScalar(zDist))
     : point.clone();
 }
+
+/**
+ * Calculate the section passing through the three points.
+ */
+export const getSectionFromPoints = (
+  points: Vector3D[],
+  targetXAxis: number[],
+  targetYAxis: number[]
+): Section => {
+  const size = 1024;
+  const threshold0 = 10 ** -5;
+  const average = new Vector3(0, 0, 0);
+
+  for (const point of points) {
+    average.add(new Vector3().fromArray(point));
+  }
+  average.divideScalar(points.length);
+
+  const n = new Vector3()
+    .fromArray(points[0])
+    .sub(new Vector3().fromArray(points[1]))
+    .cross(
+      new Vector3().fromArray(points[2]).sub(new Vector3().fromArray(points[1]))
+    )
+    .normalize();
+  if (n.lengthSq() < threshold0) {
+    throw new Error('The three points are on the same line.');
+  }
+
+  const leg = (point: number[]) => {
+    const scale =
+      new Vector3().fromArray(point).dot(n) -
+      new Vector3().fromArray(points[0]).dot(n);
+    return new Vector3().fromArray(point).sub(n.clone().multiplyScalar(scale));
+  };
+
+  const startingPoint = [0, 0, 0];
+  let origin = leg(startingPoint);
+  if (new Vector3().subVectors(origin, average).lengthSq() < threshold0) {
+    startingPoint[1] = startingPoint[1] + size;
+    origin = leg(startingPoint);
+  }
+  startingPoint[0] = startingPoint[0] + size;
+  let xAxis = leg(startingPoint);
+  if (new Vector3().subVectors(origin, xAxis).lengthSq() < threshold0) {
+    startingPoint[1] = startingPoint[1] + size;
+    xAxis = leg(startingPoint);
+  }
+  xAxis.sub(origin);
+  xAxis.setLength(new Vector3().fromArray(targetXAxis).length());
+
+  if (
+    new Vector3().subVectors(origin, xAxis).sub(average).lengthSq() <
+    new Vector3().addVectors(origin, xAxis).sub(average).lengthSq()
+  ) {
+    xAxis.negate();
+  }
+  const yAxis = new Vector3()
+    .crossVectors(xAxis, n)
+    .setLength(new Vector3().fromArray(targetYAxis).length());
+  if (
+    new Vector3().subVectors(origin, yAxis).sub(average).lengthSq() <
+    new Vector3().addVectors(origin, yAxis).sub(average).lengthSq()
+  ) {
+    yAxis.negate();
+  }
+  origin = new Vector3()
+    .subVectors(average, xAxis.clone().divideScalar(2))
+    .sub(yAxis.clone().divideScalar(2));
+  return {
+    origin: origin.toArray(),
+    xAxis: xAxis.toArray(),
+    yAxis: yAxis.toArray()
+  };
+};

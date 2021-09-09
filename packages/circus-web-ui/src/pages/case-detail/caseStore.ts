@@ -1,14 +1,14 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { EditingData, Revision } from './revisionData';
-import { ExternalLabel } from './labelData';
-import PatientInfo from '../../types/PatientInfo';
+import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
+import { Section } from '@utrad-ical/circus-rs/src/common/geometry';
+import { LayoutInfo, layoutReducer } from 'components/GridContainer';
 import Project from 'types/Project';
 import Series from 'types/Series';
-import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
-import { LayoutInfo, layoutReducer } from 'components/GridContainer';
-import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
+import PatientInfo from '../../types/PatientInfo';
+import { ExternalLabel } from './labelData';
+import { EditingData, Revision } from './revisionData';
 import { ViewerDef } from './ViewerGrid';
-
 interface CaseData {
   caseId: string;
   revisions: Revision<ExternalLabel>[];
@@ -87,14 +87,20 @@ const alphaNum = (length: number = 16) =>
 
 export const newViewerCellItem = (
   seriesIndex: number,
-  orientation: OrientationString
+  orientation: OrientationString,
+  celestialRotateMode?: boolean,
+  initialSection?: Section
 ): ViewerDef => {
   const key = alphaNum();
   return {
     key,
     seriesIndex,
     orientation,
-    celestialRotateMode: orientation === 'oblique'
+    celestialRotateMode:
+      celestialRotateMode === undefined
+        ? orientation === 'oblique'
+        : celestialRotateMode,
+    initialSection
   };
 };
 

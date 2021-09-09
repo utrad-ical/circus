@@ -1,17 +1,16 @@
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import archiver from 'archiver';
-import { EJSON } from 'bson';
 import status from 'http-status';
 import isLikeDicom from '../../utils/isLikeDicom';
 import { CircusContext, RouteMiddleware } from '../../typings/middlewares';
 import checkFilter from '../../utils/checkFilter';
 import { fileOrArchiveIterator } from '../../utils/directoryIterator';
-import { performAggregationSearch } from '../performSearch';
+import { extractFilter, performAggregationSearch } from '../performSearch';
 
 const maskPatientInfo = (ctx: CircusContext) => {
   return (series: any) => {
     const show =
-      ctx.userPrivileges.globalPrivileges.some(p => p === 'personalInfoView') &&
+      ctx.userPrivileges.globalPrivileges.includes('personalInfoView') &&
       ctx.user.preferences.personalInfoView;
     if (!show) {
       delete series.patientInfo;
@@ -88,15 +87,7 @@ export const handlePost: RouteMiddleware = ({ dicomImporter, taskManager }) => {
 
 export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
-    const urlQuery = ctx.request.query;
-    let customFilter: any;
-    try {
-      customFilter = urlQuery.filter
-        ? EJSON.parse(urlQuery.filter as string)
-        : {};
-    } catch (err) {
-      ctx.throw(status.BAD_REQUEST, 'Filter string could not be parsed.');
-    }
+    const customFilter = extractFilter(ctx);
     const fields = [
       'modality',
       'seriesUid',
@@ -130,6 +121,14 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
         ctx.throw(status.BAD_REQUEST, 'This my list is not for series');
     }
 
+    const canViewPersonalInfo = ctx.userPrivileges.globalPrivileges.includes(
+      'personalInfoView'
+    );
+
+    const baseStages: object[] = canViewPersonalInfo
+      ? []
+      : [{ $unset: 'personalInfo' }];
+
     const searchByMyListStage: object[] = [
       { $match: { myListId } },
       { $unwind: { path: '$items' } },
@@ -152,7 +151,9 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
     ];
 
     const startModel = myListId ? models.myList : models.series;
-    const lookupStages = myListId ? searchByMyListStage : [];
+    const lookupStages = myListId
+      ? [...searchByMyListStage, ...baseStages]
+      : baseStages;
     const defaultSort = myListId ? { addedToListAt: -1 } : { createdAt: -1 };
 
     // Removes patient info according to the preference

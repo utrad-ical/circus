@@ -32,7 +32,7 @@ const OptionsEditorForCCL: Editor<CclOptions> = props => {
   return (
     <>
       <div>
-        Maximum number of connected components (CCs) to display&nbsp;
+        Maximum number of connected components (CCs)&nbsp;
         <ShrinkSelect
           bsSize="sm"
           options={maximumCCNumOptions}
@@ -56,15 +56,17 @@ const OptionsEditorForCCL: Editor<CclOptions> = props => {
 };
 
 const SettingDialogCCL: React.FC<{
+  processorProgress: { value: number; label: string };
   onHide: () => void;
   onOkClick: (props: CclOptions) => void;
 }> = props => {
-  const { onHide, onOkClick } = props;
+  const { processorProgress, onHide, onOkClick } = props;
   return (
     <SettingDialog
       title="Connected component labeling (CCL)"
       optionsEditor={OptionsEditorForCCL}
       initialOptions={initialOptions}
+      processorProgress={processorProgress}
       onHide={onHide}
       onOkClick={onOkClick}
     />

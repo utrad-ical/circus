@@ -16,6 +16,7 @@ import {
   SplitButton
 } from 'components/react-bootstrap';
 import React, { useState } from 'react';
+import { ButtonProps } from 'react-bootstrap';
 import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
@@ -24,6 +25,7 @@ import * as c from './caseStore';
 import createCclProcessor, { CclOptions } from './createCclProcessor';
 import createCurrentLabelsUpdator from './createCurrentLabelsUpdator';
 import createHfProcessor, { HoleFillingOptions } from './createHfProcessor';
+import createSectionFromPoints from './createSectionFromPoints';
 import {
   createNewLabelData,
   InternalLabel,
@@ -37,7 +39,6 @@ import performLabelCreatingVoxelProcessing from './performLabelCreatingVoxelProc
 import { EditingData, EditingDataUpdater } from './revisionData';
 import SettingDialogCCL from './SettingDialogCCL';
 import SettingDialogHF from './SettingDialogHF';
-import { ButtonProps } from 'react-bootstrap';
 
 type LabelCommand =
   | 'rename'
@@ -274,6 +275,28 @@ const LabelMenu: React.FC<{
     );
   };
 
+  const onSelectThreePoints2Section = () => {
+    try {
+      const [newLayoutItems, newLayout, key] = createSectionFromPoints(
+        editingData.revision.series[activeSeriesIndex].labels.filter(label => {
+          return label.type === 'point';
+        }) as InternalLabelOf<'point'>[],
+        activeLabel!.name!,
+        viewers[editingData.activeLayoutKey!].getState().section,
+        editingData.layout,
+        editingData.layoutItems,
+        activeSeriesIndex
+      );
+      updateEditingData(d => {
+        d.layoutItems = newLayoutItems;
+        d.layout = newLayout;
+        d.activeLayoutKey = key;
+      });
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   return (
     <StyledButtonsDiv>
       <AppearanceEditor
@@ -326,27 +349,33 @@ const LabelMenu: React.FC<{
         bsSize="xs"
         title={<Icon icon="glyphicon-option-horizontal" />}
         id={`labelmenu-header-dropdown`}
-        disabled={!activeLabel || activeLabel.type !== 'voxel'}
         pullRight
         noCaret
       >
         <MenuItem
           eventKey="ccl"
-          onClick={() => {
-            setProcessorProgress({ value: 0, label: '' });
+          onSelect={() => {
             setCclDialogOpen(true);
           }}
+          disabled={!activeLabel || activeLabel.type !== 'voxel'}
         >
           CCL
         </MenuItem>
         <MenuItem
           eventKey="fillng"
-          onClick={() => {
-            setProcessorProgress({ value: 0, label: '' });
+          onSelect={() => {
             setHfDialogOpen(true);
           }}
+          disabled={!activeLabel || activeLabel.type !== 'voxel'}
         >
           Hole filling
+        </MenuItem>
+        <MenuItem
+          eventKey="section"
+          onSelect={() => onSelectThreePoints2Section()}
+          disabled={!activeLabel || activeLabel.type !== 'point'}
+        >
+          Three points to section
         </MenuItem>
       </DropdownButton>
       <IconButton

@@ -357,7 +357,11 @@ const LabelMenu: React.FC<{
           onSelect={() => {
             setCclDialogOpen(true);
           }}
-          disabled={!activeLabel || activeLabel.type !== 'voxel'}
+          disabled={
+            !editingData.activeLayoutKey ||
+            !activeLabel ||
+            activeLabel.type !== 'voxel'
+          }
         >
           CCL
         </MenuItem>
@@ -366,14 +370,22 @@ const LabelMenu: React.FC<{
           onSelect={() => {
             setHfDialogOpen(true);
           }}
-          disabled={!activeLabel || activeLabel.type !== 'voxel'}
+          disabled={
+            !editingData.activeLayoutKey ||
+            !activeLabel ||
+            activeLabel.type !== 'voxel'
+          }
         >
           Hole filling
         </MenuItem>
         <MenuItem
           eventKey="section"
           onSelect={() => onSelectThreePoints2Section()}
-          disabled={!activeLabel || activeLabel.type !== 'point'}
+          disabled={
+            !editingData.activeLayoutKey ||
+            !activeLabel ||
+            activeLabel.type !== 'point'
+          }
         >
           Three points to section
         </MenuItem>

@@ -48,6 +48,7 @@ import SeriesSelectorDialog from './SeriesSelectorDialog';
 import SideContainer from './SideContainer';
 import ToolBar, { ViewOptions, zDimmedThresholdOptions } from './ToolBar';
 import ViewerGrid from './ViewerGrid';
+import { ViewWindow } from './ViewWindowEditor';
 
 const useCompositions = (
   series: {
@@ -116,6 +117,10 @@ const RevisionEditor: React.FC<{
   const viewers = viewersRef.current;
 
   const viewWindows = useRef<rs.ViewWindow[]>([]);
+  const [currentWindow, setCurrentWindow] = useState<ViewWindow>({
+    level: 0,
+    width: 0
+  });
 
   const [touchDevice] = useState(() => isTouchDevice());
   const stateChanger = useMemo(() => createStateChanger<rs.MprViewState>(), []);
@@ -540,6 +545,7 @@ const RevisionEditor: React.FC<{
         .seriesIndex;
       const window = (viewer.getState() as rs.MprViewState).window;
       viewWindows.current[seriesIndex] = window;
+      setCurrentWindow(window);
       propagateWindowState(viewer, id as string);
     },
     [editingData.layoutItems, propagateWindowState]
@@ -591,6 +597,7 @@ const RevisionEditor: React.FC<{
     })();
     if (window) {
       viewWindows.current[seriesIndex] = window;
+      setCurrentWindow(window);
       return { ...viewState, window, interpolationMode };
     }
     return viewState; // do not update view state (should not happen)
@@ -685,6 +692,7 @@ const RevisionEditor: React.FC<{
           onChangeLayoutKind={handleChangeLayoutKind}
           wandEnabled={activeVolumeLoaded}
           windowPresets={projectData.windowPresets}
+          currentWindow={currentWindow}
           onApplyWindow={handleApplyWindow}
           onMagnify={handleMagnify}
           brushEnabled={editorEnabled}

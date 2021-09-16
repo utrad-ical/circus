@@ -22,8 +22,8 @@ const ViewWindowEditor: React.FC<{
 
   const properties = useMemo(() => {
     return [
-      { key: 'level', caption: 'window level', editor: et.number() },
-      { key: 'width', caption: 'window width', editor: et.number() }
+      { key: 'level', caption: 'Window level', editor: et.number() },
+      { key: 'width', caption: 'Window width', editor: et.number() }
     ] as PropertyEditorProperties<ViewWindow>;
   }, []);
 

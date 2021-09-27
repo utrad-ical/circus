@@ -68,11 +68,11 @@ export const useHybridImageSource = (
     partialVolumeDescriptor
   );
   const { rsHttpClient } = useContext(VolumeLoaderCacheContext)!;
-  const [imageSource, setImageSource] = useState<rs.HybridMprImageSource>();
+  const [imageSource, setImageSource] = useState<rs.WebGlHybridMprImageSource>();
 
   const pendindImageSource = useMemo(() => {
     if (!volumeLoader) return null;
-    return new rs.HybridMprImageSource({
+    return new rs.WebGlHybridMprImageSource({
       rsHttpClient,
       seriesUid,
       volumeLoader

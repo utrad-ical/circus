@@ -20,7 +20,7 @@ uniform float uRayIntensityCoef;
 uniform int uInterpolationMode;
 uniform vec4 uBackground;
 
-varying vec4 vColor;
+varying lowp vec4 vColor;
 varying vec3 vWorldSpaceCoords;
 
 uniform int uDebugFlag;
@@ -34,6 +34,8 @@ uniform vec2 uLabelSliceGridSize;
 uniform vec3 uLabelBoundaryFrom;
 uniform vec3 uLabelBoundaryTo;
 uniform vec4 uLabelLabelColor;
+
+uniform int uDrawMode;
 
 struct boundary {
   vec3 start;

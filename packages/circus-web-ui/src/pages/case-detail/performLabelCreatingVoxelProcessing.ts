@@ -64,10 +64,12 @@ const performLabelCreatingVoxelProcessing = async (
           (labelColors.indexOf(label.data.color) + num + 1) % labelColors.length
         ];
       newLabel.push(createNewLabel(color, names[num]));
-      const [sizex, sizey, sizez] =
-        (LRx - ULx + 1) * (LRy - ULy + 1) * (LRz - ULz + 1) >= 8 ** 3
-          ? [LRx - ULx + 1, LRy - ULy + 1, LRz - ULz + 1]
-          : [8, 8, 8];
+      const [sizex, sizey, sizez] = [
+        LRx - ULx + 1,
+        LRy - ULy + 1,
+        LRz - ULz + 1
+      ];
+
       newLabel[num].data.size = [sizex, sizey, sizez];
       const volume = new rs.RawData([sizex, sizey, sizez], 'binary');
 

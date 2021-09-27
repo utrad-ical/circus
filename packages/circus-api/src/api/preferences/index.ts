@@ -1,24 +1,20 @@
+import { defaultPreferences } from '../../utils/preferenceUtils';
 import { RouteMiddleware } from '../../typings/middlewares';
 
 export const handleGet: RouteMiddleware = () => {
   return async (ctx, next) => {
-    ctx.body = ctx.user.preferences;
-  };
-};
-
-export const handlePut: RouteMiddleware = ({ models }) => {
-  return async (ctx, next) => {
-    await models.user.modifyOne(ctx.user.userEmail, {
-      preferences: ctx.request.body
-    });
-    ctx.body = null;
+    ctx.body = {
+      ...defaultPreferences(),
+      ...ctx.user.preferences
+    };
   };
 };
 
 export const handlePatch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
+    const updates = ctx.request.body;
     await models.user.modifyOne(ctx.user.userEmail, {
-      preferences: { ...ctx.user.preferences, ...ctx.request.body }
+      preferences: { ...ctx.user.preferences, ...updates }
     });
     ctx.body = null;
   };

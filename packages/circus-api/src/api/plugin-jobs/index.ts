@@ -1,7 +1,6 @@
 import status from 'http-status';
-import { performAggregationSearch } from '../performSearch';
+import { extractFilter, performAggregationSearch } from '../performSearch';
 import generateUniqueId from '../../utils/generateUniqueId';
-import { EJSON } from 'bson';
 import path from 'path';
 import fs from 'fs';
 import glob from 'glob-promise';
@@ -11,11 +10,11 @@ import makeNewPluginJob from '../../plugin-job/makeNewPluginJob';
 
 const maskPatientInfo = (ctx: CircusContext) => {
   return (pluginJobData: any) => {
-    const canView = ctx.userPrivileges.globalPrivileges.some(
-      p => p === 'personalInfoView'
+    const canView = ctx.userPrivileges.globalPrivileges.includes(
+      'personalInfoView'
     );
     const wantToView = ctx.user.preferences.personalInfoView;
-    if (!canView || !wantToView) {
+    if (!canView || !wantToView || pluginJobData.patientInfo === null) {
       delete pluginJobData.patientInfo;
     }
     return pluginJobData;
@@ -71,13 +70,7 @@ export const handlePatch: RouteMiddleware = ({ models, cs }) => {
 
 export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
-    const urlQuery = ctx.request.query;
-    let customFilter: object;
-    try {
-      customFilter = urlQuery.filter ? EJSON.parse(urlQuery.filter) : {};
-    } catch (err) {
-      ctx.throw(status.BAD_REQUEST, 'Bad filter.');
-    }
+    const customFilter = extractFilter(ctx);
     const domainFilter = {
       domain: { $in: ctx.userPrivileges.domains }
     };
@@ -96,9 +89,12 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
         ctx.throw(status.BAD_REQUEST, 'This my list is not for plugin jobs');
     }
 
+    const canViewPersonalInfo = ctx.userPrivileges.globalPrivileges.includes(
+      'personalInfoView'
+    );
+
     const baseStage: object[] = [
       {
-        // Performs the 'JOIN'.
         $lookup: {
           from: 'series',
           localField: 'series.seriesUid',
@@ -113,13 +109,14 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
         }
       },
       {
-        // Removes results from non-primary (volId > 0) series
         $match: { volId: 0 }
       },
       {
-        // Appends "patientInfo" field
         $addFields: {
-          patientInfo: '$seriesDetail.patientInfo',
+          // Conditionally appends "patientInfo" field
+          ...(canViewPersonalInfo
+            ? { patientInfo: '$seriesDetail.patientInfo' }
+            : {}),
           domain: '$seriesDetail.domain'
         }
       }

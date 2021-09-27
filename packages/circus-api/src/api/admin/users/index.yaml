@@ -19,6 +19,6 @@ routes:
     description: Updates the specified user.
   - verb: post
     path: /admin/users
-    requestSchema: user|allRequiredExcept lastLoginTime,lastLoginIp,myLists
+    requestSchema: user|allRequiredExcept lastLoginTime,lastLoginIp,myLists,preferences
     requiredGlobalPrivilege: manageServer
     description: Creates a new user.

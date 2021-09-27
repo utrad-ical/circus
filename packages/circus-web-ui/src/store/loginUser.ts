@@ -19,6 +19,12 @@ export interface UserPreferences {
   pluginJobSearchPresets?: SearchPreset[];
   personalInfoView?: boolean;
   theme?: string;
+  referenceLine?: boolean;
+  interpolationMode?: string;
+  scrollBars?: string;
+  maintainAspectRatio?: boolean;
+  fixCenterOfGravity?: boolean;
+  dimmedOutlineFor2DLabels?: string;
 }
 
 export type MyListResourceType = 'series' | 'clinicalCases' | 'jobs';
@@ -75,6 +81,16 @@ const slice = createSlice({
     loggedOut: state => {
       state.isFetching = false;
       state.data = null;
+    },
+    userPreferencesUpdated: (
+      state,
+      action: PayloadAction<{
+        updates: Partial<UserPreferences>;
+      }>
+    ) => {
+      const { updates } = action.payload;
+      if (!state.data) throw new Error('User not logged in');
+      state.data.preferences = { ...state.data.preferences, ...updates };
     }
   }
 });
@@ -85,5 +101,6 @@ export const {
   fullLoginInfoLoaded,
   loginInfoConfirmed,
   loginInfoRequest,
-  loggedOut
+  loggedOut,
+  userPreferencesUpdated
 } = slice.actions;

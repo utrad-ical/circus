@@ -17,7 +17,6 @@ import Router from 'koa-router';
 import * as path from 'path';
 import { DisposableDb, Validator, Models, DicomImporter } from './interface';
 import checkPrivilege from './middleware/auth/checkPrivilege';
-import createOauthServer from './middleware/auth/createOauthServer';
 import fixUserMiddleware from './middleware/auth/fixUser';
 import cors from './middleware/cors';
 import errorHandler from './middleware/errorHandler';
@@ -28,6 +27,7 @@ import { Deps } from './typings/middlewares';
 import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
 import { TaskManager } from './createTaskManager';
 import { MhdPacker } from './case/createMhdPacker';
+import KoaOAuth2Server from './middleware/auth/KoaOAuth2Server';
 
 function handlerName(route: Route) {
   if (route.handler) return route.handler;
@@ -131,6 +131,7 @@ export const createApp: FunctionService<
     taskManager: TaskManager;
     mhdPacker: MhdPacker;
     dicomVoxelDumper: DicomVoxelDumper;
+    oauthServer: KoaOAuth2Server;
   },
   CreateAppOptions
 > = async (
@@ -148,7 +149,8 @@ export const createApp: FunctionService<
     dicomFileRepository,
     taskManager,
     mhdPacker,
-    dicomVoxelDumper
+    dicomVoxelDumper,
+    oauthServer
   }
 ) => {
   const {
@@ -184,11 +186,9 @@ export const createApp: FunctionService<
 
   const apiDir = path.resolve(__dirname, 'api/**/*.yaml');
 
-  const oauth = createOauthServer(models);
-
   const authMiddleware = fixUser
     ? fixUserMiddleware(deps, fixUser)
-    : oauth.authenticate();
+    : oauthServer.authenticate();
 
   const apiRouter = await prepareApiRouter(apiDir, deps, debug, authMiddleware);
 
@@ -223,7 +223,7 @@ export const createApp: FunctionService<
       ])
     )
   );
-  koa.use(mount('/login', compose([bodyParser(), oauth.token()])));
+  koa.use(mount('/login', compose([bodyParser(), oauthServer.token()])));
 
   const rs = new Router();
   rs.use('/series/:sid', rsSeriesRoutes as any);
@@ -245,7 +245,8 @@ createApp.dependencies = [
   'dicomImporter',
   'taskManager',
   'mhdPacker',
-  'dicomVoxelDumper'
+  'dicomVoxelDumper',
+  'oauthServer'
 ];
 
 export default createApp;

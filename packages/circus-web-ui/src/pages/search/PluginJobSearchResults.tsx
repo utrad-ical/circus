@@ -11,7 +11,8 @@ import PatientInfoBox from 'components/PatientInfoBox';
 import PluginDisplay from 'components/PluginDisplay';
 import { ProgressBar } from 'components/react-bootstrap';
 import SearchResultsView, {
-  makeSortOptions
+  makeSortOptions,
+  patientInfoSearchOptions
 } from 'components/SearchResultsView';
 import TimeDisplay from 'components/TimeDisplay';
 import UserDisplay from 'components/UserDisplay';
@@ -176,7 +177,8 @@ const DataView: React.FC<{
 };
 
 const sortOptions = makeSortOptions({
-  createdAt: 'job date'
+  createdAt: 'job date',
+  ...patientInfoSearchOptions
 });
 
 const PluginSearchResults: React.FC<{

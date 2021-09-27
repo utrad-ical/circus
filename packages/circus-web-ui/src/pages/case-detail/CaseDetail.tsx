@@ -227,8 +227,11 @@ const CaseDetail: React.FC<{}> = props => {
       {exportDialogOpen && (
         <Modal show onHide={() => {}}>
           <CaseExportModal
-            caseIds={[caseId]}
+            caseIds={[
+              { caseId, revisionIndex: caseStore.editingRevisionIndex }
+            ]}
             onClose={() => setExportDialogOpen(false)}
+            revisions={caseStore.caseData!.revisions}
           />
         </Modal>
       )}

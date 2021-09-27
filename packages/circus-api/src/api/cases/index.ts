@@ -1,10 +1,10 @@
 import status from 'http-status';
-import { performAggregationSearch } from '../performSearch';
-import { EJSON } from 'bson';
+import { extractFilter, performAggregationSearch } from '../performSearch';
 import checkFilter from '../../utils/checkFilter';
 import { RouteMiddleware, CircusContext } from '../../typings/middlewares';
 import makeNewCase from '../../case/makeNewCase';
 import {
+  CaseExportTarget,
   CompressionFormat,
   LabelPackType,
   LineEndingType
@@ -15,18 +15,7 @@ const maxTagLength = 32;
 const maskPatientInfo = (ctx: CircusContext) => {
   return (caseData: any) => {
     const wantToView = ctx.user.preferences.personalInfoView;
-    const accessibleProjects = ctx.userPrivileges.accessibleProjects;
-    const project = accessibleProjects.find(
-      p => caseData.projectId === p.projectId
-    );
-    if (!project) {
-      throw new Error(
-        `Project ${caseData.projectId} is not accessbible by ${ctx.user.userEmail}.`
-      );
-    }
-    const viewable = project.roles.some(r => r === 'viewPersonalInfo');
-    const view = viewable && wantToView;
-    if (!view) {
+    if (!wantToView || caseData.patientInfo === null) {
       delete caseData.patientInfo;
     }
     return caseData;
@@ -112,13 +101,7 @@ const searchableFields = [
 
 export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
-    const urlQuery = ctx.request.query;
-    let customFilter: object;
-    try {
-      customFilter = urlQuery.filter ? EJSON.parse(urlQuery.filter) : {};
-    } catch (err) {
-      ctx.throw(status.BAD_REQUEST, 'Invalid JSON was passed as the filter.');
-    }
+    const customFilter = extractFilter(ctx);
     if (!checkFilter(customFilter!, searchableFields))
       ctx.throw(status.BAD_REQUEST, 'Bad filter.');
 
@@ -127,13 +110,20 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
     const accessibleProjectIds = ctx.userPrivileges.accessibleProjects
       .filter(
         p =>
-          p.roles.indexOf('read') >= 0 &&
-          (!patientInfoInFilter || p.roles.indexOf('viewPersonalInfo') >= 0)
+          p.roles.includes('read') &&
+          (!patientInfoInFilter || p.roles.includes('viewPersonalInfo'))
       )
       .map(p => p.projectId);
+    const patientInfoVisibleProjectIds = ctx.userPrivileges.accessibleProjects
+      .filter(
+        p => p.roles.includes('read') && p.roles.includes('viewPersonalInfo')
+      )
+      .map(p => p.projectId);
+
     const accessibleProjectFilter = {
       projectId: { $in: accessibleProjectIds }
     };
+
     const filter = {
       $and: [customFilter!, accessibleProjectFilter /* domainFilter */]
     };
@@ -162,7 +152,17 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
       },
       { $unwind: { path: '$seriesDetail', includeArrayIndex: 'volId' } },
       { $match: { volId: 0 } },
-      { $addFields: { patientInfo: '$seriesDetail.patientInfo' } }
+      {
+        $addFields: {
+          patientInfo: {
+            $cond: [
+              { $in: ['$projectId', patientInfoVisibleProjectIds] },
+              '$seriesDetail.patientInfo',
+              null
+            ]
+          }
+        }
+      }
     ];
 
     const searchByMyListStage: object[] = [
@@ -221,7 +221,7 @@ export const handlePostExportJob: RouteMiddleware = ({
 }) => {
   return async (ctx, next) => {
     const userEmail = ctx.user.userEmail;
-    const caseIds: string[] = ctx.request.body.caseIds;
+    const caseIds: CaseExportTarget[] = ctx.request.body.caseIds;
     const labelPackType: LabelPackType =
       ctx.request.body.labelPackType === 'combined' ? 'combined' : 'isolated';
     const mhdLineEnding: LineEndingType =
@@ -229,10 +229,12 @@ export const handlePostExportJob: RouteMiddleware = ({
     const compressionFormat: CompressionFormat =
       ctx.request.body.compressionFormat === 'zip' ? 'zip' : 'tgz';
 
+    const ids = Array.from(
+      new Set(caseIds.map(i => (typeof i === 'string' ? i : i.caseId))).values()
+    );
+
     // check read privileges
-    const cursor = models.clinicalCase.findAsCursor({
-      caseId: { $in: caseIds }
-    });
+    const cursor = models.clinicalCase.findAsCursor({ caseId: { $in: ids } });
     const pidSet = new Set<string>();
     while (await cursor.hasNext()) {
       const c = await cursor.next();

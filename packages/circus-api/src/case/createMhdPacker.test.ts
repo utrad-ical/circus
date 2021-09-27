@@ -7,21 +7,23 @@ import rawBody from 'raw-body';
 import zip from 'jszip';
 
 test('pack', async () => {
+  const rev = {
+    series: [
+      {
+        seriesUid: '1.2.3',
+        partialVolumeDescriptor: { start: 1, end: 10, delta: 1 },
+        labels: []
+      }
+    ]
+  };
   const deps = {
     models: {
       clinicalCase: {
         findByIdOrFail: jest.fn().mockImplementation(() => {
           return Promise.resolve({
             caseId: 'my-case-id',
-            latestRevision: {
-              series: [
-                {
-                  seriesUid: '1.2.3',
-                  partialVolumeDescriptor: { start: 1, end: 10, delta: 1 },
-                  labels: []
-                }
-              ]
-            },
+            latestRevision: rev,
+            revisions: [rev],
             createdAt: new Date('2015-01-01T00:00:00Z'),
             updatedAt: new Date('2015-01-03T12:00:00Z'),
             projectId: 'my-project-id'
@@ -59,14 +61,14 @@ test('pack', async () => {
   const archive = await zip.loadAsync(zipFile);
   // data.json
   const json = JSON.parse(
-    await archive.file('my-case-id/data.json').async('text')
+    await archive.file('my-case-id/data.json')!.async('text')
   );
   expect(json).toEqual({
     caseId: 'my-case-id',
     projectId: 'my-project-id',
     createdAt: '2015-01-01T00:00:00.000Z',
     updatedAt: '2015-01-03T12:00:00.000Z',
-    latestRevision: {
+    revision: {
       series: [
         {
           seriesUid: '1.2.3',
@@ -77,10 +79,10 @@ test('pack', async () => {
     }
   });
   // vol000.raw
-  const raw = await archive.file('my-case-id/vol000.raw').async('arraybuffer');
+  const raw = await archive.file('my-case-id/vol000.raw')!.async('arraybuffer');
   expect(raw.byteLength).toBe(16 * 16 * 10);
   // vol000.mhd
-  const mhd = await archive.file('my-case-id/vol000.mhd').async('text');
+  const mhd = await archive.file('my-case-id/vol000.mhd')!.async('text');
   const lines = [
     'ObjectType = Image',
     'NDims = 3',

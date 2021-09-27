@@ -6,6 +6,7 @@ import {
 } from '@utrad-ical/circus-rs/src/browser';
 import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
 import { toolFactory } from '@utrad-ical/circus-rs/src/browser/tool/tool-initializer';
+import { Section } from '@utrad-ical/circus-rs/src/common/geometry';
 import classnames from 'classnames';
 import GridContainer, {
   LayoutInfo,
@@ -35,6 +36,7 @@ export interface ViewerDef {
   seriesIndex: number;
   orientation: 'axial' | 'sagittal' | 'coronal' | 'oblique';
   celestialRotateMode: boolean; // only applicable for oblique view
+  initialSection?: Section;
 }
 
 interface ViewerGridContextValue {
@@ -217,7 +219,13 @@ const HeaderDiv = styled.div`
 const celestialRotate = toolFactory('celestialRotate');
 
 const Content: React.FC<{ value: ViewerDef }> = props => {
-  const { key, seriesIndex, orientation, celestialRotateMode } = props.value;
+  const {
+    key,
+    seriesIndex,
+    orientation,
+    celestialRotateMode,
+    initialSection
+  } = props.value;
 
   const {
     compositions,
@@ -233,11 +241,16 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
 
   const combinedInitialStateSetter = useCallback(
     (viewer: Viewer, viewState: MprViewState) => {
-      const s1 = orientationInitialStateSetters[orientation](viewer, viewState);
+      const s1 = initialSection
+        ? {
+            ...orientationInitialStateSetters[orientation](viewer, viewState)!,
+            section: initialSection
+          }
+        : orientationInitialStateSetters[orientation](viewer, viewState);
       const s2 = initialStateSetter(viewer, s1!, key);
       return s2;
     },
-    [initialStateSetter, orientation, key]
+    [initialStateSetter, orientation, key, initialSection]
   );
 
   const localStateChanger = useMemo(

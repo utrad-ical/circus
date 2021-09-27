@@ -16,13 +16,16 @@ import {
   SplitButton
 } from 'components/react-bootstrap';
 import React, { useState } from 'react';
+import { ButtonProps } from 'react-bootstrap';
 import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
+import useKeyboardShortcut from 'utils/useKeyboardShortcut';
 import useLocalPreference from 'utils/useLocalPreference';
 import * as c from './caseStore';
 import createCclProcessor, { CclOptions } from './createCclProcessor';
 import createCurrentLabelsUpdator from './createCurrentLabelsUpdator';
 import createHfProcessor, { HoleFillingOptions } from './createHfProcessor';
+import createSectionFromPoints from './createSectionFromPoints';
 import {
   createNewLabelData,
   InternalLabel,
@@ -68,6 +71,10 @@ const LabelMenu: React.FC<{
 
   const [cclDialogOpen, setCclDialogOpen] = useState(false);
   const [hfDialogOpen, setHfDialogOpen] = useState(false);
+  const [processorProgress, setProcessorProgress] = useState({
+    value: 0,
+    label: ''
+  });
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
   const activeSeries = revision.series[activeSeriesIndex];
   const activeLabel =
@@ -243,9 +250,18 @@ const LabelMenu: React.FC<{
       updateEditingData,
       label,
       labelColors,
-      createCclProcessor(props)
+      createCclProcessor(props),
+      cclProgress => {
+        setProcessorProgress(cclProgress);
+        if (cclProgress.label !== '') {
+          setCclDialogOpen(false);
+          setProcessorProgress({
+            value: 0,
+            label: ''
+          });
+        }
+      }
     );
-    setCclDialogOpen(false);
   };
 
   const onOkClickDialogHF = (props: HoleFillingOptions) => {
@@ -257,9 +273,40 @@ const LabelMenu: React.FC<{
       updateEditingData,
       label,
       labelColors,
-      createHfProcessor(props)
+      createHfProcessor(props),
+      hfProgress => {
+        setProcessorProgress(hfProgress);
+        if (hfProgress.label !== '') {
+          setHfDialogOpen(false);
+          setProcessorProgress({
+            value: 0,
+            label: ''
+          });
+        }
+      }
     );
-    setHfDialogOpen(false);
+  };
+
+  const onSelectThreePoints2Section = () => {
+    try {
+      const [newLayoutItems, newLayout, key] = createSectionFromPoints(
+        editingData.revision.series[activeSeriesIndex].labels.filter(label => {
+          return label.type === 'point';
+        }) as InternalLabelOf<'point'>[],
+        activeLabel!.name!,
+        viewers[editingData.activeLayoutKey!].getState().section,
+        editingData.layout,
+        editingData.layoutItems,
+        activeSeriesIndex
+      );
+      updateEditingData(d => {
+        d.layoutItems = newLayoutItems;
+        d.layout = newLayout;
+        d.activeLayoutKey = key;
+      });
+    } catch (err) {
+      alert(err.message);
+    }
   };
 
   return (
@@ -302,9 +349,10 @@ const LabelMenu: React.FC<{
         disabled={!activeLabel || disabled}
         onClick={() => handleCommand('rename')}
       />
-      <IconButton
+      <ShortcutIconButton
+        shortcut="R"
         bsSize="xs"
-        title="Reveal in Viewer"
+        title="Reveal in Viewer (R)"
         icon="map-marker"
         disabled={!activeLabel || disabled}
         onClick={() => handleCommand('reveal')}
@@ -313,25 +361,33 @@ const LabelMenu: React.FC<{
         bsSize="xs"
         title={<Icon icon="glyphicon-option-horizontal" />}
         id={`labelmenu-header-dropdown`}
-        disabled={!activeLabel || activeLabel.type !== 'voxel'}
         pullRight
         noCaret
       >
         <MenuItem
           eventKey="ccl"
-          onClick={() => {
+          onSelect={() => {
             setCclDialogOpen(true);
           }}
+          disabled={!activeLabel || activeLabel.type !== 'voxel'}
         >
           CCL
         </MenuItem>
         <MenuItem
           eventKey="fillng"
-          onClick={() => {
+          onSelect={() => {
             setHfDialogOpen(true);
           }}
+          disabled={!activeLabel || activeLabel.type !== 'voxel'}
         >
           Hole filling
+        </MenuItem>
+        <MenuItem
+          eventKey="section"
+          onSelect={() => onSelectThreePoints2Section()}
+          disabled={!activeLabel || activeLabel.type !== 'point'}
+        >
+          Three points to section
         </MenuItem>
       </DropdownButton>
       <IconButton
@@ -368,22 +424,16 @@ const LabelMenu: React.FC<{
           );
         })}
       </SplitButton>
-      <Modal
-        show={cclDialogOpen}
-        onHide={() => setCclDialogOpen(false)}
-        bsSize="lg"
-      >
+      <Modal show={cclDialogOpen} onHide={() => setCclDialogOpen(false)}>
         <SettingDialogCCL
+          processorProgress={processorProgress}
           onHide={() => setCclDialogOpen(false)}
           onOkClick={onOkClickDialogCCL}
         />
       </Modal>
-      <Modal
-        show={hfDialogOpen}
-        onHide={() => setHfDialogOpen(false)}
-        bsSize="lg"
-      >
+      <Modal show={hfDialogOpen} onHide={() => setHfDialogOpen(false)}>
         <SettingDialogHF
+          processorProgress={processorProgress}
           onHide={() => setHfDialogOpen(false)}
           onOkClick={onOkClickDialogHF}
         />
@@ -519,3 +569,11 @@ const StyledAppearancePopoverDiv = styled.div`
     width: 85px;
   }
 `;
+
+const ShortcutIconButton: React.FC<
+  { shortcut: string; icon: string } & ButtonProps
+> = props => {
+  const { shortcut, ...rest } = props;
+  useKeyboardShortcut(shortcut, props.onClick ?? (() => {}));
+  return <IconButton {...rest} />;
+};

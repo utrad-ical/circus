@@ -62,6 +62,9 @@ const defaults: Configuration = {
       // Controls the number of maximum threds to parse DICOM files.
       maxConcurrency: os.cpus().length
     }
+  },
+  authProvider: {
+    type: 'DefaultAuthProvider'
   }
 };
 

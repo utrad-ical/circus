@@ -7,9 +7,10 @@ import {
   MenuItem,
   OverlayTrigger,
   Tooltip,
-  SplitButton
+  SplitButton,
+  Modal
 } from 'components/react-bootstrap';
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { WindowPreset } from 'types/Project';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
@@ -18,6 +19,9 @@ import { ReferenceValueOption } from '@utrad-ical/circus-rs/src/browser/tool/clo
 import ModifierKeyBehaviors from '@utrad-ical/circus-rs/src/browser/annotation/ModifierKeyBehaviors';
 import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import { LayoutKind } from './caseStore';
+import { MenuItemProps } from 'react-bootstrap';
+import PlaneFigureOption from '@utrad-ical/circus-rs/src/browser/annotation/PlaneFigureOption';
+import ViewWindowEditor, { ViewWindow } from './ViewWindowEditor';
 
 export interface ViewOptions {
   showReferenceLine?: boolean;
@@ -33,11 +37,48 @@ const scrollbarOptions: { key: ScrollbarOptions; caption: string }[] = [
   { key: 'large', caption: 'Large' }
 ];
 
-const layoutOptions: { key: LayoutKind; caption: string; icon: string }[] = [
-  { key: 'twoByTwo', caption: '2 x 2', icon: 'circus-layout-four' },
-  { key: 'axial', caption: 'Axial', icon: 'circus-orientation-axial' },
-  { key: 'sagittal', caption: 'Sagittal', icon: 'circus-orientation-sagittal' },
-  { key: 'coronal', caption: 'Coronal', icon: 'circus-orientation-coronal' }
+type ZDimmedThresholdOptions = 'hide' | 'show' | 'infinity';
+
+export const zDimmedThresholdOptions: {
+  key: ZDimmedThresholdOptions;
+  caption: string;
+  value: number;
+}[] = [
+  { key: 'hide', caption: 'None', value: 0 },
+  { key: 'show', caption: '± 2', value: 3 },
+  { key: 'infinity', caption: '∞', value: Infinity }
+];
+
+const layoutOptions: {
+  key: LayoutKind;
+  caption: string;
+  icon: string;
+  shortcut: string;
+}[] = [
+  {
+    key: 'twoByTwo',
+    caption: '2 x 2',
+    icon: 'circus-layout-four',
+    shortcut: 'X'
+  },
+  {
+    key: 'axial',
+    caption: 'Axial',
+    icon: 'circus-orientation-axial',
+    shortcut: 'A'
+  },
+  {
+    key: 'sagittal',
+    caption: 'Sagittal',
+    icon: 'circus-orientation-sagittal',
+    shortcut: 'S'
+  },
+  {
+    key: 'coronal',
+    caption: 'Coronal',
+    icon: 'circus-orientation-coronal',
+    shortcut: 'C'
+  }
 ];
 
 const ToolBar: React.FC<{
@@ -51,9 +92,12 @@ const ToolBar: React.FC<{
   onChangeModifierKeyBehaviors: (
     modifierKeyBehaviors: ModifierKeyBehaviors
   ) => void;
+  planeFigureOption: PlaneFigureOption;
+  onChangePlaneFigureOption: (planeFigureOption: PlaneFigureOption) => void;
   brushEnabled: boolean;
   wandEnabled: boolean;
   windowPresets?: WindowPreset[];
+  currentWindow: ViewWindow;
   onChangeTool: (toolName: string) => void;
   onApplyWindow: (window: any) => void;
   onMagnify: (magnitude: number) => void;
@@ -68,9 +112,12 @@ const ToolBar: React.FC<{
     onChangeLayoutKind,
     modifierKeyBehaviors,
     onChangeModifierKeyBehaviors,
+    planeFigureOption,
+    onChangePlaneFigureOption,
     brushEnabled,
     wandEnabled,
     windowPresets = [],
+    currentWindow,
     onChangeTool,
     onApplyWindow,
     onMagnify,
@@ -79,14 +126,20 @@ const ToolBar: React.FC<{
 
   const widthOptions = ['1', '3', '5', '7'];
   const wandModeOptions = { '3d': '3D', '2d': '2D' };
-  const instantZoomLevels: { [key: string]: number } = {
-    x8: 8,
-    x4: 4,
-    x2: 2,
-    'x1/2': 0.5,
-    'x1/4': 0.25,
-    'x1/8': 0.125
-  };
+  const [windowDialogOpen, setWindowDialogOpen] = useState(false);
+
+  const instantZoomLevels: {
+    label: string;
+    level: number;
+    shortcut?: string;
+  }[] = [
+    { label: 'x8', level: 8 },
+    { label: 'x4', level: 4 },
+    { label: 'x2', level: 2, shortcut: '+' },
+    { label: 'x1/2', level: 0.5, shortcut: '-' },
+    { label: 'x1/4', level: 0.25 },
+    { label: 'x1/8', level: 0.125 }
+  ];
 
   const handleToggleReferenceLine = () => {
     onChangeViewOptions({
@@ -100,6 +153,15 @@ const ToolBar: React.FC<{
     onChangeModifierKeyBehaviors({
       ...modifierKeyBehaviors,
       lockMaintainAspectRatio: !modifierKeyBehaviors.lockMaintainAspectRatio
+    });
+  };
+
+  const handleChangeZDimmedThreshold = (selection: any) => {
+    onChangePlaneFigureOption({
+      ...planeFigureOption,
+      zDimmedThreshold: zDimmedThresholdOptions.find(
+        zDimmedThresholdOption => zDimmedThresholdOption.key === selection
+      )!.value
     });
   };
 
@@ -131,13 +193,9 @@ const ToolBar: React.FC<{
     if ('level' in selection && 'width' in selection) {
       const window = selection as WindowPreset;
       onApplyWindow({ level: window.level, width: window.width });
+      setWindowDialogOpen(false);
     } else {
-      const value = await prompt('Input window level/width (e.g., "20,100")');
-      const [level, width] = (value ? value : '0,0')
-        .split(/,|\//)
-        .map(s => parseInt(s, 10));
-      if (width <= 0 || isNaN(level) || isNaN(width)) return;
-      onApplyWindow({ level, width });
+      setWindowDialogOpen(true);
     }
   };
 
@@ -159,10 +217,14 @@ const ToolBar: React.FC<{
         shortcut="Z"
         disabled={disabled}
       >
-        {Object.entries(instantZoomLevels).map(([label, level]) => (
-          <MenuItem key={label} onClick={() => onMagnify(level)}>
+        {instantZoomLevels.map(({ label, level, shortcut }) => (
+          <MenuItemWithShortcut
+            key={label}
+            onClick={() => onMagnify(level)}
+            shortcut={shortcut}
+          >
             {label}
-          </MenuItem>
+          </MenuItemWithShortcut>
         ))}
       </ToolButton>
       <ToolButton
@@ -256,15 +318,18 @@ const ToolBar: React.FC<{
         <Dropdown.Toggle>
           <Icon icon="circus-layout-four" />
         </Dropdown.Toggle>
-        <Dropdown.Menu
-          onSelect={(sel: any) => onChangeLayoutKind(sel as LayoutKind)}
-        >
+        <Dropdown.Menu>
           {layoutOptions.map(l => {
             return (
-              <MenuItem key={l.key} eventKey={l.key}>
+              <MenuItemWithShortcut
+                key={l.key}
+                eventKey={l.key}
+                shortcut={l.shortcut}
+                onClick={() => onChangeLayoutKind(l.key)}
+              >
                 <Icon icon={l.icon} />
                 {l.caption}
-              </MenuItem>
+              </MenuItemWithShortcut>
             );
           })}
         </Dropdown.Menu>
@@ -275,16 +340,22 @@ const ToolBar: React.FC<{
           <Icon icon="circus-tool" />
         </Dropdown.Toggle>
         <Dropdown.Menu>
-          <MenuItem onClick={handleToggleReferenceLine}>
+          <MenuItemWithShortcut
+            shortcut=";"
+            onClick={handleToggleReferenceLine}
+          >
             <CheckMark checked={!!viewOptions.showReferenceLine} />
             Show reference line
-          </MenuItem>
-          <MenuItem onClick={handleToggleInterpolationMode}>
+          </MenuItemWithShortcut>
+          <MenuItemWithShortcut
+            shortcut="F"
+            onClick={handleToggleInterpolationMode}
+          >
             <CheckMark
               checked={viewOptions.interpolationMode === 'trilinear'}
             />
             Trilinear filtering
-          </MenuItem>
+          </MenuItemWithShortcut>
           <MenuItem divider />
           <MenuItem header>Scroll bars</MenuItem>
           {scrollbarOptions.map(l => {
@@ -309,6 +380,21 @@ const ToolBar: React.FC<{
             <CheckMark checked={modifierKeyBehaviors.lockFixCenterOfGravity} />
             Lock Ctrl + Drag to fix center of gravity
           </MenuItem>
+          <MenuItem header>Number of slices for 2D shape</MenuItem>
+          {zDimmedThresholdOptions.map(l => {
+            return (
+              <MenuItem
+                key={l.key}
+                eventKey={l.key}
+                onSelect={handleChangeZDimmedThreshold}
+              >
+                <CheckMark
+                  checked={planeFigureOption.zDimmedThreshold === l.value}
+                />
+                {l.caption}
+              </MenuItem>
+            );
+          })}
         </Dropdown.Menu>
       </Dropdown>
       {(active === 'wand' || active === 'wandEraser') && (
@@ -355,6 +441,13 @@ const ToolBar: React.FC<{
           />
         </StyledSpanWandOption>
       )}
+      <Modal show={windowDialogOpen} onHide={() => setWindowDialogOpen(false)}>
+        <ViewWindowEditor
+          initialValue={currentWindow}
+          onHide={() => setWindowDialogOpen(false)}
+          onOkClick={handleApplyWindow}
+        />
+      </Modal>
     </StyledDiv>
   );
 });
@@ -425,12 +518,6 @@ const CheckMark: React.FC<{ checked: boolean }> = props => (
   </span>
 );
 
-const PlusMinusMark: React.FC<{ checked: boolean }> = props => (
-  <span className="plusmark">
-    <Icon icon={props.checked ? 'plus' : 'minus'} />
-  </span>
-);
-
 const ToolButton: React.FC<{
   name: string;
   icon: string;
@@ -486,6 +573,31 @@ const ToolButton: React.FC<{
     );
   }
 };
+
+const MenuItemWithShortcut: React.FC<
+  { shortcut?: string } & MenuItemProps
+> = props => {
+  const { shortcut, children, ...rest } = props;
+  useKeyboardShortcut(shortcut, props.onClick || (() => {}));
+  return (
+    <MenuItem {...rest}>
+      <ShortcutBox>
+        <span>{children}</span>
+        {shortcut && <kbd>{shortcut}</kbd>}
+      </ShortcutBox>
+    </MenuItem>
+  );
+};
+
+const ShortcutBox = styled.div`
+  display: flex;
+  justify-content: space-between;
+  kbd {
+    background-color: inherit;
+    color: inherit;
+    border: none;
+  }
+`;
 
 const WandBaseValueEditor: Editor<ReferenceValueOption> = props => {
   const { value, onChange } = props;

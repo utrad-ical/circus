@@ -253,7 +253,13 @@ const LabelMenu: React.FC<{
       createCclProcessor(props),
       cclProgress => {
         setProcessorProgress(cclProgress);
-        cclProgress.label !== '' && setCclDialogOpen(false);
+        if (cclProgress.label !== '') {
+          setCclDialogOpen(false);
+          setProcessorProgress({
+            value: 0,
+            label: ''
+          });
+        }
       }
     );
   };
@@ -270,7 +276,13 @@ const LabelMenu: React.FC<{
       createHfProcessor(props),
       hfProgress => {
         setProcessorProgress(hfProgress);
-        hfProgress.label !== '' && setHfDialogOpen(false);
+        if (hfProgress.label !== '') {
+          setHfDialogOpen(false);
+          setProcessorProgress({
+            value: 0,
+            label: ''
+          });
+        }
       }
     );
   };

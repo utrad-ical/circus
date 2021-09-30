@@ -1,6 +1,9 @@
 import { TransferFunction } from '../../ViewState';
 import { ViewWindow } from '../../../common/ViewWindow';
-import { transferFunctionOrigin, transferFunctionRange } from './texture/transfer-function-constants';
+import {
+  transferFunctionOrigin,
+  transferFunctionRange
+} from './texture/transfer-function-constants';
 
 type TransferFunctionDefinition = [number, string][];
 

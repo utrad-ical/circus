@@ -4,7 +4,11 @@ import DicomVolume from '../../common/DicomVolume';
 import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
 import MprProgram from './gl/MprProgram';
 import MprImageSource from './MprImageSource';
-import { createCameraToLookSection, getWebGLContext, resolveImageData } from './gl/webgl-util';
+import {
+  createCameraToLookSection,
+  getWebGLContext,
+  resolveImageData
+} from './gl/webgl-util';
 import MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume';
 import PriorityIntegerCaller from '../../common/PriorityIntegerCaller';
 import { Initializer as MultiRangeInitializer } from 'multi-integer-range';
@@ -37,11 +41,18 @@ export default class WebGlRawVolumeMprImageSource extends MprImageSource
 
   // For debugging
   public static captureCanvasCallbacks: CaptureCanvasCallback[] = [];
-  public static captureCanvasElement(captureCanvasCallback: CaptureCanvasCallback) {
-    WebGlRawVolumeMprImageSource.captureCanvasCallbacks.push(captureCanvasCallback);
+  public static captureCanvasElement(
+    captureCanvasCallback: CaptureCanvasCallback
+  ) {
+    WebGlRawVolumeMprImageSource.captureCanvasCallbacks.push(
+      captureCanvasCallback
+    );
   }
 
-  constructor({ volumeLoader, beginTransferOnVolumeLoaded = false }: WebGlRawVolumeMprImageSourceOptions) {
+  constructor({
+    volumeLoader,
+    beginTransferOnVolumeLoaded = false
+  }: WebGlRawVolumeMprImageSourceOptions) {
     super();
 
     const backCanvas = this.createBackCanvas();
@@ -54,12 +65,14 @@ export default class WebGlRawVolumeMprImageSource extends MprImageSource
     this.mprProgram = mprProgram;
 
     // For debugging
-    WebGlRawVolumeMprImageSource.captureCanvasCallbacks.forEach(handler => handler(backCanvas));
+    WebGlRawVolumeMprImageSource.captureCanvasCallbacks.forEach(handler =>
+      handler(backCanvas)
+    );
 
     this.loadSequence = (async () => {
       this.metadata = await volumeLoader.loadMeta();
 
-      // Assign the length of the longest side of the volume to 
+      // Assign the length of the longest side of the volume to
       // the length of the side in normalized device coordinates.
       const { voxelSize, voxelCount } = this.metadata!;
       const longestSideLengthInMmOfTheVolume = Math.max(
@@ -115,8 +128,7 @@ export default class WebGlRawVolumeMprImageSource extends MprImageSource
    * @returns {Promise<ImageData>}
    */
   public async draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
-    if (viewState.type !== 'mpr')
-      throw new Error('Unsupported view state.');
+    if (viewState.type !== 'mpr') throw new Error('Unsupported view state.');
 
     if (!this.mprProgram.isActive())
       throw new Error('The program is not active');
@@ -125,18 +137,26 @@ export default class WebGlRawVolumeMprImageSource extends MprImageSource
     const sectionVertexZValues = [
       viewState.section.origin[2],
       viewState.section.origin[2] + viewState.section.xAxis[2],
-      viewState.section.origin[2] + viewState.section.xAxis[2] + viewState.section.yAxis[2],
+      viewState.section.origin[2] +
+        viewState.section.xAxis[2] +
+        viewState.section.yAxis[2],
       viewState.section.origin[2] + viewState.section.yAxis[2]
     ];
     const minImage = Math.max(
       0,
-      Math.floor(Math.min(...sectionVertexZValues) / this.metadata!.voxelSize[2]) - 1
-      - (viewState.interpolationMode === 'trilinear' ? 1 : 0)
+      Math.floor(
+        Math.min(...sectionVertexZValues) / this.metadata!.voxelSize[2]
+      ) -
+        1 -
+        (viewState.interpolationMode === 'trilinear' ? 1 : 0)
     );
     const maxImage = Math.min(
       this.metadata!.voxelCount[2] - 1,
-      Math.ceil(Math.max(...sectionVertexZValues) / this.metadata!.voxelSize[2]) - 1
-      + (viewState.interpolationMode === 'trilinear' ? 1 : 0)
+      Math.ceil(
+        Math.max(...sectionVertexZValues) / this.metadata!.voxelSize[2]
+      ) -
+        1 +
+        (viewState.interpolationMode === 'trilinear' ? 1 : 0)
     );
     const requiredRange: MultiRangeInitializer = [[minImage, maxImage]];
     this.priorityIntegerCaller!.append(requiredRange, this.priorityCounter++);
@@ -146,7 +166,9 @@ export default class WebGlRawVolumeMprImageSource extends MprImageSource
     this.updateViewportSize(viewer.getResolution());
 
     this.glContext.clearColor(...this.background);
-    this.glContext.clear(this.glContext.COLOR_BUFFER_BIT | this.glContext.DEPTH_BUFFER_BIT);
+    this.glContext.clear(
+      this.glContext.COLOR_BUFFER_BIT | this.glContext.DEPTH_BUFFER_BIT
+    );
 
     // Camera
     const camera = createCameraToLookSection(
@@ -170,4 +192,3 @@ export default class WebGlRawVolumeMprImageSource extends MprImageSource
     return resolveImageData(this.glContext);
   }
 }
-

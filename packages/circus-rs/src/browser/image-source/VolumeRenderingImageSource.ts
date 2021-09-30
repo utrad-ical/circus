@@ -7,7 +7,11 @@ import { LabelLoader } from './volume-loader/interface';
 import { windowToTransferFunction } from './gl/transfer-function-util';
 import MprImageSource from './MprImageSource';
 import { createOrthogonalMprSection } from '../section-util';
-import { createCameraToLookSection, getWebGLContext, resolveImageData } from './gl/webgl-util';
+import {
+  createCameraToLookSection,
+  getWebGLContext,
+  resolveImageData
+} from './gl/webgl-util';
 import DicomVolume from 'common/DicomVolume';
 
 interface VolumeRenderingImageSourceOptions {
@@ -45,11 +49,19 @@ export default class VolumeRenderingImageSource extends MprImageSource {
 
   // For debugging
   public static captureCanvasCallbacks: CaptureCanvasCallback[] = [];
-  public static captureCanvasElement(captureCanvasCallback: CaptureCanvasCallback) {
-    VolumeRenderingImageSource.captureCanvasCallbacks.push(captureCanvasCallback);
+  public static captureCanvasElement(
+    captureCanvasCallback: CaptureCanvasCallback
+  ) {
+    VolumeRenderingImageSource.captureCanvasCallbacks.push(
+      captureCanvasCallback
+    );
   }
 
-  constructor({ volumeLoader, maskLoader, labelLoader }: VolumeRenderingImageSourceOptions) {
+  constructor({
+    volumeLoader,
+    maskLoader,
+    labelLoader
+  }: VolumeRenderingImageSourceOptions) {
     super();
 
     const backCanvas = this.createBackCanvas();
@@ -62,12 +74,14 @@ export default class VolumeRenderingImageSource extends MprImageSource {
     this.vrProgram.activate();
 
     // For debugging
-    VolumeRenderingImageSource.captureCanvasCallbacks.forEach(handler => handler(backCanvas));
+    VolumeRenderingImageSource.captureCanvasCallbacks.forEach(handler =>
+      handler(backCanvas)
+    );
 
     this.loadSequence = (async () => {
       this.metadata = await volumeLoader.loadMeta();
 
-      // Assign the length of the longest side of the volume to 
+      // Assign the length of the longest side of the volume to
       // the length of the side in normalized device coordinates.
       const { voxelSize, voxelCount } = this.metadata!;
       const longestSideLengthInMmOfTheVolume = Math.max(
@@ -120,8 +134,8 @@ export default class VolumeRenderingImageSource extends MprImageSource {
     const window = metadata.dicomWindow
       ? { ...metadata.dicomWindow }
       : metadata.estimatedWindow
-        ? { ...metadata.estimatedWindow }
-        : { level: 50, width: 100 };
+      ? { ...metadata.estimatedWindow }
+      : { level: 50, width: 100 };
 
     // Create initial section as axial section watched from head to toe.
     const section = createOrthogonalMprSection(
@@ -152,8 +166,7 @@ export default class VolumeRenderingImageSource extends MprImageSource {
    */
 
   public async draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
-    if (viewState.type !== 'vr')
-      throw new Error('Unsupported view state.');
+    if (viewState.type !== 'vr') throw new Error('Unsupported view state.');
 
     this.glContext.clearColor(...this.background);
     this.glContext.clearDepth(1.0);
@@ -161,11 +174,14 @@ export default class VolumeRenderingImageSource extends MprImageSource {
     this.updateViewportSize(viewer.getResolution());
 
     this.glContext.clearColor(...this.background);
-    this.glContext.clear(this.glContext.COLOR_BUFFER_BIT | this.glContext.DEPTH_BUFFER_BIT);
+    this.glContext.clear(
+      this.glContext.COLOR_BUFFER_BIT | this.glContext.DEPTH_BUFFER_BIT
+    );
     this.glContext.enable(this.glContext.DEPTH_TEST);
 
     // Camera
-    const camera = createCameraToLookSection( // createCameraToLookDownXYPlane(
+    const camera = createCameraToLookSection(
+      // createCameraToLookDownXYPlane(
       viewState.section,
       this.metadata!.voxelCount,
       this.metadata!.voxelSize
@@ -210,16 +226,18 @@ export default class VolumeRenderingImageSource extends MprImageSource {
 
     // this.vrProgram.setDicomVolume(this.volume!, this.mask);
     this.vrProgram.setVolumeCuboid(
-      subVolume ?
-        {
-          offset: subVolume.offset,
-          dimension: subVolume.dimension,
-          voxelSize
-        } : {
-          offset: [0, 0, 0],
-          dimension: voxelCount,
-          voxelSize
-        });
+      subVolume
+        ? {
+            offset: subVolume.offset,
+            dimension: subVolume.dimension,
+            voxelSize
+          }
+        : {
+            offset: [0, 0, 0],
+            dimension: voxelCount,
+            voxelSize
+          }
+    );
 
     // Transfer function
     if (

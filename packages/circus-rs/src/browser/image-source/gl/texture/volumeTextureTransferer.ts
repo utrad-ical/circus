@@ -8,7 +8,9 @@ export default function volumeTextureTransferer(
   volume: RawData
 ) {
   const voxelCount = volume.getDimension();
-  const { sliceSize, sliceGridSize, textureSize } = detectTextureLayout(voxelCount);
+  const { sliceSize, sliceGridSize, textureSize } = detectTextureLayout(
+    voxelCount
+  );
 
   const getOriginOfSlice = (z: number) => [
     (z % sliceGridSize[0]) * sliceSize[0],
@@ -22,8 +24,7 @@ export default function volumeTextureTransferer(
   const formatBytes = 3;
 
   const createSingleImageBuffer = (z: number): Uint8Array => {
-    if (voxelCount[2] <= z)
-      throw new RangeError('z-index out of bounds');
+    if (voxelCount[2] <= z) throw new RangeError('z-index out of bounds');
 
     const buffer = new Uint8Array(voxelCount[0] * voxelCount[1] * formatBytes);
 
@@ -39,7 +40,11 @@ export default function volumeTextureTransferer(
     return buffer;
   };
 
-  const writePixelValue = (buffer: { [index: number]: number }, offset: number, pixelValue: number) => {
+  const writePixelValue = (
+    buffer: { [index: number]: number },
+    offset: number,
+    pixelValue: number
+  ) => {
     const texValue = pixelValue - transferFunctionOrigin;
 
     // upper 8 bits (as dataTexel.r)
@@ -102,4 +107,3 @@ export default function volumeTextureTransferer(
     transfer
   };
 }
-

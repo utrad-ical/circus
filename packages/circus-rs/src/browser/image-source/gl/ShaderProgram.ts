@@ -1,4 +1,4 @@
-import { compileShader, createProgram } from "./webgl-util";
+import { compileShader, createProgram } from './webgl-util';
 
 export type SetUniform = {
   uniform1f(x: number): void;
@@ -42,7 +42,11 @@ export default abstract class ShaderProgram {
   ) {
     this.gl = gl;
     const vertexShader = compileShader(this.gl, 'vertex', vertexShaderSource);
-    const fragmentShader = compileShader(this.gl, 'fragment', fragmentShaderSource);
+    const fragmentShader = compileShader(
+      this.gl,
+      'fragment',
+      fragmentShaderSource
+    );
     this.program = createProgram(gl, vertexShader, fragmentShader);
   }
 
@@ -176,7 +180,13 @@ export default abstract class ShaderProgram {
    */
   protected attribBuffer(
     name: string = 'position',
-    { size, type = this.gl.FLOAT, normalized = false, stride = 0, usage = this.gl.STREAM_DRAW }: AttrBufferOptions
+    {
+      size,
+      type = this.gl.FLOAT,
+      normalized = false,
+      stride = 0,
+      usage = this.gl.STREAM_DRAW
+    }: AttrBufferOptions
   ): AttribBufferer {
     const gl = this.gl;
 
@@ -199,20 +209,19 @@ export default abstract class ShaderProgram {
         }
       }
       const location = this.getAttribLocation(name);
-      gl.vertexAttribPointer(
-        location,
-        size,
-        type,
-        normalized,
-        stride,
-        offset
-      );
+      gl.vertexAttribPointer(location, size, type, normalized, stride, offset);
       gl.enableVertexAttribArray(location);
     };
   }
   protected attribute(
     name: string = 'position',
-    { size, type = this.gl.FLOAT, normalized = false, stride = 0, usage = this.gl.STREAM_DRAW }: AttrBufferOptions
+    {
+      size,
+      type = this.gl.FLOAT,
+      normalized = false,
+      stride = 0,
+      usage = this.gl.STREAM_DRAW
+    }: AttrBufferOptions
   ) {
     const gl = this.gl;
 
@@ -237,14 +246,15 @@ export default abstract class ShaderProgram {
         return buffer;
       },
       bind: () => gl.bindBuffer(gl.ARRAY_BUFFER, buffer),
-      pointer: () => gl.vertexAttribPointer(
-        location,
-        size,
-        type,
-        normalized,
-        stride,
-        offset
-      ),
+      pointer: () =>
+        gl.vertexAttribPointer(
+          location,
+          size,
+          type,
+          normalized,
+          stride,
+          offset
+        ),
       enable: () => gl.enableVertexAttribArray(location),
       disable: () => gl.disableVertexAttribArray(location)
     };
@@ -272,7 +282,9 @@ export default abstract class ShaderProgram {
     };
   }
 
-  protected vertexElementBuffer(type = this.gl.STATIC_DRAW): VertexElementBufferer {
+  protected vertexElementBuffer(
+    type = this.gl.STATIC_DRAW
+  ): VertexElementBufferer {
     const gl = this.gl;
     const buffer = this.createBuffer();
 
@@ -287,7 +299,7 @@ export default abstract class ShaderProgram {
     };
   }
 
-  // 
+  //
   protected createTexture() {
     const texture = this.gl.createTexture();
     if (!texture) throw new Error('Failed to craete transfer function texture');

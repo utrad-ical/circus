@@ -1,10 +1,19 @@
 import { Vector3, Matrix4 } from 'three';
 import { TransferFunction, InterpolationMode } from '../../ViewState';
-import ShaderProgram, { AttribBufferer, SetUniform, VertexElementBufferer } from './ShaderProgram';
+import ShaderProgram, {
+  AttribBufferer,
+  SetUniform,
+  VertexElementBufferer
+} from './ShaderProgram';
 import loadTransferFunctionIntoTexture from './texture/loadTransferFunctionIntoTexture';
 import { Section, vectorizeSection } from '../../../common/geometry/Section';
 import { ViewWindow } from 'common/ViewWindow';
-import { Camera, createCamera, createModelViewMatrix, createPojectionMatrix } from './webgl-util';
+import {
+  Camera,
+  createCamera,
+  createModelViewMatrix,
+  createPojectionMatrix
+} from './webgl-util';
 import DicomVolume from 'common/DicomVolume';
 import volumeTextureTransferer from './texture/volumeTextureTransferer';
 
@@ -18,7 +27,6 @@ const fragmentShaderSource = [
 ].join('\n');
 
 export default class MprProgram extends ShaderProgram {
-
   /**
    * 1mm in normalized device coordinates.
    */
@@ -62,7 +70,10 @@ export default class MprProgram extends ShaderProgram {
 
     // Buffers
     this.aVertexIndexBuffer = this.vertexElementBuffer();
-    this.aVertexPositionBuffer = this.attribBuffer('aVertexPosition', { size: 3, type: gl.FLOAT });
+    this.aVertexPositionBuffer = this.attribBuffer('aVertexPosition', {
+      size: 3,
+      type: gl.FLOAT
+    });
 
     // Textures
     this.uVolumeTextureSampler = this.uniform1i('uVolumeTextureSampler');
@@ -81,7 +92,6 @@ export default class MprProgram extends ShaderProgram {
   }
 
   public setDicomVolume(volume: DicomVolume) {
-
     const voxelSize = volume.getVoxelSize();
     const dimension = volume.getDimension();
 
@@ -125,7 +135,6 @@ export default class MprProgram extends ShaderProgram {
   }
 
   public setSection(section: Section) {
-
     const { origin, xAxis, yAxis } = vectorizeSection(section);
 
     //      [3]------[2]
@@ -139,6 +148,7 @@ export default class MprProgram extends ShaderProgram {
     const v2 = new Vector3().addVectors(origin, xAxis).add(yAxis);
     const v3 = new Vector3().addVectors(origin, yAxis);
 
+    // prettier-ignore
     const positions = [
       v0.x, v0.y, v0.z, // v0
       v1.x, v1.y, v1.z, // v1
@@ -164,7 +174,7 @@ export default class MprProgram extends ShaderProgram {
     }
   }
 
-  /** 
+  /**
    * Set the background color to fill the points outside the volume,
    * but inside the viewport section.
    * Specify each value as 0 to 1
@@ -173,7 +183,12 @@ export default class MprProgram extends ShaderProgram {
     this.uBackground([r, g, b, a]);
   }
 
-  private camera: Camera = createCamera([0, 0, 0], [0, 0, 1], [0, 1, 0], [1, 1]);
+  private camera: Camera = createCamera(
+    [0, 0, 0],
+    [0, 0, 1],
+    [0, 1, 0],
+    [1, 1]
+  );
 
   public setCamera(camera: Camera) {
     this.camera = camera;

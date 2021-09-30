@@ -1,6 +1,10 @@
 import { Vector3, Matrix4 } from 'three';
 import { TransferFunction, InterpolationMode } from '../../ViewState';
-import ShaderProgram, { AttribBufferer, SetUniform, VertexElementBufferer } from './ShaderProgram';
+import ShaderProgram, {
+  AttribBufferer,
+  SetUniform,
+  VertexElementBufferer
+} from './ShaderProgram';
 import { LabelData } from '../volume-loader/interface';
 import loadLabelIntoTexture from './texture/loadLabelIntoTexture';
 import RawData from '../../../common/RawData';
@@ -8,7 +12,12 @@ import loadVolumeIntoTexture from './texture/loadVolumeIntoTexture';
 import loadTransferFunctionIntoTexture from './texture/loadTransferFunctionIntoTexture';
 import { TextureLayout } from './texture/interface';
 import DicomVolume from 'common/DicomVolume';
-import { Camera, createCamera, createModelViewMatrix, createPojectionMatrix } from './webgl-util';
+import {
+  Camera,
+  createCamera,
+  createModelViewMatrix,
+  createPojectionMatrix
+} from './webgl-util';
 
 // WebGL shader source (GLSL)
 const vertexShaderSource = require('./glsl/vr-volume.vert');
@@ -32,7 +41,6 @@ type LabelTexuture = {
 };
 
 export default class VRGLProgram extends ShaderProgram {
-
   /**
    * 1mm in normalized device coordinates.
    */
@@ -97,8 +105,16 @@ export default class VRGLProgram extends ShaderProgram {
 
     // Buffers
     this.aVertexIndexBuffer = this.vertexElementBuffer();
-    this.aVertexPositionBuffer = this.attribBuffer('aVertexPosition', { size: 3, type: gl.FLOAT, usage: gl.STREAM_DRAW });
-    this.aVertexColorBuffer = this.attribBuffer('aVertexColor', { size: 4, type: gl.FLOAT, usage: gl.STATIC_DRAW });
+    this.aVertexPositionBuffer = this.attribBuffer('aVertexPosition', {
+      size: 3,
+      type: gl.FLOAT,
+      usage: gl.STREAM_DRAW
+    });
+    this.aVertexColorBuffer = this.attribBuffer('aVertexColor', {
+      size: 4,
+      type: gl.FLOAT,
+      usage: gl.STATIC_DRAW
+    });
 
     // Textures
     this.uVolumeTextureSampler = this.uniform1i('uVolumeTextureSampler');
@@ -114,7 +130,6 @@ export default class VRGLProgram extends ShaderProgram {
     this.uLabelBoundaryFrom = this.uniform3fv('uLabelBoundaryFrom');
     this.uLabelBoundaryTo = this.uniform3fv('uLabelBoundaryTo');
     this.uLabelLabelColor = this.uniform4fv('uLabelLabelColor');
-
   }
 
   public activate() {
@@ -131,7 +146,6 @@ export default class VRGLProgram extends ShaderProgram {
   }
 
   public setDicomVolume(volume: DicomVolume, mask?: RawData) {
-
     const voxelSize = volume.getVoxelSize();
     const dimension = volume.getDimension();
     const offset = [0, 0, 0];
@@ -271,6 +285,7 @@ export default class VRGLProgram extends ShaderProgram {
     const data = new Float32Array(positions);
     this.aVertexPositionBuffer(data);
 
+    // prettier-ignore
     const volumeVertexIndices = [
       0, 1, 2, 0, 2, 3, // Front face
       4, 5, 6, 4, 6, 7, // Back face
@@ -280,7 +295,6 @@ export default class VRGLProgram extends ShaderProgram {
       20, 21, 22, 20, 22, 23 // Left face
     ];
     this.aVertexIndexBuffer(volumeVertexIndices);
-
   }
 
   private bufferVertexColor() {
@@ -293,8 +307,8 @@ export default class VRGLProgram extends ShaderProgram {
       [0.0, 0.0, 1.0, 1.0] // Left face  ... BLUE
     ];
     let volumeVertexColors: number[] = [];
-    for (let i in colors) {
-      let color = colors[i];
+    for (const i in colors) {
+      const color = colors[i];
       for (let j = 0; j < 4; j++) {
         volumeVertexColors = volumeVertexColors.concat(color);
       }
@@ -346,7 +360,12 @@ export default class VRGLProgram extends ShaderProgram {
     this.uRayIntensityCoef(1.0 / intensity / quality);
   }
 
-  private camera: Camera = createCamera([0, 0, 0], [0, 0, 1], [0, 1, 0], [1, 1]);
+  private camera: Camera = createCamera(
+    [0, 0, 0],
+    [0, 0, 1],
+    [0, 1, 0],
+    [1, 1]
+  );
 
   public setCamera(camera: Camera) {
     this.camera = camera;

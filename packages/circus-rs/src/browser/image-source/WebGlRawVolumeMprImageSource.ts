@@ -34,7 +34,7 @@ export default class WebGlRawVolumeMprImageSource extends MprImageSource
 
   private mprProgram: MprProgram;
 
-  private background: RGBA = [0.0, 0.0, 0.0, 0.0];
+  private background: RGBA = [0.0, 0.0, 0.0, 1.0];
 
   private priorityIntegerCaller: PriorityIntegerCaller | undefined = undefined;
   private priorityCounter: number = 0;

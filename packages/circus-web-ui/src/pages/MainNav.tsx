@@ -1,5 +1,5 @@
-import React, { Fragment } from 'react';
-import { Link } from 'react-router-dom';
+import React, { Fragment, useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import Icon from 'components/Icon';
 import styled from 'styled-components';
 import classnames from 'classnames';
@@ -8,6 +8,8 @@ import browserHistory from '../browserHistory';
 import useLoginUser from 'utils/useLoginUser';
 import TaskNotifier from 'components/TaskNotifier';
 import { MyList } from 'store/loginUser';
+import { Button } from 'components/react-bootstrap';
+import { useSelector } from 'react-redux';
 
 const MainMenu: React.FC<{}> = props => <ul>{props.children}</ul>;
 
@@ -59,6 +61,37 @@ const SubMenu: React.FC<{
         {props.name}
       </Link>
     </li>
+  );
+};
+
+const NextPreviousButton: React.FC<{
+  list: string[];
+  current: string;
+  prefix: string;
+}> = props => {
+  const currentPosition = props.list.indexOf(props.current);
+  if (currentPosition < 0) {
+    return null;
+  }
+  const prevLink = `${props.prefix}/${props.list[currentPosition - 1]}`;
+  const nextLink = `${props.prefix}/${props.list[currentPosition + 1]}`;
+  const ablePrevLink = 0 < currentPosition;
+  const ableNextLink = currentPosition < props.list.length - 1;
+  return (
+    <div className="next-previous-button">
+      <Link to={prevLink} className="link-prev">
+        <Button disabled={!ablePrevLink}>
+          <Icon icon="arrow-left" />
+          &ensp; Prev
+        </Button>
+      </Link>
+      <Link to={nextLink} className="link-next">
+        <Button disabled={!ableNextLink}>
+          Next &ensp;
+          <Icon icon="arrow-right" />
+        </Button>
+      </Link>
+    </div>
   );
 };
 
@@ -179,6 +212,15 @@ const StyledNav = styled.nav`
     font-weight: bold;
     margin-right: 10px;
   }
+
+  .next-previous-button {
+    [class^='link-'] {
+      width: 50%;
+      button {
+        width: 100%;
+      }
+    }
+  }
 `;
 
 const MyListMenuItems: React.FC<{
@@ -212,6 +254,13 @@ const MyListMenuItems: React.FC<{
 const MainNav: React.FC<{}> = props => {
   const user = useLoginUser();
   const loginManager = useLoginManager();
+  const pathname = useLocation().pathname;
+  const searchedCaseResult = useSelector(
+    state => state.searches.searches['case']
+  );
+  const searchedPluginJobResult = useSelector(
+    state => state.searches.searches['pluginJob']
+  );
 
   if (!user) return null;
 
@@ -228,6 +277,17 @@ const MainNav: React.FC<{}> = props => {
     await loginManager.logout();
     browserHistory.push('/');
   };
+
+  const dispNextPreviousCaseButton =
+    pathname.indexOf('/case') === 0 &&
+    Object(searchedCaseResult) === searchedCaseResult &&
+    'results' in searchedCaseResult;
+  const dispNextPreviousPluginJobButton =
+    pathname.indexOf('/plugin-job') === 0 &&
+    Object(searchedPluginJobResult) === searchedPluginJobResult &&
+    'results' in searchedPluginJobResult;
+
+  const currentCase = pathname.split('/').slice(-1)[0];
 
   return (
     <StyledHeader>
@@ -261,6 +321,17 @@ const MainNav: React.FC<{}> = props => {
             />
           </Menu>
           <Menu name="Case" link="/browse/case">
+            {dispNextPreviousCaseButton && (
+              <NextPreviousButton
+                list={
+                  searchedCaseResult.results
+                    ? searchedCaseResult.results.indexes
+                    : []
+                }
+                current={currentCase}
+                prefix="/case"
+              />
+            )}
             <SubMenu icon="search" name="Case Search" link="/browse/case" />
             {caseSearchPresets.map(preset => (
               <SubMenu
@@ -279,6 +350,17 @@ const MainNav: React.FC<{}> = props => {
             {/* <SubMenu icon="open" name="Case Import" link="/import-case" /> */}
           </Menu>
           <Menu name="CAD" icon="circus-icon-job" link="/browse/plugin-jobs">
+            {dispNextPreviousPluginJobButton && (
+              <NextPreviousButton
+                list={
+                  searchedPluginJobResult.results
+                    ? searchedPluginJobResult.results.indexes
+                    : []
+                }
+                current={currentCase}
+                prefix="/plugin-job"
+              />
+            )}
             <SubMenu
               icon="search"
               name="Plugin Job Search"

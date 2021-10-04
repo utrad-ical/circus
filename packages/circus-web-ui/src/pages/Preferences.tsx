@@ -44,6 +44,81 @@ const PresetDeleteEditor: et.Editor<SearchPreset[] | undefined> = props => {
   );
 };
 
+const TemplateEditor: et.Editor<string[] | undefined> = props => {
+  const { value = [], onChange } = props;
+  const [newTemplate, setNewTemplate] = useState<string>('');
+  const handleDeleteClick = (deleteMessage: string) => {
+    const newValue = value.filter(message => message !== deleteMessage);
+    onChange(newValue);
+  };
+
+  const handleAddClick = (addMessage: string) => {
+    setNewTemplate('');
+    console.log(
+      addMessage,
+      value,
+      value.some(message => message === addMessage),
+      value[0] === addMessage,
+      value[1] === addMessage
+    );
+    if (
+      value.some(message => {
+        message === addMessage;
+      })
+    ) {
+      return;
+    }
+    const newValue = value.concat(addMessage).sort();
+    onChange(newValue);
+  };
+
+  const canNotAdd = () => {
+    return (
+      newTemplate.length < 1 || value.some(message => message === newTemplate)
+    );
+  };
+
+  return (
+    <>
+      <label>New Template&nbsp; </label>
+      <input
+        type="text"
+        value={newTemplate}
+        onChange={ev => setNewTemplate(ev.target.value)}
+      />
+      &nbsp;
+      <Button
+        bsStyle="primary"
+        disabled={canNotAdd()}
+        onClick={() => handleAddClick(newTemplate)}
+      >
+        Add
+      </Button>
+      {!Array.isArray(value) || !value.length ? (
+        <div className="form-control-static text-muted">(no templates)</div>
+      ) : (
+        <ul className="list-unstyled">
+          {value.map(message => {
+            return (
+              <li key={message} className="form-control-static">
+                {message}{' '}
+                <IconButton
+                  bsSize="xs"
+                  bsStyle="primary"
+                  icon="remove"
+                  onClick={() => handleDeleteClick(message)}
+                >
+                  Delete
+                </IconButton>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </>
+  );
+};
+
 const appearanceProperties: PropertyEditorProperties<UserPreferences> = [
   {
     key: 'theme',
@@ -123,6 +198,11 @@ const circusDBProperties: PropertyEditorProperties<UserPreferences> = [
       show: '± 2',
       infinity: '∞'
     }) as et.Editor<string | undefined>
+  },
+  {
+    key: 'revisionMessageTemplates',
+    caption: 'Templates of Revision Message',
+    editor: TemplateEditor
   }
 ];
 

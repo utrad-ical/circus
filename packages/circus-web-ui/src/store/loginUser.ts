@@ -25,6 +25,7 @@ export interface UserPreferences {
   maintainAspectRatio?: boolean;
   fixCenterOfGravity?: boolean;
   dimmedOutlineFor2DLabels?: string;
+  revisionMessageTemplates?: string[];
 }
 
 export type MyListResourceType = 'series' | 'clinicalCases' | 'jobs';

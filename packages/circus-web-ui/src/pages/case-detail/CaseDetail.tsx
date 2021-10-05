@@ -1,5 +1,6 @@
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
-import { alert, confirm, prompt } from '@smikitky/rb-components/lib/modal';
+import { alert, confirm } from '@smikitky/rb-components/lib/modal';
+import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import CaseExportModal from 'components/CaseExportModal';
 import Collapser from 'components/Collapser';
 import FullSpanContainer from 'components/FullSpanContainer';
@@ -17,6 +18,7 @@ import {
 import Tag from 'components/Tag';
 import TimeDisplay from 'components/TimeDisplay';
 import produce from 'immer';
+import keycode from 'keycode';
 import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -46,10 +48,12 @@ const CaseDetail: React.FC<{}> = props => {
   const editingData = c.current(caseStore);
 
   const [tags, setTags] = useState<string[]>([]);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
 
   const user = useLoginUser();
   const accessibleProjects = user.accessibleProjects;
+  const revisionMessageTemplates = user.preferences.revisionMessageTemplates;
 
   useEffect(() => {
     const loadCase = async () => {
@@ -129,6 +133,25 @@ const CaseDetail: React.FC<{}> = props => {
     setTags(value);
   };
 
+  const handleSaveDialog = async (message: string) => {
+    const revision = editingData.revision;
+    setSaveDialogOpen(false);
+    try {
+      await saveRevision(caseId, revision, message, api);
+      await alert('Successfully registered a revision.');
+      const caseData = await api('cases/' + caseId);
+      caseDispatch(
+        c.loadRevisions({
+          revisions: caseData.revisions,
+          revisionIndex: caseData.revisions.length - 1
+        })
+      );
+    } catch (err) {
+      await alert('Error: ' + err.message);
+      throw err;
+    }
+  };
+
   const handleMenuBarCommand = async (command: MenuBarCommand) => {
     switch (command) {
       case 'undo':
@@ -146,23 +169,7 @@ const CaseDetail: React.FC<{}> = props => {
       }
       case 'save': {
         if (!editingData) return;
-        const revision = editingData.revision;
-        const desc = await prompt('Revision message', revision.description);
-        if (desc === null) return;
-        try {
-          await saveRevision(caseId, revision, desc, api);
-          await alert('Successfully registered a revision.');
-          const caseData = await api('cases/' + caseId);
-          caseDispatch(
-            c.loadRevisions({
-              revisions: caseData.revisions,
-              revisionIndex: caseData.revisions.length - 1
-            })
-          );
-        } catch (err) {
-          await alert('Error: ' + err.message);
-          throw err;
-        }
+        setSaveDialogOpen(true);
         break;
       }
       case 'exportMhd': {
@@ -171,6 +178,19 @@ const CaseDetail: React.FC<{}> = props => {
       }
     }
   };
+
+  const templates: Template[] = caseStore.caseData
+    ? [
+        {
+          title: 'past revision messages',
+          messages: caseStore.caseData.revisions
+            .map(revision => revision.description)
+            .sort()
+        }
+      ]
+    : [];
+  revisionMessageTemplates &&
+    templates.push({ title: 'templates', messages: revisionMessageTemplates });
 
   if (!caseData || !projectData || !seriesData || !editingData) {
     return busy ? <LoadingIndicator /> : null;
@@ -232,6 +252,16 @@ const CaseDetail: React.FC<{}> = props => {
             ]}
             onClose={() => setExportDialogOpen(false)}
             revisions={caseStore.caseData!.revisions}
+          />
+        </Modal>
+      )}
+      {saveDialogOpen && (
+        <Modal show onHide={() => {}}>
+          <SaveModal
+            value={editingData.revision.description}
+            templates={templates}
+            onHide={() => setSaveDialogOpen(false)}
+            onOkClick={message => handleSaveDialog(message)}
           />
         </Modal>
       )}
@@ -367,5 +397,80 @@ const StyledMenuBarDiv = styled.div`
     flex: 1000;
     text-align: right;
     padding: 3px;
+  }
+`;
+
+interface Template {
+  title: string;
+  messages: string[];
+}
+
+const SaveModal: React.FC<{
+  value: string;
+  templates: Template[];
+  onHide: () => void;
+  onOkClick: (props: any) => void;
+}> = props => {
+  const { templates, onHide, onOkClick } = props;
+  const [value, setValue] = useState(props.value);
+  const handleChange = (event: any) => {
+    setValue(event.target.value);
+  };
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.keyCode == keycode.codes.enter) {
+      onOkClick(value);
+    }
+  };
+  const handleSelectTemplate = (template: string) => {
+    setValue(template);
+  };
+
+  return (
+    <StyledSaveModalDiv>
+      <Modal.Header>Save</Modal.Header>
+      <Modal.Body>
+        <label>Revision message</label>
+        <br />
+        <input
+          type="text"
+          autoFocus
+          value={value}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+        />
+        {templates.length > 0 && (
+          <>
+            <label className="templates">Select from registered messages</label>
+            {templates.map(template => (
+              <div key={template.title}>
+                {template.title}:&ensp;
+                <ShrinkSelect
+                  options={template.messages}
+                  value={value}
+                  onChange={handleSelectTemplate}
+                />
+              </div>
+            ))}
+          </>
+        )}
+      </Modal.Body>
+      <Modal.Footer>
+        <Button bsStyle="link" onClick={onHide}>
+          Cancel
+        </Button>
+        <Button onClick={() => onOkClick(value)} bsStyle="primary">
+          OK
+        </Button>
+      </Modal.Footer>
+    </StyledSaveModalDiv>
+  );
+};
+
+const StyledSaveModalDiv = styled.div`
+  input {
+    width: 100%;
+  }
+  .templates {
+    margin-top: 20px;
   }
 `;

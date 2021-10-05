@@ -54,13 +54,6 @@ const TemplateEditor: et.Editor<string[] | undefined> = props => {
 
   const handleAddClick = (addMessage: string) => {
     setNewTemplate('');
-    console.log(
-      addMessage,
-      value,
-      value.some(message => message === addMessage),
-      value[0] === addMessage,
-      value[1] === addMessage
-    );
     if (
       value.some(message => {
         message === addMessage;

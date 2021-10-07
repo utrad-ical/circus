@@ -1,6 +1,5 @@
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import { alert, confirm } from '@smikitky/rb-components/lib/modal';
-import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import CaseExportModal from 'components/CaseExportModal';
 import Collapser from 'components/Collapser';
 import FullSpanContainer from 'components/FullSpanContainer';
@@ -10,6 +9,7 @@ import PatientInfoBox from 'components/PatientInfoBox';
 import ProjectDisplay from 'components/ProjectDisplay';
 import {
   Button,
+  Dropdown,
   DropdownButton,
   Glyphicon,
   MenuItem,
@@ -19,7 +19,14 @@ import Tag from 'components/Tag';
 import TimeDisplay from 'components/TimeDisplay';
 import produce from 'immer';
 import keycode from 'keycode';
-import React, { useCallback, useEffect, useReducer, useState } from 'react';
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useReducer,
+  useState
+} from 'react';
+import DropdownToggle from 'react-bootstrap/lib/DropdownToggle';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import Series from 'types/Series';
@@ -179,18 +186,20 @@ const CaseDetail: React.FC<{}> = props => {
     }
   };
 
-  const templates: Template[] = caseStore.caseData
-    ? [
-        {
-          title: 'past revision messages',
-          messages: caseStore.caseData.revisions
+  const templates: Template[] = revisionMessageTemplates
+    ? [{ title: 'templates', messages: revisionMessageTemplates }]
+    : [];
+  caseStore.caseData &&
+    templates.push({
+      title: 'revision history',
+      messages: Array.from(
+        new Set(
+          caseStore.caseData.revisions
             .map(revision => revision.description)
             .sort()
-        }
-      ]
-    : [];
-  revisionMessageTemplates &&
-    templates.push({ title: 'templates', messages: revisionMessageTemplates });
+        )
+      )
+    });
 
   if (!caseData || !projectData || !seriesData || !editingData) {
     return busy ? <LoadingIndicator /> : null;
@@ -430,7 +439,6 @@ const SaveModal: React.FC<{
       <Modal.Header>Save</Modal.Header>
       <Modal.Body>
         <label>Revision message</label>
-        <br />
         <input
           type="text"
           autoFocus
@@ -439,19 +447,25 @@ const SaveModal: React.FC<{
           onKeyDown={handleKeyDown}
         />
         {templates.length > 0 && (
-          <>
-            <label className="templates">Select from registered messages</label>
-            {templates.map(template => (
-              <div key={template.title}>
-                {template.title}:&ensp;
-                <ShrinkSelect
-                  options={template.messages}
-                  value={value}
-                  onChange={handleSelectTemplate}
-                />
-              </div>
-            ))}
-          </>
+          <Dropdown id="revision-templates-dropdown">
+            <DropdownToggle>Select from registered messages</DropdownToggle>
+            <Dropdown.Menu>
+              {templates.map((template, index) => (
+                <Fragment key={index}>
+                  {index !== 0 && <MenuItem divider />}
+                  <MenuItem header>{template.title}</MenuItem>
+                  {template.messages.map((message, i) => (
+                    <MenuItem
+                      key={i}
+                      onClick={() => handleSelectTemplate(message)}
+                    >
+                      {message}
+                    </MenuItem>
+                  ))}
+                </Fragment>
+              ))}
+            </Dropdown.Menu>
+          </Dropdown>
         )}
       </Modal.Body>
       <Modal.Footer>
@@ -470,7 +484,7 @@ const StyledSaveModalDiv = styled.div`
   input {
     width: 100%;
   }
-  .templates {
-    margin-top: 20px;
+  #revision-templates-dropdown {
+    margin-top: 10px;
   }
 `;

@@ -3,6 +3,7 @@ import React, { useContext } from 'react';
 import createApiCaller, { ApiCaller, formatCredentials } from './api';
 import { Dispatch } from 'redux';
 import * as actions from 'store/loginUser';
+import * as searchActions from 'store/searches';
 import * as qs from 'querystring';
 
 /**
@@ -64,6 +65,7 @@ const loginManager = (
       }
     } catch (err) {
       dispatch(actions.loggedOut());
+      dispatch(searchActions.reset());
     }
   };
 
@@ -71,6 +73,7 @@ const loginManager = (
     if (!api) throw new Error('Not logged in');
     await api('logout');
     dispatch(actions.loggedOut());
+    dispatch(searchActions.reset());
     sessionStorage.removeItem('tokenCredentials');
     api = null;
     onApiChange(null);

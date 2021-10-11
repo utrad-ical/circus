@@ -55,10 +55,16 @@ export interface SearchResult {
   selected: string[];
 }
 
+const initialState: SearchState = {
+  searches: {},
+  items: { series: {}, tasks: {} }
+};
+
 const slice = createSlice({
   name: 'searches',
-  initialState: { searches: {}, items: {} } as SearchState,
+  initialState,
   reducers: {
+    reset: () => initialState,
     startSearch: (
       state,
       action: PayloadAction<{
@@ -154,8 +160,12 @@ const {
   searchResultLoaded
 } = slice.actions;
 // But we export these ones
-export const { selectionStatusChanged, deleteSearch, dismissTask } =
-  slice.actions;
+export const {
+  reset,
+  selectionStatusChanged,
+  deleteSearch,
+  dismissTask
+} = slice.actions;
 
 export default slice.reducer;
 

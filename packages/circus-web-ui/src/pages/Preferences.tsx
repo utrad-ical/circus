@@ -115,7 +115,7 @@ const TemplateEditor: et.Editor<string[] | undefined> = props => {
 const appearanceProperties: PropertyEditorProperties<UserPreferences> = [
   {
     key: 'theme',
-    caption: 'Color Theme',
+    caption: 'Color theme',
     editor: et.shrinkSelect({
       mode_white: 'White',
       mode_black: 'Black'
@@ -123,7 +123,7 @@ const appearanceProperties: PropertyEditorProperties<UserPreferences> = [
   },
   {
     key: 'personalInfoView',
-    caption: 'Show Personal Info',
+    caption: 'Show personal info',
     editor: et.checkbox({ label: 'show' }) as et.Editor<boolean | undefined>
   }
 ];
@@ -131,17 +131,17 @@ const appearanceProperties: PropertyEditorProperties<UserPreferences> = [
 const searchProperties: PropertyEditorProperties<UserPreferences> = [
   {
     key: 'caseSearchPresets',
-    caption: 'Case Search Presets',
+    caption: 'Case search presets',
     editor: PresetDeleteEditor
   },
   {
     key: 'seriesSearchPresets',
-    caption: 'Series Search Presets',
+    caption: 'Series search presets',
     editor: PresetDeleteEditor
   },
   {
     key: 'pluginJobSearchPresets',
-    caption: 'Plug-in Job Search Presets',
+    caption: 'Plug-in job search presets',
     editor: PresetDeleteEditor
   }
 ];
@@ -149,12 +149,12 @@ const searchProperties: PropertyEditorProperties<UserPreferences> = [
 const circusDBProperties: PropertyEditorProperties<UserPreferences> = [
   {
     key: 'referenceLine',
-    caption: 'Reference Line',
+    caption: 'Reference lines',
     editor: et.checkbox({ label: 'show' }) as et.Editor<boolean | undefined>
   },
   {
     key: 'interpolationMode',
-    caption: 'Interpolation Mode',
+    caption: 'Interpolation mode',
     editor: et.shrinkSelect({
       nearestNeighbor: 'Nearest neighbor',
       trilinearFiltering: 'Trilinear filtering'
@@ -171,30 +171,30 @@ const circusDBProperties: PropertyEditorProperties<UserPreferences> = [
   },
   {
     key: 'maintainAspectRatio',
-    caption: 'Shift + Drag to maintain aspect ratio',
+    caption: 'Maintain aspect ratio',
     editor: et.checkbox({
-      label: 'lock'
+      label: 'Always maintain aspect ratio (Shift + Drag to invert)'
     }) as et.Editor<boolean | undefined>
   },
   {
     key: 'fixCenterOfGravity',
-    caption: 'Ctrl + Drag to fix center of gravity',
+    caption: 'Lock center of gravity',
     editor: et.checkbox({
-      label: 'lock'
+      label: 'Always Lock center of gravity (Ctrl + Drag to invert)'
     }) as et.Editor<boolean | undefined>
   },
   {
     key: 'dimmedOutlineFor2DLabels',
-    caption: 'Number of Slices for 2D Shape',
+    caption: '2D shapes visibility',
     editor: et.shrinkSelect({
-      hide: 'None',
-      show: '± 2',
-      infinity: '∞'
+      hide: 'No dimmed outline',
+      show: '±2 slices',
+      infinity: '±∞ slices'
     }) as et.Editor<string | undefined>
   },
   {
     key: 'revisionMessageTemplates',
-    caption: 'Templates of Revision Message',
+    caption: 'Revision message templates',
     editor: TemplateEditor
   }
 ];

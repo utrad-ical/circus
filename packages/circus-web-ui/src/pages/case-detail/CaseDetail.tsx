@@ -11,6 +11,9 @@ import {
   Button,
   Dropdown,
   DropdownButton,
+  FormControl,
+  FormGroup,
+  InputGroup,
   Glyphicon,
   MenuItem,
   Modal
@@ -187,11 +190,11 @@ const CaseDetail: React.FC<{}> = props => {
   };
 
   const templates: Template[] = revisionMessageTemplates
-    ? [{ title: 'templates', messages: revisionMessageTemplates }]
+    ? [{ title: 'Saved templates', messages: revisionMessageTemplates }]
     : [];
   caseStore.caseData &&
     templates.push({
-      title: 'revision history',
+      title: 'Revision history',
       messages: Array.from(
         new Set(
           caseStore.caseData.revisions
@@ -425,7 +428,7 @@ const SaveModal: React.FC<{
   const handleChange = (event: any) => {
     setValue(event.target.value);
   };
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (event: React.KeyboardEvent<FormControl>) => {
     if (event.keyCode == keycode.codes.enter) {
       onOkClick(value);
     }
@@ -439,7 +442,7 @@ const SaveModal: React.FC<{
       <Modal.Header>Save</Modal.Header>
       <Modal.Body>
         <label>Revision message</label>
-        <input
+        <FormControl
           type="text"
           autoFocus
           value={value}
@@ -448,7 +451,9 @@ const SaveModal: React.FC<{
         />
         {templates.length > 0 && (
           <Dropdown id="revision-templates-dropdown">
-            <DropdownToggle>Select from registered messages</DropdownToggle>
+            <DropdownToggle>
+              <Icon icon="glyphicon-repeat" />
+            </DropdownToggle>
             <Dropdown.Menu>
               {templates.map((template, index) => (
                 <Fragment key={index}>

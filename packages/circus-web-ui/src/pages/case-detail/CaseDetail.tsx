@@ -1,5 +1,5 @@
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
-import { alert, confirm, prompt } from '@smikitky/rb-components/lib/modal';
+import { alert, confirm } from '@smikitky/rb-components/lib/modal';
 import CaseExportModal from 'components/CaseExportModal';
 import Collapser from 'components/Collapser';
 import FullSpanContainer from 'components/FullSpanContainer';
@@ -32,6 +32,7 @@ import {
 } from './revisionData';
 import RevisionEditor from './RevisionEditor';
 import RevisionSelector from './RevisionSelector';
+import SaveModal from './SaveModal';
 import TagEditor from './TagEditor';
 
 const CaseDetail: React.FC<{}> = props => {
@@ -46,6 +47,7 @@ const CaseDetail: React.FC<{}> = props => {
   const editingData = c.current(caseStore);
 
   const [tags, setTags] = useState<string[]>([]);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
 
   const user = useLoginUser();
@@ -129,6 +131,25 @@ const CaseDetail: React.FC<{}> = props => {
     setTags(value);
   };
 
+  const handleSaveDialog = async (message: string) => {
+    const revision = editingData.revision;
+    setSaveDialogOpen(false);
+    try {
+      await saveRevision(caseId, revision, message, api);
+      await alert('Successfully registered a revision.');
+      const caseData = await api('cases/' + caseId);
+      caseDispatch(
+        c.loadRevisions({
+          revisions: caseData.revisions,
+          revisionIndex: caseData.revisions.length - 1
+        })
+      );
+    } catch (err) {
+      await alert('Error: ' + err.message);
+      throw err;
+    }
+  };
+
   const handleMenuBarCommand = async (command: MenuBarCommand) => {
     switch (command) {
       case 'undo':
@@ -146,23 +167,7 @@ const CaseDetail: React.FC<{}> = props => {
       }
       case 'save': {
         if (!editingData) return;
-        const revision = editingData.revision;
-        const desc = await prompt('Revision message', revision.description);
-        if (desc === null) return;
-        try {
-          await saveRevision(caseId, revision, desc, api);
-          await alert('Successfully registered a revision.');
-          const caseData = await api('cases/' + caseId);
-          caseDispatch(
-            c.loadRevisions({
-              revisions: caseData.revisions,
-              revisionIndex: caseData.revisions.length - 1
-            })
-          );
-        } catch (err) {
-          await alert('Error: ' + err.message);
-          throw err;
-        }
+        setSaveDialogOpen(true);
         break;
       }
       case 'exportMhd': {
@@ -232,6 +237,18 @@ const CaseDetail: React.FC<{}> = props => {
             ]}
             onClose={() => setExportDialogOpen(false)}
             revisions={caseStore.caseData!.revisions}
+          />
+        </Modal>
+      )}
+      {saveDialogOpen && (
+        <Modal show onHide={() => {}}>
+          <SaveModal
+            value={editingData.revision.description}
+            revisionHistory={
+              caseStore.caseData ? caseStore.caseData.revisions : []
+            }
+            onHide={() => setSaveDialogOpen(false)}
+            onOkClick={message => handleSaveDialog(message)}
           />
         </Modal>
       )}

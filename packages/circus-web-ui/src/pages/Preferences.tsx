@@ -4,7 +4,7 @@ import PropertyEditor, {
 } from '@smikitky/rb-components/lib/PropertyEditor';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
-import { Button } from 'components/react-bootstrap';
+import { Button, Panel } from 'components/react-bootstrap';
 import React, { useCallback, useEffect, useState } from 'react';
 import { SearchPreset, UserPreferences } from 'store/loginUser';
 import { useApi } from 'utils/api';
@@ -44,10 +44,78 @@ const PresetDeleteEditor: et.Editor<SearchPreset[] | undefined> = props => {
   );
 };
 
+const TemplateEditor: et.Editor<string[] | undefined> = props => {
+  const { value = [], onChange } = props;
+  const [newTemplate, setNewTemplate] = useState<string>('');
+  const handleDeleteClick = (deleteMessage: string) => {
+    const newValue = value.filter(message => message !== deleteMessage);
+    onChange(newValue);
+  };
+
+  const handleAddClick = (addMessage: string) => {
+    setNewTemplate('');
+    if (
+      value.some(message => {
+        message === addMessage;
+      })
+    ) {
+      return;
+    }
+    const newValue = value.concat(addMessage).sort();
+    onChange(newValue);
+  };
+
+  const canNotAdd = () => {
+    return (
+      newTemplate.length < 1 || value.some(message => message === newTemplate)
+    );
+  };
+
+  return (
+    <>
+      <label>New Template&nbsp; </label>
+      <input
+        type="text"
+        value={newTemplate}
+        onChange={ev => setNewTemplate(ev.target.value)}
+      />
+      &nbsp;
+      <Button
+        bsStyle="primary"
+        disabled={canNotAdd()}
+        onClick={() => handleAddClick(newTemplate)}
+      >
+        Add
+      </Button>
+      {!Array.isArray(value) || !value.length ? (
+        <div className="form-control-static text-muted">(no templates)</div>
+      ) : (
+        <ul className="list-unstyled">
+          {value.map(message => {
+            return (
+              <li key={message} className="form-control-static">
+                {message}{' '}
+                <IconButton
+                  bsSize="xs"
+                  bsStyle="primary"
+                  icon="remove"
+                  onClick={() => handleDeleteClick(message)}
+                >
+                  Delete
+                </IconButton>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </>
+  );
+};
+
 const appearanceProperties: PropertyEditorProperties<UserPreferences> = [
   {
     key: 'theme',
-    caption: 'Color Theme',
+    caption: 'Color theme',
     editor: et.shrinkSelect({
       mode_white: 'White',
       mode_black: 'Black'
@@ -55,7 +123,7 @@ const appearanceProperties: PropertyEditorProperties<UserPreferences> = [
   },
   {
     key: 'personalInfoView',
-    caption: 'Show Personal Info',
+    caption: 'Show personal info',
     editor: et.checkbox({ label: 'show' }) as et.Editor<boolean | undefined>
   }
 ];
@@ -63,17 +131,17 @@ const appearanceProperties: PropertyEditorProperties<UserPreferences> = [
 const searchProperties: PropertyEditorProperties<UserPreferences> = [
   {
     key: 'caseSearchPresets',
-    caption: 'Case Search Presets',
+    caption: 'Case search presets',
     editor: PresetDeleteEditor
   },
   {
     key: 'seriesSearchPresets',
-    caption: 'Series Search Presets',
+    caption: 'Series search presets',
     editor: PresetDeleteEditor
   },
   {
     key: 'pluginJobSearchPresets',
-    caption: 'Plug-in Job Search Presets',
+    caption: 'Plug-in job search presets',
     editor: PresetDeleteEditor
   }
 ];
@@ -81,12 +149,12 @@ const searchProperties: PropertyEditorProperties<UserPreferences> = [
 const circusDBProperties: PropertyEditorProperties<UserPreferences> = [
   {
     key: 'referenceLine',
-    caption: 'Reference Line',
+    caption: 'Reference lines',
     editor: et.checkbox({ label: 'show' }) as et.Editor<boolean | undefined>
   },
   {
     key: 'interpolationMode',
-    caption: 'Interpolation Mode',
+    caption: 'Interpolation mode',
     editor: et.shrinkSelect({
       nearestNeighbor: 'Nearest neighbor',
       trilinearFiltering: 'Trilinear filtering'
@@ -103,26 +171,31 @@ const circusDBProperties: PropertyEditorProperties<UserPreferences> = [
   },
   {
     key: 'maintainAspectRatio',
-    caption: 'Shift + Drag to maintain aspect ratio',
+    caption: 'Maintain aspect ratio',
     editor: et.checkbox({
-      label: 'lock'
+      label: 'Always maintain aspect ratio (Shift + Drag to invert)'
     }) as et.Editor<boolean | undefined>
   },
   {
     key: 'fixCenterOfGravity',
-    caption: 'Ctrl + Drag to fix center of gravity',
+    caption: 'Lock center of gravity',
     editor: et.checkbox({
-      label: 'lock'
+      label: 'Always Lock center of gravity (Ctrl + Drag to invert)'
     }) as et.Editor<boolean | undefined>
   },
   {
     key: 'dimmedOutlineFor2DLabels',
-    caption: 'Number of Slices for 2D Shape',
+    caption: '2D shapes visibility',
     editor: et.shrinkSelect({
-      hide: 'None',
-      show: '± 2',
-      infinity: '∞'
+      hide: 'No dimmed outline',
+      show: '±2 slices',
+      infinity: '±∞ slices'
     }) as et.Editor<string | undefined>
+  },
+  {
+    key: 'revisionMessageTemplates',
+    caption: 'Revision message templates',
+    editor: TemplateEditor
   }
 ];
 
@@ -153,24 +226,42 @@ const Preferences: React.FC<{}> = props => {
       <h1>
         <Icon icon="circus-preference" /> Preferences
       </h1>
-      <h2>Appearance</h2>
-      <PropertyEditor
-        value={settings}
-        properties={appearanceProperties}
-        onChange={setSettings}
-      />
-      <h2>Search</h2>
-      <PropertyEditor
-        value={settings}
-        properties={searchProperties}
-        onChange={setSettings}
-      />
-      <h2>DICOM DB</h2>
-      <PropertyEditor
-        value={settings}
-        properties={circusDBProperties}
-        onChange={setSettings}
-      />
+      <Panel>
+        <Panel.Heading>
+          <Icon icon="glyphicon-adjust" /> Appearance
+        </Panel.Heading>
+        <Panel.Body>
+          <PropertyEditor
+            value={settings}
+            properties={appearanceProperties}
+            onChange={setSettings}
+          />
+        </Panel.Body>
+      </Panel>
+      <Panel>
+        <Panel.Heading>
+          <Icon icon="search" /> Search
+        </Panel.Heading>
+        <Panel.Body>
+          <PropertyEditor
+            value={settings}
+            properties={searchProperties}
+            onChange={setSettings}
+          />
+        </Panel.Body>
+      </Panel>
+      <Panel>
+        <Panel.Heading>
+          <Icon icon="circus-case" /> CIRCUS DB
+        </Panel.Heading>
+        <Panel.Body>
+          <PropertyEditor
+            value={settings}
+            properties={circusDBProperties}
+            onChange={setSettings}
+          />
+        </Panel.Body>
+      </Panel>
       <p className="text-center">
         <Button bsStyle="primary" onClick={saveClick}>
           Save

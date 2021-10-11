@@ -121,7 +121,7 @@
       editors:
         [
           { type: user, userEmail: 'dave@example.com' },
-          { type: user, userEmail: 'bob@example.com' },
+          { type: user, userEmail: 'bob@example.com' }
         ]
       createdAt: { $date: 1405266782123 }
     - myListId: 01ezahm939cbyfk73g3jhw1d0b

@@ -154,11 +154,8 @@ const {
   searchResultLoaded
 } = slice.actions;
 // But we export these ones
-export const {
-  selectionStatusChanged,
-  deleteSearch,
-  dismissTask
-} = slice.actions;
+export const { selectionStatusChanged, deleteSearch, dismissTask } =
+  slice.actions;
 
 export default slice.reducer;
 

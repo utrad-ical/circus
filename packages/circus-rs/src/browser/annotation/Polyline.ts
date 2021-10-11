@@ -50,7 +50,8 @@ const cursorTypes: {
 };
 
 export default class Polyline
-  implements Annotation, ViewerEventTarget, ModifierKeyBehaviors {
+  implements Annotation, ViewerEventTarget, ModifierKeyBehaviors
+{
   /**
    * Color of the outline.
    */
@@ -112,9 +113,10 @@ export default class Polyline
       }
     | undefined = undefined;
 
-  private getDrawingColor(
-    section: Section
-  ): { color?: string; fillColor?: string } {
+  private getDrawingColor(section: Section): {
+    color?: string;
+    fillColor?: string;
+  } {
     // Displays only when the volume is displayed as an axial slice
     const orientation = detectOrthogonalSection(section);
     if (orientation !== 'axial') return {};
@@ -267,11 +269,8 @@ export default class Polyline
 
     const resolution: [number, number] = viewer.getResolution();
 
-    const {
-      dragStartVolumePoint3,
-      originalPoints,
-      originalBoundingBox
-    } = this.dragInfo;
+    const { dragStartVolumePoint3, originalPoints, originalBoundingBox } =
+      this.dragInfo;
 
     const dragStartPoint3 = new Vector3(...dragStartVolumePoint3);
     const draggedPoint3 = convertScreenCoordinateToVolumeCoordinate(

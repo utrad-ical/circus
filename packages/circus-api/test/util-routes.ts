@@ -205,12 +205,12 @@ const createMockCsCore = () => {
     )
   ) as cscore.PluginDefinition[];
 
-  const queue = ([
+  const queue = [
     {
       state: 'finished',
       jobId: '01dxgwv3k0medrvhdag4mpw9wa'
     }
-  ] as any) as cscore.QueueItem<cscore.PluginJobRequest>[];
+  ] as any as cscore.QueueItem<cscore.PluginJobRequest>[];
 
   const csCore = {
     daemon: {

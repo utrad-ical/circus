@@ -22,17 +22,15 @@ export default class Ellipsoid extends SolidFigure {
 
   protected drawFigure(): void {
     const ctx = this.drawFigureParams!.ctx;
-    const crossSectionalShapeVertices2 = this.drawFigureParams!
-      .crossSectionalShapeVertices2;
+    const crossSectionalShapeVertices2 =
+      this.drawFigureParams!.crossSectionalShapeVertices2;
 
     // draw bounding box cross-sectional shape
-    const drawBoundingBoxCrossSectionalShape = this
-      .boundingBoxCrossSectionalShape;
+    const drawBoundingBoxCrossSectionalShape =
+      this.boundingBoxCrossSectionalShape;
     if (drawBoundingBoxCrossSectionalShape) {
-      const {
-        color: strokeStyle,
-        width: lineWidth
-      } = drawBoundingBoxCrossSectionalShape;
+      const { color: strokeStyle, width: lineWidth } =
+        drawBoundingBoxCrossSectionalShape;
 
       drawSimpleFigure(ctx, crossSectionalShapeVertices2, {
         lineWidth,
@@ -41,8 +39,8 @@ export default class Ellipsoid extends SolidFigure {
     }
 
     if (this.resetDepthOfBoundingBox) {
-      const crossSectionalShapeBoundingBox2 = this.drawFigureParams!
-        .crossSectionalShapeBoundingBox2;
+      const crossSectionalShapeBoundingBox2 =
+        this.drawFigureParams!.crossSectionalShapeBoundingBox2;
       const ellipse = getInscribedEllipse(crossSectionalShapeBoundingBox2);
       drawEllipse(
         ctx,

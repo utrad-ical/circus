@@ -9,11 +9,7 @@ import PatientInfoBox from 'components/PatientInfoBox';
 import ProjectDisplay from 'components/ProjectDisplay';
 import {
   Button,
-  Dropdown,
   DropdownButton,
-  FormControl,
-  FormGroup,
-  InputGroup,
   Glyphicon,
   MenuItem,
   Modal
@@ -21,15 +17,7 @@ import {
 import Tag from 'components/Tag';
 import TimeDisplay from 'components/TimeDisplay';
 import produce from 'immer';
-import keycode from 'keycode';
-import React, {
-  Fragment,
-  useCallback,
-  useEffect,
-  useReducer,
-  useState
-} from 'react';
-import DropdownToggle from 'react-bootstrap/lib/DropdownToggle';
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import Series from 'types/Series';
@@ -44,6 +32,7 @@ import {
 } from './revisionData';
 import RevisionEditor from './RevisionEditor';
 import RevisionSelector from './RevisionSelector';
+import SaveModal from './SaveModal';
 import TagEditor from './TagEditor';
 
 const CaseDetail: React.FC<{}> = props => {
@@ -63,7 +52,6 @@ const CaseDetail: React.FC<{}> = props => {
 
   const user = useLoginUser();
   const accessibleProjects = user.accessibleProjects;
-  const revisionMessageTemplates = user.preferences.revisionMessageTemplates;
 
   useEffect(() => {
     const loadCase = async () => {
@@ -189,21 +177,6 @@ const CaseDetail: React.FC<{}> = props => {
     }
   };
 
-  const templates: Template[] = revisionMessageTemplates
-    ? [{ title: 'Saved templates', messages: revisionMessageTemplates }]
-    : [];
-  caseStore.caseData &&
-    templates.push({
-      title: 'Revision history',
-      messages: Array.from(
-        new Set(
-          caseStore.caseData.revisions
-            .map(revision => revision.description)
-            .sort()
-        )
-      )
-    });
-
   if (!caseData || !projectData || !seriesData || !editingData) {
     return busy ? <LoadingIndicator /> : null;
   }
@@ -271,7 +244,9 @@ const CaseDetail: React.FC<{}> = props => {
         <Modal show onHide={() => {}}>
           <SaveModal
             value={editingData.revision.description}
-            templates={templates}
+            revisionHistory={
+              caseStore.caseData ? caseStore.caseData.revisions : []
+            }
             onHide={() => setSaveDialogOpen(false)}
             onOkClick={message => handleSaveDialog(message)}
           />
@@ -409,87 +384,5 @@ const StyledMenuBarDiv = styled.div`
     flex: 1000;
     text-align: right;
     padding: 3px;
-  }
-`;
-
-interface Template {
-  title: string;
-  messages: string[];
-}
-
-const SaveModal: React.FC<{
-  value: string;
-  templates: Template[];
-  onHide: () => void;
-  onOkClick: (props: any) => void;
-}> = props => {
-  const { templates, onHide, onOkClick } = props;
-  const [value, setValue] = useState(props.value);
-  const handleChange = (event: any) => {
-    setValue(event.target.value);
-  };
-  const handleKeyDown = (event: React.KeyboardEvent<FormControl>) => {
-    if (event.keyCode == keycode.codes.enter) {
-      onOkClick(value);
-    }
-  };
-  const handleSelectTemplate = (template: string) => {
-    setValue(template);
-  };
-
-  return (
-    <StyledSaveModalDiv>
-      <Modal.Header>Save</Modal.Header>
-      <Modal.Body>
-        <label>Revision message</label>
-        <FormControl
-          type="text"
-          autoFocus
-          value={value}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
-        />
-        {templates.length > 0 && (
-          <Dropdown id="revision-templates-dropdown">
-            <DropdownToggle>
-              <Icon icon="glyphicon-repeat" />
-            </DropdownToggle>
-            <Dropdown.Menu>
-              {templates.map((template, index) => (
-                <Fragment key={index}>
-                  {index !== 0 && <MenuItem divider />}
-                  <MenuItem header>{template.title}</MenuItem>
-                  {template.messages.map((message, i) => (
-                    <MenuItem
-                      key={i}
-                      onClick={() => handleSelectTemplate(message)}
-                    >
-                      {message}
-                    </MenuItem>
-                  ))}
-                </Fragment>
-              ))}
-            </Dropdown.Menu>
-          </Dropdown>
-        )}
-      </Modal.Body>
-      <Modal.Footer>
-        <Button bsStyle="link" onClick={onHide}>
-          Cancel
-        </Button>
-        <Button onClick={() => onOkClick(value)} bsStyle="primary">
-          OK
-        </Button>
-      </Modal.Footer>
-    </StyledSaveModalDiv>
-  );
-};
-
-const StyledSaveModalDiv = styled.div`
-  input {
-    width: 100%;
-  }
-  #revision-templates-dropdown {
-    margin-top: 10px;
   }
 `;

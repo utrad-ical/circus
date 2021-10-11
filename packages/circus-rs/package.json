@@ -66,7 +66,7 @@
     "@types/three": "^0.93.31",
     "@types/tinycolor2": "^1.4.0",
     "@types/validator": "^6.3.0",
-    "axios": "^0.19.2",
+    "axios": "^0.21.2",
     "babel-loader": "^8.2.2",
     "benchmark": "^2.1.4",
     "css-loader": "^6.2.0",

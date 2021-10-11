@@ -4,7 +4,7 @@ import PropertyEditor, {
 } from '@smikitky/rb-components/lib/PropertyEditor';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
-import { Button } from 'components/react-bootstrap';
+import { Button, Panel } from 'components/react-bootstrap';
 import React, { useCallback, useEffect, useState } from 'react';
 import { SearchPreset, UserPreferences } from 'store/loginUser';
 import { useApi } from 'utils/api';
@@ -226,24 +226,42 @@ const Preferences: React.FC<{}> = props => {
       <h1>
         <Icon icon="circus-preference" /> Preferences
       </h1>
-      <h2>Appearance</h2>
-      <PropertyEditor
-        value={settings}
-        properties={appearanceProperties}
-        onChange={setSettings}
-      />
-      <h2>Search</h2>
-      <PropertyEditor
-        value={settings}
-        properties={searchProperties}
-        onChange={setSettings}
-      />
-      <h2>DICOM DB</h2>
-      <PropertyEditor
-        value={settings}
-        properties={circusDBProperties}
-        onChange={setSettings}
-      />
+      <Panel>
+        <Panel.Heading>
+          <Icon icon="glyphicon-adjust" /> Appearance
+        </Panel.Heading>
+        <Panel.Body>
+          <PropertyEditor
+            value={settings}
+            properties={appearanceProperties}
+            onChange={setSettings}
+          />
+        </Panel.Body>
+      </Panel>
+      <Panel>
+        <Panel.Heading>
+          <Icon icon="search" /> Search
+        </Panel.Heading>
+        <Panel.Body>
+          <PropertyEditor
+            value={settings}
+            properties={searchProperties}
+            onChange={setSettings}
+          />
+        </Panel.Body>
+      </Panel>
+      <Panel>
+        <Panel.Heading>
+          <Icon icon="circus-case" /> CIRCUS DB
+        </Panel.Heading>
+        <Panel.Body>
+          <PropertyEditor
+            value={settings}
+            properties={circusDBProperties}
+            onChange={setSettings}
+          />
+        </Panel.Body>
+      </Panel>
       <p className="text-center">
         <Button bsStyle="primary" onClick={saveClick}>
           Save

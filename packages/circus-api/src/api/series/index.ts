@@ -121,9 +121,8 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
         ctx.throw(status.BAD_REQUEST, 'This my list is not for series');
     }
 
-    const canViewPersonalInfo = ctx.userPrivileges.globalPrivileges.includes(
-      'personalInfoView'
-    );
+    const canViewPersonalInfo =
+      ctx.userPrivileges.globalPrivileges.includes('personalInfoView');
 
     const baseStages: object[] = canViewPersonalInfo
       ? []

@@ -56,9 +56,7 @@ test('extractParameters', async () => {
   expect(dicomTags.parameters.PhotometricInterpretation).toBe('MONOCHROME2'); //CS
   expect(dicomTags.parameters.InstanceNumber).toBe(8); //IS
   expect(dicomTags.parameters.ImagePositionPatient).toEqual([
-    -119.7656,
-    -399.7656,
-    -280
+    -119.7656, -399.7656, -280
   ]); //DS
   expect(dicomTags.parameters.SliceLocation).toBe(280); //DS
   expect(dicomTags.parameters.BitsAllocated).toBe(16); //US

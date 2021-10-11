@@ -45,7 +45,8 @@ const cursorTypes: {
 };
 
 export default abstract class SolidFigure
-  implements Annotation, ViewerEventTarget, ModifierKeyBehaviors {
+  implements Annotation, ViewerEventTarget, ModifierKeyBehaviors
+{
   public abstract type: FigureType;
   /**
    * Boundary of the outline, measured in mm.
@@ -180,10 +181,11 @@ export default abstract class SolidFigure
       );
       if (!isOverlap) return;
 
-      const crossSectionalShapeBoundingBox2: Box2 = crossSectionalShapeVertices2.reduce(
-        (rect, vertex) => rect.expandByPoint(vertex),
-        new Box2().makeEmpty()
-      );
+      const crossSectionalShapeBoundingBox2: Box2 =
+        crossSectionalShapeVertices2.reduce(
+          (rect, vertex) => rect.expandByPoint(vertex),
+          new Box2().makeEmpty()
+        );
 
       const drawingTargetBoundingBox2: Box2 = new Box2()
         .set(new Vector2(0, 0), resolution.clone())

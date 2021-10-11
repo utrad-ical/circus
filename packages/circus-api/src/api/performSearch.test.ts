@@ -84,9 +84,7 @@ describe('performSearch', () => {
     expect(res2.items[0].name).toBe('bluetooth pixel');
     const res3 = await search({ sort: { stock: 1, name: 1 } });
     expect(res3.items.map((i: any) => i.itemId).slice(0, 3)).toEqual([
-      28,
-      13,
-      1
+      28, 13, 1
     ]);
   });
 

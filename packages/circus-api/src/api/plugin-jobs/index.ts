@@ -10,9 +10,8 @@ import makeNewPluginJob from '../../plugin-job/makeNewPluginJob';
 
 const maskPatientInfo = (ctx: CircusContext) => {
   return (pluginJobData: any) => {
-    const canView = ctx.userPrivileges.globalPrivileges.includes(
-      'personalInfoView'
-    );
+    const canView =
+      ctx.userPrivileges.globalPrivileges.includes('personalInfoView');
     const wantToView = ctx.user.preferences.personalInfoView;
     if (!canView || !wantToView || pluginJobData.patientInfo === null) {
       delete pluginJobData.patientInfo;
@@ -89,9 +88,8 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
         ctx.throw(status.BAD_REQUEST, 'This my list is not for plugin jobs');
     }
 
-    const canViewPersonalInfo = ctx.userPrivileges.globalPrivileges.includes(
-      'personalInfoView'
-    );
+    const canViewPersonalInfo =
+      ctx.userPrivileges.globalPrivileges.includes('personalInfoView');
 
     const baseStage: object[] = [
       {

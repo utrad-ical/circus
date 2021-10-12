@@ -164,6 +164,8 @@ export default class RawData {
     y: number,
     z: number
   ): number | undefined {
+    // NOTE: In the case of color image (rgba8), returns incorrect value.
+
     // Check values
     if (
       x < 0.0 ||
@@ -425,13 +427,13 @@ export default class RawData {
   /**
    * Converts this raw data to new pixel format, optionally using a filter.
    * @param targetFormat
-   * @param mapper Optional function which is applied to
-   *     map the voxel values.
+   * @param mapper Optional function which is applied to map the voxel values.
    */
   public convert(
     targetFormat: PixelFormat,
     mapper: (input: number) => number
   ): void {
+    // NOTE: In the case of color image (rgba8), returns incorrect value.
     const [rx, ry, rz] = this.size;
     const newRaw = new RawData(this.size, targetFormat);
     for (let z = 0; z < rz; z++) {
@@ -571,6 +573,7 @@ export default class RawData {
    * @return The windowed pixel value between 0 and 255.
    */
   protected applyWindow(width: number, level: number, pixel: number): number {
+    // NOTE: In the case of color image (rgba8), returns incorrect value.
     let value = Math.round((pixel - level + width / 2) * (255 / width));
     if (value > 255) {
       value = 255;

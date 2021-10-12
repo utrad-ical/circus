@@ -10,6 +10,11 @@ interface RescaleParams {
   intercept: number;
 }
 
+interface imageTypeParams {
+  pixelDataCharacteristics: string;
+  patientExaminationCharacteristics: string;
+}
+
 interface WindowParams {
   level: number;
   width: number;
@@ -43,6 +48,9 @@ export type DicomMetadata = {
   sliceLocation?: number;
   minValue?: number;
   maxValue?: number;
+  imageOrientationPatient?: string;
+  pixelDataCharacteristics?: string;
+  samplesPerPixel?: number;
 };
 
 export type DicomImageExtractor = (buffer: ArrayBuffer) => DicomImageData;
@@ -91,13 +99,14 @@ const dicomImageExtractor: (options?: ExtractOptions) => DicomImageExtractor = (
     const window = determineWindow(dataset);
     const sliceLocation = dataset.floatString('x00201041');
 
-    // PhotometricInterpretation == 'MONOCHROME1' means
-    // large pixel value means blacker instead of whiter
-    const photometricInterpretation = dataset.string('x00280004') || '';
-    if (!/^MONOCHROME/.test(photometricInterpretation)) {
-      throw new Error('Non-monochrome images are not supported yet.');
-    }
-    // let invert = (photometricInterpretation === 'MONOCHROME1');
+    const imageOrientationPatient = dataset.string('x00200037');
+
+    const imageType = determineImageType(dataset);
+    const pixelDataCharacteristics = imageType
+      ? imageType.pixelDataCharacteristics
+      : undefined;
+
+    const samplesPerPixel = dataset.uint16('x00280002');
 
     const metadata: DicomMetadata = {
       modality,
@@ -108,7 +117,10 @@ const dicomImageExtractor: (options?: ExtractOptions) => DicomImageExtractor = (
       pixelFormat,
       rescale,
       window,
-      sliceLocation
+      sliceLocation,
+      imageOrientationPatient,
+      pixelDataCharacteristics,
+      samplesPerPixel
     };
 
     const bitsStored = dataset.uint16('x00280101')!; // Bits Stored
@@ -122,7 +134,8 @@ const dicomImageExtractor: (options?: ExtractOptions) => DicomImageExtractor = (
         columns,
         pixelFormat,
         bitsStored,
-        highBit
+        highBit,
+        samplesPerPixel
       );
 
       if (modality === 'CT') {
@@ -153,9 +166,15 @@ const dicomImageExtractor: (options?: ExtractOptions) => DicomImageExtractor = (
 };
 
 function determinePixelFormat(dataset: DataSet): PixelFormat {
+  // NOTE: About PhotometricInterpretation
+  // PhotometricInterpretation will probably be set to 'MONOCHROME1', 'MONOCHROME2', 'RGB', or 'PALETTE COLOR'.
+  // PhotometricInterpretation == 'MONOCHROME1' means large pixel value means blacker instead of whiter
+  const photometricInterpretation = dataset.string('x00280004') || '';
   const pixelRepresentation = dataset.uint16('x00280103');
   const bitsAllocated = dataset.uint16('x00280100');
-  if (pixelRepresentation === 0 && bitsAllocated === 8) {
+  if (!/^MONOCHROME/.test(photometricInterpretation)) {
+    return 'rgba8'; // color data
+  } else if (pixelRepresentation === 0 && bitsAllocated === 8) {
     return 'uint8';
   } else if (pixelRepresentation === 1 && bitsAllocated === 8) {
     return 'int8'; // This should be rare
@@ -193,6 +212,69 @@ function determinePitch(dataset: DataSet): number | undefined {
     if (!pitch) throw new Error('Slice pitch could not be determined');
   }
   return pitch;
+}
+
+function determineImageType(dataset: DataSet): imageTypeParams | undefined {
+  if (dataset.elements['x00080008']) {
+    const imageType = dataset
+      .string('x00080008')!
+      .split('\\')
+      .map(x => x);
+    const pixelDataCharacteristics = imageType[0];
+    const patientExaminationCharacteristics = imageType[1];
+    return { pixelDataCharacteristics, patientExaminationCharacteristics };
+  }
+  return;
+}
+
+function isRgb(pixelFormat: PixelFormat, samplesPerPixel: number) {
+  return pixelFormat === 'rgba8' && samplesPerPixel === 3;
+}
+
+function extractUncompressedRGBPixels(
+  dataset: DataSet,
+  rows: number,
+  columns: number,
+  pixelFormat: PixelFormat,
+  samplesPerPixel: number
+): ExtractPixelInfo {
+  const bppOfRGB = 3;
+  const bppOfRGBA = 4;
+  const pxInfo = pixelFormatInfo(pixelFormat);
+  const offset = dataset.elements['x7fe00010'].dataOffset; // pixel data itself
+  const len = dataset.elements['x7fe00010'].length;
+  if (bppOfRGB != samplesPerPixel) {
+    throw new Error('Unexpected samples per pixel.');
+  }
+  if (len !== bppOfRGB * rows * columns) {
+    throw new Error('Unexpected pixel data length.');
+  }
+
+  const srcArray = new Uint8Array(dataset.byteArray.buffer, offset, len);
+
+  const pixelData = new ArrayBuffer(rows * columns * bppOfRGBA);
+  const pixelDataArray = new Uint32Array(pixelData);
+
+  const minValue = pxInfo.maxLevel;
+  const maxValue = pxInfo.minLevel;
+
+  const alpha = 0xff;
+  const isLittleEndian = new Uint8Array(Uint16Array.of(1).buffer)[0] === 1;
+  const convertRGBA8888 = (red: number, green: number, blue: number) =>
+    isLittleEndian
+      ? ((alpha << 24) + (blue << 16) + (green << 8) + red) >>> 0
+      : ((red << 24) + (green << 16) + (blue << 8) + alpha) >>> 0;
+
+  // Convert RGB to RGBA8888
+  let destOffset = 0;
+  for (let i = 0; i < len; i++) {
+    const red = srcArray[i];
+    const green = srcArray[++i];
+    const blue = srcArray[++i];
+    const val = convertRGBA8888(red, green, blue);
+    pixelDataArray[destOffset++] = val;
+  }
+  return { pixelData, minValue, maxValue };
 }
 
 function extractUncompressedPixels(
@@ -282,19 +364,28 @@ function extractPixels(
   columns: number,
   pixelFormat: PixelFormat,
   bitsStored: number,
-  highBit: number
+  highBit: number,
+  samplesPerPixel: number
 ): ExtractPixelInfo {
   switch (transferSyntax) {
     case '1.2.840.10008.1.2': // Implicit VR Little Endian (default)
     case '1.2.840.10008.1.2.1': // Explicit VR Little Endian
-      return extractUncompressedPixels(
-        dataset,
-        rows,
-        columns,
-        pixelFormat,
-        bitsStored,
-        highBit
-      );
+      return isRgb(pixelFormat, samplesPerPixel)
+        ? extractUncompressedRGBPixels(
+            dataset,
+            rows,
+            columns,
+            pixelFormat,
+            samplesPerPixel
+          )
+        : extractUncompressedPixels(
+            dataset,
+            rows,
+            columns,
+            pixelFormat,
+            bitsStored,
+            highBit
+          );
     case '1.2.840.10008.1.2.4.57': // JPEG Lossless, Nonhierarchical
     case '1.2.840.10008.1.2.4.70': // JPEG Lossless, Nonhierarchical
       return extractLosslessJpegPixels(

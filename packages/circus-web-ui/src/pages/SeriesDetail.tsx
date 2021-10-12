@@ -39,21 +39,44 @@ const SeriesDetail: React.FC<{}> = props => {
   );
   const [seriesData] = useLoadData<any | Error>(load);
 
-  useEffect(() => {
-    if (!seriesData) return;
+  const createImageSource = async () => {
     const rsHttpClient = new rs.RsHttpClient(server);
     const volumeLoader = new rs.RsVolumeLoader({
       rsHttpClient,
       seriesUid
     });
-    const src = new rs.HybridMprImageSource({
-      volumeLoader,
-      rsHttpClient,
-      seriesUid,
-      estimateWindowType: 'center'
-    });
-    const composition = new rs.Composition(src);
-    setComposition(composition);
+    const meta = await volumeLoader.loadMeta();
+    switch (meta.mode) {
+      case '3d': {
+        return new rs.HybridMprImageSource({
+          volumeLoader,
+          rsHttpClient,
+          seriesUid,
+          estimateWindowType: 'center'
+        });
+      }
+      case '2d': {
+        return new rs.TwoDimentionalImageSource({
+          volumeLoader,
+          rsHttpClient,
+          seriesUid,
+          estimateWindowType: 'center'
+        });
+      }
+    }
+  };
+
+  const loadingId = React.useRef(0);
+  useEffect(() => {
+    if (!seriesData) return;
+    const id = ++loadingId.current;
+    (async () => {
+      const src = await createImageSource();
+      if (loadingId.current === id) {
+        const composition = new rs.Composition(src);
+        setComposition(composition);
+      }
+    })();
   }, [seriesData, seriesUid, server]);
 
   if (!seriesData) return <LoadingIndicator />;

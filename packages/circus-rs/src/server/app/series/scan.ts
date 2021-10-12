@@ -44,16 +44,8 @@ export default function scan({ imageEncoder }: ScanOptions): koa.Middleware {
   ): Promise<void> {
     const state = ctx.state as SeriesMiddlewareState;
 
-    const {
-      ww,
-      wl,
-      origin,
-      xAxis,
-      yAxis,
-      size,
-      interpolation,
-      format
-    } = state.query;
+    const { ww, wl, origin, xAxis, yAxis, size, interpolation, format } =
+      state.query;
 
     const useWindow = typeof ww === 'number' && typeof wl === 'number';
     if (format === 'png' && !useWindow) {

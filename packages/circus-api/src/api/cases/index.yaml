@@ -84,3 +84,7 @@ routes:
           minItems: 1
       required: ['operation', 'tags', 'caseIds']
     description: Manages the tags of multiple cases.
+  - verb: delete
+    path: /cases/:caseId
+    requiredProjectPrivilege: moderate
+    description: Deletes the specified case.

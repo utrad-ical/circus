@@ -180,12 +180,11 @@ export default class ServiceLoader<T extends object = any> {
    */
   public async dispose(): Promise<void> {
     const disposeTasks = Object.keys(this.loadedServices).map(async k => {
-      const item: LoadedService<T, keyof T> = this.loadedServices[
-        k as keyof T
-      ]!;
+      const item: LoadedService<T, keyof T> =
+        this.loadedServices[k as keyof T]!;
       const disposeService = async (service: any) => {
         if ('dispose' in service) {
-          await ((service as unknown) as Disposable).dispose();
+          await (service as unknown as Disposable).dispose();
         }
       };
       if (item.status === 'loading') {

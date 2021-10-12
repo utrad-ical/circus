@@ -18,8 +18,10 @@ export interface RawVolumeMprImageSourceOptions {
  * RawVolumeMprImageSource holds an entire 3D volume in memory and
  * renders MPR image form the volume.
  */
-export default class RawVolumeMprImageSource extends MprImageSource
-  implements MprImageSourceWithDicomVolume {
+export default class RawVolumeMprImageSource
+  extends MprImageSource
+  implements MprImageSourceWithDicomVolume
+{
   private volume: DicomVolume | undefined;
 
   constructor({ volumeLoader }: RawVolumeMprImageSourceOptions) {

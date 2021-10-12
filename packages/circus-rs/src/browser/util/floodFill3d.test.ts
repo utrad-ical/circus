@@ -224,48 +224,51 @@ describe('floodFill3d with separated 2 balls binarizer', () => {
 });
 
 function withReport() {
-  return (enhanced: typeof floodFill3d) => (
-    startPoint: Vector3,
-    offsetBox: Box3,
-    binarizer: (p: Vector3) => boolean,
-    origFillLine: (p1: Vector3, p2: Vector3) => void
-  ) => {
-    const report = {
-      targetVoxels:
-        (offsetBox.max.x - offsetBox.min.x + 1) *
-        (offsetBox.max.y - offsetBox.min.y + 1) *
-        (offsetBox.max.z - offsetBox.min.z + 1),
-      matchedVoxels: 0,
-      matchedRate: 0.0,
-      fillLineCalled: 0,
-      // maxStackLength: 0, // cannot get
-      procTime: 0
-    };
+  return (enhanced: typeof floodFill3d) =>
+    (
+      startPoint: Vector3,
+      offsetBox: Box3,
+      binarizer: (p: Vector3) => boolean,
+      origFillLine: (p1: Vector3, p2: Vector3) => void
+    ) => {
+      const report = {
+        targetVoxels:
+          (offsetBox.max.x - offsetBox.min.x + 1) *
+          (offsetBox.max.y - offsetBox.min.y + 1) *
+          (offsetBox.max.z - offsetBox.min.z + 1),
+        matchedVoxels: 0,
+        matchedRate: 0.0,
+        fillLineCalled: 0,
+        // maxStackLength: 0, // cannot get
+        procTime: 0
+      };
 
-    const fillLine = (p1: Vector3, p2: Vector3) => {
-      report.fillLineCalled++;
-      report.matchedVoxels += p2.x - p1.x + 1;
-      origFillLine(p1, p2);
-    };
+      const fillLine = (p1: Vector3, p2: Vector3) => {
+        report.fillLineCalled++;
+        report.matchedVoxels += p2.x - p1.x + 1;
+        origFillLine(p1, p2);
+      };
 
-    const t0 = new Date().getTime();
-    enhanced(startPoint, offsetBox, binarizer, fillLine);
-    report.procTime = new Date().getTime() - t0;
-    report.matchedRate =
-      Math.round((report.matchedVoxels / report.targetVoxels) * 10000) / 100;
-    return report;
-  };
+      const t0 = new Date().getTime();
+      enhanced(startPoint, offsetBox, binarizer, fillLine);
+      report.procTime = new Date().getTime() - t0;
+      report.matchedRate =
+        Math.round((report.matchedVoxels / report.targetVoxels) * 10000) / 100;
+      return report;
+    };
 }
-const createDualBallShapedBinarizer = (
-  [c1x, c1y, c1z]: [number, number, number],
-  r1: number,
-  [c2x, c2y, c2z]: [number, number, number],
-  r2: number
-) => (p: Vector3) =>
-  !!(
-    (p.x - c1x) ** 2 + (p.y - c1y) ** 2 + (p.z - c1z) ** 2 <= r1 ** 2 ||
-    (p.x - c2x) ** 2 + (p.y - c2y) ** 2 + (p.z - c2z) ** 2 <= r2 ** 2
-  );
+const createDualBallShapedBinarizer =
+  (
+    [c1x, c1y, c1z]: [number, number, number],
+    r1: number,
+    [c2x, c2y, c2z]: [number, number, number],
+    r2: number
+  ) =>
+  (p: Vector3) =>
+    !!(
+      (p.x - c1x) ** 2 + (p.y - c1y) ** 2 + (p.z - c1z) ** 2 <= r1 ** 2 ||
+      (p.x - c2x) ** 2 + (p.y - c2y) ** 2 + (p.z - c2z) ** 2 <= r2 ** 2
+    );
 
 const createUniverse = (w: number = 9, h: number = 9, d: number = 9) => {
   const universeBox = new Box3().setFromArray([0, 0, 0, w, h, d]); // has 1000 voxels if w=9,h=9,d=9

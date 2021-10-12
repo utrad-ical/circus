@@ -28,7 +28,7 @@ export default function asyncMemoize<T>(
       try {
         cb(null, await func(key));
       } catch (err) {
-        cb(err, (null as any) as T);
+        cb(err, null as any as T);
       }
     },
     max: options.max,

@@ -352,11 +352,10 @@ test('#transformBoundingBox', () => {
   // expand to top-left
   {
     const vol = newVol();
-    vol.transformBoundingBox({ origin: [0, 0, 0], size: [32, 32, 32] }, [
-      16,
-      16,
-      16
-    ]);
+    vol.transformBoundingBox(
+      { origin: [0, 0, 0], size: [32, 32, 32] },
+      [16, 16, 16]
+    );
     expect(vol.getDimension()).toEqual([32, 32, 32]);
     expect(vol.getPixelAt(15, 15, 15)).toBe(0);
     expect(vol.getPixelAt(16 + 1, 16 + 3, 16 + 5)).toBe(9);

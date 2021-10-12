@@ -464,3 +464,50 @@ describe('patch tags', () => {
     expect(res.status).toBe(401);
   });
 });
+
+describe('delete', () => {
+  beforeEach(async () => {
+    await setUpMongoFixture(apiTest.db, ['clinicalCases']);
+    await setUpMongoFixture(apiTest.db, ['myLists']);
+  });
+  const caseId =
+    'gfdrjivu4w8p57nv95p7n485n3p891ygy6543wedfuyt67oiulkjhtrw312wergr';
+
+  test('delete one case forcibly', async () => {
+    const res = await ax.bob.request({
+      url: `api/cases/${caseId}?force=1`,
+      method: 'delete'
+    });
+    expect(res.status).toBe(204);
+    const myList = await apiTest.db
+      .collection('myLists')
+      .findOne({ myListId: '01ewes10a08z21bjnysd4p1m3f' });
+    expect(myList.items).toEqual(
+      expect.not.objectContaining({ resourceId: caseId })
+    );
+    const aCase = await apiTest.db
+      .collection('clinicalCases')
+      .findOne({ caseId });
+    expect(aCase).toStrictEqual(null);
+  });
+
+  test('throw 401 for unauthorized user', async () => {
+    const res = await ax.alice.request({
+      url: `api/cases/${caseId}`,
+      method: 'delete'
+    });
+    expect(res.status).toBe(401);
+    expect(res.data.error).toBe(
+      'You do not have "moderate" privilege of this project.'
+    );
+  });
+
+  test('throw 403 if the case is in some mylist', async () => {
+    const res = await ax.bob.request({
+      url: `api/cases/${caseId}`,
+      method: 'delete'
+    });
+    expect(res.status).toBe(403);
+    expect(res.data.error).toBe("This case is in someone's my list.");
+  });
+});

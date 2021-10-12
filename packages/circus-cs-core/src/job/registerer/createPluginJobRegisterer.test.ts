@@ -19,15 +19,15 @@ describe('createPluginJobRegisterer', () => {
   let deps: any;
 
   beforeEach(() => {
-    const queue = ({
+    const queue = {
       enqueue: jest.fn()
-    } as unknown) as circus.PluginJobRequestQueue;
+    } as unknown as circus.PluginJobRequestQueue;
 
-    const dicomFileRepository = ({
+    const dicomFileRepository = {
       getSeries: jest.fn(seriesUid =>
         Promise.resolve({ images: seriesUid === '1.2.3' ? '1-50' : '' })
       )
-    } as unknown) as DicomFileRepository;
+    } as unknown as DicomFileRepository;
 
     const pluginDefinitionAccessor = {
       get: async pluginId => {

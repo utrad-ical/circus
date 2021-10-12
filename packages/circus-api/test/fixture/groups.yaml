@@ -15,7 +15,7 @@
   writeProjects: ['8883fdef6f5144f50eb2a83cd34baa44']
   addSeriesProjects: []
   viewPersonalInfoProjects: []
-  moderateProjects: []
+  moderateProjects: ['8883fdef6f5144f50eb2a83cd34baa44']
 - groupId: 3 # member: guest
   groupName: guests
   privileges: []

@@ -158,6 +158,7 @@ export const performAggregationSearch = async (
 
 interface Options {
   transform?: (data: any) => any;
+  unlimited?: boolean;
   defaultSort: object;
 }
 
@@ -167,11 +168,15 @@ const performSearch = async (
   ctx: CircusContext,
   opts: Options
 ) => {
-  const { defaultSort, transform } = opts;
+  const { defaultSort, unlimited, transform } = opts;
   const { sort, limit, page, skip } = extractSearchOptions(ctx, defaultSort);
 
   try {
-    const rawResults = await model.findAll(filter, { limit, skip, sort });
+    const rawResults = await model.findAll(filter, {
+      limit: unlimited ? 99999 : limit,
+      skip,
+      sort
+    });
     const totalItems = await model.findAsCursor(filter).count();
     const results = transform ? rawResults.map(transform) : rawResults;
     ctx.body = { items: results, totalItems, page };

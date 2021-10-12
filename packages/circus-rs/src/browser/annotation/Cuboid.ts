@@ -9,8 +9,8 @@ export default class Cuboid extends SolidFigure {
 
   protected drawFigure(): void {
     const ctx = this.drawFigureParams!.ctx;
-    const crossSectionalShapeVertices2 = this.drawFigureParams!
-      .crossSectionalShapeVertices2;
+    const crossSectionalShapeVertices2 =
+      this.drawFigureParams!.crossSectionalShapeVertices2;
 
     drawSimpleFigure(ctx, crossSectionalShapeVertices2, {
       lineWidth: this.width,

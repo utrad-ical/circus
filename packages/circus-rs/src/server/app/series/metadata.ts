@@ -50,12 +50,8 @@ export default function metadata(): koa.Middleware {
       images: new MultiRange(loadImages)
     };
 
-    const {
-      voxelCount,
-      voxelSize,
-      dicomWindow,
-      pixelFormat
-    } = await extractVolumeMetadata(volumeAccessor);
+    const { voxelCount, voxelSize, dicomWindow, pixelFormat } =
+      await extractVolumeMetadata(volumeAccessor);
 
     const estimatedWindow =
       estimateWindow === 'none'

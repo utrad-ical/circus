@@ -48,11 +48,8 @@ const slice = createSlice({
 
 export default slice.reducer;
 
-export const {
-  addMessage,
-  dismissMessageOnPageChange,
-  dismissMessage
-} = slice.actions;
+export const { addMessage, dismissMessageOnPageChange, dismissMessage } =
+  slice.actions;
 
 export const showMessage = (
   message: React.ReactChild,

@@ -1,6 +1,12 @@
 import { Vector2, Vector3 } from 'three';
-import { scaleSection, Section } from '../../../common/geometry';
+import {
+  convertToDummyMprSection,
+  convertToTwoDimensionalViewSection,
+  scaleSection,
+  Section
+} from '../../../common/geometry';
 import MprImageSource from '../../image-source/MprImageSource';
+import TwoDimentionalImageSource from '../../image-source/TwoDimentionalImageSource';
 import {
   convertScreenCoordinateToVolumeCoordinate,
   sectionOverlapsVolume
@@ -18,8 +24,12 @@ export default function handleZoomBy(
   const comp = viewer.getComposition();
   if (!comp) throw new Error('Composition not initialized'); // should not happen
 
-  const src = comp.imageSource as MprImageSource;
-  if (!(src instanceof MprImageSource)) return;
+  const src = comp.imageSource as any;
+  if (
+    !(src instanceof MprImageSource) &&
+    !(src instanceof TwoDimentionalImageSource)
+  )
+    return;
 
   const stepFactor = 1.05;
 
@@ -42,6 +52,28 @@ export default function handleZoomBy(
       );
       if (!overlap) return;
 
+      viewer.setState({ ...prevState, section });
+      break;
+    }
+    case '2d': {
+      const prevDummySection = convertToDummyMprSection(prevState.section);
+      const dummySection = scaleSectionBy(
+        prevDummySection,
+        1 / stepFactor ** step,
+        resolution,
+        zoomPoint ? zoomPoint : [resolution[0] * 0.5, resolution[1] * 0.5]
+      );
+
+      // Abort If the section does not overlap the volume.
+      const overlap = sectionOverlapsVolume(
+        dummySection,
+        new Vector2().fromArray(resolution),
+        new Vector3().fromArray(src.metadata!.voxelSize),
+        new Vector3().fromArray(src.metadata!.voxelCount)
+      );
+      if (!overlap) return;
+
+      const section = convertToTwoDimensionalViewSection(dummySection);
       viewer.setState({ ...prevState, section });
       break;
     }

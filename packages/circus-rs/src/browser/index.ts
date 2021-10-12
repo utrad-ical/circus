@@ -11,6 +11,7 @@ export {
   default as ViewState,
   MprViewState,
   VrViewState,
+  TwoDimensionalViewState,
   TransferFunction,
   SubVolume
 } from './ViewState';
@@ -49,6 +50,7 @@ export { default as DynamicMprImageSource } from './image-source/DynamicMprImage
 export { default as RawVolumeMprImageSource } from './image-source/RawVolumeMprImageSource';
 export { default as HybridMprImageSource } from './image-source/HybridImageSource';
 export { default as VolumeRenderingImageSource } from './image-source/VolumeRenderingImageSource';
+export { default as TwoDimentionalImageSource } from './image-source/TwoDimentionalImageSource';
 
 export { default as DicomVolumeLoader } from './image-source/volume-loader/DicomVolumeLoader';
 export { default as MockVolumeLoader } from './image-source/volume-loader/MockVolumeLoader';

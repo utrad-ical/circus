@@ -3,12 +3,14 @@ import {
   Composition,
   MprImageSource,
   normalVector,
+  TwoDimentionalImageSource,
   Viewer,
   ViewState
 } from '../..';
 import {
   dotFromPointToSection,
   Section,
+  TwoDimensionalViewSection,
   Vector2D
 } from '../../../common/geometry';
 import {
@@ -99,8 +101,6 @@ export const createScrollbar = (
   if (!composition) throw new Error('Composition not initialized'); // should not happen
   const resolution = new Vector2().fromArray(viewer.getResolution());
 
-  const mmSection = viewState.section;
-
   const { size, position, marginHorizontal, marginVertical } = settings;
 
   const scrollbarLength = (() => {
@@ -131,9 +131,10 @@ export const createScrollbar = (
 
   const { thumbStep, divideCount } = calcThumbSteps(
     composition,
-    mmSection,
+    viewState.section,
     param
   );
+
   const thumbLength = Math.max(size, scrollableLength / divideCount);
   const thumbScale = (scrollableLength - thumbLength) / (divideCount - 1);
   const thumbPosition = thumbStep * thumbScale;
@@ -150,16 +151,22 @@ export const createScrollbar = (
 
 export const calcThumbSteps = (
   composition: Composition,
-  mmSection: Section,
+  section: Section | TwoDimensionalViewSection,
   param?: ScrollbarParam
 ): { thumbStep: number; divideCount: number } => {
-  const steps = calcSectionSteps(composition, mmSection);
+  const steps =
+    composition.imageSource instanceof MprImageSource
+      ? calcSectionStepsFor3d(composition, section as Section)
+      : calcSectionStepsFor2d(
+          composition,
+          section as TwoDimensionalViewSection
+        );
   const divideCount = steps.sumCount + 2;
   const thumbStep = !param ? steps.current + 1 : param.thumbStep;
   return { thumbStep, divideCount };
 };
 
-const calcSectionSteps = (
+const calcSectionStepsFor3d = (
   composition: Composition,
   mmSection: Section
 ): { current: number; sumCount: number } => {
@@ -206,6 +213,23 @@ const calcSectionSteps = (
       };
     }
   }
+};
+
+const calcSectionStepsFor2d = (
+  composition: Composition,
+  section2d: TwoDimensionalViewSection
+): { current: number; sumCount: number } => {
+  const src = composition.imageSource as TwoDimentionalImageSource;
+  if (!src || !src.metadata || !src.metadata.voxelSize)
+    return { current: 0, sumCount: 0 };
+  const voxelCount = src.metadata?.voxelCount!;
+  const current = section2d.imageNumber;
+  const sumCount = voxelCount[2];
+  const steps = {
+    current,
+    sumCount
+  };
+  return steps;
 };
 
 export type HandleType = 'arrowInc' | 'arrowDec' | 'thumbDrag';
@@ -367,4 +391,11 @@ const containsPoint = (
   const p2 = transformedPoint({ x: x + w, y: y + h });
   const box = new Box2().expandByPoint(p1).expandByPoint(p2);
   return box.containsPoint(point);
+};
+
+export const isValidViewState = (viewState: ViewState): boolean => {
+  if (!viewState) return false;
+  if (viewState.type === 'mpr') return true;
+  if (viewState.type === '2d') return true;
+  return false;
 };

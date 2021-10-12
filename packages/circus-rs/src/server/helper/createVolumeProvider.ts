@@ -29,6 +29,7 @@ export interface VolumeAccessor {
   zIndices: Map<number, number>;
   determinePitch: () => Promise<number>;
   images: MultiRange;
+  isLike3D: () => Promise<boolean>;
 }
 
 interface OptionsWithoutCache {
@@ -127,13 +128,82 @@ const createUncachedVolumeProvider: FunctionService<
       }
     };
 
+    /**
+     * Determines if the image is a "3D-like image" and returns it.
+     * If the first two images in the subseries satisfy all of the following,
+     * it will determine that they are "3D-like images" and return true.
+     * - The modality is CT, MR or PT.
+     * - Pixel format is monochrome.
+     * - The orientation of the image written in the DICOM tag is the same for the first and the second image.
+     * - DICOM tag does not have a flag that the image is a reconstructed image.
+     * @returns True for "3D-like images"
+     */
+    const isLike3D = async () => {
+      const images = imageRange.clone();
+      const count = images.length();
+
+      // primary image
+      const primaryImageNo = images.shift()!;
+      await load(primaryImageNo);
+      const primaryMetadata = imageMetadata.get(primaryImageNo)!;
+
+      // secondary image
+      let secondaryMetadata = primaryMetadata;
+      if (count > 1) {
+        const secondaryImageNo = images.shift()!;
+        await load(secondaryImageNo);
+        secondaryMetadata = imageMetadata.get(secondaryImageNo)!;
+      }
+
+      // Check: The modality is CT, MR or PT.
+      if (
+        [primaryMetadata.modality, secondaryMetadata.modality].some(
+          x => !['CT', 'MR', 'PT'].includes(x)
+        )
+      ) {
+        return false;
+      }
+
+      // Check: Pixel format is monochrome.
+      if (
+        [
+          primaryMetadata.pixelDataCharacteristics,
+          secondaryMetadata.pixelDataCharacteristics
+        ].some(x => x && x.match('rgba8'))
+      ) {
+        return false;
+      }
+
+      // Check: The orientation of the image written in the DICOM tag is the same for the first and the second image.
+      if (
+        primaryMetadata.imageOrientationPatient !=
+        secondaryMetadata.imageOrientationPatient
+      ) {
+        return false;
+      }
+
+      // Check: DICOM tag does not have a flag that the image is a reconstructed image.
+      if (
+        [
+          primaryMetadata.pixelDataCharacteristics,
+          secondaryMetadata.pixelDataCharacteristics
+        ].some(x => x && x.match(/^DERIVED/))
+      ) {
+        return false;
+      }
+
+      // Passed all requirements.
+      return true;
+    };
+
     return {
       imageMetadata,
       volume,
       zIndices,
       load: loadSeries,
       determinePitch,
-      images: imageRange
+      images: imageRange,
+      isLike3D
     };
   };
 };

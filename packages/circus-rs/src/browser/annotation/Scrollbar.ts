@@ -11,6 +11,7 @@ import {
   drawScrollbar,
   drawVisibilityThreshold,
   HandleType,
+  isValidViewState,
   Position,
   ScrollbarContainer,
   ScrollbarParam,
@@ -154,14 +155,7 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
     prevState: ViewState,
     state: ViewState
   ): void {
-    if (
-      !prevState ||
-      prevState.type !== 'mpr' ||
-      state.type !== 'mpr' ||
-      prevState.section === state.section
-    ) {
-      return;
-    }
+    if (!isValidViewState(prevState) || !isValidViewState(state)) return;
     this.scrollbar = this.createScrollbar(state);
   }
 
@@ -184,8 +178,11 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
   public draw(viewer: Viewer, viewState: ViewState, _option: DrawOption): void {
     if (viewer !== this.targetViewer) return;
 
-    const targetState = this.targetViewer.getState();
-    if (viewState.type !== 'mpr' || targetState.type !== 'mpr') return;
+    if (
+      !isValidViewState(this.targetViewer.getState()) ||
+      !isValidViewState(viewState)
+    )
+      return;
 
     this.scrollbar = this.createScrollbar(viewState, this.scrollbar);
 

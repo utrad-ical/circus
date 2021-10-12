@@ -1,4 +1,4 @@
-import { Section } from '../common/geometry';
+import { Section, TwoDimensionalViewSection } from '../common/geometry';
 import { ViewWindow } from '../common/ViewWindow';
 
 interface SectionDrawingViewState {
@@ -64,6 +64,16 @@ export interface VrViewState extends SectionDrawingViewState {
   readonly debugMode?: number;
 }
 
+interface TwoDimensionalDrawingViewState {
+  readonly section: TwoDimensionalViewSection;
+}
+export interface TwoDimensionalViewState
+  extends TwoDimensionalDrawingViewState {
+  readonly type: '2d';
+  readonly window?: ViewWindow;
+  readonly interpolationMode?: 'none' | 'bilinear';
+}
+
 /**
  * Supports interporation.
  * trilinear: multivariate interpolation on a 3-dimensional regular grid.
@@ -99,7 +109,7 @@ export interface SubVolume {
  * ViewState determines how an ImageSource is displayed on each Viewer.
  * This is an immutable object whose identity can be checked using `===`.
  */
-type ViewState = MprViewState | VrViewState;
+type ViewState = MprViewState | VrViewState | TwoDimensionalViewState;
 
 // eslint-disable-next-line no-undef
 export default ViewState;

@@ -594,6 +594,7 @@ export default class RawData {
     windowWidth?: number,
     windowLevel?: number
   ): void {
+    // NOTE: In the case of 2D image, returns incorrect value.
     const xAxis = section.xAxis;
     const eu: Vector3D = [
       xAxis[0] / outSize[0],
@@ -606,6 +607,33 @@ export default class RawData {
       yAxis[1] / outSize[1],
       yAxis[2] / outSize[1]
     ];
+    this.scanOblique(
+      section.origin as Vector3D,
+      eu,
+      ev,
+      outSize,
+      outImage,
+      interpolation,
+      windowWidth,
+      windowLevel
+    );
+  }
+
+  /**
+   * Builds a new 2D image using the given dummy section in index-coordinate.
+   */
+  public scanSection2d(
+    section: Section,
+    outSize: Vector2D,
+    outImage: { [index: number]: number },
+    interpolation: boolean = false,
+    windowWidth?: number,
+    windowLevel?: number
+  ): void {
+    const xAxis = section.xAxis;
+    const eu: Vector3D = [xAxis[0] / outSize[0], xAxis[1] / outSize[0], 0];
+    const yAxis = section.yAxis;
+    const ev: Vector3D = [yAxis[0] / outSize[1], yAxis[1] / outSize[1], 0];
     this.scanOblique(
       section.origin as Vector3D,
       eu,

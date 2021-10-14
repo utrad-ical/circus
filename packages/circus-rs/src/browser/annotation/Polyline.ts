@@ -19,7 +19,6 @@ import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
-import ModifierKeyBehaviors from './ModifierKeyBehaviors';
 import drawBoundingBoxOutline from './helper/drawBoundingBoxOutline';
 import drawHandleFrame from './helper/drawHandleFrame';
 import { drawPath, drawPoint } from './helper/drawObject';
@@ -29,6 +28,7 @@ import {
   hitBoundingRectWithHandles,
   hitRectangle
 } from './helper/hit-test';
+import ModifierKeyBehaviors from './ModifierKeyBehaviors';
 
 const handleSize = 5;
 
@@ -121,7 +121,7 @@ export default class Polyline
     const orientation = detectOrthogonalSection(section);
     if (orientation !== 'axial') return {};
 
-    if (!this.z) return {};
+    if (this.z === undefined) return {};
 
     const zDiff = Math.abs(this.z - section.origin[2]);
     if (zDiff > this.zDimmedThreshold) return {};
@@ -132,7 +132,7 @@ export default class Polyline
   }
 
   public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
-    if (this.points.length === 0 || !this.z) return;
+    if (this.points.length === 0 || this.z === undefined) return;
 
     if (!viewer || !viewState) return;
     const canvas = viewer.canvas;
@@ -145,11 +145,12 @@ export default class Polyline
     if (!color && !fillColor) return;
 
     const resolution = new Vector2().fromArray(viewer.getResolution());
+    const z = this.z === undefined ? 0 : this.z;
     const screenPoints = this.points.map(p =>
       convertVolumeCoordinateToScreenCoordinate(
         viewState.section,
         resolution,
-        new Vector3(p[0], p[1], this.z ? this.z : 0)
+        new Vector3(p[0], p[1], z)
       )
     );
 
@@ -198,7 +199,7 @@ export default class Polyline
   }
 
   public validate(): boolean {
-    if (this.points.length === 0 || !this.z) return false;
+    if (this.points.length === 0 || this.z === undefined) return false;
     return true;
   }
 
@@ -350,7 +351,7 @@ export default class Polyline
 
   public equalsPoint(ev: ViewerEvent, targetPointIndex: number): boolean {
     if (
-      !this.z ||
+      this.z === undefined ||
       targetPointIndex < 0 ||
       targetPointIndex >= this.points.length
     )

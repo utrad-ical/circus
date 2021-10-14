@@ -7,10 +7,10 @@ import {
   Initializer as MultiRangeInitializer,
   MultiRange
 } from 'multi-integer-range';
-import RawData from '../../common/RawData';
-import PriorityIntegerCaller from '../../common/PriorityIntegerCaller';
-import DicomVolume from '../../common/DicomVolume';
 import asyncMemoize from '../../common/asyncMemoize';
+import DicomVolume from '../../common/DicomVolume';
+import PriorityIntegerCaller from '../../common/PriorityIntegerCaller';
+import RawData from '../../common/RawData';
 import { DicomExtractorWorker } from './extractor-worker/createDicomExtractorWorker';
 
 export type VolumeProvider = (seriesUid: string) => Promise<VolumeAccessor>;
@@ -146,54 +146,15 @@ const createUncachedVolumeProvider: FunctionService<
       const primaryImageNo = images.shift()!;
       await load(primaryImageNo);
       const primaryMetadata = imageMetadata.get(primaryImageNo)!;
+      if (count === 1) {
+        return _isLike3D(primaryMetadata);
+      }
 
       // secondary image
-      let secondaryMetadata = primaryMetadata;
-      if (count > 1) {
-        const secondaryImageNo = images.shift()!;
-        await load(secondaryImageNo);
-        secondaryMetadata = imageMetadata.get(secondaryImageNo)!;
-      }
-
-      // Check: The modality is CT, MR or PT.
-      if (
-        [primaryMetadata.modality, secondaryMetadata.modality].some(
-          x => !['CT', 'MR', 'PT'].includes(x)
-        )
-      ) {
-        return false;
-      }
-
-      // Check: Pixel format is monochrome.
-      if (
-        [
-          primaryMetadata.pixelDataCharacteristics,
-          secondaryMetadata.pixelDataCharacteristics
-        ].some(x => x && x.match('rgba8'))
-      ) {
-        return false;
-      }
-
-      // Check: The orientation of the image written in the DICOM tag is the same for the first and the second image.
-      if (
-        primaryMetadata.imageOrientationPatient !=
-        secondaryMetadata.imageOrientationPatient
-      ) {
-        return false;
-      }
-
-      // Check: DICOM tag does not have a flag that the image is a reconstructed image.
-      if (
-        [
-          primaryMetadata.pixelDataCharacteristics,
-          secondaryMetadata.pixelDataCharacteristics
-        ].some(x => x && x.match(/^DERIVED/))
-      ) {
-        return false;
-      }
-
-      // Passed all requirements.
-      return true;
+      const secondaryImageNo = images.shift()!;
+      await load(secondaryImageNo);
+      const secondaryMetadata = imageMetadata.get(secondaryImageNo)!;
+      return _isLike3D(primaryMetadata, secondaryMetadata);
     };
 
     return {
@@ -206,6 +167,50 @@ const createUncachedVolumeProvider: FunctionService<
       isLike3D
     };
   };
+};
+
+const _isLike3D = async (...metadata: DicomMetadata[]) => {
+  if (!(metadata.length > 0)) return false;
+
+  const primaryMetadata = metadata[0];
+
+  // Check: The modality is CT, MR or PT.
+  if (metadata.some(x => !['CT', 'MR', 'PT'].includes(x.modality))) {
+    return false;
+  }
+
+  // Check: Pixel format is monochrome.
+  if (
+    metadata.some(
+      x =>
+        x.pixelDataCharacteristics && x.pixelDataCharacteristics.match('rgba8')
+    )
+  ) {
+    return false;
+  }
+
+  // Check: The orientation of the image written in the DICOM tag is the same for the first and second and subsequent images.
+  if (
+    metadata.some(
+      x => primaryMetadata.pixelDataCharacteristics != x.imageOrientationPatient
+    )
+  ) {
+    return false;
+  }
+
+  // Check: DICOM tag does not have a flag that the image is a reconstructed image.
+  if (
+    metadata.some(
+      x =>
+        x.pixelDataCharacteristics &&
+        x.pixelDataCharacteristics.match(/^DERIVED/)
+    )
+  ) {
+    return false;
+  }
+
+  // Passed all requirements.
+  return true;
 };
 
 interface Options extends OptionsWithoutCache {

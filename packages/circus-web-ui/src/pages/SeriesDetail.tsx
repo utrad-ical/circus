@@ -39,39 +39,31 @@ const SeriesDetail: React.FC<{}> = props => {
   );
   const [seriesData] = useLoadData<any | Error>(load);
 
-  const createImageSource = async () => {
-    const rsHttpClient = new rs.RsHttpClient(server);
-    const volumeLoader = new rs.RsVolumeLoader({
-      rsHttpClient,
-      seriesUid
-    });
-    const meta = await volumeLoader.loadMeta();
-    switch (meta.mode) {
-      case '3d': {
-        return new rs.HybridMprImageSource({
-          volumeLoader,
-          rsHttpClient,
-          seriesUid,
-          estimateWindowType: 'center'
-        });
-      }
-      case '2d': {
-        return new rs.TwoDimentionalImageSource({
-          volumeLoader,
-          rsHttpClient,
-          seriesUid,
-          estimateWindowType: 'center'
-        });
-      }
-    }
-  };
-
   const loadingId = React.useRef(0);
   useEffect(() => {
     if (!seriesData) return;
     const id = ++loadingId.current;
     (async () => {
-      const src = await createImageSource();
+      const rsHttpClient = new rs.RsHttpClient(server);
+      const volumeLoader = new rs.RsVolumeLoader({
+        rsHttpClient,
+        seriesUid
+      });
+      const meta = await volumeLoader.loadMeta();
+      const src =
+        meta.mode === '3d'
+          ? new rs.HybridMprImageSource({
+              volumeLoader,
+              rsHttpClient,
+              seriesUid,
+              estimateWindowType: 'center'
+            })
+          : new rs.TwoDimentionalImageSource({
+              volumeLoader,
+              rsHttpClient,
+              seriesUid,
+              estimateWindowType: 'center'
+            });
       if (loadingId.current === id) {
         const composition = new rs.Composition(src);
         setComposition(composition);

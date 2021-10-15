@@ -1,4 +1,8 @@
-import { Section, TwoDimensionalViewSection } from '../common/geometry';
+import {
+  convertToDummyMprSection,
+  Section,
+  TwoDimensionalViewSection
+} from '../common/geometry';
 import { ViewWindow } from '../common/ViewWindow';
 
 interface SectionDrawingViewState {
@@ -110,6 +114,15 @@ export interface SubVolume {
  * This is an immutable object whose identity can be checked using `===`.
  */
 type ViewState = MprViewState | VrViewState | TwoDimensionalViewState;
+
+export const getSectionDrawingViewState = (viewState: ViewState): Section => {
+  if (!viewState) throw new Error('View state not initialized');
+  const section =
+    viewState.type === '2d'
+      ? convertToDummyMprSection(viewState.section)
+      : viewState.section;
+  return section;
+};
 
 // eslint-disable-next-line no-undef
 export default ViewState;

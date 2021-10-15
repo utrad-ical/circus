@@ -392,10 +392,3 @@ const containsPoint = (
   const box = new Box2().expandByPoint(p1).expandByPoint(p2);
   return box.containsPoint(point);
 };
-
-export const isValidViewState = (viewState: ViewState): boolean => {
-  if (!viewState) return false;
-  if (viewState.type === 'mpr') return true;
-  if (viewState.type === '2d') return true;
-  return false;
-};

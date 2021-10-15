@@ -1,8 +1,8 @@
-import { Vector2, Box3 } from 'three';
-
+import { Box3, Vector2 } from 'three';
+import { getSectionDrawingViewState } from '../..';
 import {
-  detectOrthogonalSection,
-  convertScreenCoordinateToVolumeCoordinate
+  convertScreenCoordinateToVolumeCoordinate,
+  detectOrthogonalSection
 } from '../../section-util';
 import Viewer from '../../viewer/Viewer';
 import Cuboid from '../Cuboid';
@@ -30,8 +30,9 @@ export function createDefaultSolidFigureFromViewer(
 
   if (!viewer) return anno;
   const viewState = viewer.getState();
+  if (viewState.type === '2d') throw new Error('Unsupported view state.');
 
-  const { section } = viewState;
+  const section = getSectionDrawingViewState(viewState);
   const orientation = detectOrthogonalSection(section);
 
   const resolution = new Vector2().fromArray(viewer.getResolution());
@@ -86,8 +87,7 @@ export function createDefaultPlaneFigureFromViewer(
 
   if (!viewer) return anno;
   const viewState = viewer.getState();
-
-  const { section } = viewState;
+  const section = getSectionDrawingViewState(viewState);
   const orientation = detectOrthogonalSection(section);
   if (orientation !== 'axial') return anno;
 
@@ -118,8 +118,7 @@ export function createDefaultPointFromViewer(
 
   if (!viewer) return anno;
   const viewState = viewer.getState();
-
-  const { section } = viewState;
+  const section = getSectionDrawingViewState(viewState);
 
   const resolution = new Vector2().fromArray(viewer.getResolution());
   const screenCenter = new Vector2().fromArray([
@@ -147,8 +146,7 @@ export function createDefaultRulerFromViewer(
 
   if (!viewer) return anno;
   const viewState = viewer.getState();
-
-  const { section } = viewState;
+  const section = getSectionDrawingViewState(viewState);
 
   const resolution = new Vector2().fromArray(viewer.getResolution());
   const halfLength = Math.min(resolution.x, resolution.y) * 0.5 * sizeRatio;

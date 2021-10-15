@@ -1,4 +1,4 @@
-import { Vector2 } from 'three';
+import { getSectionDrawingViewState } from '../..';
 import MprImageSource from '../../image-source/MprImageSource';
 import { isMprImageSourceWithDicomVolume } from '../../image-source/MprImageSourceWithDicomVolume';
 import { detectOrthogonalSection } from '../../section-util';
@@ -44,8 +44,11 @@ export default class WandTool extends VoxelCloudToolBase<WandToolOptions> {
       throw new Error('Unsupported image source');
     }
 
-    const { type, section } = viewer.getState();
+    const viewState = viewer.getState();
+    const type = viewState.type;
     if (type !== 'mpr') throw new Error('Unsupported view state');
+
+    const section = getSectionDrawingViewState(viewState);
 
     const startPoint = convertViewerPointToVolumeIndex(
       viewer,

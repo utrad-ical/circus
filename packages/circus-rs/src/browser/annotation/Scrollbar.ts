@@ -11,7 +11,6 @@ import {
   drawScrollbar,
   drawVisibilityThreshold,
   HandleType,
-  isValidViewState,
   Position,
   ScrollbarContainer,
   ScrollbarParam,
@@ -30,6 +29,13 @@ interface Options {
   visibility?: Visibility;
   visibilityThreshold?: number;
 }
+
+const isValidViewState = (viewState: ViewState): boolean => {
+  if (!viewState) return false;
+  if (viewState.type === 'mpr') return true;
+  if (viewState.type === '2d') return true;
+  return false;
+};
 
 /**
  * Scrollbar is a type of annotation which draws a scroll bar on a viewer.

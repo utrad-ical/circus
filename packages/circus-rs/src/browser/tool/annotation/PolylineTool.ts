@@ -1,5 +1,5 @@
+import { Annotation, getSectionDrawingViewState, ViewState } from '../..';
 import { Vector2D } from '../../../common/geometry';
-import { Annotation } from '../..';
 import Polyline from '../../annotation/Polyline';
 import Composition from '../../Composition';
 import { detectOrthogonalSection } from '../../section-util';
@@ -47,9 +47,13 @@ export default class PolylineTool extends ToolBaseClass<ToolOptions> {
   public dragStartHandler(ev: ViewerEvent): void {
     const comp = ev.viewer.getComposition();
     if (!comp) return;
-    const viewState = ev.viewer.getState();
-    if (!viewState || viewState.type !== 'mpr') return;
-    const section = viewState.section;
+
+    const viewer = ev.viewer;
+    const viewState = viewer.getState();
+    if (!this.isValidViewState(viewState)) return;
+
+    const section = getSectionDrawingViewState(viewState);
+
     const orientation = detectOrthogonalSection(section);
     if (orientation !== 'axial') return;
 
@@ -81,7 +85,6 @@ export default class PolylineTool extends ToolBaseClass<ToolOptions> {
   }
 
   protected createAnnotation(): Polyline {
-    // TODO: Check the Tool default settings
     const antn = new Polyline();
     antn.editable = true;
     return antn;
@@ -121,5 +124,12 @@ export default class PolylineTool extends ToolBaseClass<ToolOptions> {
   protected concreteAnnotation(): void {
     this.mode = 'closed';
     this.focusedAnnotation = undefined;
+  }
+
+  protected isValidViewState(viewState: ViewState): boolean {
+    if (!viewState) return false;
+    if (viewState.type === 'mpr') return true;
+    if (viewState.type === '2d') return true;
+    return false;
   }
 }

@@ -1,6 +1,6 @@
 import { Box2, Vector2, Vector3 } from 'three';
 import { Vector2D } from '..';
-import { verticesOfBox } from '../../common/geometry';
+import { Section, verticesOfBox } from '../../common/geometry';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
 import {
   convertScreenCoordinateToVolumeCoordinate,
@@ -10,15 +10,15 @@ import {
 import { convertVolumePointToViewerPoint } from '../tool/tool-util';
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
-import ViewState, { MprViewState } from '../ViewState';
+import ViewState, { getSectionDrawingViewState } from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
-import ModifierKeyBehaviors from './ModifierKeyBehaviors';
 import drawHandleFrame, { defaultHandleSize } from './helper/drawHandleFrame';
 import {
   BoundingRectWithHandleHitType,
   hitBoundingRectWithHandles
 } from './helper/hit-test';
 import resize from './helper/resize';
+import ModifierKeyBehaviors from './ModifierKeyBehaviors';
 
 export type FigureType = 'rectangle' | 'circle';
 
@@ -34,6 +34,13 @@ const cursorTypes: {
   'south-west-handle': { cursor: 'sw-resize' },
   'west-handle': { cursor: 'w-resize' },
   'rect-outline': { cursor: 'move' }
+};
+
+const isValidViewState = (viewState: ViewState): boolean => {
+  if (!viewState) return false;
+  if (viewState.type === 'mpr') return true;
+  if (viewState.type === '2d') return true;
+  return false;
 };
 export default class PlaneFigure
   implements Annotation, ViewerEventTarget, ModifierKeyBehaviors
@@ -90,32 +97,32 @@ export default class PlaneFigure
   public id?: string;
 
   public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
-    if (!viewer || !viewState) return;
+    if (!viewer || !isValidViewState(viewState)) return;
+
     const canvas = viewer.canvas;
     if (!canvas) return;
-    if (viewState.type !== 'mpr') return;
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     // Displays only when the volume is displayed as an axial slice
-    const orientation = detectOrthogonalSection(viewState.section);
+    const section = getSectionDrawingViewState(viewState);
+    const orientation = detectOrthogonalSection(section);
     if (orientation !== 'axial') return;
 
     const resolution = new Vector2().fromArray(viewer.getResolution());
     if (!this.color || !this.min || !this.max) return;
 
-    if (this.z === undefined) return;
-    const zDiff = Math.abs(this.z - viewState.section.origin[2]);
-    if (zDiff > this.zDimmedThreshold) return;
-    const color = zDiff > this.zThreshold ? this.dimmedColor : this.color;
+    const color = this.getStrokeColor(viewState, section);
+    if (!color) return;
 
     const min = convertVolumeCoordinateToScreenCoordinate(
-      viewState.section,
+      section,
       resolution,
       new Vector3(this.min[0], this.min[1], this.z ? this.z : 0)
     );
     const max = convertVolumeCoordinateToScreenCoordinate(
-      viewState.section,
+      section,
       resolution,
       new Vector3(this.max[0], this.max[1], this.z ? this.z : 0)
     );
@@ -154,6 +161,37 @@ export default class PlaneFigure
     }
   }
 
+  private getStrokeColor(
+    viewState: ViewState,
+    section: Section
+  ): string | undefined {
+    if (this.z === undefined) return;
+
+    const distance = Math.abs(this.z - section.origin[2]);
+
+    const { distanceThreshold, distanceDimmedThreshold } = (() => {
+      switch (viewState.type) {
+        case '2d':
+          return { distanceThreshold: 0, distanceDimmedThreshold: 0 };
+        case 'mpr':
+        default:
+          return {
+            distanceThreshold: this.zThreshold,
+            distanceDimmedThreshold: this.zDimmedThreshold
+          };
+      }
+    })();
+
+    switch (true) {
+      case distance <= distanceThreshold:
+        return this.color;
+      case distance <= distanceDimmedThreshold:
+        return this.dimmedColor;
+      default:
+        return;
+    }
+  }
+
   public mouseMoveHandler(ev: ViewerEvent): void {
     if (!this.editable) return;
 
@@ -181,8 +219,7 @@ export default class PlaneFigure
     const point = new Vector2(ev.viewerX!, ev.viewerY!);
 
     const viewState = viewer.getState();
-    if (!viewer || !viewState) return;
-    if (viewState.type !== 'mpr') return;
+    if (!viewer || !isValidViewState(viewState)) return;
     if (!this.min || !this.max) return;
 
     const minPoint = convertVolumePointToViewerPoint(
@@ -215,7 +252,7 @@ export default class PlaneFigure
       const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
       const handleType = this.hitTest(ev);
       if (handleType) {
-        const state = viewer.getState() as MprViewState;
+        const section = getSectionDrawingViewState(ev.viewer.getState());
         const resolution: [number, number] = viewer.getResolution();
         this.handleType = handleType;
         this.dragInfo = {
@@ -224,7 +261,7 @@ export default class PlaneFigure
             [...this.max!, this.z!]
           ],
           dragStartVolumePoint3: convertScreenCoordinateToVolumeCoordinate(
-            state.section,
+            section,
             new Vector2().fromArray(resolution),
             point.clone()
           ).toArray()
@@ -241,11 +278,11 @@ export default class PlaneFigure
     if (viewer.getHoveringAnnotation() === this) {
       ev.stopPropagation();
       const draggedPoint: [number, number] = [ev.viewerX!, ev.viewerY!];
-      const viewState = viewer.getState() as MprViewState;
+      const section = getSectionDrawingViewState(ev.viewer.getState());
       const resolution: [number, number] = viewer.getResolution();
       const orientation = 'axial';
       const draggedPoint3 = convertScreenCoordinateToVolumeCoordinate(
-        viewState.section,
+        section,
         new Vector2().fromArray(resolution),
         new Vector2().fromArray(draggedPoint)
       );
@@ -312,27 +349,28 @@ export default class PlaneFigure
   private getBoundingBox(viewer: Viewer): [Vector2, Vector2] | undefined {
     const viewState = viewer.getState();
 
-    if (!viewer || !viewState) return;
-    if (viewState.type !== 'mpr') return;
+    if (!viewer || !isValidViewState(viewState)) return;
+
+    const section = getSectionDrawingViewState(viewState);
 
     // Displays only when the volume is displayed as an axial slice
-    const orientation = detectOrthogonalSection(viewState.section);
+    const orientation = detectOrthogonalSection(section);
     if (orientation !== 'axial') return;
 
     const resolution = new Vector2().fromArray(viewer.getResolution());
     if (!this.color || !this.min || !this.max) return;
 
     if (this.z === undefined) return;
-    const zDiff = Math.abs(this.z - viewState.section.origin[2]);
+    const zDiff = Math.abs(this.z - section.origin[2]);
     if (zDiff > this.zDimmedThreshold) return;
 
     const min = convertVolumeCoordinateToScreenCoordinate(
-      viewState.section,
+      section,
       resolution,
       new Vector3(this.min[0], this.min[1], this.z ? this.z : 0)
     );
     const max = convertVolumeCoordinateToScreenCoordinate(
-      viewState.section,
+      section,
       resolution,
       new Vector3(this.max[0], this.max[1], this.z ? this.z : 0)
     );

@@ -1,3 +1,4 @@
+import { ViewState } from '../..';
 import Annotation from '../../annotation/Annotation';
 import Point from '../../annotation/Point';
 import ViewerEvent from '../../viewer/ViewerEvent';
@@ -39,5 +40,12 @@ export default class PointTool extends AnnotationToolBase {
   protected validateAnnotation(): boolean {
     if (!this.focusedAnnotation) return false;
     return this.focusedAnnotation.validate();
+  }
+
+  protected isValidViewState(viewState: ViewState): boolean {
+    if (!viewState) return false;
+    if (viewState.type === 'mpr') return true;
+    if (viewState.type === '2d') return true;
+    return false;
   }
 }

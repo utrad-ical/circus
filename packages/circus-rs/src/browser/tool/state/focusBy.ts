@@ -1,8 +1,7 @@
 import { Vector2 } from 'three';
+import { getSectionDrawingViewState } from '../..';
 import {
-  convertToDummyMprSection,
   convertToTwoDimensionalViewSection,
-  TwoDimensionalViewSection,
   Vector3D
 } from '../../../common/geometry';
 import MprImageSource from '../../image-source/MprImageSource';
@@ -27,33 +26,26 @@ export default function focusBy(
   )
     return;
 
+  const prevSection = getSectionDrawingViewState(prevState);
+  const section = translateOriginToCenter(
+    {
+      origin: focusPoint,
+      xAxis: prevSection.xAxis,
+      yAxis: prevSection.yAxis
+    },
+    resolution
+  );
+
   switch (prevState.type) {
     case 'mpr': {
-      const prevSection = prevState.section;
-      const section = translateOriginToCenter(
-        {
-          origin: focusPoint,
-          xAxis: prevSection.xAxis,
-          yAxis: prevSection.yAxis
-        },
-        resolution
-      );
       viewer.setState({ ...prevState, section });
       return;
     }
     case '2d': {
-      const prevSection = prevState.section as TwoDimensionalViewSection;
-      const prevSectionDummy = convertToDummyMprSection(prevSection);
-      const sectionDummy = translateOriginToCenter(
-        {
-          origin: focusPoint,
-          xAxis: prevSectionDummy.xAxis,
-          yAxis: prevSectionDummy.yAxis
-        },
-        resolution
-      );
-      const section = convertToTwoDimensionalViewSection(sectionDummy);
-      viewer.setState({ ...prevState, section });
+      viewer.setState({
+        ...prevState,
+        section: convertToTwoDimensionalViewSection(section)
+      });
       return;
     }
   }

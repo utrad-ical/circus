@@ -1,3 +1,4 @@
+import { ViewState } from '../..';
 import Annotation from '../../annotation/Annotation';
 import Viewer from '../../viewer/Viewer';
 import ViewerEvent from '../../viewer/ViewerEvent';
@@ -31,7 +32,7 @@ export default abstract class AnnotationToolBase<
     const comp = ev.viewer.getComposition();
     if (!comp) return;
     const viewState = ev.viewer.getState();
-    if (!viewState || viewState.type !== 'mpr') return;
+    if (!this.isValidViewState(viewState)) return;
 
     const antn = this.createAnnotation(ev);
     if (!antn) return;
@@ -45,7 +46,7 @@ export default abstract class AnnotationToolBase<
     if (!comp) return;
 
     const viewState = ev.viewer.getState();
-    if (!viewState || viewState.type !== 'mpr') return;
+    if (!this.isValidViewState(viewState)) return;
 
     if (!this.focusedAnnotation) return;
     this.updateAnnotation(ev);
@@ -62,7 +63,7 @@ export default abstract class AnnotationToolBase<
     if (!comp) return;
 
     const viewState = ev.viewer.getState();
-    if (!viewState || viewState.type !== 'mpr') return;
+    if (!this.isValidViewState(viewState)) return;
 
     const antn = this.focusedAnnotation;
     if (!antn) return;
@@ -78,5 +79,11 @@ export default abstract class AnnotationToolBase<
     comp.annotationUpdated();
 
     ev.stopPropagation();
+  }
+
+  protected isValidViewState(viewState: ViewState): boolean {
+    if (!viewState) return false;
+    if (viewState.type === 'mpr') return true;
+    return false;
   }
 }

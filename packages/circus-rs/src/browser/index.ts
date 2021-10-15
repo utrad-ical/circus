@@ -13,7 +13,8 @@ export {
   VrViewState,
   TwoDimensionalViewState,
   TransferFunction,
-  SubVolume
+  SubVolume,
+  getSectionDrawingViewState
 } from './ViewState';
 export { ViewWindow } from '../common/ViewWindow';
 export { default as Composition } from './Composition';

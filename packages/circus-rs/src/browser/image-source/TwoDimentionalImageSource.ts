@@ -210,9 +210,8 @@ export default class TwoDimentionalImageSource extends ImageSource {
         return viewState;
       }
 
-      const resizedSection = convertToTwoDimensionalViewSection(
-        resizedSectionDummy
-      );
+      const resizedSection =
+        convertToTwoDimensionalViewSection(resizedSectionDummy);
       return { ...viewState, section: resizedSection };
     };
   }

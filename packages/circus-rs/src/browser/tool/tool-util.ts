@@ -1,11 +1,12 @@
 import { Vector2, Vector3 } from 'three';
+import { getSectionDrawingViewState } from '..';
 import MprImageSource from '../image-source/MprImageSource';
-import Viewer from '../viewer/Viewer';
 import {
   convertPointToIndex,
   convertScreenCoordinateToVolumeCoordinate,
   convertVolumeCoordinateToScreenCoordinate
 } from '../section-util';
+import Viewer from '../viewer/Viewer';
 
 /**
  * Utility method which works in the same way as Math.sign().
@@ -27,8 +28,13 @@ export function convertViewerPointToVolumePoint(
   px: number,
   py: number
 ): Vector3 {
-  const { type, section } = viewer.getState();
-  if (type !== 'mpr') throw new Error('Unsupported view state.');
+  const viewState = viewer.getState();
+  const type = viewState.type;
+
+  if (type !== 'mpr' && type !== '2d')
+    throw new Error('Unsupported view state.');
+
+  const section = getSectionDrawingViewState(viewState);
 
   const resolution = viewer.getResolution();
   return convertScreenCoordinateToVolumeCoordinate(
@@ -47,8 +53,13 @@ export function convertVolumePointToViewerPoint(
   py: number,
   pz: number
 ): Vector2 {
-  const { type, section } = viewer.getState();
-  if (type !== 'mpr') throw new Error('Unsupported view state.');
+  const viewState = viewer.getState();
+  const type = viewState.type;
+
+  if (type !== 'mpr' && type !== '2d')
+    throw new Error('Unsupported view state.');
+
+  const section = getSectionDrawingViewState(viewState);
 
   const resolution = viewer.getResolution();
   return convertVolumeCoordinateToScreenCoordinate(

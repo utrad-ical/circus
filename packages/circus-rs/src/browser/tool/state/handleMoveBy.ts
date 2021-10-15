@@ -1,6 +1,6 @@
 import { Vector2, Vector3 } from 'three';
+import { getSectionDrawingViewState } from '../..';
 import {
-  convertToDummyMprSection,
   convertToTwoDimensionalViewSection,
   sectionEquals,
   translateSection
@@ -28,72 +28,44 @@ export default function handleMoveBy(
     return;
 
   const prevState = viewer.getState();
+  const prevSection = getSectionDrawingViewState(prevState);
   const viewport = viewer.getViewport();
   const resolution = viewer.getResolution();
 
   const vp = new Vector2().fromArray(viewport);
 
+  const moveScale = move.clone().divide(vp);
+  const section = translateSection(
+    prevSection,
+    new Vector3().addVectors(
+      new Vector3().fromArray(prevSection.xAxis).multiplyScalar(-moveScale.x),
+      new Vector3().fromArray(prevSection.yAxis).multiplyScalar(-moveScale.y)
+    )
+  );
+
+  // Abort if the processed section is not changed.
+  if (sectionEquals(prevSection, section)) return;
+
+  // Abort If the section does not overlap the volume.
+  const overlap = sectionOverlapsVolume(
+    section,
+    new Vector2().fromArray(resolution),
+    new Vector3().fromArray(src.metadata!.voxelSize),
+    new Vector3().fromArray(src.metadata!.voxelCount)
+  );
+  if (!overlap) return;
+
   switch (prevState.type) {
-    case 'mpr':
-    case 'vr': {
-      const moveScale = move.clone().divide(vp);
-      const section = translateSection(
-        prevState.section,
-        new Vector3().addVectors(
-          new Vector3()
-            .fromArray(prevState.section.xAxis)
-            .multiplyScalar(-moveScale.x),
-          new Vector3()
-            .fromArray(prevState.section.yAxis)
-            .multiplyScalar(-moveScale.y)
-        )
-      );
-
-      // Abort if the processed section is not changed.
-      if (sectionEquals(prevState.section, section)) return;
-
-      // Abort If the section does not overlap the volume.
-      const overlap = sectionOverlapsVolume(
-        section,
-        new Vector2().fromArray(resolution),
-        new Vector3().fromArray(src.metadata!.voxelSize),
-        new Vector3().fromArray(src.metadata!.voxelCount)
-      );
-      if (!overlap) return;
-
+    case 'mpr': {
       viewer.setState({ ...prevState, section });
-      break;
+      return;
     }
     case '2d': {
-      const moveScale = move.clone().divide(vp);
-      const prevDummySection = convertToDummyMprSection(prevState.section);
-      const dummySection = translateSection(
-        prevDummySection,
-        new Vector3().addVectors(
-          new Vector3()
-            .fromArray(prevDummySection.xAxis)
-            .multiplyScalar(-moveScale.x),
-          new Vector3()
-            .fromArray(prevDummySection.yAxis)
-            .multiplyScalar(-moveScale.y)
-        )
-      );
-
-      // Abort if the processed section is not changed.
-      if (sectionEquals(prevDummySection, dummySection)) return;
-
-      // Abort If the section does not overlap the volume.
-      const overlap = sectionOverlapsVolume(
-        dummySection,
-        new Vector2().fromArray(resolution),
-        new Vector3().fromArray(src.metadata!.voxelSize),
-        new Vector3().fromArray(src.metadata!.voxelCount)
-      );
-      if (!overlap) return;
-
-      const section = convertToTwoDimensionalViewSection(dummySection);
-      viewer.setState({ ...prevState, section });
-      break;
+      viewer.setState({
+        ...prevState,
+        section: convertToTwoDimensionalViewSection(section)
+      });
+      return;
     }
   }
 }

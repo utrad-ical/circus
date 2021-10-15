@@ -1,6 +1,6 @@
 import { Vector2, Vector3 } from 'three';
+import { getSectionDrawingViewState } from '../..';
 import {
-  convertToDummyMprSection,
   convertToTwoDimensionalViewSection,
   scaleSection,
   Section
@@ -32,49 +32,34 @@ export default function handleZoomBy(
     return;
 
   const stepFactor = 1.05;
+  const prevSection = getSectionDrawingViewState(prevState);
+
+  const section = scaleSectionBy(
+    prevSection,
+    1 / stepFactor ** step,
+    resolution,
+    zoomPoint ? zoomPoint : [resolution[0] * 0.5, resolution[1] * 0.5]
+  );
+
+  // Abort If the section does not overlap the volume.
+  const overlap = sectionOverlapsVolume(
+    section,
+    new Vector2().fromArray(resolution),
+    new Vector3().fromArray(src.metadata!.voxelSize),
+    new Vector3().fromArray(src.metadata!.voxelCount)
+  );
+  if (!overlap) return;
 
   switch (prevState.type) {
-    case 'mpr':
-    case 'vr': {
-      const section = scaleSectionBy(
-        prevState.section,
-        1 / stepFactor ** step,
-        resolution,
-        zoomPoint ? zoomPoint : [resolution[0] * 0.5, resolution[1] * 0.5]
-      );
-
-      // Abort If the section does not overlap the volume.
-      const overlap = sectionOverlapsVolume(
-        section,
-        new Vector2().fromArray(resolution),
-        new Vector3().fromArray(src.metadata!.voxelSize),
-        new Vector3().fromArray(src.metadata!.voxelCount)
-      );
-      if (!overlap) return;
-
+    case 'mpr': {
       viewer.setState({ ...prevState, section });
-      break;
+      return;
     }
     case '2d': {
-      const prevDummySection = convertToDummyMprSection(prevState.section);
-      const dummySection = scaleSectionBy(
-        prevDummySection,
-        1 / stepFactor ** step,
-        resolution,
-        zoomPoint ? zoomPoint : [resolution[0] * 0.5, resolution[1] * 0.5]
-      );
-
-      // Abort If the section does not overlap the volume.
-      const overlap = sectionOverlapsVolume(
-        dummySection,
-        new Vector2().fromArray(resolution),
-        new Vector3().fromArray(src.metadata!.voxelSize),
-        new Vector3().fromArray(src.metadata!.voxelCount)
-      );
-      if (!overlap) return;
-
-      const section = convertToTwoDimensionalViewSection(dummySection);
-      viewer.setState({ ...prevState, section });
+      viewer.setState({
+        ...prevState,
+        section: convertToTwoDimensionalViewSection(section)
+      });
       break;
     }
   }

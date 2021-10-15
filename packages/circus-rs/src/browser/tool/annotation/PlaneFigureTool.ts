@@ -1,3 +1,4 @@
+import { getSectionDrawingViewState, ViewState } from '../..';
 import { Vector2D } from '../../../common/geometry';
 import Annotation from '../../annotation/Annotation';
 import PlaneFigure, { FigureType } from '../../annotation/PlaneFigure';
@@ -14,9 +15,12 @@ export default class PlaneFigureTool extends AnnotationToolBase {
   protected figureType: FigureType = 'circle';
 
   protected createAnnotation(ev: ViewerEvent): Annotation | undefined {
-    const viewState = ev.viewer.getState();
-    if (!viewState || viewState.type !== 'mpr') return;
-    const section = viewState.section;
+    const viewer = ev.viewer;
+    const viewState = viewer.getState();
+    if (!this.isValidViewState(viewState)) return;
+
+    const section = getSectionDrawingViewState(viewState);
+
     const orientation = detectOrthogonalSection(section);
     if (orientation !== 'axial') return;
 
@@ -37,7 +41,7 @@ export default class PlaneFigureTool extends AnnotationToolBase {
 
   protected updateAnnotation(ev: ViewerEvent): void {
     const viewState = ev.viewer.getState();
-    if (!viewState || viewState.type !== 'mpr') return;
+    if (!this.isValidViewState(viewState)) return;
 
     if (!this.focusedAnnotation) return;
 
@@ -77,5 +81,12 @@ export default class PlaneFigureTool extends AnnotationToolBase {
   protected validateAnnotation(): boolean {
     if (!this.focusedAnnotation) return false;
     return this.focusedAnnotation.validate();
+  }
+
+  protected isValidViewState(viewState: ViewState): boolean {
+    if (!viewState) return false;
+    if (viewState.type === 'mpr') return true;
+    if (viewState.type === '2d') return true;
+    return false;
   }
 }

@@ -1,3 +1,4 @@
+import { getSectionDrawingViewState } from '../..';
 import { Vector3D } from '../../../common/geometry';
 import Annotation from '../../annotation/Annotation';
 import Cuboid from '../../annotation/Cuboid';
@@ -16,9 +17,12 @@ export default class SolidFigureTool extends AnnotationToolBase {
   protected figureType: FigureType = 'cuboid';
 
   protected createAnnotation(ev: ViewerEvent): Annotation | undefined {
-    const viewState = ev.viewer.getState();
-    if (!viewState || viewState.type !== 'mpr') return;
-    const section = viewState.section;
+    const viewer = ev.viewer;
+    const viewState = viewer.getState();
+    if (!this.isValidViewState(viewState)) return;
+
+    const section = getSectionDrawingViewState(viewState);
+
     const orientation = detectOrthogonalSection(section);
     if (!SolidFigure.editableOrientation.some(o => o === orientation)) return;
 
@@ -50,7 +54,7 @@ export default class SolidFigureTool extends AnnotationToolBase {
     if (!comp) return;
 
     const viewState = ev.viewer.getState();
-    if (!viewState || viewState.type !== 'mpr') return;
+    if (!this.isValidViewState(viewState)) return;
 
     if (!this.focusedAnnotation) return;
 
@@ -67,10 +71,12 @@ export default class SolidFigureTool extends AnnotationToolBase {
     const antn = this.focusedAnnotation;
     if (!antn) return;
 
-    const viewState = ev.viewer.getState();
-    if (!viewState || viewState.type !== 'mpr') return;
+    const viewer = ev.viewer;
+    const viewState = viewer.getState();
+    if (!this.isValidViewState(viewState)) return;
 
-    const orientation = detectOrthogonalSection(viewState.section);
+    const section = getSectionDrawingViewState(viewState);
+    const orientation = detectOrthogonalSection(section);
     antn.concrete(orientation);
   }
 

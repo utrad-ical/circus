@@ -18,6 +18,7 @@ import Tag from 'components/Tag';
 import TimeDisplay from 'components/TimeDisplay';
 import produce from 'immer';
 import React, { useCallback, useEffect, useReducer, useState } from 'react';
+import { Prompt } from 'react-router';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import Series from 'types/Series';
@@ -52,6 +53,15 @@ const CaseDetail: React.FC<{}> = props => {
 
   const user = useLoginUser();
   const accessibleProjects = user.accessibleProjects;
+  const isUpdated = caseStore.currentHistoryIndex > 0;
+
+  // warn before reloading or closing page with unsaved changes
+  window.onbeforeunload = isUpdated ? () => true : null;
+  useEffect(() => {
+    return () => {
+      window.onbeforeunload = null;
+    };
+  }, []);
 
   useEffect(() => {
     const loadCase = async () => {
@@ -183,6 +193,10 @@ const CaseDetail: React.FC<{}> = props => {
 
   return (
     <FullSpanContainer>
+      <Prompt
+        when={isUpdated}
+        message={`Are you sure you want to leave?\nIf you leave before saving, your changes will be lost.`}
+      />
       <CaseInfoCollapser title="Case Info">
         <PatientInfoBox value={caseStore.patientInfo} />
         <ProjectDisplay
@@ -218,6 +232,7 @@ const CaseDetail: React.FC<{}> = props => {
         caseStore={caseStore}
         onCommand={handleMenuBarCommand}
         onRevisionSelect={handleRevisionSelect}
+        isUpdated={isUpdated}
         busy={busy}
       />
       <RevisionEditor
@@ -285,9 +300,10 @@ const MenuBar: React.FC<{
   caseStore: c.CaseDetailState;
   onCommand: (command: MenuBarCommand) => void;
   onRevisionSelect: (index: number) => Promise<void>;
+  isUpdated: boolean;
   busy: boolean;
 }> = React.memo(props => {
-  const { caseStore, onCommand, onRevisionSelect, busy } = props;
+  const { caseStore, onCommand, onRevisionSelect, isUpdated, busy } = props;
   const user = useLoginUser();
 
   useKeyboardShortcut('Ctrl+Z', () => {
@@ -299,6 +315,8 @@ const MenuBar: React.FC<{
   });
 
   useKeyboardShortcut('Ctrl+S', () => onCommand('save'));
+
+  const unsavedAlertMessage = isUpdated ? 'You have unsaved changes' : '';
 
   return (
     <StyledMenuBarDiv>
@@ -318,6 +336,8 @@ const MenuBar: React.FC<{
         )}
       </div>
       <div className="right">
+        <span>{unsavedAlertMessage}</span>
+        &ensp;
         <IconButton
           bsStyle="default"
           icon="step-backward"

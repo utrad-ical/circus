@@ -130,8 +130,8 @@ export const createScrollbar = (
   const scrollableLength = scrollbarLength - size * 2;
 
   const { thumbStep, divideCount } = calcThumbSteps(
+    viewState,
     composition,
-    viewState.section,
     param
   );
 
@@ -150,20 +150,20 @@ export const createScrollbar = (
 };
 
 export const calcThumbSteps = (
+  viewState: ViewState,
   composition: Composition,
-  section: Section | Section2D,
   param?: ScrollbarParam
 ): { thumbStep: number; divideCount: number } => {
   const steps =
-    composition.imageSource instanceof MprImageSource
-      ? calcSectionStepsFor3d(composition, section as Section)
-      : calcSectionStepsFor2d(composition, section as Section2D);
+    viewState.type === '2d'
+      ? calcStepsInSection2D(composition, viewState.section)
+      : calcStepsInSection(composition, viewState.section);
   const divideCount = steps.sumCount + 2;
   const thumbStep = !param ? steps.current + 1 : param.thumbStep;
   return { thumbStep, divideCount };
 };
 
-const calcSectionStepsFor3d = (
+const calcStepsInSection = (
   composition: Composition,
   mmSection: Section
 ): { current: number; sumCount: number } => {
@@ -212,14 +212,14 @@ const calcSectionStepsFor3d = (
   }
 };
 
-const calcSectionStepsFor2d = (
+const calcStepsInSection2D = (
   composition: Composition,
   section2D: Section2D
 ): { current: number; sumCount: number } => {
   const src = composition.imageSource as TwoDimentionalImageSource;
   if (!src || !src.metadata || !src.metadata.voxelSize)
     return { current: 0, sumCount: 0 };
-  const voxelCount = src.metadata?.voxelCount!;
+  const voxelCount = src.metadata.voxelCount!;
   const current = section2D.imageNumber;
   const sumCount = voxelCount[2];
   const steps = {

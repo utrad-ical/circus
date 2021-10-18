@@ -171,8 +171,7 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
     const composition = viewer.getComposition();
     if (!composition) return;
     const viewState = viewer.getState();
-    const section = viewState.section;
-    const sectionStep = calcThumbSteps(composition, section).thumbStep;
+    const sectionStep = calcThumbSteps(viewState, composition).thumbStep;
     if (!this.scrollbar) this.scrollbar = this.createScrollbar(viewState);
     const drawnStep = this.scrollbar.thumbStep;
     const stepDiff = drawnStep - sectionStep;

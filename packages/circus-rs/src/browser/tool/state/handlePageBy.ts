@@ -1,9 +1,7 @@
 import { Vector2, Vector3 } from 'three';
-import { getSectionDrawingViewState } from '../..';
 import MprImageSource from '../../image-source/MprImageSource';
 import TwoDimentionalImageSource from '../../image-source/TwoDimentionalImageSource';
 import {
-  convertToSection2D,
   orientationAwareTranslation,
   sectionOverlapsVolume
 } from '../../section-util';
@@ -24,7 +22,7 @@ export default function handlePageBy(viewer: Viewer, step: number): void {
 
   switch (prevState.type) {
     case 'mpr': {
-      const prevSection = getSectionDrawingViewState(prevState);
+      const prevSection = prevState.section;
       const section = orientationAwareTranslation(
         prevSection,
         src.metadata!.voxelSize,
@@ -42,16 +40,13 @@ export default function handlePageBy(viewer: Viewer, step: number): void {
       return;
     }
     case '2d': {
-      step = Math.round(step);
       if (step === 0) return;
-      const prevSection = getSectionDrawingViewState(prevState);
-      const section = convertToSection2D(
-        orientationAwareTranslation(prevSection, src.metadata!.voxelSize, step)
-      );
+      const prevSection = prevState.section;
+      const imageNumber = prevSection.imageNumber + Math.round(step);
+      const section = { ...prevState.section, imageNumber };
       // Abort If the section does not overlap the volume.
       const overlap =
-        0 <= section.imageNumber &&
-        section.imageNumber < src.metadata!.voxelCount[2];
+        0 <= imageNumber && imageNumber < src.metadata!.voxelCount[2];
       if (!overlap) return;
       viewer.setState({ ...prevState, section });
       return;
@@ -61,9 +56,9 @@ export default function handlePageBy(viewer: Viewer, step: number): void {
 
 export function handlePageByScrollbar(viewer: Viewer, step: number): void {
   const prevState = viewer.getState();
-  const prevSection = getSectionDrawingViewState(prevState);
   const comp = viewer.getComposition();
   if (!comp) throw new Error('Composition not initialized'); // should not happen
+
   const src = comp.imageSource as any;
   if (
     !(src instanceof MprImageSource) &&
@@ -71,24 +66,22 @@ export function handlePageByScrollbar(viewer: Viewer, step: number): void {
   )
     return;
 
-  const section = orientationAwareTranslation(
-    prevSection,
-    src.metadata!.voxelSize,
-    step
-  );
-
   switch (prevState.type) {
     case 'mpr': {
+      const section = orientationAwareTranslation(
+        prevState.section,
+        src.metadata!.voxelSize,
+        step
+      );
       const viewState = { ...prevState, section };
       viewer.setState(viewState);
       return;
     }
     case '2d': {
-      const viewState = {
-        ...prevState,
-        section: convertToSection2D(section)
-      };
-      viewer.setState(viewState);
+      const prevSection = prevState.section;
+      const imageNumber = prevSection.imageNumber + Math.round(step);
+      const section = { ...prevState.section, imageNumber };
+      viewer.setState({ ...prevState, section });
       return;
     }
   }

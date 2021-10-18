@@ -1,14 +1,11 @@
 import { Vector2, Vector3 } from 'three';
 import { getSectionDrawingViewState } from '../..';
-import {
-  convertToTwoDimensionalViewSection,
-  scaleSection,
-  Section
-} from '../../../common/geometry';
+import { scaleSection, Section } from '../../../common/geometry';
 import MprImageSource from '../../image-source/MprImageSource';
 import TwoDimentionalImageSource from '../../image-source/TwoDimentionalImageSource';
 import {
   convertScreenCoordinateToVolumeCoordinate,
+  convertToSection2D,
   sectionOverlapsVolume
 } from '../../section-util';
 import Viewer from '../../viewer/Viewer';
@@ -58,7 +55,7 @@ export default function handleZoomBy(
     case '2d': {
       viewer.setState({
         ...prevState,
-        section: convertToTwoDimensionalViewSection(section)
+        section: convertToSection2D(section)
       });
       break;
     }

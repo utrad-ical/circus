@@ -1,12 +1,12 @@
 import { Vector2 } from 'three';
 import { getSectionDrawingViewState } from '../..';
-import {
-  convertToTwoDimensionalViewSection,
-  Vector3D
-} from '../../../common/geometry';
+import { Vector3D } from '../../../common/geometry';
 import MprImageSource from '../../image-source/MprImageSource';
 import TwoDimentionalImageSource from '../../image-source/TwoDimentionalImageSource';
-import { translateOriginToCenter } from '../../section-util';
+import {
+  convertToSection2D,
+  translateOriginToCenter
+} from '../../section-util';
 import Viewer from '../../viewer/Viewer';
 
 export default function focusBy(
@@ -44,7 +44,7 @@ export default function focusBy(
     case '2d': {
       viewer.setState({
         ...prevState,
-        section: convertToTwoDimensionalViewSection(section)
+        section: convertToSection2D(section)
       });
       return;
     }

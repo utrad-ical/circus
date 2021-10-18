@@ -1,8 +1,4 @@
-import {
-  convertToDummyMprSection,
-  Section,
-  TwoDimensionalViewSection
-} from '../common/geometry';
+import { Section, Section2D } from '../common/geometry';
 import { ViewWindow } from '../common/ViewWindow';
 
 interface SectionDrawingViewState {
@@ -69,7 +65,7 @@ export interface VrViewState extends SectionDrawingViewState {
 }
 
 interface TwoDimensionalDrawingViewState {
-  readonly section: TwoDimensionalViewSection;
+  readonly section: Section2D;
 }
 export interface TwoDimensionalViewState
   extends TwoDimensionalDrawingViewState {
@@ -117,11 +113,21 @@ type ViewState = MprViewState | VrViewState | TwoDimensionalViewState;
 
 export const getSectionDrawingViewState = (viewState: ViewState): Section => {
   if (!viewState) throw new Error('View state not initialized');
-  const section =
-    viewState.type === '2d'
-      ? convertToDummyMprSection(viewState.section)
-      : viewState.section;
-  return section;
+
+  switch (viewState.type) {
+    case '2d': {
+      const { origin, xAxis, yLength, imageNumber } = viewState.section;
+      return {
+        origin: [...origin, imageNumber],
+        xAxis: [...xAxis, 0],
+        yAxis: [0, yLength, 0]
+      };
+    }
+    case 'mpr':
+    case 'vr':
+    default:
+      return viewState.section;
+  }
 };
 
 // eslint-disable-next-line no-undef

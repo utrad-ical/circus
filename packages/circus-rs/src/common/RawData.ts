@@ -4,7 +4,7 @@ import {
   PixelFormatInfo,
   pixelFormatInfo
 } from '@utrad-ical/circus-lib/src/PixelFormat';
-import { Box, Section, Vector2D, Vector3D } from './geometry';
+import { Box, Section, Section2D, Vector2D, Vector3D } from './geometry';
 
 // Make sure you don't add properties
 // that heavily depends on DICOM spec!
@@ -620,22 +620,23 @@ export default class RawData {
   }
 
   /**
-   * Builds a new 2D image using the given dummy section in index-coordinate.
+   * Builds a new 2D image using the given section in index-coordinate.
    */
-  public scanSection2d(
-    section: Section,
+  public scanSection2D(
+    section: Section2D,
     outSize: Vector2D,
     outImage: { [index: number]: number },
     interpolation: boolean = false,
     windowWidth?: number,
     windowLevel?: number
   ): void {
+    const origin: Vector3D = [...section.origin, section.imageNumber];
     const xAxis = section.xAxis;
     const eu: Vector3D = [xAxis[0] / outSize[0], xAxis[1] / outSize[0], 0];
-    const yAxis = section.yAxis;
+    const yAxis = [0, section.yLength];
     const ev: Vector3D = [yAxis[0] / outSize[1], yAxis[1] / outSize[1], 0];
     this.scanOblique(
-      section.origin as Vector3D,
+      origin,
       eu,
       ev,
       outSize,

@@ -1,17 +1,13 @@
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import { Vector3 } from 'three';
+import { getSectionDrawingViewState } from '..';
 import DicomVolume from '../../common/DicomVolume';
-import {
-  convertToDummyMprSection,
-  convertToTwoDimensionalViewSection,
-  Section,
-  Vector2D,
-  Vector3D
-} from '../../common/geometry';
+import { Section, Vector2D, Vector3D } from '../../common/geometry';
 import RsHttpClient from '../http-client/RsHttpClient';
 import {
   adjustOnResized,
   convertSectionToIndex,
+  convertToSection2D,
   createOrthogonalMprSection
 } from '../section-util';
 import setImmediate from '../util/setImmediate';
@@ -64,7 +60,7 @@ export default class TwoDimentionalImageSource extends ImageSource {
       'axial',
       0
     );
-    const section = convertToTwoDimensionalViewSection(sectionDummy);
+    const section = convertToSection2D(sectionDummy);
 
     const state: TwoDimensionalViewState = {
       type: '2d',
@@ -94,8 +90,6 @@ export default class TwoDimentionalImageSource extends ImageSource {
   }
 
   public draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
-    // TODO: doramari Memoization
-
     if (viewState.type !== '2d') throw new Error('Unsupported view state');
 
     const imageData =
@@ -112,7 +106,7 @@ export default class TwoDimentionalImageSource extends ImageSource {
     });
   }
 
-  public createImageDataOfRGBA8(
+  private createImageDataOfRGBA8(
     viewer: Viewer,
     viewState: TwoDimensionalViewState
   ): ImageData {
@@ -129,15 +123,15 @@ export default class TwoDimentionalImageSource extends ImageSource {
     // const interpolationMode = viewState.interpolationMode;
     const interpolation = false;
 
-    const mmSectionDummy = convertToDummyMprSection(viewState.section);
-
-    const indexSectionDummy: Section = convertSectionToIndex(
-      mmSectionDummy,
+    const indexSection: Section = convertSectionToIndex(
+      getSectionDrawingViewState(viewState),
       new Vector3().fromArray(metadata.voxelSize)
     );
 
-    volume.scanSection2d(
-      indexSectionDummy,
+    const indexSection2D = convertToSection2D(indexSection);
+
+    volume.scanSection2D(
+      indexSection2D,
       outSize,
       outImage,
       interpolation,
@@ -148,7 +142,7 @@ export default class TwoDimentionalImageSource extends ImageSource {
     return imageData;
   }
 
-  public createImageDataOfMonochrome(
+  private createImageDataOfMonochrome(
     viewer: Viewer,
     viewState: TwoDimensionalViewState
   ): ImageData {
@@ -165,15 +159,15 @@ export default class TwoDimentionalImageSource extends ImageSource {
     // const interpolationMode = viewState.interpolationMode;
     const interpolation = false;
 
-    const mmSectionDummy = convertToDummyMprSection(viewState.section);
-
-    const indexSectionDummy: Section = convertSectionToIndex(
-      mmSectionDummy,
+    const indexSection: Section = convertSectionToIndex(
+      getSectionDrawingViewState(viewState),
       new Vector3().fromArray(metadata.voxelSize)
     );
 
-    volume.scanSection2d(
-      indexSectionDummy,
+    const indexSection2D = convertToSection2D(indexSection);
+
+    volume.scanSection2D(
+      indexSection2D,
       outSize,
       outImage,
       interpolation,
@@ -198,21 +192,18 @@ export default class TwoDimentionalImageSource extends ImageSource {
         return viewState;
       }
 
-      const mmSectionDummy = convertToDummyMprSection(viewState.section);
+      const section = getSectionDrawingViewState(viewState);
 
-      const resizedSectionDummy = adjustOnResized(
-        mmSectionDummy,
-        beforeSize,
-        afterSize
-      );
+      const resizedSection = adjustOnResized(section, beforeSize, afterSize);
 
-      if (mmSectionDummy === resizedSectionDummy) {
+      if (section === resizedSection) {
         return viewState;
       }
 
-      const resizedSection =
-        convertToTwoDimensionalViewSection(resizedSectionDummy);
-      return { ...viewState, section: resizedSection };
+      return {
+        ...viewState,
+        section: convertToSection2D(resizedSection)
+      };
     };
   }
 }

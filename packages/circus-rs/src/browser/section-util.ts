@@ -5,6 +5,7 @@ import {
   normalVector,
   projectPointOntoSection,
   Section,
+  Section2D,
   translateSection,
   Vector2D,
   Vector3D,
@@ -570,5 +571,21 @@ export const getSectionFromPoints = (
     origin: origin.toArray(),
     xAxis: xAxis.toArray(),
     yAxis: yAxis.toArray()
+  };
+};
+
+/**
+ * Pseudo-converts an MPR section to a 2D section.
+ * @param section MPR section
+ * @returns 2D section representation of MPR section
+ */
+export const convertToSection2D = (section: Section): Section2D => {
+  if (detectOrthogonalSection(section) !== 'axial')
+    throw new Error('Invalid section.');
+  return {
+    origin: [section.origin[0], section.origin[1]],
+    xAxis: [section.xAxis[0], section.xAxis[1]],
+    yLength: section.yAxis[1],
+    imageNumber: Math.round(section.origin[2])
   };
 };

@@ -1,6 +1,5 @@
 import { Box2, Line3, Vector2, Vector3 } from 'three';
 import {
-  convertToDummyMprSection,
   distanceFromPointToSection,
   Section,
   Vector2D,
@@ -254,10 +253,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
 
       if (['start-reset', 'end-reset'].some(t => t === this.handleType)) {
         const viewState = viewer.getState();
-        const section =
-          viewState.type === '2d'
-            ? convertToDummyMprSection(viewState.section)
-            : viewState.section;
+        const section = getSectionDrawingViewState(viewState);
         const start = new Vector3().fromArray(this.start!);
         const end = new Vector3().fromArray(this.end!);
         this.start = getOrthogonalProjectedPoint(

@@ -1,9 +1,9 @@
 import { Vector2, Vector3 } from 'three';
 import { getSectionDrawingViewState } from '../..';
-import { convertToTwoDimensionalViewSection } from '../../../common/geometry';
 import MprImageSource from '../../image-source/MprImageSource';
 import TwoDimentionalImageSource from '../../image-source/TwoDimentionalImageSource';
 import {
+  convertToSection2D,
   orientationAwareTranslation,
   sectionOverlapsVolume
 } from '../../section-util';
@@ -45,7 +45,7 @@ export default function handlePageBy(viewer: Viewer, step: number): void {
       step = Math.round(step);
       if (step === 0) return;
       const prevSection = getSectionDrawingViewState(prevState);
-      const section = convertToTwoDimensionalViewSection(
+      const section = convertToSection2D(
         orientationAwareTranslation(prevSection, src.metadata!.voxelSize, step)
       );
       // Abort If the section does not overlap the volume.
@@ -86,7 +86,7 @@ export function handlePageByScrollbar(viewer: Viewer, step: number): void {
     case '2d': {
       const viewState = {
         ...prevState,
-        section: convertToTwoDimensionalViewSection(section)
+        section: convertToSection2D(section)
       };
       viewer.setState(viewState);
       return;

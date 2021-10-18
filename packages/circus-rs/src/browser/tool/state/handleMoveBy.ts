@@ -1,13 +1,9 @@
 import { Vector2, Vector3 } from 'three';
 import { getSectionDrawingViewState } from '../..';
-import {
-  convertToTwoDimensionalViewSection,
-  sectionEquals,
-  translateSection
-} from '../../../common/geometry';
+import { sectionEquals, translateSection } from '../../../common/geometry';
 import MprImageSource from '../../image-source/MprImageSource';
 import TwoDimentionalImageSource from '../../image-source/TwoDimentionalImageSource';
-import { sectionOverlapsVolume } from '../../section-util';
+import { convertToSection2D, sectionOverlapsVolume } from '../../section-util';
 import Viewer from '../../viewer/Viewer';
 
 export default function handleMoveBy(
@@ -63,7 +59,7 @@ export default function handleMoveBy(
     case '2d': {
       viewer.setState({
         ...prevState,
-        section: convertToTwoDimensionalViewSection(section)
+        section: convertToSection2D(section)
       });
       return;
     }

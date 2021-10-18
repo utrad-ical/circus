@@ -172,7 +172,7 @@ export default class VoxelCloud implements Annotation {
     if (this.volume.getPixelFormat() !== 'binary') {
       throw new Error('The assigned volume must use binary data format.');
     }
-    if (viewState.type !== 'mpr') throw new Error('Unsupported view state.');
+    if (viewState.type !== 'mpr') return;
 
     const composition = viewer.getComposition();
     if (!composition) return;

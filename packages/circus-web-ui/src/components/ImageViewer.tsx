@@ -1,13 +1,14 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import {
+  convertToSection2D,
   createOrthogonalMprSection,
   OrientationString
 } from '@utrad-ical/circus-rs/src/browser/section-util';
+import ToolBaseClass from '@utrad-ical/circus-rs/src/browser/tool/Tool';
 import { toolFactory } from '@utrad-ical/circus-rs/src/browser/tool/tool-initializer';
 import classnames from 'classnames';
 import { EventEmitter } from 'events';
-import ToolBaseClass from '@utrad-ical/circus-rs/src/browser/tool/Tool';
+import React, { useEffect, useRef, useState } from 'react';
 
 export const setOrthogonalOrientation = (orientation: OrientationString) => {
   return (viewer: rs.Viewer, initialViewState: rs.MprViewState) => {
@@ -24,6 +25,28 @@ export const setOrthogonalOrientation = (orientation: OrientationString) => {
     };
     return newState;
   };
+};
+
+export const setOrthogonal2D = (
+  viewer: rs.Viewer,
+  initialViewState: rs.TwoDimensionalViewState
+) => {
+  if (initialViewState.type !== '2d') return;
+  const src = viewer.getComposition()!
+    .imageSource as rs.TwoDimentionalImageSource;
+  const mmDim = src.mmDim();
+  const section = createOrthogonalMprSection(
+    viewer.getResolution(),
+    mmDim,
+    'axial',
+    0
+  );
+  const section2D = convertToSection2D(section);
+  const newState: rs.TwoDimensionalViewState = {
+    ...initialViewState,
+    section: section2D
+  };
+  return newState;
 };
 
 const defaultTool = toolFactory('pager');

@@ -1,12 +1,15 @@
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { Section, Vector2D, Vector3D } from '@utrad-ical/circus-rs/src/browser';
-import { detectOrthogonalSection } from '@utrad-ical/circus-rs/src/browser/section-util';
+import {
+  convertToSection2D,
+  detectOrthogonalSection
+} from '@utrad-ical/circus-rs/src/browser/section-util';
 import focusBy from '@utrad-ical/circus-rs/src/browser/tool/state/focusBy';
+import { gzipSync } from 'fflate';
 import produce from 'immer';
 import { ApiCaller } from 'utils/api';
 import { sha1 } from 'utils/util';
-import { gzipSync } from 'fflate';
 
 type InternalLabelDataMap = {
   voxel: InternalVoxelLabelData;
@@ -372,7 +375,7 @@ const getCenterOfLabel = (
   switch (label.type) {
     case 'voxel': {
       const src = composition.imageSource as rs.MprImageSource;
-      if (!src.metadata) return;
+      if (!src || !src.metadata) return;
 
       const shrinkResult = voxelShrinkToMinimum(label.data);
       if (shrinkResult === null) return;
@@ -429,20 +432,55 @@ export const setRecommendedDisplay = (
     case 'ruler': {
       const center = getCenterOfLabel(composition, label);
       const reproduceSection = label.data.section;
+      const reproduceSection2D = convertToSection2D(reproduceSection);
       const reproduceOrientation = detectOrthogonalSection(reproduceSection);
       viewers
         .filter(viewer => viewer.getComposition() === composition)
         .forEach(viewer => {
-          const orientation = detectOrthogonalSection(
-            viewer.getState().section
-          );
-          if (orientation === reproduceOrientation) {
-            viewer.setState({
-              ...viewer.getState(),
-              section: reproduceSection
-            });
-          } else {
-            focusBy(viewer, center);
+          switch (viewer.getState().type) {
+            case '2d':
+              {
+                const prevState =
+                  viewer.getState() as rs.TwoDimensionalViewState;
+                viewer.setState({
+                  ...prevState,
+                  section: reproduceSection2D
+                });
+              }
+              break;
+            case 'mpr':
+              {
+                const prevState = viewer.getState() as rs.MprViewState;
+                const prevSection = rs.getSectionDrawingViewState(prevState);
+                const orientation = detectOrthogonalSection(prevSection);
+                if (orientation === reproduceOrientation) {
+                  viewer.setState({
+                    ...prevState,
+                    section: reproduceSection
+                  });
+                } else {
+                  focusBy(viewer, center);
+                }
+              }
+              break;
+            case 'vr':
+              {
+                const prevState = viewer.getState() as rs.VrViewState;
+                const prevSection = rs.getSectionDrawingViewState(prevState);
+                const orientation = detectOrthogonalSection(prevSection);
+                if (orientation === reproduceOrientation) {
+                  viewer.setState({
+                    ...prevState,
+                    section: reproduceSection
+                  });
+                } else {
+                  focusBy(viewer, center);
+                }
+              }
+              break;
+            default: {
+              throw new Error('Unsupported view state');
+            }
           }
         });
       break;

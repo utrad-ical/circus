@@ -2,11 +2,14 @@ import {
   Composition,
   MprViewState,
   Tool,
+  TwoDimensionalViewState,
   Viewer
 } from '@utrad-ical/circus-rs/src/browser';
-import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
+import { convertToSection2D, OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
 import { toolFactory } from '@utrad-ical/circus-rs/src/browser/tool/tool-initializer';
-import { Section } from '@utrad-ical/circus-rs/src/common/geometry';
+import {
+  Section
+} from '@utrad-ical/circus-rs/src/common/geometry';
 import classnames from 'classnames';
 import GridContainer, {
   LayoutInfo,
@@ -16,9 +19,7 @@ import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import ImageViewer, {
   createStateChanger,
-  InitialStateSetterFunc,
-  setOrthogonalOrientation,
-  StateChanger
+  InitialStateSetterFunc, setOrthogonal2D, setOrthogonalOrientation, StateChanger
 } from 'components/ImageViewer';
 import { Button, DropdownButton, MenuItem } from 'components/react-bootstrap';
 import React, {
@@ -44,10 +45,12 @@ interface ViewerGridContextValue {
   updateEditingData: EditingDataUpdater;
   compositions: { composition?: Composition }[];
   tool: Tool;
-  stateChanger: StateChanger<MprViewState>;
+  stateChanger: StateChanger<MprViewState | TwoDimensionalViewState>;
   onCreateViewer: (viewer: Viewer, id?: string | number) => void;
   onDestroyViewer: (viewer: Viewer) => void;
-  initialStateSetter: InitialStateSetterFunc<MprViewState>;
+  initialStateSetter: InitialStateSetterFunc<
+    MprViewState | TwoDimensionalViewState
+  >;
   onViewStateChange: (viewer: Viewer, id?: string | number) => void;
   multipleSeriesShown: boolean;
 }
@@ -61,9 +64,8 @@ const ViewerGridContext = React.createContext<ViewerGridContextValue | null>(
 
 const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
   const { key, seriesIndex, orientation, celestialRotateMode } = props.value;
-  const { updateEditingData, editingData, multipleSeriesShown } = useContext(
-    ViewerGridContext
-  )!;
+  const { updateEditingData, editingData, multipleSeriesShown } =
+    useContext(ViewerGridContext)!;
   const { activeSeriesIndex, activeLayoutKey, revision } = editingData;
 
   const handleClick = () => {
@@ -219,13 +221,8 @@ const HeaderDiv = styled.div`
 const celestialRotate = toolFactory('celestialRotate');
 
 const Content: React.FC<{ value: ViewerDef }> = props => {
-  const {
-    key,
-    seriesIndex,
-    orientation,
-    celestialRotateMode,
-    initialSection
-  } = props.value;
+  const { key, seriesIndex, orientation, celestialRotateMode, initialSection } =
+    props.value;
 
   const {
     compositions,
@@ -240,21 +237,43 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
   const composition = compositions[seriesIndex].composition;
 
   const combinedInitialStateSetter = useCallback(
-    (viewer: Viewer, viewState: MprViewState) => {
-      const s1 = initialSection
-        ? {
-            ...orientationInitialStateSetters[orientation](viewer, viewState)!,
-            section: initialSection
-          }
-        : orientationInitialStateSetters[orientation](viewer, viewState);
-      const s2 = initialStateSetter(viewer, s1!, key);
-      return s2;
+    (viewer: Viewer, viewState: MprViewState | TwoDimensionalViewState) => {
+      switch (viewState.type) {
+        case '2d': {
+          const initialState = setOrthogonal2D(viewer, viewState)!;
+          const s1 = initialSection
+            ? {
+                ...initialState,
+                section: convertToSection2D(initialSection)
+              }
+            : initialState;
+          const s2 = initialStateSetter(viewer, s1, key);
+          return s2;
+        }
+        case 'mpr': {
+          const initialState = orientationInitialStateSetters[orientation](
+            viewer,
+            viewState
+          )!;
+          const s1 = initialSection
+            ? {
+                ...initialState,
+                section: initialSection
+              }
+            : initialState;
+          const s2 = initialStateSetter(viewer, s1, key);
+          return s2;
+        }
+        default: {
+          throw new Error('Unsupported view state');
+        }
+      }
     },
     [initialStateSetter, orientation, key, initialSection]
   );
 
   const localStateChanger = useMemo(
-    () => createStateChanger<MprViewState>(),
+    () => createStateChanger<MprViewState | TwoDimensionalViewState>(),
     []
   );
 
@@ -271,9 +290,20 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
       initialRender.current = false;
       return;
     }
+
     // Triggers only when orientation changes after initial render
     localStateChanger((state, viewer) => {
-      return orientationInitialStateSetters[orientation](viewer, state)!;
+      switch (state.type) {
+        case '2d':
+          return setOrthogonal2D(viewer, state as TwoDimensionalViewState)!;
+        case 'mpr':
+          return orientationInitialStateSetters[orientation](
+            viewer,
+            state as MprViewState
+          )!;
+        default:
+          throw new Error('Unsupported view state');
+      }
     });
   }, [orientation, localStateChanger, key]);
 
@@ -306,17 +336,17 @@ const orientationInitialStateSetters: {
   oblique: setOrthogonalOrientation('axial')
 };
 
-export type Layout = 'twoByTwo' | 'axial' | 'sagittal' | 'coronal';
-
 const ViewerGrid: React.FC<{
   editingData: EditingData;
   updateEditingData: EditingDataUpdater;
   compositions: { composition?: Composition }[];
   tool?: Tool;
-  stateChanger: StateChanger<MprViewState>;
+  stateChanger: StateChanger<MprViewState | TwoDimensionalViewState>;
   onCreateViewer: (viewer: Viewer, id?: string | number) => void;
   onDestroyViewer: (viewer: Viewer) => void;
-  initialStateSetter: InitialStateSetterFunc<MprViewState>;
+  initialStateSetter: InitialStateSetterFunc<
+    MprViewState | TwoDimensionalViewState
+  >;
   onViewStateChange: (viewer: Viewer, id?: string | number) => void;
   multipleSeriesShown: boolean;
 }> = props => {

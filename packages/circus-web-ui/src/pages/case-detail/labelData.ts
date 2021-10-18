@@ -432,7 +432,6 @@ export const setRecommendedDisplay = (
     case 'ruler': {
       const center = getCenterOfLabel(composition, label);
       const reproduceSection = label.data.section;
-      const reproduceSection2D = convertToSection2D(reproduceSection);
       const reproduceOrientation = detectOrthogonalSection(reproduceSection);
       viewers
         .filter(viewer => viewer.getComposition() === composition)
@@ -444,7 +443,7 @@ export const setRecommendedDisplay = (
                   viewer.getState() as rs.TwoDimensionalViewState;
                 viewer.setState({
                   ...prevState,
-                  section: reproduceSection2D
+                  section: convertToSection2D(reproduceSection)
                 });
               }
               break;

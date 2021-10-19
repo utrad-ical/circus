@@ -29,7 +29,7 @@ export interface VolumeAccessor {
   zIndices: Map<number, number>;
   determinePitch: () => Promise<number>;
   images: MultiRange;
-  isLike3D: () => Promise<boolean>;
+  determineIsLike3D: () => Promise<boolean>;
 }
 
 interface OptionsWithoutCache {
@@ -90,6 +90,10 @@ const createUncachedVolumeProvider: FunctionService<
     // Prepare image loader
     const processor = async (imageNo: number) => {
       const buffer = await fetch(imageNo);
+      const metadata = imageMetadata.get(imageNo)!;
+      verifyMetadata(metadata);
+      verifyIsLike3D && verifyIsLike3D(metadata);
+
       volume.insertSingleImage(zIndices.get(imageNo)!, buffer);
     };
     const priorityLoader = new PriorityIntegerCaller(processor, {
@@ -138,7 +142,7 @@ const createUncachedVolumeProvider: FunctionService<
      * - DICOM tag does not have a flag that the image is a reconstructed image.
      * @returns True for "3D-like images"
      */
-    const isLike3D = async () => {
+    const determineIsLike3D = async () => {
       const images = imageRange.clone();
       const count = images.length();
 
@@ -147,14 +151,43 @@ const createUncachedVolumeProvider: FunctionService<
       await load(primaryImageNo);
       const primaryMetadata = imageMetadata.get(primaryImageNo)!;
       if (count === 1) {
-        return _isLike3D(primaryMetadata);
+        return isLike3D(primaryMetadata);
       }
 
       // secondary image
       const secondaryImageNo = images.shift()!;
       await load(secondaryImageNo);
       const secondaryMetadata = imageMetadata.get(secondaryImageNo)!;
-      return _isLike3D(primaryMetadata, secondaryMetadata);
+
+      const like3d = isLike3D(primaryMetadata, secondaryMetadata);
+      verifyIsLike3D = metadata => {
+        if (like3d != isLike3D(primaryMetadata, metadata))
+          throw new Error('something wrong');
+      };
+
+      return like3d;
+    };
+
+    let verifyIsLike3D: undefined | ((metadata: DicomMetadata) => void) =
+      undefined;
+
+    const verifyMetadata = async (metadata: DicomMetadata) => {
+      // primary image
+      const images = imageRange.clone();
+      const primaryImageNo = images.shift()!;
+      await load(primaryImageNo);
+      const primaryMetadata = imageMetadata.get(primaryImageNo)!;
+
+      // HACK: Support-2d-image-source
+      if (
+        primaryMetadata.columns != metadata.columns ||
+        primaryMetadata.rows != metadata.rows
+      ) {
+        throw new Error('Size is different.');
+      }
+      if (primaryMetadata.pixelFormat != metadata.pixelFormat) {
+        throw new Error('Pixel format is different.');
+      }
     };
 
     return {
@@ -164,12 +197,12 @@ const createUncachedVolumeProvider: FunctionService<
       load: loadSeries,
       determinePitch,
       images: imageRange,
-      isLike3D
+      determineIsLike3D
     };
   };
 };
 
-const _isLike3D = async (...metadata: DicomMetadata[]) => {
+const isLike3D = (...metadata: DicomMetadata[]) => {
   if (!(metadata.length > 0)) return false;
 
   const primaryMetadata = metadata[0];

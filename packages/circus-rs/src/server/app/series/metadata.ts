@@ -85,7 +85,7 @@ type VolumeMetadata = {
 async function extractVolumeMetadata(
   volumeAccessor: VolumeAccessor
 ): Promise<VolumeMetadata> {
-  const { imageMetadata, load, images, determinePitch, isLike3D } =
+  const { imageMetadata, load, images, determinePitch, determineIsLike3D } =
     volumeAccessor;
   if (images.segmentLength() === 0)
     throw new TypeError('Invalid volume accessor.');
@@ -95,7 +95,7 @@ async function extractVolumeMetadata(
   await load(primaryImageNo);
   const primaryMetadata = imageMetadata.get(primaryImageNo)!;
 
-  const mode = (await isLike3D()) ? '3d' : '2d';
+  const mode = (await determineIsLike3D()) ? '3d' : '2d';
   const pitch = mode === '3d' ? await determinePitch() : 1;
 
   return {

@@ -554,7 +554,11 @@ const RevisionEditor: React.FC<{
   const propagateWindowState = useMemo(
     () =>
       debounce((viewer: Viewer, id: string) => {
-        const window = (viewer.getState() as rs.MprViewState).window;
+        const viewState = viewer.getState();
+        const window =
+          viewState.type === 'mpr' || viewState.type === '2d'
+            ? viewState.window
+            : undefined;
         const seriesIndex = editingData.layoutItems.find(
           item => item.key === id
         )!.seriesIndex;
@@ -564,6 +568,7 @@ const RevisionEditor: React.FC<{
         stateChanger((state, viewer, id) => {
           if (targetKeys.indexOf(id as string) < 0) return state;
           if (!state.window) return state;
+          if (!window) return state;
           if (
             state.window.width !== window.width ||
             state.window.level !== window.level

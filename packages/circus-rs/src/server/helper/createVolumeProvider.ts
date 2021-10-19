@@ -180,19 +180,14 @@ const _isLike3D = async (...metadata: DicomMetadata[]) => {
   }
 
   // Check: Pixel format is monochrome.
-  if (
-    metadata.some(
-      x =>
-        x.pixelDataCharacteristics && x.pixelDataCharacteristics.match('rgba8')
-    )
-  ) {
+  if (metadata.some(x => x.pixelFormat.match('rgba8'))) {
     return false;
   }
 
   // Check: The orientation of the image written in the DICOM tag is the same for the first and second and subsequent images.
   if (
     metadata.some(
-      x => primaryMetadata.pixelDataCharacteristics != x.imageOrientationPatient
+      x => primaryMetadata.imageOrientationPatient != x.imageOrientationPatient
     )
   ) {
     return false;

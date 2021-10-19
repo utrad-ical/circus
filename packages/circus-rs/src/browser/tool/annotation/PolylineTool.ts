@@ -1,4 +1,8 @@
-import { Annotation, getSectionDrawingViewState, ViewState } from '../..';
+import {
+  Annotation,
+  getSectionAsSectionInDrawingViewState,
+  ViewState
+} from '../..';
 import { Vector2D } from '../../../common/geometry';
 import Polyline from '../../annotation/Polyline';
 import Composition from '../../Composition';
@@ -52,7 +56,7 @@ export default class PolylineTool extends ToolBaseClass<ToolOptions> {
     const viewState = viewer.getState();
     if (!this.isValidViewState(viewState)) return;
 
-    const section = getSectionDrawingViewState(viewState);
+    const section = getSectionAsSectionInDrawingViewState(viewState);
 
     const orientation = detectOrthogonalSection(section);
     if (orientation !== 'axial') return;

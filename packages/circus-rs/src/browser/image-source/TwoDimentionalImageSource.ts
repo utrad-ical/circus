@@ -1,6 +1,6 @@
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import { Vector3 } from 'three';
-import { getSectionDrawingViewState } from '..';
+import { getSectionAsSectionInDrawingViewState } from '..';
 import DicomVolume from '../../common/DicomVolume';
 import { Section, Vector2D, Vector3D } from '../../common/geometry';
 import RsHttpClient from '../http-client/RsHttpClient';
@@ -60,12 +60,11 @@ export default class TwoDimentionalImageSource extends ImageSource {
       'axial',
       0
     );
-    const section = convertToSection2D(sectionDummy);
 
     const state: TwoDimensionalViewState = {
       type: '2d',
       window,
-      section
+      ...convertToSection2D(sectionDummy)
     };
 
     return state;
@@ -124,14 +123,12 @@ export default class TwoDimentionalImageSource extends ImageSource {
     const interpolation = false;
 
     const indexSection: Section = convertSectionToIndex(
-      getSectionDrawingViewState(viewState),
+      getSectionAsSectionInDrawingViewState(viewState),
       new Vector3().fromArray(metadata.voxelSize)
     );
 
-    const indexSection2D = convertToSection2D(indexSection);
-
     volume.scanSection2D(
-      indexSection2D,
+      convertToSection2D(indexSection),
       outSize,
       outImage,
       interpolation,
@@ -160,14 +157,12 @@ export default class TwoDimentionalImageSource extends ImageSource {
     const interpolation = false;
 
     const indexSection: Section = convertSectionToIndex(
-      getSectionDrawingViewState(viewState),
+      getSectionAsSectionInDrawingViewState(viewState),
       new Vector3().fromArray(metadata.voxelSize)
     );
 
-    const indexSection2D = convertToSection2D(indexSection);
-
     volume.scanSection2D(
-      indexSection2D,
+      convertToSection2D(indexSection),
       outSize,
       outImage,
       interpolation,
@@ -192,7 +187,7 @@ export default class TwoDimentionalImageSource extends ImageSource {
         return viewState;
       }
 
-      const section = getSectionDrawingViewState(viewState);
+      const section = getSectionAsSectionInDrawingViewState(viewState);
 
       const resizedSection = adjustOnResized(section, beforeSize, afterSize);
 
@@ -202,7 +197,7 @@ export default class TwoDimentionalImageSource extends ImageSource {
 
       return {
         ...viewState,
-        section: convertToSection2D(resizedSection)
+        ...convertToSection2D(resizedSection)
       };
     };
   }

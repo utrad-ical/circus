@@ -17,7 +17,7 @@ import {
 } from '../tool/tool-util';
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
-import ViewState, { getSectionDrawingViewState } from '../ViewState';
+import ViewState, { getSectionAsSectionInDrawingViewState } from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
 import drawBoundingBoxOutline from './helper/drawBoundingBoxOutline';
 import drawHandleFrame from './helper/drawHandleFrame';
@@ -169,7 +169,7 @@ export default class Polyline
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const section = getSectionDrawingViewState(viewState);
+    const section = getSectionAsSectionInDrawingViewState(viewState);
     const { color, fillColor } = this.getDrawingColor(viewState, section);
     if (!color && !fillColor) return;
 
@@ -239,7 +239,7 @@ export default class Polyline
 
     if (!this.editable) return;
 
-    const section = getSectionDrawingViewState(viewState);
+    const section = getSectionAsSectionInDrawingViewState(viewState);
 
     // to prevent to edit unvisible polyline.
     const drawingColor = this.getDrawingColor(viewState, section);
@@ -299,7 +299,7 @@ export default class Polyline
 
     const resolution: [number, number] = viewer.getResolution();
 
-    const section = getSectionDrawingViewState(ev.viewer.getState());
+    const section = getSectionAsSectionInDrawingViewState(ev.viewer.getState());
 
     const { dragStartVolumePoint3, originalPoints, originalBoundingBox } =
       this.dragInfo;

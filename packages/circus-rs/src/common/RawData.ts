@@ -623,17 +623,17 @@ export default class RawData {
    * Builds a new 2D image using the given section in index-coordinate.
    */
   public scanSection2D(
-    section: Section2D,
+    section2D: Section2D,
     outSize: Vector2D,
     outImage: { [index: number]: number },
     interpolation: boolean = false,
     windowWidth?: number,
     windowLevel?: number
   ): void {
-    const origin: Vector3D = [...section.origin, section.imageNumber];
-    const xAxis = section.xAxis;
+    const origin: Vector3D = [...section2D.origin, section2D.imageNumber];
+    const xAxis = section2D.xAxis;
     const eu: Vector3D = [xAxis[0] / outSize[0], xAxis[1] / outSize[0], 0];
-    const yAxis = [0, section.yLength];
+    const yAxis = [0, section2D.yLength];
     const ev: Vector3D = [yAxis[0] / outSize[1], yAxis[1] / outSize[1], 0];
     this.scanOblique(
       origin,

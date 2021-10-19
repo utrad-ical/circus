@@ -1,4 +1,4 @@
-import { getSectionDrawingViewState, ViewState } from '../..';
+import { getSectionAsSectionInDrawingViewState, ViewState } from '../..';
 import Annotation from '../../annotation/Annotation';
 import Ruler from '../../annotation/Ruler';
 import ViewerEvent from '../../viewer/ViewerEvent';
@@ -16,7 +16,7 @@ export default class RulerTool extends AnnotationToolBase {
     const viewState = viewer.getState();
     if (!this.isValidViewState(viewState)) return;
 
-    const section = getSectionDrawingViewState(viewState);
+    const section = getSectionAsSectionInDrawingViewState(viewState);
 
     const ex = ev.viewerX!;
     const ey = ev.viewerY!;

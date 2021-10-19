@@ -509,13 +509,13 @@ const RevisionEditor: React.FC<{
   const handleMagnify = useCallback(
     (magnitude: number) =>
       stateChanger(state => {
-        const prevSection = rs.getSectionDrawingViewState(state);
+        const prevSection = rs.getSectionAsSectionInDrawingViewState(state);
         const section = rs.scaleSectionFromCenter(prevSection, 1 / magnitude);
         switch (state.type) {
           case '2d': {
             return {
               ...state,
-              section: convertToSection2D(section)
+              ...convertToSection2D(section)
             };
           }
           case 'mpr':

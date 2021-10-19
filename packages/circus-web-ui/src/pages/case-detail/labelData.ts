@@ -443,14 +443,15 @@ export const setRecommendedDisplay = (
                   viewer.getState() as rs.TwoDimensionalViewState;
                 viewer.setState({
                   ...prevState,
-                  section: convertToSection2D(reproduceSection)
+                  ...convertToSection2D(reproduceSection)
                 });
               }
               break;
             case 'mpr':
               {
                 const prevState = viewer.getState() as rs.MprViewState;
-                const prevSection = rs.getSectionDrawingViewState(prevState);
+                const prevSection =
+                  rs.getSectionAsSectionInDrawingViewState(prevState);
                 const orientation = detectOrthogonalSection(prevSection);
                 if (orientation === reproduceOrientation) {
                   viewer.setState({
@@ -465,7 +466,8 @@ export const setRecommendedDisplay = (
             case 'vr':
               {
                 const prevState = viewer.getState() as rs.VrViewState;
-                const prevSection = rs.getSectionDrawingViewState(prevState);
+                const prevSection =
+                  rs.getSectionAsSectionInDrawingViewState(prevState);
                 const orientation = detectOrthogonalSection(prevSection);
                 if (orientation === reproduceOrientation) {
                   viewer.setState({

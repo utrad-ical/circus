@@ -156,7 +156,7 @@ export const calcThumbSteps = (
 ): { thumbStep: number; divideCount: number } => {
   const steps =
     viewState.type === '2d'
-      ? calcStepsInSection2D(composition, viewState.section)
+      ? calcStepsInSection2D(composition, viewState)
       : calcStepsInSection(composition, viewState.section);
   const divideCount = steps.sumCount + 2;
   const thumbStep = !param ? steps.current + 1 : param.thumbStep;

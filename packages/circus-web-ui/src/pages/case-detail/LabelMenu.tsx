@@ -2,7 +2,7 @@ import { ColorPalette } from '@smikitky/rb-components/lib/ColorPicker';
 import { alert, prompt } from '@smikitky/rb-components/lib/modal';
 import Slider from '@smikitky/rb-components/lib/Slider';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
-import { getSectionDrawingViewState, Viewer } from '@utrad-ical/circus-rs/src/browser';
+import { getSectionAsSectionInDrawingViewState, Viewer } from '@utrad-ical/circus-rs/src/browser';
 import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
@@ -316,7 +316,7 @@ const LabelMenu: React.FC<{
           return label.type === 'point';
         }) as InternalLabelOf<'point'>[],
         activeLabel!.name!,
-        getSectionDrawingViewState(viewers[targetLayoutKey!].getState()),
+        getSectionAsSectionInDrawingViewState(viewers[targetLayoutKey!].getState()),
         editingData.layout,
         editingData.layoutItems,
         activeSeriesIndex

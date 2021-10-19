@@ -7,3 +7,4 @@ export interface Section2D {
   yLength: number;
   imageNumber: number;
 }
+// HACK: Support-2d-image-source

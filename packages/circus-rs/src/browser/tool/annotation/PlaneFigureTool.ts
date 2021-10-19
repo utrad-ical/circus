@@ -1,4 +1,4 @@
-import { getSectionDrawingViewState, ViewState } from '../..';
+import { getSectionAsSectionInDrawingViewState, ViewState } from '../..';
 import { Vector2D } from '../../../common/geometry';
 import Annotation from '../../annotation/Annotation';
 import PlaneFigure, { FigureType } from '../../annotation/PlaneFigure';
@@ -19,7 +19,7 @@ export default class PlaneFigureTool extends AnnotationToolBase {
     const viewState = viewer.getState();
     if (!this.isValidViewState(viewState)) return;
 
-    const section = getSectionDrawingViewState(viewState);
+    const section = getSectionAsSectionInDrawingViewState(viewState);
 
     const orientation = detectOrthogonalSection(section);
     if (orientation !== 'axial') return;

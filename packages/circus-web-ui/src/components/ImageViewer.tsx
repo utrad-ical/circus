@@ -41,10 +41,9 @@ export const setOrthogonal2D = (
     'axial',
     0
   );
-  const section2D = convertToSection2D(section);
   const newState: rs.TwoDimensionalViewState = {
     ...initialViewState,
-    section: section2D
+    ...convertToSection2D(section)
   };
   return newState;
 };

@@ -64,14 +64,14 @@ export interface VrViewState extends SectionDrawingViewState {
   readonly debugMode?: number;
 }
 
-interface TwoDimensionalDrawingViewState {
-  readonly section: Section2D;
-}
-export interface TwoDimensionalViewState
-  extends TwoDimensionalDrawingViewState {
+export interface TwoDimensionalViewState extends Section2D {
   readonly type: '2d';
   readonly window?: ViewWindow;
   readonly interpolationMode?: 'none' | 'bilinear';
+  readonly origin: [number, number];
+  readonly xAxis: [number, number];
+  readonly yLength: number;
+  readonly imageNumber: number;
 }
 
 /**
@@ -111,12 +111,34 @@ export interface SubVolume {
  */
 type ViewState = MprViewState | VrViewState | TwoDimensionalViewState;
 
-export const getSectionDrawingViewState = (viewState: ViewState): Section => {
+// HACK: Support-2d-image-source
+export function isTwoDimensionalViewState(
+  a: any
+): a is TwoDimensionalViewState {
+  return a.type === '2d';
+}
+
+// HACK: Support-2d-image-source
+export const asSectionInDrawingViewState = (
+  viewState: TwoDimensionalViewState
+): Section => {
+  const { origin, xAxis, yLength, imageNumber } = viewState;
+  return {
+    origin: [...origin, imageNumber],
+    xAxis: [...xAxis, 0],
+    yAxis: [0, yLength, 0]
+  };
+};
+
+// HACK: Support-2d-image-source
+export const getSectionAsSectionInDrawingViewState = (
+  viewState: ViewState
+): Section => {
   if (!viewState) throw new Error('View state not initialized');
 
   switch (viewState.type) {
     case '2d': {
-      const { origin, xAxis, yLength, imageNumber } = viewState.section;
+      const { origin, xAxis, yLength, imageNumber } = viewState;
       return {
         origin: [...origin, imageNumber],
         xAxis: [...xAxis, 0],

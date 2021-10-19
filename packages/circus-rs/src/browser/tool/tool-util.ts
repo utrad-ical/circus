@@ -1,5 +1,5 @@
 import { Vector2, Vector3 } from 'three';
-import { getSectionDrawingViewState } from '..';
+import { getSectionAsSectionInDrawingViewState } from '..';
 import MprImageSource from '../image-source/MprImageSource';
 import {
   convertPointToIndex,
@@ -34,7 +34,7 @@ export function convertViewerPointToVolumePoint(
   if (type !== 'mpr' && type !== '2d')
     throw new Error('Unsupported view state.');
 
-  const section = getSectionDrawingViewState(viewState);
+  const section = getSectionAsSectionInDrawingViewState(viewState);
 
   const resolution = viewer.getResolution();
   return convertScreenCoordinateToVolumeCoordinate(
@@ -59,7 +59,7 @@ export function convertVolumePointToViewerPoint(
   if (type !== 'mpr' && type !== '2d')
     throw new Error('Unsupported view state.');
 
-  const section = getSectionDrawingViewState(viewState);
+  const section = getSectionAsSectionInDrawingViewState(viewState);
 
   const resolution = viewer.getResolution();
   return convertVolumeCoordinateToScreenCoordinate(

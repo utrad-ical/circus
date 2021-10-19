@@ -1,5 +1,5 @@
 import { Vector2, Vector3 } from 'three';
-import { getSectionDrawingViewState } from '../..';
+import { getSectionAsSectionInDrawingViewState } from '../..';
 import { scaleSection, Section } from '../../../common/geometry';
 import MprImageSource from '../../image-source/MprImageSource';
 import TwoDimentionalImageSource from '../../image-source/TwoDimentionalImageSource';
@@ -29,7 +29,7 @@ export default function handleZoomBy(
     return;
 
   const stepFactor = 1.05;
-  const prevSection = getSectionDrawingViewState(prevState);
+  const prevSection = getSectionAsSectionInDrawingViewState(prevState);
 
   const section = scaleSectionBy(
     prevSection,
@@ -55,7 +55,7 @@ export default function handleZoomBy(
     case '2d': {
       viewer.setState({
         ...prevState,
-        section: convertToSection2D(section)
+        ...convertToSection2D(section)
       });
       break;
     }

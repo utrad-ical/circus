@@ -13,7 +13,7 @@ import {
 } from '../tool/tool-util';
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
-import ViewState, { getSectionDrawingViewState } from '../ViewState';
+import ViewState, { getSectionAsSectionInDrawingViewState } from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
 import { drawFillText, drawLine, drawPoint } from './helper/drawObject';
 import { hitLineSegment, hitRectangle } from './helper/hit-test';
@@ -148,7 +148,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
   }
 
   private getStrokeColor(viewState: ViewState): string | undefined {
-    const section = getSectionDrawingViewState(viewState);
+    const section = getSectionAsSectionInDrawingViewState(viewState);
     const maxDistance = Math.max(
       distanceFromPointToSection(section, new Vector3(...this.start!)),
       distanceFromPointToSection(section, new Vector3(...this.end!))
@@ -253,7 +253,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
 
       if (['start-reset', 'end-reset'].some(t => t === this.handleType)) {
         const viewState = viewer.getState();
-        const section = getSectionDrawingViewState(viewState);
+        const section = getSectionAsSectionInDrawingViewState(viewState);
         const start = new Vector3().fromArray(this.start!);
         const end = new Vector3().fromArray(this.end!);
         this.start = getOrthogonalProjectedPoint(

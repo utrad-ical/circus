@@ -1,5 +1,5 @@
 import { Vector2 } from 'three';
-import { getSectionDrawingViewState } from '../..';
+import { getSectionAsSectionInDrawingViewState } from '../..';
 import { Vector3D } from '../../../common/geometry';
 import MprImageSource from '../../image-source/MprImageSource';
 import TwoDimentionalImageSource from '../../image-source/TwoDimentionalImageSource';
@@ -26,7 +26,7 @@ export default function focusBy(
   )
     return;
 
-  const prevSection = getSectionDrawingViewState(prevState);
+  const prevSection = getSectionAsSectionInDrawingViewState(prevState);
   const section = translateOriginToCenter(
     {
       origin: focusPoint,
@@ -44,7 +44,7 @@ export default function focusBy(
     case '2d': {
       viewer.setState({
         ...prevState,
-        section: convertToSection2D(section)
+        ...convertToSection2D(section)
       });
       return;
     }

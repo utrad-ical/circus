@@ -1,5 +1,5 @@
 import { Vector2, Vector3 } from 'three';
-import { getSectionDrawingViewState } from '../..';
+import { getSectionAsSectionInDrawingViewState } from '../..';
 import { sectionEquals, translateSection } from '../../../common/geometry';
 import MprImageSource from '../../image-source/MprImageSource';
 import TwoDimentionalImageSource from '../../image-source/TwoDimentionalImageSource';
@@ -24,7 +24,7 @@ export default function handleMoveBy(
     return;
 
   const prevState = viewer.getState();
-  const prevSection = getSectionDrawingViewState(prevState);
+  const prevSection = getSectionAsSectionInDrawingViewState(prevState);
   const viewport = viewer.getViewport();
   const resolution = viewer.getResolution();
 
@@ -59,7 +59,7 @@ export default function handleMoveBy(
     case '2d': {
       viewer.setState({
         ...prevState,
-        section: convertToSection2D(section)
+        ...convertToSection2D(section)
       });
       return;
     }

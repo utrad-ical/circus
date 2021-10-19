@@ -580,6 +580,7 @@ export const getSectionFromPoints = (
  * @returns 2D section representation of MPR section
  */
 export const convertToSection2D = (section: Section): Section2D => {
+  // HACK: Support-2d-image-source
   if (detectOrthogonalSection(section) !== 'axial')
     throw new Error('Invalid section.');
   return {

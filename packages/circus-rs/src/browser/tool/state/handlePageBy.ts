@@ -41,14 +41,12 @@ export default function handlePageBy(viewer: Viewer, step: number): void {
     }
     case '2d': {
       if (step === 0) return;
-      const prevSection = prevState.section;
-      const imageNumber = prevSection.imageNumber + Math.round(step);
-      const section = { ...prevState.section, imageNumber };
+      const imageNumber = prevState.imageNumber + Math.round(step);
       // Abort If the section does not overlap the volume.
       const overlap =
         0 <= imageNumber && imageNumber < src.metadata!.voxelCount[2];
       if (!overlap) return;
-      viewer.setState({ ...prevState, section });
+      viewer.setState({ ...prevState, imageNumber });
       return;
     }
   }

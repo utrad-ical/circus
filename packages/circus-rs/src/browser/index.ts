@@ -14,7 +14,7 @@ export {
   TwoDimensionalViewState,
   TransferFunction,
   SubVolume,
-  getSectionDrawingViewState
+  getSectionAsSectionInDrawingViewState
 } from './ViewState';
 export { ViewWindow } from '../common/ViewWindow';
 export { default as Composition } from './Composition';

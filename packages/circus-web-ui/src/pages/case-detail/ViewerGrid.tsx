@@ -5,11 +5,12 @@ import {
   TwoDimensionalViewState,
   Viewer
 } from '@utrad-ical/circus-rs/src/browser';
-import { convertToSection2D, OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
-import { toolFactory } from '@utrad-ical/circus-rs/src/browser/tool/tool-initializer';
 import {
-  Section
-} from '@utrad-ical/circus-rs/src/common/geometry';
+  convertToSection2D,
+  OrientationString
+} from '@utrad-ical/circus-rs/src/browser/section-util';
+import { toolFactory } from '@utrad-ical/circus-rs/src/browser/tool/tool-initializer';
+import { Section } from '@utrad-ical/circus-rs/src/common/geometry';
 import classnames from 'classnames';
 import GridContainer, {
   LayoutInfo,
@@ -19,7 +20,10 @@ import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import ImageViewer, {
   createStateChanger,
-  InitialStateSetterFunc, setOrthogonal2D, setOrthogonalOrientation, StateChanger
+  InitialStateSetterFunc,
+  setOrthogonal2D,
+  setOrthogonalOrientation,
+  StateChanger
 } from 'components/ImageViewer';
 import { Button, DropdownButton, MenuItem } from 'components/react-bootstrap';
 import React, {
@@ -244,7 +248,7 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
           const s1 = initialSection
             ? {
                 ...initialState,
-                section: convertToSection2D(initialSection)
+                ...convertToSection2D(initialSection)
               }
             : initialState;
           const s2 = initialStateSetter(viewer, s1, key);

@@ -7,7 +7,7 @@ import {
 } from '../tool/tool-util';
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
-import ViewState, { getSectionDrawingViewState } from '../ViewState';
+import ViewState, { getSectionAsSectionInDrawingViewState } from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
 import { drawPoint } from './helper/drawObject';
 import { hitRectangle } from './helper/hit-test';
@@ -83,7 +83,7 @@ export default class Point implements Annotation, ViewerEventTarget {
   }
 
   private getDrawingColor(viewState: ViewState): string | undefined {
-    const section = getSectionDrawingViewState(viewState);
+    const section = getSectionAsSectionInDrawingViewState(viewState);
     const distance = distanceFromPointToSection(
       section,
       new Vector3(...this.location!)

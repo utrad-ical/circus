@@ -119,7 +119,11 @@ export default class TwoDimentionalImageSource extends ImageSource {
       level: undefined
     };
 
-    // const interpolationMode = viewState.interpolationMode;
+    // HACK: Support-2d-image-source
+    const interpolationMode = viewState.interpolationMode;
+    const imageSmoothingEnabled = !(
+      !interpolationMode || interpolationMode === 'none'
+    );
     const interpolation = false;
 
     const indexSection: Section = convertSectionToIndex(
@@ -135,7 +139,13 @@ export default class TwoDimentionalImageSource extends ImageSource {
       viewWindow.width,
       viewWindow.level
     );
-    const imageData = drawRgba8ToImageData(viewer, outSize, outImage);
+
+    const imageData = drawRgba8ToImageData(
+      viewer,
+      outSize,
+      outImage,
+      imageSmoothingEnabled
+    );
     return imageData;
   }
 
@@ -153,8 +163,9 @@ export default class TwoDimentionalImageSource extends ImageSource {
       level: undefined
     };
 
-    // const interpolationMode = viewState.interpolationMode;
-    const interpolation = false;
+    // HACK: Support-2d-image-source
+    const interpolationMode = viewState.interpolationMode;
+    const interpolation = !(!interpolationMode || interpolationMode === 'none');
 
     const indexSection: Section = convertSectionToIndex(
       getSectionAsSectionInDrawingViewState(viewState),

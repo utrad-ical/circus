@@ -64,28 +64,58 @@ const useCompositions = (
 
   const volumeLoaders = usePendingVolumeLoaders(series);
 
+  const getImageSource = React.useCallback(
+    async (volumeLoader, seriesUid, partialVolumeDescriptor) => {
+      const meta = await volumeLoader.loadMeta();
+      switch (meta.mode) {
+        case '2d':
+          return new rs.TwoDimentionalImageSource({
+            rsHttpClient,
+            seriesUid,
+            partialVolumeDescriptor,
+            volumeLoader,
+            estimateWindowType: 'none'
+          });
+        default:
+          return new rs.HybridMprImageSource({
+            rsHttpClient,
+            seriesUid,
+            partialVolumeDescriptor,
+            volumeLoader,
+            estimateWindowType: 'none'
+          });
+      }
+    },
+    []
+  );
+
   useEffect(() => {
     (async () => {
       const compositions = await Promise.all(
         series.map(async ({ seriesUid, partialVolumeDescriptor }, volId) => {
           const volumeLoader = volumeLoaders[volId];
           const meta = await volumeLoader.loadMeta();
-          const imageSource =
-            meta.mode === '3d'
-              ? new rs.HybridMprImageSource({
-                  rsHttpClient,
-                  seriesUid,
-                  partialVolumeDescriptor,
-                  volumeLoader,
-                  estimateWindowType: 'none'
-                })
-              : new rs.TwoDimentionalImageSource({
+          // HACK: Support-2d-image-source
+          const imageSource = (() => {
+            switch (meta.mode) {
+              case '2d':
+                return new rs.TwoDimentionalImageSource({
                   rsHttpClient,
                   seriesUid,
                   partialVolumeDescriptor,
                   volumeLoader,
                   estimateWindowType: 'none'
                 });
+              default:
+                return new rs.HybridMprImageSource({
+                  rsHttpClient,
+                  seriesUid,
+                  partialVolumeDescriptor,
+                  volumeLoader,
+                  estimateWindowType: 'none'
+                });
+            }
+          })();
           volumeLoader
             .loadMeta()
             .then(() => volumeLoader.loadVolume())

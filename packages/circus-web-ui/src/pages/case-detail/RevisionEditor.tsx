@@ -64,33 +64,41 @@ const useCompositions = (
 
   const volumeLoaders = usePendingVolumeLoaders(series);
 
+  const getImageSource = React.useCallback(
+    async (volumeLoader, seriesUid, partialVolumeDescriptor) => {
+      const meta = await volumeLoader.loadMeta();
+      switch (meta.mode) {
+        case '2d':
+          return new rs.TwoDimentionalImageSource({
+            rsHttpClient,
+            seriesUid,
+            partialVolumeDescriptor,
+            volumeLoader,
+            estimateWindowType: 'none'
+          });
+        default:
+          return new rs.HybridMprImageSource({
+            rsHttpClient,
+            seriesUid,
+            partialVolumeDescriptor,
+            volumeLoader,
+            estimateWindowType: 'none'
+          });
+      }
+    },
+    [rsHttpClient]
+  );
+
   useEffect(() => {
     (async () => {
       const compositions = await Promise.all(
         series.map(async ({ seriesUid, partialVolumeDescriptor }, volId) => {
           const volumeLoader = volumeLoaders[volId];
-          const meta = await volumeLoader.loadMeta();
-          // HACK: Support-2d-image-source
-          const imageSource = (() => {
-            switch (meta.mode) {
-              case '2d':
-                return new rs.TwoDimentionalImageSource({
-                  rsHttpClient,
-                  seriesUid,
-                  partialVolumeDescriptor,
-                  volumeLoader,
-                  estimateWindowType: 'none'
-                });
-              default:
-                return new rs.HybridMprImageSource({
-                  rsHttpClient,
-                  seriesUid,
-                  partialVolumeDescriptor,
-                  volumeLoader,
-                  estimateWindowType: 'none'
-                });
-            }
-          })();
+          const imageSource = await getImageSource(
+            volumeLoader,
+            seriesUid,
+            partialVolumeDescriptor
+          );
           volumeLoader
             .loadMeta()
             .then(() => volumeLoader.loadVolume())
@@ -107,7 +115,7 @@ const useCompositions = (
       );
       setResults(compositions);
     })();
-  }, [rsHttpClient, series, volumeLoaders]);
+  }, [rsHttpClient, series, volumeLoaders, getImageSource]);
 
   return results;
 };

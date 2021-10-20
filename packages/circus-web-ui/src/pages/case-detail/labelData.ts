@@ -117,15 +117,35 @@ export type ExternalLabel = {
 );
 
 export const labelTypes: {
-  [key in LabelType]: { icon: string; canConvertTo?: LabelType };
+  [key in LabelType]: {
+    icon: string;
+    canConvertTo?: LabelType;
+    allow2D: boolean;
+  };
 } = {
-  voxel: { icon: 'circus-annotation-voxel' },
-  cuboid: { icon: 'circus-annotation-cuboid', canConvertTo: 'ellipsoid' },
-  ellipsoid: { icon: 'circus-annotation-ellipsoid', canConvertTo: 'cuboid' },
-  rectangle: { icon: 'circus-annotation-rectangle', canConvertTo: 'ellipse' },
-  ellipse: { icon: 'circus-annotation-ellipse', canConvertTo: 'rectangle' },
-  point: { icon: 'circus-annotation-point' },
-  ruler: { icon: 'circus-annotation-ruler' }
+  voxel: { icon: 'circus-annotation-voxel', allow2D: false },
+  cuboid: {
+    icon: 'circus-annotation-cuboid',
+    allow2D: false,
+    canConvertTo: 'ellipsoid'
+  },
+  ellipsoid: {
+    icon: 'circus-annotation-ellipsoid',
+    allow2D: false,
+    canConvertTo: 'cuboid'
+  },
+  rectangle: {
+    icon: 'circus-annotation-rectangle',
+    allow2D: true,
+    canConvertTo: 'ellipse'
+  },
+  ellipse: {
+    icon: 'circus-annotation-ellipse',
+    allow2D: true,
+    canConvertTo: 'rectangle'
+  },
+  point: { icon: 'circus-annotation-point', allow2D: true },
+  ruler: { icon: 'circus-annotation-ruler', allow2D: true }
 };
 
 ////////////////////////////////////////////////////////////////////////////////

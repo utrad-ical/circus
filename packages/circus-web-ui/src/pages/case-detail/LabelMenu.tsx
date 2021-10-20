@@ -2,7 +2,10 @@ import { ColorPalette } from '@smikitky/rb-components/lib/ColorPicker';
 import { alert, prompt } from '@smikitky/rb-components/lib/modal';
 import Slider from '@smikitky/rb-components/lib/Slider';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
-import { getSectionAsSectionInDrawingViewState, Viewer } from '@utrad-ical/circus-rs/src/browser';
+import {
+  getSectionAsSectionInDrawingViewState,
+  Viewer
+} from '@utrad-ical/circus-rs/src/browser';
 import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
@@ -164,7 +167,7 @@ const LabelMenu: React.FC<{
 
   const createNewLabel = (
     type: LabelType,
-    viewer: Viewer | undefined,
+    viewer: Viewer,
     color = labelColors[0]
   ): InternalLabel => {
     const alpha = 1;
@@ -211,6 +214,14 @@ const LabelMenu: React.FC<{
       return;
     }
 
+    if (
+      !labelTypes[type].allow2D &&
+      viewers[viewerId].getState()?.type === '2d'
+    ) {
+      await alert('2D viewer does not support ' + type + ' labels.');
+      return;
+    }
+
     const orientation = editingData.layoutItems.find(
       item => item.key === viewerId
     )!.orientation;
@@ -233,6 +244,7 @@ const LabelMenu: React.FC<{
       },
       labelColors.slice()
     )[0];
+
     const newLabel = createNewLabel(type, viewers[viewerId], color);
     updateEditingData(editingData => {
       const labels = editingData.revision.series[activeSeriesIndex].labels;
@@ -316,7 +328,9 @@ const LabelMenu: React.FC<{
           return label.type === 'point';
         }) as InternalLabelOf<'point'>[],
         activeLabel!.name!,
-        getSectionAsSectionInDrawingViewState(viewers[targetLayoutKey!].getState()),
+        getSectionAsSectionInDrawingViewState(
+          viewers[targetLayoutKey!].getState()
+        ),
         editingData.layout,
         editingData.layoutItems,
         activeSeriesIndex

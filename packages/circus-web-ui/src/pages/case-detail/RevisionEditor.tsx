@@ -64,31 +64,6 @@ const useCompositions = (
 
   const volumeLoaders = usePendingVolumeLoaders(series);
 
-  const getImageSource = React.useCallback(
-    async (volumeLoader, seriesUid, partialVolumeDescriptor) => {
-      const meta = await volumeLoader.loadMeta();
-      switch (meta.mode) {
-        case '2d':
-          return new rs.TwoDimentionalImageSource({
-            rsHttpClient,
-            seriesUid,
-            partialVolumeDescriptor,
-            volumeLoader,
-            estimateWindowType: 'none'
-          });
-        default:
-          return new rs.HybridMprImageSource({
-            rsHttpClient,
-            seriesUid,
-            partialVolumeDescriptor,
-            volumeLoader,
-            estimateWindowType: 'none'
-          });
-      }
-    },
-    []
-  );
-
   useEffect(() => {
     (async () => {
       const compositions = await Promise.all(
@@ -304,6 +279,17 @@ const RevisionEditor: React.FC<{
     const seriesIndex = revision.series.findIndex(
       s => s.labels.findIndex(v => v.temporaryKey === annotation.id) >= 0
     );
+
+    // HACK: Support-2d-image-source
+    const src = compositions[seriesIndex].composition!.imageSource;
+    if (
+      src instanceof rs.TwoDimentionalImageSource &&
+      annotation instanceof rs.VoxelCloud
+    ) {
+      alert('Unsupported image source.');
+      return;
+    }
+
     const labelIndex = revision.series[seriesIndex].labels.findIndex(
       v => v.temporaryKey === annotation.id
     );

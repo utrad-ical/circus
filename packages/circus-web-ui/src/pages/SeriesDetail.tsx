@@ -74,7 +74,7 @@ const SeriesDetail: React.FC<{}> = props => {
         setComposition(composition);
       }
     })();
-  }, [seriesData, seriesUid, server]);
+  }, [seriesData, seriesUid, server, getImageSource]);
 
   if (!seriesData) return <LoadingIndicator />;
 

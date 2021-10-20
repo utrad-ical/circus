@@ -1,9 +1,7 @@
-import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import { Vector3 } from 'three';
 import { getSectionAsSectionInDrawingViewState } from '..';
 import DicomVolume from '../../common/DicomVolume';
 import { Section, Vector2D, Vector3D } from '../../common/geometry';
-import RsHttpClient from '../http-client/RsHttpClient';
 import {
   adjustOnResized,
   convertSectionToIndex,
@@ -17,19 +15,10 @@ import drawRgba8ToImageData from './drawRgba8ToImageData';
 import drawToImageData from './drawToImageData';
 import ImageSource, { ViewStateResizeTransformer } from './ImageSource';
 import { RawVolumeMprImageSourceOptions } from './RawVolumeMprImageSource';
-import DicomVolumeLoader, {
-  DicomVolumeMetadata
-} from './volume-loader/DicomVolumeLoader';
-import { EstimateWindowType } from './volume-loader/rs-loader-utils';
+import { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader';
 
 interface TwoDimentionalImageSourceOptions
-  extends RawVolumeMprImageSourceOptions {
-  volumeLoader: DicomVolumeLoader;
-  rsHttpClient: RsHttpClient;
-  seriesUid: string;
-  partialVolumeDescriptor?: PartialVolumeDescriptor;
-  estimateWindowType?: EstimateWindowType;
-}
+  extends RawVolumeMprImageSourceOptions {}
 
 export default class TwoDimentionalImageSource extends ImageSource {
   public metadata: DicomVolumeMetadata | undefined;

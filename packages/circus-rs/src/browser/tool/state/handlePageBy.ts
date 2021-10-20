@@ -76,10 +76,8 @@ export function handlePageByScrollbar(viewer: Viewer, step: number): void {
       return;
     }
     case '2d': {
-      const prevSection = prevState.section;
-      const imageNumber = prevSection.imageNumber + Math.round(step);
-      const section = { ...prevState.section, imageNumber };
-      viewer.setState({ ...prevState, section });
+      const imageNumber = prevState.imageNumber + Math.round(step);
+      viewer.setState({ ...prevState, imageNumber });
       return;
     }
   }

@@ -91,6 +91,17 @@ export default class TwoDimentionalImageSource extends ImageSource {
   public draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
     if (viewState.type !== '2d') throw new Error('Unsupported view state');
 
+    const context = viewer.canvas.getContext('2d');
+    if (!context) throw new Error('Failed to get canvas context');
+
+    // HACK: Support-2d-image-source
+    const interpolationMode = viewState.interpolationMode;
+    const imageSmoothingEnabled = !(
+      !interpolationMode || interpolationMode === 'none'
+    );
+    context.imageSmoothingEnabled = imageSmoothingEnabled;
+    context.imageSmoothingQuality = 'medium';
+
     const imageData =
       this.metadata!.pixelFormat === 'rgba8'
         ? this.createImageDataOfRGBA8(viewer, viewState)
@@ -112,19 +123,11 @@ export default class TwoDimentionalImageSource extends ImageSource {
     const metadata = this.metadata!;
     const outSize = viewer.getResolution();
     const volume = this.volume!;
-
     const outImage = new Uint32Array(outSize[0] * outSize[1]);
     const viewWindow = {
       width: undefined,
       level: undefined
     };
-
-    // HACK: Support-2d-image-source
-    const interpolationMode = viewState.interpolationMode;
-    const imageSmoothingEnabled = !(
-      !interpolationMode || interpolationMode === 'none'
-    );
-    const interpolation = false;
 
     const indexSection: Section = convertSectionToIndex(
       getSectionAsSectionInDrawingViewState(viewState),
@@ -135,17 +138,11 @@ export default class TwoDimentionalImageSource extends ImageSource {
       convertToSection2D(indexSection),
       outSize,
       outImage,
-      interpolation,
       viewWindow.width,
       viewWindow.level
     );
 
-    const imageData = drawRgba8ToImageData(
-      viewer,
-      outSize,
-      outImage,
-      imageSmoothingEnabled
-    );
+    const imageData = drawRgba8ToImageData(viewer, outSize, outImage);
     return imageData;
   }
 
@@ -156,16 +153,11 @@ export default class TwoDimentionalImageSource extends ImageSource {
     const metadata = this.metadata!;
     const outSize = viewer.getResolution();
     const volume = this.volume!;
-
     const outImage = new Uint8Array(outSize[0] * outSize[1]);
     const viewWindow = viewState.window ?? {
       width: undefined,
       level: undefined
     };
-
-    // HACK: Support-2d-image-source
-    const interpolationMode = viewState.interpolationMode;
-    const interpolation = !(!interpolationMode || interpolationMode === 'none');
 
     const indexSection: Section = convertSectionToIndex(
       getSectionAsSectionInDrawingViewState(viewState),
@@ -176,7 +168,6 @@ export default class TwoDimentionalImageSource extends ImageSource {
       convertToSection2D(indexSection),
       outSize,
       outImage,
-      interpolation,
       viewWindow.width,
       viewWindow.level
     );

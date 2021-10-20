@@ -626,7 +626,6 @@ export default class RawData {
     section2D: Section2D,
     outSize: Vector2D,
     outImage: { [index: number]: number },
-    interpolation: boolean = false,
     windowWidth?: number,
     windowLevel?: number
   ): void {
@@ -641,7 +640,7 @@ export default class RawData {
       ev,
       outSize,
       outImage,
-      interpolation,
+      false,
       windowWidth,
       windowLevel
     );

@@ -205,6 +205,17 @@ const RevisionEditor: React.FC<{
   const volumeLoadedStatus = compositions.map(entry => entry.volumeLoaded);
   const activeVolumeLoaded = volumeLoadedStatus[editingData.activeSeriesIndex];
 
+  // HACK: Support-2d-image-source
+  const activeImageSource =
+    compositions[editingData.activeSeriesIndex].composition?.imageSource;
+  const windowEnabled = !(
+    activeVolumeLoaded &&
+    activeImageSource &&
+    activeImageSource instanceof rs.TwoDimentionalImageSource &&
+    activeImageSource.metadata &&
+    activeImageSource.metadata.pixelFormat === 'rgba8'
+  );
+
   const { revision, activeLabelIndex } = editingData;
 
   const activeLabel = activeSeries.labels[activeLabelIndex];
@@ -281,10 +292,10 @@ const RevisionEditor: React.FC<{
     );
 
     // HACK: Support-2d-image-source
-    const src = compositions[seriesIndex].composition!.imageSource;
     if (
-      src instanceof rs.TwoDimentionalImageSource &&
-      annotation instanceof rs.VoxelCloud
+      activeImageSource instanceof rs.TwoDimentionalImageSource &&
+      (annotation instanceof rs.VoxelCloud ||
+        annotation instanceof rs.SolidFigure)
     ) {
       alert('Unsupported image source.');
       return;
@@ -839,6 +850,7 @@ const RevisionEditor: React.FC<{
           onChangePlaneFigureOption={setPlaneFigureOption}
           onChangeLayoutKind={handleChangeLayoutKind}
           wandEnabled={activeVolumeLoaded}
+          windowEnabled={windowEnabled}
           windowPresets={projectData.windowPresets}
           currentWindow={currentWindow}
           onApplyWindow={handleApplyWindow}

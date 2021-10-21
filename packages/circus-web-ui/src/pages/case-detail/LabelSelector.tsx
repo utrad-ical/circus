@@ -6,7 +6,7 @@ import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import { Button } from 'components/react-bootstrap';
 import { Modal } from 'components/react-bootstrap';
-import React, { useRef, useState, useMemo } from 'react';
+import React, { useRef, useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 import { mostReadable } from 'tinycolor2';
 import Series from 'types/Series';
@@ -309,6 +309,7 @@ const SeriesInfo: React.FC<{
 // We cannot access drag data during the drag, so we rely on global var here
 // https://stackoverflow.com/q/11927309/1209240
 let dragData: { seriesIndex: number; labelIndex: number };
+let isDraggingColorPreview: false | 'hidden' | 'apparent' = false;
 
 export const Label: React.FC<{
   label: InternalLabel;
@@ -331,9 +332,9 @@ export const Label: React.FC<{
     onClick
   } = props;
 
-  const [isDraggingOver, setIsDragingOver] = useState<false | 'top' | 'bottom'>(
-    false
-  );
+  const [isDraggingOver, setIsDraggingOver] = useState<
+    false | 'top' | 'bottom'
+  >(false);
   const liRef = useRef<HTMLLIElement>(null);
 
   const handleColorPreviewClick = (ev: React.MouseEvent) => {
@@ -372,16 +373,16 @@ export const Label: React.FC<{
     const y = ev.clientY - rect.top; // y position within the element
     if (y < li.clientHeight / 2) {
       if (labelIndex === dragData.labelIndex + 1) return;
-      setIsDragingOver('top');
+      setIsDraggingOver('top');
     } else {
       if (labelIndex === dragData.labelIndex - 1) return;
-      setIsDragingOver('bottom');
+      setIsDraggingOver('bottom');
     }
     ev.preventDefault(); // accept drag
   };
 
   const handleDragLeave = (ev: React.DragEvent) => {
-    setIsDragingOver(false);
+    setIsDraggingOver(false);
   };
 
   const handleDrop = (ev: React.DragEvent) => {
@@ -400,7 +401,51 @@ export const Label: React.FC<{
       series.labels.splice(dragData.labelIndex + (draggingUp ? 1 : 0), 1);
       d.activeLabelIndex = insertIndex + (draggingUp ? 0 : -1);
     });
-    setIsDragingOver(false);
+    setIsDraggingOver(false);
+  };
+
+  const handleDragStartColorPreview = (ev: React.DragEvent) => {
+    if (
+      isDraggingColorPreview ||
+      0 <= ev.dataTransfer.types.indexOf('text/x-circusdb-label')
+    ) {
+      return;
+    }
+    ev.dataTransfer.setData('text/x-circusdb-color-preview', '');
+    const emptyImg = document.createElement('canvas');
+    ev.dataTransfer.setDragImage(emptyImg, 0, 0);
+    updateEditingData(editingData => {
+      const label = editingData.revision.series[seriesIndex].labels[labelIndex];
+      const hidden = !label.hidden;
+      isDraggingColorPreview = hidden ? 'hidden' : 'apparent';
+      label.hidden = hidden;
+      editingData.allLabelsHidden = false;
+    }, 'Label visibility ' + label.temporaryKey);
+    ev.stopPropagation();
+  };
+
+  const handleDragOverColorPreview = (ev: React.DragEvent) => {
+    if (
+      !isDraggingColorPreview ||
+      (editingData.revision.series[seriesIndex].labels[labelIndex].hidden
+        ? isDraggingColorPreview === 'hidden'
+        : isDraggingColorPreview === 'apparent')
+    )
+      return;
+
+    ev.preventDefault();
+    updateEditingData(editingData => {
+      const label = editingData.revision.series[seriesIndex].labels[labelIndex];
+      isDraggingColorPreview === 'hidden'
+        ? (label.hidden = true)
+        : (label.hidden = false);
+      editingData.allLabelsHidden = false;
+    }, 'Label visibility ' + label.temporaryKey);
+  };
+
+  const handleDragEndColorPreview = (ev: React.DragEvent) => {
+    ev.preventDefault();
+    isDraggingColorPreview = false;
   };
 
   const hint = useMemo(() => {
@@ -452,6 +497,10 @@ export const Label: React.FC<{
       <div
         className="color-preview"
         onClick={handleColorPreviewClick}
+        draggable
+        onDragStart={handleDragStartColorPreview}
+        onDragOver={handleDragOverColorPreview}
+        onDragEnd={handleDragEndColorPreview}
         style={{
           backgroundColor: label.data.color,
           color: mostReadable(

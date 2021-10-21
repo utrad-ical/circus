@@ -44,15 +44,12 @@ const SeriesDetail: React.FC<{}> = props => {
   const getImageSource = React.useCallback(async (server, seriesUid) => {
     const rsHttpClient = new rs.RsHttpClient(server);
     const volumeLoader = new rs.RsVolumeLoader({ rsHttpClient, seriesUid });
-
     const meta = await volumeLoader.loadMeta();
     switch (meta.mode) {
       case '2d':
         return new rs.TwoDimentionalImageSource({
           volumeLoader,
-          rsHttpClient,
-          seriesUid,
-          estimateWindowType: 'center'
+          maxCacheSize: 10
         });
       default:
         return new rs.HybridMprImageSource({

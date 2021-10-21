@@ -11,26 +11,36 @@ import {
 import setImmediate from '../util/setImmediate';
 import Viewer from '../viewer/Viewer';
 import ViewState, { TwoDimensionalViewState } from '../ViewState';
+import ImageDataCache from './cache/ImageDataCache';
 import drawRgba8ToImageData from './drawRgba8ToImageData';
 import drawToImageData from './drawToImageData';
 import ImageSource, { ViewStateResizeTransformer } from './ImageSource';
-import { RawVolumeMprImageSourceOptions } from './RawVolumeMprImageSource';
-import { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader';
+import DicomVolumeLoader, {
+  DicomVolumeMetadata
+} from './volume-loader/DicomVolumeLoader';
 
-interface TwoDimentionalImageSourceOptions
-  extends RawVolumeMprImageSourceOptions {}
+// HACK: Support-2d-image-source
+interface TwoDimentionalImageSourceOptions {
+  volumeLoader: DicomVolumeLoader;
+  maxCacheSize?: number;
+}
 
 export default class TwoDimentionalImageSource extends ImageSource {
   public metadata: DicomVolumeMetadata | undefined;
   protected loadSequence: Promise<void> | undefined;
   private volume: DicomVolume | undefined;
+  private cache: ImageDataCache;
 
-  constructor({ volumeLoader }: TwoDimentionalImageSourceOptions) {
+  constructor({
+    volumeLoader,
+    maxCacheSize
+  }: TwoDimentionalImageSourceOptions) {
     super();
     this.loadSequence = (async () => {
       this.metadata = await volumeLoader.loadMeta();
       this.volume = await volumeLoader.loadVolume();
     })();
+    this.cache = new ImageDataCache({ maxSize: maxCacheSize });
   }
 
   public initialState(viewer: Viewer): ViewState {
@@ -77,11 +87,23 @@ export default class TwoDimentionalImageSource extends ImageSource {
     ];
   }
 
-  public draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
+  public async draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
     if (viewState.type !== '2d') throw new Error('Unsupported view state');
 
     const context = viewer.canvas.getContext('2d');
     if (!context) throw new Error('Failed to get canvas context');
+
+    // HACK: Support-2d-image-source
+    const cacheKey = this.createKey(viewState);
+    let imageData: ImageData | undefined;
+    imageData = await this.cache.getImage(cacheKey);
+    if (!imageData) {
+      imageData =
+        this.metadata!.pixelFormat === 'rgba8'
+          ? this.createImageDataOfRGBA8(viewer, viewState)
+          : this.createImageDataOfMonochrome(viewer, viewState);
+      await this.cache.putImage(cacheKey, imageData);
+    }
 
     // HACK: Support-2d-image-source
     const interpolationMode = viewState.interpolationMode;
@@ -91,18 +113,18 @@ export default class TwoDimentionalImageSource extends ImageSource {
     context.imageSmoothingEnabled = imageSmoothingEnabled;
     context.imageSmoothingQuality = 'medium';
 
-    const imageData =
-      this.metadata!.pixelFormat === 'rgba8'
-        ? this.createImageDataOfRGBA8(viewer, viewState)
-        : this.createImageDataOfMonochrome(viewer, viewState);
-
     // If we use Promise.resolve directly, the then-calleback is called
     // before any stacked UI events are handled.
     // Use the polyfilled setImmediate to delay it.
     // Cf. http://stackoverflow.com/q/27647742/1209240
     return new Promise(resolve => {
-      setImmediate(() => resolve(imageData));
+      setImmediate(() => resolve(imageData!));
     });
+  }
+
+  private createKey(state: TwoDimensionalViewState): string {
+    // HACK: Support-2d-image-source
+    return JSON.stringify(state);
   }
 
   private createImageDataOfRGBA8(

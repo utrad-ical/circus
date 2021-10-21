@@ -70,11 +70,8 @@ const useCompositions = (
       switch (meta.mode) {
         case '2d':
           return new rs.TwoDimentionalImageSource({
-            rsHttpClient,
-            seriesUid,
-            partialVolumeDescriptor,
             volumeLoader,
-            estimateWindowType: 'none'
+            maxCacheSize: 10
           });
         default:
           return new rs.HybridMprImageSource({

@@ -60,60 +60,71 @@ const useCompositions = (
 ) => {
   const { rsHttpClient } = useContext(VolumeLoaderCacheContext)!;
   const [results, setResults] = useState<
-    { composition?: Composition; volumeLoaded: boolean }[]
-  >(() => series.map(() => ({ composition: undefined, volumeLoaded: false })));
+    {
+      composition?: Composition;
+      volumeLoaded: boolean;
+    }[]
+  >(() =>
+    series.map(() => ({
+      composition: undefined,
+      volumeLoaded: false
+    }))
+  );
 
   const volumeLoaders = usePendingVolumeLoaders(series);
 
-  const getImageSource = React.useCallback(
-    async (volumeLoader, seriesUid, partialVolumeDescriptor) => {
-      const meta = await volumeLoader.loadMeta();
-      switch (meta.mode) {
-        case '2d':
-          return new rs.TwoDimentionalImageSource({
-            volumeLoader,
-            maxCacheSize: 10
-          });
-        default:
-          return new rs.HybridMprImageSource({
-            rsHttpClient,
-            seriesUid,
-            partialVolumeDescriptor,
-            volumeLoader,
-            estimateWindowType: 'none'
-          });
-      }
-    },
-    [rsHttpClient]
-  );
-
   useEffect(() => {
-    (async () => {
-      const compositions = await Promise.all(
-        series.map(async ({ seriesUid, partialVolumeDescriptor }, volId) => {
-          const volumeLoader = volumeLoaders[volId];
-          const imageSource = await getImageSource(
-            volumeLoader,
-            seriesUid,
-            partialVolumeDescriptor
-          );
-          volumeLoader
-            .loadMeta()
-            .then(() => volumeLoader.loadVolume())
-            .then(() => {
-              setResults(results =>
-                produce(results, draft => {
-                  draft[volId].volumeLoaded = true;
-                })
-              );
+    series.forEach(async ({ seriesUid, partialVolumeDescriptor }, volId) => {
+      const volumeLoader = volumeLoaders[volId];
+
+      // HACK: Support-2d-image-source
+      const meta = await volumeLoader.loadMeta();
+
+      const src = (() => {
+        switch (meta.mode) {
+          case '2d':
+            return new rs.TwoDimentionalImageSource({
+              volumeLoader,
+              maxCacheSize: 10
             });
-          const composition = new Composition(imageSource);
-          return { composition, volumeLoaded: false };
+          default:
+            return new rs.HybridMprImageSource({
+              rsHttpClient,
+              seriesUid,
+              partialVolumeDescriptor,
+              volumeLoader,
+              estimateWindowType: 'none'
+            });
+        }
+      })();
+
+      const composition = new Composition(src);
+
+      setResults(results => [
+        ...results.slice(0, volId),
+        { ...results[volId], composition },
+        ...results.slice(volId + 1)
+      ]);
+
+      await volumeLoader.loadVolume();
+
+      setResults(results =>
+        produce(results, draft => {
+          draft[volId].volumeLoaded = true;
         })
       );
-      setResults(compositions);
-    })();
-  }, [rsHttpClient, series, volumeLoaders, getImageSource]);
+    });
+  }, [rsHttpClient, series, volumeLoaders]);
+
+  useEffect(() => {
+    setResults(
+      series.map(() => ({
+        metadata: undefined,
+        composition: undefined,
+        volumeLoaded: false
+      }))
+    );
+  }, [series]);
 
   return results;
 };

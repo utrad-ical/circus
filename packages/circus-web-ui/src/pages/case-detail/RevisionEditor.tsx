@@ -618,7 +618,10 @@ const RevisionEditor: React.FC<{
       const seriesIndex = editingData.layoutItems.find(
         item => item.key === id
       )!.seriesIndex;
-      const window = (viewer.getState() as rs.MprViewState).window;
+      const state = viewer.getState();
+      if (state.type !== 'mpr' && state.type !== '2d') return;
+      const window = state.window;
+      if (!window) return;
       viewWindows.current[seriesIndex] = window;
       setCurrentWindow(window);
       propagateWindowState(viewer, id as string);

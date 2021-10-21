@@ -1,15 +1,14 @@
-import React, { Fragment, useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import Icon from 'components/Icon';
-import styled from 'styled-components';
 import classnames from 'classnames';
-import { useLoginManager } from 'utils/loginManager';
-import browserHistory from '../browserHistory';
-import useLoginUser from 'utils/useLoginUser';
-import TaskNotifier from 'components/TaskNotifier';
-import { MyList } from 'store/loginUser';
+import Icon from 'components/Icon';
 import { Button } from 'components/react-bootstrap';
+import TaskNotifier from 'components/TaskNotifier';
+import React, { Fragment } from 'react';
 import { useSelector } from 'react-redux';
+import { Link, useLocation } from 'react-router-dom';
+import { MyList } from 'store/loginUser';
+import styled from 'styled-components';
+import useLoginUser from 'utils/useLoginUser';
+import browserHistory from '../browserHistory';
 
 const MainMenu: React.FC<{}> = props => <ul>{props.children}</ul>;
 
@@ -17,7 +16,7 @@ const Menu: React.FC<{
   name: string;
   icon?: string;
   link?: string;
-  onClick?: () => void;
+  onClick?: (ev: React.MouseEvent) => void;
 }> = props => {
   const { name, icon, link, onClick, children } = props;
   const className = icon ? icon : `circus-icon-${name.toLowerCase()}`;
@@ -253,7 +252,6 @@ const MyListMenuItems: React.FC<{
 
 const MainNav: React.FC<{}> = props => {
   const user = useLoginUser();
-  const loginManager = useLoginManager();
   const pathname = useLocation().pathname;
   const searchedCaseResult = useSelector(
     state => state.searches.searches['case']
@@ -263,7 +261,6 @@ const MainNav: React.FC<{}> = props => {
   );
 
   if (!user) return null;
-
   const loginUserName = user.description;
   const isAdmin = user.globalPrivileges.indexOf('manageServer') > -1;
   const {
@@ -273,8 +270,8 @@ const MainNav: React.FC<{}> = props => {
   } = user.preferences;
   const myLists = user.myLists ?? [];
 
-  const onLogout = async () => {
-    await loginManager.logout();
+  const onLogout = async (ev: React.MouseEvent) => {
+    ev.preventDefault();
     browserHistory.push('/');
   };
 

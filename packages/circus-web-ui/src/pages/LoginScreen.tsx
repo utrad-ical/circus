@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
-import { useLoginManager } from 'utils/loginManager';
+import classnames from 'classnames';
 import {
-  Panel,
+  Button,
   FormControl,
   FormGroup,
-  Button,
-  Glyphicon
+  Glyphicon,
+  Panel
 } from 'components/react-bootstrap';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { useLoginManager } from 'utils/loginManager';
+import useLoginUser from 'utils/useLoginUser';
 import browserHistory from '../browserHistory';
-import classnames from 'classnames';
 
 const StyledDiv = styled.div`
   width: 100%;
@@ -35,6 +36,16 @@ const LoginScreen: React.FC<{}> = props => {
   const [input, setInput] = useState({ id: '', password: '' });
   const [error, setError] = useState<string>();
   const loginManager = useLoginManager();
+  const user = useLoginUser();
+
+  useEffect(() => {
+    if (user) {
+      const logout = async () => {
+        await loginManager.logout();
+      };
+      logout();
+    }
+  }, []);
 
   const handleChange = (key: string, val: string) => {
     setInput({ ...input, [key]: val });

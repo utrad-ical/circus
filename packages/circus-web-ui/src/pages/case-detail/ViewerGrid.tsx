@@ -299,12 +299,9 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
     localStateChanger((state, viewer) => {
       switch (state.type) {
         case '2d':
-          return setOrthogonal2D(viewer, state as TwoDimensionalViewState)!;
+          return setOrthogonal2D(viewer, state)!;
         case 'mpr':
-          return orientationInitialStateSetters[orientation](
-            viewer,
-            state as MprViewState
-          )!;
+          return orientationInitialStateSetters[orientation](viewer, state)!;
         default:
           throw new Error('Unsupported view state');
       }

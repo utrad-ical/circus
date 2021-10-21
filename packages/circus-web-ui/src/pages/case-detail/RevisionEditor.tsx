@@ -3,6 +3,7 @@ import JsonSchemaEditor from '@smikitky/rb-components/lib/JsonSchemaEditor';
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
+import { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
 import { convertToSection2D } from '@utrad-ical/circus-rs/src/browser/section-util';
 import { InterpolationMode } from '@utrad-ical/circus-rs/src/browser/ViewState';
 import classNames from 'classnames';
@@ -629,145 +630,100 @@ const RevisionEditor: React.FC<{
     [editingData.layoutItems, propagateWindowState]
   );
 
+  const getWindow = (metadata: DicomVolumeMetadata | undefined) => {
+    if (!metadata) throw new Error('No metadata available.');
+    const windowPriority = projectData.windowPriority || 'auto';
+    const priorities = windowPriority.split(',');
+    for (const type of priorities) {
+      switch (type) {
+        case 'auto': {
+          const window = metadata.estimatedWindow;
+          if (window) return window;
+          break;
+        }
+        case 'dicom': {
+          const window = metadata.dicomWindow;
+          if (window) return window;
+          break;
+        }
+        case 'preset': {
+          const window =
+            Array.isArray(projectData.windowPresets) &&
+            projectData.windowPresets[0];
+          if (window) return { level: window.level, width: window.width };
+          break;
+        }
+      }
+    }
+    return undefined;
+  };
+
   const initialStateSetter = (
     viewer: Viewer,
     viewState: rs.ViewState,
     id: string | number | undefined
   ): rs.MprViewState | rs.TwoDimensionalViewState => {
-    const src = viewer.getComposition()!.imageSource as any;
-    if (
-      !(src instanceof rs.MprImageSource) &&
-      !(src instanceof rs.TwoDimentionalImageSource)
-    )
-      throw new Error();
-    if (!src.metadata) throw new Error();
+    const seriesIndex = editingData.layoutItems.find(
+      item => item.key === id
+    )!.seriesIndex;
+
     switch (viewState.type) {
-      case 'mpr':
-        return initialStateSetterForMpr(
-          viewState,
-          id,
-          src as rs.MprImageSource
-        );
-      case '2d':
-        return initialStateSetterFor2d(
-          viewState,
-          id,
-          src as rs.TwoDimentionalImageSource
-        );
-      default:
-        throw new Error();
-    }
-  };
+      case 'mpr': {
+        const src = viewer.getComposition()!.imageSource;
+        if (!(src instanceof rs.MprImageSource))
+          throw new Error('Unsupported image source.');
 
-  const initialStateSetterForMpr = (
-    viewState: rs.ViewState,
-    id: string | number | undefined,
-    src: rs.MprImageSource
-  ): rs.MprViewState => {
-    if (!src.metadata) throw new Error();
-    if (viewState.type !== 'mpr') throw new Error();
+        const interpolationMode =
+          viewOptions.interpolationMode ?? 'nearestNeighbor';
 
-    const windowPriority = projectData.windowPriority || 'auto';
-
-    const interpolationMode =
-      viewOptions.interpolationMode ?? 'nearestNeighbor';
-
-    const seriesIndex = editingData.layoutItems.find(
-      item => item.key === id
-    )!.seriesIndex;
-    if (viewWindows.current[seriesIndex]) {
-      return {
-        ...viewState,
-        window: viewWindows.current[seriesIndex],
-        interpolationMode
-      };
-    }
-    const window = (() => {
-      const priorities = windowPriority.split(',');
-      for (const type of priorities) {
-        switch (type) {
-          case 'auto': {
-            const window = src.metadata.estimatedWindow;
-            if (window) return window;
-            break;
-          }
-          case 'dicom': {
-            const window = src.metadata.dicomWindow;
-            if (window) return window;
-            break;
-          }
-          case 'preset': {
-            const window =
-              Array.isArray(projectData.windowPresets) &&
-              projectData.windowPresets[0];
-            if (window) return { level: window.level, width: window.width };
-            break;
-          }
+        if (viewWindows.current[seriesIndex]) {
+          return {
+            ...viewState,
+            window: viewWindows.current[seriesIndex],
+            interpolationMode
+          };
         }
-      }
-      return undefined;
-    })();
-    if (window) {
-      viewWindows.current[seriesIndex] = window;
-      setCurrentWindow(window);
-      return { ...viewState, window, interpolationMode };
-    }
-    return viewState; // do not update view state (should not happen)
-  };
 
-  const initialStateSetterFor2d = (
-    viewState: rs.ViewState,
-    id: string | number | undefined,
-    src: rs.TwoDimentionalImageSource
-  ): rs.TwoDimensionalViewState => {
-    if (!src.metadata) throw new Error();
-    if (viewState.type !== '2d') throw new Error();
-
-    const windowPriority = projectData.windowPriority || 'auto';
-
-    const interpolationMode = 'none';
-
-    const seriesIndex = editingData.layoutItems.find(
-      item => item.key === id
-    )!.seriesIndex;
-    if (viewWindows.current[seriesIndex]) {
-      return {
-        ...viewState,
-        window: viewWindows.current[seriesIndex],
-        interpolationMode
-      };
-    }
-    const window = (() => {
-      const priorities = windowPriority.split(',');
-      for (const type of priorities) {
-        switch (type) {
-          case 'auto': {
-            const window = src.metadata.estimatedWindow;
-            if (window) return window;
-            break;
-          }
-          case 'dicom': {
-            const window = src.metadata.dicomWindow;
-            if (window) return window;
-            break;
-          }
-          case 'preset': {
-            const window =
-              Array.isArray(projectData.windowPresets) &&
-              projectData.windowPresets[0];
-            if (window) return { level: window.level, width: window.width };
-            break;
-          }
+        const window = getWindow(src.metadata);
+        if (window) {
+          viewWindows.current[seriesIndex] = window;
+          setCurrentWindow(window);
+          return { ...viewState, window, interpolationMode };
         }
+
+        return viewState; // do not update view state (should not happen)
       }
-      return undefined;
-    })();
-    if (window) {
-      viewWindows.current[seriesIndex] = window;
-      setCurrentWindow(window);
-      return { ...viewState, window, interpolationMode };
+      case '2d': {
+        const src = viewer.getComposition()!.imageSource;
+        if (!(src instanceof rs.TwoDimentionalImageSource))
+          throw new Error('Unsupported image source.');
+
+        const interpolationMode =
+          viewOptions.interpolationMode &&
+          viewOptions.interpolationMode !== 'nearestNeighbor'
+            ? 'bilinear'
+            : 'none';
+
+        if (viewWindows.current[seriesIndex]) {
+          return {
+            ...viewState,
+            window: viewWindows.current[seriesIndex],
+            interpolationMode
+          };
+        }
+
+        const window = getWindow(src.metadata);
+        if (window) {
+          viewWindows.current[seriesIndex] = window;
+          setCurrentWindow(window);
+          return { ...viewState, window, interpolationMode };
+        }
+        return viewState; // do not update view state
+      }
+      default: {
+        throw new Error('Unsupported view state.');
+      }
     }
-    return viewState; // do not update view state (should not happen)
   };
 
   if (!activeSeries) return null;

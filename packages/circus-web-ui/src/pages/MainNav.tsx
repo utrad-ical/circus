@@ -8,9 +8,8 @@ import browserHistory from '../browserHistory';
 import useLoginUser from 'utils/useLoginUser';
 import TaskNotifier from 'components/TaskNotifier';
 import { MyList } from 'store/loginUser';
-import { Button, Modal } from 'components/react-bootstrap';
+import { Button } from 'components/react-bootstrap';
 import { useSelector } from 'react-redux';
-import { alert } from '@smikitky/rb-components/lib/modal';
 
 const MainMenu: React.FC<{}> = props => <ul>{props.children}</ul>;
 
@@ -262,7 +261,6 @@ const MainNav: React.FC<{}> = props => {
   const searchedPluginJobResult = useSelector(
     state => state.searches.searches['pluginJob']
   );
-  const [logoutDialog, setLogoutDialog] = useState(false);
 
   if (!user) return null;
 
@@ -274,10 +272,6 @@ const MainNav: React.FC<{}> = props => {
     pluginJobSearchPresets = []
   } = user.preferences;
   const myLists = user.myLists ?? [];
-
-  const onClickLogout = () => {
-    setLogoutDialog(true);
-  };
 
   const onLogout = async () => {
     await loginManager.logout();
@@ -442,23 +436,9 @@ const MainNav: React.FC<{}> = props => {
         <MainMenu>
           <TaskNotifier />
           <li className="user-info hidden-xs">{loginUserName}</li>
-          <Menu name="Logout" onClick={onClickLogout} />
+          <Menu name="Logout" onClick={onLogout} />
         </MainMenu>
       </StyledNav>
-      <Modal show={logoutDialog} onHide={() => setLogoutDialog(false)}>
-        <Modal.Header>Logout</Modal.Header>
-        <Modal.Body>
-          Are you sure you want to log out the current identity?
-        </Modal.Body>
-        <Modal.Footer>
-          <Button bsStyle="link" onClick={() => setLogoutDialog(false)}>
-            Cancel
-          </Button>
-          <Button onClick={onLogout} bsStyle="primary">
-            OK
-          </Button>
-        </Modal.Footer>
-      </Modal>
     </StyledHeader>
   );
 };

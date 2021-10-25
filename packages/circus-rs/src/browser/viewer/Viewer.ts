@@ -403,6 +403,14 @@ export default class Viewer extends EventEmitter {
     this.emit('compositionChange', composition);
   }
 
+  public clearComposition(): void {
+    if (this.composition) {
+      this.cancelNextRender();
+      this.detachCurrentComposition();
+    }
+    this.composition = undefined;
+  }
+
   public getComposition(): Composition | undefined {
     return this.composition;
   }

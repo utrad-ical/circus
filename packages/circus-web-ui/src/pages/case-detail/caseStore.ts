@@ -8,7 +8,7 @@ import Series from 'types/Series';
 import PatientInfo from '../../types/PatientInfo';
 import { ExternalLabel } from './labelData';
 import { EditingData, Revision } from './revisionData';
-import { ViewerDef } from './ViewerGrid';
+import { ViewerDef, ViewerMode } from './ViewerGrid';
 interface CaseData {
   caseId: string;
   revisions: Revision<ExternalLabel>[];
@@ -53,7 +53,7 @@ export const canUndo = (s: CaseDetailState) => s.currentHistoryIndex > 0;
 export const canRedo = (s: CaseDetailState) =>
   s.currentHistoryIndex < s.history.length - 1;
 
-export type LayoutKind = 'twoByTwo' | 'axial' | 'sagittal' | 'coronal';
+export type LayoutKind = 'twoByTwo' | 'axial' | 'sagittal' | 'coronal' | '2d';
 
 export const performLayout = (
   kind: LayoutKind,
@@ -65,11 +65,17 @@ export const performLayout = (
     positions: {}
   };
   const orientations: OrientationString[] =
-    kind === 'twoByTwo' ? ['axial', 'sagittal', 'coronal', 'oblique'] : [kind];
+    kind === 'twoByTwo'
+      ? ['axial', 'sagittal', 'coronal', 'oblique']
+      : kind === '2d'
+      ? ['axial']
+      : [kind];
+
   let tmp = layout;
   const items: ViewerDef[] = [];
   orientations.forEach(orientation => {
-    const item = newViewerCellItem(seriesIndex, orientation);
+    const viewerMode = kind === '2d' ? '2d' : '3d';
+    const item = newViewerCellItem(seriesIndex, viewerMode, orientation);
     items.push(item);
     tmp = layoutReducer(tmp, {
       type: 'insertItemToEmptyCell',
@@ -87,6 +93,7 @@ const alphaNum = (length: number = 16) =>
 
 export const newViewerCellItem = (
   seriesIndex: number,
+  viewerMode: ViewerMode,
   orientation: OrientationString,
   celestialRotateMode?: boolean,
   initialSection?: Section
@@ -95,6 +102,7 @@ export const newViewerCellItem = (
   return {
     key,
     seriesIndex,
+    viewerMode,
     orientation,
     celestialRotateMode:
       celestialRotateMode === undefined

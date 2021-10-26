@@ -60,6 +60,7 @@ const createSctionFromPoints = (
 
   const item = c.newViewerCellItem(
     activeSeriesIndex,
+    '3d',
     'oblique',
     false,
     section

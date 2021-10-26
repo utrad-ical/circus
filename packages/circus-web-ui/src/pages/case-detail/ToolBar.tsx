@@ -94,6 +94,7 @@ const ToolBar: React.FC<{
   ) => void;
   planeFigureOption: PlaneFigureOption;
   onChangePlaneFigureOption: (planeFigureOption: PlaneFigureOption) => void;
+  layoutEnabled: boolean;
   brushEnabled: boolean;
   wandEnabled: boolean;
   windowEnabled: boolean;
@@ -115,6 +116,7 @@ const ToolBar: React.FC<{
     onChangeModifierKeyBehaviors,
     planeFigureOption,
     onChangePlaneFigureOption,
+    layoutEnabled,
     brushEnabled,
     wandEnabled,
     windowEnabled,
@@ -316,7 +318,7 @@ const ToolBar: React.FC<{
         disabled={!brushEnabled || !wandEnabled || disabled}
       />
       &thinsp;
-      <Dropdown id="layout-dropdown" disabled={disabled}>
+      <Dropdown id="layout-dropdown" disabled={!layoutEnabled || disabled}>
         <Dropdown.Toggle>
           <Icon icon="circus-layout-four" />
         </Dropdown.Toggle>

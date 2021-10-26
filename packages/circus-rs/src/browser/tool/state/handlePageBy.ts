@@ -77,6 +77,7 @@ export function handlePageByScrollbar(viewer: Viewer, step: number): void {
     }
     case '2d': {
       const imageNumber = prevState.imageNumber + Math.round(step);
+      if (prevState.imageNumber === imageNumber) return;
       viewer.setState({ ...prevState, imageNumber });
       return;
     }

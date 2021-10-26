@@ -125,7 +125,7 @@ const CaseDetail: React.FC<{}> = props => {
         data: value,
         handleErrors: true
       });
-    } catch (err) {
+    } catch (err: any) {
       await alert('Error: ' + err.message);
     }
     setTags(value);
@@ -144,7 +144,7 @@ const CaseDetail: React.FC<{}> = props => {
           revisionIndex: caseData.revisions.length - 1
         })
       );
-    } catch (err) {
+    } catch (err: any) {
       await alert('Error: ' + err.message);
       throw err;
     }

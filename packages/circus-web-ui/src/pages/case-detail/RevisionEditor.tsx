@@ -61,11 +61,13 @@ const useCompositions = (
   const { rsHttpClient } = useContext(VolumeLoaderCacheContext)!;
   const [results, setResults] = useState<
     {
+      metadata?: DicomVolumeMetadata;
       composition?: Composition;
       volumeLoaded: boolean;
     }[]
   >(() =>
     series.map(() => ({
+      metadata: undefined,
       composition: undefined,
       volumeLoaded: false
     }))
@@ -78,10 +80,10 @@ const useCompositions = (
       const volumeLoader = volumeLoaders[volId];
 
       // HACK: Support-2d-image-source
-      const meta = await volumeLoader.loadMeta();
+      const metadata = await volumeLoader.loadMeta();
 
       const src = (() => {
-        switch (meta.mode) {
+        switch (metadata.mode) {
           case '2d':
             return new rs.TwoDimentionalImageSource({
               volumeLoader,
@@ -102,7 +104,7 @@ const useCompositions = (
 
       setResults(results => [
         ...results.slice(0, volId),
-        { ...results[volId], composition },
+        { ...results[volId], metadata, composition },
         ...results.slice(volId + 1)
       ]);
 
@@ -219,19 +221,42 @@ const RevisionEditor: React.FC<{
 
   const compositions = useCompositions(allSeries);
 
+  const metaLoadedAll = compositions.every(comp => !!comp.metadata);
+  const metadata = compositions.map(entry => entry.metadata);
+
   const volumeLoadedStatus = compositions.map(entry => entry.volumeLoaded);
   const activeVolumeLoaded = volumeLoadedStatus[editingData.activeSeriesIndex];
+  const activeSeriesMetadata =
+    compositions[editingData.activeSeriesIndex].metadata;
 
-  // HACK: Support-2d-image-source
-  const activeImageSource =
-    compositions[editingData.activeSeriesIndex].composition?.imageSource;
+  const wandEnabled = activeVolumeLoaded;
+
   const windowEnabled = !(
-    activeVolumeLoaded &&
-    activeImageSource &&
-    activeImageSource instanceof rs.TwoDimentionalImageSource &&
-    activeImageSource.metadata &&
-    activeImageSource.metadata.pixelFormat === 'rgba8'
+    metaLoadedAll &&
+    compositions.every(comp => comp.metadata!.pixelFormat === 'rgba8')
   );
+
+  const layoutEnabled = !(metaLoadedAll && activeSeriesMetadata!.mode !== '3d');
+
+  useEffect(() => {
+    if (!layoutEnabled) {
+      updateEditingData(d => {
+        if (d.layoutItems.every(i => i.viewerMode === '2d')) return;
+        const [layoutItems, layout] = c.performLayout(
+          '2d',
+          editingData.activeSeriesIndex
+        );
+        d.layout = layout;
+        d.layoutItems = layoutItems;
+        d.activeLayoutKey = layoutItems[0].key;
+      });
+    }
+  }, [
+    editingData,
+    editingData.activeSeriesIndex,
+    layoutEnabled,
+    updateEditingData
+  ]);
 
   const { revision, activeLabelIndex } = editingData;
 
@@ -307,8 +332,8 @@ const RevisionEditor: React.FC<{
     const seriesIndex = revision.series.findIndex(
       s => s.labels.findIndex(v => v.temporaryKey === annotation.id) >= 0
     );
-
-    // HACK: Support-2d-image-source
+    const activeImageSource =
+      compositions[editingData.activeSeriesIndex].composition?.imageSource;
     if (
       activeImageSource instanceof rs.TwoDimentionalImageSource &&
       (annotation instanceof rs.VoxelCloud ||
@@ -532,13 +557,21 @@ const RevisionEditor: React.FC<{
     result: SeriesEntryWithLabels[] | null
   ) => {
     if (busy) return;
+    const activeSeriesIndex = 0;
+    const activeSeriesMetadata = metadata[activeSeriesIndex];
+    if (!activeSeriesMetadata) return;
+    const layoutKind = activeSeriesMetadata.mode !== '3d' ? '2d' : 'twoByTwo';
     setSeriesDialogOpen(false);
     if (result === null) return; // dialog cancelled
     updateEditingData(d => {
       d.revision.series = result;
-      d.activeSeriesIndex = 0;
-      d.activeLabelIndex = d.revision.series[0].labels.length > 0 ? 0 : -1;
-      const [layoutItems, layout] = c.performLayout('twoByTwo', 0);
+      d.activeSeriesIndex = activeSeriesIndex;
+      d.activeLabelIndex =
+        d.revision.series[activeSeriesIndex].labels.length > 0 ? 0 : -1;
+      const [layoutItems, layout] = c.performLayout(
+        layoutKind,
+        activeSeriesIndex
+      );
       d.layoutItems = layoutItems;
       d.layout = layout;
       d.activeLayoutKey = layoutItems[0].key;
@@ -750,6 +783,7 @@ const RevisionEditor: React.FC<{
             caseDispatch={caseDispatch}
             viewers={viewers}
             disabled={busy}
+            metadata={metadata}
           />
           <LabelSelector
             seriesData={seriesData}
@@ -758,6 +792,7 @@ const RevisionEditor: React.FC<{
             updateEditingData={updateEditingData}
             disabled={busy}
             multipleSeriesShown={multipleSeriesShown}
+            metadata={metadata}
           />
           <div className="add-series-pane">
             <IconButton
@@ -824,13 +859,14 @@ const RevisionEditor: React.FC<{
           planeFigureOption={planeFigureOption}
           onChangePlaneFigureOption={setPlaneFigureOption}
           onChangeLayoutKind={handleChangeLayoutKind}
-          wandEnabled={activeVolumeLoaded}
+          wandEnabled={wandEnabled}
           windowEnabled={windowEnabled}
           windowPresets={projectData.windowPresets}
           currentWindow={currentWindow}
           onApplyWindow={handleApplyWindow}
           onMagnify={handleMagnify}
           brushEnabled={editorEnabled}
+          layoutEnabled={layoutEnabled}
           disabled={busy}
         />
         <ViewerGrid

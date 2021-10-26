@@ -53,7 +53,6 @@ export default class TwoDimentionalImageSource extends ImageSource {
       : { level: 50, width: 100 };
 
     // Create initial section as axial MPR section watched from head to toe.
-    alert('yeah'); //TODO: Remove debug code
     const sectionDummy = createOrthogonalMprSection(
       viewer.getResolution(),
       this.mmDim(),
@@ -124,8 +123,10 @@ export default class TwoDimentionalImageSource extends ImageSource {
   }
 
   private createKey(state: TwoDimensionalViewState): string {
-    // HACK: Support-2d-image-source
-    return JSON.stringify(state);
+    const { imageNumber, window } = state;
+    let key: string = 'imageNumber:' + imageNumber + ';';
+    if (window) key += 'ww:' + window.width + ';' + 'wl:' + window.level + ';';
+    return key;
   }
 
   private createImageDataOfRGBA8(

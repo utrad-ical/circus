@@ -47,7 +47,7 @@ const SeriesDetail: React.FC<{}> = props => {
     const meta = await volumeLoader.loadMeta();
     switch (meta.mode) {
       case '2d':
-        return new rs.TwoDimentionalImageSource({
+        return new rs.TwoDimensionalImageSource({
           volumeLoader,
           maxCacheSize: 10
         });

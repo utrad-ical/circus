@@ -1,8 +1,11 @@
-import { getSectionAsSectionInDrawingViewState, ViewState } from '../..';
+import { ViewState } from '../..';
 import { Vector2D } from '../../../common/geometry';
 import Annotation from '../../annotation/Annotation';
 import PlaneFigure, { FigureType } from '../../annotation/PlaneFigure';
-import { detectOrthogonalSection } from '../../section-util';
+import {
+  asSectionInDrawingViewState,
+  detectOrthogonalSection
+} from '../../section-util';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { convertViewerPointToVolumePoint } from '../tool-util';
 import AnnotationToolBase from './AnnotationToolBase';
@@ -19,7 +22,10 @@ export default class PlaneFigureTool extends AnnotationToolBase {
     const viewState = viewer.getState();
     if (!this.isValidViewState(viewState)) return;
 
-    const section = getSectionAsSectionInDrawingViewState(viewState);
+    const section =
+      viewState.type !== '2d'
+        ? viewState.section
+        : asSectionInDrawingViewState(viewState);
 
     const orientation = detectOrthogonalSection(section);
     if (orientation !== 'axial') return;

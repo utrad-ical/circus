@@ -13,8 +13,7 @@ export {
   VrViewState,
   TwoDimensionalViewState,
   TransferFunction,
-  SubVolume,
-  getSectionAsSectionInDrawingViewState
+  SubVolume
 } from './ViewState';
 export { ViewWindow } from '../common/ViewWindow';
 export { default as Composition } from './Composition';
@@ -51,7 +50,7 @@ export { default as DynamicMprImageSource } from './image-source/DynamicMprImage
 export { default as RawVolumeMprImageSource } from './image-source/RawVolumeMprImageSource';
 export { default as HybridMprImageSource } from './image-source/HybridImageSource';
 export { default as VolumeRenderingImageSource } from './image-source/VolumeRenderingImageSource';
-export { default as TwoDimentionalImageSource } from './image-source/TwoDimentionalImageSource';
+export { default as TwoDimensionalImageSource } from './image-source/TwoDimensionalImageSource';
 
 export { default as DicomVolumeLoader } from './image-source/volume-loader/DicomVolumeLoader';
 export { default as MockVolumeLoader } from './image-source/volume-loader/MockVolumeLoader';

@@ -1,11 +1,11 @@
 import { Vector3 } from 'three';
-import { getSectionAsSectionInDrawingViewState } from '..';
 import DicomVolume from '../../common/DicomVolume';
 import { Section, Vector2D, Vector3D } from '../../common/geometry';
 import {
   adjustOnResized,
+  asSectionInDrawingViewState,
   convertSectionToIndex,
-  convertToSection2D,
+  convertSectionToTwoDimensionalState,
   createOrthogonalMprSection
 } from '../section-util';
 import setImmediate from '../util/setImmediate';
@@ -20,12 +20,12 @@ import DicomVolumeLoader, {
 } from './volume-loader/DicomVolumeLoader';
 
 // HACK: Support-2d-image-source
-interface TwoDimentionalImageSourceOptions {
+interface TwoDimensionalImageSourceOptions {
   volumeLoader: DicomVolumeLoader;
   maxCacheSize?: number;
 }
 
-export default class TwoDimentionalImageSource extends ImageSource {
+export default class TwoDimensionalImageSource extends ImageSource {
   public metadata: DicomVolumeMetadata | undefined;
   protected loadSequence: Promise<void> | undefined;
   private volume: DicomVolume | undefined;
@@ -34,7 +34,7 @@ export default class TwoDimentionalImageSource extends ImageSource {
   constructor({
     volumeLoader,
     maxCacheSize
-  }: TwoDimentionalImageSourceOptions) {
+  }: TwoDimensionalImageSourceOptions) {
     super();
     this.loadSequence = (async () => {
       this.metadata = await volumeLoader.loadMeta();
@@ -60,11 +60,11 @@ export default class TwoDimentionalImageSource extends ImageSource {
       0
     );
 
-    const state: TwoDimensionalViewState = {
+    const state = {
       type: '2d',
       window,
-      ...convertToSection2D(sectionDummy)
-    };
+      ...convertSectionToTwoDimensionalState(sectionDummy)
+    } as TwoDimensionalViewState;
 
     return state;
   }
@@ -143,12 +143,12 @@ export default class TwoDimentionalImageSource extends ImageSource {
     };
 
     const indexSection: Section = convertSectionToIndex(
-      getSectionAsSectionInDrawingViewState(viewState),
+      asSectionInDrawingViewState(viewState),
       new Vector3().fromArray(metadata.voxelSize)
     );
 
     volume.scanSection2D(
-      convertToSection2D(indexSection),
+      convertSectionToTwoDimensionalState(indexSection),
       outSize,
       outImage,
       viewWindow.width,
@@ -173,12 +173,12 @@ export default class TwoDimentionalImageSource extends ImageSource {
     };
 
     const indexSection: Section = convertSectionToIndex(
-      getSectionAsSectionInDrawingViewState(viewState),
+      asSectionInDrawingViewState(viewState),
       new Vector3().fromArray(metadata.voxelSize)
     );
 
     volume.scanSection2D(
-      convertToSection2D(indexSection),
+      convertSectionToTwoDimensionalState(indexSection),
       outSize,
       outImage,
       viewWindow.width,
@@ -202,7 +202,7 @@ export default class TwoDimentionalImageSource extends ImageSource {
         return viewState;
       }
 
-      const section = getSectionAsSectionInDrawingViewState(viewState);
+      const section = asSectionInDrawingViewState(viewState);
 
       const resizedSection = adjustOnResized(section, beforeSize, afterSize);
 
@@ -212,8 +212,8 @@ export default class TwoDimentionalImageSource extends ImageSource {
 
       return {
         ...viewState,
-        ...convertToSection2D(resizedSection)
-      };
+        ...convertSectionToTwoDimensionalState(resizedSection)
+      } as TwoDimensionalViewState;
     };
   }
 }

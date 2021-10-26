@@ -1,4 +1,4 @@
-import { Section, Section2D } from '../common/geometry';
+import { Section } from '../common/geometry';
 import { ViewWindow } from '../common/ViewWindow';
 
 interface SectionDrawingViewState {
@@ -110,47 +110,6 @@ export interface SubVolume {
  * This is an immutable object whose identity can be checked using `===`.
  */
 type ViewState = MprViewState | VrViewState | TwoDimensionalViewState;
-
-// HACK: Support-2d-image-source
-export function isTwoDimensionalViewState(
-  a: any
-): a is TwoDimensionalViewState {
-  return a.type === '2d';
-}
-
-// HACK: Support-2d-image-source
-export const asSectionInDrawingViewState = (
-  viewState: TwoDimensionalViewState
-): Section => {
-  const { origin, xAxis, yLength, imageNumber } = viewState;
-  return {
-    origin: [...origin, imageNumber],
-    xAxis: [...xAxis, 0],
-    yAxis: [0, yLength, 0]
-  };
-};
-
-// HACK: Support-2d-image-source
-export const getSectionAsSectionInDrawingViewState = (
-  viewState: ViewState
-): Section => {
-  if (!viewState) throw new Error('View state not initialized');
-
-  switch (viewState.type) {
-    case '2d': {
-      const { origin, xAxis, yLength, imageNumber } = viewState;
-      return {
-        origin: [...origin, imageNumber],
-        xAxis: [...xAxis, 0],
-        yAxis: [0, yLength, 0]
-      };
-    }
-    case 'mpr':
-    case 'vr':
-    default:
-      return viewState.section;
-  }
-};
 
 // eslint-disable-next-line no-undef
 export default ViewState;

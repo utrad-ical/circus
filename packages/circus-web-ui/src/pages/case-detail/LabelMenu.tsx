@@ -2,10 +2,7 @@ import { ColorPalette } from '@smikitky/rb-components/lib/ColorPicker';
 import { alert, prompt } from '@smikitky/rb-components/lib/modal';
 import Slider from '@smikitky/rb-components/lib/Slider';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
-import {
-  getSectionAsSectionInDrawingViewState,
-  Viewer
-} from '@utrad-ical/circus-rs/src/browser';
+import { Viewer } from '@utrad-ical/circus-rs/src/browser';
 import { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
 import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
 import Icon from 'components/Icon';
@@ -332,12 +329,12 @@ const LabelMenu: React.FC<{
         : spareKey;
       const [newLayoutItems, newLayout, key] = createSectionFromPoints(
         editingData.revision.series[activeSeriesIndex].labels.filter(label => {
-          return label.type === 'point';
+          return (
+            label.type === 'point' && !(activeSeriesMetadata?.mode !== '3d')
+          );
         }) as InternalLabelOf<'point'>[],
         activeLabel!.name!,
-        getSectionAsSectionInDrawingViewState(
-          viewers[targetLayoutKey!].getState()
-        ),
+        (viewers[targetLayoutKey!].getState() as any).section,
         editingData.layout,
         editingData.layoutItems,
         activeSeriesIndex
@@ -447,13 +444,15 @@ const LabelMenu: React.FC<{
         >
           Hole filling
         </MenuItem>
-        <MenuItem
-          eventKey="section"
-          onSelect={onSelect(onSelectThreePoints2Section)}
-          disabled={!activeLabel || activeLabel.type !== 'point'}
-        >
-          Three points to section
-        </MenuItem>
+        {!(activeSeriesMetadata?.mode !== '3d') && (
+          <MenuItem
+            eventKey="section"
+            onSelect={onSelect(onSelectThreePoints2Section)}
+            disabled={!activeLabel || activeLabel.type !== 'point'}
+          >
+            Three points to section
+          </MenuItem>
+        )}
       </DropdownButton>
       <IconButton
         bsSize="xs"

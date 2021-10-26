@@ -153,7 +153,9 @@ const SeriesItem: React.FC<{
 
   const handleDragStart = (ev: React.DragEvent) => {
     // HACK: Support-2d-image-source
-    if (!metadata) return;
+    if (!metadata) {
+      throw new Error('No metadata available.');
+    }
 
     const item = newViewerCellItem(seriesIndex, metadata.mode, 'axial');
     updateEditingData(d => {

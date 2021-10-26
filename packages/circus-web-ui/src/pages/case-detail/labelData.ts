@@ -2,7 +2,7 @@ import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { Section, Vector2D, Vector3D } from '@utrad-ical/circus-rs/src/browser';
 import {
-  convertToSection2D,
+  convertSectionToTwoDimensionalState,
   detectOrthogonalSection
 } from '@utrad-ical/circus-rs/src/browser/section-util';
 import focusBy from '@utrad-ical/circus-rs/src/browser/tool/state/focusBy';
@@ -456,38 +456,20 @@ export const setRecommendedDisplay = (
       viewers
         .filter(viewer => viewer.getComposition() === composition)
         .forEach(viewer => {
-          switch (viewer.getState().type) {
+          const prevState = viewer.getState();
+          switch (prevState.type) {
             case '2d':
               {
-                const prevState =
-                  viewer.getState() as rs.TwoDimensionalViewState;
                 viewer.setState({
                   ...prevState,
-                  ...convertToSection2D(reproduceSection)
-                });
+                  ...convertSectionToTwoDimensionalState(reproduceSection)
+                } as rs.TwoDimensionalViewState);
               }
               break;
             case 'mpr':
-              {
-                const prevState = viewer.getState() as rs.MprViewState;
-                const prevSection =
-                  rs.getSectionAsSectionInDrawingViewState(prevState);
-                const orientation = detectOrthogonalSection(prevSection);
-                if (orientation === reproduceOrientation) {
-                  viewer.setState({
-                    ...prevState,
-                    section: reproduceSection
-                  });
-                } else {
-                  focusBy(viewer, center);
-                }
-              }
-              break;
             case 'vr':
               {
-                const prevState = viewer.getState() as rs.VrViewState;
-                const prevSection =
-                  rs.getSectionAsSectionInDrawingViewState(prevState);
+                const prevSection = prevState.section;
                 const orientation = detectOrthogonalSection(prevSection);
                 if (orientation === reproduceOrientation) {
                   viewer.setState({

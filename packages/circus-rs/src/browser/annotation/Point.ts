@@ -1,13 +1,14 @@
 import { Box2, Vector2, Vector3 } from 'three';
 import { distanceFromPointToSection, Vector3D } from '../../common/geometry';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
+import { asSectionInDrawingViewState } from '../section-util';
 import {
   convertViewerPointToVolumePoint,
   convertVolumePointToViewerPoint
 } from '../tool/tool-util';
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
-import ViewState, { getSectionAsSectionInDrawingViewState } from '../ViewState';
+import ViewState from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
 import { drawPoint } from './helper/drawObject';
 import { hitRectangle } from './helper/hit-test';
@@ -83,7 +84,11 @@ export default class Point implements Annotation, ViewerEventTarget {
   }
 
   private getDrawingColor(viewState: ViewState): string | undefined {
-    const section = getSectionAsSectionInDrawingViewState(viewState);
+    const section =
+      viewState.type !== '2d'
+        ? viewState.section
+        : asSectionInDrawingViewState(viewState);
+
     const distance = distanceFromPointToSection(
       section,
       new Vector3(...this.location!)

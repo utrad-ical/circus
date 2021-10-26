@@ -1,6 +1,6 @@
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import {
-  convertToSection2D,
+  convertSectionToTwoDimensionalState,
   createOrthogonalMprSection,
   OrientationString
 } from '@utrad-ical/circus-rs/src/browser/section-util';
@@ -33,7 +33,7 @@ export const setOrthogonal2D = (
 ) => {
   if (initialViewState.type !== '2d') return;
   const src = viewer.getComposition()!
-    .imageSource as rs.TwoDimentionalImageSource;
+    .imageSource as rs.TwoDimensionalImageSource;
   const mmDim = src.mmDim();
   const section = createOrthogonalMprSection(
     viewer.getResolution(),
@@ -41,10 +41,10 @@ export const setOrthogonal2D = (
     'axial',
     0
   );
-  const newState: rs.TwoDimensionalViewState = {
+  const newState = {
     ...initialViewState,
-    ...convertToSection2D(section)
-  };
+    ...convertSectionToTwoDimensionalState(section)
+  } as rs.TwoDimensionalViewState;
   return newState;
 };
 

@@ -1,10 +1,12 @@
-import { getSectionAsSectionInDrawingViewState } from '../..';
 import { Vector3D } from '../../../common/geometry';
 import Annotation from '../../annotation/Annotation';
 import Cuboid from '../../annotation/Cuboid';
 import Ellipsoid from '../../annotation/Ellipsoid';
 import SolidFigure, { FigureType } from '../../annotation/SolidFigure';
-import { detectOrthogonalSection } from '../../section-util';
+import {
+  asSectionInDrawingViewState,
+  detectOrthogonalSection
+} from '../../section-util';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { convertViewerPointToVolumePoint } from '../tool-util';
 import AnnotationToolBase from './AnnotationToolBase';
@@ -21,7 +23,10 @@ export default class SolidFigureTool extends AnnotationToolBase {
     const viewState = viewer.getState();
     if (!this.isValidViewState(viewState)) return;
 
-    const section = getSectionAsSectionInDrawingViewState(viewState);
+    const section =
+      viewState.type !== '2d'
+        ? viewState.section
+        : asSectionInDrawingViewState(viewState);
 
     const orientation = detectOrthogonalSection(section);
     if (!SolidFigure.editableOrientation.some(o => o === orientation)) return;
@@ -75,7 +80,11 @@ export default class SolidFigureTool extends AnnotationToolBase {
     const viewState = viewer.getState();
     if (!this.isValidViewState(viewState)) return;
 
-    const section = getSectionAsSectionInDrawingViewState(viewState);
+    const section =
+      viewState.type !== '2d'
+        ? viewState.section
+        : asSectionInDrawingViewState(viewState);
+
     const orientation = detectOrthogonalSection(section);
     antn.concrete(orientation);
   }

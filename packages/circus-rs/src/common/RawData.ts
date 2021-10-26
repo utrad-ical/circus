@@ -4,7 +4,7 @@ import {
   PixelFormatInfo,
   pixelFormatInfo
 } from '@utrad-ical/circus-lib/src/PixelFormat';
-import { Box, Section, Section2D, Vector2D, Vector3D } from './geometry';
+import { Box, Section, Vector2D, Vector3D } from './geometry';
 
 // Make sure you don't add properties
 // that heavily depends on DICOM spec!
@@ -619,11 +619,14 @@ export default class RawData {
     );
   }
 
-  /**
-   * Builds a new 2D image using the given section in index-coordinate.
-   */
+  // HACK: Support-2d-image-source
   public scanSection2D(
-    section2D: Section2D,
+    section2D: {
+      origin: [number, number];
+      xAxis: [number, number];
+      yLength: number;
+      imageNumber: number;
+    },
     outSize: Vector2D,
     outImage: { [index: number]: number },
     windowWidth?: number,

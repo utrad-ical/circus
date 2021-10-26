@@ -1,6 +1,6 @@
 import { Vector2, Vector3 } from 'three';
 import MprImageSource from '../../image-source/MprImageSource';
-import TwoDimentionalImageSource from '../../image-source/TwoDimentionalImageSource';
+import TwoDimensionalImageSource from '../../image-source/TwoDimensionalImageSource';
 import {
   orientationAwareTranslation,
   sectionOverlapsVolume
@@ -16,10 +16,11 @@ export default function handlePageBy(viewer: Viewer, step: number): void {
   const src = comp.imageSource as any;
   if (
     !(src instanceof MprImageSource) &&
-    !(src instanceof TwoDimentionalImageSource)
+    !(src instanceof TwoDimensionalImageSource)
   )
     return;
 
+  // HACK: Support-2d-image-source
   switch (prevState.type) {
     case 'mpr': {
       const prevSection = prevState.section;
@@ -60,7 +61,7 @@ export function handlePageByScrollbar(viewer: Viewer, step: number): void {
   const src = comp.imageSource as any;
   if (
     !(src instanceof MprImageSource) &&
-    !(src instanceof TwoDimentionalImageSource)
+    !(src instanceof TwoDimensionalImageSource)
   )
     return;
 

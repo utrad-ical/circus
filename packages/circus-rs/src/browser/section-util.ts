@@ -5,7 +5,6 @@ import {
   normalVector,
   projectPointOntoSection,
   Section,
-  Section2D,
   translateSection,
   Vector2D,
   Vector3D,
@@ -15,6 +14,7 @@ import {
   intersectsPolygon,
   sortVerticesOfSimplePolygon
 } from '../common/geometry/Polygon';
+import { TwoDimensionalViewState } from './ViewState';
 
 export type OrientationString = 'axial' | 'sagittal' | 'coronal' | 'oblique';
 
@@ -574,13 +574,27 @@ export const getSectionFromPoints = (
   };
 };
 
-/**
- * Pseudo-converts an MPR section to a 2D section.
- * @param section MPR section
- * @returns 2D section representation of MPR section
- */
-export const convertToSection2D = (section: Section): Section2D => {
-  // HACK: Support-2d-image-source
+// HACK: Support-2d-image-source
+export const asSectionInDrawingViewState = (
+  viewState: TwoDimensionalViewState
+): Section => {
+  const { origin, xAxis, yLength, imageNumber } = viewState;
+  return {
+    origin: [...origin, imageNumber],
+    xAxis: [...xAxis, 0],
+    yAxis: [0, yLength, 0]
+  };
+};
+
+// HACK: Support-2d-image-source
+export const convertSectionToTwoDimensionalState = (
+  section: Section
+): {
+  origin: [number, number];
+  xAxis: [number, number];
+  yLength: number;
+  imageNumber: number;
+} => {
   if (detectOrthogonalSection(section) !== 'axial')
     throw new Error('Invalid section.');
   return {

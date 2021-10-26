@@ -1,13 +1,14 @@
 import { Vector2 } from 'three';
-import { getSectionAsSectionInDrawingViewState } from '../..';
 import { Vector3D } from '../../../common/geometry';
 import MprImageSource from '../../image-source/MprImageSource';
-import TwoDimentionalImageSource from '../../image-source/TwoDimentionalImageSource';
+import TwoDimensionalImageSource from '../../image-source/TwoDimensionalImageSource';
 import {
-  convertToSection2D,
+  asSectionInDrawingViewState,
+  convertSectionToTwoDimensionalState,
   translateOriginToCenter
 } from '../../section-util';
 import Viewer from '../../viewer/Viewer';
+import { TwoDimensionalViewState } from '../../ViewState';
 
 export default function focusBy(
   viewer: Viewer,
@@ -22,30 +23,38 @@ export default function focusBy(
   const src = comp.imageSource as any;
   if (
     !(src instanceof MprImageSource) &&
-    !(src instanceof TwoDimentionalImageSource)
+    !(src instanceof TwoDimensionalImageSource)
   )
     return;
 
-  const prevSection = getSectionAsSectionInDrawingViewState(prevState);
-  const section = translateOriginToCenter(
-    {
-      origin: focusPoint,
-      xAxis: prevSection.xAxis,
-      yAxis: prevSection.yAxis
-    },
-    resolution
-  );
-
   switch (prevState.type) {
     case 'mpr': {
+      const prevSection = prevState.section;
+      const section = translateOriginToCenter(
+        {
+          origin: focusPoint,
+          xAxis: prevSection.xAxis,
+          yAxis: prevSection.yAxis
+        },
+        resolution
+      );
       viewer.setState({ ...prevState, section });
       return;
     }
     case '2d': {
+      const prevSection = asSectionInDrawingViewState(prevState);
+      const section = translateOriginToCenter(
+        {
+          origin: focusPoint,
+          xAxis: prevSection.xAxis,
+          yAxis: prevSection.yAxis
+        },
+        resolution
+      );
       viewer.setState({
         ...prevState,
-        ...convertToSection2D(section)
-      });
+        ...convertSectionToTwoDimensionalState(section)
+      } as TwoDimensionalViewState);
       return;
     }
   }

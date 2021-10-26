@@ -1,16 +1,16 @@
+import { TwoDimensionalViewState } from 'browser/ViewState';
 import { Box2, Box3, Vector2, Vector3 } from 'three';
 import {
   Composition,
   MprImageSource,
   normalVector,
-  TwoDimentionalImageSource,
+  TwoDimensionalImageSource,
   Viewer,
   ViewState
 } from '../..';
 import {
   dotFromPointToSection,
   Section,
-  Section2D,
   Vector2D
 } from '../../../common/geometry';
 import {
@@ -156,7 +156,7 @@ export const calcThumbSteps = (
 ): { thumbStep: number; divideCount: number } => {
   const steps =
     viewState.type === '2d'
-      ? calcStepsInSection2D(composition, viewState)
+      ? calcStepsIn2D(composition, viewState)
       : calcStepsInSection(composition, viewState.section);
   const divideCount = steps.sumCount + 2;
   const thumbStep = !param ? steps.current + 1 : param.thumbStep;
@@ -212,15 +212,15 @@ const calcStepsInSection = (
   }
 };
 
-const calcStepsInSection2D = (
+const calcStepsIn2D = (
   composition: Composition,
-  section2D: Section2D
+  state: TwoDimensionalViewState
 ): { current: number; sumCount: number } => {
-  const src = composition.imageSource as TwoDimentionalImageSource;
+  const src = composition.imageSource as TwoDimensionalImageSource;
   if (!src || !src.metadata || !src.metadata.voxelSize)
     return { current: 0, sumCount: 0 };
   const voxelCount = src.metadata.voxelCount!;
-  const current = section2D.imageNumber;
+  const current = state.imageNumber;
   const sumCount = voxelCount[2];
   const steps = {
     current,

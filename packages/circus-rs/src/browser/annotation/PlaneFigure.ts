@@ -3,6 +3,7 @@ import { Vector2D } from '..';
 import { Section, verticesOfBox } from '../../common/geometry';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
 import {
+  asSectionInDrawingViewState,
   convertScreenCoordinateToVolumeCoordinate,
   convertVolumeCoordinateToScreenCoordinate,
   detectOrthogonalSection
@@ -10,7 +11,7 @@ import {
 import { convertVolumePointToViewerPoint } from '../tool/tool-util';
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
-import ViewState, { getSectionAsSectionInDrawingViewState } from '../ViewState';
+import ViewState from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
 import drawHandleFrame, { defaultHandleSize } from './helper/drawHandleFrame';
 import {
@@ -106,7 +107,10 @@ export default class PlaneFigure
     if (!ctx) return;
 
     // Displays only when the volume is displayed as an axial slice
-    const section = getSectionAsSectionInDrawingViewState(viewState);
+    const section =
+      viewState.type !== '2d'
+        ? viewState.section
+        : asSectionInDrawingViewState(viewState);
     const orientation = detectOrthogonalSection(section);
     if (orientation !== 'axial') return;
 
@@ -252,9 +256,11 @@ export default class PlaneFigure
       const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
       const handleType = this.hitTest(ev);
       if (handleType) {
-        const section = getSectionAsSectionInDrawingViewState(
-          ev.viewer.getState()
-        );
+        const viewState = viewer.getState();
+        const section =
+          viewState.type !== '2d'
+            ? viewState.section
+            : asSectionInDrawingViewState(viewState);
         const resolution: [number, number] = viewer.getResolution();
         this.handleType = handleType;
         this.dragInfo = {
@@ -280,9 +286,11 @@ export default class PlaneFigure
     if (viewer.getHoveringAnnotation() === this) {
       ev.stopPropagation();
       const draggedPoint: [number, number] = [ev.viewerX!, ev.viewerY!];
-      const section = getSectionAsSectionInDrawingViewState(
-        ev.viewer.getState()
-      );
+      const viewState = ev.viewer.getState();
+      const section =
+        viewState.type !== '2d'
+          ? viewState.section
+          : asSectionInDrawingViewState(viewState);
       const resolution: [number, number] = viewer.getResolution();
       const orientation = 'axial';
       const draggedPoint3 = convertScreenCoordinateToVolumeCoordinate(
@@ -355,7 +363,10 @@ export default class PlaneFigure
 
     if (!viewer || !isValidViewState(viewState)) return;
 
-    const section = getSectionAsSectionInDrawingViewState(viewState);
+    const section =
+      viewState.type !== '2d'
+        ? viewState.section
+        : asSectionInDrawingViewState(viewState);
 
     // Displays only when the volume is displayed as an axial slice
     const orientation = detectOrthogonalSection(section);

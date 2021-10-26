@@ -4,7 +4,10 @@ import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
 import { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
-import { convertToSection2D } from '@utrad-ical/circus-rs/src/browser/section-util';
+import {
+  asSectionInDrawingViewState,
+  convertSectionToTwoDimensionalState
+} from '@utrad-ical/circus-rs/src/browser/section-util';
 import { InterpolationMode } from '@utrad-ical/circus-rs/src/browser/ViewState';
 import classNames from 'classnames';
 import Collapser from 'components/Collapser';
@@ -85,7 +88,7 @@ const useCompositions = (
       const src = (() => {
         switch (metadata.mode) {
           case '2d':
-            return new rs.TwoDimentionalImageSource({
+            return new rs.TwoDimensionalImageSource({
               volumeLoader,
               maxCacheSize: 10
             });
@@ -335,7 +338,7 @@ const RevisionEditor: React.FC<{
     const activeImageSource =
       compositions[editingData.activeSeriesIndex].composition?.imageSource;
     if (
-      activeImageSource instanceof rs.TwoDimentionalImageSource &&
+      activeImageSource instanceof rs.TwoDimensionalImageSource &&
       (annotation instanceof rs.VoxelCloud ||
         annotation instanceof rs.SolidFigure)
     ) {
@@ -586,18 +589,28 @@ const RevisionEditor: React.FC<{
   const handleMagnify = useCallback(
     (magnitude: number) =>
       stateChanger(state => {
-        const prevSection = rs.getSectionAsSectionInDrawingViewState(state);
-        const section = rs.scaleSectionFromCenter(prevSection, 1 / magnitude);
         switch (state.type) {
           case '2d': {
+            const prevSection = asSectionInDrawingViewState(state);
+            const section = rs.scaleSectionFromCenter(
+              prevSection,
+              1 / magnitude
+            );
             return {
               ...state,
-              ...convertToSection2D(section)
-            };
+              ...convertSectionToTwoDimensionalState(section)
+            } as rs.TwoDimensionalViewState;
           }
-          case 'mpr':
-          default: {
+          case 'mpr': {
+            const prevSection = state.section;
+            const section = rs.scaleSectionFromCenter(
+              prevSection,
+              1 / magnitude
+            );
             return { ...state, section };
+          }
+          default: {
+            throw new Error('Unsupported view state.');
           }
         }
       }),
@@ -739,7 +752,7 @@ const RevisionEditor: React.FC<{
       }
       case '2d': {
         const src = viewer.getComposition()!.imageSource;
-        if (!(src instanceof rs.TwoDimentionalImageSource))
+        if (!(src instanceof rs.TwoDimensionalImageSource))
           throw new Error('Unsupported image source.');
 
         const interpolationMode =

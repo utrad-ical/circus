@@ -1,10 +1,8 @@
-import { Vector3 } from 'three';
 import DicomVolume from '../../common/DicomVolume';
-import { Section, Vector2D, Vector3D } from '../../common/geometry';
+import { Vector2D, Vector3D } from '../../common/geometry';
 import {
   adjustOnResized,
   asSectionInDrawingViewState,
-  convertSectionToIndex,
   convertSectionToTwoDimensionalState,
   createOrthogonalMprSection
 } from '../section-util';
@@ -12,8 +10,9 @@ import setImmediate from '../util/setImmediate';
 import Viewer from '../viewer/Viewer';
 import ViewState, { TwoDimensionalViewState } from '../ViewState';
 import ImageDataCache from './cache/ImageDataCache';
-import drawRgba8ToImageData from './drawRgba8ToImageData';
-import drawToImageData from './drawToImageData';
+import drawToImageData, {
+  drawToImageDataWithApplyWindow
+} from './drawToImageData';
 import ImageSource, { ViewStateResizeTransformer } from './ImageSource';
 import DicomVolumeLoader, {
   DicomVolumeMetadata
@@ -93,25 +92,26 @@ export default class TwoDimensionalImageSource extends ImageSource {
     const context = viewer.canvas.getContext('2d');
     if (!context) throw new Error('Failed to get canvas context');
 
-    // HACK: Support-2d-image-source
     const cacheKey = this.createKey(viewState);
-    let imageData: ImageData | undefined;
-    imageData = await this.cache.getImage(cacheKey);
-    if (!imageData) {
-      imageData =
-        this.metadata!.pixelFormat === 'rgba8'
-          ? this.createImageDataOfRGBA8(viewer, viewState)
-          : this.createImageDataOfMonochrome(viewer, viewState);
-      await this.cache.putImage(cacheKey, imageData);
+    let cachedImageData: ImageData | undefined;
+    cachedImageData = await this.cache.getImage(cacheKey);
+    if (!cachedImageData) {
+      cachedImageData = this.createCacheImageData(viewer, viewState);
+      await this.cache.putImage(cacheKey, cachedImageData);
     }
 
-    // HACK: Support-2d-image-source
     const interpolationMode = viewState.interpolationMode;
     const imageSmoothingEnabled = !(
       !interpolationMode || interpolationMode === 'none'
     );
     context.imageSmoothingEnabled = imageSmoothingEnabled;
     context.imageSmoothingQuality = 'medium';
+
+    const imageData = this.createClippedImageData(
+      viewer,
+      viewState,
+      cachedImageData
+    );
 
     // If we use Promise.resolve directly, the then-calleback is called
     // before any stacked UI events are handled.
@@ -123,75 +123,50 @@ export default class TwoDimensionalImageSource extends ImageSource {
   }
 
   private createKey(state: TwoDimensionalViewState): string {
-    const { imageNumber, window, origin, xAxis, yLength } = state;
+    const { imageNumber, window } = state;
     let key: string = 'imageNumber:' + imageNumber + ';';
     if (window) key += 'ww:' + window.width + ';' + 'wl:' + window.level + ';';
-    key += 'origin:' + origin.join(',') + ';';
-    key += 'xAxis:' + xAxis.join(',') + ';';
-    key += 'yLength:' + yLength + ';';
     return key;
   }
 
-  private createImageDataOfRGBA8(
+  private createCacheImageData(
     viewer: Viewer,
     viewState: TwoDimensionalViewState
   ): ImageData {
-    // HACK: Support-2d-image-source
     const metadata = this.metadata!;
-    const outSize = viewer.getResolution();
     const volume = this.volume!;
-    const outImage = new Uint32Array(outSize[0] * outSize[1]);
-    const viewWindow = {
-      width: undefined,
-      level: undefined
-    };
+    const context = viewer.canvas.getContext('2d');
+    if (!context) throw new Error('Failed to get canvas context');
 
-    const indexSection: Section = convertSectionToIndex(
-      asSectionInDrawingViewState(viewState),
-      new Vector3().fromArray(metadata.voxelSize)
-    );
+    const src = volume.getSingleImage(viewState.imageNumber);
+    const [w, h] = metadata.voxelCount;
 
-    volume.scanSection2D(
-      convertSectionToTwoDimensionalState(indexSection),
-      outSize,
-      outImage,
-      viewWindow.width,
-      viewWindow.level
-    );
-
-    const imageData = drawRgba8ToImageData(viewer, outSize, outImage);
-    return imageData;
+    const buffer = new Uint8ClampedArray(src);
+    if (metadata.pixelFormat === 'rgba8') {
+      // RGBA
+      return new ImageData(buffer, w, h);
+    } else if (!!viewState.window) {
+      // Monochrome (apply window)
+      const ww = viewState.window.width;
+      const wl = viewState.window.width;
+      return drawToImageDataWithApplyWindow(viewer, [w, h], buffer, ww, wl);
+    } else {
+      // Monochrome
+      return drawToImageData(viewer, [w, h], buffer);
+    }
   }
 
-  private createImageDataOfMonochrome(
+  private createClippedImageData(
     viewer: Viewer,
-    viewState: TwoDimensionalViewState
+    viewState: TwoDimensionalViewState,
+    cachedImageData: ImageData
   ): ImageData {
     // HACK: Support-2d-image-source
-    const metadata = this.metadata!;
-    const outSize = viewer.getResolution();
-    const volume = this.volume!;
-    const outImage = new Uint8Array(outSize[0] * outSize[1]);
-    const viewWindow = viewState.window ?? {
-      width: undefined,
-      level: undefined
-    };
+    // TODO: doramari
 
-    const indexSection: Section = convertSectionToIndex(
-      asSectionInDrawingViewState(viewState),
-      new Vector3().fromArray(metadata.voxelSize)
-    );
-
-    volume.scanSection2D(
-      convertSectionToTwoDimensionalState(indexSection),
-      outSize,
-      outImage,
-      viewWindow.width,
-      viewWindow.level
-    );
-
-    const imageData = drawToImageData(viewer, outSize, outImage);
-    return imageData;
+    //                                           Backcanvas (内部的に一度別のキャンバスに描画, Interpolation が効く! putImageData ?? 位置、引き伸ばし)
+    //                                           ^^^^^^^^^^^ WebGL MPR ImageSource
+    return cachedImageData;
   }
 
   /**

@@ -133,6 +133,7 @@ export default class TwoDimensionalImageSource extends ImageSource {
     viewer: Viewer,
     viewState: TwoDimensionalViewState
   ): ImageData {
+    // HACK: Support-2d-image-source
     const metadata = this.metadata!;
     const outSize = viewer.getResolution();
     const volume = this.volume!;
@@ -163,6 +164,7 @@ export default class TwoDimensionalImageSource extends ImageSource {
     viewer: Viewer,
     viewState: TwoDimensionalViewState
   ): ImageData {
+    // HACK: Support-2d-image-source
     const metadata = this.metadata!;
     const outSize = viewer.getResolution();
     const volume = this.volume!;

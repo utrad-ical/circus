@@ -615,6 +615,15 @@ export default class RawData {
   }
 
   // HACK: Support-2d-image-source
+  /**
+   *
+   * @param section2D
+   * @param outSize
+   * @param outImage
+   * @param windowWidth
+   * @param windowLevel
+   * @deprecated
+   */
   public scanSection2D(
     section2D: {
       origin: [number, number];

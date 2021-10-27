@@ -5,6 +5,7 @@ import {
   pixelFormatInfo
 } from '@utrad-ical/circus-lib/src/PixelFormat';
 import { Box, Section, Vector2D, Vector3D } from './geometry';
+import { applyWindow } from './Pixel';
 
 // Make sure you don't add properties
 // that heavily depends on DICOM spec!
@@ -574,13 +575,7 @@ export default class RawData {
    */
   protected applyWindow(width: number, level: number, pixel: number): number {
     // NOTE: In the case of color image (rgba8), returns incorrect value.
-    let value = Math.round((pixel - level + width / 2) * (255 / width));
-    if (value > 255) {
-      value = 255;
-    } else if (value < 0) {
-      value = 0;
-    }
-    return value;
+    return applyWindow(width, level, pixel);
   }
 
   /**

@@ -10,7 +10,7 @@ interface RescaleParams {
   intercept: number;
 }
 
-interface imageTypeParams {
+interface ImageTypeParams {
   pixelDataCharacteristics: string;
   patientExaminationCharacteristics: string;
 }
@@ -214,7 +214,7 @@ function determinePitch(dataset: DataSet): number | undefined {
   return pitch;
 }
 
-function determineImageType(dataset: DataSet): imageTypeParams | undefined {
+function determineImageType(dataset: DataSet): ImageTypeParams | undefined {
   if (dataset.elements['x00080008']) {
     const imageType = dataset
       .string('x00080008')!

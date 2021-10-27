@@ -5,7 +5,7 @@ import {
   pixelFormatInfo
 } from '@utrad-ical/circus-lib/src/PixelFormat';
 import { Box, Section, Vector2D, Vector3D } from './geometry';
-import { applyWindow } from './Pixel';
+import * as p from './pixel';
 
 // Make sure you don't add properties
 // that heavily depends on DICOM spec!
@@ -575,7 +575,7 @@ export default class RawData {
    */
   protected applyWindow(width: number, level: number, pixel: number): number {
     // NOTE: In the case of color image (rgba8), returns incorrect value.
-    return applyWindow(width, level, pixel);
+    return p.applyWindow(width, level, pixel);
   }
 
   /**
@@ -699,7 +699,7 @@ export default class RawData {
       for (let i = 0; i < outWidth; i++) {
         value = voxelReader.call(this, pos_x, pos_y, pos_z); // may return `undefined`
         if (value !== undefined && useWindow) {
-          value = this.applyWindow(windowWidth!, windowLevel!, value);
+          value = p.applyWindow(windowWidth!, windowLevel!, value);
         }
 
         // A value of `undefined` will be silently converted

@@ -64,7 +64,7 @@ export interface VrViewState extends SectionDrawingViewState {
   readonly debugMode?: number;
 }
 
-export interface TwoDimensionalViewState extends Section2D {
+export interface TwoDimensionalViewState {
   readonly type: '2d';
   readonly window?: ViewWindow;
   readonly interpolationMode?: 'none' | 'bilinear';

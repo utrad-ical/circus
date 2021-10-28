@@ -6,7 +6,7 @@ import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
 import { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
 import {
   asSectionInDrawingViewState,
-  convertSectionToTwoDimensionalState
+  applySectionToTwoDimensionalState
 } from '@utrad-ical/circus-rs/src/browser/section-util';
 import { InterpolationMode } from '@utrad-ical/circus-rs/src/browser/ViewState';
 import classNames from 'classnames';
@@ -596,10 +596,7 @@ const RevisionEditor: React.FC<{
               prevSection,
               1 / magnitude
             );
-            return {
-              ...state,
-              ...convertSectionToTwoDimensionalState(section)
-            } as rs.TwoDimensionalViewState;
+            return { ...applySectionToTwoDimensionalState(state, section) };
           }
           case 'mpr': {
             const prevSection = state.section;

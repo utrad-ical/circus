@@ -1,6 +1,6 @@
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import {
-  convertSectionToTwoDimensionalState,
+  applySectionToTwoDimensionalState,
   createOrthogonalMprSection,
   OrientationString
 } from '@utrad-ical/circus-rs/src/browser/section-util';
@@ -41,10 +41,7 @@ export const setOrthogonal2D = (
     'axial',
     0
   );
-  const newState = {
-    ...initialViewState,
-    ...convertSectionToTwoDimensionalState(section)
-  } as rs.TwoDimensionalViewState;
+  const newState = applySectionToTwoDimensionalState(initialViewState, section);
   return newState;
 };
 

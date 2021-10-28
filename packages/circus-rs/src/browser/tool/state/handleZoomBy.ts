@@ -5,7 +5,7 @@ import TwoDimensionalImageSource from '../../image-source/TwoDimensionalImageSou
 import {
   asSectionInDrawingViewState,
   convertScreenCoordinateToVolumeCoordinate,
-  convertSectionToTwoDimensionalState,
+  applySectionToTwoDimensionalState,
   sectionOverlapsVolume
 } from '../../section-util';
 import Viewer from '../../viewer/Viewer';
@@ -74,9 +74,8 @@ export default function handleZoomBy(
       if (!overlap) return;
 
       viewer.setState({
-        ...prevState,
-        ...convertSectionToTwoDimensionalState(section)
-      } as TwoDimensionalViewState);
+        ...applySectionToTwoDimensionalState(prevState, section)
+      });
       break;
     }
   }

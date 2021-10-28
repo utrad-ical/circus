@@ -614,45 +614,6 @@ export default class RawData {
     );
   }
 
-  // HACK: Support-2d-image-source
-  /**
-   *
-   * @param section2D
-   * @param outSize
-   * @param outImage
-   * @param windowWidth
-   * @param windowLevel
-   * @deprecated
-   */
-  public scanSection2D(
-    section2D: {
-      origin: [number, number];
-      xAxis: [number, number];
-      yLength: number;
-      imageNumber: number;
-    },
-    outSize: Vector2D,
-    outImage: { [index: number]: number },
-    windowWidth?: number,
-    windowLevel?: number
-  ): void {
-    const origin: Vector3D = [...section2D.origin, section2D.imageNumber];
-    const xAxis = section2D.xAxis;
-    const eu: Vector3D = [xAxis[0] / outSize[0], xAxis[1] / outSize[0], 0];
-    const yAxis = [0, section2D.yLength];
-    const ev: Vector3D = [yAxis[0] / outSize[1], yAxis[1] / outSize[1], 0];
-    this.scanOblique(
-      origin,
-      eu,
-      ev,
-      outSize,
-      outImage,
-      false,
-      windowWidth,
-      windowLevel
-    );
-  }
-
   /**
    * Scans over the volume and make an oblique image,
    * starting from origin and along with the plane defined by eu/ev.

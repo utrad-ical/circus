@@ -579,28 +579,28 @@ export const asSectionInDrawingViewState = (
   viewState: TwoDimensionalViewState
 ): Section => {
   const { origin, xAxis, yLength, imageNumber } = viewState;
-  return {
+  const section = {
     origin: [...origin, imageNumber],
     xAxis: [...xAxis, 0],
     yAxis: [0, yLength, 0]
   };
+  return section;
 };
 
 // HACK: Support-2d-image-source
-export const convertSectionToTwoDimensionalState = (
+export const applySectionToTwoDimensionalState = (
+  prevState: TwoDimensionalViewState,
   section: Section
-): {
-  origin: [number, number];
-  xAxis: [number, number];
-  yLength: number;
-  imageNumber: number;
-} => {
+): TwoDimensionalViewState => {
   if (detectOrthogonalSection(section) !== 'axial')
     throw new Error('Invalid section.');
-  return {
+
+  const state: TwoDimensionalViewState = {
+    ...prevState,
     origin: [section.origin[0], section.origin[1]],
     xAxis: [section.xAxis[0], section.xAxis[1]],
     yLength: section.yAxis[1],
     imageNumber: Math.round(section.origin[2])
   };
+  return state;
 };

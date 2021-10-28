@@ -4,7 +4,7 @@ import MprImageSource from '../../image-source/MprImageSource';
 import TwoDimensionalImageSource from '../../image-source/TwoDimensionalImageSource';
 import {
   asSectionInDrawingViewState,
-  convertSectionToTwoDimensionalState,
+  applySectionToTwoDimensionalState,
   translateOriginToCenter
 } from '../../section-util';
 import Viewer from '../../viewer/Viewer';
@@ -52,9 +52,8 @@ export default function focusBy(
         resolution
       );
       viewer.setState({
-        ...prevState,
-        ...convertSectionToTwoDimensionalState(section)
-      } as TwoDimensionalViewState);
+        ...applySectionToTwoDimensionalState(prevState, section)
+      });
       return;
     }
   }

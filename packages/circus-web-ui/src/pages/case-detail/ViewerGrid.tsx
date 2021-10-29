@@ -36,6 +36,7 @@ import React, {
 import styled from 'styled-components';
 import { EditingData, EditingDataUpdater, seriesColors } from './revisionData';
 
+// HACK: Support-2d-image-source
 export type ViewerMode = '2d' | '3d';
 export interface ViewerDef {
   key: string;

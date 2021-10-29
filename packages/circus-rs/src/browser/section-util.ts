@@ -578,6 +578,7 @@ export const getSectionFromPoints = (
 export const asSectionInDrawingViewState = (
   viewState: TwoDimensionalViewState
 ): Section => {
+  // NOTE: Rotation is not supported yet.
   const { origin, xAxis, yLength, imageNumber } = viewState;
   const section = {
     origin: [...origin, imageNumber],

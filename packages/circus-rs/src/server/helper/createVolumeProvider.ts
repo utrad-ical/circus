@@ -178,7 +178,6 @@ const createUncachedVolumeProvider: FunctionService<
       await load(primaryImageNo);
       const primaryMetadata = imageMetadata.get(primaryImageNo)!;
 
-      // HACK: Support-2d-image-source
       if (
         primaryMetadata.columns != metadata.columns ||
         primaryMetadata.rows != metadata.rows
@@ -202,6 +201,7 @@ const createUncachedVolumeProvider: FunctionService<
   };
 };
 
+// HACK: Support-2d-image-source
 const isLike3D = (...metadata: DicomMetadata[]) => {
   if (!(metadata.length > 0)) return false;
 

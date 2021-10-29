@@ -7,6 +7,7 @@ import {
 } from '../../section-util';
 import Viewer from '../../viewer/Viewer';
 
+// HACK: Support-2d-image-source
 export default function handlePageBy(viewer: Viewer, step: number): void {
   const prevState = viewer.getState();
   const resolution = viewer.getResolution();
@@ -20,7 +21,6 @@ export default function handlePageBy(viewer: Viewer, step: number): void {
   )
     return;
 
-  // HACK: Support-2d-image-source
   switch (prevState.type) {
     case 'mpr': {
       const prevSection = prevState.section;
@@ -29,6 +29,7 @@ export default function handlePageBy(viewer: Viewer, step: number): void {
         src.metadata!.voxelSize,
         step
       );
+
       // Abort If the section does not overlap the volume.
       const overlap = sectionOverlapsVolume(
         section,
@@ -37,22 +38,27 @@ export default function handlePageBy(viewer: Viewer, step: number): void {
         new Vector3().fromArray(src.metadata!.voxelCount)
       );
       if (!overlap) return;
+
       viewer.setState({ ...prevState, section });
       return;
     }
     case '2d': {
+      step = Math.round(step);
       if (step === 0) return;
-      const imageNumber = prevState.imageNumber + Math.round(step);
+      const imageNumber = prevState.imageNumber + step;
+
       // Abort If the section does not overlap the volume.
       const overlap =
         0 <= imageNumber && imageNumber < src.metadata!.voxelCount[2];
       if (!overlap) return;
+
       viewer.setState({ ...prevState, imageNumber });
       return;
     }
   }
 }
 
+// HACK: Support-2d-image-source
 export function handlePageByScrollbar(viewer: Viewer, step: number): void {
   const prevState = viewer.getState();
   const comp = viewer.getComposition();
@@ -77,7 +83,9 @@ export function handlePageByScrollbar(viewer: Viewer, step: number): void {
       return;
     }
     case '2d': {
-      const imageNumber = prevState.imageNumber + Math.round(step);
+      step = Math.round(step);
+      if (step === 0) return;
+      const imageNumber = prevState.imageNumber + step;
       if (prevState.imageNumber === imageNumber) return;
       viewer.setState({ ...prevState, imageNumber });
       return;

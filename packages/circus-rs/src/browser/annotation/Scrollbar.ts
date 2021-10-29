@@ -176,7 +176,7 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
     if (!this.scrollbar) this.scrollbar = this.createScrollbar(viewState);
     const drawnStep = this.scrollbar.thumbStep;
     let stepDiff = drawnStep - sectionStep;
-    if (viewState.type !== '2d') Math.round(stepDiff);
+    if (viewState.type !== '2d') stepDiff = Math.round(stepDiff);
     if (stepDiff != 0) {
       handlePageByScrollbar(viewer, stepDiff);
     }

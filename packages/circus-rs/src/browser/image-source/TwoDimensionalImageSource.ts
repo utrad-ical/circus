@@ -19,7 +19,6 @@ import DicomVolumeLoader, {
   DicomVolumeMetadata
 } from './volume-loader/DicomVolumeLoader';
 
-// HACK: Support-2d-image-source
 interface TwoDimensionalImageSourceOptions {
   volumeLoader: DicomVolumeLoader;
   maxCacheSize?: number;
@@ -31,12 +30,6 @@ export default class TwoDimensionalImageSource extends ImageSource {
   private volume: DicomVolume | undefined;
   private cache: CanvasImageSourceCache;
   private backCanvas: HTMLCanvasElement;
-
-  /**
-   * For debugging
-   */
-  public static readyBeforeVolumeLoaded: boolean = false;
-  public static defaultDebugMode: number = 0;
 
   constructor({
     volumeLoader,
@@ -92,7 +85,6 @@ export default class TwoDimensionalImageSource extends ImageSource {
     );
 
     const state = applySectionToTwoDimensionalState(initialState, sectionDummy);
-
     return state;
   }
 
@@ -157,8 +149,6 @@ export default class TwoDimensionalImageSource extends ImageSource {
     viewer: Viewer,
     viewState: TwoDimensionalViewState
   ): Promise<CanvasImageSource> {
-    const metadata = this.metadata!;
-    const volume = this.volume!;
     const context = viewer.canvas.getContext('2d');
     if (!context) throw new Error('Failed to get canvas context');
     const imageData = this.createImageData(viewer, viewState);
@@ -200,8 +190,6 @@ export default class TwoDimensionalImageSource extends ImageSource {
     viewState: TwoDimensionalViewState,
     image: CanvasImageSource
   ): Promise<ImageData> {
-    // HACK: Support-2d-image-source
-
     const outSize = viewer.getResolution();
     this.backCanvas.width = outSize[0];
     this.backCanvas.height = outSize[1];
@@ -209,9 +197,9 @@ export default class TwoDimensionalImageSource extends ImageSource {
     const backContext = this.backCanvas.getContext('2d');
     if (!backContext) throw new Error('Failed to get backCanvas context');
 
-    // if(xAxis[1]) 例外吐く？現在は回転には対応していません
-
     const { origin, xAxis, yLength } = viewState;
+    if (xAxis[1] !== 0) throw new Error('Rotation is not supported yet.');
+
     const sx = origin[0];
     const sy = origin[1];
     const sw = xAxis[0];
@@ -223,7 +211,6 @@ export default class TwoDimensionalImageSource extends ImageSource {
 
     backContext.drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh);
     const clippedImageData = backContext.getImageData(dx, dy, dw, dh);
-
     return clippedImageData;
   }
 
@@ -236,18 +223,13 @@ export default class TwoDimensionalImageSource extends ImageSource {
       beforeSize: Vector2D,
       afterSize: Vector2D
     ): ViewState => {
-      if (viewState.type !== '2d') {
-        return viewState;
-      }
+      if (viewState.type !== '2d') return viewState;
 
       const section = asSectionInDrawingViewState(viewState);
-
       const resizedSection = adjustOnResized(section, beforeSize, afterSize);
-
       if (section === resizedSection) {
         return viewState;
       }
-
       return applySectionToTwoDimensionalState(viewState, resizedSection);
     };
   }

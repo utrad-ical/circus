@@ -91,6 +91,7 @@ const alphaNum = (length: number = 16) =>
     .map(() => String.fromCharCode(97 + Math.floor(Math.random() * 26)))
     .join('');
 
+// HACK: Support-2d-image-source
 export const newViewerCellItem = (
   seriesIndex: number,
   viewerMode: ViewerMode,

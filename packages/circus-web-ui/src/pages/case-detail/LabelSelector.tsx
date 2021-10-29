@@ -15,6 +15,7 @@ import Series from 'types/Series';
 import { newViewerCellItem, performLayout } from './caseStore';
 import { InternalLabel, labelTypes } from './labelData';
 import { EditingData, EditingDataUpdater, seriesColors } from './revisionData';
+import { ViewerMode } from './ViewerGrid';
 
 const LabelSelector: React.FC<{
   editingData: EditingData;
@@ -152,12 +153,12 @@ const SeriesItem: React.FC<{
   };
 
   const handleDragStart = (ev: React.DragEvent) => {
-    // HACK: Support-2d-image-source
     if (!metadata) {
       throw new Error('No metadata available.');
     }
-
-    const item = newViewerCellItem(seriesIndex, metadata.mode, 'axial');
+    // HACK: Support-2d-image-source
+    const mode: ViewerMode = metadata.mode;
+    const item = newViewerCellItem(seriesIndex, mode, 'axial');
     updateEditingData(d => {
       d.layoutItems.push(item);
     }, 'layout');

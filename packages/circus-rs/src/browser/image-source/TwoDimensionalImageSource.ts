@@ -1,7 +1,10 @@
 import DicomVolume from '../../common/DicomVolume';
 import { Vector2D, Vector3D } from '../../common/geometry';
 import {
-  adjustOnResized, applySectionToTwoDimensionalState, asSectionInDrawingViewState, createOrthogonalMprSection
+  adjustOnResized,
+  applySectionToTwoDimensionalState,
+  asSectionInDrawingViewState,
+  createOrthogonalMprSection
 } from '../section-util';
 import setImmediate from '../util/setImmediate';
 import Viewer from '../viewer/Viewer';
@@ -171,9 +174,12 @@ export default class TwoDimensionalImageSource extends ImageSource {
     const context = viewer.canvas.getContext('2d');
     if (!context) throw new Error('Failed to get canvas context');
 
-    const src = volume.getSingleImage(viewState.imageNumber);
     const [w, h] = metadata.voxelCount;
+    const { imageNumber } = viewState;
+    const overlap = 0 <= imageNumber && imageNumber < metadata.voxelCount[2];
+    if (!overlap) return new ImageData(w, h);
 
+    const src = volume.getSingleImage(viewState.imageNumber);
     const buffer = new Uint8ClampedArray(src);
     if (metadata.pixelFormat === 'rgba8') {
       // RGBA

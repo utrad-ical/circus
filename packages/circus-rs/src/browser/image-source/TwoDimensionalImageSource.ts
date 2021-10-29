@@ -11,9 +11,7 @@ import Viewer from '../viewer/Viewer';
 import ViewState, { TwoDimensionalViewState } from '../ViewState';
 import { createCanvasImageSource } from './cache/cache-util';
 import CanvasImageSourceCache from './cache/CanvasImageSourceCache';
-import drawToImageData, {
-  drawToImageDataWithApplyWindow
-} from './drawToImageData';
+import { drawToImageDataFor2D } from './drawToImageData';
 import ImageSource, { ViewStateResizeTransformer } from './ImageSource';
 import DicomVolumeLoader, {
   DicomVolumeMetadata
@@ -170,18 +168,16 @@ export default class TwoDimensionalImageSource extends ImageSource {
     if (!overlap) return new ImageData(w, h);
 
     const src = volume.getSingleImage(viewState.imageNumber);
-    const buffer = new Uint8ClampedArray(src);
+
     if (metadata.pixelFormat === 'rgba8') {
       // RGBA
+      const buffer = new Uint8ClampedArray(src);
       return new ImageData(buffer, w, h);
-    } else if (viewState.window) {
-      // Monochrome (apply window)
-      const ww = viewState.window.width;
-      const wl = viewState.window.width;
-      return drawToImageDataWithApplyWindow(viewer, [w, h], buffer, ww, wl);
     } else {
       // Monochrome
-      return drawToImageData(viewer, [w, h], buffer);
+      const pxInfo = volume.getPixelFormatInfo();
+      const buffer = new pxInfo.arrayClass(src);
+      return drawToImageDataFor2D(viewer, [w, h], buffer, viewState.window);
     }
   }
 

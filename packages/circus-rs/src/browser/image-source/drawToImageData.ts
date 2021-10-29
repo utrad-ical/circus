@@ -1,3 +1,4 @@
+import { ViewWindow } from '..';
 import { applyWindow } from '../../common/pixel';
 import Viewer from '../viewer/Viewer';
 
@@ -32,25 +33,30 @@ export default function drawToImageData(
 }
 
 // HACK: Support-2d-image-source
-export function drawToImageDataWithApplyWindow(
+export function drawToImageDataFor2D(
   viewer: Viewer,
   outSize: [number, number],
-  buffer: Uint8Array | Uint8ClampedArray,
-  windowWidth: number,
-  windowLevel: number
+  buffer: Uint8Array | Uint8ClampedArray | Uint16Array,
+  window?: ViewWindow
 ): ImageData {
   const context = viewer.canvas.getContext('2d');
   if (!context) throw new Error('Failed to get canvas context');
 
-  if (!buffer || buffer.byteLength !== outSize[0] * outSize[1]) {
+  if (!buffer || buffer.length !== outSize[0] * outSize[1]) {
     throw TypeError('Invalid grayscale data');
   }
+
+  const buffer8 = new Uint8ClampedArray(buffer);
   const imageData = context.createImageData(outSize[0], outSize[1]);
+  imageData.data.set(buffer8);
   const pixelData = imageData.data;
-  for (let srcIdx = 0; srcIdx < outSize[0] * outSize[1]; srcIdx++) {
-    const pixel = Math.round(
-      applyWindow(windowWidth, windowLevel, buffer[srcIdx])
-    );
+  for (let srcIdx = 0; srcIdx < buffer.byteLength; srcIdx++) {
+    let pixel = buffer[srcIdx];
+    if (window) {
+      pixel = Math.round(
+        applyWindow(window.width, window.level, buffer[srcIdx])
+      );
+    }
     const dstIdx = srcIdx * 4;
     pixelData[dstIdx] = pixel;
     pixelData[dstIdx + 1] = pixel;

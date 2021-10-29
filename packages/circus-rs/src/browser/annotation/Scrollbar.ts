@@ -85,6 +85,7 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
   private visible: boolean;
   private visibilityThreshold: number;
   private handleType: HandleType | undefined;
+  private dragStartScrollbar: ScrollbarContainer | undefined;
   private dragStartPoint2: Vector2 | undefined;
   private scrollbar: ScrollbarContainer | undefined;
   private createScrollbar: (
@@ -174,7 +175,8 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
     const sectionStep = calcThumbSteps(viewState, composition).thumbStep;
     if (!this.scrollbar) this.scrollbar = this.createScrollbar(viewState);
     const drawnStep = this.scrollbar.thumbStep;
-    const stepDiff = drawnStep - sectionStep;
+    let stepDiff = drawnStep - sectionStep;
+    if (viewState.type !== '2d') Math.round(stepDiff);
     if (stepDiff != 0) {
       handlePageByScrollbar(viewer, stepDiff);
     }
@@ -261,6 +263,7 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
     const type = this.handleType;
     if ('thumbDrag' === type) {
       const point = new Vector2(ev.viewerX!, ev.viewerY!);
+      this.dragStartScrollbar = { ...this.scrollbar };
       this.dragStartPoint2 = point;
     } else if (['arrowInc', 'arrowDec'].some(t => t === type)) {
       const step = type === 'arrowDec' ? 1 : -1;
@@ -297,9 +300,13 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
       })();
 
       const prevStep = this.scrollbar.thumbStep;
-      this.scrollbar = updateThumb(this.scrollbar, 'position-diff', dist);
+      const scrollbar = this.dragStartScrollbar!;
+      this.scrollbar = updateThumb(scrollbar, 'position-diff', dist);
       const thumbStep = this.scrollbar.thumbStep;
-      if (thumbStep != prevStep) this.dragStartPoint2 = point;
+      if (thumbStep != prevStep) {
+        this.dragStartScrollbar = this.scrollbar;
+        this.dragStartPoint2 = point;
+      }
       this.handleAnnotationChange();
     }
   }
@@ -308,6 +315,7 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
     const viewer = ev.viewer;
     if (viewer.getHoveringAnnotation() === this) {
       ev.stopPropagation();
+      this.dragStartScrollbar = undefined;
       this.dragStartPoint2 = undefined;
     }
   }

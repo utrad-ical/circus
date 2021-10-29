@@ -71,22 +71,20 @@ export type UpdateThumbParamType = 'position-diff' | 'step-diff';
 export const updateThumb = (
   scrollbar: ScrollbarContainer,
   paramType: UpdateThumbParamType,
-  param: number | { composition: Composition; mmSection: Section }
+  param: number
 ): ScrollbarContainer => {
-  if (typeof param === 'number') {
-    switch (paramType) {
-      case 'position-diff': {
-        const thumbPosition = scrollbar.thumbPosition + param;
-        return updateThumbByPosition(scrollbar, thumbPosition);
-      }
-      case 'step-diff': {
-        const thumbPosition =
-          (scrollbar.thumbStep + param) * scrollbar.thumbScale;
-        return updateThumbByPosition(scrollbar, thumbPosition);
-      }
-      default:
-        break;
+  switch (paramType) {
+    case 'position-diff': {
+      const thumbPosition = scrollbar.thumbPosition + param;
+      return updateThumbByPosition(scrollbar, thumbPosition);
     }
+    case 'step-diff': {
+      const thumbPosition =
+        (scrollbar.thumbStep + param) * scrollbar.thumbScale;
+      return updateThumbByPosition(scrollbar, thumbPosition);
+    }
+    default:
+      break;
   }
   throw new Error('invalid parameter');
 };

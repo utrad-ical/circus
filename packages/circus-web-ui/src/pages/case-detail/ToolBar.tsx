@@ -526,15 +526,8 @@ const ToolButton: React.FC<{
   shortcut?: string;
   disabled?: boolean;
 }> = props => {
-  const {
-    name,
-    icon,
-    active,
-    changeTool,
-    disabled,
-    shortcut,
-    children
-  } = props;
+  const { name, icon, active, changeTool, disabled, shortcut, children } =
+    props;
 
   const handleClick = () => !disabled && changeTool(name);
   useKeyboardShortcut(shortcut, handleClick);
@@ -574,20 +567,19 @@ const ToolButton: React.FC<{
   }
 };
 
-const MenuItemWithShortcut: React.FC<
-  { shortcut?: string } & MenuItemProps
-> = props => {
-  const { shortcut, children, ...rest } = props;
-  useKeyboardShortcut(shortcut, props.onClick || (() => {}));
-  return (
-    <MenuItem {...rest}>
-      <ShortcutBox>
-        <span>{children}</span>
-        {shortcut && <kbd>{shortcut}</kbd>}
-      </ShortcutBox>
-    </MenuItem>
-  );
-};
+const MenuItemWithShortcut: React.FC<{ shortcut?: string } & MenuItemProps> =
+  props => {
+    const { shortcut, children, ...rest } = props;
+    useKeyboardShortcut(shortcut, props.onClick || (() => {}));
+    return (
+      <MenuItem {...rest}>
+        <ShortcutBox>
+          <span>{children}</span>
+          {shortcut && <kbd>{shortcut}</kbd>}
+        </ShortcutBox>
+      </MenuItem>
+    );
+  };
 
 const ShortcutBox = styled.div`
   display: flex;

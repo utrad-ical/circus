@@ -7,7 +7,7 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     await performSearch(models.group, {}, ctx, {
       defaultSort: { groupId: 1 },
-      unlimited: true
+      allowUnlimited: true
     });
   };
 };

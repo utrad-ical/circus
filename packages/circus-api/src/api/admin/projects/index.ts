@@ -7,7 +7,7 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     await performSearch(models.project, {}, ctx, {
       defaultSort: { updatedAt: -1 },
-      unlimited: true
+      allowUnlimited: true
     });
   };
 };

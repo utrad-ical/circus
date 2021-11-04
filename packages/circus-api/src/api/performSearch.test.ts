@@ -32,7 +32,7 @@ beforeAll(async () => {
         await performSearch(items, filter, ctx as any, {
           defaultSort: { price: -1 }
         });
-      } catch (err) {
+      } catch (err: any) {
         console.error(err.errors);
         throw err;
       }

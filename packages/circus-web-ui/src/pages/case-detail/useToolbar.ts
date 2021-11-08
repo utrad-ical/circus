@@ -53,9 +53,8 @@ const useToolbar = (): [
   );
 
   // Active tool
-  const [activeToolName, setActiveTool] = useState<keyof ToolCollection>(
-    'pager'
-  );
+  const [activeToolName, setActiveTool] =
+    useState<keyof ToolCollection>('pager');
   const [activeTool, applyActiveTool] = useState<ToolBaseClass>();
 
   useEffect(() => {
@@ -63,9 +62,8 @@ const useToolbar = (): [
   }, [getTool, activeToolName]);
 
   // Tool options
-  const [toolOptions, setToolOptions] = useState<ToolOptions>(
-    defaultToolOptions
-  );
+  const [toolOptions, setToolOptions] =
+    useState<ToolOptions>(defaultToolOptions);
 
   const setToolOption: ToolOptionSetter = useCallback(
     (optionName, optionValue) =>

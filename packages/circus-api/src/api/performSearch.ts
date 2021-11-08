@@ -27,7 +27,11 @@ export const extractFilter = (ctx: CircusContext) => {
 /**
  * Parses URL parameter strings and add defaults if necessary.
  */
-const extractSearchOptions = (ctx: CircusContext, defaultSort: object) => {
+const extractSearchOptions = (
+  ctx: CircusContext,
+  defaultSort: object,
+  allowUnlimited: boolean
+) => {
   const urlQuery = ctx.request.query;
 
   const first = (query: string[] | string) =>
@@ -58,8 +62,11 @@ const extractSearchOptions = (ctx: CircusContext, defaultSort: object) => {
     sort = defaultSort;
   }
 
-  const limit = parseInt(first(urlQuery.limit ?? '20'), 10);
-  if (limit > 200) {
+  const limit =
+    allowUnlimited && 'unlimited' in urlQuery
+      ? 9999
+      : parseInt(first(urlQuery.limit ?? '20'), 10);
+  if (limit > 200 && !allowUnlimited) {
     ctx.throw(
       status.BAD_REQUEST,
       'You cannot query more than 200 items at a time.'
@@ -134,8 +141,8 @@ export const performAggregationSearch = async (
   modifyStages: object[],
   opts: Options
 ) => {
-  const { defaultSort } = opts;
-  const query = extractSearchOptions(ctx, defaultSort);
+  const { defaultSort, allowUnlimited = false } = opts;
+  const query = extractSearchOptions(ctx, defaultSort, allowUnlimited);
   try {
     const { items, totalItems } = await runAggregation(model, {
       filter,
@@ -147,7 +154,7 @@ export const performAggregationSearch = async (
       transform: opts.transform
     });
     ctx.body = { items, totalItems, page: query.page };
-  } catch (err) {
+  } catch (err: any) {
     if (err.code === 2) {
       ctx.throw(status.BAD_REQUEST, 'Invalid query');
     } else {
@@ -158,6 +165,7 @@ export const performAggregationSearch = async (
 
 interface Options {
   transform?: (data: any) => any;
+  allowUnlimited?: boolean;
   defaultSort: object;
 }
 
@@ -167,15 +175,23 @@ const performSearch = async (
   ctx: CircusContext,
   opts: Options
 ) => {
-  const { defaultSort, transform } = opts;
-  const { sort, limit, page, skip } = extractSearchOptions(ctx, defaultSort);
+  const { defaultSort, allowUnlimited = false, transform } = opts;
+  const { sort, limit, page, skip } = extractSearchOptions(
+    ctx,
+    defaultSort,
+    allowUnlimited
+  );
 
   try {
-    const rawResults = await model.findAll(filter, { limit, skip, sort });
+    const rawResults = await model.findAll(filter, {
+      limit,
+      skip,
+      sort
+    });
     const totalItems = await model.findAsCursor(filter).count();
     const results = transform ? rawResults.map(transform) : rawResults;
     ctx.body = { items: results, totalItems, page };
-  } catch (err) {
+  } catch (err: any) {
     if (err.code === 2) {
       ctx.throw(status.BAD_REQUEST, 'Invalid query');
     } else {

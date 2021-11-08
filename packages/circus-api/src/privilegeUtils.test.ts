@@ -34,7 +34,7 @@ test('determineUserAccessInfo', async () => {
   sameMembers(privB.globalPrivileges, ['personalInfoView', 'downloadVolume']);
   sameMembers(privB.domains, ['vega.org', 'altair.org']);
   expect(privB.accessibleProjects).toHaveLength(1);
-  sameMembers(privB.accessibleProjects[0].roles, ['read', 'write']);
+  sameMembers(privB.accessibleProjects[0].roles, ['read', 'write', 'moderate']);
 
   const guest = await models.user.findByIdOrFail('guest@example.com');
   const privG = await determineUserAccessInfo(models, guest);

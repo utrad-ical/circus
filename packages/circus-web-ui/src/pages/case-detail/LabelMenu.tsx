@@ -253,7 +253,13 @@ const LabelMenu: React.FC<{
       createCclProcessor(props),
       cclProgress => {
         setProcessorProgress(cclProgress);
-        cclProgress.label !== '' && setCclDialogOpen(false);
+        if (cclProgress.label !== '') {
+          setCclDialogOpen(false);
+          setProcessorProgress({
+            value: 0,
+            label: ''
+          });
+        }
       }
     );
   };
@@ -270,19 +276,47 @@ const LabelMenu: React.FC<{
       createHfProcessor(props),
       hfProgress => {
         setProcessorProgress(hfProgress);
-        hfProgress.label !== '' && setHfDialogOpen(false);
+        if (hfProgress.label !== '') {
+          setHfDialogOpen(false);
+          setProcessorProgress({
+            value: 0,
+            label: ''
+          });
+        }
       }
     );
   };
 
   const onSelectThreePoints2Section = () => {
     try {
+      const seriesIndex = Number(
+        Object.keys(editingData.revision.series).find(ind =>
+          editingData.revision.series[Number(ind)].labels.find(
+            item => item.temporaryKey === activeLabel!.temporaryKey
+          )
+        )
+      );
+      const spareKey = Object.keys(editingData.layout.positions).find(
+        key =>
+          editingData.layoutItems.find(item => item.key === key)!
+            .seriesIndex === seriesIndex
+      );
+      const useActiveLayoutKey = Object.keys(editingData.layout.positions)
+        .filter(
+          key =>
+            editingData.layoutItems.find(item => item.key === key)!
+              .seriesIndex === seriesIndex
+        )
+        .some(key => key === editingData.activeLayoutKey);
+      const targetLayoutKey = useActiveLayoutKey
+        ? editingData.activeLayoutKey
+        : spareKey;
       const [newLayoutItems, newLayout, key] = createSectionFromPoints(
         editingData.revision.series[activeSeriesIndex].labels.filter(label => {
           return label.type === 'point';
         }) as InternalLabelOf<'point'>[],
         activeLabel!.name!,
-        viewers[editingData.activeLayoutKey!].getState().section,
+        viewers[targetLayoutKey!].getState().section,
         editingData.layout,
         editingData.layoutItems,
         activeSeriesIndex
@@ -294,6 +328,28 @@ const LabelMenu: React.FC<{
       });
     } catch (err) {
       alert(err.message);
+    }
+  };
+
+  const onSelect = (behavior: () => void) => () => {
+    const seriesIndex = Number(
+      Object.keys(editingData.revision.series).find(ind =>
+        editingData.revision.series[Number(ind)].labels.find(
+          item => item.temporaryKey === activeLabel!.temporaryKey
+        )
+      )
+    );
+
+    if (
+      Object.keys(editingData.layout.positions).some(
+        key =>
+          editingData.layoutItems.find(item => item.key === key)!
+            .seriesIndex === seriesIndex
+      )
+    ) {
+      return behavior();
+    } else {
+      alert(`Must display at least one viewer of Series #${seriesIndex}`);
     }
   };
 
@@ -354,25 +410,25 @@ const LabelMenu: React.FC<{
       >
         <MenuItem
           eventKey="ccl"
-          onSelect={() => {
+          onSelect={onSelect(() => {
             setCclDialogOpen(true);
-          }}
+          })}
           disabled={!activeLabel || activeLabel.type !== 'voxel'}
         >
           CCL
         </MenuItem>
         <MenuItem
           eventKey="fillng"
-          onSelect={() => {
+          onSelect={onSelect(() => {
             setHfDialogOpen(true);
-          }}
+          })}
           disabled={!activeLabel || activeLabel.type !== 'voxel'}
         >
           Hole filling
         </MenuItem>
         <MenuItem
           eventKey="section"
-          onSelect={() => onSelectThreePoints2Section()}
+          onSelect={onSelect(onSelectThreePoints2Section)}
           disabled={!activeLabel || activeLabel.type !== 'point'}
         >
           Three points to section

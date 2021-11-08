@@ -77,9 +77,11 @@ const dicomImageExtractor: (options?: ExtractOptions) => DicomImageExtractor = (
     const columns = dataset.uint16('x00280011')!; // columns
     const rows = dataset.uint16('x00280010')!; // rows
     const pixelSpacingRaw = dataset.string('x00280030');
-    const pixelSpacing = (pixelSpacingRaw
-      ? pixelSpacingRaw.split('\\').map(x => parseFloat(x))
-      : [1, 1]) as [number, number];
+    const pixelSpacing = (
+      pixelSpacingRaw
+        ? pixelSpacingRaw.split('\\').map(x => parseFloat(x))
+        : [1, 1]
+    ) as [number, number];
     const rescale = determineRescale(dataset);
     const pixelFormat = determinePixelFormat(dataset);
 

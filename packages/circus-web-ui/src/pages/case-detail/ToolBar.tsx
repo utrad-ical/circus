@@ -7,9 +7,10 @@ import {
   MenuItem,
   OverlayTrigger,
   Tooltip,
-  SplitButton
+  SplitButton,
+  Modal
 } from 'components/react-bootstrap';
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { WindowPreset } from 'types/Project';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
@@ -20,6 +21,7 @@ import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import { LayoutKind } from './caseStore';
 import { MenuItemProps } from 'react-bootstrap';
 import PlaneFigureOption from '@utrad-ical/circus-rs/src/browser/annotation/PlaneFigureOption';
+import ViewWindowEditor, { ViewWindow } from './ViewWindowEditor';
 
 export interface ViewOptions {
   showReferenceLine?: boolean;
@@ -95,6 +97,7 @@ const ToolBar: React.FC<{
   brushEnabled: boolean;
   wandEnabled: boolean;
   windowPresets?: WindowPreset[];
+  currentWindow: ViewWindow;
   onChangeTool: (toolName: string) => void;
   onApplyWindow: (window: any) => void;
   onMagnify: (magnitude: number) => void;
@@ -114,6 +117,7 @@ const ToolBar: React.FC<{
     brushEnabled,
     wandEnabled,
     windowPresets = [],
+    currentWindow,
     onChangeTool,
     onApplyWindow,
     onMagnify,
@@ -122,6 +126,7 @@ const ToolBar: React.FC<{
 
   const widthOptions = ['1', '3', '5', '7'];
   const wandModeOptions = { '3d': '3D', '2d': '2D' };
+  const [windowDialogOpen, setWindowDialogOpen] = useState(false);
 
   const instantZoomLevels: {
     label: string;
@@ -188,13 +193,9 @@ const ToolBar: React.FC<{
     if ('level' in selection && 'width' in selection) {
       const window = selection as WindowPreset;
       onApplyWindow({ level: window.level, width: window.width });
+      setWindowDialogOpen(false);
     } else {
-      const value = await prompt('Input window level/width (e.g., "20,100")');
-      const [level, width] = (value ? value : '0,0')
-        .split(/,|\//)
-        .map(s => parseInt(s, 10));
-      if (width <= 0 || isNaN(level) || isNaN(width)) return;
-      onApplyWindow({ level, width });
+      setWindowDialogOpen(true);
     }
   };
 
@@ -440,6 +441,13 @@ const ToolBar: React.FC<{
           />
         </StyledSpanWandOption>
       )}
+      <Modal show={windowDialogOpen} onHide={() => setWindowDialogOpen(false)}>
+        <ViewWindowEditor
+          initialValue={currentWindow}
+          onHide={() => setWindowDialogOpen(false)}
+          onOkClick={handleApplyWindow}
+        />
+      </Modal>
     </StyledDiv>
   );
 });

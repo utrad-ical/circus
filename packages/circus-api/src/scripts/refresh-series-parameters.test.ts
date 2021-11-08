@@ -26,11 +26,11 @@ beforeAll(async () => {
     deleteSeries: () => Promise.resolve()
   };
 
-  dicomTagReader = ((async () => {
+  dicomTagReader = (async () => {
     return {
       parameters: { PhotometricInterpretation: 'MONOCHROME2' }
     };
-  }) as any) as DicomTagReader;
+  }) as any as DicomTagReader;
 });
 
 beforeEach(async () => {

@@ -18,7 +18,8 @@ export interface Tool extends ViewerEventTarget {
  */
 export default class ToolBaseClass<T extends ToolOptions = {}>
   extends EventEmitter
-  implements Tool {
+  implements Tool
+{
   protected options: T = {} as T;
 
   constructor() {

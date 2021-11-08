@@ -11,9 +11,8 @@ const createCurrentLabelsUpdator = (
       editingData.revision.series[editingData.activeSeriesIndex].labels;
     const newLabels = produce(labels, updater);
     updateEditingData(editingData => {
-      editingData.revision.series[
-        editingData.activeSeriesIndex
-      ].labels = newLabels;
+      editingData.revision.series[editingData.activeSeriesIndex].labels =
+        newLabels;
     });
   };
 };

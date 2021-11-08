@@ -68,7 +68,7 @@ const UserAdmin: React.FC<any> = props => {
 
   useEffect(() => {
     const load = async () => {
-      const groups = (await api('admin/groups')).items as {
+      const groups = (await api('admin/groups?unlimited=1')).items as {
         groupId: string;
         groupName: string;
         privileges: string[];

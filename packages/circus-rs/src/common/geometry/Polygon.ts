@@ -145,10 +145,8 @@ function _triangulateShape(polygon: Polygon): TriangulateShapeResult {
 
   const verticesV2 = polygon.vertices;
 
-  const indexOfTriangleVertices: IndexOfTriangleVertex[] = ShapeUtils.triangulateShape(
-    verticesV2,
-    []
-  ) as any;
+  const indexOfTriangleVertices: IndexOfTriangleVertex[] =
+    ShapeUtils.triangulateShape(verticesV2, []) as any;
 
   const verticesV3 = verticesV2.map(v2 => vector2ToVector3(v2));
 

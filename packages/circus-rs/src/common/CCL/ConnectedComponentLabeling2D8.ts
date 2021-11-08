@@ -24,9 +24,8 @@ const CCL: CCL2D = (array, width, height, threshold = 0) => {
       substituteLabels[
         chiefLabel * num_maxCCL + substituteLabels[chiefLabel * num_maxCCL] + i
       ] = substituteLabels[_chiefLabel * num_maxCCL + i];
-      chiefLabelTable[
-        substituteLabels[_chiefLabel * num_maxCCL + i]
-      ] = chiefLabel;
+      chiefLabelTable[substituteLabels[_chiefLabel * num_maxCCL + i]] =
+        chiefLabel;
     }
     substituteLabels[chiefLabel * num_maxCCL] +=
       substituteLabels[_chiefLabel * num_maxCCL];

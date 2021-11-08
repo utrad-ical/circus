@@ -87,9 +87,8 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
   private judgeHandleType:
     | ((p: Vector2) => HandleType | undefined)
     | undefined = undefined;
-  private visibilityThresholdBoxHitTest:
-    | ((p: Vector2) => boolean)
-    | undefined = undefined;
+  private visibilityThresholdBoxHitTest: ((p: Vector2) => boolean) | undefined =
+    undefined;
 
   private get settings(): Settings {
     return {

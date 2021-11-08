@@ -15,7 +15,7 @@ import compose from 'koa-compose';
 import mount from 'koa-mount';
 import Router from 'koa-router';
 import * as path from 'path';
-import { DisposableDb, Validator, Models, DicomImporter } from './interface';
+import { Database, Validator, Models, DicomImporter } from './interface';
 import checkPrivilege from './middleware/auth/checkPrivilege';
 import fixUserMiddleware from './middleware/auth/fixUser';
 import cors from './middleware/cors';
@@ -67,7 +67,7 @@ async function prepareApiRouter(
     const data = yaml(await fs.readFile(manifestFile, 'utf8')) as ManifestFile;
     try {
       await validator.validate('api', data);
-    } catch (err) {
+    } catch (err: any) {
       throw new TypeError(
         `Meta schema error at ${manifestFile}.\n` +
           formatValidationErrors(err.errors)
@@ -117,7 +117,7 @@ interface CreateAppOptions {
 export const createApp: FunctionService<
   Koa,
   {
-    db: DisposableDb;
+    database: Database;
     validator: Validator;
     apiLogger: Logger;
     models: Models;
@@ -136,7 +136,7 @@ export const createApp: FunctionService<
 > = async (
   options,
   {
-    db,
+    database: database,
     validator,
     apiLogger: logger,
     models,
@@ -164,7 +164,7 @@ export const createApp: FunctionService<
   const koa = new Koa();
 
   const deps: Deps = {
-    db,
+    database,
     validator,
     logger,
     models,

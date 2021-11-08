@@ -80,7 +80,7 @@ describe('Uploading', () => {
     while (apiTest.taskManager.isTaskInProgress(taskId)) {
       await delay(10);
     }
-    const doc = await apiTest.db.collection('series').findOne({
+    const doc = await apiTest.database.db.collection('series').findOne({
       seriesUid: '2.16.840.1.113662.2.1.2519.21582.2990505.2105152.2381633.20'
     });
     expect(doc?.images).toBe('8');
@@ -113,7 +113,7 @@ describe('Delete', () => {
       method: 'delete'
     });
     expect(res.status).toBe(204);
-    const series = await apiTest.db
+    const series = await apiTest.database.db
       .collection('series')
       .findOne({ seriesUid: '222.333.444.555.666' });
     expect(series).toStrictEqual(null);
@@ -163,7 +163,7 @@ describe('search by my list', () => {
   const myListId = '01ez9knaakz9tgd2hpyceagj11'; // Dave's
 
   beforeEach(async () => {
-    await setUpMongoFixture(apiTest.db, ['users']);
+    await setUpMongoFixture(apiTest.database.db, ['users']);
   });
 
   test('search succeeds', async () => {
@@ -177,7 +177,7 @@ describe('search by my list', () => {
   });
 
   test('should not return patient info when personalInfoView = false', async () => {
-    await apiTest.db
+    await apiTest.database.db
       .collection('users')
       .updateOne(
         { userEmail: 'dave@example.com' },
@@ -202,7 +202,7 @@ describe('search by my list', () => {
   });
 
   test('should not return results if domain check fails', async () => {
-    await apiTest.db
+    await apiTest.database.db
       .collection('users')
       .updateOne({ userEmail: 'dave@example.com' }, { $set: { groups: [] } });
     const res = await ax.dave.request({

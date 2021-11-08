@@ -15,16 +15,21 @@ jest.mock('inquirer', () => {
 let pluginDefFileContent: object;
 
 beforeAll(async () => {
-  const { db, validator, models } = await modelsPromise;
+  const { database, validator, models } = await modelsPromise;
   const dockerRunner = {
     // mocked DockerRunner
     loadFromTextFile: async () => JSON.stringify(pluginDefFileContent)
   } as any;
-  commandFunc = await command(null, { db, validator, models, dockerRunner });
+  commandFunc = await command(null, {
+    database,
+    validator,
+    models,
+    dockerRunner
+  });
 });
 
 beforeEach(async () => {
-  const { db } = await modelsPromise;
+  const { db } = (await modelsPromise).database;
   await setUpMongoFixture(db, ['pluginDefinitions']);
 });
 

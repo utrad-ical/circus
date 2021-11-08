@@ -13,7 +13,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  const { db } = await modelsPromise;
+  const { db } = (await modelsPromise).database;
   const registerFn = jest.fn();
   cs = { job: { register: registerFn } };
   commandFunc = await command(null, { models, cs });

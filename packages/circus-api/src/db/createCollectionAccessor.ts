@@ -41,6 +41,11 @@ export interface CollectionAccessor<T = any> {
   unsafe_updateMany: (filter: any, update: any) => Promise<any>;
   newSequentialId: () => Promise<number>;
   collectionName: () => string;
+  // only available when transaction is enabled
+  withLockedDocument: (
+    id: string | number,
+    fn: (data: T) => Promise<void>
+  ) => Promise<void>;
 }
 
 /**

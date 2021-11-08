@@ -7,12 +7,13 @@ import configureRsServiceLoader, {
 import { ServiceLoader, Logger } from '@utrad-ical/circus-lib';
 import path from 'path';
 import {
-  DisposableDb,
+  Database,
   Validator,
   DicomImporter,
   DicomTagReader,
   Models,
-  AuthProvider
+  AuthProvider,
+  TransactionManager
 } from './interface';
 import Storage from './storage/Storage';
 import Koa from 'koa';
@@ -26,7 +27,7 @@ import KoaOAuth2Server from './middleware/auth/KoaOAuth2Server';
 export type Services = CsCoreServices &
   RsServices & {
     app: Koa;
-    db: DisposableDb;
+    db: Database;
     apiLogger: Logger;
     validator: Validator;
     models: Models;
@@ -38,6 +39,7 @@ export type Services = CsCoreServices &
     mhdPacker: MhdPacker;
     oauthServer: KoaOAuth2Server;
     authProvider: AuthProvider;
+    transactionManager: TransactionManager;
   };
 
 export type ApiServiceLoader = ServiceLoader<Services>;
@@ -85,6 +87,10 @@ const createServiceLoader = async (config: any) => {
     'authProvider',
     path.join(__dirname, 'middleware/auth/authProvider'),
     'DefaultAuthProvider'
+  );
+  loader.registerModule(
+    'transactionManager',
+    path.join(__dirname, 'createTransactionManager')
   );
   return loader as ApiServiceLoader;
 };

@@ -1,13 +1,12 @@
 import createCollectionAccessor from './createCollectionAccessor';
-import mongo from 'mongodb';
-import { Validator } from '../interface';
+import { Database, Validator } from '../interface';
 import { FunctionService } from '@utrad-ical/circus-lib';
 import { Models, ModelEntries } from '../interface';
 
 const createModels: FunctionService<
   Models,
-  { db: mongo.Db; validator: Validator }
-> = async (options, { db, validator }) => {
+  { database: Database; validator: Validator }
+> = async (options, { database, validator }) => {
   const modelDefinitions: {
     [key in keyof ModelEntries]: { col: string; pk: string };
   } = {
@@ -27,7 +26,7 @@ const createModels: FunctionService<
   const models: any = {};
   (Object.keys(modelDefinitions) as (keyof ModelEntries)[]).forEach(k => {
     const def = modelDefinitions[k];
-    models[k] = createCollectionAccessor(db, validator, {
+    models[k] = createCollectionAccessor(database.db, validator, {
       schema: k,
       collectionName: def.col,
       primaryKey: def.pk

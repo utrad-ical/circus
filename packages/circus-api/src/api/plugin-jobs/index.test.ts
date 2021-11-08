@@ -57,7 +57,7 @@ describe('plugin-job search', () => {
 
 describe('search by mylist', () => {
   beforeEach(async () => {
-    await setUpMongoFixture(apiTest.db, ['users']);
+    await setUpMongoFixture(apiTest.database.db, ['users']);
   });
   const myListId = '01ezahm939cbyfk73g3jhw1d0b';
   test('search succeeds', async () => {
@@ -82,7 +82,7 @@ describe('search by mylist', () => {
   });
 
   test('should not return results if domain check fails', async () => {
-    await apiTest.db
+    await apiTest.database.db
       .collection('users')
       .updateOne({ userEmail: 'dave@example.com' }, { $set: { groups: [] } });
     const res = await dave.get(`api/plugin-jobs/list/${myListId}`);
@@ -91,7 +91,7 @@ describe('search by mylist', () => {
   });
 
   test('should not return patient info when personalInfoView = false', async () => {
-    await apiTest.db
+    await apiTest.database.db
       .collection('users')
       .updateOne(
         { userEmail: 'dave@example.com' },
@@ -104,7 +104,7 @@ describe('search by mylist', () => {
   });
 
   test('should not return patient info when there is no privileges', async () => {
-    await apiTest.db
+    await apiTest.database.db
       .collection('groups')
       .updateMany(
         { $or: [{ groupId: 1 }, { groupId: 4 }] },

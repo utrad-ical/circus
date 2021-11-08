@@ -13,7 +13,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  const { db } = await modelsPromise;
+  const { db } = (await modelsPromise).database;
   await setUpMongoFixture(db, ['clinicalCases', 'users', 'groups', 'projects']);
 });
 

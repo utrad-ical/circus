@@ -16,7 +16,7 @@ let testCollection: CollectionAccessor<MonthData>, db: mongo.Db;
 const dbPromise = usingMongo();
 
 beforeAll(async () => {
-  db = await dbPromise;
+  db = (await dbPromise).db;
   const validator = await createValidator({
     schemaRoot: __dirname + '/../../test/test-schemas'
   });

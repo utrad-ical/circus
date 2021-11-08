@@ -64,7 +64,7 @@ describe('create new list', () => {
 describe('patch list', () => {
   const userEmail = 'bob@example.com';
   const returnChangedList = async (myListId: string) => {
-    const userData = await apiTest.db
+    const userData = await apiTest.database.db
       .collection('users')
       .findOne({ userEmail });
     const changedList = userData.myLists.filter(
@@ -157,7 +157,7 @@ describe('patch list', () => {
       expect(res.status).toBe(204);
 
       const userEmail = 'bob@example.com';
-      const userData = await apiTest.db
+      const userData = await apiTest.database.db
         .collection('users')
         .findOne({ userEmail });
       const newList = userData.myLists.filter(
@@ -198,10 +198,12 @@ describe('delete list', () => {
     });
     expect(res.status).toBe(204);
 
-    const myList = await apiTest.db.collection('myLists').findOne({ myListId });
+    const myList = await apiTest.database.db
+      .collection('myLists')
+      .findOne({ myListId });
     expect(myList).toStrictEqual(null);
 
-    const userData = await apiTest.db
+    const userData = await apiTest.database.db
       .collection('users')
       .findOne({ userEmail });
     const result = userData.myLists.find(
@@ -225,7 +227,7 @@ describe('patch list item', () => {
   const url = `api/mylists/${myListId}/items`;
 
   beforeEach(async () => {
-    await setUpMongoFixture(apiTest.db, ['myLists']);
+    await setUpMongoFixture(apiTest.database.db, ['myLists']);
   });
 
   test('insert new item into a mylist', async () => {

@@ -1,7 +1,6 @@
 import { ValidationError } from 'ajv';
 import inquirer from 'inquirer';
-import { DisposableDb } from '../interface';
-import { Models } from '../interface';
+import { Database, Models } from '../interface';
 import Command from './Command';
 import { Validator } from '../interface';
 import DockerRunner from '@utrad-ical/circus-cs-core/src/util/DockerRunner';
@@ -16,13 +15,13 @@ export const help = () => {
 };
 
 export const command: Command<{
-  db: DisposableDb;
+  database: Database;
   validator: Validator;
   models: Models;
   dockerRunner: DockerRunner;
-}> = async (opts, { db, validator, models, dockerRunner }) => {
+}> = async (opts, { database, validator, models, dockerRunner }) => {
   return async (options: any) => {
-    await db
+    await database.db
       .collection('pluginDefinitions')
       .createIndex({ pluginId: 1 }, { unique: true });
 

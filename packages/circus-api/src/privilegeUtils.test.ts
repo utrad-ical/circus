@@ -12,7 +12,8 @@ let models: Models;
 const modelsPromise = usingModels();
 
 beforeAll(async () => {
-  const { db, models: m } = await modelsPromise;
+  const { database, models: m } = await modelsPromise;
+  const db = database.db;
   await setUpMongoFixture(db, ['groups', 'users', 'series']);
   models = m;
 });

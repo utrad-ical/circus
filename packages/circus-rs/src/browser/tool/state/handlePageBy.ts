@@ -7,7 +7,6 @@ import {
 } from '../../section-util';
 import Viewer from '../../viewer/Viewer';
 
-// HACK: Support-2d-image-source
 export default function handlePageBy(viewer: Viewer, step: number): void {
   const prevState = viewer.getState();
   const resolution = viewer.getResolution();
@@ -58,7 +57,6 @@ export default function handlePageBy(viewer: Viewer, step: number): void {
   }
 }
 
-// HACK: Support-2d-image-source
 export function handlePageByScrollbar(viewer: Viewer, step: number): void {
   const prevState = viewer.getState();
   const comp = viewer.getComposition();

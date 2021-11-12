@@ -13,7 +13,6 @@ import {
 } from '../../section-util';
 import Viewer from '../../viewer/Viewer';
 
-// HACK: Support-2d-image-source
 export default function handleMoveBy(
   viewer: Viewer,
   dxOnScreen: number,

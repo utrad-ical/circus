@@ -82,7 +82,6 @@ const useCompositions = (
     series.forEach(async ({ seriesUid, partialVolumeDescriptor }, volId) => {
       const volumeLoader = volumeLoaders[volId];
 
-      // HACK: Support-2d-image-source
       const metadata = await volumeLoader.loadMeta();
 
       const src = (() => {
@@ -189,9 +188,9 @@ const RevisionEditor: React.FC<{
   const [planeFigureOption, setPlaneFigureOption] = useState({
     zDimmedThreshold: preferences.dimmedOutlineFor2DLabels
       ? zDimmedThresholdOptions.find(
-          zDimmedThresholdOption =>
-            zDimmedThresholdOption.key === preferences.dimmedOutlineFor2DLabels
-        )!.value
+        zDimmedThresholdOption =>
+          zDimmedThresholdOption.key === preferences.dimmedOutlineFor2DLabels
+      )!.value
       : 3
   });
   // Keeps track of stable seriesUid-PVD pairs to avoid frequent comp changes
@@ -754,7 +753,7 @@ const RevisionEditor: React.FC<{
 
         const interpolationMode =
           viewOptions.interpolationMode &&
-          viewOptions.interpolationMode !== 'nearestNeighbor'
+            viewOptions.interpolationMode !== 'nearestNeighbor'
             ? 'bilinear'
             : 'none';
 
@@ -842,19 +841,19 @@ const RevisionEditor: React.FC<{
         </Collapser>
         {Object.keys(projectData.caseAttributesSchema.properties || {}).length >
           0 && (
-          <Collapser title="Case Attributes" className="case-attributes">
-            <JsonSchemaEditor
-              key={refreshCounter}
-              schema={projectData.caseAttributesSchema}
-              value={revision.attributes}
-              onChange={caseAttributesChange}
-              onValidate={valid =>
-                caseDispatch(c.validateCaseAttributes(valid))
-              }
-              disabled={busy}
-            />
-          </Collapser>
-        )}
+            <Collapser title="Case Attributes" className="case-attributes">
+              <JsonSchemaEditor
+                key={refreshCounter}
+                schema={projectData.caseAttributesSchema}
+                value={revision.attributes}
+                onChange={caseAttributesChange}
+                onValidate={valid =>
+                  caseDispatch(c.validateCaseAttributes(valid))
+                }
+                disabled={busy}
+              />
+            </Collapser>
+          )}
       </SideContainer>
       <div className="case-revision-main">
         <ToolBar
@@ -893,7 +892,7 @@ const RevisionEditor: React.FC<{
         />
       </div>
       {seriesDialogOpen && (
-        <Modal show bsSize="lg" onHide={() => {}}>
+        <Modal show bsSize="lg" onHide={() => { }}>
           <SeriesSelectorDialog
             onResolve={handleSeriesDialogResolve}
             initialValue={editingData.revision.series}

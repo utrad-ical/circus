@@ -580,8 +580,8 @@ export const sectionFrom2dViewState = (
   // NOTE: Rotation is not supported yet.
   const { origin, xAxis, yLength, imageNumber } = viewState;
   const section = {
-    origin: [...origin, imageNumber],
-    xAxis: [...xAxis, 0],
+    origin: [origin[0], origin[1], imageNumber],
+    xAxis: [xAxis[0], xAxis[1], 0],
     yAxis: [0, yLength, 0]
   };
   return section;

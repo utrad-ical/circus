@@ -3,7 +3,7 @@ import { Vector2D } from '../../../common/geometry';
 import Polyline from '../../annotation/Polyline';
 import Composition from '../../Composition';
 import {
-  asSectionInDrawingViewState,
+  sectionFrom2dViewState,
   detectOrthogonalSection
 } from '../../section-util';
 import Viewer from '../../viewer/Viewer';
@@ -58,7 +58,7 @@ export default class PolylineTool extends ToolBaseClass<ToolOptions> {
     const section =
       viewState.type !== '2d'
         ? viewState.section
-        : asSectionInDrawingViewState(viewState);
+        : sectionFrom2dViewState(viewState);
 
     const orientation = detectOrthogonalSection(section);
     if (orientation !== 'axial') return;

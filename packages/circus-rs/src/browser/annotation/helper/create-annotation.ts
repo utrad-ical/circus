@@ -1,6 +1,6 @@
 import { Box3, Vector2 } from 'three';
 import {
-  asSectionInDrawingViewState,
+  sectionFrom2dViewState,
   convertScreenCoordinateToVolumeCoordinate,
   detectOrthogonalSection
 } from '../../section-util';
@@ -91,7 +91,7 @@ export function createDefaultPlaneFigureFromViewer(
   const section =
     viewState.type !== '2d'
       ? viewState.section
-      : asSectionInDrawingViewState(viewState);
+      : sectionFrom2dViewState(viewState);
   const orientation = detectOrthogonalSection(section);
   if (orientation !== 'axial') return anno;
 
@@ -125,7 +125,7 @@ export function createDefaultPointFromViewer(
   const section =
     viewState.type !== '2d'
       ? viewState.section
-      : asSectionInDrawingViewState(viewState);
+      : sectionFrom2dViewState(viewState);
 
   const resolution = new Vector2().fromArray(viewer.getResolution());
   const screenCenter = new Vector2().fromArray([
@@ -156,7 +156,7 @@ export function createDefaultRulerFromViewer(
   const section =
     viewState.type !== '2d'
       ? viewState.section
-      : asSectionInDrawingViewState(viewState);
+      : sectionFrom2dViewState(viewState);
 
   const resolution = new Vector2().fromArray(viewer.getResolution());
   const halfLength = Math.min(resolution.x, resolution.y) * 0.5 * sizeRatio;

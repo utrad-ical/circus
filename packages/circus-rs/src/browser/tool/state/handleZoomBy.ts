@@ -4,7 +4,7 @@ import MprImageSource from '../../image-source/MprImageSource';
 import TwoDimensionalImageSource from '../../image-source/TwoDimensionalImageSource';
 import {
   applySectionToTwoDimensionalState,
-  asSectionInDrawingViewState,
+  sectionFrom2dViewState,
   convertScreenCoordinateToVolumeCoordinate,
   sectionOverlapsVolume
 } from '../../section-util';
@@ -61,7 +61,7 @@ export default function handleZoomBy(
       return;
     }
     case '2d': {
-      const prevSection = asSectionInDrawingViewState(prevState);
+      const prevSection = sectionFrom2dViewState(prevState);
       const section = scale(prevSection);
 
       // Abort If the section does not overlap the volume.

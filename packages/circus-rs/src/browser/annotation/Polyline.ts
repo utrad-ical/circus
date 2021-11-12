@@ -7,7 +7,7 @@ import {
 } from '../../common/geometry';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
 import {
-  asSectionInDrawingViewState,
+  sectionFrom2dViewState,
   convertScreenCoordinateToVolumeCoordinate,
   convertVolumeCoordinateToScreenCoordinate,
   detectOrthogonalSection
@@ -173,7 +173,7 @@ export default class Polyline
     const section =
       viewState.type !== '2d'
         ? viewState.section
-        : asSectionInDrawingViewState(viewState);
+        : sectionFrom2dViewState(viewState);
 
     const { color, fillColor } = this.getDrawingColor(viewState, section);
     if (!color && !fillColor) return;
@@ -247,7 +247,7 @@ export default class Polyline
     const section =
       viewState.type !== '2d'
         ? viewState.section
-        : asSectionInDrawingViewState(viewState);
+        : sectionFrom2dViewState(viewState);
 
     // to prevent to edit unvisible polyline.
     const drawingColor = this.getDrawingColor(viewState, section);
@@ -310,7 +310,7 @@ export default class Polyline
     const section =
       viewState.type !== '2d'
         ? viewState.section
-        : asSectionInDrawingViewState(viewState);
+        : sectionFrom2dViewState(viewState);
 
     const { dragStartVolumePoint3, originalPoints, originalBoundingBox } =
       this.dragInfo;

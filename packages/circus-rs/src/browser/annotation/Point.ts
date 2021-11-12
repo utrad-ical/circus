@@ -1,7 +1,7 @@
 import { Box2, Vector2, Vector3 } from 'three';
 import { distanceFromPointToSection, Vector3D } from '../../common/geometry';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
-import { asSectionInDrawingViewState } from '../section-util';
+import { sectionFrom2dViewState } from '../section-util';
 import {
   convertViewerPointToVolumePoint,
   convertVolumePointToViewerPoint
@@ -87,7 +87,7 @@ export default class Point implements Annotation, ViewerEventTarget {
     const section =
       viewState.type !== '2d'
         ? viewState.section
-        : asSectionInDrawingViewState(viewState);
+        : sectionFrom2dViewState(viewState);
 
     const distance = distanceFromPointToSection(
       section,

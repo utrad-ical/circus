@@ -7,7 +7,7 @@ import {
 } from '../../common/geometry';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
 import {
-  asSectionInDrawingViewState,
+  sectionFrom2dViewState,
   getOrthogonalProjectedPoint
 } from '../section-util';
 import {
@@ -154,7 +154,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     const section =
       viewState.type !== '2d'
         ? viewState.section
-        : asSectionInDrawingViewState(viewState);
+        : sectionFrom2dViewState(viewState);
 
     const maxDistance = Math.max(
       distanceFromPointToSection(section, new Vector3(...this.start!)),
@@ -263,7 +263,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
         const section =
           viewState.type !== '2d'
             ? viewState.section
-            : asSectionInDrawingViewState(viewState);
+            : sectionFrom2dViewState(viewState);
 
         const start = new Vector3().fromArray(this.start!);
         const end = new Vector3().fromArray(this.end!);

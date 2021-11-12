@@ -1,7 +1,7 @@
 import { Vector2, Vector3 } from 'three';
 import MprImageSource from '../image-source/MprImageSource';
 import {
-  asSectionInDrawingViewState,
+  sectionFrom2dViewState,
   convertPointToIndex,
   convertScreenCoordinateToVolumeCoordinate,
   convertVolumeCoordinateToScreenCoordinate
@@ -37,7 +37,7 @@ export function convertViewerPointToVolumePoint(
   const section =
     viewState.type !== '2d'
       ? viewState.section
-      : asSectionInDrawingViewState(viewState);
+      : sectionFrom2dViewState(viewState);
 
   const resolution = viewer.getResolution();
   return convertScreenCoordinateToVolumeCoordinate(
@@ -65,7 +65,7 @@ export function convertVolumePointToViewerPoint(
   const section =
     viewState.type !== '2d'
       ? viewState.section
-      : asSectionInDrawingViewState(viewState);
+      : sectionFrom2dViewState(viewState);
 
   const resolution = viewer.getResolution();
   return convertVolumeCoordinateToScreenCoordinate(

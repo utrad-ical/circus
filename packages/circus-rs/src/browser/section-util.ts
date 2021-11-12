@@ -574,8 +574,7 @@ export const getSectionFromPoints = (
   };
 };
 
-// HACK: Support-2d-image-source
-export const asSectionInDrawingViewState = (
+export const sectionFrom2dViewState = (
   viewState: TwoDimensionalViewState
 ): Section => {
   // NOTE: Rotation is not supported yet.

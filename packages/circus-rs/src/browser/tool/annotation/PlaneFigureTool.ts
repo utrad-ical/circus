@@ -3,7 +3,7 @@ import { Vector2D } from '../../../common/geometry';
 import Annotation from '../../annotation/Annotation';
 import PlaneFigure, { FigureType } from '../../annotation/PlaneFigure';
 import {
-  asSectionInDrawingViewState,
+  sectionFrom2dViewState,
   detectOrthogonalSection
 } from '../../section-util';
 import ViewerEvent from '../../viewer/ViewerEvent';
@@ -25,7 +25,7 @@ export default class PlaneFigureTool extends AnnotationToolBase {
     const section =
       viewState.type !== '2d'
         ? viewState.section
-        : asSectionInDrawingViewState(viewState);
+        : sectionFrom2dViewState(viewState);
 
     const orientation = detectOrthogonalSection(section);
     if (orientation !== 'axial') return;

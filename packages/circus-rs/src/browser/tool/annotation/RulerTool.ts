@@ -1,7 +1,7 @@
 import { ViewState } from '../..';
 import Annotation from '../../annotation/Annotation';
 import Ruler from '../../annotation/Ruler';
-import { asSectionInDrawingViewState } from '../../section-util';
+import { sectionFrom2dViewState } from '../../section-util';
 import ViewerEvent from '../../viewer/ViewerEvent';
 import { convertViewerPointToVolumePoint } from '../tool-util';
 import AnnotationToolBase from './AnnotationToolBase';
@@ -20,7 +20,7 @@ export default class RulerTool extends AnnotationToolBase {
     const section =
       viewState.type !== '2d'
         ? viewState.section
-        : asSectionInDrawingViewState(viewState);
+        : sectionFrom2dViewState(viewState);
 
     const ex = ev.viewerX!;
     const ey = ev.viewerY!;

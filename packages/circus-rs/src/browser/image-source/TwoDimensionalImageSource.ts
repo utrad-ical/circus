@@ -3,7 +3,7 @@ import { Vector2D, Vector3D } from '../../common/geometry';
 import {
   adjustOnResized,
   applySectionToTwoDimensionalState,
-  asSectionInDrawingViewState,
+  sectionFrom2dViewState,
   createOrthogonalMprSection
 } from '../section-util';
 import setImmediate from '../util/setImmediate';
@@ -221,7 +221,7 @@ export default class TwoDimensionalImageSource extends ImageSource {
     ): ViewState => {
       if (viewState.type !== '2d') return viewState;
 
-      const section = asSectionInDrawingViewState(viewState);
+      const section = sectionFrom2dViewState(viewState);
       const resizedSection = adjustOnResized(section, beforeSize, afterSize);
       if (section === resizedSection) {
         return viewState;

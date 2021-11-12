@@ -4,7 +4,7 @@ import Cuboid from '../../annotation/Cuboid';
 import Ellipsoid from '../../annotation/Ellipsoid';
 import SolidFigure, { FigureType } from '../../annotation/SolidFigure';
 import {
-  asSectionInDrawingViewState,
+  sectionFrom2dViewState,
   detectOrthogonalSection
 } from '../../section-util';
 import ViewerEvent from '../../viewer/ViewerEvent';
@@ -26,7 +26,7 @@ export default class SolidFigureTool extends AnnotationToolBase {
     const section =
       viewState.type !== '2d'
         ? viewState.section
-        : asSectionInDrawingViewState(viewState);
+        : sectionFrom2dViewState(viewState);
 
     const orientation = detectOrthogonalSection(section);
     if (!SolidFigure.editableOrientation.some(o => o === orientation)) return;
@@ -83,7 +83,7 @@ export default class SolidFigureTool extends AnnotationToolBase {
     const section =
       viewState.type !== '2d'
         ? viewState.section
-        : asSectionInDrawingViewState(viewState);
+        : sectionFrom2dViewState(viewState);
 
     const orientation = detectOrthogonalSection(section);
     antn.concrete(orientation);

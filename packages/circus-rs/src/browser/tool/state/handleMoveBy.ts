@@ -7,7 +7,7 @@ import {
 import MprImageSource from '../../image-source/MprImageSource';
 import TwoDimensionalImageSource from '../../image-source/TwoDimensionalImageSource';
 import {
-  asSectionInDrawingViewState,
+  sectionFrom2dViewState,
   applySectionToTwoDimensionalState,
   sectionOverlapsVolume
 } from '../../section-util';
@@ -69,7 +69,7 @@ export default function handleMoveBy(
       return;
     }
     case '2d': {
-      const prevSection = asSectionInDrawingViewState(prevState);
+      const prevSection = sectionFrom2dViewState(prevState);
       const section = translate(prevSection);
 
       // Abort if the processed section is not changed.

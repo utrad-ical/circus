@@ -156,7 +156,6 @@ const SeriesItem: React.FC<{
     if (!metadata) {
       throw new Error('No metadata available.');
     }
-    // HACK: Support-2d-image-source
     const mode: ViewerMode = metadata.mode;
     const item = newViewerCellItem(seriesIndex, mode, 'axial');
     updateEditingData(d => {

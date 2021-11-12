@@ -3,7 +3,7 @@ import { scaleSection, Section } from '../../../common/geometry';
 import MprImageSource from '../../image-source/MprImageSource';
 import TwoDimensionalImageSource from '../../image-source/TwoDimensionalImageSource';
 import {
-  applySectionToTwoDimensionalState,
+  sectionTo2dViewState,
   sectionFrom2dViewState,
   convertScreenCoordinateToVolumeCoordinate,
   sectionOverlapsVolume
@@ -69,7 +69,7 @@ export default function handleZoomBy(
       if (!overlap) return;
 
       viewer.setState({
-        ...applySectionToTwoDimensionalState(prevState, section)
+        ...sectionTo2dViewState(prevState, section)
       });
       break;
     }

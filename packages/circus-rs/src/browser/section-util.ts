@@ -587,8 +587,7 @@ export const sectionFrom2dViewState = (
   return section;
 };
 
-// HACK: Support-2d-image-source
-export const applySectionToTwoDimensionalState = (
+export const sectionTo2dViewState = (
   prevState: TwoDimensionalViewState,
   section: Section
 ): TwoDimensionalViewState => {

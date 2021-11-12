@@ -6,7 +6,7 @@ import {
   Viewer
 } from '@utrad-ical/circus-rs/src/browser';
 import {
-  applySectionToTwoDimensionalState,
+  sectionTo2dViewState,
   OrientationString
 } from '@utrad-ical/circus-rs/src/browser/section-util';
 import { toolFactory } from '@utrad-ical/circus-rs/src/browser/tool/tool-initializer';
@@ -254,7 +254,7 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
           const initialState = setOrthogonal2D(viewer, viewState)!;
           const s1 = initialSection
             ? {
-                ...applySectionToTwoDimensionalState(
+                ...sectionTo2dViewState(
                   initialState,
                   initialSection
                 )

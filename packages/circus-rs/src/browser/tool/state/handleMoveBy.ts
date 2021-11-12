@@ -8,7 +8,7 @@ import MprImageSource from '../../image-source/MprImageSource';
 import TwoDimensionalImageSource from '../../image-source/TwoDimensionalImageSource';
 import {
   sectionFrom2dViewState,
-  applySectionToTwoDimensionalState,
+  sectionTo2dViewState,
   sectionOverlapsVolume
 } from '../../section-util';
 import Viewer from '../../viewer/Viewer';
@@ -79,7 +79,7 @@ export default function handleMoveBy(
       if (!overlap(section)) return;
 
       viewer.setState({
-        ...applySectionToTwoDimensionalState(prevState, section)
+        ...sectionTo2dViewState(prevState, section)
       });
       return;
     }

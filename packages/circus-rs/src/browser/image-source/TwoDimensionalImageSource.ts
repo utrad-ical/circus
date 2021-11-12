@@ -2,7 +2,7 @@ import DicomVolume from '../../common/DicomVolume';
 import { Vector2D, Vector3D } from '../../common/geometry';
 import {
   adjustOnResized,
-  applySectionToTwoDimensionalState,
+  sectionTo2dViewState,
   sectionFrom2dViewState,
   createOrthogonalMprSection
 } from '../section-util';
@@ -82,7 +82,7 @@ export default class TwoDimensionalImageSource extends ImageSource {
       0
     );
 
-    const state = applySectionToTwoDimensionalState(initialState, sectionDummy);
+    const state = sectionTo2dViewState(initialState, sectionDummy);
     return state;
   }
 
@@ -226,7 +226,7 @@ export default class TwoDimensionalImageSource extends ImageSource {
       if (section === resizedSection) {
         return viewState;
       }
-      return applySectionToTwoDimensionalState(viewState, resizedSection);
+      return sectionTo2dViewState(viewState, resizedSection);
     };
   }
 }

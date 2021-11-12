@@ -2,7 +2,7 @@ import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { Section, Vector2D, Vector3D } from '@utrad-ical/circus-rs/src/browser';
 import {
-  applySectionToTwoDimensionalState,
+  sectionTo2dViewState,
   detectOrthogonalSection
 } from '@utrad-ical/circus-rs/src/browser/section-util';
 import focusBy from '@utrad-ical/circus-rs/src/browser/tool/state/focusBy';
@@ -460,7 +460,7 @@ export const setRecommendedDisplay = (
           switch (prevState.type) {
             case '2d': {
               viewer.setState({
-                ...applySectionToTwoDimensionalState(
+                ...sectionTo2dViewState(
                   prevState,
                   reproduceSection
                 )

@@ -1,7 +1,10 @@
 import { setUpKoaTest, TestServer } from '../../test/util-koa';
 import { setUpMongoFixture, usingMongo } from '../../test/util-mongo';
 
-import performSearch, { runAggregation } from './performSearch';
+import performSearch, {
+  runAggregation,
+  isPatientInfoInFilter
+} from './performSearch';
 import createCollectionAccessor, {
   CollectionAccessor
 } from '../db/createCollectionAccessor';
@@ -42,6 +45,16 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await testServer.tearDown();
+});
+
+test('isPatientInfoInFilter', () => {
+  const i = isPatientInfoInFilter;
+  expect(i({ 'patientInfo.age': 7 })).toBe(true);
+  expect(i({ 'patientInfo.age': 7, status: false })).toBe(true);
+  expect(i({ status: false })).toBe(false);
+  expect(i({ $and: [{ 'patientInfo.age': 7, status: false }] })).toBe(true);
+  expect(i({ $and: [{ status: false }] })).toBe(false);
+  expect(i({ $or: [{ 'patientInfo.age': 7 }] })).toBe(true);
 });
 
 describe('performSearch', () => {

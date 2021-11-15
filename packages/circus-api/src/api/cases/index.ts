@@ -1,5 +1,9 @@
 import status from 'http-status';
-import { extractFilter, performAggregationSearch } from '../performSearch';
+import {
+  extractFilter,
+  isPatientInfoInFilter,
+  performAggregationSearch
+} from '../performSearch';
 import checkFilter from '../../utils/checkFilter';
 import { RouteMiddleware, CircusContext } from '../../typings/middlewares';
 import makeNewCase from '../../case/makeNewCase';
@@ -20,21 +24,6 @@ const maskPatientInfo = (ctx: CircusContext) => {
     }
     return caseData;
   };
-};
-
-const isPatientInfoInFilter = (customFilter: { [key: string]: any }) => {
-  const checkKeyVal = (key: string, value: any) => {
-    if (key === '$and' || key === '$or') {
-      return value.some((item: object) => isPatientInfoInFilter(item));
-    } else {
-      return /^patientInfo/.test(key);
-    }
-  };
-
-  if (Object.keys(customFilter).length === 0) return false;
-  return Object.keys(customFilter).every(key =>
-    checkKeyVal(key, customFilter[key])
-  );
 };
 
 export const handleGet: RouteMiddleware = () => {
@@ -105,7 +94,6 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
     if (!checkFilter(customFilter!, searchableFields))
       ctx.throw(status.BAD_REQUEST, 'Bad filter.');
 
-    // const domainFilter = {};
     const patientInfoInFilter = isPatientInfoInFilter(customFilter!);
     const accessibleProjectIds = ctx.userPrivileges.accessibleProjects
       .filter(

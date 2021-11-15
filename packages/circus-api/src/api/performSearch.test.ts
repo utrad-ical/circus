@@ -29,7 +29,7 @@ beforeAll(async () => {
       primaryKey: 'itemId'
     });
     app.use(async (ctx, next) => {
-      const q = ctx.request.query.q;
+      const q = ctx.request.query.q as string;
       const filter = q && q.length ? JSON.parse(q) : {};
       try {
         await performSearch(items, filter, ctx as any, {

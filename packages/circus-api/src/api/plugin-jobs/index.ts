@@ -1,5 +1,6 @@
 import status from 'http-status';
 import { extractFilter, performAggregationSearch } from '../performSearch';
+import checkFilter from '../../utils/checkFilter';
 import generateUniqueId from '../../utils/generateUniqueId';
 import path from 'path';
 import fs from 'fs';
@@ -67,9 +68,24 @@ export const handlePatch: RouteMiddleware = ({ models, cs }) => {
   };
 };
 
+const searchableFields = [
+  'pluginId',
+  'status',
+  'patientInfo.patientId',
+  'patientInfo.patientName',
+  'patientInfo.age',
+  'patientInfo.sex',
+  'createdAt',
+  'updatedAt',
+  'finishedAt'
+];
+
 export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const customFilter = extractFilter(ctx);
+    if (!checkFilter(customFilter!, searchableFields))
+      ctx.throw(status.BAD_REQUEST, 'Bad filter.');
+
     const domainFilter = {
       domain: { $in: ctx.userPrivileges.domains }
     };
@@ -215,7 +231,7 @@ export const handleGetAttachment: RouteMiddleware = ({
       });
       ctx.type = mime.getType(file) || 'application/octet-stream';
       ctx.body = stream;
-    } catch (err) {
+    } catch (err: any) {
       if (err.code === 'ENOENT') ctx.throw(status.NOT_FOUND);
       throw err;
     }

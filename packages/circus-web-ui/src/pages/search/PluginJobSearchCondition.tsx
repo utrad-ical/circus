@@ -4,6 +4,7 @@ import ConditionFrame, { Condition } from './ConditionFrame';
 import { escapeRegExp } from 'utils/util';
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import DateRangePicker, {
+  DateRange,
   dateRangeToMongoQuery
 } from '@smikitky/rb-components/lib/DateRangePicker';
 import AgeMinMax from 'components/AgeMinMax';
@@ -11,10 +12,32 @@ import { conditionToMongoQuery } from '@smikitky/rb-components/lib/ConditionEdit
 import SearchPanel from 'pages/search/SearchPanel';
 import { useApi } from 'utils/api';
 import PluginDisplay from 'components/PluginDisplay';
+import { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
 
-const sexOptions = { all: 'All', M: 'male', F: 'female', O: 'other' };
-const modalityOptions: { [key: string]: string } = { all: 'All' };
-modalities.forEach(m => (modalityOptions[m] = m));
+const sexOptions: { [key: string]: string } = {
+  all: 'All',
+  M: 'Male',
+  F: 'Female',
+  O: 'Other'
+};
+
+const modalityOptions: { [key: string]: string } = Object.fromEntries([
+  ['all', 'All'],
+  ...modalities.map(m => [m, m])
+]);
+
+const statusList = [
+  'in_queue',
+  'processing',
+  'finished',
+  'cancelled',
+  'failed',
+  'invalidated'
+];
+const statusOptions: { [key: string]: string } = Object.fromEntries([
+  ['all', 'All'],
+  ...statusList.map(s => [s, s.replace('_', ' ')])
+]);
 
 const basicConditionToMongoQuery = (condition: any) => {
   const members: any[] = [];
@@ -37,7 +60,7 @@ const basicConditionToMongoQuery = (condition: any) => {
         break;
       }
       default:
-        if (key.match(/modality|sex/) && val === 'all') return;
+        if (key.match(/modality|sex|status/) && val === 'all') return;
         if (key.match(/^(patient(.+)|sex)$/)) {
           key = 'patientInfo.' + key;
         }
@@ -87,7 +110,9 @@ const ConditionEditor: React.FC<{
     load();
   }, [api]);
 
-  const basicConditionProperties = useMemo(() => {
+  const basicConditionProperties = useMemo<
+    PropertyEditorProperties<any>
+  >(() => {
     const pluginOptions: { [key: string]: any } = { all: 'All' };
     plugins.forEach(p => (pluginOptions[p.pluginId] = p.pluginId));
     return [
@@ -100,12 +125,21 @@ const ConditionEditor: React.FC<{
       { key: 'patientName', caption: 'Pt. Name', editor: et.text() },
       { key: 'age', caption: 'Age', editor: AgeMinMax },
       { key: 'sex', caption: 'Sex', editor: et.shrinkSelect(sexOptions) },
-      { key: 'createdAt', caption: 'Job Date', editor: DateRangePicker }
+      {
+        key: 'createdAt',
+        caption: 'Job Date',
+        editor: DateRangePicker as et.Editor<DateRange>
+      },
+      {
+        key: 'status',
+        caption: 'Status',
+        editor: et.shrinkSelect(statusOptions)
+      }
     ];
   }, [plugins]);
 
   const advancedConditionKeys = useMemo(() => {
-    const pluginOptions: { [key: string]: any } = { all: 'All' };
+    const pluginOptions: { [key: string]: any } = {};
     plugins.forEach(
       p =>
         (pluginOptions[p.pluginId] = {
@@ -127,7 +161,12 @@ const ConditionEditor: React.FC<{
         spec: { options: ['M', 'F', 'O'] }
       },
       createdAt: { caption: 'job register date', type: 'date' },
-      finishedAt: { caption: 'job finish date', type: 'date' }
+      finishedAt: { caption: 'job finish date', type: 'date' },
+      status: {
+        caption: 'job status',
+        type: 'select',
+        spec: { options: statusList }
+      }
     };
   }, [plugins]);
 
@@ -144,7 +183,7 @@ const ConditionEditor: React.FC<{
 const nullCondition = (): Condition => {
   return {
     type: 'basic',
-    basic: { pluginId: 'all', sex: 'all' },
+    basic: { pluginId: 'all', sex: 'all', status: 'all' },
     advanced: { $and: [{ keyName: 'pluginId', op: '==', value: 'all' }] }
   };
 };

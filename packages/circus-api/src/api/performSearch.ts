@@ -11,6 +11,19 @@ interface SearchQuery {
   skip: number;
 }
 
+export const isPatientInfoInFilter = (filter: { [key: string]: any }) => {
+  const checkKeyVal = (key: string, value: any) => {
+    if (key === '$and' || key === '$or') {
+      return value.some((item: object) => isPatientInfoInFilter(item));
+    } else {
+      return /^patientInfo/.test(key);
+    }
+  };
+
+  if (Object.keys(filter).length === 0) return false;
+  return Object.keys(filter).some(key => checkKeyVal(key, filter[key]));
+};
+
 export const extractFilter = (ctx: CircusContext) => {
   const urlQuery = ctx.request.query;
   try {

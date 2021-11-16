@@ -177,7 +177,7 @@ export default class TwoDimensionalImageSource extends ImageSource {
       // Monochrome
       const pxInfo = volume.getPixelFormatInfo();
       const buffer = new pxInfo.arrayClass(src);
-      return drawToImageDataFor2D(viewer, [w, h], buffer, viewState.window);
+      return drawToImageDataFor2D([w, h], buffer, viewState.window);
     }
   }
 

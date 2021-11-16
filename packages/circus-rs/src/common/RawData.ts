@@ -5,7 +5,7 @@ import {
   pixelFormatInfo
 } from '@utrad-ical/circus-lib/src/PixelFormat';
 import { Box, Section, Vector2D, Vector3D } from './geometry';
-import * as p from './pixel';
+import { applyWindow } from './pixel';
 
 // Make sure you don't add properties
 // that heavily depends on DICOM spec!
@@ -567,18 +567,6 @@ export default class RawData {
   }
 
   /**
-   * Applies window level/width.
-   * @param width The window width.
-   * @param level The window level.
-   * @param pixel The input pixel value, typically a Uint16 value.
-   * @return The windowed pixel value between 0 and 255.
-   */
-  protected applyWindow(width: number, level: number, pixel: number): number {
-    // NOTE: In the case of color image (rgba8), returns incorrect value.
-    return p.applyWindow(width, level, pixel);
-  }
-
-  /**
    * Builds a new MPR image using the given section in index-coordinate.
    */
   public scanObliqueSection(
@@ -660,7 +648,7 @@ export default class RawData {
       for (let i = 0; i < outWidth; i++) {
         value = voxelReader.call(this, pos_x, pos_y, pos_z); // may return `undefined`
         if (value !== undefined && useWindow) {
-          value = p.applyWindow(windowWidth!, windowLevel!, value);
+          value = applyWindow(windowWidth!, windowLevel!, value);
         }
 
         // A value of `undefined` will be silently converted

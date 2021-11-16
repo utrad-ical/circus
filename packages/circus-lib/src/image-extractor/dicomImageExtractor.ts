@@ -170,20 +170,32 @@ function determinePixelFormat(dataset: DataSet): PixelFormat {
   // PhotometricInterpretation will probably be set to 'MONOCHROME1', 'MONOCHROME2', 'RGB', or 'PALETTE COLOR'.
   // PhotometricInterpretation == 'MONOCHROME1' means large pixel value means blacker instead of whiter
   const photometricInterpretation = dataset.string('x00280004') || '';
-  const pixelRepresentation = dataset.uint16('x00280103');
-  const bitsAllocated = dataset.uint16('x00280100');
-  if (!/^MONOCHROME/.test(photometricInterpretation)) {
-    return 'rgba8'; // color data
-  } else if (pixelRepresentation === 0 && bitsAllocated === 8) {
-    return 'uint8';
-  } else if (pixelRepresentation === 1 && bitsAllocated === 8) {
-    return 'int8'; // This should be rare
-  } else if (pixelRepresentation === 0 && bitsAllocated === 16) {
-    return 'uint16'; // unsigned 16 bit
-  } else if (pixelRepresentation === 1 && bitsAllocated === 16) {
-    return 'int16'; // signed 16 bit data
+
+  const determineMonochromePixelFormat = () => {
+    const bitsAllocated = dataset.uint16('x00280100');
+    const pixelRepresentation = dataset.uint16('x00280103');
+    if (pixelRepresentation === 0 && bitsAllocated === 8) {
+      return 'uint8';
+    } else if (pixelRepresentation === 1 && bitsAllocated === 8) {
+      return 'int8'; // This should be rare
+    } else if (pixelRepresentation === 0 && bitsAllocated === 16) {
+      return 'uint16'; // unsigned 16 bit
+    } else if (pixelRepresentation === 1 && bitsAllocated === 16) {
+      return 'int16'; // signed 16 bit data
+    } else {
+      return 'unknown';
+    }
+  };
+
+  switch (photometricInterpretation) {
+    case 'MONOCHROME1':
+    case 'MONOCHROME2':
+      return determineMonochromePixelFormat();
+    case 'RGB':
+      return 'rgba8';
+    default:
+      return 'unknown';
   }
-  return 'unknown';
 }
 
 function determineRescale(dataset: DataSet): RescaleParams {

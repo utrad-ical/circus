@@ -138,7 +138,7 @@ export default class TwoDimensionalImageSource extends ImageSource {
 
   private createKey(state: TwoDimensionalViewState): string {
     const { imageNumber, window } = state;
-    let key: string = 'imageNumber:' + imageNumber + ';';
+    let key = 'imageNumber:' + imageNumber + ';';
     if (window) key += 'ww:' + window.width + ';' + 'wl:' + window.level + ';';
     return key;
   }

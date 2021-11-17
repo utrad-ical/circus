@@ -74,18 +74,18 @@ const NextPreviousButton: React.FC<{
   }
   const prevLink = `${props.prefix}/${props.list[currentPosition - 1]}`;
   const nextLink = `${props.prefix}/${props.list[currentPosition + 1]}`;
-  const ablePrevLink = 0 < currentPosition;
-  const ableNextLink = currentPosition < props.list.length - 1;
+  const prevLinkEnabled = 0 < currentPosition;
+  const nextLinkEnabled = currentPosition < props.list.length - 1;
   return (
     <div className="next-previous-button">
       <Link to={prevLink} className="link-prev">
-        <Button disabled={!ablePrevLink}>
+        <Button disabled={!prevLinkEnabled}>
           <Icon icon="arrow-left" />
           &ensp; Prev
         </Button>
       </Link>
       <Link to={nextLink} className="link-next">
-        <Button disabled={!ableNextLink}>
+        <Button disabled={!nextLinkEnabled}>
           Next &ensp;
           <Icon icon="arrow-right" />
         </Button>
@@ -253,12 +253,6 @@ const MyListMenuItems: React.FC<{
 const MainNav: React.FC<{}> = props => {
   const user = useLoginUser();
   const pathname = useLocation().pathname;
-  const searchedCaseResult = useSelector(
-    state => state.searches.searches['case']
-  );
-  const searchedPluginJobResult = useSelector(
-    state => state.searches.searches['pluginJob']
-  );
 
   if (!user) return null;
   const loginUserName = user.description;
@@ -275,16 +269,20 @@ const MainNav: React.FC<{}> = props => {
     browserHistory.push('/');
   };
 
-  const dispNextPreviousCaseButton =
-    pathname.indexOf('/case') === 0 &&
-    Object(searchedCaseResult) === searchedCaseResult &&
-    'results' in searchedCaseResult;
-  const dispNextPreviousPluginJobButton =
-    pathname.indexOf('/plugin-job') === 0 &&
-    Object(searchedPluginJobResult) === searchedPluginJobResult &&
-    'results' in searchedPluginJobResult;
-
   const currentCase = pathname.split('/').slice(-1)[0];
+
+  let nextPreviousLists = JSON.parse(
+    localStorage.getItem('nextPreviousLists') ?? '[]'
+  );
+
+  if (nextPreviousLists.every((list: string) => list !== currentCase)) {
+    nextPreviousLists = [];
+  }
+
+  const showNextPreviousCaseButton =
+    pathname.indexOf('/case') === 0 && nextPreviousLists.length > 0;
+  const showNextPreviousPluginJobButton =
+    pathname.indexOf('/plugin-job') === 0 && nextPreviousLists.length > 0;
 
   return (
     <StyledHeader>
@@ -318,13 +316,9 @@ const MainNav: React.FC<{}> = props => {
             />
           </Menu>
           <Menu name="Case" link="/browse/case">
-            {dispNextPreviousCaseButton && (
+            {showNextPreviousCaseButton && (
               <NextPreviousButton
-                list={
-                  searchedCaseResult.results
-                    ? searchedCaseResult.results.indexes
-                    : []
-                }
+                list={nextPreviousLists}
                 current={currentCase}
                 prefix="/case"
               />
@@ -347,13 +341,9 @@ const MainNav: React.FC<{}> = props => {
             {/* <SubMenu icon="open" name="Case Import" link="/import-case" /> */}
           </Menu>
           <Menu name="CAD" icon="circus-icon-job" link="/browse/plugin-jobs">
-            {dispNextPreviousPluginJobButton && (
+            {showNextPreviousPluginJobButton && (
               <NextPreviousButton
-                list={
-                  searchedPluginJobResult.results
-                    ? searchedPluginJobResult.results.indexes
-                    : []
-                }
+                list={nextPreviousLists}
                 current={currentCase}
                 prefix="/plugin-job"
               />

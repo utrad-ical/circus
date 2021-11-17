@@ -188,6 +188,10 @@ const PluginSearchResults: React.FC<{
   const { searchName, refreshable = true } = props;
   const search = useSelector(state => state.searches.searches[searchName]);
   const selected = search?.selected ?? [];
+  localStorage.setItem(
+    'nextPreviousLists',
+    JSON.stringify(search?.results?.indexes ?? [])
+  );
 
   return (
     <SearchResultsView

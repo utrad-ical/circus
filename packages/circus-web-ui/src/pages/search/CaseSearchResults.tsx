@@ -122,6 +122,10 @@ const CaseSearchResultsView: React.FC<{
   const user = useLoginUser();
   const dispatch = useDispatch();
   const [showExportModal, setShowExportModal] = useState(false);
+  localStorage.setItem(
+    'nextPreviousLists',
+    JSON.stringify(search?.results?.indexes ?? [])
+  );
 
   const availableTags = useMemo(() => {
     const projectIds = Array.from(

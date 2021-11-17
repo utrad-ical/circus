@@ -56,12 +56,12 @@ const CaseDetail: React.FC<{}> = props => {
   const isUpdated = caseStore.currentHistoryIndex > 0;
 
   // warn before reloading or closing page with unsaved changes
-  window.onbeforeunload = isUpdated ? () => true : null;
   useEffect(() => {
+    window.onbeforeunload = isUpdated ? () => true : null;
     return () => {
       window.onbeforeunload = null;
     };
-  }, []);
+  }, [isUpdated]);
 
   useEffect(() => {
     const loadCase = async () => {

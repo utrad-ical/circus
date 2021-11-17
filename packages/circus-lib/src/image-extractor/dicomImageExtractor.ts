@@ -262,31 +262,21 @@ function extractUncompressedRGBPixels(
     throw new Error('Unexpected pixel data length.');
   }
 
+  // Convert RGB to RGBA8
   const srcArray = new Uint8Array(dataset.byteArray.buffer, offset, len);
-
-  const pixelData = new ArrayBuffer(rows * columns * bppOfRGBA);
-  const pixelDataArray = new Uint32Array(pixelData);
-
-  const minValue = pxInfo.maxLevel;
-  const maxValue = pxInfo.minLevel;
-
-  const alpha = 0xff;
-  const isLittleEndian = new Uint8Array(Uint16Array.of(1).buffer)[0] === 1;
-  const convertRGBA8888 = (red: number, green: number, blue: number) =>
-    isLittleEndian
-      ? ((alpha << 24) + (blue << 16) + (green << 8) + red) >>> 0
-      : ((red << 24) + (green << 16) + (blue << 8) + alpha) >>> 0;
-
-  // Convert RGB to RGBA8888
-  let destOffset = 0;
-  for (let i = 0; i < len; i++) {
-    const red = srcArray[i];
-    const green = srcArray[++i];
-    const blue = srcArray[++i];
-    const val = convertRGBA8888(red, green, blue);
-    pixelDataArray[destOffset++] = val;
+  const destArray = new Uint8Array(rows * columns * bppOfRGBA);
+  for (let i = 0, j = 0; i < len; ) {
+    destArray[j++] = srcArray[i++]; // red
+    destArray[j++] = srcArray[i++]; // green
+    destArray[j++] = srcArray[i++]; // blue
+    destArray[j++] = 0xff; // alpha
   }
-  return { pixelData, minValue, maxValue };
+
+  return {
+    pixelData: destArray.buffer,
+    minValue: pxInfo.maxLevel,
+    maxValue: pxInfo.minLevel
+  };
 }
 
 function extractUncompressedPixels(

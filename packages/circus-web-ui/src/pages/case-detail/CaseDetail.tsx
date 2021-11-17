@@ -57,9 +57,14 @@ const CaseDetail: React.FC<{}> = props => {
 
   // warn before reloading or closing page with unsaved changes
   useEffect(() => {
-    window.onbeforeunload = isUpdated ? () => true : null;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.returnValue = () => true;
+    };
+    if (isUpdated) {
+      window.addEventListener('beforeunload', handler);
+    }
     return () => {
-      window.onbeforeunload = null;
+      window.removeEventListener('beforeunload', handler);
     };
   }, [isUpdated]);
 

@@ -25,7 +25,6 @@ describe('dicomImageExtractor', () => {
     expect(pixelData.byteLength).toEqual(
       metadata.columns * metadata.rows * pxInfo.bpp
     );
-    const readArray = new pxInfo.arrayClass(pixelData);
 
     const doRescale =
       metadata.rescale && typeof metadata.rescale.intercept === 'number';
@@ -41,31 +40,12 @@ describe('dicomImageExtractor', () => {
     const wl = useWindow.level;
 
     if (metadata.pixelFormat === 'rgba8') {
-      // RGBA8888 Image
-      const isLittleEndian = new Uint8Array(Uint16Array.of(1).buffer)[0] === 1;
-      if (isLittleEndian) {
-        // CASE: Little Endian
-        for (let y = 0; y < png.height; y++) {
-          for (let x = 0; x < png.width; x++) {
-            const index = x + y * png.width;
-            const byteIndex = index * 4;
-            const pixel = readArray[index];
-            const alpha = pixel >>> 24;
-            const blue = (pixel << 8) >>> 24;
-            const green = (pixel << 16) >>> 24;
-            const red = (pixel << 24) >>> 24;
-            png.data[byteIndex] = red;
-            png.data[byteIndex + 1] = green;
-            png.data[byteIndex + 2] = blue;
-            png.data[byteIndex + 3] = alpha;
-          }
-        }
-      } else {
-        // CASE: Big Endian
-        png.data = readArray;
-      }
+      // RGBA8 Image
+      const readArray = new Uint8Array(pixelData);
+      png.data = Buffer.from(readArray.buffer);
     } else {
       // Monochrome Image
+      const readArray = new pxInfo.arrayClass(pixelData);
       for (let y = 0; y < png.height; y++) {
         for (let x = 0; x < png.width; x++) {
           const index = x + y * png.width;

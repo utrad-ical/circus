@@ -460,10 +460,7 @@ export const setRecommendedDisplay = (
           switch (prevState.type) {
             case '2d': {
               viewer.setState({
-                ...sectionTo2dViewState(
-                  prevState,
-                  reproduceSection
-                )
+                ...sectionTo2dViewState(prevState, reproduceSection)
               });
               break;
             }

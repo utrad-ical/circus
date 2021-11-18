@@ -7,10 +7,10 @@ import {
 } from '../../common/geometry';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
 import {
-  sectionFrom2dViewState,
   convertScreenCoordinateToVolumeCoordinate,
   convertVolumeCoordinateToScreenCoordinate,
-  detectOrthogonalSection
+  detectOrthogonalSection,
+  sectionFrom2dViewState
 } from '../section-util';
 import {
   convertViewerPointToVolumePoint,
@@ -20,6 +20,7 @@ import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
+import determineColor from './helper/determineColor';
 import drawBoundingBoxOutline from './helper/drawBoundingBoxOutline';
 import drawHandleFrame from './helper/drawHandleFrame';
 import { drawPath, drawPoint } from './helper/drawObject';
@@ -136,27 +137,24 @@ export default class Polyline
 
     const distance = Math.abs(this.z - section.origin[2]);
 
-    const { distanceThreshold, distanceDimmedThreshold } = (() => {
-      switch (viewState.type) {
-        case '2d':
-          return { distanceThreshold: 0, distanceDimmedThreshold: 0 };
-        case 'mpr':
-        default:
-          return {
-            distanceThreshold: this.zThreshold,
-            distanceDimmedThreshold: this.zDimmedThreshold
-          };
-      }
-    })();
+    const drawingColor = (
+      color: string | undefined,
+      dimmedColor: string | undefined
+    ) => {
+      return determineColor(
+        viewState,
+        distance,
+        this.zThreshold,
+        this.zDimmedThreshold,
+        color,
+        dimmedColor
+      );
+    };
 
-    switch (true) {
-      case distance <= distanceThreshold:
-        return { color: this.color, fillColor: this.fillColor };
-      case distance <= distanceDimmedThreshold:
-        return { color: this.dimmedColor, fillColor: this.dimmedFillColor };
-      default:
-        return {};
-    }
+    return {
+      color: drawingColor(this.color, this.dimmedColor),
+      fillColor: drawingColor(this.fillColor, this.dimmedFillColor)
+    };
   }
 
   public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {

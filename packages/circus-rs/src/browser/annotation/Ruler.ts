@@ -7,8 +7,8 @@ import {
 } from '../../common/geometry';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
 import {
-  sectionFrom2dViewState,
-  getOrthogonalProjectedPoint
+  getOrthogonalProjectedPoint,
+  sectionFrom2dViewState
 } from '../section-util';
 import {
   convertViewerPointToVolumePoint,
@@ -18,6 +18,7 @@ import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
+import determineColor from './helper/determineColor';
 import { drawFillText, drawLine, drawPoint } from './helper/drawObject';
 import { hitLineSegment, hitRectangle } from './helper/hit-test';
 
@@ -161,27 +162,14 @@ export default class Ruler implements Annotation, ViewerEventTarget {
       distanceFromPointToSection(section, new Vector3(...this.end!))
     );
 
-    const { distanceThreshold, distanceDimmedThreshold } = (() => {
-      switch (viewState.type) {
-        case '2d':
-          return { distanceThreshold: 0, distanceDimmedThreshold: 0 };
-        case 'mpr':
-        default:
-          return {
-            distanceThreshold: this.distanceThreshold,
-            distanceDimmedThreshold: this.distanceDimmedThreshold
-          };
-      }
-    })();
-
-    switch (true) {
-      case maxDistance <= distanceThreshold:
-        return this.color;
-      case maxDistance <= distanceDimmedThreshold:
-        return this.dimmedColor;
-      default:
-        return;
-    }
+    return determineColor(
+      viewState,
+      maxDistance,
+      this.distanceThreshold,
+      this.distanceDimmedThreshold,
+      this.color,
+      this.dimmedColor
+    );
   }
 
   /**

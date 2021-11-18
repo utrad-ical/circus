@@ -3,16 +3,17 @@ import { Vector2D } from '..';
 import { Section, verticesOfBox } from '../../common/geometry';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
 import {
-  sectionFrom2dViewState,
   convertScreenCoordinateToVolumeCoordinate,
   convertVolumeCoordinateToScreenCoordinate,
-  detectOrthogonalSection
+  detectOrthogonalSection,
+  sectionFrom2dViewState
 } from '../section-util';
 import { convertVolumePointToViewerPoint } from '../tool/tool-util';
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
+import determineColor from './helper/determineColor';
 import drawHandleFrame, { defaultHandleSize } from './helper/drawHandleFrame';
 import {
   BoundingRectWithHandleHitType,
@@ -173,27 +174,14 @@ export default class PlaneFigure
 
     const distance = Math.abs(this.z - section.origin[2]);
 
-    const { distanceThreshold, distanceDimmedThreshold } = (() => {
-      switch (viewState.type) {
-        case '2d':
-          return { distanceThreshold: 0, distanceDimmedThreshold: 0 };
-        case 'mpr':
-        default:
-          return {
-            distanceThreshold: this.zThreshold,
-            distanceDimmedThreshold: this.zDimmedThreshold
-          };
-      }
-    })();
-
-    switch (true) {
-      case distance <= distanceThreshold:
-        return this.color;
-      case distance <= distanceDimmedThreshold:
-        return this.dimmedColor;
-      default:
-        return;
-    }
+    return determineColor(
+      viewState,
+      distance,
+      this.zThreshold,
+      this.zDimmedThreshold,
+      this.color,
+      this.dimmedColor
+    );
   }
 
   public mouseMoveHandler(ev: ViewerEvent): void {

@@ -10,6 +10,7 @@ import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
+import determineColor from './helper/determineColor';
 import { drawPoint } from './helper/drawObject';
 import { hitRectangle } from './helper/hit-test';
 
@@ -94,27 +95,14 @@ export default class Point implements Annotation, ViewerEventTarget {
       new Vector3(...this.location!)
     );
 
-    const { distanceThreshold, distanceDimmedThreshold } = (() => {
-      switch (viewState.type) {
-        case '2d':
-          return { distanceThreshold: 0, distanceDimmedThreshold: 0 };
-        case 'mpr':
-        default:
-          return {
-            distanceThreshold: this.distanceThreshold,
-            distanceDimmedThreshold: this.distanceDimmedThreshold
-          };
-      }
-    })();
-
-    switch (true) {
-      case distance <= distanceThreshold:
-        return this.color;
-      case distance <= distanceDimmedThreshold:
-        return this.dimmedColor;
-      default:
-        return;
-    }
+    return determineColor(
+      viewState,
+      distance,
+      this.distanceThreshold,
+      this.distanceDimmedThreshold,
+      this.color,
+      this.dimmedColor
+    );
   }
 
   public validate(): boolean {

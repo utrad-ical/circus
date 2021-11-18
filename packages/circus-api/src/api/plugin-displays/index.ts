@@ -4,7 +4,11 @@ import path from 'path';
 import createDockerFileExtractor from '../../utils/dockerFileExtractor';
 import { RouteMiddleware } from '../../typings/middlewares';
 
-export const handleGet: RouteMiddleware = ({ pluginCachePath, models }) => {
+export const handleGet: RouteMiddleware = ({
+  pluginCachePath,
+  models,
+  logger
+}) => {
   const reading = new Map<string, Promise<void>>();
 
   return async (ctx, next) => {
@@ -16,15 +20,19 @@ export const handleGet: RouteMiddleware = ({ pluginCachePath, models }) => {
       throw ctx.throw(httpStatus.NOT_FOUND);
     }
 
-    if (!pluginId || !requestPath) ctx.throw(httpStatus.NOT_FOUND);
-    await models.plugin.findByIdOrFail(pluginId!);
+    if (!pluginId) ctx.throw(httpStatus.NOT_FOUND);
+    const plugin = await models.plugin.findByIdOrFail(pluginId);
     const displaysDir = path.join(pluginCachePath, pluginId, 'displays');
 
     const read = async (): Promise<string> => {
       try {
         await fs.access(displaysDir);
-      } catch (err) {
-        if (err.code === 'NOENT') {
+      } catch (err: any) {
+        if (err.code === 'ENOENT') {
+          logger.info(
+            'Trying to extract custom display files from the plug-in ' +
+              `${plugin.name} (ID: ${pluginId}).`
+          );
           if (reading.has(pluginId)) {
             await reading.get(pluginId);
           } else {
@@ -44,9 +52,13 @@ export const handleGet: RouteMiddleware = ({ pluginCachePath, models }) => {
       }
       const filePath = path.join(displaysDir, requestPath);
       try {
-        return fs.readFile(filePath, 'utf-8');
-      } catch (err) {
-        if (err.code === 'NOENT') {
+        return await fs.readFile(filePath, 'utf-8');
+      } catch (err: any) {
+        if (err.code === 'ENOENT') {
+          logger.error(
+            `Plug-in ${plugin.name} (${pluginId}) does not seem to` +
+              'contain the specified file for custom displays.'
+          );
           ctx.throw(httpStatus.NOT_FOUND);
         } else throw err;
         return '';

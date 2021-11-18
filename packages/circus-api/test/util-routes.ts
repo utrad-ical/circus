@@ -140,6 +140,7 @@ export const setUpAppForRoutesTest = async () => {
     {
       debug: true,
       pluginResultsPath: path.join(__dirname, 'plugin-results'),
+      pluginCachePath: path.join(__dirname, 'plugin-cache'),
       uploadFileSizeMaxBytes: 200 * 1024 * 1024,
       dicomImageServerUrl: '' // dummy
     },
@@ -205,12 +206,12 @@ const createMockCsCore = () => {
     )
   ) as cscore.PluginDefinition[];
 
-  const queue = ([
+  const queue = [
     {
       state: 'finished',
       jobId: '01dxgwv3k0medrvhdag4mpw9wa'
     }
-  ] as any) as cscore.QueueItem<cscore.PluginJobRequest>[];
+  ] as any as cscore.QueueItem<cscore.PluginJobRequest>[];
 
   const csCore = {
     daemon: {

@@ -92,7 +92,6 @@ const createUncachedVolumeProvider: FunctionService<
       const buffer = await fetch(imageNo);
       const metadata = imageMetadata.get(imageNo)!;
       verifyMetadata(metadata);
-      verifyIsLike3d && verifyIsLike3d(metadata);
 
       volume.insertSingleImage(zIndices.get(imageNo)!, buffer);
     };
@@ -166,6 +165,7 @@ const createUncachedVolumeProvider: FunctionService<
         primaryMetadata.imageOrientationPatient ===
         secondaryMetadata.imageOrientationPatient;
 
+      // check
       const like3d =
         checkPrimaryImage &&
         checkSecondaryImage &&
@@ -173,20 +173,22 @@ const createUncachedVolumeProvider: FunctionService<
 
       const imageOrientationPatient = primaryMetadata.imageOrientationPatient;
 
-      verifyIsLike3d = metadata => {
-        if (
-          like3d != determineIf3dImageFromMetadata(metadata) ||
-          (like3d &&
-            imageOrientationPatient !== metadata.imageOrientationPatient)
-        )
-          throw new Error('something wrong');
-      };
+      verifyMetadataOf3dImage = like3d
+        ? metadata => {
+            if (
+              !determineIf3dImageFromMetadata(metadata) ||
+              imageOrientationPatient !== metadata.imageOrientationPatient
+            )
+              throw new Error('Contains image that do not look like 3d image.');
+          }
+        : undefined;
 
       return like3d;
     };
 
-    let verifyIsLike3d: undefined | ((metadata: DicomMetadata) => void) =
-      undefined;
+    let verifyMetadataOf3dImage:
+      | undefined
+      | ((metadata: DicomMetadata) => void) = undefined;
 
     const verifyMetadata = async (metadata: DicomMetadata) => {
       // primary image
@@ -195,15 +197,21 @@ const createUncachedVolumeProvider: FunctionService<
       await load(primaryImageNo);
       const primaryMetadata = imageMetadata.get(primaryImageNo)!;
 
+      // Check: Size
       if (
         primaryMetadata.columns != metadata.columns ||
         primaryMetadata.rows != metadata.rows
       ) {
         throw new Error('Size is different.');
       }
+
+      // Check: Pixel format
       if (primaryMetadata.pixelFormat != metadata.pixelFormat) {
         throw new Error('Pixel format is different.');
       }
+
+      // Check: 3D Image
+      if (verifyMetadataOf3dImage) verifyMetadataOf3dImage(metadata);
     };
 
     return {

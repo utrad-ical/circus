@@ -2,12 +2,12 @@
 
 import chalk from 'chalk';
 import dashdash from 'dashdash';
-import mongo from 'mongodb';
 import merge from 'merge';
+import mongo from 'mongodb';
+import util from 'util';
+import config from './config';
 import createServiceLoader from './createServiceLoader';
 import scanMigrationFiles from './utils/scanMigrationFiles';
-import config from './config';
-import util from 'util';
 
 const options = [
   {
@@ -57,7 +57,7 @@ const parsedArgs = (() => {
       fixUser: opts.fix_user,
       debug: opts.debug
     };
-  } catch (e) {
+  } catch (e: any) {
     console.log(e.message);
     process.exit(1);
   }
@@ -76,6 +76,8 @@ const getLatestDbSchemaRevision = async () => {
 };
 
 const main = async () => {
+  console.log(`[${new Date().toISOString()}] CIRCUS API Server starting up...`);
+
   // These two options can be modified by a config file
   const patchedConfig = merge({}, config);
   Object.keys(parsedArgs).forEach(k => {
@@ -144,7 +146,9 @@ const main = async () => {
   }
 
   process.on('SIGINT', () => {
-    console.log('CIRCUS API Server terminating...');
+    console.log(
+      `[${new Date().toISOString()}] CIRCUS API Server terminating...`
+    );
     logger.warn('Server terminating...');
     process.exit(0);
   });

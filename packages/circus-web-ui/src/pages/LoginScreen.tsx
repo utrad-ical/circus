@@ -45,11 +45,13 @@ const LoginScreen: React.FC<{}> = props => {
       await loginManager.tryAuthenticate(input.id, input.password);
       await loginManager.refreshUserInfo(true);
       browserHistory.push('/home');
-    } catch (err) {
+    } catch (err: any) {
       if (err.response && err.response.status === 400) {
         setError('Invalid user ID or password.');
       } else {
-        setError('Critical server error. Plese consult the administrator.');
+        setError(
+          'Critical server error. The CIRCUS API server is not responding. Please consult the administrator.'
+        );
         console.error(err);
       }
     }

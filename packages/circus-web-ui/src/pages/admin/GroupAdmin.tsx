@@ -68,7 +68,7 @@ const GroupAdmin: React.FC<any> = props => {
       const privileges: { [name: string]: string } = {};
       for (const p of privList) privileges[p.privilege] = p.caption;
 
-      const projects = (await api('admin/projects')).items as {
+      const projects = (await api('admin/projects?unlimited=1')).items as {
         projectId: string;
       }[];
       const projectOptions = projects.map(project => ({

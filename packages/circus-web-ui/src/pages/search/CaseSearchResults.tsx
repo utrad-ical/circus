@@ -16,7 +16,8 @@ import { PhysicalTag, TagList } from 'components/Tag';
 import TimeDisplay from 'components/TimeDisplay';
 import React, { Fragment, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import * as searches from 'store/searches';
 import { updateSearch } from 'store/searches';
 import { useApi } from 'utils/api';
 import useLoginUser from 'utils/useLoginUser';
@@ -25,10 +26,25 @@ const Operation: React.FC<{
   value: any;
 }> = props => {
   const item = props.value;
+  const dispatch = useDispatch();
+  const searchName =
+    useLocation().pathname.indexOf('/browse/case/mylist') === 0
+      ? 'myCaseList'
+      : 'case';
+  const search = useSelector(state => state.searches.searches[searchName]);
+  const handleClick = () => {
+    dispatch(searches.setNextPreviousLists(search?.results?.indexes ?? []));
+  };
+
   return (
     <div className="register">
       <Link to={`/case/${item.caseId}`}>
-        <IconButton icon="circus-case" bsSize="sm" bsStyle="primary">
+        <IconButton
+          icon="circus-case"
+          bsSize="sm"
+          bsStyle="primary"
+          onClick={handleClick}
+        >
           View
         </IconButton>
       </Link>
@@ -122,10 +138,6 @@ const CaseSearchResultsView: React.FC<{
   const user = useLoginUser();
   const dispatch = useDispatch();
   const [showExportModal, setShowExportModal] = useState(false);
-  localStorage.setItem(
-    'nextPreviousLists',
-    JSON.stringify(search?.results?.indexes ?? [])
-  );
 
   const availableTags = useMemo(() => {
     const projectIds = Array.from(

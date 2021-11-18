@@ -1,5 +1,4 @@
 import Icon from '@smikitky/rb-components/lib/Icon';
-import browserHistory from '../../browserHistory';
 import DataGrid, {
   DataGridColumnDefinition,
   DataGridRenderer
@@ -17,14 +16,23 @@ import SearchResultsView, {
 import TimeDisplay from 'components/TimeDisplay';
 import UserDisplay from 'components/UserDisplay';
 import React, { Fragment, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
+import * as searches from 'store/searches';
 import styled from 'styled-components';
+import browserHistory from '../../browserHistory';
 
 const Operation: DataGridRenderer<any> = props => {
   const { value: job } = props;
-
+  const dispatch = useDispatch();
+  const searchName =
+    useLocation().pathname.indexOf('/browse/plugin-jobs/mylist') === 0
+      ? 'myPluginJobList'
+      : 'pluginJob';
+  const search = useSelector(state => state.searches.searches[searchName]);
   const handleClick = () => {
     if (job.status !== 'finished') return;
+    dispatch(searches.setNextPreviousLists(search?.results?.indexes ?? []));
     const url = `/plugin-job/${job.jobId}`;
     browserHistory.push(url);
   };
@@ -188,10 +196,6 @@ const PluginSearchResults: React.FC<{
   const { searchName, refreshable = true } = props;
   const search = useSelector(state => state.searches.searches[searchName]);
   const selected = search?.selected ?? [];
-  localStorage.setItem(
-    'nextPreviousLists',
-    JSON.stringify(search?.results?.indexes ?? [])
-  );
 
   return (
     <SearchResultsView

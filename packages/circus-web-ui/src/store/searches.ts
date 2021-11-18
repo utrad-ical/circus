@@ -43,6 +43,7 @@ interface SearchState {
     tasks: SearchedResource<Task>;
     [resourceName: string]: SearchedResource<any>;
   };
+  nextPreviousLists: string[];
 }
 
 export interface SearchResult {
@@ -57,7 +58,8 @@ export interface SearchResult {
 
 const initialState: SearchState = {
   searches: {},
-  items: { series: {}, tasks: {} }
+  items: { series: {}, tasks: {} },
+  nextPreviousLists: []
 };
 
 const slice = createSlice({
@@ -147,6 +149,9 @@ const slice = createSlice({
       const taskId = action.payload;
       if (!state.items.tasks || !state.items.tasks[taskId]) return;
       state.items.tasks[taskId].dismissed = true;
+    },
+    setNextPreviousLists: (state, action: PayloadAction<string[]>) => {
+      state.nextPreviousLists = action.payload;
     }
   }
 });
@@ -164,7 +169,8 @@ export const {
   reset,
   selectionStatusChanged,
   deleteSearch,
-  dismissTask
+  dismissTask,
+  setNextPreviousLists
 } = slice.actions;
 
 export default slice.reducer;

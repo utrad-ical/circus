@@ -253,6 +253,9 @@ const MyListMenuItems: React.FC<{
 const MainNav: React.FC<{}> = props => {
   const user = useLoginUser();
   const pathname = useLocation().pathname;
+  let nextPreviousLists = useSelector(
+    state => state.searches.nextPreviousLists
+  );
 
   if (!user) return null;
   const loginUserName = user.description;
@@ -270,10 +273,6 @@ const MainNav: React.FC<{}> = props => {
   };
 
   const currentCase = pathname.split('/').slice(-1)[0];
-
-  let nextPreviousLists = JSON.parse(
-    localStorage.getItem('nextPreviousLists') ?? '[]'
-  );
 
   if (nextPreviousLists.every((list: string) => list !== currentCase)) {
     nextPreviousLists = [];

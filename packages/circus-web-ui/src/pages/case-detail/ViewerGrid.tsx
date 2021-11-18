@@ -6,8 +6,8 @@ import {
   Viewer
 } from '@utrad-ical/circus-rs/src/browser';
 import {
-  sectionTo2dViewState,
-  OrientationString
+  OrientationString,
+  sectionTo2dViewState
 } from '@utrad-ical/circus-rs/src/browser/section-util';
 import { toolFactory } from '@utrad-ical/circus-rs/src/browser/tool/tool-initializer';
 import { Section } from '@utrad-ical/circus-rs/src/common/geometry';
@@ -20,8 +20,8 @@ import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import ImageViewer, {
   createStateChanger,
+  getInitial2dViewState,
   InitialStateSetterFunc,
-  setOrthogonal2D,
   setOrthogonalOrientation,
   StateChanger
 } from 'components/ImageViewer';
@@ -251,14 +251,11 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
     (viewer: Viewer, viewState: MprViewState | TwoDimensionalViewState) => {
       switch (viewState.type) {
         case '2d': {
-          const initialState = setOrthogonal2D(viewer, viewState)!;
+          const initialState = getInitial2dViewState(viewer, viewState)!;
           const s1 = initialSection
             ? {
-                ...sectionTo2dViewState(
-                  initialState,
-                  initialSection
-                )
-              }
+              ...sectionTo2dViewState(initialState, initialSection)
+            }
             : initialState;
           const s2 = initialStateSetter(viewer, s1, key);
           return s2;
@@ -270,9 +267,8 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
           )!;
           const s1 = initialSection
             ? {
-                ...initialState,
-                section: initialSection
-              }
+              ...initialState, section: initialSection
+            }
             : initialState;
           const s2 = initialStateSetter(viewer, s1, key);
           return s2;
@@ -308,7 +304,7 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
     localStateChanger((state, viewer) => {
       switch (state.type) {
         case '2d':
-          return setOrthogonal2D(viewer, state)!;
+          return getInitial2dViewState(viewer, state)!;
         case 'mpr':
           return orientationInitialStateSetters[orientation!](viewer, state)!;
         default:

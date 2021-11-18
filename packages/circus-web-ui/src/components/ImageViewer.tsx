@@ -27,7 +27,7 @@ export const setOrthogonalOrientation = (orientation: OrientationString) => {
   };
 };
 
-export const setOrthogonal2D = (
+export const getInitial2dViewState = (
   viewer: rs.Viewer,
   initialViewState: rs.TwoDimensionalViewState
 ) => {

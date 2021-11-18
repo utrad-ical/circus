@@ -150,22 +150,35 @@ const createUncachedVolumeProvider: FunctionService<
       const primaryImageNo = images.shift()!;
       await load(primaryImageNo);
       const primaryMetadata = imageMetadata.get(primaryImageNo)!;
+      const checkPrimaryImage = determineIf3dImageFromMetadata(primaryMetadata);
       if (count === 1) {
-        return determineIf3dImageFromMetadata(primaryMetadata);
+        return checkPrimaryImage;
       }
 
       // secondary image
       const secondaryImageNo = images.shift()!;
       await load(secondaryImageNo);
       const secondaryMetadata = imageMetadata.get(secondaryImageNo)!;
+      const checkSecondaryImage =
+        determineIf3dImageFromMetadata(secondaryMetadata);
 
-      const like3d = determineIf3dImageFromMetadata(
-        primaryMetadata,
-        secondaryMetadata
-      );
+      const checkImageOrientationPatient =
+        primaryMetadata.imageOrientationPatient ===
+        secondaryMetadata.imageOrientationPatient;
+
+      const like3d =
+        checkPrimaryImage &&
+        checkSecondaryImage &&
+        checkImageOrientationPatient;
+
+      const imageOrientationPatient = primaryMetadata.imageOrientationPatient;
 
       verifyIsLike3d = metadata => {
-        if (like3d != determineIf3dImageFromMetadata(primaryMetadata, metadata))
+        if (
+          like3d != determineIf3dImageFromMetadata(metadata) ||
+          (like3d &&
+            imageOrientationPatient !== metadata.imageOrientationPatient)
+        )
           throw new Error('something wrong');
       };
 
@@ -205,37 +218,21 @@ const createUncachedVolumeProvider: FunctionService<
   };
 };
 
-const determineIf3dImageFromMetadata = (...metadata: DicomMetadata[]) => {
-  if (!(metadata.length > 0)) return false;
-
-  const primaryMetadata = metadata[0];
-
+const determineIf3dImageFromMetadata = (metadata: DicomMetadata) => {
   // Check: The modality is CT, MR or PT.
-  if (metadata.some(x => !['CT', 'MR', 'PT'].includes(x.modality))) {
+  if (!['CT', 'MR', 'PT'].includes(metadata.modality)) {
     return false;
   }
 
   // Check: Pixel format is monochrome.
-  if (metadata.some(x => x.pixelFormat.match('rgba8'))) {
-    return false;
-  }
-
-  // Check: The orientation of the image written in the DICOM tag is the same for the first and second and subsequent images.
-  if (
-    metadata.some(
-      x => primaryMetadata.imageOrientationPatient != x.imageOrientationPatient
-    )
-  ) {
+  if (metadata.pixelFormat === 'rgba8') {
     return false;
   }
 
   // Check: DICOM tag does not have a flag that the image is a reconstructed image.
   if (
-    metadata.some(
-      x =>
-        x.pixelDataCharacteristics &&
-        x.pixelDataCharacteristics.match(/^DERIVED/)
-    )
+    metadata.pixelDataCharacteristics &&
+    metadata.pixelDataCharacteristics.match(/^DERIVED/)
   ) {
     return false;
   }

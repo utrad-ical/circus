@@ -29,7 +29,7 @@ export interface VolumeAccessor {
   zIndices: Map<number, number>;
   determinePitch: () => Promise<number>;
   images: MultiRange;
-  determineIsLike3D: () => Promise<boolean>;
+  isLike3d: () => Promise<boolean>;
 }
 
 interface OptionsWithoutCache {
@@ -92,7 +92,7 @@ const createUncachedVolumeProvider: FunctionService<
       const buffer = await fetch(imageNo);
       const metadata = imageMetadata.get(imageNo)!;
       verifyMetadata(metadata);
-      verifyIsLike3D && verifyIsLike3D(metadata);
+      verifyIsLike3d && verifyIsLike3d(metadata);
 
       volume.insertSingleImage(zIndices.get(imageNo)!, buffer);
     };
@@ -142,7 +142,7 @@ const createUncachedVolumeProvider: FunctionService<
      * - DICOM tag does not have a flag that the image is a reconstructed image.
      * @returns True for "3D-like images"
      */
-    const determineIsLike3D = async () => {
+    const isLike3d = async () => {
       const images = imageRange.clone();
       const count = images.length();
 
@@ -151,7 +151,7 @@ const createUncachedVolumeProvider: FunctionService<
       await load(primaryImageNo);
       const primaryMetadata = imageMetadata.get(primaryImageNo)!;
       if (count === 1) {
-        return isLike3D(primaryMetadata);
+        return determineIf3dImageFromMetadata(primaryMetadata);
       }
 
       // secondary image
@@ -159,16 +159,20 @@ const createUncachedVolumeProvider: FunctionService<
       await load(secondaryImageNo);
       const secondaryMetadata = imageMetadata.get(secondaryImageNo)!;
 
-      const like3d = isLike3D(primaryMetadata, secondaryMetadata);
-      verifyIsLike3D = metadata => {
-        if (like3d != isLike3D(primaryMetadata, metadata))
+      const like3d = determineIf3dImageFromMetadata(
+        primaryMetadata,
+        secondaryMetadata
+      );
+
+      verifyIsLike3d = metadata => {
+        if (like3d != determineIf3dImageFromMetadata(primaryMetadata, metadata))
           throw new Error('something wrong');
       };
 
       return like3d;
     };
 
-    let verifyIsLike3D: undefined | ((metadata: DicomMetadata) => void) =
+    let verifyIsLike3d: undefined | ((metadata: DicomMetadata) => void) =
       undefined;
 
     const verifyMetadata = async (metadata: DicomMetadata) => {
@@ -196,13 +200,12 @@ const createUncachedVolumeProvider: FunctionService<
       load: loadSeries,
       determinePitch,
       images: imageRange,
-      determineIsLike3D
+      isLike3d
     };
   };
 };
 
-// HACK: Support-2d-image-source
-const isLike3D = (...metadata: DicomMetadata[]) => {
+const determineIf3dImageFromMetadata = (...metadata: DicomMetadata[]) => {
   if (!(metadata.length > 0)) return false;
 
   const primaryMetadata = metadata[0];

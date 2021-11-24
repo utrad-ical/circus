@@ -25,8 +25,10 @@ type RGBA = [number, number, number, number];
 const debugMode = 0;
 type CaptureCanvasCallback = (canvas: HTMLCanvasElement) => void;
 
-export default class WebGlRawVolumeMprImageSource extends MprImageSource
-  implements MprImageSourceWithDicomVolume {
+export default class WebGlRawVolumeMprImageSource
+  extends MprImageSource
+  implements MprImageSourceWithDicomVolume
+{
   private volume: DicomVolume | undefined;
 
   private backCanvas: HTMLCanvasElement;
@@ -145,18 +147,14 @@ export default class WebGlRawVolumeMprImageSource extends MprImageSource
     const minImage = Math.max(
       0,
       Math.floor(
-        Math.min(...sectionVertexZValues) / this.metadata!.voxelSize[2]
-      ) -
-        1 -
-        (viewState.interpolationMode === 'trilinear' ? 1 : 0)
+        Math.min(...sectionVertexZValues) / this.metadata!.voxelSize[2] - 0.5
+      )
     );
     const maxImage = Math.min(
       this.metadata!.voxelCount[2] - 1,
-      Math.ceil(
-        Math.max(...sectionVertexZValues) / this.metadata!.voxelSize[2]
-      ) -
-        1 +
-        (viewState.interpolationMode === 'trilinear' ? 1 : 0)
+      Math.floor(
+        Math.max(...sectionVertexZValues) / this.metadata!.voxelSize[2] - 0.5
+      ) + 1
     );
     const requiredRange: MultiRangeInitializer = [[minImage, maxImage]];
     this.priorityIntegerCaller!.append(requiredRange, this.priorityCounter++);

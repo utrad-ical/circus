@@ -9,8 +9,7 @@ import {
 import setImmediate from '../util/setImmediate';
 import Viewer from '../viewer/Viewer';
 import ViewState, { TwoDimensionalViewState } from '../ViewState';
-import { createCanvasImageSource } from './cache/cache-util';
-import CanvasImageSourceCache from './cache/CanvasImageSourceCache';
+import ImageBitmapCache from './cache/ImageBitmapCache';
 import { drawToImageDataFor2D } from './drawToImageData';
 import ImageSource, { ViewStateResizeTransformer } from './ImageSource';
 import DicomVolumeLoader, {
@@ -26,7 +25,7 @@ export default class TwoDimensionalImageSource extends ImageSource {
   public metadata: DicomVolumeMetadata | undefined;
   protected loadSequence: Promise<void> | undefined;
   private volume: DicomVolume | undefined;
-  private cache: CanvasImageSourceCache;
+  private cache: ImageBitmapCache;
   private backCanvas: HTMLCanvasElement;
 
   constructor({
@@ -38,7 +37,7 @@ export default class TwoDimensionalImageSource extends ImageSource {
       this.metadata = await volumeLoader.loadMeta();
       this.volume = await volumeLoader.loadVolume();
     })();
-    this.cache = new CanvasImageSourceCache({ maxSize: maxCacheSize });
+    this.cache = new ImageBitmapCache({ maxSize: maxCacheSize });
 
     const backCanvas = this.initializeBackCanvas();
     this.backCanvas = backCanvas;
@@ -111,11 +110,12 @@ export default class TwoDimensionalImageSource extends ImageSource {
     if (!context) throw new Error('Failed to get canvas context');
 
     const cacheKey = this.createKey(viewState);
-    let image: CanvasImageSource | undefined;
-    image = await this.cache.getImage(cacheKey);
-    if (!image) {
-      image = await this.createCacheImageSource(viewer, viewState);
-      await this.cache.putImage(cacheKey, image);
+    let imageBitmap: ImageBitmap | undefined;
+    imageBitmap = await this.cache.getImage(cacheKey);
+    if (!imageBitmap) {
+      const imageData = this.createImageData(viewer, viewState);
+      imageBitmap = await createImageBitmap(imageData);
+      await this.cache.putImage(cacheKey, imageBitmap);
     }
 
     const interpolationMode = viewState.interpolationMode;
@@ -125,7 +125,11 @@ export default class TwoDimensionalImageSource extends ImageSource {
     context.imageSmoothingEnabled = imageSmoothingEnabled;
     context.imageSmoothingQuality = 'medium';
 
-    const imageData = this.createClippedImageData(viewer, viewState, image);
+    const imageData = this.createClippedImageData(
+      viewer,
+      viewState,
+      imageBitmap
+    );
 
     // If we use Promise.resolve directly, the then-calleback is called
     // before any stacked UI events are handled.
@@ -141,16 +145,6 @@ export default class TwoDimensionalImageSource extends ImageSource {
     let key = 'imageNumber:' + imageNumber + ';';
     if (window) key += 'ww:' + window.width + ';' + 'wl:' + window.level + ';';
     return key;
-  }
-
-  private async createCacheImageSource(
-    viewer: Viewer,
-    viewState: TwoDimensionalViewState
-  ): Promise<CanvasImageSource> {
-    const context = viewer.canvas.getContext('2d');
-    if (!context) throw new Error('Failed to get canvas context');
-    const imageData = this.createImageData(viewer, viewState);
-    return await createCanvasImageSource(imageData);
   }
 
   private createImageData(

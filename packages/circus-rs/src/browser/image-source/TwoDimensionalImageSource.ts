@@ -113,7 +113,7 @@ export default class TwoDimensionalImageSource extends ImageSource {
     let imageBitmap: ImageBitmap | undefined;
     imageBitmap = await this.cache.getImage(cacheKey);
     if (!imageBitmap) {
-      const imageData = this.createImageData(viewer, viewState);
+      const imageData = this.createImageData(viewState);
       imageBitmap = await createImageBitmap(imageData);
       await this.cache.putImage(cacheKey, imageBitmap);
     }
@@ -147,21 +147,16 @@ export default class TwoDimensionalImageSource extends ImageSource {
     return key;
   }
 
-  private createImageData(
-    viewer: Viewer,
-    viewState: TwoDimensionalViewState
-  ): ImageData {
+  private createImageData(viewState: TwoDimensionalViewState): ImageData {
     const metadata = this.metadata!;
     const volume = this.volume!;
-    const context = viewer.canvas.getContext('2d');
-    if (!context) throw new Error('Failed to get canvas context');
 
     const [w, h] = metadata.voxelCount;
-    const { imageNumber } = viewState;
+    const { imageNumber, window } = viewState;
     const overlap = 0 <= imageNumber && imageNumber < metadata.voxelCount[2];
     if (!overlap) return new ImageData(w, h);
 
-    const src = volume.getSingleImage(viewState.imageNumber);
+    const src = volume.getSingleImage(imageNumber);
 
     if (metadata.pixelFormat === 'rgba8') {
       // RGBA
@@ -171,7 +166,7 @@ export default class TwoDimensionalImageSource extends ImageSource {
       // Monochrome
       const pxInfo = volume.getPixelFormatInfo();
       const buffer = new pxInfo.arrayClass(src);
-      return drawToImageDataFor2D([w, h], buffer, viewState.window);
+      return drawToImageDataFor2D([w, h], buffer, window);
     }
   }
 

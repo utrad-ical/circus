@@ -140,7 +140,7 @@ const CaseDetail: React.FC<{}> = props => {
         data: value,
         handleErrors: true
       });
-    } catch (err) {
+    } catch (err: any) {
       await alert('Error: ' + err.message);
     }
     setTags(value);
@@ -159,7 +159,7 @@ const CaseDetail: React.FC<{}> = props => {
           revisionIndex: caseData.revisions.length - 1
         })
       );
-    } catch (err) {
+    } catch (err: any) {
       await alert('Error: ' + err.message);
       throw err;
     }
@@ -321,7 +321,9 @@ const MenuBar: React.FC<{
 
   useKeyboardShortcut('Ctrl+S', () => onCommand('save'));
 
-  const unsavedAlertMessage = isUpdated ? 'You have unsaved changes' : '';
+  const unsavedAlertMessage = isUpdated ? (
+    <>You have unsaved changes&nbsp;</>
+  ) : null;
 
   return (
     <StyledMenuBarDiv>
@@ -341,8 +343,7 @@ const MenuBar: React.FC<{
         )}
       </div>
       <div className="right">
-        <span>{unsavedAlertMessage}</span>
-        &ensp;
+        {unsavedAlertMessage}
         <IconButton
           bsStyle="default"
           icon="step-backward"

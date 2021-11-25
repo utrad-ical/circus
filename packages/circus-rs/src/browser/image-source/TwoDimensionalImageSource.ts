@@ -58,10 +58,10 @@ export default class TwoDimensionalImageSource extends ImageSource {
       metadata.pixelFormat === 'rgba8'
         ? undefined
         : metadata.dicomWindow
-        ? { ...metadata.dicomWindow }
-        : metadata.estimatedWindow
-        ? { ...metadata.estimatedWindow }
-        : { level: 50, width: 100 };
+          ? { ...metadata.dicomWindow }
+          : metadata.estimatedWindow
+            ? { ...metadata.estimatedWindow }
+            : { level: 50, width: 100 };
 
     const initialState: TwoDimensionalViewState = {
       type: '2d',
@@ -121,11 +121,11 @@ export default class TwoDimensionalImageSource extends ImageSource {
     const cacheKey =
       `imageNumber:${imageNumber};` +
       (window ? `ww:${window.width};wl${window.level};` : '');
-    const imageBitmap =
-      this.cache.get(cacheKey) ??
-      this.cache.set(
+
+    const imageBitmap = await this.cache.get(cacheKey) ??
+      await this.cache.set(
         cacheKey,
-        await this.createUnclippedImageBitmap(viewState)
+        this.createUnclippedImageBitmap(viewState)
       );
 
     const imageSmoothingEnabled = !(
@@ -226,7 +226,7 @@ interface UnclippedImageBitmapCacheOption {
   maxSize: number;
 }
 class UnclippedImageBitmapCache {
-  private data: Map<string, ImageBitmap>;
+  private data: Map<string, Promise<ImageBitmap>>;
   private maxSize: number;
   private lruIndex: string[];
 
@@ -236,17 +236,16 @@ class UnclippedImageBitmapCache {
     this.lruIndex = [];
   }
 
-  public get(key: string): ImageBitmap | undefined {
+  public get(key: string): Promise<ImageBitmap | undefined> {
     if (this.data.has(key)) {
       const value = this.data.get(key)!;
       this.lruIndex = this.lruIndex.filter(v => v !== key).concat([key]);
       return value;
     }
-    return undefined;
+    return Promise.resolve(undefined);
   }
 
-  public set(key: string, value: ImageBitmap): ImageBitmap {
-    this.data.set(key, value);
+  public set(key: string, value: Promise<ImageBitmap>): Promise<ImageBitmap> {
     this.lruIndex.push(key);
     if (this.maxSize < this.lruIndex.length) {
       const deleteCacheKey = this.lruIndex.shift()!;

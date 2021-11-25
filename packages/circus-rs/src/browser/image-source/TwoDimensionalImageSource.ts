@@ -122,12 +122,8 @@ export default class TwoDimensionalImageSource extends ImageSource {
       `imageNumber:${imageNumber};` +
       (window ? `ww:${window.width};wl${window.level};` : '');
 
-    const imageBitmap = await this.cache.get(cacheKey) ??
-      await this.cache.set(
-        cacheKey,
-        this.createUnclippedImageBitmap(viewState)
-      );
-
+    const imageBitmap = await (this.cache.get(cacheKey) ??
+      this.cache.set(cacheKey, this.createUnclippedImageBitmap(viewState)));
     const imageSmoothingEnabled = !(
       !interpolationMode || interpolationMode === 'none'
     );
@@ -236,13 +232,13 @@ class UnclippedImageBitmapCache {
     this.lruIndex = [];
   }
 
-  public get(key: string): Promise<ImageBitmap | undefined> {
+  public get(key: string): Promise<ImageBitmap> | undefined {
     if (this.data.has(key)) {
       const value = this.data.get(key)!;
       this.lruIndex = this.lruIndex.filter(v => v !== key).concat([key]);
       return value;
     }
-    return Promise.resolve(undefined);
+    return undefined;
   }
 
   public set(key: string, value: Promise<ImageBitmap>): Promise<ImageBitmap> {

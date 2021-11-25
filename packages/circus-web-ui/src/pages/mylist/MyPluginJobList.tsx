@@ -22,7 +22,7 @@ const MyPluginJobList: React.FC<{}> = props => {
       resource={resource}
       resourceType="pluginJobs"
       toUrl={myListId => `/browse/plugin-jobs/mylist/${myListId}`}
-      searchName="mySeriesList"
+      searchName="myPluginJobList"
       myListId={myListId}
       resultsView={PluginJobSearchResults}
     />

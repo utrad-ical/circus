@@ -224,18 +224,18 @@ interface UnclippedImageBitmapCacheOption {
 class UnclippedImageBitmapCache {
   private data: Map<string, Promise<ImageBitmap>>;
   private maxSize: number;
-  private lruIndex: string[];
 
   constructor({ maxSize }: UnclippedImageBitmapCacheOption) {
     this.data = new Map();
     this.maxSize = maxSize;
-    this.lruIndex = [];
   }
 
   public get(key: string): Promise<ImageBitmap> | undefined {
     if (this.data.has(key)) {
       const value = this.data.get(key)!;
-      this.lruIndex = this.lruIndex.filter(v => v !== key).concat([key]);
+      // peek the entry, re-insert for LRU strategy
+      this.data.delete(key);
+      this.data.set(key, value);
       return value;
     }
     return undefined;
@@ -243,9 +243,9 @@ class UnclippedImageBitmapCache {
 
   public set(key: string, value: Promise<ImageBitmap>): Promise<ImageBitmap> {
     this.data.set(key, value);
-    this.lruIndex.push(key);
-    if (this.maxSize < this.lruIndex.length) {
-      const deleteCacheKey = this.lruIndex.shift()!;
+    if (this.maxSize < this.data.size) {
+      // least-recently used cache eviction strategy
+      const deleteCacheKey = this.data.keys().next().value;
       this.data.delete(deleteCacheKey);
     }
     return value;

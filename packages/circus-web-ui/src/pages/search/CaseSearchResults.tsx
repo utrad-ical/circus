@@ -33,7 +33,7 @@ const Operation: React.FC<{
       : 'case';
   const search = useSelector(state => state.searches.searches[searchName]);
   const handleClick = () => {
-    dispatch(searches.setNextPreviousLists(search?.results?.indexes ?? []));
+    dispatch(searches.setNextPreviousList(search?.results?.indexes ?? []));
   };
 
   return (

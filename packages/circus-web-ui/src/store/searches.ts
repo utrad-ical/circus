@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction, ThunkDispatch } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { confirm, prompt } from '@smikitky/rb-components/lib/modal';
 import { AppDispatch, AppThunk } from 'store';
 import { ApiCaller } from 'utils/api';
@@ -34,7 +34,7 @@ export interface SearchedResource<T> {
   [id: string]: T;
 }
 
-interface SearchState {
+export interface SearchState {
   searches: {
     [searchName: string]: SearchResult;
   };
@@ -43,7 +43,7 @@ interface SearchState {
     tasks: SearchedResource<Task>;
     [resourceName: string]: SearchedResource<any>;
   };
-  nextPreviousLists: string[];
+  nextPreviousList: string[];
 }
 
 export interface SearchResult {
@@ -59,7 +59,7 @@ export interface SearchResult {
 const initialState: SearchState = {
   searches: {},
   items: { series: {}, tasks: {} },
-  nextPreviousLists: []
+  nextPreviousList: []
 };
 
 const slice = createSlice({
@@ -150,8 +150,8 @@ const slice = createSlice({
       if (!state.items.tasks || !state.items.tasks[taskId]) return;
       state.items.tasks[taskId].dismissed = true;
     },
-    setNextPreviousLists: (state, action: PayloadAction<string[]>) => {
-      state.nextPreviousLists = action.payload;
+    setNextPreviousList: (state, action: PayloadAction<string[]>) => {
+      state.nextPreviousList = action.payload;
     }
   }
 });
@@ -170,7 +170,7 @@ export const {
   selectionStatusChanged,
   deleteSearch,
   dismissTask,
-  setNextPreviousLists
+  setNextPreviousList
 } = slice.actions;
 
 export default slice.reducer;

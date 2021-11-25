@@ -63,7 +63,7 @@ const SubMenu: React.FC<{
   );
 };
 
-const NextPreviousButton: React.FC<{
+const NextPreviousButtons: React.FC<{
   list: string[];
   current: string;
   prefix: string;
@@ -253,9 +253,7 @@ const MyListMenuItems: React.FC<{
 const MainNav: React.FC<{}> = props => {
   const user = useLoginUser();
   const pathname = useLocation().pathname;
-  let nextPreviousLists = useSelector(
-    state => state.searches.nextPreviousLists
-  );
+  let nextPreviousList = useSelector(state => state.searches.nextPreviousList);
 
   if (!user) return null;
   const loginUserName = user.description;
@@ -274,14 +272,14 @@ const MainNav: React.FC<{}> = props => {
 
   const currentCase = pathname.split('/').slice(-1)[0];
 
-  if (nextPreviousLists.every((list: string) => list !== currentCase)) {
-    nextPreviousLists = [];
+  if (nextPreviousList.every((list: string) => list !== currentCase)) {
+    nextPreviousList = [];
   }
 
   const showNextPreviousCaseButton =
-    pathname.indexOf('/case') === 0 && nextPreviousLists.length > 0;
+    pathname.indexOf('/case') === 0 && nextPreviousList.length > 0;
   const showNextPreviousPluginJobButton =
-    pathname.indexOf('/plugin-job') === 0 && nextPreviousLists.length > 0;
+    pathname.indexOf('/plugin-job') === 0 && nextPreviousList.length > 0;
 
   return (
     <StyledHeader>
@@ -316,8 +314,8 @@ const MainNav: React.FC<{}> = props => {
           </Menu>
           <Menu name="Case" link="/browse/case">
             {showNextPreviousCaseButton && (
-              <NextPreviousButton
-                list={nextPreviousLists}
+              <NextPreviousButtons
+                list={nextPreviousList}
                 current={currentCase}
                 prefix="/case"
               />
@@ -341,8 +339,8 @@ const MainNav: React.FC<{}> = props => {
           </Menu>
           <Menu name="CAD" icon="circus-icon-job" link="/browse/plugin-jobs">
             {showNextPreviousPluginJobButton && (
-              <NextPreviousButton
-                list={nextPreviousLists}
+              <NextPreviousButtons
+                list={nextPreviousList}
                 current={currentCase}
                 prefix="/plugin-job"
               />

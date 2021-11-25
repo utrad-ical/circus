@@ -32,7 +32,7 @@ const Operation: DataGridRenderer<any> = props => {
   const search = useSelector(state => state.searches.searches[searchName]);
   const handleClick = () => {
     if (job.status !== 'finished') return;
-    dispatch(searches.setNextPreviousLists(search?.results?.indexes ?? []));
+    dispatch(searches.setNextPreviousList(search?.results?.indexes ?? []));
     const url = `/plugin-job/${job.jobId}`;
     browserHistory.push(url);
   };

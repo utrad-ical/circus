@@ -9,7 +9,6 @@ import {
 import setImmediate from '../util/setImmediate';
 import Viewer from '../viewer/Viewer';
 import ViewState, { TwoDimensionalViewState } from '../ViewState';
-import ImageBitmapCache from './cache/ImageBitmapCache';
 import { drawToImageDataFor2D } from './drawToImageData';
 import ImageSource, { ViewStateResizeTransformer } from './ImageSource';
 import DicomVolumeLoader, {
@@ -25,19 +24,19 @@ export default class TwoDimensionalImageSource extends ImageSource {
   public metadata: DicomVolumeMetadata | undefined;
   protected loadSequence: Promise<void> | undefined;
   private volume: DicomVolume | undefined;
-  private cache: ImageBitmapCache;
+  private cache: UnclippedImageBitmapCache;
   private backCanvas: HTMLCanvasElement;
 
   constructor({
     volumeLoader,
-    maxCacheSize
+    maxCacheSize = 10
   }: TwoDimensionalImageSourceOptions) {
     super();
     this.loadSequence = (async () => {
       this.metadata = await volumeLoader.loadMeta();
       this.volume = await volumeLoader.loadVolume();
     })();
-    this.cache = new ImageBitmapCache({ maxSize: maxCacheSize });
+    this.cache = new UnclippedImageBitmapCache({ maxSize: maxCacheSize });
 
     const backCanvas = this.initializeBackCanvas();
     this.backCanvas = backCanvas;
@@ -103,22 +102,32 @@ export default class TwoDimensionalImageSource extends ImageSource {
     ];
   }
 
+  private async createUnclippedImageBitmap(
+    viewState: TwoDimensionalViewState
+  ): Promise<ImageBitmap> {
+    const imageData = this.createImageData(viewState);
+    const imageBitmap = await createImageBitmap(imageData);
+    return imageBitmap;
+  }
+
   public async draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
     if (viewState.type !== '2d') throw new Error('Unsupported view state');
 
     const context = viewer.canvas.getContext('2d');
     if (!context) throw new Error('Failed to get canvas context');
 
-    const cacheKey = this.createKey(viewState);
-    let imageBitmap: ImageBitmap | undefined;
-    imageBitmap = await this.cache.getImage(cacheKey);
-    if (!imageBitmap) {
-      const imageData = this.createImageData(viewState);
-      imageBitmap = await createImageBitmap(imageData);
-      await this.cache.putImage(cacheKey, imageBitmap);
-    }
+    const { imageNumber, window, interpolationMode } = viewState;
 
-    const interpolationMode = viewState.interpolationMode;
+    const cacheKey =
+      `imageNumber:${imageNumber};` +
+      (window ? `ww:${window.width};wl${window.level};` : '');
+    const imageBitmap =
+      this.cache.get(cacheKey) ??
+      this.cache.set(
+        cacheKey,
+        await this.createUnclippedImageBitmap(viewState)
+      );
+
     const imageSmoothingEnabled = !(
       !interpolationMode || interpolationMode === 'none'
     );
@@ -138,13 +147,6 @@ export default class TwoDimensionalImageSource extends ImageSource {
     return new Promise(resolve => {
       setImmediate(() => resolve(imageData!));
     });
-  }
-
-  private createKey(state: TwoDimensionalViewState): string {
-    const { imageNumber, window } = state;
-    let key = 'imageNumber:' + imageNumber + ';';
-    if (window) key += 'ww:' + window.width + ';' + 'wl:' + window.level + ';';
-    return key;
   }
 
   private createImageData(viewState: TwoDimensionalViewState): ImageData {
@@ -217,5 +219,39 @@ export default class TwoDimensionalImageSource extends ImageSource {
       }
       return sectionTo2dViewState(viewState, resizedSection);
     };
+  }
+}
+
+interface UnclippedImageBitmapCacheOption {
+  maxSize: number;
+}
+class UnclippedImageBitmapCache {
+  private data: Map<string, ImageBitmap>;
+  private maxSize: number;
+  private lruIndex: string[];
+
+  constructor({ maxSize }: UnclippedImageBitmapCacheOption) {
+    this.data = new Map();
+    this.maxSize = maxSize;
+    this.lruIndex = [];
+  }
+
+  public get(key: string): ImageBitmap | undefined {
+    if (this.data.has(key)) {
+      const value = this.data.get(key)!;
+      this.lruIndex = this.lruIndex.filter(v => v !== key).concat([key]);
+      return value;
+    }
+    return undefined;
+  }
+
+  public set(key: string, value: ImageBitmap): ImageBitmap {
+    this.data.set(key, value);
+    this.lruIndex.push(key);
+    if (this.maxSize < this.lruIndex.length) {
+      const deleteCacheKey = this.lruIndex.shift()!;
+      this.data.delete(deleteCacheKey);
+    }
+    return value;
   }
 }

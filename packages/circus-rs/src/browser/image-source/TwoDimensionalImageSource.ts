@@ -242,6 +242,7 @@ class UnclippedImageBitmapCache {
   }
 
   public set(key: string, value: Promise<ImageBitmap>): Promise<ImageBitmap> {
+    this.data.set(key, value);
     this.lruIndex.push(key);
     if (this.maxSize < this.lruIndex.length) {
       const deleteCacheKey = this.lruIndex.shift()!;

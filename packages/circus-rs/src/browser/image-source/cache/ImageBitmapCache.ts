@@ -17,6 +17,7 @@ export default class ImageBitmapCache {
       const value = this._image.get(key)!;
       this._image.delete(key);
       this._image.set(key, value);
+      return value;
     }
     return undefined;
   }

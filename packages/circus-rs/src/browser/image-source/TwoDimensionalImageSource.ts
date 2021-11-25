@@ -58,10 +58,10 @@ export default class TwoDimensionalImageSource extends ImageSource {
       metadata.pixelFormat === 'rgba8'
         ? undefined
         : metadata.dicomWindow
-          ? { ...metadata.dicomWindow }
-          : metadata.estimatedWindow
-            ? { ...metadata.estimatedWindow }
-            : { level: 50, width: 100 };
+        ? { ...metadata.dicomWindow }
+        : metadata.estimatedWindow
+        ? { ...metadata.estimatedWindow }
+        : { level: 50, width: 100 };
 
     const initialState: TwoDimensionalViewState = {
       type: '2d',

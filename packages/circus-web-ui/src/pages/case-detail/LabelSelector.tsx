@@ -345,9 +345,7 @@ export const Label: React.FC<{
     onClick
   } = props;
 
-  const [isDraggingOver, setIsDraggingOver] = useState<
-    false | 'top' | 'bottom'
-  >(false);
+  const [isDraggingOver, setIsDraggingOver] = useState<false | 'top' | 'bottom'>(false);
   const liRef = useRef<HTMLLIElement>(null);
 
   const handleColorPreviewClick = (ev: React.MouseEvent) => {

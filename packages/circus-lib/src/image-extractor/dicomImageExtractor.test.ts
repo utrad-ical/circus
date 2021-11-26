@@ -19,11 +19,11 @@ describe('dicomImageExtractor', () => {
     if (!metadata || !pixelData) throw new Error();
 
     for (const key in checks) {
-      expect(checks[key]).toEqual((metadata as any)[key]);
+      expect((metadata as any)[key]).toEqual(checks[key]);
     }
     const pxInfo = px.pixelFormatInfo(metadata.pixelFormat);
-    expect(metadata.columns * metadata.rows * pxInfo.bpp).toEqual(
-      pixelData.byteLength
+    expect(pixelData.byteLength).toEqual(
+      metadata.columns * metadata.rows * pxInfo.bpp
     );
 
     const doRescale =

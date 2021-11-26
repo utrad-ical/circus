@@ -931,7 +931,7 @@ const RevisionEditor: React.FC<{
         />
       </div>
       {seriesDialogOpen && (
-        <Modal show bsSize="lg" onHide={() => {}}>
+        <Modal show bsSize="lg" onHide={() => { }}>
           <SeriesSelectorDialog
             onResolve={handleSeriesDialogResolve}
             initialValue={editingData.revision.series}

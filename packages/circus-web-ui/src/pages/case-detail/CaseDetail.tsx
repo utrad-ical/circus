@@ -250,7 +250,7 @@ const CaseDetail: React.FC<{}> = props => {
         updateEditingData={updateEditingData}
       />
       {exportDialogOpen && (
-        <Modal show onHide={() => { }}>
+        <Modal show onHide={() => {}}>
           <CaseExportModal
             caseIds={[
               { caseId, revisionIndex: caseStore.editingRevisionIndex }
@@ -261,7 +261,7 @@ const CaseDetail: React.FC<{}> = props => {
         </Modal>
       )}
       {saveDialogOpen && (
-        <Modal show onHide={() => { }}>
+        <Modal show onHide={() => {}}>
           <SaveModal
             value={editingData.revision.description}
             revisionHistory={

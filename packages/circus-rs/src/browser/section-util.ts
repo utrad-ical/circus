@@ -14,6 +14,7 @@ import {
   intersectsPolygon,
   sortVerticesOfSimplePolygon
 } from '../common/geometry/Polygon';
+import { TwoDimensionalViewState } from './ViewState';
 
 export type OrientationString = 'axial' | 'sagittal' | 'coronal' | 'oblique';
 
@@ -571,4 +572,34 @@ export const getSectionFromPoints = (
     xAxis: xAxis.toArray(),
     yAxis: yAxis.toArray()
   };
+};
+
+export const sectionFrom2dViewState = (
+  viewState: TwoDimensionalViewState
+): Section => {
+  // NOTE: Rotation is not supported yet.
+  const { origin, xAxis, yLength, imageNumber } = viewState;
+  const section = {
+    origin: [origin[0], origin[1], imageNumber],
+    xAxis: [xAxis[0], xAxis[1], 0],
+    yAxis: [0, yLength, 0]
+  };
+  return section;
+};
+
+export const sectionTo2dViewState = (
+  prevState: TwoDimensionalViewState,
+  section: Section
+): TwoDimensionalViewState => {
+  if (detectOrthogonalSection(section) !== 'axial')
+    throw new Error('Invalid section.');
+
+  const state: TwoDimensionalViewState = {
+    ...prevState,
+    origin: [section.origin[0], section.origin[1]],
+    xAxis: [section.xAxis[0], section.xAxis[1]],
+    yLength: section.yAxis[1],
+    imageNumber: Math.round(section.origin[2])
+  };
+  return state;
 };

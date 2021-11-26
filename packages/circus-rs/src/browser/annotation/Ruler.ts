@@ -6,15 +6,19 @@ import {
   Vector3D
 } from '../../common/geometry';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
-import { getOrthogonalProjectedPoint } from '../section-util';
+import {
+  getOrthogonalProjectedPoint,
+  sectionFrom2dViewState
+} from '../section-util';
 import {
   convertViewerPointToVolumePoint,
   convertVolumePointToViewerPoint
 } from '../tool/tool-util';
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
-import ViewState, { MprViewState } from '../ViewState';
+import ViewState from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
+import determineColor from './helper/determineColor';
 import { drawFillText, drawLine, drawPoint } from './helper/drawObject';
 import { hitLineSegment, hitRectangle } from './helper/hit-test';
 
@@ -29,6 +33,12 @@ const cursorTypes: {
   'label-move': { cursor: 'move' }
 };
 
+const isValidViewState = (viewState: ViewState): boolean => {
+  if (!viewState) return false;
+  if (viewState.type === 'mpr') return true;
+  if (viewState.type === '2d') return true;
+  return false;
+};
 export default class Ruler implements Annotation, ViewerEventTarget {
   /**
    * Color of the outline.
@@ -100,15 +110,13 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     | undefined = undefined;
 
   public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
-    if (!viewer || !viewState || viewState.type !== 'mpr') return;
+    if (!viewer || !isValidViewState(viewState)) return;
     const ctx = viewer.canvas?.getContext('2d');
     if (!ctx) return;
 
     if (!this.validate()) return;
 
-    const section = viewState.section;
-
-    const color = this.getStrokeColor(section);
+    const color = this.getStrokeColor(viewState);
     if (!color) return;
 
     // Points on screen for each end
@@ -143,20 +151,25 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     }
   }
 
-  private getStrokeColor(section: Section): string | undefined {
+  private getStrokeColor(viewState: ViewState): string | undefined {
+    const section =
+      viewState.type !== '2d'
+        ? viewState.section
+        : sectionFrom2dViewState(viewState);
+
     const maxDistance = Math.max(
       distanceFromPointToSection(section, new Vector3(...this.start!)),
       distanceFromPointToSection(section, new Vector3(...this.end!))
     );
 
-    switch (true) {
-      case maxDistance <= this.distanceThreshold:
-        return this.color;
-      case maxDistance <= this.distanceDimmedThreshold:
-        return this.dimmedColor;
-      default:
-        return;
-    }
+    return determineColor(
+      viewState,
+      maxDistance,
+      this.distanceThreshold,
+      this.distanceDimmedThreshold,
+      this.color,
+      this.dimmedColor
+    );
   }
 
   /**
@@ -182,12 +195,11 @@ export default class Ruler implements Annotation, ViewerEventTarget {
   public mouseMoveHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     const viewState = viewer.getState();
-    if (!viewer || !viewState) return;
-    if (viewState.type !== 'mpr') return;
+    if (!viewer || !isValidViewState(viewState)) return;
     if (!this.editable) return;
 
     // to prevent to edit unvisible ruler.
-    if (!this.getStrokeColor(viewState.section)) return;
+    if (!this.getStrokeColor(viewState)) return;
 
     this.handleType = this.hitTest(ev);
     if (this.handleType) {
@@ -205,14 +217,13 @@ export default class Ruler implements Annotation, ViewerEventTarget {
   public dragStartHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     const viewState = viewer.getState();
-    if (!viewer || !viewState) return;
-    if (viewState.type !== 'mpr') return;
+    if (!viewer || !isValidViewState(viewState)) return;
     if (!this.editable) return;
 
     if (!this.start || !this.end || !this.section) return;
 
     // to prevent to edit unvisible ruler.
-    if (!this.getStrokeColor(viewState.section)) return;
+    if (!this.getStrokeColor(viewState)) return;
 
     if (viewer.getHoveringAnnotation() === this) {
       ev.stopPropagation();
@@ -236,7 +247,12 @@ export default class Ruler implements Annotation, ViewerEventTarget {
       };
 
       if (['start-reset', 'end-reset'].some(t => t === this.handleType)) {
-        const { section } = viewer.getState() as MprViewState;
+        const viewState = viewer.getState();
+        const section =
+          viewState.type !== '2d'
+            ? viewState.section
+            : sectionFrom2dViewState(viewState);
+
         const start = new Vector3().fromArray(this.start!);
         const end = new Vector3().fromArray(this.end!);
         this.start = getOrthogonalProjectedPoint(
@@ -254,8 +270,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
   public dragHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     const viewState = viewer.getState();
-    if (!viewer || !viewState) return;
-    if (viewState.type !== 'mpr') return;
+    if (!viewer || !isValidViewState(viewState)) return;
     if (!this.dragInfo) return;
     if (viewer.getHoveringAnnotation() !== this) return;
 
@@ -305,8 +320,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
   public dragEndHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     const viewState = viewer.getState();
-    if (!viewer || !viewState) return;
-    if (viewState.type !== 'mpr') return;
+    if (!viewer || !isValidViewState(viewState)) return;
 
     if (viewer.getHoveringAnnotation() === this) {
       ev.stopPropagation();

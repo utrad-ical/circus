@@ -1,13 +1,14 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import {
+  sectionTo2dViewState,
   createOrthogonalMprSection,
   OrientationString
 } from '@utrad-ical/circus-rs/src/browser/section-util';
+import ToolBaseClass from '@utrad-ical/circus-rs/src/browser/tool/Tool';
 import { toolFactory } from '@utrad-ical/circus-rs/src/browser/tool/tool-initializer';
 import classnames from 'classnames';
 import { EventEmitter } from 'events';
-import ToolBaseClass from '@utrad-ical/circus-rs/src/browser/tool/Tool';
+import React, { useEffect, useRef, useState } from 'react';
 
 export const setOrthogonalOrientation = (orientation: OrientationString) => {
   return (viewer: rs.Viewer, initialViewState: rs.MprViewState) => {
@@ -24,6 +25,24 @@ export const setOrthogonalOrientation = (orientation: OrientationString) => {
     };
     return newState;
   };
+};
+
+export const getInitial2dViewState = (
+  viewer: rs.Viewer,
+  initialViewState: rs.TwoDimensionalViewState
+) => {
+  if (initialViewState.type !== '2d') return;
+  const src = viewer.getComposition()!
+    .imageSource as rs.TwoDimensionalImageSource;
+  const mmDim = src.mmDim();
+  const section = createOrthogonalMprSection(
+    viewer.getResolution(),
+    mmDim,
+    'axial',
+    0
+  );
+  const newState = sectionTo2dViewState(initialViewState, section);
+  return newState;
 };
 
 const defaultTool = toolFactory('pager');
@@ -143,8 +162,12 @@ const ImageViewer: React.FC<{
   useEffect(() => {
     if (!viewer || !composition) return;
     if (viewer.getComposition() === composition) return;
-    viewer.setComposition(composition);
+    // Ensure borowser rendering at least once.
+    setImmediate(() => viewer.setComposition(composition));
     initialStateSet.current = false;
+    return () => {
+      viewer.clearComposition;
+    };
   }, [viewer, composition]);
 
   // Handle stateChanger

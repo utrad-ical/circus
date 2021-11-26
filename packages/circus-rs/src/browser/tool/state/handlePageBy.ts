@@ -1,5 +1,6 @@
 import { Vector2, Vector3 } from 'three';
 import MprImageSource from '../../image-source/MprImageSource';
+import TwoDimensionalImageSource from '../../image-source/TwoDimensionalImageSource';
 import {
   orientationAwareTranslation,
   sectionOverlapsVolume
@@ -11,15 +12,23 @@ export default function handlePageBy(viewer: Viewer, step: number): void {
   const resolution = viewer.getResolution();
   const comp = viewer.getComposition();
   if (!comp) throw new Error('Composition not initialized'); // should not happen
-  const src = comp.imageSource as MprImageSource;
-  if (!(src instanceof MprImageSource)) return;
+
+  const src = comp.imageSource as any;
+  if (
+    !(src instanceof MprImageSource) &&
+    !(src instanceof TwoDimensionalImageSource)
+  )
+    return;
+
   switch (prevState.type) {
     case 'mpr': {
+      const prevSection = prevState.section;
       const section = orientationAwareTranslation(
-        prevState.section,
+        prevSection,
         src.metadata!.voxelSize,
         step
       );
+
       // Abort If the section does not overlap the volume.
       const overlap = sectionOverlapsVolume(
         section,
@@ -28,7 +37,21 @@ export default function handlePageBy(viewer: Viewer, step: number): void {
         new Vector3().fromArray(src.metadata!.voxelCount)
       );
       if (!overlap) return;
+
       viewer.setState({ ...prevState, section });
+      return;
+    }
+    case '2d': {
+      step = Math.round(step);
+      if (step === 0) return;
+      const imageNumber = prevState.imageNumber + step;
+
+      // Abort If the section does not overlap the volume.
+      const overlap =
+        0 <= imageNumber && imageNumber < src.metadata!.voxelCount[2];
+      if (!overlap) return;
+
+      viewer.setState({ ...prevState, imageNumber });
       return;
     }
   }
@@ -38,8 +61,13 @@ export function handlePageByScrollbar(viewer: Viewer, step: number): void {
   const prevState = viewer.getState();
   const comp = viewer.getComposition();
   if (!comp) throw new Error('Composition not initialized'); // should not happen
-  const src = comp.imageSource as MprImageSource;
-  if (!(src instanceof MprImageSource)) return;
+
+  const src = comp.imageSource as any;
+  if (
+    !(src instanceof MprImageSource) &&
+    !(src instanceof TwoDimensionalImageSource)
+  )
+    return;
 
   switch (prevState.type) {
     case 'mpr': {
@@ -50,6 +78,14 @@ export function handlePageByScrollbar(viewer: Viewer, step: number): void {
       );
       const viewState = { ...prevState, section };
       viewer.setState(viewState);
+      return;
+    }
+    case '2d': {
+      step = Math.round(step);
+      if (step === 0) return;
+      const imageNumber = prevState.imageNumber + step;
+      if (prevState.imageNumber === imageNumber) return;
+      viewer.setState({ ...prevState, imageNumber });
       return;
     }
   }

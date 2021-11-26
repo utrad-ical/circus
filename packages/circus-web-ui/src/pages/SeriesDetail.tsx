@@ -39,22 +39,39 @@ const SeriesDetail: React.FC<{}> = props => {
   );
   const [seriesData] = useLoadData<any | Error>(load);
 
+  const loadingId = React.useRef(0);
+
+  const getImageSource = React.useCallback(async (server, seriesUid) => {
+    const rsHttpClient = new rs.RsHttpClient(server);
+    const volumeLoader = new rs.RsVolumeLoader({ rsHttpClient, seriesUid });
+    const meta = await volumeLoader.loadMeta();
+    switch (meta.mode) {
+      case '2d':
+        return new rs.TwoDimensionalImageSource({
+          volumeLoader,
+          maxCacheSize: 10
+        });
+      default:
+        return new rs.HybridMprImageSource({
+          volumeLoader,
+          rsHttpClient,
+          seriesUid,
+          estimateWindowType: 'center'
+        });
+    }
+  }, []);
+
   useEffect(() => {
     if (!seriesData) return;
-    const rsHttpClient = new rs.RsHttpClient(server);
-    const volumeLoader = new rs.RsVolumeLoader({
-      rsHttpClient,
-      seriesUid
-    });
-    const src = new rs.HybridMprImageSource({
-      volumeLoader,
-      rsHttpClient,
-      seriesUid,
-      estimateWindowType: 'center'
-    });
-    const composition = new rs.Composition(src);
-    setComposition(composition);
-  }, [seriesData, seriesUid, server]);
+    (async () => {
+      const id = ++loadingId.current;
+      const src = await getImageSource(server, seriesUid);
+      if (loadingId.current === id) {
+        const composition = new rs.Composition(src);
+        setComposition(composition);
+      }
+    })();
+  }, [seriesData, seriesUid, server, getImageSource]);
 
   if (!seriesData) return <LoadingIndicator />;
 

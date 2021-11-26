@@ -1,10 +1,7 @@
 import { Box2, Vector2, Vector3 } from 'three';
-import {
-  distanceFromPointToSection,
-  Section,
-  Vector3D
-} from '../../common/geometry';
+import { distanceFromPointToSection, Vector3D } from '../../common/geometry';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
+import { sectionFrom2dViewState } from '../section-util';
 import {
   convertViewerPointToVolumePoint,
   convertVolumePointToViewerPoint
@@ -13,6 +10,7 @@ import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
+import determineColor from './helper/determineColor';
 import { drawPoint } from './helper/drawObject';
 import { hitRectangle } from './helper/hit-test';
 
@@ -22,6 +20,13 @@ const cursorTypes: {
   [key in PointHitType]: { cursor: string };
 } = {
   'point-move': { cursor: 'move' }
+};
+
+const isValidViewState = (viewState: ViewState): boolean => {
+  if (!viewState) return false;
+  if (viewState.type === 'mpr') return true;
+  if (viewState.type === '2d') return true;
+  return false;
 };
 
 export default class Point implements Annotation, ViewerEventTarget {
@@ -61,15 +66,15 @@ export default class Point implements Annotation, ViewerEventTarget {
     | undefined = undefined;
 
   public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
-    if (!viewer || !viewState) return;
+    if (!viewer || !isValidViewState(viewState)) return;
     if (!this.location) return;
     const canvas = viewer.canvas;
     if (!canvas) return;
-    if (viewState.type !== 'mpr') return;
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const color = this.getColor(viewState.section);
+    const color = this.getDrawingColor(viewState);
     if (!color) return;
 
     const screenPoint = convertVolumePointToViewerPoint(
@@ -79,20 +84,25 @@ export default class Point implements Annotation, ViewerEventTarget {
     drawPoint(ctx, screenPoint, { radius: this.radius, color });
   }
 
-  private getColor(section: Section): string | undefined {
+  private getDrawingColor(viewState: ViewState): string | undefined {
+    const section =
+      viewState.type !== '2d'
+        ? viewState.section
+        : sectionFrom2dViewState(viewState);
+
     const distance = distanceFromPointToSection(
       section,
       new Vector3(...this.location!)
     );
 
-    switch (true) {
-      case distance <= this.distanceThreshold:
-        return this.color;
-      case distance <= this.distanceDimmedThreshold:
-        return this.dimmedColor;
-      default:
-        return;
-    }
+    return determineColor(
+      viewState,
+      distance,
+      this.distanceThreshold,
+      this.distanceDimmedThreshold,
+      this.color,
+      this.dimmedColor
+    );
   }
 
   public validate(): boolean {
@@ -102,8 +112,7 @@ export default class Point implements Annotation, ViewerEventTarget {
   public mouseMoveHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     const viewState = viewer.getState();
-    if (!viewer || !viewState) return;
-    if (viewState.type !== 'mpr') return;
+    if (!viewer || !isValidViewState(viewState)) return;
     if (!this.editable) return;
     if (!this.location) return;
 
@@ -124,7 +133,7 @@ export default class Point implements Annotation, ViewerEventTarget {
     const viewer = ev.viewer;
     const viewState = viewer.getState();
     if (!viewer || !viewState) return;
-    if (viewState.type !== 'mpr') return;
+    if (!viewer || !isValidViewState(viewState)) return;
     if (!this.editable) return;
     if (!this.location) return;
 
@@ -164,7 +173,7 @@ export default class Point implements Annotation, ViewerEventTarget {
     const viewer = ev.viewer;
     const viewState = viewer.getState();
     if (!viewer || !viewState) return;
-    if (viewState.type !== 'mpr') return;
+    if (!viewer || !isValidViewState(viewState)) return;
     if (!this.dragInfo) return;
 
     if (viewer.getHoveringAnnotation() === this && this.handleType) {
@@ -197,7 +206,7 @@ export default class Point implements Annotation, ViewerEventTarget {
     const viewer = ev.viewer;
     const viewState = viewer.getState();
     if (!viewer || !viewState) return;
-    if (viewState.type !== 'mpr') return;
+    if (!viewer || !isValidViewState(viewState)) return;
 
     if (viewer.getHoveringAnnotation() === this) {
       ev.stopPropagation();

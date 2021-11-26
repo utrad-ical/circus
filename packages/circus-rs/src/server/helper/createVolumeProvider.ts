@@ -7,10 +7,10 @@ import {
   Initializer as MultiRangeInitializer,
   MultiRange
 } from 'multi-integer-range';
-import RawData from '../../common/RawData';
-import PriorityIntegerCaller from '../../common/PriorityIntegerCaller';
-import DicomVolume from '../../common/DicomVolume';
 import asyncMemoize from '../../common/asyncMemoize';
+import DicomVolume from '../../common/DicomVolume';
+import PriorityIntegerCaller from '../../common/PriorityIntegerCaller';
+import RawData from '../../common/RawData';
 import { DicomExtractorWorker } from './extractor-worker/createDicomExtractorWorker';
 
 export type VolumeProvider = (seriesUid: string) => Promise<VolumeAccessor>;
@@ -29,6 +29,7 @@ export interface VolumeAccessor {
   zIndices: Map<number, number>;
   determinePitch: () => Promise<number>;
   images: MultiRange;
+  isLike3d: () => Promise<boolean>;
 }
 
 interface OptionsWithoutCache {
@@ -89,6 +90,9 @@ const createUncachedVolumeProvider: FunctionService<
     // Prepare image loader
     const processor = async (imageNo: number) => {
       const buffer = await fetch(imageNo);
+      const metadata = imageMetadata.get(imageNo)!;
+      verifyMetadata(metadata);
+
       volume.insertSingleImage(zIndices.get(imageNo)!, buffer);
     };
     const priorityLoader = new PriorityIntegerCaller(processor, {
@@ -127,15 +131,122 @@ const createUncachedVolumeProvider: FunctionService<
       }
     };
 
+    /**
+     * Determines if the image is a "3D-like image" and returns it.
+     * If the first two images in the subseries satisfy all of the following,
+     * it will determine that they are "3D-like images" and return true.
+     * - The modality is CT, MR or PT.
+     * - Pixel format is monochrome.
+     * - The orientation of the image written in the DICOM tag is the same for the first and the second image.
+     * - DICOM tag does not have a flag that the image is a reconstructed image.
+     * @returns True for "3D-like images"
+     */
+    const isLike3d = async () => {
+      const images = imageRange.clone();
+      const count = images.length();
+
+      // primary image
+      const primaryImageNo = images.shift()!;
+      await load(primaryImageNo);
+      const primaryMetadata = imageMetadata.get(primaryImageNo)!;
+      const checkPrimaryImage = determineIf3dImageFromMetadata(primaryMetadata);
+      if (count === 1) {
+        return checkPrimaryImage;
+      }
+
+      // secondary image
+      const secondaryImageNo = images.shift()!;
+      await load(secondaryImageNo);
+      const secondaryMetadata = imageMetadata.get(secondaryImageNo)!;
+      const checkSecondaryImage =
+        determineIf3dImageFromMetadata(secondaryMetadata);
+
+      const checkImageOrientationPatient =
+        primaryMetadata.imageOrientationPatient ===
+        secondaryMetadata.imageOrientationPatient;
+
+      // check
+      const like3d =
+        checkPrimaryImage &&
+        checkSecondaryImage &&
+        checkImageOrientationPatient;
+
+      const imageOrientationPatient = primaryMetadata.imageOrientationPatient;
+
+      verifyMetadataOf3dImage = like3d
+        ? metadata => {
+            if (
+              !determineIf3dImageFromMetadata(metadata) ||
+              imageOrientationPatient !== metadata.imageOrientationPatient
+            )
+              throw new Error('Contains image that do not look like 3d image.');
+          }
+        : undefined;
+
+      return like3d;
+    };
+
+    let verifyMetadataOf3dImage:
+      | undefined
+      | ((metadata: DicomMetadata) => void) = undefined;
+
+    const verifyMetadata = async (metadata: DicomMetadata) => {
+      // primary image
+      const images = imageRange.clone();
+      const primaryImageNo = images.shift()!;
+      await load(primaryImageNo);
+      const primaryMetadata = imageMetadata.get(primaryImageNo)!;
+
+      // Check: Size
+      if (
+        primaryMetadata.columns != metadata.columns ||
+        primaryMetadata.rows != metadata.rows
+      ) {
+        throw new Error('Size is different.');
+      }
+
+      // Check: Pixel format
+      if (primaryMetadata.pixelFormat != metadata.pixelFormat) {
+        throw new Error('Pixel format is different.');
+      }
+
+      // Check: 3D Image
+      if (verifyMetadataOf3dImage) verifyMetadataOf3dImage(metadata);
+    };
+
     return {
       imageMetadata,
       volume,
       zIndices,
       load: loadSeries,
       determinePitch,
-      images: imageRange
+      images: imageRange,
+      isLike3d
     };
   };
+};
+
+const determineIf3dImageFromMetadata = (metadata: DicomMetadata) => {
+  // Check: The modality is CT, MR or PT.
+  if (!['CT', 'MR', 'PT'].includes(metadata.modality)) {
+    return false;
+  }
+
+  // Check: Pixel format is monochrome.
+  if (metadata.pixelFormat === 'rgba8') {
+    return false;
+  }
+
+  // Check: DICOM tag does not have a flag that the image is a reconstructed image.
+  if (
+    metadata.pixelDataCharacteristics &&
+    metadata.pixelDataCharacteristics.match(/^DERIVED/)
+  ) {
+    return false;
+  }
+
+  // Passed all requirements.
+  return true;
 };
 
 interface Options extends OptionsWithoutCache {

@@ -1,12 +1,15 @@
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { Section, Vector2D, Vector3D } from '@utrad-ical/circus-rs/src/browser';
-import { detectOrthogonalSection } from '@utrad-ical/circus-rs/src/browser/section-util';
+import {
+  sectionTo2dViewState,
+  detectOrthogonalSection
+} from '@utrad-ical/circus-rs/src/browser/section-util';
 import focusBy from '@utrad-ical/circus-rs/src/browser/tool/state/focusBy';
+import { gzipSync } from 'fflate';
 import produce from 'immer';
 import { ApiCaller } from 'utils/api';
 import { sha1 } from 'utils/util';
-import { gzipSync } from 'fflate';
 
 type InternalLabelDataMap = {
   voxel: InternalVoxelLabelData;
@@ -114,15 +117,35 @@ export type ExternalLabel = {
 );
 
 export const labelTypes: {
-  [key in LabelType]: { icon: string; canConvertTo?: LabelType };
+  [key in LabelType]: {
+    icon: string;
+    canConvertTo?: LabelType;
+    allow2D: boolean;
+  };
 } = {
-  voxel: { icon: 'circus-annotation-voxel' },
-  cuboid: { icon: 'circus-annotation-cuboid', canConvertTo: 'ellipsoid' },
-  ellipsoid: { icon: 'circus-annotation-ellipsoid', canConvertTo: 'cuboid' },
-  rectangle: { icon: 'circus-annotation-rectangle', canConvertTo: 'ellipse' },
-  ellipse: { icon: 'circus-annotation-ellipse', canConvertTo: 'rectangle' },
-  point: { icon: 'circus-annotation-point' },
-  ruler: { icon: 'circus-annotation-ruler' }
+  voxel: { icon: 'circus-annotation-voxel', allow2D: false },
+  cuboid: {
+    icon: 'circus-annotation-cuboid',
+    allow2D: false,
+    canConvertTo: 'ellipsoid'
+  },
+  ellipsoid: {
+    icon: 'circus-annotation-ellipsoid',
+    allow2D: false,
+    canConvertTo: 'cuboid'
+  },
+  rectangle: {
+    icon: 'circus-annotation-rectangle',
+    allow2D: true,
+    canConvertTo: 'ellipse'
+  },
+  ellipse: {
+    icon: 'circus-annotation-ellipse',
+    allow2D: true,
+    canConvertTo: 'rectangle'
+  },
+  point: { icon: 'circus-annotation-point', allow2D: true },
+  ruler: { icon: 'circus-annotation-ruler', allow2D: true }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -372,7 +395,7 @@ const getCenterOfLabel = (
   switch (label.type) {
     case 'voxel': {
       const src = composition.imageSource as rs.MprImageSource;
-      if (!src.metadata) return;
+      if (!src || !src.metadata) return;
 
       const shrinkResult = voxelShrinkToMinimum(label.data);
       if (shrinkResult === null) return;
@@ -433,16 +456,32 @@ export const setRecommendedDisplay = (
       viewers
         .filter(viewer => viewer.getComposition() === composition)
         .forEach(viewer => {
-          const orientation = detectOrthogonalSection(
-            viewer.getState().section
-          );
-          if (orientation === reproduceOrientation) {
-            viewer.setState({
-              ...viewer.getState(),
-              section: reproduceSection
-            });
-          } else {
-            focusBy(viewer, center);
+          const prevState = viewer.getState();
+          switch (prevState.type) {
+            case '2d': {
+              viewer.setState({
+                ...sectionTo2dViewState(prevState, reproduceSection)
+              });
+              break;
+            }
+            case 'mpr':
+            case 'vr':
+              {
+                const prevSection = prevState.section;
+                const orientation = detectOrthogonalSection(prevSection);
+                if (orientation === reproduceOrientation) {
+                  viewer.setState({
+                    ...prevState,
+                    section: reproduceSection
+                  });
+                } else {
+                  focusBy(viewer, center);
+                }
+              }
+              break;
+            default: {
+              throw new Error('Unsupported view state');
+            }
           }
         });
       break;

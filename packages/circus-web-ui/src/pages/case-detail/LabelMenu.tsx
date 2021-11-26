@@ -3,6 +3,7 @@ import { alert, prompt } from '@smikitky/rb-components/lib/modal';
 import Slider from '@smikitky/rb-components/lib/Slider';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import { Viewer } from '@utrad-ical/circus-rs/src/browser';
+import { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
 import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
@@ -54,6 +55,7 @@ const LabelMenu: React.FC<{
   caseDispatch: React.Dispatch<any>;
   viewers: { [index: string]: Viewer };
   disabled?: boolean;
+  metadata: (DicomVolumeMetadata | undefined)[];
 }> = props => {
   const {
     editingData,
@@ -61,13 +63,9 @@ const LabelMenu: React.FC<{
     updateEditingData,
     caseDispatch,
     viewers,
-    disabled
+    disabled,
+    metadata
   } = props;
-
-  const [newLabelType, setNewLabelType] = useLocalPreference<LabelType>(
-    'newLabelType',
-    'voxel'
-  );
 
   const [cclDialogOpen, setCclDialogOpen] = useState(false);
   const [hfDialogOpen, setHfDialogOpen] = useState(false);
@@ -76,9 +74,18 @@ const LabelMenu: React.FC<{
     label: ''
   });
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
+  const activeSeriesMetadata = metadata[activeSeriesIndex];
   const activeSeries = revision.series[activeSeriesIndex];
   const activeLabel =
     activeLabelIndex >= 0 ? activeSeries.labels[activeLabelIndex] : null;
+
+  const [defaultNewLabelType, setDefaultLabelType] =
+    useLocalPreference<LabelType>('defaultLabelType', 'voxel');
+  const newLabelType =
+    !labelTypes[defaultNewLabelType].allow2D &&
+    activeSeriesMetadata?.mode !== '3d'
+      ? 'ruler'
+      : defaultNewLabelType;
 
   const updateCurrentLabels = createCurrentLabelsUpdator(
     editingData,
@@ -164,7 +171,7 @@ const LabelMenu: React.FC<{
 
   const createNewLabel = (
     type: LabelType,
-    viewer: Viewer | undefined,
+    viewer: Viewer,
     color = labelColors[0]
   ): InternalLabel => {
     const alpha = 1;
@@ -188,7 +195,7 @@ const LabelMenu: React.FC<{
   };
 
   const addLabel = async (type: LabelType) => {
-    setNewLabelType(type);
+    setDefaultLabelType(type);
 
     const basic: OrientationString[] = ['axial', 'sagittal', 'coronal'];
     const allowedOrientations: { [key in LabelType]: OrientationString[] } = {
@@ -208,6 +215,14 @@ const LabelMenu: React.FC<{
         'Select the viewer on which you want to place the new label. ' +
           'Click the header.'
       );
+      return;
+    }
+
+    if (
+      !labelTypes[type].allow2D &&
+      viewers[viewerId].getState()?.type !== 'mpr'
+    ) {
+      await alert('2D viewer does not support ' + type + ' labels.');
       return;
     }
 
@@ -233,6 +248,7 @@ const LabelMenu: React.FC<{
       },
       labelColors.slice()
     )[0];
+
     const newLabel = createNewLabel(type, viewers[viewerId], color);
     updateEditingData(editingData => {
       const labels = editingData.revision.series[activeSeriesIndex].labels;
@@ -313,10 +329,12 @@ const LabelMenu: React.FC<{
         : spareKey;
       const [newLayoutItems, newLayout, key] = createSectionFromPoints(
         editingData.revision.series[activeSeriesIndex].labels.filter(label => {
-          return label.type === 'point';
+          return (
+            label.type === 'point' && !(activeSeriesMetadata?.mode !== '3d')
+          );
         }) as InternalLabelOf<'point'>[],
         activeLabel!.name!,
-        viewers[targetLayoutKey!].getState().section,
+        (viewers[targetLayoutKey!].getState() as any).section,
         editingData.layout,
         editingData.layoutItems,
         activeSeriesIndex
@@ -326,7 +344,7 @@ const LabelMenu: React.FC<{
         d.layout = newLayout;
         d.activeLayoutKey = key;
       });
-    } catch (err) {
+    } catch (err: any) {
       alert(err.message);
     }
   };
@@ -426,13 +444,15 @@ const LabelMenu: React.FC<{
         >
           Hole filling
         </MenuItem>
-        <MenuItem
-          eventKey="section"
-          onSelect={onSelect(onSelectThreePoints2Section)}
-          disabled={!activeLabel || activeLabel.type !== 'point'}
-        >
-          Three points to section
-        </MenuItem>
+        {!(activeSeriesMetadata?.mode !== '3d') && (
+          <MenuItem
+            eventKey="section"
+            onSelect={onSelect(onSelectThreePoints2Section)}
+            disabled={!activeLabel || activeLabel.type !== 'point'}
+          >
+            Three points to section
+          </MenuItem>
+        )}
       </DropdownButton>
       <IconButton
         bsSize="xs"
@@ -456,7 +476,10 @@ const LabelMenu: React.FC<{
         disabled={disabled}
       >
         {Object.keys(labelTypes).map((type, i) => {
-          const { icon } = labelTypes[type as LabelType];
+          const { icon, allow2D } = labelTypes[type as LabelType];
+          if (activeSeriesMetadata?.mode !== '3d' && !allow2D) {
+            return;
+          }
           return (
             <MenuItem
               key={type}

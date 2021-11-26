@@ -5,6 +5,7 @@ import {
   pixelFormatInfo
 } from '@utrad-ical/circus-lib/src/PixelFormat';
 import { Box, Section, Vector2D, Vector3D } from './geometry';
+import { applyWindow } from './pixel';
 
 // Make sure you don't add properties
 // that heavily depends on DICOM spec!
@@ -164,6 +165,8 @@ export default class RawData {
     y: number,
     z: number
   ): number | undefined {
+    // NOTE: In the case of color image (rgba8), returns incorrect value.
+
     // Check values
     if (
       x < 0.0 ||
@@ -425,13 +428,13 @@ export default class RawData {
   /**
    * Converts this raw data to new pixel format, optionally using a filter.
    * @param targetFormat
-   * @param mapper Optional function which is applied to
-   *     map the voxel values.
+   * @param mapper Optional function which is applied to map the voxel values.
    */
   public convert(
     targetFormat: PixelFormat,
     mapper: (input: number) => number
   ): void {
+    // NOTE: In the case of color image (rgba8), returns incorrect value.
     const [rx, ry, rz] = this.size;
     const newRaw = new RawData(this.size, targetFormat);
     for (let z = 0; z < rz; z++) {
@@ -564,23 +567,6 @@ export default class RawData {
   }
 
   /**
-   * Applies window level/width.
-   * @param width The window width.
-   * @param level The window level.
-   * @param pixel The input pixel value, typically a Uint16 value.
-   * @return The windowed pixel value between 0 and 255.
-   */
-  protected applyWindow(width: number, level: number, pixel: number): number {
-    let value = Math.round((pixel - level + width / 2) * (255 / width));
-    if (value > 255) {
-      value = 255;
-    } else if (value < 0) {
-      value = 0;
-    }
-    return value;
-  }
-
-  /**
    * Builds a new MPR image using the given section in index-coordinate.
    */
   public scanObliqueSection(
@@ -591,6 +577,7 @@ export default class RawData {
     windowWidth?: number,
     windowLevel?: number
   ): void {
+    // NOTE: In the case of 2D image, returns incorrect value.
     const xAxis = section.xAxis;
     const eu: Vector3D = [
       xAxis[0] / outSize[0],
@@ -661,7 +648,7 @@ export default class RawData {
       for (let i = 0; i < outWidth; i++) {
         value = voxelReader.call(this, pos_x, pos_y, pos_z); // may return `undefined`
         if (value !== undefined && useWindow) {
-          value = this.applyWindow(windowWidth!, windowLevel!, value);
+          value = applyWindow(windowWidth!, windowLevel!, value);
         }
 
         // A value of `undefined` will be silently converted

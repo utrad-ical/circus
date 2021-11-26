@@ -18,6 +18,7 @@ import Tag from 'components/Tag';
 import TimeDisplay from 'components/TimeDisplay';
 import produce from 'immer';
 import React, { useCallback, useEffect, useReducer, useState } from 'react';
+import { Prompt } from 'react-router';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import Series from 'types/Series';
@@ -52,6 +53,20 @@ const CaseDetail: React.FC<{}> = props => {
 
   const user = useLoginUser();
   const accessibleProjects = user.accessibleProjects;
+  const isUpdated = caseStore.currentHistoryIndex > 0;
+
+  // warn before reloading or closing page with unsaved changes
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      e.returnValue = () => true;
+    };
+    if (isUpdated) {
+      window.addEventListener('beforeunload', handler);
+    }
+    return () => {
+      window.removeEventListener('beforeunload', handler);
+    };
+  }, [isUpdated]);
 
   useEffect(() => {
     const loadCase = async () => {
@@ -183,6 +198,10 @@ const CaseDetail: React.FC<{}> = props => {
 
   return (
     <FullSpanContainer>
+      <Prompt
+        when={isUpdated}
+        message={`Are you sure you want to leave?\nIf you leave before saving, your changes will be lost.`}
+      />
       <CaseInfoCollapser title="Case Info">
         <PatientInfoBox value={caseStore.patientInfo} />
         <ProjectDisplay
@@ -218,6 +237,7 @@ const CaseDetail: React.FC<{}> = props => {
         caseStore={caseStore}
         onCommand={handleMenuBarCommand}
         onRevisionSelect={handleRevisionSelect}
+        isUpdated={isUpdated}
         busy={busy}
       />
       <RevisionEditor
@@ -230,7 +250,7 @@ const CaseDetail: React.FC<{}> = props => {
         updateEditingData={updateEditingData}
       />
       {exportDialogOpen && (
-        <Modal show onHide={() => {}}>
+        <Modal show onHide={() => { }}>
           <CaseExportModal
             caseIds={[
               { caseId, revisionIndex: caseStore.editingRevisionIndex }
@@ -241,7 +261,7 @@ const CaseDetail: React.FC<{}> = props => {
         </Modal>
       )}
       {saveDialogOpen && (
-        <Modal show onHide={() => {}}>
+        <Modal show onHide={() => { }}>
           <SaveModal
             value={editingData.revision.description}
             revisionHistory={
@@ -285,9 +305,10 @@ const MenuBar: React.FC<{
   caseStore: c.CaseDetailState;
   onCommand: (command: MenuBarCommand) => void;
   onRevisionSelect: (index: number) => Promise<void>;
+  isUpdated: boolean;
   busy: boolean;
 }> = React.memo(props => {
-  const { caseStore, onCommand, onRevisionSelect, busy } = props;
+  const { caseStore, onCommand, onRevisionSelect, isUpdated, busy } = props;
   const user = useLoginUser();
 
   useKeyboardShortcut('Ctrl+Z', () => {
@@ -299,6 +320,10 @@ const MenuBar: React.FC<{
   });
 
   useKeyboardShortcut('Ctrl+S', () => onCommand('save'));
+
+  const unsavedAlertMessage = isUpdated ? (
+    <>You have unsaved changes&nbsp;</>
+  ) : null;
 
   return (
     <StyledMenuBarDiv>
@@ -318,6 +343,7 @@ const MenuBar: React.FC<{
         )}
       </div>
       <div className="right">
+        {unsavedAlertMessage}
         <IconButton
           bsStyle="default"
           icon="step-backward"

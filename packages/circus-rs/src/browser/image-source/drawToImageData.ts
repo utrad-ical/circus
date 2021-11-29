@@ -1,6 +1,5 @@
 import { TypedArray } from 'three';
-import { ViewWindow } from '..';
-import { applyWindow } from '../../common/pixel';
+import { ViewWindow } from '../../common/ViewWindow';
 import Viewer from '../viewer/Viewer';
 
 /**
@@ -34,13 +33,13 @@ export default function drawToImageData(
 }
 
 /**
- * Builds RGBA canvas imagedata from a grayscale image.
- * @param viewer The viewer instance on which the image will be drawn.
+ * Builds RGBA canvas ImageData from a grayscale bitmap data.
+ * @param outSize The output size.
  * @param buffer Grayscale data (0-225) to draw on the canvas.
- * @param window Specifies how to assign the value of each pixel to a grayscale value on the screen.
- * @returns The ImageData instance.
+ * @param window If set, applies window width/length.
+ * @returns A new ImageData instance.
  */
-export function drawToImageDataFor2D(
+export function drawToImageDataWithWindow(
   outSize: [number, number],
   buffer: TypedArray,
   window?: ViewWindow
@@ -50,21 +49,18 @@ export function drawToImageDataFor2D(
   }
 
   const [w, h] = outSize;
-  const pixelData = new Uint8ClampedArray(w * h * 4);
-  for (let srcIdx = 0; srcIdx < buffer.byteLength; srcIdx++) {
-    let pixel = buffer[srcIdx];
-    if (window) {
-      pixel = applyWindow(window.width, window.level, buffer[srcIdx]);
-    }
-    const dstIdx = srcIdx * 4;
-    pixelData[dstIdx] = pixel;
-    pixelData[dstIdx + 1] = pixel;
-    pixelData[dstIdx + 2] = pixel;
-    pixelData[dstIdx + 3] = 0xff;
-  }
-
   const imageData = new ImageData(w, h);
-  imageData.data.set(pixelData);
-
+  const pixelData = imageData.data;
+  const len = buffer.byteLength;
+  for (let srcIdx = 0; srcIdx < len; srcIdx++) {
+    const value = window
+      ? (255 * (buffer[srcIdx] - window.level)) / window.width + 127.5
+      : buffer[srcIdx];
+    const dstIdx = srcIdx * 4;
+    pixelData[dstIdx] = value;
+    pixelData[dstIdx + 1] = value;
+    pixelData[dstIdx + 2] = value;
+    pixelData[dstIdx + 3] = 0xff; // opaque
+  }
   return imageData;
 }

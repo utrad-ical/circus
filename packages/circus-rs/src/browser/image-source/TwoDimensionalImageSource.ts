@@ -9,7 +9,7 @@ import {
 import setImmediate from '../util/setImmediate';
 import Viewer from '../viewer/Viewer';
 import ViewState, { TwoDimensionalViewState } from '../ViewState';
-import { drawToImageDataFor2D } from './drawToImageData';
+import { drawToImageDataWithWindow } from './drawToImageData';
 import ImageSource, { ViewStateResizeTransformer } from './ImageSource';
 import DicomVolumeLoader, {
   DicomVolumeMetadata
@@ -157,14 +157,12 @@ export default class TwoDimensionalImageSource extends ImageSource {
     const src = volume.getSingleImage(imageNumber);
 
     if (metadata.pixelFormat === 'rgba8') {
-      // RGBA
       const buffer = new Uint8ClampedArray(src);
       return new ImageData(buffer, w, h);
     } else {
-      // Monochrome
       const pxInfo = volume.getPixelFormatInfo();
       const buffer = new pxInfo.arrayClass(src);
-      return drawToImageDataFor2D([w, h], buffer, window);
+      return drawToImageDataWithWindow([w, h], buffer, window);
     }
   }
 
@@ -198,7 +196,7 @@ export default class TwoDimensionalImageSource extends ImageSource {
   }
 
   /**
-   * Produce helper of change state on resizing viewer.
+   * Produce helper to change state on resizing viewer.
    */
   public getResizeTransformer(): ViewStateResizeTransformer {
     return (
@@ -218,7 +216,7 @@ export default class TwoDimensionalImageSource extends ImageSource {
   }
 }
 
-interface UnclippedImageBitmapCacheOption {
+interface LRUOptions {
   maxSize: number;
 }
 
@@ -226,7 +224,7 @@ class LRU<T> {
   private data: Map<string, T>;
   private maxSize: number;
 
-  constructor({ maxSize }: UnclippedImageBitmapCacheOption) {
+  constructor({ maxSize }: LRUOptions) {
     this.data = new Map();
     this.maxSize = maxSize;
   }

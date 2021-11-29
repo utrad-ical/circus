@@ -477,14 +477,13 @@ const LabelMenu: React.FC<{
       >
         {Object.keys(labelTypes).map((type, i) => {
           const { icon, allow2D } = labelTypes[type as LabelType];
-          if (activeSeriesMetadata?.mode !== '3d' && !allow2D) {
-            return;
-          }
+          const disabled = activeSeriesMetadata?.mode !== '3d' && !allow2D;
           return (
             <MenuItem
               key={type}
               eventKey={i}
-              onClick={() => addLabel(type as LabelType)}
+              onSelect={() => addLabel(type as LabelType)}
+              disabled={disabled}
             >
               <Icon icon={icon} /> Add {type}
             </MenuItem>

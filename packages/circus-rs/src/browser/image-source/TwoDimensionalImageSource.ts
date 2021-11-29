@@ -24,7 +24,7 @@ export default class TwoDimensionalImageSource extends ImageSource {
   public metadata: DicomVolumeMetadata | undefined;
   protected loadSequence: Promise<void> | undefined;
   private volume: DicomVolume | undefined;
-  private cache: UnclippedImageBitmapCache;
+  private cache: LRU<Promise<ImageBitmap>>;
   private backCanvas: HTMLCanvasElement;
 
   constructor({
@@ -36,7 +36,7 @@ export default class TwoDimensionalImageSource extends ImageSource {
       this.metadata = await volumeLoader.loadMeta();
       this.volume = await volumeLoader.loadVolume();
     })();
-    this.cache = new UnclippedImageBitmapCache({ maxSize: maxCacheSize });
+    this.cache = new LRU({ maxSize: maxCacheSize });
 
     const backCanvas = this.initializeBackCanvas();
     this.backCanvas = backCanvas;
@@ -171,7 +171,7 @@ export default class TwoDimensionalImageSource extends ImageSource {
   private async createClippedImageData(
     viewer: Viewer,
     viewState: TwoDimensionalViewState,
-    image: CanvasImageSource
+    image: ImageBitmap
   ): Promise<ImageData> {
     const outSize = viewer.getResolution();
     this.backCanvas.width = outSize[0];
@@ -221,8 +221,9 @@ export default class TwoDimensionalImageSource extends ImageSource {
 interface UnclippedImageBitmapCacheOption {
   maxSize: number;
 }
-class UnclippedImageBitmapCache {
-  private data: Map<string, Promise<ImageBitmap>>;
+
+class LRU<T> {
+  private data: Map<string, T>;
   private maxSize: number;
 
   constructor({ maxSize }: UnclippedImageBitmapCacheOption) {
@@ -230,7 +231,7 @@ class UnclippedImageBitmapCache {
     this.maxSize = maxSize;
   }
 
-  public get(key: string): Promise<ImageBitmap> | undefined {
+  public get(key: string): T | undefined {
     if (this.data.has(key)) {
       const value = this.data.get(key)!;
       // peek the entry, re-insert for LRU strategy
@@ -241,7 +242,7 @@ class UnclippedImageBitmapCache {
     return undefined;
   }
 
-  public set(key: string, value: Promise<ImageBitmap>): Promise<ImageBitmap> {
+  public set(key: string, value: T): T {
     this.data.set(key, value);
     if (this.maxSize < this.data.size) {
       // least-recently used cache eviction strategy

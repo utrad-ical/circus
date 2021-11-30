@@ -60,7 +60,7 @@ export default class RawVolumeMprImageSource
       viewWindow.width,
       viewWindow.level
     );
-    const imageData = drawToImageData(viewer, outSize, mprOutput);
+    const imageData = drawToImageData(outSize, mprOutput);
 
     // If we use Promise.resolve directly, the then-calleback is called
     // before any stacked UI events are handled.

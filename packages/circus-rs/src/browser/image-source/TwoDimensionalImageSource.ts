@@ -9,7 +9,7 @@ import {
 import setImmediate from '../util/setImmediate';
 import Viewer from '../viewer/Viewer';
 import ViewState, { TwoDimensionalViewState } from '../ViewState';
-import { drawToImageDataWithWindow } from './drawToImageData';
+import drawToImageData from './drawToImageData';
 import ImageSource, { ViewStateResizeTransformer } from './ImageSource';
 import DicomVolumeLoader, {
   DicomVolumeMetadata
@@ -162,7 +162,7 @@ export default class TwoDimensionalImageSource extends ImageSource {
     } else {
       const pxInfo = volume.getPixelFormatInfo();
       const buffer = new pxInfo.arrayClass(src);
-      return drawToImageDataWithWindow([w, h], buffer, window);
+      return drawToImageData([w, h], buffer, window);
     }
   }
 

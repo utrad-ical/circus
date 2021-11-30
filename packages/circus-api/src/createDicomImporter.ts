@@ -27,12 +27,8 @@ const createDicomImporter: FunctionService<
 ) => {
   const importDicom = async (fileContent: ArrayBuffer, domain: string) => {
     // Read the DICOM file
-    const {
-      instanceNumber,
-      studyDate,
-      seriesDate,
-      ...tags
-    } = await dicomTagReader(fileContent);
+    const { instanceNumber, studyDate, seriesDate, ...tags } =
+      await dicomTagReader(fileContent);
 
     if (options.compression === 'compress') {
       fileContent = await dicomUtilityRunner.compress(fileContent);

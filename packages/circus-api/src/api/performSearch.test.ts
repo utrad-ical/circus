@@ -1,7 +1,10 @@
 import { setUpKoaTest, TestServer } from '../../test/util-koa';
 import { setUpMongoFixture, usingMongo } from '../../test/util-mongo';
 
-import performSearch, { runAggregation } from './performSearch';
+import performSearch, {
+  runAggregation,
+  isPatientInfoInFilter
+} from './performSearch';
 import createCollectionAccessor, {
   CollectionAccessor
 } from '../db/createCollectionAccessor';
@@ -26,13 +29,13 @@ beforeAll(async () => {
       primaryKey: 'itemId'
     });
     app.use(async (ctx, next) => {
-      const q = ctx.request.query.q;
+      const q = ctx.request.query.q as string;
       const filter = q && q.length ? JSON.parse(q) : {};
       try {
         await performSearch(items, filter, ctx as any, {
           defaultSort: { price: -1 }
         });
-      } catch (err) {
+      } catch (err: any) {
         console.error(err.errors);
         throw err;
       }
@@ -42,6 +45,16 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await testServer.tearDown();
+});
+
+test('isPatientInfoInFilter', () => {
+  const i = isPatientInfoInFilter;
+  expect(i({ 'patientInfo.age': 7 })).toBe(true);
+  expect(i({ 'patientInfo.age': 7, status: false })).toBe(true);
+  expect(i({ status: false })).toBe(false);
+  expect(i({ $and: [{ 'patientInfo.age': 7, status: false }] })).toBe(true);
+  expect(i({ $and: [{ status: false }] })).toBe(false);
+  expect(i({ $or: [{ 'patientInfo.age': 7 }] })).toBe(true);
 });
 
 describe('performSearch', () => {
@@ -84,9 +97,7 @@ describe('performSearch', () => {
     expect(res2.items[0].name).toBe('bluetooth pixel');
     const res3 = await search({ sort: { stock: 1, name: 1 } });
     expect(res3.items.map((i: any) => i.itemId).slice(0, 3)).toEqual([
-      28,
-      13,
-      1
+      28, 13, 1
     ]);
   });
 

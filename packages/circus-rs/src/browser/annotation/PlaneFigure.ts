@@ -36,7 +36,8 @@ const cursorTypes: {
   'rect-outline': { cursor: 'move' }
 };
 export default class PlaneFigure
-  implements Annotation, ViewerEventTarget, ModifierKeyBehaviors {
+  implements Annotation, ViewerEventTarget, ModifierKeyBehaviors
+{
   public editable: boolean = false;
   private handleType: BoundingRectWithHandleHitType | undefined = undefined;
 

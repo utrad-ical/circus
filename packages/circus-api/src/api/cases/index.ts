@@ -1,5 +1,9 @@
 import status from 'http-status';
-import { extractFilter, performAggregationSearch } from '../performSearch';
+import {
+  extractFilter,
+  isPatientInfoInFilter,
+  performAggregationSearch
+} from '../performSearch';
 import checkFilter from '../../utils/checkFilter';
 import { RouteMiddleware, CircusContext } from '../../typings/middlewares';
 import makeNewCase from '../../case/makeNewCase';
@@ -20,21 +24,6 @@ const maskPatientInfo = (ctx: CircusContext) => {
     }
     return caseData;
   };
-};
-
-const isPatientInfoInFilter = (customFilter: { [key: string]: any }) => {
-  const checkKeyVal = (key: string, value: any) => {
-    if (key === '$and' || key === '$or') {
-      return value.some((item: object) => isPatientInfoInFilter(item));
-    } else {
-      return /^patientInfo/.test(key);
-    }
-  };
-
-  if (Object.keys(customFilter).length === 0) return false;
-  return Object.keys(customFilter).every(key =>
-    checkKeyVal(key, customFilter[key])
-  );
 };
 
 export const handleGet: RouteMiddleware = () => {
@@ -105,7 +94,6 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
     if (!checkFilter(customFilter!, searchableFields))
       ctx.throw(status.BAD_REQUEST, 'Bad filter.');
 
-    // const domainFilter = {};
     const patientInfoInFilter = isPatientInfoInFilter(customFilter!);
     const accessibleProjectIds = ctx.userPrivileges.accessibleProjects
       .filter(
@@ -318,5 +306,36 @@ export const handlePatchTags: RouteMiddleware = ({ models }) => {
       updateOp
     );
     ctx.body = null;
+  };
+};
+
+export const handleDelete: RouteMiddleware = ({ models }) => {
+  return async (ctx, next) => {
+    const caseId = ctx.params.caseId;
+    const urlQuery = ctx.request.query;
+    if (urlQuery.force === '1') {
+      const targetMyLists = await models.myList.findAll({
+        'items.resourceId': caseId
+      });
+      for (const targetMyList of targetMyLists) {
+        const newItems = targetMyList.items.filter(
+          (i: any) => i.resourceId !== caseId
+        );
+        await models.myList.modifyOne(targetMyList.myListId, {
+          items: newItems
+        });
+      }
+      await models.clinicalCase.deleteOne({ caseId });
+      ctx.body = null;
+    } else {
+      const isInMyList = await models.myList
+        .findAsCursor({ 'items.resourceId': caseId })
+        .hasNext();
+      if (isInMyList) {
+        ctx.throw(403, `This case is in someone's my list.`);
+      }
+      await models.clinicalCase.deleteOne({ caseId });
+      ctx.body = null;
+    }
   };
 };

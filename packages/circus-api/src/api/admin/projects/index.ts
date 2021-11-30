@@ -6,7 +6,8 @@ import { RouteMiddleware } from '../../../typings/middlewares';
 export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     await performSearch(models.project, {}, ctx, {
-      defaultSort: { updatedAt: -1 }
+      defaultSort: { updatedAt: -1 },
+      allowUnlimited: true
     });
   };
 };

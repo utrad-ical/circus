@@ -25,7 +25,7 @@ const connectDb: FunctionService<DisposableDb> = async (opts, deps) => {
   const db = dbConnection.db(new URL(mongoUrl).pathname.slice(1));
   const dispose = async () => dbConnection.close();
   (db as any).dispose = dispose;
-  return (db as any) as DisposableDb;
+  return db as any as DisposableDb;
 };
 
 connectDb.dependencies = [];

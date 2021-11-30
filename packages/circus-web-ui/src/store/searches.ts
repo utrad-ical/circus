@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction, ThunkDispatch } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { confirm, prompt } from '@smikitky/rb-components/lib/modal';
 import { AppDispatch, AppThunk } from 'store';
 import { ApiCaller } from 'utils/api';
@@ -34,7 +34,7 @@ export interface SearchedResource<T> {
   [id: string]: T;
 }
 
-interface SearchState {
+export interface SearchState {
   searches: {
     [searchName: string]: SearchResult;
   };
@@ -43,6 +43,7 @@ interface SearchState {
     tasks: SearchedResource<Task>;
     [resourceName: string]: SearchedResource<any>;
   };
+  nextPreviousList: string[];
 }
 
 export interface SearchResult {
@@ -55,10 +56,17 @@ export interface SearchResult {
   selected: string[];
 }
 
+const initialState: SearchState = {
+  searches: {},
+  items: { series: {}, tasks: {} },
+  nextPreviousList: []
+};
+
 const slice = createSlice({
   name: 'searches',
-  initialState: { searches: {}, items: {} } as SearchState,
+  initialState,
   reducers: {
+    reset: () => initialState,
     startSearch: (
       state,
       action: PayloadAction<{
@@ -141,6 +149,9 @@ const slice = createSlice({
       const taskId = action.payload;
       if (!state.items.tasks || !state.items.tasks[taskId]) return;
       state.items.tasks[taskId].dismissed = true;
+    },
+    setNextPreviousList: (state, action: PayloadAction<string[]>) => {
+      state.nextPreviousList = action.payload;
     }
   }
 });
@@ -155,9 +166,11 @@ const {
 } = slice.actions;
 // But we export these ones
 export const {
+  reset,
   selectionStatusChanged,
   deleteSearch,
-  dismissTask
+  dismissTask,
+  setNextPreviousList
 } = slice.actions;
 
 export default slice.reducer;

@@ -33,4 +33,8 @@ properties:
     type: boolean
   dimmedOutlineFor2DLabels:
     enum: ['hide', 'show', 'infinity']
+  revisionMessageTemplates:
+    type: array
+    items:
+      type: string
 additionalProperties: false

@@ -188,26 +188,28 @@ export default class RawData {
     const fy = py - iy;
     const fz = pz - iz;
 
-    let dx = 1.0, dy = 1.0, dz = 1.0;
+    let dx = 1.0,
+      dy = 1.0,
+      dz = 1.0;
 
     if (ix < 0) {
       ix = 0;
       dx = 0;
-    } else if ((this.size[0] - 1) <= ix) {
+    } else if (this.size[0] - 1 <= ix) {
       dx = 0;
     }
 
     if (iy < 0) {
       iy = 0;
       dy = 0;
-    } else if ((this.size[1] - 1) <= iy) {
+    } else if (this.size[1] - 1 <= iy) {
       dy = 0;
     }
 
     if (iz < 0) {
       iz = 0;
       dz = 0;
-    } else if ((this.size[2] - 1) <= iz) {
+    } else if (this.size[2] - 1 <= iz) {
       dz = 0;
     }
 

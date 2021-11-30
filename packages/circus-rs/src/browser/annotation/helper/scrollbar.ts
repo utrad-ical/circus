@@ -216,12 +216,8 @@ export const drawScrollbar = (
   scrollbar: ScrollbarContainer
 ): { judgeHandleType: (p: Vector2) => HandleType | undefined } => {
   const { lineWidth, color, size, position } = settings;
-  const {
-    scrollbarTranslate,
-    scrollbarLength,
-    thumbPosition,
-    thumbLength
-  } = scrollbar;
+  const { scrollbarTranslate, scrollbarLength, thumbPosition, thumbLength } =
+    scrollbar;
 
   const canvas = viewer.canvas;
 

@@ -10,6 +10,7 @@ export const defaultPreferences = () => {
     scrollBars: 'none',
     maintainAspectRatio: false,
     fixCenterOfGravity: false,
-    dimmedOutlineFor2DLabels: 'show'
+    dimmedOutlineFor2DLabels: 'show',
+    revisionMessageTemplates: []
   };
 };

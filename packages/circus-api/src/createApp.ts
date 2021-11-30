@@ -219,7 +219,7 @@ export const createApp: FunctionService<
           limits: { fileSize: deps.uploadFileSizeMaxBytes }
         }).array('files'),
 
-        (apiRouter.routes() as any) as Middleware
+        apiRouter.routes() as any as Middleware
       ])
     )
   );

@@ -4,15 +4,8 @@ import HoleFilling2D, {
 } from '@utrad-ical/circus-rs/src/common/CCL/holeFilling';
 
 ctx.addEventListener('message', event => {
-  const {
-    input,
-    width,
-    height,
-    nSlices,
-    dimension,
-    neighbors,
-    orientation
-  } = event.data;
+  const { input, width, height, nSlices, dimension, neighbors, orientation } =
+    event.data;
   const initializedInput = new Uint8Array(width * height * nSlices);
   for (let k = 0; k < nSlices; k++) {
     for (let j = 0; j < height; j++) {

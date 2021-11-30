@@ -28,10 +28,13 @@ const loadDynamicScript = async (
   pluginId: string
 ): Promise<void> => {
   if (loaded.has(name)) return;
-  const url = `/api/plugin-displays/${pluginId}/${name}/remoteEntry.js`;
+  const url = `/api/plugin-displays/${pluginId}/displays/remoteEntry.js`;
   const script = await (await fetch(url)).text();
   const element = document.createElement('script');
-  element.text = script;
+  element.text = script.replace(
+    /http:\/\/localhost:\d{1,5}\//g,
+    `/api/plugin-displays/${pluginId}/displays/`
+  );
   element.type = 'text/javascript';
   document.head.appendChild(element);
   loaded.set(name, true);
@@ -46,9 +49,9 @@ const loadExternalDisplay = async <O extends object, F>(
 ): Promise<Display<O, F>> => {
   await loadDynamicScript(name, pluginId);
   await __webpack_init_sharing__('default');
-  const container = (window as any)[name] as any;
+  const container = (window as any)['CircusCsModule'] as any;
   await container.init(__webpack_share_scopes__.default);
-  const factory = await container.get('Display');
+  const factory = await container.get('./' + name);
   const Display = factory().default;
   return Display;
 };

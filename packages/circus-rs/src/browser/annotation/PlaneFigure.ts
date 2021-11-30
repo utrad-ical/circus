@@ -11,9 +11,8 @@ import {
 import { convertVolumePointToViewerPoint } from '../tool/tool-util';
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
-import ViewState from '../ViewState';
+import ViewState, { MprViewState, TwoDimensionalViewState } from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
-import determineColor from './helper/determineColor';
 import drawHandleFrame, { defaultHandleSize } from './helper/drawHandleFrame';
 import {
   BoundingRectWithHandleHitType,
@@ -38,7 +37,9 @@ const cursorTypes: {
   'rect-outline': { cursor: 'move' }
 };
 
-const isValidViewState = (viewState: ViewState): boolean => {
+const isValidViewState = (
+  viewState: ViewState
+): viewState is MprViewState | TwoDimensionalViewState => {
   if (!viewState) return false;
   if (viewState.type === 'mpr') return true;
   if (viewState.type === '2d') return true;
@@ -107,20 +108,19 @@ export default class PlaneFigure
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Displays only when the volume is displayed as an axial slice
+    const resolution = new Vector2().fromArray(viewer.getResolution());
+    if (!this.color || !this.min || !this.max) return;
+
+    const color =
+      viewState.type !== '2d'
+        ? this.determineLineColor3d(viewState.section)
+        : this.determineLineColor2d(viewState.imageNumber);
+    if (!color) return;
+
     const section =
       viewState.type !== '2d'
         ? viewState.section
         : sectionFrom2dViewState(viewState);
-    const orientation = detectOrthogonalSection(section);
-    if (orientation !== 'axial') return;
-
-    const resolution = new Vector2().fromArray(viewer.getResolution());
-    if (!this.color || !this.min || !this.max) return;
-
-    const color = this.getStrokeColor(viewState, section);
-    if (!color) return;
-
     const min = convertVolumeCoordinateToScreenCoordinate(
       section,
       resolution,
@@ -166,22 +166,29 @@ export default class PlaneFigure
     }
   }
 
-  private getStrokeColor(
-    viewState: ViewState,
-    section: Section
-  ): string | undefined {
+  private determineLineColor3d(section: Section): string | undefined {
+    // Displays only when the volume is displayed as an axial slice
+    const orientation = detectOrthogonalSection(section);
+    if (orientation !== 'axial') return;
+
     if (this.z === undefined) return;
 
     const distance = Math.abs(this.z - section.origin[2]);
 
-    return determineColor(
-      viewState,
-      distance,
-      this.zThreshold,
-      this.zDimmedThreshold,
-      this.color,
-      this.dimmedColor
-    );
+    switch (true) {
+      case distance <= this.zThreshold:
+        return this.color;
+      case distance <= this.zDimmedThreshold:
+        return this.dimmedColor;
+      default:
+        return;
+    }
+  }
+
+  private determineLineColor2d(imageNumber: number): string | undefined {
+    return this.z !== undefined && this.z === imageNumber
+      ? this.color
+      : undefined;
   }
 
   public mouseMoveHandler(ev: ViewerEvent): void {
@@ -211,7 +218,7 @@ export default class PlaneFigure
     const point = new Vector2(ev.viewerX!, ev.viewerY!);
 
     const viewState = viewer.getState();
-    if (!viewer || !isValidViewState(viewState)) return;
+    if (!isValidViewState(viewState)) return;
     if (!this.min || !this.max) return;
 
     const minPoint = convertVolumePointToViewerPoint(
@@ -348,8 +355,7 @@ export default class PlaneFigure
 
   private getBoundingBox(viewer: Viewer): [Vector2, Vector2] | undefined {
     const viewState = viewer.getState();
-
-    if (!viewer || !isValidViewState(viewState)) return;
+    if (!isValidViewState(viewState)) return;
 
     const section =
       viewState.type !== '2d'

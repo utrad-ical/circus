@@ -3,7 +3,7 @@ import ViewerEventTarget from '../interface/ViewerEventTarget';
 import { handlePageByScrollbar } from '../tool/state/handlePageBy';
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
-import ViewState from '../ViewState';
+import ViewState, { MprViewState, TwoDimensionalViewState } from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
 import {
   calcThumbSteps,
@@ -30,7 +30,9 @@ interface Options {
   visibilityThreshold?: number;
 }
 
-const isValidViewState = (viewState: ViewState): boolean => {
+const isValidViewState = (
+  viewState: ViewState
+): viewState is MprViewState | TwoDimensionalViewState => {
   if (!viewState) return false;
   if (viewState.type === 'mpr') return true;
   if (viewState.type === '2d') return true;
@@ -182,8 +184,8 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
     }
   }
 
-  public draw(viewer: Viewer, viewState: ViewState, _option: DrawOption): void {
-    if (viewer !== this.targetViewer) return;
+  public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
+    if (!viewer || viewer !== this.targetViewer) return;
 
     if (
       !isValidViewState(this.targetViewer.getState()) ||

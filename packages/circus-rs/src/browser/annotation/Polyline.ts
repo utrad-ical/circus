@@ -1,10 +1,5 @@
 import { Box2, Box3, Vector2, Vector3 } from 'three';
-import {
-  Section,
-  Vector2D,
-  Vector3D,
-  verticesOfBox
-} from '../../common/geometry';
+import { Vector2D, Vector3D, verticesOfBox } from '../../common/geometry';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
 import {
   convertScreenCoordinateToVolumeCoordinate,
@@ -18,9 +13,8 @@ import {
 } from '../tool/tool-util';
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
-import ViewState from '../ViewState';
+import ViewState, { MprViewState, TwoDimensionalViewState } from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
-import determineColor from './helper/determineColor';
 import drawBoundingBoxOutline from './helper/drawBoundingBoxOutline';
 import drawHandleFrame from './helper/drawHandleFrame';
 import { drawPath, drawPoint } from './helper/drawObject';
@@ -51,7 +45,9 @@ const cursorTypes: {
   'point-move': { cursor: 'crosshair' }
 };
 
-const isValidViewState = (viewState: ViewState): boolean => {
+const isValidViewState = (
+  viewState: ViewState
+): viewState is MprViewState | TwoDimensionalViewState => {
   if (!viewState) return false;
   if (viewState.type === 'mpr') return true;
   if (viewState.type === '2d') return true;
@@ -122,41 +118,6 @@ export default class Polyline
       }
     | undefined = undefined;
 
-  private getDrawingColor(
-    viewState: ViewState,
-    section: Section
-  ): {
-    color?: string;
-    fillColor?: string;
-  } {
-    // Displays only when the volume is displayed as an axial slice
-    const orientation = detectOrthogonalSection(section);
-    if (orientation !== 'axial') return {};
-
-    if (this.z === undefined) return {};
-
-    const distance = Math.abs(this.z - section.origin[2]);
-
-    const drawingColor = (
-      color: string | undefined,
-      dimmedColor: string | undefined
-    ) => {
-      return determineColor(
-        viewState,
-        distance,
-        this.zThreshold,
-        this.zDimmedThreshold,
-        color,
-        dimmedColor
-      );
-    };
-
-    return {
-      color: drawingColor(this.color, this.dimmedColor),
-      fillColor: drawingColor(this.fillColor, this.dimmedFillColor)
-    };
-  }
-
   public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
     if (this.points.length === 0 || this.z === undefined) return;
 
@@ -168,13 +129,14 @@ export default class Polyline
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    const { color, fillColor } =
+      this.determineDrawingColorFromViewState(viewState);
+    if (!color && !fillColor) return;
+
     const section =
       viewState.type !== '2d'
         ? viewState.section
         : sectionFrom2dViewState(viewState);
-
-    const { color, fillColor } = this.getDrawingColor(viewState, section);
-    if (!color && !fillColor) return;
 
     const resolution = new Vector2().fromArray(viewer.getResolution());
     const z = this.z === undefined ? 0 : this.z;
@@ -230,6 +192,42 @@ export default class Polyline
     });
   }
 
+  private determineDrawingColorFromViewState(state: ViewState): {
+    color?: string;
+    fillColor?: string;
+  } {
+    switch (state.type) {
+      case '2d': {
+        const { imageNumber } = state;
+        return this.z !== undefined && this.z === imageNumber
+          ? { color: this.color, fillColor: this.fillColor }
+          : {};
+      }
+      case 'mpr': {
+        // Displays only when the volume is displayed as an axial slice
+        const section = state.section;
+        const orientation = detectOrthogonalSection(section);
+        if (orientation !== 'axial') return {};
+
+        if (this.z === undefined) return {};
+
+        const distance = Math.abs(this.z - section.origin[2]);
+
+        switch (true) {
+          case distance <= this.zThreshold:
+            return { color: this.color, fillColor: this.fillColor };
+          case distance <= this.zDimmedThreshold:
+            return { color: this.dimmedColor, fillColor: this.dimmedFillColor };
+          default:
+            return {};
+        }
+      }
+      default: {
+        throw new Error('Unsupported view state.');
+      }
+    }
+  }
+
   public validate(): boolean {
     if (this.points.length === 0 || this.z === undefined) return false;
     return true;
@@ -238,17 +236,12 @@ export default class Polyline
   public mouseMoveHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     const viewState = viewer.getState();
-    if (!viewer || !isValidViewState(viewState)) return;
+    if (!isValidViewState(viewState)) return;
 
     if (!this.editable) return;
 
-    const section =
-      viewState.type !== '2d'
-        ? viewState.section
-        : sectionFrom2dViewState(viewState);
-
     // to prevent to edit unvisible polyline.
-    const drawingColor = this.getDrawingColor(viewState, section);
+    const drawingColor = this.determineDrawingColorFromViewState(viewState);
     if (Object.values(drawingColor).length === 0) return;
 
     this.handleType = this.hitTest(ev);
@@ -267,7 +260,7 @@ export default class Polyline
   public dragStartHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     const viewState = viewer.getState();
-    if (!viewer || !isValidViewState(viewState)) return;
+    if (!isValidViewState(viewState)) return;
     if (!this.editable) return;
 
     if (viewer.getHoveringAnnotation() !== this) return;
@@ -295,7 +288,7 @@ export default class Polyline
   public dragHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     const viewState = viewer.getState();
-    if (!viewer || !isValidViewState(viewState)) return;
+    if (!isValidViewState(viewState)) return;
     if (!this.dragInfo) return;
 
     if (viewer.getHoveringAnnotation() !== this) return;
@@ -368,7 +361,7 @@ export default class Polyline
   public dragEndHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     const viewState = viewer.getState();
-    if (!viewer || !isValidViewState(viewState)) return;
+    if (!isValidViewState(viewState)) return;
     if (!this.editable) return;
     if (viewer.getHoveringAnnotation() !== this) return;
 

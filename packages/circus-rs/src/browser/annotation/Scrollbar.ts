@@ -31,7 +31,7 @@ interface Options {
 }
 
 const isValidViewState = (
-  viewState: ViewState
+  viewState: ViewState | undefined
 ): viewState is MprViewState | TwoDimensionalViewState => {
   if (!viewState) return false;
   if (viewState.type === 'mpr') return true;
@@ -161,7 +161,7 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
   }
 
   private handleViewerStateChange(
-    prevState: ViewState,
+    prevState: ViewState | undefined,
     state: ViewState
   ): void {
     if (!isValidViewState(prevState) || !isValidViewState(state)) return;

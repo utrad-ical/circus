@@ -917,18 +917,20 @@ const RevisionEditor: React.FC<{
           layoutEnabled={layoutEnabled}
           disabled={busy}
         />
-        <ViewerGrid
-          editingData={editingData}
-          updateEditingData={updateEditingData}
-          compositions={compositions}
-          stateChanger={stateChanger}
-          tool={activeTool}
-          onCreateViewer={handleCreateViwer}
-          onDestroyViewer={handleDestroyViewer}
-          initialStateSetter={initialStateSetter}
-          onViewStateChange={handleViewStateChange}
-          multipleSeriesShown={multipleSeriesShown}
-        />
+        {activeSeriesMetadata && (
+          <ViewerGrid
+            editingData={editingData}
+            updateEditingData={updateEditingData}
+            compositions={compositions}
+            stateChanger={stateChanger}
+            tool={activeTool}
+            onCreateViewer={handleCreateViwer}
+            onDestroyViewer={handleDestroyViewer}
+            initialStateSetter={initialStateSetter}
+            onViewStateChange={handleViewStateChange}
+            multipleSeriesShown={multipleSeriesShown}
+          />
+        )}
       </div>
       {seriesDialogOpen && (
         <Modal show bsSize="lg" onHide={() => {}}>

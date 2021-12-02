@@ -3,4 +3,5 @@
 tsconfig.json
 *.test.ts
 .vscode
-.tgz
+*.tgz
+*.tsbuildinfo

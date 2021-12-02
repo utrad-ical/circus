@@ -1,0 +1,9 @@
+name: Status
+description: >
+  Returns the API server status.
+routes:
+  - verb: get
+    path: /status
+    noAuthentication: true
+    description: >
+      Returns basic API server status. Can be used for "ping"-ing.

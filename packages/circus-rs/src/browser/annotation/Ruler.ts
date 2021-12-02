@@ -117,7 +117,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
 
     if (!this.validate()) return;
 
-    const color = this.determineLineColorFromViewState(viewState);
+    const color = this.determineDrawingColorFromViewState(viewState);
     if (!color) return;
 
     // Points on screen for each end
@@ -152,21 +152,23 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     }
   }
 
-  private determineLineColorFromViewState(state: ViewState) {
+  private determineDrawingColorFromViewState(
+    state: ViewState
+  ): string | undefined {
+    if (!this.start || !this.end) return;
     switch (state.type) {
       case '2d': {
         const { imageNumber } = state;
-        return this.start![2] === imageNumber && this.end![2] === imageNumber
+        return this.start[2] === imageNumber && this.end[2] === imageNumber
           ? this.color
           : undefined;
       }
       case 'mpr': {
         const { section } = state;
         const distance = Math.max(
-          distanceFromPointToSection(section, new Vector3(...this.start!)),
-          distanceFromPointToSection(section, new Vector3(...this.end!))
+          distanceFromPointToSection(section, new Vector3(...this.start)),
+          distanceFromPointToSection(section, new Vector3(...this.end))
         );
-
         switch (true) {
           case distance <= this.distanceThreshold:
             return this.color;
@@ -209,7 +211,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     if (!this.editable) return;
 
     // to prevent to edit unvisible ruler.
-    const color = this.determineLineColorFromViewState(viewState);
+    const color = this.determineDrawingColorFromViewState(viewState);
     if (!color) return;
 
     this.handleType = this.hitTest(ev);
@@ -234,7 +236,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     if (!this.start || !this.end || !this.section) return;
 
     // to prevent to edit unvisible ruler.
-    const color = this.determineLineColorFromViewState(viewState);
+    const color = this.determineDrawingColorFromViewState(viewState);
     if (!color) return;
 
     if (viewer.getHoveringAnnotation() === this) {

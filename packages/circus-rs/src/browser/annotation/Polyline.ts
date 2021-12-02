@@ -196,10 +196,11 @@ export default class Polyline
     color?: string;
     fillColor?: string;
   } {
+    if (this.z === undefined) return {};
     switch (state.type) {
       case '2d': {
         const { imageNumber } = state;
-        return this.z !== undefined && this.z === imageNumber
+        return this.z === imageNumber
           ? { color: this.color, fillColor: this.fillColor }
           : {};
       }
@@ -208,11 +209,7 @@ export default class Polyline
         const section = state.section;
         const orientation = detectOrthogonalSection(section);
         if (orientation !== 'axial') return {};
-
-        if (this.z === undefined) return {};
-
         const distance = Math.abs(this.z - section.origin[2]);
-
         switch (true) {
           case distance <= this.zThreshold:
             return { color: this.color, fillColor: this.fillColor };

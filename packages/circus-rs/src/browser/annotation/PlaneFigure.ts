@@ -111,10 +111,7 @@ export default class PlaneFigure
     const resolution = new Vector2().fromArray(viewer.getResolution());
     if (!this.color || !this.min || !this.max) return;
 
-    const color =
-      viewState.type !== '2d'
-        ? this.determineLineColor3d(viewState.section)
-        : this.determineLineColor2d(viewState.imageNumber);
+    const color = this.determineDrawingColorFromViewState(viewState);
     if (!color) return;
 
     const section =
@@ -166,29 +163,34 @@ export default class PlaneFigure
     }
   }
 
-  private determineLineColor3d(section: Section): string | undefined {
-    // Displays only when the volume is displayed as an axial slice
-    const orientation = detectOrthogonalSection(section);
-    if (orientation !== 'axial') return;
-
+  private determineDrawingColorFromViewState(
+    state: ViewState
+  ): string | undefined {
     if (this.z === undefined) return;
-
-    const distance = Math.abs(this.z - section.origin[2]);
-
-    switch (true) {
-      case distance <= this.zThreshold:
-        return this.color;
-      case distance <= this.zDimmedThreshold:
-        return this.dimmedColor;
-      default:
-        return;
+    switch (state.type) {
+      case '2d': {
+        const { imageNumber } = state;
+        return this.z === imageNumber ? this.color : undefined;
+      }
+      case 'mpr': {
+        const { section } = state;
+        // Displays only when the volume is displayed as an axial slice
+        const orientation = detectOrthogonalSection(section);
+        if (orientation !== 'axial') return;
+        const distance = Math.abs(this.z - section.origin[2]);
+        switch (true) {
+          case distance <= this.zThreshold:
+            return this.color;
+          case distance <= this.zDimmedThreshold:
+            return this.dimmedColor;
+          default:
+            return;
+        }
+      }
+      default: {
+        throw new Error('Unsupported view state.');
+      }
     }
-  }
-
-  private determineLineColor2d(imageNumber: number): string | undefined {
-    return this.z !== undefined && this.z === imageNumber
-      ? this.color
-      : undefined;
   }
 
   public mouseMoveHandler(ev: ViewerEvent): void {

@@ -78,10 +78,7 @@ export default class Point implements Annotation, ViewerEventTarget {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const color =
-      viewState.type !== '2d'
-        ? this.determineDrawingColor3d(viewState.section)
-        : this.determineDrawingColor2d(viewState.imageNumber);
+    const color = this.determineDrawingColorFromViewState(viewState);
     if (!color) return;
 
     const screenPoint = convertVolumePointToViewerPoint(
@@ -91,27 +88,34 @@ export default class Point implements Annotation, ViewerEventTarget {
     drawPoint(ctx, screenPoint, { radius: this.radius, color });
   }
 
-  private determineDrawingColor3d(section: Section): string | undefined {
+  private determineDrawingColorFromViewState(
+    state: ViewState
+  ): string | undefined {
     if (this.location === undefined) return;
-    const distance = distanceFromPointToSection(
-      section,
-      new Vector3(...this.location)
-    );
-
-    switch (true) {
-      case distance <= this.distanceThreshold:
-        return this.color;
-      case distance <= this.distanceDimmedThreshold:
-        return this.dimmedColor;
-      default:
-        return;
+    switch (state.type) {
+      case '2d': {
+        const { imageNumber } = state;
+        return this.location[2] === imageNumber ? this.color : undefined;
+      }
+      case 'mpr': {
+        const { section } = state;
+        const distance = distanceFromPointToSection(
+          section,
+          new Vector3(...this.location)
+        );
+        switch (true) {
+          case distance <= this.distanceThreshold:
+            return this.color;
+          case distance <= this.distanceDimmedThreshold:
+            return this.dimmedColor;
+          default:
+            return;
+        }
+      }
+      default: {
+        throw new Error('Unsupported view state.');
+      }
     }
-  }
-
-  private determineDrawingColor2d(imageNumber: number): string | undefined {
-    return this.location !== undefined && this.location[2] === imageNumber
-      ? this.color
-      : undefined;
   }
 
   public validate(): boolean {

@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "description": "React components used by CIRCUS projects",
   "main": "src/index",
-  "scripts": {},
+  "scripts": {
+    "build": "tsc"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/utrad-ical/circus.git",

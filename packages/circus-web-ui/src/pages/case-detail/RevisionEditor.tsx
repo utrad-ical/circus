@@ -136,6 +136,7 @@ const useCompositions = (
 
 const RevisionEditor: React.FC<{
   editingData: EditingData;
+  initEditingDataLayout: EditingDataUpdater;
   updateEditingData: EditingDataUpdater;
   caseDispatch: React.Dispatch<any>;
   seriesData: { [seriesUid: string]: Series };
@@ -145,6 +146,7 @@ const RevisionEditor: React.FC<{
 }> = props => {
   const {
     editingData,
+    initEditingDataLayout,
     updateEditingData,
     caseDispatch,
     seriesData,
@@ -279,24 +281,25 @@ const RevisionEditor: React.FC<{
 
   const layoutEnabled = !(metaLoadedAll && activeSeriesMetadata!.mode !== '3d');
 
+  const layoutInitialized = editingData.layoutItems.every(i => i.viewerMode !== 'unknown');
   useEffect(() => {
-    if (!layoutEnabled) {
-      updateEditingData(d => {
-        if (d.layoutItems.every(i => i.viewerMode === '2d')) return;
-        const [layoutItems, layout] = c.performLayout(
-          '2d',
-          editingData.activeSeriesIndex
-        );
-        d.layout = layout;
-        d.layoutItems = layoutItems;
-        d.activeLayoutKey = layoutItems[0].key;
-      });
-    }
+    if (!activeSeriesMetadata || layoutInitialized) return;
+    initEditingDataLayout(d => {
+      if (d.layoutItems.every(i => i.viewerMode !== 'unknown')) return;
+      const [layoutItems, layout] = c.performLayout(
+        activeSeriesMetadata!.mode !== '2d' ? 'twoByTwo' : '2d',
+        editingData.activeSeriesIndex
+      );
+      d.layout = layout;
+      d.layoutItems = layoutItems;
+      d.activeLayoutKey = layoutItems[0].key;
+    });
   }, [
+    layoutInitialized,
+    activeSeriesMetadata,
     editingData,
     editingData.activeSeriesIndex,
-    layoutEnabled,
-    updateEditingData
+    initEditingDataLayout
   ]);
 
   const { revision, activeLabelIndex } = editingData;

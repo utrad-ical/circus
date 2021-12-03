@@ -133,6 +133,14 @@ const CaseDetail: React.FC<{}> = props => {
     [editingData]
   );
 
+  const initEditingDataLayout = useCallback<EditingDataUpdater>(
+    (updater, tag) => {
+      const newData = produce(editingData, updater);
+      caseDispatch(c.initialLayoutDetermined({ newData, tag }));
+    },
+    [editingData]
+  );
+
   const handleTagChange = async (value: string[]) => {
     try {
       await api(`cases/${caseData!.caseId}/tags`, {
@@ -247,6 +255,7 @@ const CaseDetail: React.FC<{}> = props => {
         seriesData={seriesData}
         projectData={projectData}
         refreshCounter={refreshCounter}
+        initEditingDataLayout={initEditingDataLayout}
         updateEditingData={updateEditingData}
       />
       {exportDialogOpen && (

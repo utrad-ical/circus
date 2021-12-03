@@ -56,7 +56,7 @@ export const canRedo = (s: CaseDetailState) =>
 export type LayoutKind = 'twoByTwo' | 'axial' | 'sagittal' | 'coronal' | '2d';
 
 export const performLayout = (
-  kind: LayoutKind,
+  kind: LayoutKind | undefined,
   seriesIndex: number = 0
 ): [ViewerDef[], LayoutInfo] => {
   const layout: LayoutInfo = {
@@ -64,17 +64,33 @@ export const performLayout = (
     rows: kind === 'twoByTwo' ? 2 : 1,
     positions: {}
   };
-  const orientations: OrientationString[] =
-    kind === 'twoByTwo'
-      ? ['axial', 'sagittal', 'coronal', 'oblique']
-      : kind === '2d'
-      ? ['axial']
-      : [kind];
+
+  const orientations = ((): OrientationString[] => {
+    switch (kind) {
+      case undefined:
+      case '2d':
+        return ['axial'];
+      case 'twoByTwo':
+        return ['axial', 'sagittal', 'coronal', 'oblique'];
+      default:
+        return [kind];
+    }
+  })();
 
   let tmp = layout;
   const items: ViewerDef[] = [];
+  const viewerMode = ((): ViewerMode => {
+    switch (kind) {
+      case undefined:
+        return 'unknown';
+      case '2d':
+        return '2d';
+      default:
+        return '3d';
+    }
+  })();
+
   orientations.forEach(orientation => {
-    const viewerMode = kind === '2d' ? '2d' : '3d';
     const item = newViewerCellItem(seriesIndex, viewerMode, orientation);
     items.push(item);
     tmp = layoutReducer(tmp, {
@@ -185,7 +201,7 @@ const slice = createSlice({
 
       const [layoutItems, layout] = sameSeriesSet
         ? [prev.layoutItems, prev.layout]
-        : performLayout('twoByTwo', 0);
+        : performLayout(undefined, 0);
 
       const editingData: EditingData = {
         revision,
@@ -201,6 +217,30 @@ const slice = createSlice({
       s.refreshCounter++;
       s.busy = false;
     },
+    initialLayoutDetermined: (
+      s,
+      action: PayloadAction<{
+        newData: EditingData;
+        /**
+         * Tag is used to avoid pushing too many similar history items.
+         * Changes with the same tag will be coalesced into one history item.
+         * Pass nothing if each history item is important!
+         */
+        tag?: string;
+      }>
+    ) => {
+      if (s.busy) throw new Error('Tried to change revision while loading');
+      const { newData } = action.payload;
+      if (newData.layoutItems.some(i => i.viewerMode === 'unknown')) {
+        throw new Error('Layout is not specified.');
+      }
+      if (s.history[s.currentHistoryIndex].layoutItems.every(i => i.viewerMode !== 'unknown')) {
+        throw new Error('Layout is already fixed.');
+      }
+      s.history[s.currentHistoryIndex].layout = newData.layout;
+      s.history[s.currentHistoryIndex].layoutItems = newData.layoutItems;
+      s.history[s.currentHistoryIndex].activeLayoutKey = newData.activeLayoutKey;
+    },
     change: (
       s,
       action: PayloadAction<{
@@ -214,6 +254,15 @@ const slice = createSlice({
       }>
     ) => {
       if (s.busy) throw new Error('Tried to change revision while loading');
+      if (
+        s.history[s.currentHistoryIndex].layoutItems.some(
+          i => i.viewerMode === 'unknown'
+        )
+      ) {
+        throw new Error(
+          'It is not possible to change the layout from "unknown".'
+        );
+      }
       const { tag, newData } = action.payload;
       s.history = s.history.slice(0, s.currentHistoryIndex + 1);
       if (typeof tag === 'string' && tag.length > 0 && tag === s.historyTag) {
@@ -270,6 +319,7 @@ export const {
   loadRevisions,
   startLoadRevision,
   loadRevision,
+  initialLayoutDetermined,
   change,
   undo,
   redo,

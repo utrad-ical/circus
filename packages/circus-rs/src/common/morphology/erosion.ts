@@ -1,11 +1,3 @@
-/**
- * @param array input binary image
- * @param width width of array
- * @param height height of array
- * @param nSlices slice number of array
- * @param structure {array, width, height, nSlices} structuring element used for the erosion
- */
-
 const defaultStructure = {
   array: new Uint8Array([0, 1, 0, 1, 1, 1, 0, 1, 0]),
   width: 3,
@@ -13,11 +5,18 @@ const defaultStructure = {
   nSlices: 1
 };
 
+/**
+ * @param array input binary image
+ * @param width width of array
+ * @param height height of array
+ * @param nSlices slice number of array
+ * @param structure {array, width, height, nSlices} structuring element used for the erosion
+ */
 const erosion: (
   array: Uint8Array,
   width: number,
   height: number,
-  nSlices: number,
+  nSlices?: number,
   structure?: {
     array: Uint8Array;
     width: number;

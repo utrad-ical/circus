@@ -234,12 +234,17 @@ const slice = createSlice({
       if (newData.layoutItems.some(i => i.viewerMode === 'unknown')) {
         throw new Error('Layout is not specified.');
       }
-      if (s.history[s.currentHistoryIndex].layoutItems.every(i => i.viewerMode !== 'unknown')) {
+      if (
+        s.history[s.currentHistoryIndex].layoutItems.every(
+          i => i.viewerMode !== 'unknown'
+        )
+      ) {
         throw new Error('Layout is already fixed.');
       }
       s.history[s.currentHistoryIndex].layout = newData.layout;
       s.history[s.currentHistoryIndex].layoutItems = newData.layoutItems;
-      s.history[s.currentHistoryIndex].activeLayoutKey = newData.activeLayoutKey;
+      s.history[s.currentHistoryIndex].activeLayoutKey =
+        newData.activeLayoutKey;
     },
     change: (
       s,

@@ -1,14 +1,30 @@
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
+import { MorphologicalImageProcessingResults } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
 import RawData from '@utrad-ical/circus-rs/src/common/RawData';
 import createCurrentLabelsUpdator from './createCurrentLabelsUpdator';
 import { createNewLabelData, InternalLabelOf } from './labelData';
 import { EditingData, EditingDataUpdater } from './revisionData';
 
-export type PostProcessor = (results: {
+export type PostProcessorForLabeling = (results: {
   labelingResults: LabelingResults3D;
   names: string[];
+}) => void;
+
+export type VoxelLabelProcessorForLabeling = (
+  input: Uint8Array,
+  width: number,
+  height: number,
+  nSlices: number,
+  name: string,
+  postProcessor: PostProcessorForLabeling,
+  handleProgress: (progress: { value: number; label: string }) => void
+) => void;
+
+export type PostProcessor = (results: {
+  morphologicalImageProcessingResults: MorphologicalImageProcessingResults;
+  name: string;
 }) => void;
 
 export type VoxelLabelProcessor = (
@@ -21,12 +37,12 @@ export type VoxelLabelProcessor = (
   handleProgress: (progress: { value: number; label: string }) => void
 ) => void;
 
-const performLabelCreatingVoxelProcessing = async (
+const performLabelCreatingVoxelProcessingForLabeling = async (
   editingData: EditingData,
   updateEditingData: EditingDataUpdater,
   label: InternalLabelOf<'voxel'>,
   labelColors: string[],
-  voxelLabelProcessor: VoxelLabelProcessor,
+  voxelLabelProcessor: VoxelLabelProcessorForLabeling,
   reportProgress: (progress: { value: number; label: string }) => void
 ) => {
   if (label.type !== 'voxel' || !label.data.size)
@@ -53,7 +69,7 @@ const performLabelCreatingVoxelProcessing = async (
   img.convert('uint8', (v: number) => {
     return v === 1 ? 1 : 0;
   });
-  const addNewLabels: PostProcessor = results => {
+  const addNewLabels: PostProcessorForLabeling = results => {
     const { labelingResults, names } = results;
     const newLabel: InternalLabelOf<'voxel'>[] = [];
     for (let num = 0; num < labelingResults.labelNum; num++) {
@@ -106,4 +122,83 @@ const performLabelCreatingVoxelProcessing = async (
   );
 };
 
-export default performLabelCreatingVoxelProcessing;
+const performLabelCreatingVoxelProcessing = async (
+  editingData: EditingData,
+  updateEditingData: EditingDataUpdater,
+  label: InternalLabelOf<'voxel'>,
+  labelColors: string[],
+  voxelLabelProcessor: VoxelLabelProcessor,
+  reportProgress: (progress: { value: number; label: string }) => void
+) => {
+  if (label.type !== 'voxel' || !label.data.size)
+    throw new TypeError('Invalid label passed.');
+
+  const createNewLabel = (
+    color: string,
+    name: string
+  ): InternalLabelOf<'voxel'> => {
+    const alpha = 1;
+    const temporaryKey = generateUniqueId();
+    const data = createNewLabelData('voxel', { color, alpha });
+    return { temporaryKey, name, ...data, attributes: {}, hidden: false };
+  };
+
+  const updateCurrentLabels = createCurrentLabelsUpdator(
+    editingData,
+    updateEditingData
+  );
+
+  const [width, height, nSlices] = label.data.size;
+  const img = new RawData([width, height, nSlices], 'binary');
+  img.assign(label.data.volumeArrayBuffer!);
+  img.convert('uint8', (v: number) => {
+    return v === 1 ? 1 : 0;
+  });
+  const addNewLabels: PostProcessor = results => {
+    const { morphologicalImageProcessingResults, name } = results;
+    const newLabel: InternalLabelOf<'voxel'>[] = [];
+    const UL = morphologicalImageProcessingResults.min;
+    const LR = morphologicalImageProcessingResults.max;
+    const color =
+      labelColors[
+        (labelColors.indexOf(label.data.color) + 1) % labelColors.length
+      ];
+    newLabel.push(createNewLabel(color, name));
+    const [sizex, sizey, sizez] = LR.map((lr, i) => lr - UL[i] + 1);
+    newLabel[0].data.size = [sizex, sizey, sizez];
+    const volume = new rs.RawData([sizex, sizey, sizez], 'binary');
+    for (let k = 0; k < sizez; k++) {
+      for (let j = 0; j < sizey; j++) {
+        for (let i = 0; i < sizex; i++) {
+          const pos = i + j * sizex + k * sizex * sizey;
+          if (morphologicalImageProcessingResults.result[pos]) {
+            volume.writePixelAt(1, i, j, k);
+          }
+        }
+      }
+    }
+    newLabel[0].data.volumeArrayBuffer = volume.data;
+    newLabel[0].data.origin = [
+      UL[0] + label.data.origin![0],
+      UL[1] + label.data.origin![1],
+      UL[2] + label.data.origin![2]
+    ];
+
+    updateCurrentLabels(labels => {
+      labels.splice(editingData.activeLabelIndex + 1, 0, ...newLabel);
+    });
+  };
+  reportProgress({ value: 100, label: '' });
+  voxelLabelProcessor(
+    new Uint8Array(img.data),
+    width,
+    height,
+    nSlices,
+    label.name!,
+    addNewLabels,
+    reportProgress
+  );
+};
+
+export default performLabelCreatingVoxelProcessingForLabeling;
+export { performLabelCreatingVoxelProcessing };

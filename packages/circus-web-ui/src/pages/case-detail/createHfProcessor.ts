@@ -2,11 +2,11 @@ import { alert } from '@smikitky/rb-components/lib/modal';
 import HoleFilling2D, {
   HoleFilling3D
 } from '@utrad-ical/circus-rs/src/common/CCL/holeFilling';
-import {
-  VoxelLabelProcessor,
-  PostProcessor
-} from './performLabelCreatingVoxelProcessing';
 import hfWorker from 'worker-loader!./hfWorker';
+import {
+  PostProcessorForLabeling,
+  VoxelLabelProcessorForLabeling
+} from './performLabelCreatingVoxelProcessing';
 
 export interface HoleFillingOptions {
   dimension: 2 | 3;
@@ -16,14 +16,14 @@ export interface HoleFillingOptions {
 
 const createHfProcessor = (
   options: HoleFillingOptions
-): VoxelLabelProcessor => {
+): VoxelLabelProcessorForLabeling => {
   return async (
     input: Uint8Array,
     width: number,
     height: number,
     nSlices: number,
     name: string,
-    postProcessor: PostProcessor,
+    postProcessor: PostProcessorForLabeling,
     reportProgress: (progress: { value: number; label: string }) => void
   ) => {
     const { dimension, neighbors, orientation } = options;
@@ -103,7 +103,7 @@ const createHfProcessor = (
                 height,
                 neighbors
               );
-      } catch (err) {
+      } catch (err: any) {
         console.log('error', err.message);
         alert(`${name} is too complex.\nPlease modify ${name}.`);
         return;

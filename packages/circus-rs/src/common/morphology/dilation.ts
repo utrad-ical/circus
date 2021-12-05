@@ -34,16 +34,16 @@ const dilation: (
 ) => {
   let input = array.slice(0);
   const output = new Uint8Array(width * height * nSlices);
-  const centre = [
+  const center = [
     Math.floor(structure.nSlices / 2),
     Math.floor(structure.height / 2),
     Math.floor(structure.width / 2)
   ];
   if (
     structure.array[
-      centre[2] +
-        centre[1] * structure.width +
-        centre[0] * structure.width * structure.height
+      center[2] +
+        center[1] * structure.width +
+        center[0] * structure.width * structure.height
     ] === 0
   ) {
     throw new Error(`invalid structure.`);
@@ -52,9 +52,9 @@ const dilation: (
   const dy: number[] = [];
   const dz: number[] = [];
   let structure_pos = 0;
-  for (let z = -centre[0]; z <= centre[0]; z++) {
-    for (let y = -centre[1]; y <= centre[1]; y++) {
-      for (let x = -centre[2]; x <= centre[2]; x++) {
+  for (let z = -center[0]; z <= center[0]; z++) {
+    for (let y = -center[1]; y <= center[1]; y++) {
+      for (let x = -center[2]; x <= center[2]; x++) {
         if (
           structure.array[structure_pos] &&
           !(z === 0 && y === 0 && x === 0)

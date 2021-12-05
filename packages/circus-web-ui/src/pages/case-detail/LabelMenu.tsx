@@ -24,7 +24,11 @@ import useLocalPreference from 'utils/useLocalPreference';
 import * as c from './caseStore';
 import createCclProcessor, { CclOptions } from './createCclProcessor';
 import createCurrentLabelsUpdator from './createCurrentLabelsUpdator';
+import createEdProcessor, { ErosionDilationOptions } from './createEdProcessor';
 import createHfProcessor, { HoleFillingOptions } from './createHfProcessor';
+import createIiProcessor, {
+  IntersliceInterpolationOptions
+} from './createIiProcessor';
 import createSectionFromPoints from './createSectionFromPoints';
 import {
   createNewLabelData,
@@ -35,10 +39,14 @@ import {
   LabelType,
   labelTypes
 } from './labelData';
-import performLabelCreatingVoxelProcessing from './performLabelCreatingVoxelProcessing';
+import performLabelCreatingVoxelProcessingForLabeling, {
+  performLabelCreatingVoxelProcessing
+} from './performLabelCreatingVoxelProcessing';
 import { EditingData, EditingDataUpdater } from './revisionData';
 import SettingDialogCCL from './SettingDialogCCL';
+import SettingDialogED from './SettingDialogED';
 import SettingDialogHF from './SettingDialogHF';
+import SettingDialogII from './SettingDialogII';
 
 type LabelCommand =
   | 'rename'
@@ -71,6 +79,9 @@ const LabelMenu: React.FC<{
 
   const [cclDialogOpen, setCclDialogOpen] = useState(false);
   const [hfDialogOpen, setHfDialogOpen] = useState(false);
+  const [erosionDialogOpen, setErosionDialogOpen] = useState(false);
+  const [dilationDialogOpen, setDilationDialogOpen] = useState(false);
+  const [iiDialogOpen, setIiDialogOpen] = useState(false);
   const [processorProgress, setProcessorProgress] = useState({
     value: 0,
     label: ''
@@ -245,7 +256,7 @@ const LabelMenu: React.FC<{
     const label = editingData.revision.series[activeSeriesIndex].labels[
       activeLabelIndex
     ] as InternalLabelOf<'voxel'>;
-    performLabelCreatingVoxelProcessing(
+    performLabelCreatingVoxelProcessingForLabeling(
       editingData,
       updateEditingData,
       label,
@@ -268,7 +279,7 @@ const LabelMenu: React.FC<{
     const label = editingData.revision.series[activeSeriesIndex].labels[
       activeLabelIndex
     ] as InternalLabelOf<'voxel'>;
-    performLabelCreatingVoxelProcessing(
+    performLabelCreatingVoxelProcessingForLabeling(
       editingData,
       updateEditingData,
       label,
@@ -287,6 +298,52 @@ const LabelMenu: React.FC<{
     );
   };
 
+  const onOkClickDialogED = (props: ErosionDilationOptions) => {
+    const label = editingData.revision.series[activeSeriesIndex].labels[
+      activeLabelIndex
+    ] as InternalLabelOf<'voxel'>;
+    performLabelCreatingVoxelProcessing(
+      editingData,
+      updateEditingData,
+      label,
+      labelColors,
+      createEdProcessor(props),
+      edProgress => {
+        setProcessorProgress(edProgress);
+        if (edProgress.label !== '') {
+          setErosionDialogOpen(false);
+          setDilationDialogOpen(false);
+          setProcessorProgress({
+            value: 0,
+            label: ''
+          });
+        }
+      }
+    );
+  };
+
+  const onOkClickDialogII = (props: IntersliceInterpolationOptions) => {
+    const label = editingData.revision.series[activeSeriesIndex].labels[
+      activeLabelIndex
+    ] as InternalLabelOf<'voxel'>;
+    performLabelCreatingVoxelProcessing(
+      editingData,
+      updateEditingData,
+      label,
+      labelColors,
+      createIiProcessor(props),
+      iiProgress => {
+        setProcessorProgress(iiProgress);
+        if (iiProgress.label !== '') {
+          setIiDialogOpen(false);
+          setProcessorProgress({
+            value: 0,
+            label: ''
+          });
+        }
+      }
+    );
+  };
   const onSelectThreePoints2Section = () => {
     try {
       const seriesIndex = Number(
@@ -326,7 +383,7 @@ const LabelMenu: React.FC<{
         d.layout = newLayout;
         d.activeLayoutKey = key;
       });
-    } catch (err) {
+    } catch (err: any) {
       alert(err.message);
     }
   };
@@ -427,6 +484,33 @@ const LabelMenu: React.FC<{
           Hole filling
         </MenuItem>
         <MenuItem
+          eventKey="erosion"
+          onSelect={onSelect(() => {
+            setErosionDialogOpen(true);
+          })}
+          disabled={!activeLabel || activeLabel.type !== 'voxel'}
+        >
+          Erosion
+        </MenuItem>
+        <MenuItem
+          eventKey="dilation"
+          onSelect={onSelect(() => {
+            setDilationDialogOpen(true);
+          })}
+          disabled={!activeLabel || activeLabel.type !== 'voxel'}
+        >
+          Dilation
+        </MenuItem>
+        <MenuItem
+          eventKey="interpolation"
+          onSelect={onSelect(() => {
+            setIiDialogOpen(true);
+          })}
+          disabled={!activeLabel || activeLabel.type !== 'voxel'}
+        >
+          Interslice interpolation
+        </MenuItem>
+        <MenuItem
           eventKey="section"
           onSelect={onSelect(onSelectThreePoints2Section)}
           disabled={!activeLabel || activeLabel.type !== 'point'}
@@ -480,6 +564,46 @@ const LabelMenu: React.FC<{
           processorProgress={processorProgress}
           onHide={() => setHfDialogOpen(false)}
           onOkClick={onOkClickDialogHF}
+        />
+      </Modal>
+      <Modal
+        show={erosionDialogOpen}
+        onHide={() => setErosionDialogOpen(false)}
+      >
+        <SettingDialogED
+          processorProgress={processorProgress}
+          onHide={() => setErosionDialogOpen(false)}
+          onOkClick={onOkClickDialogED}
+          erosionFlag={true}
+        />
+      </Modal>
+      <Modal
+        show={dilationDialogOpen}
+        onHide={() => {
+          setDilationDialogOpen(false);
+        }}
+      >
+        <SettingDialogED
+          processorProgress={processorProgress}
+          onHide={() => {
+            setDilationDialogOpen(false);
+          }}
+          onOkClick={onOkClickDialogED}
+          erosionFlag={false}
+        />
+      </Modal>
+      <Modal
+        show={iiDialogOpen}
+        onHide={() => {
+          setIiDialogOpen(false);
+        }}
+      >
+        <SettingDialogII
+          processorProgress={processorProgress}
+          onHide={() => {
+            setIiDialogOpen(false);
+          }}
+          onOkClick={onOkClickDialogII}
         />
       </Modal>
     </StyledButtonsDiv>

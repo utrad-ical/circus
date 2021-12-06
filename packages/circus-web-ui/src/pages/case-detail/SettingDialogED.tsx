@@ -1,45 +1,49 @@
 import { Editor } from '@smikitky/rb-components/lib/editor-types';
+import classnames from 'classnames';
 import { FormControl } from 'components/react-bootstrap';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { ErosionDilationOptions } from './createEdProcessor';
 import SettingDialog from './SettingDialog';
 
-const StyledSpan = styled.span`
-  .structure-shape {
-    width: 5em;
-  }
-`;
-
 const StyledDiv = styled.div`
+  line-height: 1;
+  .structure-shape {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 10px;
+    input {
+      width: 5em;
+    }
+  }
   .slice-number {
     width: 5em;
   }
-  [class^='square'] {
-    background: #fff;
-    border: 1px solid #999;
-    float: left;
-    font-size: 24px;
-    font-weight: bold;
-    line-height: 34px;
-    height: 34px;
+  .square {
+    background: ${(props: any) => props.theme.background};
+    color: ${(props: any) => props.theme.primaryText};
+    border: 1px solid ${(props: any) => props.theme.border};
+    height: 30px;
+    width: 30px;
+    font-size: 20px;
+    line-height: 30px;
     margin-right: -1px;
     margin-top: -1px;
     padding: 0;
     text-align: center;
-    width: 34px;
-  }
-  .square:focus {
-    outline: none;
-    background: #ddd;
-  }
-  .square-center {
-    background: #f0f;
-  }
-  .board-row:after {
-    clear: both;
-    content: '';
-    display: table;
+    &:focus {
+      outline: none;
+      background: ${(props: any) => props.theme.secondaryBackground};
+    }
+    &.active {
+      background: ${(props: any) => props.theme.brandPrimary};
+      &:focus {
+        background: ${(props: any) => props.theme.brandDark};
+      }
+    }
+    &.center {
+      background: ${(props: any) => props.theme.highlightColor};
+    }
   }
   .structure-caption {
     margin-top: 5px;
@@ -47,24 +51,20 @@ const StyledDiv = styled.div`
   .structure-title {
     margin-bottom: 5px;
   }
-  .active-voxel {
-    background: pink;
-  }
-  .active-voxel:focus {
-    background: #dda0a9;
-  }
 `;
 
-const Square = (props: any) => {
+const Square: React.FC<{
+  isCenter: boolean;
+  value: number;
+  onClick: React.MouseEventHandler<HTMLButtonElement>;
+}> = props => {
   return (
     <button
-      className={
-        props.center
-          ? 'square-center'
-          : props.value === 1
-          ? 'square active-voxel'
-          : 'square'
-      }
+      className={classnames('square', {
+        center: props.isCenter,
+        active: props.value === 1
+      })}
+      disabled={props.isCenter}
       onClick={props.onClick}
     >
       {props.value}
@@ -72,7 +72,7 @@ const Square = (props: any) => {
   );
 };
 
-const Board = (props: {
+const Board: React.FC<{
   structure: {
     array: Uint8Array;
     width: number;
@@ -81,7 +81,7 @@ const Board = (props: {
   };
   sliceNumber: number;
   onChange: (ev: any) => void;
-}) => {
+}> = props => {
   const { structure, sliceNumber, onChange } = props;
   const width = [...Array(structure.width).keys()];
   const height = [...Array(structure.height).keys()];
@@ -100,7 +100,7 @@ const Board = (props: {
     array[pos] = 1 - structure.array[pos];
     onChange(array);
   };
-  const centerFlag = (i: number, j: number) => {
+  const isCenter = (i: number, j: number) => {
     return (
       i === Math.floor(structure.width / 2) &&
       j === Math.floor(structure.height / 2) &&
@@ -108,7 +108,7 @@ const Board = (props: {
     );
   };
   return (
-    <>
+    <div className="board">
       {height.map((_, j) => (
         <div key={j} className="board-row">
           {width.map((_, i) => (
@@ -122,12 +122,12 @@ const Board = (props: {
                 ]
               }
               onClick={() => onClick(i, j)}
-              center={centerFlag(i, j)}
+              isCenter={isCenter(i, j)}
             />
           ))}
         </div>
       ))}
-    </>
+    </div>
   );
 };
 
@@ -227,44 +227,49 @@ const OptionsEditorForED: Editor<ErosionDilationOptions> = props => {
     });
   };
   return (
-    <>
-      <StyledSpan className="structure-shape form-inline">
-        Width&nbsp;
-        <FormControl
-          className="structure-shape"
-          type="number"
-          value={value.structure.width}
-          name="width"
-          onChange={onWidthChange}
-        />
-        &emsp; Height&nbsp;
-        <FormControl
-          className="structure-shape"
-          type="number"
-          value={value.structure.height}
-          name="height"
-          onChange={onHeightChange}
-        />
-        &emsp; nSlices&nbsp;
-        <FormControl
-          className="structure-shape"
-          type="number"
-          value={value.structure.nSlices}
-          name="nSlices"
-          onChange={onNSlicesChange}
-        />
-      </StyledSpan>
-      <br />
-      <StyledDiv>
-        <div className="structure-title form-inline">
-          Structuring element &emsp;(Slice number =&nbsp;
+    <StyledDiv>
+      <div className="structure-shape form-inline">
+        <label>
+          Width:&ensp;
           <FormControl
-            className="slice-number"
             type="number"
-            value={sliceNumber}
-            name="sliceNumber"
-            onChange={onSliceNumberChange}
+            value={value.structure.width}
+            name="width"
+            onChange={onWidthChange}
           />
+        </label>
+        <label>
+          Height:&ensp;
+          <FormControl
+            type="number"
+            value={value.structure.height}
+            name="height"
+            onChange={onHeightChange}
+          />
+        </label>
+        <label>
+          nSlices:&ensp;
+          <FormControl
+            type="number"
+            value={value.structure.nSlices}
+            name="nSlices"
+            onChange={onNSlicesChange}
+          />
+        </label>
+      </div>
+      <div>
+        <div className="structure-title form-inline">
+          Structuring element &emsp;(
+          <label>
+            Slice number =&nbsp;
+            <FormControl
+              className="slice-number"
+              type="number"
+              value={sliceNumber}
+              name="sliceNumber"
+              onChange={onSliceNumberChange}
+            />
+          </label>
           )
         </div>
         <Board
@@ -274,12 +279,12 @@ const OptionsEditorForED: Editor<ErosionDilationOptions> = props => {
         />
 
         <div className="structure-caption">
-          <Square value={1} onClick={() => {}} center={true} />
+          <Square value={1} onClick={() => {}} isCenter={true} />
           &nbsp;: origin
         </div>
         <br />
-      </StyledDiv>
-    </>
+      </div>
+    </StyledDiv>
   );
 };
 

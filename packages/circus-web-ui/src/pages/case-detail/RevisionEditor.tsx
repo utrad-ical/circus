@@ -3,6 +3,7 @@ import JsonSchemaEditor from '@smikitky/rb-components/lib/JsonSchemaEditor';
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
+import ModifierKeyBehaviors from '@utrad-ical/circus-rs/src/browser/annotation/ModifierKeyBehaviors';
 import { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
 import {
   sectionFrom2dViewState,
@@ -32,7 +33,7 @@ import {
   usePendingVolumeLoaders,
   VolumeLoaderCacheContext
 } from 'utils/useImageSource';
-import useLoginUser, { useUserPreferences } from 'utils/useLoginUser';
+import { useUserPreferences } from 'utils/useLoginUser';
 import { Modal } from '../../components/react-bootstrap';
 import * as c from './caseStore';
 import {
@@ -46,6 +47,7 @@ import LabelMenu from './LabelMenu';
 import LabelSelector from './LabelSelector';
 import {
   EditingData,
+  EditingDataLayoutInitializer,
   EditingDataUpdater,
   SeriesEntryWithLabels
 } from './revisionData';
@@ -54,7 +56,6 @@ import SideContainer from './SideContainer';
 import ToolBar, { ViewOptions, zDimmedThresholdOptions } from './ToolBar';
 import ViewerGrid from './ViewerGrid';
 import { ViewWindow } from './ViewWindowEditor';
-import ModifierKeyBehaviors from '@utrad-ical/circus-rs/src/browser/annotation/ModifierKeyBehaviors';
 
 const useCompositions = (
   series: {
@@ -136,7 +137,7 @@ const useCompositions = (
 
 const RevisionEditor: React.FC<{
   editingData: EditingData;
-  initEditingDataLayout: EditingDataUpdater;
+  initEditingDataLayout: EditingDataLayoutInitializer;
   updateEditingData: EditingDataUpdater;
   caseDispatch: React.Dispatch<any>;
   seriesData: { [seriesUid: string]: Series };
@@ -281,24 +282,28 @@ const RevisionEditor: React.FC<{
 
   const layoutEnabled = !(metaLoadedAll && activeSeriesMetadata!.mode !== '3d');
 
-  const layoutInitialized = editingData.layoutItems.every(i => i.viewerMode !== 'unknown');
+  const layoutInitialized = !!(
+    Object.keys(editingData.layout.positions).length > 0
+    && editingData.layoutItems.length > 0
+    && editingData.activeLayoutKey
+  );
+
   useEffect(() => {
     if (!activeSeriesMetadata || layoutInitialized) return;
     initEditingDataLayout(d => {
-      if (d.layoutItems.every(i => i.viewerMode !== 'unknown')) return;
+      if (Object.keys(d.layout.positions).length > 0 && d.layoutItems.length > 0 && d.activeLayoutKey) return;
       const [layoutItems, layout] = c.performLayout(
         activeSeriesMetadata!.mode !== '2d' ? 'twoByTwo' : '2d',
         editingData.activeSeriesIndex
       );
       d.layout = layout;
       d.layoutItems = layoutItems;
-      d.activeLayoutKey = layoutItems[0].key;
+      d.activeLayoutKey = layoutItems.length > 0 ? layoutItems[0].key : null;
     });
   }, [
     layoutInitialized,
     activeSeriesMetadata,
     editingData,
-    editingData.activeSeriesIndex,
     initEditingDataLayout
   ]);
 

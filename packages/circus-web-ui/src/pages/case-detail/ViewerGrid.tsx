@@ -36,7 +36,7 @@ import React, {
 import styled from 'styled-components';
 import { EditingData, EditingDataUpdater, seriesColors } from './revisionData';
 
-export type ViewerMode = 'unknown' | '2d' | '3d';
+export type ViewerMode = '2d' | '3d';
 export interface ViewerDef {
   key: string;
   viewerMode: ViewerMode;

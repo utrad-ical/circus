@@ -43,7 +43,7 @@ export interface EditingData {
 
 /**
  * Immer-backed update function used to modify the current EditingData.
- * @param update The updater function that takes the 'draft' state.
+ * @param updater The updater function that takes the 'draft' state.
  * @param tag Used for history handling. If similar small operations happen
  * many times, giving the same string as a tag will make them coalesce.
  * Don't give tags for important operations that can be undone individually.
@@ -51,6 +51,22 @@ export interface EditingData {
 export type EditingDataUpdater = (
   updater: (current: EditingData) => EditingData | void,
   tag?: string
+) => void;
+
+/**
+ * Immer-backed initialize function used to set the EditingData layout.
+ * @param initializer The initializer function that takes the 'draft' state.
+ */
+export type EditingDataLayoutInitializer = (
+  initializer: (current: {
+    layoutItems: ViewerDef[];
+    layout: LayoutInfo;
+    activeLayoutKey: string | null;
+  }) => {
+    layoutItems: ViewerDef[];
+    layout: LayoutInfo;
+    activeLayoutKey: string | null;
+  } | void
 ) => void;
 
 export interface Revision<

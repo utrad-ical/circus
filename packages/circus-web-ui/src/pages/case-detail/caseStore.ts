@@ -56,7 +56,7 @@ export const canRedo = (s: CaseDetailState) =>
 export type LayoutKind = 'twoByTwo' | 'axial' | 'sagittal' | 'coronal' | '2d';
 
 export const performLayout = (
-  kind: LayoutKind | undefined,
+  kind: LayoutKind,
   seriesIndex: number = 0
 ): [ViewerDef[], LayoutInfo] => {
   const layout: LayoutInfo = {
@@ -67,7 +67,6 @@ export const performLayout = (
 
   const orientations = ((): OrientationString[] => {
     switch (kind) {
-      case undefined:
       case '2d':
         return ['axial'];
       case 'twoByTwo':
@@ -81,8 +80,6 @@ export const performLayout = (
   const items: ViewerDef[] = [];
   const viewerMode = ((): ViewerMode => {
     switch (kind) {
-      case undefined:
-        return 'unknown';
       case '2d':
         return '2d';
       default:
@@ -201,7 +198,7 @@ const slice = createSlice({
 
       const [layoutItems, layout] = sameSeriesSet
         ? [prev.layoutItems, prev.layout]
-        : performLayout(undefined, 0);
+        : [[], { columns: 1, rows: 1, positions: {} }];
 
       const editingData: EditingData = {
         revision,
@@ -209,7 +206,7 @@ const slice = createSlice({
         activeLabelIndex: (revision.series[0].labels || []).length > 0 ? 0 : -1,
         layout,
         layoutItems,
-        activeLayoutKey: layoutItems[0].key,
+        activeLayoutKey: layoutItems.length > 0 ? layoutItems[0].key : null,
         allLabelsHidden: false
       };
       s.history = [editingData];
@@ -220,31 +217,42 @@ const slice = createSlice({
     initialLayoutDetermined: (
       s,
       action: PayloadAction<{
-        newData: EditingData;
-        /**
-         * Tag is used to avoid pushing too many similar history items.
-         * Changes with the same tag will be coalesced into one history item.
-         * Pass nothing if each history item is important!
-         */
-        tag?: string;
+        layoutItems: ViewerDef[];
+        layout: LayoutInfo;
+        activeLayoutKey: string | null;
       }>
     ) => {
       if (s.busy) throw new Error('Tried to change revision while loading');
-      const { newData } = action.payload;
-      if (newData.layoutItems.some(i => i.viewerMode === 'unknown')) {
+      const { layoutItems, layout, activeLayoutKey } = action.payload;
+      if (
+        !(
+          Object.keys(layout.positions).length > 0 &&
+          layoutItems.length > 0 &&
+          activeLayoutKey
+        )
+      ) {
         throw new Error('Layout is not specified.');
       }
+      const currentHistory = s.history[s.currentHistoryIndex];
       if (
-        s.history[s.currentHistoryIndex].layoutItems.every(
-          i => i.viewerMode !== 'unknown'
-        )
+        Object.keys(currentHistory.layout.positions).length > 0 &&
+        currentHistory.layoutItems.length > 0 &&
+        currentHistory.activeLayoutKey
       ) {
         throw new Error('Layout is already fixed.');
       }
-      s.history[s.currentHistoryIndex].layout = newData.layout;
-      s.history[s.currentHistoryIndex].layoutItems = newData.layoutItems;
-      s.history[s.currentHistoryIndex].activeLayoutKey =
-        newData.activeLayoutKey;
+      s.history
+        .filter(
+          i =>
+            Object.keys(i.layout.positions).length === 0 &&
+            i.layoutItems.length === 0 &&
+            !i.activeLayoutKey
+        )
+        .forEach(i => {
+          i.layout = layout;
+          i.layoutItems = layoutItems;
+          i.activeLayoutKey = activeLayoutKey;
+        });
     },
     change: (
       s,
@@ -259,13 +267,15 @@ const slice = createSlice({
       }>
     ) => {
       if (s.busy) throw new Error('Tried to change revision while loading');
+
+      const currentHistory = s.history[s.currentHistoryIndex];
       if (
-        s.history[s.currentHistoryIndex].layoutItems.some(
-          i => i.viewerMode === 'unknown'
-        )
+        Object.keys(currentHistory.layout.positions).length === 0 &&
+        currentHistory.layoutItems.length === 0 &&
+        !currentHistory.activeLayoutKey
       ) {
         throw new Error(
-          'It is not possible to change the layout from "unknown".'
+          'It is not possible to change the layout from the undefined state.'
         );
       }
       const { tag, newData } = action.payload;

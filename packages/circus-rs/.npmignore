@@ -6,3 +6,4 @@ config/*
 /lib
 /dist
 /docs
+*.tgz

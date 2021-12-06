@@ -27,7 +27,7 @@ import {
   usePendingVolumeLoaders,
   VolumeLoaderCacheContext
 } from 'utils/useImageSource';
-import useLoginUser from 'utils/useLoginUser';
+import useLoginUser, { useUserPreferences } from 'utils/useLoginUser';
 import { Modal } from '../../components/react-bootstrap';
 import * as c from './caseStore';
 import {
@@ -49,6 +49,7 @@ import SideContainer from './SideContainer';
 import ToolBar, { ViewOptions, zDimmedThresholdOptions } from './ToolBar';
 import ViewerGrid from './ViewerGrid';
 import { ViewWindow } from './ViewWindowEditor';
+import ModifierKeyBehaviors from '@utrad-ical/circus-rs/src/browser/annotation/ModifierKeyBehaviors';
 
 const useCompositions = (
   series: {
@@ -126,7 +127,8 @@ const RevisionEditor: React.FC<{
   const stateChanger = useMemo(() => createStateChanger<rs.MprViewState>(), []);
   const [seriesDialogOpen, setSeriesDialogOpen] = useState(false);
 
-  const preferences = useLoginUser().preferences;
+  // const preferences = useLoginUser().preferences;
+  const [preferences, updatePreferences] = useUserPreferences();
 
   const [viewOptions, setViewOptions] = useState<ViewOptions>({
     showReferenceLine: preferences.referenceLine ?? false,
@@ -138,10 +140,31 @@ const RevisionEditor: React.FC<{
       'nearestNeighbor') as InterpolationMode
   });
 
+  const saveViewOptions = (newViewOptions: ViewOptions) => {
+    setViewOptions(newViewOptions);
+    updatePreferences({
+      ...preferences,
+      referenceLine: newViewOptions.showReferenceLine,
+      scrollBars: newViewOptions.scrollbar,
+      interpolationMode: newViewOptions.interpolationMode
+    });
+  };
+
   const [modifierKeyBehaviors, setModifierKeyBehaviors] = useState({
     lockMaintainAspectRatio: preferences.maintainAspectRatio ?? false,
     lockFixCenterOfGravity: preferences.fixCenterOfGravity ?? false
   });
+
+  const saveModifierKeyBehaviors = (
+    newModifierKeyBehaviors: ModifierKeyBehaviors
+  ) => {
+    setModifierKeyBehaviors(newModifierKeyBehaviors);
+    updatePreferences({
+      ...preferences,
+      maintainAspectRatio: newModifierKeyBehaviors.lockMaintainAspectRatio,
+      fixCenterOfGravity: newModifierKeyBehaviors.lockFixCenterOfGravity
+    });
+  };
 
   const [planeFigureOption, setPlaneFigureOption] = useState({
     zDimmedThreshold: preferences.dimmedOutlineFor2DLabels
@@ -151,6 +174,22 @@ const RevisionEditor: React.FC<{
         )!.value
       : 3
   });
+
+  const savePlaneFigureOption = (newPlaneFigureOption: {
+    zDimmedThreshold: number;
+  }) => {
+    setPlaneFigureOption(newPlaneFigureOption);
+    updatePreferences({
+      ...preferences,
+      dimmedOutlineFor2DLabels:
+        newPlaneFigureOption.zDimmedThreshold === 0
+          ? 'hide'
+          : isFinite(newPlaneFigureOption.zDimmedThreshold)
+          ? 'infinity'
+          : 'show'
+    });
+  };
+
   // Keeps track of stable seriesUid-PVD pairs to avoid frequent comp changes
   const [allSeries, setAllSeries] = useState<
     {
@@ -330,12 +369,8 @@ const RevisionEditor: React.FC<{
   };
 
   useEffect(() => {
-    const {
-      revision,
-      activeSeriesIndex,
-      activeLabelIndex,
-      allLabelsHidden
-    } = editingData;
+    const { revision, activeSeriesIndex, activeLabelIndex, allLabelsHidden } =
+      editingData;
     // wait until composition is synced
     if (compositions.length !== revision.series.length) return;
     compositions.forEach((entry, seriesIndex) => {
@@ -444,9 +479,8 @@ const RevisionEditor: React.FC<{
   const labelAttributesChange = (value: any) => {
     const { activeSeriesIndex, activeLabelIndex } = editingData;
     updateEditingData(d => {
-      d.revision.series[activeSeriesIndex].labels[
-        activeLabelIndex
-      ].attributes = value;
+      d.revision.series[activeSeriesIndex].labels[activeLabelIndex].attributes =
+        value;
     }, `Change label attributes: ${activeLabel.temporaryKey}`);
   };
 
@@ -541,8 +575,9 @@ const RevisionEditor: React.FC<{
 
   const handleViewStateChange = useCallback(
     (viewer: Viewer, id?: string | number) => {
-      const seriesIndex = editingData.layoutItems.find(item => item.key === id)!
-        .seriesIndex;
+      const seriesIndex = editingData.layoutItems.find(
+        item => item.key === id
+      )!.seriesIndex;
       const window = (viewer.getState() as rs.MprViewState).window;
       viewWindows.current[seriesIndex] = window;
       setCurrentWindow(window);
@@ -561,8 +596,9 @@ const RevisionEditor: React.FC<{
     const windowPriority = projectData.windowPriority || 'auto';
     const interpolationMode =
       viewOptions.interpolationMode ?? 'nearestNeighbor';
-    const seriesIndex = editingData.layoutItems.find(item => item.key === id)!
-      .seriesIndex;
+    const seriesIndex = editingData.layoutItems.find(
+      item => item.key === id
+    )!.seriesIndex;
     if (viewWindows.current[seriesIndex]) {
       return {
         ...viewState,
@@ -684,11 +720,11 @@ const RevisionEditor: React.FC<{
           toolOptions={toolOptions}
           setToolOption={setToolOption}
           viewOptions={viewOptions}
-          onChangeViewOptions={setViewOptions}
+          onChangeViewOptions={saveViewOptions}
           modifierKeyBehaviors={modifierKeyBehaviors}
-          onChangeModifierKeyBehaviors={setModifierKeyBehaviors}
+          onChangeModifierKeyBehaviors={saveModifierKeyBehaviors}
           planeFigureOption={planeFigureOption}
-          onChangePlaneFigureOption={setPlaneFigureOption}
+          onChangePlaneFigureOption={savePlaneFigureOption}
           onChangeLayoutKind={handleChangeLayoutKind}
           wandEnabled={activeVolumeLoaded}
           windowPresets={projectData.windowPresets}

@@ -46,7 +46,7 @@ const SeriesDetail: React.FC<{}> = props => {
       rsHttpClient,
       seriesUid
     });
-    const src = new rs.HybridMprImageSource({
+    const src = new rs.WebGlHybridMprImageSource({
       volumeLoader,
       rsHttpClient,
       seriesUid,

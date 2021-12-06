@@ -70,7 +70,7 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
   public visibility: Visibility;
 
   /**
-   * For debug,
+   * For debugging,
    */
   public drawVisibilityThreshold: boolean = false;
 

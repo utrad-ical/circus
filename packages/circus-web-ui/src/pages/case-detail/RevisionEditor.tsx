@@ -292,10 +292,8 @@ const RevisionEditor: React.FC<{
     if (!activeSeriesMetadata || layoutInitialized) return;
     initEditingDataLayout(d => {
       if (Object.keys(d.layout.positions).length > 0 && d.layoutItems.length > 0 && d.activeLayoutKey) return;
-      const [layoutItems, layout] = c.performLayout(
-        activeSeriesMetadata!.mode !== '2d' ? 'twoByTwo' : '2d',
-        editingData.activeSeriesIndex
-      );
+      const layoutKind = activeSeriesMetadata.mode !== '3d' ? '2d' : 'twoByTwo';
+      const [layoutItems, layout] = c.performLayout(layoutKind, editingData.activeSeriesIndex);
       d.layout = layout;
       d.layoutItems = layoutItems;
       d.activeLayoutKey = layoutItems.length > 0 ? layoutItems[0].key : null;

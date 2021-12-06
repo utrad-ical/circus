@@ -17,17 +17,15 @@ const initialOptions = {
 const OptionsEditorForII: Editor<IntersliceInterpolationOptions> = props => {
   const { value, onChange } = props;
   return (
-    <>
-      <div>
-        Orientation&nbsp;
-        <ShrinkSelect
-          bsSize="sm"
-          options={orientationOptions}
-          value={value.orientation}
-          onChange={v => onChange({ ...value, orientation: v })}
-        />
-      </div>
-    </>
+    <div>
+      Orientation&nbsp;
+      <ShrinkSelect
+        bsSize="sm"
+        options={orientationOptions}
+        value={value.orientation}
+        onChange={v => onChange({ ...value, orientation: v })}
+      />
+    </div>
   );
 };
 

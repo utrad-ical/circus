@@ -1,12 +1,13 @@
 import { alert } from '@smikitky/rb-components/lib/modal';
+import { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
 import HoleFilling2D, {
   HoleFilling3D
 } from '@utrad-ical/circus-rs/src/common/CCL/holeFilling';
-import {
-  VoxelLabelProcessor,
-  PostProcessor
-} from './performLabelCreatingVoxelProcessing';
 import hfWorker from 'worker-loader!./hfWorker';
+import {
+  PostProcessor,
+  VoxelLabelProcessor
+} from './performLabelCreatingVoxelProcessing';
 
 export interface HoleFillingOptions {
   dimension: 2 | 3;
@@ -16,14 +17,14 @@ export interface HoleFillingOptions {
 
 const createHfProcessor = (
   options: HoleFillingOptions
-): VoxelLabelProcessor => {
+): VoxelLabelProcessor<LabelingResults3D> => {
   return async (
     input: Uint8Array,
     width: number,
     height: number,
     nSlices: number,
     name: string,
-    postProcessor: PostProcessor,
+    postProcessor: PostProcessor<LabelingResults3D>,
     reportProgress: (progress: { value: number; label: string }) => void
   ) => {
     const { dimension, neighbors, orientation } = options;
@@ -49,7 +50,7 @@ const createHfProcessor = (
         }
         const { result, _, holeVolume } = e.data;
         postProcessor({
-          labelingResults: {
+          processingResults: {
             labelMap: result,
             labelNum: 1,
             labels: [
@@ -103,7 +104,7 @@ const createHfProcessor = (
                 height,
                 neighbors
               );
-      } catch (err) {
+      } catch (err: any) {
         console.log('error', err.message);
         alert(`${name} is too complex.\nPlease modify ${name}.`);
         return;
@@ -124,7 +125,7 @@ const createHfProcessor = (
         }
       }
       postProcessor({
-        labelingResults: {
+        processingResults: {
           labelMap: output,
           labelNum: 1,
           labels: [

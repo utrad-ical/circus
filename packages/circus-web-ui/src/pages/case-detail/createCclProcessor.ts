@@ -13,14 +13,16 @@ export interface CclOptions {
   neighbors: 6 | 26;
 }
 
-const createCclProcessor = (options: CclOptions): VoxelLabelProcessor => {
+const createCclProcessor = (
+  options: CclOptions
+): VoxelLabelProcessor<LabelingResults3D> => {
   return async (
     input: Uint8Array,
     width: number,
     height: number,
     nSlices: number,
     name: string,
-    postProcessor: PostProcessor,
+    postProcessor: PostProcessor<LabelingResults3D>,
     reportProgress: (progress: { value: number; label: string }) => void
   ) => {
     const { maximumCcNum, neighbors } = options;
@@ -105,7 +107,7 @@ const createCclProcessor = (options: CclOptions): VoxelLabelProcessor => {
       }
       results.labelNum = names.length;
       return {
-        labelingResults: results,
+        processingResults: results,
         names: names
       };
     };
@@ -134,7 +136,7 @@ const createCclProcessor = (options: CclOptions): VoxelLabelProcessor => {
           neighbors === 6
             ? CCL6(input, width, height, nSlices)
             : CCL26(input, width, height, nSlices);
-      } catch (err) {
+      } catch (err: any) {
         console.log('error', err.message);
         alert(`${name} is too complex.\nPlease modify ${name}.`);
         return;

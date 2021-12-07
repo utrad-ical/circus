@@ -3,11 +3,11 @@ import dilation from '@utrad-ical/circus-rs/src/common/morphology/dilation';
 import erosion from '@utrad-ical/circus-rs/src/common/morphology/erosion';
 
 ctx.addEventListener('message', event => {
-  const { input, width, height, nSlices, structure, erosionFlag } = event.data;
+  const { input, width, height, nSlices, structure, isErosion } = event.data;
 
   let result: Uint8Array;
   try {
-    result = erosionFlag
+    result = isErosion
       ? erosion(input, width, height, nSlices, structure)
       : dilation(input, width, height, nSlices, structure);
   } catch (err: any) {

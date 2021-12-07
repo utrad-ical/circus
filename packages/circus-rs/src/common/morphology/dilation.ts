@@ -1,4 +1,6 @@
-const defaultStructure = {
+import { Structure, BasicMorphologicalOperation } from './morphology-types';
+
+const defaultStructure: Structure = {
   array: new Uint8Array([0, 1, 0, 1, 1, 1, 0, 1, 0]),
   width: 3,
   height: 3,
@@ -10,21 +12,9 @@ const defaultStructure = {
  * @param width width of array
  * @param height height of array
  * @param nSlices slice number of array
- * @param structure {array, width, height, nSlices} structuring element used for the erosion
+ * @param structure {array, width, height, nSlices} structuring element used for the dilation
  */
-const dilation: (
-  array: Uint8Array,
-  width: number,
-  height: number,
-  nSlices?: number,
-  structure?: {
-    array: Uint8Array;
-    width: number;
-    height: number;
-    nSlices: number;
-  },
-  iteration?: number
-) => Uint8Array = (
+const dilation: BasicMorphologicalOperation = (
   array,
   width,
   height,

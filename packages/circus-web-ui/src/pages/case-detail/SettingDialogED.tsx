@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { ErosionDilationOptions } from './createEdProcessor';
 import SettingDialog from './SettingDialog';
+import { Structure } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
 
 const StyledDiv = styled.div`
   line-height: 1;
@@ -73,12 +74,7 @@ const Square: React.FC<{
 };
 
 const Board: React.FC<{
-  structure: {
-    array: Uint8Array;
-    width: number;
-    height: number;
-    nSlices: number;
-  };
+  structure: Structure;
   sliceNumber: number;
   onChange: (ev: any) => void;
 }> = props => {
@@ -292,10 +288,10 @@ const SettingDialogED: React.FC<{
   processorProgress: { value: number; label: string };
   onHide: () => void;
   onOkClick: (props: ErosionDilationOptions) => void;
-  erosionFlag: boolean;
+  isErosion: boolean;
 }> = props => {
-  const { processorProgress, onHide, onOkClick, erosionFlag } = props;
-  const title = erosionFlag ? 'Erosion' : 'Dilation';
+  const { processorProgress, onHide, onOkClick, isErosion } = props;
+  const title = isErosion ? 'Erosion' : 'Dilation';
   const initialOptions = {
     structure: {
       array: newStructure(3, 3, 3),
@@ -303,7 +299,7 @@ const SettingDialogED: React.FC<{
       height: 3,
       nSlices: 3
     },
-    erosionFlag: erosionFlag
+    isErosion: isErosion
   };
 
   return (

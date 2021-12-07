@@ -1,4 +1,5 @@
 import dilation from './dilation';
+import { Structure } from './morphology-types';
 
 function sampleImg(dimension: 2 | 3): {
   input: Uint8Array;
@@ -6,12 +7,7 @@ function sampleImg(dimension: 2 | 3): {
   width: number;
   height: number;
   nSlices: number;
-  structure: {
-    array: Uint8Array;
-    width: number;
-    height: number;
-    nSlices: number;
-  };
+  structure: Structure;
 } {
   const [width, height, nSlices] = [10, 10, 3];
   const structure =
@@ -151,12 +147,7 @@ function dilationTest(
   height: number,
   nSlices: number,
   answer: Uint8Array,
-  structure: {
-    array: Uint8Array;
-    width: number;
-    height: number;
-    nSlices: number;
-  }
+  structure: Structure
 ) {
   return () => {
     const result = dilation(array, width, height, nSlices, structure);

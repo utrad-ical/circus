@@ -6,31 +6,28 @@ import {
   PostProcessor,
   VoxelLabelProcessor
 } from './performLabelCreatingVoxelProcessing';
+import { Structure } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
+import { MorphologicalImageProcessingResults } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
 
 export interface ErosionDilationOptions {
-  structure: {
-    array: Uint8Array;
-    width: number;
-    height: number;
-    nSlices: number;
-  };
-  erosionFlag: boolean;
+  structure: Structure;
+  isErosion: boolean;
 }
 
 const createEdProcessor = (
   options: ErosionDilationOptions
-): VoxelLabelProcessor => {
+): VoxelLabelProcessor<MorphologicalImageProcessingResults> => {
   return async (
     input: Uint8Array,
     width: number,
     height: number,
     nSlices: number,
     name: string,
-    postProcessor: PostProcessor,
+    postProcessor: PostProcessor<MorphologicalImageProcessingResults>,
     reportProgress: (progress: { value: number; label: string }) => void
   ) => {
-    const { structure, erosionFlag } = options;
-    const padding = erosionFlag
+    const { structure, isErosion } = options;
+    const padding = isErosion
       ? [0, 0, 0]
       : [
           Math.floor(structure.width / 2),
@@ -65,7 +62,7 @@ const createEdProcessor = (
         height: height + 2 * padding[1],
         nSlices: nSlices + 2 * padding[2],
         structure: structure,
-        erosionFlag: erosionFlag
+        isErosion: isErosion
       });
       myWorker.onmessage = (e: any) => {
         if (typeof e.data === 'string') {
@@ -76,7 +73,7 @@ const createEdProcessor = (
         const result = e.data;
 
         postProcessor({
-          morphologicalImageProcessingResults: {
+          processingResults: {
             result: result,
             min: [-padding[0], -padding[1], -padding[2]],
             max: [
@@ -85,7 +82,7 @@ const createEdProcessor = (
               nSlices - 1 + padding[2]
             ]
           },
-          name: erosionFlag ? `eroded ${name}` : `dilated ${name}`
+          names: [isErosion ? `eroded ${name}` : `dilated ${name}`]
         });
         reportProgress({ value: 100, label: 'Completed' });
       };
@@ -93,7 +90,7 @@ const createEdProcessor = (
       console.log('× window.Worker');
       let result: Uint8Array;
       try {
-        result = erosionFlag
+        result = isErosion
           ? erosion(
               initializedInput,
               width + 2 * padding[0],
@@ -114,7 +111,7 @@ const createEdProcessor = (
         return;
       }
       postProcessor({
-        morphologicalImageProcessingResults: {
+        processingResults: {
           result: result,
           min: [-padding[0], -padding[1], -padding[2]],
           max: [
@@ -123,7 +120,7 @@ const createEdProcessor = (
             nSlices - 1 + padding[2]
           ]
         },
-        name: erosionFlag ? `eroded ${name}` : `dilated ${name}`
+        names: [isErosion ? `eroded ${name}` : `dilated ${name}`]
       });
       reportProgress({ value: 100, label: 'Completed' });
     }

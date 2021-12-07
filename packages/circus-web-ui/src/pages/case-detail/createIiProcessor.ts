@@ -5,6 +5,7 @@ import {
   PostProcessor,
   VoxelLabelProcessor
 } from './performLabelCreatingVoxelProcessing';
+import { MorphologicalImageProcessingResults } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
 
 export interface IntersliceInterpolationOptions {
   orientation: 'Axial' | 'Coronal' | 'Sagital';
@@ -38,14 +39,14 @@ const transpose = (
 
 const createIiProcessor = (
   options: IntersliceInterpolationOptions
-): VoxelLabelProcessor => {
+): VoxelLabelProcessor<MorphologicalImageProcessingResults> => {
   return async (
     input: Uint8Array,
     width: number,
     height: number,
     nSlices: number,
     name: string,
-    postProcessor: PostProcessor,
+    postProcessor: PostProcessor<MorphologicalImageProcessingResults>,
     reportProgress: (progress: { value: number; label: string }) => void
   ) => {
     const { orientation } = options;
@@ -102,12 +103,12 @@ const createIiProcessor = (
         );
 
         postProcessor({
-          morphologicalImageProcessingResults: {
+          processingResults: {
             result: result,
             min: [0, 0, 0],
             max: [width - 1, height - 1, nSlices - 1]
           },
-          name: `interpolated ${name}`
+          names: [`interpolated ${name}`]
         });
         reportProgress({ value: 100, label: 'Completed' });
       };
@@ -134,12 +135,12 @@ const createIiProcessor = (
         return;
       }
       postProcessor({
-        morphologicalImageProcessingResults: {
+        processingResults: {
           result: result,
           min: [0, 0, 0],
           max: [width - 1, height - 1, nSlices - 1]
         },
-        name: `interpolated ${name}`
+        names: [`interpolated ${name}`]
       });
       reportProgress({ value: 100, label: 'Completed' });
     }

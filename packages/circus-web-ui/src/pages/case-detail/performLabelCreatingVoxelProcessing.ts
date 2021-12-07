@@ -7,44 +7,36 @@ import createCurrentLabelsUpdator from './createCurrentLabelsUpdator';
 import { createNewLabelData, InternalLabelOf } from './labelData';
 import { EditingData, EditingDataUpdater } from './revisionData';
 
-export type PostProcessorForLabeling = (results: {
-  labelingResults: LabelingResults3D;
-  names: string[];
-}) => void;
+export type PostProcessor<
+  T extends LabelingResults3D | MorphologicalImageProcessingResults
+> = (results: { processingResults: T; names: string[] }) => void;
 
-export type VoxelLabelProcessorForLabeling = (
+export type VoxelLabelProcessor<
+  T extends LabelingResults3D | MorphologicalImageProcessingResults
+> = (
   input: Uint8Array,
   width: number,
   height: number,
   nSlices: number,
   name: string,
-  postProcessor: PostProcessorForLabeling,
+  postProcessor: PostProcessor<T>,
   handleProgress: (progress: { value: number; label: string }) => void
 ) => void;
 
-export type PostProcessor = (results: {
-  morphologicalImageProcessingResults: MorphologicalImageProcessingResults;
-  name: string;
-}) => void;
-
-export type VoxelLabelProcessor = (
-  input: Uint8Array,
-  width: number,
-  height: number,
-  nSlices: number,
-  name: string,
-  postProcessor: PostProcessor,
-  handleProgress: (progress: { value: number; label: string }) => void
-) => void;
-
-const performLabelCreatingVoxelProcessingForLabeling = async (
+async function performLabelCreatingVoxelProcessing<
+  T extends LabelingResults3D | MorphologicalImageProcessingResults
+>(
   editingData: EditingData,
   updateEditingData: EditingDataUpdater,
   label: InternalLabelOf<'voxel'>,
   labelColors: string[],
-  voxelLabelProcessor: VoxelLabelProcessorForLabeling,
+  voxelLabelProcessor: VoxelLabelProcessor<
+    T extends LabelingResults3D | MorphologicalImageProcessingResults
+      ? T
+      : never
+  >,
   reportProgress: (progress: { value: number; label: string }) => void
-) => {
+) {
   if (label.type !== 'voxel' || !label.data.size)
     throw new TypeError('Invalid label passed.');
 
@@ -69,47 +61,82 @@ const performLabelCreatingVoxelProcessingForLabeling = async (
   img.convert('uint8', (v: number) => {
     return v === 1 ? 1 : 0;
   });
-  const addNewLabels: PostProcessorForLabeling = results => {
-    const { labelingResults, names } = results;
+
+  const addNewLabels: PostProcessor<T> = results => {
+    const { processingResults, names } = results;
     const newLabel: InternalLabelOf<'voxel'>[] = [];
-    for (let num = 0; num < labelingResults.labelNum; num++) {
-      const [ULx, ULy, ULz] = labelingResults.labels[num].min;
-      const [LRx, LRy, LRz] = labelingResults.labels[num].max;
+
+    if ('labelNum' in processingResults) {
+      for (let num = 0; num < processingResults.labelNum; num++) {
+        const [ULx, ULy, ULz] = processingResults.labels[num].min;
+        const [LRx, LRy, LRz] = processingResults.labels[num].max;
+        const color =
+          labelColors[
+            (labelColors.indexOf(label.data.color) + num + 1) %
+              labelColors.length
+          ];
+        newLabel.push(createNewLabel(color, names[num]));
+        const [sizex, sizey, sizez] = [
+          LRx - ULx + 1,
+          LRy - ULy + 1,
+          LRz - ULz + 1
+        ];
+
+        newLabel[num].data.size = [sizex, sizey, sizez];
+        const volume = new rs.RawData([sizex, sizey, sizez], 'binary');
+
+        for (let k = ULz; k <= LRz; k++) {
+          for (let j = ULy; j <= LRy; j++) {
+            for (let i = ULx; i <= LRx; i++) {
+              const pos = i + j * width + k * width * height;
+              if (processingResults.labelMap[pos] === num + 1) {
+                volume.writePixelAt(1, i - ULx, j - ULy, k - ULz);
+              }
+            }
+          }
+        }
+        newLabel[num].data.volumeArrayBuffer = volume.data;
+        newLabel[num].data.origin = [
+          ULx + label.data.origin![0],
+          ULy + label.data.origin![1],
+          ULz + label.data.origin![2]
+        ];
+      }
+    } else {
+      const UL = processingResults.min;
+      const LR = processingResults.max;
       const color =
         labelColors[
-          (labelColors.indexOf(label.data.color) + num + 1) % labelColors.length
+          (labelColors.indexOf(label.data.color) + 1) % labelColors.length
         ];
-      newLabel.push(createNewLabel(color, names[num]));
-      const [sizex, sizey, sizez] = [
-        LRx - ULx + 1,
-        LRy - ULy + 1,
-        LRz - ULz + 1
-      ];
-
-      newLabel[num].data.size = [sizex, sizey, sizez];
+      newLabel.push(createNewLabel(color, names[0]));
+      const [sizex, sizey, sizez] = LR.map(
+        (lr: number, i: number) => lr - UL[i] + 1
+      );
+      newLabel[0].data.size = [sizex, sizey, sizez];
       const volume = new rs.RawData([sizex, sizey, sizez], 'binary');
-
-      for (let k = ULz; k <= LRz; k++) {
-        for (let j = ULy; j <= LRy; j++) {
-          for (let i = ULx; i <= LRx; i++) {
-            const pos = i + j * width + k * width * height;
-            if (labelingResults.labelMap[pos] === num + 1) {
-              volume.writePixelAt(1, i - ULx, j - ULy, k - ULz);
+      for (let k = 0; k < sizez; k++) {
+        for (let j = 0; j < sizey; j++) {
+          for (let i = 0; i < sizex; i++) {
+            const pos = i + j * sizex + k * sizex * sizey;
+            if (processingResults.result[pos]) {
+              volume.writePixelAt(1, i, j, k);
             }
           }
         }
       }
-      newLabel[num].data.volumeArrayBuffer = volume.data;
-      newLabel[num].data.origin = [
-        ULx + label.data.origin![0],
-        ULy + label.data.origin![1],
-        ULz + label.data.origin![2]
+      newLabel[0].data.volumeArrayBuffer = volume.data;
+      newLabel[0].data.origin = [
+        UL[0] + label.data.origin![0],
+        UL[1] + label.data.origin![1],
+        UL[2] + label.data.origin![2]
       ];
     }
     updateCurrentLabels(labels => {
       labels.splice(editingData.activeLabelIndex + 1, 0, ...newLabel);
     });
   };
+
   reportProgress({ value: 100, label: '' });
   voxelLabelProcessor(
     new Uint8Array(img.data),
@@ -120,85 +147,6 @@ const performLabelCreatingVoxelProcessingForLabeling = async (
     addNewLabels,
     reportProgress
   );
-};
+}
 
-const performLabelCreatingVoxelProcessing = async (
-  editingData: EditingData,
-  updateEditingData: EditingDataUpdater,
-  label: InternalLabelOf<'voxel'>,
-  labelColors: string[],
-  voxelLabelProcessor: VoxelLabelProcessor,
-  reportProgress: (progress: { value: number; label: string }) => void
-) => {
-  if (label.type !== 'voxel' || !label.data.size)
-    throw new TypeError('Invalid label passed.');
-
-  const createNewLabel = (
-    color: string,
-    name: string
-  ): InternalLabelOf<'voxel'> => {
-    const alpha = 1;
-    const temporaryKey = generateUniqueId();
-    const data = createNewLabelData('voxel', { color, alpha });
-    return { temporaryKey, name, ...data, attributes: {}, hidden: false };
-  };
-
-  const updateCurrentLabels = createCurrentLabelsUpdator(
-    editingData,
-    updateEditingData
-  );
-
-  const [width, height, nSlices] = label.data.size;
-  const img = new RawData([width, height, nSlices], 'binary');
-  img.assign(label.data.volumeArrayBuffer!);
-  img.convert('uint8', (v: number) => {
-    return v === 1 ? 1 : 0;
-  });
-  const addNewLabels: PostProcessor = results => {
-    const { morphologicalImageProcessingResults, name } = results;
-    const newLabel: InternalLabelOf<'voxel'>[] = [];
-    const UL = morphologicalImageProcessingResults.min;
-    const LR = morphologicalImageProcessingResults.max;
-    const color =
-      labelColors[
-        (labelColors.indexOf(label.data.color) + 1) % labelColors.length
-      ];
-    newLabel.push(createNewLabel(color, name));
-    const [sizex, sizey, sizez] = LR.map((lr, i) => lr - UL[i] + 1);
-    newLabel[0].data.size = [sizex, sizey, sizez];
-    const volume = new rs.RawData([sizex, sizey, sizez], 'binary');
-    for (let k = 0; k < sizez; k++) {
-      for (let j = 0; j < sizey; j++) {
-        for (let i = 0; i < sizex; i++) {
-          const pos = i + j * sizex + k * sizex * sizey;
-          if (morphologicalImageProcessingResults.result[pos]) {
-            volume.writePixelAt(1, i, j, k);
-          }
-        }
-      }
-    }
-    newLabel[0].data.volumeArrayBuffer = volume.data;
-    newLabel[0].data.origin = [
-      UL[0] + label.data.origin![0],
-      UL[1] + label.data.origin![1],
-      UL[2] + label.data.origin![2]
-    ];
-
-    updateCurrentLabels(labels => {
-      labels.splice(editingData.activeLabelIndex + 1, 0, ...newLabel);
-    });
-  };
-  reportProgress({ value: 100, label: '' });
-  voxelLabelProcessor(
-    new Uint8Array(img.data),
-    width,
-    height,
-    nSlices,
-    label.name!,
-    addNewLabels,
-    reportProgress
-  );
-};
-
-export default performLabelCreatingVoxelProcessingForLabeling;
-export { performLabelCreatingVoxelProcessing };
+export default performLabelCreatingVoxelProcessing;

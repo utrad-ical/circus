@@ -4,8 +4,8 @@ import CCL26 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeli
 import CCL6 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D6';
 import cclWorker from 'worker-loader!./cclWorker';
 import {
-  PostProcessorForLabeling,
-  VoxelLabelProcessorForLabeling
+  PostProcessor,
+  VoxelLabelProcessor
 } from './performLabelCreatingVoxelProcessing';
 
 export interface CclOptions {
@@ -15,14 +15,14 @@ export interface CclOptions {
 
 const createCclProcessor = (
   options: CclOptions
-): VoxelLabelProcessorForLabeling => {
+): VoxelLabelProcessor<LabelingResults3D> => {
   return async (
     input: Uint8Array,
     width: number,
     height: number,
     nSlices: number,
     name: string,
-    postProcessor: PostProcessorForLabeling,
+    postProcessor: PostProcessor<LabelingResults3D>,
     reportProgress: (progress: { value: number; label: string }) => void
   ) => {
     const { maximumCcNum, neighbors } = options;
@@ -107,7 +107,7 @@ const createCclProcessor = (
       }
       results.labelNum = names.length;
       return {
-        labelingResults: results,
+        processingResults: results,
         names: names
       };
     };

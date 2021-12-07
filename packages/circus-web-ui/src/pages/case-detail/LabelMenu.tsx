@@ -4,6 +4,8 @@ import Slider from '@smikitky/rb-components/lib/Slider';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import { Viewer } from '@utrad-ical/circus-rs/src/browser';
 import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
+import { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
+import { MorphologicalImageProcessingResults } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import {
@@ -39,9 +41,7 @@ import {
   LabelType,
   labelTypes
 } from './labelData';
-import performLabelCreatingVoxelProcessingForLabeling, {
-  performLabelCreatingVoxelProcessing
-} from './performLabelCreatingVoxelProcessing';
+import performLabelCreatingVoxelProcessing from './performLabelCreatingVoxelProcessing';
 import { EditingData, EditingDataUpdater } from './revisionData';
 import SettingDialogCCL from './SettingDialogCCL';
 import SettingDialogED from './SettingDialogED';
@@ -256,7 +256,7 @@ const LabelMenu: React.FC<{
     const label = editingData.revision.series[activeSeriesIndex].labels[
       activeLabelIndex
     ] as InternalLabelOf<'voxel'>;
-    performLabelCreatingVoxelProcessingForLabeling(
+    performLabelCreatingVoxelProcessing<LabelingResults3D>(
       editingData,
       updateEditingData,
       label,
@@ -279,7 +279,7 @@ const LabelMenu: React.FC<{
     const label = editingData.revision.series[activeSeriesIndex].labels[
       activeLabelIndex
     ] as InternalLabelOf<'voxel'>;
-    performLabelCreatingVoxelProcessingForLabeling(
+    performLabelCreatingVoxelProcessing<LabelingResults3D>(
       editingData,
       updateEditingData,
       label,
@@ -302,7 +302,7 @@ const LabelMenu: React.FC<{
     const label = editingData.revision.series[activeSeriesIndex].labels[
       activeLabelIndex
     ] as InternalLabelOf<'voxel'>;
-    performLabelCreatingVoxelProcessing(
+    performLabelCreatingVoxelProcessing<MorphologicalImageProcessingResults>(
       editingData,
       updateEditingData,
       label,
@@ -326,7 +326,7 @@ const LabelMenu: React.FC<{
     const label = editingData.revision.series[activeSeriesIndex].labels[
       activeLabelIndex
     ] as InternalLabelOf<'voxel'>;
-    performLabelCreatingVoxelProcessing(
+    performLabelCreatingVoxelProcessing<MorphologicalImageProcessingResults>(
       editingData,
       updateEditingData,
       label,
@@ -574,7 +574,7 @@ const LabelMenu: React.FC<{
           processorProgress={processorProgress}
           onHide={() => setErosionDialogOpen(false)}
           onOkClick={onOkClickDialogED}
-          erosionFlag={true}
+          isErosion={true}
         />
       </Modal>
       <Modal
@@ -589,7 +589,7 @@ const LabelMenu: React.FC<{
             setDilationDialogOpen(false);
           }}
           onOkClick={onOkClickDialogED}
-          erosionFlag={false}
+          isErosion={false}
         />
       </Modal>
       <Modal

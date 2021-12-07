@@ -1,11 +1,12 @@
 import { alert } from '@smikitky/rb-components/lib/modal';
+import { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
 import HoleFilling2D, {
   HoleFilling3D
 } from '@utrad-ical/circus-rs/src/common/CCL/holeFilling';
 import hfWorker from 'worker-loader!./hfWorker';
 import {
-  PostProcessorForLabeling,
-  VoxelLabelProcessorForLabeling
+  PostProcessor,
+  VoxelLabelProcessor
 } from './performLabelCreatingVoxelProcessing';
 
 export interface HoleFillingOptions {
@@ -16,14 +17,14 @@ export interface HoleFillingOptions {
 
 const createHfProcessor = (
   options: HoleFillingOptions
-): VoxelLabelProcessorForLabeling => {
+): VoxelLabelProcessor<LabelingResults3D> => {
   return async (
     input: Uint8Array,
     width: number,
     height: number,
     nSlices: number,
     name: string,
-    postProcessor: PostProcessorForLabeling,
+    postProcessor: PostProcessor<LabelingResults3D>,
     reportProgress: (progress: { value: number; label: string }) => void
   ) => {
     const { dimension, neighbors, orientation } = options;
@@ -49,7 +50,7 @@ const createHfProcessor = (
         }
         const { result, _, holeVolume } = e.data;
         postProcessor({
-          labelingResults: {
+          processingResults: {
             labelMap: result,
             labelNum: 1,
             labels: [
@@ -124,7 +125,7 @@ const createHfProcessor = (
         }
       }
       postProcessor({
-        labelingResults: {
+        processingResults: {
           labelMap: output,
           labelNum: 1,
           labels: [

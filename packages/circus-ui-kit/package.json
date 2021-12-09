@@ -2,7 +2,7 @@
   "name": "@utrad-ical/circus-ui-kit",
   "version": "0.2.0",
   "description": "React components used by CIRCUS projects",
-  "main": "src/index.js",
+  "main": "lib/index.js",
   "scripts": {
     "build": "tsc --build"
   },

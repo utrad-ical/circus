@@ -16,7 +16,7 @@
     "@babel/preset-env": "^7.14.1",
     "@babel/preset-typescript": "^7.13.0",
     "@babel/register": "^7.13.16",
-    "@utrad-ical/circus-lib": "^0.15.2",
+    "@utrad-ical/circus-lib": "^0.16.0",
     "ajv": "^6.11.0",
     "archiver": "^5.3.0",
     "argv": "0.0.2",

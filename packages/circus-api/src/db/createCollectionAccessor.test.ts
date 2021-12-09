@@ -217,3 +217,58 @@ describe('#newSequentialId', () => {
     expect(v2).toBe(2);
   });
 });
+
+describe('#withLockedDocument', () => {
+  let session: mongo.ClientSession;
+  let sessionCollection: CollectionAccessor<MonthData>;
+
+  beforeAll(async () => {
+    const validator = await createValidator({
+      schemaRoot: __dirname + '/../../test/test-schemas'
+    });
+    session = (await dbPromise).connection.startSession();
+    sessionCollection = createCollectionAccessor<MonthData>(db, validator, {
+      schema: 'months',
+      collectionName: 'months',
+      primaryKey: 'month',
+      session
+    });
+  });
+
+  test('lock document', async () => {
+    session.startTransaction();
+    let flag = 0;
+    await sessionCollection.withLockedDocument(2, async doc => {
+      flag++;
+      expect(doc.name).toBe('Kisaragi');
+      const docWithSession = await db
+        .collection('months')
+        .findOne({ month: 2 }, { session });
+      expect(docWithSession).toHaveProperty('myLock');
+      const docWithoutSession = await db
+        .collection('months')
+        .findOne({ month: 2 });
+      expect(docWithoutSession).not.toHaveProperty('myLock');
+      await sessionCollection.modifyOne(2, { name: 'Nigatsu' });
+    });
+    expect(flag).toBe(1);
+    await session.commitTransaction();
+    const finalDoc = await db.collection('months').findOne({ month: 2 });
+    expect(finalDoc).not.toHaveProperty('myLock');
+    expect(finalDoc.name).toBe('Nigatsu');
+  });
+
+  test('throw error for session is not used', async () => {
+    const promise = testCollection.withLockedDocument(2, async () => {});
+    await expect(promise).rejects.toThrowError(
+      'Cannot lock a document outside a session'
+    );
+  });
+
+  test('throw 404 for nonexistent data', async () => {
+    const func = async () => {
+      await sessionCollection.withLockedDocument(100, async () => {});
+    };
+    await expect(func()).rejects.toThrow('The requested months was not found.');
+  });
+});

@@ -179,14 +179,16 @@ export const handleDelete: RouteMiddleware = ({
   return async (ctx, next) => {
     const uid = ctx.params.seriesUid;
 
-    const pluginJob = models.pluginJob.find({ 'series.seriesUid': uid });
+    const pluginJob = models.pluginJob.findAsCursor({
+      'series.seriesUid': uid
+    });
     if (await pluginJob.hasNext())
       ctx.throw(
         status.BAD_REQUEST,
         'There is a plug-in job associated with this series.'
       );
 
-    const clinicalCase = models.clinicalCase.find({
+    const clinicalCase = models.clinicalCase.findAsCursor({
       'revisions.series.seriesUid': uid
     });
     if (await clinicalCase.hasNext())

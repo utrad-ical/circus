@@ -1,5 +1,6 @@
 import { FunctionService } from '@utrad-ical/circus-lib';
 import { TransactionManager, Models, Database, Validator } from 'interface';
+import { makeModels } from './db/createModels';
 
 interface Options {
   maxCommitTimeMS: number;
@@ -7,16 +8,16 @@ interface Options {
 
 const createTransactionManager: FunctionService<
   TransactionManager,
-  { db: Database; validator: Validator },
+  { database: Database; validator: Validator },
   Options
 > = async (opt, deps) => {
-  const { maxCommitTimeMS = 1000 } = opt;
-  const { db } = deps;
+  const { maxCommitTimeMS } = opt;
+  const { database, validator } = deps;
   const withTransaction = async (fn: (models: Models) => Promise<void>) => {
-    const session = db.connection.startSession();
+    const session = database.connection.startSession();
     await session.withTransaction(
       async session => {
-        const models = createSessionModels(db, validator, session);
+        const models = makeModels(database, validator, session);
         await fn(models);
       },
       { maxCommitTimeMS } as any

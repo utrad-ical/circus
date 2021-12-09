@@ -24,6 +24,7 @@ import { EventEmitter } from 'events';
 import createOauthServer from '../src/middleware/auth/createOauthServer';
 import createDefaultAuthProvider from '../src/middleware/auth/authProvider/DefaultAuthProvider';
 import { Database } from 'interface';
+import createTransactionManager from '../src/createTransactionManager';
 
 /**
  * Holds data used for API route testing.
@@ -99,6 +100,10 @@ export const setUpAppForRoutesTest = async () => {
     database: database,
     validator
   });
+  const transactionManager = await createTransactionManager(
+    { maxCommitTimeMS: 10000 },
+    { database: database, validator }
+  );
   const csCore = createMockCsCore();
   const apiLogger = await createTestLogger();
   const dicomTagReader = await createDicomTagReader({});
@@ -159,7 +164,8 @@ export const setUpAppForRoutesTest = async () => {
       volumeProvider: null as any, // dummy
       taskManager,
       dicomVoxelDumper,
-      oauthServer: await createOauthServer({}, { models, authProvider })
+      oauthServer: await createOauthServer({}, { models, authProvider }),
+      transactionManager
     }
   );
 

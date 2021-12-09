@@ -1,5 +1,10 @@
 import koa, { ParameterizedContext } from 'koa';
-import { Validator, DicomImporter, Database } from '../interface';
+import {
+  Validator,
+  DicomImporter,
+  Database,
+  TransactionManager
+} from '../interface';
 import { Models } from '../interface';
 import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
 import Storage from '../storage/Storage';
@@ -25,6 +30,7 @@ export interface Deps {
   taskManager: TaskManager;
   mhdPacker: MhdPacker;
   dicomVoxelDumper: DicomVoxelDumper;
+  transactionManager: TransactionManager;
 }
 
 interface CustomCtxMembers {

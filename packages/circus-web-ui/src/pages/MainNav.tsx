@@ -294,7 +294,9 @@ const MainNav: React.FC<{}> = props => {
                 sub
                 icon="chevron-right"
                 name={preset.name}
-                link={`/browse/series/${encodeURIComponent(preset.name)}`}
+                link={`/browse/series/preset/${encodeURIComponent(
+                  preset.name
+                )}`}
               />
             ))}
             <MyListMenuItems
@@ -323,7 +325,7 @@ const MainNav: React.FC<{}> = props => {
                 sub
                 icon="chevron-right"
                 name={preset.name}
-                link={`/browse/case/${encodeURIComponent(preset.name)}`}
+                link={`/browse/case/preset/${encodeURIComponent(preset.name)}`}
               />
             ))}
             <MyListMenuItems
@@ -352,7 +354,9 @@ const MainNav: React.FC<{}> = props => {
                 sub
                 icon="chevron-right"
                 name={preset.name}
-                link={`/browse/plugin-jobs/${encodeURIComponent(preset.name)}`}
+                link={`/browse/plugin-jobs/preset/${encodeURIComponent(
+                  preset.name
+                )}`}
               />
             ))}
             <MyListMenuItems

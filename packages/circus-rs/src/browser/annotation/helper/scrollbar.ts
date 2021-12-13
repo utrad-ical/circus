@@ -1,8 +1,10 @@
+import { TwoDimensionalViewState } from 'browser/ViewState';
 import { Box2, Box3, Vector2, Vector3 } from 'three';
 import {
   Composition,
   MprImageSource,
   normalVector,
+  TwoDimensionalImageSource,
   Viewer,
   ViewState
 } from '../..';
@@ -69,22 +71,20 @@ export type UpdateThumbParamType = 'position-diff' | 'step-diff';
 export const updateThumb = (
   scrollbar: ScrollbarContainer,
   paramType: UpdateThumbParamType,
-  param: number | { composition: Composition; mmSection: Section }
+  param: number
 ): ScrollbarContainer => {
-  if (typeof param === 'number') {
-    switch (paramType) {
-      case 'position-diff': {
-        const thumbPosition = scrollbar.thumbPosition + param;
-        return updateThumbByPosition(scrollbar, thumbPosition);
-      }
-      case 'step-diff': {
-        const thumbPosition =
-          (scrollbar.thumbStep + param) * scrollbar.thumbScale;
-        return updateThumbByPosition(scrollbar, thumbPosition);
-      }
-      default:
-        break;
+  switch (paramType) {
+    case 'position-diff': {
+      const thumbPosition = scrollbar.thumbPosition + param;
+      return updateThumbByPosition(scrollbar, thumbPosition);
     }
+    case 'step-diff': {
+      const thumbPosition =
+        (scrollbar.thumbStep + param) * scrollbar.thumbScale;
+      return updateThumbByPosition(scrollbar, thumbPosition);
+    }
+    default:
+      break;
   }
   throw new Error('invalid parameter');
 };
@@ -98,8 +98,6 @@ export const createScrollbar = (
   const composition = viewer.getComposition();
   if (!composition) throw new Error('Composition not initialized'); // should not happen
   const resolution = new Vector2().fromArray(viewer.getResolution());
-
-  const mmSection = viewState.section;
 
   const { size, position, marginHorizontal, marginVertical } = settings;
 
@@ -130,10 +128,11 @@ export const createScrollbar = (
   const scrollableLength = scrollbarLength - size * 2;
 
   const { thumbStep, divideCount } = calcThumbSteps(
+    viewState,
     composition,
-    mmSection,
     param
   );
+
   const thumbLength = Math.max(size, scrollableLength / divideCount);
   const thumbScale = (scrollableLength - thumbLength) / (divideCount - 1);
   const thumbPosition = thumbStep * thumbScale;
@@ -149,17 +148,20 @@ export const createScrollbar = (
 };
 
 export const calcThumbSteps = (
+  viewState: ViewState,
   composition: Composition,
-  mmSection: Section,
   param?: ScrollbarParam
 ): { thumbStep: number; divideCount: number } => {
-  const steps = calcSectionSteps(composition, mmSection);
+  const steps =
+    viewState.type === '2d'
+      ? calcStepsIn2D(composition, viewState)
+      : calcStepsInSection(composition, viewState.section);
   const divideCount = steps.sumCount + 2;
   const thumbStep = !param ? steps.current + 1 : param.thumbStep;
   return { thumbStep, divideCount };
 };
 
-const calcSectionSteps = (
+const calcStepsInSection = (
   composition: Composition,
   mmSection: Section
 ): { current: number; sumCount: number } => {
@@ -206,6 +208,23 @@ const calcSectionSteps = (
       };
     }
   }
+};
+
+const calcStepsIn2D = (
+  composition: Composition,
+  state: TwoDimensionalViewState
+): { current: number; sumCount: number } => {
+  const src = composition.imageSource as TwoDimensionalImageSource;
+  if (!src || !src.metadata || !src.metadata.voxelSize)
+    return { current: 0, sumCount: 0 };
+  const voxelCount = src.metadata.voxelCount!;
+  const current = state.imageNumber;
+  const sumCount = voxelCount[2];
+  const steps = {
+    current,
+    sumCount
+  };
+  return steps;
 };
 
 export type HandleType = 'arrowInc' | 'arrowDec' | 'thumbDrag';

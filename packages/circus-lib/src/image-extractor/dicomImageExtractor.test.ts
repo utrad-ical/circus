@@ -25,7 +25,6 @@ describe('dicomImageExtractor', () => {
     expect(metadata.columns * metadata.rows * pxInfo.bpp).toEqual(
       pixelData.byteLength
     );
-    const readArray = new pxInfo.arrayClass(pixelData);
 
     const doRescale =
       metadata.rescale && typeof metadata.rescale.intercept === 'number';
@@ -39,24 +38,34 @@ describe('dicomImageExtractor', () => {
     };
     const ww = useWindow.width;
     const wl = useWindow.level;
-    for (let y = 0; y < png.height; y++) {
-      for (let x = 0; x < png.width; x++) {
-        const index = x + y * png.width;
-        const byteIndex = index * 4;
-        let pixel = readArray[index];
-        if (doRescale) {
-          pixel = pixel * metadata.rescale.slope + metadata.rescale.intercept;
+
+    if (metadata.pixelFormat === 'rgba8') {
+      // RGBA8 Image
+      const readArray = new Uint8Array(pixelData);
+      png.data = Buffer.from(readArray.buffer);
+    } else {
+      // Monochrome Image
+      const readArray = new pxInfo.arrayClass(pixelData);
+      for (let y = 0; y < png.height; y++) {
+        for (let x = 0; x < png.width; x++) {
+          const index = x + y * png.width;
+          const byteIndex = index * 4;
+          let pixel = readArray[index];
+          if (doRescale) {
+            pixel = pixel * metadata.rescale.slope + metadata.rescale.intercept;
+          }
+          const col = Math.max(
+            0,
+            Math.min(255, Math.round((pixel - wl + ww / 2) * (255 / ww)))
+          );
+          png.data[byteIndex] = col;
+          png.data[byteIndex + 1] = col;
+          png.data[byteIndex + 2] = col;
+          png.data[byteIndex + 3] = 0xff;
         }
-        const col = Math.max(
-          0,
-          Math.min(255, Math.round((pixel - wl + ww / 2) * (255 / ww)))
-        );
-        png.data[byteIndex] = col;
-        png.data[byteIndex + 1] = col;
-        png.data[byteIndex + 2] = col;
-        png.data[byteIndex + 3] = 0xff;
       }
     }
+
     const outFile = path.join(testdir, `${file}.png`);
     return new Promise(resolve => {
       png.pack().pipe(fs.createWriteStream(outFile)).on('finish', resolve);
@@ -77,7 +86,9 @@ describe('dicomImageExtractor', () => {
     return testFile('CT-MONO2-16-brain', {
       columns: 512,
       rows: 512,
-      pixelSpacing: [0.46875, 0.46875]
+      pixelSpacing: [0.46875, 0.46875],
+      pixelFormat: 'int16',
+      pixelDataCharacteristics: 'ORIGINAL'
     });
   });
 
@@ -85,7 +96,9 @@ describe('dicomImageExtractor', () => {
     return testFile('CT-phantom-lossless', {
       columns: 512,
       rows: 512,
-      pixelSpacing: [0.683594, 0.683594]
+      pixelSpacing: [0.683594, 0.683594],
+      pixelFormat: 'int16',
+      pixelDataCharacteristics: 'ORIGINAL'
     });
   });
 
@@ -93,7 +106,9 @@ describe('dicomImageExtractor', () => {
     return testFile('MR-MONO2-16-head', {
       columns: 256,
       rows: 256,
-      pixelSpacing: [0.859375, 0.859375]
+      pixelSpacing: [0.859375, 0.859375],
+      pixelFormat: 'int16',
+      pixelDataCharacteristics: 'ORIGINAL'
     });
   });
 
@@ -101,7 +116,9 @@ describe('dicomImageExtractor', () => {
     return testFile('DX-MONO2-16-chest', {
       columns: 2022,
       rows: 2022,
-      window: { level: 8192, width: 16383 }
+      window: { level: 8192, width: 16383 },
+      pixelFormat: 'int16',
+      pixelDataCharacteristics: 'ORIGINAL'
     });
   });
 
@@ -109,7 +126,9 @@ describe('dicomImageExtractor', () => {
     return testFile('MR-phantom-LI', {
       columns: 256,
       rows: 256,
-      pixelSpacing: [1.5625, 1.5625]
+      pixelSpacing: [1.5625, 1.5625],
+      pixelFormat: 'int16',
+      pixelDataCharacteristics: 'ORIGINAL'
     });
   });
 
@@ -117,7 +136,9 @@ describe('dicomImageExtractor', () => {
     return testFile('MR-phantom-LE', {
       columns: 256,
       rows: 256,
-      pixelSpacing: [1.5625, 1.5625]
+      pixelSpacing: [1.5625, 1.5625],
+      pixelFormat: 'int16',
+      pixelDataCharacteristics: 'ORIGINAL'
     });
   });
 
@@ -125,7 +146,19 @@ describe('dicomImageExtractor', () => {
     return testFile('MR-phantom-lossless', {
       columns: 256,
       rows: 256,
-      pixelSpacing: [1.5625, 1.5625]
+      pixelSpacing: [1.5625, 1.5625],
+      pixelFormat: 'int16',
+      pixelDataCharacteristics: 'ORIGINAL'
+    });
+  });
+
+  test('MR-RGB-Head-MRA', () => {
+    return testFile('MR-RGB-Head-MRA', {
+      columns: 512,
+      rows: 512,
+      pixelFormat: 'rgba8',
+      pixelDataCharacteristics: 'DERIVED',
+      samplesPerPixel: 3
     });
   });
 

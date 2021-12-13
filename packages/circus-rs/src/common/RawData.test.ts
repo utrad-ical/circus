@@ -274,6 +274,7 @@ describe('basic read/write', () => {
   test('UInt16 volume', readWriteTest('uint16', 32, 32, 10));
   test('Int16 volume', readWriteTest('int16', 32, 32, 10));
   test('Binary volume', readWriteTest('binary', 32, 32, 10));
+  test('RGBA volume', readWriteTest('rgba8', 128, 128, 10));
 });
 
 test('#convert', () => {

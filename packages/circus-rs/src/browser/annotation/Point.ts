@@ -11,7 +11,7 @@ import {
 } from '../tool/tool-util';
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
-import ViewState from '../ViewState';
+import ViewState, { MprViewState, TwoDimensionalViewState } from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
 import { drawPoint } from './helper/drawObject';
 import { hitRectangle } from './helper/hit-test';
@@ -22,6 +22,15 @@ const cursorTypes: {
   [key in PointHitType]: { cursor: string };
 } = {
   'point-move': { cursor: 'move' }
+};
+
+const isValidViewState = (
+  viewState: ViewState
+): viewState is MprViewState | TwoDimensionalViewState => {
+  if (!viewState) return false;
+  if (viewState.type === 'mpr') return true;
+  if (viewState.type === '2d') return true;
+  return false;
 };
 
 export default class Point implements Annotation, ViewerEventTarget {
@@ -61,15 +70,15 @@ export default class Point implements Annotation, ViewerEventTarget {
     | undefined = undefined;
 
   public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
-    if (!viewer || !viewState) return;
+    if (!viewer || !isValidViewState(viewState)) return;
     if (!this.location) return;
     const canvas = viewer.canvas;
     if (!canvas) return;
-    if (viewState.type !== 'mpr') return;
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const color = this.getColor(viewState.section);
+    const color = this.determineDrawingColorFromViewState(viewState);
     if (!color) return;
 
     const screenPoint = convertVolumePointToViewerPoint(
@@ -79,19 +88,33 @@ export default class Point implements Annotation, ViewerEventTarget {
     drawPoint(ctx, screenPoint, { radius: this.radius, color });
   }
 
-  private getColor(section: Section): string | undefined {
-    const distance = distanceFromPointToSection(
-      section,
-      new Vector3(...this.location!)
-    );
-
-    switch (true) {
-      case distance <= this.distanceThreshold:
-        return this.color;
-      case distance <= this.distanceDimmedThreshold:
-        return this.dimmedColor;
-      default:
-        return;
+  private determineDrawingColorFromViewState(
+    state: ViewState
+  ): string | undefined {
+    if (this.location === undefined) return;
+    switch (state.type) {
+      case '2d': {
+        const { imageNumber } = state;
+        return this.location[2] === imageNumber ? this.color : undefined;
+      }
+      case 'mpr': {
+        const { section } = state;
+        const distance = distanceFromPointToSection(
+          section,
+          new Vector3(...this.location)
+        );
+        switch (true) {
+          case distance <= this.distanceThreshold:
+            return this.color;
+          case distance <= this.distanceDimmedThreshold:
+            return this.dimmedColor;
+          default:
+            return;
+        }
+      }
+      default: {
+        throw new Error('Unsupported view state.');
+      }
     }
   }
 
@@ -102,8 +125,7 @@ export default class Point implements Annotation, ViewerEventTarget {
   public mouseMoveHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     const viewState = viewer.getState();
-    if (!viewer || !viewState) return;
-    if (viewState.type !== 'mpr') return;
+    if (!isValidViewState(viewState)) return;
     if (!this.editable) return;
     if (!this.location) return;
 
@@ -123,8 +145,7 @@ export default class Point implements Annotation, ViewerEventTarget {
   public dragStartHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     const viewState = viewer.getState();
-    if (!viewer || !viewState) return;
-    if (viewState.type !== 'mpr') return;
+    if (!isValidViewState(viewState)) return;
     if (!this.editable) return;
     if (!this.location) return;
 
@@ -163,15 +184,14 @@ export default class Point implements Annotation, ViewerEventTarget {
   public dragHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     const viewState = viewer.getState();
-    if (!viewer || !viewState) return;
-    if (viewState.type !== 'mpr') return;
+    if (!isValidViewState(viewState)) return;
     if (!this.dragInfo) return;
 
     if (viewer.getHoveringAnnotation() === this && this.handleType) {
       ev.stopPropagation();
 
       const draggedPoint3 = convertViewerPointToVolumePoint(
-        ev.viewer,
+        viewer,
         ev.viewerX!,
         ev.viewerY!
       );
@@ -196,8 +216,7 @@ export default class Point implements Annotation, ViewerEventTarget {
   public dragEndHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     const viewState = viewer.getState();
-    if (!viewer || !viewState) return;
-    if (viewState.type !== 'mpr') return;
+    if (!isValidViewState(viewState)) return;
 
     if (viewer.getHoveringAnnotation() === this) {
       ev.stopPropagation();

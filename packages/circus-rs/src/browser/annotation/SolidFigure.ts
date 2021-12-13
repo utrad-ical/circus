@@ -44,6 +44,11 @@ const cursorTypes: {
   'rect-outline': { cursor: 'move' }
 };
 
+const isValidViewState = (viewState: ViewState): viewState is MprViewState => {
+  if (!viewState) return false;
+  if (viewState.type === 'mpr') return true;
+  return false;
+};
 export default abstract class SolidFigure
   implements Annotation, ViewerEventTarget, ModifierKeyBehaviors
 {
@@ -148,8 +153,7 @@ export default abstract class SolidFigure
 
   public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
     try {
-      if (!viewer || !viewState) return;
-      if (viewState.type !== 'mpr') return;
+      if (!viewer || !isValidViewState(viewState)) return;
 
       const canvas = viewer.canvas;
       if (!canvas) return;
@@ -253,8 +257,7 @@ export default abstract class SolidFigure
   public mouseMoveHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     const viewState = viewer.getState();
-    if (!viewer || !viewState) return;
-    if (viewState.type !== 'mpr') return;
+    if (!isValidViewState(viewState)) return;
     if (!this.editable) return;
 
     const min = this.min;
@@ -280,8 +283,7 @@ export default abstract class SolidFigure
     const point = new Vector2(ev.viewerX!, ev.viewerY!);
 
     const viewState = viewer.getState();
-    if (!viewer || !viewState) return;
-    if (viewState.type !== 'mpr') return;
+    if (!isValidViewState(viewState)) return;
     if (!this.min || !this.max) return;
 
     const minPoint = convertVolumePointToViewerPoint(viewer, ...this.min);
@@ -294,8 +296,7 @@ export default abstract class SolidFigure
   public dragStartHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     const viewState = viewer.getState();
-    if (!viewer || !viewState) return;
-    if (viewState.type !== 'mpr') return;
+    if (!isValidViewState(viewState)) return;
     if (!this.editable) return;
 
     if (viewer.getHoveringAnnotation() === this) {
@@ -307,7 +308,7 @@ export default abstract class SolidFigure
       const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
       const handleType = this.hitTest(ev);
       if (handleType) {
-        const state = viewer.getState() as MprViewState;
+        const state = viewState;
         const resolution: [number, number] = viewer.getResolution();
         this.handleType = handleType;
         this.dragInfo = {
@@ -326,13 +327,12 @@ export default abstract class SolidFigure
     const viewer = ev.viewer;
     const viewState = viewer.getState();
     if (!viewer || !viewState) return;
-    if (viewState.type !== 'mpr') return;
+    if (!isValidViewState(viewState)) return;
 
     if (viewer.getHoveringAnnotation() === this) {
       ev.stopPropagation();
       const draggedPoint: [number, number] = [ev.viewerX!, ev.viewerY!];
 
-      const viewState = viewer.getState() as MprViewState;
       const resolution: [number, number] = viewer.getResolution();
       const orientation = detectOrthogonalSection(viewState.section);
       const draggedPoint3 = convertScreenCoordinateToVolumeCoordinate(
@@ -368,8 +368,7 @@ export default abstract class SolidFigure
   public dragEndHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     const viewState = viewer.getState();
-    if (!viewer || !viewState) return;
-    if (viewState.type !== 'mpr') return;
+    if (!isValidViewState(viewState)) return;
 
     if (viewer.getHoveringAnnotation() === this) {
       ev.stopPropagation();

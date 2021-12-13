@@ -1,15 +1,11 @@
 import { Box2, Box3, Vector2, Vector3 } from 'three';
-import {
-  Section,
-  Vector2D,
-  Vector3D,
-  verticesOfBox
-} from '../../common/geometry';
+import { Vector2D, Vector3D, verticesOfBox } from '../../common/geometry';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
 import {
   convertScreenCoordinateToVolumeCoordinate,
   convertVolumeCoordinateToScreenCoordinate,
-  detectOrthogonalSection
+  detectOrthogonalSection,
+  sectionFrom2dViewState
 } from '../section-util';
 import {
   convertViewerPointToVolumePoint,
@@ -17,9 +13,8 @@ import {
 } from '../tool/tool-util';
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
-import ViewState from '../ViewState';
+import ViewState, { MprViewState, TwoDimensionalViewState } from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
-import ModifierKeyBehaviors from './ModifierKeyBehaviors';
 import drawBoundingBoxOutline from './helper/drawBoundingBoxOutline';
 import drawHandleFrame from './helper/drawHandleFrame';
 import { drawPath, drawPoint } from './helper/drawObject';
@@ -29,6 +24,7 @@ import {
   hitBoundingRectWithHandles,
   hitRectangle
 } from './helper/hit-test';
+import ModifierKeyBehaviors from './ModifierKeyBehaviors';
 
 const handleSize = 5;
 
@@ -47,6 +43,15 @@ const cursorTypes: {
   'west-handle': { cursor: 'w-resize' },
   'rect-outline': { cursor: 'move' },
   'point-move': { cursor: 'crosshair' }
+};
+
+const isValidViewState = (
+  viewState: ViewState
+): viewState is MprViewState | TwoDimensionalViewState => {
+  if (!viewState) return false;
+  if (viewState.type === 'mpr') return true;
+  if (viewState.type === '2d') return true;
+  return false;
 };
 
 export default class Polyline
@@ -113,43 +118,33 @@ export default class Polyline
       }
     | undefined = undefined;
 
-  private getDrawingColor(section: Section): {
-    color?: string;
-    fillColor?: string;
-  } {
-    // Displays only when the volume is displayed as an axial slice
-    const orientation = detectOrthogonalSection(section);
-    if (orientation !== 'axial') return {};
-
-    if (!this.z) return {};
-
-    const zDiff = Math.abs(this.z - section.origin[2]);
-    if (zDiff > this.zDimmedThreshold) return {};
-
-    return zDiff > this.zThreshold
-      ? { color: this.dimmedColor, fillColor: this.dimmedFillColor }
-      : { color: this.color, fillColor: this.fillColor };
-  }
-
   public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
-    if (this.points.length === 0 || !this.z) return;
+    if (this.points.length === 0 || this.z === undefined) return;
 
-    if (!viewer || !viewState) return;
+    if (!viewer || !isValidViewState(viewState)) return;
+
     const canvas = viewer.canvas;
     if (!canvas) return;
-    if (viewState.type !== 'mpr') return;
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const { color, fillColor } = this.getDrawingColor(viewState.section);
+    const { color, fillColor } =
+      this.determineDrawingColorFromViewState(viewState);
     if (!color && !fillColor) return;
 
+    const section =
+      viewState.type !== '2d'
+        ? viewState.section
+        : sectionFrom2dViewState(viewState);
+
     const resolution = new Vector2().fromArray(viewer.getResolution());
+    const z = this.z === undefined ? 0 : this.z;
     const screenPoints = this.points.map(p =>
       convertVolumeCoordinateToScreenCoordinate(
-        viewState.section,
+        section,
         resolution,
-        new Vector3(p[0], p[1], this.z ? this.z : 0)
+        new Vector3(p[0], p[1], z)
       )
     );
 
@@ -176,7 +171,7 @@ export default class Polyline
         ctx,
         this.boundingBox3(),
         resolution,
-        viewState.section,
+        section,
         drawBoundingBoxOutlineStyle
       );
     }
@@ -197,20 +192,53 @@ export default class Polyline
     });
   }
 
+  private determineDrawingColorFromViewState(state: ViewState): {
+    color?: string;
+    fillColor?: string;
+  } {
+    if (this.z === undefined) return {};
+    switch (state.type) {
+      case '2d': {
+        const { imageNumber } = state;
+        return this.z === imageNumber
+          ? { color: this.color, fillColor: this.fillColor }
+          : {};
+      }
+      case 'mpr': {
+        // Displays only when the volume is displayed as an axial slice
+        const section = state.section;
+        const orientation = detectOrthogonalSection(section);
+        if (orientation !== 'axial') return {};
+        const distance = Math.abs(this.z - section.origin[2]);
+        switch (true) {
+          case distance <= this.zThreshold:
+            return { color: this.color, fillColor: this.fillColor };
+          case distance <= this.zDimmedThreshold:
+            return { color: this.dimmedColor, fillColor: this.dimmedFillColor };
+          default:
+            return {};
+        }
+      }
+      default: {
+        throw new Error('Unsupported view state.');
+      }
+    }
+  }
+
   public validate(): boolean {
-    if (this.points.length === 0 || !this.z) return false;
+    if (this.points.length === 0 || this.z === undefined) return false;
     return true;
   }
 
   public mouseMoveHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     const viewState = viewer.getState();
-    if (!viewer || !viewState) return;
-    if (viewState.type !== 'mpr') return;
+    if (!isValidViewState(viewState)) return;
+
     if (!this.editable) return;
 
     // to prevent to edit unvisible polyline.
-    const drawingColor = this.getDrawingColor(viewState.section);
+    const drawingColor = this.determineDrawingColorFromViewState(viewState);
     if (Object.values(drawingColor).length === 0) return;
 
     this.handleType = this.hitTest(ev);
@@ -229,8 +257,7 @@ export default class Polyline
   public dragStartHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     const viewState = viewer.getState();
-    if (!viewer || !viewState) return;
-    if (viewState.type !== 'mpr') return;
+    if (!isValidViewState(viewState)) return;
     if (!this.editable) return;
 
     if (viewer.getHoveringAnnotation() !== this) return;
@@ -258,8 +285,7 @@ export default class Polyline
   public dragHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     const viewState = viewer.getState();
-    if (!viewer || !viewState) return;
-    if (viewState.type !== 'mpr') return;
+    if (!isValidViewState(viewState)) return;
     if (!this.dragInfo) return;
 
     if (viewer.getHoveringAnnotation() !== this) return;
@@ -269,12 +295,17 @@ export default class Polyline
 
     const resolution: [number, number] = viewer.getResolution();
 
+    const section =
+      viewState.type !== '2d'
+        ? viewState.section
+        : sectionFrom2dViewState(viewState);
+
     const { dragStartVolumePoint3, originalPoints, originalBoundingBox } =
       this.dragInfo;
 
     const dragStartPoint3 = new Vector3(...dragStartVolumePoint3);
     const draggedPoint3 = convertScreenCoordinateToVolumeCoordinate(
-      viewState.section,
+      section,
       new Vector2().fromArray(resolution),
       new Vector2().fromArray(evPoint)
     );
@@ -327,8 +358,7 @@ export default class Polyline
   public dragEndHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     const viewState = viewer.getState();
-    if (!viewer || !viewState) return;
-    if (viewState.type !== 'mpr') return;
+    if (!isValidViewState(viewState)) return;
     if (!this.editable) return;
     if (viewer.getHoveringAnnotation() !== this) return;
 
@@ -350,7 +380,7 @@ export default class Polyline
 
   public equalsPoint(ev: ViewerEvent, targetPointIndex: number): boolean {
     if (
-      !this.z ||
+      this.z === undefined ||
       targetPointIndex < 0 ||
       targetPointIndex >= this.points.length
     )

@@ -4,7 +4,8 @@ const formats = {
   int8: 1,
   uint16: 2,
   int16: 3,
-  binary: 4
+  binary: 4,
+  rgba8: 5
 } as const;
 
 export type PixelFormat = keyof typeof formats;
@@ -68,6 +69,15 @@ export function pixelFormatInfo(type: PixelFormat): PixelFormatInfo {
         minLevel: 0,
         maxLevel: 1,
         arrayClass: Uint8Array
+      };
+    case 'rgba8':
+      return {
+        bpp: 4,
+        minWidth: 1,
+        maxWidth: 16777216,
+        minLevel: 0,
+        maxLevel: 255,
+        arrayClass: Uint32Array
       };
     default:
       throw new Error('Undefined pixel format.');

@@ -3,6 +3,12 @@ import JsonSchemaEditor from '@smikitky/rb-components/lib/JsonSchemaEditor';
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
+import ModifierKeyBehaviors from '@utrad-ical/circus-rs/src/browser/annotation/ModifierKeyBehaviors';
+import { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
+import {
+  sectionFrom2dViewState,
+  sectionTo2dViewState
+} from '@utrad-ical/circus-rs/src/browser/section-util';
 import { InterpolationMode } from '@utrad-ical/circus-rs/src/browser/ViewState';
 import classNames from 'classnames';
 import Collapser from 'components/Collapser';
@@ -27,7 +33,7 @@ import {
   usePendingVolumeLoaders,
   VolumeLoaderCacheContext
 } from 'utils/useImageSource';
-import useLoginUser, { useUserPreferences } from 'utils/useLoginUser';
+import { useUserPreferences } from 'utils/useLoginUser';
 import { Modal } from '../../components/react-bootstrap';
 import * as c from './caseStore';
 import {
@@ -41,6 +47,7 @@ import LabelMenu from './LabelMenu';
 import LabelSelector from './LabelSelector';
 import {
   EditingData,
+  EditingDataLayoutInitializer,
   EditingDataUpdater,
   SeriesEntryWithLabels
 } from './revisionData';
@@ -49,7 +56,6 @@ import SideContainer from './SideContainer';
 import ToolBar, { ViewOptions, zDimmedThresholdOptions } from './ToolBar';
 import ViewerGrid from './ViewerGrid';
 import { ViewWindow } from './ViewWindowEditor';
-import ModifierKeyBehaviors from '@utrad-ical/circus-rs/src/browser/annotation/ModifierKeyBehaviors';
 
 const useCompositions = (
   series: {
@@ -59,44 +65,79 @@ const useCompositions = (
 ) => {
   const { rsHttpClient } = useContext(VolumeLoaderCacheContext)!;
   const [results, setResults] = useState<
-    { composition?: Composition; volumeLoaded: boolean }[]
-  >(() => series.map(() => ({ composition: undefined, volumeLoaded: false })));
+    {
+      metadata?: DicomVolumeMetadata;
+      composition?: Composition;
+      volumeLoaded: boolean;
+    }[]
+  >(() =>
+    series.map(() => ({
+      metadata: undefined,
+      composition: undefined,
+      volumeLoaded: false
+    }))
+  );
 
   const volumeLoaders = usePendingVolumeLoaders(series);
 
   useEffect(() => {
-    const compositions = series.map(
-      ({ seriesUid, partialVolumeDescriptor }, volId) => {
-        const volumeLoader = volumeLoaders[volId];
-        const imageSource = new rs.WebGlHybridMprImageSource({
-          rsHttpClient,
-          seriesUid,
-          partialVolumeDescriptor,
-          volumeLoader,
-          estimateWindowType: 'none'
-        });
-        volumeLoader
-          .loadMeta()
-          .then(() => volumeLoader.loadVolume())
-          .then(() => {
-            setResults(results =>
-              produce(results, draft => {
-                draft[volId].volumeLoaded = true;
-              })
-            );
-          });
-        const composition = new Composition(imageSource);
-        return { composition, volumeLoaded: false };
-      }
-    );
-    setResults(compositions);
+    series.forEach(async ({ seriesUid, partialVolumeDescriptor }, volId) => {
+      const volumeLoader = volumeLoaders[volId];
+
+      const metadata = await volumeLoader.loadMeta();
+
+      const src = (() => {
+        switch (metadata.mode) {
+          case '2d':
+            return new rs.TwoDimensionalImageSource({
+              volumeLoader,
+              maxCacheSize: 10
+            });
+          default:
+            return new rs.WebGlHybridMprImageSource({
+              rsHttpClient,
+              seriesUid,
+              partialVolumeDescriptor,
+              volumeLoader,
+              estimateWindowType: 'none'
+            });
+        }
+      })();
+
+      const composition = new Composition(src);
+
+      setResults(results => [
+        ...results.slice(0, volId),
+        { ...results[volId], metadata, composition },
+        ...results.slice(volId + 1)
+      ]);
+
+      await volumeLoader.loadVolume();
+
+      setResults(results =>
+        produce(results, draft => {
+          draft[volId].volumeLoaded = true;
+        })
+      );
+    });
   }, [rsHttpClient, series, volumeLoaders]);
+
+  useEffect(() => {
+    setResults(
+      series.map(() => ({
+        metadata: undefined,
+        composition: undefined,
+        volumeLoaded: false
+      }))
+    );
+  }, [series]);
 
   return results;
 };
 
 const RevisionEditor: React.FC<{
   editingData: EditingData;
+  initEditingDataLayout: EditingDataLayoutInitializer;
   updateEditingData: EditingDataUpdater;
   caseDispatch: React.Dispatch<any>;
   seriesData: { [seriesUid: string]: Series };
@@ -106,6 +147,7 @@ const RevisionEditor: React.FC<{
 }> = props => {
   const {
     editingData,
+    initEditingDataLayout,
     updateEditingData,
     caseDispatch,
     seriesData,
@@ -124,7 +166,10 @@ const RevisionEditor: React.FC<{
   });
 
   const [touchDevice] = useState(() => isTouchDevice());
-  const stateChanger = useMemo(() => createStateChanger<rs.MprViewState>(), []);
+  const stateChanger = useMemo(
+    () => createStateChanger<rs.MprViewState | rs.TwoDimensionalViewState>(),
+    []
+  );
   const [seriesDialogOpen, setSeriesDialogOpen] = useState(false);
 
   // const preferences = useLoginUser().preferences;
@@ -220,8 +265,53 @@ const RevisionEditor: React.FC<{
 
   const compositions = useCompositions(allSeries);
 
+  const metaLoadedAll = compositions.every(comp => !!comp.metadata);
+  const metadata = compositions.map(entry => entry.metadata);
+
   const volumeLoadedStatus = compositions.map(entry => entry.volumeLoaded);
   const activeVolumeLoaded = volumeLoadedStatus[editingData.activeSeriesIndex];
+  const activeSeriesMetadata =
+    compositions[editingData.activeSeriesIndex].metadata;
+
+  const wandEnabled = activeVolumeLoaded;
+
+  const windowEnabled = !(
+    metaLoadedAll &&
+    compositions.every(comp => comp.metadata!.pixelFormat === 'rgba8')
+  );
+
+  const layoutEnabled = !(metaLoadedAll && activeSeriesMetadata!.mode !== '3d');
+
+  const layoutInitialized = !!(
+    Object.keys(editingData.layout.positions).length > 0 &&
+    editingData.layoutItems.length > 0 &&
+    editingData.activeLayoutKey
+  );
+
+  useEffect(() => {
+    if (!activeSeriesMetadata || layoutInitialized) return;
+    initEditingDataLayout(d => {
+      if (
+        Object.keys(d.layout.positions).length > 0 &&
+        d.layoutItems.length > 0 &&
+        d.activeLayoutKey
+      )
+        return;
+      const layoutKind = activeSeriesMetadata.mode !== '3d' ? '2d' : 'twoByTwo';
+      const [layoutItems, layout] = c.performLayout(
+        layoutKind,
+        editingData.activeSeriesIndex
+      );
+      d.layout = layout;
+      d.layoutItems = layoutItems;
+      d.activeLayoutKey = layoutItems.length > 0 ? layoutItems[0].key : null;
+    });
+  }, [
+    layoutInitialized,
+    activeSeriesMetadata,
+    editingData,
+    initEditingDataLayout
+  ]);
 
   const { revision, activeLabelIndex } = editingData;
 
@@ -297,6 +387,17 @@ const RevisionEditor: React.FC<{
     const seriesIndex = revision.series.findIndex(
       s => s.labels.findIndex(v => v.temporaryKey === annotation.id) >= 0
     );
+    const activeImageSource =
+      compositions[editingData.activeSeriesIndex].composition?.imageSource;
+    if (
+      activeImageSource instanceof rs.TwoDimensionalImageSource &&
+      (annotation instanceof rs.VoxelCloud ||
+        annotation instanceof rs.SolidFigure)
+    ) {
+      alert('Unsupported image source.');
+      return;
+    }
+
     const labelIndex = revision.series[seriesIndex].labels.findIndex(
       v => v.temporaryKey === annotation.id
     );
@@ -470,10 +571,23 @@ const RevisionEditor: React.FC<{
   ]);
 
   useEffect(() => {
-    stateChanger(viewState => ({
-      ...viewState,
-      interpolationMode: viewOptions.interpolationMode ?? 'nearestNeighbor'
-    }));
+    stateChanger(viewState => {
+      switch (viewState.type) {
+        case '2d': {
+          return {
+            ...viewState,
+            interpolationMode: viewOptions.interpolationMode ?? 'none'
+          } as rs.TwoDimensionalViewState;
+        }
+        case 'mpr':
+        default:
+          return {
+            ...viewState,
+            interpolationMode:
+              viewOptions.interpolationMode ?? 'nearestNeighbor'
+          } as rs.MprViewState;
+      }
+    });
   }, [stateChanger, viewOptions.interpolationMode]);
 
   const labelAttributesChange = (value: any) => {
@@ -498,13 +612,21 @@ const RevisionEditor: React.FC<{
     result: SeriesEntryWithLabels[] | null
   ) => {
     if (busy) return;
+    const activeSeriesIndex = 0;
+    const activeSeriesMetadata = metadata[activeSeriesIndex];
+    if (!activeSeriesMetadata) return;
+    const layoutKind = activeSeriesMetadata.mode !== '3d' ? '2d' : 'twoByTwo';
     setSeriesDialogOpen(false);
     if (result === null) return; // dialog cancelled
     updateEditingData(d => {
       d.revision.series = result;
-      d.activeSeriesIndex = 0;
-      d.activeLabelIndex = d.revision.series[0].labels.length > 0 ? 0 : -1;
-      const [layoutItems, layout] = c.performLayout('twoByTwo', 0);
+      d.activeSeriesIndex = activeSeriesIndex;
+      d.activeLabelIndex =
+        d.revision.series[activeSeriesIndex].labels.length > 0 ? 0 : -1;
+      const [layoutItems, layout] = c.performLayout(
+        layoutKind,
+        activeSeriesIndex
+      );
       d.layoutItems = layoutItems;
       d.layout = layout;
       d.activeLayoutKey = layoutItems[0].key;
@@ -519,8 +641,27 @@ const RevisionEditor: React.FC<{
   const handleMagnify = useCallback(
     (magnitude: number) =>
       stateChanger(state => {
-        const section = rs.scaleSectionFromCenter(state.section, 1 / magnitude);
-        return { ...state, section };
+        switch (state.type) {
+          case '2d': {
+            const prevSection = sectionFrom2dViewState(state);
+            const section = rs.scaleSectionFromCenter(
+              prevSection,
+              1 / magnitude
+            );
+            return { ...sectionTo2dViewState(state, section) };
+          }
+          case 'mpr': {
+            const prevSection = state.section;
+            const section = rs.scaleSectionFromCenter(
+              prevSection,
+              1 / magnitude
+            );
+            return { ...state, section };
+          }
+          default: {
+            throw new Error('Unsupported view state.');
+          }
+        }
       }),
     [stateChanger]
   );
@@ -552,7 +693,11 @@ const RevisionEditor: React.FC<{
   const propagateWindowState = useMemo(
     () =>
       debounce((viewer: Viewer, id: string) => {
-        const window = (viewer.getState() as rs.MprViewState).window;
+        const viewState = viewer.getState();
+        const window =
+          viewState.type === 'mpr' || viewState.type === '2d'
+            ? viewState.window
+            : undefined;
         const seriesIndex = editingData.layoutItems.find(
           item => item.key === id
         )!.seriesIndex;
@@ -561,6 +706,8 @@ const RevisionEditor: React.FC<{
           .map(item => item.key);
         stateChanger((state, viewer, id) => {
           if (targetKeys.indexOf(id as string) < 0) return state;
+          if (!state.window) return state;
+          if (!window) return state;
           if (
             state.window.width !== window.width ||
             state.window.level !== window.level
@@ -578,7 +725,10 @@ const RevisionEditor: React.FC<{
       const seriesIndex = editingData.layoutItems.find(
         item => item.key === id
       )!.seriesIndex;
-      const window = (viewer.getState() as rs.MprViewState).window;
+      const state = viewer.getState();
+      if (state.type !== 'mpr' && state.type !== '2d') return;
+      const window = state.window;
+      if (!window) return;
       viewWindows.current[seriesIndex] = window;
       setCurrentWindow(window);
       propagateWindowState(viewer, id as string);
@@ -586,57 +736,100 @@ const RevisionEditor: React.FC<{
     [editingData.layoutItems, propagateWindowState]
   );
 
+  const getWindow = (metadata: DicomVolumeMetadata | undefined) => {
+    if (!metadata) throw new Error('No metadata available.');
+    const windowPriority = projectData.windowPriority || 'auto';
+    const priorities = windowPriority.split(',');
+    for (const type of priorities) {
+      switch (type) {
+        case 'auto': {
+          const window = metadata.estimatedWindow;
+          if (window) return window;
+          break;
+        }
+        case 'dicom': {
+          const window = metadata.dicomWindow;
+          if (window) return window;
+          break;
+        }
+        case 'preset': {
+          const window =
+            Array.isArray(projectData.windowPresets) &&
+            projectData.windowPresets[0];
+          if (window) return { level: window.level, width: window.width };
+          break;
+        }
+      }
+    }
+    return undefined;
+  };
+
   const initialStateSetter = (
     viewer: Viewer,
     viewState: rs.ViewState,
     id: string | number | undefined
-  ): rs.MprViewState => {
-    const src = viewer.getComposition()!.imageSource as rs.MprImageSource;
-    if (!src.metadata || viewState.type !== 'mpr') throw new Error();
-    const windowPriority = projectData.windowPriority || 'auto';
-    const interpolationMode =
-      viewOptions.interpolationMode ?? 'nearestNeighbor';
+  ): rs.MprViewState | rs.TwoDimensionalViewState => {
     const seriesIndex = editingData.layoutItems.find(
       item => item.key === id
     )!.seriesIndex;
-    if (viewWindows.current[seriesIndex]) {
-      return {
-        ...viewState,
-        window: viewWindows.current[seriesIndex],
-        interpolationMode
-      };
-    }
-    const window = (() => {
-      const priorities = windowPriority.split(',');
-      for (const type of priorities) {
-        switch (type) {
-          case 'auto': {
-            const window = src.metadata.estimatedWindow;
-            if (window) return window;
-            break;
-          }
-          case 'dicom': {
-            const window = src.metadata.dicomWindow;
-            if (window) return window;
-            break;
-          }
-          case 'preset': {
-            const window =
-              Array.isArray(projectData.windowPresets) &&
-              projectData.windowPresets[0];
-            if (window) return { level: window.level, width: window.width };
-            break;
-          }
+
+    switch (viewState.type) {
+      case 'mpr': {
+        const src = viewer.getComposition()!.imageSource;
+        if (!(src instanceof rs.MprImageSource))
+          throw new Error('Unsupported image source.');
+
+        const interpolationMode =
+          viewOptions.interpolationMode ?? 'nearestNeighbor';
+
+        if (viewWindows.current[seriesIndex]) {
+          return {
+            ...viewState,
+            window: viewWindows.current[seriesIndex],
+            interpolationMode
+          };
         }
+
+        const window = getWindow(src.metadata);
+        if (window) {
+          viewWindows.current[seriesIndex] = window;
+          setCurrentWindow(window);
+          return { ...viewState, window, interpolationMode };
+        }
+
+        return viewState; // do not update view state (should not happen)
       }
-      return undefined;
-    })();
-    if (window) {
-      viewWindows.current[seriesIndex] = window;
-      setCurrentWindow(window);
-      return { ...viewState, window, interpolationMode };
+      case '2d': {
+        const src = viewer.getComposition()!.imageSource;
+        if (!(src instanceof rs.TwoDimensionalImageSource))
+          throw new Error('Unsupported image source.');
+
+        const interpolationMode =
+          viewOptions.interpolationMode &&
+          viewOptions.interpolationMode !== 'nearestNeighbor'
+            ? 'bilinear'
+            : 'none';
+
+        if (viewWindows.current[seriesIndex]) {
+          return {
+            ...viewState,
+            window: viewWindows.current[seriesIndex],
+            interpolationMode
+          };
+        }
+
+        const window = getWindow(src.metadata);
+        if (window) {
+          viewWindows.current[seriesIndex] = window;
+          setCurrentWindow(window);
+          return { ...viewState, window, interpolationMode };
+        }
+        return viewState; // do not update view state
+      }
+      default: {
+        throw new Error('Unsupported view state.');
+      }
     }
-    return viewState; // do not update view state (should not happen)
   };
 
   if (!activeSeries) return null;
@@ -652,6 +845,7 @@ const RevisionEditor: React.FC<{
             caseDispatch={caseDispatch}
             viewers={viewers}
             disabled={busy}
+            metadata={metadata}
           />
           <LabelSelector
             seriesData={seriesData}
@@ -660,6 +854,7 @@ const RevisionEditor: React.FC<{
             updateEditingData={updateEditingData}
             disabled={busy}
             multipleSeriesShown={multipleSeriesShown}
+            metadata={metadata}
           />
           <div className="add-series-pane">
             <IconButton
@@ -726,26 +921,30 @@ const RevisionEditor: React.FC<{
           planeFigureOption={planeFigureOption}
           onChangePlaneFigureOption={savePlaneFigureOption}
           onChangeLayoutKind={handleChangeLayoutKind}
-          wandEnabled={activeVolumeLoaded}
+          wandEnabled={wandEnabled}
+          windowEnabled={windowEnabled}
           windowPresets={projectData.windowPresets}
           currentWindow={currentWindow}
           onApplyWindow={handleApplyWindow}
           onMagnify={handleMagnify}
           brushEnabled={editorEnabled}
+          layoutEnabled={layoutEnabled}
           disabled={busy}
         />
-        <ViewerGrid
-          editingData={editingData}
-          updateEditingData={updateEditingData}
-          compositions={compositions}
-          stateChanger={stateChanger}
-          tool={activeTool}
-          onCreateViewer={handleCreateViwer}
-          onDestroyViewer={handleDestroyViewer}
-          initialStateSetter={initialStateSetter}
-          onViewStateChange={handleViewStateChange}
-          multipleSeriesShown={multipleSeriesShown}
-        />
+        {activeSeriesMetadata && (
+          <ViewerGrid
+            editingData={editingData}
+            updateEditingData={updateEditingData}
+            compositions={compositions}
+            stateChanger={stateChanger}
+            tool={activeTool}
+            onCreateViewer={handleCreateViwer}
+            onDestroyViewer={handleDestroyViewer}
+            initialStateSetter={initialStateSetter}
+            onViewStateChange={handleViewStateChange}
+            multipleSeriesShown={multipleSeriesShown}
+          />
+        )}
       </div>
       {seriesDialogOpen && (
         <Modal show bsSize="lg" onHide={() => {}}>

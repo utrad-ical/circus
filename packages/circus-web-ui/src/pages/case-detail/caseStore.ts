@@ -8,7 +8,7 @@ import Series from 'types/Series';
 import PatientInfo from '../../types/PatientInfo';
 import { ExternalLabel } from './labelData';
 import { EditingData, Revision } from './revisionData';
-import { ViewerDef } from './ViewerGrid';
+import { ViewerDef, ViewerMode } from './ViewerGrid';
 interface CaseData {
   caseId: string;
   revisions: Revision<ExternalLabel>[];
@@ -53,7 +53,7 @@ export const canUndo = (s: CaseDetailState) => s.currentHistoryIndex > 0;
 export const canRedo = (s: CaseDetailState) =>
   s.currentHistoryIndex < s.history.length - 1;
 
-export type LayoutKind = 'twoByTwo' | 'axial' | 'sagittal' | 'coronal';
+export type LayoutKind = 'twoByTwo' | 'axial' | 'sagittal' | 'coronal' | '2d';
 
 export const performLayout = (
   kind: LayoutKind,
@@ -64,12 +64,31 @@ export const performLayout = (
     rows: kind === 'twoByTwo' ? 2 : 1,
     positions: {}
   };
-  const orientations: OrientationString[] =
-    kind === 'twoByTwo' ? ['axial', 'sagittal', 'coronal', 'oblique'] : [kind];
+
+  const orientations = ((): OrientationString[] => {
+    switch (kind) {
+      case '2d':
+        return ['axial'];
+      case 'twoByTwo':
+        return ['axial', 'sagittal', 'coronal', 'oblique'];
+      default:
+        return [kind];
+    }
+  })();
+
   let tmp = layout;
   const items: ViewerDef[] = [];
+  const viewerMode = ((): ViewerMode => {
+    switch (kind) {
+      case '2d':
+        return '2d';
+      default:
+        return '3d';
+    }
+  })();
+
   orientations.forEach(orientation => {
-    const item = newViewerCellItem(seriesIndex, orientation);
+    const item = newViewerCellItem(seriesIndex, viewerMode, orientation);
     items.push(item);
     tmp = layoutReducer(tmp, {
       type: 'insertItemToEmptyCell',
@@ -87,6 +106,7 @@ const alphaNum = (length: number = 16) =>
 
 export const newViewerCellItem = (
   seriesIndex: number,
+  viewerMode: ViewerMode,
   orientation: OrientationString,
   celestialRotateMode?: boolean,
   initialSection?: Section
@@ -95,6 +115,7 @@ export const newViewerCellItem = (
   return {
     key,
     seriesIndex,
+    viewerMode,
     orientation,
     celestialRotateMode:
       celestialRotateMode === undefined
@@ -177,7 +198,7 @@ const slice = createSlice({
 
       const [layoutItems, layout] = sameSeriesSet
         ? [prev.layoutItems, prev.layout]
-        : performLayout('twoByTwo', 0);
+        : [[], { columns: 1, rows: 1, positions: {} }];
 
       const editingData: EditingData = {
         revision,
@@ -185,13 +206,46 @@ const slice = createSlice({
         activeLabelIndex: (revision.series[0].labels || []).length > 0 ? 0 : -1,
         layout,
         layoutItems,
-        activeLayoutKey: layoutItems[0].key,
+        activeLayoutKey: layoutItems.length > 0 ? layoutItems[0].key : null,
         allLabelsHidden: false
       };
       s.history = [editingData];
       s.currentHistoryIndex = 0;
       s.refreshCounter++;
       s.busy = false;
+    },
+    initialLayoutDetermined: (
+      s,
+      action: PayloadAction<{
+        layoutItems: ViewerDef[];
+        layout: LayoutInfo;
+        activeLayoutKey: string | null;
+      }>
+    ) => {
+      if (s.busy) throw new Error('Tried to change revision while loading');
+      const { layoutItems, layout, activeLayoutKey } = action.payload;
+      if (
+        !(
+          Object.keys(layout.positions).length > 0 &&
+          layoutItems.length > 0 &&
+          activeLayoutKey
+        )
+      ) {
+        throw new Error('Layout is not specified.');
+      }
+      const currentHistory = s.history[s.currentHistoryIndex];
+      if (
+        Object.keys(currentHistory.layout.positions).length > 0 &&
+        currentHistory.layoutItems.length > 0 &&
+        currentHistory.activeLayoutKey
+      ) {
+        throw new Error('Layout is already fixed.');
+      }
+      s.history.forEach(i => {
+        i.layout = layout;
+        i.layoutItems = layoutItems;
+        i.activeLayoutKey = activeLayoutKey;
+      });
     },
     change: (
       s,
@@ -206,6 +260,17 @@ const slice = createSlice({
       }>
     ) => {
       if (s.busy) throw new Error('Tried to change revision while loading');
+
+      const currentHistory = s.history[s.currentHistoryIndex];
+      if (
+        Object.keys(currentHistory.layout.positions).length === 0 &&
+        currentHistory.layoutItems.length === 0 &&
+        !currentHistory.activeLayoutKey
+      ) {
+        throw new Error(
+          'It is not possible to change the layout from the undefined state.'
+        );
+      }
       const { tag, newData } = action.payload;
       s.history = s.history.slice(0, s.currentHistoryIndex + 1);
       if (typeof tag === 'string' && tag.length > 0 && tag === s.historyTag) {
@@ -262,6 +327,7 @@ export const {
   loadRevisions,
   startLoadRevision,
   loadRevision,
+  initialLayoutDetermined,
   change,
   undo,
   redo,

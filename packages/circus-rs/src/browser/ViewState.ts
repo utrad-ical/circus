@@ -64,6 +64,16 @@ export interface VrViewState extends SectionDrawingViewState {
   readonly debugMode?: number;
 }
 
+export interface TwoDimensionalViewState {
+  readonly type: '2d';
+  readonly window?: ViewWindow;
+  readonly interpolationMode?: 'none' | 'bilinear';
+  readonly origin: [number, number];
+  readonly xAxis: [number, number];
+  readonly yLength: number;
+  readonly imageNumber: number;
+}
+
 /**
  * Supports interporation.
  * trilinear: multivariate interpolation on a 3-dimensional regular grid.
@@ -99,7 +109,7 @@ export interface SubVolume {
  * ViewState determines how an ImageSource is displayed on each Viewer.
  * This is an immutable object whose identity can be checked using `===`.
  */
-type ViewState = MprViewState | VrViewState;
+type ViewState = MprViewState | VrViewState | TwoDimensionalViewState;
 
 // eslint-disable-next-line no-undef
 export default ViewState;

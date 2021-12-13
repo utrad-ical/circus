@@ -1,20 +1,21 @@
+import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import PartialVolumeDescriptor, {
   describePartialVolumeDescriptor
 } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
+import { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
 import classNames from 'classnames';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
-import { Button } from 'components/react-bootstrap';
-import { Modal } from 'components/react-bootstrap';
-import React, { useRef, useState, useMemo, useEffect } from 'react';
+import { Button, Modal } from 'components/react-bootstrap';
+import { multirange } from 'multi-integer-range';
+import React, { useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { mostReadable } from 'tinycolor2';
 import Series from 'types/Series';
-import { EditingData, EditingDataUpdater, seriesColors } from './revisionData';
-import { InternalLabel, labelTypes } from './labelData';
-import { multirange } from 'multi-integer-range';
 import { newViewerCellItem, performLayout } from './caseStore';
-import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
+import { InternalLabel, labelTypes } from './labelData';
+import { EditingData, EditingDataUpdater, seriesColors } from './revisionData';
+import { ViewerMode } from './ViewerGrid';
 
 const LabelSelector: React.FC<{
   editingData: EditingData;
@@ -23,6 +24,7 @@ const LabelSelector: React.FC<{
   volumeLoadedStatus: boolean[];
   disabled?: boolean;
   multipleSeriesShown: boolean;
+  metadata: (DicomVolumeMetadata | undefined)[];
 }> = props => {
   const {
     editingData,
@@ -30,13 +32,15 @@ const LabelSelector: React.FC<{
     seriesData,
     volumeLoadedStatus,
     disabled,
-    multipleSeriesShown
+    multipleSeriesShown,
+    metadata
   } = props;
 
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
   const activeSeries = revision.series[activeSeriesIndex];
   const activeLabel =
     activeLabelIndex >= 0 ? activeSeries.labels[activeLabelIndex] : null;
+  const activeSeriesMetadata = metadata[activeSeriesIndex];
 
   return (
     <StyledSeriesUl>
@@ -51,6 +55,7 @@ const LabelSelector: React.FC<{
           activeLabel={activeLabel}
           disabled={disabled}
           multipleSeriesShown={multipleSeriesShown}
+          metadata={activeSeriesMetadata}
         />
       ))}
     </StyledSeriesUl>
@@ -88,6 +93,7 @@ const SeriesItem: React.FC<{
   activeLabel: InternalLabel | null;
   disabled?: boolean;
   multipleSeriesShown: boolean;
+  metadata: DicomVolumeMetadata | undefined;
 }> = props => {
   const {
     seriesIndex,
@@ -97,7 +103,8 @@ const SeriesItem: React.FC<{
     volumeLoaded,
     activeLabel,
     disabled,
-    multipleSeriesShown
+    multipleSeriesShown,
+    metadata
   } = props;
   const series = editingData.revision.series[seriesIndex];
 
@@ -131,7 +138,9 @@ const SeriesItem: React.FC<{
   const handleSeriesDoubleClick = () => {
     if (disabled) return;
     if (editingData.activeSeriesIndex !== seriesIndex) return;
-    const [layoutItems, layout] = performLayout('twoByTwo', seriesIndex);
+    if (!metadata) return;
+    const layoutKind = metadata.mode !== '3d' ? '2d' : 'twoByTwo';
+    const [layoutItems, layout] = performLayout(layoutKind, seriesIndex);
     updateEditingData(d => {
       d.layoutItems = layoutItems;
       d.layout = layout;
@@ -144,7 +153,11 @@ const SeriesItem: React.FC<{
   };
 
   const handleDragStart = (ev: React.DragEvent) => {
-    const item = newViewerCellItem(seriesIndex, 'axial');
+    if (!metadata) {
+      throw new Error('No metadata available.');
+    }
+    const mode: ViewerMode = metadata.mode;
+    const item = newViewerCellItem(seriesIndex, mode, 'axial');
     updateEditingData(d => {
       d.layoutItems.push(item);
     }, 'layout');

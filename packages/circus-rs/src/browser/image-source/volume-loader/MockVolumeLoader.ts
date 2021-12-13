@@ -19,6 +19,7 @@ export default class MockLoader implements DicomVolumeLoader {
     this.option = option;
 
     const meta: DicomVolumeMetadata = option.meta || {
+      mode: '3d',
       voxelSize: [0.4688, 0.4688, 0.6],
       voxelCount: [512, 512, 132],
       estimatedWindow: { level: 200, width: 600 },

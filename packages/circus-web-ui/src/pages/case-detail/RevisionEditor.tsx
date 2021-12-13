@@ -1,5 +1,5 @@
 import IconButton from '@smikitky/rb-components/lib/IconButton';
-import JsonSchemaEditor from '@smikitky/rb-components/lib/JsonSchemaEditor';
+import StyledJsonSchemaEditor from 'components/StyledJsonSchemaEditor';
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
@@ -874,7 +874,7 @@ const RevisionEditor: React.FC<{
                 <b>Attributes for</b>:{' '}
                 <Icon icon={labelTypes[activeLabel.type].icon} />{' '}
                 <span className="label-name">{activeLabel.name}</span>
-                <JsonSchemaEditor
+                <StyledJsonSchemaEditor
                   key={activeLabel.temporaryKey + ':' + refreshCounter}
                   schema={projectData.labelAttributesSchema}
                   value={activeLabel.attributes || {}}
@@ -895,7 +895,7 @@ const RevisionEditor: React.FC<{
         {Object.keys(projectData.caseAttributesSchema.properties || {}).length >
           0 && (
           <Collapser title="Case Attributes" className="case-attributes">
-            <JsonSchemaEditor
+            <StyledJsonSchemaEditor
               key={refreshCounter}
               schema={projectData.caseAttributesSchema}
               value={revision.attributes}

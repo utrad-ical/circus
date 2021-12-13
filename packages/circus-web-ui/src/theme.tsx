@@ -11,6 +11,7 @@ interface CircusTheme {
   primaryText: string;
   border: string;
   activeBackground: string;
+  invalidBackground: string;
   brandPrimary: string;
   brandDark: string;
   brandDarker: string;
@@ -25,6 +26,7 @@ const themes: { [name: string]: CircusTheme } = {
     primaryText: 'black',
     border: 'silver',
     activeBackground: '#dddddd',
+    invalidBackground: 'pink',
     brandPrimary,
     brandDark: tinycolor(brandPrimary).darken(10).toString(),
     brandDarker: tinycolor(brandPrimary).darken(20).toString(),
@@ -37,6 +39,7 @@ const themes: { [name: string]: CircusTheme } = {
     primaryText: 'white',
     border: 'darkgray',
     activeBackground: '#444444',
+    invalidBackground: '#660000',
     brandPrimary,
     brandDark: tinycolor(brandPrimary).darken(10).toString(),
     brandDarker: tinycolor(brandPrimary).darken(20).toString(),

@@ -241,18 +241,11 @@ const slice = createSlice({
       ) {
         throw new Error('Layout is already fixed.');
       }
-      s.history
-        .filter(
-          i =>
-            Object.keys(i.layout.positions).length === 0 &&
-            i.layoutItems.length === 0 &&
-            !i.activeLayoutKey
-        )
-        .forEach(i => {
-          i.layout = layout;
-          i.layoutItems = layoutItems;
-          i.activeLayoutKey = activeLayoutKey;
-        });
+      s.history.forEach(i => {
+        i.layout = layout;
+        i.layoutItems = layoutItems;
+        i.activeLayoutKey = activeLayoutKey;
+      });
     },
     change: (
       s,

@@ -1,34 +1,30 @@
 import { Vector3, Matrix4 } from 'three';
-import { mat4 } from 'gl-matrix';
 import { TransferFunction, InterpolationMode } from '../../ViewState';
-import GLProgramBase, { SetUniform } from './GLProgramBase';
+import ShaderProgram, {
+  AttribBufferer,
+  SetUniform,
+  VertexElementBufferer
+} from './ShaderProgram';
 import { LabelData } from '../volume-loader/interface';
-import loadLabelIntoTexture from './texture-loader/loadLabelIntoTexture';
+import loadLabelIntoTexture from './texture/loadLabelIntoTexture';
 import RawData from '../../../common/RawData';
-import loadVolumeIntoTexture from './texture-loader/loadVolumeIntoTexture';
-import loadTransferFunctionIntoTexture from './texture-loader/loadTransferFunctionIntoTexture';
-import { TextureLayout } from './texture-loader/interface';
-
-export interface Camera {
-  position: Vector3;
-  target: Vector3;
-  up: Vector3;
-  zoom: number;
-}
+import loadVolumeIntoTexture from './texture/loadVolumeIntoTexture';
+import loadTransferFunctionIntoTexture from './texture/loadTransferFunctionIntoTexture';
+import { TextureLayout } from './texture/interface';
+import DicomVolume from 'common/DicomVolume';
+import {
+  Camera,
+  createCamera,
+  createModelViewMatrix,
+  createPojectionMatrix
+} from './webgl-util';
 
 // WebGL shader source (GLSL)
-const vertexShaderSource = require('./vertex-shader.vert');
+const vertexShaderSource = require('./glsl/vr-volume.vert');
 const fragmentShaderSource = [
-  require('./fragment-shader/header.frag'),
-  require('./fragment-shader/getLabeledAt.frag'),
-  require('./fragment-shader/getValueAt.frag'),
-  require('./fragment-shader/getColorFromPixelValue.frag'),
-  require('./fragment-shader/getVoxelValueAndMaskValueWithInterpolation.frag'),
-  // If highlighting label with interporation, it seems too weak.
-  // require('./fragment-shader/getLabeledValueWithInterpolation.frag'),
-  require('./fragment-shader/getLabeledValueAnyNeighbor.frag'),
-  require('./fragment-shader/getColorWithRayCasting.frag'),
-  require('./fragment-shader/main.frag')
+  require('./glsl/vr-header.frag'),
+  require('./glsl/vr-fn.frag'),
+  require('./glsl/vr-main.frag')
 ].join('\n');
 
 // [TextureIndex]
@@ -44,10 +40,13 @@ type LabelTexuture = {
   color: [number, number, number, number];
 };
 
-export default class VRGLProgram extends GLProgramBase {
-  protected program: WebGLProgram;
+export default class VRGLProgram extends ShaderProgram {
+  /**
+   * 1mm in normalized device coordinates.
+   */
+  private mmInNdc: number = 0.002;
+
   private highlightLabelIndex: number = -1;
-  private mmToWorldCoords?: number;
 
   private uVolumeOffset: SetUniform['uniform3fv'];
   private uVolumeDimension: SetUniform['uniform3fv'];
@@ -57,21 +56,21 @@ export default class VRGLProgram extends GLProgramBase {
   private uSkipStride: SetUniform['uniform3fv'];
   private uRayIntensityCoef: SetUniform['uniform1f'];
   private uInterpolationMode: SetUniform['uniform1i'];
-  public uMVPMatrix: SetUniform['uniformMatrix4fv'];
+  private uProjectionMatrix: SetUniform['uniformMatrix4fv'];
+  private uModelViewMatrix: SetUniform['uniformMatrix4fv'];
   private uDebugFlag: SetUniform['uniform1i'];
 
-  private aVertexPositionBuffer: WebGLBuffer;
-  private aVertexPositionLocation: number;
-  private aVertexColorBuffer: WebGLBuffer;
-  private aVertexColorLocation: number;
-  private aVertexIndexBuffer: WebGLBuffer;
+  private aVertexIndexBuffer: VertexElementBufferer;
+  private aVertexPositionBuffer: AttribBufferer;
+  private aVertexColorBuffer: AttribBufferer;
 
-  private volumeTexture: WebGLTexture;
+  private volumeTexture: WebGLTexture | undefined = undefined;
+  private volumeTextureLayout: TextureLayout | undefined = undefined;
   private uVolumeTextureSampler: SetUniform['uniform1i'];
   private uTextureSize: SetUniform['uniform2fv'];
   private uSliceGridSize: SetUniform['uniform2fv'];
 
-  private transferFunctionTexture: WebGLTexture;
+  private transferFunctionTexture: WebGLTexture | undefined = undefined;
   private uTransferFunctionSampler: SetUniform['uniform1i'];
 
   private labelTextures: Record<number, LabelTexuture> = {};
@@ -86,11 +85,7 @@ export default class VRGLProgram extends GLProgramBase {
   private uEnableMask: SetUniform['uniform1i'];
 
   constructor(gl: WebGLRenderingContext) {
-    super(gl);
-    gl.enable(gl.DEPTH_TEST);
-
-    // Prepare program
-    this.program = this.activateProgram();
+    super(gl, vertexShaderSource, fragmentShaderSource);
 
     // Uniforms
     this.uVolumeOffset = this.uniform3fv('uVolumeOffset');
@@ -101,30 +96,32 @@ export default class VRGLProgram extends GLProgramBase {
     this.uSkipStride = this.uniform3fv('uSkipStride');
     this.uRayIntensityCoef = this.uniform1f('uRayIntensityCoef');
     this.uInterpolationMode = this.uniform1i('uInterpolationMode');
-    this.uMVPMatrix = this.uniformMatrix4fv('uMVPMatrix', false);
+    this.uProjectionMatrix = this.uniformMatrix4fv('uProjectionMatrix', false);
+    this.uModelViewMatrix = this.uniformMatrix4fv('uModelViewMatrix', false);
 
+    this.uEnableLabel = this.uniform1i('uEnableLabel');
+    this.uEnableMask = this.uniform1i('uEnableMask');
     this.uDebugFlag = this.uniform1i('uDebugFlag');
 
     // Buffers
-    this.aVertexPositionBuffer = this.createBuffer();
-    this.aVertexPositionLocation = this.getAttribLocation('aVertexPosition');
-
-    this.aVertexIndexBuffer = this.createBuffer();
-
-    this.aVertexColorBuffer = this.createBuffer();
-    this.aVertexColorLocation = this.getAttribLocation('aVertexColor');
+    this.aVertexIndexBuffer = this.vertexElementBuffer();
+    this.aVertexPositionBuffer = this.attribBuffer('aVertexPosition', {
+      size: 3,
+      type: gl.FLOAT,
+      usage: gl.STREAM_DRAW
+    });
+    this.aVertexColorBuffer = this.attribBuffer('aVertexColor', {
+      size: 4,
+      type: gl.FLOAT,
+      usage: gl.STATIC_DRAW
+    });
 
     // Textures
-    this.volumeTexture = this.createTexture();
     this.uVolumeTextureSampler = this.uniform1i('uVolumeTextureSampler');
     this.uTextureSize = this.uniform2fv('uTextureSize');
     this.uSliceGridSize = this.uniform2fv('uSliceGridSize');
 
-    this.transferFunctionTexture = this.createTexture();
     this.uTransferFunctionSampler = this.uniform1i('uTransferFunctionSampler');
-
-    this.uEnableLabel = this.uniform1i('uEnableLabel');
-    this.uEnableMask = this.uniform1i('uEnableMask');
 
     // Labels
     this.uLabelSampler = this.uniform1i('uLabelSampler');
@@ -135,42 +132,72 @@ export default class VRGLProgram extends GLProgramBase {
     this.uLabelLabelColor = this.uniform4fv('uLabelLabelColor');
   }
 
-  protected activateProgram() {
-    const vertexShader = this.compileShader(vertexShaderSource, 'vertex');
-    const fragmentShader = this.compileShader(fragmentShaderSource, 'fragment');
-    const shaderProgram = super.activateProgram([vertexShader, fragmentShader]);
-    return shaderProgram;
+  public activate() {
+    super.activate();
+    this.gl.enable(this.gl.DEPTH_TEST);
+  }
+
+  public setMmInNdc(mmInNdc: number) {
+    this.mmInNdc = mmInNdc;
   }
 
   public setDebugMode(debug: number) {
-    switch (debug) {
-      case 1: // 1: check volume box
-      case 2: // 2: check volume box with ray casting
-      case 3: // 3: check transfer function
-        this.uDebugFlag(debug);
-        break;
-      default:
-        this.uDebugFlag(0);
+    this.uDebugFlag(debug);
+  }
+
+  public setDicomVolume(volume: DicomVolume, mask?: RawData) {
+    const voxelSize = volume.getVoxelSize();
+    const dimension = volume.getDimension();
+    const offset = [0, 0, 0];
+
+    this.uVoxelSizeInverse([
+      1.0 / voxelSize[0],
+      1.0 / voxelSize[1],
+      1.0 / voxelSize[2]
+    ]);
+    this.uVolumeOffset(offset);
+    this.uVolumeDimension(dimension);
+
+    if (!this.volumeTexture) {
+      this.volumeTexture = this.createTexture();
+      this.volumeTextureLayout = loadVolumeIntoTexture(
+        this.gl,
+        this.volumeTexture,
+        volume,
+        mask
+      );
     }
-  }
 
-  public setWorldCoordsBaseLength(mmBaseLength: number) {
-    this.mmToWorldCoords = 1.0 / mmBaseLength;
-  }
-
-  public setVolume(volume: RawData, mask?: RawData) {
-    const { textureSize, sliceGridSize } = loadVolumeIntoTexture(
-      this.gl,
-      this.volumeTexture,
-      volume,
-      mask
-    );
-
+    const { textureSize, sliceGridSize } = this.volumeTextureLayout!;
     this.uTextureSize(textureSize);
     this.uSliceGridSize(sliceGridSize);
   }
 
+  public setVolumeCuboid({
+    offset,
+    dimension,
+    voxelSize
+  }: {
+    offset: [number, number, number];
+    dimension: [number, number, number];
+    voxelSize: [number, number, number];
+  }) {
+    this.uVolumeOffset(offset);
+    this.uVolumeDimension(dimension);
+    this.uVoxelSizeInverse([
+      1.0 / voxelSize[0],
+      1.0 / voxelSize[1],
+      1.0 / voxelSize[2]
+    ]);
+    this.bufferVertexPosition({ dimension, offset, voxelSize });
+    this.bufferVertexColor();
+  }
+
   public setTransferFunction(transferFunction: TransferFunction) {
+    if (this.transferFunctionTexture === undefined) {
+      this.transferFunctionTexture = this.createTexture();
+    }
+
     loadTransferFunctionIntoTexture(
       this.gl,
       this.transferFunctionTexture,
@@ -198,27 +225,6 @@ export default class VRGLProgram extends GLProgramBase {
     };
   }
 
-  public setDrawingBoundary({
-    offset,
-    dimension,
-    voxelSize
-  }: {
-    offset: [number, number, number];
-    dimension: [number, number, number];
-    voxelSize: [number, number, number];
-  }) {
-    this.uVolumeOffset(offset);
-    this.uVolumeDimension(dimension);
-    this.uVoxelSizeInverse([
-      1.0 / voxelSize[0],
-      1.0 / voxelSize[1],
-      1.0 / voxelSize[2]
-    ]);
-    this.bufferVertexPosition({ dimension, offset, voxelSize });
-    this.bufferVertexIndex();
-    this.bufferVertexColor();
-  }
-
   private bufferVertexPosition({
     dimension,
     offset,
@@ -228,36 +234,15 @@ export default class VRGLProgram extends GLProgramBase {
     offset: number[];
     voxelSize: number[];
   }) {
-    const gl = this.gl;
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.aVertexPositionBuffer);
-
-    // Describe the layout of the buffer
-    gl.vertexAttribPointer(
-      this.aVertexPositionLocation,
-      3, // size
-      gl.FLOAT, // type
-      false, // normalized
-      0, // stride
-      0 // offset
-    );
-
-    //
-    //             1.0 y
-    //              ^  -1.0
-    //              | / z
-    //              |/       x
-    // -1.0 -----------------> +1.0
-    //            / |
-    //      +1.0 /  |
-    //           -1.0
-    //
-    //         [7]------[6]
-    //        / |      / |
-    //      [3]------[2] |
-    //       |  |     |  |
-    //       | [4]----|-[5]
-    //       |/       |/
-    //      [0]------[1]
+    //                                  |
+    //             1.0 y                |        [7]------[6]
+    //              ^  -1.0             |       / |      / |
+    //              | / z               |     [3]------[2] |
+    //              |/       x          |      |  |     |  |
+    // -1.0 -----------------> +1.0     |      | [4]----|-[5]
+    //            / |                   |      |/       |/
+    //      +1.0 /  |                   |     [0]------[1]
+    //           -1.0                   |
     //
     const [vw, vh, vd] = voxelSize;
     const [ox, oy, oz] = [offset[0] * vw, offset[1] * vh, offset[2] * vd];
@@ -298,15 +283,8 @@ export default class VRGLProgram extends GLProgramBase {
     ];
 
     const data = new Float32Array(positions);
-    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STREAM_DRAW);
-    // gl.bufferSubData(gl.ARRAY_BUFFER, 0, data);
-  }
+    this.aVertexPositionBuffer(data);
 
-  private bufferVertexIndex() {
-    const gl = this.gl;
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.aVertexIndexBuffer);
-
-    // Vertex index buffer array
     // prettier-ignore
     const volumeVertexIndices = [
       0, 1, 2, 0, 2, 3, // Front face
@@ -316,25 +294,10 @@ export default class VRGLProgram extends GLProgramBase {
       16, 17, 18, 16, 18, 19, // Right face
       20, 21, 22, 20, 22, 23 // Left face
     ];
-    const data = new Uint16Array(volumeVertexIndices);
-
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, data, gl.DYNAMIC_DRAW);
+    this.aVertexIndexBuffer(volumeVertexIndices);
   }
 
   private bufferVertexColor() {
-    const gl = this.gl;
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.aVertexColorBuffer);
-
-    // Describe the layout of the buffer
-    gl.vertexAttribPointer(
-      this.aVertexColorLocation,
-      4, // size
-      gl.FLOAT, // type
-      false, // normalized
-      0, // stride
-      0 // offset
-    );
-
     const colors = [
       [1.0, 0.0, 0.0, 1.0], // Front face ... RED
       [1.0, 1.0, 0.0, 1.0], // Back face  ... YELLOW
@@ -352,7 +315,7 @@ export default class VRGLProgram extends GLProgramBase {
     }
 
     const data = new Float32Array(volumeVertexColors);
-    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+    this.aVertexColorBuffer(data);
   }
 
   public setInterporationMode(interpolationMode?: InterpolationMode) {
@@ -368,11 +331,7 @@ export default class VRGLProgram extends GLProgramBase {
   }
 
   public setBackground(background: [number, number, number, number]) {
-    const gl = this.gl;
     const [r, g, b, a] = background as number[];
-    gl.clearColor(r, g, b, a);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
     this.uBackground([r / 0xff, g / 0xff, b / 0xff, a / 0xff]);
   }
 
@@ -401,89 +360,18 @@ export default class VRGLProgram extends GLProgramBase {
     this.uRayIntensityCoef(1.0 / intensity / quality);
   }
 
+  private camera: Camera = createCamera(
+    [0, 0, 0],
+    [0, 0, 1],
+    [0, 1, 0],
+    [1, 1]
+  );
+
   public setCamera(camera: Camera) {
-    const projectionMatrix = new Matrix4().fromArray(
-      this.createPojectionMatrix(camera)
-    );
-    const modelViewMatrix = new Matrix4().fromArray(
-      this.createModelViewMatrix(camera)
-    );
-    const mvpMatrix = projectionMatrix.multiply(modelViewMatrix);
-    this.uMVPMatrix(mvpMatrix.toArray());
+    this.camera = camera;
   }
 
-  private createPojectionMatrix(camera: Camera) {
-    const near = 0.001;
-    const far = 100; // far 1.5
-
-    const projectionMatrix = mat4.create();
-    mat4.ortho(
-      projectionMatrix,
-      -0.5 / camera.zoom,
-      0.5 / camera.zoom,
-      -0.5 / camera.zoom,
-      0.5 / camera.zoom,
-      near,
-      far
-    );
-
-    return projectionMatrix;
-  }
-
-  /**
-   * @param camera Camera
-   * @todo use threejs
-   */
-  private createModelViewMatrix(camera: Camera) {
-    // Model to world coordinates size.
-    const modelMatrix = new Matrix4()
-      .makeScale(
-        this.mmToWorldCoords!,
-        this.mmToWorldCoords!,
-        this.mmToWorldCoords!
-      )
-      .toArray();
-
-    // Prepare view matrix
-    const viewMatrixWithGLMatrix = mat4.create();
-    const [px, py, pz] = camera.position
-      .clone()
-      .multiplyScalar(this.mmToWorldCoords!)
-      .toArray();
-    const [tx, ty, tz] = camera.target
-      .clone()
-      .multiplyScalar(this.mmToWorldCoords!)
-      .toArray();
-    const [ux, uy, uz] = camera.up.toArray();
-    try {
-      mat4.lookAt(
-        viewMatrixWithGLMatrix,
-        [px, py, pz, 1],
-        [tx, ty, tz, 1],
-        [ux, uy, uz, 0]
-      );
-    } catch (e) {
-      mat4.identity(viewMatrixWithGLMatrix);
-    }
-    const viewMatrix = viewMatrixWithGLMatrix;
-
-    // const viewMatrixWithThree = new Matrix4()
-    //   .lookAt(
-    //     camera.position.clone().multiplyScalar(this.mmToWorldCoords!),
-    //     camera.target.clone().multiplyScalar(this.mmToWorldCoords!),
-    //     camera.up
-    //   )
-    //   .toArray();
-    // const viewMatrix = viewMatrixWithThree;
-
-    // Model view
-    const modelViewMatrix = mat4.create();
-    mat4.multiply(modelViewMatrix, viewMatrix, modelMatrix);
-
-    return modelViewMatrix;
-  }
-
-  public toggleMask(enabled: boolean) {
+  public setMaskEnabled(enabled: boolean) {
     this.uEnableMask(enabled ? 1 : 0);
   }
 
@@ -517,13 +405,18 @@ export default class VRGLProgram extends GLProgramBase {
     const gl = this.gl;
 
     // Activate textures
-    this.uVolumeTextureSampler(0);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, this.volumeTexture);
+    if (this.volumeTexture) {
+      this.uVolumeTextureSampler(0);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, this.volumeTexture);
+    }
 
-    this.uTransferFunctionSampler(1);
-    gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, this.transferFunctionTexture);
+    // Transfer function
+    if (this.transferFunctionTexture) {
+      this.uTransferFunctionSampler(1);
+      gl.activeTexture(gl.TEXTURE1);
+      gl.bindTexture(gl.TEXTURE_2D, this.transferFunctionTexture);
+    }
 
     if (this.highlightLabelIndex > -1) {
       const { texture } = this.labelTextures[this.highlightLabelIndex];
@@ -532,23 +425,22 @@ export default class VRGLProgram extends GLProgramBase {
       this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
     }
 
+    // Projection(Model/View)
+    const projectionMatrix = new Matrix4().fromArray(
+      createPojectionMatrix(this.camera, this.mmInNdc)
+    );
+    this.uProjectionMatrix(projectionMatrix.toArray());
+
+    const modelViewMatrix = new Matrix4().fromArray(
+      createModelViewMatrix(this.camera, this.mmInNdc)
+    );
+    this.uModelViewMatrix(modelViewMatrix.toArray());
+
     // Enable attribute pointers
-    gl.enableVertexAttribArray(this.aVertexColorLocation);
-    gl.enableVertexAttribArray(this.aVertexPositionLocation);
+    gl.enableVertexAttribArray(this.getAttribLocation('aVertexPosition'));
+    gl.enableVertexAttribArray(this.getAttribLocation('aVertexColor'));
 
     // Draw vertices
-    gl.drawElements(
-      gl.TRIANGLES,
-      36, // volumeVertexIndices.length
-      gl.UNSIGNED_SHORT, // 2 [byte]
-      0
-    );
+    gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
   }
 }
-
-// [WEbGLBuffer]
-// https://developer.mozilla.org/ja/docs/Web/API/WebGLRenderingContext/bufferData
-// target: GLenum, // ARRAY_BUFFER | ELEMENT_ARRAY_BUFFER
-// usage: GLenum, // STATIC_DRAW | DYNAMIC_DRAW | STREAM_DRAW
-// type: number, // UNSIGNED_SHORT | FLOAT
-// size: number

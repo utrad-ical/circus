@@ -1,6 +1,9 @@
 import { TransferFunction } from '../../ViewState';
 import { ViewWindow } from '../../../common/ViewWindow';
-import { transferFunctionOrigin, transferFunctionRange } from './constants';
+import {
+  transferFunctionOrigin,
+  transferFunctionRange
+} from './texture/transfer-function-constants';
 
 type TransferFunctionDefinition = [number, string][];
 
@@ -77,7 +80,6 @@ export function mprTransferFunction(
   const { level, width } = window;
 
   return createTransferFunction([
-    [level - width * 0.5 * rangeRate - 1, '#00000000'],
     [level - width * 0.5 * rangeRate, '#000000ff'],
     [level + width * 0.5 * rangeRate, '#ffffffff']
   ]);

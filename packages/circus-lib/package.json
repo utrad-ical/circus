@@ -1,11 +1,11 @@
 {
   "name": "@utrad-ical/circus-lib",
-  "version": "0.15.3",
+  "version": "0.16.0",
   "description": "Shared utilities for CIRCUS projects",
   "main": "src/index.ts",
   "scripts": {
     "prepublishOnly": "npm run build",
-    "build": "rimraf ./lib && tsc"
+    "build": "rimraf ./lib *.tsbuildinfo && tsc"
   },
   "repository": {
     "type": "git",

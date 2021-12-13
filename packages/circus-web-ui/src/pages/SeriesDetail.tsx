@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef
+} from 'react';
 import { Row, Col, Panel } from 'components/react-bootstrap';
 import { useApi } from 'utils/api';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
@@ -22,6 +28,26 @@ const StyledMenu = styled.div`
   margin-bottom: 1em;
 `;
 
+const getImageSource = async (server: string, seriesUid: string) => {
+  const rsHttpClient = new rs.RsHttpClient(server);
+  const volumeLoader = new rs.RsVolumeLoader({ rsHttpClient, seriesUid });
+  const meta = await volumeLoader.loadMeta();
+  switch (meta.mode) {
+    case '2d':
+      return new rs.TwoDimensionalImageSource({
+        volumeLoader,
+        maxCacheSize: 10
+      });
+    default:
+      return new rs.WebGlHybridMprImageSource({
+        volumeLoader,
+        rsHttpClient,
+        seriesUid,
+        estimateWindowType: 'center'
+      });
+  }
+};
+
 const SeriesDetail: React.FC<{}> = props => {
   const seriesUid = useParams<{ uid: string }>().uid;
   const [composition, setComposition] = useState<rs.Composition | null>(null);
@@ -39,27 +65,7 @@ const SeriesDetail: React.FC<{}> = props => {
   );
   const [seriesData] = useLoadData<any | Error>(load);
 
-  const loadingId = React.useRef(0);
-
-  const getImageSource = React.useCallback(async (server, seriesUid) => {
-    const rsHttpClient = new rs.RsHttpClient(server);
-    const volumeLoader = new rs.RsVolumeLoader({ rsHttpClient, seriesUid });
-    const meta = await volumeLoader.loadMeta();
-    switch (meta.mode) {
-      case '2d':
-        return new rs.TwoDimensionalImageSource({
-          volumeLoader,
-          maxCacheSize: 10
-        });
-      default:
-        return new rs.HybridMprImageSource({
-          volumeLoader,
-          rsHttpClient,
-          seriesUid,
-          estimateWindowType: 'center'
-        });
-    }
-  }, []);
+  const loadingId = useRef(0);
 
   useEffect(() => {
     if (!seriesData) return;
@@ -71,7 +77,7 @@ const SeriesDetail: React.FC<{}> = props => {
         setComposition(composition);
       }
     })();
-  }, [seriesData, seriesUid, server, getImageSource]);
+  }, [seriesData, seriesUid, server]);
 
   if (!seriesData) return <LoadingIndicator />;
 

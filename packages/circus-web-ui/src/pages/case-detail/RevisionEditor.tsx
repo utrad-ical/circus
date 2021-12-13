@@ -94,7 +94,7 @@ const useCompositions = (
               maxCacheSize: 10
             });
           default:
-            return new rs.HybridMprImageSource({
+            return new rs.WebGlHybridMprImageSource({
               rsHttpClient,
               seriesUid,
               partialVolumeDescriptor,
@@ -214,9 +214,9 @@ const RevisionEditor: React.FC<{
   const [planeFigureOption, setPlaneFigureOption] = useState({
     zDimmedThreshold: preferences.dimmedOutlineFor2DLabels
       ? zDimmedThresholdOptions.find(
-        zDimmedThresholdOption =>
-          zDimmedThresholdOption.key === preferences.dimmedOutlineFor2DLabels
-      )!.value
+          zDimmedThresholdOption =>
+            zDimmedThresholdOption.key === preferences.dimmedOutlineFor2DLabels
+        )!.value
       : 3
   });
 
@@ -230,8 +230,8 @@ const RevisionEditor: React.FC<{
         newPlaneFigureOption.zDimmedThreshold === 0
           ? 'hide'
           : isFinite(newPlaneFigureOption.zDimmedThreshold)
-            ? 'infinity'
-            : 'show'
+          ? 'infinity'
+          : 'show'
     });
   };
 
@@ -283,17 +283,25 @@ const RevisionEditor: React.FC<{
   const layoutEnabled = !(metaLoadedAll && activeSeriesMetadata!.mode !== '3d');
 
   const layoutInitialized = !!(
-    Object.keys(editingData.layout.positions).length > 0
-    && editingData.layoutItems.length > 0
-    && editingData.activeLayoutKey
+    Object.keys(editingData.layout.positions).length > 0 &&
+    editingData.layoutItems.length > 0 &&
+    editingData.activeLayoutKey
   );
 
   useEffect(() => {
     if (!activeSeriesMetadata || layoutInitialized) return;
     initEditingDataLayout(d => {
-      if (Object.keys(d.layout.positions).length > 0 && d.layoutItems.length > 0 && d.activeLayoutKey) return;
+      if (
+        Object.keys(d.layout.positions).length > 0 &&
+        d.layoutItems.length > 0 &&
+        d.activeLayoutKey
+      )
+        return;
       const layoutKind = activeSeriesMetadata.mode !== '3d' ? '2d' : 'twoByTwo';
-      const [layoutItems, layout] = c.performLayout(layoutKind, editingData.activeSeriesIndex);
+      const [layoutItems, layout] = c.performLayout(
+        layoutKind,
+        editingData.activeSeriesIndex
+      );
       d.layout = layout;
       d.layoutItems = layoutItems;
       d.activeLayoutKey = layoutItems.length > 0 ? layoutItems[0].key : null;
@@ -798,7 +806,7 @@ const RevisionEditor: React.FC<{
 
         const interpolationMode =
           viewOptions.interpolationMode &&
-            viewOptions.interpolationMode !== 'nearestNeighbor'
+          viewOptions.interpolationMode !== 'nearestNeighbor'
             ? 'bilinear'
             : 'none';
 
@@ -886,19 +894,19 @@ const RevisionEditor: React.FC<{
         </Collapser>
         {Object.keys(projectData.caseAttributesSchema.properties || {}).length >
           0 && (
-            <Collapser title="Case Attributes" className="case-attributes">
-              <JsonSchemaEditor
-                key={refreshCounter}
-                schema={projectData.caseAttributesSchema}
-                value={revision.attributes}
-                onChange={caseAttributesChange}
-                onValidate={valid =>
-                  caseDispatch(c.validateCaseAttributes(valid))
-                }
-                disabled={busy}
-              />
-            </Collapser>
-          )}
+          <Collapser title="Case Attributes" className="case-attributes">
+            <JsonSchemaEditor
+              key={refreshCounter}
+              schema={projectData.caseAttributesSchema}
+              value={revision.attributes}
+              onChange={caseAttributesChange}
+              onValidate={valid =>
+                caseDispatch(c.validateCaseAttributes(valid))
+              }
+              disabled={busy}
+            />
+          </Collapser>
+        )}
       </SideContainer>
       <div className="case-revision-main">
         <ToolBar

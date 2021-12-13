@@ -51,6 +51,8 @@ export { default as RawVolumeMprImageSource } from './image-source/RawVolumeMprI
 export { default as HybridMprImageSource } from './image-source/HybridImageSource';
 export { default as VolumeRenderingImageSource } from './image-source/VolumeRenderingImageSource';
 export { default as TwoDimensionalImageSource } from './image-source/TwoDimensionalImageSource';
+export { default as WebGlRawVolumeMprImageSource } from './image-source/WebGlRawVolumeMprImageSource';
+export { default as WebGlHybridMprImageSource } from './image-source/WebGlHybridMprImageSource';
 
 export { default as DicomVolumeLoader } from './image-source/volume-loader/DicomVolumeLoader';
 export { default as MockVolumeLoader } from './image-source/volume-loader/MockVolumeLoader';
@@ -76,5 +78,5 @@ export { default as moveBy } from './tool/state/handleMoveBy';
 export { default as pageBy } from './tool/state/handlePageBy';
 export { default as zoomBy } from './tool/state/handleZoomBy';
 export { default as rotateBy } from './tool/state/handleRotationBy';
-export * from './image-source/volume-rendering-image-source/transfer-function-util';
-export { default as buildTransferFunctionMap } from './image-source/volume-rendering-image-source/texture-loader/buildTransferFunctionMap';
+export * from './image-source/gl/transfer-function-util';
+export { default as buildTransferFunctionMap } from './image-source/gl/texture/buildTransferFunctionMap';

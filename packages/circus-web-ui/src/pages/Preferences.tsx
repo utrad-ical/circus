@@ -4,7 +4,7 @@ import PropertyEditor, {
 } from '@smikitky/rb-components/lib/PropertyEditor';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
-import { Button, Panel } from 'components/react-bootstrap';
+import { Button, Panel, FormControl } from 'components/react-bootstrap';
 import React, { useCallback, useEffect, useState } from 'react';
 import { SearchPreset, UserPreferences } from 'store/loginUser';
 import { useApi } from 'utils/api';
@@ -73,20 +73,23 @@ const TemplateEditor: et.Editor<string[] | undefined> = props => {
 
   return (
     <>
-      <label>New Template&nbsp; </label>
-      <input
-        type="text"
-        value={newTemplate}
-        onChange={ev => setNewTemplate(ev.target.value)}
-      />
-      &nbsp;
-      <Button
-        bsStyle="primary"
-        disabled={canNotAdd()}
-        onClick={() => handleAddClick(newTemplate)}
-      >
-        Add
-      </Button>
+      <span className="revision-message-template form-inline">
+        <label>New Template&nbsp; </label>
+        <FormControl
+          type="text"
+          autoFocus
+          value={newTemplate}
+          onChange={(ev: any) => setNewTemplate(ev.target.value)}
+        />
+        &nbsp;
+        <Button
+          bsStyle="primary"
+          disabled={canNotAdd()}
+          onClick={() => handleAddClick(newTemplate)}
+        >
+          Add
+        </Button>
+      </span>
       {!Array.isArray(value) || !value.length ? (
         <div className="form-control-static text-muted">(no templates)</div>
       ) : (

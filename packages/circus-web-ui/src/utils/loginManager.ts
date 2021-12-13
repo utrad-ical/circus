@@ -28,6 +28,19 @@ const loginManager = (
     }
   };
 
+  const checkServerIsLive = async () => {
+    try {
+      const res = await axios.request({
+        method: 'get',
+        url: apiServer + 'api/status',
+        validateStatus: () => true
+      });
+      return res.status === 200;
+    } catch (err: any) {
+      return false;
+    }
+  };
+
   const tryAuthenticate = async (id: string, password: string) => {
     const res = await axios.request({
       method: 'post',
@@ -81,6 +94,7 @@ const loginManager = (
 
   return {
     restoreApiCaller,
+    checkServerIsLive,
     tryAuthenticate,
     refreshUserInfo,
     logout

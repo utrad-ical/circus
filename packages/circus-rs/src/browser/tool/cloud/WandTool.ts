@@ -44,8 +44,7 @@ export default class WandTool extends VoxelCloudToolBase<WandToolOptions> {
     }
 
     const viewState = viewer.getState();
-    const type = viewState.type;
-    if (type !== 'mpr') throw new Error('Unsupported view state');
+    if (viewState.type !== 'mpr') throw new Error('Unsupported view state');
 
     const section = viewState.section;
 

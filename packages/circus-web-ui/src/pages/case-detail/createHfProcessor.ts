@@ -13,6 +13,7 @@ export interface HoleFillingOptions {
   dimension: 2 | 3;
   neighbors: 4 | 8 | 6 | 26;
   orientation: 'Axial' | 'Coronal' | 'Sagital';
+  maximumComponents: number;
 }
 
 const createHfProcessor = (
@@ -27,7 +28,7 @@ const createHfProcessor = (
     postProcessor: PostProcessor<LabelingResults3D>,
     reportProgress: (progress: { value: number; label: string }) => void
   ) => {
-    const { dimension, neighbors, orientation } = options;
+    const { dimension, neighbors, orientation, maximumComponents } = options;
 
     reportProgress({ value: 100, label: '' });
 
@@ -40,7 +41,8 @@ const createHfProcessor = (
         nSlices,
         dimension,
         neighbors,
-        orientation
+        orientation,
+        maximumComponents
       });
       myWorker.onmessage = (e: any) => {
         if (typeof e.data === 'string') {
@@ -92,11 +94,32 @@ const createHfProcessor = (
       try {
         holeFillingResult =
           dimension === 3
-            ? HoleFilling3D(initializedInput, width, height, nSlices, neighbors)
+            ? HoleFilling3D(
+                initializedInput,
+                width,
+                height,
+                nSlices,
+                neighbors,
+                maximumComponents
+              )
             : orientation === 'Axial'
-            ? HoleFilling2D(initializedInput, width, height, nSlices, neighbors)
+            ? HoleFilling2D(
+                initializedInput,
+                width,
+                height,
+                nSlices,
+                neighbors,
+                maximumComponents
+              )
             : orientation === 'Sagital'
-            ? HoleFilling2D(initializedInput, height, nSlices, width, neighbors)
+            ? HoleFilling2D(
+                initializedInput,
+                height,
+                nSlices,
+                width,
+                neighbors,
+                maximumComponents
+              )
             : HoleFilling2D(
                 initializedInput,
                 nSlices,

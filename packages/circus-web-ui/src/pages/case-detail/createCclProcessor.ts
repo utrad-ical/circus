@@ -11,6 +11,7 @@ import {
 export interface CclOptions {
   maximumCcNum: number;
   neighbors: 6 | 26;
+  maximumComponents: number;
 }
 
 const createCclProcessor = (
@@ -25,7 +26,7 @@ const createCclProcessor = (
     postProcessor: PostProcessor<LabelingResults3D>,
     reportProgress: (progress: { value: number; label: string }) => void
   ) => {
-    const { maximumCcNum, neighbors } = options;
+    const { maximumCcNum, neighbors, maximumComponents } = options;
     const relabeling = (results: LabelingResults3D) => {
       const nameTable = [
         'largest CC',
@@ -119,7 +120,14 @@ const createCclProcessor = (
     };
     if (window.Worker) {
       const myWorker = new cclWorker();
-      myWorker.postMessage({ input, width, height, nSlices, neighbors });
+      myWorker.postMessage({
+        input,
+        width,
+        height,
+        nSlices,
+        neighbors,
+        maximumComponents
+      });
       myWorker.onmessage = (e: any) => {
         if (typeof e.data === 'string') {
           reportProgress({ value: 100, label: 'Failed' });
@@ -134,8 +142,8 @@ const createCclProcessor = (
       try {
         labelingResults =
           neighbors === 6
-            ? CCL6(input, width, height, nSlices)
-            : CCL26(input, width, height, nSlices);
+            ? CCL6(input, width, height, nSlices, maximumComponents)
+            : CCL26(input, width, height, nSlices, maximumComponents);
       } catch (err: any) {
         console.log('error', err.message);
         alert(`${name} is too complex.\nPlease modify ${name}.`);

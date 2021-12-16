@@ -10,10 +10,11 @@ function CCLTest(
   labelNo: number,
   volume: Uint32Array,
   UL: Uint16Array,
-  LR: Uint16Array
+  LR: Uint16Array,
+  maxComponents?: number
 ) {
   return () => {
-    const labelingResults = CCL(array, width, height, NSlice);
+    const labelingResults = CCL(array, width, height, NSlice, maxComponents);
     let flag = labelingResults.labelNum !== labelNo ? true : false;
     if (flag === false) {
       for (let i = 0; i < width * height * NSlice; i++) {
@@ -47,19 +48,20 @@ function CCLTest(
 test('<Exception handling> number of tentative label > 8 bit', () => {
   const width = 16;
   const neighbor = 6;
+  const maxComponents = 255;
   const [img, label, num, volume, UL, LR] = mosaic(
     width,
     width,
     width,
     neighbor
   );
-  expect(() => CCL(img, width, width, width)).toThrow(
-    `number of tentative label is not in 8 bit.`
+  expect(() => CCL(img, width, width, width, maxComponents)).toThrow(
+    `number of tentative label is not less than ${maxComponents}.`
   );
 });
 
 describe('labeling: Mosaic', () => {
-  const width = 7;
+  const width = 10;
   const neighbor = 6;
   const [img, label, num, volume, UL, LR] = mosaic(
     width,
@@ -69,7 +71,7 @@ describe('labeling: Mosaic', () => {
   );
   test(
     '3D 6-neighbor',
-    CCLTest(img, width, width, width, label, num, volume, UL, LR)
+    CCLTest(img, width, width, width, label, num, volume, UL, LR, 1000)
   );
 });
 

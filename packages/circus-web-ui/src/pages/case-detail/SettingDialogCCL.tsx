@@ -1,5 +1,6 @@
 import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import { FormControl } from 'components/react-bootstrap';
 import React from 'react';
 import { CclOptions } from './createCclProcessor';
 import SettingDialog from './SettingDialog';
@@ -24,11 +25,19 @@ const neighborsOptions = {
 
 const initialOptions = {
   maximumCcNum: 2,
-  neighbors: 26
+  neighbors: 26,
+  maximumComponents: 255
 };
 
 const OptionsEditorForCCL: Editor<CclOptions> = props => {
   const { value, onChange } = props;
+  const onMaximumComponentsChange = (ev: any) => {
+    if (ev.target.value < 1 || 2 ** 16 <= ev.target.value) return;
+    onChange({
+      ...value,
+      maximumComponents: Number(ev.target.value)
+    });
+  };
   return (
     <>
       <div>
@@ -49,6 +58,15 @@ const OptionsEditorForCCL: Editor<CclOptions> = props => {
           value={value.neighbors}
           onChange={v => onChange({ ...value, neighbors: v })}
           numericalValue
+        />
+      </div>
+      <div className="maximum-number-of-tentative-label form-inline">
+        Maximum number of tentative label&nbsp;
+        <FormControl
+          type="number"
+          value={value.maximumComponents}
+          name="maximumComponents"
+          onChange={onMaximumComponentsChange}
         />
       </div>
     </>

@@ -48,14 +48,15 @@ function CCLTest(
 test('<Exception handling> number of tentative label > 8 bit', () => {
   const width = 512;
   const neighbor = 26;
+  const maxComponents = 255;
   const [img, label, num, volume, UL, LR] = mosaic(
     width,
     width,
     width,
     neighbor
   );
-  expect(() => CCL(img, width, width, width)).toThrow(
-    `number of tentative label is not in 8 bit.`
+  expect(() => CCL(img, width, width, width, maxComponents)).toThrow(
+    `number of tentative label is not less than ${maxComponents}.`
   );
 });
 

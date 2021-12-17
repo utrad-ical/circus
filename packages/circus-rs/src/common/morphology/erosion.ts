@@ -36,7 +36,7 @@ const erosion: BasicMorphologicalOperation = (
         center[0] * structure.width * structure.height
     ] === 0
   ) {
-    throw new Error(`invalid structure.`);
+    throw new Error(`Invalid structure.`);
   }
   const dx: number[] = [];
   const dy: number[] = [];

@@ -8,7 +8,8 @@ type HoleFilling3D = (
   width: number,
   height: number,
   nSlices: number,
-  neighbor: number
+  neighbor: number,
+  bufferSize?: number
 ) => { result: Uint8Array; holeNum: number; holeVolume: number };
 
 /**
@@ -17,13 +18,15 @@ type HoleFilling3D = (
  * @param height height of array
  * @param nSlices slice number of array
  * @param neighbor neighbor of CCL
+ * @param bufferSize max number of labels, must be < 2**16
  */
 const HoleFilling2D: HoleFilling3D = (
   array,
   width,
   height,
   nSlices,
-  neighbor
+  neighbor,
+  bufferSize = 10000
 ) => {
   let pos1 = 0;
   const result = array.slice();
@@ -38,8 +41,8 @@ const HoleFilling2D: HoleFilling3D = (
     }
     const hole =
       neighbor === 4
-        ? CCL2D4(tmp, width + 2, height + 2)
-        : CCL2D8(tmp, width + 2, height + 2);
+        ? CCL2D4(tmp, width + 2, height + 2, bufferSize)
+        : CCL2D8(tmp, width + 2, height + 2, bufferSize);
     if (hole.labelNum === 1) continue;
     let pos2 = k * width * height;
     holeNum += hole.labelNum - 1;
@@ -62,7 +65,8 @@ const HoleFilling3D: HoleFilling3D = (
   width,
   height,
   nSlices,
-  neighbor
+  neighbor,
+  bufferSize = 10000
 ) => {
   let pos = 0;
   let holeNum = 0;
@@ -83,8 +87,8 @@ const HoleFilling3D: HoleFilling3D = (
 
   const hole =
     neighbor === 6
-      ? CCL3D6(tmp, width + 2, height + 2, nSlices + 2)
-      : CCL3D26(tmp, width + 2, height + 2, nSlices + 2);
+      ? CCL3D6(tmp, width + 2, height + 2, nSlices + 2, bufferSize)
+      : CCL3D26(tmp, width + 2, height + 2, nSlices + 2, bufferSize);
   if (hole.labelNum === 1) {
     return { result: result, holeNum: holeNum, holeVolume: holeVolume };
   }

@@ -4,14 +4,14 @@ import CCL26 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeli
 import CCL6 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D6';
 
 ctx.addEventListener('message', event => {
-  const { input, width, height, nSlices, neighbors } = event.data;
+  const { input, width, height, nSlices, neighbors, bufferSize } = event.data;
   let labelingResults: LabelingResults3D | string;
   try {
     labelingResults =
       neighbors === 6
-        ? CCL6(input, width, height, nSlices)
-        : CCL26(input, width, height, nSlices);
-  } catch (err) {
+        ? CCL6(input, width, height, nSlices, bufferSize)
+        : CCL26(input, width, height, nSlices, bufferSize);
+  } catch (err: any) {
     console.log(err);
     labelingResults = err.message;
   }

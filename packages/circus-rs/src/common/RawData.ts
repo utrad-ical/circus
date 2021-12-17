@@ -67,9 +67,6 @@ export default class RawData {
     this.pixelFormat = pixelFormat;
     const pxInfo = this.getPixelFormatInfo(this.pixelFormat);
     const [rx, ry, rz] = this.size;
-    if (this.pixelFormat === 'binary' && rx * ry * pxInfo.bpp < 1) {
-      throw new RangeError('Single image size should be at least 1 byte.');
-    }
     const dataSize = Math.ceil(rx * ry * rz * pxInfo.bpp);
     this.data = new ArrayBuffer(dataSize);
     this.setAccessor();

@@ -9,8 +9,9 @@ import {
 } from './performLabelCreatingVoxelProcessing';
 
 export interface CclOptions {
-  maximumCcNum: number;
+  maxOutputComponents: number;
   neighbors: 6 | 26;
+  bufferSize: number;
 }
 
 const createCclProcessor = (
@@ -25,7 +26,7 @@ const createCclProcessor = (
     postProcessor: PostProcessor<LabelingResults3D>,
     reportProgress: (progress: { value: number; label: string }) => void
   ) => {
-    const { maximumCcNum, neighbors } = options;
+    const { maxOutputComponents, neighbors, bufferSize } = options;
     const relabeling = (results: LabelingResults3D) => {
       const nameTable = [
         'largest CC',
@@ -39,12 +40,12 @@ const createCclProcessor = (
         '9th largest CC',
         '10th largest CC',
         '11th largest CC',
-        `remaining (${results.labelNum - maximumCcNum}) CCs`
+        `remaining (${results.labelNum - maxOutputComponents}) CCs`
       ];
       const names =
-        results.labelNum <= maximumCcNum + 1
+        results.labelNum <= maxOutputComponents + 1
           ? nameTable.slice(0, results.labelNum)
-          : nameTable.slice(0, maximumCcNum).concat(nameTable[11]);
+          : nameTable.slice(0, maxOutputComponents).concat(nameTable[11]);
 
       results.labels.shift();
       const order = [...Array(results.labelNum)].map((_, i) => i);
@@ -68,20 +69,25 @@ const createCclProcessor = (
         }
       );
 
-      for (let num = maximumCcNum + 1; num < results.labelNum; num++) {
+      for (let num = maxOutputComponents + 1; num < results.labelNum; num++) {
         for (let i = 0; i < 3; i++) {
           if (
-            results.labels[num].min[i] < results.labels[maximumCcNum].min[i]
+            results.labels[num].min[i] <
+            results.labels[maxOutputComponents].min[i]
           ) {
-            results.labels[maximumCcNum].min[i] = results.labels[num].min[i];
+            results.labels[maxOutputComponents].min[i] =
+              results.labels[num].min[i];
           }
           if (
-            results.labels[maximumCcNum].max[i] < results.labels[num].max[i]
+            results.labels[maxOutputComponents].max[i] <
+            results.labels[num].max[i]
           ) {
-            results.labels[maximumCcNum].max[i] = results.labels[num].max[i];
+            results.labels[maxOutputComponents].max[i] =
+              results.labels[num].max[i];
           }
         }
-        results.labels[maximumCcNum].volume += results.labels[num].volume;
+        results.labels[maxOutputComponents].volume +=
+          results.labels[num].volume;
         for (
           let k = results.labels[num].min[2];
           k <= results.labels[num].max[2];
@@ -99,7 +105,7 @@ const createCclProcessor = (
             ) {
               const pos = i + j * width + k * width * height;
               if (results.labelMap[pos] === num + 1) {
-                results.labelMap[pos] = maximumCcNum + 1;
+                results.labelMap[pos] = maxOutputComponents + 1;
               }
             }
           }
@@ -119,7 +125,14 @@ const createCclProcessor = (
     };
     if (window.Worker) {
       const myWorker = new cclWorker();
-      myWorker.postMessage({ input, width, height, nSlices, neighbors });
+      myWorker.postMessage({
+        input,
+        width,
+        height,
+        nSlices,
+        neighbors,
+        bufferSize
+      });
       myWorker.onmessage = (e: any) => {
         if (typeof e.data === 'string') {
           reportProgress({ value: 100, label: 'Failed' });
@@ -134,8 +147,8 @@ const createCclProcessor = (
       try {
         labelingResults =
           neighbors === 6
-            ? CCL6(input, width, height, nSlices)
-            : CCL26(input, width, height, nSlices);
+            ? CCL6(input, width, height, nSlices, bufferSize)
+            : CCL26(input, width, height, nSlices, bufferSize);
       } catch (err: any) {
         console.log('error', err.message);
         alert(`${name} is too complex.\nPlease modify ${name}.`);

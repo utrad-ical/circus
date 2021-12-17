@@ -1,5 +1,6 @@
 import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import { FormControl } from 'components/react-bootstrap';
 import React from 'react';
 import { HoleFillingOptions } from './createHfProcessor';
 import SettingDialog from './SettingDialog';
@@ -28,11 +29,21 @@ const orientationOptions = {
 const initialOptions = {
   dimension: 2,
   neighbors: 4,
-  orientation: 'Axial'
+  orientation: 'Axial',
+  bufferSize: 255
 };
 
 const OptionsEditorForHF: Editor<HoleFillingOptions> = props => {
   const { value, onChange } = props;
+
+  const onMaximumComponentsChange = (ev: any) => {
+    if (ev.target.value < 1 || 2 ** 16 <= ev.target.value) return;
+    onChange({
+      ...value,
+      bufferSize: Number(ev.target.value)
+    });
+  };
+
   return (
     <>
       <div>
@@ -83,6 +94,15 @@ const OptionsEditorForHF: Editor<HoleFillingOptions> = props => {
           value={value.neighbors}
           onChange={v => onChange({ ...value, neighbors: v })}
           numericalValue
+        />
+      </div>
+      <div className="maximum-number-of-tentative-label form-inline">
+        Maximum number of tentative labels&nbsp;
+        <FormControl
+          type="number"
+          value={value.bufferSize}
+          name="bufferSize"
+          onChange={onMaximumComponentsChange}
         />
       </div>
     </>

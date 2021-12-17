@@ -2,7 +2,7 @@ export interface LabelingResults<T> {
   /**
    * Contains label indexes.
    */
-  labelMap: Uint8Array;
+  labelMap: Uint8Array | Uint16Array;
   /**
    * The number of labels detected.
    */
@@ -24,6 +24,7 @@ export type CCL2D = (
   array: Uint8Array | Uint16Array,
   width: number,
   height: number,
+  bufferSize?: number,
   threshold?: number
 ) => LabelingResults2D;
 
@@ -32,5 +33,6 @@ export type CCL3D = (
   width: number,
   height: number,
   nSlices: number,
+  bufferSize?: number,
   threshold?: number
 ) => LabelingResults3D;

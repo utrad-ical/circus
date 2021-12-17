@@ -13,7 +13,7 @@ export interface HoleFillingOptions {
   dimension: 2 | 3;
   neighbors: 4 | 8 | 6 | 26;
   orientation: 'Axial' | 'Coronal' | 'Sagital';
-  maximumComponents: number;
+  bufferSize: number;
 }
 
 const createHfProcessor = (
@@ -28,7 +28,7 @@ const createHfProcessor = (
     postProcessor: PostProcessor<LabelingResults3D>,
     reportProgress: (progress: { value: number; label: string }) => void
   ) => {
-    const { dimension, neighbors, orientation, maximumComponents } = options;
+    const { dimension, neighbors, orientation, bufferSize } = options;
 
     reportProgress({ value: 100, label: '' });
 
@@ -42,7 +42,7 @@ const createHfProcessor = (
         dimension,
         neighbors,
         orientation,
-        maximumComponents
+        bufferSize
       });
       myWorker.onmessage = (e: any) => {
         if (typeof e.data === 'string') {
@@ -100,7 +100,7 @@ const createHfProcessor = (
                 height,
                 nSlices,
                 neighbors,
-                maximumComponents
+                bufferSize
               )
             : orientation === 'Axial'
             ? HoleFilling2D(
@@ -109,7 +109,7 @@ const createHfProcessor = (
                 height,
                 nSlices,
                 neighbors,
-                maximumComponents
+                bufferSize
               )
             : orientation === 'Sagital'
             ? HoleFilling2D(
@@ -118,7 +118,7 @@ const createHfProcessor = (
                 nSlices,
                 width,
                 neighbors,
-                maximumComponents
+                bufferSize
               )
             : HoleFilling2D(
                 initializedInput,

@@ -24,9 +24,9 @@ const neighborsOptions = {
 };
 
 const initialOptions = {
-  maximumCcNum: 2,
+  maxOutputComponents: 2,
   neighbors: 26,
-  maximumComponents: 255
+  bufferSize: 255
 };
 
 const OptionsEditorForCCL: Editor<CclOptions> = props => {
@@ -35,7 +35,7 @@ const OptionsEditorForCCL: Editor<CclOptions> = props => {
     if (ev.target.value < 1 || 2 ** 16 <= ev.target.value) return;
     onChange({
       ...value,
-      maximumComponents: Number(ev.target.value)
+      bufferSize: Number(ev.target.value)
     });
   };
   return (
@@ -45,8 +45,8 @@ const OptionsEditorForCCL: Editor<CclOptions> = props => {
         <ShrinkSelect
           bsSize="sm"
           options={maximumCCNumOptions}
-          value={value.maximumCcNum}
-          onChange={v => onChange({ ...value, maximumCcNum: v })}
+          value={value.maxOutputComponents}
+          onChange={v => onChange({ ...value, maxOutputComponents: v })}
           numericalValue
         />
       </div>
@@ -61,11 +61,11 @@ const OptionsEditorForCCL: Editor<CclOptions> = props => {
         />
       </div>
       <div className="maximum-number-of-tentative-label form-inline">
-        Maximum number of tentative label&nbsp;
+        Maximum number of tentative labels&nbsp;
         <FormControl
           type="number"
-          value={value.maximumComponents}
-          name="maximumComponents"
+          value={value.bufferSize}
+          name="bufferSize"
           onChange={onMaximumComponentsChange}
         />
       </div>

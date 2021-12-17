@@ -43,13 +43,13 @@ function CCLTest(
   };
 }
 
-test('<Exception handling> number of tentative label > 8 bit', () => {
+test('<Exception handling> number of tentative labels > 8 bit', () => {
   const width = 512;
   const neighbor = 26;
-  const maxComponents = 255;
+  const bufferSize = 255;
   const [img, label, num, volume, UL, LR] = mosaic(width, width, 1, neighbor);
-  expect(() => CCL(img, width, width, maxComponents)).toThrow(
-    `number of tentative label is not less than ${maxComponents}.`
+  expect(() => CCL(img, width, width, bufferSize)).toThrow(
+    `Number of tentative labels exceeded the limit ${bufferSize}.`
   );
 });
 

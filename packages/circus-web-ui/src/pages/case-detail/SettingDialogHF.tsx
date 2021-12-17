@@ -30,7 +30,7 @@ const initialOptions = {
   dimension: 2,
   neighbors: 4,
   orientation: 'Axial',
-  maximumComponents: 255
+  bufferSize: 255
 };
 
 const OptionsEditorForHF: Editor<HoleFillingOptions> = props => {
@@ -40,7 +40,7 @@ const OptionsEditorForHF: Editor<HoleFillingOptions> = props => {
     if (ev.target.value < 1 || 2 ** 16 <= ev.target.value) return;
     onChange({
       ...value,
-      maximumComponents: Number(ev.target.value)
+      bufferSize: Number(ev.target.value)
     });
   };
 
@@ -97,11 +97,11 @@ const OptionsEditorForHF: Editor<HoleFillingOptions> = props => {
         />
       </div>
       <div className="maximum-number-of-tentative-label form-inline">
-        Maximum number of tentative label&nbsp;
+        Maximum number of tentative labels&nbsp;
         <FormControl
           type="number"
-          value={value.maximumComponents}
-          name="maximumComponents"
+          value={value.bufferSize}
+          name="bufferSize"
           onChange={onMaximumComponentsChange}
         />
       </div>

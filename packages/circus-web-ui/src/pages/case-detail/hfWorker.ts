@@ -12,7 +12,7 @@ ctx.addEventListener('message', event => {
     dimension,
     neighbors,
     orientation,
-    maximumComponents
+    bufferSize
   } = event.data;
   const initializedInput = new Uint8Array(width * height * nSlices);
   for (let k = 0; k < nSlices; k++) {
@@ -45,7 +45,7 @@ ctx.addEventListener('message', event => {
             height,
             nSlices,
             neighbors,
-            maximumComponents
+            bufferSize
           )
         : orientation === 'Axial'
         ? HoleFilling2D(
@@ -54,7 +54,7 @@ ctx.addEventListener('message', event => {
             height,
             nSlices,
             neighbors,
-            maximumComponents
+            bufferSize
           )
         : orientation === 'Sagital'
         ? HoleFilling2D(
@@ -63,7 +63,7 @@ ctx.addEventListener('message', event => {
             nSlices,
             width,
             neighbors,
-            maximumComponents
+            bufferSize
           )
         : HoleFilling2D(
             initializedInput,
@@ -71,7 +71,7 @@ ctx.addEventListener('message', event => {
             width,
             height,
             neighbors,
-            maximumComponents
+            bufferSize
           );
     const output = new Uint8Array(width * height * nSlices);
     for (let k = 0; k < nSlices; k++) {

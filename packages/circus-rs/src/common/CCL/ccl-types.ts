@@ -24,7 +24,7 @@ export type CCL2D = (
   array: Uint8Array | Uint16Array,
   width: number,
   height: number,
-  maxComponents?: number,
+  bufferSize?: number,
   threshold?: number
 ) => LabelingResults2D;
 
@@ -33,6 +33,6 @@ export type CCL3D = (
   width: number,
   height: number,
   nSlices: number,
-  maxComponents?: number,
+  bufferSize?: number,
   threshold?: number
 ) => LabelingResults3D;

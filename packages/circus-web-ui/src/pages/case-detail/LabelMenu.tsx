@@ -48,6 +48,8 @@ import SettingDialogCCL from './SettingDialogCCL';
 import SettingDialogED from './SettingDialogED';
 import SettingDialogHF from './SettingDialogHF';
 import SettingDialogII from './SettingDialogII';
+import SettingDialogDuplicate from './SettingDialogDuplicate';
+import SettingDialogSetTheory from './SettingDialogII';
 
 type LabelCommand =
   | 'rename'
@@ -80,6 +82,8 @@ const LabelMenu: React.FC<{
   const [erosionDialogOpen, setErosionDialogOpen] = useState(false);
   const [dilationDialogOpen, setDilationDialogOpen] = useState(false);
   const [iiDialogOpen, setIiDialogOpen] = useState(false);
+  const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
+  const [setTheoryDialogOpen, setSetTheoryDialogOpen] = useState(false);
   const [processorProgress, setProcessorProgress] = useState({
     value: 0,
     label: ''
@@ -360,6 +364,53 @@ const LabelMenu: React.FC<{
       }
     );
   };
+
+  const onOkClickDialogDuplicate = (props: DuplicateOptions) => {
+    const label = editingData.revision.series[activeSeriesIndex].labels[
+      activeLabelIndex
+    ] as InternalLabelOf<'voxel'>;
+    performLabelCreatingVoxelProcessing<MorphologicalImageProcessingResults>(
+      editingData,
+      updateEditingData,
+      label,
+      labelColors,
+      createDuplicateProcessor(props),
+      duplicateProgress => {
+        setProcessorProgress(duplicateProgress);
+        if (duplicateProgress.label !== '') {
+          setDuplicateDialogOpen(false);
+          setProcessorProgress({
+            value: 0,
+            label: ''
+          });
+        }
+      }
+    );
+  };
+
+  const onOkClickDialogSetTheory = (props: SetTheoryOptions) => {
+    const label = editingData.revision.series[activeSeriesIndex].labels[
+      activeLabelIndex
+    ] as InternalLabelOf<'voxel'>;
+    performLabelCreatingVoxelProcessing<MorphologicalImageProcessingResults>(
+      editingData,
+      updateEditingData,
+      label,
+      labelColors,
+      createSetTheoryProcessor(props),
+      setTheoryProgress => {
+        setProcessorProgress(setTheoryProgress);
+        if (setTheoryProgress.label !== '') {
+          setSetTheoryDialogOpen(false);
+          setProcessorProgress({
+            value: 0,
+            label: ''
+          });
+        }
+      }
+    );
+  };
+
   const onSelectThreePoints2Section = () => {
     try {
       const seriesIndex = Number(
@@ -483,6 +534,24 @@ const LabelMenu: React.FC<{
         pullRight
         noCaret
       >
+        <MenuItem
+          eventKey="duplicate"
+          onSelect={onSelect(() => {
+            setDuplicateDialogOpen(true);
+          })}
+          disabled={!activeLabel || activeLabel.type !== 'voxel'}
+        >
+          Duplicate
+        </MenuItem>
+        <MenuItem
+          eventKey="setTheory"
+          onSelect={onSelect(() => {
+            setSetTheoryDialogOpen(true);
+          })}
+          disabled={!activeLabel || activeLabel.type !== 'voxel'}
+        >
+          Set theory
+        </MenuItem>
         <MenuItem
           eventKey="ccl"
           onSelect={onSelect(() => {
@@ -624,6 +693,34 @@ const LabelMenu: React.FC<{
             setIiDialogOpen(false);
           }}
           onOkClick={onOkClickDialogII}
+        />
+      </Modal>
+      <Modal
+        show={duplicateDialogOpen}
+        onHide={() => {
+          setDuplicateDialogOpen(false);
+        }}
+      >
+        <SettingDialogDuplicate
+          processorProgress={processorProgress}
+          onHide={() => {
+            setDuplicateDialogOpen(false);
+          }}
+          onOkClick={onOkClickDialogDuplicate}
+        />
+      </Modal>
+      <Modal
+        show={setTheoryDialogOpen}
+        onHide={() => {
+          setSetTheoryDialogOpen(false);
+        }}
+      >
+        <SettingDialogSetTheory
+          processorProgress={processorProgress}
+          onHide={() => {
+            setSetTheoryDialogOpen(false);
+          }}
+          onOkClick={onOkClickDialogSetTheory}
         />
       </Modal>
     </StyledButtonsDiv>

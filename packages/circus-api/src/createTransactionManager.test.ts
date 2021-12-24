@@ -50,14 +50,12 @@ describe('createTransactionManager', () => {
     const userId = 1;
     const useTransactionProcessing = async () => {
       await transactionManager.withTransaction(async (models: any) => {
-        await models.bankAccounts.withLockedDocument(
-          userId,
-          async (doc: any) => {
-            await models.bankAccounts.modifyOne(userId, {
-              balance: doc.balance + 1
-            });
-          }
-        );
+        const doc = await models.bankAccounts.findById(userId, {
+          withLock: true
+        });
+        await models.bankAccounts.modifyOne(userId, {
+          balance: doc.balance + 1
+        });
       });
     };
 

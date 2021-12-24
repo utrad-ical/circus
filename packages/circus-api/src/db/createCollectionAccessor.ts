@@ -23,6 +23,10 @@ interface CursorLike<T> {
   count: () => Promise<number>;
 }
 
+interface FindOptions {
+  withLock: boolean;
+}
+
 export interface CollectionAccessor<T = any> {
   deleteMany: (query?: object) => Promise<mongo.DeleteWriteOpResultObject>;
   deleteOne: (query?: object) => Promise<mongo.DeleteWriteOpResultObject>;
@@ -31,7 +35,10 @@ export interface CollectionAccessor<T = any> {
     query?: object,
     options?: CursorOptions
   ) => CursorLike<WithDates<T>>;
-  findById: (id: string | number) => Promise<WithDates<T>>;
+  findById: (
+    id: string | number,
+    options?: FindOptions
+  ) => Promise<WithDates<T>>;
   findByIdOrFail: (id: string | number) => Promise<WithDates<T>>;
   insert: (data: T) => Promise<any>;
   upsert: (id: string | number, data: Partial<T>) => Promise<any>;
@@ -41,11 +48,6 @@ export interface CollectionAccessor<T = any> {
   unsafe_updateMany: (filter: any, update: any) => Promise<any>;
   newSequentialId: () => Promise<number>;
   collectionName: () => string;
-  // only available when transaction is enabled
-  withLockedDocument: (
-    id: string | number,
-    fn: (data: T) => Promise<void>
-  ) => Promise<void>;
 }
 
 /**
@@ -171,8 +173,23 @@ const createCollectionAccessor = <T = any>(
   /**
    * Fetches the single document that matches the primary key.
    */
-  const findById = async (id: string | number) => {
+  const findById = async (id: string | number, options?: FindOptions) => {
     const key = primaryKey ? primaryKey : '_id';
+    if (options?.withLock) {
+      if (!session) throw new Error('Cannot lock a document outside a session');
+      await collection.findOneAndUpdate(
+        { [key]: id } as mongo.FilterQuery<WithDates<T>>,
+        {
+          $set: { myLock: { pseudoRandom: new mongo.ObjectId() } }
+        } as mongo.UpdateQuery<any>,
+        { session }
+      );
+      await collection.updateOne(
+        { [key]: id } as mongo.FilterQuery<WithDates<T>>,
+        { $unset: { myLock: 1 } } as mongo.UpdateQuery<any>,
+        { session }
+      );
+    }
     const docs = await collection
       .find({ [key]: id } as mongo.FilterQuery<WithDates<T>>, {
         ...sessionOpts
@@ -282,31 +299,6 @@ const createCollectionAccessor = <T = any>(
     }
   };
 
-  const withLockedDocument = async (
-    id: string | number,
-    fn: (data: T) => Promise<void>
-  ) => {
-    if (!session) throw new Error('Cannot lock a document outside a session');
-    const doc = await collection.findOneAndUpdate(
-      { [primaryKey]: id } as mongo.FilterQuery<WithDates<T>>,
-      {
-        $set: { myLock: { pseudoRandom: new mongo.ObjectId() } }
-      } as mongo.UpdateQuery<any>,
-      { session, returnDocument: 'before', projection: { _id: false } }
-    );
-    try {
-      if (!doc.value) throw404();
-      await validator.validate(dbEntrySchema, doc.value);
-      await fn(doc.value!);
-    } finally {
-      await collection.updateOne(
-        { [primaryKey]: id } as mongo.FilterQuery<WithDates<T>>,
-        { $unset: { myLock: 1 } } as mongo.UpdateQuery<any>,
-        { session }
-      );
-    }
-  };
-
   const deleteMany = (query: object) => {
     return collection.deleteMany(query, { ...sessionOpts });
   };
@@ -329,8 +321,7 @@ const createCollectionAccessor = <T = any>(
     modifyOne,
     unsafe_updateMany,
     newSequentialId,
-    collectionName: () => collectionName,
-    withLockedDocument
+    collectionName: () => collectionName
   } as CollectionAccessor<T>;
 };
 

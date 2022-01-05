@@ -5,15 +5,11 @@ import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import { Viewer } from '@utrad-ical/circus-rs/src/browser';
 import { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
 import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
-import { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
-import { MorphologicalImageProcessingResults } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import {
   Button,
-  DropdownButton,
   MenuItem,
-  Modal,
   OverlayTrigger,
   Popover,
   SplitButton
@@ -25,29 +21,19 @@ import tinyColor from 'tinycolor2';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
 import useLocalPreference from 'utils/useLocalPreference';
 import * as c from './caseStore';
-import createCclProcessor, { CclOptions } from './createCclProcessor';
 import createCurrentLabelsUpdator from './createCurrentLabelsUpdator';
-import createEdProcessor, { ErosionDilationOptions } from './createEdProcessor';
-import createHfProcessor, { HoleFillingOptions } from './createHfProcessor';
-import createIiProcessor, {
-  IntersliceInterpolationOptions
-} from './createIiProcessor';
-import createSectionFromPoints from './createSectionFromPoints';
 import {
   createNewLabelData,
   InternalLabel,
   InternalLabelData,
-  InternalLabelOf,
   LabelAppearance,
   LabelType,
   labelTypes
 } from './labelData';
-import performLabelCreatingVoxelProcessing from './performLabelCreatingVoxelProcessing';
 import { EditingData, EditingDataUpdater } from './revisionData';
-import SettingDialogCCL from './SettingDialogCCL';
-import SettingDialogED from './SettingDialogED';
-import SettingDialogHF from './SettingDialogHF';
-import SettingDialogII from './SettingDialogII';
+import { ProcessorDialogKey } from './voxelprocessor-types';
+import VoxelProcessorDropdown from './VoxelProcessorDropdown';
+import VoxelProcessorModal from './VoxelProcessorModal';
 
 type LabelCommand =
   | 'rename'
@@ -75,15 +61,10 @@ const LabelMenu: React.FC<{
     metadata
   } = props;
 
-  const [cclDialogOpen, setCclDialogOpen] = useState(false);
-  const [hfDialogOpen, setHfDialogOpen] = useState(false);
-  const [erosionDialogOpen, setErosionDialogOpen] = useState(false);
-  const [dilationDialogOpen, setDilationDialogOpen] = useState(false);
-  const [iiDialogOpen, setIiDialogOpen] = useState(false);
-  const [processorProgress, setProcessorProgress] = useState({
-    value: 0,
-    label: ''
-  });
+  const [processorDialogKey, setProcessorDialogKey] =
+    useState<ProcessorDialogKey>('');
+  const [showModal, setShowModal] = useState<boolean>(false);
+
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
   const activeSeriesMetadata = metadata[activeSeriesIndex];
   const activeSeries = revision.series[activeSeriesIndex];
@@ -268,144 +249,6 @@ const LabelMenu: React.FC<{
     });
   };
 
-  const onOkClickDialogCCL = (props: CclOptions) => {
-    const label = editingData.revision.series[activeSeriesIndex].labels[
-      activeLabelIndex
-    ] as InternalLabelOf<'voxel'>;
-    performLabelCreatingVoxelProcessing<LabelingResults3D>(
-      editingData,
-      updateEditingData,
-      label,
-      labelColors,
-      createCclProcessor(props),
-      cclProgress => {
-        setProcessorProgress(cclProgress);
-        if (cclProgress.label !== '') {
-          setCclDialogOpen(false);
-          setProcessorProgress({
-            value: 0,
-            label: ''
-          });
-        }
-      }
-    );
-  };
-
-  const onOkClickDialogHF = (props: HoleFillingOptions) => {
-    const label = editingData.revision.series[activeSeriesIndex].labels[
-      activeLabelIndex
-    ] as InternalLabelOf<'voxel'>;
-    performLabelCreatingVoxelProcessing<LabelingResults3D>(
-      editingData,
-      updateEditingData,
-      label,
-      labelColors,
-      createHfProcessor(props),
-      hfProgress => {
-        setProcessorProgress(hfProgress);
-        if (hfProgress.label !== '') {
-          setHfDialogOpen(false);
-          setProcessorProgress({
-            value: 0,
-            label: ''
-          });
-        }
-      }
-    );
-  };
-
-  const onOkClickDialogED = (props: ErosionDilationOptions) => {
-    const label = editingData.revision.series[activeSeriesIndex].labels[
-      activeLabelIndex
-    ] as InternalLabelOf<'voxel'>;
-    performLabelCreatingVoxelProcessing<MorphologicalImageProcessingResults>(
-      editingData,
-      updateEditingData,
-      label,
-      labelColors,
-      createEdProcessor(props),
-      edProgress => {
-        setProcessorProgress(edProgress);
-        if (edProgress.label !== '') {
-          setErosionDialogOpen(false);
-          setDilationDialogOpen(false);
-          setProcessorProgress({
-            value: 0,
-            label: ''
-          });
-        }
-      }
-    );
-  };
-
-  const onOkClickDialogII = (props: IntersliceInterpolationOptions) => {
-    const label = editingData.revision.series[activeSeriesIndex].labels[
-      activeLabelIndex
-    ] as InternalLabelOf<'voxel'>;
-    performLabelCreatingVoxelProcessing<MorphologicalImageProcessingResults>(
-      editingData,
-      updateEditingData,
-      label,
-      labelColors,
-      createIiProcessor(props),
-      iiProgress => {
-        setProcessorProgress(iiProgress);
-        if (iiProgress.label !== '') {
-          setIiDialogOpen(false);
-          setProcessorProgress({
-            value: 0,
-            label: ''
-          });
-        }
-      }
-    );
-  };
-  const onSelectThreePoints2Section = () => {
-    try {
-      const seriesIndex = Number(
-        Object.keys(editingData.revision.series).find(ind =>
-          editingData.revision.series[Number(ind)].labels.find(
-            item => item.temporaryKey === activeLabel!.temporaryKey
-          )
-        )
-      );
-      const spareKey = Object.keys(editingData.layout.positions).find(
-        key =>
-          editingData.layoutItems.find(item => item.key === key)!
-            .seriesIndex === seriesIndex
-      );
-      const useActiveLayoutKey = Object.keys(editingData.layout.positions)
-        .filter(
-          key =>
-            editingData.layoutItems.find(item => item.key === key)!
-              .seriesIndex === seriesIndex
-        )
-        .some(key => key === editingData.activeLayoutKey);
-      const targetLayoutKey = useActiveLayoutKey
-        ? editingData.activeLayoutKey
-        : spareKey;
-      const [newLayoutItems, newLayout, key] = createSectionFromPoints(
-        editingData.revision.series[activeSeriesIndex].labels.filter(label => {
-          return (
-            label.type === 'point' && !(activeSeriesMetadata?.mode !== '3d')
-          );
-        }) as InternalLabelOf<'point'>[],
-        activeLabel!.name!,
-        (viewers[targetLayoutKey!].getState() as any).section,
-        editingData.layout,
-        editingData.layoutItems,
-        activeSeriesIndex
-      );
-      updateEditingData(d => {
-        d.layoutItems = newLayoutItems;
-        d.layout = newLayout;
-        d.activeLayoutKey = key;
-      });
-    } catch (err: any) {
-      alert(err.message);
-    }
-  };
-
   const onSelect = (behavior: () => void) => () => {
     const seriesIndex = Number(
       Object.keys(editingData.revision.series).find(ind =>
@@ -476,66 +319,13 @@ const LabelMenu: React.FC<{
         disabled={!activeLabel || disabled}
         onClick={() => handleCommand('reveal')}
       />
-      <DropdownButton
-        bsSize="xs"
-        title={<Icon icon="glyphicon-option-horizontal" />}
-        id={`labelmenu-header-dropdown`}
-        pullRight
-        noCaret
-      >
-        <MenuItem
-          eventKey="ccl"
-          onSelect={onSelect(() => {
-            setCclDialogOpen(true);
-          })}
-          disabled={!activeLabel || activeLabel.type !== 'voxel'}
-        >
-          CCL
-        </MenuItem>
-        <MenuItem
-          eventKey="fillng"
-          onSelect={onSelect(() => {
-            setHfDialogOpen(true);
-          })}
-          disabled={!activeLabel || activeLabel.type !== 'voxel'}
-        >
-          Hole filling
-        </MenuItem>
-        <MenuItem
-          eventKey="erosion"
-          onSelect={onSelect(() => {
-            setErosionDialogOpen(true);
-          })}
-          disabled={!activeLabel || activeLabel.type !== 'voxel'}
-        >
-          Erosion
-        </MenuItem>
-        <MenuItem
-          eventKey="dilation"
-          onSelect={onSelect(() => {
-            setDilationDialogOpen(true);
-          })}
-          disabled={!activeLabel || activeLabel.type !== 'voxel'}
-        >
-          Dilation
-        </MenuItem>
-        <MenuItem
-          eventKey="interpolation"
-          onSelect={onSelect(() => {
-            setIiDialogOpen(true);
-          })}
-          disabled={!activeLabel || activeLabel.type !== 'voxel'}
-        >
-          Interslice interpolation
-        </MenuItem>
-        <MenuItem
-          eventKey="section"
-          onSelect={onSelect(onSelectThreePoints2Section)}
-          disabled={!activeLabel || activeLabel.type !== 'point'}
-        >
-          Three points to section
-        </MenuItem>
-      </DropdownButton>
+      <VoxelProcessorDropdown
+        activeLabelType={activeLabel?.type}
+        onSelect={(processorDialogKey: ProcessorDialogKey) => {
+          setProcessorDialogKey(processorDialogKey);
+          setShowModal(true);
+        }}
+      />
       <IconButton
         bsSize="xs"
         title="Remove"
@@ -572,60 +362,24 @@ const LabelMenu: React.FC<{
           );
         })}
       </SplitButton>
-      <Modal show={cclDialogOpen} onHide={() => setCclDialogOpen(false)}>
-        <SettingDialogCCL
-          processorProgress={processorProgress}
-          onHide={() => setCclDialogOpen(false)}
-          onOkClick={onOkClickDialogCCL}
-        />
-      </Modal>
-      <Modal show={hfDialogOpen} onHide={() => setHfDialogOpen(false)}>
-        <SettingDialogHF
-          processorProgress={processorProgress}
-          onHide={() => setHfDialogOpen(false)}
-          onOkClick={onOkClickDialogHF}
-        />
-      </Modal>
-      <Modal
-        show={erosionDialogOpen}
-        onHide={() => setErosionDialogOpen(false)}
-      >
-        <SettingDialogED
-          processorProgress={processorProgress}
-          onHide={() => setErosionDialogOpen(false)}
-          onOkClick={onOkClickDialogED}
-          isErosion={true}
-        />
-      </Modal>
-      <Modal
-        show={dilationDialogOpen}
-        onHide={() => {
-          setDilationDialogOpen(false);
-        }}
-      >
-        <SettingDialogED
-          processorProgress={processorProgress}
+      {showModal && (
+        <VoxelProcessorModal
+          editingData={editingData}
+          updateEditingData={updateEditingData}
+          label={
+            editingData.revision.series[activeSeriesIndex].labels[
+              activeLabelIndex
+            ]
+          }
+          labelColors={labelColors}
+          processorDialogKey={processorDialogKey}
           onHide={() => {
-            setDilationDialogOpen(false);
+            setShowModal(false);
           }}
-          onOkClick={onOkClickDialogED}
-          isErosion={false}
+          metadata={metadata}
+          viewers={viewers}
         />
-      </Modal>
-      <Modal
-        show={iiDialogOpen}
-        onHide={() => {
-          setIiDialogOpen(false);
-        }}
-      >
-        <SettingDialogII
-          processorProgress={processorProgress}
-          onHide={() => {
-            setIiDialogOpen(false);
-          }}
-          onOkClick={onOkClickDialogII}
-        />
-      </Modal>
+      )}
     </StyledButtonsDiv>
   );
 };

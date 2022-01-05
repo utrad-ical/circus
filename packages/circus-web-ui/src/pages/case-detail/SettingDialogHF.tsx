@@ -4,6 +4,7 @@ import { FormControl } from 'components/react-bootstrap';
 import React from 'react';
 import { HoleFillingOptions } from './createHfProcessor';
 import SettingDialog from './SettingDialog';
+import { SettingDialogProperty } from './voxelprocessor-types';
 
 const neighborsOptions2D = {
   4: '4-neigobors',
@@ -109,11 +110,7 @@ const OptionsEditorForHF: Editor<HoleFillingOptions> = props => {
   );
 };
 
-const SettingDialogHF: React.FC<{
-  processorProgress: { value: number; label: string };
-  onHide: () => void;
-  onOkClick: (props: HoleFillingOptions) => void;
-}> = props => {
+const SettingDialogHF: React.FC<SettingDialogProperty> = props => {
   const { processorProgress, onHide, onOkClick } = props;
   return (
     <SettingDialog

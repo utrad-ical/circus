@@ -1,11 +1,12 @@
 import { Editor } from '@smikitky/rb-components/lib/editor-types';
+import { Structure } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
 import classnames from 'classnames';
 import { FormControl } from 'components/react-bootstrap';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { ErosionDilationOptions } from './createEdProcessor';
 import SettingDialog from './SettingDialog';
-import { Structure } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
+import { SettingDialogProperty } from './voxelprocessor-types';
 
 const StyledDiv = styled.div`
   line-height: 1;
@@ -284,34 +285,33 @@ const OptionsEditorForED: Editor<ErosionDilationOptions> = props => {
   );
 };
 
-const SettingDialogED: React.FC<{
-  processorProgress: { value: number; label: string };
-  onHide: () => void;
-  onOkClick: (props: ErosionDilationOptions) => void;
-  isErosion: boolean;
-}> = props => {
-  const { processorProgress, onHide, onOkClick, isErosion } = props;
-  const title = isErosion ? 'Erosion' : 'Dilation';
-  const initialOptions = {
-    structure: {
-      array: newStructure(3, 3, 3),
-      width: 3,
-      height: 3,
-      nSlices: 3
-    },
-    isErosion: isErosion
-  };
+const SettingDialogED: (isErosion: boolean) => React.FC<SettingDialogProperty> =
+  isErosion => {
+    const title = isErosion ? 'Erosion' : 'Dilation';
+    const initialOptions = {
+      structure: {
+        array: newStructure(3, 3, 3),
+        width: 3,
+        height: 3,
+        nSlices: 3
+      },
+      isErosion: isErosion
+    };
 
-  return (
-    <SettingDialog
-      title={title}
-      optionsEditor={OptionsEditorForED}
-      initialOptions={initialOptions}
-      processorProgress={processorProgress}
-      onHide={onHide}
-      onOkClick={onOkClick}
-    />
-  );
-};
+    return props => {
+      const { processorProgress, onHide, onOkClick } = props;
+
+      return (
+        <SettingDialog
+          title={title}
+          optionsEditor={OptionsEditorForED}
+          initialOptions={initialOptions}
+          processorProgress={processorProgress}
+          onHide={onHide}
+          onOkClick={onOkClick}
+        />
+      );
+    };
+  };
 
 export default SettingDialogED;

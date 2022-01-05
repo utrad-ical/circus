@@ -4,6 +4,7 @@ import { FormControl } from 'components/react-bootstrap';
 import React from 'react';
 import { CclOptions } from './createCclProcessor';
 import SettingDialog from './SettingDialog';
+import { SettingDialogProperty } from './voxelprocessor-types';
 
 const maximumCCNumOptions = {
   1: '1 CC',
@@ -73,11 +74,7 @@ const OptionsEditorForCCL: Editor<CclOptions> = props => {
   );
 };
 
-const SettingDialogCCL: React.FC<{
-  processorProgress: { value: number; label: string };
-  onHide: () => void;
-  onOkClick: (props: CclOptions) => void;
-}> = props => {
+const SettingDialogCCL: React.FC<SettingDialogProperty> = props => {
   const { processorProgress, onHide, onOkClick } = props;
   return (
     <SettingDialog

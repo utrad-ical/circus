@@ -3,6 +3,7 @@ import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import React from 'react';
 import { IntersliceInterpolationOptions } from './createIiProcessor';
 import SettingDialog from './SettingDialog';
+import { SettingDialogProperty } from './voxelprocessor-types';
 
 const orientationOptions = {
   Axial: 'Axial',
@@ -29,11 +30,7 @@ const OptionsEditorForII: Editor<IntersliceInterpolationOptions> = props => {
   );
 };
 
-const SettingDialogII: React.FC<{
-  processorProgress: { value: number; label: string };
-  onHide: () => void;
-  onOkClick: (props: IntersliceInterpolationOptions) => void;
-}> = props => {
+const SettingDialogII: React.FC<SettingDialogProperty> = props => {
   const { processorProgress, onHide, onOkClick } = props;
 
   return (

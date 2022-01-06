@@ -6,6 +6,7 @@ import RawData from '@utrad-ical/circus-rs/src/common/RawData';
 import createCurrentLabelsUpdator from '../createCurrentLabelsUpdator';
 import { createNewLabelData, InternalLabelOf } from '../labelData';
 import { EditingData, EditingDataUpdater } from '../revisionData';
+import { ProcessorProgress } from './processor-types';
 
 export type PostProcessor<
   T extends LabelingResults3D | MorphologicalImageProcessingResults
@@ -20,7 +21,7 @@ export type VoxelLabelProcessor<
   nSlices: number,
   name: string,
   postProcessor: PostProcessor<T>,
-  handleProgress: (progress: { value: number; label: string }) => void
+  handleProgress: (progress: ProcessorProgress) => void
 ) => void;
 
 async function performLabelCreatingVoxelProcessing<
@@ -30,12 +31,8 @@ async function performLabelCreatingVoxelProcessing<
   updateEditingData: EditingDataUpdater,
   label: InternalLabelOf<'voxel'>,
   labelColors: string[],
-  voxelLabelProcessor: VoxelLabelProcessor<
-    T extends LabelingResults3D | MorphologicalImageProcessingResults
-      ? T
-      : never
-  >,
-  reportProgress: (progress: { value: number; label: string }) => void
+  voxelLabelProcessor: VoxelLabelProcessor<T>,
+  reportProgress: (progress: ProcessorProgress) => void
 ) {
   if (label.type !== 'voxel' || !label.data.size)
     throw new TypeError('Invalid label passed.');

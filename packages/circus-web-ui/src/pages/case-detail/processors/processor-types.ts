@@ -6,7 +6,7 @@ import { HoleFillingOptions } from './createHfProcessor';
 import { IntersliceInterpolationOptions } from './createIiProcessor';
 import React from 'react';
 
-export type ProcessorInputMap = {
+export type ProcessorOptionsMap = {
   ccl: CclOptions;
   filling: HoleFillingOptions;
   erosion: ErosionDilationOptions;
@@ -26,11 +26,11 @@ export type ProcessorResultMap = {
   '': void;
 };
 
-export type ProcessorDialogKey = keyof ProcessorInputMap;
+export type ProcessorDialogKey = keyof ProcessorOptionsMap;
 
-export type ProcessorInput<T extends keyof ProcessorInputMap> = {
+export type ProcessorOptions<T extends keyof ProcessorOptionsMap> = {
   type: T;
-  data: ProcessorInputMap[T];
+  data: ProcessorOptionsMap[T];
 };
 
 export type ProcessorResult<T extends keyof ProcessorResultMap> = {
@@ -38,8 +38,10 @@ export type ProcessorResult<T extends keyof ProcessorResultMap> = {
   data: ProcessorResultMap[T];
 };
 
+export type ProcessorProgress = { value: number; label: string };
+
 type SettingDialogProps<T> = {
-  processorProgress: { value: number; label: string };
+  processorProgress: ProcessorProgress;
   onHide: () => void;
   onOkClick: (options: T) => void;
 };

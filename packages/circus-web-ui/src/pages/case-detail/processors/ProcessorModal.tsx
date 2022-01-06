@@ -19,16 +19,16 @@ import SettingDialogHF from './SettingDialogHF';
 import SettingDialogII from './SettingDialogII';
 import {
   ProcessorDialogKey,
-  ProcessorInput,
-  CustomSettingDialog
+  CustomSettingDialog,
+  ProcessorProgress
 } from './processor-types';
 
 type VoxelProcessorModalProperty = {
-  SettingDialog: CustomSettingDialog<any> | undefined;
+  settingDialog: CustomSettingDialog<any> | undefined;
   processor: Function;
 };
 
-type VoxelProcessorModalPropertyType =
+export type VoxelProcessorModalPropertyType =
   | 'ccl'
   | 'filling'
   | 'erosion'
@@ -41,28 +41,27 @@ const voxelProcessorModalProperties: {
     | 'section']: VoxelProcessorModalProperty;
 } = {
   ccl: {
-    SettingDialog: SettingDialogCCL,
+    settingDialog: SettingDialogCCL,
     processor: createCclProcessor
   },
   filling: {
-    SettingDialog: SettingDialogHF,
+    settingDialog: SettingDialogHF,
     processor: createHfProcessor
   },
   erosion: {
-    SettingDialog: SettingDialogErosion,
+    settingDialog: SettingDialogErosion,
     processor: createEdProcessor
   },
   dilation: {
-    SettingDialog: SettingDialogDilatation,
+    settingDialog: SettingDialogDilatation,
     processor: createEdProcessor
   },
   interpolation: {
-    SettingDialog: SettingDialogII,
+    settingDialog: SettingDialogII,
     processor: createIiProcessor
   },
-
   section: {
-    SettingDialog: undefined,
+    settingDialog: undefined,
     processor: addNewSctionFromPoints
   }
 };
@@ -87,60 +86,61 @@ const ProcessorModal: React.FC<{
     metadata,
     viewers
   } = props;
-  const [processorProgress, setProcessorProgress] = useState({
-    value: 0,
-    label: ''
-  });
+
+  const [processorProgress, setProcessorProgress] = useState<ProcessorProgress>(
+    {
+      value: 0,
+      label: ''
+    }
+  );
 
   useEffect(() => {
     if (processorDialogKey !== '') {
       const SettingDialog =
-        voxelProcessorModalProperties[processorDialogKey].SettingDialog;
+        voxelProcessorModalProperties[processorDialogKey].settingDialog;
 
       if (!SettingDialog) {
-        const updator = voxelProcessorModalProperties[
+        const processor = voxelProcessorModalProperties[
           processorDialogKey
         ].processor({
           editingData,
           updateEditingData,
           metadata,
           viewers
-        }) as () => void;
-        updator();
+        });
+        processor();
         return onHide();
       }
     }
   });
 
-  if (processorDialogKey === '') return <></>;
+  if (processorDialogKey === '') return null;
   const SettingDialog =
-    voxelProcessorModalProperties[processorDialogKey].SettingDialog;
+    voxelProcessorModalProperties[processorDialogKey].settingDialog;
+
   if (SettingDialog) {
     const processor =
       voxelProcessorModalProperties[processorDialogKey].processor;
-    const onOkClick = (
-      label.type !== 'voxel'
-        ? (props: ProcessorInput<VoxelProcessorModalPropertyType>) => {}
-        : (props: ProcessorInput<VoxelProcessorModalPropertyType>) => {
-            performLabelCreatingVoxelProcessing<any>(
-              editingData,
-              updateEditingData,
-              label,
-              labelColors,
-              processor(props),
-              progress => {
-                setProcessorProgress(progress);
-                if (progress.label !== '') {
-                  setProcessorProgress({
-                    value: 0,
-                    label: ''
-                  });
-                  onHide();
-                }
-              }
-            );
+    const onOkClick = (options: any) => {
+      if (label.type !== 'voxel') return;
+      performLabelCreatingVoxelProcessing<any>(
+        editingData,
+        updateEditingData,
+        label,
+        labelColors,
+        processor(options),
+        progress => {
+          setProcessorProgress(progress);
+          if (progress.label !== '') {
+            setProcessorProgress({
+              value: 0,
+              label: ''
+            });
+            onHide();
           }
-    ) as (props: any) => void;
+        }
+      );
+    };
 
     return (
       <Modal show={processorDialogKey.length > 0} onHide={onHide}>

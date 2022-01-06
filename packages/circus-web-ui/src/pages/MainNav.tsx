@@ -74,15 +74,21 @@ const NextPreviousButtons: React.FC<{
   }
   const prevLink = `${props.prefix}/${props.list[currentPosition - 1]}`;
   const nextLink = `${props.prefix}/${props.list[currentPosition + 1]}`;
-  const prevLinkEnabled = 0 < currentPosition;
-  const nextLinkEnabled = currentPosition < props.list.length - 1;
+  const prevLinkDisabled = 0 >= currentPosition;
+  const nextLinkDisabled = currentPosition >= props.list.length - 1;
   return (
     <li className="next-previous-buttons">
-      <Link to={prevLinkEnabled ? prevLink : ''} className="link-prev">
+      <Link
+        to={prevLink}
+        className={classnames('link-prev', { disabled: prevLinkDisabled })}
+      >
         <Icon icon="arrow-left" />
         &ensp; Prev
       </Link>
-      <Link to={nextLinkEnabled ? nextLink : ''} className="link-next">
+      <Link
+        to={nextLink}
+        className={classnames('link-next', { disabled: nextLinkDisabled })}
+      >
         Next &ensp;
         <Icon icon="arrow-right" />
       </Link>
@@ -213,6 +219,10 @@ const StyledNav = styled.nav`
     > a {
       flex: 0 0 50%;
       text-align: center;
+      &.disabled {
+        opacity: 0.5;
+        pointer-events: none;
+      }
     }
     border-bottom: 1px solid gray;
   }

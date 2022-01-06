@@ -3,7 +3,7 @@ import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import React from 'react';
 import { IntersliceInterpolationOptions } from './createIiProcessor';
 import SettingDialog from './SettingDialog';
-import { SettingDialogProperty } from './voxelprocessor-types';
+import { SettingDialogProperty } from './processor-types';
 
 const orientationOptions = {
   Axial: 'Axial',

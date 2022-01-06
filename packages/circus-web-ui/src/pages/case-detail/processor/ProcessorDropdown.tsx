@@ -1,8 +1,8 @@
 import Icon from 'components/Icon';
 import { DropdownButton, MenuItem } from 'components/react-bootstrap';
 import React from 'react';
-import { LabelType } from './labelData';
-import { ProcessorDialogKey } from './voxelprocessor-types';
+import { LabelType } from '../labelData';
+import { ProcessorDialogKey } from './processor-types';
 
 const voxelProcessorDropdownProperties: {
   key: ProcessorDialogKey;
@@ -21,7 +21,7 @@ const voxelProcessorDropdownProperties: {
   { key: 'section', caption: 'Three points to section', labelType: 'point' }
 ];
 
-const VoxelProcessorDropdown: React.FC<{
+const ProcessorDropdown: React.FC<{
   activeLabelType: LabelType | undefined;
   onSelect: (key: ProcessorDialogKey) => void;
 }> = props => {
@@ -50,4 +50,4 @@ const VoxelProcessorDropdown: React.FC<{
   );
 };
 
-export default VoxelProcessorDropdown;
+export default ProcessorDropdown;

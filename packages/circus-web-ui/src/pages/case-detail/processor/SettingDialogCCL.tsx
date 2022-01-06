@@ -4,7 +4,7 @@ import { FormControl } from 'components/react-bootstrap';
 import React from 'react';
 import { CclOptions } from './createCclProcessor';
 import SettingDialog from './SettingDialog';
-import { SettingDialogProperty } from './voxelprocessor-types';
+import { SettingDialogProperty } from './processor-types';
 
 const maximumCCNumOptions = {
   1: '1 CC',

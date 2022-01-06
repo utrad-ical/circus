@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { ErosionDilationOptions } from './createEdProcessor';
 import SettingDialog from './SettingDialog';
-import { SettingDialogProperty } from './voxelprocessor-types';
+import { SettingDialogProperty } from './processor-types';
 
 const StyledDiv = styled.div`
   line-height: 1;

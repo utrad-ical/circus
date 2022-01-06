@@ -4,7 +4,7 @@ import { FormControl } from 'components/react-bootstrap';
 import React from 'react';
 import { HoleFillingOptions } from './createHfProcessor';
 import SettingDialog from './SettingDialog';
-import { SettingDialogProperty } from './voxelprocessor-types';
+import { SettingDialogProperty } from './processor-types';
 
 const neighborsOptions2D = {
   4: '4-neigobors',

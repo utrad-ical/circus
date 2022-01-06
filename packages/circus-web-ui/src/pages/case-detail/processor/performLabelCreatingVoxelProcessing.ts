@@ -3,9 +3,9 @@ import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
 import { MorphologicalImageProcessingResults } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
 import RawData from '@utrad-ical/circus-rs/src/common/RawData';
-import createCurrentLabelsUpdator from './createCurrentLabelsUpdator';
-import { createNewLabelData, InternalLabelOf } from './labelData';
-import { EditingData, EditingDataUpdater } from './revisionData';
+import createCurrentLabelsUpdator from '../createCurrentLabelsUpdator';
+import { createNewLabelData, InternalLabelOf } from '../labelData';
+import { EditingData, EditingDataUpdater } from '../revisionData';
 
 export type PostProcessor<
   T extends LabelingResults3D | MorphologicalImageProcessingResults

@@ -7,9 +7,9 @@ import createEdProcessor from './createEdProcessor';
 import createHfProcessor from './createHfProcessor';
 import createIiProcessor from './createIiProcessor';
 import addNewSctionFromPoints from './addNewSctionFromPoints';
-import { InternalLabel } from './labelData';
+import { InternalLabel } from '../labelData';
 import performLabelCreatingVoxelProcessing from './performLabelCreatingVoxelProcessing';
-import { EditingData, EditingDataUpdater } from './revisionData';
+import { EditingData, EditingDataUpdater } from '../revisionData';
 import SettingDialogCCL from './SettingDialogCCL';
 import SettingDialogED from './SettingDialogED';
 import SettingDialogHF from './SettingDialogHF';
@@ -18,7 +18,7 @@ import {
   ProcessorDialogKey,
   ProcessorInput,
   SettingDialogProperty
-} from './voxelprocessor-types';
+} from './processor-types';
 
 type VoxelProcessorModalProperty = {
   SettingDialog: React.FC<SettingDialogProperty> | undefined;
@@ -63,7 +63,7 @@ const voxelProcessorModalProperties: {
   }
 };
 
-const VoxelProcessorModal: React.FC<{
+const ProcessorModal: React.FC<{
   editingData: EditingData;
   updateEditingData: EditingDataUpdater;
   label: InternalLabel;
@@ -150,4 +150,4 @@ const VoxelProcessorModal: React.FC<{
   } else return <></>;
 };
 
-export default VoxelProcessorModal;
+export default ProcessorModal;

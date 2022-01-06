@@ -4,10 +4,10 @@ import { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-sou
 import { getSectionFromPoints } from '@utrad-ical/circus-rs/src/browser/section-util';
 import { Section } from '@utrad-ical/circus-rs/src/common/geometry';
 import { LayoutInfo, layoutReducer } from 'components/GridContainer';
-import * as c from './caseStore';
-import { InternalLabelOf } from './labelData';
-import { EditingData, EditingDataUpdater } from './revisionData';
-import { ViewerDef } from './ViewerGrid';
+import * as c from '../caseStore';
+import { InternalLabelOf } from '../labelData';
+import { EditingData, EditingDataUpdater } from '../revisionData';
+import { ViewerDef } from '../ViewerGrid';
 
 const createSectionFromPoints = (
   points: InternalLabelOf<'point'>[],

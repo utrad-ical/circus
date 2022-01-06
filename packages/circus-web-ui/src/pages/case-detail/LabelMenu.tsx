@@ -31,9 +31,9 @@ import {
   labelTypes
 } from './labelData';
 import { EditingData, EditingDataUpdater } from './revisionData';
-import { ProcessorDialogKey } from './voxelprocessor-types';
-import VoxelProcessorDropdown from './VoxelProcessorDropdown';
-import VoxelProcessorModal from './VoxelProcessorModal';
+import { ProcessorDialogKey } from './processor/processor-types';
+import ProcessorDropdown from './processor/ProcessorDropdown';
+import ProcessorModal from './processor/ProcessorModal';
 
 type LabelCommand =
   | 'rename'
@@ -91,7 +91,7 @@ const LabelMenu: React.FC<{
         if (!activeLabel) return;
         const newName = await prompt('Label name', activeLabel.name || '');
         if (newName === null || activeLabel.name === newName) return;
-        updateCurrentLabels(labels => {
+        updateCurrentLabels((labels: InternalLabel[]) => {
           labels[activeLabelIndex].name = newName;
         });
         break;
@@ -118,7 +118,7 @@ const LabelMenu: React.FC<{
         if (!activeLabel) return;
         const newLabelType = labelTypes[activeLabel.type].canConvertTo;
         if (!newLabelType) return;
-        updateCurrentLabels(labels => {
+        updateCurrentLabels((labels: InternalLabel[]) => {
           labels[activeLabelIndex].type = newLabelType;
         });
         break;
@@ -319,7 +319,7 @@ const LabelMenu: React.FC<{
         disabled={!activeLabel || disabled}
         onClick={() => handleCommand('reveal')}
       />
-      <VoxelProcessorDropdown
+      <ProcessorDropdown
         activeLabelType={activeLabel?.type}
         onSelect={(processorDialogKey: ProcessorDialogKey) => {
           setProcessorDialogKey(processorDialogKey);
@@ -363,7 +363,7 @@ const LabelMenu: React.FC<{
         })}
       </SplitButton>
       {showModal && (
-        <VoxelProcessorModal
+        <ProcessorModal
           editingData={editingData}
           updateEditingData={updateEditingData}
           label={

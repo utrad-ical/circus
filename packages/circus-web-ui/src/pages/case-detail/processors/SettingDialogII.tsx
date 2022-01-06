@@ -3,7 +3,7 @@ import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import React from 'react';
 import { IntersliceInterpolationOptions } from './createIiProcessor';
 import SettingDialog from './SettingDialog';
-import { SettingDialogProperty } from './processor-types';
+import { CustomSettingDialog } from './processor-types';
 
 const orientationOptions = {
   Axial: 'Axial',
@@ -11,7 +11,7 @@ const orientationOptions = {
   Sagital: 'Sagital'
 };
 
-const initialOptions = {
+const initialOptions: IntersliceInterpolationOptions = {
   orientation: 'Axial'
 };
 
@@ -30,19 +30,20 @@ const OptionsEditorForII: Editor<IntersliceInterpolationOptions> = props => {
   );
 };
 
-const SettingDialogII: React.FC<SettingDialogProperty> = props => {
-  const { processorProgress, onHide, onOkClick } = props;
+const SettingDialogII: CustomSettingDialog<IntersliceInterpolationOptions> =
+  props => {
+    const { processorProgress, onHide, onOkClick } = props;
 
-  return (
-    <SettingDialog
-      title="Interslice Interpolation"
-      optionsEditor={OptionsEditorForII}
-      initialOptions={initialOptions}
-      processorProgress={processorProgress}
-      onHide={onHide}
-      onOkClick={onOkClick}
-    />
-  );
-};
+    return (
+      <SettingDialog
+        title="Interslice Interpolation"
+        optionsEditor={OptionsEditorForII}
+        initialOptions={initialOptions}
+        processorProgress={processorProgress}
+        onHide={onHide}
+        onOkClick={onOkClick}
+      />
+    );
+  };
 
 export default SettingDialogII;

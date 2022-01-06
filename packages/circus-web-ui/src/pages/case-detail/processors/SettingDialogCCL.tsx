@@ -3,8 +3,8 @@ import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import { FormControl } from 'components/react-bootstrap';
 import React from 'react';
 import { CclOptions } from './createCclProcessor';
+import { CustomSettingDialog } from './processor-types';
 import SettingDialog from './SettingDialog';
-import { SettingDialogProperty } from './processor-types';
 
 const maximumCCNumOptions = {
   1: '1 CC',
@@ -24,7 +24,7 @@ const neighborsOptions = {
   26: '26-neigobors'
 };
 
-const initialOptions = {
+const initialOptions: CclOptions = {
   maxOutputComponents: 2,
   neighbors: 26,
   bufferSize: 255
@@ -74,7 +74,7 @@ const OptionsEditorForCCL: Editor<CclOptions> = props => {
   );
 };
 
-const SettingDialogCCL: React.FC<SettingDialogProperty> = props => {
+const SettingDialogCCL: CustomSettingDialog<CclOptions> = props => {
   const { processorProgress, onHide, onOkClick } = props;
   return (
     <SettingDialog

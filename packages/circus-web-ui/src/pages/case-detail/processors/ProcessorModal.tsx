@@ -11,19 +11,23 @@ import { InternalLabel } from '../labelData';
 import performLabelCreatingVoxelProcessing from './performLabelCreatingVoxelProcessing';
 import { EditingData, EditingDataUpdater } from '../revisionData';
 import SettingDialogCCL from './SettingDialogCCL';
-import SettingDialogED from './SettingDialogED';
+import {
+  SettingDialogErosion,
+  SettingDialogDilatation
+} from './SettingDialogED';
 import SettingDialogHF from './SettingDialogHF';
 import SettingDialogII from './SettingDialogII';
 import {
   ProcessorDialogKey,
   ProcessorInput,
-  SettingDialogProperty
+  CustomSettingDialog
 } from './processor-types';
 
 type VoxelProcessorModalProperty = {
-  SettingDialog: React.FC<SettingDialogProperty> | undefined;
+  SettingDialog: CustomSettingDialog<any> | undefined;
   processor: Function;
 };
+
 type VoxelProcessorModalPropertyType =
   | 'ccl'
   | 'filling'
@@ -45,11 +49,11 @@ const voxelProcessorModalProperties: {
     processor: createHfProcessor
   },
   erosion: {
-    SettingDialog: SettingDialogED(true),
+    SettingDialog: SettingDialogErosion,
     processor: createEdProcessor
   },
   dilation: {
-    SettingDialog: SettingDialogED(false),
+    SettingDialog: SettingDialogDilatation,
     processor: createEdProcessor
   },
   interpolation: {
@@ -147,7 +151,7 @@ const ProcessorModal: React.FC<{
         />
       </Modal>
     );
-  } else return <></>;
+  } else return null;
 };
 
 export default ProcessorModal;

@@ -1,20 +1,20 @@
 import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import { Button, Modal, ProgressBar } from 'components/react-bootstrap';
-import React, { useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 
 const StyledDiv = styled.div`
   line-height: 2.5;
 `;
 
-const SettingDialog: React.FC<{
+const SettingDialog: <T>(props: {
   title: string;
-  optionsEditor: Editor<any>;
-  initialOptions: any;
+  optionsEditor: Editor<T>;
+  initialOptions: T;
   processorProgress: { value: number; label: string };
   onHide: () => void;
-  onOkClick: (props: any) => void;
-}> = props => {
+  onOkClick: (options: T) => void;
+}) => ReactElement<any, any> = props => {
   const {
     title,
     optionsEditor: OptionsEditor,

@@ -4,6 +4,7 @@ import { CclOptions } from './createCclProcessor';
 import { ErosionDilationOptions } from './createEdProcessor';
 import { HoleFillingOptions } from './createHfProcessor';
 import { IntersliceInterpolationOptions } from './createIiProcessor';
+import React from 'react';
 
 export type ProcessorInputMap = {
   ccl: CclOptions;
@@ -37,12 +38,10 @@ export type ProcessorResult<T extends keyof ProcessorResultMap> = {
   data: ProcessorResultMap[T];
 };
 
-export type SettingDialogProperty = {
+type SettingDialogProps<T> = {
   processorProgress: { value: number; label: string };
   onHide: () => void;
-  onOkClick:
-    | ((props: CclOptions) => void)
-    | ((props: ErosionDilationOptions) => void)
-    | ((props: HoleFillingOptions) => void)
-    | ((props: IntersliceInterpolationOptions) => void);
+  onOkClick: (options: T) => void;
 };
+
+export type CustomSettingDialog<T> = React.VFC<SettingDialogProps<T>>;

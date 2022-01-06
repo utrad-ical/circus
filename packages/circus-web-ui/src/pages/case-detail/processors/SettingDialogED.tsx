@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { ErosionDilationOptions } from './createEdProcessor';
 import SettingDialog from './SettingDialog';
-import { SettingDialogProperty } from './processor-types';
+import { CustomSettingDialog } from './processor-types';
 
 const StyledDiv = styled.div`
   line-height: 1;
@@ -285,33 +285,35 @@ const OptionsEditorForED: Editor<ErosionDilationOptions> = props => {
   );
 };
 
-const SettingDialogED: (isErosion: boolean) => React.FC<SettingDialogProperty> =
-  isErosion => {
-    const title = isErosion ? 'Erosion' : 'Dilation';
-    const initialOptions = {
-      structure: {
-        array: newStructure(3, 3, 3),
-        width: 3,
-        height: 3,
-        nSlices: 3
-      },
-      isErosion: isErosion
-    };
-
-    return props => {
-      const { processorProgress, onHide, onOkClick } = props;
-
-      return (
-        <SettingDialog
-          title={title}
-          optionsEditor={OptionsEditorForED}
-          initialOptions={initialOptions}
-          processorProgress={processorProgress}
-          onHide={onHide}
-          onOkClick={onOkClick}
-        />
-      );
-    };
+const craeteDialog: (
+  isErosion: boolean
+) => CustomSettingDialog<ErosionDilationOptions> = isErosion => {
+  const title = isErosion ? 'Erosion' : 'Dilation';
+  const initialOptions: ErosionDilationOptions = {
+    structure: {
+      array: newStructure(3, 3, 3),
+      width: 3,
+      height: 3,
+      nSlices: 3
+    },
+    isErosion: isErosion
   };
 
-export default SettingDialogED;
+  return props => {
+    const { processorProgress, onHide, onOkClick } = props;
+
+    return (
+      <SettingDialog
+        title={title}
+        optionsEditor={OptionsEditorForED}
+        initialOptions={initialOptions}
+        processorProgress={processorProgress}
+        onHide={onHide}
+        onOkClick={onOkClick}
+      />
+    );
+  };
+};
+
+export const SettingDialogErosion = craeteDialog(true);
+export const SettingDialogDilatation = craeteDialog(false);

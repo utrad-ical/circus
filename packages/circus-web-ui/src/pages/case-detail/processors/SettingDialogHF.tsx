@@ -4,7 +4,7 @@ import { FormControl } from 'components/react-bootstrap';
 import React from 'react';
 import { HoleFillingOptions } from './createHfProcessor';
 import SettingDialog from './SettingDialog';
-import { SettingDialogProperty } from './processor-types';
+import { CustomSettingDialog } from './processor-types';
 
 const neighborsOptions2D = {
   4: '4-neigobors',
@@ -27,7 +27,7 @@ const orientationOptions = {
   Sagital: 'Sagital'
 };
 
-const initialOptions = {
+const initialOptions: HoleFillingOptions = {
   dimension: 2,
   neighbors: 4,
   orientation: 'Axial',
@@ -110,7 +110,7 @@ const OptionsEditorForHF: Editor<HoleFillingOptions> = props => {
   );
 };
 
-const SettingDialogHF: React.FC<SettingDialogProperty> = props => {
+const SettingDialogHF: CustomSettingDialog<HoleFillingOptions> = props => {
   const { processorProgress, onHide, onOkClick } = props;
   return (
     <SettingDialog

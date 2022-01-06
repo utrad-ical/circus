@@ -219,6 +219,7 @@ const StyledNav = styled.nav`
     > a {
       flex: 0 0 50%;
       text-align: center;
+      user-select: none;
       &.disabled {
         opacity: 0.5;
         pointer-events: none;

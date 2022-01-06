@@ -31,9 +31,9 @@ import {
   labelTypes
 } from './labelData';
 import { EditingData, EditingDataUpdater } from './revisionData';
-import { ProcessorDialogKey } from './processor/processor-types';
-import ProcessorDropdown from './processor/ProcessorDropdown';
-import ProcessorModal from './processor/ProcessorModal';
+import { ProcessorDialogKey } from './processors/processor-types';
+import ProcessorDropdown from './processors/ProcessorDropdown';
+import ProcessorModal from './processors/ProcessorModal';
 
 type LabelCommand =
   | 'rename'

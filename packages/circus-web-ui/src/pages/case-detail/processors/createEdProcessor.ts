@@ -6,10 +6,7 @@ import {
   Structure
 } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
 import edWorker from 'worker-loader!./edWorker';
-import {
-  PostProcessor,
-  VoxelLabelProcessor
-} from './performLabelCreatingVoxelProcessing';
+import { VoxelLabelProcessor } from './performLabelCreatingVoxelProcessing';
 
 export interface ErosionDilationOptions {
   structure: Structure;
@@ -19,15 +16,17 @@ export interface ErosionDilationOptions {
 const createEdProcessor = (
   options: ErosionDilationOptions
 ): VoxelLabelProcessor<MorphologicalImageProcessingResults> => {
-  return async (
-    input: Uint8Array,
-    width: number,
-    height: number,
-    nSlices: number,
-    name: string,
-    postProcessor: PostProcessor<MorphologicalImageProcessingResults>,
-    reportProgress: (progress: { value: number; label: string }) => void
-  ) => {
+  return async props => {
+    const {
+      input,
+      width,
+      height,
+      nSlices,
+      name,
+      postProcessor,
+      handleProgress
+    } = props;
+
     const { structure, isErosion } = options;
     const padding = isErosion
       ? [0, 0, 0]
@@ -36,7 +35,7 @@ const createEdProcessor = (
           Math.floor(structure.height / 2),
           Math.floor(structure.nSlices / 2)
         ];
-    reportProgress({ value: 100, label: '' });
+    handleProgress({ value: 100, label: '' });
 
     const initializedInput = new Uint8Array(
       (width + 2 * padding[0]) *
@@ -68,7 +67,7 @@ const createEdProcessor = (
       });
       myWorker.onmessage = (e: any) => {
         if (typeof e.data === 'string') {
-          reportProgress({ value: 100, label: 'Failed' });
+          handleProgress({ value: 100, label: 'Failed' });
           alert(`structuring element is invalid.`);
           return;
         }
@@ -86,7 +85,7 @@ const createEdProcessor = (
           },
           names: [isErosion ? `eroded ${name}` : `dilated ${name}`]
         });
-        reportProgress({ value: 100, label: 'Completed' });
+        handleProgress({ value: 100, label: 'Completed' });
       };
     } else {
       console.log('× window.Worker');
@@ -124,7 +123,7 @@ const createEdProcessor = (
         },
         names: [isErosion ? `eroded ${name}` : `dilated ${name}`]
       });
-      reportProgress({ value: 100, label: 'Completed' });
+      handleProgress({ value: 100, label: 'Completed' });
     }
   };
 };

@@ -2,30 +2,18 @@ import Icon from 'components/Icon';
 import { DropdownButton, MenuItem } from 'components/react-bootstrap';
 import React from 'react';
 import { LabelType } from '../labelData';
-import { ProcessorDialogKey } from './processor-types';
-
-const voxelProcessorDropdownProperties: {
-  key: ProcessorDialogKey;
-  caption: string;
-  labelType: LabelType;
-}[] = [
-  { key: 'ccl', caption: 'CCL', labelType: 'voxel' },
-  { key: 'filling', caption: 'Hole filling', labelType: 'voxel' },
-  { key: 'erosion', caption: 'Erosion', labelType: 'voxel' },
-  { key: 'dilation', caption: 'Dilation', labelType: 'voxel' },
-  {
-    key: 'interpolation',
-    caption: 'Interslice interpolation',
-    labelType: 'voxel'
-  },
-  { key: 'section', caption: 'Three points to section', labelType: 'point' }
-];
+import {
+  Processor,
+  ProcessorDialogKey,
+  processorProperties
+} from './processor-types';
 
 const ProcessorDropdown: React.FC<{
   activeLabelType: LabelType | undefined;
   onSelect: (key: ProcessorDialogKey) => void;
+  setProcessor: React.Dispatch<React.SetStateAction<Processor>>;
 }> = props => {
-  const { activeLabelType, onSelect } = props;
+  const { activeLabelType, onSelect, setProcessor } = props;
   return (
     <DropdownButton
       bsSize="xs"
@@ -34,15 +22,25 @@ const ProcessorDropdown: React.FC<{
       pullRight
       noCaret
     >
-      {voxelProcessorDropdownProperties.map(properties => {
+      {Object.keys(processorProperties).map(key => {
+        const dialogKey = key as ProcessorDialogKey;
         return (
           <MenuItem
-            key={properties.key}
-            eventKey={properties.key}
-            onSelect={() => onSelect(properties.key)}
-            disabled={activeLabelType !== properties.labelType}
+            key={dialogKey}
+            eventKey={dialogKey}
+            onSelect={() => {
+              onSelect(dialogKey);
+              if (!processorProperties[dialogKey].settingDialog)
+                setProcessor({
+                  processor: processorProperties[dialogKey].processor(),
+                  update: processorProperties[dialogKey].update
+                });
+            }}
+            disabled={
+              activeLabelType !== processorProperties[dialogKey].labelType
+            }
           >
-            {properties.caption}
+            {processorProperties[dialogKey].caption}
           </MenuItem>
         );
       })}

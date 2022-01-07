@@ -3,10 +3,7 @@ import { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-type
 import CCL26 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D26';
 import CCL6 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D6';
 import cclWorker from 'worker-loader!./cclWorker';
-import {
-  PostProcessor,
-  VoxelLabelProcessor
-} from './performLabelCreatingVoxelProcessing';
+import { VoxelLabelProcessor } from './performLabelCreatingVoxelProcessing';
 
 export interface CclOptions {
   maxOutputComponents: number;
@@ -17,15 +14,17 @@ export interface CclOptions {
 const createCclProcessor = (
   options: CclOptions
 ): VoxelLabelProcessor<LabelingResults3D> => {
-  return async (
-    input: Uint8Array,
-    width: number,
-    height: number,
-    nSlices: number,
-    name: string,
-    postProcessor: PostProcessor<LabelingResults3D>,
-    reportProgress: (progress: { value: number; label: string }) => void
-  ) => {
+  return async props => {
+    const {
+      input,
+      width,
+      height,
+      nSlices,
+      name,
+      postProcessor,
+      handleProgress
+    } = props;
+
     const { maxOutputComponents, neighbors, bufferSize } = options;
     const relabeling = (results: LabelingResults3D) => {
       const nameTable = [
@@ -135,12 +134,12 @@ const createCclProcessor = (
       });
       myWorker.onmessage = (e: any) => {
         if (typeof e.data === 'string') {
-          reportProgress({ value: 100, label: 'Failed' });
+          handleProgress({ value: 100, label: 'Failed' });
           alert(`${name} is too complex.\nPlease modify ${name}.`);
           return;
         }
         postProcessor(relabeling(e.data));
-        reportProgress({ value: 100, label: 'Completed' });
+        handleProgress({ value: 100, label: 'Completed' });
       };
     } else {
       console.log('× window.Worker');
@@ -155,7 +154,7 @@ const createCclProcessor = (
         return;
       }
       postProcessor(relabeling(labelingResults));
-      reportProgress({ value: 100, label: 'Completed' });
+      handleProgress({ value: 100, label: 'Completed' });
     }
   };
 };

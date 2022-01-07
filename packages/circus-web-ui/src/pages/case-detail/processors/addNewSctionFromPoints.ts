@@ -1,13 +1,12 @@
 import { Vector3D } from '@utrad-ical/circus-lib/src/generateMhdHeader';
-import { Viewer } from '@utrad-ical/circus-rs/src/browser';
-import { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
 import { getSectionFromPoints } from '@utrad-ical/circus-rs/src/browser/section-util';
 import { Section } from '@utrad-ical/circus-rs/src/common/geometry';
 import { LayoutInfo, layoutReducer } from 'components/GridContainer';
 import * as c from '../caseStore';
 import { InternalLabelOf } from '../labelData';
-import { EditingData, EditingDataUpdater } from '../revisionData';
+import { EditingData } from '../revisionData';
 import { ViewerDef } from '../ViewerGrid';
+import { NewSctionFromPointsProps } from './processor-types';
 
 const createSectionFromPoints = (
   points: InternalLabelOf<'point'>[],
@@ -77,65 +76,55 @@ const createSectionFromPoints = (
   return [newLayoutItems, newLayout, item.key];
 };
 
-export type NewSctionFromPointsOptions = {
-  editingData: EditingData;
-  updateEditingData: EditingDataUpdater;
-  metadata: (DicomVolumeMetadata | undefined)[];
-  viewers: { [index: string]: Viewer };
-};
+const addNewSctionFromPoints = (props: NewSctionFromPointsProps) => {
+  const { editingData, updateEditingData, metadata, viewers } = props;
 
-const addNewSctionFromPoints = (options: NewSctionFromPointsOptions) => {
-  const { editingData, updateEditingData, metadata, viewers } = options;
-  return () => {
-    try {
-      const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
-      const activeSeriesMetadata = metadata[activeSeriesIndex];
-      const activeSeries = revision.series[activeSeriesIndex];
-      const activeLabel =
-        activeLabelIndex >= 0 ? activeSeries.labels[activeLabelIndex] : null;
-      const seriesIndex = Number(
-        Object.keys(editingData.revision.series).find(ind =>
-          editingData.revision.series[Number(ind)].labels.find(
-            item => item.temporaryKey === activeLabel!.temporaryKey
-          )
+  try {
+    const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
+    const activeSeriesMetadata = metadata[activeSeriesIndex];
+    const activeSeries = revision.series[activeSeriesIndex];
+    const activeLabel =
+      activeLabelIndex >= 0 ? activeSeries.labels[activeLabelIndex] : null;
+    const seriesIndex = Number(
+      Object.keys(editingData.revision.series).find(ind =>
+        editingData.revision.series[Number(ind)].labels.find(
+          item => item.temporaryKey === activeLabel!.temporaryKey
         )
-      );
-      const spareKey = Object.keys(editingData.layout.positions).find(
+      )
+    );
+    const spareKey = Object.keys(editingData.layout.positions).find(
+      key =>
+        editingData.layoutItems.find(item => item.key === key)!.seriesIndex ===
+        seriesIndex
+    );
+    const useActiveLayoutKey = Object.keys(editingData.layout.positions)
+      .filter(
         key =>
           editingData.layoutItems.find(item => item.key === key)!
             .seriesIndex === seriesIndex
-      );
-      const useActiveLayoutKey = Object.keys(editingData.layout.positions)
-        .filter(
-          key =>
-            editingData.layoutItems.find(item => item.key === key)!
-              .seriesIndex === seriesIndex
-        )
-        .some(key => key === editingData.activeLayoutKey);
-      const targetLayoutKey = useActiveLayoutKey
-        ? editingData.activeLayoutKey
-        : spareKey;
-      const [newLayoutItems, newLayout, key] = createSectionFromPoints(
-        editingData.revision.series[activeSeriesIndex].labels.filter(label => {
-          return (
-            label.type === 'point' && !(activeSeriesMetadata?.mode !== '3d')
-          );
-        }) as InternalLabelOf<'point'>[],
-        activeLabel!.name!,
-        (viewers[targetLayoutKey!].getState() as any).section,
-        editingData.layout,
-        editingData.layoutItems,
-        activeSeriesIndex
-      );
-      updateEditingData((d: EditingData) => {
-        d.layoutItems = newLayoutItems;
-        d.layout = newLayout;
-        d.activeLayoutKey = key;
-      });
-    } catch (err: any) {
-      alert(err.message);
-    }
-  };
+      )
+      .some(key => key === editingData.activeLayoutKey);
+    const targetLayoutKey = useActiveLayoutKey
+      ? editingData.activeLayoutKey
+      : spareKey;
+    const [newLayoutItems, newLayout, key] = createSectionFromPoints(
+      editingData.revision.series[activeSeriesIndex].labels.filter(label => {
+        return label.type === 'point' && !(activeSeriesMetadata?.mode !== '3d');
+      }) as InternalLabelOf<'point'>[],
+      activeLabel!.name!,
+      (viewers[targetLayoutKey!].getState() as any).section,
+      editingData.layout,
+      editingData.layoutItems,
+      activeSeriesIndex
+    );
+    updateEditingData((d: EditingData) => {
+      d.layoutItems = newLayoutItems;
+      d.layout = newLayout;
+      d.activeLayoutKey = key;
+    });
+  } catch (err: any) {
+    alert(err.message);
+  }
 };
 
 export default addNewSctionFromPoints;

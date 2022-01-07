@@ -4,10 +4,7 @@ import HoleFilling2D, {
   HoleFilling3D
 } from '@utrad-ical/circus-rs/src/common/CCL/holeFilling';
 import hfWorker from 'worker-loader!./hfWorker';
-import {
-  PostProcessor,
-  VoxelLabelProcessor
-} from './performLabelCreatingVoxelProcessing';
+import { VoxelLabelProcessor } from './performLabelCreatingVoxelProcessing';
 
 export interface HoleFillingOptions {
   dimension: 2 | 3;
@@ -19,18 +16,19 @@ export interface HoleFillingOptions {
 const createHfProcessor = (
   options: HoleFillingOptions
 ): VoxelLabelProcessor<LabelingResults3D> => {
-  return async (
-    input: Uint8Array,
-    width: number,
-    height: number,
-    nSlices: number,
-    name: string,
-    postProcessor: PostProcessor<LabelingResults3D>,
-    reportProgress: (progress: { value: number; label: string }) => void
-  ) => {
+  return async props => {
+    const {
+      input,
+      width,
+      height,
+      nSlices,
+      name,
+      postProcessor,
+      handleProgress
+    } = props;
     const { dimension, neighbors, orientation, bufferSize } = options;
 
-    reportProgress({ value: 100, label: '' });
+    handleProgress({ value: 100, label: '' });
 
     if (window.Worker) {
       const myWorker = new hfWorker();
@@ -46,7 +44,7 @@ const createHfProcessor = (
       });
       myWorker.onmessage = (e: any) => {
         if (typeof e.data === 'string') {
-          reportProgress({ value: 100, label: 'Failed' });
+          handleProgress({ value: 100, label: 'Failed' });
           alert(`${name} is too complex.\nPlease modify ${name}.`);
           return;
         }
@@ -69,7 +67,7 @@ const createHfProcessor = (
             }`
           ]
         });
-        reportProgress({ value: 100, label: 'Completed' });
+        handleProgress({ value: 100, label: 'Completed' });
       };
     } else {
       console.log('× window.Worker');
@@ -165,7 +163,7 @@ const createHfProcessor = (
           }`
         ]
       });
-      reportProgress({ value: 100, label: 'Completed' });
+      handleProgress({ value: 100, label: 'Completed' });
     }
   };
 };

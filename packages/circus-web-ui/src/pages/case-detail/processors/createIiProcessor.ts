@@ -2,10 +2,7 @@ import { alert } from '@smikitky/rb-components/lib/modal';
 import intersliceInterpolation from '@utrad-ical/circus-rs/src/common/morphology/intersliceInterpolation';
 import { MorphologicalImageProcessingResults } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
 import iiWorker from 'worker-loader!./iiWorker';
-import {
-  PostProcessor,
-  VoxelLabelProcessor
-} from './performLabelCreatingVoxelProcessing';
+import { VoxelLabelProcessor } from './performLabelCreatingVoxelProcessing';
 
 export interface IntersliceInterpolationOptions {
   orientation: 'Axial' | 'Coronal' | 'Sagital';
@@ -40,17 +37,18 @@ const transpose = (
 const createIiProcessor = (
   options: IntersliceInterpolationOptions
 ): VoxelLabelProcessor<MorphologicalImageProcessingResults> => {
-  return async (
-    input: Uint8Array,
-    width: number,
-    height: number,
-    nSlices: number,
-    name: string,
-    postProcessor: PostProcessor<MorphologicalImageProcessingResults>,
-    reportProgress: (progress: { value: number; label: string }) => void
-  ) => {
+  return async props => {
+    const {
+      input,
+      width,
+      height,
+      nSlices,
+      name,
+      postProcessor,
+      handleProgress
+    } = props;
     const { orientation } = options;
-    reportProgress({ value: 100, label: '' });
+    handleProgress({ value: 100, label: '' });
 
     const initializedInput = transpose(
       input,
@@ -89,7 +87,7 @@ const createIiProcessor = (
       });
       myWorker.onmessage = (e: any) => {
         if (typeof e.data === 'string') {
-          reportProgress({ value: 100, label: 'Failed' });
+          handleProgress({ value: 100, label: 'Failed' });
           alert(e.data);
           return;
         }
@@ -110,7 +108,7 @@ const createIiProcessor = (
           },
           names: [`interpolated ${name}`]
         });
-        reportProgress({ value: 100, label: 'Completed' });
+        handleProgress({ value: 100, label: 'Completed' });
       };
     } else {
       console.log('× window.Worker');
@@ -142,7 +140,7 @@ const createIiProcessor = (
         },
         names: [`interpolated ${name}`]
       });
-      reportProgress({ value: 100, label: 'Completed' });
+      handleProgress({ value: 100, label: 'Completed' });
     }
   };
 };

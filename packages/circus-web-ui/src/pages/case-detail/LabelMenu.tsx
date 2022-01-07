@@ -14,7 +14,7 @@ import {
   Popover,
   SplitButton
 } from 'components/react-bootstrap';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ButtonProps } from 'react-bootstrap';
 import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
@@ -30,10 +30,14 @@ import {
   LabelType,
   labelTypes
 } from './labelData';
-import { EditingData, EditingDataUpdater } from './revisionData';
-import { ProcessorDialogKey } from './processors/processor-types';
+import {
+  Processor,
+  ProcessorDialogKey,
+  ProcessorProgress
+} from './processors/processor-types';
 import ProcessorDropdown from './processors/ProcessorDropdown';
 import ProcessorModal from './processors/ProcessorModal';
+import { EditingData, EditingDataUpdater } from './revisionData';
 
 type LabelCommand =
   | 'rename'
@@ -64,6 +68,16 @@ const LabelMenu: React.FC<{
   const [processorDialogKey, setProcessorDialogKey] =
     useState<ProcessorDialogKey>('');
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [processor, setProcessor] = useState<Processor>({
+    processor: null,
+    update: ''
+  });
+  const [processorProgress, setProcessorProgress] = useState<ProcessorProgress>(
+    {
+      value: 0,
+      label: ''
+    }
+  );
 
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
   const activeSeriesMetadata = metadata[activeSeriesIndex];
@@ -83,6 +97,55 @@ const LabelMenu: React.FC<{
     editingData,
     updateEditingData
   );
+
+  useEffect(() => {
+    if (processor.update === '' || !processor.processor) return;
+    const label =
+      editingData.revision.series[activeSeriesIndex].labels[activeLabelIndex];
+    if (processor.update === 'label') {
+      processor.processor({
+        editingData: editingData,
+        updateEditingData: updateEditingData,
+        label: label,
+        labelColors: labelColors,
+        reportProgress: (progress: ProcessorProgress) => {
+          setProcessorProgress(progress);
+          if (progress.label !== '') {
+            setProcessorProgress({ value: 0, label: '' });
+            setShowModal(false);
+          }
+        }
+      });
+    } else if (processor.update === 'section') {
+      processor.processor({
+        editingData: editingData,
+        updateEditingData: updateEditingData,
+        metadata: metadata,
+        viewers: viewers
+      });
+      setProcessor({
+        processor: null,
+        update: ''
+      });
+      setProcessorProgress({
+        value: 0,
+        label: ''
+      });
+      setShowModal(false);
+    }
+  }, [processor]);
+
+  const onHideProcessorModal = () => {
+    setShowModal(false);
+    setProcessor({
+      processor: null,
+      update: ''
+    });
+    setProcessorProgress({
+      value: 0,
+      label: ''
+    });
+  };
 
   const handleCommand = async (command: LabelCommand) => {
     if (disabled) return;
@@ -249,28 +312,6 @@ const LabelMenu: React.FC<{
     });
   };
 
-  const onSelect = (behavior: () => void) => () => {
-    const seriesIndex = Number(
-      Object.keys(editingData.revision.series).find(ind =>
-        editingData.revision.series[Number(ind)].labels.find(
-          item => item.temporaryKey === activeLabel!.temporaryKey
-        )
-      )
-    );
-
-    if (
-      Object.keys(editingData.layout.positions).some(
-        key =>
-          editingData.layoutItems.find(item => item.key === key)!
-            .seriesIndex === seriesIndex
-      )
-    ) {
-      return behavior();
-    } else {
-      alert(`Must display at least one viewer of Series #${seriesIndex}`);
-    }
-  };
-
   return (
     <StyledButtonsDiv>
       <AppearanceEditor
@@ -325,6 +366,7 @@ const LabelMenu: React.FC<{
           setProcessorDialogKey(processorDialogKey);
           setShowModal(true);
         }}
+        setProcessor={setProcessor}
       />
       <IconButton
         bsSize="xs"
@@ -364,20 +406,10 @@ const LabelMenu: React.FC<{
       </SplitButton>
       {showModal && (
         <ProcessorModal
-          editingData={editingData}
-          updateEditingData={updateEditingData}
-          label={
-            editingData.revision.series[activeSeriesIndex].labels[
-              activeLabelIndex
-            ]
-          }
-          labelColors={labelColors}
           processorDialogKey={processorDialogKey}
-          onHide={() => {
-            setShowModal(false);
-          }}
-          metadata={metadata}
-          viewers={viewers}
+          onHide={onHideProcessorModal}
+          setProcessor={setProcessor}
+          processorProgress={processorProgress}
         />
       )}
     </StyledButtonsDiv>

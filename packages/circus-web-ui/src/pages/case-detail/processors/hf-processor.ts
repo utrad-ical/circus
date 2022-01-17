@@ -3,7 +3,7 @@ import { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-type
 import HoleFilling2D, {
   HoleFilling3D
 } from '@utrad-ical/circus-rs/src/common/CCL/holeFilling';
-import hfWorker from 'worker-loader!./hfWorker';
+import hfWorker from 'worker-loader!./hf-worker';
 import { VoxelLabelProcessor } from './performLabelCreatingVoxelProcessing';
 
 export interface HoleFillingOptions {
@@ -24,11 +24,11 @@ const createHfProcessor = (
       nSlices,
       name,
       postProcessor,
-      handleProgress
+      reportProgress
     } = props;
     const { dimension, neighbors, orientation, bufferSize } = options;
 
-    handleProgress({ value: 100, label: '' });
+    reportProgress({ value: 100, label: '' });
 
     if (window.Worker) {
       const myWorker = new hfWorker();
@@ -44,7 +44,7 @@ const createHfProcessor = (
       });
       myWorker.onmessage = (e: any) => {
         if (typeof e.data === 'string') {
-          handleProgress({ value: 100, label: 'Failed' });
+          reportProgress({ value: 100, label: 'Failed' });
           alert(`${name} is too complex.\nPlease modify ${name}.`);
           return;
         }
@@ -67,7 +67,7 @@ const createHfProcessor = (
             }`
           ]
         });
-        handleProgress({ value: 100, label: 'Completed' });
+        reportProgress({ value: 100, label: 'Completed' });
       };
     } else {
       console.log('× window.Worker');
@@ -163,7 +163,7 @@ const createHfProcessor = (
           }`
         ]
       });
-      handleProgress({ value: 100, label: 'Completed' });
+      reportProgress({ value: 100, label: 'Completed' });
     }
   };
 };

@@ -2,7 +2,7 @@ import { alert } from '@smikitky/rb-components/lib/modal';
 import { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
 import CCL26 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D26';
 import CCL6 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D6';
-import cclWorker from 'worker-loader!./cclWorker';
+import cclWorker from 'worker-loader!./ccl-worker';
 import { VoxelLabelProcessor } from './performLabelCreatingVoxelProcessing';
 
 export interface CclOptions {
@@ -22,7 +22,7 @@ const createCclProcessor = (
       nSlices,
       name,
       postProcessor,
-      handleProgress
+      reportProgress
     } = props;
 
     const { maxOutputComponents, neighbors, bufferSize } = options;
@@ -134,12 +134,12 @@ const createCclProcessor = (
       });
       myWorker.onmessage = (e: any) => {
         if (typeof e.data === 'string') {
-          handleProgress({ value: 100, label: 'Failed' });
+          reportProgress({ value: 100, label: 'Failed' });
           alert(`${name} is too complex.\nPlease modify ${name}.`);
           return;
         }
         postProcessor(relabeling(e.data));
-        handleProgress({ value: 100, label: 'Completed' });
+        reportProgress({ value: 100, label: 'Completed' });
       };
     } else {
       console.log('× window.Worker');
@@ -154,7 +154,7 @@ const createCclProcessor = (
         return;
       }
       postProcessor(relabeling(labelingResults));
-      handleProgress({ value: 100, label: 'Completed' });
+      reportProgress({ value: 100, label: 'Completed' });
     }
   };
 };

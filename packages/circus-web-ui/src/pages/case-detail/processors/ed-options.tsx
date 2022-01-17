@@ -4,9 +4,7 @@ import classnames from 'classnames';
 import { FormControl } from 'components/react-bootstrap';
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { ErosionDilationOptions } from './createEdProcessor';
-import SettingDialog from './SettingDialog';
-import { CustomSettingDialog } from './processor-types';
+import { ErosionDilationOptions } from './ed-processor';
 
 const StyledDiv = styled.div`
   line-height: 1;
@@ -153,7 +151,7 @@ const newStructure = (width: number, height: number, nSlices: number) => {
   return structure;
 };
 
-const OptionsEditorForED: Editor<ErosionDilationOptions> = props => {
+export const OptionsEditor: Editor<ErosionDilationOptions> = props => {
   const { value, onChange } = props;
   const [sliceNumber, setSliceNumber] = useState(
     Math.floor(value.structure.nSlices / 2)
@@ -165,6 +163,7 @@ const OptionsEditorForED: Editor<ErosionDilationOptions> = props => {
       return;
     setSliceNumber(Number(ev.target.value));
   };
+
   const onWidthChange = (ev: any) => {
     if (ev.target.value < range[0] || range[1] < ev.target.value) return;
     const structure = newStructure(
@@ -181,6 +180,7 @@ const OptionsEditorForED: Editor<ErosionDilationOptions> = props => {
       }
     });
   };
+
   const onHeightChange = (ev: any) => {
     if (ev.target.value < range[0] || range[1] < ev.target.value) return;
     const structure = newStructure(
@@ -197,6 +197,7 @@ const OptionsEditorForED: Editor<ErosionDilationOptions> = props => {
       }
     });
   };
+
   const onNSlicesChange = (ev: any) => {
     if (ev.target.value < range[0] || range[1] < ev.target.value) return;
     const structure = newStructure(
@@ -214,15 +215,11 @@ const OptionsEditorForED: Editor<ErosionDilationOptions> = props => {
       }
     });
   };
+
   const onStructureChange = (array: Uint8Array) => {
-    onChange({
-      ...value,
-      structure: {
-        ...value.structure,
-        array: array
-      }
-    });
+    onChange({ ...value, structure: { ...value.structure, array } });
   };
+
   return (
     <StyledDiv>
       <div className="structure-shape form-inline">
@@ -285,35 +282,19 @@ const OptionsEditorForED: Editor<ErosionDilationOptions> = props => {
   );
 };
 
-const craeteDialog: (
-  isErosion: boolean
-) => CustomSettingDialog<ErosionDilationOptions> = isErosion => {
-  const title = isErosion ? 'Erosion' : 'Dilation';
-  const initialOptions: ErosionDilationOptions = {
-    structure: {
-      array: newStructure(3, 3, 3),
-      width: 3,
-      height: 3,
-      nSlices: 3
-    },
-    isErosion: isErosion
-  };
-
-  return props => {
-    const { processorProgress, onHide, onOkClick } = props;
-
-    return (
-      <SettingDialog
-        title={title}
-        optionsEditor={OptionsEditorForED}
-        initialOptions={initialOptions}
-        processorProgress={processorProgress}
-        onHide={onHide}
-        onOkClick={onOkClick}
-      />
-    );
-  };
+const structure = {
+  array: newStructure(3, 3, 3),
+  width: 3,
+  height: 3,
+  nSlices: 3
 };
 
-export const SettingDialogErosion = craeteDialog(true);
-export const SettingDialogDilatation = craeteDialog(false);
+export const initialOptionsForErosion: ErosionDilationOptions = {
+  structure,
+  isErosion: true
+};
+
+export const initialOptionsForDilation: ErosionDilationOptions = {
+  structure,
+  isErosion: false
+};

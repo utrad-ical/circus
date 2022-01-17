@@ -1,7 +1,7 @@
 import { alert } from '@smikitky/rb-components/lib/modal';
 import intersliceInterpolation from '@utrad-ical/circus-rs/src/common/morphology/intersliceInterpolation';
 import { MorphologicalImageProcessingResults } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
-import iiWorker from 'worker-loader!./iiWorker';
+import iiWorker from 'worker-loader!./ii-worker';
 import { VoxelLabelProcessor } from './performLabelCreatingVoxelProcessing';
 
 export interface IntersliceInterpolationOptions {
@@ -45,10 +45,10 @@ const createIiProcessor = (
       nSlices,
       name,
       postProcessor,
-      handleProgress
+      reportProgress
     } = props;
     const { orientation } = options;
-    handleProgress({ value: 100, label: '' });
+    reportProgress({ value: 100, label: '' });
 
     const initializedInput = transpose(
       input,
@@ -87,7 +87,7 @@ const createIiProcessor = (
       });
       myWorker.onmessage = (e: any) => {
         if (typeof e.data === 'string') {
-          handleProgress({ value: 100, label: 'Failed' });
+          reportProgress({ value: 100, label: 'Failed' });
           alert(e.data);
           return;
         }
@@ -108,7 +108,7 @@ const createIiProcessor = (
           },
           names: [`interpolated ${name}`]
         });
-        handleProgress({ value: 100, label: 'Completed' });
+        reportProgress({ value: 100, label: 'Completed' });
       };
     } else {
       console.log('× window.Worker');
@@ -140,7 +140,7 @@ const createIiProcessor = (
         },
         names: [`interpolated ${name}`]
       });
-      handleProgress({ value: 100, label: 'Completed' });
+      reportProgress({ value: 100, label: 'Completed' });
     }
   };
 };

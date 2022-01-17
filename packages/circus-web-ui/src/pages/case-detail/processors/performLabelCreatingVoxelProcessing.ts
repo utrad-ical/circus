@@ -20,7 +20,7 @@ export type VoxelLabelProcessor<
   nSlices: number;
   name: string;
   postProcessor: PostProcessor<T>;
-  handleProgress: (progress: ProcessorProgress) => void;
+  reportProgress: (progress: ProcessorProgress) => void;
 }) => void;
 
 function performLabelCreatingVoxelProcessing<
@@ -142,7 +142,7 @@ function performLabelCreatingVoxelProcessing<
       nSlices: nSlices,
       name: label.name!,
       postProcessor: addNewLabels,
-      handleProgress: reportProgress
+      reportProgress
     });
   };
 }

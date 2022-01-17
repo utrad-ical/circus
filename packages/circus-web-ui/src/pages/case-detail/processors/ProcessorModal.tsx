@@ -1,47 +1,66 @@
-import { Modal } from 'components/react-bootstrap';
-import React from 'react';
-import {
-  CustomSettingDialog,
-  Processor,
-  ProcessorDialogKey,
-  processorModalPropertyKey,
-  ProcessorModalPropertyType,
-  ProcessorProgress,
-  processorProperties
-} from './processor-types';
+import { Editor } from '@smikitky/rb-components/lib/editor-types';
+import { Button, Modal, ProgressBar } from 'components/react-bootstrap';
+import React, { useState } from 'react';
+import styled from 'styled-components';
+import { ProcessorProgress } from './processor-types';
 
 const ProcessorModal: React.FC<{
-  processorDialogKey: ProcessorDialogKey;
+  title: string;
+  optionsEditor: Editor<any>;
+  initialOptions: any;
+  onOkClick: (options: any) => void;
   onHide: () => void;
-  setProcessor: React.Dispatch<React.SetStateAction<Processor>>;
-  processorProgress: ProcessorProgress;
+  progress: ProcessorProgress | null;
 }> = props => {
-  const { processorDialogKey, onHide, setProcessor, processorProgress } = props;
-  if (
-    processorDialogKey === '' ||
-    processorModalPropertyKey.every(key => key !== processorDialogKey)
-  ) {
-    return null;
-  }
-  const _processorDialogKey = processorDialogKey as ProcessorModalPropertyType;
-  const SettingDialog = processorProperties[_processorDialogKey]
-    .settingDialog as CustomSettingDialog<any>;
+  const {
+    title,
+    optionsEditor: OptionsEditor,
+    initialOptions,
+    onOkClick,
+    onHide,
+    progress
+  } = props;
 
-  const processor = processorProperties[_processorDialogKey].processor;
-  const update = processorProperties[_processorDialogKey].update;
-  const onOkClick = (options: any) => {
-    setProcessor({ processor: processor(options), update: update });
+  const handleOkClick = () => {
+    onOkClick(options);
   };
 
+  const [options, setOptions] = useState(initialOptions);
+
   return (
-    <Modal show={processorDialogKey.length > 0} onHide={onHide}>
-      <SettingDialog
-        processorProgress={processorProgress}
-        onHide={onHide}
-        onOkClick={onOkClick}
-      />
+    <Modal show={true} onHide={onHide}>
+      <Modal.Header>{title}</Modal.Header>
+      <Modal.Body>
+        <StyledDiv>
+          <OptionsEditor value={options} onChange={setOptions} />
+          {progress && (
+            <div>
+              <ProgressBar
+                now={progress.value}
+                label={progress.label}
+                striped
+                active
+              />
+            </div>
+          )}
+        </StyledDiv>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button bsStyle="link" onClick={onHide}>
+          Cancel
+        </Button>
+        <Button onClick={handleOkClick} bsStyle="primary">
+          OK
+        </Button>
+      </Modal.Footer>
     </Modal>
   );
 };
+
+const StyledDiv = styled.div`
+  display: flex;
+  flex-flow: column;
+  gap: 15px;
+`;
 
 export default ProcessorModal;

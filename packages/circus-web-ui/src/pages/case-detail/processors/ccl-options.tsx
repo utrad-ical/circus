@@ -2,9 +2,7 @@ import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import { FormControl } from 'components/react-bootstrap';
 import React from 'react';
-import { CclOptions } from './createCclProcessor';
-import { CustomSettingDialog } from './processor-types';
-import SettingDialog from './SettingDialog';
+import { CclOptions } from './ccl-processor';
 
 const maximumCCNumOptions = {
   1: '1 CC',
@@ -24,13 +22,13 @@ const neighborsOptions = {
   26: '26-neigobors'
 };
 
-const initialOptions: CclOptions = {
+export const initialOptions: CclOptions = {
   maxOutputComponents: 2,
   neighbors: 26,
   bufferSize: 255
 };
 
-const OptionsEditorForCCL: Editor<CclOptions> = props => {
+export const OptionsEditor: Editor<CclOptions> = props => {
   const { value, onChange } = props;
   const onMaximumComponentsChange = (ev: any) => {
     if (ev.target.value < 1 || 2 ** 16 <= ev.target.value) return;
@@ -73,19 +71,3 @@ const OptionsEditorForCCL: Editor<CclOptions> = props => {
     </>
   );
 };
-
-const SettingDialogCCL: CustomSettingDialog<CclOptions> = props => {
-  const { processorProgress, onHide, onOkClick } = props;
-  return (
-    <SettingDialog
-      title="Connected component labeling (CCL)"
-      optionsEditor={OptionsEditorForCCL}
-      initialOptions={initialOptions}
-      processorProgress={processorProgress}
-      onHide={onHide}
-      onOkClick={onOkClick}
-    />
-  );
-};
-
-export default SettingDialogCCL;

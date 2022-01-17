@@ -5,7 +5,7 @@ import {
   MorphologicalImageProcessingResults,
   Structure
 } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
-import edWorker from 'worker-loader!./edWorker';
+import edWorker from 'worker-loader!./ed-worker';
 import { VoxelLabelProcessor } from './performLabelCreatingVoxelProcessing';
 
 export interface ErosionDilationOptions {
@@ -24,7 +24,7 @@ const createEdProcessor = (
       nSlices,
       name,
       postProcessor,
-      handleProgress
+      reportProgress
     } = props;
 
     const { structure, isErosion } = options;
@@ -35,7 +35,7 @@ const createEdProcessor = (
           Math.floor(structure.height / 2),
           Math.floor(structure.nSlices / 2)
         ];
-    handleProgress({ value: 100, label: '' });
+    reportProgress({ value: 100, label: '' });
 
     const initializedInput = new Uint8Array(
       (width + 2 * padding[0]) *
@@ -67,7 +67,7 @@ const createEdProcessor = (
       });
       myWorker.onmessage = (e: any) => {
         if (typeof e.data === 'string') {
-          handleProgress({ value: 100, label: 'Failed' });
+          reportProgress({ value: 100, label: 'Failed' });
           alert(`structuring element is invalid.`);
           return;
         }
@@ -85,7 +85,7 @@ const createEdProcessor = (
           },
           names: [isErosion ? `eroded ${name}` : `dilated ${name}`]
         });
-        handleProgress({ value: 100, label: 'Completed' });
+        reportProgress({ value: 100, label: 'Completed' });
       };
     } else {
       console.log('× window.Worker');
@@ -123,7 +123,7 @@ const createEdProcessor = (
         },
         names: [isErosion ? `eroded ${name}` : `dilated ${name}`]
       });
-      handleProgress({ value: 100, label: 'Completed' });
+      reportProgress({ value: 100, label: 'Completed' });
     }
   };
 };

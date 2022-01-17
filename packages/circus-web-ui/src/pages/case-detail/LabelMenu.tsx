@@ -14,7 +14,7 @@ import {
   Popover,
   SplitButton
 } from 'components/react-bootstrap';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { ButtonProps } from 'react-bootstrap';
 import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
@@ -31,8 +31,8 @@ import {
   labelTypes
 } from './labelData';
 import {
-  Processor,
-  ProcessorDialogKey,
+  processors,
+  ProcessorType,
   ProcessorProgress
 } from './processors/processor-types';
 import ProcessorDropdown from './processors/ProcessorDropdown';
@@ -45,6 +45,12 @@ type LabelCommand =
   | 'convertType'
   | 'reveal'
   | 'toggleHideAllLabels';
+
+type ProcessorState = {
+  type: null | ProcessorType;
+  showModal: boolean;
+  progress: null | ProcessorProgress;
+};
 
 const LabelMenu: React.FC<{
   editingData: EditingData;
@@ -65,19 +71,11 @@ const LabelMenu: React.FC<{
     metadata
   } = props;
 
-  const [processorDialogKey, setProcessorDialogKey] =
-    useState<ProcessorDialogKey>('');
-  const [showModal, setShowModal] = useState<boolean>(false);
-  const [processor, setProcessor] = useState<Processor>({
-    processor: null,
-    update: ''
+  const [processorState, setProcessorState] = useState<ProcessorState>({
+    type: null,
+    showModal: false,
+    progress: null
   });
-  const [processorProgress, setProcessorProgress] = useState<ProcessorProgress>(
-    {
-      value: 0,
-      label: ''
-    }
-  );
 
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
   const activeSeriesMetadata = metadata[activeSeriesIndex];
@@ -98,53 +96,60 @@ const LabelMenu: React.FC<{
     updateEditingData
   );
 
-  useEffect(() => {
-    if (processor.update === '' || !processor.processor) return;
+  const handleProcesssorSelect = (type: ProcessorType) => {
+    if (processors[type].settingsModal) {
+      setProcessorState(s => ({ ...s, type, showModal: true }));
+    } else {
+      executeProcessor(null); // no modal, executes right away
+    }
+  };
+
+  const executeProcessor = (options: any) => {
+    if (!processorState.type) return;
+    const behavior = processors[processorState.type];
+    const processor = behavior.processorCreator(options);
+
     const label =
       editingData.revision.series[activeSeriesIndex].labels[activeLabelIndex];
-    if (processor.update === 'label') {
-      processor.processor({
-        editingData: editingData,
-        updateEditingData: updateEditingData,
-        label: label,
-        labelColors: labelColors,
-        reportProgress: (progress: ProcessorProgress) => {
-          setProcessorProgress(progress);
-          if (progress.label !== '') {
-            setProcessorProgress({ value: 0, label: '' });
-            setShowModal(false);
-          }
-        }
-      });
-    } else if (processor.update === 'section') {
-      processor.processor({
-        editingData: editingData,
-        updateEditingData: updateEditingData,
-        metadata: metadata,
-        viewers: viewers
-      });
-      setProcessor({
-        processor: null,
-        update: ''
-      });
-      setProcessorProgress({
-        value: 0,
-        label: ''
-      });
-      setShowModal(false);
-    }
-  }, [processor]);
 
-  const onHideProcessorModal = () => {
-    setShowModal(false);
-    setProcessor({
-      processor: null,
-      update: ''
-    });
-    setProcessorProgress({
-      value: 0,
-      label: ''
-    });
+    // ??
+    switch (behavior.processTarget) {
+      case 'label':
+        processor({
+          editingData: editingData,
+          updateEditingData: updateEditingData,
+          label: label,
+          labelColors: labelColors,
+          reportProgress: (progress: ProcessorProgress) => {
+            setProcessorState(s => ({ ...s, progress }));
+            if (progress.label !== '') {
+              // ??
+              setProcessorState({
+                type: null,
+                showModal: false,
+                progress: null
+              });
+            }
+          }
+        });
+        break;
+      case 'section':
+        processor({
+          editingData: editingData,
+          updateEditingData: updateEditingData,
+          metadata: metadata,
+          viewers: viewers
+        });
+        setProcessorState({
+          type: null,
+          progress: null,
+          showModal: false
+        });
+    }
+  };
+
+  const handleHideProcessorModal = () => {
+    setProcessorState({ type: null, showModal: false, progress: null });
   };
 
   const handleCommand = async (command: LabelCommand) => {
@@ -362,11 +367,7 @@ const LabelMenu: React.FC<{
       />
       <ProcessorDropdown
         activeLabelType={activeLabel?.type}
-        onSelect={(processorDialogKey: ProcessorDialogKey) => {
-          setProcessorDialogKey(processorDialogKey);
-          setShowModal(true);
-        }}
-        setProcessor={setProcessor}
+        onSelect={handleProcesssorSelect}
       />
       <IconButton
         bsSize="xs"
@@ -404,12 +405,12 @@ const LabelMenu: React.FC<{
           );
         })}
       </SplitButton>
-      {showModal && (
+      {processorState.showModal && (
         <ProcessorModal
-          processorDialogKey={processorDialogKey}
-          onHide={onHideProcessorModal}
-          setProcessor={setProcessor}
-          processorProgress={processorProgress}
+          onHide={handleHideProcessorModal}
+          onOkClick={executeProcessor}
+          progress={processorState.progress}
+          {...processors[processorState.type!].settingsModal!}
         />
       )}
     </StyledButtonsDiv>

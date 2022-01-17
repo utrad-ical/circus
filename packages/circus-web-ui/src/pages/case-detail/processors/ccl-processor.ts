@@ -3,7 +3,9 @@ import { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-type
 import CCL26 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D26';
 import CCL6 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D6';
 import cclWorker from 'worker-loader!./ccl-worker';
-import { VoxelLabelProcessor } from './performLabelCreatingVoxelProcessing';
+import performLabelCreatingVoxelProcessing, {
+  VoxelLabelProcessor
+} from './performLabelCreatingVoxelProcessing';
 
 export interface CclOptions {
   maxOutputComponents: number;
@@ -11,11 +13,10 @@ export interface CclOptions {
   bufferSize: number;
 }
 
-const createCclProcessor = (
-  options: CclOptions
-): VoxelLabelProcessor<LabelingResults3D> => {
-  return async props => {
+const cclVoxelProcessor: VoxelLabelProcessor<LabelingResults3D, CclOptions> =
+  props => {
     const {
+      options: { maxOutputComponents, neighbors, bufferSize },
       input,
       width,
       height,
@@ -25,7 +26,6 @@ const createCclProcessor = (
       reportProgress
     } = props;
 
-    const { maxOutputComponents, neighbors, bufferSize } = options;
     const relabeling = (results: LabelingResults3D) => {
       const nameTable = [
         'largest CC',
@@ -157,6 +157,6 @@ const createCclProcessor = (
       reportProgress({ value: 100, label: 'Completed' });
     }
   };
-};
 
-export default createCclProcessor;
+const cclProcessor = performLabelCreatingVoxelProcessing(cclVoxelProcessor);
+export default cclProcessor;

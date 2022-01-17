@@ -1,23 +1,17 @@
 import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import { Viewer } from '@utrad-ical/circus-rs/src/browser';
 import { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
-import { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
-import { MorphologicalImageProcessingResults } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
-import React from 'react';
 import { InternalLabel, LabelType } from '../labelData';
 import { EditingData, EditingDataUpdater } from '../revisionData';
 import addNewSctionFromPoints from './addNewSctionFromPoints';
 import * as ccl from './ccl-options';
-import createCclProcessor, { CclOptions } from './ccl-processor';
+import cclProcessor from './ccl-processor';
 import * as ed from './ed-options';
-import createEdProcessor, { ErosionDilationOptions } from './ed-processor';
+import { erosionProcessor, dilatationProcessor } from './ed-processor';
 import * as hf from './hf-options';
-import createHfProcessor, { HoleFillingOptions } from './hf-processor';
+import hfProcessor from './hf-processor';
 import * as ii from './ii-options';
-import createIiProcessor, {
-  IntersliceInterpolationOptions
-} from './ii-processor';
-import performLabelCreatingVoxelProcessing from './performLabelCreatingVoxelProcessing';
+import iiProcessor from './ii-processor';
 
 export const processorTypes = [
   'ccl',
@@ -32,42 +26,21 @@ export type ProcessorType = typeof processorTypes[number];
 
 export type ProcessorProgress = { value: number; label: string };
 
-export type NewSctionFromPointsProps = {
+interface ProcessorInput<T> {
+  options: T;
   editingData: EditingData;
+  selectedLabel: InternalLabel;
   updateEditingData: EditingDataUpdater;
-  metadata: (DicomVolumeMetadata | undefined)[];
-  viewers: { [index: string]: Viewer };
-};
-
-export type UpdateLabelProps = {
-  editingData: EditingData;
-  updateEditingData: EditingDataUpdater;
-  label: InternalLabel;
-  labelColors: string[];
   reportProgress: (progress: ProcessorProgress) => void;
-};
+  hints: {
+    seriesMetadata: (DicomVolumeMetadata | undefined)[];
+    viewers: { [index: string]: Viewer };
+    labelColors: string[];
+  };
+}
 
-export type Processor =
-  | {
-      processor: (props: UpdateLabelProps) => void;
-      update: 'label';
-    }
-  | {
-      processor: (props: NewSctionFromPointsProps) => void;
-      update: 'section';
-    }
-  | {
-      processor: null;
-      update: '';
-    };
-
-type SettingDialogProps<T> = {
-  processorProgress: ProcessorProgress;
-  onHide: () => void;
-  onOkClick: (options: T) => void;
-};
-
-export type CustomSettingDialog<T> = React.VFC<SettingDialogProps<T>>;
+// This is not async; progress reported via reportProgress callback
+export type Processor<T> = (input: ProcessorInput<T>) => void;
 
 interface ProcessorModalConfiguration<T> {
   title: string;
@@ -75,91 +48,69 @@ interface ProcessorModalConfiguration<T> {
   initialOptions: T;
 }
 
-interface ProcessorProperties {
+interface ProcessorDefinition {
   caption: string;
   labelType: LabelType;
-  processTarget: 'label' | 'section';
-  processorCreator: (options?: any) => (props: any) => void; // ??
+  processor: Processor<any>;
   settingsModal?: ProcessorModalConfiguration<any>;
 }
 
 export const processors: {
-  [key in ProcessorType]: ProcessorProperties;
+  [key in ProcessorType]: ProcessorDefinition;
 } = {
   ccl: {
     caption: 'CCL',
     labelType: 'voxel',
-    processTarget: 'label',
     settingsModal: {
       title: 'Connected component labeling (CCL)',
       optionsEditor: ccl.OptionsEditor,
       initialOptions: ccl.initialOptions
     },
-    processorCreator: (options: CclOptions) =>
-      performLabelCreatingVoxelProcessing<LabelingResults3D>(
-        createCclProcessor(options)
-      )
+    processor: cclProcessor
   },
   filling: {
     caption: 'Hole filling',
     labelType: 'voxel',
-    processTarget: 'label',
     settingsModal: {
       title: 'Hole filling',
       optionsEditor: hf.OptionsEditor,
       initialOptions: hf.initialOptions
     },
-    processorCreator: (options: HoleFillingOptions) =>
-      performLabelCreatingVoxelProcessing<LabelingResults3D>(
-        createHfProcessor(options)
-      )
+    processor: hfProcessor
   },
   erosion: {
     caption: 'Erosion',
     labelType: 'voxel',
-    processTarget: 'label',
     settingsModal: {
       title: 'Erosion',
       optionsEditor: ed.OptionsEditor,
-      initialOptions: ed.initialOptionsForErosion
+      initialOptions: ed.initialOptions
     },
-    processorCreator: (options: ErosionDilationOptions) =>
-      performLabelCreatingVoxelProcessing<MorphologicalImageProcessingResults>(
-        createEdProcessor(options)
-      )
+    processor: erosionProcessor
   },
   dilation: {
     caption: 'Dilation',
     labelType: 'voxel',
-    processTarget: 'label',
     settingsModal: {
       title: 'Erosion',
       optionsEditor: ed.OptionsEditor,
-      initialOptions: ed.initialOptionsForDilation
+      initialOptions: ed.initialOptions
     },
-    processorCreator: (options: ErosionDilationOptions) =>
-      performLabelCreatingVoxelProcessing<MorphologicalImageProcessingResults>(
-        createEdProcessor(options)
-      )
+    processor: dilatationProcessor
   },
   interpolation: {
     caption: 'Interslice interpolation',
     labelType: 'voxel',
-    processTarget: 'label',
     settingsModal: {
       title: 'Erosion',
       optionsEditor: ii.OptionsEditor,
       initialOptions: ii.initialOptions
     },
-    processorCreator: (options: IntersliceInterpolationOptions) =>
-      performLabelCreatingVoxelProcessing<MorphologicalImageProcessingResults>(
-        createIiProcessor(options)
-      )
+    processor: iiProcessor
   },
   section: {
     caption: 'Three points to section',
     labelType: 'point',
-    processTarget: 'section',
-    processorCreator: () => addNewSctionFromPoints
+    processor: addNewSctionFromPoints
   }
 };

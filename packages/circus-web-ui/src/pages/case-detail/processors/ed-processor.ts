@@ -6,18 +6,21 @@ import {
   Structure
 } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
 import edWorker from 'worker-loader!./ed-worker';
-import { VoxelLabelProcessor } from './performLabelCreatingVoxelProcessing';
+import performLabelCreatingVoxelProcessing, {
+  VoxelLabelProcessor
+} from './performLabelCreatingVoxelProcessing';
 
-export interface ErosionDilationOptions {
-  structure: Structure;
-  isErosion: boolean;
-}
+export type ErosionDilationOptions = Structure;
 
-const createEdProcessor = (
-  options: ErosionDilationOptions
-): VoxelLabelProcessor<MorphologicalImageProcessingResults> => {
+const createEdProcessor: (
+  isErosion: boolean
+) => VoxelLabelProcessor<
+  MorphologicalImageProcessingResults,
+  ErosionDilationOptions
+> = isErosion => {
   return async props => {
     const {
+      options: structure,
       input,
       width,
       height,
@@ -27,7 +30,6 @@ const createEdProcessor = (
       reportProgress
     } = props;
 
-    const { structure, isErosion } = options;
     const padding = isErosion
       ? [0, 0, 0]
       : [
@@ -128,4 +130,10 @@ const createEdProcessor = (
   };
 };
 
-export default createEdProcessor;
+export const erosionProcessor = performLabelCreatingVoxelProcessing(
+  createEdProcessor(true)
+);
+
+export const dilatationProcessor = performLabelCreatingVoxelProcessing(
+  createEdProcessor(false)
+);

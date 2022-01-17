@@ -6,7 +6,7 @@ import * as c from '../caseStore';
 import { InternalLabelOf } from '../labelData';
 import { EditingData } from '../revisionData';
 import { ViewerDef } from '../ViewerGrid';
-import { NewSctionFromPointsProps } from './processor-types';
+import { Processor } from './processor-types';
 
 const createSectionFromPoints = (
   points: InternalLabelOf<'point'>[],
@@ -76,8 +76,13 @@ const createSectionFromPoints = (
   return [newLayoutItems, newLayout, item.key];
 };
 
-const addNewSctionFromPoints = (props: NewSctionFromPointsProps) => {
-  const { editingData, updateEditingData, metadata, viewers } = props;
+const addNewSctionFromPoints: Processor<{}> = input => {
+  const {
+    editingData,
+    updateEditingData,
+    reportProgress,
+    hints: { seriesMetadata: metadata, viewers }
+  } = input;
 
   try {
     const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
@@ -122,6 +127,7 @@ const addNewSctionFromPoints = (props: NewSctionFromPointsProps) => {
       d.layout = newLayout;
       d.activeLayoutKey = key;
     });
+    reportProgress({ value: 100, label: 'Completed' });
   } catch (err: any) {
     alert(err.message);
   }

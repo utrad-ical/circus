@@ -5,15 +5,17 @@ import { MorphologicalImageProcessingResults } from '@utrad-ical/circus-rs/src/c
 import RawData from '@utrad-ical/circus-rs/src/common/RawData';
 import createCurrentLabelsUpdator from '../createCurrentLabelsUpdator';
 import { createNewLabelData, InternalLabelOf } from '../labelData';
-import { ProcessorProgress, UpdateLabelProps } from './processor-types';
+import { ProcessorProgress, Processor } from './processor-types';
 
 export type PostProcessor<
   T extends LabelingResults3D | MorphologicalImageProcessingResults
 > = (results: { processingResults: T; names: string[] }) => void;
 
 export type VoxelLabelProcessor<
-  T extends LabelingResults3D | MorphologicalImageProcessingResults
+  T extends LabelingResults3D | MorphologicalImageProcessingResults,
+  O
 > = (props: {
+  options: O;
   input: Uint8Array;
   width: number;
   height: number;
@@ -23,17 +25,21 @@ export type VoxelLabelProcessor<
   reportProgress: (progress: ProcessorProgress) => void;
 }) => void;
 
-function performLabelCreatingVoxelProcessing<
-  T extends LabelingResults3D | MorphologicalImageProcessingResults
->(voxelLabelProcessor: VoxelLabelProcessor<T>) {
-  return (props: UpdateLabelProps) => {
+const performLabelCreatingVoxelProcessing = <
+  T extends LabelingResults3D | MorphologicalImageProcessingResults,
+  O
+>(
+  voxelLabelProcessor: VoxelLabelProcessor<T, O>
+): Processor<O> => {
+  return async input => {
     const {
+      options,
       editingData,
       updateEditingData,
-      label,
-      labelColors,
+      selectedLabel: label,
+      hints: { labelColors },
       reportProgress
-    } = props;
+    } = input;
     if (label.type !== 'voxel' || !label.data.size)
       throw new TypeError('Invalid label passed.');
 
@@ -136,6 +142,7 @@ function performLabelCreatingVoxelProcessing<
 
     reportProgress({ value: 100, label: '' });
     voxelLabelProcessor({
+      options,
       input: new Uint8Array(img.data),
       width: width,
       height: height,
@@ -145,6 +152,6 @@ function performLabelCreatingVoxelProcessing<
       reportProgress
     });
   };
-}
+};
 
 export default performLabelCreatingVoxelProcessing;

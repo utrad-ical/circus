@@ -106,46 +106,26 @@ const LabelMenu: React.FC<{
 
   const executeProcessor = (options: any) => {
     if (!processorState.type) return;
-    const behavior = processors[processorState.type];
-    const processor = behavior.processorCreator(options);
+    const { processor } = processors[processorState.type];
 
-    const label =
+    const selectedLabel =
       editingData.revision.series[activeSeriesIndex].labels[activeLabelIndex];
 
-    // ??
-    switch (behavior.processTarget) {
-      case 'label':
-        processor({
-          editingData: editingData,
-          updateEditingData: updateEditingData,
-          label: label,
-          labelColors: labelColors,
-          reportProgress: (progress: ProcessorProgress) => {
-            setProcessorState(s => ({ ...s, progress }));
-            if (progress.label !== '') {
-              // ??
-              setProcessorState({
-                type: null,
-                showModal: false,
-                progress: null
-              });
-            }
-          }
-        });
-        break;
-      case 'section':
-        processor({
-          editingData: editingData,
-          updateEditingData: updateEditingData,
-          metadata: metadata,
-          viewers: viewers
-        });
-        setProcessorState({
-          type: null,
-          progress: null,
-          showModal: false
-        });
-    }
+    const reportProgress = (progress: ProcessorProgress) => {
+      setProcessorState(s => ({ ...s, progress }));
+      if (progress.label !== '') {
+        setProcessorState({ type: null, showModal: false, progress: null });
+      }
+    };
+
+    processor({
+      options,
+      editingData,
+      updateEditingData,
+      selectedLabel,
+      reportProgress,
+      hints: { labelColors, viewers, seriesMetadata: metadata }
+    });
   };
 
   const handleHideProcessorModal = () => {

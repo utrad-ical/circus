@@ -153,14 +153,11 @@ const newStructure = (width: number, height: number, nSlices: number) => {
 
 export const OptionsEditor: Editor<ErosionDilationOptions> = props => {
   const { value, onChange } = props;
-  const [sliceNumber, setSliceNumber] = useState(
-    Math.floor(value.structure.nSlices / 2)
-  );
+  const [sliceNumber, setSliceNumber] = useState(Math.floor(value.nSlices / 2));
   const range = [1, 11];
 
   const onSliceNumberChange = (ev: any) => {
-    if (ev.target.value < 0 || value.structure.nSlices <= ev.target.value)
-      return;
+    if (ev.target.value < 0 || value.nSlices <= ev.target.value) return;
     setSliceNumber(Number(ev.target.value));
   };
 
@@ -168,56 +165,47 @@ export const OptionsEditor: Editor<ErosionDilationOptions> = props => {
     if (ev.target.value < range[0] || range[1] < ev.target.value) return;
     const structure = newStructure(
       Number(ev.target.value),
-      value.structure.height,
-      value.structure.nSlices
+      value.height,
+      value.nSlices
     );
     onChange({
       ...value,
-      structure: {
-        ...value.structure,
-        width: Number(ev.target.value),
-        array: structure
-      }
+      width: Number(ev.target.value),
+      array: structure
     });
   };
 
   const onHeightChange = (ev: any) => {
     if (ev.target.value < range[0] || range[1] < ev.target.value) return;
     const structure = newStructure(
-      value.structure.width,
+      value.width,
       Number(ev.target.value),
-      value.structure.nSlices
+      value.nSlices
     );
     onChange({
       ...value,
-      structure: {
-        ...value.structure,
-        height: Number(ev.target.value),
-        array: structure
-      }
+      height: Number(ev.target.value),
+      array: structure
     });
   };
 
   const onNSlicesChange = (ev: any) => {
     if (ev.target.value < range[0] || range[1] < ev.target.value) return;
     const structure = newStructure(
-      value.structure.width,
-      value.structure.height,
+      value.width,
+      value.height,
       Number(ev.target.value)
     );
     setSliceNumber(Math.floor(Number(ev.target.value) / 2));
     onChange({
       ...value,
-      structure: {
-        ...value.structure,
-        nSlices: Number(ev.target.value),
-        array: structure
-      }
+      nSlices: Number(ev.target.value),
+      array: structure
     });
   };
 
   const onStructureChange = (array: Uint8Array) => {
-    onChange({ ...value, structure: { ...value.structure, array } });
+    onChange({ ...value, array });
   };
 
   return (
@@ -227,7 +215,7 @@ export const OptionsEditor: Editor<ErosionDilationOptions> = props => {
           Width:&ensp;
           <FormControl
             type="number"
-            value={value.structure.width}
+            value={value.width}
             name="width"
             onChange={onWidthChange}
           />
@@ -236,7 +224,7 @@ export const OptionsEditor: Editor<ErosionDilationOptions> = props => {
           Height:&ensp;
           <FormControl
             type="number"
-            value={value.structure.height}
+            value={value.height}
             name="height"
             onChange={onHeightChange}
           />
@@ -245,7 +233,7 @@ export const OptionsEditor: Editor<ErosionDilationOptions> = props => {
           nSlices:&ensp;
           <FormControl
             type="number"
-            value={value.structure.nSlices}
+            value={value.nSlices}
             name="nSlices"
             onChange={onNSlicesChange}
           />
@@ -267,7 +255,7 @@ export const OptionsEditor: Editor<ErosionDilationOptions> = props => {
           )
         </div>
         <Board
-          structure={value.structure}
+          structure={value}
           sliceNumber={sliceNumber}
           onChange={onStructureChange}
         />
@@ -282,19 +270,9 @@ export const OptionsEditor: Editor<ErosionDilationOptions> = props => {
   );
 };
 
-const structure = {
+export const initialOptions = {
   array: newStructure(3, 3, 3),
   width: 3,
   height: 3,
   nSlices: 3
-};
-
-export const initialOptionsForErosion: ErosionDilationOptions = {
-  structure,
-  isErosion: true
-};
-
-export const initialOptionsForDilation: ErosionDilationOptions = {
-  structure,
-  isErosion: false
 };

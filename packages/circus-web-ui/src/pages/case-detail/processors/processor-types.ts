@@ -26,8 +26,7 @@ export type ProcessorType = typeof processorTypes[number];
 
 export type ProcessorProgress = { value: number; label: string };
 
-interface ProcessorInput<T> {
-  options: T;
+interface ProcessorInput {
   editingData: EditingData;
   selectedLabel: InternalLabel;
   updateEditingData: EditingDataUpdater;
@@ -40,7 +39,7 @@ interface ProcessorInput<T> {
 }
 
 // This is not async; progress reported via reportProgress callback
-export type Processor<T> = (input: ProcessorInput<T>) => void;
+export type Processor<T> = (options: T, input: ProcessorInput) => void;
 
 interface ProcessorModalConfiguration<T> {
   title: string;

@@ -31,9 +31,8 @@ const performLabelCreatingVoxelProcessing = <
 >(
   voxelLabelProcessor: VoxelLabelProcessor<T, O>
 ): Processor<O> => {
-  return async input => {
+  return async (options, input) => {
     const {
-      options,
       editingData,
       updateEditingData,
       selectedLabel: label,

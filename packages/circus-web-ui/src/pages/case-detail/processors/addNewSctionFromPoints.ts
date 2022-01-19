@@ -76,7 +76,7 @@ const createSectionFromPoints = (
   return [newLayoutItems, newLayout, item.key];
 };
 
-const addNewSctionFromPoints: Processor<{}> = input => {
+const addNewSctionFromPoints: Processor<{}> = (options, input) => {
   const {
     editingData,
     updateEditingData,

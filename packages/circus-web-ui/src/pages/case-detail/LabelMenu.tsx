@@ -118,8 +118,7 @@ const LabelMenu: React.FC<{
       }
     };
 
-    processor({
-      options,
+    processor(options, {
       editingData,
       updateEditingData,
       selectedLabel,

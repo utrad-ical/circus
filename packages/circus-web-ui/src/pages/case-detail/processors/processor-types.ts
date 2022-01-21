@@ -34,6 +34,9 @@ interface ProcessorInput {
   editingData: EditingData;
   selectedLabel: InternalLabel;
   updateEditingData: EditingDataUpdater;
+  /**
+   * The callback function to report the processor's progress.
+   */
   reportProgress: (progress: ProcessorProgress) => void;
   hints: {
     seriesMetadata: (DicomVolumeMetadata | undefined)[];
@@ -42,7 +45,15 @@ interface ProcessorInput {
   };
 }
 
-// This is not async; progress reported via reportProgress callback
+/**
+ * Processor is a function that is invoked after one of the processor menu
+ * items was selected. It can take `options` object configured
+ * via a setting dialog.
+ * A processor must change the current `editingData` using
+ * `updateEditingData`.
+ * This is a *sync* function. A processor must report its progress
+ * using the callback `input.reportProgress`.
+ */
 export type Processor<T> = (options: T, input: ProcessorInput) => void;
 
 interface ProcessorModalConfiguration<T> {
@@ -58,6 +69,9 @@ interface ProcessorDefinition {
   settingsModal?: ProcessorModalConfiguration<any>;
 }
 
+/**
+ * Defines the details of each processor.
+ */
 export const processors: {
   [key in ProcessorType]: ProcessorDefinition;
 } = {

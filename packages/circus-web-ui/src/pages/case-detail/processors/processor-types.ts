@@ -95,7 +95,7 @@ export const processors: {
     caption: 'Dilation',
     labelType: 'voxel',
     settingsModal: {
-      title: 'Erosion',
+      title: 'Dilation',
       optionsEditor: ed.OptionsEditor,
       initialOptions: ed.initialOptions
     },
@@ -105,7 +105,7 @@ export const processors: {
     caption: 'Interslice interpolation',
     labelType: 'voxel',
     settingsModal: {
-      title: 'Erosion',
+      title: 'Interslice interpolation',
       optionsEditor: ii.OptionsEditor,
       initialOptions: ii.initialOptions
     },

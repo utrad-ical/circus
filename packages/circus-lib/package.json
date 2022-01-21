@@ -33,7 +33,7 @@
     "@types/node": "^13.13.5",
     "@types/pngjs": "^3.4.2",
     "@types/tar-stream": "^1.6.2",
-    "log4js": "^4.3.1",
+    "log4js": "^6.4.0",
     "pngjs": "^3.4.0",
     "rimraf": "^2.6.3",
     "tslib": "^1.11.2",

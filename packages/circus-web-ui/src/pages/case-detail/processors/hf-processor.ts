@@ -30,8 +30,6 @@ const hfVoxelProcessor: VoxelLabelProcessor<
     reportProgress
   } = props;
 
-  reportProgress({ value: 100, label: '' });
-
   if (window.Worker) {
     const myWorker = new hfWorker();
     myWorker.postMessage({
@@ -46,7 +44,7 @@ const hfVoxelProcessor: VoxelLabelProcessor<
     });
     myWorker.onmessage = (e: any) => {
       if (typeof e.data === 'string') {
-        reportProgress({ value: 100, label: 'Failed' });
+        reportProgress({ value: 100, label: 'Failed', finished: true });
         alert(`${name} is too complex.\nPlease modify ${name}.`);
         return;
       }
@@ -69,7 +67,7 @@ const hfVoxelProcessor: VoxelLabelProcessor<
           }`
         ]
       });
-      reportProgress({ value: 100, label: 'Completed' });
+      reportProgress({ value: 100, label: 'Completed', finished: true });
     };
   } else {
     console.log('× window.Worker');
@@ -159,7 +157,7 @@ const hfVoxelProcessor: VoxelLabelProcessor<
         }`
       ]
     });
-    reportProgress({ value: 100, label: 'Completed' });
+    reportProgress({ value: 100, label: 'Completed', finished: true });
   }
 };
 

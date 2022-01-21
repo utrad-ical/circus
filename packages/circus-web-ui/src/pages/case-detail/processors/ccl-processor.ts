@@ -134,12 +134,12 @@ const cclVoxelProcessor: VoxelLabelProcessor<LabelingResults3D, CclOptions> =
       });
       myWorker.onmessage = (e: any) => {
         if (typeof e.data === 'string') {
-          reportProgress({ value: 100, label: 'Failed' });
+          reportProgress({ value: 100, label: 'Failed', finished: true });
           alert(`${name} is too complex.\nPlease modify ${name}.`);
           return;
         }
         postProcessor(relabeling(e.data));
-        reportProgress({ value: 100, label: 'Completed' });
+        reportProgress({ value: 100, label: 'Completed', finished: true });
       };
     } else {
       console.log('× window.Worker');
@@ -154,7 +154,7 @@ const cclVoxelProcessor: VoxelLabelProcessor<LabelingResults3D, CclOptions> =
         return;
       }
       postProcessor(relabeling(labelingResults));
-      reportProgress({ value: 100, label: 'Completed' });
+      reportProgress({ value: 100, label: 'Completed', finished: true });
     }
   };
 

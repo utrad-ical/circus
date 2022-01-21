@@ -127,7 +127,7 @@ const addNewSctionFromPoints: Processor<{}> = (options, input) => {
       d.layout = newLayout;
       d.activeLayoutKey = key;
     });
-    reportProgress({ value: 100, label: 'Completed' });
+    reportProgress({ value: 100, label: 'Completed', finished: true });
   } catch (err: any) {
     alert(err.message);
   }

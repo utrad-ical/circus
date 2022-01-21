@@ -50,7 +50,6 @@ const iiVoxelProcessor: VoxelLabelProcessor<
     postProcessor,
     reportProgress
   } = props;
-  reportProgress({ value: 100, label: '' });
 
   const initializedInput = transpose(
     input,
@@ -89,7 +88,7 @@ const iiVoxelProcessor: VoxelLabelProcessor<
     });
     myWorker.onmessage = (e: any) => {
       if (typeof e.data === 'string') {
-        reportProgress({ value: 100, label: 'Failed' });
+        reportProgress({ value: 100, label: 'Failed', finished: true });
         alert(e.data);
         return;
       }
@@ -110,7 +109,7 @@ const iiVoxelProcessor: VoxelLabelProcessor<
         },
         names: [`interpolated ${name}`]
       });
-      reportProgress({ value: 100, label: 'Completed' });
+      reportProgress({ value: 100, label: 'Completed', finished: true });
     };
   } else {
     console.log('× window.Worker');
@@ -142,7 +141,7 @@ const iiVoxelProcessor: VoxelLabelProcessor<
       },
       names: [`interpolated ${name}`]
     });
-    reportProgress({ value: 100, label: 'Completed' });
+    reportProgress({ value: 100, label: 'Completed', finished: true });
   }
 };
 

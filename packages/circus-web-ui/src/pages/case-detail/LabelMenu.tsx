@@ -100,20 +100,20 @@ const LabelMenu: React.FC<{
     if (processors[type].settingsModal) {
       setProcessorState(s => ({ ...s, type, showModal: true }));
     } else {
-      executeProcessor(null); // no modal, executes right away
+      executeProcessor(type)(null); // no modal, executes right away
     }
   };
 
-  const executeProcessor = (options: any) => {
-    if (!processorState.type) return;
-    const { processor } = processors[processorState.type];
+  const executeProcessor = (type: null | ProcessorType) => (options: any) => {
+    if (!type) return;
+    const { processor } = processors[type];
 
     const selectedLabel =
       editingData.revision.series[activeSeriesIndex].labels[activeLabelIndex];
 
     const reportProgress = (progress: ProcessorProgress) => {
       setProcessorState(s => ({ ...s, progress }));
-      if (progress.label !== '') {
+      if (progress.finished) {
         setProcessorState({ type: null, showModal: false, progress: null });
       }
     };
@@ -387,7 +387,7 @@ const LabelMenu: React.FC<{
       {processorState.showModal && (
         <ProcessorModal
           onHide={handleHideProcessorModal}
-          onOkClick={executeProcessor}
+          onOkClick={executeProcessor(processorState.type)}
           progress={processorState.progress}
           {...processors[processorState.type!].settingsModal!}
         />

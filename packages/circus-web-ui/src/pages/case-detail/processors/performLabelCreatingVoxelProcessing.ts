@@ -139,7 +139,7 @@ const performLabelCreatingVoxelProcessing = <
       });
     };
 
-    reportProgress({ value: 100, label: '' });
+    reportProgress({ value: 100, label: '', finished: false });
     voxelLabelProcessor({
       options,
       input: new Uint8Array(img.data),

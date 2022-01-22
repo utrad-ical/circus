@@ -113,7 +113,7 @@ const LabelMenu: React.FC<{
 
     const reportProgress = (progress: ProcessorProgress) => {
       setProcessorState(s => ({ ...s, progress }));
-      if (progress.finished) {
+      if ('finished' in progress && progress.finished) {
         setProcessorState({ type: null, showModal: false, progress: null });
       }
     };

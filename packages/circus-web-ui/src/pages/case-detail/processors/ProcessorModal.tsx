@@ -33,7 +33,7 @@ const ProcessorModal: React.FC<{
       <Modal.Body>
         <StyledDiv>
           <OptionsEditor value={options} onChange={setOptions} />
-          {progress && (
+          {progress && 'value' in progress && (
             <div>
               <ProgressBar
                 now={progress.value}

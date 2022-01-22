@@ -139,7 +139,7 @@ const cclVoxelProcessor: VoxelLabelProcessor<LabelingResults3D, CclOptions> =
           return;
         }
         postProcessor(relabeling(e.data));
-        reportProgress({ value: 100, label: 'Completed', finished: true });
+        reportProgress({ finished: true });
       };
     } else {
       console.log('× window.Worker');
@@ -154,7 +154,7 @@ const cclVoxelProcessor: VoxelLabelProcessor<LabelingResults3D, CclOptions> =
         return;
       }
       postProcessor(relabeling(labelingResults));
-      reportProgress({ value: 100, label: 'Completed', finished: true });
+      reportProgress({ finished: true });
     }
   };
 

@@ -24,11 +24,9 @@ export const processorTypes = [
 
 export type ProcessorType = typeof processorTypes[number];
 
-export type ProcessorProgress = {
-  value: number;
-  label: string;
-  finished: boolean;
-};
+export type ProcessorProgress =
+  | { readonly value: number; readonly label: string }
+  | { readonly finished: boolean };
 
 interface ProcessorInput {
   editingData: EditingData;

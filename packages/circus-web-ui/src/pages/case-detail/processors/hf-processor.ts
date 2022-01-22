@@ -157,7 +157,7 @@ const hfVoxelProcessor: VoxelLabelProcessor<
         }`
       ]
     });
-    reportProgress({ value: 100, label: 'Completed', finished: true });
+    reportProgress({ finished: true });
   }
 };
 

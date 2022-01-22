@@ -88,7 +88,7 @@ const iiVoxelProcessor: VoxelLabelProcessor<
     });
     myWorker.onmessage = (e: any) => {
       if (typeof e.data === 'string') {
-        reportProgress({ value: 100, label: 'Failed', finished: true });
+        reportProgress({ finished: true });
         alert(e.data);
         return;
       }
@@ -109,7 +109,7 @@ const iiVoxelProcessor: VoxelLabelProcessor<
         },
         names: [`interpolated ${name}`]
       });
-      reportProgress({ value: 100, label: 'Completed', finished: true });
+      reportProgress({ finished: true });
     };
   } else {
     console.log('× window.Worker');
@@ -141,7 +141,7 @@ const iiVoxelProcessor: VoxelLabelProcessor<
       },
       names: [`interpolated ${name}`]
     });
-    reportProgress({ value: 100, label: 'Completed', finished: true });
+    reportProgress({ finished: true });
   }
 };
 

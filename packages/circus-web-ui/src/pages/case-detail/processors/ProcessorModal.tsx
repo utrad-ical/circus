@@ -2,58 +2,65 @@ import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import { Button, Modal, ProgressBar } from 'components/react-bootstrap';
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { ProcessorProgress } from './processor-types';
 
-const StyledDiv = styled.div`
-  line-height: 2.5;
-`;
-
-const SettingDialog: React.FC<{
+const ProcessorModal: React.FC<{
   title: string;
   optionsEditor: Editor<any>;
   initialOptions: any;
-  processorProgress: { value: number; label: string };
+  onOkClick: (options: any) => void;
   onHide: () => void;
-  onOkClick: (props: any) => void;
+  progress: ProcessorProgress | null;
 }> = props => {
   const {
     title,
     optionsEditor: OptionsEditor,
     initialOptions,
-    processorProgress,
+    onOkClick,
     onHide,
-    onOkClick
+    progress
   } = props;
+
+  const handleOkClick = () => {
+    onOkClick(options);
+  };
+
   const [options, setOptions] = useState(initialOptions);
 
   return (
-    <>
+    <Modal show={true} onHide={onHide}>
       <Modal.Header>{title}</Modal.Header>
       <Modal.Body>
         <StyledDiv>
           <OptionsEditor value={options} onChange={setOptions} />
+          {progress && 'value' in progress && (
+            <div>
+              <ProgressBar
+                now={progress.value}
+                label={progress.label}
+                striped
+                active
+              />
+            </div>
+          )}
         </StyledDiv>
       </Modal.Body>
       <Modal.Footer>
         <Button bsStyle="link" onClick={onHide}>
           Cancel
         </Button>
-        <Button onClick={() => onOkClick(options)} bsStyle="primary">
+        <Button onClick={handleOkClick} bsStyle="primary">
           OK
         </Button>
-        {processorProgress.value !== 0 && (
-          <div>
-            <span>&nbsp;</span>
-            <ProgressBar
-              now={processorProgress.value}
-              label={processorProgress.label}
-              striped
-              active
-            />
-          </div>
-        )}
       </Modal.Footer>
-    </>
+    </Modal>
   );
 };
 
-export default SettingDialog;
+const StyledDiv = styled.div`
+  display: flex;
+  flex-flow: column;
+  gap: 15px;
+`;
+
+export default ProcessorModal;

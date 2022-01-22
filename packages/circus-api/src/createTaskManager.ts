@@ -249,7 +249,7 @@ const createTaskManager: FunctionService<
     let stat: fs.Stats;
     try {
       stat = await fs.stat(fileName);
-    } catch (err) {
+    } catch (err: any) {
       if (err.code === 'ENOENT') {
         ctx.throw(
           404,

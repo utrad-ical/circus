@@ -6,7 +6,7 @@ import * as path from 'path';
 import createValidator from '../src/createValidator';
 import { Database, Validator, Models } from '../src/interface';
 import connectDb from '../src/db/connectDb';
-import createModels from '../src/db/createModels';
+import createModels, { makeModels } from '../src/db/createModels';
 
 /**
  * Connects to a test MongoDB instance.
@@ -103,6 +103,26 @@ export const usingModels = () => {
         database: database,
         validator
       });
+      resolve({ database, validator, models });
+    });
+    afterAll(async () => {
+      await database.dispose();
+    });
+  });
+};
+
+export const usingSessionModels = () => {
+  return new Promise<{
+    database: Database;
+    validator: Validator;
+    models: Models;
+  }>(resolve => {
+    let database: Database;
+    beforeAll(async () => {
+      database = await connectMongo();
+      const session = database.connection.startSession();
+      const validator = await createValidator(undefined);
+      const models = makeModels(database, validator, session);
       resolve({ database, validator, models });
     });
     afterAll(async () => {

@@ -1,10 +1,12 @@
 import { setUpMongoFixture } from '../../../test/util-mongo';
 import { setUpAppForRoutesTest, ApiTest } from '../../../test/util-routes';
+import mongo from 'mongodb';
 
-let apiTest: ApiTest, ax: typeof apiTest.axiosInstances;
+let apiTest: ApiTest, ax: typeof apiTest.axiosInstances, db: mongo.Db;
 beforeAll(async () => {
   apiTest = await setUpAppForRoutesTest();
   ax = apiTest.axiosInstances;
+  db = apiTest.database.db;
 });
 afterAll(() => apiTest.tearDown());
 
@@ -99,14 +101,14 @@ describe('patch list', () => {
     expect(changedList.public).toBe(true);
   });
 
-  test('throw 404 for my list the user does not own', async () => {
+  test('throw 401 for my list the user does not own', async () => {
     const myListId = '01ex36f2n99kjaqvpfrerrsryp';
     const res = await ax.bob.request({
       url: `api/mylists/${myListId}`,
       method: 'patch',
       data: { name: 'new name' }
     });
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(401);
   });
 
   test('throw 400 when the new list name is empty text', async () => {
@@ -212,6 +214,15 @@ describe('delete list', () => {
     expect(result).toStrictEqual(undefined);
   });
 
+  test('throw 401 for my list the user does not own', async () => {
+    const myListId = '01ex36f2n99kjaqvpfrerrsryp';
+    const res = await ax.bob.request({
+      url: `api/mylists/${myListId}`,
+      method: 'delete'
+    });
+    expect(res.status).toBe(401);
+  });
+
   test('throw 404 for nonexistent my list id', async () => {
     const myListId = 'dummyid';
     const res = await ax.bob.request({
@@ -227,7 +238,7 @@ describe('patch list item', () => {
   const url = `api/mylists/${myListId}/items`;
 
   beforeEach(async () => {
-    await setUpMongoFixture(apiTest.database.db, ['myLists']);
+    await setUpMongoFixture(db, ['myLists']);
   });
 
   test('insert new item into a mylist', async () => {
@@ -321,5 +332,29 @@ describe('patch list item', () => {
       );
       expect(res.status).toBe(401);
     });
+  });
+});
+
+describe('transaction test', () => {
+  beforeEach(async () => {
+    // await setUpMongoFixture(db, ['users', 'myLists']);
+  });
+
+  test('avoid collision of many create-list requests', async () => {
+    const names = new Array(30).fill(0).map((_, i) => `list${i + 1}`);
+    const promises = names.map(name =>
+      ax.bob.request({
+        url: 'api/mylists',
+        method: 'post',
+        data: { name, resourceType: 'clinicalCases', public: false }
+      })
+    );
+    const responses = await Promise.all(promises);
+    expect(responses.every(res => res.status === 201)).toBe(true);
+    const user = await db
+      .collection('users')
+      .findOne({ userEmail: 'bob@example.com' });
+    expect(user.myLists.length).toBe(34); // including ones already in fixture
+    // myListsの中に30個データがある
   });
 });

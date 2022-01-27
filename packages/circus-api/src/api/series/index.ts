@@ -173,34 +173,36 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
 };
 
 export const handleDelete: RouteMiddleware = ({
-  models,
+  transactionManager,
   dicomFileRepository
 }) => {
   return async (ctx, next) => {
     const uid = ctx.params.seriesUid;
+    await transactionManager.withTransaction(async models => {
+      await models.series.findByIdOrFail(uid);
 
-    const pluginJob = models.pluginJob.findAsCursor({
-      'series.seriesUid': uid
+      const pluginJob = models.pluginJob.findAsCursor({
+        'series.seriesUid': uid
+      });
+      if (await pluginJob.hasNext())
+        ctx.throw(
+          status.BAD_REQUEST,
+          'There is a plug-in job associated with this series.'
+        );
+
+      const clinicalCase = models.clinicalCase.findAsCursor({
+        'revisions.series.seriesUid': uid
+      });
+      if (await clinicalCase.hasNext())
+        ctx.throw(
+          status.BAD_REQUEST,
+          'There is a case associated with this series.'
+        );
+
+      const result = await models.series.deleteOne({ seriesUid: uid });
+      if (result.deletedCount !== 1) ctx.throw(status.NOT_FOUND);
     });
-    if (await pluginJob.hasNext())
-      ctx.throw(
-        status.BAD_REQUEST,
-        'There is a plug-in job associated with this series.'
-      );
-
-    const clinicalCase = models.clinicalCase.findAsCursor({
-      'revisions.series.seriesUid': uid
-    });
-    if (await clinicalCase.hasNext())
-      ctx.throw(
-        status.BAD_REQUEST,
-        'There is a case associated with this series.'
-      );
-
     await dicomFileRepository.deleteSeries(uid);
-
-    const result = await models.series.deleteOne({ seriesUid: uid });
-    if (result.deletedCount !== 1) ctx.throw(status.NOT_FOUND);
     ctx.body = null;
   };
 };

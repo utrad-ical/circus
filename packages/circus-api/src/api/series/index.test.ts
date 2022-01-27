@@ -7,9 +7,6 @@ import delay from '../../utils/delay';
 import { setUpMongoFixture } from '../../../test/util-mongo';
 import zlib from 'zlib';
 import tarfs from 'tar-fs';
-import { PassThrough } from 'stream';
-import { reject } from 'lodash';
-import { promises } from 'dns';
 
 let apiTest: ApiTest, ax: typeof apiTest.axiosInstances;
 beforeAll(async () => {
@@ -145,17 +142,30 @@ describe('Delete', () => {
 });
 
 describe('Delete file', () => {
+  beforeEach(async () => {
+    await setUpMongoFixture(apiTest.database.db, ['series']);
+  });
+
   it('should delete single DICOM file', async () => {
     const dicomFileRepository = apiTest.dicomFileRepository;
     const series = await dicomFileRepository.getSeries('222.333.444.555.666');
     const input = new Uint8Array('abcde'.split('').map(c => c.charCodeAt(0)));
     await series.save(1, input.buffer as ArrayBuffer);
-    await ax.dave.request({
+    const res = await ax.dave.request({
       url: 'api/series/222.333.444.555.666',
       method: 'delete'
     });
+    expect(res.status).toBe(204);
     const series2 = await dicomFileRepository.getSeries('222.333.444.555.666');
     expect(series2.images).toBe('');
+  });
+
+  it('should throw 404 for deletion of nonexistent series', async () => {
+    const res = await ax.dave.request({
+      url: 'api/series/nonexistentSeries',
+      method: 'delete'
+    });
+    expect(res.status).toBe(404);
   });
 });
 

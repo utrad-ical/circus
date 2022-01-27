@@ -39,7 +39,10 @@ export interface CollectionAccessor<T = any> {
     id: string | number,
     options?: FindOptions
   ) => Promise<WithDates<T>>;
-  findByIdOrFail: (id: string | number) => Promise<WithDates<T>>;
+  findByIdOrFail: (
+    id: string | number,
+    options?: FindOptions
+  ) => Promise<WithDates<T>>;
   insert: (data: T) => Promise<any>;
   upsert: (id: string | number, data: Partial<T>) => Promise<any>;
   aggregate: (pipeline: object[]) => Promise<any[]>;
@@ -130,9 +133,7 @@ const createCollectionAccessor = <T = any>(
    */
   const findAsCursor = (query: object = {}, options: CursorOptions = {}) => {
     const { sort, limit, skip } = options;
-    let cursor = collection
-      .find(query, { ...sessionOpts })
-      .project({ _id: 0, myLock: 0 });
+    let cursor = collection.find(query, { ...sessionOpts }).project({ _id: 0 });
     if (sort) cursor = cursor.sort(sort);
     if (skip) cursor = cursor.skip(skip);
     if (limit) cursor = cursor.limit(limit);
@@ -194,7 +195,7 @@ const createCollectionAccessor = <T = any>(
       .find({ [key]: id } as mongo.FilterQuery<WithDates<T>>, {
         ...sessionOpts
       })
-      .project({ _id: 0, myLock: 0 })
+      .project({ _id: 0 })
       .limit(1)
       .toArray();
     const result = docs[0];
@@ -215,8 +216,8 @@ const createCollectionAccessor = <T = any>(
    * Fetches the single document by the primary key.
    * Throws an error with 404 status if nothing found.
    */
-  const findByIdOrFail = async (id: string | number) => {
-    const result = await findById(id);
+  const findByIdOrFail = async (id: string | number, options?: FindOptions) => {
+    const result = await findById(id, options);
     if (result === undefined) throw404();
     return result;
   };

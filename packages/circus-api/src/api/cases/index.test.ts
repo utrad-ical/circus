@@ -510,4 +510,30 @@ describe('delete', () => {
     expect(res.status).toBe(403);
     expect(res.data.error).toBe("This case is in someone's my list.");
   });
+
+  test('throw 404 for nonexistent caseId', async () => {
+    const res = await ax.bob.request({
+      url: 'api/cases/nonexistentCaseId',
+      method: 'delete'
+    });
+    expect(res.status).toBe(404);
+  });
+
+  test('transaction tests', async () => {
+    const promise = () => {
+      return ax.bob.request({
+        url: `api/cases/${caseId}?force=1`,
+        method: 'delete'
+      });
+    };
+    const arr = [];
+    for (let i = 0; i < 10; i++) {
+      arr.push(promise());
+    }
+    try {
+      await Promise.all(arr);
+    } catch (err) {
+      console.log(err);
+    }
+  });
 });

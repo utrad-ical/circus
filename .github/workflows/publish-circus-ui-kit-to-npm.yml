@@ -23,10 +23,15 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Can Publish
+        id: canPublish
         run: npx can-npm-publish --verbose
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - run: npm ci
-      - run: npm publish --access=public
+        continue-on-error: true
+      - name: Publish package
+        if: steps.canPublish.outcome != 'failure'
+        run: |
+          npm ci
+          npm publish --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

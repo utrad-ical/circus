@@ -130,3 +130,19 @@
       public: false
       editors: []
       createdAt: { $date: 1405266782123 }
+- userEmail: eve@example.com
+  loginId: eve
+  # password is 'eveSecret'
+  password: '$2y$10$aUx3Joa7nCth58lr3u/L9ObgueqSpDTZF9eYsmlVeRLej.a4tFZ.i'
+  description: Eve
+  lastLoginTime: { $date: 1405266782008 }
+  lastLoginIp: '0.0.0.0'
+  preferences:
+    theme: mode_white
+    personalInfoView: false
+    seriesSearchPresets: []
+    caseSearchPresets: []
+    pluginJobSearchPresets: []
+  loginEnabled: false
+  groups: [3] # guests
+  myLists: []

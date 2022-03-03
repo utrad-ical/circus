@@ -92,7 +92,8 @@ export const setUpAppForRoutesTest = async () => {
     'tasks',
     'pluginJobs',
     'pluginDefinitions',
-    'myLists'
+    'myLists',
+    'onetimeUrls'
   ]);
 
   const validator = await createValidator(undefined);

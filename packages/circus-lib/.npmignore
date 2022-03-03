@@ -6,3 +6,5 @@ tsconfig.json
 .vscode
 *.tgz
 *.tsbuildinfo
+*.ts
+!/lib/**/*.d.ts

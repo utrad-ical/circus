@@ -2,8 +2,6 @@
  * This module re-exports "public" classes and functions
  * which should be visible to the consumers of CIRCUS RS.
  */
-import './circus-rs.less';
-import '@utrad-ical/circus-icons/dist/circus-rs-font-glyphs.less';
 import 'tslib';
 
 export { default as Viewer } from './viewer/Viewer';

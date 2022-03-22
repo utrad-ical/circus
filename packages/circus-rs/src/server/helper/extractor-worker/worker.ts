@@ -9,7 +9,7 @@ parentPort!.on('message', (buffer: ArrayBuffer) => {
   try {
     const result = extract(buffer);
     parentPort!.postMessage(result);
-  } catch (err) {
+  } catch (err: any) {
     // returning a string means an error
     parentPort!.postMessage(
       typeof err === 'string' ? err : err.message ?? 'Unknown error'

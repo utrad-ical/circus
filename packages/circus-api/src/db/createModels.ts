@@ -50,6 +50,6 @@ const createModels: FunctionService<
   return makeModels(database, validator);
 };
 
-createModels.dependencies = ['db', 'validator'];
+createModels.dependencies = ['database', 'validator'];
 
 export default createModels;

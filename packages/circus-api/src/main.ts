@@ -87,14 +87,14 @@ const main = async () => {
   });
 
   const loader = await createServiceLoader(patchedConfig);
-  const db = await loader.get('db');
+  const database = await loader.get('db');
   const logger = await loader.get('apiLogger');
   const blobStorage = await loader.get('blobStorage');
   const dicomFileRepository = await loader.get('dicomFileRepository');
 
   // Establish db connection (shared throughout app)
 
-  const currentDbSchemaRevision = await getCurrentDbSchemaRevision(db);
+  const currentDbSchemaRevision = await getCurrentDbSchemaRevision(database.db);
   const latestDbSchemaRevision = await getLatestDbSchemaRevision();
   if (currentDbSchemaRevision !== latestDbSchemaRevision) {
     console.warn(

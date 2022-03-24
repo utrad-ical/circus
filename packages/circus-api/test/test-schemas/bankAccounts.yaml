@@ -1,0 +1,12 @@
+$async: true
+description: >
+  Test schema for testing the transaction manager.
+type: object
+properties:
+  userId:
+    type: number
+  name:
+    type: string
+  balance:
+    type: number
+additionalProperties: false

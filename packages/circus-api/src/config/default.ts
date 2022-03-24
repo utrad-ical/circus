@@ -64,6 +64,11 @@ const defaults: Configuration = {
   },
   authProvider: {
     type: 'DefaultAuthProvider'
+  },
+  transactionManager: {
+    options: {
+      maxCommitTimeMS: 10000
+    }
   }
 };
 

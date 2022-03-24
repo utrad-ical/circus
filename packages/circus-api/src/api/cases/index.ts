@@ -34,21 +34,23 @@ export const handleGet: RouteMiddleware = () => {
   };
 };
 
-export const handlePost: RouteMiddleware = ({ models }) => {
+export const handlePost: RouteMiddleware = ({ transactionManager }) => {
   return async (ctx, next) => {
-    const project = await models.project.findByIdOrFail(
-      ctx.request.body.projectId
-    );
-    const caseId = await makeNewCase(
-      models,
-      ctx.user,
-      ctx.userPrivileges,
-      project,
-      ctx.request.body.series,
-      ctx.request.body.tags
-    );
-    ctx.body = { caseId };
-    ctx.status = status.CREATED;
+    await transactionManager.withTransaction(async models => {
+      const project = await models.project.findByIdOrFail(
+        ctx.request.body.projectId
+      );
+      const caseId = await makeNewCase(
+        models,
+        ctx.user,
+        ctx.userPrivileges,
+        project,
+        ctx.request.body.series,
+        ctx.request.body.tags
+      );
+      ctx.body = { caseId };
+      ctx.status = status.CREATED;
+    });
   };
 };
 
@@ -309,33 +311,37 @@ export const handlePatchTags: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handleDelete: RouteMiddleware = ({ models }) => {
+export const handleDelete: RouteMiddleware = ({ transactionManager }) => {
   return async (ctx, next) => {
     const caseId = ctx.params.caseId;
     const urlQuery = ctx.request.query;
     if (urlQuery.force === '1') {
-      const targetMyLists = await models.myList.findAll({
-        'items.resourceId': caseId
-      });
-      for (const targetMyList of targetMyLists) {
-        const newItems = targetMyList.items.filter(
-          (i: any) => i.resourceId !== caseId
-        );
-        await models.myList.modifyOne(targetMyList.myListId, {
-          items: newItems
+      await transactionManager.withTransaction(async models => {
+        const targetMyLists = await models.myList.findAll({
+          'items.resourceId': caseId
         });
-      }
-      await models.clinicalCase.deleteOne({ caseId });
-      ctx.body = null;
+        for (const targetMyList of targetMyLists) {
+          const newItems = targetMyList.items.filter(
+            (i: any) => i.resourceId !== caseId
+          );
+          await models.myList.modifyOne(targetMyList.myListId, {
+            items: newItems
+          });
+        }
+        await models.clinicalCase.deleteOne({ caseId });
+        ctx.body = null;
+      });
     } else {
-      const isInMyList = await models.myList
-        .findAsCursor({ 'items.resourceId': caseId })
-        .hasNext();
-      if (isInMyList) {
-        ctx.throw(403, `This case is in someone's my list.`);
-      }
-      await models.clinicalCase.deleteOne({ caseId });
-      ctx.body = null;
+      await transactionManager.withTransaction(async models => {
+        const isInMyList = await models.myList
+          .findAsCursor({ 'items.resourceId': caseId })
+          .hasNext();
+        if (isInMyList) {
+          ctx.throw(403, `This case is in someone's my list.`);
+        }
+        await models.clinicalCase.deleteOne({ caseId });
+        ctx.body = null;
+      });
     }
   };
 };

@@ -1,14 +1,14 @@
 import { usingMongo } from '../../test/util-mongo';
 import delay from '../utils/delay';
 import createLocker from './createLocker';
-import { DisposableDb } from '../interface';
+import mongo from 'mongodb';
 
-let db: DisposableDb, locker: ReturnType<typeof createLocker>;
+let db: mongo.Db, locker: ReturnType<typeof createLocker>;
 
 const dbPromise = usingMongo();
 
 beforeAll(async () => {
-  db = await dbPromise;
+  db = (await dbPromise).db;
   await db.collection('locks').deleteMany({});
   locker = await createLocker(db);
 });

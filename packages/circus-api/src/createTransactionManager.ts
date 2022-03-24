@@ -26,6 +26,6 @@ const createTransactionManager: FunctionService<
   return { withTransaction };
 };
 
-createTransactionManager.dependencies = ['db', 'validator'];
+createTransactionManager.dependencies = ['database', 'validator'];
 
 export default createTransactionManager;

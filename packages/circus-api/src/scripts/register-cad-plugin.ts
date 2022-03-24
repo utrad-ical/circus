@@ -104,4 +104,4 @@ export const command: Command<{
   };
 };
 
-command.dependencies = ['db', 'validator', 'models', 'dockerRunner'];
+command.dependencies = ['database', 'validator', 'models', 'dockerRunner'];

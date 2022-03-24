@@ -73,9 +73,18 @@ export const createOauthServer: FunctionService<
     },
     getUser: async (username: string, password: string) => {
       // debug && console.log('getting user', arguments);
+      const ots = await models.onetimeUrl.findAll({ onetimeString: password });
+      if (ots.length > 0) {
+        if (username !== password) return null;
+        await models.onetimeUrl.deleteOne({
+          onetimeUrlId: ots[0].onetimeUrlId
+        });
+        return await models.user.findById(ots[0].userEmail);
+      }
       const check = await authProvider.check(username, password);
-      if (check.result === 'NG') return null;
-      return await models.user.findById(check.authenticatedUserEmail);
+      if (check.result === 'OK')
+        return await models.user.findById(check.authenticatedUserEmail);
+      return null;
     },
     saveToken: async function (token: Token, client: any, user: any) {
       // debug && console.log('saveToken', arguments);

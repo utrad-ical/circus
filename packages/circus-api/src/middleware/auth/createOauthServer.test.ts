@@ -8,13 +8,15 @@ import errorHandler from '../errorHandler';
 import createOauthServer from './createOauthServer';
 import createNullLogger from '@utrad-ical/circus-lib/src/logger/NullLogger';
 import DefaultAuthProvider from '../auth/authProvider/DefaultAuthProvider';
+import { DisposableDb, Models } from 'interface';
 
-let testServer: TestServer, ax: AxiosInstance;
+let testServer: TestServer, ax: AxiosInstance, db: DisposableDb, models: Models;
 
 const modelsPromise = usingModels();
 
 beforeAll(async () => {
-  const { db, models } = await modelsPromise;
+  db = (await modelsPromise).db;
+  models = (await modelsPromise).models;
   const authProvider = await DefaultAuthProvider({}, { models });
   testServer = await setUpKoaTest(async app => {
     const oauth = await createOauthServer({}, { models, authProvider });
@@ -36,8 +38,11 @@ beforeAll(async () => {
     );
     app.use(router.routes());
   });
-  await setUpMongoFixture(db, ['users']);
   ax = axios.create({ baseURL: testServer.url, validateStatus: () => true });
+});
+
+beforeEach(async () => {
+  await setUpMongoFixture(db, ['users', 'onetimeUrls']);
 });
 
 afterAll(async () => {
@@ -101,4 +106,19 @@ it('should return empty data with a request with invalid token', async () => {
     headers: { Authorization: `Bearer ${wrongToken}` }
   });
   expect(res2.status).toBe(401);
+});
+
+it('onetime URL', async () => {
+  const res = await ax.request({
+    method: 'POST',
+    url: 'token',
+    data: qs.stringify({
+      client_id: 'circus-front',
+      client_secret: 'not-a-secret',
+      grant_type: 'password',
+      username: 'bgticgmjqprbgdundfklfdmbnr',
+      password: 'bgticgmjqprbgdundfklfdmbnr'
+    })
+  });
+  expect(res.status).toBe(200);
 });

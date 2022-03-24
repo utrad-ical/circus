@@ -239,7 +239,7 @@ export const createApp: FunctionService<
 };
 
 createApp.dependencies = [
-  'db',
+  'database',
   'validator',
   'apiLogger',
   'models',

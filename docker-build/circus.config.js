@@ -1,61 +1,61 @@
-const mongoUrl = "mongodb://localhost:27017/circus-api";
-const pluginResultsDir = "/var/circus/data/plugin-results";
-const path = require("path");
-const os = require("os");
+const mongoUrl = 'mongodb://localhost:27017/circus-api';
+const pluginResultsDir = '/var/circus/data/plugin-results';
+const path = require('path');
+const os = require('os');
 
 module.exports = {
-  db: {
-    options: { mongoUrl },
+  database: {
+    options: { mongoUrl }
   },
   apiServer: {
-    options: { 
+    options: {
       pluginResultsDir,
-      dicomImageServerUrl: "http://localhost/rs"
-    },
+      dicomImageServerUrl: 'http://localhost/rs'
+    }
   },
   rsServer: {
     // Used when CIRCUS RS is invoked as a standalone image server
     options: {
       // port: 8080,
       // authorization: { enabled: true }
-    },
+    }
   },
   blobStorage: {
-    options: { dataDir: "/var/circus/data/labels" },
+    options: { dataDir: '/var/circus/data/labels' }
   },
   jobRunner: {
     options: {
-      workingDirectory: "/var/circus/data/cs-tmp",
-      removeTemporaryDirectory: false,
-    },
+      workingDirectory: '/var/circus/data/cs-tmp',
+      removeTemporaryDirectory: false
+    }
   },
   pluginDefinitionAccessor: {
-    type: "MongoPluginDefinitionAccessor",
-    options: { mongoUrl, collectionName: "pluginDefinitions" },
+    type: 'MongoPluginDefinitionAccessor',
+    options: { mongoUrl, collectionName: 'pluginDefinitions' }
   },
   queue: {
-    type: "MongoQueue",
-    options: { mongoUrl, collectionName: "pluginJobQueue" },
+    type: 'MongoQueue',
+    options: { mongoUrl, collectionName: 'pluginJobQueue' }
   },
   jobReporter: {
-    type: "MongoPluginJobReporter",
+    type: 'MongoPluginJobReporter',
     options: {
       mongoUrl,
-      collectionName: "pluginJobs",
-      resultsDirectory: "/var/circus/data/plugin-results",
-    },
+      collectionName: 'pluginJobs',
+      resultsDirectory: '/var/circus/data/plugin-results'
+    }
   },
   dicomFileRepository: {
-    type: "StaticDicomFileRepository",
-    options: { dataDir: "/var/circus/data/dicom", useHash: false },
+    type: 'StaticDicomFileRepository',
+    options: { dataDir: '/var/circus/data/dicom', useHash: false }
   },
   csCoreDaemonLogger: {
-    type: "FileLogger",
-    options: { fileName: "/var/circus/data/logs/cscore-daemon" },
+    type: 'FileLogger',
+    options: { fileName: '/var/circus/data/logs/cscore-daemon' }
   },
   dicomTagReader: {
     options: {
-      defaultTzOffset: 540, // Timezone offset of Asia/Tokyo
-    },
-  },
+      defaultTzOffset: 540 // Timezone offset of Asia/Tokyo
+    }
+  }
 };

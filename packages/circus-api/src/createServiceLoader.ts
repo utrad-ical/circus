@@ -27,7 +27,7 @@ import KoaOAuth2Server from './middleware/auth/KoaOAuth2Server';
 export type Services = CsCoreServices &
   RsServices & {
     app: Koa;
-    db: Database;
+    database: Database;
     apiLogger: Logger;
     validator: Validator;
     models: Models;

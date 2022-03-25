@@ -49,4 +49,4 @@ export const command: Command<{ database: Database; models: Models }> = async (
   };
 };
 
-command.dependencies = ['db', 'models'];
+command.dependencies = ['database', 'models'];

@@ -5,6 +5,7 @@
     "start": "node ./server.js",
     "debug": "nodemon --inspect ./server.js",
     "devserver": "webpack serve --mode=development",
+    "prebuild": "bash prebuild.sh",
     "build": "tsc",
     "postbuild": "bash postbuild.sh",
     "watch": "webpack --watch",

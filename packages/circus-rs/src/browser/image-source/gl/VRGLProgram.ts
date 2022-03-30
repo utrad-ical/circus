@@ -20,12 +20,10 @@ import {
 } from './webgl-util';
 
 // WebGL shader source (GLSL)
-const vertexShaderSource = require('./glsl/vr-volume.vert');
-const fragmentShaderSource = [
-  require('./glsl/vr-header.frag'),
-  require('./glsl/vr-fn.frag'),
-  require('./glsl/vr-main.frag')
-].join('\n');
+import {
+  vertexShaderSource,
+  fragmentShaderSource
+} from './glsl/vrShaderSource';
 
 // [TextureIndex]
 // 0: Volume

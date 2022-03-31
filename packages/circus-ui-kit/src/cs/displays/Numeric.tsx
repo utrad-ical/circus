@@ -21,12 +21,8 @@ interface NumberOptions {
  * Numeric display collect user feedback as a number.
  */
 export const Numeric: Display<NumberOptions, number> = props => {
-  const {
-    options,
-    initialFeedbackValue,
-    onFeedbackChange,
-    personalOpinions
-  } = props;
+  const { options, initialFeedbackValue, onFeedbackChange, personalOpinions } =
+    props;
   const {
     label,
     minimum,
@@ -81,7 +77,7 @@ export const Numeric: Display<NumberOptions, number> = props => {
       typeCheck(maximum, 'maximum');
       typeCheck(exclusiveMaximum, 'exclusiveMaximum');
       typeCheck(multipleOf, 'multipleOf');
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message);
       return;
     }

@@ -1,6 +1,6 @@
 {
   "name": "@utrad-ical/circus-ui-kit",
-  "version": "0.3.0-experimental.2",
+  "version": "0.3.0-experimental.3",
   "description": "React components used by CIRCUS projects",
   "main": "lib/index.js",
   "scripts": {
@@ -28,6 +28,7 @@
     "@utrad-ical/circus-lib": "^0.17.0-experimental.1",
     "@utrad-ical/circus-rs": "^0.27.0-experimental.1",
     "classnames": "^2.3.1",
-    "lodash.get": "^4.4.2"
+    "lodash.get": "^4.4.2",
+    "react-bootstrap": "^0.33.1"
   }
 }

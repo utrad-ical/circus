@@ -27,7 +27,7 @@
     "memory-streams": "^0.1.3",
     "merge": "^1.2.1",
     "minimist": "^1.2.0",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "mongodb": "^3.5.2",
     "multi-integer-range": "^4.0.8",
     "pify": "^5.0.0",

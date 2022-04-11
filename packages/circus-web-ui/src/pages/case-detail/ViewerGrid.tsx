@@ -2,9 +2,13 @@ import {
   Composition,
   MprViewState,
   Tool,
+  TwoDimensionalViewState,
   Viewer
 } from '@utrad-ical/circus-rs/src/browser';
-import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
+import {
+  OrientationString,
+  sectionTo2dViewState
+} from '@utrad-ical/circus-rs/src/browser/section-util';
 import { toolFactory } from '@utrad-ical/circus-rs/src/browser/tool/tool-initializer';
 import { Section } from '@utrad-ical/circus-rs/src/common/geometry';
 import classnames from 'classnames';
@@ -16,6 +20,7 @@ import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import ImageViewer, {
   createStateChanger,
+  getInitial2dViewState,
   InitialStateSetterFunc,
   setOrthogonalOrientation,
   StateChanger
@@ -31,8 +36,10 @@ import React, {
 import styled from 'styled-components';
 import { EditingData, EditingDataUpdater, seriesColors } from './revisionData';
 
+export type ViewerMode = '2d' | '3d';
 export interface ViewerDef {
   key: string;
+  viewerMode: ViewerMode;
   seriesIndex: number;
   orientation: 'axial' | 'sagittal' | 'coronal' | 'oblique';
   celestialRotateMode: boolean; // only applicable for oblique view
@@ -44,10 +51,12 @@ interface ViewerGridContextValue {
   updateEditingData: EditingDataUpdater;
   compositions: { composition?: Composition }[];
   tool: Tool;
-  stateChanger: StateChanger<MprViewState>;
+  stateChanger: StateChanger<MprViewState | TwoDimensionalViewState>;
   onCreateViewer: (viewer: Viewer, id?: string | number) => void;
   onDestroyViewer: (viewer: Viewer) => void;
-  initialStateSetter: InitialStateSetterFunc<MprViewState>;
+  initialStateSetter: InitialStateSetterFunc<
+    MprViewState | TwoDimensionalViewState
+  >;
   onViewStateChange: (viewer: Viewer, id?: string | number) => void;
   multipleSeriesShown: boolean;
 }
@@ -60,10 +69,10 @@ const ViewerGridContext = React.createContext<ViewerGridContextValue | null>(
 );
 
 const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
-  const { key, seriesIndex, orientation, celestialRotateMode } = props.value;
-  const { updateEditingData, editingData, multipleSeriesShown } = useContext(
-    ViewerGridContext
-  )!;
+  const { key, viewerMode, seriesIndex, orientation, celestialRotateMode } =
+    props.value;
+  const { updateEditingData, editingData, multipleSeriesShown } =
+    useContext(ViewerGridContext)!;
   const { activeSeriesIndex, activeLayoutKey, revision } = editingData;
 
   const handleClick = () => {
@@ -133,6 +142,8 @@ const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
     ? seriesColors[Math.min(seriesIndex, seriesColors.length - 1)]
     : '#ffffff';
 
+  const viewerLabel = viewerMode === '3d' ? orientation : '2d';
+
   return (
     <HeaderDiv
       className={classnames({ active, 'selected-series': selectedSeries })}
@@ -142,7 +153,7 @@ const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
         {multipleSeriesShown && (
           <div className="box" style={{ backgroundColor: color }} />
         )}
-        Series #{seriesIndex} {orientation}
+        Series #{seriesIndex} {viewerLabel}
       </span>
       <span>
         {orientation === 'oblique' && (
@@ -154,27 +165,29 @@ const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
             Rotate
           </Button>
         )}
-        <DropdownButton
-          bsSize="xs"
-          title={<Icon icon="glyphicon-option-horizontal" />}
-          id={`viewergrid-header-dropdown-${key}`}
-          pullRight
-          noCaret
-          onSelect={handleSelectLayoutKind as any}
-        >
-          <MenuItem eventKey="axial">
-            <Icon icon="circus-orientation-axial" /> Axial
-          </MenuItem>
-          <MenuItem eventKey="sagittal">
-            <Icon icon="circus-orientation-sagittal" /> Sagittal
-          </MenuItem>
-          <MenuItem eventKey="coronal">
-            <Icon icon="circus-orientation-coronal" /> Coronal
-          </MenuItem>
-          <MenuItem eventKey="oblique">
-            <Icon icon="circus-orientation-oblique" /> Oblique
-          </MenuItem>
-        </DropdownButton>
+        {viewerMode === '3d' && (
+          <DropdownButton
+            bsSize="xs"
+            title={<Icon icon="glyphicon-option-horizontal" />}
+            id={`viewergrid-header-dropdown-${key}`}
+            pullRight
+            noCaret
+            onSelect={handleSelectLayoutKind as any}
+          >
+            <MenuItem eventKey="axial">
+              <Icon icon="circus-orientation-axial" /> Axial
+            </MenuItem>
+            <MenuItem eventKey="sagittal">
+              <Icon icon="circus-orientation-sagittal" /> Sagittal
+            </MenuItem>
+            <MenuItem eventKey="coronal">
+              <Icon icon="circus-orientation-coronal" /> Coronal
+            </MenuItem>
+            <MenuItem eventKey="oblique">
+              <Icon icon="circus-orientation-oblique" /> Oblique
+            </MenuItem>
+          </DropdownButton>
+        )}
         <IconButton
           bsSize="xs"
           icon="glyphicon-remove"
@@ -219,13 +232,8 @@ const HeaderDiv = styled.div`
 const celestialRotate = toolFactory('celestialRotate');
 
 const Content: React.FC<{ value: ViewerDef }> = props => {
-  const {
-    key,
-    seriesIndex,
-    orientation,
-    celestialRotateMode,
-    initialSection
-  } = props.value;
+  const { key, seriesIndex, orientation, celestialRotateMode, initialSection } =
+    props.value;
 
   const {
     compositions,
@@ -240,21 +248,41 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
   const composition = compositions[seriesIndex].composition;
 
   const combinedInitialStateSetter = useCallback(
-    (viewer: Viewer, viewState: MprViewState) => {
-      const s1 = initialSection
-        ? {
-            ...orientationInitialStateSetters[orientation](viewer, viewState)!,
-            section: initialSection
-          }
-        : orientationInitialStateSetters[orientation](viewer, viewState);
-      const s2 = initialStateSetter(viewer, s1!, key);
-      return s2;
+    (viewer: Viewer, viewState: MprViewState | TwoDimensionalViewState) => {
+      switch (viewState.type) {
+        case '2d': {
+          const initialState = getInitial2dViewState(viewer, viewState)!;
+          const s1 = initialSection
+            ? {
+              ...sectionTo2dViewState(initialState, initialSection)
+            }
+            : initialState;
+          const s2 = initialStateSetter(viewer, s1, key);
+          return s2;
+        }
+        case 'mpr': {
+          const initialState = orientationInitialStateSetters[orientation!](
+            viewer,
+            viewState
+          )!;
+          const s1 = initialSection
+            ? {
+              ...initialState, section: initialSection
+            }
+            : initialState;
+          const s2 = initialStateSetter(viewer, s1, key);
+          return s2;
+        }
+        default: {
+          throw new Error('Unsupported view state');
+        }
+      }
     },
     [initialStateSetter, orientation, key, initialSection]
   );
 
   const localStateChanger = useMemo(
-    () => createStateChanger<MprViewState>(),
+    () => createStateChanger<MprViewState | TwoDimensionalViewState>(),
     []
   );
 
@@ -271,9 +299,17 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
       initialRender.current = false;
       return;
     }
+
     // Triggers only when orientation changes after initial render
     localStateChanger((state, viewer) => {
-      return orientationInitialStateSetters[orientation](viewer, state)!;
+      switch (state.type) {
+        case '2d':
+          return getInitial2dViewState(viewer, state)!;
+        case 'mpr':
+          return orientationInitialStateSetters[orientation!](viewer, state)!;
+        default:
+          throw new Error('Unsupported view state');
+      }
     });
   }, [orientation, localStateChanger, key]);
 
@@ -306,17 +342,17 @@ const orientationInitialStateSetters: {
   oblique: setOrthogonalOrientation('axial')
 };
 
-export type Layout = 'twoByTwo' | 'axial' | 'sagittal' | 'coronal';
-
 const ViewerGrid: React.FC<{
   editingData: EditingData;
   updateEditingData: EditingDataUpdater;
   compositions: { composition?: Composition }[];
   tool?: Tool;
-  stateChanger: StateChanger<MprViewState>;
+  stateChanger: StateChanger<MprViewState | TwoDimensionalViewState>;
   onCreateViewer: (viewer: Viewer, id?: string | number) => void;
   onDestroyViewer: (viewer: Viewer) => void;
-  initialStateSetter: InitialStateSetterFunc<MprViewState>;
+  initialStateSetter: InitialStateSetterFunc<
+    MprViewState | TwoDimensionalViewState
+  >;
   onViewStateChange: (viewer: Viewer, id?: string | number) => void;
   multipleSeriesShown: boolean;
 }> = props => {

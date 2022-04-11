@@ -66,6 +66,11 @@ function createPagerWheelHandler(): (viewerEvent: ViewerEvent) => any {
         ]);
         break;
       }
+      case '2d': {
+        const step = -sign(ev.original.deltaY) * (ev.original.ctrlKey ? 5 : 1);
+        handlePageBy(ev.viewer, step);
+        break;
+      }
     }
   };
 }

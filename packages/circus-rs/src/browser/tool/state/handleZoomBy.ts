@@ -1,7 +1,10 @@
 import { Vector2, Vector3 } from 'three';
 import { scaleSection, Section } from '../../../common/geometry';
 import MprImageSource from '../../image-source/MprImageSource';
+import TwoDimensionalImageSource from '../../image-source/TwoDimensionalImageSource';
 import {
+  sectionTo2dViewState,
+  sectionFrom2dViewState,
   convertScreenCoordinateToVolumeCoordinate,
   sectionOverlapsVolume
 } from '../../section-util';
@@ -12,37 +15,61 @@ export default function handleZoomBy(
   step: number,
   zoomPoint?: [number, number]
 ) {
-  const prevState = viewer.getState();
   const resolution = viewer.getResolution();
 
   const comp = viewer.getComposition();
   if (!comp) throw new Error('Composition not initialized'); // should not happen
 
-  const src = comp.imageSource as MprImageSource;
-  if (!(src instanceof MprImageSource)) return;
+  const src = comp.imageSource as any;
+  if (
+    !(src instanceof MprImageSource) &&
+    !(src instanceof TwoDimensionalImageSource)
+  )
+    return;
 
-  const stepFactor = 1.05;
+  const overlap = (section: Section) => {
+    const metadata = src.metadata!;
+    return sectionOverlapsVolume(
+      section,
+      new Vector2().fromArray(resolution),
+      new Vector3().fromArray(metadata.voxelSize),
+      new Vector3().fromArray(metadata.voxelCount)
+    );
+  };
 
+  const scale = (section: Section) => {
+    const stepFactor = 1.05;
+    return scaleSectionBy(
+      section,
+      1 / stepFactor ** step,
+      resolution,
+      zoomPoint ? zoomPoint : [resolution[0] * 0.5, resolution[1] * 0.5]
+    );
+  };
+
+  const prevState = viewer.getState();
   switch (prevState.type) {
     case 'mpr':
     case 'vr': {
-      const section = scaleSectionBy(
-        prevState.section,
-        1 / stepFactor ** step,
-        resolution,
-        zoomPoint ? zoomPoint : [resolution[0] * 0.5, resolution[1] * 0.5]
-      );
+      const prevSection = prevState.section;
+      const section = scale(prevSection);
 
       // Abort If the section does not overlap the volume.
-      const overlap = sectionOverlapsVolume(
-        section,
-        new Vector2().fromArray(resolution),
-        new Vector3().fromArray(src.metadata!.voxelSize),
-        new Vector3().fromArray(src.metadata!.voxelCount)
-      );
+      if (!overlap(section)) return;
+      viewer.setState({ ...prevState, section });
+      return;
+    }
+    case '2d': {
+      const prevSection = sectionFrom2dViewState(prevState);
+      const section = scale(prevSection);
+
+      // Abort If the section does not overlap the volume.
+      if (!overlap(section)) return;
       if (!overlap) return;
 
-      viewer.setState({ ...prevState, section });
+      viewer.setState({
+        ...sectionTo2dViewState(prevState, section)
+      });
       break;
     }
   }

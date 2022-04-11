@@ -27,6 +27,7 @@ import useKeyboardShortcut from 'utils/useKeyboardShortcut';
 import useLoginUser from 'utils/useLoginUser';
 import caseStoreReducer, * as c from './caseStore';
 import {
+  EditingDataLayoutInitializer,
   EditingDataUpdater,
   externalRevisionToInternal,
   saveRevision
@@ -129,6 +130,14 @@ const CaseDetail: React.FC<{}> = props => {
     (updater, tag) => {
       const newData = produce(editingData, updater);
       caseDispatch(c.change({ newData, tag }));
+    },
+    [editingData]
+  );
+
+  const initEditingDataLayout = useCallback<EditingDataLayoutInitializer>(
+    (initializer) => {
+      const newData = produce(editingData, initializer);
+      caseDispatch(c.initialLayoutDetermined(newData));
     },
     [editingData]
   );
@@ -247,6 +256,7 @@ const CaseDetail: React.FC<{}> = props => {
         seriesData={seriesData}
         projectData={projectData}
         refreshCounter={refreshCounter}
+        initEditingDataLayout={initEditingDataLayout}
         updateEditingData={updateEditingData}
       />
       {exportDialogOpen && (

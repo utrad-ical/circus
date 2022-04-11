@@ -18,6 +18,7 @@ interface MetadataResponse {
   voxelSize: [number, number, number];
   dicomWindow?: ViewWindow;
   pixelFormat: PixelFormat;
+  mode: '3d' | '2d';
   estimatedWindow?: ViewWindow;
 }
 
@@ -50,7 +51,7 @@ export default function metadata(): koa.Middleware {
       images: new MultiRange(loadImages)
     };
 
-    const { voxelCount, voxelSize, dicomWindow, pixelFormat } =
+    const { voxelCount, voxelSize, dicomWindow, pixelFormat, mode } =
       await extractVolumeMetadata(volumeAccessor);
 
     const estimatedWindow =
@@ -63,7 +64,8 @@ export default function metadata(): koa.Middleware {
       voxelSize,
       dicomWindow,
       pixelFormat,
-      estimatedWindow
+      estimatedWindow,
+      mode
     };
 
     ctx.body = body;
@@ -77,12 +79,14 @@ type VolumeMetadata = {
   voxelSize: [number, number, number];
   dicomWindow?: ViewWindow;
   pixelFormat: PixelFormat;
+  mode: '3d' | '2d';
 };
 
 async function extractVolumeMetadata(
   volumeAccessor: VolumeAccessor
 ): Promise<VolumeMetadata> {
-  const { imageMetadata, load, images, determinePitch } = volumeAccessor;
+  const { imageMetadata, load, images, determinePitch, isLike3d } =
+    volumeAccessor;
   if (images.segmentLength() === 0)
     throw new TypeError('Invalid volume accessor.');
 
@@ -91,7 +95,8 @@ async function extractVolumeMetadata(
   await load(primaryImageNo);
   const primaryMetadata = imageMetadata.get(primaryImageNo)!;
 
-  const pitch = await determinePitch();
+  const mode = (await isLike3d()) ? '3d' : '2d';
+  const pitch = mode === '3d' ? await determinePitch() : 1;
 
   return {
     voxelCount: [primaryMetadata.columns, primaryMetadata.rows, count],
@@ -101,7 +106,8 @@ async function extractVolumeMetadata(
       pitch
     ],
     dicomWindow: primaryMetadata.window,
-    pixelFormat: primaryMetadata.pixelFormat
+    pixelFormat: primaryMetadata.pixelFormat,
+    mode
   };
 }
 

@@ -1,4 +1,6 @@
+import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import classnames from 'classnames';
+import Icon from 'components/Icon';
 import {
   Button,
   FormControl,
@@ -30,13 +32,30 @@ const StyledDiv = styled.div`
     background-color: #d0e6e4;
     border-radius: 7px;
   }
+  .critical {
+    background-color: red;
+    color: white;
+    margin-bottom: 10px;
+    padding: 15px;
+    border-radius: 7px;
+  }
 `;
 
 const LoginScreen: React.FC<{}> = props => {
+  const [serverAlive, setServerAlive] = useState<boolean | undefined>();
   const [input, setInput] = useState({ id: '', password: '' });
   const [error, setError] = useState<string>();
+  const [criticalError, setCriticalError] = useState(false);
   const loginManager = useLoginManager();
   const user = useLoginUser();
+
+  useEffect(() => {
+    (async () => {
+      const alive = await loginManager.checkServerIsLive();
+      setServerAlive(alive);
+      if (!alive) setCriticalError(true);
+    })();
+  }, [loginManager]);
 
   useEffect(() => {
     if (user) {
@@ -45,6 +64,7 @@ const LoginScreen: React.FC<{}> = props => {
       };
       logout();
     }
+    // eslint-disable-next-line
   }, []);
 
   const handleChange = (key: string, val: string) => {
@@ -60,9 +80,7 @@ const LoginScreen: React.FC<{}> = props => {
       if (err.response && err.response.status === 400) {
         setError('Invalid user ID or password.');
       } else {
-        setError(
-          'Critical server error. The CIRCUS API server is not responding. Please consult the administrator.'
-        );
+        setCriticalError(true);
         console.error(err);
       }
     }
@@ -70,8 +88,17 @@ const LoginScreen: React.FC<{}> = props => {
 
   const disabled = input.id.length === 0 || input.password.length === 0;
 
+  if (serverAlive === undefined) return <LoadingIndicator delay={1000} />;
+
   return (
-    <StyledDiv className={classnames({ 'has-error': error })}>
+    <StyledDiv className={classnames({ 'has-error': error || criticalError })}>
+      {criticalError && (
+        <div className="critical">
+          <Icon icon="glyphicon-ban-circle" />
+          &nbsp; The CIRCUS API server does not seem to be responding. Please
+          consult the administrator.
+        </div>
+      )}
       <Panel bsStyle="primary">
         <Panel.Body>
           <h1 className="text-center">
@@ -95,7 +122,7 @@ const LoginScreen: React.FC<{}> = props => {
               onChange={(ev: React.BaseSyntheticEvent) =>
                 handleChange('password', ev.target.value)
               }
-              onKeyDown={ev => ev.keyCode == 13 && handleLoginClick()}
+              onKeyDown={ev => ev.key === 'Enter' && handleLoginClick()}
             />
           </FormGroup>
           {error && <p className="text-danger">{error}</p>}

@@ -74,23 +74,25 @@ const NextPreviousButtons: React.FC<{
   }
   const prevLink = `${props.prefix}/${props.list[currentPosition - 1]}`;
   const nextLink = `${props.prefix}/${props.list[currentPosition + 1]}`;
-  const prevLinkEnabled = 0 < currentPosition;
-  const nextLinkEnabled = currentPosition < props.list.length - 1;
+  const prevLinkDisabled = 0 >= currentPosition;
+  const nextLinkDisabled = currentPosition >= props.list.length - 1;
   return (
-    <div className="next-previous-button">
-      <Link to={prevLink} className="link-prev">
-        <Button disabled={!prevLinkEnabled}>
-          <Icon icon="arrow-left" />
-          &ensp; Prev
-        </Button>
+    <li className="next-previous-buttons">
+      <Link
+        to={prevLink}
+        className={classnames('link-prev', { disabled: prevLinkDisabled })}
+      >
+        <Icon icon="arrow-left" />
+        &ensp; Prev
       </Link>
-      <Link to={nextLink} className="link-next">
-        <Button disabled={!nextLinkEnabled}>
-          Next &ensp;
-          <Icon icon="arrow-right" />
-        </Button>
+      <Link
+        to={nextLink}
+        className={classnames('link-next', { disabled: nextLinkDisabled })}
+      >
+        Next &ensp;
+        <Icon icon="arrow-right" />
       </Link>
-    </div>
+    </li>
   );
 };
 
@@ -212,13 +214,18 @@ const StyledNav = styled.nav`
     margin-right: 10px;
   }
 
-  .next-previous-button {
-    [class^='link-'] {
-      width: 50%;
-      button {
-        width: 100%;
+  .next-previous-buttons {
+    display: flex;
+    > a {
+      flex: 0 0 50%;
+      text-align: center;
+      user-select: none;
+      &.disabled {
+        opacity: 0.5;
+        pointer-events: none;
       }
     }
+    border-bottom: 1px solid gray;
   }
 `;
 
@@ -298,7 +305,9 @@ const MainNav: React.FC<{}> = props => {
                 sub
                 icon="chevron-right"
                 name={preset.name}
-                link={`/browse/series/${encodeURIComponent(preset.name)}`}
+                link={`/browse/series/preset/${encodeURIComponent(
+                  preset.name
+                )}`}
               />
             ))}
             <MyListMenuItems
@@ -327,7 +336,7 @@ const MainNav: React.FC<{}> = props => {
                 sub
                 icon="chevron-right"
                 name={preset.name}
-                link={`/browse/case/${encodeURIComponent(preset.name)}`}
+                link={`/browse/case/preset/${encodeURIComponent(preset.name)}`}
               />
             ))}
             <MyListMenuItems
@@ -356,7 +365,9 @@ const MainNav: React.FC<{}> = props => {
                 sub
                 icon="chevron-right"
                 name={preset.name}
-                link={`/browse/plugin-jobs/${encodeURIComponent(preset.name)}`}
+                link={`/browse/plugin-jobs/preset/${encodeURIComponent(
+                  preset.name
+                )}`}
               />
             ))}
             <MyListMenuItems

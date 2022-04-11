@@ -8,6 +8,7 @@ export interface DicomVolumeMetadata {
   voxelCount: [number, number, number];
   voxelSize: [number, number, number];
   pixelFormat: PixelFormat;
+  mode: '3d' | '2d';
 }
 
 export default interface DicomVolumeLoader {

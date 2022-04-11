@@ -87,7 +87,7 @@ const SearchPanel: <T extends {}>(props: {
         filter: conditionToFilter(condition),
         sort: search?.params?.sort ?? defaultSort,
         ...(search?.params?.limit > 0 ? { limit: search.params.limit } : {}),
-        ...(search?.params?.page > 0 ? { page: search.params.page } : {})
+        page: 1
       })
     );
   }, [

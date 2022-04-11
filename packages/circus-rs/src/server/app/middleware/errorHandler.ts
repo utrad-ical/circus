@@ -18,7 +18,7 @@ export default function errorHandler(
   ): Promise<void> {
     try {
       await next();
-    } catch (err) {
+    } catch (err: any) {
       logger.error(err.message);
       if ('stack' in err) logger.trace(err.stack);
 

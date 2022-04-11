@@ -56,21 +56,6 @@ const AppRoutes: React.FC<{}> = () => {
     <Application>
       <Switch>
         <Route path="/home" component={HomePage} />
-        <Route
-          path="/browse/series/mylist/:myListId?"
-          component={MySeriesList}
-        />
-        <Route path="/browse/case/mylist/:myListId?" component={MyCaseList} />
-        <Route
-          path="/browse/plugin-jobs/mylist/:myListId?"
-          component={MyPluginJobList}
-        />
-        <Route path="/browse/series/:presetName?" component={SeriesSearch} />
-        <Route path="/browse/case/:presetName?" component={CaseSearch} />
-        <Route
-          path="/browse/plugin-jobs/:presetName?"
-          component={PluginJobSearch}
-        />
         <Route path="/plugin-job-queue" component={PluginJobQueueSearch} />
         <Route path="/import-series" component={ImportSeries} />
         <Route path="/import-case" component={ImportCase} />
@@ -87,9 +72,34 @@ const AppRoutes: React.FC<{}> = () => {
         <Route path="/admin/plugins" component={PluginAdmin} />
         <Route path="/admin/plugin-job-queue" component={PluginJobQueueAdmin} />
         <Route path="/admin" exact component={AdminIndex} />
+
+        <Route
+          path="/browse/series/mylist/:myListId?"
+          component={MySeriesList}
+        />
+        <Route
+          path="/browse/series/preset/:presetName"
+          component={SeriesSearch}
+        />
         <Route path="/series/:uid" component={SeriesDetail} />
+        <Route path="/browse/series" component={SeriesSearch} />
+
+        <Route path="/browse/case/mylist/:myListId?" component={MyCaseList} />
+        <Route path="/browse/case/preset/:presetName" component={CaseSearch} />
         <Route path="/case/:caseId" component={CaseDetail} />
+        <Route path="/browse/case" component={CaseSearch} />
+
+        <Route
+          path="/browse/plugin-jobs/mylist/:myListId?"
+          component={MyPluginJobList}
+        />
+        <Route
+          path="/browse/plugin-jobs/preset/:presetName"
+          component={PluginJobSearch}
+        />
         <Route path="/plugin-job/:jobId" component={PluginJobDetail} />
+        <Route path="/browse/plugin-jobs" component={PluginJobSearch} />
+
         <Route path="/task-list" component={TaskList} />
         <Route path="/preference" component={Preferences} />
         <Route path="/tokens" component={TokenManagement} />

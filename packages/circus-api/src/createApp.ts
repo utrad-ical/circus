@@ -67,7 +67,7 @@ async function prepareApiRouter(
     const data = yaml(await fs.readFile(manifestFile, 'utf8')) as ManifestFile;
     try {
       await validator.validate('api', data);
-    } catch (err) {
+    } catch (err: any) {
       throw new TypeError(
         `Meta schema error at ${manifestFile}.\n` +
           formatValidationErrors(err.errors)

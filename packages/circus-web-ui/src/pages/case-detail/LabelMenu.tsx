@@ -3,14 +3,13 @@ import { alert, prompt } from '@smikitky/rb-components/lib/modal';
 import Slider from '@smikitky/rb-components/lib/Slider';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import { Viewer } from '@utrad-ical/circus-rs/src/browser';
+import { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
 import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import {
   Button,
-  DropdownButton,
   MenuItem,
-  Modal,
   OverlayTrigger,
   Popover,
   SplitButton
@@ -22,23 +21,23 @@ import tinyColor from 'tinycolor2';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
 import useLocalPreference from 'utils/useLocalPreference';
 import * as c from './caseStore';
-import createCclProcessor, { CclOptions } from './createCclProcessor';
 import createCurrentLabelsUpdator from './createCurrentLabelsUpdator';
-import createHfProcessor, { HoleFillingOptions } from './createHfProcessor';
-import createSectionFromPoints from './createSectionFromPoints';
 import {
   createNewLabelData,
   InternalLabel,
   InternalLabelData,
-  InternalLabelOf,
   LabelAppearance,
   LabelType,
   labelTypes
 } from './labelData';
-import performLabelCreatingVoxelProcessing from './performLabelCreatingVoxelProcessing';
+import {
+  processors,
+  ProcessorType,
+  ProcessorProgress
+} from './processors/processor-types';
+import ProcessorDropdown from './processors/ProcessorDropdown';
+import ProcessorModal from './processors/ProcessorModal';
 import { EditingData, EditingDataUpdater } from './revisionData';
-import SettingDialogCCL from './SettingDialogCCL';
-import SettingDialogHF from './SettingDialogHF';
 
 type LabelCommand =
   | 'rename'
@@ -47,6 +46,12 @@ type LabelCommand =
   | 'reveal'
   | 'toggleHideAllLabels';
 
+type ProcessorState = {
+  type: null | ProcessorType;
+  showModal: boolean;
+  progress: null | ProcessorProgress;
+};
+
 const LabelMenu: React.FC<{
   editingData: EditingData;
   onReveal: () => void;
@@ -54,6 +59,7 @@ const LabelMenu: React.FC<{
   caseDispatch: React.Dispatch<any>;
   viewers: { [index: string]: Viewer };
   disabled?: boolean;
+  metadata: (DicomVolumeMetadata | undefined)[];
 }> = props => {
   const {
     editingData,
@@ -61,29 +67,69 @@ const LabelMenu: React.FC<{
     updateEditingData,
     caseDispatch,
     viewers,
-    disabled
+    disabled,
+    metadata
   } = props;
 
-  const [newLabelType, setNewLabelType] = useLocalPreference<LabelType>(
-    'newLabelType',
-    'voxel'
-  );
-
-  const [cclDialogOpen, setCclDialogOpen] = useState(false);
-  const [hfDialogOpen, setHfDialogOpen] = useState(false);
-  const [processorProgress, setProcessorProgress] = useState({
-    value: 0,
-    label: ''
+  const [processorState, setProcessorState] = useState<ProcessorState>({
+    type: null,
+    showModal: false,
+    progress: null
   });
+
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
+  const activeSeriesMetadata = metadata[activeSeriesIndex];
   const activeSeries = revision.series[activeSeriesIndex];
   const activeLabel =
     activeLabelIndex >= 0 ? activeSeries.labels[activeLabelIndex] : null;
+
+  const [defaultNewLabelType, setDefaultLabelType] =
+    useLocalPreference<LabelType>('defaultLabelType', 'voxel');
+  const newLabelType =
+    !labelTypes[defaultNewLabelType].allow2D &&
+    activeSeriesMetadata?.mode !== '3d'
+      ? 'ruler'
+      : defaultNewLabelType;
 
   const updateCurrentLabels = createCurrentLabelsUpdator(
     editingData,
     updateEditingData
   );
+
+  const handleProcesssorSelect = (type: ProcessorType) => {
+    if (processors[type].settingsModal) {
+      setProcessorState(s => ({ ...s, type, showModal: true }));
+    } else {
+      executeProcessor(type)(null); // no modal, executes right away
+    }
+  };
+
+  const executeProcessor = (type: null | ProcessorType) => (options: any) => {
+    if (!type) return;
+    const { processor } = processors[type];
+
+    const selectedLabel =
+      editingData.revision.series[activeSeriesIndex].labels[activeLabelIndex];
+
+    const reportProgress = (progress: ProcessorProgress) => {
+      setProcessorState(s => ({ ...s, progress }));
+      if ('finished' in progress && progress.finished) {
+        setProcessorState({ type: null, showModal: false, progress: null });
+      }
+    };
+
+    processor(options, {
+      editingData,
+      updateEditingData,
+      selectedLabel,
+      reportProgress,
+      hints: { labelColors, viewers, seriesMetadata: metadata }
+    });
+  };
+
+  const handleHideProcessorModal = () => {
+    setProcessorState({ type: null, showModal: false, progress: null });
+  };
 
   const handleCommand = async (command: LabelCommand) => {
     if (disabled) return;
@@ -92,7 +138,7 @@ const LabelMenu: React.FC<{
         if (!activeLabel) return;
         const newName = await prompt('Label name', activeLabel.name || '');
         if (newName === null || activeLabel.name === newName) return;
-        updateCurrentLabels(labels => {
+        updateCurrentLabels((labels: InternalLabel[]) => {
           labels[activeLabelIndex].name = newName;
         });
         break;
@@ -119,7 +165,7 @@ const LabelMenu: React.FC<{
         if (!activeLabel) return;
         const newLabelType = labelTypes[activeLabel.type].canConvertTo;
         if (!newLabelType) return;
-        updateCurrentLabels(labels => {
+        updateCurrentLabels((labels: InternalLabel[]) => {
           labels[activeLabelIndex].type = newLabelType;
         });
         break;
@@ -164,7 +210,7 @@ const LabelMenu: React.FC<{
 
   const createNewLabel = (
     type: LabelType,
-    viewer: Viewer | undefined,
+    viewer: Viewer,
     color = labelColors[0]
   ): InternalLabel => {
     const alpha = 1;
@@ -188,7 +234,7 @@ const LabelMenu: React.FC<{
   };
 
   const addLabel = async (type: LabelType) => {
-    setNewLabelType(type);
+    setDefaultLabelType(type);
 
     const basic: OrientationString[] = ['axial', 'sagittal', 'coronal'];
     const allowedOrientations: { [key in LabelType]: OrientationString[] } = {
@@ -208,6 +254,14 @@ const LabelMenu: React.FC<{
         'Select the viewer on which you want to place the new label. ' +
           'Click the header.'
       );
+      return;
+    }
+
+    if (
+      !labelTypes[type].allow2D &&
+      viewers[viewerId].getState()?.type !== 'mpr'
+    ) {
+      await alert('2D viewer does not support ' + type + ' labels.');
       return;
     }
 
@@ -233,124 +287,13 @@ const LabelMenu: React.FC<{
       },
       labelColors.slice()
     )[0];
+
     const newLabel = createNewLabel(type, viewers[viewerId], color);
     updateEditingData(editingData => {
       const labels = editingData.revision.series[activeSeriesIndex].labels;
       labels.push(newLabel);
       editingData.activeLabelIndex = labels.length - 1;
     });
-  };
-
-  const onOkClickDialogCCL = (props: CclOptions) => {
-    const label = editingData.revision.series[activeSeriesIndex].labels[
-      activeLabelIndex
-    ] as InternalLabelOf<'voxel'>;
-    performLabelCreatingVoxelProcessing(
-      editingData,
-      updateEditingData,
-      label,
-      labelColors,
-      createCclProcessor(props),
-      cclProgress => {
-        setProcessorProgress(cclProgress);
-        if (cclProgress.label !== '') {
-          setCclDialogOpen(false);
-          setProcessorProgress({
-            value: 0,
-            label: ''
-          });
-        }
-      }
-    );
-  };
-
-  const onOkClickDialogHF = (props: HoleFillingOptions) => {
-    const label = editingData.revision.series[activeSeriesIndex].labels[
-      activeLabelIndex
-    ] as InternalLabelOf<'voxel'>;
-    performLabelCreatingVoxelProcessing(
-      editingData,
-      updateEditingData,
-      label,
-      labelColors,
-      createHfProcessor(props),
-      hfProgress => {
-        setProcessorProgress(hfProgress);
-        if (hfProgress.label !== '') {
-          setHfDialogOpen(false);
-          setProcessorProgress({
-            value: 0,
-            label: ''
-          });
-        }
-      }
-    );
-  };
-
-  const onSelectThreePoints2Section = () => {
-    try {
-      const seriesIndex = Number(
-        Object.keys(editingData.revision.series).find(ind =>
-          editingData.revision.series[Number(ind)].labels.find(
-            item => item.temporaryKey === activeLabel!.temporaryKey
-          )
-        )
-      );
-      const spareKey = Object.keys(editingData.layout.positions).find(
-        key =>
-          editingData.layoutItems.find(item => item.key === key)!
-            .seriesIndex === seriesIndex
-      );
-      const useActiveLayoutKey = Object.keys(editingData.layout.positions)
-        .filter(
-          key =>
-            editingData.layoutItems.find(item => item.key === key)!
-              .seriesIndex === seriesIndex
-        )
-        .some(key => key === editingData.activeLayoutKey);
-      const targetLayoutKey = useActiveLayoutKey
-        ? editingData.activeLayoutKey
-        : spareKey;
-      const [newLayoutItems, newLayout, key] = createSectionFromPoints(
-        editingData.revision.series[activeSeriesIndex].labels.filter(label => {
-          return label.type === 'point';
-        }) as InternalLabelOf<'point'>[],
-        activeLabel!.name!,
-        viewers[targetLayoutKey!].getState().section,
-        editingData.layout,
-        editingData.layoutItems,
-        activeSeriesIndex
-      );
-      updateEditingData(d => {
-        d.layoutItems = newLayoutItems;
-        d.layout = newLayout;
-        d.activeLayoutKey = key;
-      });
-    } catch (err) {
-      alert(err.message);
-    }
-  };
-
-  const onSelect = (behavior: () => void) => () => {
-    const seriesIndex = Number(
-      Object.keys(editingData.revision.series).find(ind =>
-        editingData.revision.series[Number(ind)].labels.find(
-          item => item.temporaryKey === activeLabel!.temporaryKey
-        )
-      )
-    );
-
-    if (
-      Object.keys(editingData.layout.positions).some(
-        key =>
-          editingData.layoutItems.find(item => item.key === key)!
-            .seriesIndex === seriesIndex
-      )
-    ) {
-      return behavior();
-    } else {
-      alert(`Must display at least one viewer of Series #${seriesIndex}`);
-    }
   };
 
   return (
@@ -401,39 +344,10 @@ const LabelMenu: React.FC<{
         disabled={!activeLabel || disabled}
         onClick={() => handleCommand('reveal')}
       />
-      <DropdownButton
-        bsSize="xs"
-        title={<Icon icon="glyphicon-option-horizontal" />}
-        id={`labelmenu-header-dropdown`}
-        pullRight
-        noCaret
-      >
-        <MenuItem
-          eventKey="ccl"
-          onSelect={onSelect(() => {
-            setCclDialogOpen(true);
-          })}
-          disabled={!activeLabel || activeLabel.type !== 'voxel'}
-        >
-          CCL
-        </MenuItem>
-        <MenuItem
-          eventKey="fillng"
-          onSelect={onSelect(() => {
-            setHfDialogOpen(true);
-          })}
-          disabled={!activeLabel || activeLabel.type !== 'voxel'}
-        >
-          Hole filling
-        </MenuItem>
-        <MenuItem
-          eventKey="section"
-          onSelect={onSelect(onSelectThreePoints2Section)}
-          disabled={!activeLabel || activeLabel.type !== 'point'}
-        >
-          Three points to section
-        </MenuItem>
-      </DropdownButton>
+      <ProcessorDropdown
+        activeLabelType={activeLabel?.type}
+        onSelect={handleProcesssorSelect}
+      />
       <IconButton
         bsSize="xs"
         title="Remove"
@@ -456,32 +370,28 @@ const LabelMenu: React.FC<{
         disabled={disabled}
       >
         {Object.keys(labelTypes).map((type, i) => {
-          const { icon } = labelTypes[type as LabelType];
+          const { icon, allow2D } = labelTypes[type as LabelType];
+          const disabled = activeSeriesMetadata?.mode !== '3d' && !allow2D;
           return (
             <MenuItem
               key={type}
               eventKey={i}
-              onClick={() => addLabel(type as LabelType)}
+              onSelect={() => addLabel(type as LabelType)}
+              disabled={disabled}
             >
               <Icon icon={icon} /> Add {type}
             </MenuItem>
           );
         })}
       </SplitButton>
-      <Modal show={cclDialogOpen} onHide={() => setCclDialogOpen(false)}>
-        <SettingDialogCCL
-          processorProgress={processorProgress}
-          onHide={() => setCclDialogOpen(false)}
-          onOkClick={onOkClickDialogCCL}
+      {processorState.showModal && (
+        <ProcessorModal
+          onHide={handleHideProcessorModal}
+          onOkClick={executeProcessor(processorState.type)}
+          progress={processorState.progress}
+          {...processors[processorState.type!].settingsModal!}
         />
-      </Modal>
-      <Modal show={hfDialogOpen} onHide={() => setHfDialogOpen(false)}>
-        <SettingDialogHF
-          processorProgress={processorProgress}
-          onHide={() => setHfDialogOpen(false)}
-          onOkClick={onOkClickDialogHF}
-        />
-      </Modal>
+      )}
     </StyledButtonsDiv>
   );
 };

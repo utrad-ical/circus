@@ -94,8 +94,10 @@ const ToolBar: React.FC<{
   ) => void;
   planeFigureOption: PlaneFigureOption;
   onChangePlaneFigureOption: (planeFigureOption: PlaneFigureOption) => void;
+  layoutEnabled: boolean;
   brushEnabled: boolean;
   wandEnabled: boolean;
+  windowEnabled: boolean;
   windowPresets?: WindowPreset[];
   currentWindow: ViewWindow;
   onChangeTool: (toolName: string) => void;
@@ -114,8 +116,10 @@ const ToolBar: React.FC<{
     onChangeModifierKeyBehaviors,
     planeFigureOption,
     onChangePlaneFigureOption,
+    layoutEnabled,
     brushEnabled,
     wandEnabled,
+    windowEnabled,
     windowPresets = [],
     currentWindow,
     onChangeTool,
@@ -241,7 +245,7 @@ const ToolBar: React.FC<{
         changeTool={onChangeTool}
         active={active}
         shortcut="W"
-        disabled={disabled}
+        disabled={!windowEnabled || disabled}
       >
         {windowPresets.map((p: WindowPreset, i) => (
           <MenuItem
@@ -314,7 +318,7 @@ const ToolBar: React.FC<{
         disabled={!brushEnabled || !wandEnabled || disabled}
       />
       &thinsp;
-      <Dropdown id="layout-dropdown" disabled={disabled}>
+      <Dropdown id="layout-dropdown" disabled={!layoutEnabled || disabled}>
         <Dropdown.Toggle>
           <Icon icon="circus-layout-four" />
         </Dropdown.Toggle>

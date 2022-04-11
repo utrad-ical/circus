@@ -1,3 +1,4 @@
+import { TypedArray } from 'three';
 import { CCL3D } from './ccl-types';
 
 /**
@@ -5,17 +6,33 @@ import { CCL3D } from './ccl-types';
  * @param width width of array
  * @param height height of array
  * @param nSlices slice number of array
+ * @param bufferSize max number of labels, must be < 2**16
  * @param threshold voxel value of threshold
  */
-const CCL: CCL3D = (array, width, height, nSlices, threshold = 0) => {
+const CCL: CCL3D = (
+  array,
+  width,
+  height,
+  nSlices,
+  bufferSize = 10000,
+  threshold = 0
+) => {
+  if (2 ** 16 <= bufferSize) {
+    throw new Error(`Max number of tentative labels must be less than 2**16.`);
+  }
   const [dx, dy, dz] = [
     [0, -1, 0],
     [0, 0, -1],
     [-1, 0, 0]
   ];
-  const num_maxCCL = 2 ** 8;
-  const chiefLabelTable = new Uint8Array(num_maxCCL);
-  const substituteLabels = new Uint8Array(num_maxCCL ** 2);
+  const chiefLabelTable: TypedArray =
+    bufferSize < 2 ** 8
+      ? new Uint8Array(bufferSize)
+      : new Uint16Array(bufferSize);
+  const substituteLabels: TypedArray =
+    bufferSize < 2 ** 8
+      ? new Uint8Array(bufferSize ** 2)
+      : new Uint16Array(bufferSize ** 2);
 
   const resolve = (label1: number, label2: number) => {
     if (chiefLabelTable[label1] === chiefLabelTable[label2]) {
@@ -27,23 +44,23 @@ const CCL: CCL3D = (array, width, height, nSlices, threshold = 0) => {
     const chiefLabel = chiefLabelTable[label1];
     const _chiefLabel = chiefLabelTable[label2];
 
-    for (let i = 1; i <= substituteLabels[_chiefLabel * num_maxCCL]; i++) {
+    for (let i = 1; i <= substituteLabels[_chiefLabel * bufferSize]; i++) {
       substituteLabels[
-        chiefLabel * num_maxCCL + substituteLabels[chiefLabel * num_maxCCL] + i
-      ] = substituteLabels[_chiefLabel * num_maxCCL + i];
-      chiefLabelTable[substituteLabels[_chiefLabel * num_maxCCL + i]] =
+        chiefLabel * bufferSize + substituteLabels[chiefLabel * bufferSize] + i
+      ] = substituteLabels[_chiefLabel * bufferSize + i];
+      chiefLabelTable[substituteLabels[_chiefLabel * bufferSize + i]] =
         chiefLabel;
     }
-    substituteLabels[chiefLabel * num_maxCCL] +=
-      substituteLabels[_chiefLabel * num_maxCCL];
+    substituteLabels[chiefLabel * bufferSize] +=
+      substituteLabels[_chiefLabel * bufferSize];
 
-    substituteLabels[_chiefLabel * num_maxCCL] = 0;
+    substituteLabels[_chiefLabel * bufferSize] = 0;
   };
 
   const setNewLabel = (label: number) => {
     chiefLabelTable[label] = label;
-    substituteLabels[label * num_maxCCL + 1] = label;
-    substituteLabels[label * num_maxCCL] = 1;
+    substituteLabels[label * bufferSize + 1] = label;
+    substituteLabels[label * bufferSize] = 1;
   };
 
   const val0 = (x: number, y: number, z: number) => {
@@ -52,7 +69,10 @@ const CCL: CCL3D = (array, width, height, nSlices, threshold = 0) => {
       : array[x + width * (y + z * height)];
   };
 
-  const labelImg = new Uint8Array(width * height * nSlices);
+  const labelImg =
+    bufferSize < 2 ** 8
+      ? new Uint8Array(width * height * nSlices)
+      : new Uint16Array(width * height * nSlices);
 
   const val = (x: number, y: number, z: number) => {
     return x < 0 || width <= x || y < 0 || height <= y || z < 0 || nSlices <= z
@@ -105,8 +125,10 @@ const CCL: CCL3D = (array, width, height, nSlices, threshold = 0) => {
           );
         } else {
           ++label;
-          if (num_maxCCL <= label) {
-            throw new Error(`number of tentative label is not in 8 bit.`);
+          if (bufferSize <= label) {
+            throw new Error(
+              `Number of tentative labels exceeded the limit ${bufferSize}.`
+            );
           }
           labelImg[i + width * (j + k * height)] = label;
           setNewLabel(label);
@@ -117,12 +139,12 @@ const CCL: CCL3D = (array, width, height, nSlices, threshold = 0) => {
 
   let labelCount = 0;
 
-  for (let i = 1; i < num_maxCCL; i++) {
-    if (substituteLabels[i * num_maxCCL] != 0) {
+  for (let i = 1; i < bufferSize; i++) {
+    if (substituteLabels[i * bufferSize] != 0) {
       labelCount++;
       for (
-        let j = i * num_maxCCL + 1;
-        j <= i * num_maxCCL + substituteLabels[i * num_maxCCL];
+        let j = i * bufferSize + 1;
+        j <= i * bufferSize + substituteLabels[i * bufferSize];
         j++
       ) {
         chiefLabelTable[substituteLabels[j]] = labelCount;

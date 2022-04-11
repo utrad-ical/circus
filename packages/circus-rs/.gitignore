@@ -2,3 +2,5 @@ node_modules
 /logs
 /lib
 /dist
+*.tgz
+.*

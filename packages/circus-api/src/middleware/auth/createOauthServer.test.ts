@@ -16,7 +16,7 @@ const modelsPromise = usingModels();
 
 beforeAll(async () => {
   const { database, models } = await modelsPromise;
-  const { db } = database;
+  db = database.db;
   const authProvider = await DefaultAuthProvider({}, { models });
   testServer = await setUpKoaTest(async app => {
     const oauth = await createOauthServer({}, { models, authProvider });

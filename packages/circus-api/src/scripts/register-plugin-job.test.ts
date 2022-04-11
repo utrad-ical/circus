@@ -1,22 +1,30 @@
-import { setUpMongoFixture, usingModels } from '../../test/util-mongo';
+import { setUpMongoFixture, usingSessionModels } from '../../test/util-mongo';
 import { CommandFunc } from './Command';
-import { Models } from '../interface';
+import { Database, TransactionManager, Validator } from '../interface';
 import { command } from './register-plugin-job';
+import createTransactionManager from '../createTransactionManager';
 
-const modelsPromise = usingModels();
+const modelsPromise = usingSessionModels();
 let commandFunc: CommandFunc;
-let models: Models;
+let transactionManager: TransactionManager;
+let database: Database;
+let validator: Validator;
 let cs: any;
 
 beforeAll(async () => {
-  models = (await modelsPromise).models;
+  database = (await modelsPromise).database;
+  validator = (await modelsPromise).validator;
+  transactionManager = await createTransactionManager(
+    { maxCommitTimeMS: 10000 },
+    { database, validator }
+  );
 });
 
 beforeEach(async () => {
-  const { db } = await modelsPromise;
+  const { db } = (await modelsPromise).database;
   const registerFn = jest.fn();
   cs = { job: { register: registerFn } };
-  commandFunc = await command(null, { models, cs });
+  commandFunc = await command(null, { transactionManager, cs });
   await setUpMongoFixture(db, ['pluginJobs', 'users']);
 });
 
@@ -37,10 +45,12 @@ test('create new plugin-job', async () => {
     'e2cf1a5f82d62f7b3bd02db78e51008f4f11f8b31aedc96bfd50f3d7c80ba6e6'
   );
   const jobId = spy.mock.calls[0][0];
-  const data = await models.pluginJob.findById(jobId);
-  expect(data.pluginId).toBe(
-    'e2cf1a5f82d62f7b3bd02db78e51008f4f11f8b31aedc96bfd50f3d7c80ba6e6'
-  );
+  await transactionManager.withTransaction(async models => {
+    const data = await models.pluginJob.findById(jobId);
+    expect(data.pluginId).toBe(
+      'e2cf1a5f82d62f7b3bd02db78e51008f4f11f8b31aedc96bfd50f3d7c80ba6e6'
+    );
+  });
   spy.mockReset();
 });
 

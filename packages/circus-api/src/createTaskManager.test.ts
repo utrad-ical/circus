@@ -17,7 +17,8 @@ const downloadTestDir = path.join(__dirname, '../test/download-test');
 
 beforeAll(async () => {
   await fs.mkdir(downloadTestDir);
-  const { db, models: m } = await modelsPromise;
+  const { database, models: m } = await modelsPromise;
+  const { db } = database;
   await setUpMongoFixture(db, ['tasks']);
   models = m;
 });

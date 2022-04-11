@@ -15,8 +15,8 @@ let testServer: TestServer, ax: AxiosInstance, db: DisposableDb, models: Models;
 const modelsPromise = usingModels();
 
 beforeAll(async () => {
-  db = (await modelsPromise).db;
-  models = (await modelsPromise).models;
+  const { database, models } = await modelsPromise;
+  const { db } = database;
   const authProvider = await DefaultAuthProvider({}, { models });
   testServer = await setUpKoaTest(async app => {
     const oauth = await createOauthServer({}, { models, authProvider });

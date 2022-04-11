@@ -13,7 +13,7 @@ export const handleGet: RouteMiddleware = () => {
 };
 
 export const handleGetFull: RouteMiddleware = ({
-  db,
+  database,
   models,
   dicomImageServerUrl,
   uploadFileSizeMaxBytes
@@ -34,7 +34,7 @@ export const handleGetFull: RouteMiddleware = ({
         ? defaultDomainValue
         : null;
 
-    const sharedMyLists = await db
+    const sharedMyLists = await database.db
       .collection('users')
       .aggregate([
         { $unwind: { path: '$myLists' } },

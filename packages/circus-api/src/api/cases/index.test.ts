@@ -402,7 +402,7 @@ describe('search by mylist', () => {
 
 describe('patch tags', () => {
   beforeEach(async () => {
-    await setUpMongoFixture(apiTest.db, ['clinicalCases']);
+    await setUpMongoFixture(apiTest.database.db, ['clinicalCases']);
   });
 
   test('add tags', async () => {
@@ -467,8 +467,8 @@ describe('patch tags', () => {
 
 describe('delete', () => {
   beforeEach(async () => {
-    await setUpMongoFixture(apiTest.db, ['clinicalCases']);
-    await setUpMongoFixture(apiTest.db, ['myLists']);
+    await setUpMongoFixture(apiTest.database.db, ['clinicalCases']);
+    await setUpMongoFixture(apiTest.database.db, ['myLists']);
   });
   const caseId =
     'gfdrjivu4w8p57nv95p7n485n3p891ygy6543wedfuyt67oiulkjhtrw312wergr';
@@ -479,13 +479,13 @@ describe('delete', () => {
       method: 'delete'
     });
     expect(res.status).toBe(204);
-    const myList = await apiTest.db
+    const myList = await apiTest.database.db
       .collection('myLists')
       .findOne({ myListId: '01ewes10a08z21bjnysd4p1m3f' });
     expect(myList.items).toEqual(
       expect.not.objectContaining({ resourceId: caseId })
     );
-    const aCase = await apiTest.db
+    const aCase = await apiTest.database.db
       .collection('clinicalCases')
       .findOne({ caseId });
     expect(aCase).toStrictEqual(null);
@@ -509,5 +509,31 @@ describe('delete', () => {
     });
     expect(res.status).toBe(403);
     expect(res.data.error).toBe("This case is in someone's my list.");
+  });
+
+  test('throw 404 for nonexistent caseId', async () => {
+    const res = await ax.bob.request({
+      url: 'api/cases/nonexistentCaseId',
+      method: 'delete'
+    });
+    expect(res.status).toBe(404);
+  });
+
+  test('transaction tests', async () => {
+    const promise = () => {
+      return ax.bob.request({
+        url: `api/cases/${caseId}?force=1`,
+        method: 'delete'
+      });
+    };
+    const arr = [];
+    for (let i = 0; i < 10; i++) {
+      arr.push(promise());
+    }
+    try {
+      await Promise.all(arr);
+    } catch (err) {
+      console.log(err);
+    }
   });
 });

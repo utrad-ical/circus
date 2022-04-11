@@ -15,7 +15,7 @@ let commandFunc: CommandFunc,
   models: Models;
 
 beforeEach(async () => {
-  const { db } = await modelsPromise;
+  const { db } = (await modelsPromise).database;
   models = (await modelsPromise).models;
   await setUpMongoFixture(db, ['series']);
   const apiLogger = await createTestLogger();

@@ -29,7 +29,7 @@ const defaults: Configuration = {
       uploadFileSizeMaxBytes: 200 * 1024 * 1024
     }
   },
-  db: {
+  database: {
     options: { mongoUrl: 'mongodb://localhost:27017/circus-api' }
   },
   apiLogger: {
@@ -64,6 +64,11 @@ const defaults: Configuration = {
   },
   authProvider: {
     type: 'DefaultAuthProvider'
+  },
+  transactionManager: {
+    options: {
+      maxCommitTimeMS: 10000
+    }
   }
 };
 

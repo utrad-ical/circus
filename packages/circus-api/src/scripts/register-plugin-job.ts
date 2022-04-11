@@ -1,5 +1,5 @@
 import Command from './Command';
-import { Models } from '../interface';
+import { TransactionManager } from '../interface';
 import { CsCore } from '@utrad-ical/circus-cs-core';
 import { toEntry } from './toEntry';
 import makeNewPluginJob from '../plugin-job/makeNewPluginJob';
@@ -36,54 +36,57 @@ interface Args {
   priority?: number;
 }
 
-export const command: Command<{ models: Models; cs: CsCore }> = async (
-  _,
-  { models, cs }
-) => {
+export const command: Command<{
+  transactionManager: TransactionManager;
+  cs: CsCore;
+}> = async (_, { transactionManager, cs }) => {
   return async (options: Args) => {
-    if (options._args.length < 2)
-      throw new Error(
-        'Required arguments must be specified.\n' +
-          'argument 1: plugin ID or plugin name\n' +
-          'argument 2: series UID'
+    await transactionManager.withTransaction(async models => {
+      if (options._args.length < 2)
+        throw new Error(
+          'Required arguments must be specified.\n' +
+            'argument 1: plugin ID or plugin name\n' +
+            'argument 2: series UID'
+        );
+      const [pluginIdOrName, ...seriesUids] = options._args;
+
+      const pluginDocs = await models.plugin.findAll({
+        $or: [{ pluginId: pluginIdOrName }, { pluginName: pluginIdOrName }]
+      });
+      if (!pluginDocs.length)
+        throw new Error('Specified plugin does not exist.');
+
+      const series = await Promise.all(seriesUids.map(s => toEntry(s, models)));
+
+      if (!options.user?.length)
+        throw new Error('User ID or e-mail must be specified.');
+      const userDocs = await models.user.findAll({
+        $or: [{ userEmail: options.user }, { loginId: options.user }]
+      });
+      if (!userDocs.length) throw new Error('Specified user does not exist.');
+      const user = userDocs[0];
+
+      const userPrivileges = await determineUserAccessInfo(models, user);
+
+      const priority = options.priority ?? 0;
+
+      const request = {
+        pluginId: pluginDocs[0].pluginId,
+        series
+      };
+
+      const jobId = await makeNewPluginJob(
+        models,
+        request,
+        userPrivileges,
+        user.userEmail,
+        cs,
+        priority
       );
-    const [pluginIdOrName, ...seriesUids] = options._args;
 
-    const pluginDocs = await models.plugin.findAll({
-      $or: [{ pluginId: pluginIdOrName }, { pluginName: pluginIdOrName }]
+      console.log(jobId);
     });
-    if (!pluginDocs.length) throw new Error('Specified plugin does not exist.');
-
-    const series = await Promise.all(seriesUids.map(s => toEntry(s, models)));
-
-    if (!options.user?.length)
-      throw new Error('User ID or e-mail must be specified.');
-    const userDocs = await models.user.findAll({
-      $or: [{ userEmail: options.user }, { loginId: options.user }]
-    });
-    if (!userDocs.length) throw new Error('Specified user does not exist.');
-    const user = userDocs[0];
-
-    const userPrivileges = await determineUserAccessInfo(models, user);
-
-    const priority = options.priority ?? 0;
-
-    const request = {
-      pluginId: pluginDocs[0].pluginId,
-      series
-    };
-
-    const jobId = await makeNewPluginJob(
-      models,
-      request,
-      userPrivileges,
-      user.userEmail,
-      cs,
-      priority
-    );
-
-    console.log(jobId);
   };
 };
 
-command.dependencies = ['models', 'core'];
+command.dependencies = ['transactionManager', 'core'];

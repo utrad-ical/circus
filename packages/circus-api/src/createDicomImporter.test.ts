@@ -19,7 +19,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  const { db } = await modelsPromise;
+  const { db } = (await modelsPromise).database;
   await setUpMongoFixture(db, ['series']);
   const dicomTagReader = await createDicomTagReader({});
   dicomFileRepository = new MemoryDicomFileRepository({});

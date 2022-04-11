@@ -11,7 +11,7 @@ afterAll(async () => apiTest.tearDown());
 
 beforeEach(async () => {
   axios = apiTest.axiosInstances.alice;
-  await setUpMongoFixture(apiTest.db, ['onetimeUrls']);
+  await setUpMongoFixture(apiTest.database.db, ['onetimeUrls']);
 });
 
 test('create a one time URL', async () => {

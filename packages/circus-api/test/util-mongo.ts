@@ -43,7 +43,7 @@ export const setUpMongoFixture = async (
       }
       try {
         await col.insertMany(data);
-      } catch (err) {
+      } catch (err: any) {
         console.log(err.errors);
         throw err;
       }

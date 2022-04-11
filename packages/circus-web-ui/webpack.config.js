@@ -60,7 +60,12 @@ module.exports = {
     new webpack.container.ModuleFederationPlugin({
       shared: [
         { react: { singleton: true, eager: true } },
-        { 'react-dom': { singleton: true, eager: true } }
+        { 'react-dom': { singleton: true, eager: true } },
+        {
+          'circus-ui-kit': {
+            singleton: true
+          }
+        }
       ]
     })
   ],

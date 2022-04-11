@@ -27,7 +27,8 @@ export const makeModels = (
     task: { col: 'tasks', pk: 'taskId' },
     plugin: { col: 'pluginDefinitions', pk: 'pluginId' },
     pluginJob: { col: 'pluginJobs', pk: 'jobId' },
-    myList: { col: 'myLists', pk: 'myListId' }
+    myList: { col: 'myLists', pk: 'myListId' },
+    onetimeUrl: { col: 'onetimeUrls', pk: 'onetimeUrlId' }
   };
   const models: any = {};
   (Object.keys(modelDefinitions) as (keyof ModelEntries)[]).forEach(k => {

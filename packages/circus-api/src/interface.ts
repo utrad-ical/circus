@@ -29,6 +29,7 @@ export interface ModelEntries {
   plugin: any;
   pluginJob: any;
   myList: any;
+  onetimeUrl: any;
 }
 
 export type Models = {

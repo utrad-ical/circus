@@ -1,0 +1,14 @@
+name: One Time URL
+description: Manages one time url.
+routes:
+  - verb: post
+    path: /admin/onetime-urls
+    requestSchema:
+      type: object
+      properties:
+        user:
+          type: string
+      required: ['user']
+      additionalProperties: false
+    requiredGlobalPrivilege: issueOnetime
+    description: Creates a new one time url.

@@ -1,6 +1,6 @@
 - groupId: 1 # member: alice
   groupName: admin
-  privileges: ['manageServer', 'personalInfoView']
+  privileges: ['manageServer', 'personalInfoView', 'issueOnetime']
   domains: ['sirius.org']
   readProjects: []
   writeProjects: []

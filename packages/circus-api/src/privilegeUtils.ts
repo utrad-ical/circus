@@ -122,5 +122,6 @@ export const globalPrivileges = () => [
   { privilege: 'deleteProject', caption: 'Delete Project' },
   { privilege: 'manageServer', caption: 'Manage Server' },
   { privilege: 'personalInfoView', caption: 'View Personal Info' },
-  { privilege: 'downloadVolume', caption: 'Download volume as raw file' }
+  { privilege: 'downloadVolume', caption: 'Download Volume as Raw File' },
+  { privilege: 'issueOnetime', caption: 'Issue Onetime URL' }
 ];

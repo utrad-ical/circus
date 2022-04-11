@@ -26,7 +26,11 @@ const sameMembers = (test: string[], members: string[]) => {
 test('determineUserAccessInfo', async () => {
   const alice = await models.user.findByIdOrFail('alice@example.com');
   const privA = await determineUserAccessInfo(models, alice);
-  sameMembers(privA.globalPrivileges, ['manageServer', 'personalInfoView']);
+  sameMembers(privA.globalPrivileges, [
+    'manageServer',
+    'personalInfoView',
+    'issueOnetime'
+  ]);
   sameMembers(privA.domains, ['sirius.org']);
   expect(privA.accessibleProjects).toEqual([]);
 

@@ -48,7 +48,8 @@
     "tslib": "^1.11.2",
     "validator": "^7.0.0",
     "webpack-cli": "^4.7.2",
-    "winston": "^3.2.1"
+    "winston": "^3.2.1",
+    "ws": "^8.5.0"
   },
   "devDependencies": {
     "@types/async-cache": "^1.1.0",
@@ -66,6 +67,7 @@
     "@types/three": "^0.93.31",
     "@types/tinycolor2": "^1.4.0",
     "@types/validator": "^6.3.0",
+    "@types/ws": "^8.5.3",
     "axios": "^0.19.2",
     "babel-loader": "^8.2.2",
     "benchmark": "^2.1.4",

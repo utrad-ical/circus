@@ -22,6 +22,8 @@ import checkSeriesAccessToken from './app/auth/checkSeriesAccessToken';
 // application
 import { FunctionService } from '@utrad-ical/circus-lib';
 import createAuthorizer from './helper/createAuthorizer';
+import withWebSocketConnectionHandlers from './ws/withWebSocketConnectionHandlers';
+import hello from './ws/connection/hello';
 
 /**
  * Create Koa App.
@@ -80,6 +82,11 @@ const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
   router.use('/series/:sid', rsSeriesRoutes);
 
   app.use(router.routes());
+
+  // websocket
+  withWebSocketConnectionHandlers({
+    '/ws/hello': hello
+  })(app);
 
   // This is a default handler to catch all unknown requests of all types of verbs
   app.use(async (ctx: koa.DefaultContext, next: koa.Next) => {

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compataible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>WebSocket | CIRCUS RS Demo</title>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+
+<body>
+  <div id="test-container" class="container my-3">
+
+    <div class="form-row">
+      <div class="col-6">
+        <div style="padding: 1rem; border: 1px solid #ccc;">
+          <input type="button" data-role="hello-button" value="Hello">
+          |
+          <input type="button" data-role="create-button" value="Create">
+          |
+          <input type="button" data-role="close-button" value="Disconnect">
+          |
+          <input type="button" data-role="clear-log-button" value="Clear logs">
+          <br />
+
+          <pre data-role="log-console"></pre>
+        </div>
+      </div>
+      <div class="col-6" data-role="image-no-table"></div>
+    </div>
+
+  </div>
+
+  <!-- cdn scripts -->
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+    integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+
+  <script src="/main.js"></script>
+</body>
+
+</html>

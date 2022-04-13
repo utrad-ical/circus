@@ -73,7 +73,7 @@ const createImageTransferAgent = (
 
     const queue = new PriorityIntegerQueue;
     const targets = new MultiRange([[0, dummyVolume.metadata.voxelCount[2] - 1]]).subtract(skip);
-    queue.append(targets.toArray()); // 別プロジェクトのため MultiRange が同名だが別物なので toArray() を使用
+    queue.append(targets);
 
     collection.set(transferId, queue);
 
@@ -86,10 +86,10 @@ const createImageTransferAgent = (
     const priorityIntegerQueue = collection.get(transferId);
     if (priorityIntegerQueue) {
       const targetRange = new MultiRange(target).intersect(
-        priorityIntegerQueue.entireRange().toString() // @TODO: remove .toString();
+        priorityIntegerQueue.entireRange()
       );
       if (0 < targetRange.segmentLength()) {
-        priorityIntegerQueue.append(targetRange.toString(), priority); // @TODO: remove .toString();
+        priorityIntegerQueue.append(targetRange, priority);
       }
     }
   };

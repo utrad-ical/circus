@@ -24,6 +24,7 @@ import { FunctionService } from '@utrad-ical/circus-lib';
 import createAuthorizer from './helper/createAuthorizer';
 import withWebSocketConnectionHandlers from './ws/withWebSocketConnectionHandlers';
 import hello from './ws/connection/hello';
+import volume from './ws/connection/volume';
 
 /**
  * Create Koa App.
@@ -85,7 +86,10 @@ const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
 
   // websocket
   withWebSocketConnectionHandlers({
-    '/ws/hello': hello
+    '/ws/hello': hello,
+    '/ws/volume': volume({
+      authFunctionProvider: (req) => async (seriesUid) => true
+    }),
   })(app);
 
   // This is a default handler to catch all unknown requests of all types of verbs

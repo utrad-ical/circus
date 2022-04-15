@@ -61,11 +61,7 @@ module.exports = {
       shared: [
         { react: { singleton: true, eager: true } },
         { 'react-dom': { singleton: true, eager: true } },
-        {
-          'circus-ui-kit': {
-            singleton: true
-          }
-        }
+        { '@utrad-ical/circus-ui-kit': { singleton: true, eager: true } }
       ]
     })
   ],

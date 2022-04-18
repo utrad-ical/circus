@@ -1,6 +1,6 @@
 {
   "name": "@utrad-ical/circus-ui-kit",
-  "version": "0.3.0-experimental.4",
+  "version": "0.3.0-experimental.5",
   "description": "React components used by CIRCUS projects",
   "main": "lib/index.js",
   "scripts": {
@@ -20,7 +20,8 @@
   },
   "devDependencies": {
     "react": "^17.0.2",
-    "styled-components": "^5.1.0"
+    "styled-components": "^5.1.0",
+    "typescript": "^4.2.4"
   },
   "dependencies": {
     "@smikitky/rb-components": "^6.1.0",

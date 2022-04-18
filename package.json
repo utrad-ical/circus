@@ -55,5 +55,8 @@
     ],
     "testEnvironment": "node",
     "testTimeout": 10000
+  },
+  "dependencies": {
+    "@utrad-ical/circus-ui-kit": "file:packages/circus-ui-kit"
   }
 }

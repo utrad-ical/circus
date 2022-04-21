@@ -81,7 +81,9 @@ RUN chmod 755 /root/*.sh
 WORKDIR /root
 
 ENV PATH=/root:$PATH \
-    DATA_PATH=/var/circus/data \
-    DAEMON_MODE=0
+    HOST_DATA_PATH=/var/circus/data \
+    LOCAL_HOST_IP=127.0.0.1 \
+    DAEMON_MODE=0 \
+    PM2_HOME=/circus/.pm2
 
 CMD ["/root/startup.sh"]

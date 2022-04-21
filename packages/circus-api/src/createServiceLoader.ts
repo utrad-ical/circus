@@ -39,6 +39,7 @@ export type Services = CsCoreServices &
     mhdPacker: MhdPacker;
     oauthServer: KoaOAuth2Server;
     authProvider: AuthProvider;
+    defaultAuthProvider: AuthProvider;
     transactionManager: TransactionManager;
   };
 
@@ -87,6 +88,10 @@ const createServiceLoader = async (config: any) => {
     'authProvider',
     path.join(__dirname, 'middleware/auth/authProvider'),
     'DefaultAuthProvider'
+  );
+  loader.registerModule(
+    'defaultAuthProvider',
+    path.join(__dirname, 'middleware/auth/authProvider/DefaultAuthProvider')
   );
   loader.registerModule(
     'transactionManager',

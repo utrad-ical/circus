@@ -16,7 +16,7 @@ interface Token {
 }
 
 interface Options {
-  fallbackToDefault: false;
+  fallbackToDefault?: boolean;
 }
 
 /**
@@ -32,7 +32,7 @@ export const createOauthServer: FunctionService<
   Options
 > = async (opts, deps) => {
   const { models, authProvider, defaultAuthProvider } = deps;
-  const { fallbackToDefault } = opts;
+  const { fallbackToDefault = false } = opts;
   const oauthModel = {
     getAccessToken: async function (bearerToken: string) {
       // debug && console.log('getAccessToken', arguments);

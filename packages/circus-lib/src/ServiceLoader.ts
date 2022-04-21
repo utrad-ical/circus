@@ -11,7 +11,7 @@ interface HasDependencies {
   dependencies?: string[];
 }
 
-interface Disposable {
+export interface Disposable {
   dispose: () => Promise<void>;
 }
 

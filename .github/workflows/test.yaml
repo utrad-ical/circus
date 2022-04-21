@@ -11,14 +11,18 @@ jobs:
         node-version: [12.x, 14.x, 16.x]
       fail-fast: false
 
-    services:
-      mongodb:
-        image: mongo:4.2.2-bionic
-        ports:
-          - 27017:27017
+    # services:
+    #   mongodb:
+    #     image: mongo:4.2.2-bionic
+    #     ports:
+    #       - 27017:27017
 
     steps:
       - uses: actions/checkout@v1
+      - name: Start mongod
+        run: |
+          docker run --name mongo -p 27017:27017 -d mongo:4.2.2-bionic --replSet replset
+          echo "rs.initiate();" | mongo
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
@@ -42,3 +46,6 @@ jobs:
         env:
           CI: true
           CIRCUS_MONGO_TEST_URL: 'mongodb://localhost:27017/circus-api-test'
+      - name: Stop mongod
+        run: |
+          docker stop mongo

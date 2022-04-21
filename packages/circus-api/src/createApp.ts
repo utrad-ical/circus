@@ -15,7 +15,13 @@ import compose from 'koa-compose';
 import mount from 'koa-mount';
 import Router from 'koa-router';
 import * as path from 'path';
-import { DisposableDb, Validator, Models, DicomImporter } from './interface';
+import {
+  Database,
+  Validator,
+  Models,
+  DicomImporter,
+  TransactionManager
+} from './interface';
 import checkPrivilege from './middleware/auth/checkPrivilege';
 import fixUserMiddleware from './middleware/auth/fixUser';
 import cors from './middleware/cors';
@@ -118,7 +124,7 @@ interface CreateAppOptions {
 export const createApp: FunctionService<
   Koa,
   {
-    db: DisposableDb;
+    database: Database;
     validator: Validator;
     apiLogger: Logger;
     models: Models;
@@ -132,12 +138,13 @@ export const createApp: FunctionService<
     mhdPacker: MhdPacker;
     dicomVoxelDumper: DicomVoxelDumper;
     oauthServer: KoaOAuth2Server;
+    transactionManager: TransactionManager;
   },
   CreateAppOptions
 > = async (
   options,
   {
-    db,
+    database: database,
     validator,
     apiLogger: logger,
     models,
@@ -150,7 +157,8 @@ export const createApp: FunctionService<
     taskManager,
     mhdPacker,
     dicomVoxelDumper,
-    oauthServer
+    oauthServer,
+    transactionManager
   }
 ) => {
   const {
@@ -166,7 +174,7 @@ export const createApp: FunctionService<
   const koa = new Koa();
 
   const deps: Deps = {
-    db,
+    database,
     validator,
     logger,
     models,
@@ -181,7 +189,8 @@ export const createApp: FunctionService<
     dicomImageServerUrl,
     taskManager,
     mhdPacker,
-    dicomVoxelDumper
+    dicomVoxelDumper,
+    transactionManager
   };
 
   const apiDir = path.resolve(__dirname, 'api/**/*.yaml');
@@ -233,7 +242,7 @@ export const createApp: FunctionService<
 };
 
 createApp.dependencies = [
-  'db',
+  'database',
   'validator',
   'apiLogger',
   'models',
@@ -246,7 +255,8 @@ createApp.dependencies = [
   'taskManager',
   'mhdPacker',
   'dicomVoxelDumper',
-  'oauthServer'
+  'oauthServer',
+  'transactionManager'
 ];
 
 export default createApp;

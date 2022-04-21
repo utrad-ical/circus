@@ -1,6 +1,10 @@
 import koa, { ParameterizedContext } from 'koa';
-import mongo from 'mongodb';
-import { Validator, DicomImporter } from '../interface';
+import {
+  Validator,
+  DicomImporter,
+  Database,
+  TransactionManager
+} from '../interface';
 import { Models } from '../interface';
 import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
 import Storage from '../storage/Storage';
@@ -12,7 +16,7 @@ import { MhdPacker } from '../case/createMhdPacker';
 
 export interface Deps {
   validator: Validator;
-  db: mongo.Db;
+  database: Database;
   logger: Logger;
   models: Models;
   blobStorage: Storage;
@@ -27,6 +31,7 @@ export interface Deps {
   taskManager: TaskManager;
   mhdPacker: MhdPacker;
   dicomVoxelDumper: DicomVoxelDumper;
+  transactionManager: TransactionManager;
 }
 
 interface CustomCtxMembers {

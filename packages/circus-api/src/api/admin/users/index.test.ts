@@ -10,7 +10,7 @@ beforeAll(async () => {
 afterAll(async () => await apiTest.tearDown());
 
 beforeEach(async () => {
-  await setUpMongoFixture(apiTest.db, ['users']);
+  await setUpMongoFixture(apiTest.database.db, ['users']);
 });
 
 it('should return list of users', async () => {

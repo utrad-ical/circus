@@ -5,7 +5,6 @@ import path from 'path';
 import createApp from '../src/createApp';
 import { setUpKoaTestWith } from './util-koa';
 import { connectMongo, setUpMongoFixture } from './util-mongo';
-import mongo from 'mongodb';
 import * as cscore from '@utrad-ical/circus-cs-core';
 import createTestLogger from './util-logger';
 import createValidator from '../src/createValidator';
@@ -24,16 +23,16 @@ import { Archiver } from 'archiver';
 import { EventEmitter } from 'events';
 import createOauthServer from '../src/middleware/auth/createOauthServer';
 import createDefaultAuthProvider from '../src/middleware/auth/authProvider/DefaultAuthProvider';
+import { Database } from 'interface';
+import createTransactionManager from '../src/createTransactionManager';
 
 /**
  * Holds data used for API route testing.
  * Make sure to call `tearDown()` in the `afterAll()` function.
  */
 export interface ApiTest {
-  /**
-   * The mongo.Db instance shared among the test file.
-   */
-  db: mongo.Db;
+  database: Database;
+
   /**
    * Holds several `AxiosInstance`s that represent three API
    * users with different privileges.
@@ -79,7 +78,8 @@ export interface ApiTest {
 }
 
 export const setUpAppForRoutesTest = async () => {
-  const db = await connectMongo();
+  const database = await connectMongo();
+  const db = database.db;
 
   await setUpMongoFixture(db, [
     'series',
@@ -92,11 +92,19 @@ export const setUpAppForRoutesTest = async () => {
     'tasks',
     'pluginJobs',
     'pluginDefinitions',
-    'myLists'
+    'myLists',
+    'onetimeUrls'
   ]);
 
   const validator = await createValidator(undefined);
-  const models = await createModels(undefined, { db, validator });
+  const models = await createModels(undefined, {
+    database: database,
+    validator
+  });
+  const transactionManager = await createTransactionManager(
+    { maxCommitTimeMS: 10000 },
+    { database: database, validator }
+  );
   const csCore = createMockCsCore();
   const apiLogger = await createTestLogger();
   const dicomTagReader = await createDicomTagReader({});
@@ -146,7 +154,7 @@ export const setUpAppForRoutesTest = async () => {
     },
     {
       validator,
-      db,
+      database,
       apiLogger,
       models,
       blobStorage: await createMemoryStorage(undefined),
@@ -158,7 +166,8 @@ export const setUpAppForRoutesTest = async () => {
       volumeProvider: null as any, // dummy
       taskManager,
       dicomVoxelDumper,
-      oauthServer: await createOauthServer({}, { models, authProvider })
+      oauthServer: await createOauthServer({}, { models, authProvider }),
+      transactionManager
     }
   );
 
@@ -182,11 +191,11 @@ export const setUpAppForRoutesTest = async () => {
 
   const tearDown = async () => {
     testServer.tearDown();
-    await db.dispose();
+    await database.dispose();
   };
 
   return {
-    db,
+    database,
     axiosInstances,
     csCore,
     tearDown,

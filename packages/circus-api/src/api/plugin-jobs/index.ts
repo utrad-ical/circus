@@ -21,21 +21,22 @@ const maskPatientInfo = (ctx: CircusContext) => {
   };
 };
 
-export const handlePost: RouteMiddleware = ({ models, cs }) => {
+export const handlePost: RouteMiddleware = ({ transactionManager, cs }) => {
   return async (ctx, next) => {
     const { priority, ...request } = ctx.request.body;
+    await transactionManager.withTransaction(async models => {
+      const jobId = await makeNewPluginJob(
+        models,
+        request,
+        ctx.userPrivileges,
+        ctx.user.userEmail,
+        cs,
+        priority
+      );
 
-    const jobId = await makeNewPluginJob(
-      models,
-      request,
-      ctx.userPrivileges,
-      ctx.user.userEmail,
-      cs,
-      priority
-    );
-
-    ctx.body = { jobId };
-    ctx.status = status.CREATED;
+      ctx.body = { jobId };
+      ctx.status = status.CREATED;
+    });
   };
 };
 
@@ -293,15 +294,19 @@ export const handleGetFeedback: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handleDeleteFeedback: RouteMiddleware = ({ models }) => {
+export const handleDeleteFeedback: RouteMiddleware = ({
+  transactionManager
+}) => {
   return async (ctx, next) => {
-    const { jobId, feedbackId } = ctx.params;
-    const job = await models.pluginJob.findByIdOrFail(jobId);
-    const newList =
-      feedbackId === 'all'
-        ? []
-        : job.feedbacks.filter((f: any) => feedbackId !== f.feedbackId); // TODO: fix type
-    await models.pluginJob.modifyOne(jobId, { feedbacks: newList });
-    ctx.body = null;
+    await transactionManager.withTransaction(async models => {
+      const { jobId, feedbackId } = ctx.params;
+      const job = await models.pluginJob.findByIdOrFail(jobId);
+      const newList =
+        feedbackId === 'all'
+          ? []
+          : job.feedbacks.filter((f: any) => feedbackId !== f.feedbackId); // TODO: fix type
+      await models.pluginJob.modifyOne(jobId, { feedbacks: newList });
+      ctx.body = null;
+    });
   };
 };

@@ -10,7 +10,7 @@ beforeAll(async () => {
 afterAll(async () => await apiTest.tearDown());
 
 beforeEach(async () => {
-  await setUpMongoFixture(apiTest.db, ['pluginDefinitions']);
+  await setUpMongoFixture(apiTest.database.db, ['pluginDefinitions']);
 });
 
 test('return user info by userEmail', async () => {

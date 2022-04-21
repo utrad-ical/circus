@@ -10,8 +10,8 @@ let testServer: TestServer, userEmail: string, ax: AxiosInstance;
 const modelsPromise = usingModels();
 
 beforeAll(async () => {
-  const { db, models } = await modelsPromise;
-  await setUpMongoFixture(db, [
+  const { database, models } = await modelsPromise;
+  await setUpMongoFixture(database.db, [
     'groups',
     'users',
     'projects',

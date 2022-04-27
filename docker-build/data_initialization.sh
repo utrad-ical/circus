@@ -13,7 +13,7 @@ mkdir /var/circus/data/mongodb_dump
 mkdir -p /var/circus/data/logs/mongodb
 mkdir /var/circus/data/logs/nginx
 
-mongod --config /etc/mongod.conf --replSet replset &
+mongod --config /etc/mongod.conf &
 echo "rs.initiate();" | mongosh
 
 cd /var/circus/packages/circus-api

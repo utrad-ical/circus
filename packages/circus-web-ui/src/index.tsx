@@ -134,7 +134,38 @@ const TheApp: React.FC<{}> = () => {
   const [manager, setManager] = useState<ReturnType<typeof loginManager>>();
   const [api, setApi] = useState<ApiCaller>();
 
+  const transferSessionStorage = (event: StorageEvent) => {
+    const { key, newValue } = event;
+    if (!newValue) return;
+    if (key === 'getSessionStorage') {
+      // send data to the other tab
+      localStorage.setItem(
+        'sessionStorage',
+        sessionStorage.getItem('tokenCredentials') ?? ''
+      );
+      localStorage.removeItem('sessionStorage');
+    } else if (key === 'sessionStorage' && !sessionStorage.length) {
+      // Another tab sent data <- get it
+      sessionStorage.setItem('tokenCredentials', newValue);
+
+      // First-time login management when creating new tab
+      const manager = loginManager('/', store.dispatch, api =>
+        setApi(() => api!)
+      );
+      setManager(manager);
+      if (manager.restoreApiCaller()) {
+        manager.refreshUserInfo(true);
+      }
+    }
+  };
+
   useEffect(() => {
+    window.addEventListener('storage', transferSessionStorage);
+    if (!sessionStorage.length) {
+      localStorage.setItem('getSessionStorage', 'a new tab has been created');
+      localStorage.removeItem('getSessionStorage');
+    }
+
     // First-time login management
     const manager = loginManager('/', store.dispatch, api =>
       setApi(() => api!)

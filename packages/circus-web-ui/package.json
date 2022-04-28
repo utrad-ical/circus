@@ -57,7 +57,7 @@
     "@utrad-ical/circus-lib": "^0.16.0",
     "@utrad-ical/circus-rs": "^0.26.0",
     "@utrad-ical/circus-ui-kit": "^0.2.0",
-    "axios": "^0.19.2",
+    "axios": "^0.21.2",
     "bootstrap": "^3.4.1",
     "bytes": "^3.1.0",
     "classnames": "^2.3.1",

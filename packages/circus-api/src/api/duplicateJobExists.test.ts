@@ -6,8 +6,8 @@ let models: Models;
 const modelsPromise = usingModels();
 
 beforeAll(async () => {
-  const { db, models: m } = await modelsPromise;
-  await setUpMongoFixture(db, ['pluginJobs']);
+  const { database, models: m } = await modelsPromise;
+  await setUpMongoFixture(database.db, ['pluginJobs']);
   models = m;
 });
 

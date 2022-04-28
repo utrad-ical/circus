@@ -9,7 +9,7 @@ let testServer: TestServer, ax: AxiosInstance;
 const modelsPromise = usingModels();
 
 beforeAll(async () => {
-  const { db, validator, models } = await modelsPromise;
+  const { database, validator, models } = await modelsPromise;
   const apiLogger = await createTestLogger();
   const koaApp = await createApp(
     {
@@ -21,7 +21,7 @@ beforeAll(async () => {
     },
     {
       validator,
-      db,
+      database,
       models,
       apiLogger,
       dicomFileRepository: null as any, // dummy
@@ -38,7 +38,8 @@ beforeAll(async () => {
           next();
         },
         token: () => () => {}
-      } as any
+      } as any,
+      transactionManager: null as any // dummy
     }
   );
 

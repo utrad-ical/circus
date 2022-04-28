@@ -4,9 +4,10 @@ import { command } from './migrate';
 const modelsPromise = usingModels();
 
 test('perform migration from scratch', async () => {
-  const { db, models } = await modelsPromise;
+  const { database, models } = await modelsPromise;
+  const { db } = database;
   await deleteAllCollections(db);
-  const commandFunc = await command(null, { db, models });
+  const commandFunc = await command(null, { database, models });
   const spy1 = jest.spyOn(console, 'log').mockImplementation(() => {});
   await commandFunc({});
   expect(spy1).toHaveBeenCalledWith('Current Revision: 0');

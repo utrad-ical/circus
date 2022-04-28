@@ -68,9 +68,12 @@ export const determineUserAccessInfo = async (models: Models, user: any) => {
 
 /**
  * Check domain and image range for each series.
+ * Each series will be locked so that the relevant series will no be
+ * accidentally deleted.
+ * @param models Session-enabled Models object
  */
-export const fetchAccessibleSeries = async (
-  models: Models,
+export const fetchAndLockAccessibleSeries = async (
+  models: Models, // must be session-enabled
   userPrivileges: UserPrivilegeInfo,
   series: SeriesEntry[]
 ) => {
@@ -85,7 +88,7 @@ export const fetchAccessibleSeries = async (
 
   for (const seriesEntry of series) {
     const { seriesUid, partialVolumeDescriptor } = seriesEntry;
-    const item = await models.series.findById(seriesUid);
+    const item = await models.series.findById(seriesUid, { withLock: true });
     if (!item) {
       throwError(400, 'Nonexistent series.');
     }
@@ -119,5 +122,6 @@ export const globalPrivileges = () => [
   { privilege: 'deleteProject', caption: 'Delete Project' },
   { privilege: 'manageServer', caption: 'Manage Server' },
   { privilege: 'personalInfoView', caption: 'View Personal Info' },
-  { privilege: 'downloadVolume', caption: 'Download volume as raw file' }
+  { privilege: 'downloadVolume', caption: 'Download Volume as Raw File' },
+  { privilege: 'issueOnetime', caption: 'Issue Onetime URL' }
 ];

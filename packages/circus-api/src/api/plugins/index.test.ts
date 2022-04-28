@@ -10,7 +10,7 @@ beforeAll(async () => {
 afterAll(async () => await apiTest.tearDown());
 
 beforeEach(async () => {
-  await setUpMongoFixture(apiTest.db, ['pluginDefinitions']);
+  await setUpMongoFixture(apiTest.database.db, ['pluginDefinitions']);
 });
 
 it('should return list of all plugins', async () => {

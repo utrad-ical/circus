@@ -6,7 +6,8 @@ const modelsPromise = usingModels();
 let commandFunc: CommandFunc;
 
 beforeEach(async () => {
-  const { db, models } = await modelsPromise;
+  const { database, models } = await modelsPromise;
+  const { db } = database;
   await setUpMongoFixture(db, ['tokens']);
   commandFunc = await command(null, { models });
 });

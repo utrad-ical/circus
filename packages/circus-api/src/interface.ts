@@ -1,4 +1,5 @@
 import { readDicomTags } from './utils/createDicomTagReader';
+import { Disposable } from '@utrad-ical/circus-lib/src/ServiceLoader';
 import { CollectionAccessor } from './db/createCollectionAccessor';
 import mongo from 'mongodb';
 
@@ -28,6 +29,7 @@ export interface ModelEntries {
   plugin: any;
   pluginJob: any;
   myList: any;
+  onetimeUrl: any;
 }
 
 export type Models = {
@@ -37,9 +39,10 @@ export type Models = {
 /**
  * mongo.Db instance with `dispose()` method attached for disconnecting.
  */
-export type DisposableDb = mongo.Db & {
-  dispose: () => Promise<void>;
-};
+export interface Database extends Disposable {
+  db: mongo.Db;
+  connection: mongo.MongoClient;
+}
 
 type AuthResult =
   | { result: 'OK'; authenticatedUserEmail: string }
@@ -48,4 +51,8 @@ type AuthResult =
 export interface AuthProvider {
   check(id: string, password: string): Promise<AuthResult>;
   describe(): string;
+}
+
+export interface TransactionManager {
+  withTransaction: (fn: (models: Models) => Promise<void>) => Promise<void>;
 }

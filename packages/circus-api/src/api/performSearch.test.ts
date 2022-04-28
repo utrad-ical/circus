@@ -17,7 +17,7 @@ let testServer: TestServer, items: CollectionAccessor;
 const dbPromise = usingMongo();
 
 beforeAll(async () => {
-  const db = await dbPromise;
+  const db = (await dbPromise).db;
   await setUpMongoFixture(db, ['items']);
   testServer = await setUpKoaTest(async app => {
     const validator = await createValidator({

@@ -1,6 +1,6 @@
 import mongo from 'mongodb';
 import { FunctionService } from '@utrad-ical/circus-lib';
-import { DisposableDb } from '../interface';
+import { Database } from '../interface';
 
 /**
  * @deprecated
@@ -16,16 +16,15 @@ export const connectProdDb = async () => {
  * @param connectionString The Mongo connection URL with database,
  * eg `'mongodb://localhost:27017/mydatabase'`
  */
-const connectDb: FunctionService<DisposableDb> = async (opts, deps) => {
+const connectDb: FunctionService<Database> = async (opts, deps) => {
   const { mongoUrl } = opts;
   if (!mongoUrl) throw new Error('Connection string not set');
-  const dbConnection = await mongo.MongoClient.connect(mongoUrl, {
+  const connection = await mongo.MongoClient.connect(mongoUrl, {
     useUnifiedTopology: true
   });
-  const db = dbConnection.db(new URL(mongoUrl).pathname.slice(1));
-  const dispose = async () => dbConnection.close();
-  (db as any).dispose = dispose;
-  return db as any as DisposableDb;
+  const db = connection.db(new URL(mongoUrl).pathname.slice(1));
+  const dispose = () => connection.close();
+  return { db, connection, dispose };
 };
 
 connectDb.dependencies = [];

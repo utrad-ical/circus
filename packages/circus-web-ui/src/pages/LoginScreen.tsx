@@ -45,6 +45,7 @@ const LoginScreen: React.FC<{}> = props => {
   const [serverAlive, setServerAlive] = useState<boolean | undefined>();
   const [input, setInput] = useState({ id: '', password: '' });
   const [error, setError] = useState<string>();
+  const [loginSucceeded, setLoginSucceeded] = useState(false);
   const [criticalError, setCriticalError] = useState(false);
   const loginManager = useLoginManager();
   const user = useLoginUser();
@@ -57,15 +58,15 @@ const LoginScreen: React.FC<{}> = props => {
     })();
   }, [loginManager]);
 
+  // Force logout when user shows this page
   useEffect(() => {
-    if (user) {
+    if (user && !loginSucceeded) {
       const logout = async () => {
         await loginManager.logout();
       };
       logout();
     }
-    // eslint-disable-next-line
-  }, []);
+  }, [loginManager, loginSucceeded, user]);
 
   const handleChange = (key: string, val: string) => {
     setInput({ ...input, [key]: val });
@@ -74,6 +75,7 @@ const LoginScreen: React.FC<{}> = props => {
   const handleLoginClick = async () => {
     try {
       await loginManager.tryAuthenticate(input.id, input.password);
+      setLoginSucceeded(true);
       await loginManager.refreshUserInfo(true);
       browserHistory.push('/home');
     } catch (err: any) {

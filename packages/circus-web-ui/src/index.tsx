@@ -134,10 +134,7 @@ const TheApp: React.FC<{}> = () => {
   const [manager, setManager] = useState<ReturnType<typeof loginManager>>();
   const [api, setApi] = useState<ApiCaller>();
 
-  const sessionStorage_transfer = (event: any) => {
-    if (!event) {
-      event = window.event;
-    }
+  const transferSessionStorage = (event: StorageEvent) => {
     const { key, newValue } = event;
     if (!newValue) return;
     if (key === 'getSessionStorage') {
@@ -148,7 +145,7 @@ const TheApp: React.FC<{}> = () => {
       );
       localStorage.removeItem('sessionStorage');
     } else if (key === 'sessionStorage' && !sessionStorage.length) {
-      // another tab sent data <- get it
+      // Another tab sent data <- get it
       sessionStorage.setItem('tokenCredentials', newValue);
 
       // First-time login management when creating new tab
@@ -163,12 +160,9 @@ const TheApp: React.FC<{}> = () => {
   };
 
   useEffect(() => {
-    window.addEventListener('storage', sessionStorage_transfer);
+    window.addEventListener('storage', transferSessionStorage);
     if (!sessionStorage.length) {
-      localStorage.setItem(
-        'getSessionStorage',
-        'notify that new tab has created'
-      );
+      localStorage.setItem('getSessionStorage', 'a new tab has been created');
       localStorage.removeItem('getSessionStorage');
     }
 

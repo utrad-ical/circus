@@ -4,13 +4,13 @@ const path = require("path");
 const os = require("os");
 
 module.exports = {
-  db: {
+  database: {
     options: { mongoUrl },
   },
   apiServer: {
-    options: { 
+    options: {
       pluginResultsDir,
-      dicomImageServerUrl: "http://localhost/rs"
+      dicomImageServerUrl: "http://" + process.env.LOCAL_HOST_IP + "/rs",
     },
   },
   rsServer: {

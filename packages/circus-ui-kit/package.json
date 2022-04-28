@@ -1,6 +1,6 @@
 {
   "name": "@utrad-ical/circus-ui-kit",
-  "version": "0.3.0-experimental.5",
+  "version": "0.3.0",
   "description": "React components used by CIRCUS projects",
   "main": "lib/index.js",
   "scripts": {
@@ -26,8 +26,8 @@
   "dependencies": {
     "@smikitky/rb-components": "^6.1.0",
     "@utrad-ical/circus-icons": "^0.2.0",
-    "@utrad-ical/circus-lib": "^0.17.0-experimental.1",
-    "@utrad-ical/circus-rs": "^0.27.0-experimental.2",
+    "@utrad-ical/circus-lib": "^0.17.0",
+    "@utrad-ical/circus-rs": "^0.27.0",
     "classnames": "^2.3.1",
     "fflate": "^0.6.10",
     "lodash.get": "^4.4.2",

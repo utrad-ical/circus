@@ -28,10 +28,7 @@ const duplicateJobExists = async (
       series[volId].partialVolumeDescriptor.delta;
   }
 
-  const duplicateJobNumber = await models.pluginJob
-    .findAsCursor(filter)
-    .count();
-  return duplicateJobNumber !== 0;
+  return await models.pluginJob.findAsCursor(filter).hasNext();
 };
 
 export default duplicateJobExists;

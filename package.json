@@ -42,8 +42,8 @@
     "typescript": "^4.2.4"
   },
   "prettier": {
-    "singleQuote": true,
-    "trailingComma": "none",
+    "singleQuote": false,
+    "trailingComma": "es5",
     "arrowParens": "avoid"
   },
   "jest": {

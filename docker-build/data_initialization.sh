@@ -1,21 +1,20 @@
 #!/bin/bash
 
-DATA_PATH=`docker inspect --format='{{json .Mounts}}' $HOSTNAME | jq -r '.[] | select(.Source != "/var/run/docker.sock") | .Source'`
+mkdir -p /var/circus/data/api-store/logs
+mkdir /var/circus/data/api-store/blobs
+mkdir /var/circus/data/dicom
+mkdir /var/circus/data/labels
+mkdir /var/circus/data/plugin-results
+mkdir /var/circus/data/cs-tmp
+mkdir /var/circus/data/downloads
 
-mkdir -p $DATA_PATH/api-store/logs
-mkdir $DATA_PATH/api-store/blobs
-mkdir $DATA_PATH/dicom
-mkdir $DATA_PATH/labels
-mkdir $DATA_PATH/plugin-results
-mkdir $DATA_PATH/cs-tmp
-mkdir $DATA_PATH/downloads
-
-mkdir $DATA_PATH/mongodb
-mkdir $DATA_PATH/mongodb_dump
-mkdir -p $DATA_PATH/logs/mongodb
-mkdir $DATA_PATH/logs/nginx
+mkdir /var/circus/data/mongodb
+mkdir /var/circus/data/mongodb_dump
+mkdir -p /var/circus/data/logs/mongodb
+mkdir /var/circus/data/logs/nginx
 
 mongod --config /etc/mongod.conf &
+echo "rs.initiate();" | mongosh
 
 cd /var/circus/packages/circus-api
 node circus migrate

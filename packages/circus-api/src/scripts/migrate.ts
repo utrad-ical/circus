@@ -1,6 +1,6 @@
 import * as path from 'path';
 import chalk from 'chalk';
-import { DisposableDb, Models } from '../interface';
+import { Database, Models } from '../interface';
 import scanMigrationFiles from '../utils/scanMigrationFiles';
 import Command from './Command';
 
@@ -8,13 +8,13 @@ export const help = () => {
   return 'Performs DB migration.';
 };
 
-export const command: Command<{ db: DisposableDb; models: Models }> = async (
+export const command: Command<{ database: Database; models: Models }> = async (
   opts,
-  { db, models }
+  { database, models }
 ) => {
   return async () => {
     const migrations = await scanMigrationFiles();
-    const migrationCollection = db.collection('migration');
+    const migrationCollection = database.db.collection('migration');
 
     const revDoc = await migrationCollection.find({}).toArray();
     const currentRevision = revDoc.length ? revDoc[0].revision : 0;
@@ -32,7 +32,7 @@ export const command: Command<{ db: DisposableDb; models: Models }> = async (
       const name = path.basename(file);
       console.log(chalk.green('Forwarding...'), name);
       try {
-        await module.up(db, models);
+        await module.up(database.db, models);
         await migrationCollection.updateOne(
           {},
           { $set: { revision: i, updatedAt: new Date() } },
@@ -49,4 +49,4 @@ export const command: Command<{ db: DisposableDb; models: Models }> = async (
   };
 };
 
-command.dependencies = ['db', 'models'];
+command.dependencies = ['database', 'models'];

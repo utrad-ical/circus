@@ -1,12 +1,13 @@
 import Project, { ProjectRoles } from '../types/Project';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-type GlobalPrivileges =
+export type GlobalPrivilege =
   | 'createProject'
   | 'deleteProject'
   | 'manageServer'
   | 'personalInfoView'
-  | 'downloadVolume';
+  | 'downloadVolume'
+  | 'issueOnetime';
 
 export interface SearchPreset {
   name: string;
@@ -46,7 +47,7 @@ export interface LoginUser {
     dicomImageServer: string;
     domains: string[];
     defaultDomain: string | null;
-    globalPrivileges: GlobalPrivileges[];
+    globalPrivileges: GlobalPrivilege[];
     groups: string[];
     lastLoginIp: string;
     lastLoginTime: string;

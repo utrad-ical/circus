@@ -1,0 +1,14 @@
+$schema: 'http://json-schema.org/schema#'
+$async: true
+title: OnetimeUrl
+type: object
+description: >
+  One-time URL that enables a user to log in without a login ID and a password.
+properties:
+  onetimeUrlId:
+    type: string
+  userEmail:
+    type: string
+  onetimeString:
+    type: string
+additionalProperties: false

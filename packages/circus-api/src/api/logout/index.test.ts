@@ -19,7 +19,7 @@ test('logout', async () => {
 test('preserve permanent token', async () => {
   const res = await apiTest.axiosInstances.guest.get('api/logout');
   expect(res.status).toBe(httpStatus.NO_CONTENT);
-  const rows = await apiTest.db
+  const rows = await apiTest.database.db
     .collection('tokens')
     .find({ userId: 'guest@example.com' })
     .toArray();

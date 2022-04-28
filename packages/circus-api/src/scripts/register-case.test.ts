@@ -1,20 +1,32 @@
-import { setUpMongoFixture, usingModels } from '../../test/util-mongo';
-import { Models } from '../interface';
+import { setUpMongoFixture, usingSessionModels } from '../../test/util-mongo';
+import { Database, TransactionManager, Validator } from '../interface';
 import { CommandFunc } from './Command';
 import { command } from './register-case';
+import createTransactionManager from '../createTransactionManager';
 
-const modelsPromise = usingModels();
+const modelsPromise = usingSessionModels();
 let commandFunc: CommandFunc;
-let models: Models;
+let transactionManager: TransactionManager;
+let database: Database;
+let validator: Validator;
 
 beforeAll(async () => {
-  models = (await modelsPromise).models;
-  commandFunc = await command(null, { models });
+  database = (await modelsPromise).database;
+  validator = (await modelsPromise).validator;
+  transactionManager = await createTransactionManager(
+    { maxCommitTimeMS: 10000 },
+    { database, validator }
+  );
+  commandFunc = await command(null, { transactionManager });
 });
 
 beforeEach(async () => {
-  const { db } = await modelsPromise;
-  await setUpMongoFixture(db, ['clinicalCases', 'users', 'groups', 'projects']);
+  await setUpMongoFixture(database.db, [
+    'clinicalCases',
+    'users',
+    'groups',
+    'projects'
+  ]);
 });
 
 test('create new case', async () => {
@@ -29,8 +41,10 @@ test('create new case', async () => {
     tags: 'tag1,tag2'
   });
   const caseId = spy.mock.calls[0][0];
-  const data = await models.clinicalCase.findById(caseId);
-  expect(data.projectId).toBe('8883fdef6f5144f50eb2a83cd34baa44');
+  await transactionManager.withTransaction(async models => {
+    const data = await models.clinicalCase.findById(caseId);
+    expect(data.projectId).toBe('8883fdef6f5144f50eb2a83cd34baa44');
+  });
   spy.mockReset();
 });
 

@@ -11,7 +11,6 @@ interface Options {
 
 export interface DicomUtilityRunner {
   compress: (buf: ArrayBuffer) => Promise<ArrayBuffer>;
-  dispose: () => Promise<void>;
 }
 
 const createDicomUtilityRunner: NoDepFunctionService<DicomUtilityRunner> =
@@ -132,7 +131,7 @@ const createDicomUtilityRunner: NoDepFunctionService<DicomUtilityRunner> =
       dispose: async () => {
         await pool.destroy();
       }
-    } as DicomUtilityRunner;
+    };
   };
 
 export default createDicomUtilityRunner;

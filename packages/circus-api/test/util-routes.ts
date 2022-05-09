@@ -115,9 +115,9 @@ export const setUpAppForRoutesTest = async () => {
     {
       dicomFileRepository,
       apiLogger,
-      models,
       dicomUtilityRunner,
-      dicomTagReader
+      dicomTagReader,
+      transactionManager
     }
   );
 
@@ -165,7 +165,10 @@ export const setUpAppForRoutesTest = async () => {
       volumeProvider: null as any, // dummy
       taskManager,
       dicomVoxelDumper,
-      oauthServer: await createOauthServer({}, { models, authProvider }),
+      oauthServer: await createOauthServer(
+        {},
+        { defaultAuthProvider: authProvider, models, authProvider }
+      ),
       transactionManager
     }
   );

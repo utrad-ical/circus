@@ -3,15 +3,15 @@ import { TransactionManager, Models, Database, Validator } from 'interface';
 import { makeModels } from './db/createModels';
 
 interface Options {
-  maxCommitTimeMS: number;
+  maxCommitTimeMS?: number;
 }
 
 const createTransactionManager: FunctionService<
   TransactionManager,
   { database: Database; validator: Validator },
   Options
-> = async (opt, deps) => {
-  const { maxCommitTimeMS } = opt;
+> = async (opt = {}, deps) => {
+  const { maxCommitTimeMS = 2000 } = opt;
   const { database, validator } = deps;
   const withTransaction = async (fn: (models: Models) => Promise<void>) => {
     const session = database.connection.startSession();

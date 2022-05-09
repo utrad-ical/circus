@@ -7,6 +7,7 @@ import { Models } from '../interface';
 import { CommandFunc } from './Command';
 import { command } from './import-series';
 import createDicomTagReader from '../utils/createDicomTagReader';
+import createTransactionManager from '../createTransactionManager';
 
 const modelsPromise = usingModels(),
   domain = 'default';
@@ -15,20 +16,24 @@ let commandFunc: CommandFunc,
   models: Models;
 
 beforeEach(async () => {
-  const { db } = (await modelsPromise).database;
+  const { database, validator } = await modelsPromise;
   models = (await modelsPromise).models;
-  await setUpMongoFixture(db, ['series']);
+  await setUpMongoFixture(database.db, ['series']);
   const apiLogger = await createTestLogger();
   dicomFileRepository = new MemoryDicomFileRepository({});
   const dicomTagReader = await createDicomTagReader({});
+  const transactionManager = await createTransactionManager(
+    {},
+    { database, validator }
+  );
   const dicomImporter = await createDicomImporter(
     {},
     {
       dicomFileRepository,
-      models,
       apiLogger,
       dicomTagReader,
-      dicomUtilityRunner: null as any // Dummy
+      dicomUtilityRunner: null as any, // Dummy
+      transactionManager
     }
   );
   commandFunc = await command(null, { dicomImporter });

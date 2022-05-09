@@ -46,27 +46,31 @@ const createDicomImporter: FunctionService<
     }
     // Check if there is already a series with the same series UID
     const seriesUid = tags.seriesUid;
-    await transactionManager.withTransaction(async models => {
-      const series = await models.series.findById(seriesUid);
+    try {
+      await transactionManager.withTransaction(async models => {
+        const series = await models.series.findById(seriesUid);
 
-      apiLogger.trace(`Importing ${seriesUid} #${instanceNumber}`, tags);
-      if (series) {
-        // Add image number
-        const mr = multirange(series.images);
-        mr.append(instanceNumber);
-        await models.series.modifyOne(seriesUid, { images: mr.toString() });
-      } else {
-        // Insert as a new series
-        const doc = {
-          ...tags,
-          seriesDate: seriesDate || studyDate || null,
-          images: String(instanceNumber),
-          domain,
-          storageId: 0
-        };
-        await models.series.insert(doc);
-      }
-    });
+        apiLogger.trace(`Importing ${seriesUid} #${instanceNumber}`, tags);
+        if (series) {
+          // Add image number
+          const mr = multirange(series.images);
+          mr.append(instanceNumber);
+          await models.series.modifyOne(seriesUid, { images: mr.toString() });
+        } else {
+          // Insert as a new series
+          const doc = {
+            ...tags,
+            seriesDate: seriesDate || studyDate || null,
+            images: String(instanceNumber),
+            domain,
+            storageId: 0
+          };
+          await models.series.insert(doc);
+        }
+      });
+    } catch (err) {
+      console.error(err);
+    }
 
     const seriesLoader = await dicomFileRepository.getSeries(seriesUid);
     await seriesLoader.save(instanceNumber, fileContent);

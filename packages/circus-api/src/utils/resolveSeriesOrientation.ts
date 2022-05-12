@@ -20,27 +20,40 @@ const resolveSeriesOrientation = async (
     dicomTagReader: DicomTagReader;
   }
 ) => {
-  if (start > end) throw new Error('invalid argument');
+  const isAscendingOrder = start <= end ? true : false;
 
   const series = await dicomFileRepository.getSeries(seriesUid);
   if (series.images === '1') {
     return { start, end, delta: 1 } as PartialVolumeDescriptor;
   }
-  const startImage = await series.load(start);
-  const endImage = await series.load(end);
+
+  let startImage: ArrayBuffer, endImage: ArrayBuffer;
+  try {
+    startImage = await series.load(start);
+    endImage = await series.load(end);
+  } catch (err) {
+    throw new Error('no image');
+  }
+
   const startImageTags = await dicomTagReader(startImage);
   const endImageTags = await dicomTagReader(endImage);
 
-  if (!startImageTags.parameters.imagePositionPatientZ) {
-    return { start, end, delta: 1 } as PartialVolumeDescriptor;
-  }
   if (
-    startImageTags.parameters.imagePositionPatientZ >
-    endImageTags.parameters.imagePositionPatientZ!
+    !startImageTags.parameters.imagePositionPatientZ ||
+    !endImageTags.parameters.imagePositionPatientZ
+  )
+    throw new Error('invalid image');
+  if (
+    startImageTags.parameters.imagePositionPatientZ >=
+    endImageTags.parameters.imagePositionPatientZ
   ) {
-    return { start, end, delta: 1 } as PartialVolumeDescriptor;
+    return isAscendingOrder
+      ? ({ start, end, delta: 1 } as PartialVolumeDescriptor)
+      : ({ start: end, end: start, delta: -1 } as PartialVolumeDescriptor);
   } else {
-    return { start: end, end: start, delta: -1 } as PartialVolumeDescriptor;
+    return isAscendingOrder
+      ? ({ start: end, end: start, delta: -1 } as PartialVolumeDescriptor)
+      : ({ start, end, delta: 1 } as PartialVolumeDescriptor);
   }
 };
 

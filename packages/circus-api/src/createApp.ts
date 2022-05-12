@@ -20,7 +20,8 @@ import {
   Validator,
   Models,
   DicomImporter,
-  TransactionManager
+  TransactionManager,
+  DicomTagReader
 } from './interface';
 import checkPrivilege from './middleware/auth/checkPrivilege';
 import fixUserMiddleware from './middleware/auth/fixUser';
@@ -133,6 +134,7 @@ export const createApp: FunctionService<
     rsSeriesRoutes: Koa.Middleware;
     volumeProvider: VolumeProvider;
     dicomFileRepository: DicomFileRepository;
+    dicomTagReader: DicomTagReader;
     dicomImporter: DicomImporter;
     taskManager: TaskManager;
     mhdPacker: MhdPacker;
@@ -154,6 +156,7 @@ export const createApp: FunctionService<
     volumeProvider,
     dicomImporter,
     dicomFileRepository,
+    dicomTagReader,
     taskManager,
     mhdPacker,
     dicomVoxelDumper,
@@ -180,6 +183,7 @@ export const createApp: FunctionService<
     models,
     blobStorage,
     dicomFileRepository,
+    dicomTagReader,
     dicomImporter,
     pluginResultsPath,
     pluginCachePath,
@@ -251,6 +255,7 @@ createApp.dependencies = [
   'rsSeriesRoutes',
   'volumeProvider',
   'dicomFileRepository',
+  'dicomTagReader',
   'dicomImporter',
   'taskManager',
   'mhdPacker',

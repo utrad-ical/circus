@@ -21,6 +21,16 @@ routes:
   - verb: get
     path: /series/:seriesUid
     description: Returns information about the specified series.
+  - verb: get
+    path: /series/:seriesUid/orientation
+    handler: handleGetOrientation
+    responseSchema:
+      type: object
+      properties:
+        orientation:
+          enum: ['head-first', 'foot-first']
+      additionalProperties: false
+    description: Returns whether series is head-first or foot-first.
   - verb: delete
     path: /series/:seriesUid
     description: Deletes the specified series.

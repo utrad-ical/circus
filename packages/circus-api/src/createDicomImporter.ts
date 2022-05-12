@@ -50,7 +50,7 @@ const createDicomImporter: FunctionService<
       await transactionManager.withTransaction(async models => {
         const series = await models.series.findById(seriesUid);
 
-        apiLogger.trace(`Importing ${seriesUid} #${instanceNumber}`, tags);
+        apiLogger.trace(`Importing: ${seriesUid} #${instanceNumber}`);
         if (series) {
           // Add image number
           const mr = multirange(series.images);
@@ -68,8 +68,10 @@ const createDicomImporter: FunctionService<
           await models.series.insert(doc);
         }
       });
+      apiLogger.trace(`Import complete: ${seriesUid} #${instanceNumber}`);
     } catch (err) {
-      console.error(err);
+      apiLogger.error(`Import failure: ${seriesUid} #${instanceNumber}`);
+      apiLogger.error(err);
     }
 
     const seriesLoader = await dicomFileRepository.getSeries(seriesUid);

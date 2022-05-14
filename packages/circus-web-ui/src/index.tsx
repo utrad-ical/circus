@@ -7,6 +7,7 @@ import { Router, Route, Switch } from 'react-router-dom';
 import Application from 'pages/Application';
 
 import LoginScreen from 'pages/LoginScreen';
+import OneTimeLogin from 'pages/OneTimeLogin';
 import HomePage from 'pages/HomePage';
 import SeriesSearch from 'pages/search/SeriesSearch';
 import CreateNewCase from 'pages/CreateNewCase';
@@ -205,6 +206,7 @@ const TheApp: React.FC<{}> = () => {
               <Router history={browserHistory}>
                 <Switch>
                   <Route exact path="/" component={LoginScreen} />
+                  <Route exact path="/otp" component={OneTimeLogin} />
                   <AppRoutes />
                 </Switch>
               </Router>

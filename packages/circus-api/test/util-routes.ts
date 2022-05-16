@@ -148,6 +148,7 @@ export const setUpAppForRoutesTest = async () => {
     {
       debug: true,
       pluginResultsPath: path.join(__dirname, 'plugin-results'),
+      pluginCachePath: path.join(__dirname, 'plugin-cache'),
       uploadFileSizeMaxBytes: 200 * 1024 * 1024,
       dicomImageServerUrl: '' // dummy
     },

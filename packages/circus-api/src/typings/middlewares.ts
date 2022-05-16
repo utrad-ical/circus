@@ -23,6 +23,7 @@ export interface Deps {
   dicomFileRepository: DicomFileRepository;
   dicomImporter: DicomImporter;
   pluginResultsPath: string;
+  pluginCachePath: string;
   cs: CsCore;
   volumeProvider: VolumeProvider;
   uploadFileSizeMaxBytes: number;

@@ -1,9 +1,11 @@
-import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import { PartialVolumeDescriptor, partialVolumeDescriptorToArray } from '@utrad-ical/circus-lib';
 import PriorityIntegerQueue from '../../common/PriorityIntegerQueue';
 import { MultiRange } from 'multi-integer-range';
 import { MultiRangeDescriptor } from '../../common/ws/types';
 import { TransferImageMessage, transferImageMessageData } from '../../common/ws/message';
 import { debugDummyWait, createDummyBuffer, dummyVolume } from '../../ws-temporary-config';
+import { DicomFileRepository } from '@utrad-ical/circus-lib';
+import { DicomExtractorWorker } from '../helper/extractor-worker/createDicomExtractorWorker';
 
 export type ImageTransferAgent = ReturnType<typeof createImageTransferAgent>;
 
@@ -11,13 +13,20 @@ interface Acceptor {
   (data: TransferImageMessage, buffer: ArrayBuffer): Promise<void>;
 }
 
+type LoadingItem = {
+  fetch: (image: number) => Promise<ArrayBuffer>;
+  queue: PriorityIntegerQueue;
+  startTime: number; // :DEBUG
+}
+
 const createImageTransferAgent = (
   accept: Acceptor,
+  dicomFileRepository: DicomFileRepository,
+  dicomExtractorWorker: DicomExtractorWorker,
   { connectionId }: { connectionId?: number; } = {} // :DEBUG
 ) => {
 
-  const collection = new Map<string, PriorityIntegerQueue>();
-  const beginTransferAt = new Map<string, number>(); // :DEBUG
+  const collection = new Map<string, LoadingItem>();
 
   let inOperation = false;
 
@@ -30,33 +39,28 @@ const createImageTransferAgent = (
     }
     while (0 < loaderIds.length) {
       const transferId = loaderIds.shift()!;
-      const imageNo = collection.get(transferId)?.shift();
+      const { queue, fetch, startTime } = collection.get(transferId)!;
+      const imageNo = queue.shift();
       if (imageNo !== undefined) {
         if (debugDummyWait) await (debugDummyWait as unknown as () => Promise<void>)(); // :DEBUG
-        await transfer(transferId, imageNo);
+        const buffer = createDummyBuffer ? (createDummyBuffer as any)() : await fetch(imageNo);
+
+        console.log(`${connectionId}: Loader#${transferId}: Transfer ${imageNo}`);
+        const data = transferImageMessageData(transferId, imageNo);
+
+        try {
+          await accept(data, buffer);
+        } catch (err) {
+          console.error((err as Error).message);
+          stopTransfer(transferId);
+        }
+
       } else {
-        const beginAt = beginTransferAt.get(transferId) || 0; // :DEBUG
-        console.log(`${connectionId}: Loader#${transferId}: Finish (complete or error) / in ${new Date().getTime() - beginAt} [ms]`); // :DEBUG
-        beginTransferAt.delete(transferId); // :DEBUG
+        console.log(`${connectionId}: Loader#${transferId}: Finish (complete or error) / in ${new Date().getTime() - startTime} [ms]`); // :DEBUG
         collection.delete(transferId);
       }
     }
     next();
-  };
-
-  const transfer = async (transferId: string, imageNo: number) => {
-    console.log(`${connectionId}: Loader#${transferId}: Transfer ${imageNo}`);
-
-    // @see createVolumeProvider.ts
-    const data = transferImageMessageData(transferId, imageNo);
-    const buffer = createDummyBuffer();
-
-    try {
-      await accept(data, buffer);
-    } catch (err) {
-      console.error((err as Error).message);
-      stopTransfer(transferId);
-    }
   };
 
   const beginTransfer = async (
@@ -71,25 +75,35 @@ const createImageTransferAgent = (
     // @TODO: check if the specified seriesUid is valid
     if (seriesUid !== dummyVolume.seriesUid) return;
 
+    const { load, images } = await dicomFileRepository.getSeries(seriesUid);
+
+    const fetch = async (imageNo: number) => {
+      const unparsedBuffer = await load(imageNo);
+      const { pixelData } = await dicomExtractorWorker(unparsedBuffer);
+      return pixelData!;
+    };
+
     const queue = new PriorityIntegerQueue;
-    const targets = new MultiRange([[0, dummyVolume.metadata.voxelCount[2] - 1]]).subtract(skip);
+    const targetImageNumbers = partialVolumeDescriptor
+      ? partialVolumeDescriptorToArray(partialVolumeDescriptor)
+      : images;
+    const targets = new MultiRange(targetImageNumbers).subtract(skip);
     queue.append(targets);
 
-    collection.set(transferId, queue);
-
-    beginTransferAt.set(transferId, new Date().getTime());
+    const startTime = new Date().getTime();
+    collection.set(transferId, { fetch, queue, startTime });
 
     if (!inOperation) next();
   };
 
   const setPriority = (transferId: string, target: MultiRangeDescriptor, priority: number) => {
-    const priorityIntegerQueue = collection.get(transferId);
-    if (priorityIntegerQueue) {
+    const queue = collection.get(transferId)?.queue;
+    if (queue) {
       const targetRange = new MultiRange(target).intersect(
-        priorityIntegerQueue.entireRange()
+        queue.entireRange()
       );
       if (0 < targetRange.segmentLength()) {
-        priorityIntegerQueue.append(targetRange, priority);
+        queue.append(targetRange, priority);
       }
     }
   };

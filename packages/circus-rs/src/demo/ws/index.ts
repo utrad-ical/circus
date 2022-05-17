@@ -3,6 +3,8 @@ import { dummyVolume } from "ws-temporary-config";
 import { createTransferClientFactory, TransferClientFactory } from "../../browser/ws/createTransferClientFactory";
 import DebugLogger from "./DebugLogger";
 import WebSocketClient from "../../browser/ws/WebSocketClient";
+import drawToImageData from "../../browser/image-source/drawToImageData";
+import { pixelFormatInfo } from '@utrad-ical/circus-lib/src/PixelFormat';
 
 type Config = Exclude<ReturnType<typeof restoreConfig>, null>;
 const cfg = restoreConfig();
@@ -73,10 +75,20 @@ function main(cfg: Config) {
     });
 }
 
+// interface MetadataResponse {
+//     voxelCount: [number, number, number];
+//     voxelSize: [number, number, number];
+//     dicomWindow?: ViewWindow;
+//     pixelFormat: PixelFormat;
+//     mode: '3d' | '2d';
+//     estimatedWindow?: ViewWindow;
+// }
+
 async function handleClickCreateButton(apiClient: RsHttpClient, logger: DebugLogger, factory: TransferClientFactory) {
 
     const { seriesUid } = dummyVolume;
     const metadata = await apiClient.request(`series/${seriesUid}/metadata`, {});
+    const { arrayClass } = pixelFormatInfo(metadata.pixelFormat);
 
     const setPriorityTargets = [
         Math.trunc(Math.random() * metadata.voxelCount[2]),
@@ -95,7 +107,7 @@ async function handleClickCreateButton(apiClient: RsHttpClient, logger: DebugLog
         }
 
         const canvas = loaderElement.querySelector('canvas[data-role=load-indicator]') as HTMLCanvasElement | undefined;
-        if(canvas) {
+        if (canvas) {
             const ctx = canvas.getContext('2d')!;
             switch (loadCounter.get(imageNo)!) {
                 case 1:
@@ -108,8 +120,19 @@ async function handleClickCreateButton(apiClient: RsHttpClient, logger: DebugLog
                     ctx.fillStyle = 'rgba(255,0,0,1.0)';
                     break;
             }
-            ctx.fillRect(imageNo, 0, 1, 50);
+            ctx.fillRect(imageNo - 1, 0, 1, 50);
         }
+
+        // show preview image in canvas
+        const typedBuffer = new arrayClass(buffer);
+
+        const [w, h] = metadata.voxelCount;
+        const imageData = drawToImageData([w, h], typedBuffer, metadata.dicomWindow);
+        const preview = document.getElementById('latest-image') as null | HTMLCanvasElement;
+        if (preview) preview.getContext('2d')!.putImageData(imageData, 0, 0);
+
+        // const img = document.createElement("img");
+        // img.src = "data:image/jpeg;base64," + window.btoa(buffer);
     }
 
     const transferClient = await factory.make({ seriesUid }, handler);

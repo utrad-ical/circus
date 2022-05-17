@@ -88,28 +88,27 @@ async function handleClickCreateButton(apiClient: RsHttpClient, logger: DebugLog
     const loadCounter = new Map<number, number>();
 
     const handler = (imageNo: number, buffer: ArrayBuffer) => {
-
-        if (imageNo === 0) console.time(transferClient.id());
-        if (imageNo === 29) console.timeEnd(transferClient.id());
-
         if (loadCounter.has(imageNo)) {
             loadCounter.set(imageNo, loadCounter.get(imageNo)! + 1);
         } else {
             loadCounter.set(imageNo, 1);
         }
-        const cell = loaderElement.querySelector(`[data-role=image-${imageNo}]`) as HTMLInputElement | undefined;
-        if (cell) {
+
+        const canvas = loaderElement.querySelector('canvas[data-role=load-indicator]') as HTMLCanvasElement | undefined;
+        if(canvas) {
+            const ctx = canvas.getContext('2d')!;
             switch (loadCounter.get(imageNo)!) {
                 case 1:
-                    cell.classList.add('bg-success');
+                    ctx.fillStyle = 'rgba(0,0,255,1.0)';
                     break;
                 case 2:
-                    cell.classList.add('bg-warning');
+                    ctx.fillStyle = 'rgba(0,255,0,1.0)';
                     break;
                 default:
-                    cell.classList.add('bg-danger');
+                    ctx.fillStyle = 'rgba(255,0,0,1.0)';
                     break;
             }
+            ctx.fillRect(imageNo, 0, 1, 50);
         }
     }
 
@@ -171,24 +170,18 @@ async function handleClickCreateButton(apiClient: RsHttpClient, logger: DebugLog
     loaderElement.append(disposeButton);
 
     // Loaded Image Cells
-    const table = document.createElement('table');
-    table.classList.add('table', 'table-sm', 'table-bordered', 'text-center', 'mt-2');
-    loaderElement.append(table);
-    const tbody = document.createElement('tbody');
-    table.append(tbody);
-    let tr: HTMLTableRowElement | undefined = undefined;
-    const nextRow = () => (tr = document.createElement('tr')) && tbody.append(tr);
     const imageCount = metadata.voxelCount[2];
-    for (let i = 0; i < imageCount; i++) {
-        if (0 === (i % 10)) nextRow();
-        const td = document.createElement('td');
-        td.classList.add('p-0');
-        td.setAttribute('data-role', `image-${i}`);
-        td.innerText = i.toString();
-        tr!.append(td);
-    }
+    const indicator = document.createElement('canvas');
+    indicator.setAttribute('data-role', 'load-indicator');
+    indicator.setAttribute('width', imageCount.toString());
+    indicator.setAttribute('height', '50');
+    indicator.style.setProperty('margin-top', '0.2rem');
+    indicator.style.setProperty('width', '100%');
+    indicator.style.setProperty('height', '50px');
+    indicator.style.setProperty('border', '1px solid #999999');
+    loaderElement.append(indicator);
 
-    const wrapper = document.querySelector('[data-role=image-no-table]') as HTMLElement | undefined;
+    const wrapper = document.querySelector('[data-role=loader-container]') as HTMLElement | undefined;
     if (wrapper) wrapper.append(loaderElement);
 }
 

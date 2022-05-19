@@ -3,13 +3,14 @@ import PriorityIntegerQueue from '../../common/PriorityIntegerQueue';
 import { MultiRange } from 'multi-integer-range';
 import { MultiRangeDescriptor } from '../../common/ws/types';
 import { TransferImageMessage, transferImageMessageData } from '../../common/ws/message';
-import { debugDummyWait, createDummyBuffer, dummyVolume } from '../../ws-temporary-config';
+import { createDummyBuffer, dummyVolume } from '../../ws-temporary-config';
 import { DicomFileRepository } from '@utrad-ical/circus-lib';
 import { DicomExtractorWorker } from '../helper/extractor-worker/createDicomExtractorWorker';
+import { console_log } from '../../debug';
 
 export type ImageTransferAgent = ReturnType<typeof createImageTransferAgent>;
 
-interface Acceptor {
+interface ImageDataEmitter {
   (data: TransferImageMessage, buffer: ArrayBuffer): Promise<void>;
 }
 
@@ -20,7 +21,7 @@ type LoadingItem = {
 }
 
 const createImageTransferAgent = (
-  accept: Acceptor,
+  imageDataEmitter: ImageDataEmitter,
   dicomFileRepository: DicomFileRepository,
   dicomExtractorWorker: DicomExtractorWorker,
   { connectionId }: { connectionId?: number; } = {} // :DEBUG
@@ -37,26 +38,30 @@ const createImageTransferAgent = (
       inOperation = false;
       return;
     }
+
     while (0 < loaderIds.length) {
       const transferId = loaderIds.shift()!;
+
+      if (!collection.has(transferId)) {
+        console_log(`No handler for tr#${transferId} con#${connectionId}`);
+        continue;
+      }
+
       const { queue, fetch, startTime } = collection.get(transferId)!;
       const imageNo = queue.shift();
+
       if (imageNo !== undefined) {
-        if (debugDummyWait) await (debugDummyWait as unknown as () => Promise<void>)(); // :DEBUG
-        const buffer = createDummyBuffer ? (createDummyBuffer as any)() : await fetch(imageNo);
-
-        console.log(`${connectionId}: Loader#${transferId}: Transfer ${imageNo}`);
-        const data = transferImageMessageData(transferId, imageNo);
-
         try {
-          await accept(data, buffer);
+          const data = transferImageMessageData(transferId, imageNo);
+          const buffer = createDummyBuffer ? (createDummyBuffer as any)() : await fetch(imageNo);
+          await imageDataEmitter(data, buffer);
+          console_log(`Success to emit image#${imageNo} for tr#${transferId} con#${connectionId}`);
         } catch (err) {
-          console.error((err as Error).message);
-          stopTransfer(transferId);
+          console_log(`Failed to emit image#${imageNo} for tr#${transferId} con#${connectionId}: ${(err as Error).message}`);
+          collection.delete(transferId);
         }
-
       } else {
-        console.log(`${connectionId}: Loader#${transferId}: Finish (complete or error) / in ${new Date().getTime() - startTime} [ms]`); // :DEBUG
+        console_log(`Complete tr#${transferId} con#${connectionId} in ${new Date().getTime() - startTime} [ms]`);
         collection.delete(transferId);
       }
     }
@@ -70,6 +75,7 @@ const createImageTransferAgent = (
     skip: MultiRangeDescriptor = []
   ) => {
 
+    console_log(`${connectionId}: call stopTransfer @beginTransfer`);
     stopTransfer(transferId);
 
     // @TODO: check if the specified seriesUid is valid
@@ -111,6 +117,7 @@ const createImageTransferAgent = (
   const stopTransfer = (transferId: string) => {
     if (collection.has(transferId)) {
       collection.delete(transferId);
+      console_log(`Accept stopTransfer for tr#${transferId} con#${connectionId}`);
     }
   };
 

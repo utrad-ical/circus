@@ -32,6 +32,22 @@ const volume: (option: Option) => WebSocketConnectionHandler =
 
       ws.binaryType = 'arraybuffer';
 
+      // const transferImage = (data: TransferImageMessage, buffer: ArrayBuffer) =>
+      //   new Promise<void>((resolve, reject) => {
+      //     ws.send(
+      //       createMessageBuffer(data, buffer),
+      //       (e?: Error) => e ? reject(e) : resolve()
+      //     );
+      //     // resolve();
+      //   });
+
+      const waitFlushBuffer = async () => {
+        console.log(`ws.bufferedAmount: ${ws.bufferedAmount}`);
+        while (0 < ws.bufferedAmount) {
+          await new Promise<void>(resolve => setTimeout(() => resolve(), 100));
+        }
+      };
+
       const transferImage = (data: TransferImageMessage, buffer: ArrayBuffer) =>
         new Promise<void>((resolve, reject) => {
           ws.send(
@@ -41,7 +57,12 @@ const volume: (option: Option) => WebSocketConnectionHandler =
           // resolve();
         });
 
-      const imageTransferAgent = createImageTransferAgent(transferImage, dicomFileRepository, dicomExtractorWorker, { connectionId });
+      const imageDataEmitter = async (data: TransferImageMessage, buffer: ArrayBuffer) => {
+        await waitFlushBuffer();
+        await transferImage(data, buffer);
+      };
+
+      const imageTransferAgent = createImageTransferAgent(imageDataEmitter, dicomFileRepository, dicomExtractorWorker, { connectionId });
 
       ws.on('close', () => {
         console.log(`${connectionId}: Close`);

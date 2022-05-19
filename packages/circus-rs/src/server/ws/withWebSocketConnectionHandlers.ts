@@ -1,14 +1,15 @@
 
 import Koa from 'koa';
 
-import { Server as WebSocketServer, WebSocket } from 'ws';
+import * as ws from 'ws';
 import WebSocketConnectionHandler from './connection/WebSocketConnectionHandler';
 
 const withWebSocketConnectionHandlers = (routes: Record<string, WebSocketConnectionHandler>) => (app: Koa<Koa.DefaultState, Koa.DefaultContext>) => {
 
   const createWebSocketServer = () => {
-    const wss = new WebSocketServer({
+    const wss = new ws.Server({
       noServer: true,
+      skipUTF8Validation: true,
       perMessageDeflate: {
         zlibDeflateOptions: {
           // See zlib defaults.
@@ -30,7 +31,7 @@ const withWebSocketConnectionHandlers = (routes: Record<string, WebSocketConnect
       }
     });
 
-    wss.on('connection', function connection(ws: WebSocket, request) {
+    wss.on('connection', function connection(ws: ws.WebSocket, request) {
       if (!request.url || !(request.url in routes)) return;
       const handler = routes[request.url];
       handler(ws, request);

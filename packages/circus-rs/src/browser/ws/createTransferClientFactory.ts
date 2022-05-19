@@ -1,3 +1,4 @@
+import { console_log } from "debug";
 import {
     beginTransferMessageData,
     createMessageBuffer,
@@ -77,15 +78,22 @@ export const createTransferClientFactory = (wsClient: WebSocketClient) => {
         const { data, buffer } = parseMessageBuffer(message);
 
         if (isImageTransferData(data)) {
-            const { transferId } = data;
-            const handler = handlerCollection.get(transferId);
-            if (!handler) {
-                const data = stopTransferMessageData(transferId);
-                const message = createMessageBuffer(data);
-                wsClient.send(message);
-            } else if (data.messageType === MessageDataType.TRANSFER_IMAGE) {
-                const { imageNo } = data;
-                handler(imageNo, buffer!);
+
+            if (data.messageType === MessageDataType.TRANSFER_IMAGE) {
+                const { transferId, imageNo } = data;
+                if (handlerCollection.has(transferId)) {
+                    const handler = handlerCollection.get(transferId)!;
+                    handler(imageNo, buffer!);
+                } else {
+                    // To prevent many stop messages from being sent, 
+                    // stop messages are not sent even in the case of unmanaged reception.
+                    // Otherwise, the client will respond the same number of times as the number
+                    // of messages the server has already emitted.
+                    // 
+                    // const data = stopTransferMessageData(transferId);
+                    // const message = createMessageBuffer(data);
+                    // wsClient.send(message);
+                }
             }
         }
     });

@@ -73,6 +73,15 @@ function main(cfg: Config) {
     clearLogButton?.addEventListener('click', function (e) {
         logger.shutdown();
     });
+
+    // Start all
+    const startAllButton = el.querySelector('[data-role=start-all-button]') as HTMLElement | undefined;
+    startAllButton?.addEventListener('click', function (e) {
+        [].forEach.call(
+            document.querySelectorAll('[data-role=start-button]'),
+            (btn: HTMLButtonElement) => btn.click()
+        );
+    });
 }
 
 // interface MetadataResponse {
@@ -106,9 +115,9 @@ async function handleClickCreateButton(apiClient: RsHttpClient, logger: DebugLog
             loadCounter.set(imageNo, 1);
         }
 
-        const canvas = loaderElement.querySelector('canvas[data-role=load-indicator]') as HTMLCanvasElement | undefined;
-        if (canvas) {
-            const ctx = canvas.getContext('2d')!;
+        const indicator = loaderElement.querySelector('canvas[data-role=load-indicator]') as HTMLCanvasElement | undefined;
+        if (indicator) {
+            const ctx = indicator.getContext('2d')!;
             switch (loadCounter.get(imageNo)!) {
                 case 1:
                     ctx.fillStyle = 'rgba(0,0,255,1.0)';
@@ -124,15 +133,11 @@ async function handleClickCreateButton(apiClient: RsHttpClient, logger: DebugLog
         }
 
         // show preview image in canvas
-        const typedBuffer = new arrayClass(buffer);
-
         const [w, h] = metadata.voxelCount;
+        const typedBuffer = new arrayClass(buffer);
         const imageData = drawToImageData([w, h], typedBuffer, metadata.dicomWindow);
-        const preview = document.getElementById('latest-image') as null | HTMLCanvasElement;
+        const preview = loaderElement.querySelector('canvas[data-role=load-preview]') as HTMLCanvasElement | undefined;
         if (preview) preview.getContext('2d')!.putImageData(imageData, 0, 0);
-
-        // const img = document.createElement("img");
-        // img.src = "data:image/jpeg;base64," + window.btoa(buffer);
     }
 
     const transferClient = await factory.make({ seriesUid }, handler);
@@ -166,6 +171,7 @@ async function handleClickCreateButton(apiClient: RsHttpClient, logger: DebugLog
 
     // Start
     const startButton = document.createElement('button');
+    startButton.setAttribute('data-role', 'start-button');
     startButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'mr-2');
     startButton.innerText = 'Start';
     startButton.addEventListener('click', onClickStartButton);
@@ -192,7 +198,18 @@ async function handleClickCreateButton(apiClient: RsHttpClient, logger: DebugLog
     disposeButton.addEventListener('click', onClickDisposeButton);
     loaderElement.append(disposeButton);
 
-    // Loaded Image Cells
+    // Layout
+    const container = document.createElement('div');
+    container.classList.add('row', 'no-gutturs');
+    loaderElement.append(container);
+    const previewContainer = document.createElement('div');
+    previewContainer.classList.add('col-2', 'pr-1');
+    container.append(previewContainer);
+    const indicatorContainer = document.createElement('div');
+    indicatorContainer.classList.add('col-10');
+    container.append(indicatorContainer);
+    
+    // Loading indicator
     const imageCount = metadata.voxelCount[2];
     const indicator = document.createElement('canvas');
     indicator.setAttribute('data-role', 'load-indicator');
@@ -202,7 +219,18 @@ async function handleClickCreateButton(apiClient: RsHttpClient, logger: DebugLog
     indicator.style.setProperty('width', '100%');
     indicator.style.setProperty('height', '50px');
     indicator.style.setProperty('border', '1px solid #999999');
-    loaderElement.append(indicator);
+    indicatorContainer.append(indicator);
+
+    // Image Viewer
+    const [w, h] = metadata.voxelCount;
+    const preview = document.createElement('canvas');
+    preview.setAttribute('data-role', 'load-preview');
+    preview.setAttribute('width', w.toString());
+    preview.setAttribute('height', h.toString());
+    preview.style.setProperty('width', '100%');
+    preview.style.setProperty('height', 'auto');
+    preview.style.setProperty('border', '1px solid #999999');
+    previewContainer.append(preview);
 
     const wrapper = document.querySelector('[data-role=loader-container]') as HTMLElement | undefined;
     if (wrapper) wrapper.append(loaderElement);

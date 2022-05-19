@@ -15,25 +15,18 @@
   <div id="test-container" class="container my-3">
 
     <div class="form-row">
-      <div class="col-6">
-        <div style="padding: 1rem; border: 1px solid #ccc;">
-          <input type="button" data-role="hello-button" value="Hello">
-          |
-          <input type="button" data-role="create-button" value="Create">
-          |
-          <input type="button" data-role="close-button" value="Disconnect">
-          |
-          <input type="button" data-role="clear-log-button" value="Clear logs">
-          <br />
-
-          <pre data-role="log-console"></pre>
-        </div>
+      <div class="col-4">
+        <input type="button" data-role="hello-button" value="Hello" class="btn btn-outline-secondary mr-1">
+        <input type="button" data-role="create-button" value="Create" class="btn btn-outline-secondary mr-1">
+        <input type="button" data-role="close-button" value="Disconnect" class="btn btn-outline-secondary mr-1">
+        <input type="button" data-role="clear-log-button" value="Clear logs" class="btn btn-outline-secondary mr-1">
+        <hr>
+        <pre data-role="log-console" class="border m-0 p-1" style="min-height: 4rem;"></pre>
       </div>
-      <div class="col-6">
+      <div class="col-8">
+        <input type="button" data-role="start-all-button" value="Start all" class="btn btn-outline-secondary mr-1">
+        <hr>
         <div data-role="loader-container"></div>
-        <div>
-          <canvas id="latest-image" width="512" height="512" style="width:100%; height: auto;"></canvas>
-        </div>
       </div>
     </div>
 

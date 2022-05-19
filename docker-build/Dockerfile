@@ -50,7 +50,7 @@ RUN apt-get update &&\
 RUN sed -i '8s@  dbPath: /var/lib/mongodb@  dbPath: /var/circus/data/mongodb@g' /etc/mongod.conf && \
     sed -i '18s@/var/log/mongodb/mongod.log@/var/circus/data/logs/mongodb/mongod.log@g' /etc/mongod.conf && \
     sed -i '19i\  logRotate: reopen' /etc/mongod.conf && \
-    sed -i '25s/127.0.0.1/0.0.0.0/' /etc/mongod.conf && \
+    sed -i '24s/127.0.0.1/0.0.0.0/' /etc/mongod.conf && \
     sed -i '30i\  fork: true' /etc/mongod.conf && \
     sed -i -e '36s:^#::' /etc/mongod.conf && \
     sed -i '37i\  replSetName: "rs0"' /etc/mongod.conf

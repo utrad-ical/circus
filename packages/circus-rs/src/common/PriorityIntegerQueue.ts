@@ -56,6 +56,9 @@ export default class PriorityIntegerQueue {
   }
 
   public entireRange(): MultiRange {
-    return this.entries.reduce((m, { value }) => m.append(value), new MultiRange);
+    return this.entries.reduce(
+      (m, { value }) => m.append(value),
+      new MultiRange()
+    );
   }
 }

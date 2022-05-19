@@ -48,7 +48,7 @@ export default class WebSocketClient implements IWebSocketClient {
             case WebSocket.OPEN:
                 throw new Error('OPEN');
         }
-    };
+    }
 
     private createSocket(): Promise<WebSocket> {
         return new Promise((resolve, reject) => {

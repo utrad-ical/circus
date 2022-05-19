@@ -34,7 +34,13 @@ const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
   deps
 ) => {
   const { authorization, globalIpFilter } = options;
-  const { rsLogger, counter, rsSeriesRoutes, dicomFileRepository, dicomExtractorWorker } = deps;
+  const {
+    rsLogger,
+    counter,
+    rsSeriesRoutes,
+    dicomFileRepository,
+    dicomExtractorWorker
+  } = deps;
 
   // create server process
   const app = new koa();
@@ -90,8 +96,8 @@ const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
     '/ws/volume': volume({
       dicomFileRepository,
       dicomExtractorWorker,
-      authFunctionProvider: (req) => async (seriesUid) => true
-    }),
+      authFunctionProvider: req => async seriesUid => true
+    })
   })(app);
 
   // This is a default handler to catch all unknown requests of all types of verbs
@@ -102,6 +108,12 @@ const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
   return app;
 };
 
-createServer.dependencies = ['rsLogger', 'counter', 'rsSeriesRoutes', 'dicomFileRepository', 'dicomExtractorWorker'];
+createServer.dependencies = [
+  'rsLogger',
+  'counter',
+  'rsSeriesRoutes',
+  'dicomFileRepository',
+  'dicomExtractorWorker'
+];
 
 export default createServer;

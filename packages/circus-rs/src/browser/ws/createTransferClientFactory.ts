@@ -39,7 +39,7 @@ export const createTransferClientFactory = (wsClient: WebSocketClient) => {
             const data = beginTransferMessageData(transferId, seriesUid, partialVolumeDescriptor, skip);
             const message = createMessageBuffer(data);
             wsClient.send(message);
-
+            
             handlerCollection.set(transferId, handler);
         }
 

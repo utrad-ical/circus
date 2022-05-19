@@ -138,11 +138,18 @@ async function handleClickCreateButton(apiClient: RsHttpClient, logger: DebugLog
         const imageData = drawToImageData([w, h], typedBuffer, metadata.dicomWindow);
         const preview = loaderElement.querySelector('canvas[data-role=load-preview]') as HTMLCanvasElement | undefined;
         if (preview) preview.getContext('2d')!.putImageData(imageData, 0, 0);
+
+        if (loadCounter.size === metadata.voxelCount[2]) {
+            logger.info(`#${transferClient.id()} Completed in ${new Date().getTime() - startTime} [ms]`);
+        }
     }
 
     const transferClient = await factory.make({ seriesUid }, handler);
 
+    let startTime = -1;
+
     const onClickStartButton = () => {
+        startTime = new Date().getTime();
         logger.info(`#${transferClient.id()} beginTransfer`);
         transferClient.beginTransfer();
     };
@@ -208,7 +215,7 @@ async function handleClickCreateButton(apiClient: RsHttpClient, logger: DebugLog
     const indicatorContainer = document.createElement('div');
     indicatorContainer.classList.add('col-10');
     container.append(indicatorContainer);
-    
+
     // Loading indicator
     const imageCount = metadata.voxelCount[2];
     const indicator = document.createElement('canvas');

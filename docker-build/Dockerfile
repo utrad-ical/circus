@@ -6,12 +6,13 @@ RUN sed -i.bak -e "s%http://[^ ]\+%http://ftp.jaist.ac.jp/pub/Linux/ubuntu/%g" /
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=UTC
 
-RUN apt-get update &&\ 
+RUN apt-get update &&\
     apt-get install -y tzdata
 
 RUN apt-get install -y\
+        cpio\
         curl\
-        jq \ 
+        jq \
         vim\
         git\
         apt-transport-https\
@@ -19,7 +20,7 @@ RUN apt-get install -y\
         software-properties-common\
         gnupg
 
-# Get GPG keys 
+# Get GPG keys
 RUN curl -SL https://www.mongodb.org/static/pgp/server-5.0.asc | apt-key add - &&\
     echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/5.0 multiverse"\
      | tee /etc/apt/sources.list.d/mongodb-org-5.0.list
@@ -34,7 +35,7 @@ RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - &&\
     $(lsb_release -cs) \
     stable"
 
-RUN apt-get update &&\ 
+RUN apt-get update &&\
     apt-get install -y\
         nodejs \
         mongodb-org=5.0.6 \
@@ -81,7 +82,7 @@ RUN npm run build
 RUN mkdir -p /circus/.pm2 && \
     chmod 755 /circus && \
     chmod 777 /circus/.pm2
-    
+
 COPY docker-build/circus.config.js /var/circus/circus.config.js
 COPY docker-build/startup.sh /circus/startup.sh
 COPY docker-build/services.sh /circus/services.sh

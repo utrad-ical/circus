@@ -16,6 +16,8 @@ const createCancellableTimer: (
     timerResolution?: number;
   }
 ) => CancellableTimer = (interval, options = {}) => {
+  if (typeof interval !== 'number') throw new Error('Interval not specified');
+
   const { timerResolution = 100 } = options;
 
   let cancelled: boolean = false;

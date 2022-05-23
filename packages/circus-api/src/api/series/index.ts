@@ -6,6 +6,8 @@ import { CircusContext, RouteMiddleware } from '../../typings/middlewares';
 import checkFilter from '../../utils/checkFilter';
 import { fileOrArchiveIterator } from '../../utils/directoryIterator';
 import { extractFilter, performAggregationSearch } from '../performSearch';
+import resolveSeriesOrientation from '../../utils/resolveSeriesOrientation';
+import { multirange } from 'multi-integer-range';
 
 const maskPatientInfo = (ctx: CircusContext) => {
   return (series: any) => {
@@ -30,6 +32,61 @@ export const handleGet: RouteMiddleware = ({ models }) => {
       );
     }
     ctx.body = maskPatientInfo(ctx)(series);
+  };
+};
+
+interface OrientationFilter {
+  start?: number;
+  end?: number;
+}
+
+export const handleGetOrientation: RouteMiddleware = ({
+  models,
+  dicomFileRepository,
+  dicomTagReader
+}) => {
+  return async (ctx, next) => {
+    const uid = ctx.params.seriesUid;
+    const series = await models.series.findByIdOrFail(uid);
+    const images = multirange(series.images);
+
+    const getInt = (param: any): number | undefined => {
+      if (param === undefined) return undefined;
+      if (!/^[1-9]\d*$/.test(param))
+        throw ctx.throw(status.BAD_REQUEST, 'Invalid string');
+      return Number(param);
+    };
+    const start = getInt(ctx.request.query.start) ?? images.min()!;
+    const end = getInt(ctx.request.query.end) ?? images.max()!;
+
+    if (!images.has(start) || !images.has(end)) {
+      ctx.throw(
+        status.BAD_REQUEST,
+        'The given start/end number is out of bounds.'
+      );
+    }
+
+    if (ctx.userPrivileges.domains.indexOf(series.domain) < 0) {
+      ctx.throw(
+        status.FORBIDDEN,
+        'You do not have privilege to access this series.'
+      );
+    }
+
+    try {
+      const result = await resolveSeriesOrientation(
+        series.seriesUid,
+        start,
+        end,
+        { dicomFileRepository, dicomTagReader }
+      );
+
+      const resolvedOrientation =
+        result.delta >= 1 ? 'head-first' : 'foot-first';
+      ctx.body = { orientation: resolvedOrientation };
+    } catch (err: any) {
+      ctx.throw(status.INTERNAL_SERVER_ERROR, err);
+    }
   };
 };
 

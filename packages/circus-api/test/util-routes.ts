@@ -159,6 +159,7 @@ export const setUpAppForRoutesTest = async () => {
       models,
       blobStorage: await createMemoryStorage(undefined),
       dicomFileRepository,
+      dicomTagReader,
       dicomImporter,
       core: csCore,
       mhdPacker: null as any, // dummy

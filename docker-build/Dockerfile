@@ -10,7 +10,6 @@ RUN apt-get update &&\
     apt-get install -y tzdata
 
 RUN apt-get install -y\
-        cpio\
         curl\
         jq \
         vim\

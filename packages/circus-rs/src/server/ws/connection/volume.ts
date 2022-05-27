@@ -15,7 +15,7 @@ import { DicomExtractorWorker } from '../../helper/extractor-worker/createDicomE
 let lastWsConnectionId = 0;
 
 type AuthFunction = (seriesUid: string) => Promise<boolean>;
-type AuthFunctionProvider = (req: IncomingMessage) => AuthFunction;
+export type AuthFunctionProvider = (req: IncomingMessage) => AuthFunction;
 type Option = {
   authFunctionProvider: AuthFunctionProvider;
   dicomFileRepository: DicomFileRepository;

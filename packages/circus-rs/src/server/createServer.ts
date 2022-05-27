@@ -24,7 +24,6 @@ import { FunctionService } from '@utrad-ical/circus-lib';
 import createAuthorizer from './helper/createAuthorizer';
 import withWebSocketConnectionHandlers from './ws/withWebSocketConnectionHandlers';
 import hello from './ws/connection/hello';
-import volume from './ws/connection/volume';
 
 /**
  * Create Koa App.
@@ -38,8 +37,7 @@ const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
     rsLogger,
     counter,
     rsSeriesRoutes,
-    dicomFileRepository,
-    dicomExtractorWorker
+    rsWebsocketVolumeRoute
   } = deps;
 
   // create server process
@@ -93,9 +91,7 @@ const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
   // websocket
   withWebSocketConnectionHandlers({
     '/ws/hello': hello,
-    '/ws/volume': volume({
-      dicomFileRepository,
-      dicomExtractorWorker,
+    '/ws/volume': rsWebsocketVolumeRoute({
       authFunctionProvider: req => async seriesUid => true
     })
   })(app);
@@ -112,8 +108,7 @@ createServer.dependencies = [
   'rsLogger',
   'counter',
   'rsSeriesRoutes',
-  'dicomFileRepository',
-  'dicomExtractorWorker'
+  'rsWebsocketVolumeRoute'
 ];
 
 export default createServer;

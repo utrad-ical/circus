@@ -9,6 +9,7 @@ import { Counter } from './helper/createCounter';
 import { VolumeProvider } from './helper/createVolumeProvider';
 import ImageEncoder from './helper/image-encoder/ImageEncoder';
 import { DicomExtractorWorker } from './helper/extractor-worker/createDicomExtractorWorker';
+import { RsWebsocketVolumeRoute } from './ws/createWebsocketVolumeRoute';
 
 export interface RsServices {
   rsServer: Koa;
@@ -19,6 +20,7 @@ export interface RsServices {
   imageEncoder: ImageEncoder;
   rsSeriesRoutes: Koa.Middleware;
   volumeProvider: VolumeProvider;
+  rsWebsocketVolumeRoute: RsWebsocketVolumeRoute;
 }
 
 const configureServiceLoader = (loader: ServiceLoader<any>): void => {
@@ -48,6 +50,10 @@ const configureServiceLoader = (loader: ServiceLoader<any>): void => {
   loader.registerModule(
     'volumeProvider',
     path.join(__dirname, 'helper/createVolumeProvider')
+  );
+  loader.registerModule(
+    'rsWebsocketVolumeRoute',
+    path.join(__dirname, 'ws/createWebsocketVolumeRoute')
   );
   loader.registerModule('rsServer', path.join(__dirname, './createServer'));
 };

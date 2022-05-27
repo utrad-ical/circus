@@ -4,9 +4,8 @@ import { MultiRange } from 'multi-integer-range';
 import { MultiRangeDescriptor } from '../../common/ws/types';
 import { TransferImageMessage, transferImageMessageData } from '../../common/ws/message';
 import { createDummyBuffer, dummyVolume } from '../../ws-temporary-config';
-import { DicomFileRepository } from '@utrad-ical/circus-lib';
-import { DicomExtractorWorker } from '../helper/extractor-worker/createDicomExtractorWorker';
 import { console_log } from '../../debug';
+import { VolumeProvider } from '../helper/createVolumeProvider';
 
 export type ImageTransferAgent = ReturnType<typeof createImageTransferAgent>;
 
@@ -21,11 +20,11 @@ type LoadingItem = {
 }
 
 const createImageTransferAgent = (
-  imageDataEmitter: ImageDataEmitter,
-  dicomFileRepository: DicomFileRepository,
-  dicomExtractorWorker: DicomExtractorWorker,
-  { connectionId }: { connectionId?: number; } = {} // :DEBUG
-) => {
+  { imageDataEmitter, volumeProvider, connectionId }: {
+    imageDataEmitter: ImageDataEmitter,
+    volumeProvider: VolumeProvider,
+    connectionId?: number;// :DEBUG
+  }) => {
 
   const collection = new Map<string, LoadingItem>();
 
@@ -81,12 +80,20 @@ const createImageTransferAgent = (
     // @TODO: check if the specified seriesUid is valid
     if (seriesUid !== dummyVolume.seriesUid) return;
 
-    const { load, images } = await dicomFileRepository.getSeries(seriesUid);
+    const {
+      // imageMetadata,
+      volume, //: RawData;
+      load, //: (range: MultiRangeInitializer, priority?: number) => Promise<void>;
+      zIndices, //: Map<number, number>; Maps an image number to the corresponding zero-based volume z-index
+      // determinePitch, // : () => Promise<number>;
+      images, //: MultiRange;
+      // isLike3d, //: () => Promise<boolean>;
+    } = await volumeProvider(seriesUid);
 
     const fetch = async (imageNo: number) => {
-      const unparsedBuffer = await load(imageNo);
-      const { pixelData } = await dicomExtractorWorker(unparsedBuffer);
-      return pixelData!;
+      await load(imageNo, 1);
+      const z = zIndices.get(imageNo)!;
+      return volume.getSingleImage(z);
     };
 
     const queue = new PriorityIntegerQueue;

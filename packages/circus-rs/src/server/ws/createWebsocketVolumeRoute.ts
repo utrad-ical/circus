@@ -1,26 +1,21 @@
-import { DicomFileRepository, FunctionService } from '@utrad-ical/circus-lib';
-import { DicomExtractorWorker } from '../helper/extractor-worker/createDicomExtractorWorker';
+import { FunctionService } from '@utrad-ical/circus-lib';
 import WebSocketConnectionHandler from './connection/WebSocketConnectionHandler';
 import volume, { AuthFunctionProvider } from './connection/volume';
+import { VolumeProvider } from 'server/helper/createVolumeProvider';
 
 export type RsWebsocketVolumeRoute = (option: { authFunctionProvider: AuthFunctionProvider; }) => WebSocketConnectionHandler;
 const createWebsocketVolumeRoute: FunctionService<
   RsWebsocketVolumeRoute,
   {
-    dicomFileRepository: DicomFileRepository;
-    dicomExtractorWorker: DicomExtractorWorker;
+    volumeProvider: VolumeProvider;
   },
   never
-> = async (_opts, { dicomFileRepository, dicomExtractorWorker }) => {
+> = async (_opts, { volumeProvider }) => {
   return ({ authFunctionProvider }) => volume({
-    dicomFileRepository,
-    dicomExtractorWorker,
+    volumeProvider,
     authFunctionProvider
   });
 }
-createWebsocketVolumeRoute.dependencies = [
-  'dicomFileRepository',
-  'dicomExtractorWorker'
-];
+createWebsocketVolumeRoute.dependencies = ['volumeProvider'];
 
 export default createWebsocketVolumeRoute;

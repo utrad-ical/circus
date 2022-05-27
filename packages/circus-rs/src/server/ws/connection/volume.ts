@@ -9,8 +9,7 @@ import {
 import { IncomingMessage } from 'http';
 
 import createImageTransferAgent from '../image-transfer-agent';
-import { DicomFileRepository } from '@utrad-ical/circus-lib';
-import { DicomExtractorWorker } from '../../helper/extractor-worker/createDicomExtractorWorker';
+import { VolumeProvider } from '../../helper/createVolumeProvider';
 
 let lastWsConnectionId = 0;
 
@@ -18,14 +17,12 @@ type AuthFunction = (seriesUid: string) => Promise<boolean>;
 export type AuthFunctionProvider = (req: IncomingMessage) => AuthFunction;
 type Option = {
   authFunctionProvider: AuthFunctionProvider;
-  dicomFileRepository: DicomFileRepository;
-  dicomExtractorWorker: DicomExtractorWorker;
+  volumeProvider: VolumeProvider;
 };
 
 const volume: (option: Option) => WebSocketConnectionHandler = ({
+  volumeProvider,
   authFunctionProvider,
-  dicomFileRepository,
-  dicomExtractorWorker
 }) => {
   return (ws, req) => {
     const connectionId = ++lastWsConnectionId;
@@ -45,12 +42,11 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
         )
       );
 
-    const imageTransferAgent = createImageTransferAgent(
+    const imageTransferAgent = createImageTransferAgent({
       imageDataEmitter,
-      dicomFileRepository,
-      dicomExtractorWorker,
-      { connectionId }
-    );
+      volumeProvider,
+      connectionId
+    });
 
     ws.on('close', () => {
       console.log(`${connectionId}: Close`);

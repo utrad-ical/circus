@@ -94,7 +94,7 @@ async function main(cfg: Config) {
     let rendered: number = 0;
     volumeLoader.addProgressListener('progress', ({ count, total }) => {
         const t = new Date().getTime();
-        console.log({ count, total, rendered, t, r: t - rendered });
+        // console.log({ count, total, rendered, t, r: t - rendered });
         if ((count === total) || (300 < (t - rendered))) {
             viewer.render();
             rendered = t;

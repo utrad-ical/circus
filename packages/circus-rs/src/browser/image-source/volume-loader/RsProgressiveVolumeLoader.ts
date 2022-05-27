@@ -106,6 +106,7 @@ export default class RsProgressiveVolumeLoader implements DicomVolumeProgressive
 
       this.addProgressListener('progress', (({ target, count, total }) => {
         if (count === total) {
+          console.timeEnd(`Transfering ${this.seriesUid}`);
           console.log('Complete!');
           // @todo: put buffer into cache
           // this.cache.putVolume(cacheKey, this.volume.?????);
@@ -115,7 +116,7 @@ export default class RsProgressiveVolumeLoader implements DicomVolumeProgressive
       const images = new Map<number, boolean>();
 
       const handler = (imageNo: number, buffer: ArrayBuffer) => {
-        console.log(`imageNo: ${imageNo}`);
+        // console.log(`imageNo: ${imageNo}`);
         volume.insertSingleImage(imageNo - 1, buffer);
         images.set(imageNo, true);
         this.progressListeners.forEach(listener => listener({
@@ -130,7 +131,8 @@ export default class RsProgressiveVolumeLoader implements DicomVolumeProgressive
         { seriesUid: this.seriesUid },
         handler
       );
-
+      
+      console.time(`Transfering ${this.seriesUid}`);
       transferClient.beginTransfer();
     }
 

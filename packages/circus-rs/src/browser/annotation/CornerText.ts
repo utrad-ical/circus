@@ -7,7 +7,7 @@ const PADDING = 10;
 export default class CornerText implements Annotation {
   public id?: string;
 
-  public draw(viewer: Viewer, viewState: ViewState): void {
+  public draw(viewer: Viewer, viewState: ViewState | undefined): void {
     if (!viewer || !viewState) return;
     const canvas = viewer.canvas;
     if (!canvas) return;
@@ -15,12 +15,10 @@ export default class CornerText implements Annotation {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const state = viewer.getState();
-
     const lines =
-      state.type === 'mpr'
-        ? [JSON.stringify(state.window), JSON.stringify(state.section)]
-        : JSON.stringify(state);
+      viewState.type === 'mpr'
+        ? [JSON.stringify(viewState.window), JSON.stringify(viewState.section)]
+        : JSON.stringify(viewState);
     const vp = viewer.getViewport();
 
     try {

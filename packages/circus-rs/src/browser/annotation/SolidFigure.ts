@@ -44,7 +44,9 @@ const cursorTypes: {
   'rect-outline': { cursor: 'move' }
 };
 
-const isValidViewState = (viewState: ViewState): viewState is MprViewState => {
+const isValidViewState = (
+  viewState: ViewState | undefined
+): viewState is MprViewState => {
   if (!viewState) return false;
   if (viewState.type === 'mpr') return true;
   return false;
@@ -151,7 +153,11 @@ export default abstract class SolidFigure
     this.handleType = undefined;
   }
 
-  public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
+  public draw(
+    viewer: Viewer,
+    viewState: ViewState | undefined,
+    option: DrawOption
+  ): void {
     try {
       if (!viewer || !isValidViewState(viewState)) return;
 

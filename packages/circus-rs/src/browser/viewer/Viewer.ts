@@ -7,7 +7,7 @@ import {
   ViewStateResizeTransformer
 } from '../image-source/ImageSource';
 import { Tool } from '../tool/Tool';
-import Annotation from '../annotation/Annotation';
+import Annotation, { DrawOption } from '../annotation/Annotation';
 import LoadingIndicator from '../interface/LoadingIndicator';
 import defaultLoadingIndicator from './defaultLoadingIndicator';
 
@@ -240,16 +240,38 @@ export default class Viewer extends EventEmitter {
    * This function does nothing when ImageSource.draw() is in progress
    * (i.e., this.currentRender is not empty).
    */
-  public renderAnnotations(viewState: ViewState | null = null): void {
-    if (!viewState) viewState = this.viewState || null;
+  public renderAnnotations(
+    viewState: ViewState | undefined | null = null,
+    {
+      draftImage = false,
+      requestingViewState = undefined
+    }: Partial<DrawOption> = {}
+  ): void {
     const comp = this.composition;
-    if (!viewState || !comp) return;
+    if (!comp) return;
+
+    if (requestingViewState) {
+      for (const annotation of comp.annotations) {
+        annotation.draw(this, this.viewState, {
+          hover: this.hoveringAnnotation === annotation,
+          draftImage,
+          requestingViewState
+        });
+      }
+    }
+
     if (this.cachedSourceImage)
       this.renderImageDataToCanvas(this.cachedSourceImage);
-    for (const annotation of comp.annotations) {
-      annotation.draw(this, viewState, {
-        hover: this.hoveringAnnotation === annotation
-      });
+
+    if (!viewState) viewState = this.viewState || undefined;
+    if (viewState) {
+      for (const annotation of comp.annotations) {
+        annotation.draw(this, viewState, {
+          hover: this.hoveringAnnotation === annotation,
+          draftImage,
+          requestingViewState
+        });
+      }
     }
   }
 
@@ -301,7 +323,10 @@ export default class Viewer extends EventEmitter {
           abortController.abort();
           this.currentRender = null;
         }
-        this.renderAnnotations(state);
+        this.renderAnnotations(state, {
+          draftImage: 'draft' in drawResult,
+          requestingViewState: state
+        });
         this.firstImageDrawn = true;
         this.emit('draw', state);
         return true;
@@ -338,6 +363,7 @@ export default class Viewer extends EventEmitter {
    */
   public setState(state: ViewState): void {
     if (this.viewState === state) return;
+    this.renderAnnotations(undefined, { requestingViewState: state });
     const prevState = this.viewState;
     this.viewState = state;
     this.emit('stateChange', prevState, state);
@@ -438,8 +464,14 @@ export default class Viewer extends EventEmitter {
         div.offsetHeight
       ];
       const state = this.getState();
-      const newState = transformer(state, this.getResolution(), newResolution);
-      this.setState(newState);
+      if (state) {
+        const newState = transformer(
+          state,
+          this.getResolution(),
+          newResolution
+        );
+        this.setState(newState);
+      }
     }
     this.resizeCanvas();
   }

@@ -6,6 +6,7 @@ import {
   sectionOverlapsVolume
 } from '../../section-util';
 import Viewer from '../../viewer/Viewer';
+import ViewState from '../../ViewState';
 
 export default function handlePageBy(viewer: Viewer, step: number): void {
   const prevState = viewer.getState();
@@ -57,36 +58,31 @@ export default function handlePageBy(viewer: Viewer, step: number): void {
   }
 }
 
-export function handlePageByScrollbar(viewer: Viewer, step: number): void {
-  const prevState = viewer.getState();
-  const comp = viewer.getComposition();
-  if (!comp) throw new Error('Composition not initialized'); // should not happen
-
-  const src = comp.imageSource as any;
-  if (
-    !(src instanceof MprImageSource) &&
-    !(src instanceof TwoDimensionalImageSource)
-  )
-    return;
-
-  switch (prevState.type) {
+export function handlePageByScrollbar(
+  viewer: Viewer,
+  step: number,
+  baseState?: ViewState
+): void {
+  if (!baseState) baseState = viewer.getState();
+  switch (baseState.type) {
     case 'mpr': {
+      const composition = viewer.getComposition();
+      if (!composition) return;
+      const src = composition.imageSource as MprImageSource;
       const section = orientationAwareTranslation(
-        prevState.section,
+        baseState.section,
         src.metadata!.voxelSize,
         step
       );
-      const viewState = { ...prevState, section };
-      viewer.setState(viewState);
+      viewer.setState({ ...baseState, section });
       return;
     }
     case '2d': {
-      step = Math.round(step);
-      if (step === 0) return;
-      const imageNumber = prevState.imageNumber + step;
-      if (prevState.imageNumber === imageNumber) return;
-      viewer.setState({ ...prevState, imageNumber });
+      const imageNumber = Math.round(baseState.imageNumber + step);
+      viewer.setState({ ...baseState, imageNumber });
       return;
     }
+    default:
+      return;
   }
 }

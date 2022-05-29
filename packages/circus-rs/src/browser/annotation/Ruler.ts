@@ -33,7 +33,7 @@ const cursorTypes: {
 };
 
 const isValidViewState = (
-  viewState: ViewState
+  viewState: ViewState | undefined
 ): viewState is MprViewState | TwoDimensionalViewState => {
   if (!viewState) return false;
   if (viewState.type === 'mpr') return true;
@@ -110,7 +110,11 @@ export default class Ruler implements Annotation, ViewerEventTarget {
       }
     | undefined = undefined;
 
-  public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
+  public draw(
+    viewer: Viewer,
+    viewState: ViewState | undefined,
+    option: DrawOption
+  ): void {
     if (!viewer || !isValidViewState(viewState)) return;
     const ctx = viewer.canvas?.getContext('2d');
     if (!ctx) return;

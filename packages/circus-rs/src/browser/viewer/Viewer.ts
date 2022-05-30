@@ -250,21 +250,11 @@ export default class Viewer extends EventEmitter {
     const comp = this.composition;
     if (!comp) return;
 
-    if (requestingViewState) {
-      for (const annotation of comp.annotations) {
-        annotation.draw(this, this.viewState, {
-          hover: this.hoveringAnnotation === annotation,
-          draftImage,
-          requestingViewState
-        });
-      }
-    }
-
     if (this.cachedSourceImage)
       this.renderImageDataToCanvas(this.cachedSourceImage);
 
     if (!viewState) viewState = this.viewState || undefined;
-    if (viewState) {
+    if (viewState || requestingViewState) {
       for (const annotation of comp.annotations) {
         annotation.draw(this, viewState, {
           hover: this.hoveringAnnotation === annotation,

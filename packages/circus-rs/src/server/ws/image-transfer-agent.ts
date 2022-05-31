@@ -3,7 +3,6 @@ import PriorityIntegerQueue from '../../common/PriorityIntegerQueue';
 import { MultiRange } from 'multi-integer-range';
 import { MultiRangeDescriptor } from '../../common/ws/types';
 import { TransferImageMessage, transferImageMessageData } from '../../common/ws/message';
-import { createDummyBuffer, dummyVolume } from '../../ws-temporary-config';
 import { console_log } from '../../debug';
 import { VolumeProvider } from '../helper/createVolumeProvider';
 
@@ -52,7 +51,7 @@ const createImageTransferAgent = (
       if (imageNo !== undefined) {
         try {
           const data = transferImageMessageData(transferId, imageNo);
-          const buffer = createDummyBuffer ? (createDummyBuffer as any)() : await fetch(imageNo);
+          const buffer = await fetch(imageNo);
           await imageDataEmitter(data, buffer);
           console_log(`Success to emit image#${imageNo} for tr#${transferId} con#${connectionId}`);
         } catch (err) {
@@ -76,9 +75,6 @@ const createImageTransferAgent = (
 
     console_log(`${connectionId}: call stopTransfer @beginTransfer`);
     stopTransfer(transferId);
-
-    // @TODO: check if the specified seriesUid is valid
-    if (seriesUid !== dummyVolume.seriesUid) return;
 
     const {
       // imageMetadata,

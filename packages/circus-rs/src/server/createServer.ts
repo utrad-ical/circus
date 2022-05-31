@@ -34,12 +34,7 @@ const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
   deps
 ) => {
   const { authorization, globalIpFilter } = options;
-  const {
-    rsLogger,
-    counter,
-    rsSeriesRoutes,
-    rsWebsocketVolumeRoute
-  } = deps;
+  const { rsLogger, counter, rsSeriesRoutes, rsWebsocketVolumeRoute } = deps;
 
   // create server process
   const app = new koa();

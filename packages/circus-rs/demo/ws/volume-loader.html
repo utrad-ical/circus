@@ -9,26 +9,24 @@
 
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
     integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <style>
+    #viewer-container>div {
+      width: 256px;
+      height: 256px;
+      margin: 16px;
+      display: inline-block;
+    }
+  </style>
 </head>
 
 <body>
-  <div id="test-container" class="container my-3">
+  <div class="container my-3">
     <div id="toolbar"></div>
     <hr>
-    <style>
-      #viewer {
-        width: 256px;
-        height: 256px;
-      }
-    </style>
-    <div id="viewer"></div>
+    <div id="viewer-container"></div>
   </div>
 
-  <!-- cdn scripts -->
-  <script src="https://code.jquery.com/jquery-3.3.1.min.js"
-    integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-
-  <script src="/main.js"></script>
+  <script src="/ws/volume-loader.js"></script>
 </body>
 
 </html>

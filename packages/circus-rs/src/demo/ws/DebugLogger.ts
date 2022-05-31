@@ -55,7 +55,10 @@ export default class DebugLogger implements Logger {
             divElement.appendChild(text);
             switch (type) {
                 case 'info':
-                    divElement.style.color = '#666666';
+                    divElement.style.color = '#000066';
+                    break;
+                case 'trace':
+                    divElement.style.color = '#ff6600';
                     break;
                 case 'error':
                     divElement.style.color = '#ff0000';

@@ -12,70 +12,71 @@ interface ImageDataEmitter {
   (data: TransferImageMessage, buffer: ArrayBuffer): Promise<void>;
 }
 
-type LoadingItem = {
+type TransferConnection = {
   fetch: (image: number) => Promise<ArrayBuffer>;
   queue: PriorityIntegerQueue;
+  targets: MultiRange;
   startTime: number; // :DEBUG
-}
+  setPriority: (target: MultiRangeDescriptor, priority: number) => void;
+};
 
 const createImageTransferAgent = (
   { imageDataEmitter, volumeProvider, connectionId }: {
-    imageDataEmitter: ImageDataEmitter,
-    volumeProvider: VolumeProvider,
+    imageDataEmitter: ImageDataEmitter;
+    volumeProvider: VolumeProvider;
     connectionId?: number;// :DEBUG
   }) => {
 
-  const collection = new Map<string, LoadingItem>();
+  const transferConnections = new Map<string, TransferConnection>();
 
   let inOperation = false;
 
   const next = async () => {
-    inOperation = true;
-    const loaderIds = Array.from(collection.keys());
-    if (loaderIds.length === 0) {
+
+    if (transferConnections.size === 0) {
       inOperation = false;
       return;
     }
 
-    while (0 < loaderIds.length) {
-      const transferId = loaderIds.shift()!;
+    const transferIds = Array.from(transferConnections.keys());
 
-      if (!collection.has(transferId)) {
+    while (0 < transferIds.length) {
+      const transferId = transferIds.shift()!;
+
+      const connection = transferConnections.get(transferId);
+
+      if (!connection) {
         console_log(`No handler for tr#${transferId} con#${connectionId}`);
         continue;
       }
 
-      const { queue, fetch, startTime } = collection.get(transferId)!;
+      const { queue, fetch, startTime } = connection;
       const imageNo = queue.shift();
 
       if (imageNo !== undefined) {
         try {
+          console.log(`Try to emit image#${imageNo} for tr#${transferId} con#${connectionId}`);
           const data = transferImageMessageData(transferId, imageNo);
           const buffer = await fetch(imageNo);
           await imageDataEmitter(data, buffer);
-          console_log(`Success to emit image#${imageNo} for tr#${transferId} con#${connectionId}`);
+          //          console_log(`Success to emit image#${imageNo} for tr#${transferId} con#${connectionId}`);
         } catch (err) {
           console_log(`Failed to emit image#${imageNo} for tr#${transferId} con#${connectionId}: ${(err as Error).message}`);
-          collection.delete(transferId);
+          transferConnections.delete(transferId);
         }
       } else {
         console_log(`Complete tr#${transferId} con#${connectionId} in ${new Date().getTime() - startTime} [ms]`);
-        collection.delete(transferId);
+        transferConnections.delete(transferId);
       }
     }
-    next();
+    setImmediate(next);
   };
 
   const beginTransfer = async (
     transferId: string,
     seriesUid: string,
-    partialVolumeDescriptor?: PartialVolumeDescriptor,
-    skip: MultiRangeDescriptor = []
+    partialVolumeDescriptor?: PartialVolumeDescriptor
   ) => {
-
-    console_log(`${connectionId}: call stopTransfer @beginTransfer`);
-    stopTransfer(transferId);
-
     const {
       // imageMetadata,
       volume, //: RawData;
@@ -92,40 +93,46 @@ const createImageTransferAgent = (
       return volume.getSingleImage(z);
     };
 
-    const queue = new PriorityIntegerQueue;
-    const targetImageNumbers = partialVolumeDescriptor
-      ? partialVolumeDescriptorToArray(partialVolumeDescriptor)
+    const targets = partialVolumeDescriptor
+      ? new MultiRange(partialVolumeDescriptorToArray(partialVolumeDescriptor))
       : images;
-    const targets = new MultiRange(targetImageNumbers).subtract(skip);
+
+    const queue = new PriorityIntegerQueue;
     queue.append(targets);
 
-    const startTime = new Date().getTime();
-    collection.set(transferId, { fetch, queue, startTime });
+    const setPriority = (target: MultiRangeDescriptor, priority: number) => {
+      const targetRange = new MultiRange(target).intersect(targets);
+      if (0 < targetRange.segmentLength()) queue.append(targetRange, priority);
+    };
 
-    if (!inOperation) next();
+    const startTime = new Date().getTime();
+    transferConnections.set(transferId, {
+      fetch,
+      queue,
+      startTime,
+      targets,
+      setPriority
+    });
+
+    if (!inOperation) {
+      inOperation = true;
+      setImmediate(next);
+    };
   };
 
   const setPriority = (transferId: string, target: MultiRangeDescriptor, priority: number) => {
-    const queue = collection.get(transferId)?.queue;
-    if (queue) {
-      const targetRange = new MultiRange(target).intersect(
-        queue.entireRange()
-      );
-      if (0 < targetRange.segmentLength()) {
-        queue.append(targetRange, priority);
-      }
-    }
+    transferConnections.get(transferId)?.setPriority(target, priority);
   };
 
   const stopTransfer = (transferId: string) => {
-    if (collection.has(transferId)) {
-      collection.delete(transferId);
+    if (transferConnections.has(transferId)) {
+      transferConnections.delete(transferId);
       console_log(`Accept stopTransfer for tr#${transferId} con#${connectionId}`);
     }
   };
 
   const dispose = () => {
-    collection.clear();
+    transferConnections.clear();
   };
 
   return { beginTransfer, setPriority, stopTransfer, dispose };

@@ -47,7 +47,7 @@ export const MessageDataType = {
 
 export type MessageDataType = typeof MessageDataType[keyof typeof MessageDataType];
 
-type ImageTransferMessageData =
+export type ImageTransferMessageData =
     | BeginTransferMessageData
     | StopTransferMessageData
     | SetPriorityMessageData
@@ -58,7 +58,6 @@ export type BeginTransferMessageData = {
     transferId: string;
     seriesUid: string;
     partialVolumeDescriptor?: PartialVolumeDescriptor;
-    skip?: MultiRangeDescriptor;
 };
 
 export type SetPriorityMessageData = {
@@ -88,10 +87,9 @@ export function isImageTransferData(r: any): r is ImageTransferMessageData {
 export function beginTransferMessageData(
     transferId: string,
     seriesUid: string,
-    partialVolumeDescriptor?: PartialVolumeDescriptor,
-    skip?: MultiRangeDescriptor
+    partialVolumeDescriptor?: PartialVolumeDescriptor
 ): BeginTransferMessageData {
-    return { messageType: MessageDataType.BEGIN_TRANSFER, transferId, seriesUid, partialVolumeDescriptor, skip };
+    return { messageType: MessageDataType.BEGIN_TRANSFER, transferId, seriesUid, partialVolumeDescriptor };
 }
 
 export function setPriorityMessageData(

@@ -19,7 +19,7 @@ type TransferredImageHandler = (imageNo: number, buffer: ArrayBuffer) => void;
 
 export type TransferClient = {
     id: () => string;
-    beginTransfer: (skip?: MultiRangeDescriptor | undefined) => void;
+    beginTransfer: () => void;
     setPriority: (targets: number[], priority: number) => void;
     stopTransfer: () => void;
 }
@@ -35,11 +35,11 @@ export const createTransferClientFactory = (wsClient: WebSocketClient) => {
         const { seriesUid, partialVolumeDescriptor } = volumeSpecifier;
         const transferId = (++lastTransferId).toString();
 
-        const beginTransfer = (skip?: MultiRangeDescriptor) => {
-            const data = beginTransferMessageData(transferId, seriesUid, partialVolumeDescriptor, skip);
+        const beginTransfer = () => {
+            const data = beginTransferMessageData(transferId, seriesUid, partialVolumeDescriptor);
             const message = createMessageBuffer(data);
             wsClient.send(message);
-            
+
             handlerCollection.set(transferId, handler);
         }
 

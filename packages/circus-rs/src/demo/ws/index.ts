@@ -4,7 +4,7 @@ import DebugLogger from "./DebugLogger";
 import WebSocketClient from "../../browser/ws/WebSocketClient";
 import drawToImageData from "../../browser/image-source/drawToImageData";
 import { pixelFormatInfo } from '@utrad-ical/circus-lib/src/PixelFormat';
-import setting, { VolumeSetting } from './setting';
+import setting from './setting';
 import { PartialVolumeDescriptor } from "@utrad-ical/circus-lib";
 
 document.addEventListener('DOMContentLoaded', function (e) {
@@ -200,17 +200,9 @@ async function prepareLoadingProcess(
         const indicator = loaderElement.querySelector('canvas[data-role=load-indicator]') as HTMLCanvasElement | undefined;
         if (indicator) {
             const ctx = indicator.getContext('2d')!;
-            switch (loadCounter.get(imageNo)!) {
-                case 1:
-                    ctx.fillStyle = 'rgba(0,0,255,0.75)';
-                    break;
-                case 2:
-                    ctx.fillStyle = 'rgba(0,255,0,0.75)';
-                    break;
-                default:
-                    ctx.fillStyle = 'rgba(255,0,0,0.75)';
-                    break;
-            }
+
+            const alpha = (0.5 + loadCounter.size / imageCount * 0.5).toFixed(5);
+            ctx.fillStyle = `rgba(0,0,255,${alpha})`;
             ctx.fillRect(imageNo - 1, 10, 1, 40);
 
             updateDisplay();
@@ -227,17 +219,6 @@ async function prepareLoadingProcess(
     const transferClient = await factory.make({ seriesUid }, handler);
 
     let startTime = -1;
-
-    const onClickStopButton = () => {
-        logger.info(`#${transferClient.id()} stopTransfer`);
-        transferClient.stopTransfer();
-    };
-
-    const onClickDisposeButton = () => {
-        logger.info(`#${transferClient.id()} stopTransfer`);
-        transferClient.stopTransfer();
-        loaderElement.remove();
-    };
 
     // Layout
     const container = document.createElement('div');
@@ -292,7 +273,7 @@ async function prepareLoadingProcess(
     row2.append(indicator);
 
     const ctx = indicator.getContext('2d')!;
-    ctx.fillStyle = 'rgba(0,255,255,0.75)';
+    ctx.fillStyle = 'rgba(0,255,255,1.0)';
     higherPriorityImages.forEach(imageNo => ctx.fillRect(imageNo - 1, 0, 1, 8));
 
     // Image Viewer
@@ -336,7 +317,10 @@ async function prepareLoadingProcess(
     const stopButton = document.createElement('button');
     stopButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'mr-2');
     stopButton.innerText = 'Stop';
-    stopButton.addEventListener('click', onClickStopButton);
+    stopButton.addEventListener('click', () => {
+        logger.info(`#${transferClient.id()} stopTransfer`);
+        transferClient.stopTransfer();
+    });
     buttonContainer.append(stopButton);
 
     // Dispose
@@ -344,9 +328,12 @@ async function prepareLoadingProcess(
     disposeButton.setAttribute('data-role', 'dispose-button');
     disposeButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'mr-2');
     disposeButton.innerText = 'Dispose';
-    disposeButton.addEventListener('click', onClickDisposeButton);
+    disposeButton.addEventListener('click', () => {
+        logger.info(`#${transferClient.id()} stopTransfer`);
+        transferClient.stopTransfer();
+        loaderElement.remove();
+    });
     buttonContainer.append(disposeButton);
-
 
     const wrapper = document.querySelector('[data-role=loader-container]') as HTMLElement | undefined;
     if (wrapper) wrapper.append(loaderElement);

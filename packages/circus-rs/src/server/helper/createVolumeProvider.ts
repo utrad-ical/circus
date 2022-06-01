@@ -13,10 +13,7 @@ import PriorityIntegerCaller from '../../common/PriorityIntegerCaller';
 import RawData from '../../common/RawData';
 import { DicomExtractorWorker } from './extractor-worker/createDicomExtractorWorker';
 
-export type VolumeProvider = (seriesUid: string, options?: VolumeAccessorOptions) => Promise<VolumeAccessor>;
-interface VolumeAccessorOptions {
-  startLoadingImmediately?: boolean;
-}
+export type VolumeProvider = (seriesUid: string) => Promise<VolumeAccessor>;
 
 /**
  * VolumeAccessor is a set of data which loadVolumeProvider middleware
@@ -52,11 +49,7 @@ const createUncachedVolumeProvider: FunctionService<
 > = async (opts, deps) => {
   const { dicomFileRepository, dicomExtractorWorker } = deps;
   const { maxConcurrency = 32 } = opts;
-  return async (seriesUid, options): Promise<VolumeAccessor> => {
-    const { startLoadingImmediately } = options || {
-      startLoadingImmediately: true
-    };
-
+  return async (seriesUid): Promise<VolumeAccessor> => {
     const { load, images } = await dicomFileRepository.getSeries(seriesUid);
     const imageRange = new MultiRange(images);
 
@@ -108,7 +101,7 @@ const createUncachedVolumeProvider: FunctionService<
     });
 
     // start loading immediately
-    if (startLoadingImmediately) priorityLoader.append(images);
+    priorityLoader.append(images);
 
     const loadSeries = (range: MultiRangeInitializer, priority: number = 0) => {
       if (!imageRange.has(range)) throw new RangeError('Invalid image range');

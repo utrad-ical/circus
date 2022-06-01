@@ -85,7 +85,7 @@ const createImageTransferAgent = (
       // determinePitch, // : () => Promise<number>;
       images, //: MultiRange;
       // isLike3d, //: () => Promise<boolean>;
-    } = await volumeProvider(seriesUid, { startLoadingImmediately: false });
+    } = await volumeProvider(seriesUid);
 
     const fetch = async (imageNo: number) => {
       await load(imageNo, 1);

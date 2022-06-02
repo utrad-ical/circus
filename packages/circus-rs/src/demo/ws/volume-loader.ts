@@ -34,6 +34,8 @@ document.addEventListener('DOMContentLoaded', function (e) {
         comp.addAnnotation(axialLine);
         comp.addAnnotation(coronalLine);
         comp.addAnnotation(saggitalLine);
+
+        comp.viewers.forEach(viewer => viewer.render());
     }
 });
 
@@ -75,16 +77,6 @@ function setupComposition({ server, seriesUid, partialVolumeDescriptor }: Volume
     // const imageSource = new DynamicMprImageSource({ rsHttpClient: apiClient, seriesUid, partialVolumeDescriptor });
 
     const comp = new Composition(imageSource);
-
-    // @TODO: Remove this sample behavior code here.
-    let rendered: number = 0;
-    volumeLoader.on('progress', (target, count, total) => {
-        const t = new Date().getTime();
-        if ((count === total) || (300 < (t - rendered))) {
-            comp.viewers.forEach(viewer => viewer.render());
-            rendered = t;
-        }
-    });
 
     return comp;
 }

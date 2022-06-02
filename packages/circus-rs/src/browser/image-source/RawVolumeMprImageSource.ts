@@ -1,5 +1,5 @@
 import DicomVolume from '../../common/DicomVolume';
-import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
+import DicomVolumeLoader, { DicomVolumeProgressiveLoader } from './volume-loader/DicomVolumeLoader';
 import ViewState from '../ViewState';
 import { convertSectionToIndex } from '../section-util';
 import { Section } from '../../common/geometry';
@@ -9,9 +9,14 @@ import drawToImageData from './drawToImageData';
 import MprImageSource from './MprImageSource';
 import { Vector3 } from 'three';
 import MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume';
+import { DrawResult } from './ImageSource';
 
 export interface RawVolumeMprImageSourceOptions {
-  volumeLoader: DicomVolumeLoader;
+  volumeLoader: DicomVolumeProgressiveLoader;
+  // Specify the interval of updating draft image in ms.
+  // If zero is specified, do not return a draft image.
+  // Default value is 300 [ms]
+  stepOfProgress?: number;
 }
 
 /**
@@ -20,23 +25,31 @@ export interface RawVolumeMprImageSourceOptions {
  */
 export default class RawVolumeMprImageSource
   extends MprImageSource
-  implements MprImageSourceWithDicomVolume
-{
+  implements MprImageSourceWithDicomVolume {
   private volume: DicomVolume | undefined;
+  private fullyLoaded: boolean = false;
 
-  constructor({ volumeLoader }: RawVolumeMprImageSourceOptions) {
+  private stepOfProgress: number = 0;
+
+  constructor({ volumeLoader, stepOfProgress }: RawVolumeMprImageSourceOptions) {
     super();
+
+    stepOfProgress = stepOfProgress || 300;
+
     this.loadSequence = (async () => {
+      this.stepOfProgress = stepOfProgress;
       this.metadata = await volumeLoader.loadMeta();
-      this.volume = await volumeLoader.loadVolume();
+      volumeLoader.loadVolume().then(() => this.fullyLoaded = true);
+      this.volume = volumeLoader.getVolume()!;
+      if (!stepOfProgress) await volumeLoader.loadVolume();
     })();
   }
 
   public getLoadedDicomVolume() {
-    return this.volume;
+    return this.fullyLoaded && this.volume || undefined;
   }
 
-  public draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
+  public draw(viewer: Viewer, viewState: ViewState, abortSignal: AbortSignal): Promise<DrawResult> {
     const outSize = viewer.getResolution();
     const mprOutput = new Uint8Array(outSize[0] * outSize[1]);
     const metadata = this.metadata!;
@@ -62,12 +75,21 @@ export default class RawVolumeMprImageSource
     );
     const imageData = drawToImageData(outSize, mprOutput);
 
+    const nextDraw = async () => {
+      await new Promise<void>((resolve) => setTimeout(() => resolve(), this.stepOfProgress));
+      return await this.draw(viewer, viewState, abortSignal);
+    };
+
+    const drawResult: DrawResult = this.fullyLoaded
+      ? imageData
+      : { draft: imageData, next: nextDraw() };
+
     // If we use Promise.resolve directly, the then-calleback is called
     // before any stacked UI events are handled.
     // Use the polyfilled setImmediate to delay it.
     // Cf. http://stackoverflow.com/q/27647742/1209240
     return new Promise(resolve => {
-      setImmediate(() => resolve(imageData));
+      setImmediate(() => resolve(drawResult));
     });
   }
 }

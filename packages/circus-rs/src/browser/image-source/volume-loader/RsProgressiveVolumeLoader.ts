@@ -10,6 +10,7 @@ import { EstimateWindowType, createRequestParams } from './rs-loader-utils';
 import { TransferClientFactory } from 'browser/ws/createTransferClientFactory';
 import { Range } from 'multi-integer-range';
 import EventEmitter from 'events';
+import setImmediate from '../../util/setImmediate';
 
 interface RsProgressiveVolumeLoaderOptions {
   rsHttpClient: RsHttpClient;
@@ -95,47 +96,51 @@ export default class RsProgressiveVolumeLoader
   private async _doLoadVolume(): Promise<DicomVolume> {
     if (!this.meta) throw new Error('Medatadata not loaded yet');
 
-    const volume = this.createVolume(this.meta);
+    this.volume = this.createVolume(this.meta);
 
     const cacheKey = this.createKey('buffer');
     let buffer: ArrayBuffer | undefined;
     buffer = await this.cache.getVolume(cacheKey);
     if (buffer) {
-      volume.assign(buffer as ArrayBuffer);
+      this.volume.assign(buffer as ArrayBuffer);
     } else {
+      await this._doSequentialLoading(this.meta!, this.volume);
+      this.cache.putVolume(cacheKey, this.volume.data);
+    }
 
+    return this.volume;
+  }
+
+  private _doSequentialLoading(meta: DicomVolumeMetadata, volume: DicomVolume) {
+    return new Promise<void>((resolve, reject) => {
       const images = new Map<number, boolean>();
 
       const handler = (imageNo: number, buffer: ArrayBuffer) => {
-        // console.log(`imageNo: ${imageNo}`);
         volume.insertSingleImage(imageNo - 1, buffer);
         images.set(imageNo, true);
 
         const finished = images.size;
-        const total = this.meta!.voxelCount[2];
+        const total = meta.voxelCount[2];
 
         if (finished === total) {
           console.timeEnd(`Transfering ${this.seriesUid}`);
           console.log('Complete!');
-          // @todo: put buffer into cache
-          // this.cache.putVolume(cacheKey, this.volume.?????);
+          setImmediate(() => resolve());
         }
 
         this.emit('progress', this, finished, total);
       };
 
-      const transferClient = await this.transferClientFactory.make(
-        { seriesUid: this.seriesUid },
-        handler
-      );
+      (async () => {
+        const transferClient = await this.transferClientFactory.make(
+          { seriesUid: this.seriesUid },
+          handler
+        );
 
-      console.time(`Transfering ${this.seriesUid}`);
-      transferClient.beginTransfer();
-    }
-
-    this.volume = volume;
-
-    return volume;
+        console.time(`Transfering ${this.seriesUid}`);
+        transferClient.beginTransfer();
+      })();
+    });
   }
 
   private createVolume(meta: DicomVolumeMetadata) {

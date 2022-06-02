@@ -76,10 +76,10 @@ function setupComposition({ server, seriesUid, partialVolumeDescriptor }: Volume
 
     const comp = new Composition(imageSource);
 
+    // @TODO: Remove this sample behavior code here.
     let rendered: number = 0;
-    volumeLoader.addProgressListener('progress', ({ count, total }) => {
+    volumeLoader.on('progress', (target, count, total) => {
         const t = new Date().getTime();
-        // console.log({ count, total, rendered, t, r: t - rendered });
         if ((count === total) || (300 < (t - rendered))) {
             comp.viewers.forEach(viewer => viewer.render());
             rendered = t;

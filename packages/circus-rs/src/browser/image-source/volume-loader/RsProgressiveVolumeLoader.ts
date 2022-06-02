@@ -1,5 +1,5 @@
 import RsHttpClient from '../../http-client/RsHttpClient';
-import { DicomVolumeProgressiveLoader, ProgressListener } from './DicomVolumeLoader';
+import { DicomVolumeProgressiveLoader, ProgressEventEmitter } from './DicomVolumeLoader';
 import DicomVolume from '../../../common/DicomVolume';
 import { DicomVolumeMetadata } from './DicomVolumeLoader';
 import PartialVolumeDescriptor, {
@@ -9,6 +9,7 @@ import VolumeCache, { nullVolumeCache } from './cache/VolumeCache';
 import { EstimateWindowType, createRequestParams } from './rs-loader-utils';
 import { TransferClientFactory } from 'browser/ws/createTransferClientFactory';
 import { Range } from 'multi-integer-range';
+import EventEmitter from 'events';
 
 interface RsProgressiveVolumeLoaderOptions {
   rsHttpClient: RsHttpClient;
@@ -19,7 +20,9 @@ interface RsProgressiveVolumeLoaderOptions {
   transferClientFactory: TransferClientFactory;
 }
 
-export default class RsProgressiveVolumeLoader implements DicomVolumeProgressiveLoader {
+export default class RsProgressiveVolumeLoader
+  extends (EventEmitter as { new(): ProgressEventEmitter })
+  implements DicomVolumeProgressiveLoader {
   private rsHttpClient: RsHttpClient;
   private seriesUid: string;
   private partialVolumeDescriptor?: PartialVolumeDescriptor;
@@ -32,8 +35,6 @@ export default class RsProgressiveVolumeLoader implements DicomVolumeProgressive
   private volume: DicomVolume | null = null;
   private transferClientFactory: TransferClientFactory;
 
-  private progressListeners: ProgressListener[] = [];
-
   constructor({
     rsHttpClient,
     seriesUid,
@@ -42,6 +43,9 @@ export default class RsProgressiveVolumeLoader implements DicomVolumeProgressive
     estimateWindowType = 'none',
     transferClientFactory
   }: RsProgressiveVolumeLoaderOptions) {
+
+    super();
+
     if (!seriesUid) throw new Error('SeriesUid is required.');
 
     if (
@@ -57,10 +61,6 @@ export default class RsProgressiveVolumeLoader implements DicomVolumeProgressive
     this.estimateWindowType = estimateWindowType;
     this.cache = cache || nullVolumeCache;
     this.transferClientFactory = transferClientFactory;
-  }
-
-  public addProgressListener(type: 'progress', listener: ProgressListener): void {
-    this.progressListeners.push(listener);
   }
 
   public setPriority(images: string | number | (number | Range)[], priority: number): void {
@@ -104,34 +104,31 @@ export default class RsProgressiveVolumeLoader implements DicomVolumeProgressive
       volume.assign(buffer as ArrayBuffer);
     } else {
 
-      this.addProgressListener('progress', (({ target, count, total }) => {
-        if (count === total) {
-          console.timeEnd(`Transfering ${this.seriesUid}`);
-          console.log('Complete!');
-          // @todo: put buffer into cache
-          // this.cache.putVolume(cacheKey, this.volume.?????);
-        }
-      }));
-
       const images = new Map<number, boolean>();
 
       const handler = (imageNo: number, buffer: ArrayBuffer) => {
         // console.log(`imageNo: ${imageNo}`);
         volume.insertSingleImage(imageNo - 1, buffer);
         images.set(imageNo, true);
-        this.progressListeners.forEach(listener => listener({
-          type: 'progress',
-          target: this,
-          count: images.size,
-          total: this.meta!.voxelCount[2]
-        }));
+
+        const finished = images.size;
+        const total = this.meta!.voxelCount[2];
+
+        if (finished === total) {
+          console.timeEnd(`Transfering ${this.seriesUid}`);
+          console.log('Complete!');
+          // @todo: put buffer into cache
+          // this.cache.putVolume(cacheKey, this.volume.?????);
+        }
+
+        this.emit('progress', this, finished, total);
       };
 
       const transferClient = await this.transferClientFactory.make(
         { seriesUid: this.seriesUid },
         handler
       );
-      
+
       console.time(`Transfering ${this.seriesUid}`);
       transferClient.beginTransfer();
     }

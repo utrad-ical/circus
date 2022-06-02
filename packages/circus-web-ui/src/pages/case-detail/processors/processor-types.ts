@@ -12,6 +12,8 @@ import * as hf from './hf-options';
 import hfProcessor from './hf-processor';
 import * as ii from './ii-options';
 import iiProcessor from './ii-processor';
+import * as duplicate from './duplicate-options';
+import duplicateProcessor from './duplicateProcessor';
 
 export const processorTypes = [
   'ccl',
@@ -19,7 +21,8 @@ export const processorTypes = [
   'erosion',
   'dilation',
   'interpolation',
-  'section'
+  'section',
+  'duplicate'
 ] as const;
 
 export type ProcessorType = typeof processorTypes[number];
@@ -62,7 +65,7 @@ interface ProcessorModalConfiguration<T> {
 
 interface ProcessorDefinition {
   caption: string;
-  labelType: LabelType;
+  labelType: LabelType[];
   processor: Processor<any>;
   settingsModal?: ProcessorModalConfiguration<any>;
 }
@@ -75,7 +78,7 @@ export const processors: {
 } = {
   ccl: {
     caption: 'CCL',
-    labelType: 'voxel',
+    labelType: ['voxel'],
     settingsModal: {
       title: 'Connected component labeling (CCL)',
       optionsEditor: ccl.OptionsEditor,
@@ -85,7 +88,7 @@ export const processors: {
   },
   filling: {
     caption: 'Hole filling',
-    labelType: 'voxel',
+    labelType: ['voxel'],
     settingsModal: {
       title: 'Hole filling',
       optionsEditor: hf.OptionsEditor,
@@ -95,7 +98,7 @@ export const processors: {
   },
   erosion: {
     caption: 'Erosion',
-    labelType: 'voxel',
+    labelType: ['voxel'],
     settingsModal: {
       title: 'Erosion',
       optionsEditor: ed.OptionsEditor,
@@ -105,7 +108,7 @@ export const processors: {
   },
   dilation: {
     caption: 'Dilation',
-    labelType: 'voxel',
+    labelType: ['voxel'],
     settingsModal: {
       title: 'Dilation',
       optionsEditor: ed.OptionsEditor,
@@ -115,7 +118,7 @@ export const processors: {
   },
   interpolation: {
     caption: 'Interslice interpolation',
-    labelType: 'voxel',
+    labelType: ['voxel'],
     settingsModal: {
       title: 'Interslice interpolation',
       optionsEditor: ii.OptionsEditor,
@@ -125,7 +128,25 @@ export const processors: {
   },
   section: {
     caption: 'Three points to section',
-    labelType: 'point',
+    labelType: ['point'],
     processor: addNewSctionFromPoints
+  },
+  duplicate: {
+    caption: 'Duplicate',
+    labelType: [
+      'voxel',
+      'rectangle',
+      'ellipse',
+      'cuboid',
+      'ellipsoid',
+      'point',
+      'ruler'
+    ],
+    settingsModal: {
+      title: 'Duplicate',
+      optionsEditor: duplicate.OptionsEditor,
+      initialOptions: duplicate.initialOptions
+    },
+    processor: duplicateProcessor
   }
 };

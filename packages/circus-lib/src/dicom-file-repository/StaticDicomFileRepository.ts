@@ -42,7 +42,7 @@ export default class StaticDicomFileRepository implements DicomFileRepository {
         result.append(num);
       }
       return result;
-    } catch (e) {
+    } catch (e: any) {
       if (e.code === 'ENOENT') {
         // Directory does not exist
         return result;

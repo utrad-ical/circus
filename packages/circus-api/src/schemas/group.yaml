@@ -20,6 +20,7 @@ properties:
         - manageServer
         - personalInfoView
         - downloadVolume
+        - issueOnetime
   domains:
     type: array
     items:

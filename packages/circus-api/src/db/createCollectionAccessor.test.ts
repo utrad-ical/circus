@@ -16,7 +16,7 @@ let testCollection: CollectionAccessor<MonthData>, db: mongo.Db;
 const dbPromise = usingMongo();
 
 beforeAll(async () => {
-  db = await dbPromise;
+  db = (await dbPromise).db;
   const validator = await createValidator({
     schemaRoot: __dirname + '/../../test/test-schemas'
   });
@@ -163,6 +163,39 @@ describe('#findById', () => {
     await expect(testCollection.findByIdOrFail(7)).rejects.toThrow(
       ValidationError
     );
+  });
+
+  describe('with lock document', () => {
+    let session: mongo.ClientSession;
+    let sessionCollection: CollectionAccessor<MonthData>;
+
+    beforeAll(async () => {
+      const validator = await createValidator({
+        schemaRoot: __dirname + '/../../test/test-schemas'
+      });
+      session = (await dbPromise).connection.startSession();
+      sessionCollection = createCollectionAccessor<MonthData>(db, validator, {
+        schema: 'months',
+        collectionName: 'months',
+        primaryKey: 'month',
+        session
+      });
+    });
+
+    test('should return same data  with or without the lock', async () => {
+      const LockedDoc = await sessionCollection.findById(3, { withLock: true });
+      expect(LockedDoc.name).toBe('Yayoi');
+
+      const withoutLocked = await testCollection.findById(3);
+      expect(LockedDoc).toEqual(withoutLocked);
+    });
+
+    test('throw error for session is not used', async () => {
+      const promise = testCollection.findById(3, { withLock: true });
+      await expect(promise).rejects.toThrowError(
+        'Cannot lock a document outside a session'
+      );
+    });
   });
 });
 

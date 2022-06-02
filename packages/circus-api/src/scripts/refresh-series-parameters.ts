@@ -36,7 +36,7 @@ export const command: Command<{
         multirange(series.images).min()!
       );
       const tags = await dicomTagReader(firstImage);
-      models.series.modifyOne(series.seriesUid, {
+      await models.series.modifyOne(series.seriesUid, {
         parameters: tags.parameters,
         updatedAt: series.updatedAt
       });

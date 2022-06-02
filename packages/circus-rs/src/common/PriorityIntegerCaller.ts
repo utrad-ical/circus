@@ -115,7 +115,7 @@ export default class PriorityIntegerCaller {
         try {
           await this.fn.call(null, target);
           this.markAsResolved(target);
-        } catch (err) {
+        } catch (err: any) {
           this.markAsRejected(target, err);
         }
         this.processing.splice(this.processing.indexOf(target), 1);

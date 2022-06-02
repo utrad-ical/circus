@@ -24,12 +24,13 @@ const defaults: Configuration = {
       host: 'localhost',
       port: 8080,
       pluginResultsPath: '/var/circus/data/plugin-results',
+      pluginCachePath: '/var/circus/data/plugin-cache',
       dicomImageServerUrl: 'http://localhost:8080/rs',
       debug: false,
       uploadFileSizeMaxBytes: 200 * 1024 * 1024
     }
   },
-  db: {
+  database: {
     options: { mongoUrl: 'mongodb://localhost:27017/circus-api' }
   },
   apiLogger: {
@@ -64,6 +65,16 @@ const defaults: Configuration = {
   },
   authProvider: {
     type: 'DefaultAuthProvider'
+  },
+  oauthServer: {
+    options: {
+      fallbackToDefault: false
+    }
+  },
+  transactionManager: {
+    options: {
+      maxCommitTimeMS: 10000
+    }
   }
 };
 

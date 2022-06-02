@@ -11,7 +11,7 @@ afterAll(async () => await apiTest.tearDown());
 
 describe('admin/plugins', () => {
   beforeEach(async () => {
-    await setUpMongoFixture(apiTest.db, ['pluginDefinitions']);
+    await setUpMongoFixture(apiTest.database.db, ['pluginDefinitions']);
   });
 
   test('should return list of plugins', async () => {

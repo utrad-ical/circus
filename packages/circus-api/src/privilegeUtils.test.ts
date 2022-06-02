@@ -1,18 +1,19 @@
-import { setUpMongoFixture, usingModels } from '../test/util-mongo';
+import { setUpMongoFixture, usingSessionModels } from '../test/util-mongo';
 import { Models } from './interface';
 import {
   determineUserAccessInfo,
-  fetchAccessibleSeries,
+  fetchAndLockAccessibleSeries,
   UserPrivilegeInfo
 } from './privilegeUtils';
 import { SeriesEntry } from './typings/circus';
 
 let models: Models;
 
-const modelsPromise = usingModels();
+const modelsPromise = usingSessionModels();
 
 beforeAll(async () => {
-  const { db, models: m } = await modelsPromise;
+  const { database, models: m } = await modelsPromise;
+  const db = database.db;
   await setUpMongoFixture(db, ['groups', 'users', 'series']);
   models = m;
 });
@@ -25,7 +26,11 @@ const sameMembers = (test: string[], members: string[]) => {
 test('determineUserAccessInfo', async () => {
   const alice = await models.user.findByIdOrFail('alice@example.com');
   const privA = await determineUserAccessInfo(models, alice);
-  sameMembers(privA.globalPrivileges, ['manageServer', 'personalInfoView']);
+  sameMembers(privA.globalPrivileges, [
+    'manageServer',
+    'personalInfoView',
+    'issueOnetime'
+  ]);
   sameMembers(privA.domains, ['sirius.org']);
   expect(privA.accessibleProjects).toEqual([]);
 
@@ -43,7 +48,7 @@ test('determineUserAccessInfo', async () => {
   expect(privG.accessibleProjects).toEqual([]);
 });
 
-test('fetchAccessibleSeries', async () => {
+test('fetchAndLockAccessibleSeries', async () => {
   const alice = await models.user.findByIdOrFail('alice@example.com');
   const privA = await determineUserAccessInfo(models, alice);
   const bob = await models.user.findByIdOrFail('bob@example.com');
@@ -51,7 +56,7 @@ test('fetchAccessibleSeries', async () => {
   const guest = await models.user.findByIdOrFail('guest@example.com');
   const privG = await determineUserAccessInfo(models, guest);
   const fetch = (priv: UserPrivilegeInfo, seriesEntries: string[]) =>
-    fetchAccessibleSeries(
+    fetchAndLockAccessibleSeries(
       models,
       priv,
       seriesEntries.map(i => {

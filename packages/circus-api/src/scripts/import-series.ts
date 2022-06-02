@@ -57,7 +57,7 @@ export const command: Command<{
           await dicomImporter.importDicom(entry.buffer, domain);
           count++;
         }
-      } catch (err) {
+      } catch (err: any) {
         const message =
           err.code === 'ENOENT'
             ? `${pathArg} is not a file nor a directory.`

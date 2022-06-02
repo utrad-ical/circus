@@ -15,17 +15,24 @@ interface Token {
   refreshTokenExpiresAt: Date;
 }
 
-interface Options {}
+interface Options {
+  fallbackToDefault?: boolean;
+}
 
 /**
  * Creates an OAuth2 server that interacts with backend mongo.
  */
 export const createOauthServer: FunctionService<
   KoaOAuth2Server,
-  { models: Models; authProvider: AuthProvider },
+  {
+    models: Models;
+    authProvider: AuthProvider;
+    defaultAuthProvider: AuthProvider;
+  },
   Options
-> = async (opt, deps) => {
-  const { models, authProvider } = deps;
+> = async (opts, deps) => {
+  const { models, authProvider, defaultAuthProvider } = deps;
+  const { fallbackToDefault = false } = opts ?? {};
   const oauthModel = {
     getAccessToken: async function (bearerToken: string) {
       // debug && console.log('getAccessToken', arguments);
@@ -73,9 +80,23 @@ export const createOauthServer: FunctionService<
     },
     getUser: async (username: string, password: string) => {
       // debug && console.log('getting user', arguments);
+      const ots = await models.onetimeUrl.findAll({ onetimeString: password });
+      if (ots.length > 0) {
+        if (username !== password) return null;
+        await models.onetimeUrl.deleteOne({
+          onetimeUrlId: ots[0].onetimeUrlId
+        });
+        return await models.user.findById(ots[0].userEmail);
+      }
       const check = await authProvider.check(username, password);
-      if (check.result === 'NG') return null;
-      return await models.user.findById(check.authenticatedUserEmail);
+      if (check.result === 'OK')
+        return await models.user.findById(check.authenticatedUserEmail);
+      if (fallbackToDefault) {
+        const check = await defaultAuthProvider.check(username, password);
+        if (check.result === 'OK')
+          return await models.user.findById(check.authenticatedUserEmail);
+      }
+      return null;
     },
     saveToken: async function (token: Token, client: any, user: any) {
       // debug && console.log('saveToken', arguments);
@@ -110,6 +131,10 @@ export const createOauthServer: FunctionService<
   return oauth;
 };
 
-createOauthServer.dependencies = ['models', 'authProvider'];
+createOauthServer.dependencies = [
+  'models',
+  'authProvider',
+  'defaultAuthProvider'
+];
 
 export default createOauthServer;

@@ -6,6 +6,7 @@ import { DicomImporter, Models } from './interface';
 import createTestLogger from '../test/util-logger';
 import createDicomTagReader from './utils/createDicomTagReader';
 import fs from 'fs-extra';
+import createTransactionManager from './createTransactionManager';
 
 const modelsPromise = usingModels();
 
@@ -19,8 +20,8 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  const { db } = await modelsPromise;
-  await setUpMongoFixture(db, ['series']);
+  const { database, validator } = await modelsPromise;
+  await setUpMongoFixture(database.db, ['series']);
   const dicomTagReader = await createDicomTagReader({});
   dicomFileRepository = new MemoryDicomFileRepository({});
   const apiLogger = await createTestLogger();
@@ -28,14 +29,18 @@ beforeEach(async () => {
     compress: async (buf: ArrayBuffer) => buf,
     dispose: async () => {}
   }; // mock
+  const transactionManager = await createTransactionManager(
+    {},
+    { database, validator }
+  );
   importer = await createDicomImporter(
     {},
     {
       dicomFileRepository,
-      models,
       apiLogger,
       dicomTagReader,
-      dicomUtilityRunner
+      dicomUtilityRunner,
+      transactionManager
     }
   );
 });

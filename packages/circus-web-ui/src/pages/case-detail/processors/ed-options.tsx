@@ -1,11 +1,10 @@
 import { Editor } from '@smikitky/rb-components/lib/editor-types';
+import { Structure } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
 import classnames from 'classnames';
 import { FormControl } from 'components/react-bootstrap';
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { ErosionDilationOptions } from './createEdProcessor';
-import SettingDialog from './SettingDialog';
-import { Structure } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
+import { ErosionDilationOptions } from './ed-processor';
 
 const StyledDiv = styled.div`
   line-height: 1;
@@ -152,76 +151,63 @@ const newStructure = (width: number, height: number, nSlices: number) => {
   return structure;
 };
 
-const OptionsEditorForED: Editor<ErosionDilationOptions> = props => {
+export const OptionsEditor: Editor<ErosionDilationOptions> = props => {
   const { value, onChange } = props;
-  const [sliceNumber, setSliceNumber] = useState(
-    Math.floor(value.structure.nSlices / 2)
-  );
+  const [sliceNumber, setSliceNumber] = useState(Math.floor(value.nSlices / 2));
   const range = [1, 11];
 
   const onSliceNumberChange = (ev: any) => {
-    if (ev.target.value < 0 || value.structure.nSlices <= ev.target.value)
-      return;
+    if (ev.target.value < 0 || value.nSlices <= ev.target.value) return;
     setSliceNumber(Number(ev.target.value));
   };
+
   const onWidthChange = (ev: any) => {
     if (ev.target.value < range[0] || range[1] < ev.target.value) return;
     const structure = newStructure(
       Number(ev.target.value),
-      value.structure.height,
-      value.structure.nSlices
+      value.height,
+      value.nSlices
     );
     onChange({
       ...value,
-      structure: {
-        ...value.structure,
-        width: Number(ev.target.value),
-        array: structure
-      }
+      width: Number(ev.target.value),
+      array: structure
     });
   };
+
   const onHeightChange = (ev: any) => {
     if (ev.target.value < range[0] || range[1] < ev.target.value) return;
     const structure = newStructure(
-      value.structure.width,
+      value.width,
       Number(ev.target.value),
-      value.structure.nSlices
+      value.nSlices
     );
     onChange({
       ...value,
-      structure: {
-        ...value.structure,
-        height: Number(ev.target.value),
-        array: structure
-      }
+      height: Number(ev.target.value),
+      array: structure
     });
   };
+
   const onNSlicesChange = (ev: any) => {
     if (ev.target.value < range[0] || range[1] < ev.target.value) return;
     const structure = newStructure(
-      value.structure.width,
-      value.structure.height,
+      value.width,
+      value.height,
       Number(ev.target.value)
     );
     setSliceNumber(Math.floor(Number(ev.target.value) / 2));
     onChange({
       ...value,
-      structure: {
-        ...value.structure,
-        nSlices: Number(ev.target.value),
-        array: structure
-      }
+      nSlices: Number(ev.target.value),
+      array: structure
     });
   };
+
   const onStructureChange = (array: Uint8Array) => {
-    onChange({
-      ...value,
-      structure: {
-        ...value.structure,
-        array: array
-      }
-    });
+    onChange({ ...value, array });
   };
+
   return (
     <StyledDiv>
       <div className="structure-shape form-inline">
@@ -229,7 +215,7 @@ const OptionsEditorForED: Editor<ErosionDilationOptions> = props => {
           Width:&ensp;
           <FormControl
             type="number"
-            value={value.structure.width}
+            value={value.width}
             name="width"
             onChange={onWidthChange}
           />
@@ -238,7 +224,7 @@ const OptionsEditorForED: Editor<ErosionDilationOptions> = props => {
           Height:&ensp;
           <FormControl
             type="number"
-            value={value.structure.height}
+            value={value.height}
             name="height"
             onChange={onHeightChange}
           />
@@ -247,7 +233,7 @@ const OptionsEditorForED: Editor<ErosionDilationOptions> = props => {
           nSlices:&ensp;
           <FormControl
             type="number"
-            value={value.structure.nSlices}
+            value={value.nSlices}
             name="nSlices"
             onChange={onNSlicesChange}
           />
@@ -269,7 +255,7 @@ const OptionsEditorForED: Editor<ErosionDilationOptions> = props => {
           )
         </div>
         <Board
-          structure={value.structure}
+          structure={value}
           sliceNumber={sliceNumber}
           onChange={onStructureChange}
         />
@@ -284,34 +270,9 @@ const OptionsEditorForED: Editor<ErosionDilationOptions> = props => {
   );
 };
 
-const SettingDialogED: React.FC<{
-  processorProgress: { value: number; label: string };
-  onHide: () => void;
-  onOkClick: (props: ErosionDilationOptions) => void;
-  isErosion: boolean;
-}> = props => {
-  const { processorProgress, onHide, onOkClick, isErosion } = props;
-  const title = isErosion ? 'Erosion' : 'Dilation';
-  const initialOptions = {
-    structure: {
-      array: newStructure(3, 3, 3),
-      width: 3,
-      height: 3,
-      nSlices: 3
-    },
-    isErosion: isErosion
-  };
-
-  return (
-    <SettingDialog
-      title={title}
-      optionsEditor={OptionsEditorForED}
-      initialOptions={initialOptions}
-      processorProgress={processorProgress}
-      onHide={onHide}
-      onOkClick={onOkClick}
-    />
-  );
+export const initialOptions = {
+  array: newStructure(3, 3, 3),
+  width: 3,
+  height: 3,
+  nSlices: 3
 };
-
-export default SettingDialogED;

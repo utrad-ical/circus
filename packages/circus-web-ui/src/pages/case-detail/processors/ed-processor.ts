@@ -1,32 +1,35 @@
 import { alert } from '@smikitky/rb-components/lib/modal';
 import dilation from '@utrad-ical/circus-rs/src/common/morphology/dilation';
 import erosion from '@utrad-ical/circus-rs/src/common/morphology/erosion';
-import edWorker from 'worker-loader!./edWorker';
 import {
-  PostProcessor,
+  MorphologicalImageProcessingResults,
+  Structure
+} from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
+import edWorker from 'worker-loader!./ed-worker';
+import performLabelCreatingVoxelProcessing, {
   VoxelLabelProcessor
 } from './performLabelCreatingVoxelProcessing';
-import { Structure } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
-import { MorphologicalImageProcessingResults } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
 
-export interface ErosionDilationOptions {
-  structure: Structure;
-  isErosion: boolean;
-}
+export type ErosionDilationOptions = Structure;
 
-const createEdProcessor = (
-  options: ErosionDilationOptions
-): VoxelLabelProcessor<MorphologicalImageProcessingResults> => {
-  return async (
-    input: Uint8Array,
-    width: number,
-    height: number,
-    nSlices: number,
-    name: string,
-    postProcessor: PostProcessor<MorphologicalImageProcessingResults>,
-    reportProgress: (progress: { value: number; label: string }) => void
-  ) => {
-    const { structure, isErosion } = options;
+const createEdProcessor: (
+  isErosion: boolean
+) => VoxelLabelProcessor<
+  MorphologicalImageProcessingResults,
+  ErosionDilationOptions
+> = isErosion => {
+  return async props => {
+    const {
+      options: structure,
+      input,
+      width,
+      height,
+      nSlices,
+      name,
+      postProcessor,
+      reportProgress
+    } = props;
+
     const padding = isErosion
       ? [0, 0, 0]
       : [
@@ -34,7 +37,6 @@ const createEdProcessor = (
           Math.floor(structure.height / 2),
           Math.floor(structure.nSlices / 2)
         ];
-    reportProgress({ value: 100, label: '' });
 
     const initializedInput = new Uint8Array(
       (width + 2 * padding[0]) *
@@ -66,7 +68,7 @@ const createEdProcessor = (
       });
       myWorker.onmessage = (e: any) => {
         if (typeof e.data === 'string') {
-          reportProgress({ value: 100, label: 'Failed' });
+          reportProgress({ finished: true });
           alert(`structuring element is invalid.`);
           return;
         }
@@ -84,7 +86,7 @@ const createEdProcessor = (
           },
           names: [isErosion ? `eroded ${name}` : `dilated ${name}`]
         });
-        reportProgress({ value: 100, label: 'Completed' });
+        reportProgress({ finished: true });
       };
     } else {
       console.log('× window.Worker');
@@ -122,9 +124,15 @@ const createEdProcessor = (
         },
         names: [isErosion ? `eroded ${name}` : `dilated ${name}`]
       });
-      reportProgress({ value: 100, label: 'Completed' });
+      reportProgress({ finished: true });
     }
   };
 };
 
-export default createEdProcessor;
+export const erosionProcessor = performLabelCreatingVoxelProcessing(
+  createEdProcessor(true)
+);
+
+export const dilatationProcessor = performLabelCreatingVoxelProcessing(
+  createEdProcessor(false)
+);

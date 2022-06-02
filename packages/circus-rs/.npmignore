@@ -3,7 +3,10 @@ node_modules
 config/*
 !/config/default.js
 /logs
-/lib
+/src
 /dist
 /docs
 *.tgz
+*.ts
+!/lib/**/*.d.ts
+*.tsbuildinfo

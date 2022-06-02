@@ -217,7 +217,7 @@ const PluginJobDetail: React.FC<{}> = props => {
       },
       loadAttachment,
       rsHttpClient,
-      loadDisplay
+      loadDisplay: loadDisplay(jobData.pluginData.pluginId)
     };
   }, [
     jobData,

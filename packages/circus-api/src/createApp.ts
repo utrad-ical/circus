@@ -15,7 +15,14 @@ import compose from 'koa-compose';
 import mount from 'koa-mount';
 import Router from 'koa-router';
 import * as path from 'path';
-import { DisposableDb, Validator, Models, DicomImporter } from './interface';
+import {
+  Database,
+  Validator,
+  Models,
+  DicomImporter,
+  TransactionManager,
+  DicomTagReader
+} from './interface';
 import checkPrivilege from './middleware/auth/checkPrivilege';
 import fixUserMiddleware from './middleware/auth/fixUser';
 import cors from './middleware/cors';
@@ -106,6 +113,7 @@ interface CreateAppOptions {
   fixUser?: string;
   corsOrigin?: string;
   pluginResultsPath: string;
+  pluginCachePath: string;
   dicomImageServerUrl: string;
   uploadFileSizeMaxBytes: number;
 }
@@ -117,7 +125,7 @@ interface CreateAppOptions {
 export const createApp: FunctionService<
   Koa,
   {
-    db: DisposableDb;
+    database: Database;
     validator: Validator;
     apiLogger: Logger;
     models: Models;
@@ -126,17 +134,19 @@ export const createApp: FunctionService<
     rsSeriesRoutes: Koa.Middleware;
     volumeProvider: VolumeProvider;
     dicomFileRepository: DicomFileRepository;
+    dicomTagReader: DicomTagReader;
     dicomImporter: DicomImporter;
     taskManager: TaskManager;
     mhdPacker: MhdPacker;
     dicomVoxelDumper: DicomVoxelDumper;
     oauthServer: KoaOAuth2Server;
+    transactionManager: TransactionManager;
   },
   CreateAppOptions
 > = async (
   options,
   {
-    db,
+    database: database,
     validator,
     apiLogger: logger,
     models,
@@ -146,10 +156,12 @@ export const createApp: FunctionService<
     volumeProvider,
     dicomImporter,
     dicomFileRepository,
+    dicomTagReader,
     taskManager,
     mhdPacker,
     dicomVoxelDumper,
-    oauthServer
+    oauthServer,
+    transactionManager
   }
 ) => {
   const {
@@ -157,6 +169,7 @@ export const createApp: FunctionService<
     debug,
     corsOrigin,
     pluginResultsPath,
+    pluginCachePath,
     uploadFileSizeMaxBytes,
     dicomImageServerUrl
   } = options;
@@ -164,21 +177,24 @@ export const createApp: FunctionService<
   const koa = new Koa();
 
   const deps: Deps = {
-    db,
+    database,
     validator,
     logger,
     models,
     blobStorage,
     dicomFileRepository,
+    dicomTagReader,
     dicomImporter,
     pluginResultsPath,
+    pluginCachePath,
     cs: core,
     volumeProvider,
     uploadFileSizeMaxBytes,
     dicomImageServerUrl,
     taskManager,
     mhdPacker,
-    dicomVoxelDumper
+    dicomVoxelDumper,
+    transactionManager
   };
 
   const apiDir = path.resolve(__dirname, 'api/**/*.yaml');
@@ -230,7 +246,7 @@ export const createApp: FunctionService<
 };
 
 createApp.dependencies = [
-  'db',
+  'database',
   'validator',
   'apiLogger',
   'models',
@@ -239,11 +255,13 @@ createApp.dependencies = [
   'rsSeriesRoutes',
   'volumeProvider',
   'dicomFileRepository',
+  'dicomTagReader',
   'dicomImporter',
   'taskManager',
   'mhdPacker',
   'dicomVoxelDumper',
-  'oauthServer'
+  'oauthServer',
+  'transactionManager'
 ];
 
 export default createApp;

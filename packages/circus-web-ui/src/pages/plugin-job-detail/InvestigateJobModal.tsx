@@ -108,8 +108,8 @@ const InvestigateJobModal: React.FC<{}> = React.memo(props => {
                 </tr>
               </thead>
               <tbody>
-                {feedbacks.map(fb => (
-                  <tr>
+                {feedbacks.map((fb, i) => (
+                  <tr key={i}>
                     <td>{fb.isConsensual ? 'Consensual' : 'Personal'}</td>
                     <td>
                       <UserDisplay userEmail={fb.userEmail} />

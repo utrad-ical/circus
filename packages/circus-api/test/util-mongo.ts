@@ -4,9 +4,9 @@ import { safeLoad as yaml } from 'js-yaml';
 import mongo from 'mongodb';
 import * as path from 'path';
 import createValidator from '../src/createValidator';
-import { DisposableDb, Validator, Models } from '../src/interface';
+import { Database, Validator, Models } from '../src/interface';
 import connectDb from '../src/db/connectDb';
-import createModels from '../src/db/createModels';
+import createModels, { makeModels } from '../src/db/createModels';
 
 /**
  * Connects to a test MongoDB instance.
@@ -43,7 +43,7 @@ export const setUpMongoFixture = async (
       }
       try {
         await col.insertMany(data);
-      } catch (err) {
+      } catch (err: any) {
         console.log(err.errors);
         throw err;
       }
@@ -74,14 +74,14 @@ export const deleteAllCollections = async (db: mongo.Db) => {
  * the connection after the tests have finished.
  */
 export const usingMongo = () => {
-  return new Promise<DisposableDb>(resolve => {
-    let db: DisposableDb;
+  return new Promise<Database>(resolve => {
+    let database: Database;
     beforeAll(async () => {
-      db = await connectMongo();
-      resolve(db);
+      database = await connectMongo();
+      resolve(database);
     });
     afterAll(async () => {
-      await db.dispose();
+      await database.dispose();
     });
   });
 };
@@ -91,19 +91,42 @@ export const usingMongo = () => {
  */
 export const usingModels = () => {
   return new Promise<{
-    db: DisposableDb;
+    database: Database;
     validator: Validator;
     models: Models;
   }>(resolve => {
-    let db: DisposableDb;
+    let database: Database;
     beforeAll(async () => {
-      db = await connectMongo();
+      database = await connectMongo();
       const validator = await createValidator(undefined);
-      const models = await createModels(undefined, { db, validator });
-      resolve({ db, validator, models });
+      const models = await createModels(undefined, {
+        database: database,
+        validator
+      });
+      resolve({ database, validator, models });
     });
     afterAll(async () => {
-      await db.dispose();
+      await database.dispose();
+    });
+  });
+};
+
+export const usingSessionModels = () => {
+  return new Promise<{
+    database: Database;
+    validator: Validator;
+    models: Models;
+  }>(resolve => {
+    let database: Database;
+    beforeAll(async () => {
+      database = await connectMongo();
+      const session = database.connection.startSession();
+      const validator = await createValidator(undefined);
+      const models = makeModels(database, validator, session);
+      resolve({ database, validator, models });
+    });
+    afterAll(async () => {
+      await database.dispose();
     });
   });
 };

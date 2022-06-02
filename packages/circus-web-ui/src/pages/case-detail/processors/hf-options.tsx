@@ -2,8 +2,7 @@ import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import { FormControl } from 'components/react-bootstrap';
 import React from 'react';
-import { HoleFillingOptions } from './createHfProcessor';
-import SettingDialog from './SettingDialog';
+import { HoleFillingOptions } from './hf-processor';
 
 const neighborsOptions2D = {
   4: '4-neigobors',
@@ -26,14 +25,14 @@ const orientationOptions = {
   Sagital: 'Sagital'
 };
 
-const initialOptions = {
+export const initialOptions: HoleFillingOptions = {
   dimension: 2,
   neighbors: 4,
   orientation: 'Axial',
   bufferSize: 255
 };
 
-const OptionsEditorForHF: Editor<HoleFillingOptions> = props => {
+export const OptionsEditor: Editor<HoleFillingOptions> = props => {
   const { value, onChange } = props;
 
   const onMaximumComponentsChange = (ev: any) => {
@@ -108,23 +107,3 @@ const OptionsEditorForHF: Editor<HoleFillingOptions> = props => {
     </>
   );
 };
-
-const SettingDialogHF: React.FC<{
-  processorProgress: { value: number; label: string };
-  onHide: () => void;
-  onOkClick: (props: HoleFillingOptions) => void;
-}> = props => {
-  const { processorProgress, onHide, onOkClick } = props;
-  return (
-    <SettingDialog
-      title="Hole filling"
-      optionsEditor={OptionsEditorForHF}
-      initialOptions={initialOptions}
-      processorProgress={processorProgress}
-      onHide={onHide}
-      onOkClick={onOkClick}
-    />
-  );
-};
-
-export default SettingDialogHF;

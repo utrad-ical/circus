@@ -2,9 +2,8 @@ import { alert } from '@smikitky/rb-components/lib/modal';
 import { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
 import CCL26 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D26';
 import CCL6 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D6';
-import cclWorker from 'worker-loader!./cclWorker';
-import {
-  PostProcessor,
+import cclWorker from 'worker-loader!./ccl-worker';
+import performLabelCreatingVoxelProcessing, {
   VoxelLabelProcessor
 } from './performLabelCreatingVoxelProcessing';
 
@@ -14,19 +13,19 @@ export interface CclOptions {
   bufferSize: number;
 }
 
-const createCclProcessor = (
-  options: CclOptions
-): VoxelLabelProcessor<LabelingResults3D> => {
-  return async (
-    input: Uint8Array,
-    width: number,
-    height: number,
-    nSlices: number,
-    name: string,
-    postProcessor: PostProcessor<LabelingResults3D>,
-    reportProgress: (progress: { value: number; label: string }) => void
-  ) => {
-    const { maxOutputComponents, neighbors, bufferSize } = options;
+const cclVoxelProcessor: VoxelLabelProcessor<LabelingResults3D, CclOptions> =
+  props => {
+    const {
+      options: { maxOutputComponents, neighbors, bufferSize },
+      input,
+      width,
+      height,
+      nSlices,
+      name,
+      postProcessor,
+      reportProgress
+    } = props;
+
     const relabeling = (results: LabelingResults3D) => {
       const nameTable = [
         'largest CC',
@@ -135,12 +134,12 @@ const createCclProcessor = (
       });
       myWorker.onmessage = (e: any) => {
         if (typeof e.data === 'string') {
-          reportProgress({ value: 100, label: 'Failed' });
+          reportProgress({ value: 100, label: 'Failed', finished: true });
           alert(`${name} is too complex.\nPlease modify ${name}.`);
           return;
         }
         postProcessor(relabeling(e.data));
-        reportProgress({ value: 100, label: 'Completed' });
+        reportProgress({ finished: true });
       };
     } else {
       console.log('× window.Worker');
@@ -155,9 +154,9 @@ const createCclProcessor = (
         return;
       }
       postProcessor(relabeling(labelingResults));
-      reportProgress({ value: 100, label: 'Completed' });
+      reportProgress({ finished: true });
     }
   };
-};
 
-export default createCclProcessor;
+const cclProcessor = performLabelCreatingVoxelProcessing(cclVoxelProcessor);
+export default cclProcessor;

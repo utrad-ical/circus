@@ -1,5 +1,8 @@
 import generateUniqueId from '../utils/generateUniqueId';
-import { fetchAccessibleSeries, UserPrivilegeInfo } from '../privilegeUtils';
+import {
+  fetchAndLockAccessibleSeries,
+  UserPrivilegeInfo
+} from '../privilegeUtils';
 import { Models } from '../interface';
 import { SeriesEntry } from '../typings/circus';
 import { isValidPartialVolumeDescriptor } from '@utrad-ical/circus-lib';
@@ -30,7 +33,7 @@ const makeNewCase = async (
     throw new Error('Invalid partial volume descriptor.');
   }
 
-  const seriesData = await fetchAccessibleSeries(
+  const seriesData = await fetchAndLockAccessibleSeries(
     models,
     userPrivileges,
     series

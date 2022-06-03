@@ -1,4 +1,4 @@
-import { Composition, createOrthogonalMprSection, createToolbar, MprViewState, RawVolumeMprImageSource, ReferenceLine, RsHttpClient, Viewer } from "browser";
+import { Composition, createOrthogonalMprSection, createToolbar, MprViewState, RawVolumeMprImageSource, ReferenceLine, RsHttpClient, Viewer, WebGlRawVolumeMprImageSource } from "browser";
 import RsProgressiveVolumeLoader from "browser/image-source/volume-loader/RsProgressiveVolumeLoader";
 import WebSocketClient from "browser/ws/WebSocketClient";
 import { createTransferClientFactory } from "browser/ws/createTransferClientFactory";
@@ -8,32 +8,28 @@ document.addEventListener('DOMContentLoaded', function (e) {
 
     const toolbar = setupToolbar();
 
+    const viewerInitializer = (comp: Composition) => {
+        const setOrientation = createOrientationSetter(comp);
+
+        return (orientation: string, color: string) => {
+            const viewer = setupViewer();
+            viewer.setComposition(comp);
+            setOrientation(viewer, orientation);
+            toolbar.bindViewer(viewer);
+            const viewerLine = new ReferenceLine(viewer, { color });
+            comp.addAnnotation(viewerLine);
+            return viewer;
+        };
+    }
+
     for (let i = 0; i < setting.count(); i++) {
         const cfg = setting.get(i);
         const comp = setupComposition(cfg);
-        const setOrientation = createOrientationSetter(comp);
+        const initializeViewer = viewerInitializer(comp);
 
-        const axial = setupViewer();
-        axial.setComposition(comp);
-        setOrientation(axial, 'axial');
-        toolbar.bindViewer(axial);
-
-        const coronal = setupViewer();
-        coronal.setComposition(comp);
-        setOrientation(coronal, 'coronal');
-        toolbar.bindViewer(coronal);
-
-        const saggital = setupViewer();
-        saggital.setComposition(comp);
-        setOrientation(saggital, 'sagittal');
-        toolbar.bindViewer(saggital);
-
-        const axialLine = new ReferenceLine(axial, { color: '#993300' });
-        const coronalLine = new ReferenceLine(coronal, { color: '#3399ff' });
-        const saggitalLine = new ReferenceLine(saggital, { color: '#33ff33' });
-        comp.addAnnotation(axialLine);
-        comp.addAnnotation(coronalLine);
-        comp.addAnnotation(saggitalLine);
+        initializeViewer('axial', '#993300');
+        initializeViewer('coronal', '#3399ff');
+        initializeViewer('sagittal', '#33ff33');
 
         comp.viewers.forEach(viewer => viewer.render());
     }

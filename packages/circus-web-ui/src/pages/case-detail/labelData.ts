@@ -107,14 +107,14 @@ export type ExternalLabel = {
   name?: string;
   attributes: object;
 } & (
-  | { type: 'voxel'; data: ExternalVoxelLabelData }
-  | InternalLabelDataOf<'ellipse'>
-  | InternalLabelDataOf<'rectangle'>
-  | InternalLabelDataOf<'ellipsoid'>
-  | InternalLabelDataOf<'cuboid'>
-  | InternalLabelDataOf<'point'>
-  | InternalLabelDataOf<'ruler'>
-);
+    | { type: 'voxel'; data: ExternalVoxelLabelData }
+    | InternalLabelDataOf<'ellipse'>
+    | InternalLabelDataOf<'rectangle'>
+    | InternalLabelDataOf<'ellipsoid'>
+    | InternalLabelDataOf<'cuboid'>
+    | InternalLabelDataOf<'point'>
+    | InternalLabelDataOf<'ruler'>
+  );
 
 export const labelTypes: {
   [key in LabelType]: {
@@ -405,9 +405,9 @@ const getCenterOfLabel = (
       const { voxelSize } = src.metadata;
 
       return [
-        (origin[0] + size[0]) * voxelSize[0],
-        (origin[1] + size[1]) * voxelSize[1],
-        (origin[2] + size[2]) * voxelSize[2]
+        (origin[0] + size[0] * 0.5) * voxelSize[0],
+        (origin[1] + size[1] * 0.5) * voxelSize[1],
+        (origin[2] + size[2] * 0.5) * voxelSize[2]
       ];
     }
     case 'cuboid':

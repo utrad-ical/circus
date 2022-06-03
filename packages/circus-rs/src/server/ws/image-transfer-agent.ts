@@ -55,11 +55,11 @@ const createImageTransferAgent = (
 
       if (imageNo !== undefined) {
         try {
-          console.log(`Try to emit image#${imageNo} for tr#${transferId} con#${connectionId}`);
+          // console_log(`Try to emit image#${imageNo} for tr#${transferId} con#${connectionId}`);
           const data = transferImageMessageData(transferId, imageNo);
           const buffer = await fetch(imageNo);
           await imageDataEmitter(data, buffer);
-          //          console_log(`Success to emit image#${imageNo} for tr#${transferId} con#${connectionId}`);
+          console_log(`Success to emit image#${imageNo} for tr#${transferId} con#${connectionId}`);
         } catch (err) {
           console_log(`Failed to emit image#${imageNo} for tr#${transferId} con#${connectionId}: ${(err as Error).message}`);
           transferConnections.delete(transferId);

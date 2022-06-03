@@ -1,5 +1,5 @@
 import { RsHttpClient } from "browser";
-import { createTransferClientFactory, TransferClientFactory } from "../../browser/ws/createTransferClientFactory";
+import { createTransferConnectionFactory, TransferConnection, TransferConnectionFactory } from "../../browser/ws/createTransferConnectionFactory";
 import DebugLogger from "./DebugLogger";
 import WebSocketClient from "../../browser/ws/WebSocketClient";
 import drawToImageData from "../../browser/image-source/drawToImageData";
@@ -26,7 +26,7 @@ function setup() {
 
     const apiClient = new RsHttpClient(apiHost);
     const wsClient = new WebSocketClient(`${wsHost}/ws/volume`);
-    const factory = createTransferClientFactory(wsClient);
+    const beginTransfer = createTransferConnectionFactory(wsClient);
 
     const logConsole = el.querySelector('[data-role=log-console]') as HTMLElement;
     const logger = new DebugLogger(logConsole);
@@ -107,7 +107,7 @@ function setup() {
             // Create
             btn(`Create#${i}`, subBtnContainer).addEventListener('click', function (e) {
                 const { seriesUid, partialVolumeDescriptor } = setting.get(i);
-                prepareLoadingProcess(apiClient, logger, factory, seriesUid, partialVolumeDescriptor);
+                prepareLoadingProcess(apiClient, logger, beginTransfer, seriesUid, partialVolumeDescriptor);
             });
         }
 
@@ -162,7 +162,7 @@ function setup() {
 async function prepareLoadingProcess(
     apiClient: RsHttpClient,
     logger: DebugLogger,
-    factory: TransferClientFactory,
+    beginTransfer: TransferConnectionFactory,
     seriesUid: string,
     partialVolumeDescriptor?: PartialVolumeDescriptor
 ) {
@@ -216,7 +216,7 @@ async function prepareLoadingProcess(
         if (preview) preview.getContext('2d')!.putImageData(imageData, 0, 0);
     }
 
-    const transferClient = await factory.make({ seriesUid }, handler);
+    let transferConnection: TransferConnection | null = null;
 
     let startTime = -1;
 
@@ -243,8 +243,7 @@ async function prepareLoadingProcess(
     row1.classList.add('d-flex', 'justify-content-between');
     const seriesUidContainer = document.createElement('div');
     row1.append(seriesUidContainer);
-    seriesUidContainer.innerText = `#${transferClient.id()} / ` +
-        seriesUid.substring(0, 12) + (seriesUid.length > 12 ? '...' : '');// partialVolumeDescriptor
+    seriesUidContainer.innerText = seriesUid.substring(0, 12) + (seriesUid.length > 12 ? '...' : '');// partialVolumeDescriptor
 
     const counterContainer = document.createElement('div');
     row1.append(counterContainer);
@@ -295,11 +294,15 @@ async function prepareLoadingProcess(
     startButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'mr-2');
     startButton.innerText = 'Start';
     startButton.addEventListener('click', () => {
+        if (transferConnection) return;
+
         startTime = new Date().getTime();
-        logger.info(`#${transferClient.id()} beginTransfer`);
-        transferClient.beginTransfer();
-        logger.info(`#${transferClient.id()} setPriority`);
-        transferClient.setPriority(higherPriorityImages, 10);
+        transferConnection = beginTransfer({ seriesUid, partialVolumeDescriptor }, handler);
+        seriesUidContainer.innerText = seriesUidContainer.innerText + `#${transferConnection.id}`;
+
+        logger.info(`#${transferConnection.id} beginTransfer`);
+        transferConnection.setPriority(higherPriorityImages, 10);
+        logger.info(`#${transferConnection.id} setPriority`);
     });
     buttonContainer.append(startButton);
 
@@ -308,8 +311,8 @@ async function prepareLoadingProcess(
     // changePriorityButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'mr-2');
     // changePriorityButton.innerText = 'Change Priority ' + higherPriorityImages.toString();
     // changePriorityButton.addEventListener('click', () => {
-    //     logger.info(`#${transferClient.id()} setPriority`);
-    //     transferClient.setPriority(higherPriorityImages, 10);
+    //     logger.info(`#${transferConnection.id()} setPriority`);
+    //     transferConnection.setPriority(higherPriorityImages, 10);
     // });
     // buttonContainer.append(changePriorityButton);
 
@@ -318,8 +321,10 @@ async function prepareLoadingProcess(
     stopButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'mr-2');
     stopButton.innerText = 'Stop';
     stopButton.addEventListener('click', () => {
-        logger.info(`#${transferClient.id()} stopTransfer`);
-        transferClient.stopTransfer();
+        if (!transferConnection) return;
+        logger.info(`#${transferConnection.id} stopTransfer`);
+        transferConnection.stop();
+        transferConnection = null;
     });
     buttonContainer.append(stopButton);
 
@@ -329,8 +334,10 @@ async function prepareLoadingProcess(
     disposeButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'mr-2');
     disposeButton.innerText = 'Dispose';
     disposeButton.addEventListener('click', () => {
-        logger.info(`#${transferClient.id()} stopTransfer`);
-        transferClient.stopTransfer();
+        if (!transferConnection) return;
+        logger.info(`#${transferConnection.id} stopTransfer`);
+        transferConnection.stop();
+        transferConnection = null;
         loaderElement.remove();
     });
     buttonContainer.append(disposeButton);

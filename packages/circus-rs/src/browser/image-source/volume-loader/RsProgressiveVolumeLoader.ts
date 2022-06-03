@@ -7,8 +7,8 @@ import PartialVolumeDescriptor, {
 } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
 import VolumeCache, { nullVolumeCache } from './cache/VolumeCache';
 import { EstimateWindowType, createRequestParams } from './rs-loader-utils';
-import { TransferClientFactory } from 'browser/ws/createTransferClientFactory';
-import { Range } from 'multi-integer-range';
+import { TransferConnection, TransferConnectionFactory } from '../../ws/createTransferConnectionFactory';
+import MultiRange, { MultiRangeInitializer } from 'multi-integer-range';
 import EventEmitter from 'events';
 import setImmediate from '../../util/setImmediate';
 
@@ -18,7 +18,7 @@ interface RsProgressiveVolumeLoaderOptions {
   partialVolumeDescriptor?: PartialVolumeDescriptor;
   cache?: VolumeCache;
   estimateWindowType?: EstimateWindowType;
-  transferClientFactory: TransferClientFactory;
+  transferConnectionFactory: TransferConnectionFactory;
 }
 
 export default class RsProgressiveVolumeLoader
@@ -34,7 +34,10 @@ export default class RsProgressiveVolumeLoader
   private estimateWindowType: EstimateWindowType;
 
   private volume: DicomVolume | null = null;
-  private transferClientFactory: TransferClientFactory;
+  private transferConnectionFactory: TransferConnectionFactory;
+  private transferConnection?: TransferConnection;
+  private connected: Promise<void>;
+  private resolveConnected?: (value: void | PromiseLike<void>) => void;
 
   constructor({
     rsHttpClient,
@@ -42,7 +45,7 @@ export default class RsProgressiveVolumeLoader
     partialVolumeDescriptor,
     cache,
     estimateWindowType = 'none',
-    transferClientFactory
+    transferConnectionFactory
   }: RsProgressiveVolumeLoaderOptions) {
 
     super();
@@ -61,11 +64,12 @@ export default class RsProgressiveVolumeLoader
     this.partialVolumeDescriptor = partialVolumeDescriptor;
     this.estimateWindowType = estimateWindowType;
     this.cache = cache || nullVolumeCache;
-    this.transferClientFactory = transferClientFactory;
+    this.transferConnectionFactory = transferConnectionFactory;
+    this.connected = new Promise<void>((resolve) => this.resolveConnected = resolve);
   }
 
-  public setPriority(images: string | number | (number | Range)[], priority: number): void {
-    // @todo: implement here
+  public setPriority(images: MultiRangeInitializer, priority: number): void {
+    this.connected.then(() => this.transferConnection?.setPriority(new MultiRange(images).toArray(), priority));
   }
 
   private async _doLoadMeta(): Promise<DicomVolumeMetadata> {
@@ -130,15 +134,12 @@ export default class RsProgressiveVolumeLoader
         this.emit('progress', { target: this, imageNo, finished, total });
       };
 
-      (async () => {
-        const transferClient = await this.transferClientFactory.make(
-          { seriesUid: this.seriesUid },
-          handler
-        );
-
-        console.time(`Transfering ${this.seriesUid}`);
-        transferClient.beginTransfer();
-      })();
+      console.time(`Transfering ${this.seriesUid}`);
+      this.transferConnection = this.transferConnectionFactory(
+        { seriesUid: this.seriesUid },
+        handler
+      );
+      this.resolveConnected && this.resolveConnected();
     });
   }
 

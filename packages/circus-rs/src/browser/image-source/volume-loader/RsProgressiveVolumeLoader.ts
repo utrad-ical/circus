@@ -95,8 +95,7 @@ export default class RsProgressiveVolumeLoader
 
   private async _doLoadVolume(): Promise<DicomVolume> {
     if (!this.meta) throw new Error('Medatadata not loaded yet');
-
-    this.volume = this.createVolume(this.meta);
+    if (!this.volume) this.volume = this.createVolume(this.meta);
 
     const cacheKey = this.createKey('buffer');
     let buffer: ArrayBuffer | undefined;
@@ -159,7 +158,10 @@ export default class RsProgressiveVolumeLoader
   }
 
   public getVolume(): DicomVolume | null {
-    return this.volume || null;
+    if (!this.meta) return null;
+    if (!this.volume) this.volume = this.createVolume(this.meta);
+
+    return this.volume;
   }
 
   private createKey(suffix: string): string {

@@ -69,7 +69,8 @@ function setupComposition({ server, seriesUid, partialVolumeDescriptor }: Volume
         transferClientFactory: factory
     });
 
-    const imageSource = new RawVolumeMprImageSource({ volumeLoader });
+    // const imageSource = new RawVolumeMprImageSource({ volumeLoader });
+    const imageSource = new WebGlRawVolumeMprImageSource({ volumeLoader });
     // const imageSource = new DynamicMprImageSource({ rsHttpClient: apiClient, seriesUid, partialVolumeDescriptor });
 
     const comp = new Composition(imageSource);

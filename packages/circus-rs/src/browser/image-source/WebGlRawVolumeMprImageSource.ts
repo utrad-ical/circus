@@ -1,7 +1,7 @@
 import Viewer from '../viewer/Viewer';
 import ViewState from '../ViewState';
 import DicomVolume from '../../common/DicomVolume';
-import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
+import DicomVolumeLoader, { DicomVolumeProgressiveLoader } from './volume-loader/DicomVolumeLoader';
 import MprProgram from './gl/MprProgram';
 import MprImageSource from './MprImageSource';
 import {
@@ -11,10 +11,18 @@ import {
 } from './gl/webgl-util';
 import MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume';
 import PriorityIntegerCaller from '../../common/PriorityIntegerCaller';
-import { Initializer as MultiRangeInitializer } from 'multi-integer-range';
+import { MultiRangeInitializer } from 'multi-integer-range';
+import { DrawResult } from './ImageSource';
+import setImmediate from '../util/setImmediate';
 
 export interface WebGlRawVolumeMprImageSourceOptions {
-  volumeLoader: DicomVolumeLoader;
+  volumeLoader: DicomVolumeProgressiveLoader;
+  // Specify the interval of updating draft image in ms.
+  // If zero is specified, do not return a draft image.
+  // Default value is 300 [ms]
+  stepOfProgress?: number;
+
+  // Make the timing for transferring the texture before the drawing call.
   beginTransferOnVolumeLoaded?: boolean;
 }
 type RGBA = [number, number, number, number];
@@ -27,9 +35,11 @@ type CaptureCanvasCallback = (canvas: HTMLCanvasElement) => void;
 
 export default class WebGlRawVolumeMprImageSource
   extends MprImageSource
-  implements MprImageSourceWithDicomVolume
-{
+  implements MprImageSourceWithDicomVolume {
   private volume: DicomVolume | undefined;
+  private markAsTextured: Set<number> = new Set;
+  private fullyLoaded: boolean = false;
+  private stepOfProgress: number = 0;
 
   private backCanvas: HTMLCanvasElement;
   private glContext: WebGLRenderingContext;
@@ -53,9 +63,12 @@ export default class WebGlRawVolumeMprImageSource
 
   constructor({
     volumeLoader,
+    stepOfProgress,
     beginTransferOnVolumeLoaded = false
   }: WebGlRawVolumeMprImageSourceOptions) {
     super();
+
+    stepOfProgress = stepOfProgress || 300;
 
     const backCanvas = this.createBackCanvas();
     const glContext = getWebGLContext(backCanvas);
@@ -72,7 +85,9 @@ export default class WebGlRawVolumeMprImageSource
     );
 
     this.loadSequence = (async () => {
+      this.stepOfProgress = stepOfProgress;
       this.metadata = await volumeLoader.loadMeta();
+      this.volume = volumeLoader.getVolume()!;
 
       // Assign the length of the longest side of the volume to
       // the length of the side in normalized device coordinates.
@@ -83,17 +98,26 @@ export default class WebGlRawVolumeMprImageSource
         voxelCount[2] * voxelSize[2]
       );
       mprProgram.setMmInNdc(1.0 / longestSideLengthInMmOfTheVolume);
-
-      this.volume = await volumeLoader.loadVolume();
-
       mprProgram.activate();
       const { images, transfer } = mprProgram.setDicomVolume(this.volume);
-      this.priorityIntegerCaller = new PriorityIntegerCaller(
-        async (z: number) => transfer(z)
-      );
-      if (beginTransferOnVolumeLoaded) {
-        this.priorityIntegerCaller.append(images, this.priorityCounter++);
-      }
+
+      // const processor = async (z: number) => {
+      //   this.markAsTextured.add(z);
+      //   await transfer(z);
+      // };
+      volumeLoader.on('progress', async ({ imageNo }) => {
+        this.markAsTextured.add(imageNo - 1);
+        await transfer(imageNo - 1);
+      });
+
+      // this.priorityIntegerCaller = new PriorityIntegerCaller(processor);
+
+      // if (beginTransferOnVolumeLoaded) {
+      //   this.priorityIntegerCaller.append(images, this.priorityCounter++);
+      // }
+
+      volumeLoader.loadVolume().then(() => this.fullyLoaded = true);
+      if (!stepOfProgress) await volumeLoader.loadVolume();
     })();
   }
 
@@ -129,36 +153,59 @@ export default class WebGlRawVolumeMprImageSource
    * @param viewState
    * @returns {Promise<ImageData>}
    */
-  public async draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
+  public async draw(viewer: Viewer, viewState: ViewState, abortSignal: AbortSignal): Promise<DrawResult> {
+
+    let drawResult: DrawResult | undefined = undefined;
+    if (this.fullyLoaded) {
+      drawResult = await this.createImageData(viewer, viewState, abortSignal);
+    } else {
+      const imageData = await this.createImageData(viewer, viewState, abortSignal);
+      const nextDraw = async () => {
+        await new Promise<void>((resolve) => setTimeout(() => resolve(), this.stepOfProgress));
+        return await this.draw(viewer, viewState, abortSignal);
+      };
+      drawResult = { draft: imageData, next: nextDraw() };
+    }
+
+    // If we use Promise.resolve directly, the then-calleback is called
+    // before any stacked UI events are handled.
+    // Use the polyfilled setImmediate to delay it.
+    // Cf. http://stackoverflow.com/q/27647742/1209240
+    return new Promise(resolve => {
+      setImmediate(() => resolve(drawResult!));
+    });
+  }
+
+  private async createImageData(viewer: Viewer, viewState: ViewState, abortSignal: AbortSignal): Promise<ImageData> {
     if (viewState.type !== 'mpr') throw new Error('Unsupported view state.');
 
     if (!this.mprProgram.isActive())
       throw new Error('The program is not active');
 
     // Wait to transfer required images.
-    const sectionVertexZValues = [
-      viewState.section.origin[2],
-      viewState.section.origin[2] + viewState.section.xAxis[2],
-      viewState.section.origin[2] +
-        viewState.section.xAxis[2] +
-        viewState.section.yAxis[2],
-      viewState.section.origin[2] + viewState.section.yAxis[2]
-    ];
-    const minImage = Math.max(
-      0,
-      Math.floor(
-        Math.min(...sectionVertexZValues) / this.metadata!.voxelSize[2] - 0.5
-      )
-    );
-    const maxImage = Math.min(
-      this.metadata!.voxelCount[2] - 1,
-      Math.floor(
-        Math.max(...sectionVertexZValues) / this.metadata!.voxelSize[2] - 0.5
-      ) + 1
-    );
-    const requiredRange: MultiRangeInitializer = [[minImage, maxImage]];
-    this.priorityIntegerCaller!.append(requiredRange, this.priorityCounter++);
-    await this.priorityIntegerCaller!.waitFor(requiredRange);
+    // const sectionVertexZValues = [
+    //   viewState.section.origin[2],
+    //   viewState.section.origin[2] + viewState.section.xAxis[2],
+    //   viewState.section.origin[2] +
+    //   viewState.section.xAxis[2] +
+    //   viewState.section.yAxis[2],
+    //   viewState.section.origin[2] + viewState.section.yAxis[2]
+    // ];
+    // const minImage = Math.max(
+    //   0,
+    //   Math.floor(
+    //     Math.min(...sectionVertexZValues) / this.metadata!.voxelSize[2] - 0.5
+    //   )
+    // );
+    // const maxImage = Math.min(
+    //   this.metadata!.voxelCount[2] - 1,
+    //   Math.floor(
+    //     Math.max(...sectionVertexZValues) / this.metadata!.voxelSize[2] - 0.5
+    //   ) + 1
+    // );
+    // const requiredRange: MultiRangeInitializer = [[minImage, maxImage]];
+    // this.priorityIntegerCaller!.append(requiredRange, this.priorityCounter++);
+    // await this.priorityIntegerCaller!.waitFor(requiredRange);
 
     // Adjust viewport
     this.updateViewportSize(viewer.getResolution());

@@ -128,7 +128,7 @@ export default class RsProgressiveVolumeLoader
           setImmediate(() => resolve());
         }
 
-        this.emit('progress', this, finished, total);
+        this.emit('progress', { target: this, imageNo, finished, total });
       };
 
       (async () => {

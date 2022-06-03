@@ -21,8 +21,15 @@ export default interface DicomVolumeLoader {
 
 type MultiRangeDescriptor = Exclude<MultiRangeInitializer, MultiRange>;
 
+interface ProgressInfo {
+  target: DicomVolumeProgressiveLoader;
+  imageNo: number;
+  finished?: number;
+  total?: number;
+}
+
 interface ProgressEvents {
-  progress: (target: DicomVolumeProgressiveLoader, finished?: number, total?: number) => void;
+  progress: (info: ProgressInfo) => void;
 }
 
 export type ProgressEventEmitter = StrictEventEmitter<EventEmitter, ProgressEvents>;

@@ -19,8 +19,10 @@ const bufferedAmountCheck: WebSocketConnectionHandler = async (ws) => {
     let lastBufferAmount = NaN;
     const dumpBufferAmount = () => {
         // const bufferedAmount = ws.bufferedAmount;
-        const bufferedAmount: number = (ws as any)._socket._writableState.length;
         // const bufferedAmount = (ws as any)._sender._bufferedBytes;
+        // const bufferedAmount: number = (ws as any)._socket._writableState.length;
+        // const bufferedAmount: number = (ws as any)._socket.writableLength;
+        const bufferedAmount: number = (ws as any)._socket.bufferSize;
         if (lastBufferAmount !== bufferedAmount) {
             console.log(`bufferedAmount: ${bufferedAmount}`);
             lastBufferAmount = bufferedAmount;
@@ -28,8 +30,8 @@ const bufferedAmountCheck: WebSocketConnectionHandler = async (ws) => {
         return bufferedAmount;
     };
 
-    const bufferFlushed = () => new Promise<void>((resolve) => {
-        const check = () => void (0 === dumpBufferAmount() ? resolve() : setImmediate(check));
+    const bufferFlushed = (bufferSize: number = 0) => new Promise<void>((resolve) => {
+        const check = () => void (dumpBufferAmount() <= bufferSize ? resolve() : setImmediate(check));
         check();
     });
 

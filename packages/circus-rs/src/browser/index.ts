@@ -3,6 +3,8 @@
  * which should be visible to the consumers of CIRCUS RS.
  */
 import 'tslib';
+import './circus-rs.less';
+import '@utrad-ical/circus-icons/dist/circus-rs-font-glyphs.less';
 
 export { default as Viewer } from './viewer/Viewer';
 export {

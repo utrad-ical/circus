@@ -15,7 +15,7 @@ import {
 import Viewer from '../viewer/Viewer';
 import ViewState from '../ViewState';
 import { scanBoundingBox } from '../volume-util';
-import Annotation from './Annotation';
+import Annotation, { DrawOption } from './Annotation';
 
 /**
  * VoxelCloud is a type of Annotation that can be registered to a Composition.
@@ -161,8 +161,13 @@ export default class VoxelCloud implements Annotation {
     // console.timeEnd('expand to maximum');
   }
 
-  public draw(viewer: Viewer, viewState: ViewState): void {
+  public draw(
+    viewer: Viewer,
+    viewState: ViewState | undefined,
+    option: DrawOption
+  ): void {
     if (
+      !viewState ||
       !(this.volume instanceof RawData) ||
       !this.origin ||
       !this.color ||

@@ -48,6 +48,8 @@ export default function handleZoomBy(
   };
 
   const prevState = viewer.getState();
+  if (!prevState) return;
+
   switch (prevState.type) {
     case 'mpr':
     case 'vr': {

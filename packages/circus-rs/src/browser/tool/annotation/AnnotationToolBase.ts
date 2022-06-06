@@ -1,7 +1,7 @@
-import { ViewState } from '../..';
 import Annotation from '../../annotation/Annotation';
 import Viewer from '../../viewer/Viewer';
 import ViewerEvent from '../../viewer/ViewerEvent';
+import ViewState from '../../ViewState';
 import ToolBaseClass, { ToolOptions } from '../Tool';
 
 export default abstract class AnnotationToolBase<
@@ -14,6 +14,10 @@ export default abstract class AnnotationToolBase<
   protected abstract updateAnnotation(ev: ViewerEvent): void;
   protected abstract concreteAnnotation(ev: ViewerEvent): void;
   protected abstract validateAnnotation(): boolean;
+
+  protected abstract isValidViewState(
+    state: ViewState | undefined
+  ): state is any;
 
   public activate(viewer: Viewer): void {
     viewer.primaryEventTarget = this;
@@ -79,11 +83,5 @@ export default abstract class AnnotationToolBase<
     comp.annotationUpdated();
 
     ev.stopPropagation();
-  }
-
-  protected isValidViewState(viewState: ViewState): boolean {
-    if (!viewState) return false;
-    if (viewState.type === 'mpr') return true;
-    return false;
   }
 }

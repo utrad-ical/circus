@@ -1,14 +1,15 @@
 import { Box2, Vector2, Vector3 } from 'three';
-import { Vector2D } from '..';
-import { Section, verticesOfBox } from '../../common/geometry';
+import { Vector2D, verticesOfBox } from '../../common/geometry';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
 import {
-  convertScreenCoordinateToVolumeCoordinate,
   convertVolumeCoordinateToScreenCoordinate,
   detectOrthogonalSection,
   sectionFrom2dViewState
 } from '../section-util';
-import { convertVolumePointToViewerPoint } from '../tool/tool-util';
+import {
+  convertViewerPointToVolumePoint,
+  convertVolumePointToViewerPoint
+} from '../tool/tool-util';
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState, { MprViewState, TwoDimensionalViewState } from '../ViewState';
@@ -38,13 +39,14 @@ const cursorTypes: {
 };
 
 const isValidViewState = (
-  viewState: ViewState
+  viewState: ViewState | undefined
 ): viewState is MprViewState | TwoDimensionalViewState => {
   if (!viewState) return false;
   if (viewState.type === 'mpr') return true;
   if (viewState.type === '2d') return true;
   return false;
 };
+
 export default class PlaneFigure
   implements Annotation, ViewerEventTarget, ModifierKeyBehaviors
 {
@@ -99,17 +101,13 @@ export default class PlaneFigure
 
   public id?: string;
 
-  public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
+  public draw(
+    viewer: Viewer,
+    viewState: ViewState | undefined,
+    option: DrawOption
+  ): void {
     if (!viewer || !isValidViewState(viewState)) return;
-
-    const canvas = viewer.canvas;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const resolution = new Vector2().fromArray(viewer.getResolution());
-    if (!this.color || !this.min || !this.max) return;
+    if (!this.color || !this.min || !this.max || this.z === undefined) return;
 
     const color = this.determineDrawingColorFromViewState(viewState);
     if (!color) return;
@@ -118,6 +116,7 @@ export default class PlaneFigure
       viewState.type !== '2d'
         ? viewState.section
         : sectionFrom2dViewState(viewState);
+    const resolution = new Vector2().fromArray(viewer.getResolution());
     const min = convertVolumeCoordinateToScreenCoordinate(
       section,
       resolution,
@@ -129,6 +128,10 @@ export default class PlaneFigure
       new Vector3(this.max[0], this.max[1], this.z ? this.z : 0)
     );
 
+    const canvas = viewer.canvas;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
     ctx.save();
     try {
       ctx.strokeStyle = color;
@@ -167,6 +170,7 @@ export default class PlaneFigure
     state: ViewState
   ): string | undefined {
     if (this.z === undefined) return;
+
     switch (state.type) {
       case '2d': {
         const { imageNumber } = state;
@@ -193,15 +197,37 @@ export default class PlaneFigure
     }
   }
 
+  private judgeHandleType(
+    viewer: Viewer,
+    point: Vector2
+  ): BoundingRectWithHandleHitType | undefined {
+    if (!this.min || !this.max || this.z === undefined) return;
+
+    const minPoint = convertVolumePointToViewerPoint(
+      viewer,
+      this.min[0],
+      this.min[1],
+      this.z
+    );
+    const maxPoint = convertVolumePointToViewerPoint(
+      viewer,
+      this.max[0],
+      this.max[1],
+      this.z
+    );
+    const boundingBox = new Box2(minPoint, maxPoint);
+    return hitBoundingRectWithHandles(point, boundingBox, defaultHandleSize);
+  }
+
   public mouseMoveHandler(ev: ViewerEvent): void {
     if (!this.editable) return;
 
     const viewer = ev.viewer;
+    const viewState = viewer.getState();
+    if (!isValidViewState(viewState)) return;
 
-    const boundingBox = this.getBoundingBox(viewer);
-    if (!boundingBox) return;
-
-    const handleType = this.hitTest(ev);
+    const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
+    const handleType = this.judgeHandleType(viewer, point);
     if (handleType) {
       ev.stopPropagation();
       this.handleType = handleType;
@@ -215,178 +241,118 @@ export default class PlaneFigure
     }
   }
 
-  private hitTest(ev: ViewerEvent): BoundingRectWithHandleHitType | undefined {
+  public dragStartHandler(ev: ViewerEvent): void {
+    if (!this.editable) return;
+    if (this.z === undefined) return;
+    if (!this.min || !this.max) return;
+
     const viewer = ev.viewer;
-    const point = new Vector2(ev.viewerX!, ev.viewerY!);
+    if (viewer.getHoveringAnnotation() !== this) return;
 
     const viewState = viewer.getState();
     if (!isValidViewState(viewState)) return;
-    if (!this.min || !this.max) return;
 
-    const minPoint = convertVolumePointToViewerPoint(
+    ev.stopPropagation();
+
+    const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
+    const handleType = this.judgeHandleType(viewer, point);
+    if (!handleType) return;
+
+    const dragStartVolumePoint3 = convertViewerPointToVolumePoint(
       viewer,
-      this.min[0],
-      this.min[1],
-      this.z!
+      ev.viewerX!,
+      ev.viewerY!
     );
-    const maxPoint = convertVolumePointToViewerPoint(
-      viewer,
-      this.max[0],
-      this.max[1],
-      this.z!
-    );
-    const BoundingBox = new Box2(minPoint, maxPoint);
 
-    return hitBoundingRectWithHandles(point, BoundingBox, defaultHandleSize);
-  }
-
-  public dragStartHandler(ev: ViewerEvent): void {
-    if (!this.editable) return;
-
-    const viewer = ev.viewer;
-    if (viewer.getHoveringAnnotation() === this) {
-      ev.stopPropagation();
-
-      const boundingBox = this.getBoundingBox(viewer);
-      if (!boundingBox) return;
-
-      const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
-      const handleType = this.hitTest(ev);
-      if (handleType) {
-        const viewState = viewer.getState();
-        const section =
-          viewState.type !== '2d'
-            ? viewState.section
-            : sectionFrom2dViewState(viewState);
-        const resolution: [number, number] = viewer.getResolution();
-        this.handleType = handleType;
-        this.dragInfo = {
-          originalBoundingBox3: [
-            [...this.min!, this.z!],
-            [...this.max!, this.z!]
-          ],
-          dragStartVolumePoint3: convertScreenCoordinateToVolumeCoordinate(
-            section,
-            new Vector2().fromArray(resolution),
-            point.clone()
-          ).toArray()
-        };
-      }
-    }
+    this.handleType = handleType;
+    this.dragInfo = {
+      originalBoundingBox3: [
+        [this.min[0], this.min[1], this.z],
+        [this.max[0], this.max[1], this.z]
+      ],
+      dragStartVolumePoint3: dragStartVolumePoint3.toArray()
+    };
   }
 
   public dragHandler(ev: ViewerEvent): void {
     if (!this.editable) return;
+    if (!this.dragInfo) return;
 
     const viewer = ev.viewer;
+    if (viewer.getHoveringAnnotation() !== this) return;
 
-    if (viewer.getHoveringAnnotation() === this) {
-      ev.stopPropagation();
-      const draggedPoint: [number, number] = [ev.viewerX!, ev.viewerY!];
-      const viewState = ev.viewer.getState();
-      const section =
-        viewState.type !== '2d'
-          ? viewState.section
-          : sectionFrom2dViewState(viewState);
-      const resolution: [number, number] = viewer.getResolution();
-      const orientation = 'axial';
-      const draggedPoint3 = convertScreenCoordinateToVolumeCoordinate(
-        section,
-        new Vector2().fromArray(resolution),
-        new Vector2().fromArray(draggedPoint)
-      );
+    const viewState = viewer.getState();
+    if (!isValidViewState(viewState)) return;
 
-      const maintainAspectRatio = this.lockMaintainAspectRatio !== ev.shiftKey;
-      const fixCenterOfGravity = this.lockFixCenterOfGravity !== ev.ctrlKey;
+    ev.stopPropagation();
 
-      const originalBoundingBox3 = this.dragInfo!.originalBoundingBox3!;
-      const newBoundingBox3 = resize(
-        this.handleType!,
-        orientation,
-        originalBoundingBox3,
-        new Vector3().fromArray(this.dragInfo!.dragStartVolumePoint3!),
-        draggedPoint3,
-        maintainAspectRatio,
-        fixCenterOfGravity
-      );
+    const dragPoint3 = convertViewerPointToVolumePoint(
+      viewer,
+      ev.viewerX!,
+      ev.viewerY!
+    );
 
-      this.min = [newBoundingBox3[0][0], newBoundingBox3[0][1]];
-      this.max = [newBoundingBox3[1][0], newBoundingBox3[1][1]];
+    const dragStartVolumePoint3 = new Vector3().fromArray(
+      this.dragInfo.dragStartVolumePoint3
+    );
 
-      const comp = viewer.getComposition();
-      if (!comp) return;
-      comp.dispatchAnnotationChanging(this);
-      comp.annotationUpdated();
-    }
+    const maintainAspectRatio = this.lockMaintainAspectRatio !== ev.shiftKey;
+    const fixCenterOfGravity = this.lockFixCenterOfGravity !== ev.ctrlKey;
+
+    const originalBoundingBox3 = this.dragInfo.originalBoundingBox3;
+
+    const newBoundingBox3 = resize(
+      this.handleType!,
+      'axial',
+      originalBoundingBox3,
+      dragStartVolumePoint3,
+      dragPoint3,
+      maintainAspectRatio,
+      fixCenterOfGravity
+    );
+
+    this.min = [newBoundingBox3[0][0], newBoundingBox3[0][1]];
+    this.max = [newBoundingBox3[1][0], newBoundingBox3[1][1]];
+
+    const comp = viewer.getComposition();
+    if (!comp) return;
+    comp.dispatchAnnotationChanging(this);
+    comp.annotationUpdated();
   }
 
   public dragEndHandler(ev: ViewerEvent): void {
     if (!this.editable) return;
 
     const viewer = ev.viewer;
-    if (viewer.getHoveringAnnotation() === this) {
-      ev.stopPropagation();
+    if (viewer.getHoveringAnnotation() !== this) return;
 
-      const comp = viewer.getComposition();
-      if (
-        this.min &&
-        this.max &&
-        this.min[0] !== this.max[0] &&
-        this.min[1] !== this.max[1]
-      ) {
-        const newMin: Vector2D = [
-          Math.min(this.min[0], this.max[0]),
-          Math.min(this.min[1], this.max[1])
-        ];
-        const newMax: Vector2D = [
-          Math.max(this.min[0], this.max[0]),
-          Math.max(this.min[1], this.max[1])
-        ];
-        this.min = newMin;
-        this.max = newMax;
-      } else {
-        if (comp) comp.removeAnnotation(this);
-      }
-      if (comp) comp.dispatchAnnotationChange(this);
-      if (comp) comp.annotationUpdated();
+    ev.stopPropagation();
 
-      this.handleType = undefined;
-      viewer.setCursorStyle('');
+    this.handleType = undefined;
+    viewer.setCursorStyle('');
+
+    const comp = viewer.getComposition();
+    if (
+      this.min &&
+      this.max &&
+      this.min[0] !== this.max[0] &&
+      this.min[1] !== this.max[1]
+    ) {
+      const newMin: Vector2D = [
+        Math.min(this.min[0], this.max[0]),
+        Math.min(this.min[1], this.max[1])
+      ];
+      const newMax: Vector2D = [
+        Math.max(this.min[0], this.max[0]),
+        Math.max(this.min[1], this.max[1])
+      ];
+      this.min = newMin;
+      this.max = newMax;
+    } else {
+      if (comp) comp.removeAnnotation(this);
     }
-  }
-
-  private getBoundingBox(viewer: Viewer): [Vector2, Vector2] | undefined {
-    const viewState = viewer.getState();
-    if (!isValidViewState(viewState)) return;
-
-    const section =
-      viewState.type !== '2d'
-        ? viewState.section
-        : sectionFrom2dViewState(viewState);
-
-    // Displays only when the volume is displayed as an axial slice
-    const orientation = detectOrthogonalSection(section);
-    if (orientation !== 'axial') return;
-
-    const resolution = new Vector2().fromArray(viewer.getResolution());
-    if (!this.color || !this.min || !this.max) return;
-
-    if (this.z === undefined) return;
-    const zDiff = Math.abs(this.z - section.origin[2]);
-    if (zDiff > this.zDimmedThreshold) return;
-
-    const min = convertVolumeCoordinateToScreenCoordinate(
-      section,
-      resolution,
-      new Vector3(this.min[0], this.min[1], this.z ? this.z : 0)
-    );
-    const max = convertVolumeCoordinateToScreenCoordinate(
-      section,
-      resolution,
-      new Vector3(this.max[0], this.max[1], this.z ? this.z : 0)
-    );
-
-    return [min, max];
+    if (comp) comp.dispatchAnnotationChange(this);
+    if (comp) comp.annotationUpdated();
   }
 
   public validate(): boolean {

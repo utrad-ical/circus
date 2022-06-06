@@ -87,7 +87,7 @@ const LabelMenu: React.FC<{
     useLocalPreference<LabelType>('defaultLabelType', 'voxel');
   const newLabelType =
     !labelTypes[defaultNewLabelType].allow2D &&
-    activeSeriesMetadata?.mode !== '3d'
+      activeSeriesMetadata?.mode !== '3d'
       ? 'ruler'
       : defaultNewLabelType;
 
@@ -252,14 +252,20 @@ const LabelMenu: React.FC<{
     if (!viewerId) {
       await alert(
         'Select the viewer on which you want to place the new label. ' +
-          'Click the header.'
+        'Click the header.'
       );
+      return;
+    }
+
+    const viewState = viewers[viewerId].getState();
+    if (!viewState) {
+      await alert('View state not initialized.');
       return;
     }
 
     if (
       !labelTypes[type].allow2D &&
-      viewers[viewerId].getState()?.type !== 'mpr'
+      viewState.type !== 'mpr'
     ) {
       await alert('2D viewer does not support ' + type + ' labels.');
       return;
@@ -271,8 +277,8 @@ const LabelMenu: React.FC<{
     if (allowedOrientations[type].indexOf(orientation) < 0) {
       await alert(
         'The orientation of the selected viewer must be ' +
-          allowedOrientations[type].join(' or ') +
-          '.'
+        allowedOrientations[type].join(' or ') +
+        '.'
       );
       return;
     }
@@ -302,9 +308,9 @@ const LabelMenu: React.FC<{
         appearance={
           activeLabel
             ? {
-                color: activeLabel.data.color,
-                alpha: activeLabel.data.alpha
-              }
+              color: activeLabel.data.color,
+              alpha: activeLabel.data.alpha
+            }
             : undefined
         }
         hidden={!!activeLabel?.hidden}

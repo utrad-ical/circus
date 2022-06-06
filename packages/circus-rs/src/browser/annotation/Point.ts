@@ -25,7 +25,7 @@ const cursorTypes: {
 };
 
 const isValidViewState = (
-  viewState: ViewState
+  viewState: ViewState | undefined
 ): viewState is MprViewState | TwoDimensionalViewState => {
   if (!viewState) return false;
   if (viewState.type === 'mpr') return true;
@@ -69,7 +69,11 @@ export default class Point implements Annotation, ViewerEventTarget {
       }
     | undefined = undefined;
 
-  public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
+  public draw(
+    viewer: Viewer,
+    viewState: ViewState | undefined,
+    option: DrawOption
+  ): void {
     if (!viewer || !isValidViewState(viewState)) return;
     if (!this.location) return;
     const canvas = viewer.canvas;
@@ -129,7 +133,9 @@ export default class Point implements Annotation, ViewerEventTarget {
     if (!this.editable) return;
     if (!this.location) return;
 
-    this.handleType = this.hitTest(ev);
+    const point = new Vector2(ev.viewerX!, ev.viewerY!);
+
+    this.handleType = this.judgeHandleType(viewer, point);
     if (this.handleType) {
       ev.stopPropagation();
       viewer.setCursorStyle(cursorTypes[this.handleType].cursor);
@@ -144,37 +150,39 @@ export default class Point implements Annotation, ViewerEventTarget {
 
   public dragStartHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
+    if (viewer.getHoveringAnnotation() !== this) return;
+
     const viewState = viewer.getState();
     if (!isValidViewState(viewState)) return;
+
     if (!this.editable) return;
     if (!this.location) return;
+    if (!this.handleType) return;
 
-    if (viewer.getHoveringAnnotation() === this && this.handleType) {
-      ev.stopPropagation();
+    ev.stopPropagation();
 
-      this.dragInfo = {
-        dragStartPoint3: convertViewerPointToVolumePoint(
-          viewer,
-          ev.viewerX!,
-          ev.viewerY!
-        ),
-        originalLocation: this.location
-      };
-    }
+    this.dragInfo = {
+      dragStartPoint3: convertViewerPointToVolumePoint(
+        viewer,
+        ev.viewerX!,
+        ev.viewerY!
+      ),
+      originalLocation: this.location
+    };
   }
 
-  private hitTest(ev: ViewerEvent): PointHitType | undefined {
+  private judgeHandleType(
+    viewer: Viewer,
+    point: Vector2
+  ): PointHitType | undefined {
     if (!this.location) return;
-
-    const viewer = ev.viewer;
-    const evPoint = new Vector2(ev.viewerX!, ev.viewerY!);
 
     const hitPoint = convertVolumePointToViewerPoint(viewer, ...this.location);
     const hitBox = new Box2(
       new Vector2(hitPoint.x - this.radius, hitPoint.y - this.radius),
       new Vector2(hitPoint.x + this.radius, hitPoint.y + this.radius)
     );
-    if (hitRectangle(evPoint, hitBox, 5)) {
+    if (hitRectangle(point, hitBox, 5)) {
       return 'point-move';
     }
 
@@ -183,54 +191,57 @@ export default class Point implements Annotation, ViewerEventTarget {
 
   public dragHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
+    if (viewer.getHoveringAnnotation() !== this) return;
+
     const viewState = viewer.getState();
     if (!isValidViewState(viewState)) return;
+
     if (!this.dragInfo) return;
+    if (!this.handleType) return;
 
-    if (viewer.getHoveringAnnotation() === this && this.handleType) {
-      ev.stopPropagation();
+    ev.stopPropagation();
 
-      const draggedPoint3 = convertViewerPointToVolumePoint(
-        viewer,
-        ev.viewerX!,
-        ev.viewerY!
-      );
-      const draggedTotal3 = new Vector3().subVectors(
-        draggedPoint3,
-        this.dragInfo.dragStartPoint3
-      );
+    const draggedPoint3 = convertViewerPointToVolumePoint(
+      viewer,
+      ev.viewerX!,
+      ev.viewerY!
+    );
+    const draggedTotal3 = new Vector3().subVectors(
+      draggedPoint3,
+      this.dragInfo.dragStartPoint3
+    );
 
-      this.location = [
-        this.dragInfo.originalLocation[0] + draggedTotal3.x,
-        this.dragInfo.originalLocation[1] + draggedTotal3.y,
-        this.dragInfo.originalLocation[2] + draggedTotal3.z
-      ];
+    this.location = [
+      this.dragInfo.originalLocation[0] + draggedTotal3.x,
+      this.dragInfo.originalLocation[1] + draggedTotal3.y,
+      this.dragInfo.originalLocation[2] + draggedTotal3.z
+    ];
 
-      const comp = viewer.getComposition();
-      if (!comp) return;
-      comp.dispatchAnnotationChanging(this);
-      comp.annotationUpdated();
-    }
+    const comp = viewer.getComposition();
+    if (!comp) return;
+    comp.dispatchAnnotationChanging(this);
+    comp.annotationUpdated();
   }
 
   public dragEndHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
+    if (viewer.getHoveringAnnotation() !== this) return;
+
     const viewState = viewer.getState();
     if (!isValidViewState(viewState)) return;
 
-    if (viewer.getHoveringAnnotation() === this) {
-      ev.stopPropagation();
-      this.dragInfo = undefined;
-      viewer.setCursorStyle('');
+    ev.stopPropagation();
 
-      const comp = viewer.getComposition();
-      if (!comp) return;
-      if (this.validate()) {
-        comp.dispatchAnnotationChange(this);
-        comp.annotationUpdated();
-      } else {
-        comp.removeAnnotation(this);
-      }
+    this.dragInfo = undefined;
+    viewer.setCursorStyle('');
+
+    const comp = viewer.getComposition();
+    if (!comp) return;
+    if (this.validate()) {
+      comp.dispatchAnnotationChange(this);
+      comp.annotationUpdated();
+    } else {
+      comp.removeAnnotation(this);
     }
   }
 }

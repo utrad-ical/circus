@@ -52,6 +52,8 @@ export default function handleMoveBy(
   };
 
   const prevState = viewer.getState();
+  if (!prevState) return;
+
   switch (prevState.type) {
     case 'mpr':
     case 'vr': {

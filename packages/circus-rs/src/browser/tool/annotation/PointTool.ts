@@ -1,7 +1,10 @@
-import { ViewState } from '../..';
 import Annotation from '../../annotation/Annotation';
 import Point from '../../annotation/Point';
 import ViewerEvent from '../../viewer/ViewerEvent';
+import ViewState, {
+  MprViewState,
+  TwoDimensionalViewState
+} from '../../ViewState';
 import { convertViewerPointToVolumePoint } from '../tool-util';
 import AnnotationToolBase from './AnnotationToolBase';
 
@@ -12,6 +15,10 @@ export default class PointTool extends AnnotationToolBase {
   protected focusedAnnotation?: Point;
 
   protected createAnnotation(ev: ViewerEvent): Annotation | undefined {
+    const viewer = ev.viewer;
+    const viewState = viewer.getState();
+    if (!this.isValidViewState(viewState)) return;
+
     const point = convertViewerPointToVolumePoint(
       ev.viewer,
       ev.viewerX!,
@@ -23,6 +30,10 @@ export default class PointTool extends AnnotationToolBase {
   }
 
   protected updateAnnotation(ev: ViewerEvent): void {
+    const viewer = ev.viewer;
+    const viewState = viewer.getState();
+    if (!this.isValidViewState(viewState)) return;
+
     if (!this.focusedAnnotation) return;
     const point = convertViewerPointToVolumePoint(
       ev.viewer,
@@ -42,10 +53,12 @@ export default class PointTool extends AnnotationToolBase {
     return this.focusedAnnotation.validate();
   }
 
-  protected isValidViewState(viewState: ViewState): boolean {
-    if (!viewState) return false;
-    if (viewState.type === 'mpr') return true;
-    if (viewState.type === '2d') return true;
+  protected isValidViewState(
+    state: ViewState | undefined
+  ): state is MprViewState | TwoDimensionalViewState {
+    if (!state) return false;
+    if (state.type === 'mpr') return true;
+    if (state.type === '2d') return true;
     return false;
   }
 }

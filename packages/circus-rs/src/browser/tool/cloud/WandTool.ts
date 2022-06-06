@@ -44,6 +44,7 @@ export default class WandTool extends VoxelCloudToolBase<WandToolOptions> {
     }
 
     const viewState = viewer.getState();
+    if (!viewState) throw new Error('View state not initialized');
     if (viewState.type !== 'mpr') throw new Error('Unsupported view state');
 
     const section = viewState.section;
@@ -51,7 +52,8 @@ export default class WandTool extends VoxelCloudToolBase<WandToolOptions> {
     const startPoint = convertViewerPointToVolumeIndex(
       viewer,
       this.pX!,
-      this.pY!
+      this.pY!,
+      viewState
     );
 
     const { mode, threshold, maxDistance, baseValue } = this.options;
@@ -84,6 +86,6 @@ export default class WandTool extends VoxelCloudToolBase<WandToolOptions> {
       this.fillValue
     );
 
-    comp.annotationUpdated(ev.viewer);
+    comp.annotationUpdated(viewer);
   }
 }

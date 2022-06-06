@@ -27,6 +27,7 @@ export default class CelestialRotateTool extends DraggableTool implements Tool {
 
     // Angle(degree) per moving 1px
     const speed = ev.original.ctrlKey ? 2.0 : 0.3;
+
     handleRotationBy(viewer, dragInfo.dx * speed, dragInfo.dy * speed);
   }
 }

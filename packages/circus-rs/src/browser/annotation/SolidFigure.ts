@@ -2,18 +2,19 @@ import { Box2, Box3, Vector2, Vector3 } from 'three';
 import { Section, Vector3D } from '../../common/geometry';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
 import {
-  convertScreenCoordinateToVolumeCoordinate,
   detectOrthogonalSection,
   OrientationString,
   polygonVerticesOfBoxAndSection,
   sectionOverlapsPolygon
 } from '../section-util';
-import { convertVolumePointToViewerPoint } from '../tool/tool-util';
+import {
+  convertViewerPointToVolumePoint,
+  convertVolumePointToViewerPoint
+} from '../tool/tool-util';
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState, { MprViewState } from '../ViewState';
 import Annotation, { DrawOption } from './Annotation';
-import ModifierKeyBehaviors from './ModifierKeyBehaviors';
 import drawBoundingBoxCrossHair from './helper/drawBoundingBoxCrossHair';
 import drawBoundingBoxOutline from './helper/drawBoundingBoxOutline';
 import drawHandleFrame, { defaultHandleSize } from './helper/drawHandleFrame';
@@ -22,6 +23,7 @@ import {
   hitBoundingRectWithHandles
 } from './helper/hit-test';
 import resize from './helper/resize';
+import ModifierKeyBehaviors from './ModifierKeyBehaviors';
 
 export type FigureType = 'cuboid' | 'ellipsoid';
 
@@ -292,8 +294,16 @@ export default abstract class SolidFigure
     if (!isValidViewState(viewState)) return;
     if (!this.min || !this.max) return;
 
-    const minPoint = convertVolumePointToViewerPoint(viewer, ...this.min);
-    const maxPoint = convertVolumePointToViewerPoint(viewer, ...this.max);
+    const minPoint = convertVolumePointToViewerPoint(
+      viewer,
+      ...this.min,
+      viewState
+    );
+    const maxPoint = convertVolumePointToViewerPoint(
+      viewer,
+      ...this.max,
+      viewState
+    );
     const BoundingBox = new Box2(minPoint, maxPoint);
 
     return hitBoundingRectWithHandles(point, BoundingBox, defaultHandleSize);
@@ -301,94 +311,93 @@ export default abstract class SolidFigure
 
   public dragStartHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
+    if (viewer.getHoveringAnnotation() !== this) return;
+
     const viewState = viewer.getState();
     if (!isValidViewState(viewState)) return;
+
     if (!this.editable) return;
+    if (!this.handleType) return;
 
-    if (viewer.getHoveringAnnotation() === this) {
-      ev.stopPropagation();
+    ev.stopPropagation();
 
-      const min = this.min;
-      const max = this.max;
-      if (!min || !max) return;
-      const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
-      const handleType = this.hitTest(ev);
-      if (handleType) {
-        const state = viewState;
-        const resolution: [number, number] = viewer.getResolution();
-        this.handleType = handleType;
-        this.dragInfo = {
-          originalBoundingBox3: [min.concat(), max.concat()],
-          dragStartVolumePoint3: convertScreenCoordinateToVolumeCoordinate(
-            state.section,
-            new Vector2().fromArray(resolution),
-            point.clone()
-          ).toArray()
-        };
-      }
-    }
+    const min = this.min;
+    const max = this.max;
+    if (!min || !max) return;
+
+    const dragStartPoint3 = convertViewerPointToVolumePoint(
+      viewer,
+      ev.viewerX!,
+      ev.viewerY!,
+      viewState
+    );
+
+    this.dragInfo = {
+      originalBoundingBox3: [min.concat(), max.concat()],
+      dragStartVolumePoint3: dragStartPoint3.toArray()
+    };
   }
 
   public dragHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
+    if (viewer.getHoveringAnnotation() !== this) return;
+
     const viewState = viewer.getState();
-    if (!viewer || !viewState) return;
     if (!isValidViewState(viewState)) return;
 
-    if (viewer.getHoveringAnnotation() === this) {
-      ev.stopPropagation();
-      const draggedPoint: [number, number] = [ev.viewerX!, ev.viewerY!];
+    if (!this.handleType) return;
+    if (!this.dragInfo) return;
 
-      const resolution: [number, number] = viewer.getResolution();
-      const orientation = detectOrthogonalSection(viewState.section);
-      const draggedPoint3 = convertScreenCoordinateToVolumeCoordinate(
-        viewState.section,
-        new Vector2().fromArray(resolution),
-        new Vector2().fromArray(draggedPoint)
-      );
+    ev.stopPropagation();
 
-      const originalBoundingBox3 = this.dragInfo!.originalBoundingBox3!;
+    const orientation = detectOrthogonalSection(viewState.section);
+    const dragPoint3 = convertViewerPointToVolumePoint(
+      viewer,
+      ev.viewerX!,
+      ev.viewerY!,
+      viewState
+    );
+    const dragStartVolumePoint3 = new Vector3().fromArray(
+      this.dragInfo.dragStartVolumePoint3
+    );
+    const originalBoundingBox3 = this.dragInfo.originalBoundingBox3;
+    const maintainAspectRatio = this.lockMaintainAspectRatio !== ev.shiftKey;
+    const fixCenterOfGravity = this.lockFixCenterOfGravity !== ev.ctrlKey;
 
-      const maintainAspectRatio = this.lockMaintainAspectRatio !== ev.shiftKey;
-      const fixCenterOfGravity = this.lockFixCenterOfGravity !== ev.ctrlKey;
+    const newBoundingBox3 = resize(
+      this.handleType,
+      orientation,
+      originalBoundingBox3,
+      dragStartVolumePoint3,
+      dragPoint3,
+      maintainAspectRatio,
+      fixCenterOfGravity
+    );
+    this.min = newBoundingBox3[0];
+    this.max = newBoundingBox3[1];
 
-      const newBoundingBox3 = resize(
-        this.handleType!,
-        orientation,
-        originalBoundingBox3,
-        new Vector3().fromArray(this.dragInfo!.dragStartVolumePoint3!),
-        draggedPoint3,
-        maintainAspectRatio,
-        fixCenterOfGravity
-      );
-      this.min = newBoundingBox3[0];
-      this.max = newBoundingBox3[1];
-
-      const comp = viewer.getComposition();
-      if (!comp) return;
-      comp.dispatchAnnotationChanging(this);
-      comp.annotationUpdated();
-    }
+    const comp = viewer.getComposition();
+    if (!comp) return;
+    comp.dispatchAnnotationChanging(this);
+    comp.annotationUpdated();
   }
 
   public dragEndHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
-    const viewState = viewer.getState();
-    if (!isValidViewState(viewState)) return;
+    if (viewer.getHoveringAnnotation() !== this) return;
 
-    if (viewer.getHoveringAnnotation() === this) {
-      ev.stopPropagation();
-      viewer.setCursorStyle('');
-      this.concrete();
+    ev.stopPropagation();
 
-      const comp = viewer.getComposition();
-      if (!comp) return;
-      if (this.validate()) {
-        comp.dispatchAnnotationChange(this);
-        comp.annotationUpdated();
-      } else {
-        comp.removeAnnotation(this);
-      }
+    viewer.setCursorStyle('');
+    this.concrete();
+
+    const comp = viewer.getComposition();
+    if (!comp) return;
+    if (this.validate()) {
+      comp.dispatchAnnotationChange(this);
+      comp.annotationUpdated();
+    } else {
+      comp.removeAnnotation(this);
     }
   }
 }

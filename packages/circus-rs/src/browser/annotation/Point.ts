@@ -87,7 +87,8 @@ export default class Point implements Annotation, ViewerEventTarget {
 
     const screenPoint = convertVolumePointToViewerPoint(
       viewer,
-      ...this.location
+      ...this.location,
+      viewState
     );
     drawPoint(ctx, screenPoint, { radius: this.radius, color });
   }
@@ -133,7 +134,9 @@ export default class Point implements Annotation, ViewerEventTarget {
     if (!this.editable) return;
     if (!this.location) return;
 
-    this.handleType = this.hitTest(ev);
+    const point = new Vector2(ev.viewerX!, ev.viewerY!);
+
+    this.handleType = this.hitTest(viewer, point, viewState);
     if (this.handleType) {
       ev.stopPropagation();
       viewer.setCursorStyle(cursorTypes[this.handleType].cursor);
@@ -148,37 +151,45 @@ export default class Point implements Annotation, ViewerEventTarget {
 
   public dragStartHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
+    if (viewer.getHoveringAnnotation() !== this) return;
+
     const viewState = viewer.getState();
     if (!isValidViewState(viewState)) return;
+
     if (!this.editable) return;
     if (!this.location) return;
+    if (!this.handleType) return;
 
-    if (viewer.getHoveringAnnotation() === this && this.handleType) {
-      ev.stopPropagation();
+    ev.stopPropagation();
 
-      this.dragInfo = {
-        dragStartPoint3: convertViewerPointToVolumePoint(
-          viewer,
-          ev.viewerX!,
-          ev.viewerY!
-        ),
-        originalLocation: this.location
-      };
-    }
+    this.dragInfo = {
+      dragStartPoint3: convertViewerPointToVolumePoint(
+        viewer,
+        ev.viewerX!,
+        ev.viewerY!,
+        viewState
+      ),
+      originalLocation: this.location
+    };
   }
 
-  private hitTest(ev: ViewerEvent): PointHitType | undefined {
+  private hitTest(
+    viewer: Viewer,
+    point: Vector2,
+    viewState: ViewState
+  ): PointHitType | undefined {
     if (!this.location) return;
 
-    const viewer = ev.viewer;
-    const evPoint = new Vector2(ev.viewerX!, ev.viewerY!);
-
-    const hitPoint = convertVolumePointToViewerPoint(viewer, ...this.location);
+    const hitPoint = convertVolumePointToViewerPoint(
+      viewer,
+      ...this.location,
+      viewState
+    );
     const hitBox = new Box2(
       new Vector2(hitPoint.x - this.radius, hitPoint.y - this.radius),
       new Vector2(hitPoint.x + this.radius, hitPoint.y + this.radius)
     );
-    if (hitRectangle(evPoint, hitBox, 5)) {
+    if (hitRectangle(point, hitBox, 5)) {
       return 'point-move';
     }
 
@@ -187,54 +198,58 @@ export default class Point implements Annotation, ViewerEventTarget {
 
   public dragHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
+    if (viewer.getHoveringAnnotation() !== this) return;
+
     const viewState = viewer.getState();
     if (!isValidViewState(viewState)) return;
+
     if (!this.dragInfo) return;
+    if (!this.handleType) return;
 
-    if (viewer.getHoveringAnnotation() === this && this.handleType) {
-      ev.stopPropagation();
+    ev.stopPropagation();
 
-      const draggedPoint3 = convertViewerPointToVolumePoint(
-        viewer,
-        ev.viewerX!,
-        ev.viewerY!
-      );
-      const draggedTotal3 = new Vector3().subVectors(
-        draggedPoint3,
-        this.dragInfo.dragStartPoint3
-      );
+    const draggedPoint3 = convertViewerPointToVolumePoint(
+      viewer,
+      ev.viewerX!,
+      ev.viewerY!,
+      viewState
+    );
+    const draggedTotal3 = new Vector3().subVectors(
+      draggedPoint3,
+      this.dragInfo.dragStartPoint3
+    );
 
-      this.location = [
-        this.dragInfo.originalLocation[0] + draggedTotal3.x,
-        this.dragInfo.originalLocation[1] + draggedTotal3.y,
-        this.dragInfo.originalLocation[2] + draggedTotal3.z
-      ];
+    this.location = [
+      this.dragInfo.originalLocation[0] + draggedTotal3.x,
+      this.dragInfo.originalLocation[1] + draggedTotal3.y,
+      this.dragInfo.originalLocation[2] + draggedTotal3.z
+    ];
 
-      const comp = viewer.getComposition();
-      if (!comp) return;
-      comp.dispatchAnnotationChanging(this);
-      comp.annotationUpdated();
-    }
+    const comp = viewer.getComposition();
+    if (!comp) return;
+    comp.dispatchAnnotationChanging(this);
+    comp.annotationUpdated();
   }
 
   public dragEndHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
+    if (viewer.getHoveringAnnotation() !== this) return;
+
     const viewState = viewer.getState();
     if (!isValidViewState(viewState)) return;
 
-    if (viewer.getHoveringAnnotation() === this) {
-      ev.stopPropagation();
-      this.dragInfo = undefined;
-      viewer.setCursorStyle('');
+    ev.stopPropagation();
 
-      const comp = viewer.getComposition();
-      if (!comp) return;
-      if (this.validate()) {
-        comp.dispatchAnnotationChange(this);
-        comp.annotationUpdated();
-      } else {
-        comp.removeAnnotation(this);
-      }
+    this.dragInfo = undefined;
+    viewer.setCursorStyle('');
+
+    const comp = viewer.getComposition();
+    if (!comp) return;
+    if (this.validate()) {
+      comp.dispatchAnnotationChange(this);
+      comp.annotationUpdated();
+    } else {
+      comp.removeAnnotation(this);
     }
   }
 }

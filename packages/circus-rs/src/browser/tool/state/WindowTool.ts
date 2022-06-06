@@ -1,8 +1,8 @@
-import DraggableTool from '../DraggableTool';
-import ViewerEvent from '../../viewer/ViewerEvent';
-import Viewer from '../../viewer/Viewer';
-import { Tool } from '../Tool';
 import { ViewWindow } from '../../../common/ViewWindow';
+import Viewer from '../../viewer/Viewer';
+import ViewerEvent from '../../viewer/ViewerEvent';
+import DraggableTool from '../DraggableTool';
+import { Tool } from '../Tool';
 
 /**
  * WindowTool handles mouse drag and modifies the window level/width accordingly.
@@ -19,7 +19,7 @@ export default class WindowTool extends DraggableTool implements Tool {
   public dragStartHandler(ev: ViewerEvent): void {
     super.dragStartHandler(ev);
     const viewer = ev.viewer;
-    const state = viewer.getState();
+    const state = viewer.getRequestingStateOrState();
 
     if (state.type !== 'mpr' && state.type !== '2d')
       throw new Error('Unsupported view state');
@@ -33,8 +33,10 @@ export default class WindowTool extends DraggableTool implements Tool {
   public dragHandler(ev: ViewerEvent): void {
     super.dragHandler(ev);
     const dragInfo = this.dragInfo;
-    const state = ev.viewer.getState();
 
+    const viewer = ev.viewer;
+
+    const state = viewer.getRequestingStateOrState();
     if (state.type !== 'mpr' && state.type !== '2d')
       throw new Error('Unsupported view state');
 
@@ -46,6 +48,7 @@ export default class WindowTool extends DraggableTool implements Tool {
       level: viewWindow.level + dragInfo.dy * speed,
       width: Math.max(1, viewWindow.width + dragInfo.dx * speed)
     };
-    ev.viewer.setState({ ...state, window: newWindow });
+
+    viewer.setState({ ...state, window: newWindow });
   }
 }

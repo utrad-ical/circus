@@ -1,8 +1,8 @@
 import { Vector2, Vector3 } from 'three';
-import { MprViewState, Viewer } from '../..';
 import { intersectionOfTwoSections, Section } from '../../../common/geometry';
 import { convertVolumeCoordinateToScreenCoordinate } from '../../section-util';
-
+import Viewer from '../../viewer/Viewer';
+import { MprViewState } from '../../ViewState';
 export interface Line2 {
   start: Vector2;
   end: Vector2;
@@ -11,7 +11,7 @@ export interface Line2 {
 const handleSize = 5;
 export interface Settings {
   color: string;
-  hover: boolean;
+  hover?: boolean;
 }
 
 export const getReferenceLineOnScreen = (
@@ -94,9 +94,8 @@ const lineHitTest = (line: Line2, point: Vector2): boolean => {
 export const handlePageByReferenceLine = (
   viewer: Viewer,
   moveDistance: Vector3,
-  baseState?: MprViewState
+  baseState: MprViewState
 ): void => {
-  if (!baseState) baseState = viewer.getState() as MprViewState;
   const section = baseState.section;
 
   const cross = new Vector3()

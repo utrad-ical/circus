@@ -30,6 +30,7 @@ export default class PagerTool extends DraggableTool implements Tool {
     if (step === this.currentStep) return;
 
     const relativeStep = step - this.currentStep!;
+
     handlePageBy(ev.viewer, relativeStep);
     this.currentStep = step;
   }

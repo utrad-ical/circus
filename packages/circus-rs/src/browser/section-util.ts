@@ -611,10 +611,10 @@ export const getSectionFromPoints = (
 };
 
 export const sectionFrom2dViewState = (
-  viewState: TwoDimensionalViewState
+  state: TwoDimensionalViewState
 ): Section => {
   // NOTE: Rotation is not supported yet.
-  const { origin, xAxis, yLength, imageNumber } = viewState;
+  const { origin, xAxis, yLength, imageNumber } = state;
   const section = {
     origin: [origin[0], origin[1], imageNumber],
     xAxis: [xAxis[0], xAxis[1], 0],
@@ -624,14 +624,14 @@ export const sectionFrom2dViewState = (
 };
 
 export const sectionTo2dViewState = (
-  prevState: TwoDimensionalViewState,
+  baseState: TwoDimensionalViewState,
   section: Section
 ): TwoDimensionalViewState => {
   if (detectOrthogonalSection(section) !== 'axial')
     throw new Error('Invalid section.');
 
   const state: TwoDimensionalViewState = {
-    ...prevState,
+    ...baseState,
     origin: [section.origin[0], section.origin[1]],
     xAxis: [section.xAxis[0], section.xAxis[1]],
     yLength: section.yAxis[1],

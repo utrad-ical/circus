@@ -693,7 +693,7 @@ const RevisionEditor: React.FC<{
   const propagateWindowState = useMemo(
     () =>
       debounce((viewer: Viewer, id: string) => {
-        const viewState = viewer.getState();
+        const viewState = viewer.getRequestingStateOrState();
         const window =
           viewState.type === 'mpr' || viewState.type === '2d'
             ? viewState.window
@@ -725,7 +725,7 @@ const RevisionEditor: React.FC<{
       const seriesIndex = editingData.layoutItems.find(
         item => item.key === id
       )!.seriesIndex;
-      const state = viewer.getState();
+      const state = viewer.getRequestingStateOrState();
       if (state.type !== 'mpr' && state.type !== '2d') return;
       const window = state.window;
       if (!window) return;

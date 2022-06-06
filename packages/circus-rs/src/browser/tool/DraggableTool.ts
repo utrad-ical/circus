@@ -1,5 +1,6 @@
 import ToolBaseClass, { ToolOptions } from '../../browser/tool/Tool';
 import ViewerEvent from '../../browser/viewer/ViewerEvent';
+import ViewState from '../../browser/ViewState';
 
 /**
  * DragInfo holds convenient data while dragging.

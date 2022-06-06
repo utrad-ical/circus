@@ -251,7 +251,7 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
         )
       );
       this.handleAnnotationChange(
-        viewer.getState(),
+        this.scrollbar.viewState,
         requestingThumbStep - this.scrollbar.thumbStep
       );
     }

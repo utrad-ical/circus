@@ -3,7 +3,8 @@ import {
   MprViewState,
   Tool,
   TwoDimensionalViewState,
-  Viewer
+  Viewer,
+  ViewState
 } from '@utrad-ical/circus-rs/src/browser';
 import {
   OrientationString,
@@ -248,7 +249,7 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
   const composition = compositions[seriesIndex].composition;
 
   const combinedInitialStateSetter = useCallback(
-    (viewer: Viewer, viewState: MprViewState | TwoDimensionalViewState) => {
+    (viewer: Viewer, viewState: ViewState) => {
       switch (viewState.type) {
         case '2d': {
           const initialState = getInitial2dViewState(viewer, viewState)!;

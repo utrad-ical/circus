@@ -8,24 +8,22 @@ import {
 import Viewer from '../../viewer/Viewer';
 import ViewState from '../../ViewState';
 
-export default function handlePageBy(viewer: Viewer, step: number): void {
-  const prevState = viewer.getState();
-  const resolution = viewer.getResolution();
-  const comp = viewer.getComposition();
-  if (!comp) throw new Error('Composition not initialized'); // should not happen
+export default function handlePageBy(
+  viewer: Viewer,
+  step: number,
+  baseState?: ViewState
+): void {
+  if (!baseState) baseState = viewer.getRequestingStateOrState();
 
-  const src = comp.imageSource as any;
-  if (
-    !(src instanceof MprImageSource) &&
-    !(src instanceof TwoDimensionalImageSource)
-  )
-    return;
+  const composition = viewer.getComposition();
+  if (!composition) throw new Error('Composition not initialized'); // should not happen
 
-  switch (prevState.type) {
+  switch (baseState.type) {
     case 'mpr': {
-      const prevSection = prevState.section;
+      const src = composition.imageSource as MprImageSource;
+      const resolution = viewer.getResolution();
       const section = orientationAwareTranslation(
-        prevSection,
+        baseState.section,
         src.metadata!.voxelSize,
         step
       );
@@ -39,20 +37,21 @@ export default function handlePageBy(viewer: Viewer, step: number): void {
       );
       if (!overlap) return;
 
-      viewer.setState({ ...prevState, section });
+      viewer.setState({ ...baseState, section });
       return;
     }
     case '2d': {
+      const src = composition.imageSource as TwoDimensionalImageSource;
       step = Math.round(step);
       if (step === 0) return;
-      const imageNumber = prevState.imageNumber + step;
+      const imageNumber = baseState.imageNumber + step;
 
       // Abort If the section does not overlap the volume.
       const overlap =
         0 <= imageNumber && imageNumber < src.metadata!.voxelCount[2];
       if (!overlap) return;
 
-      viewer.setState({ ...prevState, imageNumber });
+      viewer.setState({ ...baseState, imageNumber });
       return;
     }
   }
@@ -64,6 +63,7 @@ export function handlePageByScrollbar(
   baseState?: ViewState
 ): void {
   if (!baseState) baseState = viewer.getState();
+  if (!baseState) throw new Error('View state not initialized');
   switch (baseState.type) {
     case 'mpr': {
       const composition = viewer.getComposition();

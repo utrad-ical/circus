@@ -125,8 +125,16 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     if (!color) return;
 
     // Points on screen for each end
-    const start = convertVolumePointToViewerPoint(viewer, ...this.start!);
-    const end = convertVolumePointToViewerPoint(viewer, ...this.end!);
+    const start = convertVolumePointToViewerPoint(
+      viewer,
+      ...this.start!,
+      viewState
+    );
+    const end = convertVolumePointToViewerPoint(
+      viewer,
+      ...this.end!,
+      viewState
+    );
 
     // Draw the line connects start point to end point.
     const lineStyle = {
@@ -140,7 +148,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     drawPoint(ctx, end, { radius: this.radius, color });
 
     // Draw label text for distance.
-    const label = this.getLengthInMillimeter()! + 'mm';
+    const label = this.getLengthInMillimeter() + 'mm';
     if (this.labelPosition) {
       const [px, py] = this.labelPosition;
       const position = new Vector2(start.x + px, start.y + py);
@@ -191,8 +199,8 @@ export default class Ruler implements Annotation, ViewerEventTarget {
   /**
    * return the ruler length in millimeter
    */
-  private getLengthInMillimeter(): number | undefined {
-    if (!this.start || !this.end) return;
+  private getLengthInMillimeter(): number {
+    if (!this.start || !this.end) return 0;
     const line = new Line3(
       new Vector3(...this.start),
       new Vector3(...this.end)
@@ -210,6 +218,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
 
   public mouseMoveHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
+
     const viewState = viewer.getState();
     if (!isValidViewState(viewState)) return;
     if (!this.editable) return;
@@ -218,7 +227,9 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     const color = this.determineDrawingColorFromViewState(viewState);
     if (!color) return;
 
-    this.handleType = this.hitTest(ev);
+    const viewerPoint = new Vector2(ev.viewerX!, ev.viewerY!);
+
+    this.handleType = this.judgeHandleType(viewer, viewerPoint, viewState);
     if (this.handleType) {
       ev.stopPropagation();
       viewer.setCursorStyle(cursorTypes[this.handleType].cursor);
@@ -233,90 +244,107 @@ export default class Ruler implements Annotation, ViewerEventTarget {
 
   public dragStartHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
+    if (viewer.getHoveringAnnotation() !== this) return;
+
     const viewState = viewer.getState();
     if (!isValidViewState(viewState)) return;
-    if (!this.editable) return;
 
+    if (!this.editable) return;
     if (!this.start || !this.end || !this.section) return;
+    if (!this.handleType) return;
 
     // to prevent to edit unvisible ruler.
     const color = this.determineDrawingColorFromViewState(viewState);
     if (!color) return;
 
-    if (viewer.getHoveringAnnotation() === this) {
-      ev.stopPropagation();
+    ev.stopPropagation();
 
-      this.dragInfo = {
-        dragStartPoint3: convertViewerPointToVolumePoint(
-          viewer,
-          ev.viewerX!,
-          ev.viewerY!
-        ),
-        originalStart: this.start,
-        originalEnd: this.end,
-        labelPositionFromCursor: new Vector2().subVectors(
-          convertVolumePointToViewerPoint(viewer, ...this.start!).add(
-            this.labelPosition
-              ? new Vector2(this.labelPosition[0], this.labelPosition[1])
-              : new Vector2(0, 0)
-          ),
-          new Vector2(ev.viewerX!, ev.viewerY!)
-        )
-      };
+    const viewerPoint = new Vector2(ev.viewerX!, ev.viewerY!);
 
-      if (['start-reset', 'end-reset'].some(t => t === this.handleType)) {
-        const viewState = viewer.getState();
-        const section =
-          viewState.type !== '2d'
-            ? viewState.section
-            : sectionFrom2dViewState(viewState);
+    const dragStartPoint3 = convertViewerPointToVolumePoint(
+      viewer,
+      viewerPoint.x,
+      viewerPoint.y,
+      viewState
+    );
 
-        const start = new Vector3().fromArray(this.start!);
-        const end = new Vector3().fromArray(this.end!);
-        this.start = getOrthogonalProjectedPoint(
-          section,
-          start
-        ).toArray() as Vector3D;
-        this.end = getOrthogonalProjectedPoint(
-          section,
-          end
-        ).toArray() as Vector3D;
-      }
+    const labelPosition = this.labelPosition
+      ? new Vector2(this.labelPosition[0], this.labelPosition[1])
+      : new Vector2(0, 0);
+
+    const labelPositionFromCursor = new Vector2().subVectors(
+      convertVolumePointToViewerPoint(viewer, ...this.start, viewState).add(
+        labelPosition
+      ),
+      viewerPoint
+    );
+
+    this.dragInfo = {
+      dragStartPoint3,
+      originalStart: this.start,
+      originalEnd: this.end,
+      labelPositionFromCursor
+    };
+
+    if (['start-reset', 'end-reset'].some(t => t === this.handleType)) {
+      const section =
+        viewState.type !== '2d'
+          ? viewState.section
+          : sectionFrom2dViewState(viewState);
+
+      const start = getOrthogonalProjectedPoint(
+        section,
+        new Vector3().fromArray(this.start)
+      ).toArray() as Vector3D;
+
+      const end = getOrthogonalProjectedPoint(
+        section,
+        new Vector3().fromArray(this.end)
+      ).toArray() as Vector3D;
+
+      this.start = start;
+      this.end = end;
     }
   }
 
   public dragHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
+    if (viewer.getHoveringAnnotation() !== this) return;
+
     const viewState = viewer.getState();
     if (!isValidViewState(viewState)) return;
+
     if (!this.dragInfo) return;
-    if (viewer.getHoveringAnnotation() !== this) return;
+    if (!this.start || !this.end || !this.section) return;
+    if (!this.handleType) return;
 
     ev.stopPropagation();
 
-    const draggedPoint3 = convertViewerPointToVolumePoint(
-      ev.viewer,
+    const dragPoint3 = convertViewerPointToVolumePoint(
+      viewer,
       ev.viewerX!,
-      ev.viewerY!
+      ev.viewerY!,
+      viewState
     );
-    const draggedTotal3 = new Vector3().subVectors(
-      draggedPoint3,
+
+    const dragDistance3 = new Vector3().subVectors(
+      dragPoint3,
       this.dragInfo.dragStartPoint3
     );
 
     if (['start-reset', 'line-move'].some(t => t === this.handleType)) {
       this.start = [
-        this.dragInfo.originalStart[0] + draggedTotal3.x,
-        this.dragInfo.originalStart[1] + draggedTotal3.y,
-        this.dragInfo.originalStart[2] + draggedTotal3.z
+        this.dragInfo.originalStart[0] + dragDistance3.x,
+        this.dragInfo.originalStart[1] + dragDistance3.y,
+        this.dragInfo.originalStart[2] + dragDistance3.z
       ];
     }
 
     if (['end-reset', 'line-move'].some(t => t === this.handleType)) {
       this.end = [
-        this.dragInfo.originalEnd[0] + draggedTotal3.x,
-        this.dragInfo.originalEnd[1] + draggedTotal3.y,
-        this.dragInfo.originalEnd[2] + draggedTotal3.z
+        this.dragInfo.originalEnd[0] + dragDistance3.x,
+        this.dragInfo.originalEnd[1] + dragDistance3.y,
+        this.dragInfo.originalEnd[2] + dragDistance3.z
       ];
     }
 
@@ -325,7 +353,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
         ev.viewerX! + this.dragInfo.labelPositionFromCursor.x,
         ev.viewerY! + this.dragInfo.labelPositionFromCursor.y
       )
-        .sub(convertVolumePointToViewerPoint(viewer, ...this.start!))
+        .sub(convertVolumePointToViewerPoint(viewer, ...this.start, viewState))
         .toArray() as Vector2D;
     }
 
@@ -337,55 +365,64 @@ export default class Ruler implements Annotation, ViewerEventTarget {
 
   public dragEndHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
-    const viewState = viewer.getState();
-    if (!isValidViewState(viewState)) return;
+    if (viewer.getHoveringAnnotation() !== this) return;
 
-    if (viewer.getHoveringAnnotation() === this) {
-      ev.stopPropagation();
-      this.dragInfo = undefined;
+    ev.stopPropagation();
 
-      viewer.setCursorStyle('');
+    this.dragInfo = undefined;
+    viewer.setCursorStyle('');
 
-      const comp = viewer.getComposition();
-      if (!comp) return;
-      if (this.validate()) {
-        comp.dispatchAnnotationChange(this);
-        comp.annotationUpdated();
-      } else {
-        comp.removeAnnotation(this);
-      }
+    const comp = viewer.getComposition();
+    if (!comp) return;
+    if (this.validate()) {
+      comp.dispatchAnnotationChange(this);
+      comp.annotationUpdated();
+    } else {
+      comp.removeAnnotation(this);
     }
   }
 
-  private hitTest(ev: ViewerEvent): RulerHitType | undefined {
+  private judgeHandleType(
+    viewer: Viewer,
+    viewerPoint: Vector2,
+    viewState: ViewState
+  ): RulerHitType | undefined {
     if (!this.validate()) return;
 
-    const viewer = ev.viewer;
-    const point = new Vector2(ev.viewerX!, ev.viewerY!);
-
-    if (this.textBoundingBox && hitRectangle(point, this.textBoundingBox)) {
+    if (
+      this.textBoundingBox &&
+      hitRectangle(viewerPoint, this.textBoundingBox)
+    ) {
       return 'label-move';
     }
 
-    const start = convertVolumePointToViewerPoint(viewer, ...this.start!);
+    const start = convertVolumePointToViewerPoint(
+      viewer,
+      ...this.start!,
+      viewState
+    );
     const startHitBox = new Box2(
       new Vector2(start.x - this.radius, start.y - this.radius),
       new Vector2(start.x + this.radius, start.y + this.radius)
     );
-    if (hitRectangle(point, startHitBox, 5)) {
+    if (hitRectangle(viewerPoint, startHitBox, 5)) {
       return 'start-reset';
     }
 
-    const end = convertVolumePointToViewerPoint(viewer, ...this.end!);
+    const end = convertVolumePointToViewerPoint(
+      viewer,
+      ...this.end!,
+      viewState
+    );
     const endHitBox = new Box2(
       new Vector2(end.x - this.radius, end.y - this.radius),
       new Vector2(end.x + this.radius, end.y + this.radius)
     );
-    if (hitRectangle(point, endHitBox, 5)) {
+    if (hitRectangle(viewerPoint, endHitBox, 5)) {
       return 'end-reset';
     }
 
-    if (hitLineSegment(point, { start, end })) {
+    if (hitLineSegment(viewerPoint, { start, end })) {
       return 'line-move';
     }
 

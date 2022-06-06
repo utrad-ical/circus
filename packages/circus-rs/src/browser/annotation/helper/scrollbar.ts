@@ -1,23 +1,20 @@
-import { TwoDimensionalViewState } from 'browser/ViewState';
 import { Box2, Box3, Vector2, Vector3 } from 'three';
 import {
-  Composition,
-  MprImageSource,
-  normalVector,
-  TwoDimensionalImageSource,
-  Viewer,
-  ViewState
-} from '../..';
-import {
   dotFromPointToSection,
+  normalVector,
   Section,
   Vector2D
 } from '../../../common/geometry';
+import Composition from '../../Composition';
+import MprImageSource from '../../image-source/MprImageSource';
+import TwoDimensionalImageSource from '../../image-source/TwoDimensionalImageSource';
 import {
   convertPointToMm,
   convertSectionToIndex,
   detectOrthogonalSection
 } from '../../section-util';
+import Viewer from '../../viewer/Viewer';
+import ViewState, { TwoDimensionalViewState } from '../../ViewState';
 
 export type Position = 'right' | 'left' | 'top' | 'bottom';
 export type Visibility = 'always' | 'hover';

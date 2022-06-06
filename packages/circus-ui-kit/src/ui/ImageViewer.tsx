@@ -83,7 +83,7 @@ export const ImageViewer: React.FC<{
         newViewer.setComposition(composition);
         if (typeof initialStateSetter === 'function') {
           newViewer.on('imageReady', () => {
-            const state = newViewer.getState();
+            const state = newViewer.getRequestingStateOrState();
             const newState = initialStateSetter(state, newViewer, id);
             newViewer.setState(newState);
           });
@@ -112,7 +112,7 @@ export const ImageViewer: React.FC<{
     if (stateChanger) {
       const cb = (changer: StateChangerFunc<any>) => {
         if (!viewer) return;
-        viewer.setState(changer(viewer.getState(), viewer, id));
+        viewer.setState(changer(viewer.getRequestingStateOrState(), viewer, id));
       };
       stateChanger.on(cb);
       return () => {

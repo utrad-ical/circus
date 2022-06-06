@@ -50,25 +50,27 @@ export default class ToolBaseClass<T extends ToolOptions = {}>
 function createPagerWheelHandler(): (viewerEvent: ViewerEvent) => any {
   return ev => {
     const viewer = ev.viewer;
-    const state = viewer.getState();
+    const baseState = viewer.getRequestingStateOrState();
 
-    switch (state.type) {
+    switch (baseState.type) {
       case 'mpr': {
         const step = -sign(ev.original.deltaY) * (ev.original.ctrlKey ? 5 : 1);
-        handlePageBy(ev.viewer, step);
+        handlePageBy(ev.viewer, step, baseState);
         break;
       }
       case 'vr': {
         const speed = ev.original.shiftKey ? 0.05 : 0.01;
-        handleZoomBy(viewer, -ev.original.deltaY * speed, [
-          ev.viewerX!,
-          ev.viewerY!
-        ]);
+        handleZoomBy(
+          viewer,
+          -ev.original.deltaY * speed,
+          [ev.viewerX!, ev.viewerY!],
+          baseState
+        );
         break;
       }
       case '2d': {
         const step = -sign(ev.original.deltaY) * (ev.original.ctrlKey ? 5 : 1);
-        handlePageBy(ev.viewer, step);
+        handlePageBy(ev.viewer, step, baseState);
         break;
       }
     }

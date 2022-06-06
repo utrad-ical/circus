@@ -2,7 +2,6 @@ import { Box2, Box3, Vector2, Vector3 } from 'three';
 import { Vector2D, Vector3D, verticesOfBox } from '../../common/geometry';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
 import {
-  convertScreenCoordinateToVolumeCoordinate,
   convertVolumeCoordinateToScreenCoordinate,
   detectOrthogonalSection,
   sectionFrom2dViewState
@@ -114,7 +113,7 @@ export default class Polyline
     | {
         dragStartVolumePoint3: Vector3D;
         originalPoints: Vector2D[];
-        originalBoundingBox: [number[], number[]] | undefined;
+        originalBoundingBox: [number[], number[]];
       }
     | undefined = undefined;
 
@@ -143,12 +142,11 @@ export default class Polyline
         : sectionFrom2dViewState(viewState);
 
     const resolution = new Vector2().fromArray(viewer.getResolution());
-    const z = this.z === undefined ? 0 : this.z;
     const screenPoints = this.points.map(p =>
       convertVolumeCoordinateToScreenCoordinate(
         section,
         resolution,
-        new Vector3(p[0], p[1], z)
+        new Vector3(p[0], p[1], this.z)
       )
     );
 
@@ -184,10 +182,14 @@ export default class Polyline
 
     // Draw handle frame
     if (this.points.length > 1) {
-      drawHandleFrame(ctx, verticesOfBox(this.boundingBox2(viewer)), {
-        handleSize,
-        strokeStyle: '#ffff00'
-      });
+      drawHandleFrame(
+        ctx,
+        verticesOfBox(this.boundingBox2(viewer, viewState)),
+        {
+          handleSize,
+          strokeStyle: '#ffff00'
+        }
+      );
     }
 
     drawHandleFrame(ctx, screenPoints, {
@@ -239,13 +241,15 @@ export default class Polyline
     const viewState = viewer.getState();
     if (!isValidViewState(viewState)) return;
 
+    if (this.z === undefined) return;
     if (!this.editable) return;
 
     // to prevent to edit unvisible polyline.
     const drawingColor = this.determineDrawingColorFromViewState(viewState);
     if (Object.values(drawingColor).length === 0) return;
 
-    this.handleType = this.hitTest(ev);
+    const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
+    this.handleType = this.judgeHandleType(viewer, point, viewState);
     if (this.handleType) {
       ev.stopPropagation();
       viewer.setCursorStyle(cursorTypes[this.handleType.hitType].cursor);
@@ -260,78 +264,71 @@ export default class Polyline
 
   public dragStartHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
+    if (viewer.getHoveringAnnotation() !== this) return;
+
     const viewState = viewer.getState();
     if (!isValidViewState(viewState)) return;
+
+    if (this.z === undefined) return;
     if (!this.editable) return;
-
-    if (viewer.getHoveringAnnotation() !== this) return;
-    ev.stopPropagation();
-
-    this.handleType = this.hitTest(ev);
     if (!this.handleType) return;
 
-    const originalBoundingBox = this.boundingBox3();
+    ev.stopPropagation();
 
+    const boundingBox3 = this.boundingBox3();
     this.dragInfo = {
       dragStartVolumePoint3: convertViewerPointToVolumePoint(
         viewer,
         ev.viewerX!,
-        ev.viewerY!
+        ev.viewerY!,
+        viewState
       ).toArray() as Vector3D,
       originalPoints: [...this.points],
       originalBoundingBox: [
-        originalBoundingBox.min.toArray(),
-        originalBoundingBox.max.toArray()
+        boundingBox3.min.toArray(),
+        boundingBox3.max.toArray()
       ]
     };
   }
 
   public dragHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
+    if (viewer.getHoveringAnnotation() !== this) return;
+
     const viewState = viewer.getState();
     if (!isValidViewState(viewState)) return;
+
+    if (this.z === undefined) return;
+    if (!this.editable) return;
+    if (!this.handleType) return;
     if (!this.dragInfo) return;
 
-    if (viewer.getHoveringAnnotation() !== this) return;
     ev.stopPropagation();
 
-    const evPoint: [number, number] = [ev.viewerX!, ev.viewerY!];
+    const dragStartVolumePoint3 = new Vector3(
+      ...this.dragInfo.dragStartVolumePoint3
+    );
+    const originalPoints = [...this.dragInfo.originalPoints];
+    const originalBoundingBox = this.dragInfo.originalBoundingBox;
 
-    const resolution: [number, number] = viewer.getResolution();
-
-    const section =
-      viewState.type !== '2d'
-        ? viewState.section
-        : sectionFrom2dViewState(viewState);
-
-    const { dragStartVolumePoint3, originalPoints, originalBoundingBox } =
-      this.dragInfo;
-
-    const dragStartPoint3 = new Vector3(...dragStartVolumePoint3);
-    const draggedPoint3 = convertScreenCoordinateToVolumeCoordinate(
-      section,
-      new Vector2().fromArray(resolution),
-      new Vector2().fromArray(evPoint)
+    const dragPoint3 = convertViewerPointToVolumePoint(
+      viewer,
+      ev.viewerX!,
+      ev.viewerY!,
+      viewState
     );
 
-    const draggedTotal3 = new Vector3().subVectors(
-      draggedPoint3,
-      dragStartPoint3
-    );
-
-    if (!this.handleType) return;
     const { hitType, findHitPointIndex } = this.handleType;
     if (hitType === 'point-move') {
       // Move a point
+      const dragDistance = dragPoint3.clone().sub(dragStartVolumePoint3);
       const targetOriginalPoint = [...originalPoints[findHitPointIndex]];
       this.points[findHitPointIndex] = [
-        targetOriginalPoint[0] + draggedTotal3.x,
-        targetOriginalPoint[1] + draggedTotal3.y
+        targetOriginalPoint[0] + dragDistance.x,
+        targetOriginalPoint[1] + dragDistance.y
       ];
     } else if (hitType as BoundingRectWithHandleHitType) {
       // Move or Resize
-      const targetOriginalPoints = [...originalPoints];
-
       const lockMaintainAspectRatio = this.lockMaintainAspectRatio
         ? !!ev.shiftKey
         : !ev.shiftKey;
@@ -339,18 +336,16 @@ export default class Polyline
         ? !!ev.ctrlKey
         : !ev.ctrlKey;
 
+      const z = this.z;
       this.points = handleBoundingBoxOperation(
-        originalBoundingBox!,
+        originalBoundingBox,
         'axial',
         hitType,
-        dragStartPoint3,
-        draggedPoint3,
+        dragStartVolumePoint3,
+        dragPoint3,
         lockMaintainAspectRatio,
         lockFixCenterOfGravity,
-        targetOriginalPoints.map(targetOriginalPoint => [
-          ...targetOriginalPoint,
-          this.z!
-        ])
+        originalPoints.map(p => [...p, z])
       ).map(p => [p[0], p[1]]);
     } else {
       throw new Error('Unsupported PolylineHitType');
@@ -361,15 +356,16 @@ export default class Polyline
 
   public dragEndHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
-    const viewState = viewer.getState();
-    if (!isValidViewState(viewState)) return;
-    if (!this.editable) return;
     if (viewer.getHoveringAnnotation() !== this) return;
+
+    if (this.z === undefined) return;
+    if (!this.editable) return;
 
     ev.stopPropagation();
 
     this.annotationUpdated(viewer);
     this.handleType = undefined;
+    this.dragInfo = undefined;
   }
 
   protected annotationUpdated(viewer: Viewer): void {
@@ -382,55 +378,77 @@ export default class Polyline
     comp.annotationUpdated();
   }
 
-  public equalsPoint(ev: ViewerEvent, targetPointIndex: number): boolean {
-    if (
-      this.z === undefined ||
-      targetPointIndex < 0 ||
-      targetPointIndex >= this.points.length
-    )
-      return false;
+  public equalsFirstPoint(
+    viewer: Viewer,
+    viewerPoint: Vector2D,
+    viewState: ViewState
+  ): boolean {
+    if (this.z === undefined) return false;
+    const index = 0;
+    return this.hitPointTest(
+      viewer,
+      new Vector2(...viewerPoint),
+      [...this.points[index]],
+      viewState
+    );
+  }
 
-    const viewer = ev.viewer;
-    const evPoint = new Vector2(ev.viewerX!, ev.viewerY!);
-    const targetPoint = [...this.points[targetPointIndex], this.z] as Vector3D;
-    return this.hitPointTest(viewer, evPoint, targetPoint);
+  public equalsLastPoint(
+    viewer: Viewer,
+    viewerPoint: Vector2D,
+    viewState: ViewState
+  ): boolean {
+    if (this.z === undefined) return false;
+    const index = this.points.length - 1;
+    return this.hitPointTest(
+      viewer,
+      new Vector2(...viewerPoint),
+      [...this.points[index]],
+      viewState
+    );
   }
 
   protected boundingBox3() {
+    const z = this.z;
     const points = this.points;
     const box = new Box3().makeEmpty();
-    points.forEach(point => box.expandByPoint(new Vector3(...point, this.z)));
+    points.forEach(point => box.expandByPoint(new Vector3(...point, z)));
     return box;
   }
 
-  protected boundingBox2(viewer: Viewer) {
+  protected boundingBox2(viewer: Viewer, viewState: ViewState) {
     const box3 = this.boundingBox3();
     const minPoint = convertVolumePointToViewerPoint(
       viewer,
-      ...(box3.min.toArray() as Vector3D)
+      ...(box3.min.toArray() as Vector3D),
+      viewState
     );
     const maxPoint = convertVolumePointToViewerPoint(
       viewer,
-      ...(box3.max.toArray() as Vector3D)
+      ...(box3.max.toArray() as Vector3D),
+      viewState
     );
     const box = new Box2(minPoint, maxPoint);
     return box;
   }
 
-  protected hitTest(
-    ev: ViewerEvent
+  protected judgeHandleType(
+    viewer: Viewer,
+    viewerPoint: Vector2,
+    viewState: ViewState
   ): { hitType: PolylineHitType; findHitPointIndex: number } | undefined {
-    const viewer = ev.viewer;
-    const evPoint = new Vector2(ev.viewerX!, ev.viewerY!);
-
-    const findHitPointIndex = this.findHitPointIndex(viewer, evPoint);
+    const findHitPointIndex = this.findHitPointIndex(
+      viewer,
+      viewerPoint,
+      viewState
+    );
     if (findHitPointIndex > -1) {
       return { hitType: 'point-move', findHitPointIndex };
     }
 
     const hitType = hitBoundingRectWithHandles(
-      evPoint,
-      this.boundingBox2(viewer),
+      viewerPoint,
+      this.boundingBox2(viewer, viewState),
       handleSize
     );
     return hitType
@@ -443,20 +461,36 @@ export default class Polyline
 
   protected hitPointTest(
     viewer: Viewer,
-    evPoint: Vector2,
-    point: Vector3D
+    viewerPoint: Vector2,
+    polylinePoint: Vector2D,
+    viewState: ViewState
   ): boolean {
-    const hitPoint = convertVolumePointToViewerPoint(viewer, ...point);
+    if (this.z === undefined) return false;
+
+    const hitPoint = convertVolumePointToViewerPoint(
+      viewer,
+      ...polylinePoint,
+      this.z,
+      viewState
+    );
+
     const hitBox = new Box2(
       new Vector2(hitPoint.x - handleSize, hitPoint.y - handleSize),
       new Vector2(hitPoint.x + handleSize, hitPoint.y + handleSize)
     );
-    return hitRectangle(evPoint, hitBox, handleSize);
+
+    return hitRectangle(viewerPoint, hitBox, handleSize);
   }
 
-  protected findHitPointIndex(viewer: Viewer, evPoint: Vector2): number {
-    return this.points.findIndex(point =>
-      this.hitPointTest(viewer, evPoint, [...point, this.z!])
+  protected findHitPointIndex(
+    viewer: Viewer,
+    viewerPoint: Vector2,
+    viewState: ViewState
+  ): number {
+    if (this.z === undefined) return -1;
+    const z = this.z;
+    return this.points.findIndex(p =>
+      this.hitPointTest(viewer, viewerPoint, [...p], viewState)
     );
   }
 }

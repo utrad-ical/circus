@@ -1,8 +1,8 @@
 import { Box3, Vector2 } from 'three';
 import {
-  sectionFrom2dViewState,
   convertScreenCoordinateToVolumeCoordinate,
-  detectOrthogonalSection
+  detectOrthogonalSection,
+  sectionFrom2dViewState
 } from '../../section-util';
 import Viewer from '../../viewer/Viewer';
 import Cuboid from '../Cuboid';
@@ -30,6 +30,7 @@ export function createDefaultSolidFigureFromViewer(
 
   if (!viewer) return anno;
   const viewState = viewer.getState();
+  if (!viewState) throw new Error('View state not initialized');
   if (viewState.type === '2d') throw new Error('Unsupported view state.');
 
   const section = viewState.section;
@@ -87,11 +88,11 @@ export function createDefaultPlaneFigureFromViewer(
   const anno = new PlaneFigure();
 
   if (!viewer) return anno;
-  const viewState = viewer.getState();
+  const baseState = viewer.getRequestingStateOrState();
   const section =
-    viewState.type !== '2d'
-      ? viewState.section
-      : sectionFrom2dViewState(viewState);
+    baseState.type !== '2d'
+      ? baseState.section
+      : sectionFrom2dViewState(baseState);
   const orientation = detectOrthogonalSection(section);
   if (orientation !== 'axial') return anno;
 
@@ -121,11 +122,11 @@ export function createDefaultPointFromViewer(
   const anno = new Point();
 
   if (!viewer) return anno;
-  const viewState = viewer.getState();
+  const baseState = viewer.getRequestingStateOrState();
   const section =
-    viewState.type !== '2d'
-      ? viewState.section
-      : sectionFrom2dViewState(viewState);
+    baseState.type !== '2d'
+      ? baseState.section
+      : sectionFrom2dViewState(baseState);
 
   const resolution = new Vector2().fromArray(viewer.getResolution());
   const screenCenter = new Vector2().fromArray([
@@ -152,11 +153,11 @@ export function createDefaultRulerFromViewer(
   const anno = new Ruler();
 
   if (!viewer) return anno;
-  const viewState = viewer.getState();
+  const baseState = viewer.getRequestingStateOrState();
   const section =
-    viewState.type !== '2d'
-      ? viewState.section
-      : sectionFrom2dViewState(viewState);
+    baseState.type !== '2d'
+      ? baseState.section
+      : sectionFrom2dViewState(baseState);
 
   const resolution = new Vector2().fromArray(viewer.getResolution());
   const halfLength = Math.min(resolution.x, resolution.y) * 0.5 * sizeRatio;

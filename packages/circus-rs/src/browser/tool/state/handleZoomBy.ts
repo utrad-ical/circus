@@ -9,16 +9,21 @@ import {
   sectionOverlapsVolume
 } from '../../section-util';
 import Viewer from '../../viewer/Viewer';
+import ViewState from '../../ViewState';
 
 export default function handleZoomBy(
   viewer: Viewer,
   step: number,
-  zoomPoint?: [number, number]
+  zoomPoint?: [number, number],
+  baseState?: ViewState
 ) {
   const resolution = viewer.getResolution();
 
   const comp = viewer.getComposition();
   if (!comp) throw new Error('Composition not initialized'); // should not happen
+
+  if (!baseState) baseState = viewer.getState();
+  if (!baseState) throw new Error('View state not initialized');
 
   const src = comp.imageSource as any;
   if (
@@ -47,28 +52,27 @@ export default function handleZoomBy(
     );
   };
 
-  const prevState = viewer.getState();
-  switch (prevState.type) {
+  switch (baseState.type) {
     case 'mpr':
     case 'vr': {
-      const prevSection = prevState.section;
-      const section = scale(prevSection);
+      const baseSection = baseState.section;
+      const section = scale(baseSection);
 
       // Abort If the section does not overlap the volume.
       if (!overlap(section)) return;
-      viewer.setState({ ...prevState, section });
+      viewer.setState({ ...baseState, section });
       return;
     }
     case '2d': {
-      const prevSection = sectionFrom2dViewState(prevState);
-      const section = scale(prevSection);
+      const baseSection = sectionFrom2dViewState(baseState);
+      const section = scale(baseSection);
 
       // Abort If the section does not overlap the volume.
       if (!overlap(section)) return;
       if (!overlap) return;
 
       viewer.setState({
-        ...sectionTo2dViewState(prevState, section)
+        ...sectionTo2dViewState(baseState, section)
       });
       break;
     }

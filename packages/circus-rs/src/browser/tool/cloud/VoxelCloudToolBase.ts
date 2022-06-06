@@ -1,14 +1,14 @@
-import Composition from '../../Composition';
-import VoxelCloud from '../../annotation/VoxelCloud';
-import DraggableTool from '../DraggableTool';
-import Viewer from '../../viewer/Viewer';
-import MprImageSource from '../../image-source/MprImageSource';
-import { processVoxelsOnLine } from '../../volume-util';
-import ViewerEvent from '../../viewer/ViewerEvent';
 import { Box3, Vector3 } from 'three';
+import { Vector2D } from '../../../common/geometry';
+import VoxelCloud from '../../annotation/VoxelCloud';
+import Composition from '../../Composition';
+import MprImageSource from '../../image-source/MprImageSource';
+import Viewer from '../../viewer/Viewer';
+import ViewerEvent from '../../viewer/ViewerEvent';
+import { processVoxelsOnLine } from '../../volume-util';
+import DraggableTool from '../DraggableTool';
 import { ToolOptions } from '../Tool';
 import { convertViewerPointToVolumeIndex } from '../tool-util';
-import { Vector2D } from '../../../common/geometry';
 
 /**
  * VoxelCloudToolBase is a base tool that affects VoxelCloud annotations.
@@ -42,8 +42,9 @@ export default class VoxelCloudToolBase<
     const comp = viewer.getComposition();
     if (!comp) throw new Error('Composition not initialized'); // should not happen
 
-    const state = viewer.getState();
-    if (state.type !== 'mpr') throw new Error('Unsupported view state.');
+    const baseState = viewer.getState();
+    if (!baseState) throw new Error('View state not initialized');
+    if (baseState.type !== 'mpr') throw new Error('Unsupported view state.');
 
     const activeCloud = this.activeCloud;
     if (!activeCloud) return; // no cloud to paint on
@@ -59,8 +60,8 @@ export default class VoxelCloudToolBase<
     const [sx, sy] = start;
     const [ex, ey] = end;
 
-    const edge0 = convertViewerPointToVolumeIndex(viewer, sx, sy);
-    const edge1 = convertViewerPointToVolumeIndex(viewer, ex, ey);
+    const edge0 = convertViewerPointToVolumeIndex(viewer, sx, sy, baseState);
+    const edge1 = convertViewerPointToVolumeIndex(viewer, ex, ey, baseState);
     const v = new Vector3(
       edge1.x - edge0.x,
       edge1.y - edge0.y,
@@ -73,9 +74,24 @@ export default class VoxelCloudToolBase<
     // |    C      width
     // |           v
     // p2
-    const p0 = convertViewerPointToVolumeIndex(viewer, sx - pen, sy - pen);
-    const p1 = convertViewerPointToVolumeIndex(viewer, sx + pen, sy - pen);
-    const p2 = convertViewerPointToVolumeIndex(viewer, sx - pen, sy + pen);
+    const p0 = convertViewerPointToVolumeIndex(
+      viewer,
+      sx - pen,
+      sy - pen,
+      baseState
+    );
+    const p1 = convertViewerPointToVolumeIndex(
+      viewer,
+      sx + pen,
+      sy - pen,
+      baseState
+    );
+    const p2 = convertViewerPointToVolumeIndex(
+      viewer,
+      sx - pen,
+      sy + pen,
+      baseState
+    );
     const u = new Vector3(p2.x - p0.x, p2.y - p0.y, p2.z - p0.z);
 
     // p0 to p1

@@ -8,14 +8,17 @@ import {
   translateOriginToCenter
 } from '../../section-util';
 import Viewer from '../../viewer/Viewer';
-import { TwoDimensionalViewState } from '../../ViewState';
+import ViewState from '../../ViewState';
 
 export default function focusBy(
   viewer: Viewer,
-  focusPoint: Vector3D | undefined
+  focusPoint: Vector3D | undefined,
+  baseState?: ViewState
 ) {
   if (!focusPoint) return;
-  const prevState = viewer.getState();
+
+  if (!baseState) baseState = viewer.getRequestingStateOrState();
+
   const resolution = new Vector2().fromArray(viewer.getResolution());
   const comp = viewer.getComposition();
   if (!comp) throw new Error('Composition not initialized'); // should not happen
@@ -27,32 +30,32 @@ export default function focusBy(
   )
     return;
 
-  switch (prevState.type) {
+  switch (baseState.type) {
     case 'mpr': {
-      const prevSection = prevState.section;
+      const baseSection = baseState.section;
       const section = translateOriginToCenter(
         {
           origin: focusPoint,
-          xAxis: prevSection.xAxis,
-          yAxis: prevSection.yAxis
+          xAxis: baseSection.xAxis,
+          yAxis: baseSection.yAxis
         },
         resolution
       );
-      viewer.setState({ ...prevState, section });
+      viewer.setState({ ...baseState, section });
       return;
     }
     case '2d': {
-      const prevSection = sectionFrom2dViewState(prevState);
+      const baseSection = sectionFrom2dViewState(baseState);
       const section = translateOriginToCenter(
         {
           origin: focusPoint,
-          xAxis: prevSection.xAxis,
-          yAxis: prevSection.yAxis
+          xAxis: baseSection.xAxis,
+          yAxis: baseSection.yAxis
         },
         resolution
       );
       viewer.setState({
-        ...sectionTo2dViewState(prevState, section)
+        ...sectionTo2dViewState(baseState, section)
       });
       return;
     }

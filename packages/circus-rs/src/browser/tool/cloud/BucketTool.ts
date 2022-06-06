@@ -1,12 +1,12 @@
-import ViewerEvent from '../../viewer/ViewerEvent';
-import VoxelCloudToolBase from './VoxelCloudToolBase';
-import { floodFillOnSlice } from '../../volume-util';
-import { detectOrthogonalSection } from '../../section-util';
-import { Vector2, Vector3 } from 'three';
+import { Vector3 } from 'three';
 import { Vector3D } from '../../../common/geometry';
-import { convertViewerPointToVolumeIndex } from '../tool-util';
 import MprImageSource from '../../image-source/MprImageSource';
 import { isMprImageSourceWithDicomVolume } from '../../image-source/MprImageSourceWithDicomVolume';
+import { detectOrthogonalSection } from '../../section-util';
+import ViewerEvent from '../../viewer/ViewerEvent';
+import { floodFillOnSlice } from '../../volume-util';
+import { convertViewerPointToVolumeIndex } from '../tool-util';
+import VoxelCloudToolBase from './VoxelCloudToolBase';
 
 /**
  * Bucket tool performs the flood-fill operation along an orthogonal MPR plane.
@@ -17,6 +17,7 @@ export default class BucketTool extends VoxelCloudToolBase {
     super.dragStartHandler(ev);
     const viewer = ev.viewer;
     const state = viewer.getState();
+    if (!state) throw new Error('View state not initialized');
     if (state.type !== 'mpr') throw new Error('Unsupported view state');
     const section = state.section;
     const comp = viewer.getComposition();
@@ -31,7 +32,8 @@ export default class BucketTool extends VoxelCloudToolBase {
     const volumeIndex = convertViewerPointToVolumeIndex(
       viewer,
       ev.viewerX!,
-      ev.viewerY!
+      ev.viewerY!,
+      state
     );
     const cloudIndex = this.activeCloud.getInternalIndexFromVolumeCoordinate(
       volumeIndex.toArray() as Vector3D

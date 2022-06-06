@@ -1,6 +1,6 @@
 import { Vector2, Vector3 } from 'three';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
-import { convertScreenCoordinateToVolumeCoordinate } from '../section-util';
+import { convertViewerPointToVolumePoint } from '../tool/tool-util';
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState, { MprViewState } from '../ViewState';
@@ -48,28 +48,29 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
     }
     this.targetViewer = viewer;
     this.color = color;
-    this.handleViewerStateChange = this.handleViewerStateChange.bind(this);
+    this.handleViewerRequestingStateChange =
+      this.handleViewerRequestingStateChange.bind(this);
     this.getReferenceLineOnScreen = this.getReferenceLineOnScreen.bind(this);
-    viewer.on('stateChange', this.handleViewerStateChange);
+    viewer.on('requestingStateChange', this.handleViewerRequestingStateChange);
   }
 
   public dispose(): void {
     if (this.targetViewer) {
       this.targetViewer.removeListener(
-        'stateChange',
-        this.handleViewerStateChange
+        'requestingStateChange',
+        this.handleViewerRequestingStateChange
       );
     }
   }
 
-  private handleViewerStateChange(
-    prevState: ViewState,
-    state: ViewState
+  private handleViewerRequestingStateChange(
+    state: ViewState,
+    requestingState: ViewState
   ): void {
     if (
-      !isValidViewState(prevState) ||
       !isValidViewState(state) ||
-      prevState.section === state.section
+      !isValidViewState(requestingState) ||
+      state.section === requestingState.section
     )
       return;
 
@@ -82,16 +83,15 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
 
   private getReferenceLineOnScreen(
     screenViewer: Viewer,
-    screenState?: ViewState
+    screenState: ViewState
   ): Line2 | undefined {
     const screenResolution = new Vector2().fromArray(
       screenViewer.getResolution()
     );
-    if (!screenState) screenState = screenViewer.getState();
 
     const targetState = (() => {
       try {
-        return this.targetViewer.getState(); // this may be uninitialized
+        return this.targetViewer.getRequestingStateOrState(); // this may be uninitialized
       } catch (err) {
         return undefined;
       }
@@ -99,6 +99,7 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
 
     if (!isValidViewState(screenState) || !isValidViewState(targetState))
       return;
+
     return getReferenceLineOnScreen(
       screenResolution,
       screenState.section,
@@ -124,10 +125,12 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
    */
   public mouseMoveHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
-
     if (viewer === this.targetViewer) return;
 
-    const line = this.getReferenceLineOnScreen(viewer);
+    const state = viewer.getRequestingStateOrState();
+    if (!isValidViewState(state)) return;
+
+    const line = this.getReferenceLineOnScreen(viewer, state);
     if (!line) return;
 
     const point = new Vector2(ev.viewerX!, ev.viewerY!);
@@ -148,48 +151,56 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
   public dragStartHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
     if (viewer.getHoveringAnnotation() !== this) return;
+
+    const state = viewer.getRequestingStateOrState();
+    if (!isValidViewState(state)) return;
+
+    const dragStartTargetState = this.targetViewer.getRequestingStateOrState();
+    if (!isValidViewState(dragStartTargetState)) return;
+
     if (!this.handleType) return;
 
     ev.stopPropagation();
 
-    const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
-    const state = viewer.getState() as MprViewState;
-    const resolution: [number, number] = viewer.getResolution();
-
-    this.dragStartPoint3 = convertScreenCoordinateToVolumeCoordinate(
-      state.section,
-      new Vector2().fromArray(resolution),
-      new Vector2().fromArray([point.x, point.y])
+    const dragStartPoint3 = convertViewerPointToVolumePoint(
+      viewer,
+      ev.viewerX!,
+      ev.viewerY!,
+      state
     );
-    this.dragStartTargetState = this.targetViewer.getState() as MprViewState;
+
+    this.dragStartPoint3 = dragStartPoint3;
+    this.dragStartTargetState = dragStartTargetState;
   }
 
   public dragHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
-
     if (viewer.getHoveringAnnotation() !== this) return;
+
+    const state = viewer.getRequestingStateOrState();
+    if (!isValidViewState(state)) return;
+
     if (!this.handleType) return;
     if (!this.dragStartPoint3 || !this.dragStartTargetState) return;
 
     ev.stopPropagation();
 
-    const dragPoint3 = ((): Vector3 => {
-      const resolution = viewer.getResolution();
-      const screenState = viewer.getState() as MprViewState;
-      const point = convertScreenCoordinateToVolumeCoordinate(
-        screenState.section,
-        new Vector2().fromArray(resolution),
-        new Vector2(ev.viewerX!, ev.viewerY!)
-      );
-      return point;
-    })();
+    const dragPoint3 = convertViewerPointToVolumePoint(
+      viewer,
+      ev.viewerX!,
+      ev.viewerY!,
+      state
+    );
 
-    const dragDistance = dragPoint3.clone().sub(this.dragStartPoint3);
+    const dragDistance3 = new Vector3().subVectors(
+      dragPoint3,
+      this.dragStartPoint3
+    );
 
     if (this.handleType === 'move') {
       handlePageByReferenceLine(
         this.targetViewer,
-        dragDistance,
+        dragDistance3,
         this.dragStartTargetState
       );
     }

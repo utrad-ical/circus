@@ -117,7 +117,7 @@ const addNewSctionFromPoints: Processor<{}> = (options, input) => {
         return label.type === 'point' && !(activeSeriesMetadata?.mode !== '3d');
       }) as InternalLabelOf<'point'>[],
       activeLabel!.name!,
-      (viewers[targetLayoutKey!].getState() as any).section,
+      (viewers[targetLayoutKey!].getRequestingStateOrState() as any).section,
       editingData.layout,
       editingData.layoutItems,
       activeSeriesIndex

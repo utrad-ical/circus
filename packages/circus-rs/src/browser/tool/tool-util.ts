@@ -7,6 +7,7 @@ import {
   convertVolumeCoordinateToScreenCoordinate
 } from '../section-util';
 import Viewer from '../viewer/Viewer';
+import ViewState from '../ViewState';
 
 /**
  * Utility method which works in the same way as Math.sign().
@@ -26,18 +27,19 @@ export function sign(val: number): number {
 export function convertViewerPointToVolumePoint(
   viewer: Viewer,
   px: number,
-  py: number
+  py: number,
+  baseState?: ViewState
 ): Vector3 {
-  const viewState = viewer.getState();
-  const type = viewState.type;
+  if (!baseState) baseState = viewer.getRequestingStateOrState();
 
+  const type = baseState.type;
   if (type !== 'mpr' && type !== '2d')
     throw new Error('Unsupported view state.');
 
   const section =
-    viewState.type !== '2d'
-      ? viewState.section
-      : sectionFrom2dViewState(viewState);
+    baseState.type !== '2d'
+      ? baseState.section
+      : sectionFrom2dViewState(baseState);
 
   const resolution = viewer.getResolution();
   return convertScreenCoordinateToVolumeCoordinate(
@@ -54,18 +56,19 @@ export function convertVolumePointToViewerPoint(
   viewer: Viewer,
   px: number,
   py: number,
-  pz: number
+  pz: number,
+  baseState?: ViewState
 ): Vector2 {
-  const viewState = viewer.getState();
-  const type = viewState.type;
+  if (!baseState) baseState = viewer.getRequestingStateOrState();
 
+  const type = baseState.type;
   if (type !== 'mpr' && type !== '2d')
     throw new Error('Unsupported view state.');
 
   const section =
-    viewState.type !== '2d'
-      ? viewState.section
-      : sectionFrom2dViewState(viewState);
+    baseState.type !== '2d'
+      ? baseState.section
+      : sectionFrom2dViewState(baseState);
 
   const resolution = viewer.getResolution();
   return convertVolumeCoordinateToScreenCoordinate(
@@ -81,12 +84,20 @@ export function convertVolumePointToViewerPoint(
 export function convertViewerPointToVolumeIndex(
   viewer: Viewer,
   px: number,
-  py: number
+  py: number,
+  baseState?: ViewState
 ): Vector3 {
   const comp = viewer.getComposition();
   if (!comp) throw new Error('Composition not initialized'); // should not happen
 
-  const point3inMillimeter = convertViewerPointToVolumePoint(viewer, px, py);
+  if (!baseState) baseState = viewer.getRequestingStateOrState();
+
+  const point3inMillimeter = convertViewerPointToVolumePoint(
+    viewer,
+    px,
+    py,
+    baseState
+  );
 
   // from volume coordinate in millimeter to index coordinate
   const src = comp.imageSource as MprImageSource;

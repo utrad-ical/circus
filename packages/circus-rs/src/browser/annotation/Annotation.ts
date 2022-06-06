@@ -2,9 +2,9 @@ import ViewState from '../ViewState';
 import Viewer from '../viewer/Viewer';
 
 export interface DrawOption {
-  hover: boolean;
-  draftImage: boolean;
-  requestingViewState: undefined | ViewState;
+  hover?: boolean;
+  draftImage?: boolean;
+  requestingViewState?: ViewState;
 }
 
 export default interface Annotation {

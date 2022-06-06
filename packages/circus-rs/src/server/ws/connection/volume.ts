@@ -64,12 +64,7 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
       imageTransferAgent.dispose();
     });
 
-    const pendings: Map<string, (StopTransferMessageData | SetPriorityMessageData)[]> = new Map;
-    const isAcceptable = (data: StopTransferMessageData | SetPriorityMessageData) => {
-      const pending = pendings.get(data.transferId);
-      pending?.push(data);
-      return !pending;
-    };
+    const pendings = new Map<string, Promise<void>>();
 
     const handleMessageData = async (data: ImageTransferMessageData) => {
       switch (data.messageType) {
@@ -79,7 +74,8 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
 
           console.log(`tr#${transferId} BEGIN_TRANSFER / ${seriesUid}`);
 
-          pendings.set(transferId, []);
+          let flushPendings: () => void = () => { };
+          pendings.set(transferId, new Promise<void>((resolve) => flushPendings = resolve));
 
           const hasAccessRight = await authFunction(seriesUid);
           if (!hasAccessRight) {
@@ -94,25 +90,21 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
             partialVolumeDescriptor
           );
 
-          const todos = pendings.get(transferId)!;
+          flushPendings();
           pendings.delete(transferId);
-
-          todos.forEach(data => handleMessageData(data));
           break;
         }
         case MessageDataType.SET_PRIORITY: {
-          if (isAcceptable(data)) {
-            const { transferId, target, priority } = data;
-            console.log(`tr#${transferId} SET_PRIORITY / ${target.toString()}`);
-            imageTransferAgent.setPriority(transferId, target, priority);
-          }
+          const { transferId, target, priority } = data;
+          await pendings.get(transferId);
+          console.log(`tr#${transferId} SET_PRIORITY / ${target.toString()}`);
+          imageTransferAgent.setPriority(transferId, target, priority);
           break;
         }
         case MessageDataType.STOP_TRANSFER: {
-          if (isAcceptable(data)) {
-            const { transferId } = data;
-            imageTransferAgent.stopTransfer(transferId);
-          }
+          const { transferId } = data;
+          await pendings.get(transferId);
+          imageTransferAgent.stopTransfer(transferId);
           break;
         }
       }

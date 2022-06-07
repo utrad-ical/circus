@@ -101,9 +101,10 @@ const createImageTransferAgent = (
 
     const fetch = async (zIndex: number) => {
       const imageNo = zIndices.get(zIndex);
+      // console.log(`zIndex: ${zIndex} => #${imageNo}`);
       if (!imageNo) throw new Error('Invalid image request');
       await load(imageNo);
-      return volume.getSingleImage(zIndex);
+      return volume.getSingleImage(imageNo - 1);
     };
 
     const queue = new PriorityIntegerQueue;

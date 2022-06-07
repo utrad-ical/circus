@@ -10,10 +10,10 @@ import {
   resolveImageData
 } from './gl/webgl-util';
 import MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume';
-import PriorityIntegerCaller from '../../common/PriorityIntegerCaller';
-import { MultiRangeInitializer } from 'multi-integer-range';
+import MultiRange, { MultiRangeInitializer } from 'multi-integer-range';
 import { DrawResult } from './ImageSource';
 import setImmediate from '../util/setImmediate';
+import getRequiredImageZIndexRange from 'browser/util/getRequiredImageZIndexRange';
 
 export interface WebGlRawVolumeMprImageSourceOptions {
   volumeLoader: DicomVolumeProgressiveLoader;
@@ -34,7 +34,6 @@ export default class WebGlRawVolumeMprImageSource
   extends MprImageSource
   implements MprImageSourceWithDicomVolume {
   private volume: DicomVolume | undefined;
-  private markAsTextured: Set<number> = new Set;
   private fullyLoaded: boolean = false;
   private draftInterval: number = 0;
 
@@ -45,8 +44,8 @@ export default class WebGlRawVolumeMprImageSource
 
   private background: RGBA = [0.0, 0.0, 0.0, 1.0];
 
-  private priorityIntegerCaller: PriorityIntegerCaller | undefined = undefined;
   private priorityCounter: number = 0;
+  private setPriority: (imageIndices: MultiRangeInitializer, priority: number) => void = () => { };
 
   // For debugging
   public static captureCanvasCallbacks: CaptureCanvasCallback[] = [];
@@ -81,6 +80,7 @@ export default class WebGlRawVolumeMprImageSource
       this.draftInterval = draftInterval;
       this.metadata = await volumeLoader.loadMeta();
       this.volume = volumeLoader.getVolume()!;
+      if (volumeLoader.setPriority) this.setPriority = volumeLoader.setPriority.bind(volumeLoader);
 
       // Assign the length of the longest side of the volume to
       // the length of the side in normalized device coordinates.
@@ -92,22 +92,11 @@ export default class WebGlRawVolumeMprImageSource
       );
       mprProgram.setMmInNdc(1.0 / longestSideLengthInMmOfTheVolume);
       mprProgram.activate();
-      const { images, transfer } = mprProgram.setDicomVolume(this.volume);
+      const { transfer } = mprProgram.setDicomVolume(this.volume);
 
-      // const processor = async (z: number) => {
-      //   this.markAsTextured.add(z);
-      //   await transfer(z);
-      // };
       volumeLoader.on('progress', async ({ imageIndex }) => {
-        this.markAsTextured.add(imageIndex);
         await transfer(imageIndex);
       });
-
-      // this.priorityIntegerCaller = new PriorityIntegerCaller(processor);
-
-      // if (beginTransferOnVolumeLoaded) {
-      //   this.priorityIntegerCaller.append(images, this.priorityCounter++);
-      // }
 
       volumeLoader.loadVolume().then(() => this.fullyLoaded = true);
       if (!draftInterval) await volumeLoader.loadVolume();
@@ -175,30 +164,8 @@ export default class WebGlRawVolumeMprImageSource
     if (!this.mprProgram.isActive())
       throw new Error('The program is not active');
 
-    // Wait to transfer required images.
-    // const sectionVertexZValues = [
-    //   viewState.section.origin[2],
-    //   viewState.section.origin[2] + viewState.section.xAxis[2],
-    //   viewState.section.origin[2] +
-    //   viewState.section.xAxis[2] +
-    //   viewState.section.yAxis[2],
-    //   viewState.section.origin[2] + viewState.section.yAxis[2]
-    // ];
-    // const minImage = Math.max(
-    //   0,
-    //   Math.floor(
-    //     Math.min(...sectionVertexZValues) / this.metadata!.voxelSize[2] - 0.5
-    //   )
-    // );
-    // const maxImage = Math.min(
-    //   this.metadata!.voxelCount[2] - 1,
-    //   Math.floor(
-    //     Math.max(...sectionVertexZValues) / this.metadata!.voxelSize[2] - 0.5
-    //   ) + 1
-    // );
-    // const requiredRange: MultiRangeInitializer = [[minImage, maxImage]];
-    // this.priorityIntegerCaller!.append(requiredRange, this.priorityCounter++);
-    // await this.priorityIntegerCaller!.waitFor(requiredRange);
+    // const [min, max] = getRequiredImageZIndexRange(viewState.section, this.metadata!);
+    // this.setPriority(new MultiRange([[min, max]]), ++this.priorityCounter);
 
     // Adjust viewport
     this.updateViewportSize(viewer.getResolution());

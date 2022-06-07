@@ -51,6 +51,8 @@ const createImageTransferAgent = (
         continue;
       }
 
+      await new Promise<void>((resolve)=>setTimeout(()=>resolve(), 300));
+
       const { queue, fetch, startTime } = connection;
       const imageIndex = queue.shift();
 
@@ -112,7 +114,10 @@ const createImageTransferAgent = (
 
     const setPriority = (target: MultiRangeDescriptor, priority: number) => {
       const targetRange = new MultiRange(target).intersect(imageIndices);
-      if (0 < targetRange.segmentLength()) queue.append(targetRange, priority);
+      if (0 < targetRange.segmentLength()) {
+        console.log(`Set priority ${priority} / ${targetRange.toString()}`);
+        queue.append(targetRange, priority);
+      }
     };
 
     const startTime = new Date().getTime();

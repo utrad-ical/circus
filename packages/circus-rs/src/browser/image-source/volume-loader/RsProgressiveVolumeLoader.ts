@@ -38,6 +38,8 @@ export default class RsProgressiveVolumeLoader
   private connected: Promise<void>;
   private resolveConnected?: (value: void | PromiseLike<void>) => void;
 
+  private loadedIndices: Set<number> = new Set();
+
   constructor({
     rsHttpClient,
     seriesUid,
@@ -68,7 +70,12 @@ export default class RsProgressiveVolumeLoader
   }
 
   public setPriority(imageIndices: MultiRangeInitializer, priority: number): void {
-    this.connected.then(() => this.transferConnection?.setPriority(new MultiRange(imageIndices).toArray(), priority));
+    this.connected.then(() => {
+      const targets = new MultiRange(imageIndices).subtract(Array.from(this.loadedIndices));
+      if (0 < targets.segmentLength()) {
+        this.transferConnection!.setPriority(targets.toArray(), priority);
+      }
+    });
   }
 
   private async _doLoadMeta(): Promise<DicomVolumeMetadata> {
@@ -115,13 +122,13 @@ export default class RsProgressiveVolumeLoader
 
   private _doSequentialLoading(meta: DicomVolumeMetadata, volume: DicomVolume) {
     return new Promise<void>((resolve, reject) => {
-      const stored = new Set<number>();
+      this.loadedIndices = new Set<number>();
 
       const handler = (imageIndex: number, buffer: ArrayBuffer) => {
         volume.insertSingleImage(imageIndex, buffer);
-        stored.add(imageIndex);
+        this.loadedIndices.add(imageIndex);
 
-        const finished = stored.size;
+        const finished = this.loadedIndices.size;
         const total = meta.voxelCount[2];
 
         this.emit('progress', { target: this, imageIndex, finished, total });
@@ -136,6 +143,7 @@ export default class RsProgressiveVolumeLoader
         },
         handler
       );
+
       this.resolveConnected && this.resolveConnected();
     });
   }

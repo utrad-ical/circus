@@ -1,7 +1,7 @@
 import DicomVolume from '../../../common/DicomVolume';
 import { ViewWindow } from '../../../common/ViewWindow';
 import { PixelFormat } from '@utrad-ical/circus-lib/src/PixelFormat';
-import MultiRange, { MultiRangeInitializer } from 'multi-integer-range';
+import { MultiRangeInitializer } from 'multi-integer-range';
 import EventEmitter from 'events';
 import StrictEventEmitter from 'strict-event-emitter-types';
 
@@ -18,8 +18,6 @@ export default interface DicomVolumeLoader {
   loadMeta(): Promise<DicomVolumeMetadata>;
   loadVolume(): Promise<DicomVolume>;
 }
-
-type MultiRangeDescriptor = Exclude<MultiRangeInitializer, MultiRange>;
 
 interface ProgressInfo {
   target: DicomVolumeProgressiveLoader;
@@ -38,5 +36,5 @@ export interface DicomVolumeProgressiveLoader extends ProgressEventEmitter {
   loadMeta(): Promise<DicomVolumeMetadata>;
   loadVolume(): Promise<DicomVolume>;
   getVolume(): DicomVolume | null;
-  setPriority?(images: MultiRangeDescriptor, priority: number): void;
+  setPriority?(images: MultiRangeInitializer, priority: number): void;
 }

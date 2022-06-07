@@ -151,11 +151,7 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
     handlePageByScrollbar(viewer, step, baseState);
   }
 
-  public draw(
-    viewer: Viewer,
-    viewState: ViewState | undefined,
-    option: DrawOption
-  ): void {
+  public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
     if (viewer !== this.targetViewer) return;
 
     const requestingViewState = option.requestingViewState || viewState;

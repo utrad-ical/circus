@@ -117,11 +117,7 @@ export default class Polyline
       }
     | undefined = undefined;
 
-  public draw(
-    viewer: Viewer,
-    viewState: ViewState | undefined,
-    option: DrawOption
-  ): void {
+  public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
     if (this.points.length === 0 || this.z === undefined) return;
 
     if (!viewer || !isValidViewState(viewState)) return;

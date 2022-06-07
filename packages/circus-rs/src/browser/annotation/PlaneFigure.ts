@@ -101,11 +101,7 @@ export default class PlaneFigure
 
   public id?: string;
 
-  public draw(
-    viewer: Viewer,
-    viewState: ViewState | undefined,
-    option: DrawOption
-  ): void {
+  public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
     if (!viewer || !isValidViewState(viewState)) return;
     if (!this.color || !this.min || !this.max || this.z === undefined) return;
 

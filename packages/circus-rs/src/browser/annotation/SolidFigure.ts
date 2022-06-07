@@ -155,11 +155,7 @@ export default abstract class SolidFigure
     this.handleType = undefined;
   }
 
-  public draw(
-    viewer: Viewer,
-    viewState: ViewState | undefined,
-    option: DrawOption
-  ): void {
+  public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
     try {
       if (!viewer || !isValidViewState(viewState)) return;
 

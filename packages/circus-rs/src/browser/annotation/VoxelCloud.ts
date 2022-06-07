@@ -161,11 +161,7 @@ export default class VoxelCloud implements Annotation {
     // console.timeEnd('expand to maximum');
   }
 
-  public draw(
-    viewer: Viewer,
-    viewState: ViewState | undefined,
-    option: DrawOption
-  ): void {
+  public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
     if (
       !viewState ||
       !(this.volume instanceof RawData) ||

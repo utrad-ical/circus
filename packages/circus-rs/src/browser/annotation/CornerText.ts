@@ -7,11 +7,7 @@ const PADDING = 10;
 export default class CornerText implements Annotation {
   public id?: string;
 
-  public draw(
-    viewer: Viewer,
-    viewState: ViewState | undefined,
-    options: DrawOption
-  ): void {
+  public draw(viewer: Viewer, viewState: ViewState, options: DrawOption): void {
     if (!viewer || !viewState) return;
     const canvas = viewer.canvas;
     if (!canvas) return;

@@ -247,15 +247,14 @@ export default class Viewer extends EventEmitter {
     const image = this.cachedSourceImage;
     if (image) this.renderImageDataToCanvas(image);
 
-    const requestingViewState = this.requestingViewState;
     const viewState = this.viewState;
-    if (!viewState && !requestingViewState) return;
+    if (!viewState) return;
 
     for (const annotation of comp.annotations) {
       annotation.draw(this, viewState, {
         hover: this.hoveringAnnotation === annotation,
         draftImage: this.cachedSourceImageIsDraft,
-        requestingViewState
+        requestingViewState: this.requestingViewState
       });
     }
   }

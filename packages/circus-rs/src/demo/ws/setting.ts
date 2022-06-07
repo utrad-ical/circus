@@ -3,7 +3,7 @@ import { PartialVolumeDescriptor } from "@utrad-ical/circus-lib";
 export type VolumeSetting = {
     server: string;
     seriesUid: string;
-    partialVolumeDescriptor: PartialVolumeDescriptor | undefined;
+    partialVolumeDescriptor: string;
 };
 
 let config: VolumeSetting[] = [];
@@ -27,11 +27,7 @@ const add = (
     seriesUid: string,
     partialVolumeDescriptor: string
 ) => {
-    config.push({
-        server,
-        seriesUid,
-        partialVolumeDescriptor: toPartialVolumeDescriptor(partialVolumeDescriptor)
-    });
+    config.push({ server, seriesUid, partialVolumeDescriptor });
     save();
 }
 
@@ -44,7 +40,10 @@ const get = (idx: number) => config[idx];
 
 const count = () => config.length;
 
-function toPartialVolumeDescriptor(str: string): PartialVolumeDescriptor | undefined {
+restore();
+
+export function toPartialVolumeDescriptor(str?: string): PartialVolumeDescriptor | undefined {
+    if (!str) return undefined;
     const [start, end, delta] = str.split(':').map(value => {
         const num = parseInt(value, 10);
         return isNaN(num) ? undefined : num;
@@ -61,7 +60,5 @@ function toPartialVolumeDescriptor(str: string): PartialVolumeDescriptor | undef
         );
     }
 }
-
-restore();
 
 export default { add, remove, get, count };

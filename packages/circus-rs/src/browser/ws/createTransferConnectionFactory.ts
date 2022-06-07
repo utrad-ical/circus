@@ -14,11 +14,11 @@ export interface TransferConnectionFactory {
     (volumeSpecifier: VolumeSpecifier, handler: TransferredImageHandler): TransferConnection;
 }
 
-type TransferredImageHandler = (imageNo: number, buffer: ArrayBuffer) => void;
+type TransferredImageHandler = (imageIndex: number, buffer: ArrayBuffer) => void;
 
 export type TransferConnection = {
     readonly id: string;
-    setPriority: (targets: number[], priority: number) => void;
+    setPriority: (imageIndices: number[], priority: number) => void;
     stop: () => void;
 }
 
@@ -35,10 +35,10 @@ export const createTransferConnectionFactory = (wsClient: WebSocketClient): Tran
         if (isImageTransferData(data)) {
 
             if (data.messageType === MessageDataType.TRANSFER_IMAGE) {
-                const { transferId, imageNo } = data;
+                const { transferId, imageIndex } = data;
                 if (handlerCollection.has(transferId)) {
                     const handler = handlerCollection.get(transferId)!;
-                    handler(imageNo, buffer!);
+                    handler(imageIndex, buffer!);
                 } else {
                     // To prevent many stop messages from being sent, 
                     // stop messages are not sent even in the case of unmanaged reception.
@@ -63,8 +63,8 @@ export const createTransferConnectionFactory = (wsClient: WebSocketClient): Tran
         wsClient.send(message);
         handlerCollection.set(id, handler);
 
-        const setPriority = (targets: number[], priority: number) => {
-            const data = setPriorityMessageData(id, targets, priority);
+        const setPriority = (imageIndices: number[], priority: number) => {
+            const data = setPriorityMessageData(id, imageIndices, priority);
             const message = createMessageBuffer(data);
             wsClient.send(message);
         }

@@ -3,7 +3,7 @@ import { DicomVolumeProgressiveLoader, ProgressEventEmitter } from './DicomVolum
 import DicomVolume from '../../../common/DicomVolume';
 import { DicomVolumeMetadata } from './DicomVolumeLoader';
 import PartialVolumeDescriptor, {
-  isValidPartialVolumeDescriptor
+  isValidPartialVolumeDescriptor, partialVolumeDescriptorToArray
 } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
 import VolumeCache, { nullVolumeCache } from './cache/VolumeCache';
 import { EstimateWindowType, createRequestParams } from './rs-loader-utils';
@@ -68,8 +68,8 @@ export default class RsProgressiveVolumeLoader
     this.connected = new Promise<void>((resolve) => this.resolveConnected = resolve);
   }
 
-  public setPriority(images: MultiRangeInitializer, priority: number): void {
-    this.connected.then(() => this.transferConnection?.setPriority(new MultiRange(images).toArray(), priority));
+  public setPriority(imageIndices: MultiRangeInitializer, priority: number): void {
+    this.connected.then(() => this.transferConnection?.setPriority(new MultiRange(imageIndices).toArray(), priority));
   }
 
   private async _doLoadMeta(): Promise<DicomVolumeMetadata> {
@@ -99,7 +99,7 @@ export default class RsProgressiveVolumeLoader
 
   private async _doLoadVolume(): Promise<DicomVolume> {
     if (!this.meta) throw new Error('Medatadata not loaded yet');
-    if (!this.volume) this.volume = this.createVolume(this.meta);
+    if (!this.volume) this.volume = this.createVolume(this.meta, this.partialVolumeDescriptor);
 
     const cacheKey = this.createKey('buffer');
     let buffer: ArrayBuffer | undefined;
@@ -116,13 +116,13 @@ export default class RsProgressiveVolumeLoader
 
   private _doSequentialLoading(meta: DicomVolumeMetadata, volume: DicomVolume) {
     return new Promise<void>((resolve, reject) => {
-      const images = new Map<number, boolean>();
+      const stored = new Set<number>();
 
-      const handler = (imageNo: number, buffer: ArrayBuffer) => {
-        volume.insertSingleImage(imageNo - 1, buffer);
-        images.set(imageNo, true);
+      const handler = (imageIndex: number, buffer: ArrayBuffer) => {
+        volume.insertSingleImage(imageIndex, buffer);
+        stored.add(imageIndex);
 
-        const finished = images.size;
+        const finished = stored.size;
         const total = meta.voxelCount[2];
 
         if (finished === total) {
@@ -131,20 +131,30 @@ export default class RsProgressiveVolumeLoader
           setImmediate(() => resolve());
         }
 
-        this.emit('progress', { target: this, imageNo, finished, total });
+        this.emit('progress', { target: this, imageIndex, finished, total });
       };
 
       console.time(`Transfering ${this.seriesUid}`);
       this.transferConnection = this.transferConnectionFactory(
-        { seriesUid: this.seriesUid },
+        {
+          seriesUid: this.seriesUid,
+          partialVolumeDescriptor: this.partialVolumeDescriptor
+        },
         handler
       );
       this.resolveConnected && this.resolveConnected();
     });
   }
 
-  private createVolume(meta: DicomVolumeMetadata) {
-    const volume = new DicomVolume(meta.voxelCount, meta.pixelFormat);
+  private createVolume(meta: DicomVolumeMetadata, partialVolumeDescriptor?: PartialVolumeDescriptor) {
+    const voxelCount: typeof meta.voxelCount = partialVolumeDescriptor
+      ? [
+        meta.voxelCount[0],
+        meta.voxelCount[1],
+        partialVolumeDescriptorToArray(partialVolumeDescriptor).length
+      ]
+      : meta.voxelCount;
+    const volume = new DicomVolume(voxelCount, meta.pixelFormat);
     volume.setVoxelSize(meta.voxelSize);
     if (meta.dicomWindow) volume.dicomWindow = meta.dicomWindow;
     if (meta.estimatedWindow) volume.estimatedWindow = meta.estimatedWindow;
@@ -160,7 +170,7 @@ export default class RsProgressiveVolumeLoader
 
   public getVolume(): DicomVolume | null {
     if (!this.meta) return null;
-    if (!this.volume) this.volume = this.createVolume(this.meta);
+    if (!this.volume) this.volume = this.createVolume(this.meta, this.partialVolumeDescriptor);
 
     return this.volume;
   }

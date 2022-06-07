@@ -98,9 +98,9 @@ export default class WebGlRawVolumeMprImageSource
       //   this.markAsTextured.add(z);
       //   await transfer(z);
       // };
-      volumeLoader.on('progress', async ({ imageNo }) => {
-        this.markAsTextured.add(imageNo - 1);
-        await transfer(imageNo - 1);
+      volumeLoader.on('progress', async ({ imageIndex }) => {
+        this.markAsTextured.add(imageIndex);
+        await transfer(imageIndex);
       });
 
       // this.priorityIntegerCaller = new PriorityIntegerCaller(processor);

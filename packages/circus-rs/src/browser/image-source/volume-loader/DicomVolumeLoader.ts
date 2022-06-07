@@ -21,7 +21,7 @@ export default interface DicomVolumeLoader {
 
 interface ProgressInfo {
   target: DicomVolumeProgressiveLoader;
-  imageNo: number;
+  imageIndex: number;
   finished?: number;
   total?: number;
 }
@@ -36,5 +36,5 @@ export interface DicomVolumeProgressiveLoader extends ProgressEventEmitter {
   loadMeta(): Promise<DicomVolumeMetadata>;
   loadVolume(): Promise<DicomVolume>;
   getVolume(): DicomVolume | null;
-  setPriority?(images: MultiRangeInitializer, priority: number): void;
+  setPriority?(imageIndices: MultiRangeInitializer, priority: number): void;
 }

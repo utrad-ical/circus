@@ -6,6 +6,8 @@ import { TransferImageMessage, transferImageMessageData } from '../../common/ws/
 import { console_log } from '../../debug';
 import { VolumeProvider } from '../helper/createVolumeProvider';
 
+const PARTIAL_VOLUME_PRIORITY = 1;
+
 export type ImageTransferAgent = ReturnType<typeof createImageTransferAgent>;
 
 interface ImageDataEmitter {
@@ -15,7 +17,6 @@ interface ImageDataEmitter {
 type TransferConnection = {
   fetch: (image: number) => Promise<ArrayBuffer>;
   queue: PriorityIntegerQueue;
-  targets: MultiRange;
   startTime: number; // :DEBUG
   setPriority: (target: MultiRangeDescriptor, priority: number) => void;
 };
@@ -51,17 +52,17 @@ const createImageTransferAgent = (
       }
 
       const { queue, fetch, startTime } = connection;
-      const imageNo = queue.shift();
+      const imageIndex = queue.shift();
 
-      if (imageNo !== undefined) {
+      if (imageIndex !== undefined) {
         try {
-          // console_log(`Try to emit image#${imageNo} for tr#${transferId} con#${connectionId}`);
-          const data = transferImageMessageData(transferId, imageNo);
-          const buffer = await fetch(imageNo);
+          // console_log(`Try to emit image#${imageIndex} for tr#${transferId} con#${connectionId}`);
+          const data = transferImageMessageData(transferId, imageIndex);
+          const buffer = await fetch(imageIndex);
           await imageDataEmitter(data, buffer);
-          console_log(`Success to emit image#${imageNo} for tr#${transferId} con#${connectionId}`);
+          console_log(`Success to emit image#${imageIndex} for tr#${transferId} con#${connectionId}`);
         } catch (err) {
-          console_log(`Failed to emit image#${imageNo} for tr#${transferId} con#${connectionId}: ${(err as Error).message}`);
+          console_log(`Failed to emit image#${imageIndex} for tr#${transferId} con#${connectionId}: ${(err as Error).message}`);
           transferConnections.delete(transferId);
         }
       } else {
@@ -77,31 +78,39 @@ const createImageTransferAgent = (
     seriesUid: string,
     partialVolumeDescriptor?: PartialVolumeDescriptor
   ) => {
-    const {
-      // imageMetadata,
-      volume, //: RawData;
-      load, //: (range: MultiRangeInitializer, priority?: number) => Promise<void>;
-      zIndices, //: Map<number, number>; Maps an image number to the corresponding zero-based volume z-index
-      // determinePitch, // : () => Promise<number>;
-      images, //: MultiRange;
-      // isLike3d, //: () => Promise<boolean>;
-    } = await volumeProvider(seriesUid);
+    const { volume, load, images } = await volumeProvider(seriesUid);
 
-    const fetch = async (imageNo: number) => {
-      await load(imageNo, 1);
-      const z = zIndices.get(imageNo)!;
-      return volume.getSingleImage(z);
+    // Maps a zero-based volume z-index to the corresponding image number,
+    // The number is the number to be specified when call load() function.
+    const zIndices = new Map<number, number>();
+
+    if (partialVolumeDescriptor) {
+      const partialImages = partialVolumeDescriptorToArray(partialVolumeDescriptor);
+
+      // Set zIndices for the partial volume.
+      partialImages.forEach((v, i) => zIndices.set(i, v));
+
+      // Set higher priority to the images in partial volume.
+      load(partialImages, PARTIAL_VOLUME_PRIORITY);
+    } else {
+      // Set zIndices for the entire volume.
+      images.toArray().forEach((v, i) => zIndices.set(i, v));
+    }
+
+    const imageIndices = Array.from(zIndices.keys());
+
+    const fetch = async (zIndex: number) => {
+      const imageNo = zIndices.get(zIndex);
+      if (!imageNo) throw new Error('Invalid image request');
+      await load(imageNo);
+      return volume.getSingleImage(zIndex);
     };
 
-    const targets = partialVolumeDescriptor
-      ? new MultiRange(partialVolumeDescriptorToArray(partialVolumeDescriptor))
-      : images;
-
     const queue = new PriorityIntegerQueue;
-    queue.append(targets);
+    queue.append(imageIndices);
 
     const setPriority = (target: MultiRangeDescriptor, priority: number) => {
-      const targetRange = new MultiRange(target).intersect(targets);
+      const targetRange = new MultiRange(target).intersect(imageIndices);
       if (0 < targetRange.segmentLength()) queue.append(targetRange, priority);
     };
 
@@ -110,7 +119,6 @@ const createImageTransferAgent = (
       fetch,
       queue,
       startTime,
-      targets,
       setPriority
     });
 

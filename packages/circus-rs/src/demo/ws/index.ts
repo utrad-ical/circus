@@ -4,8 +4,9 @@ import DebugLogger from "./DebugLogger";
 import WebSocketClient from "../../browser/ws/WebSocketClient";
 import drawToImageData from "../../browser/image-source/drawToImageData";
 import { pixelFormatInfo } from '@utrad-ical/circus-lib/src/PixelFormat';
-import setting from './setting';
+import setting, { toPartialVolumeDescriptor } from './setting';
 import { PartialVolumeDescriptor } from "@utrad-ical/circus-lib";
+import { createRequestParams } from "../../browser/image-source/volume-loader/rs-loader-utils";
 
 document.addEventListener('DOMContentLoaded', function (e) {
     setup()
@@ -164,10 +165,15 @@ async function prepareLoadingProcess(
     logger: DebugLogger,
     beginTransfer: TransferConnectionFactory,
     seriesUid: string,
-    partialVolumeDescriptor?: PartialVolumeDescriptor
+    partialVolumeString?: string
 ) {
 
-    const metadata = await apiClient.request(`series/${seriesUid}/metadata`, {});
+    const metadata = await apiClient.request(
+        `series/${seriesUid}/metadata`,
+        createRequestParams(
+            toPartialVolumeDescriptor(partialVolumeString)
+        )
+    );
     const { arrayClass } = pixelFormatInfo(metadata.pixelFormat);
 
     const higherPriorityImages = [
@@ -180,7 +186,7 @@ async function prepareLoadingProcess(
 
     const loaderElement = document.createElement('div');
     loaderElement.classList.add('list-group-item');
-    const loadCounter = new Map<number, number>();
+    const stored = new Set<number>();
     let loadedLength = 0;
 
     const divAt = (parent?: HTMLElement) => {
@@ -189,21 +195,17 @@ async function prepareLoadingProcess(
         return el;
     };
 
-    const handler = (imageNo: number, buffer: ArrayBuffer) => {
+    const handler = (imageIndex: number, buffer: ArrayBuffer) => {
         loadedLength += buffer.byteLength;
-        if (loadCounter.has(imageNo)) {
-            loadCounter.set(imageNo, loadCounter.get(imageNo)! + 1);
-        } else {
-            loadCounter.set(imageNo, 1);
-        }
+        stored.add(imageIndex);
 
         const indicator = loaderElement.querySelector('canvas[data-role=load-indicator]') as HTMLCanvasElement | undefined;
         if (indicator) {
             const ctx = indicator.getContext('2d')!;
 
-            const alpha = (0.5 + loadCounter.size / imageCount * 0.5).toFixed(5);
+            const alpha = (0.5 + stored.size / imageCount * 0.5).toFixed(5);
             ctx.fillStyle = `rgba(0,0,255,${alpha})`;
-            ctx.fillRect(imageNo - 1, 10, 1, 40);
+            ctx.fillRect(imageIndex, 10, 1, 40);
 
             updateDisplay();
         }
@@ -243,15 +245,15 @@ async function prepareLoadingProcess(
     row1.classList.add('d-flex', 'justify-content-between');
     const seriesUidContainer = document.createElement('div');
     row1.append(seriesUidContainer);
-    seriesUidContainer.innerText = seriesUid.substring(0, 12) + (seriesUid.length > 12 ? '...' : '');// partialVolumeDescriptor
+    seriesUidContainer.innerText = seriesUid.substring(0, 12) + (seriesUid.length > 12 ? '... ' : ' ') + (partialVolumeString || '');
 
     const counterContainer = document.createElement('div');
     row1.append(counterContainer);
-    counterContainer.innerText = `${loadCounter.size} / ${imageCount}`;
+    counterContainer.innerText = `${stored.size} / ${imageCount}`;
     const updateDisplay = () => {
         const t = new Date().getTime() - startTime;
         const mbps = loadedLength * 0.001 / t;
-        counterContainer.innerText = `${loadCounter.size} / ${imageCount}`
+        counterContainer.innerText = `${stored.size} / ${imageCount}`
             + ` ${loadedLength.toLocaleString()} bytes`
             + ` ${t.toLocaleString()} ms `
             + ` ${mbps.toFixed(2)} Mbps`;
@@ -265,6 +267,7 @@ async function prepareLoadingProcess(
     indicator.setAttribute('data-role', 'load-indicator');
     indicator.setAttribute('width', imageCount.toString());
     indicator.setAttribute('height', '50');
+    indicator.style.setProperty('image-rendering', 'pixelated');
     indicator.style.setProperty('margin-top', '0.2rem');
     indicator.style.setProperty('width', '100%');
     indicator.style.setProperty('height', '50px');
@@ -273,7 +276,7 @@ async function prepareLoadingProcess(
 
     const ctx = indicator.getContext('2d')!;
     ctx.fillStyle = 'rgba(0,255,255,1.0)';
-    higherPriorityImages.forEach(imageNo => ctx.fillRect(imageNo - 1, 0, 1, 8));
+    higherPriorityImages.forEach(zIndex => ctx.fillRect(zIndex, 0, 1, 8));
 
     // Image Viewer
     const [w, h] = metadata.voxelCount;
@@ -297,6 +300,7 @@ async function prepareLoadingProcess(
         if (transferConnection) return;
 
         startTime = new Date().getTime();
+        const partialVolumeDescriptor = toPartialVolumeDescriptor(partialVolumeString);
         transferConnection = beginTransfer({ seriesUid, partialVolumeDescriptor }, handler);
         seriesUidContainer.innerText = seriesUidContainer.innerText + `#${transferConnection.id}`;
 
@@ -345,5 +349,3 @@ async function prepareLoadingProcess(
     const wrapper = document.querySelector('[data-role=loader-container]') as HTMLElement | undefined;
     if (wrapper) wrapper.append(loaderElement);
 }
-
-

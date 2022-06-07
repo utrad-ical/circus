@@ -75,7 +75,7 @@ export type StopTransferMessageData = {
 export type TransferImageMessage = {
     messageType: typeof MessageDataType.TRANSFER_IMAGE;
     transferId: string;
-    imageNo: number;
+    imageIndex: number;
 }
 
 export function isImageTransferData(r: any): r is ImageTransferMessageData {
@@ -104,6 +104,6 @@ export function stopTransferMessageData(transferId: string): StopTransferMessage
     return { messageType: MessageDataType.STOP_TRANSFER, transferId };
 }
 
-export function transferImageMessageData(transferId: string, imageNo: number): TransferImageMessage {
-    return { messageType: MessageDataType.TRANSFER_IMAGE, transferId, imageNo };
+export function transferImageMessageData(transferId: string, imageIndex: number): TransferImageMessage {
+    return { messageType: MessageDataType.TRANSFER_IMAGE, transferId, imageIndex };
 }

@@ -2,7 +2,7 @@ import { Composition, createOrthogonalMprSection, createToolbar, MprViewState, R
 import RsProgressiveVolumeLoader from "../../browser/image-source/volume-loader/RsProgressiveVolumeLoader";
 import WebSocketClient from "../../browser/ws/WebSocketClient";
 import { createTransferConnectionFactory } from "../../browser/ws/createTransferConnectionFactory";
-import setting, { VolumeSetting } from './setting';
+import setting, { toPartialVolumeDescriptor, VolumeSetting } from './setting';
 
 document.addEventListener('DOMContentLoaded', function (e) {
 
@@ -55,13 +55,14 @@ const setupToolbar = () => {
     return toolbar;
 }
 
-function setupComposition({ server, seriesUid, partialVolumeDescriptor }: VolumeSetting) {
+function setupComposition({ server, seriesUid, partialVolumeDescriptor: partial }: VolumeSetting) {
     const host = server.replace(/^.*\/\/(.*)$/, '$1');
 
     const apiClient = new RsHttpClient(`http://${host}`);
     const wsClient = new WebSocketClient(`ws://${host}/ws/volume`);
     const transferConnectionFactory = createTransferConnectionFactory(wsClient);
 
+    const partialVolumeDescriptor = toPartialVolumeDescriptor(partial);
     const volumeLoader = new RsProgressiveVolumeLoader({
         seriesUid,
         partialVolumeDescriptor,
@@ -71,7 +72,7 @@ function setupComposition({ server, seriesUid, partialVolumeDescriptor }: Volume
 
     // const imageSource = new RawVolumeMprImageSource({ volumeLoader });
     const imageSource = new WebGlRawVolumeMprImageSource({ volumeLoader });
-    volumeLoader.setPriority('150-500', 100);
+    // volumeLoader.setPriority('13-26', 100);
 
     // const imageSource = new DynamicMprImageSource({ rsHttpClient: apiClient, seriesUid, partialVolumeDescriptor });
 

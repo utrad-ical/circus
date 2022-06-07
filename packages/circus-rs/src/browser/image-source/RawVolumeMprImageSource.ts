@@ -16,7 +16,7 @@ export interface RawVolumeMprImageSourceOptions {
   // Specify the interval of updating draft image in ms.
   // If zero is specified, do not return a draft image.
   // Default value is 300 [ms]
-  stepOfProgress?: number;
+  draftInterval?: number;
 }
 
 /**
@@ -29,19 +29,19 @@ export default class RawVolumeMprImageSource
   private volume: DicomVolume | undefined;
   private fullyLoaded: boolean = false;
 
-  private stepOfProgress: number = 0;
+  private draftInterval: number = 0;
 
-  constructor({ volumeLoader, stepOfProgress }: RawVolumeMprImageSourceOptions) {
+  constructor({ volumeLoader, draftInterval }: RawVolumeMprImageSourceOptions) {
     super();
 
-    stepOfProgress = stepOfProgress || 300;
+    draftInterval = draftInterval || 300;
 
     this.loadSequence = (async () => {
-      this.stepOfProgress = stepOfProgress;
+      this.draftInterval = draftInterval;
       this.metadata = await volumeLoader.loadMeta();
       volumeLoader.loadVolume().then(() => this.fullyLoaded = true);
       this.volume = volumeLoader.getVolume()!;
-      if (!stepOfProgress) await volumeLoader.loadVolume();
+      if (!draftInterval) await volumeLoader.loadVolume();
     })();
   }
 
@@ -76,7 +76,7 @@ export default class RawVolumeMprImageSource
     const imageData = drawToImageData(outSize, mprOutput);
 
     const nextDraw = async () => {
-      await new Promise<void>((resolve) => setTimeout(() => resolve(), this.stepOfProgress));
+      await new Promise<void>((resolve) => setTimeout(() => resolve(), this.draftInterval));
       return await this.draw(viewer, viewState, abortSignal);
     };
 

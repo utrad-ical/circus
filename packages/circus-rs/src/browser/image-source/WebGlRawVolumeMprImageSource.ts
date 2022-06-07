@@ -20,10 +20,7 @@ export interface WebGlRawVolumeMprImageSourceOptions {
   // Specify the interval of updating draft image in ms.
   // If zero is specified, do not return a draft image.
   // Default value is 300 [ms]
-  stepOfProgress?: number;
-
-  // Make the timing for transferring the texture before the drawing call.
-  beginTransferOnVolumeLoaded?: boolean;
+  draftInterval?: number;
 }
 type RGBA = [number, number, number, number];
 
@@ -39,7 +36,7 @@ export default class WebGlRawVolumeMprImageSource
   private volume: DicomVolume | undefined;
   private markAsTextured: Set<number> = new Set;
   private fullyLoaded: boolean = false;
-  private stepOfProgress: number = 0;
+  private draftInterval: number = 0;
 
   private backCanvas: HTMLCanvasElement;
   private glContext: WebGLRenderingContext;
@@ -61,14 +58,10 @@ export default class WebGlRawVolumeMprImageSource
     );
   }
 
-  constructor({
-    volumeLoader,
-    stepOfProgress,
-    beginTransferOnVolumeLoaded = false
-  }: WebGlRawVolumeMprImageSourceOptions) {
+  constructor({ volumeLoader, draftInterval }: WebGlRawVolumeMprImageSourceOptions) {
     super();
 
-    stepOfProgress = stepOfProgress || 300;
+    draftInterval = draftInterval || 200;
 
     const backCanvas = this.createBackCanvas();
     const glContext = getWebGLContext(backCanvas);
@@ -85,7 +78,7 @@ export default class WebGlRawVolumeMprImageSource
     );
 
     this.loadSequence = (async () => {
-      this.stepOfProgress = stepOfProgress;
+      this.draftInterval = draftInterval;
       this.metadata = await volumeLoader.loadMeta();
       this.volume = volumeLoader.getVolume()!;
 
@@ -117,7 +110,7 @@ export default class WebGlRawVolumeMprImageSource
       // }
 
       volumeLoader.loadVolume().then(() => this.fullyLoaded = true);
-      if (!stepOfProgress) await volumeLoader.loadVolume();
+      if (!draftInterval) await volumeLoader.loadVolume();
     })();
   }
 
@@ -161,7 +154,7 @@ export default class WebGlRawVolumeMprImageSource
     } else {
       const imageData = await this.createImageData(viewer, viewState, abortSignal);
       const nextDraw = async () => {
-        await new Promise<void>((resolve) => setTimeout(() => resolve(), this.stepOfProgress));
+        await new Promise<void>((resolve) => setTimeout(() => resolve(), this.draftInterval));
         return await this.draw(viewer, viewState, abortSignal);
       };
       drawResult = { draft: imageData, next: nextDraw() };

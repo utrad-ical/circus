@@ -38,5 +38,5 @@ export interface DicomVolumeProgressiveLoader extends ProgressEventEmitter {
   loadMeta(): Promise<DicomVolumeMetadata>;
   loadVolume(): Promise<DicomVolume>;
   getVolume(): DicomVolume | null;
-  setPriority(images: MultiRangeDescriptor, priority: number): void;
+  setPriority?(images: MultiRangeDescriptor, priority: number): void;
 }

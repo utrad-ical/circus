@@ -27,9 +27,9 @@ document.addEventListener('DOMContentLoaded', function (e) {
         const comp = setupComposition(cfg);
         const initializeViewer = viewerInitializer(comp);
 
-        initializeViewer('axial', '#993300');
+        // initializeViewer('axial', '#993300');
         initializeViewer('coronal', '#3399ff');
-        initializeViewer('sagittal', '#33ff33');
+        // initializeViewer('sagittal', '#33ff33');
 
         comp.viewers.forEach(viewer => viewer.render());
     }
@@ -92,7 +92,7 @@ const createOrientationSetter = (comp: Composition) => async (v: Viewer, orienta
     );
 
     const newState = { ...v.getState(), section } as MprViewState;
-    v.setState(newState);
+    v.setState({ ...newState, interpolationMode: 'nearestNeighbor' });
 };
 
 function setupViewer() {

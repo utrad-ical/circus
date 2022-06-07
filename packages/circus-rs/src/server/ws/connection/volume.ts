@@ -14,6 +14,7 @@ import { IncomingMessage } from 'http';
 import createImageTransferAgent from '../image-transfer-agent';
 import { VolumeProvider } from '../../helper/createVolumeProvider';
 import { console_log } from 'debug';
+import { MultiRange } from 'multi-integer-range';
 
 let lastWsConnectionId = 0;
 
@@ -97,7 +98,7 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
         case MessageDataType.SET_PRIORITY: {
           const { transferId, target, priority } = data;
           await pendings.get(transferId);
-          console.log(`tr#${transferId} SET_PRIORITY / ${target.toString()}`);
+          console.log(`tr#${transferId} SET_PRIORITY / ${new MultiRange(target).toString()}`);
           imageTransferAgent.setPriority(transferId, target, priority);
           break;
         }

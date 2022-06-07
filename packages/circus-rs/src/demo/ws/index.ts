@@ -195,6 +195,8 @@ async function prepareLoadingProcess(
         return el;
     };
 
+    const imageDataCollection = new Map<number, ImageData>();
+
     const handler = (imageIndex: number, buffer: ArrayBuffer) => {
         loadedLength += buffer.byteLength;
         stored.add(imageIndex);
@@ -214,8 +216,11 @@ async function prepareLoadingProcess(
         const [w, h] = metadata.voxelCount;
         const typedBuffer = new arrayClass(buffer);
         const imageData = drawToImageData([w, h], typedBuffer, metadata.dicomWindow);
-        const preview = loaderElement.querySelector('canvas[data-role=load-preview]') as HTMLCanvasElement | undefined;
-        if (preview) preview.getContext('2d')!.putImageData(imageData, 0, 0);
+        imageDataCollection.set(imageIndex, imageData);
+
+        previewController.value = imageIndex.toString();
+        previewIndex.innerText = previewController.value;
+        preview.getContext('2d')!.putImageData(imageData, 0, 0);
     }
 
     let transferConnection: TransferConnection | null = null;
@@ -278,6 +283,24 @@ async function prepareLoadingProcess(
     ctx.fillStyle = 'rgba(0,255,255,1.0)';
     higherPriorityImages.forEach(zIndex => ctx.fillRect(zIndex, 0, 1, 8));
 
+    // Preview control range
+    const previewController = document.createElement('input');
+    previewController.setAttribute('type', 'range');
+    previewController.setAttribute('min', '0');
+    previewController.setAttribute('max', (imageCount - 1).toString());
+    previewController.setAttribute('step', '1');
+    previewController.style.setProperty('width', '100%');
+    previewController.addEventListener('input', () => {
+        const imageData = imageDataCollection.get(Number(previewController.value));
+        previewIndex.innerText = previewController.value;
+        if (imageData) {
+            preview.getContext('2d')!.putImageData(imageData, 0, 0);
+        } else {
+            preview.getContext('2d')!.clearRect(0, 0, imageCount, 50);
+        }
+    });
+    row2.append(previewController);
+
     // Image Viewer
     const [w, h] = metadata.voxelCount;
     const preview = document.createElement('canvas');
@@ -288,6 +311,10 @@ async function prepareLoadingProcess(
     preview.style.setProperty('height', 'auto');
     preview.style.setProperty('border', '1px solid #999999');
     previewContainer.append(preview);
+
+    const previewIndex = document.createElement('div');
+    previewIndex.classList.add('text-center');
+    previewContainer.append(previewIndex);
 
     // Buttons
     const buttonContainer = divAt(row3);

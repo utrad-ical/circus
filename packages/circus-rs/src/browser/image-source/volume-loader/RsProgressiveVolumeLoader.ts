@@ -10,7 +10,6 @@ import { EstimateWindowType, createRequestParams } from './rs-loader-utils';
 import { TransferConnection, TransferConnectionFactory } from '../../ws/createTransferConnectionFactory';
 import MultiRange, { MultiRangeInitializer } from 'multi-integer-range';
 import EventEmitter from 'events';
-import setImmediate from '../../util/setImmediate';
 
 interface RsProgressiveVolumeLoaderOptions {
   rsHttpClient: RsHttpClient;
@@ -125,16 +124,11 @@ export default class RsProgressiveVolumeLoader
         const finished = stored.size;
         const total = meta.voxelCount[2];
 
-        if (finished === total) {
-          console.timeEnd(`Transfering ${this.seriesUid}`);
-          console.log('Complete!');
-          setImmediate(() => resolve());
-        }
-
         this.emit('progress', { target: this, imageIndex, finished, total });
+
+        if (finished === total) resolve();
       };
 
-      console.time(`Transfering ${this.seriesUid}`);
       this.transferConnection = this.transferConnectionFactory(
         {
           seriesUid: this.seriesUid,

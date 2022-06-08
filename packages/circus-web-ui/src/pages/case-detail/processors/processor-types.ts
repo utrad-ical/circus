@@ -1,19 +1,27 @@
-import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import { Viewer } from '@utrad-ical/circus-rs/src/browser';
 import { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
 import { InternalLabel, LabelType } from '../labelData';
 import { EditingData, EditingDataUpdater } from '../revisionData';
 import addNewSctionFromPoints from './addNewSctionFromPoints';
+import * as calculator from './calculator-options';
+import calculatorProcessor from './calculatorProcessor';
 import * as ccl from './ccl-options';
 import cclProcessor from './ccl-processor';
+import * as duplicate from './duplicate-options';
+import duplicateProcessor from './duplicateProcessor';
 import * as ed from './ed-options';
-import { erosionProcessor, dilatationProcessor } from './ed-processor';
+import { dilatationProcessor, erosionProcessor } from './ed-processor';
 import * as hf from './hf-options';
 import hfProcessor from './hf-processor';
 import * as ii from './ii-options';
 import iiProcessor from './ii-processor';
-import * as duplicate from './duplicate-options';
-import duplicateProcessor from './duplicateProcessor';
+
+export type Editor<T> = React.FC<{
+  value: T;
+  onChange: (value: T) => void;
+  activeLabelIndex: number;
+  labels: InternalLabel[];
+}>;
 
 export const processorTypes = [
   'ccl',
@@ -22,7 +30,8 @@ export const processorTypes = [
   'dilation',
   'interpolation',
   'section',
-  'duplicate'
+  'duplicate',
+  'calculator'
 ] as const;
 
 export type ProcessorType = typeof processorTypes[number];
@@ -148,5 +157,15 @@ export const processors: {
       initialOptions: duplicate.initialOptions
     },
     processor: duplicateProcessor
+  },
+  calculator: {
+    caption: 'Calculator',
+    labelType: ['voxel'],
+    settingsModal: {
+      title: 'Voxel label calculator',
+      optionsEditor: calculator.OptionsEditor,
+      initialOptions: calculator.initialOptions
+    },
+    processor: calculatorProcessor
   }
 };

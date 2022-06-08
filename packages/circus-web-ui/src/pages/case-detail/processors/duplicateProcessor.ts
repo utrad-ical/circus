@@ -17,7 +17,6 @@ const duplicateProcessor: Processor<DuplicateOptions> = (options, input) => {
     editingData,
     updateEditingData,
     selectedLabel: label,
-    hints: { labelColors },
     reportProgress
   } = input;
 

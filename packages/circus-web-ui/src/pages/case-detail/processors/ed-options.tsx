@@ -1,4 +1,4 @@
-import { Editor } from '@smikitky/rb-components/lib/editor-types';
+import { Editor } from './processor-types';
 import { Structure } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
 import classnames from 'classnames';
 import { FormControl } from 'components/react-bootstrap';

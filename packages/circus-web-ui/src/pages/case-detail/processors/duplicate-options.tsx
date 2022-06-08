@@ -1,4 +1,4 @@
-import { Editor } from '@smikitky/rb-components/lib/editor-types';
+import { Editor } from './processor-types';
 import { FormControl } from 'components/react-bootstrap';
 import React from 'react';
 import { DuplicateOptions } from './duplicateProcessor';

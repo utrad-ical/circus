@@ -28,7 +28,7 @@ export const OptionsEditor: Editor<CalculatorOptions> = props => {
     if (value.targetLabelIndex < 0) {
       onChange({
         ...value,
-        targetLabelIndex: targetIndex[0]
+        targetLabelIndex: targetIndex[initialLabelIndex]
       });
     }
   }, []);

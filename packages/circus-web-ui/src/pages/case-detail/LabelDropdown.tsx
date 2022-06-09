@@ -72,7 +72,10 @@ const LabelDropdown: React.FC<{
       bsSize="xs"
       title={<Label label={selectedLabel} displayOptions={displayOptions} />}
       id="label-dropdown"
-      noCaret
+      style={{
+        display: 'flex',
+        alignItems: 'center'
+      }}
     >
       {labels.map((label, ind) => {
         return (
@@ -94,10 +97,10 @@ export { Label };
 
 const StyledLabelDiv = styled.div`
   white-space: nowrap;
-  display: flex;
+  display: inline-flex;
   flex-direction: row;
   align-items: center;
-  padding: 3px 0px 3px 0px;
+  padding: 3px 3px 3px 0px;
   gap: 0px 15px;
   min-width: 200px;
   .color-preview {
@@ -116,8 +119,5 @@ const StyledLabelDiv = styled.div`
     .no-name {
       color: gray;
     }
-  }
-  &:hover {
-    background-color: ${(props: any) => props.theme.secondaryBackground};
   }
 `;

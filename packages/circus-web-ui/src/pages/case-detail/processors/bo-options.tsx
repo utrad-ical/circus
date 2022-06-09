@@ -2,7 +2,7 @@ import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import LabelDropdown, { Label } from '../LabelDropdown';
-import { CalculatorOptions } from './calculatorProcessor';
+import { BooleanOperationsOptions } from './booleanOperationsProcessor';
 import { Editor } from './processor-types';
 
 const operationOptions = {
@@ -11,12 +11,12 @@ const operationOptions = {
   Intersect: ' ∩ (intersect)'
 };
 
-export const initialOptions: CalculatorOptions = {
+export const initialOptions: BooleanOperationsOptions = {
   operation: 'Add',
   targetLabelIndex: -1
 };
 
-export const OptionsEditor: Editor<CalculatorOptions> = props => {
+export const OptionsEditor: Editor<BooleanOperationsOptions> = props => {
   const { value, onChange, activeLabelIndex, labels } = props;
   const targetIndex = labels.flatMap((label, ind) =>
     label.type === 'voxel' ? ind : []
@@ -40,7 +40,7 @@ export const OptionsEditor: Editor<CalculatorOptions> = props => {
   };
   return (
     <StyledDiv>
-      <div>label1:</div>
+      <div>Label1:</div>
       <Label label={labels[activeLabelIndex]} />
       <div>Operation:</div>
       <ShrinkSelect
@@ -51,7 +51,7 @@ export const OptionsEditor: Editor<CalculatorOptions> = props => {
           onChange({ ...value, operation: v });
         }}
       />
-      <div>label2:</div>
+      <div>Label2:</div>
       <LabelDropdown
         labels={voxelLabels}
         onSelect={handleSelectLabel2}

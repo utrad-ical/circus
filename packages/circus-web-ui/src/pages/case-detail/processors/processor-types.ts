@@ -3,8 +3,8 @@ import { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-sou
 import { InternalLabel, LabelType } from '../labelData';
 import { EditingData, EditingDataUpdater } from '../revisionData';
 import addNewSctionFromPoints from './addNewSctionFromPoints';
-import * as calculator from './calculator-options';
-import calculatorProcessor from './calculatorProcessor';
+import * as bo from './bo-options';
+import booleanOperationsProcessor from './booleanOperationsProcessor';
 import * as ccl from './ccl-options';
 import cclProcessor from './ccl-processor';
 import * as duplicate from './duplicate-options';
@@ -31,7 +31,7 @@ export const processorTypes = [
   'interpolation',
   'section',
   'duplicate',
-  'calculator'
+  'booleanOperations'
 ] as const;
 
 export type ProcessorType = typeof processorTypes[number];
@@ -158,14 +158,14 @@ export const processors: {
     },
     processor: duplicateProcessor
   },
-  calculator: {
-    caption: 'Calculator',
+  booleanOperations: {
+    caption: 'Boolean operations',
     labelType: ['voxel'],
     settingsModal: {
-      title: 'Voxel label calculator',
-      optionsEditor: calculator.OptionsEditor,
-      initialOptions: calculator.initialOptions
+      title: 'Boolean operations',
+      optionsEditor: bo.OptionsEditor,
+      initialOptions: bo.initialOptions
     },
-    processor: calculatorProcessor
+    processor: booleanOperationsProcessor
   }
 };

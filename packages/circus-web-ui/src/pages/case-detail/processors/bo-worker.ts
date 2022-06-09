@@ -1,47 +1,11 @@
-import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import RawData from '@utrad-ical/circus-rs/src/common/RawData';
-import createCurrentLabelsUpdator from '../createCurrentLabelsUpdator';
-import {
-  createNewLabelData,
-  InternalLabel,
-  InternalLabelOf
-} from '../labelData';
-import { Processor, ProcessorProgress } from './processor-types';
+import { createNewLabelData, InternalLabelOf } from '../labelData';
 
-export interface CalculatorOptions {
-  operation: 'Add' | 'Subtract' | 'Intersect';
-  targetLabelIndex: number;
-}
+const ctx: Worker = self as any;
 
-export type LabelProcessor = (props: {
-  options: CalculatorOptions;
-  reportProgress: (progress: ProcessorProgress) => void;
-}) => void;
-
-const calculatorProcessor: Processor<CalculatorOptions> = (options, input) => {
-  const {
-    editingData,
-    updateEditingData,
-    selectedLabel: label,
-    hints: { labelColors },
-    reportProgress
-  } = input;
-
-  if (label.type !== 'voxel' || !label.data.size || !label.data.origin)
-    throw new TypeError('Invalid label passed.');
-
-  const { operation, targetLabelIndex } = options;
-  const targetLabel =
-    editingData.revision.series[editingData.activeSeriesIndex].labels[
-      targetLabelIndex
-    ];
-  if (
-    targetLabel.type !== 'voxel' ||
-    !targetLabel.data.size ||
-    !targetLabel.data.origin
-  )
-    throw new TypeError('Invalid label passed.');
-
+ctx.addEventListener('message', event => {
+  const { label, targetLabel, operation, temporaryKey, appearance } =
+    event.data;
   const size1 = label.data.size;
   const origin1 = label.data.origin;
   const size2 = targetLabel.data.size;
@@ -78,24 +42,13 @@ const calculatorProcessor: Processor<CalculatorOptions> = (options, input) => {
   label1.assign(label.data.volumeArrayBuffer!);
   const label2 = new RawData(size2, 'binary');
   label2.assign(targetLabel.data.volumeArrayBuffer!);
-  const updateCurrentLabels = createCurrentLabelsUpdator(
-    editingData,
-    updateEditingData
-  );
 
-  const color =
-    labelColors[
-      Math.max(
-        labelColors.indexOf(label.data.color) + 1,
-        labelColors.indexOf(targetLabel.data.color) + 1
-      ) % labelColors.length
-    ];
   const newLabel: InternalLabelOf<'voxel'> = {
-    temporaryKey: generateUniqueId(),
+    temporaryKey: temporaryKey,
     name: `(${label.name})${
       operation === 'Add' ? ' + ' : operation === 'Subtract' ? ' - ' : ' ∩ '
     }(${targetLabel.name})`,
-    ...createNewLabelData('voxel', { color, alpha: 1 }),
+    ...createNewLabelData('voxel', appearance),
     attributes: {},
     hidden: false
   };
@@ -172,14 +125,5 @@ const calculatorProcessor: Processor<CalculatorOptions> = (options, input) => {
     }
   }
   newLabel.data.volumeArrayBuffer = volume.data;
-  updateCurrentLabels(labels => {
-    labels.splice(
-      Math.max(editingData.activeLabelIndex + 1, targetLabelIndex + 1),
-      0,
-      newLabel as InternalLabel
-    );
-  });
-  reportProgress({ finished: true });
-};
-
-export default calculatorProcessor;
+  ctx.postMessage(newLabel);
+});

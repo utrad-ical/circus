@@ -4,7 +4,7 @@ import { convertViewerPointToVolumePoint } from '../tool/tool-util';
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState, { MprViewState } from '../ViewState';
-import Annotation, { DrawOption } from './Annotation';
+import Annotation, { DrawHints } from './Annotation';
 import {
   drawReferenceLine,
   getReferenceLineOnScreen,
@@ -101,15 +101,15 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
     );
   }
 
-  public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
+  public draw(viewer: Viewer, viewState: ViewState, hints: DrawHints): void {
     if (viewer === this.targetViewer) return;
 
-    const requestingViewState = option.requestingViewState ?? viewState;
+    const requestingViewState = hints.requestingViewState ?? viewState;
     const line = this.getReferenceLineOnScreen(viewer, requestingViewState);
     if (!line) return;
 
     if (line) {
-      const settings = { color: this.color, hover: option.hover };
+      const settings = { color: this.color, hover: hints.hover };
       drawReferenceLine(viewer, settings, line);
     }
   }

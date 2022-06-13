@@ -1,13 +1,13 @@
 import Viewer from '../viewer/Viewer';
 import ViewState from '../ViewState';
-import Annotation, { DrawOption } from './Annotation';
+import Annotation, { DrawHints } from './Annotation';
 
 const PADDING = 10;
 
 export default class CornerText implements Annotation {
   public id?: string;
 
-  public draw(viewer: Viewer, viewState: ViewState, options: DrawOption): void {
+  public draw(viewer: Viewer, viewState: ViewState, hints: DrawHints): void {
     if (!viewer || !viewState) return;
     const canvas = viewer.canvas;
     if (!canvas) return;

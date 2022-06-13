@@ -13,7 +13,7 @@ import {
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState, { MprViewState, TwoDimensionalViewState } from '../ViewState';
-import Annotation, { DrawOption } from './Annotation';
+import Annotation, { DrawHints } from './Annotation';
 import drawBoundingBoxOutline from './helper/drawBoundingBoxOutline';
 import drawHandleFrame from './helper/drawHandleFrame';
 import { drawPath, drawPoint } from './helper/drawObject';
@@ -117,7 +117,7 @@ export default class Polyline
       }
     | undefined = undefined;
 
-  public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
+  public draw(viewer: Viewer, viewState: ViewState, hints: DrawHints): void {
     if (this.points.length === 0 || this.z === undefined) return;
 
     if (!viewer || !isValidViewState(viewState)) return;

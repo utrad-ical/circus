@@ -14,7 +14,7 @@ import {
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState, { MprViewState } from '../ViewState';
-import Annotation, { DrawOption } from './Annotation';
+import Annotation, { DrawHints } from './Annotation';
 import drawBoundingBoxCrossHair from './helper/drawBoundingBoxCrossHair';
 import drawBoundingBoxOutline from './helper/drawBoundingBoxOutline';
 import drawHandleFrame, { defaultHandleSize } from './helper/drawHandleFrame';
@@ -155,7 +155,7 @@ export default abstract class SolidFigure
     this.handleType = undefined;
   }
 
-  public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
+  public draw(viewer: Viewer, viewState: ViewState, hints: DrawHints): void {
     try {
       if (!viewer || !isValidViewState(viewState)) return;
 
@@ -241,7 +241,7 @@ export default abstract class SolidFigure
       const orientation = detectOrthogonalSection(section);
       if (
         this.editable &&
-        option.hover &&
+        hints.hover &&
         SolidFigure.editableOrientation.some(o => o === orientation)
       ) {
         const drawStyle = {

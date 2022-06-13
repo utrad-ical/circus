@@ -4,7 +4,7 @@ import { handlePageByScrollbar } from '../tool/state/handlePageBy';
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState, { MprViewState, TwoDimensionalViewState } from '../ViewState';
-import Annotation, { DrawOption } from './Annotation';
+import Annotation, { DrawHints } from './Annotation';
 import {
   createScrollbar,
   determineThumbStepFromPosition,
@@ -151,10 +151,10 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
     handlePageByScrollbar(viewer, step, baseState);
   }
 
-  public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
+  public draw(viewer: Viewer, viewState: ViewState, hints: DrawHints): void {
     if (viewer !== this.targetViewer) return;
 
-    const requestingViewState = option.requestingViewState || viewState;
+    const requestingViewState = hints.requestingViewState || viewState;
     if (!isValidViewState(requestingViewState)) return;
 
     const resolution = viewer.getResolution();

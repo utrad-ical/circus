@@ -13,7 +13,7 @@ import {
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState, { MprViewState, TwoDimensionalViewState } from '../ViewState';
-import Annotation, { DrawOption } from './Annotation';
+import Annotation, { DrawHints } from './Annotation';
 import drawHandleFrame, { defaultHandleSize } from './helper/drawHandleFrame';
 import {
   BoundingRectWithHandleHitType,
@@ -101,7 +101,7 @@ export default class PlaneFigure
 
   public id?: string;
 
-  public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
+  public draw(viewer: Viewer, viewState: ViewState, hints: DrawHints): void {
     if (!viewer || !isValidViewState(viewState)) return;
     if (!this.color || !this.min || !this.max || this.z === undefined) return;
 
@@ -146,7 +146,7 @@ export default class PlaneFigure
       }
 
       // draw handle frame
-      if (this.editable && option.hover) {
+      if (this.editable && hints.hover) {
         const drawStyle = {
           handleSize: 5,
           lineWidth: 1,

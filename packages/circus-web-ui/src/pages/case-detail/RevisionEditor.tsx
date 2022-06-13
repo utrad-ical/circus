@@ -214,9 +214,9 @@ const RevisionEditor: React.FC<{
   const [planeFigureOption, setPlaneFigureOption] = useState({
     zDimmedThreshold: preferences.dimmedOutlineFor2DLabels
       ? zDimmedThresholdOptions.find(
-        zDimmedThresholdOption =>
-          zDimmedThresholdOption.key === preferences.dimmedOutlineFor2DLabels
-      )!.value
+          zDimmedThresholdOption =>
+            zDimmedThresholdOption.key === preferences.dimmedOutlineFor2DLabels
+        )!.value
       : 3
   });
 
@@ -230,8 +230,8 @@ const RevisionEditor: React.FC<{
         newPlaneFigureOption.zDimmedThreshold === 0
           ? 'hide'
           : isFinite(newPlaneFigureOption.zDimmedThreshold)
-            ? 'infinity'
-            : 'show'
+          ? 'infinity'
+          : 'show'
     });
   };
 
@@ -524,16 +524,15 @@ const RevisionEditor: React.FC<{
       }
 
       if (viewOptions.scrollbar !== 'none') {
-        Object.keys(viewers)
-          .forEach(key => {
-            composition.addAnnotation(
-              new rs.Scrollbar(viewers[key], {
-                color: undefined,
-                size: viewOptions.scrollbar === 'large' ? 30 : 20,
-                visibility: touchDevice ? 'always' : 'hover'
-              })
-            );
-          });
+        Object.keys(viewers).forEach(key => {
+          composition.addAnnotation(
+            new rs.Scrollbar(viewers[key], {
+              color: undefined,
+              size: viewOptions.scrollbar === 'large' ? 30 : 20,
+              visibility: touchDevice ? 'always' : 'hover'
+            })
+          );
+        });
       }
 
       composition.annotations.forEach(antn => {
@@ -807,7 +806,8 @@ const RevisionEditor: React.FC<{
           throw new Error('Unsupported image source.');
 
         const interpolationMode =
-          viewOptions.interpolationMode && viewOptions.interpolationMode !== 'nearestNeighbor'
+          viewOptions.interpolationMode &&
+          viewOptions.interpolationMode !== 'nearestNeighbor'
             ? 'bilinear'
             : 'none';
 
@@ -893,7 +893,8 @@ const RevisionEditor: React.FC<{
               </div>
             )}
         </Collapser>
-        {Object.keys(projectData.caseAttributesSchema.properties || {}).length > 0 && (
+        {Object.keys(projectData.caseAttributesSchema.properties || {}).length >
+          0 && (
           <Collapser title="Case Attributes" className="case-attributes">
             <StyledJsonSchemaEditor
               key={refreshCounter}
@@ -947,7 +948,7 @@ const RevisionEditor: React.FC<{
         )}
       </div>
       {seriesDialogOpen && (
-        <Modal show bsSize="lg" onHide={() => { }}>
+        <Modal show bsSize="lg" onHide={() => {}}>
           <SeriesSelectorDialog
             onResolve={handleSeriesDialogResolve}
             initialValue={editingData.revision.series}

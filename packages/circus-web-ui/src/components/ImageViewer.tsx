@@ -78,7 +78,7 @@ export const createStateChanger = <T extends rs.ViewState = rs.ViewState>() => {
   return changer;
 };
 
-const noop = () => { };
+const noop = () => {};
 
 /**
  * Wraps CIRCUS RS Dicom Viewer.
@@ -125,7 +125,11 @@ const ImageViewer: React.FC<{
     viewer.on('imageReady', () => {
       if (typeof savedInitialStateSetter.current === 'function') {
         const baseState = composition!.imageSource.initialState(viewer);
-        const viewState = savedInitialStateSetter.current(viewer, baseState, id);
+        const viewState = savedInitialStateSetter.current(
+          viewer,
+          baseState,
+          id
+        );
         viewer.setState(viewState);
       }
       initialStateSet.current = true;

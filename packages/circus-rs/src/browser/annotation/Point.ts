@@ -12,7 +12,7 @@ import {
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState, { MprViewState, TwoDimensionalViewState } from '../ViewState';
-import Annotation, { DrawOption } from './Annotation';
+import Annotation, { DrawHints } from './Annotation';
 import { drawPoint } from './helper/drawObject';
 import { hitRectangle } from './helper/hit-test';
 
@@ -69,7 +69,7 @@ export default class Point implements Annotation, ViewerEventTarget {
       }
     | undefined = undefined;
 
-  public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
+  public draw(viewer: Viewer, viewState: ViewState, hints: DrawHints): void {
     if (!viewer || !isValidViewState(viewState)) return;
     if (!this.location) return;
     const canvas = viewer.canvas;

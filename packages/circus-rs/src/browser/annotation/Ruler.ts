@@ -17,7 +17,7 @@ import {
 import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
 import ViewState, { MprViewState, TwoDimensionalViewState } from '../ViewState';
-import Annotation, { DrawOption } from './Annotation';
+import Annotation, { DrawHints } from './Annotation';
 import { drawFillText, drawLine, drawPoint } from './helper/drawObject';
 import { hitLineSegment, hitRectangle } from './helper/hit-test';
 
@@ -110,7 +110,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
       }
     | undefined = undefined;
 
-  public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
+  public draw(viewer: Viewer, viewState: ViewState, hints: DrawHints): void {
     if (!viewer || !isValidViewState(viewState)) return;
     if (!this.validate()) return;
 

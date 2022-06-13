@@ -75,14 +75,14 @@ export default class RawVolumeMprImageSource
     );
     const imageData = drawToImageData(outSize, mprOutput);
 
-    const nextDraw = async () => {
+    const next = async () => {
       await new Promise<void>((resolve) => setTimeout(() => resolve(), this.draftInterval));
       return await this.draw(viewer, viewState, abortSignal);
     };
 
     const drawResult: DrawResult = this.fullyLoaded
       ? imageData
-      : { draft: imageData, next: nextDraw() };
+      : { draft: imageData, next };
 
     // If we use Promise.resolve directly, the then-calleback is called
     // before any stacked UI events are handled.

@@ -293,7 +293,7 @@ export default class Viewer extends EventEmitter {
         const drawImage = 'draft' in drawResult ? drawResult.draft : drawResult;
         this.cachedSourceImage = drawImage;
         if ('next' in drawResult && !this.nextRender) {
-          drawResult.next.then(drawResult =>
+          drawResult.next().then(drawResult =>
             handleImageDraw(state, drawResult)
           );
           this.emit('drawDraft', state);

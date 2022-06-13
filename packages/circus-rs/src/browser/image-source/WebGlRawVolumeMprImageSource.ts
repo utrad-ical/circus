@@ -142,11 +142,11 @@ export default class WebGlRawVolumeMprImageSource
       drawResult = await this.createImageData(viewer, viewState, abortSignal);
     } else {
       const imageData = await this.createImageData(viewer, viewState, abortSignal);
-      const nextDraw = async () => {
+      const next = async () => {
         await new Promise<void>((resolve) => setTimeout(() => resolve(), this.draftInterval));
         return await this.draw(viewer, viewState, abortSignal);
       };
-      drawResult = { draft: imageData, next: nextDraw() };
+      drawResult = { draft: imageData, next };
     }
 
     // If we use Promise.resolve directly, the then-calleback is called

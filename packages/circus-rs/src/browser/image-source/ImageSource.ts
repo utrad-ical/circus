@@ -11,7 +11,7 @@ export type ViewStateResizeTransformer = (
 
 export type DrawResult =
   | ImageData
-  | { draft: ImageData; next: Promise<DrawResult> };
+  | { draft: ImageData; next: () => Promise<DrawResult> };
 
 /**
  * ImageSource is an abstract class which represents a

@@ -51,8 +51,6 @@ const createImageTransferAgent = (
         continue;
       }
 
-      await new Promise<void>((resolve)=>setTimeout(()=>resolve(), 300));
-
       const { queue, fetch, startTime } = connection;
       const imageIndex = queue.shift();
 

@@ -44,7 +44,7 @@ export default class PointTool extends AnnotationToolBase {
     antn.location = [point.x, point.y, point.z];
   }
 
-  protected concreteAnnotation(ev: ViewerEvent): void {
+  protected materializeAnnotation(ev: ViewerEvent): void {
     // Nothing to do
   }
 

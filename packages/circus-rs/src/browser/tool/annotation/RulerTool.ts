@@ -63,7 +63,7 @@ export default class RulerTool extends AnnotationToolBase {
     antn.end = [end.x, end.y, end.z];
   }
 
-  protected concreteAnnotation(ev: ViewerEvent): void {
+  protected materializeAnnotation(ev: ViewerEvent): void {
     // Nothing to do
   }
 

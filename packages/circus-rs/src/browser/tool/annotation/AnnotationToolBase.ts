@@ -12,12 +12,12 @@ export default abstract class AnnotationToolBase<
 
   protected abstract createAnnotation(ev: ViewerEvent): Annotation | undefined;
   protected abstract updateAnnotation(ev: ViewerEvent): void;
-  protected abstract concreteAnnotation(ev: ViewerEvent): void;
+  protected abstract materializeAnnotation(ev: ViewerEvent): void;
   protected abstract validateAnnotation(): boolean;
 
   protected abstract isValidViewState(
     state: ViewState | undefined
-  ): state is any;
+  ): state is ViewState;
 
   public activate(viewer: Viewer): void {
     viewer.primaryEventTarget = this;
@@ -73,7 +73,7 @@ export default abstract class AnnotationToolBase<
     if (!antn) return;
 
     if (this.validateAnnotation()) {
-      this.concreteAnnotation(ev);
+      this.materializeAnnotation(ev);
     } else {
       comp.removeAnnotation(antn);
     }

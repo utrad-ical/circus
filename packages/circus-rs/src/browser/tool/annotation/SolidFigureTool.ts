@@ -67,7 +67,7 @@ export default class SolidFigureTool extends AnnotationToolBase {
     antn.max = max.toArray() as Vector3D;
   }
 
-  protected concreteAnnotation(ev: ViewerEvent): void {
+  protected materializeAnnotation(ev: ViewerEvent): void {
     const antn = this.focusedAnnotation;
     if (!antn) return;
 

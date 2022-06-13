@@ -63,7 +63,7 @@ export default class PlaneFigureTool extends AnnotationToolBase {
     antn.max = [point.x, point.y];
   }
 
-  protected concreteAnnotation(ev: ViewerEvent): void {
+  protected materializeAnnotation(ev: ViewerEvent): void {
     if (!this.focusedAnnotation) return;
 
     const antn = this.focusedAnnotation;

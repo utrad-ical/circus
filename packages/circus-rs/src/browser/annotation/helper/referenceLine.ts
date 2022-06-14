@@ -67,7 +67,7 @@ export const drawReferenceLine = (
   }
 };
 
-export const judgeHandleType = (
+export const determineHandleType = (
   line: Line2,
   point: Vector2
 ): HandleType | undefined => {

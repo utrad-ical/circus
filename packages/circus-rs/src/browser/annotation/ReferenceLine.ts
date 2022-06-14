@@ -10,7 +10,7 @@ import {
   getReferenceLineOnScreen,
   handlePageByReferenceLine,
   HandleType,
-  judgeHandleType,
+  determineHandleType,
   Line2
 } from './helper/referenceLine';
 
@@ -128,7 +128,7 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
     if (!line) return;
 
     const point = new Vector2(ev.viewerX!, ev.viewerY!);
-    this.handleType = judgeHandleType(line, point);
+    this.handleType = determineHandleType(line, point);
 
     if (this.handleType) {
       ev.stopPropagation();

@@ -131,7 +131,7 @@ export default class Point implements Annotation, ViewerEventTarget {
 
     const point = new Vector2(ev.viewerX!, ev.viewerY!);
 
-    this.handleType = this.judgeHandleType(viewer, point);
+    this.handleType = this.determineHandleType(viewer, point);
     if (this.handleType) {
       ev.stopPropagation();
       viewer.setCursorStyle(cursorTypes[this.handleType].cursor);
@@ -167,7 +167,7 @@ export default class Point implements Annotation, ViewerEventTarget {
     };
   }
 
-  private judgeHandleType(
+  private determineHandleType(
     viewer: Viewer,
     point: Vector2
   ): PointHitType | undefined {

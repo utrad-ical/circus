@@ -216,7 +216,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
 
     const viewerPoint = new Vector2(ev.viewerX!, ev.viewerY!);
 
-    this.handleType = this.judgeHandleType(viewer, viewerPoint);
+    this.handleType = this.determineHandleType(viewer, viewerPoint);
     if (this.handleType) {
       ev.stopPropagation();
       viewer.setCursorStyle(cursorTypes[this.handleType].cursor);
@@ -365,7 +365,7 @@ export default class Ruler implements Annotation, ViewerEventTarget {
     }
   }
 
-  private judgeHandleType(
+  private determineHandleType(
     viewer: Viewer,
     viewerPoint: Vector2
   ): RulerHitType | undefined {

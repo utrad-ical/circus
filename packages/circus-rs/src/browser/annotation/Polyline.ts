@@ -241,7 +241,7 @@ export default class Polyline
     if (Object.values(drawingColor).length === 0) return;
 
     const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
-    this.handleType = this.judgeHandleType(viewer, point);
+    this.handleType = this.determineHandleType(viewer, point);
     if (this.handleType) {
       ev.stopPropagation();
       viewer.setCursorStyle(cursorTypes[this.handleType.hitType].cursor);
@@ -406,7 +406,7 @@ export default class Polyline
     return box;
   }
 
-  protected judgeHandleType(
+  protected determineHandleType(
     viewer: Viewer,
     viewerPoint: Vector2
   ): { hitType: PolylineHitType; findHitPointIndex: number } | undefined {

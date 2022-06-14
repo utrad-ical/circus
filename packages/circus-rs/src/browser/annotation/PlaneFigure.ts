@@ -193,7 +193,7 @@ export default class PlaneFigure
     }
   }
 
-  private judgeHandleType(
+  private determineHandleType(
     viewer: Viewer,
     point: Vector2
   ): BoundingRectWithHandleHitType | undefined {
@@ -223,7 +223,7 @@ export default class PlaneFigure
     if (!isValidViewState(viewState)) return;
 
     const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
-    const handleType = this.judgeHandleType(viewer, point);
+    const handleType = this.determineHandleType(viewer, point);
     if (handleType) {
       ev.stopPropagation();
       this.handleType = handleType;
@@ -251,7 +251,7 @@ export default class PlaneFigure
     ev.stopPropagation();
 
     const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
-    const handleType = this.judgeHandleType(viewer, point);
+    const handleType = this.determineHandleType(viewer, point);
     if (!handleType) return;
 
     const dragStartVolumePoint3 = convertViewerPointToVolumePoint(

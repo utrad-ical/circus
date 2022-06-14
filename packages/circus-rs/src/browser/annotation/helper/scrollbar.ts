@@ -218,7 +218,7 @@ export const drawScrollbar = (
   viewer: Viewer,
   settings: Settings,
   scrollbar: ScrollbarContainer
-): { judgeHandleType: (p: Vector2) => HandleType | undefined } => {
+): { determineHandleType: (p: Vector2) => HandleType | undefined } => {
   const { lineWidth, color, size, position } = settings;
   const { scrollbarTranslate, scrollbarLength, thumbPosition, thumbLength } =
     scrollbar;
@@ -287,13 +287,13 @@ export const drawScrollbar = (
       return containsPoint(p, matrix, xywhArrowDec);
     };
 
-    const judgeHandleType = (p: Vector2): HandleType | undefined => {
+    const determineHandleType = (p: Vector2): HandleType | undefined => {
       if (thumbBoxHitTest(p)) return 'thumbDrag';
       if (arrowIncBoxHitTest(p)) return 'arrowInc';
       if (arrowDecBoxHitTest(p)) return 'arrowDec';
       return undefined;
     };
-    return { judgeHandleType };
+    return { determineHandleType };
   } finally {
     ctx.restore();
   }

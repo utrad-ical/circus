@@ -270,7 +270,7 @@ export default abstract class SolidFigure
 
     const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
 
-    const handleType = this.judgeHandleType(viewer, point);
+    const handleType = this.determineHandleType(viewer, point);
     if (handleType) {
       ev.stopPropagation();
       this.handleType = handleType;
@@ -284,7 +284,7 @@ export default abstract class SolidFigure
     }
   }
 
-  private judgeHandleType(
+  private determineHandleType(
     viewer: Viewer,
     point: Vector2
   ): BoundingRectWithHandleHitType | undefined {

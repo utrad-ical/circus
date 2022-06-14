@@ -92,7 +92,7 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
   private createScrollbar: (
     requestingViewState: ViewState
   ) => ScrollbarContainer;
-  private judgeHandleType:
+  private determineHandleType:
     | ((p: Vector2) => HandleType | undefined)
     | undefined = undefined;
   private visibilityThresholdBoxHitTest: ((p: Vector2) => boolean) | undefined =
@@ -168,14 +168,14 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
     }
 
     if (this.visible) {
-      const { judgeHandleType } = drawScrollbar(
+      const { determineHandleType } = drawScrollbar(
         viewer,
         this.settings,
         this.scrollbar
       );
-      this.judgeHandleType = judgeHandleType;
+      this.determineHandleType = determineHandleType;
     } else {
-      this.judgeHandleType = undefined;
+      this.determineHandleType = undefined;
     }
 
     const { visibilityThresholdBoxHitTest } = drawVisibilityThreshold(
@@ -203,9 +203,9 @@ export default class Scrollbar implements Annotation, ViewerEventTarget {
         : false);
 
     this.handleType =
-      !this.visible || !this.judgeHandleType
+      !this.visible || !this.determineHandleType
         ? undefined
-        : this.judgeHandleType(point);
+        : this.determineHandleType(point);
 
     if (this.handleType) {
       ev.stopPropagation();

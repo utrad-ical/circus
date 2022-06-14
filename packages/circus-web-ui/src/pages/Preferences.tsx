@@ -2,11 +2,13 @@ import * as et from '@smikitky/rb-components/lib/editor-types';
 import PropertyEditor, {
   PropertyEditorProperties
 } from '@smikitky/rb-components/lib/PropertyEditor';
+import Slider from '@smikitky/rb-components/lib/Slider';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
-import { Button, Panel, FormControl } from 'components/react-bootstrap';
+import { Button, FormControl, Panel } from 'components/react-bootstrap';
 import React, { useCallback, useEffect, useState } from 'react';
 import { SearchPreset, UserPreferences } from 'store/loginUser';
+import styled from 'styled-components';
 import { useApi } from 'utils/api';
 import { useUserPreferences } from 'utils/useLoginUser';
 import useShowMessage from 'utils/useShowMessage';
@@ -115,6 +117,41 @@ const TemplateEditor: et.Editor<string[] | undefined> = props => {
   );
 };
 
+const InitialAlphaEditor: et.Editor<number | undefined> = props => {
+  const { value = 1, onChange } = props;
+  const [newAlpha, setNewAlpha] = useState(value * 100);
+
+  const handleChangeAlpha = (alpha: number) => {
+    setNewAlpha(alpha);
+    onChange(alpha / 100);
+  };
+
+  return (
+    <StyledAlphaDiv>
+      <div className="alpha-label">{newAlpha}%&nbsp; </div>
+      <Slider
+        className="alpha-slider"
+        min={0}
+        max={100}
+        step={10}
+        value={newAlpha}
+        onChange={handleChangeAlpha}
+      />
+    </StyledAlphaDiv>
+  );
+};
+
+const StyledAlphaDiv = styled.div`
+  display: flex;
+  align-items: center;
+  .alpha-label {
+    width: 3em;
+  }
+  .alpha-slider {
+    width: 85px;
+  }
+`;
+
 const appearanceProperties: PropertyEditorProperties<UserPreferences> = [
   {
     key: 'theme',
@@ -154,6 +191,11 @@ const circusDBProperties: PropertyEditorProperties<UserPreferences> = [
     key: 'referenceLine',
     caption: 'Reference lines',
     editor: et.checkbox({ label: 'show' }) as et.Editor<boolean | undefined>
+  },
+  {
+    key: 'alpha',
+    caption: 'Initial alpha value',
+    editor: InitialAlphaEditor
   },
   {
     key: 'interpolationMode',

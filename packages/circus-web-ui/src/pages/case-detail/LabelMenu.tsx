@@ -20,6 +20,7 @@ import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
 import useLocalPreference from 'utils/useLocalPreference';
+import useLoginUser from 'utils/useLoginUser';
 import * as c from './caseStore';
 import createCurrentLabelsUpdator from './createCurrentLabelsUpdator';
 import {
@@ -31,9 +32,9 @@ import {
   labelTypes
 } from './labelData';
 import {
+  ProcessorProgress,
   processors,
-  ProcessorType,
-  ProcessorProgress
+  ProcessorType
 } from './processors/processor-types';
 import ProcessorDropdown from './processors/ProcessorDropdown';
 import ProcessorModal from './processors/ProcessorModal';
@@ -82,6 +83,7 @@ const LabelMenu: React.FC<{
   const activeSeries = revision.series[activeSeriesIndex];
   const activeLabel =
     activeLabelIndex >= 0 ? activeSeries.labels[activeLabelIndex] : null;
+  const preferences = useLoginUser().preferences;
 
   const [defaultNewLabelType, setDefaultLabelType] =
     useLocalPreference<LabelType>('defaultLabelType', 'voxel');
@@ -123,7 +125,12 @@ const LabelMenu: React.FC<{
       updateEditingData,
       selectedLabel,
       reportProgress,
-      hints: { labelColors, viewers, seriesMetadata: metadata }
+      hints: {
+        labelColors,
+        viewers,
+        seriesMetadata: metadata,
+        initialAlpha: preferences.alpha ?? 1
+      }
     });
   };
 
@@ -213,7 +220,7 @@ const LabelMenu: React.FC<{
     viewer: Viewer,
     color = labelColors[0]
   ): InternalLabel => {
-    const alpha = 1;
+    const alpha = preferences.alpha ?? 1;
     const temporaryKey = generateUniqueId();
     const labelNames: { [key in LabelType]: string } = {
       voxel: 'Voxels',

@@ -21,7 +21,7 @@ export interface UserPreferences {
   personalInfoView?: boolean;
   theme?: string;
   referenceLine?: boolean;
-  alpha?: number;
+  initailAlphaForNewLabels?: number;
   interpolationMode?: string;
   scrollBars?: string;
   maintainAspectRatio?: boolean;

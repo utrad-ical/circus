@@ -129,7 +129,7 @@ const LabelMenu: React.FC<{
         labelColors,
         viewers,
         seriesMetadata: metadata,
-        initialAlpha: preferences.alpha ?? 1
+        initialAlpha: preferences.initailAlphaForNewLabels ?? 1
       }
     });
   };
@@ -220,7 +220,7 @@ const LabelMenu: React.FC<{
     viewer: Viewer,
     color = labelColors[0]
   ): InternalLabel => {
-    const alpha = preferences.alpha ?? 1;
+    const alpha = preferences.initailAlphaForNewLabels ?? 1;
     const temporaryKey = generateUniqueId();
     const labelNames: { [key in LabelType]: string } = {
       voxel: 'Voxels',

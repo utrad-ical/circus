@@ -117,28 +117,32 @@ const TemplateEditor: et.Editor<string[] | undefined> = props => {
   );
 };
 
-const InitialAlphaEditor: et.Editor<number | undefined> = props => {
-  const { value = 1, onChange } = props;
-  const [newAlpha, setNewAlpha] = useState(value * 100);
-
-  const handleChangeAlpha = (alpha: number) => {
-    setNewAlpha(alpha);
-    onChange(alpha / 100);
+const labeledSlider = (options: {
+  min: number;
+  max: number;
+  step: number;
+  defaultValue: number;
+  label: (value: number) => string;
+}): et.Editor<number | undefined> => {
+  const { min, max, step, defaultValue, label } = options;
+  return props => {
+    const { value, onChange } = props;
+    return (
+      <StyledAlphaDiv>
+        <div className="alpha-label">
+          {label(value ?? options.defaultValue)}&nbsp;
+        </div>
+        <Slider
+          className="alpha-slider"
+          min={min}
+          max={max}
+          step={step}
+          value={value ?? defaultValue}
+          onChange={onChange}
+        />
+      </StyledAlphaDiv>
+    );
   };
-
-  return (
-    <StyledAlphaDiv>
-      <div className="alpha-label">{newAlpha}%&nbsp; </div>
-      <Slider
-        className="alpha-slider"
-        min={0}
-        max={100}
-        step={10}
-        value={newAlpha}
-        onChange={handleChangeAlpha}
-      />
-    </StyledAlphaDiv>
-  );
 };
 
 const StyledAlphaDiv = styled.div`
@@ -193,9 +197,15 @@ const circusDBProperties: PropertyEditorProperties<UserPreferences> = [
     editor: et.checkbox({ label: 'show' }) as et.Editor<boolean | undefined>
   },
   {
-    key: 'alpha',
-    caption: 'Initial alpha value',
-    editor: InitialAlphaEditor
+    key: 'initailAlphaForNewLabels',
+    caption: 'Initial alpha for new labels',
+    editor: labeledSlider({
+      min: 0,
+      max: 1,
+      step: 0.1,
+      defaultValue: 1,
+      label: value => `${Math.round(value * 100)}%`
+    })
   },
   {
     key: 'interpolationMode',

@@ -23,7 +23,7 @@ properties:
       type: object
   referenceLine:
     type: boolean
-  alpha:
+  initailAlphaForNewLabels:
     type: number
   interpolationMode:
     enum: ['nearestNeighbor', 'trilinear']

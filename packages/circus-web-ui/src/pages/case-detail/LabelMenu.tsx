@@ -257,10 +257,13 @@ const LabelMenu: React.FC<{
       return;
     }
 
-    if (
-      !labelTypes[type].allow2D &&
-      viewers[viewerId].getState()?.type !== 'mpr'
-    ) {
+    const viewState = viewers[viewerId].getState();
+    if (!viewState) {
+      await alert('View state not initialized.');
+      return;
+    }
+
+    if (!labelTypes[type].allow2D && viewState.type !== 'mpr') {
       await alert('2D viewer does not support ' + type + ' labels.');
       return;
     }

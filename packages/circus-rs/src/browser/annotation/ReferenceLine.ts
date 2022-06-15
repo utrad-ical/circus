@@ -1,26 +1,31 @@
-import Annotation, { DrawOption } from './Annotation';
-import Viewer from '../viewer/Viewer';
-import ViewState, { MprViewState } from '../ViewState';
-import {
-  convertVolumeCoordinateToScreenCoordinate,
-  convertScreenCoordinateToVolumeCoordinate
-} from '../section-util';
-import { intersectionOfTwoSections, Section } from '../../common/geometry';
 import { Vector2, Vector3 } from 'three';
 import ViewerEventTarget from '../interface/ViewerEventTarget';
+import { convertViewerPointToVolumePoint } from '../tool/tool-util';
+import Viewer from '../viewer/Viewer';
 import ViewerEvent from '../viewer/ViewerEvent';
-
-const handleSize = 5;
-type HandleType = 'move';
-
-interface Line2 {
-  start: Vector2;
-  end: Vector2;
-}
+import ViewState, { MprViewState } from '../ViewState';
+import Annotation, { DrawHints } from './Annotation';
+import {
+  drawReferenceLine,
+  getReferenceLineOnScreen,
+  handlePageByReferenceLine,
+  HandleType,
+  determineHandleType,
+  Line2
+} from './helper/referenceLine';
 
 interface Options {
   color?: string;
 }
+
+const isValidViewState = (
+  viewState: ViewState | undefined
+): viewState is MprViewState => {
+  if (!viewState) return false;
+  if (viewState.type === 'mpr') return true;
+  return false;
+};
+
 /**
  * ReferenceLine is a type of annotation which draws how the sections
  * of other viewers which share the same composition intersect with this viewer.
@@ -32,10 +37,9 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
    * Color of the reference line.
    */
   public color: string;
-
   private handleType: HandleType | undefined = undefined;
   private dragStartPoint3: Vector3 | undefined = undefined;
-
+  private dragStartTargetState: MprViewState | undefined = undefined;
   public id?: string;
 
   public constructor(viewer: Viewer, { color = '#ff00ff' }: Options = {}) {
@@ -44,93 +48,70 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
     }
     this.targetViewer = viewer;
     this.color = color;
-    this.handleViewerStateChange = this.handleViewerStateChange.bind(this);
-    viewer.on('stateChange', this.handleViewerStateChange);
+    this.handleViewerRequestingStateChange =
+      this.handleViewerRequestingStateChange.bind(this);
+    this.getReferenceLineOnScreen = this.getReferenceLineOnScreen.bind(this);
+    viewer.on('requestingStateChange', this.handleViewerRequestingStateChange);
   }
 
-  private handleViewerStateChange(
-    prevState: ViewState,
-    state: ViewState
+  public dispose(): void {
+    if (this.targetViewer) {
+      this.targetViewer.removeListener(
+        'requestingStateChange',
+        this.handleViewerRequestingStateChange
+      );
+    }
+  }
+
+  private handleViewerRequestingStateChange(
+    state: ViewState,
+    requestingState: ViewState
   ): void {
     if (
-      prevState?.type !== 'mpr' ||
-      state.type !== 'mpr' ||
-      prevState.section === state.section
-    ) {
-      return;
-    }
-    const viewer = this.targetViewer;
-    const comp = viewer.getComposition();
-    if (comp) comp.viewers.forEach(v => v !== viewer && v.renderAnnotations());
-  }
-
-  public draw(viewer: Viewer, viewState: ViewState, option: DrawOption): void {
-    if (viewer === this.targetViewer) return;
-
-    const targetState = (() => {
-      try {
-        return this.targetViewer.getState(); // this may be uninitialized
-      } catch (err) {
-        return null;
-      }
-    })();
-    if (viewState.type !== 'mpr' || !targetState || targetState.type !== 'mpr')
+      !isValidViewState(state) ||
+      !isValidViewState(requestingState) ||
+      state.section === requestingState.section
+    )
       return;
 
-    const section = viewState.section;
-    const targetSection = targetState.section;
-    const resolution = new Vector2().fromArray(viewer.getResolution());
-    const line = this.getReferenceLineOnScreen(
-      section,
-      targetSection,
-      resolution
-    );
-    if (!line) return;
-
-    const canvas = viewer.canvas;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    try {
-      ctx.save();
-      ctx.beginPath();
-      if (option.hover) {
-        ctx.strokeStyle = this.color;
-        ctx.lineWidth = 3;
-      } else {
-        ctx.strokeStyle = this.color;
-        ctx.lineWidth = 1;
-      }
-      const { start, end } = line;
-      ctx.moveTo(start.x, start.y);
-      ctx.lineTo(end.x, end.y);
-      ctx.stroke();
-      ctx.closePath();
-    } finally {
-      ctx.restore();
-    }
+    const targetViewer = this.targetViewer;
+    const composition = targetViewer.getComposition();
+    if (!composition) return;
+    const viewers = composition.viewers.filter(v => v !== targetViewer);
+    composition.annotationUpdated(viewers);
   }
 
   private getReferenceLineOnScreen(
-    section1: Section,
-    section2: Section,
-    resolution: Vector2
+    screenViewer: Viewer,
+    screenState: ViewState
   ): Line2 | undefined {
-    const refLine = intersectionOfTwoSections(section1, section2);
-    if (!refLine) return;
-
-    const start = convertVolumeCoordinateToScreenCoordinate(
-      section1,
-      resolution,
-      refLine.start
-    );
-    const end = convertVolumeCoordinateToScreenCoordinate(
-      section1,
-      resolution,
-      refLine.end
+    const screenResolution = new Vector2().fromArray(
+      screenViewer.getResolution()
     );
 
-    return { start, end };
+    const targetState =
+      this.targetViewer.getRequestingState() || this.targetViewer.getState();
+    if (!isValidViewState(screenState) || !isValidViewState(targetState))
+      return;
+
+    return getReferenceLineOnScreen(
+      screenResolution,
+      screenState.section,
+      targetState.section
+    );
+  }
+
+  public draw(viewer: Viewer, viewState: ViewState, hints: DrawHints): void {
+    if (viewer === this.targetViewer) return;
+
+    const requestingViewState = hints.requestingViewState ?? viewState;
+    const line = this.getReferenceLineOnScreen(viewer, requestingViewState);
+    if (!line) return;
+
+    if (line) {
+      const settings = { color: this.color, hover: hints.hover };
+      drawReferenceLine(viewer, settings, line);
+    }
   }
 
   /**
@@ -138,24 +119,19 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
    */
   public mouseMoveHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
-
     if (viewer === this.targetViewer) return;
+
     const viewState = viewer.getState();
+    if (!isValidViewState(viewState)) return;
 
-    const targetState = this.targetViewer.getState();
-    if (viewState.type !== 'mpr' || targetState.type !== 'mpr') return;
-
-    const section1 = viewState.section;
-    const section2 = targetState.section;
-    const resolution = new Vector2().fromArray(viewer.getResolution());
-    const line = this.getReferenceLineOnScreen(section1, section2, resolution);
+    const line = this.getReferenceLineOnScreen(viewer, viewState);
     if (!line) return;
 
     const point = new Vector2(ev.viewerX!, ev.viewerY!);
+    this.handleType = determineHandleType(line, point);
 
-    const handleType = this.lineHitTest(line, point);
-    if (handleType) {
-      this.handleType = handleType;
+    if (this.handleType) {
+      ev.stopPropagation();
       viewer.setHoveringAnnotation(this);
       viewer.setCursorStyle('move');
       viewer.renderAnnotations();
@@ -168,100 +144,67 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
 
   public dragStartHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
-    if (viewer.getHoveringAnnotation() === this) {
-      ev.stopPropagation();
+    if (viewer.getHoveringAnnotation() !== this) return;
 
-      const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
-      const state = viewer.getState() as MprViewState;
-      const resolution: [number, number] = viewer.getResolution();
+    const viewState = viewer.getState();
+    if (!isValidViewState(viewState)) return;
 
-      this.dragStartPoint3 = convertScreenCoordinateToVolumeCoordinate(
-        state.section,
-        new Vector2().fromArray(resolution),
-        new Vector2().fromArray([point.x, point.y])
-      );
-    }
+    const dragStartTargetState = this.targetViewer.getState();
+    if (!isValidViewState(dragStartTargetState)) return;
+
+    if (!this.handleType) return;
+
+    ev.stopPropagation();
+
+    const dragStartPoint3 = convertViewerPointToVolumePoint(
+      viewer,
+      ev.viewerX!,
+      ev.viewerY!
+    );
+
+    this.dragStartPoint3 = dragStartPoint3;
+    this.dragStartTargetState = dragStartTargetState;
   }
 
   public dragHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
+    if (viewer.getHoveringAnnotation() !== this) return;
 
-    if (viewer.getHoveringAnnotation() === this) {
-      ev.stopPropagation();
+    const viewState = viewer.getState();
+    if (!isValidViewState(viewState)) return;
 
-      const point: Vector2 = new Vector2(ev.viewerX!, ev.viewerY!);
-      const state = viewer.getState() as MprViewState;
-      const resolution: [number, number] = viewer.getResolution();
+    if (!this.handleType) return;
+    if (!this.dragStartPoint3 || !this.dragStartTargetState) return;
 
-      const draggedPoint3 = convertScreenCoordinateToVolumeCoordinate(
-        state.section,
-        new Vector2().fromArray(resolution),
-        point
+    ev.stopPropagation();
+
+    const dragPoint3 = convertViewerPointToVolumePoint(
+      viewer,
+      ev.viewerX!,
+      ev.viewerY!
+    );
+
+    const dragDistance3 = new Vector3().subVectors(
+      dragPoint3,
+      this.dragStartPoint3
+    );
+
+    if (this.handleType === 'move') {
+      handlePageByReferenceLine(
+        this.targetViewer,
+        dragDistance3,
+        this.dragStartTargetState
       );
-      const dist = draggedPoint3.clone().sub(this.dragStartPoint3!);
-      const targetState = this.targetViewer.getState() as MprViewState;
-      const targetSection = targetState.section;
-
-      /**
-       * Move
-       */
-      if (this.handleType === 'move') {
-        const cross = new Vector3()
-          .crossVectors(
-            new Vector3().fromArray(targetSection.xAxis),
-            new Vector3().fromArray(targetSection.yAxis)
-          )
-          .normalize();
-
-        const movedOrigin = new Vector3()
-          .fromArray(targetSection.origin)
-          .add(cross.multiplyScalar(dist.dot(cross)))
-          .toArray();
-
-        this.targetViewer.setState({
-          ...targetState,
-          section: {
-            ...targetState.section,
-            origin: movedOrigin
-          }
-        });
-      }
-
-      this.dragStartPoint3 = draggedPoint3;
     }
   }
 
   public dragEndHandler(ev: ViewerEvent): void {
     const viewer = ev.viewer;
-    if (viewer.getHoveringAnnotation() === this) {
-      ev.stopPropagation();
-      this.dragStartPoint3 = undefined;
-    }
-  }
+    if (viewer.getHoveringAnnotation() !== this) return;
 
-  public dispose(): void {
-    if (this.targetViewer) {
-      this.targetViewer.removeListener(
-        'stateChange',
-        this.handleViewerStateChange
-      );
-    }
-  }
+    ev.stopPropagation();
 
-  private lineHitTest(line: Line2, point: Vector2): HandleType | undefined {
-    const { start, end } = line;
-
-    const delta = new Vector2(end.x - start.x, end.y - start.y);
-    const nu = delta.clone().normalize();
-    const nv = new Vector2(delta.y, delta.x * -1).normalize();
-
-    const o = start.clone().add(nv.clone().multiplyScalar(-handleSize));
-    const p = point.clone().sub(o);
-    const pu = p.dot(nu);
-    const pv = p.dot(nv);
-
-    return pu >= 0 && pv >= 0 && pu <= delta.length() && pv <= handleSize * 2
-      ? 'move'
-      : undefined;
+    this.dragStartPoint3 = undefined;
+    this.dragStartTargetState = undefined;
   }
 }

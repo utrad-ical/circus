@@ -1,8 +1,11 @@
-import { ViewState } from '../..';
 import Annotation from '../../annotation/Annotation';
 import Ruler from '../../annotation/Ruler';
 import { sectionFrom2dViewState } from '../../section-util';
 import ViewerEvent from '../../viewer/ViewerEvent';
+import ViewState, {
+  MprViewState,
+  TwoDimensionalViewState
+} from '../../ViewState';
 import { convertViewerPointToVolumePoint } from '../tool-util';
 import AnnotationToolBase from './AnnotationToolBase';
 
@@ -60,7 +63,7 @@ export default class RulerTool extends AnnotationToolBase {
     antn.end = [end.x, end.y, end.z];
   }
 
-  protected concreteAnnotation(ev: ViewerEvent): void {
+  protected materializeAnnotation(ev: ViewerEvent): void {
     // Nothing to do
   }
 
@@ -69,10 +72,12 @@ export default class RulerTool extends AnnotationToolBase {
     return this.focusedAnnotation.validate();
   }
 
-  protected isValidViewState(viewState: ViewState): boolean {
-    if (!viewState) return false;
-    if (viewState.type === 'mpr') return true;
-    if (viewState.type === '2d') return true;
+  protected isValidViewState(
+    state: ViewState | undefined
+  ): state is MprViewState | TwoDimensionalViewState {
+    if (!state) return false;
+    if (state.type === 'mpr') return true;
+    if (state.type === '2d') return true;
     return false;
   }
 }

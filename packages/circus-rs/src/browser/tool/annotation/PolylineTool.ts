@@ -1,13 +1,17 @@
-import { Annotation, ViewState } from '../..';
 import { Vector2D } from '../../../common/geometry';
+import Annotation from '../../annotation/Annotation';
 import Polyline from '../../annotation/Polyline';
 import Composition from '../../Composition';
 import {
-  sectionFrom2dViewState,
-  detectOrthogonalSection
+  detectOrthogonalSection,
+  sectionFrom2dViewState
 } from '../../section-util';
 import Viewer from '../../viewer/Viewer';
 import ViewerEvent from '../../viewer/ViewerEvent';
+import ViewState, {
+  MprViewState,
+  TwoDimensionalViewState
+} from '../../ViewState';
 import ToolBaseClass, { ToolOptions } from '../Tool';
 import { convertViewerPointToVolumePoint } from '../tool-util';
 
@@ -102,21 +106,26 @@ export default class PolylineTool extends ToolBaseClass<ToolOptions> {
   }
 
   protected creationHandler(ev: ViewerEvent, antn: Polyline): Annotation {
+    const viewer = ev.viewer;
+
+    const viewState = viewer.getState();
+    if (!viewState) throw new Error('View state not initialized');
+
     const evPoint = convertViewerPointToVolumePoint(
       ev.viewer,
       ev.viewerX!,
       ev.viewerY!
     );
-    const point = [evPoint.x, evPoint.y] as Vector2D;
     if (!antn.z) {
       antn.z = evPoint.z;
     }
 
-    if (antn.equalsPoint(ev, 0)) {
+    const viewerPoint = [evPoint.x, evPoint.y] as Vector2D;
+    if (antn.hitFirstPointTest(viewer, viewerPoint)) {
       antn.closed = true;
       this.concreteAnnotation();
-    } else if (!antn.equalsPoint(ev, antn.points.length - 1)) {
-      antn.points.push(point);
+    } else if (!antn.hitLastPointTest(viewer, viewerPoint)) {
+      antn.points.push(viewerPoint);
     }
 
     return antn;
@@ -132,10 +141,12 @@ export default class PolylineTool extends ToolBaseClass<ToolOptions> {
     this.focusedAnnotation = undefined;
   }
 
-  protected isValidViewState(viewState: ViewState): boolean {
-    if (!viewState) return false;
-    if (viewState.type === 'mpr') return true;
-    if (viewState.type === '2d') return true;
+  protected isValidViewState(
+    state: ViewState | undefined
+  ): state is MprViewState | TwoDimensionalViewState {
+    if (!state) return false;
+    if (state.type === 'mpr') return true;
+    if (state.type === '2d') return true;
     return false;
   }
 }

@@ -1,23 +1,20 @@
-import { TwoDimensionalViewState } from 'browser/ViewState';
 import { Box2, Box3, Vector2, Vector3 } from 'three';
 import {
-  Composition,
-  MprImageSource,
-  normalVector,
-  TwoDimensionalImageSource,
-  Viewer,
-  ViewState
-} from '../..';
-import {
   dotFromPointToSection,
+  normalVector,
   Section,
   Vector2D
 } from '../../../common/geometry';
+import Composition from '../../Composition';
+import MprImageSource from '../../image-source/MprImageSource';
+import TwoDimensionalImageSource from '../../image-source/TwoDimensionalImageSource';
 import {
   convertPointToMm,
   convertSectionToIndex,
   detectOrthogonalSection
 } from '../../section-util';
+import Viewer from '../../viewer/Viewer';
+import ViewState, { TwoDimensionalViewState } from '../../ViewState';
 
 export type Position = 'right' | 'left' | 'top' | 'bottom';
 export type Visibility = 'always' | 'hover';
@@ -35,65 +32,25 @@ export interface Settings {
 }
 
 export interface ScrollbarContainer extends ScrollbarBase {
+  viewState: ViewState;
+  thumbStep: number;
   thumbPosition: number;
 }
 
-interface ScrollbarBase extends ScrollbarParam {
+interface ScrollbarBase {
+  resolution: Vector2D;
   scrollbarTranslate: Vector2D;
   scrollbarLength: number;
   scrollableLength: number;
+  scrollbarSteps: number;
   thumbLength: number;
   thumbScale: number;
 }
 
-export interface ScrollbarParam {
-  thumbStep: number;
-}
-
-const updateThumbByPosition = (
-  scrollbarBase: ScrollbarBase,
-  thumbPosition: number
-): ScrollbarContainer => {
-  const { scrollableLength, thumbLength, thumbScale } = scrollbarBase;
-
-  thumbPosition = Math.min(
-    Math.max(0, thumbPosition),
-    scrollableLength - thumbLength
-  );
-
-  const thumbStep = thumbPosition / thumbScale;
-
-  return { ...scrollbarBase, thumbPosition, thumbStep };
-};
-
-export type UpdateThumbParamType = 'position-diff' | 'step-diff';
-
-export const updateThumb = (
-  scrollbar: ScrollbarContainer,
-  paramType: UpdateThumbParamType,
-  param: number
-): ScrollbarContainer => {
-  switch (paramType) {
-    case 'position-diff': {
-      const thumbPosition = scrollbar.thumbPosition + param;
-      return updateThumbByPosition(scrollbar, thumbPosition);
-    }
-    case 'step-diff': {
-      const thumbPosition =
-        (scrollbar.thumbStep + param) * scrollbar.thumbScale;
-      return updateThumbByPosition(scrollbar, thumbPosition);
-    }
-    default:
-      break;
-  }
-  throw new Error('invalid parameter');
-};
-
 export const createScrollbar = (
   viewer: Viewer,
   viewState: ViewState,
-  settings: Settings,
-  param?: ScrollbarParam
+  settings: Settings
 ): ScrollbarContainer => {
   const composition = viewer.getComposition();
   if (!composition) throw new Error('Composition not initialized'); // should not happen
@@ -127,44 +84,72 @@ export const createScrollbar = (
 
   const scrollableLength = scrollbarLength - size * 2;
 
-  const { thumbStep, divideCount } = calcThumbSteps(
-    viewState,
-    composition,
-    param
-  );
-
-  const thumbLength = Math.max(size, scrollableLength / divideCount);
-  const thumbScale = (scrollableLength - thumbLength) / (divideCount - 1);
-  const thumbPosition = thumbStep * thumbScale;
-  const scrollbarBase: ScrollbarBase = {
-    scrollbarTranslate,
-    scrollbarLength,
-    scrollableLength,
-    thumbLength,
-    thumbScale,
-    thumbStep
-  };
-  return updateThumbByPosition(scrollbarBase, thumbPosition);
-};
-
-export const calcThumbSteps = (
-  viewState: ViewState,
-  composition: Composition,
-  param?: ScrollbarParam
-): { thumbStep: number; divideCount: number } => {
   const steps =
     viewState.type === '2d'
       ? calcStepsIn2D(composition, viewState)
       : calcStepsInSection(composition, viewState.section);
-  const divideCount = steps.sumCount + 2;
-  const thumbStep = !param ? steps.current + 1 : param.thumbStep;
-  return { thumbStep, divideCount };
+
+  // Provide out of range above and below the scroll bar.
+  const scrollbarSteps = steps.sumCount + 2;
+  const stateStep = steps.current + 1;
+
+  const thumbLength = Math.max(size, scrollableLength / scrollbarSteps);
+  const thumbScale = (scrollableLength - thumbLength) / (scrollbarSteps - 1);
+
+  const scrollbarBase: ScrollbarBase = {
+    resolution: [resolution.x, resolution.y],
+    scrollbarLength,
+    scrollbarTranslate,
+    scrollableLength,
+    scrollbarSteps,
+    thumbLength,
+    thumbScale
+  };
+
+  const thumbStep = determineThumbStepFromStep(scrollbarBase, stateStep);
+  const thumbPosition = thumbStep * thumbScale;
+
+  return { ...scrollbarBase, viewState, thumbStep, thumbPosition };
+};
+
+const determineThumbPositionFromPosition = (
+  scrollbarBase: ScrollbarBase,
+  position: number
+): number => {
+  const { scrollableLength, thumbLength } = scrollbarBase;
+  const thumbPosition = Math.min(
+    Math.max(0, position),
+    scrollableLength - thumbLength
+  );
+  return thumbPosition;
+};
+
+export const determineThumbStepFromPosition = (
+  scrollbarBase: ScrollbarBase,
+  position: number
+): number => {
+  const { thumbScale } = scrollbarBase;
+  const thumbPosition = determineThumbPositionFromPosition(
+    scrollbarBase,
+    position
+  );
+  const step = thumbPosition / thumbScale;
+  return determineThumbStepFromStep(scrollbarBase, step);
+};
+
+export const determineThumbStepFromStep = (
+  scrollbarBase: ScrollbarBase,
+  step: number
+): number => {
+  const { scrollbarSteps } = scrollbarBase;
+  const thumbStep = Math.min(Math.max(step, 0), scrollbarSteps - 1);
+  return thumbStep;
 };
 
 const calcStepsInSection = (
   composition: Composition,
   mmSection: Section
-): { current: number; sumCount: number } => {
+): { sumCount: number; current: number } => {
   const orientation = detectOrthogonalSection(mmSection);
 
   const src = composition.imageSource as MprImageSource;
@@ -203,8 +188,8 @@ const calcStepsInSection = (
       const current = sumCount / 2 - delta;
 
       return {
-        current,
-        sumCount
+        sumCount,
+        current
       };
     }
   }
@@ -213,7 +198,7 @@ const calcStepsInSection = (
 const calcStepsIn2D = (
   composition: Composition,
   state: TwoDimensionalViewState
-): { current: number; sumCount: number } => {
+): { sumCount: number; current: number } => {
   const src = composition.imageSource as TwoDimensionalImageSource;
   if (!src || !src.metadata || !src.metadata.voxelSize)
     return { current: 0, sumCount: 0 };
@@ -221,8 +206,8 @@ const calcStepsIn2D = (
   const current = state.imageNumber;
   const sumCount = voxelCount[2];
   const steps = {
-    current,
-    sumCount
+    sumCount,
+    current
   };
   return steps;
 };
@@ -233,7 +218,7 @@ export const drawScrollbar = (
   viewer: Viewer,
   settings: Settings,
   scrollbar: ScrollbarContainer
-): { judgeHandleType: (p: Vector2) => HandleType | undefined } => {
+): { determineHandleType: (p: Vector2) => HandleType | undefined } => {
   const { lineWidth, color, size, position } = settings;
   const { scrollbarTranslate, scrollbarLength, thumbPosition, thumbLength } =
     scrollbar;
@@ -302,13 +287,13 @@ export const drawScrollbar = (
       return containsPoint(p, matrix, xywhArrowDec);
     };
 
-    const judgeHandleType = (p: Vector2): HandleType | undefined => {
+    const determineHandleType = (p: Vector2): HandleType | undefined => {
       if (thumbBoxHitTest(p)) return 'thumbDrag';
       if (arrowIncBoxHitTest(p)) return 'arrowInc';
       if (arrowDecBoxHitTest(p)) return 'arrowDec';
       return undefined;
     };
-    return { judgeHandleType };
+    return { determineHandleType };
   } finally {
     ctx.restore();
   }

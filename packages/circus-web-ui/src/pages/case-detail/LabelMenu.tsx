@@ -396,6 +396,8 @@ const LabelMenu: React.FC<{
           onOkClick={executeProcessor(processorState.type)}
           progress={processorState.progress}
           {...processors[processorState.type!].settingsModal!}
+          activeLabelIndex={activeLabelIndex}
+          labels={activeSeries.labels}
         />
       )}
     </StyledButtonsDiv>

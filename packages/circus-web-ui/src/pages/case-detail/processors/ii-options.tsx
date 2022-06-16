@@ -1,4 +1,4 @@
-import { Editor } from '@smikitky/rb-components/lib/editor-types';
+import { Editor } from './processor-types';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import React from 'react';
 import { IntersliceInterpolationOptions } from './ii-processor';

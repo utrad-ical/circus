@@ -1,8 +1,8 @@
 import { Box3, Vector2 } from 'three';
 import {
-  sectionFrom2dViewState,
   convertScreenCoordinateToVolumeCoordinate,
-  detectOrthogonalSection
+  detectOrthogonalSection,
+  sectionFrom2dViewState
 } from '../../section-util';
 import Viewer from '../../viewer/Viewer';
 import Cuboid from '../Cuboid';
@@ -30,6 +30,7 @@ export function createDefaultSolidFigureFromViewer(
 
   if (!viewer) return anno;
   const viewState = viewer.getState();
+  if (!viewState) throw new Error('View state not initialized');
   if (viewState.type === '2d') throw new Error('Unsupported view state.');
 
   const section = viewState.section;
@@ -88,6 +89,7 @@ export function createDefaultPlaneFigureFromViewer(
 
   if (!viewer) return anno;
   const viewState = viewer.getState();
+  if (!viewState) return anno;
   const section =
     viewState.type !== '2d'
       ? viewState.section
@@ -122,6 +124,7 @@ export function createDefaultPointFromViewer(
 
   if (!viewer) return anno;
   const viewState = viewer.getState();
+  if (!viewState) return anno;
   const section =
     viewState.type !== '2d'
       ? viewState.section
@@ -153,6 +156,7 @@ export function createDefaultRulerFromViewer(
 
   if (!viewer) return anno;
   const viewState = viewer.getState();
+  if (!viewState) return anno;
   const section =
     viewState.type !== '2d'
       ? viewState.section

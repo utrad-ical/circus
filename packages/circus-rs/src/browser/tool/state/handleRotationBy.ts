@@ -7,6 +7,8 @@ export default function handleRotationBy(
   dvDeg: number
 ) {
   const prevState = viewer.getState();
+  if (!prevState) return;
+
   switch (prevState.type) {
     case 'mpr':
     case 'vr': {

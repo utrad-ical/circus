@@ -6,6 +6,7 @@ export const defaultPreferences = () => {
     seriesSearchPresets: [],
     pluginJobSearchPresets: [],
     referenceLine: false,
+    initailAlphaForNewLabels: 1,
     interpolationMode: 'nearestNeighbor',
     scrollBars: 'none',
     maintainAspectRatio: false,

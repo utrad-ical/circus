@@ -81,9 +81,10 @@ comp.addAnnotation(referenceLine2);
 const setOrientation = async (v, orientation) => {
   const imageSource = comp.imageSource;
   await imageSource.ready();
-
+  const viewState = v.getState() || v.getRequestingState();
+  if (!viewState) throw new Error('View state not initialized');
   v.setState({
-    ...v.getState(),
+    ...viewState,
     section: rs.createOrthogonalMprSection(
       v.getResolution(),
       imageSource.mmDim(),
@@ -191,15 +192,16 @@ Resets the view state to one of the orthogonal MPR slice.
 --*/
 
 function mpr(orientation, position) {
-  const state = viewer.getState();
+  const viewState = viewer.getState();
+  if (!viewState) throw new Error('View state not initialized');
   const mmDim = viewer.getComposition().imageSource.mmDim();
-  state.section = rs.createOrthogonalMprSection(
+  viewState.section = rs.createOrthogonalMprSection(
     viewer.getResolution(),
     mmDim,
     orientation,
     position
   );
-  viewer.setState(state);
+  viewer.setState(viewState);
 }
 
 mpr('sagittal'); // or 'axial', 'coronal'

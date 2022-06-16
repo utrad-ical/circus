@@ -19,6 +19,8 @@ const LabeledSlider: React.FC<
   );
 };
 
+export default LabeledSlider;
+
 const StyledDiv = styled.div`
   display: flex;
   gap: 15px;

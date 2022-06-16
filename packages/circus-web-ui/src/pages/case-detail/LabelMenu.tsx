@@ -78,12 +78,14 @@ const LabelMenu: React.FC<{
     progress: null
   });
 
+  const loginUser = useLoginUser();
+  const initialAlpha = loginUser.preferences.initailAlphaForNewLabels ?? 1;
+
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
   const activeSeriesMetadata = metadata[activeSeriesIndex];
   const activeSeries = revision.series[activeSeriesIndex];
   const activeLabel =
     activeLabelIndex >= 0 ? activeSeries.labels[activeLabelIndex] : null;
-  const preferences = useLoginUser().preferences;
 
   const [defaultNewLabelType, setDefaultLabelType] =
     useLocalPreference<LabelType>('defaultLabelType', 'voxel');
@@ -125,12 +127,7 @@ const LabelMenu: React.FC<{
       updateEditingData,
       selectedLabel,
       reportProgress,
-      hints: {
-        labelColors,
-        viewers,
-        seriesMetadata: metadata,
-        initialAlpha: preferences.initailAlphaForNewLabels ?? 1
-      }
+      hints: { labelColors, viewers, seriesMetadata: metadata, initialAlpha }
     });
   };
 
@@ -220,7 +217,6 @@ const LabelMenu: React.FC<{
     viewer: Viewer,
     color = labelColors[0]
   ): InternalLabel => {
-    const alpha = preferences.initailAlphaForNewLabels ?? 1;
     const temporaryKey = generateUniqueId();
     const labelNames: { [key in LabelType]: string } = {
       voxel: 'Voxels',
@@ -234,7 +230,7 @@ const LabelMenu: React.FC<{
     const name = getUniqueLabelName(labelNames[type]);
     const data = createNewLabelData(
       type,
-      { color, alpha },
+      { color, alpha: initialAlpha },
       viewer
     ) as InternalLabelData;
     return { temporaryKey, name, ...data, attributes: {}, hidden: false };

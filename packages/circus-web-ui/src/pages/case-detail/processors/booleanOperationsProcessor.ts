@@ -26,7 +26,7 @@ const booleanOperationsProcessor: Processor<BooleanOperationsOptions> = (
     editingData,
     updateEditingData,
     selectedLabel: label,
-    hints: { labelColors },
+    hints: { labelColors, initialAlpha },
     reportProgress
   } = input;
   if (label.type !== 'voxel' || !label.data.size || !label.data.origin)
@@ -57,7 +57,6 @@ const booleanOperationsProcessor: Processor<BooleanOperationsOptions> = (
         labelColors.indexOf(targetLabel.data.color) + 1
       ) % labelColors.length
     ];
-  const alpha = 1;
 
   if (window.Worker) {
     const myWorker = new boWorker();
@@ -66,7 +65,7 @@ const booleanOperationsProcessor: Processor<BooleanOperationsOptions> = (
       targetLabel,
       operation,
       temporaryKey: generateUniqueId(),
-      appearance: { color, alpha }
+      appearance: { color, alpha: initialAlpha }
     });
     myWorker.onmessage = (e: any) => {
       updateCurrentLabels(labels => {
@@ -121,7 +120,7 @@ const booleanOperationsProcessor: Processor<BooleanOperationsOptions> = (
       name: `(${label.name})${
         operation === 'Add' ? ' + ' : operation === 'Subtract' ? ' - ' : ' ∩ '
       }(${targetLabel.name})`,
-      ...createNewLabelData('voxel', { color, alpha }),
+      ...createNewLabelData('voxel', { color, alpha: initialAlpha }),
       attributes: {},
       hidden: false
     };

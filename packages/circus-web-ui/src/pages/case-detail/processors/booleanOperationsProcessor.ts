@@ -8,8 +8,12 @@ import {
 } from '../labelData';
 import { Processor, ProcessorProgress } from './processor-types';
 import boWorker from 'worker-loader!./bo-worker';
+
+export const booleanOperationTypes = ['add', 'subtract', 'intersect'] as const;
+export type BooleanOperationType = typeof booleanOperationTypes[number];
+
 export interface BooleanOperationsOptions {
-  operation: 'Add' | 'Subtract' | 'Intersect';
+  operation: BooleanOperationType;
   targetLabelIndex: number;
 }
 
@@ -33,6 +37,8 @@ const booleanOperationsProcessor: Processor<BooleanOperationsOptions> = (
     throw new TypeError('Invalid label passed.');
 
   const { operation, targetLabelIndex } = options;
+  if (targetLabelIndex < 0) return;
+
   const targetLabel =
     editingData.revision.series[editingData.activeSeriesIndex].labels[
       targetLabelIndex
@@ -90,14 +96,14 @@ const booleanOperationsProcessor: Processor<BooleanOperationsOptions> = (
       LRx: number,
       LRy: number,
       LRz: number;
-    if (operation === 'Add') {
+    if (operation === 'add') {
       ULx = Math.min(origin1[0], origin2[0]);
       ULy = Math.min(origin1[1], origin2[1]);
       ULz = Math.min(origin1[2], origin2[2]);
       LRx = Math.max(origin1[0] + size1[0], origin2[0] + size2[0]);
       LRy = Math.max(origin1[1] + size1[1], origin2[1] + size2[1]);
       LRz = Math.max(origin1[2] + size1[2], origin2[2] + size2[2]);
-    } else if (operation === 'Subtract') {
+    } else if (operation === 'subtract') {
       [ULx, ULy, ULz] = origin1;
       LRx = ULx + size1[0];
       LRy = ULy + size1[1];
@@ -118,7 +124,7 @@ const booleanOperationsProcessor: Processor<BooleanOperationsOptions> = (
     const newLabel: InternalLabelOf<'voxel'> = {
       temporaryKey: generateUniqueId(),
       name: `(${label.name})${
-        operation === 'Add' ? ' + ' : operation === 'Subtract' ? ' - ' : ' ∩ '
+        operation === 'add' ? ' + ' : operation === 'subtract' ? ' - ' : ' ∩ '
       }(${targetLabel.name})`,
       ...createNewLabelData('voxel', { color, alpha: initialAlpha }),
       attributes: {},
@@ -145,7 +151,7 @@ const booleanOperationsProcessor: Processor<BooleanOperationsOptions> = (
     for (let k = ULz; k < LRz; k++) {
       for (let j = ULy; j < LRy; j++) {
         for (let i = ULx; i < LRx; i++) {
-          if (operation === 'Add') {
+          if (operation === 'add') {
             if (
               (isInside({ i, j, k }, origin1, size1) &&
                 0 <
@@ -163,7 +169,7 @@ const booleanOperationsProcessor: Processor<BooleanOperationsOptions> = (
                   ))
             )
               volume.writePixelAt(1, i - ULx, j - ULy, k - ULz);
-          } else if (operation === 'Subtract') {
+          } else if (operation === 'subtract') {
             if (
               0 <
                 label1.getPixelAt(

@@ -17,14 +17,14 @@ ctx.addEventListener('message', event => {
     LRx: number,
     LRy: number,
     LRz: number;
-  if (operation === 'Add') {
+  if (operation === 'add') {
     ULx = Math.min(origin1[0], origin2[0]);
     ULy = Math.min(origin1[1], origin2[1]);
     ULz = Math.min(origin1[2], origin2[2]);
     LRx = Math.max(origin1[0] + size1[0], origin2[0] + size2[0]);
     LRy = Math.max(origin1[1] + size1[1], origin2[1] + size2[1]);
     LRz = Math.max(origin1[2] + size1[2], origin2[2] + size2[2]);
-  } else if (operation === 'Subtract') {
+  } else if (operation === 'subtract') {
     [ULx, ULy, ULz] = origin1;
     LRx = ULx + size1[0];
     LRy = ULy + size1[1];
@@ -46,7 +46,7 @@ ctx.addEventListener('message', event => {
   const newLabel: InternalLabelOf<'voxel'> = {
     temporaryKey: temporaryKey,
     name: `(${label.name})${
-      operation === 'Add' ? ' + ' : operation === 'Subtract' ? ' - ' : ' ∩ '
+      operation === 'add' ? ' + ' : operation === 'subtract' ? ' - ' : ' ∩ '
     }(${targetLabel.name})`,
     ...createNewLabelData('voxel', appearance),
     attributes: {},
@@ -73,7 +73,7 @@ ctx.addEventListener('message', event => {
   for (let k = ULz; k < LRz; k++) {
     for (let j = ULy; j < LRy; j++) {
       for (let i = ULx; i < LRx; i++) {
-        if (operation === 'Add') {
+        if (operation === 'add') {
           if (
             (isInside({ i, j, k }, origin1, size1) &&
               0 <
@@ -91,7 +91,7 @@ ctx.addEventListener('message', event => {
                 ))
           )
             volume.writePixelAt(1, i - ULx, j - ULy, k - ULz);
-        } else if (operation === 'Subtract') {
+        } else if (operation === 'subtract') {
           if (
             0 <
               label1.getPixelAt(

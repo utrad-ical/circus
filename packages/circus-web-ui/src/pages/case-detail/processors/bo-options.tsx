@@ -1,61 +1,93 @@
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
-import React, { useEffect } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import LabelDropdown, { Label } from '../LabelDropdown';
-import { BooleanOperationsOptions } from './booleanOperationsProcessor';
+import LabelDisplay from '../LabelDisplay';
+import {
+  BooleanOperationsOptions,
+  BooleanOperationType,
+  booleanOperationTypes
+} from './booleanOperationsProcessor';
 import { Editor } from './processor-types';
 
-const operationOptions = {
-  Add: ' + (add)',
-  Subtract: ' - (subtract)',
-  Intersect: ' ∩ (intersect)'
+const RenderOperationType: React.FC<{
+  caption: BooleanOperationType;
+}> = props => {
+  const { caption } = props;
+  const map: Record<BooleanOperationType, [string, string]> = {
+    add: ['+', 'Add'],
+    subtract: ['-', 'Subtract'],
+    intersect: ['∩', 'Intersect']
+  };
+  return (
+    <StyledSpan>
+      <span className="symbol">{map[caption][0]}</span> ({map[caption][1]})
+    </StyledSpan>
+  );
 };
 
+const StyledSpan = styled.span`
+  > .symbol {
+    display: inline-block;
+    width: 20px;
+    font-weight: bolder;
+    text-align: center;
+  }
+`;
+
 export const initialOptions: BooleanOperationsOptions = {
-  operation: 'Add',
-  targetLabelIndex: -1
+  operation: 'add',
+  targetLabelIndex: -1 // unselected
 };
 
 export const OptionsEditor: Editor<BooleanOperationsOptions> = props => {
   const { value, onChange, activeLabelIndex, labels } = props;
-  const targetIndex = labels.flatMap((label, ind) =>
-    label.type === 'voxel' ? ind : []
+
+  const targetIndexes = labels.flatMap((label, idx) =>
+    label.type === 'voxel' && idx !== activeLabelIndex ? idx : []
   );
-  const voxelLabels = targetIndex.map(i => labels[i]);
-  const initialLabelIndex =
-    activeLabelIndex === targetIndex[0] && 1 < targetIndex.length ? 1 : 0;
-  useEffect(() => {
-    if (value.targetLabelIndex < 0) {
-      onChange({
-        ...value,
-        targetLabelIndex: targetIndex[initialLabelIndex]
-      });
-    }
-  }, []);
-  const handleSelectLabel2 = (i: number) => {
-    onChange({
-      ...value,
-      targetLabelIndex: targetIndex[i]
-    });
+
+  const handleSelectLabel2 = (key: string) => {
+    const targetLabelIndex = labels.findIndex(f => f.temporaryKey === key);
+    onChange({ ...value, targetLabelIndex });
   };
+
+  const options = useMemo(
+    () => ['unselected', ...targetIndexes.map(i => labels[i].temporaryKey)],
+    [targetIndexes, labels]
+  );
+
+  const RenderLabel = useCallback(
+    (props: { caption: string }) => {
+      if (props.caption === 'unselected') return <>Select Label...</>;
+      const label = labels.find(l => l.temporaryKey === props.caption)!;
+      return (
+        <div style={{ display: 'inline-block' }}>
+          <LabelDisplay label={label} />
+        </div>
+      );
+    },
+    [labels]
+  );
+
   return (
     <StyledDiv>
       <div>Label1:</div>
-      <Label label={labels[activeLabelIndex]} />
+      <LabelDisplay label={labels[activeLabelIndex]} />
       <div>Operation:</div>
       <ShrinkSelect
         bsSize="sm"
-        options={operationOptions}
+        options={booleanOperationTypes as unknown as string[]}
         value={value.operation}
-        onChange={v => {
-          onChange({ ...value, operation: v });
-        }}
+        onChange={operation => onChange({ ...value, operation })}
+        renderer={RenderOperationType}
       />
       <div>Label2:</div>
-      <LabelDropdown
-        labels={voxelLabels}
-        onSelect={handleSelectLabel2}
-        initialLabelIndex={initialLabelIndex}
+      <ShrinkSelect
+        bsSize="sm"
+        options={options}
+        value={labels[value.targetLabelIndex]?.temporaryKey ?? 'unselected'}
+        onChange={handleSelectLabel2}
+        renderer={RenderLabel}
       />
     </StyledDiv>
   );
@@ -65,5 +97,5 @@ const StyledDiv = styled.div`
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: center;
-  grid-gap: 5px;
+  gap: 5px;
 `;

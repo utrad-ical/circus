@@ -40,6 +40,7 @@ interface ProcessorInput {
     seriesMetadata: (DicomVolumeMetadata | undefined)[];
     viewers: { [index: string]: Viewer };
     labelColors: string[];
+    initialAlpha: number;
   };
 }
 

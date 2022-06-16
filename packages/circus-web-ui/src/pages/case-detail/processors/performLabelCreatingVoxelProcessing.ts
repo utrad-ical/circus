@@ -36,7 +36,7 @@ const performLabelCreatingVoxelProcessing = <
       editingData,
       updateEditingData,
       selectedLabel: label,
-      hints: { labelColors },
+      hints: { labelColors, initialAlpha = 1 },
       reportProgress
     } = input;
     if (label.type !== 'voxel' || !label.data.size)
@@ -46,9 +46,8 @@ const performLabelCreatingVoxelProcessing = <
       color: string,
       name: string
     ): InternalLabelOf<'voxel'> => {
-      const alpha = 1;
       const temporaryKey = generateUniqueId();
-      const data = createNewLabelData('voxel', { color, alpha });
+      const data = createNewLabelData('voxel', { color, alpha: initialAlpha });
       return { temporaryKey, name, ...data, attributes: {}, hidden: false };
     };
 

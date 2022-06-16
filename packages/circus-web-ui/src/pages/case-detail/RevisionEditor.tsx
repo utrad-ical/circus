@@ -488,7 +488,6 @@ const RevisionEditor: React.FC<{
 
       composition.annotations.forEach(antn => {
         if (antn instanceof rs.ReferenceLine) antn.dispose();
-        if (antn instanceof rs.Scrollbar) antn.dispose();
       });
       composition.removeAllAnnotations();
 
@@ -525,10 +524,10 @@ const RevisionEditor: React.FC<{
       }
 
       if (viewOptions.scrollbar !== 'none') {
-        Object.keys(viewers).forEach(k => {
+        Object.keys(viewers).forEach(key => {
           composition.addAnnotation(
-            new rs.Scrollbar(viewers[k], {
-              color: orientationColor(k),
+            new rs.Scrollbar(viewers[key], {
+              color: undefined,
               size: viewOptions.scrollbar === 'large' ? 30 : 20,
               visibility: touchDevice ? 'always' : 'hover'
             })
@@ -694,6 +693,7 @@ const RevisionEditor: React.FC<{
     () =>
       debounce((viewer: Viewer, id: string) => {
         const viewState = viewer.getState();
+        if (!viewState) return;
         const window =
           viewState.type === 'mpr' || viewState.type === '2d'
             ? viewState.window
@@ -725,9 +725,10 @@ const RevisionEditor: React.FC<{
       const seriesIndex = editingData.layoutItems.find(
         item => item.key === id
       )!.seriesIndex;
-      const state = viewer.getState();
-      if (state.type !== 'mpr' && state.type !== '2d') return;
-      const window = state.window;
+      const viewState = viewer.getState();
+      if (!viewState) return;
+      if (viewState.type !== 'mpr' && viewState.type !== '2d') return;
+      const window = viewState.window;
       if (!window) return;
       viewWindows.current[seriesIndex] = window;
       setCurrentWindow(window);

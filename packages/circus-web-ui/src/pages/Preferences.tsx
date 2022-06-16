@@ -4,7 +4,8 @@ import PropertyEditor, {
 } from '@smikitky/rb-components/lib/PropertyEditor';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
-import { Button, Panel, FormControl } from 'components/react-bootstrap';
+import { labeledSlider } from 'components/LabeledSlider';
+import { Button, FormControl, Panel } from 'components/react-bootstrap';
 import React, { useCallback, useEffect, useState } from 'react';
 import { SearchPreset, UserPreferences } from 'store/loginUser';
 import { useApi } from 'utils/api';
@@ -154,6 +155,17 @@ const circusDBProperties: PropertyEditorProperties<UserPreferences> = [
     key: 'referenceLine',
     caption: 'Reference lines',
     editor: et.checkbox({ label: 'show' }) as et.Editor<boolean | undefined>
+  },
+  {
+    key: 'initailAlphaForNewLabels',
+    caption: 'Initial alpha for new labels',
+    editor: labeledSlider({
+      min: 0,
+      max: 1,
+      step: 0.1,
+      defaultValue: 1,
+      label: value => `${Math.round(value * 100)}%`
+    })
   },
   {
     key: 'interpolationMode',

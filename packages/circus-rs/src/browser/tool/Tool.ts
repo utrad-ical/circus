@@ -50,9 +50,10 @@ export default class ToolBaseClass<T extends ToolOptions = {}>
 function createPagerWheelHandler(): (viewerEvent: ViewerEvent) => any {
   return ev => {
     const viewer = ev.viewer;
-    const state = viewer.getState();
+    const viewState = viewer.getState();
+    if (!viewState) return;
 
-    switch (state.type) {
+    switch (viewState.type) {
       case 'mpr': {
         const step = -sign(ev.original.deltaY) * (ev.original.ctrlKey ? 5 : 1);
         handlePageBy(ev.viewer, step);

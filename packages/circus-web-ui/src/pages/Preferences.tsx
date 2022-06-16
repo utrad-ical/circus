@@ -2,13 +2,12 @@ import * as et from '@smikitky/rb-components/lib/editor-types';
 import PropertyEditor, {
   PropertyEditorProperties
 } from '@smikitky/rb-components/lib/PropertyEditor';
-import Slider from '@smikitky/rb-components/lib/Slider';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
+import { labeledSlider } from 'components/LabeledSlider';
 import { Button, FormControl, Panel } from 'components/react-bootstrap';
 import React, { useCallback, useEffect, useState } from 'react';
 import { SearchPreset, UserPreferences } from 'store/loginUser';
-import styled from 'styled-components';
 import { useApi } from 'utils/api';
 import { useUserPreferences } from 'utils/useLoginUser';
 import useShowMessage from 'utils/useShowMessage';
@@ -116,45 +115,6 @@ const TemplateEditor: et.Editor<string[] | undefined> = props => {
     </>
   );
 };
-
-const labeledSlider = (options: {
-  min: number;
-  max: number;
-  step: number;
-  defaultValue: number;
-  label: (value: number) => string;
-}): et.Editor<number | undefined> => {
-  const { min, max, step, defaultValue, label } = options;
-  return props => {
-    const { value, onChange } = props;
-    return (
-      <StyledAlphaDiv>
-        <div className="alpha-label">
-          {label(value ?? options.defaultValue)}&nbsp;
-        </div>
-        <Slider
-          className="alpha-slider"
-          min={min}
-          max={max}
-          step={step}
-          value={value ?? defaultValue}
-          onChange={onChange}
-        />
-      </StyledAlphaDiv>
-    );
-  };
-};
-
-const StyledAlphaDiv = styled.div`
-  display: flex;
-  align-items: center;
-  .alpha-label {
-    width: 3em;
-  }
-  .alpha-slider {
-    width: 85px;
-  }
-`;
 
 const appearanceProperties: PropertyEditorProperties<UserPreferences> = [
   {

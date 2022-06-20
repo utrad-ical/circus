@@ -1,4 +1,4 @@
-const ctx: Worker = self as any;
+const ctx: DedicatedWorkerGlobalScope = self as any;
 import { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
 import CCL26 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D26';
 import CCL6 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D6';
@@ -16,4 +16,5 @@ ctx.addEventListener('message', event => {
     labelingResults = err.message;
   }
   ctx.postMessage(labelingResults);
+  ctx.close();
 });

@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.settings.json",
   "compilerOptions": {
-    "lib": ["dom", "es2019"],
+    "lib": ["dom", "webworker", "es2019"],
     "jsx": "react",
     "rootDir": "src",
     "baseUrl": "src",

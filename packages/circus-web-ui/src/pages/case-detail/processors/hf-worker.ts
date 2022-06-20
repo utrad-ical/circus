@@ -1,4 +1,4 @@
-const ctx: Worker = self as any;
+const ctx: DedicatedWorkerGlobalScope = self as any;
 import HoleFilling2D, {
   HoleFilling3D
 } from '@utrad-ical/circus-rs/src/common/CCL/holeFilling';
@@ -94,4 +94,5 @@ ctx.addEventListener('message', event => {
     holeFillingResult = err.message;
   }
   ctx.postMessage(holeFillingResult);
+  ctx.close();
 });

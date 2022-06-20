@@ -1,7 +1,7 @@
 import RawData from '@utrad-ical/circus-rs/src/common/RawData';
 import { createNewLabelData, InternalLabelOf } from '../labelData';
 
-const ctx: Worker = self as any;
+const ctx: DedicatedWorkerGlobalScope = self as any;
 
 ctx.addEventListener('message', event => {
   const { label, targetLabel, operation, temporaryKey, appearance } =
@@ -126,4 +126,5 @@ ctx.addEventListener('message', event => {
   }
   newLabel.data.volumeArrayBuffer = volume.data;
   ctx.postMessage(newLabel);
+  ctx.close();
 });

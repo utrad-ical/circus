@@ -1,5 +1,5 @@
 import Icon from 'components/Icon';
-import React, { DragEventHandler, MouseEventHandler } from 'react';
+import React, { DragEventHandler, MouseEventHandler, useMemo } from 'react';
 import styled from 'styled-components';
 import { mostReadable } from 'tinycolor2';
 import { InternalLabel, labelTypes } from './labelData';
@@ -25,10 +25,10 @@ const LabelDisplay: React.FC<{
     onColorDragEnd
   } = props;
 
-  const color = mostReadable(label.data.color, [
-    '#000000',
-    '#ffffff'
-  ]).toHexString();
+  const iconColor = useMemo(
+    () => mostReadable(label.data.color, ['#000000', '#ffffff']).toHexString(),
+    [label.data.color]
+  );
 
   return (
     <StyledLabelDiv className="circus-label">
@@ -39,7 +39,7 @@ const LabelDisplay: React.FC<{
         onDragStart={onColorDragStart}
         onDragOver={onColorDragOver}
         onDragEnd={onColorDragEnd}
-        style={{ backgroundColor: label.data.color, color }}
+        style={{ backgroundColor: label.data.color, color: iconColor }}
       >
         {visibility === 'allHidden' ? (
           <Icon icon="glyphicon-remove-circle" />

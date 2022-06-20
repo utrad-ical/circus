@@ -1,4 +1,4 @@
-const ctx: Worker = self as any;
+const ctx: DedicatedWorkerGlobalScope = self as any;
 import dilation from '@utrad-ical/circus-rs/src/common/morphology/dilation';
 import erosion from '@utrad-ical/circus-rs/src/common/morphology/erosion';
 
@@ -15,4 +15,5 @@ ctx.addEventListener('message', event => {
     result = err.message;
   }
   ctx.postMessage(result);
+  ctx.close();
 });

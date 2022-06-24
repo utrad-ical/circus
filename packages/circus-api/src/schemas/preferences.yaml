@@ -41,4 +41,6 @@ properties:
     type: array
     items:
       type: string
+  labelColors:
+    type: object
 additionalProperties: false

@@ -11,6 +11,7 @@ import { SearchPreset, UserPreferences } from 'store/loginUser';
 import { useApi } from 'utils/api';
 import { useUserPreferences } from 'utils/useLoginUser';
 import useShowMessage from 'utils/useShowMessage';
+import LabelColorsSelector from 'components/LabelColorsSelector';
 
 const PresetDeleteEditor: et.Editor<SearchPreset[] | undefined> = props => {
   const { value = [], onChange } = props;
@@ -166,6 +167,11 @@ const circusDBProperties: PropertyEditorProperties<UserPreferences> = [
       defaultValue: 1,
       label: value => `${Math.round(value * 100)}%`
     })
+  },
+  {
+    key: 'labelColors',
+    caption: 'Color table for label',
+    editor: LabelColorsSelector
   },
   {
     key: 'interpolationMode',

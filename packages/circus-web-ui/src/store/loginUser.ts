@@ -28,6 +28,7 @@ export interface UserPreferences {
   fixCenterOfGravity?: boolean;
   dimmedOutlineFor2DLabels?: string;
   revisionMessageTemplates?: string[];
+  labelColors?: { default: boolean; customColors: string[] };
 }
 
 export type MyListResourceType = 'series' | 'clinicalCases' | 'jobs';

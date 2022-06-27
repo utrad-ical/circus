@@ -13,6 +13,6 @@ export const defaultPreferences = () => {
     fixCenterOfGravity: false,
     dimmedOutlineFor2DLabels: 'show',
     revisionMessageTemplates: [],
-    labelColors: { default: true, customColors: [] }
+    labelColors: { useDefault: true, customColors: [] }
   };
 };

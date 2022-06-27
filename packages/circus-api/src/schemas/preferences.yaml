@@ -43,4 +43,9 @@ properties:
       type: string
   labelColors:
     type: object
+    properties:
+      useDefault:
+        type: boolean
+      customColors:
+        type: array
 additionalProperties: false

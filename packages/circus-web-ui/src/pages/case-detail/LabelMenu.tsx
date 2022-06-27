@@ -83,7 +83,7 @@ const LabelMenu: React.FC<{
   const initialAlpha = loginUser.preferences.initailAlphaForNewLabels ?? 1;
   const labelColors =
     !loginUser.preferences.labelColors ||
-    loginUser.preferences.labelColors.default
+    loginUser.preferences.labelColors.useDefault
       ? defaultLabelColors
       : loginUser.preferences.labelColors.customColors;
 

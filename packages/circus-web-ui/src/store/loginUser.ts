@@ -14,7 +14,7 @@ export interface SearchPreset {
   condition: any;
 }
 
-export type LabelColorsEditorType = {
+export type LabelColorsSettings = {
   useDefault: boolean;
   customColors: string[];
 };
@@ -33,7 +33,7 @@ export interface UserPreferences {
   fixCenterOfGravity?: boolean;
   dimmedOutlineFor2DLabels?: string;
   revisionMessageTemplates?: string[];
-  labelColors?: LabelColorsEditorType;
+  labelColors?: LabelColorsSettings;
 }
 
 export type MyListResourceType = 'series' | 'clinicalCases' | 'jobs';

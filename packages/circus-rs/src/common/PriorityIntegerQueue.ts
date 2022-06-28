@@ -1,4 +1,6 @@
-import MultiRange, { Initializer as MultiRangeInitializer } from 'multi-integer-range';
+import MultiRange, {
+  Initializer as MultiRangeInitializer
+} from 'multi-integer-range';
 
 interface Entry {
   priority: number;
@@ -35,7 +37,9 @@ export default class PriorityIntegerQueue {
 
     const newEntry = { priority, value: newRange };
     this.entries.splice(index, 0, newEntry);
-    this.entries = this.entries.filter(({ value }) => value.segmentLength() > 0);
+    this.entries = this.entries.filter(
+      ({ value }) => value.segmentLength() > 0
+    );
     // console.log(
     //   this.entries.map(e => e.priority + ' ' + e.value).join('\n'),
     //   '\n'

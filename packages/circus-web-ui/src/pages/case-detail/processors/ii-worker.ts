@@ -1,4 +1,4 @@
-const ctx: Worker = self as any;
+const ctx: DedicatedWorkerGlobalScope = self as any;
 import intersliceInterpolation from '@utrad-ical/circus-rs/src/common/morphology/intersliceInterpolation';
 
 ctx.addEventListener('message', event => {
@@ -12,4 +12,5 @@ ctx.addEventListener('message', event => {
     result = err.message;
   }
   ctx.postMessage(result);
+  ctx.close();
 });

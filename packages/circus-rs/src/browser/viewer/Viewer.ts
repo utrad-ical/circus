@@ -1,15 +1,16 @@
 import { EventEmitter } from 'events';
+import Annotation from '../annotation/Annotation';
 import Composition from '../Composition';
-import ViewerEvent from './ViewerEvent';
-import ViewState from '../ViewState';
 import {
   DrawResult,
+  isDraft,
   ViewStateResizeTransformer
 } from '../image-source/ImageSource';
-import { Tool } from '../tool/Tool';
-import Annotation from '../annotation/Annotation';
 import LoadingIndicator from '../interface/LoadingIndicator';
+import { Tool } from '../tool/Tool';
+import ViewState from '../ViewState';
 import defaultLoadingIndicator from './defaultLoadingIndicator';
+import ViewerEvent from './ViewerEvent';
 
 /**
  * Viewer is the main component of CIRCUS RS, and wraps a HTML canvas element
@@ -21,12 +22,14 @@ export default class Viewer extends EventEmitter {
   private rootDiv: HTMLDivElement;
 
   private viewState: ViewState | undefined;
+  private requestingViewState: ViewState | undefined;
 
   private composition: Composition | undefined;
 
   private activeTool: Tool | undefined = undefined;
 
-  private cachedSourceImage: ImageData | undefined;
+  private cachedSourceImage: ImageData | undefined = undefined;
+  private cachedSourceImageIsDraft: boolean | undefined = undefined;
 
   private hoveringAnnotation: Annotation | undefined = undefined;
 
@@ -47,7 +50,6 @@ export default class Viewer extends EventEmitter {
   private boundEventHandler: (event: MouseEvent | TouchEvent) => void;
 
   private imageReady: boolean = false;
-  private firstImageDrawn: boolean = false;
 
   private isDragging: boolean = false;
 
@@ -237,18 +239,22 @@ export default class Viewer extends EventEmitter {
    * This function is automatically called when ImageSource.draw() has
    * returned an image (either draft or final),
    * but can be called arbitrary times when annotations are updated.
-   * This function does nothing when ImageSource.draw() is in progress
-   * (i.e., this.currentRender is not empty).
    */
-  public renderAnnotations(viewState: ViewState | null = null): void {
-    if (!viewState) viewState = this.viewState || null;
+  public renderAnnotations(): void {
     const comp = this.composition;
-    if (!viewState || !comp) return;
-    if (this.cachedSourceImage)
-      this.renderImageDataToCanvas(this.cachedSourceImage);
+    if (!comp) return;
+
+    const image = this.cachedSourceImage;
+    if (image) this.renderImageDataToCanvas(image);
+
+    const viewState = this.viewState;
+    if (!viewState) return;
+
     for (const annotation of comp.annotations) {
       annotation.draw(this, viewState, {
-        hover: this.hoveringAnnotation === annotation
+        hover: this.hoveringAnnotation === annotation,
+        draftImage: this.cachedSourceImageIsDraft,
+        requestingViewState: this.requestingViewState
       });
     }
   }
@@ -282,28 +288,50 @@ export default class Viewer extends EventEmitter {
     const src = this.composition!.imageSource;
 
     const p: Promise<boolean> = waiter.then(() => {
-      const state = this.viewState;
-      if (!state) throw new Error('View state not initialized');
+      const viewState = this.requestingViewState || this.viewState;
+      if (!viewState) return false;
 
       // Used to cancel the subsequent results after intial result
       const abortController = new AbortController();
 
-      const handleImageDraw = (state: ViewState, drawResult: DrawResult) => {
+      const handleImageDraw = (
+        drawnState: ViewState,
+        drawResult: DrawResult
+      ) => {
         if (this.currentRender !== p) return true; // happens on subsequent results
-        const drawImage = 'draft' in drawResult ? drawResult.draft : drawResult;
-        this.cachedSourceImage = drawImage;
-        if ('next' in drawResult && !this.nextRender) {
-          drawResult.next().then(drawResult =>
-            handleImageDraw(state, drawResult)
-          );
-          this.emit('drawDraft', state);
+
+        const prevState = this.viewState;
+        if (prevState !== drawnState) {
+          this.viewState = drawnState;
+        }
+
+        if (this.requestingViewState === drawnState)
+          this.requestingViewState = undefined;
+
+        if (isDraft(drawResult)) {
+          this.cachedSourceImageIsDraft = true;
+          this.cachedSourceImage = drawResult.draft;
+          if (!this.nextRender) {
+            drawResult.next().then(drawResult =>
+              handleImageDraw(drawnState, drawResult)
+            );
+          }
         } else {
+          this.cachedSourceImageIsDraft = false;
+          this.cachedSourceImage = drawResult;
+        }
+
+        if (!isDraft(drawResult) || this.nextRender) {
           abortController.abort();
           this.currentRender = null;
         }
-        this.renderAnnotations(state);
-        this.firstImageDrawn = true;
-        this.emit('draw', state);
+
+        this.renderAnnotations();
+
+        if (prevState !== drawnState) {
+          this.emit('stateChange', prevState, drawnState);
+        }
+
         return true;
       };
 
@@ -317,8 +345,8 @@ export default class Viewer extends EventEmitter {
       this.currentRender = p;
       this.nextRender = null;
       return src
-        .draw(this, state, abortController.signal)
-        .then(drawResult => handleImageDraw(state, drawResult));
+        .draw(this, viewState, abortController.signal)
+        .then(drawResult => handleImageDraw(viewState, drawResult));
     });
     // Remember this render() call as the most recent one,
     // possibly overwriting and expiring the previous nextRender
@@ -336,20 +364,29 @@ export default class Viewer extends EventEmitter {
   /**
    * Sets the view state and re-renders the viewer.
    */
-  public setState(state: ViewState): void {
-    if (this.viewState === state) return;
-    const prevState = this.viewState;
-    this.viewState = state;
-    this.emit('stateChange', prevState, state);
+  public setState(viewState: ViewState): void {
+    const prevRequestingState = this.requestingViewState || this.viewState;
+    if (prevRequestingState === viewState) return;
+
+    this.requestingViewState = viewState;
+    this.emit('requestingStateChange', prevRequestingState, viewState);
+
+    this.renderAnnotations();
     this.render();
   }
 
   /**
-   * Returns the current view state.
+   * Returns the rendered current view state.
    */
-  public getState(): ViewState {
-    if (!this.viewState) throw new Error('View state not initialized');
+  public getState(): ViewState | undefined {
     return this.viewState;
+  }
+
+  /**
+   * Returns the requesting view state.
+   */
+  public getRequestingState(): ViewState | undefined {
+    return this.requestingViewState;
   }
 
   private detachCurrentComposition(): void {
@@ -379,11 +416,10 @@ export default class Viewer extends EventEmitter {
     this.composition = composition;
     this.composition.registerViewer(this);
     this.imageReady = false;
-    this.firstImageDrawn = false;
 
     // Loading indicator
     const drawLoadingIndicator = (time: number) => {
-      if (this.firstImageDrawn) return;
+      if (this.viewState) return;
       const ctx = this.canvas.getContext('2d')!;
       this.loadingIndicator(ctx, time);
       requestAnimationFrame(drawLoadingIndicator);
@@ -431,15 +467,13 @@ export default class Viewer extends EventEmitter {
 
   public handleResize(): void {
     const transformer = this.viewStateResizeTransformer;
-    if (transformer) {
+    const prevState = this.viewState;
+    if (transformer && !!prevState) {
       const div = this.rootDiv;
-      const newResolution: [number, number] = [
-        div.offsetWidth,
-        div.offsetHeight
-      ];
-      const state = this.getState();
-      const newState = transformer(state, this.getResolution(), newResolution);
-      this.setState(newState);
+      const beforeSize = this.getResolution();
+      const afterSize: [number, number] = [div.offsetWidth, div.offsetHeight];
+      const viewState = transformer(prevState, beforeSize, afterSize);
+      this.setState(viewState);
     }
     this.resizeCanvas();
   }

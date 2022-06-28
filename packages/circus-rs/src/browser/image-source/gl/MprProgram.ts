@@ -16,15 +16,11 @@ import {
 } from './webgl-util';
 import DicomVolume from 'common/DicomVolume';
 import volumeTextureTransferer from './texture/volumeTextureTransferer';
-
 // WebGL shader source (GLSL)
-const vertexShaderSource = require('./glsl/mpr-section.vert');
-const fragmentShaderSource = [
-  require('./glsl/mpr-header.frag'),
-  require('./glsl/pixel-value.frag'),
-  require('./glsl/pixel-color.frag'),
-  require('./glsl/mpr-main.frag')
-].join('\n');
+import {
+  vertexShaderSource,
+  fragmentShaderSource
+} from './glsl/mprShaderSource';
 
 export default class MprProgram extends ShaderProgram {
   /**

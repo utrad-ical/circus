@@ -1,8 +1,8 @@
-import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import { Button, Modal, ProgressBar } from 'components/react-bootstrap';
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { ProcessorProgress } from './processor-types';
+import { ProcessorProgress, Editor } from './processor-types';
+import { InternalLabel } from '../labelData';
 
 const ProcessorModal: React.FC<{
   title: string;
@@ -11,6 +11,8 @@ const ProcessorModal: React.FC<{
   onOkClick: (options: any) => void;
   onHide: () => void;
   progress: ProcessorProgress | null;
+  activeLabelIndex: number;
+  labels: InternalLabel[];
 }> = props => {
   const {
     title,
@@ -18,7 +20,9 @@ const ProcessorModal: React.FC<{
     initialOptions,
     onOkClick,
     onHide,
-    progress
+    progress,
+    activeLabelIndex,
+    labels
   } = props;
 
   const handleOkClick = () => {
@@ -32,7 +36,12 @@ const ProcessorModal: React.FC<{
       <Modal.Header>{title}</Modal.Header>
       <Modal.Body>
         <StyledDiv>
-          <OptionsEditor value={options} onChange={setOptions} />
+          <OptionsEditor
+            value={options}
+            onChange={setOptions}
+            activeLabelIndex={activeLabelIndex}
+            labels={labels}
+          />
           {progress && 'value' in progress && (
             <div>
               <ProgressBar

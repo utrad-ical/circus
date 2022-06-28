@@ -124,9 +124,13 @@ const ImageViewer: React.FC<{
     setViewer(viewer);
     viewer.on('imageReady', () => {
       if (typeof savedInitialStateSetter.current === 'function') {
-        const state = viewer.getState();
-        const newState = savedInitialStateSetter.current(viewer, state, id);
-        viewer.setState(newState);
+        const baseState = composition!.imageSource.initialState(viewer);
+        const viewState = savedInitialStateSetter.current(
+          viewer,
+          baseState,
+          id
+        );
+        viewer.setState(viewState);
       }
       initialStateSet.current = true;
     });
@@ -175,8 +179,9 @@ const ImageViewer: React.FC<{
     if (!stateChanger) return;
     const handleChangeState = (changer: StateChangerFunc<rs.ViewState>) => {
       if (!viewer) return;
-      const state = viewer.getState();
-      viewer.setState(changer(state, viewer, id));
+      const viewState = viewer.getState();
+      if (!viewState) return;
+      viewer.setState(changer(viewState, viewer, id));
     };
     stateChanger.on(handleChangeState);
     return () => {

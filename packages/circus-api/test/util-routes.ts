@@ -115,9 +115,9 @@ export const setUpAppForRoutesTest = async () => {
     {
       dicomFileRepository,
       apiLogger,
-      models,
       dicomUtilityRunner,
-      dicomTagReader
+      dicomTagReader,
+      transactionManager
     }
   );
 
@@ -148,6 +148,7 @@ export const setUpAppForRoutesTest = async () => {
     {
       debug: true,
       pluginResultsPath: path.join(__dirname, 'plugin-results'),
+      pluginCachePath: path.join(__dirname, 'plugin-cache'),
       uploadFileSizeMaxBytes: 200 * 1024 * 1024,
       dicomImageServerUrl: '' // dummy
     },
@@ -158,6 +159,7 @@ export const setUpAppForRoutesTest = async () => {
       models,
       blobStorage: await createMemoryStorage(undefined),
       dicomFileRepository,
+      dicomTagReader,
       dicomImporter,
       core: csCore,
       mhdPacker: null as any, // dummy
@@ -165,7 +167,10 @@ export const setUpAppForRoutesTest = async () => {
       volumeProvider: null as any, // dummy
       taskManager,
       dicomVoxelDumper,
-      oauthServer: await createOauthServer({}, { models, authProvider }),
+      oauthServer: await createOauthServer(
+        {},
+        { defaultAuthProvider: authProvider, models, authProvider }
+      ),
       transactionManager
     }
   );

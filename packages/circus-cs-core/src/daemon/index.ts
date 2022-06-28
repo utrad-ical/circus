@@ -63,7 +63,7 @@ async function createLoopRunOptions(
   const dispose = () => serviceLoader.dispose();
 
   const cancellableTimer = createCancellableTimer(
-    config.jobManager.options.interval
+    config.jobManager.options.checkQueueInterval
   );
 
   return {

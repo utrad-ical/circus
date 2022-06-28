@@ -23,6 +23,10 @@ properties:
       type: object
   referenceLine:
     type: boolean
+  initailAlphaForNewLabels:
+    type: number
+    minimum: 0
+    maximum: 1
   interpolationMode:
     enum: ['nearestNeighbor', 'trilinear']
   scrollBars:

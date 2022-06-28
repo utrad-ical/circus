@@ -2,8 +2,8 @@ import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { Section, Vector2D, Vector3D } from '@utrad-ical/circus-rs/src/browser';
 import {
-  sectionTo2dViewState,
-  detectOrthogonalSection
+  detectOrthogonalSection,
+  sectionTo2dViewState
 } from '@utrad-ical/circus-rs/src/browser/section-util';
 import focusBy from '@utrad-ical/circus-rs/src/browser/tool/state/focusBy';
 import { gzipSync } from 'fflate';
@@ -405,9 +405,9 @@ const getCenterOfLabel = (
       const { voxelSize } = src.metadata;
 
       return [
-        (origin[0] + size[0]) * voxelSize[0],
-        (origin[1] + size[1]) * voxelSize[1],
-        (origin[2] + size[2]) * voxelSize[2]
+        (origin[0] + size[0] * 0.5) * voxelSize[0],
+        (origin[1] + size[1] * 0.5) * voxelSize[1],
+        (origin[2] + size[2] * 0.5) * voxelSize[2]
       ];
     }
     case 'cuboid':
@@ -457,6 +457,7 @@ export const setRecommendedDisplay = (
         .filter(viewer => viewer.getComposition() === composition)
         .forEach(viewer => {
           const prevState = viewer.getState();
+          if (!prevState) return;
           switch (prevState.type) {
             case '2d': {
               viewer.setState({
@@ -467,8 +468,7 @@ export const setRecommendedDisplay = (
             case 'mpr':
             case 'vr':
               {
-                const prevSection = prevState.section;
-                const orientation = detectOrthogonalSection(prevSection);
+                const orientation = detectOrthogonalSection(prevState.section);
                 if (orientation === reproduceOrientation) {
                   viewer.setState({
                     ...prevState,

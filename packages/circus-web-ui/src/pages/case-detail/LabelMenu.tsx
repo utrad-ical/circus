@@ -20,6 +20,7 @@ import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
 import useLocalPreference from 'utils/useLocalPreference';
+import useLoginUser from 'utils/useLoginUser';
 import * as c from './caseStore';
 import createCurrentLabelsUpdator from './createCurrentLabelsUpdator';
 import {
@@ -31,9 +32,9 @@ import {
   labelTypes
 } from './labelData';
 import {
+  ProcessorProgress,
   processors,
-  ProcessorType,
-  ProcessorProgress
+  ProcessorType
 } from './processors/processor-types';
 import ProcessorDropdown from './processors/ProcessorDropdown';
 import ProcessorModal from './processors/ProcessorModal';
@@ -76,6 +77,9 @@ const LabelMenu: React.FC<{
     showModal: false,
     progress: null
   });
+
+  const loginUser = useLoginUser();
+  const initialAlpha = loginUser.preferences.initailAlphaForNewLabels ?? 1;
 
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
   const activeSeriesMetadata = metadata[activeSeriesIndex];
@@ -123,7 +127,7 @@ const LabelMenu: React.FC<{
       updateEditingData,
       selectedLabel,
       reportProgress,
-      hints: { labelColors, viewers, seriesMetadata: metadata }
+      hints: { labelColors, viewers, seriesMetadata: metadata, initialAlpha }
     });
   };
 
@@ -213,7 +217,6 @@ const LabelMenu: React.FC<{
     viewer: Viewer,
     color = labelColors[0]
   ): InternalLabel => {
-    const alpha = 1;
     const temporaryKey = generateUniqueId();
     const labelNames: { [key in LabelType]: string } = {
       voxel: 'Voxels',
@@ -227,7 +230,7 @@ const LabelMenu: React.FC<{
     const name = getUniqueLabelName(labelNames[type]);
     const data = createNewLabelData(
       type,
-      { color, alpha },
+      { color, alpha: initialAlpha },
       viewer
     ) as InternalLabelData;
     return { temporaryKey, name, ...data, attributes: {}, hidden: false };
@@ -257,10 +260,13 @@ const LabelMenu: React.FC<{
       return;
     }
 
-    if (
-      !labelTypes[type].allow2D &&
-      viewers[viewerId].getState()?.type !== 'mpr'
-    ) {
+    const viewState = viewers[viewerId].getState();
+    if (!viewState) {
+      await alert('View state not initialized.');
+      return;
+    }
+
+    if (!labelTypes[type].allow2D && viewState.type !== 'mpr') {
       await alert('2D viewer does not support ' + type + ' labels.');
       return;
     }
@@ -390,6 +396,8 @@ const LabelMenu: React.FC<{
           onOkClick={executeProcessor(processorState.type)}
           progress={processorState.progress}
           {...processors[processorState.type!].settingsModal!}
+          activeLabelIndex={activeLabelIndex}
+          labels={activeSeries.labels}
         />
       )}
     </StyledButtonsDiv>

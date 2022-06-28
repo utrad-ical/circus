@@ -42,8 +42,9 @@ export default class VoxelCloudToolBase<
     const comp = viewer.getComposition();
     if (!comp) throw new Error('Composition not initialized'); // should not happen
 
-    const state = viewer.getState();
-    if (state.type !== 'mpr') throw new Error('Unsupported view state.');
+    const viewState = viewer.getState();
+    if (!viewState) return;
+    if (viewState.type !== 'mpr') throw new Error('Unsupported view state.');
 
     const activeCloud = this.activeCloud;
     if (!activeCloud) return; // no cloud to paint on

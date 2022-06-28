@@ -23,7 +23,11 @@ const ProcessorDropdown: React.FC<{
           <MenuItem
             key={type}
             eventKey={type}
-            disabled={activeLabelType !== processors[type].labelType}
+            disabled={
+              !processors[type].labelType.some(
+                labelType => labelType === activeLabelType
+              )
+            }
           >
             {processors[type].caption}
           </MenuItem>

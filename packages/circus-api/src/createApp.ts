@@ -20,7 +20,8 @@ import {
   Validator,
   Models,
   DicomImporter,
-  TransactionManager
+  TransactionManager,
+  DicomTagReader
 } from './interface';
 import checkPrivilege from './middleware/auth/checkPrivilege';
 import fixUserMiddleware from './middleware/auth/fixUser';
@@ -112,6 +113,7 @@ interface CreateAppOptions {
   fixUser?: string;
   corsOrigin?: string;
   pluginResultsPath: string;
+  pluginCachePath: string;
   dicomImageServerUrl: string;
   uploadFileSizeMaxBytes: number;
 }
@@ -132,6 +134,7 @@ export const createApp: FunctionService<
     rsSeriesRoutes: Koa.Middleware;
     volumeProvider: VolumeProvider;
     dicomFileRepository: DicomFileRepository;
+    dicomTagReader: DicomTagReader;
     dicomImporter: DicomImporter;
     taskManager: TaskManager;
     mhdPacker: MhdPacker;
@@ -153,6 +156,7 @@ export const createApp: FunctionService<
     volumeProvider,
     dicomImporter,
     dicomFileRepository,
+    dicomTagReader,
     taskManager,
     mhdPacker,
     dicomVoxelDumper,
@@ -165,6 +169,7 @@ export const createApp: FunctionService<
     debug,
     corsOrigin,
     pluginResultsPath,
+    pluginCachePath,
     uploadFileSizeMaxBytes,
     dicomImageServerUrl
   } = options;
@@ -178,8 +183,10 @@ export const createApp: FunctionService<
     models,
     blobStorage,
     dicomFileRepository,
+    dicomTagReader,
     dicomImporter,
     pluginResultsPath,
+    pluginCachePath,
     cs: core,
     volumeProvider,
     uploadFileSizeMaxBytes,
@@ -248,6 +255,7 @@ createApp.dependencies = [
   'rsSeriesRoutes',
   'volumeProvider',
   'dicomFileRepository',
+  'dicomTagReader',
   'dicomImporter',
   'taskManager',
   'mhdPacker',

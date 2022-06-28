@@ -7,6 +7,7 @@ import { Router, Route, Switch } from 'react-router-dom';
 import Application from 'pages/Application';
 
 import LoginScreen from 'pages/LoginScreen';
+import OneTimeLogin from 'pages/OneTimeLogin';
 import HomePage from 'pages/HomePage';
 import SeriesSearch from 'pages/search/SeriesSearch';
 import CreateNewCase from 'pages/CreateNewCase';
@@ -134,7 +135,43 @@ const TheApp: React.FC<{}> = () => {
   const [manager, setManager] = useState<ReturnType<typeof loginManager>>();
   const [api, setApi] = useState<ApiCaller>();
 
+  const handleStorageEvent = (event: StorageEvent) => {
+    console.log('storage', event.key);
+    switch (event.key) {
+      case 'getSessionStorage': {
+        // Send the current credentials to other tabs via localStorage
+        localStorage.setItem(
+          'transferCredentials',
+          sessionStorage.getItem('tokenCredentials') ?? ''
+        );
+        localStorage.removeItem('transferCredentials');
+        break;
+      }
+      case 'transferCredentials': {
+        // Another tab sent credentials
+        if (!event.newValue) return;
+        if (location.pathname === '/') return;
+        // Save the sent credentials to sessionStorage and recreate loginManger
+        sessionStorage.setItem('tokenCredentials', event.newValue);
+        const manager = loginManager('/', store.dispatch, api =>
+          setApi(() => api!)
+        );
+        setManager(manager);
+        if (manager.restoreApiCaller()) {
+          manager.refreshUserInfo(true);
+        }
+        break;
+      }
+    }
+  };
+
   useEffect(() => {
+    window.addEventListener('storage', handleStorageEvent);
+    if (!sessionStorage.length) {
+      localStorage.setItem('getSessionStorage', 'a new tab has been created');
+      localStorage.removeItem('getSessionStorage');
+    }
+
     // First-time login management
     const manager = loginManager('/', store.dispatch, api =>
       setApi(() => api!)
@@ -169,6 +206,7 @@ const TheApp: React.FC<{}> = () => {
               <Router history={browserHistory}>
                 <Switch>
                   <Route exact path="/" component={LoginScreen} />
+                  <Route exact path="/otp" component={OneTimeLogin} />
                   <AppRoutes />
                 </Switch>
               </Router>

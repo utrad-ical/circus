@@ -7,12 +7,35 @@ import delay from '../../utils/delay';
 import { setUpMongoFixture } from '../../../test/util-mongo';
 import zlib from 'zlib';
 import tarfs from 'tar-fs';
+import { DicomFileRepository } from '@utrad-ical/circus-lib';
 
-let apiTest: ApiTest, ax: typeof apiTest.axiosInstances;
+let apiTest: ApiTest,
+  ax: typeof apiTest.axiosInstances,
+  dicomFileRepository: DicomFileRepository;
+
 beforeAll(async () => {
   apiTest = await setUpAppForRoutesTest();
   ax = apiTest.axiosInstances;
+  dicomFileRepository = apiTest.dicomFileRepository;
+  const headFirstSeries = await dicomFileRepository.getSeries(
+    '333.444.555.666.777'
+  );
+  const footFirstSeries = await dicomFileRepository.getSeries(
+    '333.444.555.666.888'
+  );
+  for (let i = 1; i <= 10; i++) {
+    const num = i.toString().padStart(3, '0');
+    const headFirstFile = await fs.readFile(
+      path.join(__dirname, `../../../test/dicom/head-first${num}.dcm`)
+    );
+    const footFirstFile = await fs.readFile(
+      path.join(__dirname, `../../../test/dicom/foot-first${num}.dcm`)
+    );
+    await headFirstSeries.save(i, headFirstFile.buffer as ArrayBuffer);
+    await footFirstSeries.save(i, footFirstFile.buffer as ArrayBuffer);
+  }
 });
+
 afterAll(async () => await apiTest.tearDown());
 
 it('should perform search', async () => {
@@ -21,7 +44,7 @@ it('should perform search', async () => {
     method: 'get'
   });
   expect(res.status).toBe(200);
-  expect(res.data.items).toHaveLength(7);
+  expect(res.data.items).toHaveLength(9);
 });
 
 it('should return single series information', async () => {
@@ -39,6 +62,69 @@ it('should reject 403 for unauthorized series', async () => {
     method: 'get'
   });
   expect(res.status).toBe(403);
+});
+
+describe('getOrientation', () => {
+  it('head-first ascending order', async () => {
+    const res = await ax.dave.request({
+      url: 'api/series/333.444.555.666.777/orientation',
+      method: 'get',
+      params: { start: 1, end: 10 }
+    });
+    expect(res.status).toBe(200);
+    expect(res.data).toEqual({ orientation: 'head-first' });
+  });
+
+  it('foot-first descending order', async () => {
+    const res = await ax.dave.request({
+      url: 'api/series/333.444.555.666.888/orientation',
+      method: 'get',
+      params: { start: 10, end: 1 }
+    });
+    expect(res.status).toBe(200);
+    expect(res.data).toEqual({ orientation: 'foot-first' });
+  });
+
+  it('no specified start/end', async () => {
+    const res = await ax.dave.request({
+      url: 'api/series/333.444.555.666.777/orientation',
+      method: 'get'
+    });
+    expect(res.status).toBe(200);
+    expect(res.data).toEqual({ orientation: 'head-first' });
+  });
+
+  it('throw 400 for specify image out of bounds', async () => {
+    const res = await ax.dave.request({
+      url: 'api/series/333.444.555.666.777/orientation',
+      method: 'get',
+      params: { start: 1, end: 100 }
+    });
+    expect(res.status).toBe(400);
+    expect(res.data.error).toBe('The given start/end number is out of bounds.');
+  });
+
+  it('throw 403 for without privilege user', async () => {
+    const res = await ax.guest.request({
+      url: 'api/series/333.444.555.666.777/orientation',
+      method: 'get',
+      params: { start: 1, end: 10 }
+    });
+    expect(res.status).toBe(403);
+    expect(res.data.error).toBe(
+      'You do not have privilege to access this series.'
+    );
+  });
+
+  it('throw 500 for no data in the repository', async () => {
+    const res = await ax.dave.request({
+      url: 'api/series/111.222.333.444.555/orientation',
+      method: 'get',
+      params: { filter: { start: 1, end: 10 } }
+    });
+    expect(res.status).toBe(500);
+    expect(res.data.error).toBe('no image');
+  });
 });
 
 describe('Uploading', () => {

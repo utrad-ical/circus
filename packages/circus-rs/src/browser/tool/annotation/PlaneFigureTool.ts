@@ -1,12 +1,15 @@
-import { ViewState } from '../..';
 import { Vector2D } from '../../../common/geometry';
 import Annotation from '../../annotation/Annotation';
 import PlaneFigure, { FigureType } from '../../annotation/PlaneFigure';
 import {
-  sectionFrom2dViewState,
-  detectOrthogonalSection
+  detectOrthogonalSection,
+  sectionFrom2dViewState
 } from '../../section-util';
 import ViewerEvent from '../../viewer/ViewerEvent';
+import ViewState, {
+  MprViewState,
+  TwoDimensionalViewState
+} from '../../ViewState';
 import { convertViewerPointToVolumePoint } from '../tool-util';
 import AnnotationToolBase from './AnnotationToolBase';
 
@@ -60,7 +63,7 @@ export default class PlaneFigureTool extends AnnotationToolBase {
     antn.max = [point.x, point.y];
   }
 
-  protected concreteAnnotation(ev: ViewerEvent): void {
+  protected materializeAnnotation(ev: ViewerEvent): void {
     if (!this.focusedAnnotation) return;
 
     const antn = this.focusedAnnotation;
@@ -89,10 +92,12 @@ export default class PlaneFigureTool extends AnnotationToolBase {
     return this.focusedAnnotation.validate();
   }
 
-  protected isValidViewState(viewState: ViewState): boolean {
-    if (!viewState) return false;
-    if (viewState.type === 'mpr') return true;
-    if (viewState.type === '2d') return true;
+  protected isValidViewState(
+    state: ViewState | undefined
+  ): state is MprViewState | TwoDimensionalViewState {
+    if (!state) return false;
+    if (state.type === 'mpr') return true;
+    if (state.type === '2d') return true;
     return false;
   }
 }

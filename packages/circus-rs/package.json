@@ -1,13 +1,14 @@
 {
   "name": "@utrad-ical/circus-rs",
-  "version": "0.26.0",
+  "version": "0.27.0-experimental.2",
   "scripts": {
     "start": "node ./server.js",
     "debug": "nodemon --inspect ./server.js",
     "devserver": "webpack serve --mode=development",
-    "build": "webpack --mode=production",
+    "prebuild": "bash prebuild.sh",
+    "build": "tsc",
+    "postbuild": "bash postbuild.sh",
     "watch": "webpack --watch",
-    "build-npm": "tsc && find src -name \"*.vert\" -or -name \"*.frag\" | cpio -upd lib",
     "clean": "rimraf dist",
     "docs": "jekyll build --source=./docs --dest=./docs/_site && cp -r ./dist ./docs/_site",
     "docserver": "jekyll serve --source=./docs --dest=./docs/_site"
@@ -26,8 +27,9 @@
     "@babel/preset-typescript": "^7.13.0",
     "@babel/register": "^7.13.16",
     "@utrad-ical/circus-icons": "^0.2.0",
-    "@utrad-ical/circus-lib": "^0.16.0",
+    "@utrad-ical/circus-lib": "^0.17.0-experimental.1",
     "async-cache": "^1.1.0",
+    "axios": "^0.19.2",
     "dicom-parser": "^1.8.4",
     "extend": "^3.0.2",
     "gl-matrix": "^2.4.0",
@@ -49,7 +51,7 @@
     "validator": "^7.0.0",
     "webpack-cli": "^4.7.2",
     "winston": "^3.2.1",
-    "ws": "^8.5.0"
+    "ws": "^8.8.0"
   },
   "devDependencies": {
     "@types/async-cache": "^1.1.0",
@@ -68,7 +70,6 @@
     "@types/tinycolor2": "^1.4.0",
     "@types/validator": "^6.3.0",
     "@types/ws": "^8.5.3",
-    "axios": "^0.19.2",
     "babel-loader": "^8.2.2",
     "benchmark": "^2.1.4",
     "css-loader": "^6.2.0",

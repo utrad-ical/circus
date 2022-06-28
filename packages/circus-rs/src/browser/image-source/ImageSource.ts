@@ -9,9 +9,12 @@ export type ViewStateResizeTransformer = (
   afterSize: Vector2D
 ) => ViewState;
 
-export type DrawResult =
-  | ImageData
-  | { draft: ImageData; next: () => Promise<DrawResult> };
+export type DrawResult = ImageData | DraftDrawResult;
+export type DraftDrawResult = { draft: ImageData; next: () => Promise<DrawResult> };
+
+export function isDraft(result: DrawResult): result is DraftDrawResult {
+  return 'draft' in result;
+}
 
 /**
  * ImageSource is an abstract class which represents a

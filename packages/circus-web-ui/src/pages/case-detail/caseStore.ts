@@ -279,7 +279,7 @@ const slice = createSlice({
       }
       s.history.push(newData);
       s.currentHistoryIndex++;
-      if (history.length > maxHistoryLength) {
+      if (s.history.length > maxHistoryLength) {
         s.history = s.history.slice(-maxHistoryLength);
         s.currentHistoryIndex = s.history.length - 1;
       }

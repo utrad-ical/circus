@@ -10,10 +10,10 @@ import { Button, Modal } from 'components/react-bootstrap';
 import { multirange } from 'multi-integer-range';
 import React, { useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { mostReadable } from 'tinycolor2';
 import Series from 'types/Series';
 import { newViewerCellItem, performLayout } from './caseStore';
-import { InternalLabel, labelTypes } from './labelData';
+import { InternalLabel } from './labelData';
+import LabelDisplay from './LabelDisplay';
 import { EditingData, EditingDataUpdater, seriesColors } from './revisionData';
 import { ViewerMode } from './ViewerGrid';
 
@@ -507,71 +507,33 @@ export const Label: React.FC<{
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
     >
-      <div
-        className="color-preview"
-        onClick={handleColorPreviewClick}
-        draggable
-        onDragStart={handleDragStartColorPreview}
-        onDragOver={handleDragOverColorPreview}
-        onDragEnd={handleDragEndColorPreview}
-        style={{
-          backgroundColor: label.data.color,
-          color: mostReadable(
-            label.data.color,
-            editingData.allLabelsHidden
-              ? ['#666600', '#ffff00']
-              : ['#000000', '#ffffff']
-          ).toHexString()
-        }}
-      >
-        {editingData.allLabelsHidden ? (
-          <Icon icon="glyphicon-remove-circle" />
-        ) : label.hidden ? (
-          <Icon icon="eye-close" />
-        ) : undefined}
-      </div>
-      <div className="caption">
-        <Icon icon={labelTypes[label.type].icon} />
-        &nbsp;
-        {label.name ?? <span className="no-name">Label</span>}
-        <span className="hint" title={hint}>
-          {hint}
-        </span>
-      </div>
+      <LabelDisplay
+        label={label}
+        onColorClick={handleColorPreviewClick}
+        colorDraggable
+        onColorDragStart={handleDragStartColorPreview}
+        onColorDragOver={handleDragOverColorPreview}
+        onColorDragEnd={handleDragEndColorPreview}
+        visibility={
+          editingData.allLabelsHidden
+            ? 'allHidden'
+            : label.hidden
+            ? 'hidden'
+            : 'normal'
+        }
+        hintText={hint}
+      />
     </StyledLabelLi>
   );
 };
 
 const StyledLabelLi = styled.li`
-  white-space: nowrap;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  padding: 3px 0px 3px 10px;
+  list-style-type: none;
   border-bottom: 1px solid ${(props: any) => props.theme.border};
-  .color-preview {
-    display: block;
-    flex: 0 0 25px;
-    height: 20px;
-    text-align: center;
-    border: 1px solid ${(props: any) => props.theme.border};
-  }
-  .caption {
-    pointer-events: none; /* Needed for drag & drop */
-    .circus-icon {
-      font-size: 130%;
-    }
-    flex-grow: 1;
-    margin-left: 15px;
+  height: 30px;
+  > .circus-label {
+    width: 100%;
     overflow: hidden;
-    .no-name {
-      color: gray;
-    }
-  }
-  .hint {
-    margin-left: 10px;
-    opacity: 0.7;
-    font-size: 80%;
   }
   &:hover {
     background-color: ${(props: any) => props.theme.secondaryBackground};

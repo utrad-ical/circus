@@ -1,7 +1,7 @@
 import { FunctionService } from '@utrad-ical/circus-lib';
 import { DicomFileRepository, Logger } from '@utrad-ical/circus-lib';
 import { multirange } from 'multi-integer-range';
-import { DicomImporter, Models, DicomTagReader } from './interface';
+import { DicomImporter, DicomTagReader, TransactionManager } from './interface';
 import { DicomUtilityRunner } from './utils/createDicomUtilityRunner';
 
 interface Options {
@@ -16,14 +16,21 @@ const createDicomImporter: FunctionService<
   DicomImporter,
   {
     dicomFileRepository: DicomFileRepository;
-    models: Models;
+    // models: Models;
     apiLogger: Logger;
     dicomTagReader: DicomTagReader;
     dicomUtilityRunner: DicomUtilityRunner;
+    transactionManager: TransactionManager;
   }
 > = async (
   options: Options,
-  { dicomFileRepository, models, apiLogger, dicomTagReader, dicomUtilityRunner }
+  {
+    dicomFileRepository,
+    apiLogger,
+    dicomTagReader,
+    dicomUtilityRunner,
+    transactionManager
+  }
 ) => {
   const importDicom = async (fileContent: ArrayBuffer, domain: string) => {
     // Read the DICOM file
@@ -39,25 +46,32 @@ const createDicomImporter: FunctionService<
     }
     // Check if there is already a series with the same series UID
     const seriesUid = tags.seriesUid;
-    const series = await models.series.findById(seriesUid);
+    try {
+      await transactionManager.withTransaction(async models => {
+        const series = await models.series.findById(seriesUid);
 
-    apiLogger.trace(`Importing ${seriesUid} #${instanceNumber}`, tags);
-
-    if (series) {
-      // Add image number
-      const mr = multirange(series.images);
-      mr.append(instanceNumber);
-      await models.series.modifyOne(seriesUid, { images: mr.toString() });
-    } else {
-      // Insert as a new series
-      const doc = {
-        ...tags,
-        seriesDate: seriesDate || studyDate || null,
-        images: String(instanceNumber),
-        domain,
-        storageId: 0
-      };
-      await models.series.insert(doc);
+        apiLogger.trace(`Importing: ${seriesUid} #${instanceNumber}`);
+        if (series) {
+          // Add image number
+          const mr = multirange(series.images);
+          mr.append(instanceNumber);
+          await models.series.modifyOne(seriesUid, { images: mr.toString() });
+        } else {
+          // Insert as a new series
+          const doc = {
+            ...tags,
+            seriesDate: seriesDate || studyDate || null,
+            images: String(instanceNumber),
+            domain,
+            storageId: 0
+          };
+          await models.series.insert(doc);
+        }
+      });
+      apiLogger.trace(`Import complete: ${seriesUid} #${instanceNumber}`);
+    } catch (err) {
+      apiLogger.error(`Import failure: ${seriesUid} #${instanceNumber}`);
+      apiLogger.error(err);
     }
 
     const seriesLoader = await dicomFileRepository.getSeries(seriesUid);
@@ -72,7 +86,8 @@ createDicomImporter.dependencies = [
   'models',
   'apiLogger',
   'dicomTagReader',
-  'dicomUtilityRunner'
+  'dicomUtilityRunner',
+  'transactionManager'
 ];
 
 export default createDicomImporter;

@@ -1,6 +1,7 @@
 import koa, { ParameterizedContext } from 'koa';
 import {
   Validator,
+  DicomTagReader,
   DicomImporter,
   Database,
   TransactionManager
@@ -21,8 +22,10 @@ export interface Deps {
   models: Models;
   blobStorage: Storage;
   dicomFileRepository: DicomFileRepository;
+  dicomTagReader: DicomTagReader;
   dicomImporter: DicomImporter;
   pluginResultsPath: string;
+  pluginCachePath: string;
   cs: CsCore;
   volumeProvider: VolumeProvider;
   uploadFileSizeMaxBytes: number;

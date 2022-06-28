@@ -1,12 +1,12 @@
-import ViewerEvent from '../../viewer/ViewerEvent';
-import VoxelCloudToolBase from './VoxelCloudToolBase';
-import { floodFillOnSlice } from '../../volume-util';
-import { detectOrthogonalSection } from '../../section-util';
-import { Vector2, Vector3 } from 'three';
+import { Vector3 } from 'three';
 import { Vector3D } from '../../../common/geometry';
-import { convertViewerPointToVolumeIndex } from '../tool-util';
 import MprImageSource from '../../image-source/MprImageSource';
 import { isMprImageSourceWithDicomVolume } from '../../image-source/MprImageSourceWithDicomVolume';
+import { detectOrthogonalSection } from '../../section-util';
+import ViewerEvent from '../../viewer/ViewerEvent';
+import { floodFillOnSlice } from '../../volume-util';
+import { convertViewerPointToVolumeIndex } from '../tool-util';
+import VoxelCloudToolBase from './VoxelCloudToolBase';
 
 /**
  * Bucket tool performs the flood-fill operation along an orthogonal MPR plane.
@@ -16,9 +16,10 @@ export default class BucketTool extends VoxelCloudToolBase {
   public dragStartHandler(ev: ViewerEvent): void {
     super.dragStartHandler(ev);
     const viewer = ev.viewer;
-    const state = viewer.getState();
-    if (state.type !== 'mpr') throw new Error('Unsupported view state');
-    const section = state.section;
+    const viewState = viewer.getState();
+    if (!viewState) throw new Error('View state not initialized');
+    if (viewState.type !== 'mpr') throw new Error('Unsupported view state');
+    const section = viewState.section;
     const comp = viewer.getComposition();
     if (!comp) throw new Error('Composition not initialized'); // should not happen
 

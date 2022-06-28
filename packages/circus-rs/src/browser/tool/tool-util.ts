@@ -1,10 +1,10 @@
 import { Vector2, Vector3 } from 'three';
 import MprImageSource from '../image-source/MprImageSource';
 import {
-  sectionFrom2dViewState,
   convertPointToIndex,
   convertScreenCoordinateToVolumeCoordinate,
-  convertVolumeCoordinateToScreenCoordinate
+  convertVolumeCoordinateToScreenCoordinate,
+  sectionFrom2dViewState
 } from '../section-util';
 import Viewer from '../viewer/Viewer';
 
@@ -29,8 +29,9 @@ export function convertViewerPointToVolumePoint(
   py: number
 ): Vector3 {
   const viewState = viewer.getState();
-  const type = viewState.type;
+  if (!viewState) throw new Error('View state not initialized');
 
+  const type = viewState.type;
   if (type !== 'mpr' && type !== '2d')
     throw new Error('Unsupported view state.');
 
@@ -57,8 +58,9 @@ export function convertVolumePointToViewerPoint(
   pz: number
 ): Vector2 {
   const viewState = viewer.getState();
-  const type = viewState.type;
+  if (!viewState) throw new Error('View state not initialized');
 
+  const type = viewState.type;
   if (type !== 'mpr' && type !== '2d')
     throw new Error('Unsupported view state.');
 

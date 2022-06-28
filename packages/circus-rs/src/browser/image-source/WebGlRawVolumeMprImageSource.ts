@@ -1,5 +1,5 @@
 import Viewer from '../viewer/Viewer';
-import ViewState from '../ViewState';
+import ViewState, { MprViewState } from '../ViewState';
 import DicomVolume from '../../common/DicomVolume';
 import DicomVolumeLoader, { DicomVolumeProgressiveLoader } from './volume-loader/DicomVolumeLoader';
 import MprProgram from './gl/MprProgram';
@@ -44,7 +44,6 @@ export default class WebGlRawVolumeMprImageSource
 
   private background: RGBA = [0.0, 0.0, 0.0, 1.0];
 
-  private priorityCounter: number = 0;
   private setPriority: (imageIndices: MultiRangeInitializer, priority: number) => void = () => { };
 
   // For debugging
@@ -137,17 +136,14 @@ export default class WebGlRawVolumeMprImageSource
    */
   public async draw(viewer: Viewer, viewState: ViewState, abortSignal: AbortSignal): Promise<DrawResult> {
 
-    let drawResult: DrawResult | undefined = undefined;
-    if (this.fullyLoaded) {
-      drawResult = await this.createImageData(viewer, viewState, abortSignal);
-    } else {
-      const imageData = await this.createImageData(viewer, viewState, abortSignal);
-      const next = async () => {
-        await new Promise<void>((resolve) => setTimeout(() => resolve(), this.draftInterval));
-        return await this.draw(viewer, viewState, abortSignal);
-      };
-      drawResult = { draft: imageData, next };
-    }
+    if (viewState.type !== 'mpr') throw new TypeError('Unsupported state');
+
+    const [min, max] = getRequiredImageZIndexRange(viewState.section, this.metadata!)
+    const images = new MultiRange([[min, max]]);
+    const priority = this.metadata!.voxelCount[2] / images.length();
+    this.setPriority(images, priority);
+
+    const drawResult = this.createDrawResult(viewer, viewState, abortSignal);
 
     // If we use Promise.resolve directly, the then-calleback is called
     // before any stacked UI events are handled.
@@ -158,14 +154,25 @@ export default class WebGlRawVolumeMprImageSource
     });
   }
 
+  private async createDrawResult(viewer: Viewer, viewState: MprViewState, abortSignal: AbortSignal): Promise<DrawResult> {
+    const imageData = await this.createImageData(viewer, viewState, abortSignal);
+
+    return this.fullyLoaded
+      ? imageData
+      : {
+        draft: imageData,
+        next: async () => {
+          await new Promise<void>((resolve) => setTimeout(() => resolve(), this.draftInterval));
+          return await this.createDrawResult(viewer, viewState, abortSignal);
+        }
+      };
+  }
+
   private async createImageData(viewer: Viewer, viewState: ViewState, abortSignal: AbortSignal): Promise<ImageData> {
     if (viewState.type !== 'mpr') throw new Error('Unsupported view state.');
 
     if (!this.mprProgram.isActive())
       throw new Error('The program is not active');
-
-    // const [min, max] = getRequiredImageZIndexRange(viewState.section, this.metadata!);
-    // this.setPriority(new MultiRange([[min, max]]), ++this.priorityCounter);
 
     // Adjust viewport
     this.updateViewportSize(viewer.getResolution());

@@ -3,8 +3,8 @@ import RsProgressiveVolumeLoader from "../../browser/image-source/volume-loader/
 import WebSocketClient from "../../browser/ws/WebSocketClient";
 import { createTransferConnectionFactory } from "../../browser/ws/createTransferConnectionFactory";
 import setting, { toPartialVolumeDescriptor, VolumeSetting } from './setting';
-import getRequiredImageZIndexRange from "browser/util/getRequiredImageZIndexRange";
-import MultiRange from "multi-integer-range";
+// import getRequiredImageZIndexRange from "browser/util/getRequiredImageZIndexRange";
+// import MultiRange from "multi-integer-range";
 import handleRotationBy from "browser/tool/state/handleRotationBy";
 
 document.addEventListener('DOMContentLoaded', function (e) {
@@ -35,15 +35,15 @@ document.addEventListener('DOMContentLoaded', function (e) {
         const initializeViewer = viewerInitializer(comp);
 
         initializeViewer('axial', '#993300');
-        // initializeViewer('coronal', '#3399ff');
-        // initializeViewer('sagittal', '#33ff33');
+        initializeViewer('coronal', '#3399ff');
+        initializeViewer('sagittal', '#33ff33');
 
         comp.viewers.forEach(async (viewer) => {
-            const meta = await volumeLoader.loadMeta();
-            viewer.on('stateChange', (prevState, newState) => {
-                const [min, max] = getRequiredImageZIndexRange(newState.section, meta)
-                volumeLoader.setPriority(new MultiRange([[min, max]]), ++priorityCounter);
-            });
+            // const meta = await volumeLoader.loadMeta();
+            // viewer.on('stateChange', (prevState, newState) => {
+            //     const [min, max] = getRequiredImageZIndexRange(newState.section, meta)
+            //     volumeLoader.setPriority(new MultiRange([[min, max]]), ++priorityCounter);
+            // });
             viewer.render();
             setRotations.push(() => handleRotationBy(viewer, 0, 15));
             dumpStates.push(() => console.log(viewer.getState()));

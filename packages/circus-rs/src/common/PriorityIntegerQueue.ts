@@ -1,4 +1,4 @@
-import MultiRange, { MultiRangeInitializer } from 'multi-integer-range';
+import MultiRange, { Initializer as MultiRangeInitializer } from 'multi-integer-range';
 
 interface Entry {
   priority: number;

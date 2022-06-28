@@ -1,7 +1,7 @@
 import Viewer from '../viewer/Viewer';
 import ViewState, { MprViewState } from '../ViewState';
 import DicomVolume from '../../common/DicomVolume';
-import DicomVolumeLoader, { DicomVolumeProgressiveLoader } from './volume-loader/DicomVolumeLoader';
+import { DicomVolumeProgressiveLoader } from './volume-loader/DicomVolumeLoader';
 import MprProgram from './gl/MprProgram';
 import MprImageSource from './MprImageSource';
 import {
@@ -10,7 +10,7 @@ import {
   resolveImageData
 } from './gl/webgl-util';
 import MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume';
-import MultiRange, { MultiRangeInitializer } from 'multi-integer-range';
+import MultiRange, { Initializer as MultiRangeInitializer } from 'multi-integer-range';
 import { DrawResult } from './ImageSource';
 import setImmediate from '../util/setImmediate';
 import getRequiredImageZIndexRange from 'browser/util/getRequiredImageZIndexRange';

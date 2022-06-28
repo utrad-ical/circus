@@ -8,7 +8,7 @@ import PartialVolumeDescriptor, {
 import VolumeCache, { nullVolumeCache } from './cache/VolumeCache';
 import { EstimateWindowType, createRequestParams } from './rs-loader-utils';
 import { TransferConnection, TransferConnectionFactory } from '../../ws/createTransferConnectionFactory';
-import MultiRange, { MultiRangeInitializer } from 'multi-integer-range';
+import MultiRange, { Initializer as MultiRangeInitializer } from 'multi-integer-range';
 import EventEmitter from 'events';
 
 interface RsProgressiveVolumeLoaderOptions {
@@ -21,7 +21,7 @@ interface RsProgressiveVolumeLoaderOptions {
 }
 
 export default class RsProgressiveVolumeLoader
-  extends (EventEmitter as { new(): ProgressEventEmitter })
+  extends (EventEmitter as unknown as { new(): ProgressEventEmitter })
   implements DicomVolumeProgressiveLoader {
   private rsHttpClient: RsHttpClient;
   private seriesUid: string;

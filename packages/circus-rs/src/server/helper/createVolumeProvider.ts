@@ -4,7 +4,7 @@ import {
   FunctionService
 } from '@utrad-ical/circus-lib';
 import {
-  MultiRangeInitializer,
+  Initializer as MultiRangeInitializer,
   MultiRange
 } from 'multi-integer-range';
 import asyncMemoize from '../../common/asyncMemoize';

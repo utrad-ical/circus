@@ -1,8 +1,8 @@
 import DicomVolume from '../../../common/DicomVolume';
 import { ViewWindow } from '../../../common/ViewWindow';
 import { PixelFormat } from '@utrad-ical/circus-lib/src/PixelFormat';
-import { MultiRangeInitializer } from 'multi-integer-range';
-import EventEmitter from 'events';
+import { Initializer as MultiRangeInitializer } from 'multi-integer-range';
+import { EventEmitter } from 'events';
 import StrictEventEmitter from 'strict-event-emitter-types';
 
 export interface DicomVolumeMetadata {

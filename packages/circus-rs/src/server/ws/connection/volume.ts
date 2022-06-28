@@ -5,16 +5,12 @@ import {
   isImageTransferData,
   MessageDataType,
   parseMessageBuffer,
-  SetPriorityMessageData,
-  StopTransferMessageData,
   TransferImageMessage
 } from '../../../common/ws/message';
 import { IncomingMessage } from 'http';
 
 import createImageTransferAgent from '../image-transfer-agent';
 import { VolumeProvider } from '../../helper/createVolumeProvider';
-import { console_log } from 'debug';
-import { MultiRange } from 'multi-integer-range';
 
 let lastWsConnectionId = 0;
 
@@ -31,7 +27,7 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
 }) => {
   return (ws, req) => {
     const connectionId = ++lastWsConnectionId;
-    console.log(`${connectionId}: Open`);
+    // console.log(`${connectionId}: Open`);
 
     const authFunction = authFunctionProvider(req);
 
@@ -61,7 +57,7 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
     });
 
     ws.on('close', () => {
-      console.log(`${connectionId}: Close`);
+      // console.log(`${connectionId}: Close`);
       imageTransferAgent.dispose();
     });
 
@@ -73,7 +69,7 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
           const { transferId, seriesUid, partialVolumeDescriptor } =
             data;
 
-          console.log(`tr#${transferId} BEGIN_TRANSFER / ${seriesUid}`);
+          // console.log(`tr#${transferId} BEGIN_TRANSFER / ${seriesUid}`);
 
           let flushPendings: () => void = () => { };
           pendings.set(transferId, new Promise<void>((resolve) => flushPendings = resolve));
@@ -98,7 +94,6 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
         case MessageDataType.SET_PRIORITY: {
           const { transferId, target, priority } = data;
           await pendings.get(transferId);
-          console.log(`tr#${transferId} SET_PRIORITY / ${new MultiRange(target).toString()}`);
           imageTransferAgent.setPriority(transferId, target, priority);
           break;
         }
@@ -112,11 +107,6 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
     };
 
     ws.on('message', (messageBuffer: ArrayBuffer) => {
-      // if (typeof messageBuffer !== 'object' || !(messageBuffer instanceof ArrayBuffer)) {
-      //   console.warn('Ignore invalid message below');
-      //   console.warn(messageBuffer);
-      //   return;
-      // }
       const { data } = parseMessageBuffer(messageBuffer);
       if (isImageTransferData(data)) handleMessageData(data);
     });

@@ -3,7 +3,6 @@ import PriorityIntegerQueue from '../../common/PriorityIntegerQueue';
 import { MultiRange } from 'multi-integer-range';
 import { MultiRangeDescriptor } from '../../common/ws/types';
 import { TransferImageMessage, transferImageMessageData } from '../../common/ws/message';
-import { console_log } from '../../debug';
 import { VolumeProvider } from '../helper/createVolumeProvider';
 
 const PARTIAL_VOLUME_PRIORITY = 1;
@@ -47,7 +46,7 @@ const createImageTransferAgent = (
       const connection = transferConnections.get(transferId);
 
       if (!connection) {
-        console_log(`No handler for tr#${transferId} con#${connectionId}`);
+        // console.log(`No handler for tr#${transferId} con#${connectionId}`);
         continue;
       }
 
@@ -56,17 +55,17 @@ const createImageTransferAgent = (
 
       if (imageIndex !== undefined) {
         try {
-          // console_log(`Try to emit image#${imageIndex} for tr#${transferId} con#${connectionId}`);
+          // console.log(`Try to emit image#${imageIndex} for tr#${transferId} con#${connectionId}`);
           const data = transferImageMessageData(transferId, imageIndex);
           const buffer = await fetch(imageIndex);
           await imageDataEmitter(data, buffer);
-          console_log(`Success to emit image#${imageIndex} for tr#${transferId} con#${connectionId}`);
+          // console.log(`Success to emit image#${imageIndex} for tr#${transferId} con#${connectionId}`);
         } catch (err) {
-          console_log(`Failed to emit image#${imageIndex} for tr#${transferId} con#${connectionId}: ${(err as Error).message}`);
+          // console.log(`Failed to emit image#${imageIndex} for tr#${transferId} con#${connectionId}: ${(err as Error).message}`);
           transferConnections.delete(transferId);
         }
       } else {
-        console_log(`Complete tr#${transferId} con#${connectionId} in ${new Date().getTime() - startTime} [ms]`);
+        // console.log(`Complete tr#${transferId} con#${connectionId} in ${new Date().getTime() - startTime} [ms]`);
         transferConnections.delete(transferId);
       }
     }
@@ -113,7 +112,7 @@ const createImageTransferAgent = (
     const setPriority = (target: MultiRangeDescriptor, priority: number) => {
       const targetRange = new MultiRange(target).intersect(imageIndices);
       if (0 < targetRange.segmentLength()) {
-        console.log(`Set priority ${priority} / ${targetRange.toString()}`);
+        // console.log(`Set priority ${priority} / ${targetRange.toString()}`);
         queue.append(targetRange, priority);
       }
     };
@@ -139,7 +138,7 @@ const createImageTransferAgent = (
   const stopTransfer = (transferId: string) => {
     if (transferConnections.has(transferId)) {
       transferConnections.delete(transferId);
-      console_log(`Accept stopTransfer for tr#${transferId} con#${connectionId}`);
+      // console.log(`Accept stopTransfer for tr#${transferId} con#${connectionId}`);
     }
   };
 

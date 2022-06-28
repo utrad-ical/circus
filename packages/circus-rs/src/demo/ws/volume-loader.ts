@@ -119,7 +119,7 @@ const createOrientationSetter = (comp: Composition) => async (v: Viewer, orienta
         orientation
     );
 
-    const newState = { ...v.getState(), section } as MprViewState;
+    const newState = { ...v.getRequestingState(), section } as MprViewState;
     v.setState({ ...newState, interpolationMode: 'nearestNeighbor' });
 };
 

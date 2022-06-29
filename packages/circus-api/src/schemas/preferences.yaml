@@ -41,4 +41,14 @@ properties:
     type: array
     items:
       type: string
+  labelColors:
+    type: object
+    properties:
+      useDefault:
+        type: boolean
+      customColors:
+        type: array
+        items:
+          type: string
+          pattern: '^#[0-9a-f]{6}$'
 additionalProperties: false

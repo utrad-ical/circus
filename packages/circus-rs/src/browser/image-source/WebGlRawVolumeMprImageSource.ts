@@ -13,7 +13,7 @@ import MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume';
 import MultiRange, { Initializer as MultiRangeInitializer } from 'multi-integer-range';
 import { DrawResult } from './ImageSource';
 import setImmediate from '../util/setImmediate';
-import getRequiredImageZIndexRange from 'browser/util/getRequiredImageZIndexRange';
+import getRequiredImageZIndexRange from '../util/getRequiredImageZIndexRange'
 
 export interface WebGlRawVolumeMprImageSourceOptions {
   volumeLoader: DicomVolumeProgressiveLoader;

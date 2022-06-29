@@ -6,6 +6,8 @@ import setting, { toPartialVolumeDescriptor, VolumeSetting } from './setting';
 // import getRequiredImageZIndexRange from "browser/util/getRequiredImageZIndexRange";
 // import MultiRange from "multi-integer-range";
 import handleRotationBy from "browser/tool/state/handleRotationBy";
+import '../../../src/browser/circus-rs.less';
+import '@utrad-ical/circus-icons/dist/circus-rs-font-glyphs.less';
 
 document.addEventListener('DOMContentLoaded', function (e) {
 

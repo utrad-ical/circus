@@ -55,4 +55,8 @@ export default abstract class ImageSource extends EventEmitter {
   public getResizeTransformer(): ViewStateResizeTransformer {
     return v => v;
   }
+
+  public dispose(): void {
+
+  }
 }

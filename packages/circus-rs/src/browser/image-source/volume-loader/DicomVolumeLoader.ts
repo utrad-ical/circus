@@ -25,9 +25,16 @@ interface ProgressInfo {
   finished?: number;
   total?: number;
 }
+export type ProgressEventListener = (info: ProgressInfo) => void;
+
+interface AbortInfo {
+  target: DicomVolumeProgressiveLoader;
+}
+export type AbortEventListener = (info: AbortInfo) => void;
 
 interface ProgressEvents {
-  progress: (info: ProgressInfo) => void;
+  progress: ProgressEventListener;
+  abort: AbortEventListener;
 }
 
 export type ProgressEventEmitter = StrictEventEmitter<EventEmitter, ProgressEvents>;
@@ -37,6 +44,7 @@ export interface DicomVolumeProgressiveLoader extends DicomVolumeLoader, Progres
   loadVolume(): Promise<DicomVolume>;
   getVolume(): DicomVolume | null;
   setPriority?(imageIndices: MultiRangeInitializer, priority: number): void;
+  abort(): void;
 }
 
 export function isProgressiveLoader(loader: DicomVolumeLoader): loader is DicomVolumeProgressiveLoader {

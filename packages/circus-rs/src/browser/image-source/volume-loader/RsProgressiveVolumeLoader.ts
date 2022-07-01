@@ -182,4 +182,9 @@ export default class RsProgressiveVolumeLoader
     const pvdStr = pvd ? `:${pvd.start}:${pvd.end}:${pvd.delta}` : ':full';
     return this.seriesUid + pvdStr + '.' + suffix;
   }
+
+  public abort() {
+    this.transferConnection?.stop();
+    this.emit('abort', { target: this });
+  }
 }

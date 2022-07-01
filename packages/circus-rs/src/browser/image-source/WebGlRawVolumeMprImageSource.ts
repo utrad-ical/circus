@@ -1,7 +1,7 @@
 import Viewer from '../viewer/Viewer';
 import ViewState, { MprViewState } from '../ViewState';
 import DicomVolume from '../../common/DicomVolume';
-import { DicomVolumeProgressiveLoader, isProgressiveLoader } from './volume-loader/DicomVolumeLoader';
+import { DicomVolumeProgressiveLoader, isProgressiveLoader, ProgressEventListener } from './volume-loader/DicomVolumeLoader';
 import MprProgram from './gl/MprProgram';
 import MprImageSource from './MprImageSource';
 import {
@@ -45,6 +45,7 @@ export default class WebGlRawVolumeMprImageSource
   private background: RGBA = [0.0, 0.0, 0.0, 1.0];
 
   private setPriority: (imageIndices: MultiRangeInitializer, priority: number) => void = () => { };
+  private disposeCallbacks: (() => void)[] = [];
 
   // For debugging
   public static captureCanvasCallbacks: CaptureCanvasCallback[] = [];
@@ -59,7 +60,7 @@ export default class WebGlRawVolumeMprImageSource
   constructor({ volumeLoader, draftInterval }: WebGlRawVolumeMprImageSourceOptions) {
     super();
 
-    if(!isProgressiveLoader(volumeLoader)) {
+    if (!isProgressiveLoader(volumeLoader)) {
       throw new TypeError('The specified volumeLoader is not a progressive loader.');
     }
 
@@ -97,13 +98,21 @@ export default class WebGlRawVolumeMprImageSource
       mprProgram.activate();
       const { transfer } = mprProgram.setDicomVolume(this.volume);
 
-      volumeLoader.on('progress', async ({ imageIndex }) => {
-        await transfer(imageIndex);
-      });
+      volumeLoader.loadedImages().forEach(imageIndex => transfer(imageIndex));
+      const progressListener = ({ imageIndex }: { imageIndex: number; }) => {
+        console.log(`transfer ${imageIndex}`);
+        transfer(imageIndex);
+      };
+      volumeLoader.on('progress', progressListener);
+      this.disposeCallbacks.push(() => volumeLoader.off('progress', progressListener));
 
       volumeLoader.loadVolume().then(() => this.fullyLoaded = true);
       if (!draftInterval) await volumeLoader.loadVolume();
     })();
+  }
+
+  public dispose() {
+    this.disposeCallbacks.forEach(callback => callback());
   }
 
   public getLoadedDicomVolume() {
@@ -120,6 +129,8 @@ export default class WebGlRawVolumeMprImageSource
 
     // backCanvas.addEventListener('webglcontextlost', _ev => {}, false);
     // backCanvas.addEventListener('webglcontextrestored', _ev => {}, false);
+
+    this.disposeCallbacks.push(() => void (backCanvas.remove()));
 
     return backCanvas;
   }

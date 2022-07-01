@@ -44,6 +44,7 @@ export interface DicomVolumeProgressiveLoader extends DicomVolumeLoader, Progres
   loadVolume(): Promise<DicomVolume>;
   getVolume(): DicomVolume | null;
   setPriority?(imageIndices: MultiRangeInitializer, priority: number): void;
+  loadedImages(): number[];
   abort(): void;
 }
 

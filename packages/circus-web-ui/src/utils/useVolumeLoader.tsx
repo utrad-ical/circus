@@ -28,11 +28,12 @@ const defaultContextValue = {
 
 export const VolumeLoaderFactoryContext = React.createContext<Context>(defaultContextValue);
 
-export const VolumeLoaderFactoryProvider: React.FC = props => {
+export const VolumeLoaderFactoryProvider: React.FC<{ cacheTimeout?: number }> = ({ children, cacheTimeout = 5000 }) => {
   const server = useSelector(state => state.loginUser.data?.dicomImageServer);
 
   const loaders = useRef(new Map<string, rs.DicomVolumeProgressiveLoader>());
   const referenceCounter = useRef(new Map<string, number>());
+  const cleanupTimeout = useRef(new Map<string, NodeJS.Timeout>());
 
   const contextValue = useMemo(() => {
     if (!server) return defaultContextValue;
@@ -57,6 +58,7 @@ export const VolumeLoaderFactoryProvider: React.FC = props => {
       const id = serializeUtilizeOptions(options);
 
       if (!loaders.current.has(id)) {
+        console.log(`Create new loader #${id}`);
         const loader = new rs.RsProgressiveVolumeLoader({
           rsHttpClient,
           transferConnectionFactory,
@@ -66,6 +68,10 @@ export const VolumeLoaderFactoryProvider: React.FC = props => {
       }
 
       referenceCounter.current.set(id, (referenceCounter.current.get(id) ?? 0) + 1);
+      if (cleanupTimeout.current.has(id)) {
+        clearTimeout(cleanupTimeout.current.get(id)!);
+        cleanupTimeout.current.delete(id);
+      }
       return id;
     };
 
@@ -74,14 +80,27 @@ export const VolumeLoaderFactoryProvider: React.FC = props => {
       return loaders.current.get(id)!;
     };
 
+    const cleanup = (id: string) => {
+      const timeout = setTimeout(() => {
+        const count = referenceCounter.current.get(id) || 0;
+        if (count === 0) {
+          console.log(`Delete loader #${id}`);
+
+          loaders.current.get(id)?.abort();
+          loaders.current.delete(id);
+          referenceCounter.current.delete(id);
+        }
+      }, cacheTimeout);
+
+      cleanupTimeout.current.set(id, timeout);
+    };
+
     const abandonVolumeLoader = (id: string) => {
       const count = referenceCounter.current.get(id) || 0;
-      if (count > 1) {
-        referenceCounter.current.set(id, referenceCounter.current.get(id)! - 1);
-      } else if (count === 1) {
-        loaders.current.delete(id);
-        referenceCounter.current.delete(id);
-      }
+      if (count < 1) return;
+
+      referenceCounter.current.set(id, count - 1);
+      if (count === 1) cleanup(id);
     };
 
     return { serializeUtilizeOptions, utilizeVolumeLoader, getVolumeLoader, abandonVolumeLoader };
@@ -89,7 +108,7 @@ export const VolumeLoaderFactoryProvider: React.FC = props => {
 
   return (
     <VolumeLoaderFactoryContext.Provider value={contextValue}>
-      {props.children}
+      {children}
     </VolumeLoaderFactoryContext.Provider>
   );
 };

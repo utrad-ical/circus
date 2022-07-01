@@ -183,6 +183,10 @@ export default class RsProgressiveVolumeLoader
     return this.seriesUid + pvdStr + '.' + suffix;
   }
 
+  public loadedImages(): number[] {
+    return Array.from(this.loadedIndices.values());
+  }
+
   public abort() {
     this.transferConnection?.stop();
     this.emit('abort', { target: this });

@@ -28,19 +28,6 @@ const StyledMenu = styled.div`
   margin-bottom: 1em;
 `;
 
-const getImageSource = async (volumeLoader: rs.DicomVolumeProgressiveLoader) => {
-  const meta = await volumeLoader.loadMeta();
-  switch (meta.mode) {
-    case '2d':
-      return new rs.TwoDimensionalImageSource({
-        volumeLoader,
-        maxCacheSize: 10
-      });
-    default:
-      return new rs.WebGlRawVolumeMprImageSource({ volumeLoader });
-  }
-};
-
 const SeriesDetail: React.FC<{}> = props => {
   const seriesUid = useParams<{ uid: string }>().uid;
   const [composition, setComposition] = useState<rs.Composition | null>(null);
@@ -56,16 +43,18 @@ const SeriesDetail: React.FC<{}> = props => {
   );
   const [seriesData] = useLoadData<any | Error>(load);
 
-  const loadingSiriesUid = useRef(seriesUid);
+  const loadingSiriesUid = useRef<string>();
 
   const [volumeLoader] = useVolumeLoaders([{ seriesUid, estimateWindowType: 'center' }]);
 
   useEffect(() => {
     if (!seriesData) return;
+
+    let composition: rs.Composition | undefined = undefined;
     (async () => {
       loadingSiriesUid.current = seriesData.seriesUid;
       const { mode } = await volumeLoader.loadMeta();
-      if(seriesData.seriesUid !== loadingSiriesUid.current) return;
+      if (loadingSiriesUid.current !== seriesData.seriesUid) return;
 
       const src = mode === '2d'
         ? new rs.TwoDimensionalImageSource({
@@ -74,9 +63,14 @@ const SeriesDetail: React.FC<{}> = props => {
         })
         : new rs.WebGlRawVolumeMprImageSource({ volumeLoader });
 
-      const composition = new rs.Composition(src);
+      composition = new rs.Composition(src);
       setComposition(composition);
     })();
+
+    return () => {
+      loadingSiriesUid.current = undefined;
+      if (composition) composition.dispose();
+    };
   }, [!seriesData, volumeLoader]);
 
   if (!seriesData) return <LoadingIndicator />;

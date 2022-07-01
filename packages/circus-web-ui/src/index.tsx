@@ -45,6 +45,7 @@ import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { ApiContext, ApiCaller } from 'utils/api';
 import loginManager, { LoginManagerContext } from 'utils/loginManager';
 import { VolumeLoaderCacheContext } from 'utils/useImageSource';
+import { VolumeLoaderFactoryProvider } from 'utils/useVolumeLoader';
 
 require('./styles/main.less');
 
@@ -200,18 +201,20 @@ const TheApp: React.FC<{}> = () => {
     <LoginManagerContext.Provider value={manager}>
       <ApiContext.Provider value={api}>
         <ReduxStoreProvider store={store}>
-          <VolumeCacheProvider>
-            <CircusThemeProvider>
-              <GlobalStyle />
-              <Router history={browserHistory}>
-                <Switch>
-                  <Route exact path="/" component={LoginScreen} />
-                  <Route exact path="/otp" component={OneTimeLogin} />
-                  <AppRoutes />
-                </Switch>
-              </Router>
-            </CircusThemeProvider>
-          </VolumeCacheProvider>
+          <VolumeLoaderFactoryProvider>
+            <VolumeCacheProvider>
+              <CircusThemeProvider>
+                <GlobalStyle />
+                <Router history={browserHistory}>
+                  <Switch>
+                    <Route exact path="/" component={LoginScreen} />
+                    <Route exact path="/otp" component={OneTimeLogin} />
+                    <AppRoutes />
+                  </Switch>
+                </Router>
+              </CircusThemeProvider>
+            </VolumeCacheProvider>
+          </VolumeLoaderFactoryProvider>
         </ReduxStoreProvider>
       </ApiContext.Provider>
     </LoginManagerContext.Provider>

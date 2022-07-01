@@ -72,7 +72,12 @@ module.exports = {
     proxy: {
       '/api': process.env.DEV_PROXY || 'http://localhost:8080',
       '/login': process.env.DEV_PROXY || 'http://localhost:8080',
-      '/rs': process.env.DEV_PROXY || 'http://localhost:8080'
+      '/rs/ws': {
+        target: process.env.DEV_PROXY || 'http://localhost:8080',
+        ws: true,
+        changeOrigin: true
+      },
+      '/rs': process.env.DEV_PROXY || 'http://localhost:8080',
     }
   },
   devtool: 'source-map',

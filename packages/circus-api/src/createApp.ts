@@ -35,6 +35,8 @@ import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVo
 import { TaskManager } from './createTaskManager';
 import { MhdPacker } from './case/createMhdPacker';
 import KoaOAuth2Server from './middleware/auth/KoaOAuth2Server';
+import withWebSocketConnectionHandlers from '@utrad-ical/circus-rs/src/server/ws/withWebSocketConnectionHandlers';
+import { RsWebsocketVolumeRoute } from '@utrad-ical/circus-rs/src/server/ws/createWebsocketVolumeRoute';
 
 function handlerName(route: Route) {
   if (route.handler) return route.handler;
@@ -132,6 +134,7 @@ export const createApp: FunctionService<
     blobStorage: Storage;
     core: CsCore;
     rsSeriesRoutes: Koa.Middleware;
+    rsWebsocketVolumeRoute: RsWebsocketVolumeRoute;
     volumeProvider: VolumeProvider;
     dicomFileRepository: DicomFileRepository;
     dicomTagReader: DicomTagReader;
@@ -153,6 +156,7 @@ export const createApp: FunctionService<
     blobStorage,
     core,
     rsSeriesRoutes,
+    rsWebsocketVolumeRoute,
     volumeProvider,
     dicomImporter,
     dicomFileRepository,
@@ -241,7 +245,12 @@ export const createApp: FunctionService<
   const rs = new Router();
   rs.use('/series/:sid', rsSeriesRoutes as any);
   koa.use(mount('/rs', rs.routes() as any));
-
+  withWebSocketConnectionHandlers({
+    '/rs/ws/volume': rsWebsocketVolumeRoute({
+      authFunctionProvider: req => async seriesUid => true
+    })
+  })(koa);
+  
   return koa;
 };
 
@@ -253,6 +262,7 @@ createApp.dependencies = [
   'blobStorage',
   'core',
   'rsSeriesRoutes',
+  'rsWebsocketVolumeRoute',
   'volumeProvider',
   'dicomFileRepository',
   'dicomTagReader',

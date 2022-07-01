@@ -32,9 +32,13 @@ interface ProgressEvents {
 
 export type ProgressEventEmitter = StrictEventEmitter<EventEmitter, ProgressEvents>;
 
-export interface DicomVolumeProgressiveLoader extends ProgressEventEmitter {
+export interface DicomVolumeProgressiveLoader extends DicomVolumeLoader, ProgressEventEmitter {
   loadMeta(): Promise<DicomVolumeMetadata>;
   loadVolume(): Promise<DicomVolume>;
   getVolume(): DicomVolume | null;
   setPriority?(imageIndices: MultiRangeInitializer, priority: number): void;
+}
+
+export function isProgressiveLoader(loader: DicomVolumeLoader): loader is DicomVolumeProgressiveLoader {
+  return 'getVolume' in loader;
 }

@@ -1,7 +1,7 @@
 import Viewer from '../viewer/Viewer';
 import ViewState, { MprViewState } from '../ViewState';
 import DicomVolume from '../../common/DicomVolume';
-import { DicomVolumeProgressiveLoader } from './volume-loader/DicomVolumeLoader';
+import { DicomVolumeProgressiveLoader, isProgressiveLoader } from './volume-loader/DicomVolumeLoader';
 import MprProgram from './gl/MprProgram';
 import MprImageSource from './MprImageSource';
 import {
@@ -58,6 +58,10 @@ export default class WebGlRawVolumeMprImageSource
 
   constructor({ volumeLoader, draftInterval }: WebGlRawVolumeMprImageSourceOptions) {
     super();
+
+    if(!isProgressiveLoader(volumeLoader)) {
+      throw new TypeError('The specified volumeLoader is not a progressive loader.');
+    }
 
     draftInterval = draftInterval || 200;
 

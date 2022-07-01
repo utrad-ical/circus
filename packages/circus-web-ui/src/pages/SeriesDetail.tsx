@@ -11,11 +11,11 @@ import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import ImageViewer from 'components/ImageViewer';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { toolFactory } from '@utrad-ical/circus-rs/src/browser/tool/tool-initializer';
-import useLoginUser from 'utils/useLoginUser';
 import useLoadData from 'utils/useLoadData';
 import styled from 'styled-components';
 import { Link, useParams } from 'react-router-dom';
 import IconButton from 'components/IconButton';
+import { useVolumeLoaders } from 'utils/useVolumeLoader';
 
 const StyledImageViewer = styled(ImageViewer)`
   background: black;
@@ -28,9 +28,7 @@ const StyledMenu = styled.div`
   margin-bottom: 1em;
 `;
 
-const getImageSource = async (server: string, seriesUid: string) => {
-  const rsHttpClient = new rs.RsHttpClient(server);
-  const volumeLoader = new rs.RsVolumeLoader({ rsHttpClient, seriesUid });
+const getImageSource = async (volumeLoader: rs.DicomVolumeProgressiveLoader) => {
   const meta = await volumeLoader.loadMeta();
   switch (meta.mode) {
     case '2d':
@@ -39,22 +37,15 @@ const getImageSource = async (server: string, seriesUid: string) => {
         maxCacheSize: 10
       });
     default:
-      return new rs.WebGlHybridMprImageSource({
-        volumeLoader,
-        rsHttpClient,
-        seriesUid,
-        estimateWindowType: 'center'
-      });
+      return new rs.WebGlRawVolumeMprImageSource({ volumeLoader });
   }
 };
 
 const SeriesDetail: React.FC<{}> = props => {
   const seriesUid = useParams<{ uid: string }>().uid;
   const [composition, setComposition] = useState<rs.Composition | null>(null);
-  const loginUser = useLoginUser()!;
   const api = useApi();
   const pagerTool = useMemo(() => toolFactory('pager'), []);
-  const server = loginUser.dicomImageServer;
 
   const load = useCallback(
     async cancelToken => {
@@ -65,19 +56,28 @@ const SeriesDetail: React.FC<{}> = props => {
   );
   const [seriesData] = useLoadData<any | Error>(load);
 
-  const loadingId = useRef(0);
+  const loadingSiriesUid = useRef(seriesUid);
+
+  const [volumeLoader] = useVolumeLoaders([{ seriesUid, estimateWindowType: 'center' }]);
 
   useEffect(() => {
     if (!seriesData) return;
     (async () => {
-      const id = ++loadingId.current;
-      const src = await getImageSource(server, seriesUid);
-      if (loadingId.current === id) {
-        const composition = new rs.Composition(src);
-        setComposition(composition);
-      }
+      loadingSiriesUid.current = seriesData.seriesUid;
+      const { mode } = await volumeLoader.loadMeta();
+      if(seriesData.seriesUid !== loadingSiriesUid.current) return;
+
+      const src = mode === '2d'
+        ? new rs.TwoDimensionalImageSource({
+          volumeLoader,
+          maxCacheSize: 10
+        })
+        : new rs.WebGlRawVolumeMprImageSource({ volumeLoader });
+
+      const composition = new rs.Composition(src);
+      setComposition(composition);
     })();
-  }, [seriesData, seriesUid, server]);
+  }, [!seriesData, volumeLoader]);
 
   if (!seriesData) return <LoadingIndicator />;
 

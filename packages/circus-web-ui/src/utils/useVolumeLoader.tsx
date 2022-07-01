@@ -26,7 +26,7 @@ const defaultContextValue = {
   abandonVolumeLoader: () => { throw new Error('Context is not ready') },
 };
 
-export const VolumeLoaderFactoryContext = React.createContext<Context>(defaultContextValue);
+const VolumeLoaderFactoryContext = React.createContext<Context>(defaultContextValue);
 
 export const VolumeLoaderFactoryProvider: React.FC<{ cacheTimeout?: number }> = ({ children, cacheTimeout = 5000 }) => {
   const server = useSelector(state => state.loginUser.data?.dicomImageServer);

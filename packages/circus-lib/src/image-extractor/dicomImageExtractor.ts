@@ -220,6 +220,7 @@ function determinePitch(dataset: DataSet): number | undefined {
   // [0018, 0088] Spacing between slices
   let pitch: number | undefined = undefined;
   if ('x00180088' in dataset.elements) {
+    // This value can be negative (respresents the direction of stacking)!
     pitch = dataset.floatString('x00180088');
     if (!pitch) throw new Error('Slice pitch could not be determined');
   }

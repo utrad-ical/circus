@@ -4,8 +4,7 @@
   "description": "React components used by CIRCUS projects",
   "main": "lib/index.js",
   "scripts": {
-    "build": "tsc --build",
-    "postbuild": "bash postbuild.sh"
+    "build": "tsc --build"
   },
   "repository": {
     "type": "git",

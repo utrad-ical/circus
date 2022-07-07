@@ -13,9 +13,9 @@
   },
   "dependencies": {
     "@babel/core": "^7.14.0",
-    "@babel/preset-env": "^7.14.1",
-    "@babel/preset-typescript": "^7.13.0",
-    "@babel/register": "^7.13.16",
+    "@babel/preset-env": "^7.18.6",
+    "@babel/preset-typescript": "^7.18.6",
+    "@babel/register": "^7.18.6",
     "@utrad-ical/circus-lib": "^0.17.0",
     "ajv": "^6.11.0",
     "archiver": "^5.3.0",

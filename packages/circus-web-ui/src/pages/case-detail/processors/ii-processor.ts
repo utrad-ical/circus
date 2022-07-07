@@ -8,6 +8,7 @@ import performLabelCreatingVoxelProcessing, {
 
 export interface IntersliceInterpolationOptions {
   orientation: 'Axial' | 'Coronal' | 'Sagital';
+  mode: 'Single' | 'Multi';
 }
 
 const transpose = (
@@ -41,7 +42,7 @@ const iiVoxelProcessor: VoxelLabelProcessor<
   IntersliceInterpolationOptions
 > = props => {
   const {
-    options: { orientation },
+    options: { orientation, mode },
     input,
     width,
     height,
@@ -50,7 +51,6 @@ const iiVoxelProcessor: VoxelLabelProcessor<
     postProcessor,
     reportProgress
   } = props;
-
   const initializedInput = transpose(
     input,
     width,
@@ -84,7 +84,8 @@ const iiVoxelProcessor: VoxelLabelProcessor<
       input: initializedInput,
       width: transposedWidth,
       height: transposedHeight,
-      nSlices: transposedNSlices
+      nSlices: transposedNSlices,
+      mode: mode
     });
     myWorker.onmessage = (e: any) => {
       if (typeof e.data === 'string') {
@@ -120,7 +121,8 @@ const iiVoxelProcessor: VoxelLabelProcessor<
           initializedInput,
           transposedWidth,
           transposedHeight,
-          transposedNSlices
+          transposedNSlices,
+          mode
         ),
         width,
         height,

@@ -4,19 +4,18 @@ import PartialVolumeDescriptor, {
   isValidPartialVolumeDescriptor
 } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
 import { useSelector } from 'react-redux';
-import { EstimateWindowType } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/rs-loader-utils';
 
 type Context = {
-  serializeUtilizeOptions: (options: UtilizeOptions) => string;
-  utilizeVolumeLoader: (options: UtilizeOptions) => string;
+  serializeUtilizeOptions: (options: SeriesEntryWithHints) => string;
+  utilizeVolumeLoader: (options: SeriesEntryWithHints) => string;
   getVolumeLoader: (key: string) => rs.DicomVolumeProgressiveLoader;
   abandonVolumeLoader: (key: string) => void;
 };
 
-interface UtilizeOptions {
+interface SeriesEntryWithHints {
   seriesUid: string;
-  partialVolumeDescriptor?: PartialVolumeDescriptor;
-  estimateWindowType?: EstimateWindowType;
+  partialVolumeDescriptor: PartialVolumeDescriptor;
+  estimateWindowType?: rs.EstimateWindowType;
 }
 
 const defaultContextValue = {
@@ -45,12 +44,12 @@ export const VolumeLoaderFactoryProvider: React.FC<{ cacheTimeout?: number }> = 
     const wsClient = new rs.WebSocketClient(`${secure ? 'wss' : 'ws'}://${host}/ws/volume`);
     const transferConnectionFactory = rs.createTransferConnectionFactory(wsClient);
 
-    const serializeUtilizeOptions = ({ seriesUid, partialVolumeDescriptor, estimateWindowType }: UtilizeOptions) =>
+    const serializeUtilizeOptions = ({ seriesUid, partialVolumeDescriptor, estimateWindowType }: SeriesEntryWithHints) =>
       seriesUid +
       (partialVolumeDescriptor ? `&${partialVolumeDescriptor.start}:${partialVolumeDescriptor.end}:${partialVolumeDescriptor.delta}` : '') +
       (estimateWindowType ? `/${estimateWindowType}` : '');
 
-    const utilizeVolumeLoader = (options: UtilizeOptions) => {
+    const utilizeVolumeLoader = (options: SeriesEntryWithHints) => {
 
       if (options.partialVolumeDescriptor && !isValidPartialVolumeDescriptor(options.partialVolumeDescriptor))
         throw new Error('Invalid partial volume descriptor');
@@ -114,7 +113,7 @@ export const VolumeLoaderFactoryProvider: React.FC<{ cacheTimeout?: number }> = 
 };
 
 
-export const useVolumeLoaders = (series: UtilizeOptions[]) => {
+export const useVolumeLoaders = (series: SeriesEntryWithHints[]) => {
   const { serializeUtilizeOptions, utilizeVolumeLoader, abandonVolumeLoader, getVolumeLoader } = useContext(VolumeLoaderFactoryContext)!;
 
   const runningLoaders = useRef<Set<string>>(new Set());
@@ -139,7 +138,7 @@ export const useVolumeLoaders = (series: UtilizeOptions[]) => {
           runningLoaders.current.delete(id);
         });
 
-      return series.map((options: UtilizeOptions) => {
+      return series.map((options: SeriesEntryWithHints) => {
         const key = serializeUtilizeOptions(options);
         if (!runningLoaders.current.has(key)) {
           utilizeVolumeLoader(options);

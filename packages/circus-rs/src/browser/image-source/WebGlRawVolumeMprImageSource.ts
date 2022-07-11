@@ -1,7 +1,7 @@
 import Viewer from '../viewer/Viewer';
 import ViewState, { MprViewState } from '../ViewState';
 import DicomVolume from '../../common/DicomVolume';
-import { DicomVolumeProgressiveLoader, isProgressiveLoader, ProgressEventListener } from './volume-loader/DicomVolumeLoader';
+import { DicomVolumeProgressiveLoader, isProgressiveLoader } from './volume-loader/DicomVolumeLoader';
 import MprProgram from './gl/MprProgram';
 import MprImageSource from './MprImageSource';
 import {

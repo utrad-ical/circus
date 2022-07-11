@@ -81,3 +81,4 @@ export { default as zoomBy } from './tool/state/handleZoomBy';
 export { default as rotateBy } from './tool/state/handleRotationBy';
 export * from './image-source/gl/transfer-function-util';
 export { default as buildTransferFunctionMap } from './image-source/gl/texture/buildTransferFunctionMap';
+export { EstimateWindowType } from './image-source/volume-loader/rs-loader-utils';

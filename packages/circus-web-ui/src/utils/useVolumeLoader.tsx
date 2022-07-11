@@ -12,7 +12,7 @@ type Context = {
   abandonVolumeLoader: (key: string) => void;
 };
 
-interface SeriesEntryWithHints {
+export interface SeriesEntryWithHints {
   seriesUid: string;
   partialVolumeDescriptor: PartialVolumeDescriptor;
   estimateWindowType?: rs.EstimateWindowType;

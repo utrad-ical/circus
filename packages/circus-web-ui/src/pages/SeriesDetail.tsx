@@ -2,8 +2,7 @@ import React, {
   useState,
   useEffect,
   useMemo,
-  useCallback,
-  useRef
+  useCallback
 } from 'react';
 import { Row, Col, Panel } from 'components/react-bootstrap';
 import { useApi } from 'utils/api';
@@ -15,7 +14,7 @@ import useLoadData from 'utils/useLoadData';
 import styled from 'styled-components';
 import { Link, useParams } from 'react-router-dom';
 import IconButton from 'components/IconButton';
-import { useVolumeLoaders } from 'utils/useVolumeLoader';
+import { SeriesEntryWithHints, useVolumeLoaders } from 'utils/useVolumeLoader';
 
 const StyledImageViewer = styled(ImageViewer)`
   background: black;
@@ -43,35 +42,57 @@ const SeriesDetail: React.FC<{}> = props => {
   );
   const [seriesData] = useLoadData<any | Error>(load);
 
-  const loadingSiriesUid = useRef<string>();
-
-  const [volumeLoader] = useVolumeLoaders([{ seriesUid, estimateWindowType: 'center' }]);
+  const [seriesEntries, setSeriesEntries] = useState<SeriesEntryWithHints[]>(
+    []
+  );
+  const [volumeLoader] = useVolumeLoaders(seriesEntries);
 
   useEffect(() => {
-    if (!seriesData) return;
+    const { seriesUid, images } = seriesData || {};
+    if (seriesUid && images) {
+      const [start, end] = images.split('-').map((i: string) => Number(i)) as [
+        number,
+        number
+      ];
+      setSeriesEntries([
+        {
+          seriesUid,
+          partialVolumeDescriptor: { start, end, delta: 1 },
+          estimateWindowType: 'center'
+        }
+      ]);
+    } else {
+      setSeriesEntries([]);
+    }
+  }, [seriesData]);
+
+  useEffect(() => {
+    if (!volumeLoader) return;
+
+    const abortController = new AbortController();
 
     let composition: rs.Composition | undefined = undefined;
     (async () => {
-      loadingSiriesUid.current = seriesData.seriesUid;
       const { mode } = await volumeLoader.loadMeta();
-      if (loadingSiriesUid.current !== seriesData.seriesUid) return;
+      if (abortController.signal.aborted) return;
 
-      const src = mode === '2d'
-        ? new rs.TwoDimensionalImageSource({
-          volumeLoader,
-          maxCacheSize: 10
-        })
-        : new rs.WebGlRawVolumeMprImageSource({ volumeLoader });
+      const src =
+        mode === '2d'
+          ? new rs.TwoDimensionalImageSource({
+              volumeLoader,
+              maxCacheSize: 10
+            })
+          : new rs.WebGlRawVolumeMprImageSource({ volumeLoader });
 
       composition = new rs.Composition(src);
       setComposition(composition);
     })();
 
     return () => {
-      loadingSiriesUid.current = undefined;
+      abortController.abort();
       if (composition) composition.dispose();
     };
-  }, [!seriesData, volumeLoader]);
+  }, [volumeLoader]);
 
   if (!seriesData) return <LoadingIndicator />;
 

@@ -10,13 +10,17 @@ import setImmediate from '../util/setImmediate';
 import Viewer from '../viewer/Viewer';
 import ViewState, { TwoDimensionalViewState } from '../ViewState';
 import drawToImageData from './drawToImageData';
-import ImageSource, { ViewStateResizeTransformer } from './ImageSource';
-import DicomVolumeLoader, {
+import ImageSource, {
+  DrawResult,
+  ViewStateResizeTransformer
+} from './ImageSource';
+import {
+  DicomVolumeProgressiveLoader,
   DicomVolumeMetadata
 } from './volume-loader/DicomVolumeLoader';
 
 interface TwoDimensionalImageSourceOptions {
-  volumeLoader: DicomVolumeLoader;
+  volumeLoader: DicomVolumeProgressiveLoader;
   maxCacheSize?: number;
 }
 
@@ -27,14 +31,21 @@ export default class TwoDimensionalImageSource extends ImageSource {
   private cache: LRU<Promise<ImageBitmap>>;
   private backCanvas: HTMLCanvasElement;
 
+  private volumeLoader: DicomVolumeProgressiveLoader;
+  private higherPriority: number = 0;
+  private draftInterval: number = 300;
+
   constructor({
     volumeLoader,
     maxCacheSize = 10
   }: TwoDimensionalImageSourceOptions) {
     super();
+    this.volumeLoader = volumeLoader;
+
     this.loadSequence = (async () => {
       this.metadata = await volumeLoader.loadMeta();
-      this.volume = await volumeLoader.loadVolume();
+      this.volume = volumeLoader.getVolume()!;
+      volumeLoader.loadVolume();
     })();
     this.cache = new LRU({ maxSize: maxCacheSize });
 
@@ -58,10 +69,10 @@ export default class TwoDimensionalImageSource extends ImageSource {
       metadata.pixelFormat === 'rgba8'
         ? undefined
         : metadata.dicomWindow
-        ? { ...metadata.dicomWindow }
-        : metadata.estimatedWindow
-        ? { ...metadata.estimatedWindow }
-        : { level: 50, width: 100 };
+          ? { ...metadata.dicomWindow }
+          : metadata.estimatedWindow
+            ? { ...metadata.estimatedWindow }
+            : { level: 50, width: 100 };
 
     const initialState: TwoDimensionalViewState = {
       type: '2d',
@@ -102,47 +113,89 @@ export default class TwoDimensionalImageSource extends ImageSource {
     ];
   }
 
-  private async createUnclippedImageBitmap(
-    viewState: TwoDimensionalViewState
-  ): Promise<ImageBitmap> {
-    const imageData = this.createImageData(viewState);
-    const imageBitmap = await createImageBitmap(imageData);
-    return imageBitmap;
-  }
-
-  public async draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
+  public async draw(
+    viewer: Viewer,
+    viewState: ViewState,
+    abortSignal: AbortSignal
+  ): Promise<DrawResult> {
     if (viewState.type !== '2d') throw new Error('Unsupported view state');
 
-    const context = viewer.canvas.getContext('2d');
-    if (!context) throw new Error('Failed to get canvas context');
+    const { imageNumber } = viewState;
+    this.volumeLoader.setPriority &&
+      this.volumeLoader.setPriority(imageNumber, ++this.higherPriority);
 
-    const { imageNumber, window, interpolationMode } = viewState;
-
-    const cacheKey =
-      `imageNumber:${imageNumber};` +
-      (window ? `ww:${window.width};wl${window.level};` : '');
-
-    const imageBitmap = await (this.cache.get(cacheKey) ??
-      this.cache.set(cacheKey, this.createUnclippedImageBitmap(viewState)));
-    const imageSmoothingEnabled = !(
-      !interpolationMode || interpolationMode === 'none'
-    );
-    context.imageSmoothingEnabled = imageSmoothingEnabled;
-    context.imageSmoothingQuality = 'medium';
-
-    const imageData = this.createClippedImageData(
-      viewer,
-      viewState,
-      imageBitmap
-    );
+    const drawResult = await this.createDrawResult(viewer, viewState, abortSignal);
 
     // If we use Promise.resolve directly, the then-calleback is called
     // before any stacked UI events are handled.
     // Use the polyfilled setImmediate to delay it.
     // Cf. http://stackoverflow.com/q/27647742/1209240
     return new Promise(resolve => {
-      setImmediate(() => resolve(imageData!));
+      setImmediate(() => resolve(drawResult));
     });
+  }
+
+  private async createDrawResult(
+    viewer: Viewer,
+    viewState: TwoDimensionalViewState,
+    abortSignal: AbortSignal
+  ): Promise<DrawResult> {
+    const { imageNumber } = viewState;
+
+    if (this.volumeLoader.loadedImages().some(i => i === imageNumber)) {
+      return await this.createImageResult(viewer, viewState, abortSignal);
+    } else {
+      return {
+        draft: this.createEmptyData(),
+        next: async () => {
+          await new Promise<void>(resolve =>
+            setTimeout(() => resolve(), this.draftInterval)
+          );
+          return await this.createDrawResult(viewer, viewState, abortSignal);
+        }
+      };
+    }
+  }
+
+  private async createImageResult(
+    viewer: Viewer,
+    viewState: TwoDimensionalViewState,
+    abortSignal: AbortSignal
+  ): Promise<DrawResult> {
+    const context = viewer.canvas.getContext('2d');
+    if (!context) throw new Error('Failed to get canvas context');
+
+    const { imageNumber, window, interpolationMode = 'none' } = viewState;
+
+    const cacheKey =
+      `imageNumber:${imageNumber};` +
+      (window ? `ww:${window.width};wl${window.level};` : '');
+
+    let bitmapPromise: Promise<ImageBitmap> | undefined =
+      this.cache.get(cacheKey);
+    if (!bitmapPromise) {
+      const imageData = this.createImageData(viewState);
+      bitmapPromise = createImageBitmap(imageData);
+      this.cache.set(cacheKey, bitmapPromise);
+    }
+
+    const bitmap = await bitmapPromise;
+
+    const imageSmoothingEnabled = !(
+      !interpolationMode || interpolationMode === 'none'
+    );
+    context.imageSmoothingEnabled = imageSmoothingEnabled;
+    context.imageSmoothingQuality = 'medium';
+
+    const imageData = this.createClippedImageData(viewer, viewState, bitmap);
+
+    return imageData;
+  }
+
+  private createEmptyData(): ImageData {
+    const metadata = this.metadata!;
+    const [w, h] = metadata.voxelCount;
+    return new ImageData(w, h);
   }
 
   private createImageData(viewState: TwoDimensionalViewState): ImageData {
@@ -166,11 +219,11 @@ export default class TwoDimensionalImageSource extends ImageSource {
     }
   }
 
-  private async createClippedImageData(
+  private createClippedImageData(
     viewer: Viewer,
     viewState: TwoDimensionalViewState,
     image: ImageBitmap
-  ): Promise<ImageData> {
+  ): ImageData {
     const outSize = viewer.getResolution();
     this.backCanvas.width = outSize[0];
     this.backCanvas.height = outSize[1];
@@ -227,6 +280,10 @@ class LRU<T> {
   constructor({ maxSize }: LRUOptions) {
     this.data = new Map();
     this.maxSize = maxSize;
+  }
+
+  public has(key: string): boolean {
+    return this.data.has(key);
   }
 
   public get(key: string): T | undefined {

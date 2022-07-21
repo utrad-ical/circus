@@ -9,6 +9,7 @@ import { toolFactory } from '@utrad-ical/circus-rs/src/browser/tool/tool-initial
 import classnames from 'classnames';
 import { EventEmitter } from 'events';
 import React, { useEffect, useRef, useState } from 'react';
+import setImmediate from '@utrad-ical/circus-rs/src/browser/util/setImmediate';
 
 export const setOrthogonalOrientation = (orientation: OrientationString) => {
   return (viewer: rs.Viewer, initialViewState: rs.MprViewState) => {

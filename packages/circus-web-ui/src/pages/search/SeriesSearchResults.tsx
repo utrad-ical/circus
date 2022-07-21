@@ -39,12 +39,6 @@ const Operation: DataGridRenderer<any> = props => {
   const { value: series } = props;
   return (
     <Fragment>
-      <Link to={`/series/${series.seriesUid}`}>
-        <IconButton icon="circus-series" bsSize="sm">
-          View
-        </IconButton>
-      </Link>
-      &thinsp;
       <DropdownButton
         id="dropdown-new-item"
         bsSize="sm"
@@ -61,6 +55,20 @@ const Operation: DataGridRenderer<any> = props => {
         <MenuItem eventKey="2" href={`/new-job/${series.seriesUid}`}>
           New Job
         </MenuItem>
+      </DropdownButton>
+      &thinsp;
+      <DropdownButton
+        onSelect={() => console.log('(´_ゝ｀)')}
+        bsSize="sm"
+        title={<Icon icon="glyphicon-option-horizontal" />}
+        id={`dropdown-`}
+        pullRight
+        noCaret
+      >
+        <MenuItem eventKey="1" href={`/series/${series.seriesUid}`}>
+          View
+        </MenuItem>
+        <MenuItem eventKey="2">Delete</MenuItem>
       </DropdownButton>
     </Fragment>
   );

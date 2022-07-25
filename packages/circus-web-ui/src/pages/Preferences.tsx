@@ -288,7 +288,7 @@ const Preferences: React.FC<{}> = props => {
           Save
         </Button>
         <Button bsStyle="link" onClick={loadSettings}>
-          Cancel
+          Reset
         </Button>
       </p>
     </div>

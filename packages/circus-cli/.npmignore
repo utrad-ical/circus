@@ -1,0 +1,7 @@
+/src
+.env
+/out
+*.tgz
+.editorconfig
+tsconfig.json
+/.vscode

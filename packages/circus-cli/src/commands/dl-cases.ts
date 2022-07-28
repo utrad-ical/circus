@@ -5,7 +5,7 @@ import downloadToFile from '../downloadToFile.js';
 import * as path from 'node:path';
 import createSpinner from '../createSpinner.js';
 
-const createCommand: CreateCommand = fetch => ({
+const createCommand: CreateCommand = ({ getFetch }) => ({
   configureCommand: program => {
     return program
       .command('dl-cases')
@@ -32,6 +32,7 @@ const createCommand: CreateCommand = fetch => ({
       );
   },
   run: async (args: string[], options) => {
+    const fetch = getFetch();
     const outDir = options.outdir ?? process.cwd();
     const casesPerTask = Number(options.perTask) ?? 10;
     const ids = !!options.file

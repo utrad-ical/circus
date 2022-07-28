@@ -226,10 +226,17 @@ export const handlePostExportJob: RouteMiddleware = ({
     // check read privileges
     const cursor = models.clinicalCase.findAsCursor({ caseId: { $in: ids } });
     const pidSet = new Set<string>();
+    let count = 0;
     while (await cursor.hasNext()) {
       const c = await cursor.next();
+      count++;
       pidSet.add(c.projectId);
     }
+
+    if (count !== ids.length) {
+      ctx.throw(status.BAD_REQUEST, 'Some cases do not exist.');
+    }
+
     const projectIds = Array.from(pidSet.values());
     const { accessibleProjects } = ctx.userPrivileges;
     for (const projectId of projectIds) {
@@ -237,7 +244,7 @@ export const handlePostExportJob: RouteMiddleware = ({
       if (!project || project.roles.indexOf('read') < 0) {
         ctx.throw(
           status.UNAUTHORIZED,
-          'You do not have enough read privilege.'
+          'You do not have enough read privilege for some cases.'
         );
       }
     }

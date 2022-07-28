@@ -8,7 +8,7 @@
     "build": "tsc"
   },
   "bin": {
-    "circus-api-util": "lib/index.js"
+    "circus-api-util": "./dist/index.js"
   },
   "engines": {
     "node": ">=18.0.0"

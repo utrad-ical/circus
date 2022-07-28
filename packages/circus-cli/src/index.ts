@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { Command } from 'commander';
 import { config } from 'dotenv';
 import { promises as fs } from 'node:fs';

@@ -51,7 +51,7 @@ const main = async () => {
     .description('CLI for CIRCUS API Server')
     .version(await getVersion());
 
-  const commands = ['preferences', 'dl-cases'];
+  const commands = ['login', 'preferences', 'dl-cases'];
 
   for (const command of commands) {
     const configureCommand: (program: Command) => Command = (

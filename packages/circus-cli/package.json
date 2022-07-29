@@ -20,10 +20,12 @@
   "dependencies": {
     "commander": "^9.4.0",
     "dotenv": "^16.0.1",
+    "inquirer": "^9.0.2",
     "picocolors": "^1.0.0",
     "progress-stream": "^2.0.0"
   },
   "devDependencies": {
+    "@types/inquirer": "^8.2.1",
     "@types/node": "^18.6.1",
     "@types/progress-stream": "^2.0.2",
     "typescript": "^4.7.4"

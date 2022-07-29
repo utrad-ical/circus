@@ -1,14 +1,14 @@
 import pc from 'picocolors';
 
-const SpinnerGlyphs = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+const isTTY = process.stdout.isTTY && process.stdout.columns > 0;
+const spinnerGlyphs = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+const eraseLine = '\x1b[2K\r';
 
 export interface Spinner {
   tick: (message?: string) => void;
   stop: (message?: string, isError?: boolean) => void;
   setAutoTick: (enabled: boolean) => void;
 }
-
-const eraseLine = '\x1b[2K\r';
 
 const createSpinner = (
   initialMessage: string = '',
@@ -17,21 +17,26 @@ const createSpinner = (
   let phase = 0;
   let timerId: NodeJS.Timer | null = null;
   let message = initialMessage;
-  process.stdout.write(pc.cyan(SpinnerGlyphs[phase++]) + '  ' + initialMessage);
+  process.stdout.write(pc.cyan(spinnerGlyphs[phase++]) + '  ' + initialMessage);
+
+  const putLine = (glyph: string, message: string) => {
+    if (isTTY) {
+      process.stdout.write(eraseLine + glyph + ' ' + message);
+    } else {
+      process.stdout.write('\n' + glyph + ' ' + message);
+    }
+  };
 
   const tick = (newMessage?: string) => {
-    // Erase current line
     if (newMessage) message = newMessage;
-    process.stdout.write(
-      eraseLine +
-        pc.cyan(SpinnerGlyphs[phase % SpinnerGlyphs.length]) +
-        '  ' +
-        message
+    putLine(
+      pc.cyan(isTTY ? spinnerGlyphs[phase++ % spinnerGlyphs.length] : '>>'),
+      message
     );
-    phase++;
   };
 
   const setAutoTick = (enabled: boolean) => {
+    if (!isTTY) return;
     if (enabled) {
       if (!timerId) timerId = setInterval(tick, 100);
     } else {
@@ -45,13 +50,8 @@ const createSpinner = (
   return {
     tick,
     stop: (message = 'Done', isError) => {
-      process.stdout.write(
-        eraseLine +
-          pc.cyan(isError ? pc.red('X') + message : pc.green('✓')) +
-          '  ' +
-          message +
-          '\n'
-      );
+      putLine(isError ? pc.red('✖') : pc.green('✓'), message);
+      process.stdout.write('\n');
       if (timerId) clearTimeout(timerId);
     },
     setAutoTick

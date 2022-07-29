@@ -1,37 +1,48 @@
 # CIRCUS API Tools
 
+This is an API client to connect to CIRCUS API Server.
+
 Currently, this tool can:
 
 - Show user's preference (primarily for testing the auth status)
 - Download case data as MHD
 
+**Note:** This is an HTTP client that works by accessing CIRCUS API Server (REST API). CIRCUS also provides admin CLI, which is available only for server administrators. Some operations may work more efficiently via admin CLI because it does not use HTTP connections.
+
 ## Install
 
-1. Install [Node](https://nodejs.org/). **Node 18** or later is required.
+1. Install [Node](https://nodejs.org/). **Node 18** or later is required. Node 17 or below won't work!
 
-2. Run the following command (NPM is a node package manager that will be installed along with Node itself):
+2. Run the following command (NPM should have been installed along with Node itself):
 
    ```
    npm install -g @utrad-ical/circus-api-util
    ```
 
-3. Run the following command to check if the API client has been successfully installed:
+   This will install the client globally, i.e., somewhere in your PATH.
+
+3. Run the following command to store an API token to your machine:
 
    ```
-   circus-api-util --version
+   circus-api-util login
    ```
 
-4. Create a file called `.circusapirc` in your home directory. Its contents should look like the following:
+   You will be prompted to enter two values:
 
-   ```
-   CIRCUS_API_TOKEN=3bac24b0c2f79085c5fceb15c7fffb9565a39062
-   CIRCUS_API_ENDPOINT=http://111.222.333.444/api/
-   ```
+   - **API Endpoint**, e.g., "http://111.222.333.444/api/".
+   - **API Token**, e.g., "3bac24b0c2f79085c5fceb15c7fffb9565a39062". This can be generated via the web UI.
 
-5. Run the following command to check if the API can connect to a running CIRCUS API server:
+   These data will be stored in the `.circusapirc` file in your home directory.
+
+   **Tip:** Alternatively, you can export the following two environment variables:
+
+   - `CIRCUS_API_TOKEN`
+   - `CIRCUS_API_ENDPOINT`
+
+4. Run the following command to check if the client can connect to a running CIRCUS API server:
 
    ```
    circus-api-util preferences
    ```
 
-   It will display the list of your preferences. If it fails, check if the `.circusapirc` has been properly configured.
+   This will display the list of your preferences. If it fails, return to the previous step and check if the given values are correct.

@@ -1,4 +1,5 @@
 import { Command } from 'commander';
+import { int } from '../utils/commander-utils.js';
 
 export default (program: Command) => {
   return program
@@ -12,7 +13,8 @@ export default (program: Command) => {
     .option(
       '-p, --per-task <num>',
       'number of cases downloaded as a batch',
-      '10'
+      int({ min: 1, max: 100 }),
+      10
     )
     .argument(
       '<case-id...>',

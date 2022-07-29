@@ -3,9 +3,9 @@ import * as path from 'node:path';
 import pc from 'picocolors';
 import createSpinner from '../createSpinner.js';
 import downloadToFile from '../downloadToFile.js';
-import CreateCommand from './CreateCommand.js';
+import CommandAction from './CommandAction.js';
 
-const createCommand: CreateCommand = ({ getFetch }) => {
+const createCommand: CommandAction = ({ getFetch }) => {
   return async (args: string[], options) => {
     const fetch = getFetch();
     const outDir = options.outdir ?? process.cwd();

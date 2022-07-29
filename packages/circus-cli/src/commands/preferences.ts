@@ -1,6 +1,6 @@
-import CreateCommand from './CreateCommand.js';
+import CommandAction from './CommandAction.js';
 
-const createCommand: CreateCommand = ({ getFetch }) => {
+const createCommand: CommandAction = ({ getFetch }) => {
   return async () => {
     const fetch = getFetch();
     const res = await fetch('preferences');

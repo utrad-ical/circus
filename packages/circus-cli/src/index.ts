@@ -7,6 +7,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import * as url from 'node:url';
 import pc from 'picocolors';
+import CommandAction from './commands/CommandAction.js';
 import createAuthorizedFetch from './createAuthorizedFetch.js';
 
 const getVersion = async () => {
@@ -58,9 +59,10 @@ const main = async () => {
     ).default;
     const cmd = configureCommand(program);
     cmd.action(async (...args) => {
-      const mod = await import(`./commands/${command}.js`);
+      const action: CommandAction = (await import(`./commands/${command}.js`))
+        .default;
       try {
-        await mod.default({ getFetch, rcFilePath })(...args);
+        await action({ getFetch, rcFilePath })(...args);
       } catch (err: any) {
         console.error(pc.bgRed('Error'));
         console.error(pc.red(err.message));

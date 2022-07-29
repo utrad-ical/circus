@@ -1,5 +1,3 @@
-import pc from 'picocolors';
-
 /**
  * @param token - The token to use for authorization.
  * @param endpoint - e.g. 'https://circus-server.net/api/'
@@ -16,7 +14,7 @@ const createAuthorizedFetch = (
       resource = endpoint + resource;
     }
     if ('Authorization' in (init?.headers ?? {}))
-      throw new Error('Authorization header cannot be set');
+      throw new Error('Internal error: Authorization header cannot be set');
     const res = await fetch(resource, {
       ...init,
       headers: {
@@ -25,10 +23,11 @@ const createAuthorizedFetch = (
       }
     });
     if (!res.ok) {
-      console.error(pc.bgRed(`HTTP Error: ${res.status} ${res.statusText}`));
-      console.error(pc.red(`URL: ${res.url}`));
-      console.error(pc.red(await res.text()));
-      throw new Error(`Terminated due to HTTP error`);
+      throw new Error(
+        `HTTP error: ${res.status} ${res.statusText}\n` +
+          `URL: ${res.url}\n` +
+          `Error content: ${await res.text()}`
+      );
     }
     return res;
   };

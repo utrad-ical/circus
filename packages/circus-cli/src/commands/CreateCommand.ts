@@ -5,9 +5,6 @@ interface CommandDeps {
   rcFilePath: string;
 }
 
-type CreateCommand = (deps: CommandDeps) => {
-  configureCommand: (command: Command) => Command;
-  run: (...args: any[]) => Promise<void>;
-};
+type CreateCommand = (deps: CommandDeps) => (...args: any[]) => Promise<void>;
 
 export default CreateCommand;

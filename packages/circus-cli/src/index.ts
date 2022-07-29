@@ -7,7 +7,6 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import * as url from 'node:url';
 import pc from 'picocolors';
-import CreateCommand from './commands/CreateCommand.js';
 import createAuthorizedFetch from './createAuthorizedFetch.js';
 
 const getVersion = async () => {
@@ -28,18 +27,17 @@ const main = async () => {
     const CIRCUS_API_ENDPOIT = process.env.CIRCUS_API_ENDPOINT;
 
     if (!CIRCUS_API_TOKEN || !CIRCUS_API_ENDPOIT) {
-      console.error(
-        pc.red(
-          'Missing environment variables to connect to CIRCUS API Server.\n'
-        ) +
-          'You need to create an .env file.\n' +
+      throw new Error(
+        'Connection options have not been configured yet.\n' +
+          'You need to create a .circusapirc file.\n' +
           'See README.md.'
       );
-      throw new Error();
     }
     if (!CIRCUS_API_ENDPOIT.endsWith('/')) {
-      console.error(pc.red('CIRCUS_API_ENDPOINT must end with a slash.'));
-      throw new Error();
+      throw new Error(
+        'Connection options are configured incorrectly.\n' +
+          'CIRCUS_API_ENDPOINT must end with a slash.'
+      );
     }
     const apiToken = process.env.CIRCUS_API_TOKEN!;
     const apiEndpoint = process.env.CIRCUS_API_ENDPOINT!;
@@ -48,18 +46,26 @@ const main = async () => {
 
   const program = new Command();
   program
-    .name('circus-api')
+    .name('circus-api-util')
     .description('CLI for CIRCUS API Server')
     .version(await getVersion());
 
   const commands = ['preferences', 'dl-cases'];
 
   for (const command of commands) {
-    const createCommand: CreateCommand = (
-      await import(`./commands/${command}.js`)
+    const configureCommand: (program: Command) => Command = (
+      await import(`./commands/${command}.args.js`)
     ).default;
-    const cmd = createCommand({ getFetch, rcFilePath });
-    cmd.configureCommand(program).action(cmd.run);
+    const cmd = configureCommand(program);
+    cmd.action(async (...args) => {
+      const mod = await import(`./commands/${command}.js`);
+      try {
+        await mod.default({ getFetch, rcFilePath })(...args);
+      } catch (err: any) {
+        console.error(pc.bgRed('Error'));
+        console.error(pc.red(err.message));
+      }
+    });
   }
 
   program.parse();

@@ -1,37 +1,12 @@
-import CreateCommand from './CreateCommand.js';
-import { promises as fs, createWriteStream } from 'node:fs';
-import pc from 'picocolors';
-import downloadToFile from '../downloadToFile.js';
+import { promises as fs } from 'node:fs';
 import * as path from 'node:path';
+import pc from 'picocolors';
 import createSpinner from '../createSpinner.js';
+import downloadToFile from '../downloadToFile.js';
+import CreateCommand from './CreateCommand.js';
 
-const createCommand: CreateCommand = ({ getFetch }) => ({
-  configureCommand: program => {
-    return program
-      .command('dl-cases')
-      .description('Download CIRCUS DB cases in MHD format.')
-      .option('-o, --outdir <dir>', 'Output directory (default: CWD)')
-      .option('-f, --file', 'Read list of cases from file')
-      .option('-c, --combined', 'Export combined label files')
-      .option('-l, --crlf', 'Use CRLF instead of LF for line endings')
-      .option('-z, --zip', 'Use zip compression instead of tgz')
-      .option(
-        '-p, --per-task <num>',
-        'Number of cases downloaded as a batch',
-        '10'
-      )
-      .argument(
-        '<case-id...>',
-        'Case ID, or file containing IDs when --file is used'
-      )
-      .addHelpText(
-        'after',
-        '\nExamples:\n' +
-          '  circus-api dl-cases 123456789\n' +
-          '  circus-api dl-cases --file casee-ids.txt'
-      );
-  },
-  run: async (args: string[], options) => {
+const createCommand: CreateCommand = ({ getFetch }) => {
+  return async (args: string[], options) => {
     const fetch = getFetch();
     const outDir = options.outdir ?? process.cwd();
     const casesPerTask = Number(options.perTask) ?? 10;
@@ -110,7 +85,7 @@ const createCommand: CreateCommand = ({ getFetch }) => ({
         body: JSON.stringify({ dismissed: true })
       });
     }
-  }
-});
+  };
+};
 
 export default createCommand;

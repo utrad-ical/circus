@@ -48,11 +48,15 @@ const createCommand: CommandAction = ({ getFetch }) => {
             compressionFormat: options.zip ? 'zip' : 'tgz'
           })
         });
-        const taskId = (await res1.json()).taskId;
+        const taskId = ((await res1.json()) as { taskId: string }).taskId;
         spinner.tick('Waiting for export task to complete...');
         while (true) {
           const res2 = await fetch(`tasks/${taskId}`);
-          const task = await res2.json();
+          const task = (await res2.json()) as {
+            status: string;
+            errorMessage?: string;
+            progress: number;
+          };
           if (task.status === 'finished') {
             spinner.tick('Task completed. Waiting for download...');
             break;

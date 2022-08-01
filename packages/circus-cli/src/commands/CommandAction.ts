@@ -1,3 +1,5 @@
+import fetch from 'node-fetch';
+
 interface CommandDeps {
   getFetch: () => typeof fetch;
   rcFilePath: string;

@@ -1,3 +1,5 @@
+import fetch, { RequestInfo, RequestInit } from 'node-fetch';
+
 /**
  * @param token - The token to use for authorization.
  * @param endpoint - e.g. 'https://circus-server.net/api/'
@@ -9,7 +11,7 @@ const createAuthorizedFetch = (
 ): typeof fetch => {
   if (!token.length || !endpoint.length)
     throw new Error('Invalid token or endpoint');
-  return async (resource: RequestInfo | URL, init?: RequestInit) => {
+  return async (resource: RequestInfo, init?: RequestInit) => {
     if (typeof resource === 'string' && !resource.startsWith('http')) {
       resource = endpoint + resource;
     }

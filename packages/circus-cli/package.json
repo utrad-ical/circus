@@ -21,6 +21,7 @@
     "commander": "^9.4.0",
     "dotenv": "^16.0.1",
     "inquirer": "^9.0.2",
+    "node-fetch": "^3.2.10",
     "picocolors": "^1.0.0",
     "progress-stream": "^2.0.0"
   },

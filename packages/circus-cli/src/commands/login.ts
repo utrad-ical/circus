@@ -4,7 +4,7 @@ import pc from 'picocolors';
 import CommandAction from './CommandAction.js';
 import fileExists from '../utils/fileExits.js';
 
-const command: CommandAction = ({ rcFilePath }) => {
+const action: CommandAction = ({ rcFilePath }) => {
   return async () => {
     if (await fileExists(rcFilePath)) {
       console.log(pc.yellow(`The token file already exists at ${rcFilePath}.`));
@@ -52,4 +52,4 @@ const command: CommandAction = ({ rcFilePath }) => {
   };
 };
 
-export default command;
+export default action;

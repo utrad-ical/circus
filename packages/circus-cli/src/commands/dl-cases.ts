@@ -8,7 +8,7 @@ import CommandAction from './CommandAction.js';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-const createCommand: CommandAction = ({ getFetch }) => {
+const action: CommandAction = ({ getFetch }) => {
   return async (args: string[], options) => {
     const fetch = getFetch();
     const outDir = options.outdir ?? process.cwd();
@@ -112,4 +112,4 @@ const createCommand: CommandAction = ({ getFetch }) => {
   };
 };
 
-export default createCommand;
+export default action;

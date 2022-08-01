@@ -1,6 +1,6 @@
 import CommandAction from './CommandAction.js';
 
-const createCommand: CommandAction = ({ getFetch }) => {
+const action: CommandAction = ({ getFetch }) => {
   return async () => {
     const fetch = getFetch();
     const res = await fetch('preferences');
@@ -9,4 +9,4 @@ const createCommand: CommandAction = ({ getFetch }) => {
   };
 };
 
-export default createCommand;
+export default action;

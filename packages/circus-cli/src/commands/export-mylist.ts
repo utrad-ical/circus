@@ -24,7 +24,7 @@ interface MyList {
 
 const limit = 100; // fetches per page
 
-const createCommand: CommandAction = ({ getFetch }) => {
+const action: CommandAction = ({ getFetch }) => {
   return async (myListId: string, options: { type: ResourceType }) => {
     const fetch = getFetch();
     const ids: string[] = [];
@@ -79,4 +79,4 @@ const createCommand: CommandAction = ({ getFetch }) => {
   };
 };
 
-export default createCommand;
+export default action;

@@ -3,6 +3,7 @@ import * as path from 'node:path';
 import pc from 'picocolors';
 import createSpinner from '../utils/createSpinner.js';
 import downloadToFile from '../utils/downloadToFile.js';
+import taskReporter, { TaskEvent } from '../utils/taskReporter.js';
 import CommandAction from './CommandAction.js';
 
 const createCommand: CommandAction = ({ getFetch }) => {
@@ -29,71 +30,80 @@ const createCommand: CommandAction = ({ getFetch }) => {
       console.log(`Tasks were split into ${batches} batches.`);
     }
 
-    for (let batchIdx = 0; batchIdx < batches; batchIdx++) {
-      console.log(pc.cyan(`\nBatch #${batchIdx + 1} of ${batches}`));
-      const batch = ids.slice(
-        batchIdx * casesPerTask,
-        (batchIdx + 1) * casesPerTask
-      );
-      console.log(`Case IDs to download: ${batch.join(', ')}`);
-      const spinner = createSpinner('Registering an export task...');
-      try {
-        const res1 = await fetch('cases/export-mhd', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            caseIds: batch,
-            labelPackType: options.combined ? 'combined' : 'isolated',
-            mhdLineEnding: options.crlf ? 'crlf' : 'lf',
-            compressionFormat: options.zip ? 'zip' : 'tgz'
-          })
-        });
-        const taskId = ((await res1.json()) as { taskId: string }).taskId;
-        spinner.update('Waiting for export task to complete...');
-        while (true) {
-          const res2 = await fetch(`tasks/${taskId}`);
-          const task = (await res2.json()) as {
-            status: string;
-            errorMessage?: string;
-            progress: number;
-          };
-          if (task.status === 'finished') {
-            spinner.update('Task completed. Waiting for download...');
-            break;
-          }
-          if (task.status === 'error') {
-            spinner.stop('Task failed.', true);
-            console.error(
-              pc.bgRed(`Export task ${taskId} (batch ${batchIdx + 1}) failed.`)
-            );
-            console.error(pc.red(`Task error message: ${task.errorMessage}`));
-            throw new Error(`Export task failed.`);
-          }
-          await new Promise(resolve => setTimeout(resolve, 500));
-        }
-        const res3 = await fetch(`tasks/${taskId}/download`);
-        await downloadToFile(
-          res3,
-          path.join(
-            outDir,
-            `batch-${String(batchIdx + 1).padStart(3, '0')}.${
-              options.zip ? 'zip' : 'tgz'
-            }`
-          ),
-          { spinner }
-        );
+    const taskReports = taskReporter(fetch);
 
-        spinner.update('Marking the task as finished...');
-        await fetch(`tasks/${taskId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ dismissed: true })
-        });
-      } catch (err: any) {
-        spinner.stop('Task failed', true);
-        throw err;
+    try {
+      for (let batchIdx = 0; batchIdx < batches; batchIdx++) {
+        console.log(pc.cyan(`\nBatch #${batchIdx + 1} of ${batches}`));
+        const batch = ids.slice(
+          batchIdx * casesPerTask,
+          (batchIdx + 1) * casesPerTask
+        );
+        console.log(`Case IDs to download: ${batch.join(', ')}`);
+        const spinner = createSpinner('Registering an export task...');
+        try {
+          const res1 = await fetch('cases/export-mhd', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              caseIds: batch,
+              labelPackType: options.combined ? 'combined' : 'isolated',
+              mhdLineEnding: options.crlf ? 'crlf' : 'lf',
+              compressionFormat: options.zip ? 'zip' : 'tgz'
+            })
+          });
+          const taskId = ((await res1.json()) as { taskId: string }).taskId;
+          spinner.update('Waiting for export task to complete...');
+
+          // Wait for the task to complete.
+          await new Promise<void>((resolve, reject) => {
+            const handler = (event: TaskEvent) => {
+              if (event.taskId !== taskId) return;
+              switch (event.type) {
+                case 'finish':
+                  taskReports.events.off('event', handler);
+                  resolve();
+                  break;
+                case 'progress':
+                  spinner.update(
+                    `Waiting for export task to complete: ${event.message}`
+                  );
+                  break;
+                case 'error':
+                  taskReports.events.off('event', handler);
+                  reject('Task did not complete: ' + event.message);
+                  break;
+              }
+            };
+            taskReports.events.on('event', handler);
+          });
+
+          const res3 = await fetch(`tasks/${taskId}/download`);
+          await downloadToFile(
+            res3,
+            path.join(
+              outDir,
+              `batch-${String(batchIdx + 1).padStart(3, '0')}.${
+                options.zip ? 'zip' : 'tgz'
+              }`
+            ),
+            { spinner }
+          );
+
+          spinner.update('Marking the task as finished...');
+          await fetch(`tasks/${taskId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ dismissed: true })
+          });
+        } catch (err: any) {
+          spinner.stop('Task failed', true);
+          throw err;
+        }
+        spinner.stop('Download complete.');
       }
-      spinner.stop('Download complete.');
+    } finally {
+      taskReports.stop();
     }
   };
 };

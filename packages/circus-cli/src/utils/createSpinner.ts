@@ -9,7 +9,10 @@ export interface Spinner {
   stop: (message?: string, isError?: boolean) => void;
 }
 
-const createSpinner = (initialMessage: string = ''): Spinner => {
+const createSpinner = (
+  initialMessage: string = '',
+  { hideInNonTTY = true }: { hideInNonTTY?: boolean } = {}
+): Spinner => {
   let phase = 0;
   let timerId: NodeJS.Timer | null = null;
   let message = initialMessage;
@@ -19,7 +22,9 @@ const createSpinner = (initialMessage: string = ''): Spinner => {
     if (isTTY) {
       process.stdout.write(eraseLine + glyph + ' ' + message);
     } else {
-      process.stdout.write('\n' + glyph + ' ' + message);
+      if (!hideInNonTTY) {
+        process.stdout.write('\n' + glyph + ' ' + message);
+      }
     }
   };
 

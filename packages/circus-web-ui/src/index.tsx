@@ -1,6 +1,3 @@
-// Babel polyfill, needed for async/await and Promise support for IE
-import '@babel/polyfill';
-
 import React, { useState, useEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, Switch } from 'react-router-dom';

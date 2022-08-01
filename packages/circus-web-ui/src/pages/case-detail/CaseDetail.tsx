@@ -18,8 +18,10 @@ import Tag from 'components/Tag';
 import TimeDisplay from 'components/TimeDisplay';
 import produce from 'immer';
 import React, { useCallback, useEffect, useReducer, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { Prompt } from 'react-router';
 import { useParams } from 'react-router-dom';
+import { showMessage } from 'store/messages';
 import styled from 'styled-components';
 import Series from 'types/Series';
 import { useApi } from 'utils/api';
@@ -37,13 +39,14 @@ import RevisionSelector from './RevisionSelector';
 import SaveModal from './SaveModal';
 import TagEditor from './TagEditor';
 
-const CaseDetail: React.FC<{}> = props => {
+const CaseDetail: React.FC<{}> = () => {
   const caseId = useParams<any>().caseId;
   const [caseStore, caseDispatch] = useReducer(
     caseStoreReducer,
     caseStoreReducer(undefined as any, { type: 'dummy' }) // gets initial state
   );
   const api = useApi();
+  const dispatch = useDispatch();
 
   const { busy, caseData, seriesData, projectData, refreshCounter } = caseStore;
   const editingData = c.current(caseStore);
@@ -135,7 +138,7 @@ const CaseDetail: React.FC<{}> = props => {
   );
 
   const initEditingDataLayout = useCallback<EditingDataLayoutInitializer>(
-    (initializer) => {
+    initializer => {
       const newData = produce(editingData, initializer);
       caseDispatch(c.initialLayoutDetermined(newData));
     },
@@ -160,7 +163,11 @@ const CaseDetail: React.FC<{}> = props => {
     setSaveDialogOpen(false);
     try {
       await saveRevision(caseId, revision, message, api);
-      await alert('Successfully registered a revision.');
+      dispatch(
+        showMessage('Successfully registered a revision.', 'success', {
+          short: true
+        })
+      );
       const caseData = await api('cases/' + caseId);
       caseDispatch(
         c.loadRevisions({

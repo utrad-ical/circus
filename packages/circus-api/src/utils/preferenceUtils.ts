@@ -12,6 +12,7 @@ export const defaultPreferences = () => {
     maintainAspectRatio: false,
     fixCenterOfGravity: false,
     dimmedOutlineFor2DLabels: 'show',
-    revisionMessageTemplates: []
+    revisionMessageTemplates: [],
+    labelColors: { useDefault: true, customColors: [] }
   };
 };

@@ -11,6 +11,7 @@ import { SearchPreset, UserPreferences } from 'store/loginUser';
 import { useApi } from 'utils/api';
 import { useUserPreferences } from 'utils/useLoginUser';
 import useShowMessage from 'utils/useShowMessage';
+import LabelColorsEditor from 'components/LabelColorsEditor';
 
 const PresetDeleteEditor: et.Editor<SearchPreset[] | undefined> = props => {
   const { value = [], onChange } = props;
@@ -168,6 +169,11 @@ const circusDBProperties: PropertyEditorProperties<UserPreferences> = [
     })
   },
   {
+    key: 'labelColors',
+    caption: 'Label colors',
+    editor: LabelColorsEditor
+  },
+  {
     key: 'interpolationMode',
     caption: 'Interpolation mode',
     editor: et.shrinkSelect({
@@ -282,7 +288,7 @@ const Preferences: React.FC<{}> = props => {
           Save
         </Button>
         <Button bsStyle="link" onClick={loadSettings}>
-          Cancel
+          Reset
         </Button>
       </p>
     </div>

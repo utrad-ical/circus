@@ -39,6 +39,7 @@ import {
 import ProcessorDropdown from './processors/ProcessorDropdown';
 import ProcessorModal from './processors/ProcessorModal';
 import { EditingData, EditingDataUpdater } from './revisionData';
+import { defaultLabelColors } from '../../labelColors';
 
 type LabelCommand =
   | 'rename'
@@ -80,6 +81,11 @@ const LabelMenu: React.FC<{
 
   const loginUser = useLoginUser();
   const initialAlpha = loginUser.preferences.initailAlphaForNewLabels ?? 1;
+  const labelColors =
+    !loginUser.preferences.labelColors ||
+    loginUser.preferences.labelColors.useDefault
+      ? defaultLabelColors
+      : loginUser.preferences.labelColors.customColors;
 
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
   const activeSeriesMetadata = metadata[activeSeriesIndex];
@@ -316,6 +322,7 @@ const LabelMenu: React.FC<{
         hidden={!!activeLabel?.hidden}
         disabled={!activeLabel || disabled}
         onChange={handleAppearanceChange}
+        labelColors={labelColors}
       />
       <IconButton
         icon={editingData.allLabelsHidden ? 'eye-open' : 'eye-close'}
@@ -416,25 +423,6 @@ export default LabelMenu;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-const labelColors = [
-  '#ff0000',
-  '#00ff00',
-  '#ffff00',
-  '#0000ff',
-  '#ff00ff',
-  '#00ffff',
-  '#ff4400',
-  '#ff0044',
-  '#88ff00',
-  '#afc6fc',
-  '#ff5e6e',
-  '#aa4433',
-  '#ff8888',
-  '#ffff88',
-  '#aaffaa',
-  '#ff88ff'
-];
-
 const ColorEditorButton = styled(Button)`
   min-width: 50px;
 `;
@@ -444,8 +432,9 @@ const AppearanceEditor: React.FC<{
   hidden: boolean;
   disabled?: boolean;
   onChange: (appearance: LabelAppearance, hidden: boolean) => void;
+  labelColors: string[];
 }> = props => {
-  const { appearance, hidden, disabled, onChange } = props;
+  const { appearance, hidden, disabled, onChange, labelColors } = props;
   if (disabled || !appearance) {
     return (
       <ColorEditorButton bsSize="xs" style={{ backgroundColor: '#eeeeee' }}>
@@ -460,6 +449,7 @@ const AppearanceEditor: React.FC<{
         appearance={appearance}
         hidden={hidden}
         onChange={onChange}
+        labelColors={labelColors}
       />
     </Popover>
   );
@@ -491,8 +481,9 @@ const AppearancePopover: React.FC<{
   appearance: LabelAppearance;
   hidden: boolean;
   onChange: (apperance: LabelAppearance, hidden: boolean) => void;
+  labelColors: string[];
 }> = props => {
-  const { onChange, appearance, hidden } = props;
+  const { onChange, appearance, hidden, labelColors } = props;
   const { color, alpha } = appearance;
 
   return (

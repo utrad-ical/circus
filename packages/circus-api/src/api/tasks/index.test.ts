@@ -62,9 +62,20 @@ test('report', async () => {
   emitter.emit('finish');
 });
 
+describe('get', () => {
+  test('Returns task info', async () => {
+    const res = await axios.get('api/tasks/aaaabbbbcccc1111');
+    expect(res.status).toBe(200);
+  });
+  test('Returns 401 for unauthorized task', async () => {
+    const res = await axios.get('api/tasks/bbbbccccdddd1111'); // Bob's
+    expect(res.status).toBe(401);
+  });
+});
+
 describe('download', () => {
   test('Returns 401 for unauthorized task', async () => {
-    const res = await axios.get('api/tasks/bbbbccccdddd1111/download'); //Bob's task
+    const res = await axios.get('api/tasks/bbbbccccdddd1111/download'); // Bob's
     expect(res.status).toBe(401);
   });
   test('Returns 400 when task has no downloadable file', async () => {

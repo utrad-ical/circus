@@ -14,7 +14,10 @@ export const handleSearch: RouteMiddleware = ({
     const urlQuery = ctx.request.query;
     let customFilter: object;
     try {
-      customFilter = urlQuery.filter ? EJSON.parse(urlQuery.filter) : {};
+      if (Array.isArray(urlQuery.filter)) throw new Error();
+      customFilter = urlQuery.filter
+        ? (EJSON.parse(urlQuery.filter) as object)
+        : {};
     } catch (err) {
       ctx.throw(httpStatus.BAD_REQUEST, 'Filter string could not be parsed.');
     }
@@ -50,6 +53,18 @@ export const handleReport: RouteMiddleware = ({ taskManager }) => {
   return async (ctx, next) => {
     const userEmail = ctx.user.userEmail;
     taskManager.report(ctx, userEmail);
+  };
+};
+
+export const handleGet: RouteMiddleware = ({ models }) => {
+  return async (ctx, next) => {
+    const userEmail = ctx.user.userEmail;
+    const taskId = ctx.params.taskId;
+    const task = await models.task.findByIdOrFail(taskId);
+    if (userEmail !== task.userEmail) {
+      ctx.throw(httpStatus.UNAUTHORIZED, 'You cannot access this task.');
+    }
+    ctx.body = task;
   };
 };
 

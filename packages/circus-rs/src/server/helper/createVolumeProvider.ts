@@ -118,7 +118,8 @@ const createUncachedVolumeProvider: FunctionService<
       const primaryMetadata = imageMetadata.get(primaryImageNo)!;
 
       if (primaryMetadata.pitch) {
-        return primaryMetadata.pitch;
+        // The pitch value can be negative (represents the direction of stacking)
+        return Math.abs(primaryMetadata.pitch);
       } else if (count > 1) {
         const secondaryImageNo = images.shift()!;
         await load(secondaryImageNo);

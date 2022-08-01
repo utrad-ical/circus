@@ -2,7 +2,7 @@ import { InvalidArgumentError } from 'commander';
 
 export const int = (opts: { min?: number; max?: number } = {}) => {
   return (value: string) => {
-    if (!/^\-?[1-9][0-9]+$/.test(value))
+    if (!/^\-?[1-9][0-9]*$/.test(value))
       throw new InvalidArgumentError(`Not a valid integer.`);
     const i = parseInt(value, 10);
     if (isNaN(i)) throw new InvalidArgumentError(`Not a valid integer.`);

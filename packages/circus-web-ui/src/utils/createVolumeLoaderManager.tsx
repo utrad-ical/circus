@@ -10,18 +10,21 @@ export interface SeriesEntryWithHints {
 }
 
 export interface VolumeLoaderManager {
-  serializeUtilizeOptions: ({ seriesUid, partialVolumeDescriptor, estimateWindowType }: SeriesEntryWithHints) => string;
-  utilizeVolumeLoader: (options: SeriesEntryWithHints) => string; // id
-  getVolumeLoader: (id: string) => rs.DicomVolumeProgressiveLoader;
-  abandonVolumeLoader: (id: string) => void;
-}
+  /**
+   * Creates volume loader when necessary and increases internal reference counter.
+   */
+  acquireVolumeLoader: (options: SeriesEntryWithHints) => string; // id , 使用中カウンタを増やす
 
-export const nullVolumeLoaderManager: VolumeLoaderManager = {
-  serializeUtilizeOptions: () => { throw new Error('Context is not ready') },
-  utilizeVolumeLoader: () => { throw new Error('Context is not ready') },
-  getVolumeLoader: () => { throw new Error('Context is not ready') },
-  abandonVolumeLoader: () => { throw new Error('Context is not ready') },
-};
+  /**
+   * Gets acquired loader
+   */
+  getVolumeLoader: (id: string) => rs.DicomVolumeProgressiveLoader;
+
+  /**
+   * Decreases internal reference counter and disposes after cacheTime [ms] if no longer necessary.
+   */
+  releaseVolumeLoader: (id: string) => void;
+}
 
 const createVolumeLoaderManager = ({
   server,
@@ -41,12 +44,7 @@ const createVolumeLoaderManager = ({
   const referenceCounter = new Map<string, number>();
   const cleanupTimeout = new Map<string, NodeJS.Timeout>();
 
-  const serializeUtilizeOptions = ({ seriesUid, partialVolumeDescriptor, estimateWindowType }: SeriesEntryWithHints) =>
-    seriesUid +
-    (partialVolumeDescriptor ? `&${partialVolumeDescriptor.start}:${partialVolumeDescriptor.end}:${partialVolumeDescriptor.delta}` : '') +
-    (estimateWindowType ? `/${estimateWindowType}` : '');
-
-  const utilizeVolumeLoader = (options: SeriesEntryWithHints) => {
+  const acquireVolumeLoader = (options: SeriesEntryWithHints) => {
 
     if (options.partialVolumeDescriptor && !isValidPartialVolumeDescriptor(options.partialVolumeDescriptor))
       throw new Error('Invalid partial volume descriptor');
@@ -92,7 +90,7 @@ const createVolumeLoaderManager = ({
     cleanupTimeout.set(id, timeout);
   };
 
-  const abandonVolumeLoader = (id: string) => {
+  const releaseVolumeLoader = (id: string) => {
     const count = referenceCounter.get(id) || 0;
     if (count < 1) return;
 
@@ -100,7 +98,12 @@ const createVolumeLoaderManager = ({
     if (count === 1) cleanup(id);
   };
 
-  return { serializeUtilizeOptions, utilizeVolumeLoader, getVolumeLoader, abandonVolumeLoader };
+  return { acquireVolumeLoader, getVolumeLoader, releaseVolumeLoader };
 }
+
+export const serializeUtilizeOptions = ({ seriesUid, partialVolumeDescriptor, estimateWindowType }: SeriesEntryWithHints) =>
+  seriesUid +
+  (partialVolumeDescriptor ? `&${partialVolumeDescriptor.start}:${partialVolumeDescriptor.end}:${partialVolumeDescriptor.delta}` : '') +
+  (estimateWindowType ? `/${estimateWindowType}` : '');
 
 export default createVolumeLoaderManager;

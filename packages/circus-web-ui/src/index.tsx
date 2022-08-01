@@ -43,7 +43,7 @@ import { ApiContext, ApiCaller } from 'utils/api';
 import loginManager, { LoginManagerContext } from 'utils/loginManager';
 import { VolumeLoaderCacheContext } from 'utils/useImageSource';
 import { VolumeLoaderFactoryContext } from 'utils/useVolumeLoader';
-import createVolumeLoaderManager, { nullVolumeLoaderManager } from 'utils/createVolumeLoaderManager';
+import createVolumeLoaderManager from 'utils/createVolumeLoaderManager';
 
 require('./styles/main.less');
 
@@ -112,7 +112,7 @@ const VolumeLoaderFactoryProvider: React.FC<{ cacheTimeout?: number }> = ({ chil
   const server = useSelector(state => state.loginUser.data?.dicomImageServer);
 
   const provider = useMemo(() => {
-    if (!server) return nullVolumeLoaderManager;
+    if (!server) return null as any;
 
     return createVolumeLoaderManager({ server, cacheTimeout });
   }, [server, cacheTimeout]);

@@ -38,7 +38,9 @@ const createSpinner = (initialMessage: string = ''): Spinner => {
     );
   };
 
-  timerId = setInterval(tick, 100);
+  if (isTTY) {
+    timerId = setInterval(tick, 100);
+  }
 
   return {
     update,

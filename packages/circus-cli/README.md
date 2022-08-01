@@ -11,7 +11,7 @@ Currently, this tool can:
 
 ## Install
 
-1. Install [Node](https://nodejs.org/). **Node 18** or later is required. Node 17 or below won't work!
+1. Install the latest [Node](https://nodejs.org/).
 
 2. Run the following command (NPM should have been installed along with Node itself):
 

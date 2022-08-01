@@ -6,6 +6,8 @@ import downloadToFile from '../utils/downloadToFile.js';
 import taskReporter, { TaskEvent } from '../utils/taskReporter.js';
 import CommandAction from './CommandAction.js';
 
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 const createCommand: CommandAction = ({ getFetch }) => {
   return async (args: string[], options) => {
     const fetch = getFetch();
@@ -77,6 +79,8 @@ const createCommand: CommandAction = ({ getFetch }) => {
             };
             taskReports.events.on('event', handler);
           });
+          spinner.update('Task completed. Downloading...');
+          await delay(500);
 
           const res3 = await fetch(`tasks/${taskId}/download`);
           await downloadToFile(

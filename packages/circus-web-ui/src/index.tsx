@@ -42,7 +42,8 @@ import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { ApiContext, ApiCaller } from 'utils/api';
 import loginManager, { LoginManagerContext } from 'utils/loginManager';
 import { VolumeLoaderCacheContext } from 'utils/useImageSource';
-import { VolumeLoaderFactoryProvider } from 'utils/useVolumeLoader';
+import { VolumeLoaderFactoryContext } from 'utils/useVolumeLoader';
+import createVolumeLoaderManager, { nullVolumeLoaderManager } from 'utils/createVolumeLoaderManager';
 
 require('./styles/main.less');
 
@@ -104,6 +105,22 @@ const AppRoutes: React.FC<{}> = () => {
         <Route path="/tokens" component={TokenManagement} />
       </Switch>
     </Application>
+  );
+};
+
+const VolumeLoaderFactoryProvider: React.FC<{ cacheTimeout?: number }> = ({ children, cacheTimeout = 5000 }) => {
+  const server = useSelector(state => state.loginUser.data?.dicomImageServer);
+
+  const provider = useMemo(() => {
+    if (!server) return nullVolumeLoaderManager;
+
+    return createVolumeLoaderManager({ server, cacheTimeout });
+  }, [server, cacheTimeout]);
+
+  return (
+    <VolumeLoaderFactoryContext.Provider value={provider}>
+      {children}
+    </VolumeLoaderFactoryContext.Provider>
   );
 };
 

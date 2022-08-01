@@ -1,8 +1,8 @@
 import { promises as fs } from 'node:fs';
 import * as path from 'node:path';
 import pc from 'picocolors';
-import createSpinner from '../createSpinner.js';
-import downloadToFile from '../downloadToFile.js';
+import createSpinner from '../utils/createSpinner.js';
+import downloadToFile from '../utils/downloadToFile.js';
 import CommandAction from './CommandAction.js';
 
 const createCommand: CommandAction = ({ getFetch }) => {

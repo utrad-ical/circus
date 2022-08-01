@@ -9,7 +9,7 @@ import * as path from 'node:path';
 import * as url from 'node:url';
 import pc from 'picocolors';
 import CommandAction from './commands/CommandAction.js';
-import createAuthorizedFetch from './createAuthorizedFetch.js';
+import createAuthorizedFetch from './utils/createAuthorizedFetch.js';
 
 const getVersion = async () => {
   const packageJsonPath = path.resolve(

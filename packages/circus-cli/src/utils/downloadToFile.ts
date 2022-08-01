@@ -21,13 +21,13 @@ const downloadToFile = async (
   const out = createWriteStream(file);
 
   progressStream.on('progress', progress => {
-    spinner?.tick('Downloading: ' + Math.round(progress.percentage) + '%');
+    spinner?.update('Downloading: ' + Math.round(progress.percentage) + '%');
   });
 
   stream.pipe(progressStream).pipe(out);
   return new Promise<void>((resolve, reject) => {
     out.on('finish', () => {
-      spinner?.tick('Download complete.');
+      spinner?.update('Download complete.');
       resolve();
     });
     out.on('error', err => {

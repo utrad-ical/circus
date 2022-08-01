@@ -5,15 +5,11 @@ const spinnerGlyphs = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '
 const eraseLine = '\x1b[2K\r';
 
 export interface Spinner {
-  tick: (message?: string) => void;
+  update: (message?: string) => void;
   stop: (message?: string, isError?: boolean) => void;
-  setAutoTick: (enabled: boolean) => void;
 }
 
-const createSpinner = (
-  initialMessage: string = '',
-  autoTick = false
-): Spinner => {
+const createSpinner = (initialMessage: string = ''): Spinner => {
   let phase = 0;
   let timerId: NodeJS.Timer | null = null;
   let message = initialMessage;
@@ -27,34 +23,30 @@ const createSpinner = (
     }
   };
 
-  const tick = (newMessage?: string) => {
+  const update = (newMessage?: string) => {
     if (newMessage) message = newMessage;
+    putLine(
+      pc.cyan(isTTY ? spinnerGlyphs[phase % spinnerGlyphs.length] : '>>'),
+      message
+    );
+  };
+
+  const tick = () => {
     putLine(
       pc.cyan(isTTY ? spinnerGlyphs[phase++ % spinnerGlyphs.length] : '>>'),
       message
     );
   };
 
-  const setAutoTick = (enabled: boolean) => {
-    if (!isTTY) return;
-    if (enabled) {
-      if (!timerId) timerId = setInterval(tick, 100);
-    } else {
-      if (timerId) clearInterval(timerId);
-      timerId = null;
-    }
-  };
-
-  if (autoTick) setAutoTick(true);
+  timerId = setInterval(tick, 100);
 
   return {
-    tick,
+    update,
     stop: (message = 'Done', isError) => {
       putLine(isError ? pc.red('✖') : pc.green('✓'), message);
       process.stdout.write('\n');
       if (timerId) clearTimeout(timerId);
-    },
-    setAutoTick
+    }
   };
 };
 

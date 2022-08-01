@@ -36,7 +36,7 @@ const createCommand: CommandAction = ({ getFetch }) => {
         (batchIdx + 1) * casesPerTask
       );
       console.log(`Case IDs to download: ${batch.join(', ')}`);
-      const spinner = createSpinner('Registering an export task...', true);
+      const spinner = createSpinner('Registering an export task...');
       try {
         const res1 = await fetch('cases/export-mhd', {
           method: 'POST',
@@ -49,7 +49,7 @@ const createCommand: CommandAction = ({ getFetch }) => {
           })
         });
         const taskId = ((await res1.json()) as { taskId: string }).taskId;
-        spinner.tick('Waiting for export task to complete...');
+        spinner.update('Waiting for export task to complete...');
         while (true) {
           const res2 = await fetch(`tasks/${taskId}`);
           const task = (await res2.json()) as {
@@ -58,7 +58,7 @@ const createCommand: CommandAction = ({ getFetch }) => {
             progress: number;
           };
           if (task.status === 'finished') {
-            spinner.tick('Task completed. Waiting for download...');
+            spinner.update('Task completed. Waiting for download...');
             break;
           }
           if (task.status === 'error') {
@@ -72,7 +72,6 @@ const createCommand: CommandAction = ({ getFetch }) => {
           await new Promise(resolve => setTimeout(resolve, 500));
         }
         const res3 = await fetch(`tasks/${taskId}/download`);
-        spinner.setAutoTick(false);
         await downloadToFile(
           res3,
           path.join(
@@ -84,8 +83,7 @@ const createCommand: CommandAction = ({ getFetch }) => {
           { spinner }
         );
 
-        spinner.setAutoTick(true);
-        spinner.tick('Marking the task as finished...');
+        spinner.update('Marking the task as finished...');
         await fetch(`tasks/${taskId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },

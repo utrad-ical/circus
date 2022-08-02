@@ -1,9 +1,9 @@
+import { confirm } from '@smikitky/rb-components/lib/modal';
 import DataGrid, {
   DataGridColumnDefinition,
   DataGridRenderer
 } from 'components/DataGrid';
 import Icon from 'components/Icon';
-import IconButton from 'components/IconButton';
 import IdDisplay from 'components/IdDisplay';
 import MyListDropdown from 'components/MyListDropdown';
 import PatientInfoBox from 'components/PatientInfoBox';
@@ -16,8 +16,11 @@ import TimeDisplay from 'components/TimeDisplay';
 import { multirange } from 'multi-integer-range';
 import React, { Fragment, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { dispatch } from 'store';
+import { showMessage } from 'store/messages';
 import styled from 'styled-components';
+import { useApi } from 'utils/api';
+import { useLoginManager } from 'utils/loginManager';
 
 const ModalitySpan = styled.span`
   display: inline-block;
@@ -37,6 +40,29 @@ const Modality: DataGridRenderer<any> = props => {
 
 const Operation: DataGridRenderer<any> = props => {
   const { value: series } = props;
+  const api = useApi();
+  const loginmanager = useLoginManager();
+
+  const handleDelete = async (seriesUid: string, name: string) => {
+    const ans = await confirm(
+      <>
+        Delete <b>{name}</b>? This cannot be undone.
+      </>
+    );
+    if (!ans) return;
+    await api(`/series/${seriesUid}`, { method: 'delete' });
+    dispatch(
+      showMessage(
+        <>
+          Deleted <b>{name}</b>.
+        </>,
+        'warning',
+        { short: true }
+      )
+    );
+    loginmanager.refreshUserInfo(true);
+  };
+
   return (
     <Fragment>
       <DropdownButton
@@ -58,7 +84,6 @@ const Operation: DataGridRenderer<any> = props => {
       </DropdownButton>
       &thinsp;
       <DropdownButton
-        onSelect={() => console.log('(´_ゝ｀)')}
         bsSize="sm"
         title={<Icon icon="glyphicon-option-horizontal" />}
         id={`dropdown-`}
@@ -68,7 +93,17 @@ const Operation: DataGridRenderer<any> = props => {
         <MenuItem eventKey="1" href={`/series/${series.seriesUid}`}>
           View
         </MenuItem>
-        <MenuItem eventKey="2">Delete</MenuItem>
+        <MenuItem
+          eventKey="2"
+          onClick={() => {
+            handleDelete(
+              series.seriesUid,
+              `${series.patientInfo.patientName}(${series.seriesDescription})`
+            );
+          }}
+        >
+          Delete
+        </MenuItem>
       </DropdownButton>
     </Fragment>
   );

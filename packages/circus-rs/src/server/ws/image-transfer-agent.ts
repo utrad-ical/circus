@@ -18,6 +18,8 @@ type TransferConnection = {
   transferNextImage: () => Promise<void>;
   setPriority: (target: MultiRangeInitializer, priority: number) => void;
   abort: () => void;
+  pause: () => void;
+  resume: () => void;
 };
 
 interface CreateImageTransferAgentOptions {
@@ -61,7 +63,7 @@ const createImageTransferAgent = ({
         continue;
       }
 
-      await new Promise<void>((resolve) => setTimeout(() => resolve(), 300));
+      // await new Promise<void>((resolve) => setTimeout(() => resolve(), 300));
 
       try {
         await connection.transferNextImage();
@@ -113,6 +115,7 @@ const createImageTransferAgent = ({
     };
 
     const transferNextImage = async () => {
+      if (paused) return;
       const imageIndex = queue.shift();
       if (imageIndex !== undefined) {
         try {
@@ -126,8 +129,11 @@ const createImageTransferAgent = ({
       } else {
         abort();
       }
-      return undefined;
     };
+
+    let paused = false;
+    const pause = () => paused = true;
+    const resume = () => paused = false;
 
     const transferConnection: TransferConnection = {
       id: () => transferId,
@@ -135,6 +141,8 @@ const createImageTransferAgent = ({
       transferNextImage,
       setPriority,
       abort,
+      pause,
+      resume
     };
 
     transferConnections.set(transferId, transferConnection);

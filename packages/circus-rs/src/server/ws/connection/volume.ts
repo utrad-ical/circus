@@ -90,7 +90,19 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
           (await getConnection(transferId))?.setPriority(target, priority);
           break;
         }
-        case MessageDataType.STOP_TRANSFER: {
+        case MessageDataType.PAUSE_TRANSFER: {
+          const { transferId } = data;
+          await checkingAccessRights.get(transferId);
+          (await getConnection(transferId))?.pause();
+          break;
+        }
+        case MessageDataType.RESUME_TRANSFER: {
+          const { transferId } = data;
+          await checkingAccessRights.get(transferId);
+          (await getConnection(transferId))?.resume();
+          break;
+        }
+        case MessageDataType.ABORT_TRANSFER: {
           const { transferId } = data;
           await checkingAccessRights.get(transferId);
           (await getConnection(transferId))?.abort();

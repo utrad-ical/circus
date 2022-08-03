@@ -188,7 +188,17 @@ export default class RsProgressiveVolumeLoader
   }
 
   public abort() {
-    this.transferConnection?.stop();
+    this.transferConnection?.abort();
     this.emit('abort', { target: this });
+  }
+
+  public pause() {
+    this.transferConnection?.pause();
+    // this.emit('pause', { target: this });
+  }
+
+  public resume() {
+    this.transferConnection?.resume();
+    // this.emit('resume', { target: this });
   }
 }

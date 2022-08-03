@@ -347,18 +347,39 @@ async function prepareLoadingProcess(
     // });
     // buttonContainer.append(changePriorityButton);
 
-    // Stop
-    const stopButton = document.createElement('button');
-    stopButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'mr-2');
-    stopButton.innerText = 'Stop';
-    stopButton.addEventListener('click', () => {
-        if (transferConnection) {
-            logger.info(`#${transferConnection.id} stopTransfer`);
-            transferConnection.stop();
-            transferConnection = null;
-        }
+    // Pause
+    const pauseButton = document.createElement('button');
+    pauseButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'mr-2');
+    pauseButton.innerText = 'Pause';
+    pauseButton.addEventListener('click', () => {
+        if (!transferConnection) return;
+        logger.info(`#${transferConnection.id} pauseTransfer`);
+        transferConnection.pause();
     });
-    buttonContainer.append(stopButton);
+    buttonContainer.append(pauseButton);
+
+    // Resume
+    const resumeButton = document.createElement('button');
+    resumeButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'mr-2');
+    resumeButton.innerText = 'Resume';
+    resumeButton.addEventListener('click', () => {
+        if (!transferConnection) return;
+        logger.info(`#${transferConnection.id} resumeTransfer`);
+        transferConnection.resume();
+    });
+    buttonContainer.append(resumeButton);
+
+    // Abort
+    const abortButton = document.createElement('button');
+    abortButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'mr-2');
+    abortButton.innerText = 'Abort';
+    abortButton.addEventListener('click', () => {
+        if (!transferConnection) return;
+        logger.info(`#${transferConnection.id} stopTransfer`);
+        transferConnection.abort();
+        transferConnection = null;
+    });
+    buttonContainer.append(abortButton);
 
     // Dispose
     const disposeButton = document.createElement('button');
@@ -368,7 +389,7 @@ async function prepareLoadingProcess(
     disposeButton.addEventListener('click', () => {
         if (transferConnection) {
             logger.info(`#${transferConnection.id} stopTransfer`);
-            transferConnection.stop();
+            transferConnection.abort();
             transferConnection = null;
         }
         loaderElement.remove();

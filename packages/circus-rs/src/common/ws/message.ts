@@ -40,7 +40,9 @@ export function parseMessageBuffer(messageBuffer: ArrayBuffer) {
 export const MessageDataType = {
     BEGIN_TRANSFER: 'BEGIN_TRANSFER',
     SET_PRIORITY: 'SET_PRIORITY',
-    STOP_TRANSFER: 'STOP_TRANSFER',
+    ABORT_TRANSFER: 'ABORT_TRANSFER',
+    PAUSE_TRANSFER: 'PAUSE_TRANSFER',
+    RESUME_TRANSFER: 'RESUME_TRANSFER',
     TRANSFER_IMAGE: 'TRANSFER_IMAGE',
 } as const;
 
@@ -48,7 +50,9 @@ export type MessageDataType = typeof MessageDataType[keyof typeof MessageDataTyp
 
 export type ImageTransferMessageData =
     | BeginTransferMessageData
-    | StopTransferMessageData
+    | PauseTransferMessageData
+    | ResumeTransferMessageData
+    | AbortTransferMessageData
     | SetPriorityMessageData
     | TransferImageMessage;
 
@@ -66,8 +70,18 @@ export type SetPriorityMessageData = {
     priority: number;
 };
 
-export type StopTransferMessageData = {
-    messageType: typeof MessageDataType.STOP_TRANSFER;
+export type AbortTransferMessageData = {
+    messageType: typeof MessageDataType.ABORT_TRANSFER;
+    transferId: string;
+};
+
+export type PauseTransferMessageData = {
+    messageType: typeof MessageDataType.PAUSE_TRANSFER;
+    transferId: string;
+};
+
+export type ResumeTransferMessageData = {
+    messageType: typeof MessageDataType.RESUME_TRANSFER;
     transferId: string;
 };
 
@@ -99,8 +113,16 @@ export function setPriorityMessageData(
     return { messageType: MessageDataType.SET_PRIORITY, transferId, target, priority };
 }
 
-export function stopTransferMessageData(transferId: string): StopTransferMessageData {
-    return { messageType: MessageDataType.STOP_TRANSFER, transferId };
+export function stopTransferMessageData(transferId: string): AbortTransferMessageData {
+    return { messageType: MessageDataType.ABORT_TRANSFER, transferId };
+}
+
+export function pauseTransferMessageData(transferId: string): PauseTransferMessageData {
+    return { messageType: MessageDataType.PAUSE_TRANSFER, transferId };
+}
+
+export function resumeTransferMessageData(transferId: string): ResumeTransferMessageData {
+    return { messageType: MessageDataType.RESUME_TRANSFER, transferId };
 }
 
 export function transferImageMessageData(transferId: string, imageIndex: number): TransferImageMessage {

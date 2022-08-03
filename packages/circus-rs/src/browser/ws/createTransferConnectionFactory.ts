@@ -6,9 +6,10 @@ import {
     stopTransferMessageData,
     parseMessageBuffer,
     isImageTransferData,
-    MessageDataType
+    MessageDataType,
+    pauseTransferMessageData,
+    resumeTransferMessageData
 } from "../../common/ws/message";
-import { VolumeSpecifier } from "../../common/ws/types";
 import WebSocketClient from "./WebSocketClient";
 
 type VolumeSpecifier = {
@@ -25,7 +26,9 @@ type TransferredImageHandler = (imageIndex: number, buffer: ArrayBuffer) => void
 export type TransferConnection = {
     readonly id: string;
     setPriority: (imageIndices: number[], priority: number) => void;
-    stop: () => void;
+    pause: () => void;
+    resume: () => void;
+    abort: () => void;
 }
 
 export const createTransferConnectionFactory = (wsClient: WebSocketClient): TransferConnectionFactory => {
@@ -84,6 +87,18 @@ export const createTransferConnectionFactory = (wsClient: WebSocketClient): Tran
             handlerCollection.delete(id);
         }
 
-        return { id, setPriority, stop };
+        const pause = () => {
+            const data = pauseTransferMessageData(id);
+            const message = createMessageBuffer(data);
+            wsClient.send(message);
+        }
+
+        const resume = () => {
+            const data = resumeTransferMessageData(id);
+            const message = createMessageBuffer(data);
+            wsClient.send(message);
+        }
+
+        return { id, setPriority, abort: stop, pause, resume };
     };
 };

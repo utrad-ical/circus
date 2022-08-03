@@ -3,70 +3,71 @@ import PriorityIntegerQueue from '../../common/PriorityIntegerQueue';
 import { MultiRange } from 'multi-integer-range';
 import { MultiRangeDescriptor } from '../../common/ws/types';
 import { TransferImageMessage, transferImageMessageData } from '../../common/ws/message';
-import { VolumeProvider } from '../helper/createVolumeProvider';
+import { VolumeAccessor, VolumeProvider } from '../helper/createVolumeProvider';
 
 const PARTIAL_VOLUME_PRIORITY = 1;
 
-export type ImageTransferAgent = ReturnType<typeof createImageTransferAgent>;
+interface ImageTransferAgent {
+  beginTransfer: (transferId: string, seriesUid: string, partialVolumeDescriptor?: PartialVolumeDescriptor) => Promise<TransferConnection>;
+  getConnection: (transferId: string) => Promise<TransferConnection | null>;
+  dispose: () => void;
+}
+
+type TransferConnection = {
+  id: () => string;
+  time: () => number;
+  transferNextImage: () => Promise<number | undefined>;
+  setPriority: (target: MultiRangeDescriptor, priority: number) => void;
+  abort: () => void;
+};
+
+interface CreateImageTransferAgentOptions {
+  imageDataEmitter: ImageDataEmitter;
+  volumeProvider: VolumeProvider;
+}
 
 interface ImageDataEmitter {
   (data: TransferImageMessage, buffer: ArrayBuffer): Promise<void>;
 }
 
-type TransferConnection = {
-  fetch: (image: number) => Promise<ArrayBuffer>;
-  queue: PriorityIntegerQueue;
-  startTime: number; // :DEBUG
-  setPriority: (target: MultiRangeDescriptor, priority: number) => void;
-};
-
-const createImageTransferAgent = (
-  { imageDataEmitter, volumeProvider, connectionId }: {
-    imageDataEmitter: ImageDataEmitter;
-    volumeProvider: VolumeProvider;
-    connectionId?: number;// :DEBUG
-  }) => {
+const createImageTransferAgent = ({
+  imageDataEmitter,
+  volumeProvider
+}: CreateImageTransferAgentOptions): ImageTransferAgent => {
 
   const transferConnections = new Map<string, TransferConnection>();
+  const pendingsUntilTransferStarts = new Map<string, Promise<TransferConnection | null>>();
 
   let inOperation = false;
+  const startOperationIfNecessary = () => {
+    if (inOperation) return;
+    inOperation = true;
+    setImmediate(next);
+  };
+  const stopOperation = () => {
+    if (!inOperation) return;
+    inOperation = false;
+  };
 
   const next = async () => {
 
-    if (transferConnections.size === 0) {
-      inOperation = false;
-      return;
-    }
+    if (transferConnections.size === 0) return stopOperation();
 
     const transferIds = Array.from(transferConnections.keys());
-
     while (0 < transferIds.length) {
       const transferId = transferIds.shift()!;
-
       const connection = transferConnections.get(transferId);
-
       if (!connection) {
         // console.log(`No handler for tr#${transferId} con#${connectionId}`);
         continue;
       }
 
-      const { queue, fetch, startTime } = connection;
-      const imageIndex = queue.shift();
+      await new Promise<void>((resolve) => setTimeout(() => resolve(), 300));
 
-      if (imageIndex !== undefined) {
-        try {
-          // console.log(`Try to emit image#${imageIndex} for tr#${transferId} con#${connectionId}`);
-          const data = transferImageMessageData(transferId, imageIndex);
-          const buffer = await fetch(imageIndex);
-          await imageDataEmitter(data, buffer);
-          // console.log(`Success to emit image#${imageIndex} for tr#${transferId} con#${connectionId}`);
-        } catch (err) {
-          // console.log(`Failed to emit image#${imageIndex} for tr#${transferId} con#${connectionId}: ${(err as Error).message}`);
-          transferConnections.delete(transferId);
-        }
-      } else {
-        // console.log(`Complete tr#${transferId} con#${connectionId} in ${new Date().getTime() - startTime} [ms]`);
-        transferConnections.delete(transferId);
+      try {
+        await connection.transferNextImage();
+      } catch (err) {
+        console.error(err);
       }
     }
     setImmediate(next);
@@ -77,76 +78,130 @@ const createImageTransferAgent = (
     seriesUid: string,
     partialVolumeDescriptor?: PartialVolumeDescriptor
   ) => {
-    const { volume, load, images } = await volumeProvider(seriesUid);
 
-    // Maps a zero-based volume z-index to the corresponding image number,
-    // The number is the number to be specified when call load() function.
-    const zIndices = new Map<number, number>();
-
-    if (partialVolumeDescriptor) {
-      const partialImages = partialVolumeDescriptorToArray(partialVolumeDescriptor);
-
-      // Set zIndices for the partial volume.
-      partialImages.forEach((v, i) => zIndices.set(i, v));
-
-      // Set higher priority to the images in partial volume.
-      load(partialImages, PARTIAL_VOLUME_PRIORITY);
-    } else {
-      // Set zIndices for the entire volume.
-      images.toArray().forEach((v, i) => zIndices.set(i, v));
+    if (pendingsUntilTransferStarts.has(transferId) || transferConnections.has(transferId)) {
+      throw new Error(`The transfer ${transferId} is already in progress.`)
     }
 
-    const imageIndices = Array.from(zIndices.keys());
+    // Mark as in preparation.
+    let resolvePending: (con: TransferConnection | null) => void = () => { };
+    pendingsUntilTransferStarts.set(transferId, new Promise<TransferConnection | null>((resolve) => resolvePending = resolve));
 
-    const fetch = async (zIndex: number) => {
-      const imageNo = zIndices.get(zIndex);
-      // console.log(`zIndex: ${zIndex} => #${imageNo}`);
-      if (!imageNo) throw new Error('Invalid image request');
-      await load(imageNo);
-      return volume.getSingleImage(imageNo - 1);
-    };
+    // Supprot abort
+    const abortSignal = new AbortController;
+    abortSignal.signal.addEventListener('abort', () => {
+      if (pendingsUntilTransferStarts.has(transferId)) {
+        resolvePending(null);
+      }
+      if (transferConnections.has(transferId)) {
+        transferConnections.delete(transferId);
+        queue.clear();
 
-    const queue = new PriorityIntegerQueue;
-    queue.append(imageIndices);
+        // @todo: Currently, there is no way to interrupt the volumeProvider loading process.
+      }
+    });
+    const abort = abortSignal.abort.bind(abortSignal);
 
-    const setPriority = (target: MultiRangeDescriptor, priority: number) => {
-      const targetRange = new MultiRange(target).intersect(imageIndices);
+    const startTime = new Date().getTime();
+    const { queue, fillImageToVolume } = prepare(await volumeProvider(seriesUid), partialVolumeDescriptor);
+
+    const setPriority = async (target: MultiRangeDescriptor, priority: number) => {
+      const targetRange = new MultiRange(target).intersect(queue.toArray());
       if (0 < targetRange.segmentLength()) {
         // console.log(`Set priority ${priority} / ${targetRange.toString()}`);
         queue.append(targetRange, priority);
       }
     };
 
-    const startTime = new Date().getTime();
-    transferConnections.set(transferId, {
-      fetch,
-      queue,
-      startTime,
-      setPriority
-    });
-
-    if (!inOperation) {
-      inOperation = true;
-      setImmediate(next);
+    const transferNextImage = async () => {
+      const imageIndex = queue.shift();
+      if (imageIndex !== undefined) {
+        try {
+          const data = transferImageMessageData(transferId, imageIndex);
+          const buffer = await fillImageToVolume(imageIndex);
+          await imageDataEmitter(data, buffer);
+        } catch (err) {
+          abort();
+          throw new Error(`Failed to emit image#${imageIndex} for tr#${transferId}: ${(err as Error).message}`);
+        }
+      } else {
+        abort();
+      }
+      return undefined;
     };
+
+    const transferConnection: TransferConnection = {
+      id: () => transferId,
+      time: () => new Date().getTime() - startTime,
+      transferNextImage,
+      setPriority,
+      abort,
+    };
+
+    transferConnections.set(transferId, transferConnection);
+
+    // Remove preparation mark.
+    resolvePending(transferConnection);
+    pendingsUntilTransferStarts.delete(transferId);
+
+    startOperationIfNecessary();
+
+    return transferConnection;
   };
 
-  const setPriority = (transferId: string, target: MultiRangeDescriptor, priority: number) => {
-    transferConnections.get(transferId)?.setPriority(target, priority);
-  };
-
-  const stopTransfer = (transferId: string) => {
+  const getConnection = async (transferId: string): Promise<TransferConnection | null> => {
     if (transferConnections.has(transferId)) {
-      transferConnections.delete(transferId);
-      // console.log(`Accept stopTransfer for tr#${transferId} con#${connectionId}`);
+      return transferConnections.get(transferId)!;
     }
+    if (pendingsUntilTransferStarts.has(transferId)) {
+      return await pendingsUntilTransferStarts.get(transferId)!;
+    }
+    return null;
   };
 
   const dispose = () => {
+    Array.from(transferConnections.values()).map(
+      (connection) => connection.abort()
+    );
     transferConnections.clear();
   };
 
-  return { beginTransfer, setPriority, stopTransfer, dispose };
+  return { beginTransfer, getConnection, dispose };
+}
+
+const prepare = ({ volume, load, images }: VolumeAccessor, partialVolumeDescriptor?: PartialVolumeDescriptor) => {
+
+  // Maps a zero-based volume z-index to the corresponding image number,
+  // The number is the number to be specified when call load() function.
+  const zIndices = new Map<number, number>();
+
+  if (partialVolumeDescriptor) {
+    // Set zIndices for the partial volume.
+    const partialImages = partialVolumeDescriptorToArray(partialVolumeDescriptor);
+    partialImages.forEach((v, i) => zIndices.set(i, v));
+    // It has already started loading by volumeProvider.
+    // So set higher priority to the images in partial volume.
+    load(partialImages, PARTIAL_VOLUME_PRIORITY);
+  } else {
+    // Set zIndices for the entire volume.
+    // It has already started loading by volumeProvider.
+    images.toArray().forEach((v, i) => zIndices.set(i, v));
+  }
+
+  const imageIndices = Array.from(zIndices.keys());
+
+  const queue = new PriorityIntegerQueue;
+  queue.append(imageIndices);
+
+  const fillImageToVolume = async (zIndex: number) => {
+    const imageNo = zIndices.get(zIndex);
+    // console.log(`zIndex: ${zIndex} => #${imageNo}`);
+    if (!imageNo) throw new Error('Invalid image request');
+    await load(imageNo);
+    return volume.getSingleImage(imageNo - 1);
+  };
+
+  return { queue, fillImageToVolume };
 }
 
 export default createImageTransferAgent;

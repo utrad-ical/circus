@@ -50,57 +50,50 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
       await untilBufferIsFlushed();
     };
 
-    const imageTransferAgent = createImageTransferAgent({
-      imageDataEmitter,
-      volumeProvider,
-      connectionId
-    });
+    const { beginTransfer, getConnection, dispose }
+      = createImageTransferAgent({ imageDataEmitter, volumeProvider });
 
     ws.on('close', () => {
       // console.log(`${connectionId}: Close`);
-      imageTransferAgent.dispose();
+      dispose();
     });
 
-    const pendings = new Map<string, Promise<void>>();
+    const checkingAccessRights = new Map<string, Promise<void>>();
 
     const handleMessageData = async (data: ImageTransferMessageData) => {
+
       switch (data.messageType) {
         case MessageDataType.BEGIN_TRANSFER: {
           const { transferId, seriesUid, partialVolumeDescriptor } =
             data;
 
           // console.log(`tr#${transferId} BEGIN_TRANSFER / ${seriesUid}`);
-
-          let flushPendings: () => void = () => { };
-          pendings.set(transferId, new Promise<void>((resolve) => flushPendings = resolve));
+          let authenticated: () => void = () => { };
+          checkingAccessRights.set(transferId, new Promise((resolve) => authenticated = resolve));
 
           const hasAccessRight = await authFunction(seriesUid);
+          checkingAccessRights.delete(transferId);
+          authenticated();
+
           if (!hasAccessRight) {
             throw new Error(
               `${connectionId}: Attempted to access ${seriesUid} without proper authorization.`
             );
           }
 
-          await imageTransferAgent.beginTransfer(
-            transferId,
-            seriesUid,
-            partialVolumeDescriptor
-          );
-
-          flushPendings();
-          pendings.delete(transferId);
+          await beginTransfer(transferId, seriesUid, partialVolumeDescriptor);
           break;
         }
         case MessageDataType.SET_PRIORITY: {
           const { transferId, target, priority } = data;
-          await pendings.get(transferId);
-          imageTransferAgent.setPriority(transferId, target, priority);
+          await checkingAccessRights.get(transferId);
+          (await getConnection(transferId))?.setPriority(target, priority);
           break;
         }
         case MessageDataType.STOP_TRANSFER: {
           const { transferId } = data;
-          await pendings.get(transferId);
-          imageTransferAgent.stopTransfer(transferId);
+          await checkingAccessRights.get(transferId);
+          (await getConnection(transferId))?.abort();
           break;
         }
       }

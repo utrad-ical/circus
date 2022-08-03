@@ -352,10 +352,11 @@ async function prepareLoadingProcess(
     stopButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'mr-2');
     stopButton.innerText = 'Stop';
     stopButton.addEventListener('click', () => {
-        if (!transferConnection) return;
-        logger.info(`#${transferConnection.id} stopTransfer`);
-        transferConnection.stop();
-        transferConnection = null;
+        if (transferConnection) {
+            logger.info(`#${transferConnection.id} stopTransfer`);
+            transferConnection.stop();
+            transferConnection = null;
+        }
     });
     buttonContainer.append(stopButton);
 
@@ -365,10 +366,11 @@ async function prepareLoadingProcess(
     disposeButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'mr-2');
     disposeButton.innerText = 'Dispose';
     disposeButton.addEventListener('click', () => {
-        if (!transferConnection) return;
-        logger.info(`#${transferConnection.id} stopTransfer`);
-        transferConnection.stop();
-        transferConnection = null;
+        if (transferConnection) {
+            logger.info(`#${transferConnection.id} stopTransfer`);
+            transferConnection.stop();
+            transferConnection = null;
+        }
         loaderElement.remove();
     });
     buttonContainer.append(disposeButton);

@@ -59,4 +59,11 @@ export default class PriorityIntegerQueue {
   public clear(): void {
     this.entries = [];
   }
+
+  public toArray(): number[] {
+    return this.entries.reverse().reduce<number[]>(
+      (collection, { value }) => [...collection, ...value.toArray()],
+      []
+    );
+  }
 }

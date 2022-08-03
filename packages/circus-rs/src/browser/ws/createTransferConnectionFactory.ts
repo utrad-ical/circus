@@ -1,3 +1,4 @@
+import { PartialVolumeDescriptor } from "@utrad-ical/circus-lib";
 import {
     beginTransferMessageData,
     createMessageBuffer,
@@ -9,6 +10,11 @@ import {
 } from "../../common/ws/message";
 import { VolumeSpecifier } from "../../common/ws/types";
 import WebSocketClient from "./WebSocketClient";
+
+type VolumeSpecifier = {
+    seriesUid: string;
+    partialVolumeDescriptor?: PartialVolumeDescriptor;
+};
 
 export interface TransferConnectionFactory {
     (volumeSpecifier: VolumeSpecifier, handler: TransferredImageHandler): TransferConnection;
@@ -54,7 +60,7 @@ export const createTransferConnectionFactory = (wsClient: WebSocketClient): Tran
     });
 
     let lastTransferId = 0;
-    return (volumeSpecifier, handler) => {
+    return (volumeSpecifier, handler): TransferConnection => {
         const { seriesUid, partialVolumeDescriptor } = volumeSpecifier;
         const id = (++lastTransferId).toString();
 

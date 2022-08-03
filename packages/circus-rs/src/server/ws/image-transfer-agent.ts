@@ -1,7 +1,6 @@
 import { PartialVolumeDescriptor, partialVolumeDescriptorToArray } from '@utrad-ical/circus-lib';
 import PriorityIntegerQueue from '../../common/PriorityIntegerQueue';
-import { MultiRange } from 'multi-integer-range';
-import { MultiRangeDescriptor } from '../../common/ws/types';
+import { MultiRange, Initializer as MultiRangeInitializer } from 'multi-integer-range';
 import { TransferImageMessage, transferImageMessageData } from '../../common/ws/message';
 import { VolumeAccessor, VolumeProvider } from '../helper/createVolumeProvider';
 
@@ -16,8 +15,8 @@ interface ImageTransferAgent {
 type TransferConnection = {
   id: () => string;
   time: () => number;
-  transferNextImage: () => Promise<number | undefined>;
-  setPriority: (target: MultiRangeDescriptor, priority: number) => void;
+  transferNextImage: () => Promise<void>;
+  setPriority: (target: MultiRangeInitializer, priority: number) => void;
   abort: () => void;
 };
 
@@ -105,7 +104,7 @@ const createImageTransferAgent = ({
     const startTime = new Date().getTime();
     const { queue, fillImageToVolume } = prepare(await volumeProvider(seriesUid), partialVolumeDescriptor);
 
-    const setPriority = async (target: MultiRangeDescriptor, priority: number) => {
+    const setPriority = async (target: MultiRangeInitializer, priority: number) => {
       const targetRange = new MultiRange(target).intersect(queue.toArray());
       if (0 < targetRange.segmentLength()) {
         // console.log(`Set priority ${priority} / ${targetRange.toString()}`);

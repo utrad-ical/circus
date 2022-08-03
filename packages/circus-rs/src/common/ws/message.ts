@@ -1,5 +1,4 @@
 import { PartialVolumeDescriptor } from "@utrad-ical/circus-lib";
-import { MultiRangeDescriptor } from "./types";
 
 const endOfJson = 0x0a;
 

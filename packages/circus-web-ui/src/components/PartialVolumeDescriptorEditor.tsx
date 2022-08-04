@@ -1,14 +1,16 @@
-import React, { useState, useMemo } from 'react';
-import { Button, Modal } from 'components/react-bootstrap';
+import * as et from '@smikitky/rb-components/lib/editor-types';
 import PropertyEditor, {
   PropertyEditorProperties
 } from '@smikitky/rb-components/lib/PropertyEditor';
-import * as et from '@smikitky/rb-components/lib/editor-types';
-import MultiRange from 'multi-integer-range';
 import PartialVolumeDescriptor, {
   describePartialVolumeDescriptor,
   rangeHasPartialVolume
 } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
+import { Button, Modal } from 'components/react-bootstrap';
+import MultiRange from 'multi-integer-range';
+import React, { useMemo, useState } from 'react';
+import IconButton from './IconButton';
+import styled from 'styled-components';
 
 const PartialVolumeDescriptorEditor: React.FC<{
   onResolve: (
@@ -35,11 +37,28 @@ const PartialVolumeDescriptorEditor: React.FC<{
   const properties = useMemo(() => {
     const mr = new MultiRange(images);
     return [
-      { key: 'start', editor: et.number({ min: 1, max: mr.max() }) },
-      { key: 'end', editor: et.number({ min: 1, max: mr.max() }) },
-      { key: 'delta', editor: et.number({ min: -10, max: 10 }) }
+      {
+        key: 'start',
+        caption: 'Start',
+        editor: et.number({ min: 1, max: mr.max() })
+      },
+      {
+        key: 'end',
+        caption: 'End',
+        editor: et.number({ min: 1, max: mr.max() })
+      },
+      {
+        key: 'delta',
+        caption: 'Delta',
+        editor: et.number({ min: -10, max: 10 })
+      }
     ] as PropertyEditorProperties<PartialVolumeDescriptor>;
   }, [images]);
+
+  const handleFlip = () => {
+    if (!isValid) return;
+    setDescriptor(d => ({ start: d.end, end: d.start, delta: -d.delta }));
+  };
 
   return (
     <>
@@ -53,7 +72,18 @@ const PartialVolumeDescriptorEditor: React.FC<{
           onChange={setDescriptor}
         />
         <hr />
-        <b>Preview:</b> {describePartialVolumeDescriptor(descriptor)}
+        <PreviewDiv>
+          <span>
+            <b>Preview:</b> {describePartialVolumeDescriptor(descriptor)}
+          </span>
+          <IconButton
+            icon="glyphicon-transfer"
+            disabled={!isValid}
+            onClick={handleFlip}
+          >
+            Flip start/end
+          </IconButton>
+        </PreviewDiv>
       </Modal.Body>
       <Modal.Footer>
         <Button bsStyle="link" onClick={() => onResolve(null)}>
@@ -73,5 +103,11 @@ const PartialVolumeDescriptorEditor: React.FC<{
     </>
   );
 };
+
+const PreviewDiv = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
 
 export default PartialVolumeDescriptorEditor;

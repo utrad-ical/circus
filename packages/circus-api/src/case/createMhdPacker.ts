@@ -43,6 +43,18 @@ const defaultLabelPackOptions: PackOptions = {
   compressionFormat: 'tgz'
 };
 
+const waitForEntry = (archiver: Archiver.Archiver, path: string) => {
+  return new Promise<void>(resolve => {
+    const handler = (entry: any) => {
+      if (entry.name === path) {
+        archiver.off('entry', handler);
+        resolve();
+      }
+    };
+    archiver.on('entry', handler);
+  });
+};
+
 const createMhdPacker: FunctionService<
   MhdPacker,
   {
@@ -106,6 +118,7 @@ const createMhdPacker: FunctionService<
           ),
           { name: labelName + '.mhd' }
         );
+        await waitForEntry(archiver, labelName + '.mhd');
       }
     }
     if (options.labelPackType === 'combined' && combinedVolume) {
@@ -122,6 +135,7 @@ const createMhdPacker: FunctionService<
         ),
         { name: labelFileBaseName + '.mhd' }
       );
+      await waitForEntry(archiver, labelFileBaseName + '.mhd');
     }
   };
 
@@ -174,6 +188,7 @@ const createMhdPacker: FunctionService<
         ),
         { name: rawFileBaseName + '.mhd' }
       );
+      await waitForEntry(archiver, rawFileBaseName + '.mhd');
       const labelFileBaseName = `${caseId}/vol${pad(volId)}-label`;
       await putLabelData({
         labelFileBaseName,
@@ -196,6 +211,7 @@ const createMhdPacker: FunctionService<
       packOptions.compressionFormat === 'zip'
         ? Archiver('zip')
         : Archiver('tar', { gzip: true });
+    archiver.pipe(downloadFileStream);
 
     try {
       for (let i = 0; i < caseIds.length; i++) {
@@ -210,7 +226,6 @@ const createMhdPacker: FunctionService<
         );
         await putCaseData(caseId, revisionIndex, archiver, packOptions);
       }
-      archiver.pipe(downloadFileStream);
       taskEmitter.emit(
         'progress',
         'Performing compression...',
@@ -221,7 +236,7 @@ const createMhdPacker: FunctionService<
         taskEmitter.emit('finish', `Exported ${caseIds.length} case(s).`);
       });
       archiver.finalize();
-    } catch (err) {
+    } catch (err: any) {
       apiLogger.error('Case export error');
       apiLogger.error(err.message);
       taskEmitter.emit(

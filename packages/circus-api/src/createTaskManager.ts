@@ -5,6 +5,7 @@ import status from 'http-status';
 import _ from 'lodash';
 import mime from 'mime';
 import { PassThrough, Writable } from 'stream';
+import path from 'path';
 import StrictEventEmitter from 'strict-event-emitter-types';
 import generateUniqueId from '../src/utils/generateUniqueId';
 import { Models } from './interface';
@@ -28,6 +29,7 @@ export interface TaskManager {
   report: (ctx: CircusContext, userEmail: string) => void;
   isTaskInProgress: (taskId: string) => boolean;
   download: (ctx: CircusContext, taskId: string) => Promise<void>;
+  deleteDownload: (taskId: string) => Promise<void>;
 }
 
 interface TaskEvents {
@@ -56,8 +58,33 @@ interface Task {
 
 interface Options {
   downloadFileDirectory: string;
-  timeoutMs: number;
+  timeoutMs?: number;
+  deleteDownloadFilesAfterMs?: number;
+  checkDownloadFilesIntervalMs?: number;
 }
+
+/**
+ * Delete files older than the specified milliseconds, in the speficied directory
+ * @param directory - Directory to delete files from
+ * @param milliseconds - The max file age in milliseconds
+ * @param logger - The Logger instance to use
+ */
+export const deleteOldFiles = async (
+  directory: string,
+  milliseconds: number,
+  logger: Logger
+) => {
+  logger.info(`Started deleting old download files in ${directory}`);
+  const files = await fs.readdir(directory);
+  for (const file of files) {
+    const filePath = path.join(directory, file);
+    const stats = await fs.stat(filePath);
+    if (stats.isFile() && stats.mtimeMs < Date.now() - milliseconds) {
+      logger.info(`Deleting old download file: ${filePath}`);
+      await fs.unlink(filePath);
+    }
+  }
+};
 
 const createTaskManager: FunctionService<
   TaskManager,
@@ -65,6 +92,16 @@ const createTaskManager: FunctionService<
   Options
 > = async (opt, deps) => {
   const { models, apiLogger } = deps;
+  const {
+    downloadFileDirectory,
+    timeoutMs,
+    deleteDownloadFilesAfterMs = 1000 * 60 * 60 * 24 * 7, // 1 week
+    checkDownloadFilesIntervalMs = 1000 * 60 * 60 * 24 // 1 day
+  } = opt;
+
+  if (!downloadFileDirectory) {
+    throw new Error('downloadFileDirectory is required');
+  }
 
   // In-memory storage of ongoing tasks
   const tasks = new Map<string, Task>();
@@ -73,8 +110,20 @@ const createTaskManager: FunctionService<
     AggregatedEvents
   >;
 
+  // Sets up timer to delete old files
+  const deleteTimerId = setInterval(() => {
+    deleteOldFiles(
+      downloadFileDirectory,
+      deleteDownloadFilesAfterMs,
+      apiLogger
+    ).catch(err =>
+      apiLogger.error('Error while deleting old download files', err)
+    );
+  }, checkDownloadFilesIntervalMs);
+  deleteTimerId.unref();
+
   const downloadFileName = (taskId: string) => {
-    return `${opt.downloadFileDirectory}/${taskId}`;
+    return path.join(downloadFileDirectory, taskId);
   };
 
   const register = async (
@@ -252,7 +301,7 @@ const createTaskManager: FunctionService<
     } catch (err: any) {
       if (err.code === 'ENOENT') {
         ctx.throw(
-          404,
+          status.NOT_FOUND,
           'The requested download file for the ' +
             `task ${taskId} is no longer available.`
         );
@@ -274,7 +323,12 @@ const createTaskManager: FunctionService<
     ctx.body = stream;
   };
 
-  return { register, report, isTaskInProgress, download };
+  const deleteDownload = async (taskId: string) => {
+    const fileName = downloadFileName(taskId);
+    await fs.unlink(fileName);
+  };
+
+  return { register, report, isTaskInProgress, download, deleteDownload };
 };
 
 createTaskManager.dependencies = ['models', 'apiLogger'];

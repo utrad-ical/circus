@@ -87,7 +87,7 @@ export const handleDownload: RouteMiddleware = ({ models, taskManager }) => {
   };
 };
 
-export const handlePatch: RouteMiddleware = ({ models }) => {
+export const handlePatch: RouteMiddleware = ({ models, taskManager }) => {
   return async (ctx, next) => {
     const userEmail = ctx.user.userEmail;
     const taskId = ctx.params.taskId;
@@ -102,7 +102,20 @@ export const handlePatch: RouteMiddleware = ({ models }) => {
     )
       ctx.throw(httpStatus.BAD_REQUEST);
 
+    if (task.status !== 'finished') {
+      ctx.throw(httpStatus.BAD_REQUEST, 'The task is not completed yet.');
+    }
+
     await models.task.modifyOne(taskId, { dismissed: body.dismissed });
+    try {
+      // Remove the download file
+      if (task.downloadFileType && body?.dismissed) {
+        await taskManager.deleteDownload(taskId);
+      }
+    } catch (err: any) {
+      // An error may happen when the download file is still being accessed,
+      // but we'll ignore it here.
+    }
     ctx.body = null;
   };
 };

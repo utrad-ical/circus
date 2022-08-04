@@ -155,7 +155,7 @@ export default class ServiceLoader<T extends object = any> {
       }
     }
     if (!(name in this.services))
-      throw new TypeError(`Service '${name}' is not registered`);
+      throw new TypeError(`Service '${String(name)}' is not registered`);
     const serviceOrFactory: ServiceDef<T, K> = this.services[name]!;
     const promise = (() => {
       switch (serviceOrFactory.type) {

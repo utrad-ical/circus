@@ -43,10 +43,17 @@ const Operation: DataGridRenderer<any> = props => {
   const api = useApi();
   const loginmanager = useLoginManager();
 
-  const handleDelete = async (seriesUid: string, name: string) => {
+  const handleDelete = async (seriesUid: string, series: any) => {
     const ans = await confirm(
       <>
-        Delete <b>{name}</b>? This cannot be undone.
+        Are you sure you want to delete this series? This cannot be undone.
+        <DataGrid
+          className="series-search-result"
+          itemPrimaryKey="seriesUid"
+          columns={columns.slice(0, 5)}
+          value={[series]}
+          itemSelectable={false}
+        />
       </>
     );
     if (!ans) return;
@@ -54,7 +61,14 @@ const Operation: DataGridRenderer<any> = props => {
     dispatch(
       showMessage(
         <>
-          Deleted <b>{name}</b>.
+          Deleted the following series.
+          <DataGrid
+            className="series-search-result"
+            itemPrimaryKey="seriesUid"
+            columns={columns.slice(0, 5)}
+            value={[series]}
+            itemSelectable={false}
+          />
         </>,
         'warning',
         { short: true }
@@ -96,10 +110,7 @@ const Operation: DataGridRenderer<any> = props => {
         <MenuItem
           eventKey="2"
           onClick={() => {
-            handleDelete(
-              series.seriesUid,
-              `${series.patientInfo.patientName}(${series.seriesDescription})`
-            );
+            handleDelete(series.seriesUid, series);
           }}
         >
           Delete

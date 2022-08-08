@@ -127,65 +127,89 @@ describe('getOrientation', () => {
   });
 });
 
-describe('Uploading', () => {
-  const uploadTest = async (
-    file: string,
-    axios: AxiosInstance = apiTest.axiosInstances.dave,
-    domain = 'sirius.org'
-  ) => {
-    const formData = new FormData();
-    const fileData = await fs.readFile(file);
-    formData.append('files', fileData, { filename: file });
-    const res = await axios.request({
-      method: 'post',
-      url: `api/series/domain/${domain}`,
-      headers: formData.getHeaders(),
-      data: formData
-    });
-    if (res.status === 503) {
-      console.warn(
-        'Upload request returned with 503: Is dicom_utility installed?'
-      );
-    }
-    return res;
-  };
+describe('Upload', () => {
+  const file = path.join(
+    __dirname,
+    '../../../test/dicom/CT-MONO2-16-brain.dcm'
+  );
+  const seriesUid =
+    '2.16.840.1.113662.2.1.2519.21582.2990505.2105152.2381633.20';
 
-  it('should upload signle DICOM file', async () => {
-    const file = path.join(
-      __dirname,
-      '../../../test/dicom/CT-MONO2-16-brain.dcm'
-    );
-    const res = await uploadTest(file);
-    if (res.status === 503) return;
-    expect(res.status).toBe(201);
-    expect(res.data?.taskId).toHaveLength(26);
-    const taskId = res.data.taskId;
-    while (apiTest.taskManager.isTaskInProgress(taskId)) {
-      await delay(10);
-    }
-    const doc = await apiTest.database.db.collection('series').findOne({
-      seriesUid: '2.16.840.1.113662.2.1.2519.21582.2990505.2105152.2381633.20'
-    });
-    expect(doc?.images).toBe('8');
+  beforeEach(async () => {
+    await setUpMongoFixture(apiTest.database.db, ['series']);
   });
 
-  it('should upload zipped DICOM files', async () => {
-    const file = path.join(__dirname, '../../../test/dicom/test.zip');
-    const res = await uploadTest(file);
-    if (res.status === 503) return;
-    expect(res.status).toBe(201);
-    expect(res.data?.taskId).toHaveLength(26);
+  describe('with a task', () => {
+    const uploadTest = async (
+      file: string,
+      axios: AxiosInstance = apiTest.axiosInstances.dave,
+      domain = 'sirius.org'
+    ) => {
+      const formData = new FormData();
+      const fileData = await fs.readFile(file);
+      formData.append('files', fileData, { filename: file });
+      const res = await axios.request({
+        method: 'post',
+        url: `api/series/domain/${domain}`,
+        headers: formData.getHeaders(),
+        data: formData
+      });
+      if (res.status === 503) {
+        console.warn(
+          'Upload request returned with 503: Is dicom_utility installed?'
+        );
+      }
+      return res;
+    };
+
+    test('upload signle DICOM file', async () => {
+      const res = await uploadTest(file);
+      if (res.status === 503) return;
+      expect(res.status).toBe(201);
+      expect(res.data?.taskId).toHaveLength(26);
+      const taskId = res.data.taskId;
+      while (apiTest.taskManager.isTaskInProgress(taskId)) {
+        await delay(10);
+      }
+      const doc = await apiTest.database.db.collection('series').findOne({
+        seriesUid
+      });
+      expect(doc?.images).toBe('8');
+    });
+
+    test('upload zipped DICOM files', async () => {
+      const file = path.join(__dirname, '../../../test/dicom/test.zip');
+      const res = await uploadTest(file);
+      if (res.status === 503) return;
+      expect(res.status).toBe(201);
+      expect(res.data?.taskId).toHaveLength(26);
+    });
+
+    test('reject series upload into innaccessible domain', async () => {
+      const res = await uploadTest(file, apiTest.axiosInstances.bob);
+      if (res.status === 503) return;
+      expect(res.status).toBe(403);
+      expect(res.data.error).toMatch(/You cannot upload to this domain/);
+    });
   });
 
-  it('should reject series upload into innaccessible domain', async () => {
-    const file = path.join(
-      __dirname,
-      '../../../test/dicom/CT-MONO2-16-brain.dcm'
-    );
-    const res = await uploadTest(file, apiTest.axiosInstances.bob);
-    if (res.status === 503) return;
-    expect(res.status).toBe(403);
-    expect(res.data.error).toMatch(/You cannot upload to this domain/);
+  describe('without a task', () => {
+    test('should upload signle DICOM file', async () => {
+      const formData = new FormData();
+      const fileData = await fs.readFile(file);
+      formData.append('files', fileData, { filename: file });
+      const res = await apiTest.axiosInstances.dave.request({
+        method: 'post',
+        url: `api/series/domain/sirius.org/single`,
+        headers: formData.getHeaders(),
+        data: formData
+      });
+      expect(res.status).toBe(201);
+      const doc = await apiTest.database.db.collection('series').findOne({
+        seriesUid
+      });
+      expect(doc?.images).toBe('8');
+    });
   });
 });
 

@@ -90,16 +90,18 @@ export const handleGetOrientation: RouteMiddleware = ({
   };
 };
 
+const checkDomain = (ctx: CircusContext) => {
+  const domain = ctx.params.domain;
+  if (!ctx.userPrivileges.domains.some(d => d === domain)) {
+    ctx.throw(status.FORBIDDEN, 'You cannot upload to this domain.');
+  }
+  return domain;
+};
+
 export const handlePost: RouteMiddleware = ({ dicomImporter, taskManager }) => {
   return async (ctx, next) => {
-    if (!dicomImporter) {
-      ctx.throw(status.SERVICE_UNAVAILABLE);
-    }
-
-    const domain = ctx.params.domain;
-    if (!ctx.userPrivileges.domains.some(d => d === domain)) {
-      ctx.throw(status.FORBIDDEN, 'You cannot upload to this domain.');
-    }
+    if (!dicomImporter) ctx.throw(status.SERVICE_UNAVAILABLE);
+    const domain = checkDomain(ctx);
 
     const { emitter } = await taskManager.register(ctx, {
       name: 'Series import',
@@ -139,6 +141,29 @@ export const handlePost: RouteMiddleware = ({ dicomImporter, taskManager }) => {
         );
       }
     })();
+  };
+};
+
+export const handlePostSingle: RouteMiddleware = ({ dicomImporter }) => {
+  return async (ctx, next) => {
+    if (!dicomImporter) ctx.throw(status.SERVICE_UNAVAILABLE);
+    const domain = checkDomain(ctx);
+
+    if (ctx.request.files.length !== 1) {
+      ctx.throw(status.BAD_REQUEST, 'Only one file is allowed.');
+    }
+
+    const { buffer } = ctx.request.files[0];
+    const arrayBuffer = Buffer.from(buffer).buffer;
+    if (!isLikeDicom(arrayBuffer)) {
+      ctx.throw(
+        status.BAD_REQUEST,
+        'The file is not a DICOM file. You cannot use archive files.'
+      );
+    }
+    await dicomImporter.importDicom(arrayBuffer, domain);
+    ctx.body = null;
+    ctx.status = status.CREATED; // 201
   };
 };
 

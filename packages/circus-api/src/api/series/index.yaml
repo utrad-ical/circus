@@ -17,7 +17,12 @@ routes:
   - verb: post
     path: /series/domain/:domain
     expectedContentType: multipart/form-data
-    description: Uploads one or more DICOM files.
+    description: Uploads one or more DICOM files, creating a task.
+  - verb: post
+    path: /series/domain/:domain/single
+    expectedContentType: multipart/form-data
+    handler: handlePostSingle
+    description: Uploads one DICOM file without creating a task.
   - verb: get
     path: /series/:seriesUid
     description: Returns information about the specified series.

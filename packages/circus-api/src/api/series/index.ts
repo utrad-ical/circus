@@ -158,10 +158,18 @@ export const handlePostSingle: RouteMiddleware = ({ dicomImporter }) => {
     if (!isLikeDicom(arrayBuffer)) {
       ctx.throw(
         status.BAD_REQUEST,
-        'The file is not a DICOM file. You cannot use archive files.'
+        'The file is not a DICOM file. You cannot use archived files.'
       );
     }
-    await dicomImporter.importDicom(arrayBuffer, domain);
+    try {
+      await dicomImporter.importDicom(arrayBuffer, domain);
+    } catch (err: any) {
+      ctx.throw(
+        status.INTERNAL_SERVER_ERROR,
+        'Error while importing a DICOM file. ' +
+          'This may mean the uploaded file is broken.'
+      );
+    }
     ctx.body = null;
     ctx.status = status.CREATED; // 201
   };

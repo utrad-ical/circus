@@ -247,7 +247,10 @@ export const createApp: FunctionService<
   koa.use(mount('/rs', rs.routes() as any));
   withWebSocketConnectionHandlers({
     '/rs/ws/volume': rsWebsocketVolumeRoute({
-      authFunctionProvider: req => async seriesUid => true
+      // authFunctionProvider: req => async seriesUid => true
+      authFunctionProvider: req => seriesUid => new Promise((resolve) => {
+        setTimeout(() => resolve(true), 2000)
+      })
     })
   })(koa);
   

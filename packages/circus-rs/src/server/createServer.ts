@@ -89,7 +89,11 @@ const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
     '/ws/hello': hello,
     '/ws/bufferedAmountCheck': bufferedAmountCheck,
     '/ws/volume': rsWebsocketVolumeRoute({
-      authFunctionProvider: req => async seriesUid => true
+      // authFunctionProvider: req => async seriesUid => true
+      authFunctionProvider: req => seriesUid => new Promise((resolve) => {
+        setTimeout(() => resolve(true), 2000)
+      })
+
     })
   })(app);
 

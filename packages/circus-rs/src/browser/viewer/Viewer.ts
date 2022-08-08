@@ -485,6 +485,9 @@ export default class Viewer extends EventEmitter {
     this.cancelNextRender();
     this.detachCurrentComposition();
     this.stopResizeObserver();
+
+    // stop next() for the draft image.
+
     this.removeAllListeners();
   }
 }

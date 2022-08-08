@@ -194,11 +194,9 @@ export default class RsProgressiveVolumeLoader
 
   public pause() {
     this.transferConnection?.pause();
-    // this.emit('pause', { target: this });
   }
 
   public resume() {
     this.transferConnection?.resume();
-    // this.emit('resume', { target: this });
   }
 }

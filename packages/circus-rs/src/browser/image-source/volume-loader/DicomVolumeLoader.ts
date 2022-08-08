@@ -46,6 +46,8 @@ export interface DicomVolumeProgressiveLoader extends DicomVolumeLoader, Progres
   setPriority?(imageIndices: MultiRangeInitializer, priority: number): void;
   loadedImages(): number[];
   abort(): void;
+  pause(): void;
+  resume(): void;
 }
 
 export function isProgressiveLoader(loader: DicomVolumeLoader): loader is DicomVolumeProgressiveLoader {

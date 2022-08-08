@@ -28,7 +28,7 @@ export interface VolumeLoaderManager {
 
 const createVolumeLoaderManager = ({
   server,
-  cacheTimeout = 5000
+  cacheTimeout = 60000
 }: {
   server: string;
   cacheTimeout?: number
@@ -59,6 +59,9 @@ const createVolumeLoaderManager = ({
         ...options
       });
       loaders.set(id, loader);
+    } else if (referenceCounter.get(id) === 0) {
+      loaders.get(id)?.resume();
+      console.log(`Resume loader #${id}`);
     }
 
     referenceCounter.set(id, (referenceCounter.get(id) ?? 0) + 1);
@@ -76,6 +79,10 @@ const createVolumeLoaderManager = ({
   };
 
   const cleanup = (id: string) => {
+
+    loaders.get(id)?.pause();
+    console.log(`Pause loader #${id}`);
+
     const timeout = setTimeout(() => {
       const count = referenceCounter.get(id) || 0;
       if (count === 0) {

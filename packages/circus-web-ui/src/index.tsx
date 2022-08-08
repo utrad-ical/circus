@@ -108,14 +108,14 @@ const AppRoutes: React.FC<{}> = () => {
   );
 };
 
-const VolumeLoaderFactoryProvider: React.FC<{ cacheTimeout?: number }> = ({ children, cacheTimeout = 5000 }) => {
+const VolumeLoaderFactoryProvider: React.FC<{}> = ({ children }) => {
   const server = useSelector(state => state.loginUser.data?.dicomImageServer);
 
   const provider = useMemo(() => {
     if (!server) return null as any;
 
-    return createVolumeLoaderManager({ server, cacheTimeout });
-  }, [server, cacheTimeout]);
+    return createVolumeLoaderManager({ server });
+  }, [server]);
 
   return (
     <VolumeLoaderFactoryContext.Provider value={provider}>

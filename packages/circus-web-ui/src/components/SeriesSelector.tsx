@@ -1,5 +1,6 @@
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import { confirm, modal } from '@smikitky/rb-components/lib/modal';
+import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import PartialVolumeDescriptor, {
   describePartialVolumeDescriptor
 } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
@@ -9,7 +10,7 @@ import { Panel } from 'components/react-bootstrap';
 import SearchResultsView from 'components/SearchResultsView';
 import produce from 'immer';
 import { multirange } from 'multi-integer-range';
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { newSearch } from 'store/searches';
 import styled from 'styled-components';
@@ -40,7 +41,7 @@ const PartialVolumeRenderer: React.FC<{
 };
 
 const RelevantSeries: React.FC<{
-  onSeriesRegister: (seriesUid: string) => void;
+  onSeriesRegister: (seriesUid: string, studyUid: string) => void;
 }> = props => {
   const { onSeriesRegister } = props;
 
@@ -70,7 +71,7 @@ const RelevantSeries: React.FC<{
               icon="chevron-up"
               bsSize="xs"
               bsStyle="primary"
-              onClick={() => onSeriesRegister(value.seriesUid)}
+              onClick={() => onSeriesRegister(value.seriesUid, value.studyUid)}
             >
               Add
             </IconButton>
@@ -109,6 +110,9 @@ const SeriesSelector: React.FC<{
     onPvdEditing,
     alwaysShowRelevantSeries
   } = props;
+  const [seriesSearchTarget, setSeriesSearchTarget] = useState<
+    'studyUid' | 'patientId'
+  >('studyUid');
   const [showRelevantSeries, setShowRelevantSeries] = useState(
     !!alwaysShowRelevantSeries
   );
@@ -155,7 +159,17 @@ const SeriesSelector: React.FC<{
 
   useEffect(() => {
     if (!showRelevantSeries || !primarySeries) return;
-    const filter = { studyUid: primarySeries.studyUid };
+    if (seriesSearchTarget === 'patientId' && !primarySeries.patientInfo) {
+      return;
+    }
+    const filter =
+      seriesSearchTarget === 'patientId'
+        ? {
+            'patientInfo.patientId': primarySeries.patientInfo!.patientId
+          }
+        : {
+            studyUid: primarySeries.studyUid
+          };
     dispatch(
       newSearch(api, 'relevantSeries', {
         resource: { endPoint: 'series', primaryKey: 'seriesUid' },
@@ -164,7 +178,7 @@ const SeriesSelector: React.FC<{
         sort: '{"seriesDate":-1}'
       })
     );
-  }, [api, dispatch, primarySeries, showRelevantSeries]);
+  }, [api, dispatch, primarySeries, showRelevantSeries, seriesSearchTarget]);
 
   const handleAddSeriesClick = () => {
     setShowRelevantSeries(s => !s);
@@ -199,9 +213,11 @@ const SeriesSelector: React.FC<{
     );
   };
 
-  const handleSeriesRegister = async (seriesUid: string) => {
+  const handleSeriesRegister = async (seriesUid: string, studyUid: string) => {
     if (value.some(s => s.seriesUid === seriesUid)) {
       if (!(await confirm('Add the same series?'))) return;
+    } else if (primarySeries!.studyUid !== studyUid) {
+      if (!(await confirm('Add the series with a different studyUid?'))) return;
     }
     const newEntry: SeriesEntry = {
       seriesUid,
@@ -306,11 +322,31 @@ const SeriesSelector: React.FC<{
               {showRelevantSeries ? 'Close' : 'Add Series'}
             </IconButton>
           )}
-          {showRelevantSeries && ' Showing series from the same study'}
+          {showRelevantSeries && (
+            <>
+              Showing series from &thinsp;
+              <ShrinkSelect
+                options={{
+                  studyUid: 'the same study',
+                  patientId: 'the same patient'
+                }}
+                value={seriesSearchTarget}
+                onChange={key => {
+                  setSeriesSearchTarget(key);
+                }}
+              />
+            </>
+          )}
         </div>
-        {showRelevantSeries && (
-          <RelevantSeries onSeriesRegister={handleSeriesRegister} />
-        )}
+        {showRelevantSeries &&
+          primarySeries &&
+          (seriesSearchTarget === 'studyUid' || primarySeries.patientInfo ? (
+            <RelevantSeries onSeriesRegister={handleSeriesRegister} />
+          ) : (
+            <WarninMessageSpan>
+              You don't have permission to access personal information.
+            </WarninMessageSpan>
+          ))}
       </Panel.Body>
     </Panel>
   );
@@ -319,6 +355,12 @@ const SeriesSelector: React.FC<{
 const SeriesUidSpan = styled.span`
   font-size: 80%;
   word-break: break-all;
+`;
+
+const WarninMessageSpan = styled.span`
+  display: block;
+  text-align: center;
+  margin: 1em;
 `;
 
 export default SeriesSelector;

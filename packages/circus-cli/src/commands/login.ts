@@ -2,7 +2,7 @@ import inq from 'inquirer';
 import { promises as fs } from 'node:fs';
 import pc from 'picocolors';
 import CommandAction from './CommandAction.js';
-import fileExists from '../utils/fileExits.js';
+import fileExists from '../utils/fileExists.js';
 
 const action: CommandAction = ({ rcFilePath }) => {
   return async () => {

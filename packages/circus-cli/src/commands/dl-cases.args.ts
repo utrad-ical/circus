@@ -24,6 +24,6 @@ export default (program: Command) => {
       'after',
       '\nExamples:\n' +
         '  circus-api-util dl-cases -o ~/data a2b4c6e8f\n' +
-        '  circus-api-util dl-cases --file casee-ids.txt'
+        '  circus-api-util dl-cases --file case-ids.txt'
     );
 };

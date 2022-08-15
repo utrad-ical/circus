@@ -57,23 +57,32 @@ const Operation: DataGridRenderer<any> = props => {
       </>
     );
     if (!ans) return;
-    await api(`/series/${seriesUid}`, { method: 'delete' });
-    dispatch(
-      showMessage(
-        <>
-          Deleted the following series.
-          <DataGrid
-            className="series-search-result"
-            itemPrimaryKey="seriesUid"
-            columns={columns.slice(0, 5)}
-            value={[series]}
-            itemSelectable={false}
-          />
-        </>,
-        'warning',
-        { short: true }
-      )
-    );
+    try {
+      await api(`/series/${seriesUid}`, {
+        method: 'delete',
+        handleErrors: [400]
+      });
+      dispatch(
+        showMessage(
+          <>
+            Deleted the following series.
+            <DataGrid
+              className="series-search-result"
+              itemPrimaryKey="seriesUid"
+              columns={columns.slice(0, 5)}
+              value={[series]}
+              itemSelectable={false}
+            />
+          </>,
+          'warning',
+          { short: true }
+        )
+      );
+    } catch (err: any) {
+      dispatch(
+        showMessage(<>Failed to delete: {err.response.data.error}</>, 'danger')
+      );
+    }
     loginmanager.refreshUserInfo(true);
   };
 

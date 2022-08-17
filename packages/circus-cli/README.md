@@ -7,6 +7,7 @@ Currently, this tool can:
 - Show user's preference (primarily for testing the auth status)
 - Download case data as MHD
 - Add a new revision to a case
+- Uploads/downloads blobs (label binary data)
 - Show the list of mylists and export its resource IDs
 
 **Note:** This is an HTTP client that works by accessing CIRCUS API Server (REST API). CIRCUS also provides admin CLI, which is available only for server administrators. Some operations may work more efficiently via admin CLI because it does not use HTTP connections.

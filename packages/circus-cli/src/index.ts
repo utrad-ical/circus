@@ -56,6 +56,8 @@ const main = async () => {
     'auth',
     'case-addrev',
     'case-dl',
+    'blob-post',
+    'blob-get',
     'mylist-show',
     'mylist-export',
     'preferences'

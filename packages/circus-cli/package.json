@@ -27,7 +27,8 @@
     "json5": "^2.2.1",
     "node-fetch": "^3.2.10",
     "picocolors": "^1.0.0",
-    "progress-stream": "^2.0.0"
+    "progress-stream": "^2.0.0",
+    "raw-body": "^2.5.1"
   },
   "devDependencies": {
     "@types/dedent": "^0.7.0",

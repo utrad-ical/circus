@@ -6,16 +6,13 @@ export default (program: Command) => {
     .command('case-addrev')
     .description('add a new revision to specified case(s)')
     .requiredOption(
-      '-e, --exec <command>',
-      'command to process the latest revision'
+      '-e, --exec <cmd>',
+      'filter command to generate the revision to save'
     )
     .option('-d, --desc [desc]', 'set revision description (message)')
-    .option('--force', "don't prompt for revision description or confirmation")
+    .option('--force', "don't prompt for confirmation")
     .option('-f, --file', 'read list of case IDs from file')
-    .option(
-      '-a, --all-revs',
-      '[unimplemented] pass all revisions instead of only the latest'
-    )
+    .option('-a, --all-revs', 'pass all revisions instead of only the latest')
     .argument(
       '<case-id...>',
       'case ID, or file containing IDs when --file is used'
@@ -24,11 +21,9 @@ export default (program: Command) => {
       'after',
       '\n' +
         dedent`
-          This command will add a new revision to the specified DB case, based on the latest revision.
+          This command will save a new revision to the specified DB case, based on the latest revision.
 
           The "-e (--exec)" option is required, and specifies the "filter" command to process the JSON of the latest revision. You can use any command that reads JSON from stdin and writes JSON to stdout. The 'jq' utility is a good choice for simple tasks such as adding a fixed value to attributes. You can also use 'sed', 'vipe', and so on. For complex tasks, write your own script in the language of your choice.
-
-          The "-a (--all-revs)" option allows the filter command to receive all the revisions instead of only the latest. Note that your output JSON must still be a single revision.
 
           The input JSON passed to the filter is an object representing the latest revision of the specified case. It contains the following fields:
 
@@ -41,7 +36,9 @@ export default (program: Command) => {
 
           You can specify the new values for the first four fields. The "createdAt" and "creator" fields output from the filter will always be ignored.
 
-          The "-d" option specifies how to determine the description of the new revision. If the "-d" is used with an actual string, that string will be used as the description (overwriting the "description" field from the output JSON). If "-d" is used without a string, the description will be read from the output JSON. If "-d" is not used, a prompt will be shown to enter the description (unless "-f" is set).
+          The "-a (--all-revs)" option allows the filter command to receive all the revisions instead of only the latest. Note that your output JSON must still be a single revision.
+
+          The "-d" option specifies how to determine the description of the new revision. If "-d" is not set, a prompt will be shown to enter the description. If the "-d" is used with an actual string, that string will be used as the description (overwriting the "description" field from the output JSON). If "-d" is used without a string, the description will be read from the output JSON.
 
           The following environment variables are avaialble to the command:
 

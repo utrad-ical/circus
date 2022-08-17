@@ -57,10 +57,11 @@ const action: CommandAction = ({ getFetch }) => {
       // };
 
       const newRevStr = await new Promise<string>((resolve, reject) => {
-        const child = cp.exec(command, (err, stdout) => {
-          if (err) reject(err);
-          else resolve(stdout);
-        });
+        const child = cp.exec(
+          command,
+          { env: { ...process.env, CIRCUS_CASE_ID: caseId } },
+          (err, stdout) => (err ? reject(err) : resolve(stdout))
+        );
         child.stdin!.end(JSON.stringify(inputRev));
       });
 

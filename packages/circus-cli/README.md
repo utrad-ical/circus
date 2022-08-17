@@ -47,10 +47,10 @@ Currently, this tool can:
 4. Run the following command to check if the client can connect to a running CIRCUS API server:
 
    ```
-   circus-api-util preferences
+   circus-api-util get login-info
    ```
 
-   This will display the list of your preferences. If it fails, return to the previous step and check if the given values are correct.
+   This displays the basic information about the user associated with the API token. If it fails, return to the previous step and check if the given values are correct.
 
 5. You can see the list of commands like this:
 

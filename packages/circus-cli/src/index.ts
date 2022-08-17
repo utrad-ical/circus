@@ -54,13 +54,13 @@ const main = async () => {
 
   const commands = [
     'auth',
+    'get',
     'case-addrev',
     'case-dl',
     'blob-post',
     'blob-get',
     'mylist-show',
-    'mylist-export',
-    'preferences'
+    'mylist-export'
   ];
 
   for (const command of commands) {

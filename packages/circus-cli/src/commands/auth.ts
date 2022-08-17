@@ -1,22 +1,34 @@
 import inq from 'inquirer';
 import { promises as fs } from 'node:fs';
 import pc from 'picocolors';
-import CommandAction from './CommandAction.js';
 import fileExists from '../utils/fileExists.js';
+import { confirm, defaultValidateString } from '../utils/inquiry.js';
+import CommandAction from './CommandAction.js';
+
+interface Options {
+  logout?: boolean;
+}
 
 const action: CommandAction = ({ rcFilePath }) => {
-  return async () => {
-    if (await fileExists(rcFilePath)) {
-      console.log(pc.yellow(`The token file already exists at ${rcFilePath}.`));
-      const ans = await inq.prompt([
-        {
-          type: 'confirm',
-          name: 'overwrite',
-          message: 'Overwrite existing config file?',
-          default: false
+  return async (options: Options) => {
+    const rcFileExists = await fileExists(rcFilePath);
+    const { logout } = options;
+
+    if (logout) {
+      if (!rcFileExists) {
+        throw new Error('No config file found');
+      } else {
+        if (await confirm('Are you sure you want to log out?')) {
+          await fs.unlink(rcFilePath);
+          console.log(pc.green('Config file deleted successfully'));
         }
-      ]);
-      if (!ans.overwrite) return;
+      }
+      return;
+    }
+
+    if (rcFileExists) {
+      console.log(pc.yellow(`The token file already exists at ${rcFilePath}.`));
+      if (!(await confirm('Overwrite existing config file?'))) return;
     }
 
     const ans = await inq.prompt([
@@ -34,10 +46,7 @@ const action: CommandAction = ({ rcFilePath }) => {
         type: 'input',
         name: 'token',
         message: 'API token:',
-        validate: (val: string) => {
-          if (val.length === 0) return 'Token is required.';
-          return true;
-        }
+        validate: defaultValidateString
       }
     ]);
 

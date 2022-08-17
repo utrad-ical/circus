@@ -53,7 +53,7 @@ const main = async () => {
     .version(await getVersion());
 
   const commands = [
-    'login',
+    'auth',
     'case-addrev',
     'case-dl',
     'mylist-show',

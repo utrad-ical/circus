@@ -28,7 +28,7 @@ Currently, this tool can:
 3. Run the following command to store an API token to your machine:
 
    ```
-   circus-api-util login
+   circus-api-util auth
    ```
 
    You will be prompted to enter two values:

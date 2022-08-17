@@ -1,13 +1,13 @@
 import dedent from 'dedent';
-import inq from 'inquirer';
+import { diff } from 'jest-diff';
 import JSON5 from 'json5';
 import pc from 'picocolors';
 import { fetchWithSpinner } from '../utils/createAuthorizedFetch.js';
 import exec from '../utils/exec.js';
+import { confirm, promptString } from '../utils/inquiry.js';
 import launchEditor from '../utils/launchEditor.js';
 import readIds from '../utils/readIds.js';
 import CommandAction from './CommandAction.js';
-import { diff } from 'jest-diff';
 
 interface Options {
   exec: string;
@@ -17,11 +17,6 @@ interface Options {
   file: boolean;
   allRevs: boolean;
 }
-
-const promptString = async (message: string) => {
-  const ans = await inq.prompt([{ type: 'input', name: 'value', message }]);
-  return ans.value;
-};
 
 const withoutMetadata = (obj: any): any => {
   const { series, attributes, status, description } = obj;
@@ -116,10 +111,7 @@ const action: CommandAction = ({ getFetch }) => {
             console.log(diffStr);
           }
         }
-        const ans = await inq.prompt([
-          { type: 'confirm', name: 'ok', message: 'Is this okay?' }
-        ]);
-        if (!ans.ok) {
+        if (!(await confirm('Is this okay?'))) {
           console.log('Operation cancelled.');
           return;
         }

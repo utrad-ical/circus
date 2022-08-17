@@ -11,7 +11,8 @@ import { diff } from 'jest-diff';
 
 interface Options {
   exec: string;
-  desc?: string | boolean;
+  desc?: string;
+  editDesc?: boolean;
   force?: boolean;
   file: boolean;
   allRevs: boolean;
@@ -23,19 +24,28 @@ const promptString = async (message: string) => {
 };
 
 const withoutMetadata = (obj: any): any => {
-  const { createdAt, creator, ...rest } = obj;
-  return rest;
+  const { series, attributes, status, description } = obj;
+  return { series, attributes, status, description };
 };
 
 const action: CommandAction = ({ getFetch }) => {
   return async (args: string[], options: Options) => {
     const fetch = getFetch();
-    const { exec: command, desc, force, file, allRevs } = options;
+    const { exec: command, desc, editDesc, force, file, allRevs } = options;
 
-    if (force && !desc)
-      throw new Error("You must set '--desc' option to enable '--force'");
+    if (force && !desc && !editDesc)
+      throw new Error(
+        "You must set either '-d (--desc)' or '-D (--edit-desc)' to enable '--force'"
+      );
+    if (desc && editDesc) {
+      throw new Error(
+        "You cannot use both '-d (--desc)' and '-D (--edit-desc)'"
+      );
+    }
     if (allRevs && !command)
-      throw new Error("You must set '--exec' option to enable '--all-revs'");
+      throw new Error(
+        "You must set '-e (--exec)' option to enable '-a (--all-revs)'"
+      );
 
     const caseIds = await readIds(args, !!file);
 
@@ -46,7 +56,9 @@ const action: CommandAction = ({ getFetch }) => {
         `cases/${caseId}`
       );
       const data = (await res.json()) as any;
-      const inputRev = allRevs ? data.revisions : data.revisions[0];
+      const inputRev = allRevs
+        ? data.revisions
+        : data.revisions[data.revisions.length - 1];
 
       const newRevStr = command
         ? await exec(command, JSON.stringify(inputRev), {
@@ -57,11 +69,12 @@ const action: CommandAction = ({ getFetch }) => {
             dedent`
               // The following is the content of the latest revision.
               // Edit the JSON below and close the editor.
-              // The 'creator' and 'createdAt' fields will be ignored.
+              // The 'creator' and 'date' fields will be ignored.
               // Case ID: ${caseId}
             ` +
               '\n\n' +
-              JSON.stringify(inputRev, null, 2)
+              JSON.stringify(inputRev, null, 2),
+            'json'
           );
 
       const newRev = (() => {
@@ -78,8 +91,8 @@ const action: CommandAction = ({ getFetch }) => {
 
       if (typeof desc === 'string' && desc.length > 0) {
         newRev.description = options.desc;
-      } else if (typeof desc === 'undefined') {
-        newRev.description = await promptString('Revision description');
+      } else if (!editDesc) {
+        newRev.description = await promptString('Revision description:');
       }
 
       if (!force) {
@@ -89,7 +102,9 @@ const action: CommandAction = ({ getFetch }) => {
         } else {
           const diffStr = diff(newRev, withoutMetadata(inputRev), {
             aAnnotation: 'New revision',
-            bAnnotation: 'Current revision'
+            bAnnotation: 'Current revision',
+            contextLines: 5,
+            expand: false
           });
           if (/Compared values have no visual difference/.test(diffStr!)) {
             console.log(
@@ -104,14 +119,21 @@ const action: CommandAction = ({ getFetch }) => {
         const ans = await inq.prompt([
           { type: 'confirm', name: 'ok', message: 'Is this okay?' }
         ]);
-        if (!ans.ok) return;
+        if (!ans.ok) {
+          console.log('Operation cancelled.');
+          return;
+        }
       }
 
       await fetchWithSpinner(
         fetch,
         `Saving a revision to ${caseId}`,
-        `cases/${caseId}/revisions`,
-        { method: 'POST', body: JSON.stringify(newRev) }
+        `cases/${caseId}/revision`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newRev)
+        }
       );
     }
   };

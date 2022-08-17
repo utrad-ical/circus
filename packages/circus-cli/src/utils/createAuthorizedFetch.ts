@@ -67,7 +67,7 @@ export const fetchWithSpinner = async (
       throw err;
     }
   } finally {
-    spinner.stop(isError ? `${message}: Error` : 'Done', isError);
+    spinner.stop(isError ? `${message}: Error` : `${message}: Done`, isError);
   }
 };
 

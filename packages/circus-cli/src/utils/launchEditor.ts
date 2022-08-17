@@ -8,14 +8,17 @@ import * as path from 'node:path';
  * @param original - The text to edit.
  * @returns The text after editing.
  */
-const launchEditor = async (original: string): Promise<string> => {
+const launchEditor = async (
+  original: string,
+  ext: string = 'txt'
+): Promise<string> => {
   const editor =
     process.env.VISUAL ??
     process.env.EDITOR ??
     (os.platform() === 'win32' ? 'notepad' : 'vi');
   const tempFile = path.join(
     os.tmpdir(),
-    `${Math.random().toString(36).slice(-7)}.txt`
+    `${Math.random().toString(36).slice(-7)}.${ext}`
   );
   await fs.writeFile(tempFile, original, 'utf8');
   try {

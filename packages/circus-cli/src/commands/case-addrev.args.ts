@@ -10,6 +10,10 @@ export default (program: Command) => {
       'filter command to produce the revision to save'
     )
     .option('-d, --desc [desc]', 'set revision description (message)')
+    .option(
+      '-D, --edit-desc',
+      'edit revision description directly from editor or filter command'
+    )
     .option('--force', 'skip confirmation prompt')
     .option('-f, --file', 'read list of case IDs from file')
     .option('-a, --all-revs', 'pass all revisions instead of only the latest')
@@ -33,16 +37,16 @@ export default (program: Command) => {
             - attributes
             - status
             - description (ignored for new revision unless -d is set)
-            - createdAt (ignored for new revision)
+            - date (ignored for new revision)
             - creator (ignored for new revision)
 
-          You can specify the new values for the first four fields. The "createdAt" and "creator" fields output from the filter will always be ignored.
+          You can specify the new values for the first four fields. The "date" and "creator" fields output from the filter will always be ignored.
 
           Within the filter command, the environment variable "CIRCUS_CASE_ID" is available.
 
           When the filter command is set, you can also specify the "-a (--all-revs)" flag, which allows the filter to receive all the revisions instead of only the latest. Note that the output JSON must still be a single revision.
 
-          The "-d" option specifies how to determine the description of the new revision. If "-d" is not set, a prompt will be shown to enter the description. If the "-d" is used with an actual string, that string will be used as the description (overwriting the "description" field from the output JSON). If "-d" is used without a string, the description will be read from the output JSON.
+          The "-d (--desc) <desc>" option lets you specify the revision description (message) directly in the command line. Alternatively, you can use the "-D (--edit-desc)" flag to edit the description with an editor or filter command. If neither is set, a prompt will be shown asking for the description.
 
           Examples:
 
@@ -52,8 +56,8 @@ export default (program: Command) => {
             # Change case attributes for cases specified in file
             circus-api-util case-addrev -e "jq '.attributes.smoker = true'" -f ./case-ids.txt
 
-            # Use an editor to create a new revision, using the output's description
-            circus-api-util case-addrev -d a2b4c6e8f
+            # Use VSCode to edit a revision, using the output's description
+            EDITOR="code --wait" circus-api-util case-addrev a2b4c6e8f -d
           `
     );
 };

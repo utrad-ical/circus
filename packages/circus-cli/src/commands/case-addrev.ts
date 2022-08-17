@@ -1,20 +1,31 @@
 import CommandAction from './CommandAction.js';
 import * as cp from 'node:child_process';
 import pc from 'picocolors';
+import inq from 'inquirer';
+import createSpinner from '../utils/createSpinner.js';
 
 interface Options {
   exec: string;
-  desc?: string;
+  desc?: string | boolean;
   force?: boolean;
   file: boolean;
   allRevs: boolean;
 }
 
+const promptString = async (message: string) => {
+  const ans = await inq.prompt([{ type: 'input', name: 'value', message }]);
+  return ans.value;
+};
+
 const action: CommandAction = ({ getFetch }) => {
   return async (args: string[], options: Options) => {
     const fetch = getFetch();
     const caseIds = args;
-    const { exec: command, desc, file, allRevs } = options;
+    const { exec: command, desc, force, file, allRevs } = options;
+
+    if (force && !desc) {
+      throw new Error("'--force' requires '--desc' option to be set");
+    }
 
     for (const caseId of caseIds) {
       // (await fetch(`cases/${caseId}`)).json();
@@ -47,23 +58,51 @@ const action: CommandAction = ({ getFetch }) => {
       };
 
       const newRevStr = await new Promise<string>((resolve, reject) => {
-        const p = cp.exec(command, (err, stdout) => {
+        const child = cp.exec(command, (err, stdout) => {
           if (err) reject(err);
           else resolve(stdout);
         });
-        p.stdin!.end(JSON.stringify(inputRev));
+        child.stdin!.end(JSON.stringify(inputRev));
       });
-      const newRev = JSON.parse(newRevStr);
 
-      if (desc) {
+      const newRev = (() => {
+        try {
+          const { createdAt, creator, ...newRev } = JSON.parse(newRevStr);
+          return newRev;
+        } catch (err: any) {
+          console.error('The filter command returned the following:');
+          console.error(newRevStr + '\n');
+          throw new Error(
+            `Error parsing output from the filter command: ${err.message}`
+          );
+        }
+      })();
+
+      if (typeof desc === 'string' && desc.length > 0) {
         newRev.description = options.desc;
+      } else if (typeof desc === 'undefined') {
+        newRev.description = await promptString('Revision description');
       }
 
-      if (dryRun) {
+      if (!force) {
         console.log(pc.cyan('Processed JSON:'));
         console.log(JSON.stringify(newRev, null, 2));
-      } else {
-        console.log('Saving revision...');
+        const ans = await inq.prompt([
+          { type: 'confirm', name: 'ok', message: 'Is this okay?' }
+        ]);
+        if (!ans.ok) return;
+      }
+
+      const spinner = createSpinner(`Saving a revision to ${caseId}...`, {
+        hideInNonTTY: false
+      });
+      try {
+        const res = await fetch(`cases/${caseId}/revisions`, {
+          method: 'POST',
+          body: JSON.stringify(newRev)
+        });
+      } finally {
+        spinner.stop(`Saving a revision to ${caseId} done.`);
       }
     }
   };

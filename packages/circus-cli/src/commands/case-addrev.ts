@@ -5,16 +5,16 @@ import pc from 'picocolors';
 interface Options {
   exec: string;
   desc?: string;
-  dryRun?: boolean;
-  file?: boolean;
-  all?: boolean;
+  force?: boolean;
+  file: boolean;
+  allRevs: boolean;
 }
 
 const action: CommandAction = ({ getFetch }) => {
   return async (args: string[], options: Options) => {
     const fetch = getFetch();
     const caseIds = args;
-    const { exec: command, desc, dryRun } = options;
+    const { exec: command, desc, file, allRevs } = options;
 
     for (const caseId of caseIds) {
       // (await fetch(`cases/${caseId}`)).json();

@@ -57,7 +57,7 @@ const main = async () => {
     'preferences',
     'dl-cases',
     'export-mylist',
-    'add-revision'
+    'case-addrev'
   ];
 
   for (const command of commands) {

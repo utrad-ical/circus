@@ -1,4 +1,5 @@
 import fetch, { RequestInfo, RequestInit } from 'node-fetch';
+import createSpinner from './createSpinner.js';
 
 /**
  * @param token - The token to use for authorization.
@@ -47,6 +48,27 @@ const createAuthorizedFetch = (
       }
     }
   };
+};
+
+export const fetchWithSpinner = async (
+  fetchInstance: typeof fetch,
+  message: string,
+  url: string,
+  init?: RequestInit
+) => {
+  const spinner = createSpinner(message + '...');
+  let isError = false;
+  try {
+    try {
+      const res = await fetchInstance(url, init);
+      return res;
+    } catch (err) {
+      isError = true;
+      throw err;
+    }
+  } finally {
+    spinner.stop(isError ? `${message}: Error` : `${message}: Done`, isError);
+  }
 };
 
 export default createAuthorizedFetch;

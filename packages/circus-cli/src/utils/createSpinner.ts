@@ -16,6 +16,7 @@ const createSpinner = (
   let phase = 0;
   let timerId: NodeJS.Timer | null = null;
   let message = initialMessage;
+  let stopped = false;
 
   const newProgressGlyph = () =>
     pc.cyan(isTTY ? spinnerGlyphs[phase++ % spinnerGlyphs.length] : '>>');
@@ -26,7 +27,6 @@ const createSpinner = (
     initial = false
   ) => {
     if (isTTY) {
-      const glyph = spinnerGlyphs[phase++ % spinnerGlyphs.length];
       process.stdout.write((initial ? '' : eraseLine) + glyph + ' ' + message);
     } else {
       if (!hideInNonTTY) {
@@ -53,6 +53,8 @@ const createSpinner = (
   return {
     update,
     stop: (message = 'Done', isError = false) => {
+      if (stopped) return;
+      stopped = true;
       putLine(message, isError ? pc.red('✖') : pc.green('✓'));
       process.stdout.write('\n');
       if (timerId) clearTimeout(timerId);

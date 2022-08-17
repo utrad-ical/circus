@@ -3,7 +3,7 @@ import { int } from '../utils/commander-utils.js';
 
 export default (program: Command) => {
   return program
-    .command('dl-cases')
+    .command('case-dl')
     .description('download CIRCUS DB cases in MHD format')
     .option('-o, --outdir <dir>', 'output directory (default: CWD)')
     .option('-f, --file', 'read list of case IDs from file')
@@ -23,7 +23,7 @@ export default (program: Command) => {
     .addHelpText(
       'after',
       '\nExamples:\n' +
-        '  circus-api-util dl-cases -o ~/data a2b4c6e8f\n' +
-        '  circus-api-util dl-cases --file case-ids.txt'
+        '  circus-api-util case-dl -o ~/data a2b4c6e8f\n' +
+        '  circus-api-util case-dl --file case-ids.txt'
     );
 };

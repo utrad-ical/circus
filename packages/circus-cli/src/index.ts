@@ -54,10 +54,10 @@ const main = async () => {
 
   const commands = [
     'login',
-    'preferences',
-    'dl-cases',
-    'export-mylist',
-    'case-addrev'
+    'case-addrev',
+    'case-dl',
+    'mylist-export',
+    'preferences'
   ];
 
   for (const command of commands) {

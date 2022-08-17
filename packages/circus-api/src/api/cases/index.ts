@@ -54,7 +54,10 @@ export const handlePost: RouteMiddleware = ({ transactionManager }) => {
   };
 };
 
-export const handlePostRevision: RouteMiddleware = ({ models }) => {
+export const handlePostRevision: RouteMiddleware = ({
+  models,
+  blobStorage
+}) => {
   return async (ctx, next) => {
     const aCase = ctx.case;
     const rev = ctx.request.body;
@@ -64,6 +67,27 @@ export const handlePostRevision: RouteMiddleware = ({ models }) => {
     }
     if (rev.creator) {
       ctx.throw(status.BAD_REQUEST, 'You cannot specify revision creator.');
+    }
+
+    const blobIds: string[] = rev.series
+      .map((s: any) => {
+        return s.labels
+          .filter((l: any) => l.type === 'voxel' && l.voxels !== null)
+          .map((l: any) => l.data.voxels);
+      })
+      .flat();
+    const missingBlobIds = (
+      await Promise.all(
+        blobIds.map(async id => (!(await blobStorage.exists(id)) ? id : null))
+      )
+    ).filter(id => id !== null);
+    if (missingBlobIds.length) {
+      ctx.throw(
+        status.BAD_REQUEST,
+        `Some voxel data are missing (${missingBlobIds.join(
+          ', '
+        )}). Store them first.`
+      );
     }
 
     rev.date = new Date();

@@ -144,6 +144,12 @@ export const setUpAppForRoutesTest = async () => {
 
   const authProvider = await createDefaultAuthProvider({}, { models });
 
+  const blobStorage = await createMemoryStorage(undefined);
+  await blobStorage.write(
+    '5a616841a4fdd6066ee5c7e2d3118e0963ec1fc6',
+    Buffer.from('dummy', 'utf-8')
+  );
+
   const app = await createApp(
     {
       debug: true,
@@ -157,7 +163,7 @@ export const setUpAppForRoutesTest = async () => {
       database,
       apiLogger,
       models,
-      blobStorage: await createMemoryStorage(undefined),
+      blobStorage,
       dicomFileRepository,
       dicomTagReader,
       dicomImporter,

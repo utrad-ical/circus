@@ -1,5 +1,6 @@
 import { fetchWithSpinner } from '../utils/createAuthorizedFetch.js';
 import CommandAction from './CommandAction.js';
+import easyTable from 'easy-table';
 
 const resourceTypes = ['series', 'clinicalCases', 'pluginJobs'];
 type ResourceType = typeof resourceTypes[number];
@@ -8,6 +9,7 @@ interface MyList {
   myListId: string;
   resourceType: ResourceType;
   name: string;
+  createdAt: string;
 }
 
 const action: CommandAction = ({ getFetch }) => {
@@ -22,17 +24,18 @@ const action: CommandAction = ({ getFetch }) => {
 
     const myLists = (await res.json()) as MyList[];
     const dispList = myLists
+      .sort((a, b) => a.resourceType.localeCompare(b.resourceType))
       .map(l => ({
-        myListId: l.myListId,
-        resourceType: l.resourceType,
-        name: l.name
-      }))
-      .sort((a, b) => a.resourceType.localeCompare(b.resourceType));
+        'resource type': l.resourceType,
+        'list ID': l.myListId,
+        name: l.name,
+        created: l.createdAt
+      }));
 
     if (dispList.length === 0) {
       console.log('This user has no my list yet.');
     } else {
-      console.table(dispList);
+      console.log(easyTable.print(dispList));
     }
     return;
   };

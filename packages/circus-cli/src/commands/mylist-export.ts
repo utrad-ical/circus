@@ -20,6 +20,7 @@ interface MyList {
   myListId: string;
   resourceType: ResourceType;
   name: string;
+  createdAt: string;
 }
 
 const limit = 100; // fetches per page

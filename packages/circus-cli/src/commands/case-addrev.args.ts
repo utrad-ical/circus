@@ -12,7 +12,7 @@ export default (program: Command) => {
     .option('-d, --desc [desc]', 'set revision description (message)')
     .option(
       '-D, --edit-desc',
-      'edit revision description directly from editor or filter command'
+      'specify revision description directly from editor or filter command'
     )
     .option('--force', 'skip confirmation prompt')
     .option('-f, --file', 'read list of case IDs from file')
@@ -46,7 +46,7 @@ export default (program: Command) => {
 
           When the filter command is set, you can also specify the "-a (--all-revs)" flag, which allows the filter to receive all the revisions instead of only the latest. Note that the output JSON must still be a single revision.
 
-          The "-d (--desc) <desc>" option lets you specify the revision description (message) directly in the command line. Alternatively, you can use the "-D (--edit-desc)" flag to edit the description with an editor or filter command. If neither is set, a prompt will be shown asking for the description.
+          The "-d (--desc) <desc>" option lets you specify the revision description (message) directly in the command. Alternatively, you can set the "-D (--edit-desc)" flag to edit the description with an editor or filter command. If neither is set, a prompt will be shown asking for the description.
 
           Examples:
 
@@ -57,7 +57,7 @@ export default (program: Command) => {
             circus-api-util case-addrev -e "jq '.attributes.smoker = true'" -f ./case-ids.txt
 
             # Use VSCode to edit a revision, using the output's description
-            EDITOR="code --wait" circus-api-util case-addrev a2b4c6e8f -d
+            EDITOR="code --wait" circus-api-util case-addrev -D a2b4c6e8f
           `
     );
 };

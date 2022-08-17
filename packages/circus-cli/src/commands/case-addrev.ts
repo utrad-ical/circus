@@ -3,7 +3,6 @@ import inq from 'inquirer';
 import JSON5 from 'json5';
 import pc from 'picocolors';
 import { fetchWithSpinner } from '../utils/createAuthorizedFetch.js';
-import createSpinner from '../utils/createSpinner.js';
 import exec from '../utils/exec.js';
 import launchEditor from '../utils/launchEditor.js';
 import readIdFiles from '../utils/readIdFiles.js';
@@ -35,32 +34,13 @@ const action: CommandAction = ({ getFetch }) => {
     const caseIds = !!file ? await readIdFiles(args) : args;
 
     for (const caseId of caseIds) {
-      // const res = (await (await fetch(`cases/${caseId}`)).json()) as any;
-      // const inputRev = allRevs ? res.revisions[0] : res.currentRevision;
-      const inputRev = {
-        description: 'FooBar',
-        attributes: { smoker: true },
-        status: 'draft',
-        series: [
-          {
-            seriesUid: '1.2.803.7.326.35232.166922',
-            partialVolumeDescriptor: { start: 1, end: 132, delta: 1 },
-            labels: [
-              {
-                type: 'voxel',
-                name: 'Voxels',
-                data: {
-                  color: '#ff0000',
-                  alpha: 1,
-                  voxels: 'd7afe8531d526e5abb19330d38385551b9f72dc4',
-                  origin: [132, 126, 22],
-                  size: [64, 45, 1]
-                }
-              }
-            ]
-          }
-        ]
-      };
+      const res = await fetchWithSpinner(
+        fetch,
+        `Retreiving case ${caseId}`,
+        `cases/${caseId}`
+      );
+      const data = (await res.json()) as any;
+      const inputRev = allRevs ? data.revisions : data.revisions[0];
 
       const newRevStr = command
         ? await exec(command, JSON.stringify(inputRev), {

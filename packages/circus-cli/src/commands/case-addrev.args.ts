@@ -10,7 +10,7 @@ export default (program: Command) => {
       'filter command to produce the revision to save'
     )
     .option('-d, --desc [desc]', 'set revision description (message)')
-    .option('--force', "don't prompt for confirmation")
+    .option('--force', 'skip confirmation prompt')
     .option('-f, --file', 'read list of case IDs from file')
     .option('-a, --all-revs', 'pass all revisions instead of only the latest')
     .argument(

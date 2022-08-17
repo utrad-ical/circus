@@ -16,31 +16,34 @@ const createSpinner = (
   let phase = 0;
   let timerId: NodeJS.Timer | null = null;
   let message = initialMessage;
-  process.stdout.write(pc.cyan(spinnerGlyphs[phase++]) + '  ' + initialMessage);
 
-  const putLine = (glyph: string, message: string) => {
+  const newProgressGlyph = () =>
+    pc.cyan(isTTY ? spinnerGlyphs[phase++ % spinnerGlyphs.length] : '>>');
+
+  const putLine = (
+    message: string,
+    glyph = newProgressGlyph(),
+    initial = false
+  ) => {
     if (isTTY) {
-      process.stdout.write(eraseLine + glyph + ' ' + message);
+      const glyph = spinnerGlyphs[phase++ % spinnerGlyphs.length];
+      process.stdout.write((initial ? '' : eraseLine) + glyph + ' ' + message);
     } else {
       if (!hideInNonTTY) {
-        process.stdout.write('\n' + glyph + ' ' + message);
+        process.stdout.write((initial ? '' : '\n') + glyph + ' ' + message);
       }
     }
   };
 
+  putLine(initialMessage, undefined, true);
+
   const update = (newMessage?: string) => {
     if (newMessage) message = newMessage;
-    putLine(
-      pc.cyan(isTTY ? spinnerGlyphs[phase % spinnerGlyphs.length] : '>>'),
-      message
-    );
+    putLine(message);
   };
 
   const tick = () => {
-    putLine(
-      pc.cyan(isTTY ? spinnerGlyphs[phase++ % spinnerGlyphs.length] : '>>'),
-      message
-    );
+    putLine(message);
   };
 
   if (isTTY) {
@@ -49,8 +52,8 @@ const createSpinner = (
 
   return {
     update,
-    stop: (message = 'Done', isError) => {
-      putLine(isError ? pc.red('✖') : pc.green('✓'), message);
+    stop: (message = 'Done', isError = false) => {
+      putLine(message, isError ? pc.red('✖') : pc.green('✓'));
       process.stdout.write('\n');
       if (timerId) clearTimeout(timerId);
     }

@@ -1,4 +1,5 @@
 import { Command } from 'commander';
+import dedent from 'dedent';
 import { int } from '../utils/commander-utils.js';
 
 export default (program: Command) => {
@@ -22,8 +23,11 @@ export default (program: Command) => {
     )
     .addHelpText(
       'after',
-      '\nExamples:\n' +
-        '  circus-api-util case-dl -o ~/data a2b4c6e8f\n' +
-        '  circus-api-util case-dl --file case-ids.txt'
+      '\n' +
+        dedent`
+          Examples:
+            circus-api-util case-dl -o ~/data a2b4c6e8f
+            circus-api-util case-dl --file case-ids.txt
+        `
     );
 };

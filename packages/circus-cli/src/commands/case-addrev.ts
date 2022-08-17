@@ -7,6 +7,7 @@ import exec from '../utils/exec.js';
 import launchEditor from '../utils/launchEditor.js';
 import readIds from '../utils/readIds.js';
 import CommandAction from './CommandAction.js';
+import { diff } from 'jest-diff';
 
 interface Options {
   exec: string;
@@ -19,6 +20,11 @@ interface Options {
 const promptString = async (message: string) => {
   const ans = await inq.prompt([{ type: 'input', name: 'value', message }]);
   return ans.value;
+};
+
+const withoutMetadata = (obj: any): any => {
+  const { createdAt, creator, ...rest } = obj;
+  return rest;
 };
 
 const action: CommandAction = ({ getFetch }) => {
@@ -60,8 +66,7 @@ const action: CommandAction = ({ getFetch }) => {
 
       const newRev = (() => {
         try {
-          const { createdAt, creator, ...newRev } = JSON5.parse(newRevStr);
-          return newRev;
+          return withoutMetadata(JSON5.parse(newRevStr));
         } catch (err: any) {
           console.error('The filter command returned the following:');
           console.error(newRevStr + '\n');
@@ -78,8 +83,24 @@ const action: CommandAction = ({ getFetch }) => {
       }
 
       if (!force) {
-        console.log(pc.cyan('Processed JSON:'));
-        console.log(JSON.stringify(newRev, null, 2));
+        if (allRevs) {
+          console.log(pc.cyan('Processed JSON:'));
+          console.log(JSON.stringify(newRev, null, 2));
+        } else {
+          const diffStr = diff(newRev, withoutMetadata(inputRev), {
+            aAnnotation: 'New revision',
+            bAnnotation: 'Current revision'
+          });
+          if (/Compared values have no visual difference/.test(diffStr!)) {
+            console.log(
+              pc.bgYellow('WARN'),
+              'No change has been made to the latest revision!'
+            );
+          } else {
+            console.log(pc.cyan('Diff:'));
+            console.log(diffStr);
+          }
+        }
         const ans = await inq.prompt([
           { type: 'confirm', name: 'ok', message: 'Is this okay?' }
         ]);

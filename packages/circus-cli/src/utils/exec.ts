@@ -1,5 +1,12 @@
 import * as cp from 'node:child_process';
 
+/**
+ * Promise-based exec.
+ * @param command - command to execute
+ * @param stdin - passed to stdin of the child process
+ * @param env - passed to options.env
+ * @returns captured stdout of the child process
+ */
 const exec = async (
   command: string,
   stdin?: string,

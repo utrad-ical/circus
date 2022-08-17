@@ -6,6 +6,8 @@ Currently, this tool can:
 
 - Show user's preference (primarily for testing the auth status)
 - Download case data as MHD
+- Add a new revision to a case
+- Show the list of mylists and export its resource IDs
 
 **Note:** This is an HTTP client that works by accessing CIRCUS API Server (REST API). CIRCUS also provides admin CLI, which is available only for server administrators. Some operations may work more efficiently via admin CLI because it does not use HTTP connections.
 
@@ -20,6 +22,8 @@ Currently, this tool can:
    ```
 
    This will install the client globally, i.e., somewhere in your PATH.
+
+   **Tip:** You can update the tool using the same command.
 
 3. Run the following command to store an API token to your machine:
 
@@ -46,3 +50,15 @@ Currently, this tool can:
    ```
 
    This will display the list of your preferences. If it fails, return to the previous step and check if the given values are correct.
+
+5. You can see the list of commands like this:
+
+   ```
+   circus-api-util --help
+   ```
+
+   You can see the detailed description of each command like this:
+
+   ```
+   circus-api-util help <COMMAND>
+   ```

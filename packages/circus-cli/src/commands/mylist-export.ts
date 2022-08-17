@@ -32,25 +32,7 @@ const action: CommandAction = ({ getFetch }) => {
     let page = 1;
 
     try {
-      // Fetch all my lists.
       const myLists = (await (await fetch(`mylists`)).json()) as MyList[];
-
-      if (typeof myListId !== 'string' || myListId.length === 0) {
-        spinner.stop('Done');
-        const dispList = myLists
-          .map(l => ({
-            myListId: l.myListId,
-            resourceType: l.resourceType,
-            name: l.name
-          }))
-          .sort((a, b) => a.resourceType.localeCompare(b.resourceType));
-        if (dispList.length === 0) {
-          console.log('This user has no my lists.');
-        } else {
-          console.table(dispList);
-        }
-        return;
-      }
 
       const myList = myLists.find(l => l.myListId === myListId);
       if (!myList) {
@@ -70,8 +52,8 @@ const action: CommandAction = ({ getFetch }) => {
         if (items.length < limit) break;
         page++;
       }
-      console.log(ids.join('\n'));
-      spinner.stop('Done.');
+      spinner.stop(`Done. ${ids.length} items found.`);
+      process.stdout.write(ids.join('\n') + '\n');
     } catch (err) {
       spinner.stop('Error', true);
       throw err;

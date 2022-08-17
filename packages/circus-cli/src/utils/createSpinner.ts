@@ -56,7 +56,7 @@ const createSpinner = (
       if (stopped) return;
       stopped = true;
       putLine(message, isError ? pc.red('✖') : pc.green('✓'));
-      process.stdout.write('\n');
+      if (isTTY) process.stdout.write('\n');
       if (timerId) clearTimeout(timerId);
     }
   };

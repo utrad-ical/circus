@@ -56,6 +56,7 @@ const main = async () => {
     'login',
     'case-addrev',
     'case-dl',
+    'mylist-show',
     'mylist-export',
     'preferences'
   ];

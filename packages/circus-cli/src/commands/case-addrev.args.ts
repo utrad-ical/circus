@@ -13,7 +13,7 @@ export default (program: Command) => {
     .option('--force', "don't prompt for revision description or confirmation")
     .option('-f, --file', 'read list of case IDs from file')
     .option(
-      '-a, --allrevs',
+      '-a, --all-revs',
       '[unimplemented] pass all revisions instead of only the latest'
     )
     .argument(
@@ -26,7 +26,9 @@ export default (program: Command) => {
         dedent`
           This command will add a new revision to the specified DB case, based on the latest revision.
 
-          The "-e" option is required, and specifies the "filter" command to process the JSON of the latest revision. The 'jq' utility is a good choice for simple tasks such as adding a fixed value to attributes, but for complex tasks, you can write and use any script that reads JSON from stdin and writes JSON to stdout.
+          The "-e (--exec)" option is required, and specifies the "filter" command to process the JSON of the latest revision. You can use any command that reads JSON from stdin and writes JSON to stdout. The 'jq' utility is a good choice for simple tasks such as adding a fixed value to attributes. You can also use 'sed', 'vipe', and so on. For complex tasks, write your own script in the language of your choice.
+
+          The "-a (--all-revs)" option allows the filter command to receive all the revisions instead of only the latest. Note that your output JSON must still be a single revision.
 
           The input JSON passed to the filter is an object representing the latest revision of the specified case. It contains the following fields:
 
@@ -52,6 +54,9 @@ export default (program: Command) => {
 
             # Change case attributes for cases specified in file
             circus-api-util case-addrev -e "jq '.attributes.smoker = true'" -f ./case-ids.txt
+
+            # Use 'vipe' as a filter to directly edit the revision with an editor
+            circus-api-util case-addrev -e vipe -d a2b4c6e8f
           `
     );
 };

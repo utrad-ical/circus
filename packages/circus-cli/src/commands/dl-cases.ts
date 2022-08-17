@@ -3,6 +3,7 @@ import * as path from 'node:path';
 import pc from 'picocolors';
 import createSpinner from '../utils/createSpinner.js';
 import downloadToFile from '../utils/downloadToFile.js';
+import readIdFiles from '../utils/readIdFiles.js';
 import taskReporter, { TaskEvent } from '../utils/taskReporter.js';
 import CommandAction from './CommandAction.js';
 
@@ -13,16 +14,7 @@ const action: CommandAction = ({ getFetch }) => {
     const fetch = getFetch();
     const outDir = options.outdir ?? process.cwd();
     const casesPerTask = Number(options.perTask) ?? 10;
-    const ids = !!options.file
-      ? await (async () => {
-          if (args.length > 1)
-            throw new Error('You cannot specify more than one ID file.');
-          return (await fs.readFile(args[0], 'utf8'))
-            .split('\n')
-            .map(line => line.trim())
-            .filter(line => line.length && !line.startsWith('#'));
-        })()
-      : args;
+    const ids = !!options.file ? await readIdFiles(args) : args;
     console.log(`Downloading ${ids.length} case(s)...`);
 
     await fs.mkdir(outDir, { recursive: true });

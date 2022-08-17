@@ -1,8 +1,9 @@
-import CommandAction from './CommandAction.js';
+import inq from 'inquirer';
 import * as cp from 'node:child_process';
 import pc from 'picocolors';
-import inq from 'inquirer';
 import createSpinner from '../utils/createSpinner.js';
+import readIdFiles from '../utils/readIdFiles.js';
+import CommandAction from './CommandAction.js';
 
 interface Options {
   exec: string;
@@ -20,42 +21,40 @@ const promptString = async (message: string) => {
 const action: CommandAction = ({ getFetch }) => {
   return async (args: string[], options: Options) => {
     const fetch = getFetch();
-    const caseIds = args;
     const { exec: command, desc, force, file, allRevs } = options;
 
     if (force && !desc) {
       throw new Error("'--force' requires '--desc' option to be set");
     }
+    const caseIds = !!file ? await readIdFiles(args) : args;
 
     for (const caseId of caseIds) {
-      // (await fetch(`cases/${caseId}`)).json();
-      // const inputRev = res.revisions[0];
-      // delete inputRev.creator;
-      // delete inputRev.createdAt;
-      const inputRev = {
-        description: 'FooBar',
-        attributes: { smoker: true },
-        status: 'draft',
-        series: [
-          {
-            seriesUid: '1.2.803.7.326.35232.166922',
-            partialVolumeDescriptor: { start: 1, end: 132, delta: 1 },
-            labels: [
-              {
-                type: 'voxel',
-                name: 'Voxels',
-                data: {
-                  color: '#ff0000',
-                  alpha: 1,
-                  voxels: 'd7afe8531d526e5abb19330d38385551b9f72dc4',
-                  origin: [132, 126, 22],
-                  size: [64, 45, 1]
-                }
-              }
-            ]
-          }
-        ]
-      };
+      const res = (await (await fetch(`cases/${caseId}`)).json()) as any;
+      const inputRev = allRevs ? res.revisions[0] : res.currentRevision;
+      // const inputRev = {
+      //   description: 'FooBar',
+      //   attributes: { smoker: true },
+      //   status: 'draft',
+      //   series: [
+      //     {
+      //       seriesUid: '1.2.803.7.326.35232.166922',
+      //       partialVolumeDescriptor: { start: 1, end: 132, delta: 1 },
+      //       labels: [
+      //         {
+      //           type: 'voxel',
+      //           name: 'Voxels',
+      //           data: {
+      //             color: '#ff0000',
+      //             alpha: 1,
+      //             voxels: 'd7afe8531d526e5abb19330d38385551b9f72dc4',
+      //             origin: [132, 126, 22],
+      //             size: [64, 45, 1]
+      //           }
+      //         }
+      //       ]
+      //     }
+      //   ]
+      // };
 
       const newRevStr = await new Promise<string>((resolve, reject) => {
         const child = cp.exec(command, (err, stdout) => {
@@ -101,6 +100,18 @@ const action: CommandAction = ({ getFetch }) => {
           method: 'POST',
           body: JSON.stringify(newRev)
         });
+        if (!res.ok) {
+          spinner.stop(
+            `Saving a revision to ${caseId}: ${res.statusText}`,
+            true
+          );
+          try {
+            console.error(((await res.json()) as any)?.error);
+          } catch (err) {
+            //
+          }
+          throw new Error(`Error while saving revision: ${res.statusText}`);
+        }
       } finally {
         spinner.stop(`Saving a revision to ${caseId} done.`);
       }

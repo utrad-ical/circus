@@ -38,13 +38,11 @@ export default (program: Command) => {
 
           You can specify the new values for the first four fields. The "createdAt" and "creator" fields output from the filter will always be ignored.
 
-          The "-a (--all-revs)" option allows the filter command to receive all the revisions instead of only the latest. Note that your output JSON must still be a single revision.
+          Within the filter command, the environment variable "CIRCUS_CASE_ID" is available.
+
+          When the filter command is set, you can also specify the "-a (--all-revs)" flag, which allows the filter to receive all the revisions instead of only the latest. Note that the output JSON must still be a single revision.
 
           The "-d" option specifies how to determine the description of the new revision. If "-d" is not set, a prompt will be shown to enter the description. If the "-d" is used with an actual string, that string will be used as the description (overwriting the "description" field from the output JSON). If "-d" is used without a string, the description will be read from the output JSON.
-
-          The following environment variables are avaialble to the command:
-
-            - CIRCUS_CASE_ID
 
           Examples:
 
@@ -54,8 +52,8 @@ export default (program: Command) => {
             # Change case attributes for cases specified in file
             circus-api-util case-addrev -e "jq '.attributes.smoker = true'" -f ./case-ids.txt
 
-            # Use 'vipe' as a filter to directly edit the revision with an editor
-            circus-api-util case-addrev -e vipe -d a2b4c6e8f
+            # Use an editor to create a new revision, using the output's description
+            circus-api-util case-addrev -d a2b4c6e8f
           `
     );
 };

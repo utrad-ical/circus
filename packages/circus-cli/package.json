@@ -1,6 +1,6 @@
 {
   "name": "@utrad-ical/circus-api-util",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "CIRCUS API Client",
   "main": "lib/index.js",
   "scripts": {

@@ -59,8 +59,7 @@ const main = async () => {
     'case-dl',
     'blob-post',
     'blob-get',
-    'mylist-show',
-    'mylist-export'
+    'mylist-show'
   ];
 
   for (const command of commands) {

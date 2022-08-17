@@ -1,7 +1,9 @@
 import inq from 'inquirer';
-import * as cp from 'node:child_process';
+import JSON5 from 'json5';
 import pc from 'picocolors';
 import createSpinner from '../utils/createSpinner.js';
+import exec from '../utils/exec.js';
+import launchEditor from '../utils/launchEditor.js';
 import readIdFiles from '../utils/readIdFiles.js';
 import CommandAction from './CommandAction.js';
 
@@ -23,51 +25,55 @@ const action: CommandAction = ({ getFetch }) => {
     const fetch = getFetch();
     const { exec: command, desc, force, file, allRevs } = options;
 
-    if (force && !desc) {
-      throw new Error("'--force' requires '--desc' option to be set");
-    }
+    if (force && !desc)
+      throw new Error("You must set '--desc' option to enable '--force'");
+    if (allRevs && !command)
+      throw new Error("You must set '--exec' option to enable '--all-revs'");
+
     const caseIds = !!file ? await readIdFiles(args) : args;
 
     for (const caseId of caseIds) {
-      const res = (await (await fetch(`cases/${caseId}`)).json()) as any;
-      const inputRev = allRevs ? res.revisions[0] : res.currentRevision;
-      // const inputRev = {
-      //   description: 'FooBar',
-      //   attributes: { smoker: true },
-      //   status: 'draft',
-      //   series: [
-      //     {
-      //       seriesUid: '1.2.803.7.326.35232.166922',
-      //       partialVolumeDescriptor: { start: 1, end: 132, delta: 1 },
-      //       labels: [
-      //         {
-      //           type: 'voxel',
-      //           name: 'Voxels',
-      //           data: {
-      //             color: '#ff0000',
-      //             alpha: 1,
-      //             voxels: 'd7afe8531d526e5abb19330d38385551b9f72dc4',
-      //             origin: [132, 126, 22],
-      //             size: [64, 45, 1]
-      //           }
-      //         }
-      //       ]
-      //     }
-      //   ]
-      // };
+      // const res = (await (await fetch(`cases/${caseId}`)).json()) as any;
+      // const inputRev = allRevs ? res.revisions[0] : res.currentRevision;
+      const inputRev = {
+        description: 'FooBar',
+        attributes: { smoker: true },
+        status: 'draft',
+        series: [
+          {
+            seriesUid: '1.2.803.7.326.35232.166922',
+            partialVolumeDescriptor: { start: 1, end: 132, delta: 1 },
+            labels: [
+              {
+                type: 'voxel',
+                name: 'Voxels',
+                data: {
+                  color: '#ff0000',
+                  alpha: 1,
+                  voxels: 'd7afe8531d526e5abb19330d38385551b9f72dc4',
+                  origin: [132, 126, 22],
+                  size: [64, 45, 1]
+                }
+              }
+            ]
+          }
+        ]
+      };
 
-      const newRevStr = await new Promise<string>((resolve, reject) => {
-        const child = cp.exec(
-          command,
-          { env: { ...process.env, CIRCUS_CASE_ID: caseId } },
-          (err, stdout) => (err ? reject(err) : resolve(stdout))
-        );
-        child.stdin!.end(JSON.stringify(inputRev));
-      });
+      const newRevStr = command
+        ? await exec(command, JSON.stringify(inputRev), {
+            ...process.env,
+            CIRCUS_CASE_ID: caseId
+          })
+        : await launchEditor(
+            '// Edit the JSON below\n' +
+              `// Case ID: ${caseId}\n\n` +
+              JSON.stringify(inputRev, null, 2)
+          );
 
       const newRev = (() => {
         try {
-          const { createdAt, creator, ...newRev } = JSON.parse(newRevStr);
+          const { createdAt, creator, ...newRev } = JSON5.parse(newRevStr);
           return newRev;
         } catch (err: any) {
           console.error('The filter command returned the following:');

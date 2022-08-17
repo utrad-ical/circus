@@ -5,9 +5,9 @@ export default (program: Command) => {
   return program
     .command('case-addrev')
     .description('add a new revision to specified case(s)')
-    .requiredOption(
+    .option(
       '-e, --exec <cmd>',
-      'filter command to generate the revision to save'
+      'filter command to produce the revision to save'
     )
     .option('-d, --desc [desc]', 'set revision description (message)')
     .option('--force', "don't prompt for confirmation")
@@ -21,9 +21,11 @@ export default (program: Command) => {
       'after',
       '\n' +
         dedent`
-          This command will save a new revision to the specified DB case, based on the latest revision.
+          This command will save a new revision to the specified DB case.
 
-          The "-e (--exec)" option is required, and specifies the "filter" command to process the JSON of the latest revision. You can use any command that reads JSON from stdin and writes JSON to stdout. The 'jq' utility is a good choice for simple tasks such as adding a fixed value to attributes. You can also use 'sed', 'vipe', and so on. For complex tasks, write your own script in the language of your choice.
+          If the "-e (--exec)" option is not set, an editor is launched with the latest revision as the content, so you can edit the content to create the new revision.
+
+          If "-e (--exec)" is specified, it works as the "filter" command that processes the JSON of the latest revision. You can use any command that reads JSON from stdin and writes JSON to stdout. The 'jq' utility is a good choice for simple tasks such as adding a fixed value to attributes. For complex tasks, you can write your own script in the language of your choice.
 
           The input JSON passed to the filter is an object representing the latest revision of the specified case. It contains the following fields:
 

@@ -5,7 +5,7 @@ import pc from 'picocolors';
 import { fetchWithSpinner } from '../utils/createAuthorizedFetch.js';
 import exec from '../utils/exec.js';
 import launchEditor from '../utils/launchEditor.js';
-import readIdFiles from '../utils/readIdFiles.js';
+import readIds from '../utils/readIds.js';
 import CommandAction from './CommandAction.js';
 
 interface Options {
@@ -31,7 +31,7 @@ const action: CommandAction = ({ getFetch }) => {
     if (allRevs && !command)
       throw new Error("You must set '--exec' option to enable '--all-revs'");
 
-    const caseIds = !!file ? await readIdFiles(args) : args;
+    const caseIds = await readIds(args, !!file);
 
     for (const caseId of caseIds) {
       const res = await fetchWithSpinner(

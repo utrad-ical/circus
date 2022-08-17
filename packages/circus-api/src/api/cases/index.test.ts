@@ -332,6 +332,38 @@ describe('add revision', () => {
     expect(res.status).toBe(400);
   });
 
+  test('reject revision addition with nonexistent voxel', async () => {
+    const res = await ax.bob.request({
+      url: `api/cases/${cid}/revision`,
+      method: 'post',
+      data: {
+        description: 'Add labels',
+        attributes: {},
+        status: 'for-review',
+        series: [
+          {
+            seriesUid: '111.222.333.444.777',
+            labels: [
+              {
+                type: 'voxel',
+                data: {
+                  //invlid voxel id
+                  voxels: '7777777777fdd6066ee5c7e2d3118e0963ec1fc6',
+                  color: '#00ff00',
+                  alpha: 0,
+                  min: [1, 3, 5],
+                  max: [7, 11, 13]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    });
+    expect(res.status).toBe(400);
+    expect(res.data.error).toContain('Some voxel data are missing');
+  });
+
   test('reject revision addition from unauthorized user', async () => {
     const res = await ax.guest.request({
       url: `api/cases/${cid}/revision`,

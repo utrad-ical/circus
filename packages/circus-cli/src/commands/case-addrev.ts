@@ -1,6 +1,8 @@
+import dedent from 'dedent';
 import inq from 'inquirer';
 import JSON5 from 'json5';
 import pc from 'picocolors';
+import { fetchWithSpinner } from '../utils/createAuthorizedFetch.js';
 import createSpinner from '../utils/createSpinner.js';
 import exec from '../utils/exec.js';
 import launchEditor from '../utils/launchEditor.js';
@@ -66,8 +68,13 @@ const action: CommandAction = ({ getFetch }) => {
             CIRCUS_CASE_ID: caseId
           })
         : await launchEditor(
-            '// Edit the JSON below\n' +
-              `// Case ID: ${caseId}\n\n` +
+            dedent`
+              // The following is the content of the latest revision.
+              // Edit the JSON below and close the editor.
+              // The 'creator' and 'createdAt' fields will be ignored.
+              // Case ID: ${caseId}
+            ` +
+              '\n\n' +
               JSON.stringify(inputRev, null, 2)
           );
 
@@ -99,29 +106,12 @@ const action: CommandAction = ({ getFetch }) => {
         if (!ans.ok) return;
       }
 
-      const spinner = createSpinner(`Saving a revision to ${caseId}...`, {
-        hideInNonTTY: false
-      });
-      try {
-        const res = await fetch(`cases/${caseId}/revisions`, {
-          method: 'POST',
-          body: JSON.stringify(newRev)
-        });
-        if (!res.ok) {
-          spinner.stop(
-            `Saving a revision to ${caseId}: ${res.statusText}`,
-            true
-          );
-          try {
-            console.error(((await res.json()) as any)?.error);
-          } catch (err) {
-            //
-          }
-          throw new Error(`Error while saving revision: ${res.statusText}`);
-        }
-      } finally {
-        spinner.stop(`Saving a revision to ${caseId} done.`);
-      }
+      await fetchWithSpinner(
+        fetch,
+        `Saving a revision to ${caseId}`,
+        `cases/${caseId}/revisions`,
+        { method: 'POST', body: JSON.stringify(newRev) }
+      );
     }
   };
 };

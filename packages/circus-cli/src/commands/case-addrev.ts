@@ -1,4 +1,3 @@
-import dedent from 'dedent';
 import { diff } from 'jest-diff';
 import JSON5 from 'json5';
 import pc from 'picocolors';
@@ -61,13 +60,10 @@ const action: CommandAction = ({ getFetch }) => {
             CIRCUS_CASE_ID: caseId
           })
         : await launchEditor(
-            dedent`
-              // The following is the content of the latest revision.
-              // Edit the JSON below and close the editor.
-              // The 'creator' and 'date' fields will be ignored.
-              // Case ID: ${caseId}
-            ` +
-              '\n\n' +
+            `// The following is the content of the latest revision.\n` +
+              `// Edit the JSON below and close the editor.\n` +
+              `// The 'creator' and 'date' fields will be ignored.\n` +
+              `// Case ID: ${caseId}\n\n` +
               JSON.stringify(inputRev, null, 2),
             'json'
           );

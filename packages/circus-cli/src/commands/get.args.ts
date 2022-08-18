@@ -1,39 +1,38 @@
 import { Command } from 'commander';
-import dedent from 'dedent';
+import formatHelp from '../utils/formatHelp.js';
 
 export default (program: Command) => {
   return program
     .command('get')
-    .description('feach resource from CIRCUS API')
-    .argument('<resource>', 'resource to fetch')
-    .option('-n, --no-pretty', 'disable pretty-print even on TTY')
+    .description('Fetch resource from CIRCUS API')
+    .argument('<resource>', 'resource to fetch (URL)')
+    .option('-n, --no-pretty', 'disable JSON pretty-print even on TTY')
     .option('-q, --query <query...>', 'query parameter (urlencoded)')
     .addHelpText(
       'after',
-      '\n' +
-        dedent`
-          This command makes a GET request to CIRCUS API Server.
-          Output is written to stdout.
+      formatHelp`
+        This command makes a GET request to CIRCUS API Server.
+        Output is written to stdout.
 
-          The "-q (--query)" option can be used to add query parameters to the API.
-          The value after the "=" sign will be url-encoded.
+        The "-q (--query)" option can be used to add query parameters to the API.
+        The value after the "=" sign will be url-encoded.
+        This option can be used multiple times.
 
-          Hint:
-            Use the 'jq' utility to format or select parts of the data.
+        Hint:
+          It's recommended to the 'jq' utility to format or select parts of the data.
 
-          Examples:
-            # fetch current user's preferences
-            circus-api-util get preferences
+        Examples:
+          # Fetch current user's preferences
+          circus-api-util get preferences
 
-            # fetch a case and picks the latest revision's creator using jq
-            circus-api-util get cases/a2b4c6e8f | jq .revisions[-1].creator
+          # Fetch a case and picks the latest revision's creator using jq
+          circus-api-util get cases/a2b4c6e8f | jq .revisions[-1].creator
 
-            # perform search (get the most recently uploaded series of a male patient)
-            circus-api-util get series \
-              -q 'filter={"patientInfo.sex":"M"}' \
-              -q 'sort={"createdAt":-1}' \
-              -q limit=1
-
+          # Perform search (get the most recently uploaded series of a male patient)
+          circus-api-util get series \
+            -q 'filter={"patientInfo.sex":"M"}' \
+            -q 'sort={"createdAt":-1}' \
+            -q limit=1
         `
     );
 };

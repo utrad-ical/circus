@@ -1,11 +1,11 @@
 import { Command } from 'commander';
-import dedent from 'dedent';
 import { int } from '../utils/commander-utils.js';
+import formatHelp from '../utils/formatHelp.js';
 
 export default (program: Command) => {
   return program
     .command('case-dl')
-    .description('download CIRCUS DB cases in MHD format')
+    .description('Download CIRCUS DB cases in MHD format')
     .option('-o, --outdir <dir>', 'output directory (default: CWD)')
     .option('-f, --file', 'read list of case IDs from file')
     .option('-c, --combined', 'export combined label files')
@@ -23,11 +23,19 @@ export default (program: Command) => {
     )
     .addHelpText(
       'after',
-      '\n' +
-        dedent`
-          Examples:
-            circus-api-util case-dl -o ~/data a2b4c6e8f
-            circus-api-util case-dl --file case-ids.txt
-        `
+      formatHelp`
+        This command lets you download CIRCUS DB cases in MHD format.
+        The downloaded cases are stored in the output directory with names like "batch-1.tgz".
+
+        One archive file may contains more than one case.
+        Use the "-p (--per-task)" flag to control the number of cases downloaded as a batch.
+
+        Examples:
+          # Download one case
+          circus-api-util case-dl -o ~/data a2b4c6e8f
+
+          # Download cases whose IDs are in a file
+          circus-api-util case-dl --file case-ids.txt
+      `
     );
 };

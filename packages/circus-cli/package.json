@@ -19,7 +19,6 @@
   "license": "MIT",
   "dependencies": {
     "commander": "^9.4.0",
-    "dedent": "^0.7.0",
     "dotenv": "^16.0.1",
     "easy-table": "^1.2.0",
     "inquirer": "^9.0.2",
@@ -32,7 +31,6 @@
     "raw-body": "^2.5.1"
   },
   "devDependencies": {
-    "@types/dedent": "^0.7.0",
     "@types/inquirer": "^8.2.1",
     "@types/node": "^18.6.1",
     "@types/progress-stream": "^2.0.2",

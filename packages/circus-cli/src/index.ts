@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { Command } from 'commander';
+import { Command, Help } from 'commander';
 import { config } from 'dotenv';
 import fetch from 'node-fetch';
 import { promises as fs } from 'node:fs';
@@ -50,7 +50,17 @@ const main = async () => {
   program
     .name('circus-api-util')
     .description('CLI for CIRCUS API Server')
-    .version(await getVersion());
+    .version(await getVersion())
+    .configureHelp({
+      optionTerm: option => pc.bold(option.flags),
+      commandDescription: command => pc.yellow(pc.bold(command.description())),
+      formatHelp: (cmd, helper) => {
+        const raw = new Help().formatHelp(cmd, helper);
+        return raw.replace(/(Arguments|Usage|Commands|Options):/g, $ =>
+          pc.cyan($)
+        );
+      }
+    });
 
   const commands = [
     'auth',

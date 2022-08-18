@@ -27,8 +27,8 @@ export default (program: Command) => {
         This command lets you download CIRCUS DB cases in MHD format.
         The downloaded cases are stored in the output directory with names like "batch-1.tgz".
 
-        One archive file may contains more than one case.
-        Use the "-p (--per-task)" flag to control the number of cases downloaded as a batch.
+        One archive file may contain the data of more than one case.
+        Use the "-p (--per-task)" option to control the number of cases downloaded as a batch.
 
         Examples:
           # Download one case

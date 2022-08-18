@@ -68,6 +68,9 @@ const main = async () => {
   const commands = [
     'auth',
     'get',
+    'post',
+    'put',
+    'patch',
     'case-addrev',
     'case-dl',
     'blob-post',

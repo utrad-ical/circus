@@ -28,6 +28,9 @@ export default (program: Command) => {
           # Fetch a case and picks the latest revision's creator using jq
           circus-api-util get cases/a2b4c6e8f | jq .revisions[-1].creator
 
+          # List IDs of resources (series, case, job) in a mylist
+          circus-api-util get mylists/shsez5qf | jq -r .resourceIds[]
+
           # Perform search (get the most recently uploaded series of a male patient)
           circus-api-util get series \
             -q 'filter={"patientInfo.sex":"M"}' \

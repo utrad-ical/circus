@@ -60,7 +60,10 @@ const main = async () => {
           pc.cyan($)
         );
       }
-    });
+    })
+    .showHelpAfterError(
+      `(Use ${pc.yellow('--help')} for additional information)`
+    );
 
   const commands = [
     'auth',

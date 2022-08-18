@@ -1,14 +1,20 @@
-# CIRCUS API Tools
+# CIRCUS API Utility
 
 This is an API client to connect to CIRCUS API Server.
 
-Currently, this tool can:
+This utility can make a generic authorized API requests using the following commands (although you have to construct a JSON reuqest body manually):
 
-- Show user's preference (primarily for testing the auth status)
+- get
+- post
+- put
+- patch
+
+This utility also has several specialized commands that can do the following:
+
 - Download case data as MHD
 - Add a new revision to a case
 - Uploads/downloads blobs (label binary data)
-- Show the list of mylists and export its resource IDs
+- Show the all mylists belonging to the user
 
 **Note:** This is an HTTP client that works by accessing CIRCUS API Server (REST API). CIRCUS also provides admin CLI, which is available only for server administrators. Some operations may work more efficiently via admin CLI because it does not use HTTP connections.
 

@@ -12,23 +12,23 @@ import {
 } from "../../common/ws/message";
 import WebSocketClient from "./WebSocketClient";
 
-type VolumeSpecifier = {
+interface VolumeSpecifier {
     seriesUid: string;
     partialVolumeDescriptor?: PartialVolumeDescriptor;
 };
 
-export interface TransferConnectionFactory {
-    (volumeSpecifier: VolumeSpecifier, handler: TransferredImageHandler): TransferConnection;
-}
+export type TransferConnectionFactory =
+    (volumeSpecifier: VolumeSpecifier, handler: TransferredImageHandler) => TransferConnection;
+
 
 type TransferredImageHandler = (imageIndex: number, buffer: ArrayBuffer) => void;
 
-export type TransferConnection = {
+export interface TransferConnection {
     readonly id: string;
-    setPriority: (imageIndices: number[], priority: number) => void;
-    pause: () => void;
-    resume: () => void;
-    abort: () => void;
+    setPriority(imageIndices: number[], priority: number): void;
+    pause(): void;
+    resume(): void;
+    abort(): void;
 }
 
 export const createTransferConnectionFactory = (wsClient: WebSocketClient): TransferConnectionFactory => {
@@ -43,7 +43,7 @@ export const createTransferConnectionFactory = (wsClient: WebSocketClient): Tran
 
         if (isImageTransferData(data)) {
 
-            if (data.messageType === MessageDataType.TRANSFER_IMAGE) {
+            if (data.messageType === 'TRANSFER_IMAGE') {
                 const { transferId, imageIndex } = data;
                 if (handlerCollection.has(transferId)) {
                     const handler = handlerCollection.get(transferId)!;

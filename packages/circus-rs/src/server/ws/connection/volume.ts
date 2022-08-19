@@ -3,7 +3,6 @@ import {
   createMessageBuffer,
   ImageTransferMessageData,
   isImageTransferData,
-  MessageDataType,
   parseMessageBuffer,
   TransferImageMessage
 } from '../../../common/ws/message';
@@ -63,7 +62,7 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
     const handleMessageData = async (data: ImageTransferMessageData) => {
 
       switch (data.messageType) {
-        case MessageDataType.BEGIN_TRANSFER: {
+        case 'BEGIN_TRANSFER': {
           const { transferId, seriesUid, partialVolumeDescriptor } =
             data;
 
@@ -84,25 +83,25 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
           await beginTransfer(transferId, seriesUid, partialVolumeDescriptor);
           break;
         }
-        case MessageDataType.SET_PRIORITY: {
+        case 'SET_PRIORITY': {
           const { transferId, target, priority } = data;
           await checkingAccessRights.get(transferId);
           (await getConnection(transferId))?.setPriority(target, priority);
           break;
         }
-        case MessageDataType.PAUSE_TRANSFER: {
+        case 'PAUSE_TRANSFER': {
           const { transferId } = data;
           await checkingAccessRights.get(transferId);
           (await getConnection(transferId))?.pause();
           break;
         }
-        case MessageDataType.RESUME_TRANSFER: {
+        case 'RESUME_TRANSFER': {
           const { transferId } = data;
           await checkingAccessRights.get(transferId);
           (await getConnection(transferId))?.resume();
           break;
         }
-        case MessageDataType.ABORT_TRANSFER: {
+        case 'ABORT_TRANSFER': {
           const { transferId } = data;
           await checkingAccessRights.get(transferId);
           (await getConnection(transferId))?.abort();

@@ -37,16 +37,15 @@ export function parseMessageBuffer(messageBuffer: ArrayBuffer) {
     }
 }
 
-export const MessageDataType = {
-    BEGIN_TRANSFER: 'BEGIN_TRANSFER',
-    SET_PRIORITY: 'SET_PRIORITY',
-    ABORT_TRANSFER: 'ABORT_TRANSFER',
-    PAUSE_TRANSFER: 'PAUSE_TRANSFER',
-    RESUME_TRANSFER: 'RESUME_TRANSFER',
-    TRANSFER_IMAGE: 'TRANSFER_IMAGE',
-} as const;
+const messageDataTypes = [
+    'BEGIN_TRANSFER',
+    'SET_PRIORITY',
+    'ABORT_TRANSFER',
+    'PAUSE_TRANSFER',
+    'RESUME_TRANSFER',
+    'TRANSFER_IMAGE'] as const;
 
-export type MessageDataType = typeof MessageDataType[keyof typeof MessageDataType];
+export type MessageDataType = typeof messageDataTypes[number];
 
 export type ImageTransferMessageData =
     | BeginTransferMessageData
@@ -57,36 +56,36 @@ export type ImageTransferMessageData =
     | TransferImageMessage;
 
 export type BeginTransferMessageData = {
-    messageType: typeof MessageDataType.BEGIN_TRANSFER;
+    messageType: 'BEGIN_TRANSFER';
     transferId: string;
     seriesUid: string;
     partialVolumeDescriptor?: PartialVolumeDescriptor;
 };
 
 export type SetPriorityMessageData = {
-    messageType: typeof MessageDataType.SET_PRIORITY;
+    messageType: 'SET_PRIORITY';
     transferId: string;
     target: number | number[];
     priority: number;
 };
 
 export type AbortTransferMessageData = {
-    messageType: typeof MessageDataType.ABORT_TRANSFER;
+    messageType: 'ABORT_TRANSFER';
     transferId: string;
 };
 
 export type PauseTransferMessageData = {
-    messageType: typeof MessageDataType.PAUSE_TRANSFER;
+    messageType: 'PAUSE_TRANSFER';
     transferId: string;
 };
 
 export type ResumeTransferMessageData = {
-    messageType: typeof MessageDataType.RESUME_TRANSFER;
+    messageType: 'RESUME_TRANSFER';
     transferId: string;
 };
 
 export type TransferImageMessage = {
-    messageType: typeof MessageDataType.TRANSFER_IMAGE;
+    messageType: 'TRANSFER_IMAGE';
     transferId: string;
     imageIndex: number;
 }
@@ -94,7 +93,7 @@ export type TransferImageMessage = {
 export function isImageTransferData(r: any): r is ImageTransferMessageData {
     return typeof r === 'object'
         && typeof r.messageType === 'string'
-        && Object.values(MessageDataType).some(v => v === r.messageType);
+        && messageDataTypes.some(v => v === r.messageType);
 }
 
 export function beginTransferMessageData(
@@ -102,7 +101,7 @@ export function beginTransferMessageData(
     seriesUid: string,
     partialVolumeDescriptor?: PartialVolumeDescriptor
 ): BeginTransferMessageData {
-    return { messageType: MessageDataType.BEGIN_TRANSFER, transferId, seriesUid, partialVolumeDescriptor };
+    return { messageType: 'BEGIN_TRANSFER', transferId, seriesUid, partialVolumeDescriptor };
 }
 
 export function setPriorityMessageData(
@@ -110,21 +109,21 @@ export function setPriorityMessageData(
     target: number | number[],
     priority: number
 ): SetPriorityMessageData {
-    return { messageType: MessageDataType.SET_PRIORITY, transferId, target, priority };
+    return { messageType: 'SET_PRIORITY', transferId, target, priority };
 }
 
 export function stopTransferMessageData(transferId: string): AbortTransferMessageData {
-    return { messageType: MessageDataType.ABORT_TRANSFER, transferId };
+    return { messageType: 'ABORT_TRANSFER', transferId };
 }
 
 export function pauseTransferMessageData(transferId: string): PauseTransferMessageData {
-    return { messageType: MessageDataType.PAUSE_TRANSFER, transferId };
+    return { messageType: 'PAUSE_TRANSFER', transferId };
 }
 
 export function resumeTransferMessageData(transferId: string): ResumeTransferMessageData {
-    return { messageType: MessageDataType.RESUME_TRANSFER, transferId };
+    return { messageType: 'RESUME_TRANSFER', transferId };
 }
 
 export function transferImageMessageData(transferId: string, imageIndex: number): TransferImageMessage {
-    return { messageType: MessageDataType.TRANSFER_IMAGE, transferId, imageIndex };
+    return { messageType: 'TRANSFER_IMAGE', transferId, imageIndex };
 }

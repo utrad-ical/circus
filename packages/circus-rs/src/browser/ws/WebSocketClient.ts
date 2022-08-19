@@ -36,8 +36,6 @@ export default class WebSocketClient implements IWebSocketClient {
 
     private handleError(e: Event) {
         const ws = e.target as WebSocket;
-        console.error(e);
-        console.error(this);
         switch (ws.readyState) {
             case WebSocket.CLOSED:
                 throw new Error('CLOSED');
@@ -52,7 +50,6 @@ export default class WebSocketClient implements IWebSocketClient {
 
     private createSocket(): Promise<WebSocket> {
         return new Promise((resolve, reject) => {
-            console.log('Try to connect ...');
 
             const ws = new WebSocket(...this.wsArguments);
             ws.binaryType = 'arraybuffer';
@@ -60,7 +57,6 @@ export default class WebSocketClient implements IWebSocketClient {
             let rejected = false;
 
             const suspended = (e: CloseEvent) => {
-                console.log('Socket suspended');
                 if (!rejected) {
                     rejected = true;
                     reject('Socket suspended');
@@ -68,7 +64,6 @@ export default class WebSocketClient implements IWebSocketClient {
             };
 
             const failed = (e: Event) => {
-                console.log('Socket failed');
                 if (!rejected) {
                     rejected = true;
                     reject('Socket failed');
@@ -76,7 +71,6 @@ export default class WebSocketClient implements IWebSocketClient {
             };
 
             const opened = (e: Event) => {
-                console.log('Socket connected');
                 ws.removeEventListener('close', suspended);
                 ws.removeEventListener('error', failed);
                 resolve(ws);
@@ -116,7 +110,6 @@ export default class WebSocketClient implements IWebSocketClient {
             case WebSocket.CONNECTING:
             case WebSocket.OPEN:
                 ws.close();
-                console.log('disconnected');
                 break;
         }
     }
@@ -126,7 +119,6 @@ export default class WebSocketClient implements IWebSocketClient {
     }
 
     public async send(data: string | ArrayBufferLike | Blob | ArrayBufferView): Promise<void> {
-        console.log('Try to send ...');
         const ws = this.connected() ? this.ws! : (await this.connect());
         ws.send(data);
     }

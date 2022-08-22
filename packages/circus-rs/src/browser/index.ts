@@ -54,7 +54,7 @@ export { default as TwoDimensionalImageSource } from './image-source/TwoDimensio
 export { default as WebGlRawVolumeMprImageSource } from './image-source/WebGlRawVolumeMprImageSource';
 export { default as WebGlHybridMprImageSource } from './image-source/WebGlHybridMprImageSource';
 
-export { default as DicomVolumeLoader, DicomVolumeProgressiveLoader } from './image-source/volume-loader/DicomVolumeLoader';
+export { default as DicomVolumeLoader, VolumeLoadController } from './image-source/volume-loader/DicomVolumeLoader';
 export { default as MockVolumeLoader } from './image-source/volume-loader/MockVolumeLoader';
 export { default as MixVolumeLoader } from './image-source/volume-loader/MixVolumeLoader';
 export { default as RsVolumeLoader } from './image-source/volume-loader/RsVolumeLoader';

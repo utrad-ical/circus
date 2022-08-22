@@ -18,7 +18,7 @@ export interface VolumeLoaderManager {
   /**
    * Gets acquired loader
    */
-  getVolumeLoader: (id: string) => rs.DicomVolumeProgressiveLoader;
+  getVolumeLoader: (id: string) => rs.DicomVolumeLoader;
 
   /**
    * Decreases internal reference counter and disposes after cacheTime [ms] if no longer necessary.
@@ -40,7 +40,7 @@ const createVolumeLoaderManager = ({
   const wsClient = new rs.WebSocketClient(`${secure ? 'wss' : 'ws'}://${host}/ws/volume`);
   const transferConnectionFactory = rs.createTransferConnectionFactory(wsClient);
 
-  const loaders = new Map<string, rs.DicomVolumeProgressiveLoader>();
+  const loaders = new Map<string, rs.DicomVolumeLoader>();
   const referenceCounter = new Map<string, number>();
   const cleanupTimeout = new Map<string, NodeJS.Timeout>();
 
@@ -60,7 +60,7 @@ const createVolumeLoaderManager = ({
       });
       loaders.set(id, loader);
     } else if (referenceCounter.get(id) === 0) {
-      loaders.get(id)?.resume();
+      loaders.get(id)?.loadController?.resume();
       console.log(`Resume loader #${id}`);
     }
 
@@ -80,7 +80,7 @@ const createVolumeLoaderManager = ({
 
   const cleanup = (id: string) => {
 
-    loaders.get(id)?.pause();
+    loaders.get(id)?.loadController?.pause();
     console.log(`Pause loader #${id}`);
 
     const timeout = setTimeout(() => {
@@ -88,7 +88,7 @@ const createVolumeLoaderManager = ({
       if (count === 0) {
         console.log(`Delete loader #${id}`);
 
-        loaders.get(id)?.abort();
+        loaders.get(id)?.loadController?.abort();
         loaders.delete(id);
         referenceCounter.delete(id);
       }

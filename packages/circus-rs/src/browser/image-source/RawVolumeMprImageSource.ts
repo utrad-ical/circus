@@ -1,5 +1,5 @@
 import DicomVolume from '../../common/DicomVolume';
-import DicomVolumeLoader, { DicomVolumeProgressiveLoader } from './volume-loader/DicomVolumeLoader';
+import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
 import ViewState from '../ViewState';
 import { convertSectionToIndex } from '../section-util';
 import { Section } from '../../common/geometry';
@@ -12,7 +12,7 @@ import MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume';
 import { DrawResult } from './ImageSource';
 
 export interface RawVolumeMprImageSourceOptions {
-  volumeLoader: DicomVolumeProgressiveLoader;
+  volumeLoader: DicomVolumeLoader;
   // Specify the interval of updating draft image in ms.
   // If zero is specified, do not return a draft image.
   // Default value is 300 [ms]
@@ -34,13 +34,17 @@ export default class RawVolumeMprImageSource
   constructor({ volumeLoader, draftInterval }: RawVolumeMprImageSourceOptions) {
     super();
 
+    if (!volumeLoader.loadController) {
+      throw new TypeError('The specified volumeLoader does not have loadController.');
+    }
+
     draftInterval = draftInterval || 300;
 
     this.loadSequence = (async () => {
       this.draftInterval = draftInterval;
       this.metadata = await volumeLoader.loadMeta();
       volumeLoader.loadVolume().then(() => this.fullyLoaded = true);
-      this.volume = volumeLoader.getVolume()!;
+      this.volume = volumeLoader.loadController!.getVolume()!;
       if (!draftInterval) await volumeLoader.loadVolume();
     })();
   }

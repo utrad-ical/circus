@@ -15,12 +15,13 @@ export interface DicomVolumeMetadata {
 }
 
 export default interface DicomVolumeLoader {
+  readonly loadController?: VolumeLoadController;
   loadMeta(): Promise<DicomVolumeMetadata>;
   loadVolume(): Promise<DicomVolume>;
 }
 
 interface ProgressInfo {
-  target: DicomVolumeProgressiveLoader;
+  target: DicomVolumeLoader;
   imageIndex: number;
   finished?: number;
   total?: number;
@@ -28,7 +29,7 @@ interface ProgressInfo {
 export type ProgressEventListener = (info: ProgressInfo) => void;
 
 interface AbortInfo {
-  target: DicomVolumeProgressiveLoader;
+  target: DicomVolumeLoader;
 }
 export type AbortEventListener = (info: AbortInfo) => void;
 
@@ -39,17 +40,11 @@ interface ProgressEvents {
 
 export type ProgressEventEmitter = StrictEventEmitter<EventEmitter, ProgressEvents>;
 
-export interface DicomVolumeProgressiveLoader extends DicomVolumeLoader, ProgressEventEmitter {
-  loadMeta(): Promise<DicomVolumeMetadata>;
-  loadVolume(): Promise<DicomVolume>;
+export interface VolumeLoadController extends ProgressEventEmitter {
   getVolume(): DicomVolume | null;
-  setPriority?(imageIndices: MultiRangeInitializer, priority: number): void;
+  setPriority(imageIndices: MultiRangeInitializer, priority: number): void;
   loadedImages(): number[];
   abort(): void;
   pause(): void;
   resume(): void;
-}
-
-export function isProgressiveLoader(loader: DicomVolumeLoader): loader is DicomVolumeProgressiveLoader {
-  return 'getVolume' in loader;
 }

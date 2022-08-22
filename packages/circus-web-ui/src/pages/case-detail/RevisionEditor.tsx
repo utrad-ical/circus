@@ -114,8 +114,8 @@ const useCompositions = (
         );
       };
 
-      volumeLoader.on('progress', progressListener);
-      abortController.signal.addEventListener('abort', () => volumeLoader.off('progress', progressListener));
+      volumeLoader.loadController?.on('progress', progressListener);
+      abortController.signal.addEventListener('abort', () => volumeLoader.loadController?.off('progress', progressListener));
 
       await volumeLoader.loadVolume();
       if (abortController.signal.aborted) return;
@@ -223,9 +223,9 @@ const RevisionEditor: React.FC<{
   const [planeFigureOption, setPlaneFigureOption] = useState({
     zDimmedThreshold: preferences.dimmedOutlineFor2DLabels
       ? zDimmedThresholdOptions.find(
-          zDimmedThresholdOption =>
-            zDimmedThresholdOption.key === preferences.dimmedOutlineFor2DLabels
-        )!.value
+        zDimmedThresholdOption =>
+          zDimmedThresholdOption.key === preferences.dimmedOutlineFor2DLabels
+      )!.value
       : 3
   });
 

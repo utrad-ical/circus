@@ -1,5 +1,5 @@
 import RsHttpClient from '../../http-client/RsHttpClient';
-import { DicomVolumeProgressiveLoader, ProgressEventEmitter } from './DicomVolumeLoader';
+import DicomVolumeLoader, { ProgressEventEmitter, VolumeLoadController } from './DicomVolumeLoader';
 import DicomVolume from '../../../common/DicomVolume';
 import { DicomVolumeMetadata } from './DicomVolumeLoader';
 import PartialVolumeDescriptor, {
@@ -9,7 +9,7 @@ import VolumeCache, { nullVolumeCache } from './cache/VolumeCache';
 import { EstimateWindowType, createRequestParams } from './rs-loader-utils';
 import { TransferConnection, TransferConnectionFactory } from '../../ws/createTransferConnectionFactory';
 import MultiRange, { Initializer as MultiRangeInitializer } from 'multi-integer-range';
-import EventEmitter from 'events';
+import { EventEmitter } from 'events';
 
 interface RsProgressiveVolumeLoaderOptions {
   rsHttpClient: RsHttpClient;
@@ -20,9 +20,7 @@ interface RsProgressiveVolumeLoaderOptions {
   transferConnectionFactory: TransferConnectionFactory;
 }
 
-export default class RsProgressiveVolumeLoader
-  extends (EventEmitter as unknown as { new(): ProgressEventEmitter })
-  implements DicomVolumeProgressiveLoader {
+export default class RsProgressiveVolumeLoader implements DicomVolumeLoader {
   private rsHttpClient: RsHttpClient;
   private seriesUid: string;
   private partialVolumeDescriptor?: PartialVolumeDescriptor;
@@ -40,6 +38,8 @@ export default class RsProgressiveVolumeLoader
 
   private loadedIndices: Set<number> = new Set();
 
+  public readonly loadController: VolumeLoadController;
+
   constructor({
     rsHttpClient,
     seriesUid,
@@ -48,8 +48,6 @@ export default class RsProgressiveVolumeLoader
     estimateWindowType = 'none',
     transferConnectionFactory
   }: RsProgressiveVolumeLoaderOptions) {
-
-    super();
 
     if (!seriesUid) throw new Error('SeriesUid is required.');
 
@@ -67,15 +65,60 @@ export default class RsProgressiveVolumeLoader
     this.cache = cache || nullVolumeCache;
     this.transferConnectionFactory = transferConnectionFactory;
     this.connected = new Promise<void>((resolve) => this.resolveConnected = resolve);
+
+    this.loadController = this.createLoadController();
   }
 
-  public setPriority(imageIndices: MultiRangeInitializer, priority: number): void {
-    this.connected.then(() => {
-      const targets = new MultiRange(imageIndices).subtract(Array.from(this.loadedIndices));
-      if (0 < targets.segmentLength()) {
-        this.transferConnection!.setPriority(targets.toArray(), priority);
+  private createLoadController() {
+
+    const emitter: ProgressEventEmitter = new EventEmitter();
+
+    const setPriority = (imageIndices: MultiRangeInitializer, priority: number) => {
+      this.connected.then(() => {
+        const targets = new MultiRange(imageIndices).subtract(Array.from(this.loadedIndices));
+        if (0 < targets.segmentLength()) {
+          this.transferConnection!.setPriority(targets.toArray(), priority);
+        }
+      });
+    }
+
+    const getVolume = (): DicomVolume | null => {
+      if (!this.meta) return null;
+      if (!this.volume) this.volume = this.createVolume(this.meta, this.partialVolumeDescriptor);
+
+      return this.volume;
+    };
+
+    const loadedImages = (): number[] => {
+      return Array.from(this.loadedIndices.values());
+    };
+
+    const abort = () => {
+      this.transferConnection?.abort();
+      emitter.emit('abort', { target: this });
+    };
+
+    const pause = () => {
+      this.transferConnection?.pause();
+    };
+
+    const resume = () => {
+      this.transferConnection?.resume();
+    };
+
+    const loadController = Object.assign(
+      emitter,
+      {
+        getVolume: getVolume.bind(this),
+        loadedImages: loadedImages.bind(this),
+        setPriority: setPriority.bind(this),
+        abort: abort.bind(this),
+        pause: pause.bind(this),
+        resume: resume.bind(this)
       }
-    });
+    );
+
+    return loadController;
   }
 
   private async _doLoadMeta(): Promise<DicomVolumeMetadata> {
@@ -131,7 +174,7 @@ export default class RsProgressiveVolumeLoader
         const finished = this.loadedIndices.size;
         const total = meta.voxelCount[2];
 
-        this.emit('progress', { target: this, imageIndex, finished, total });
+        this.loadController.emit('progress', { target: this, imageIndex, finished, total });
 
         if (finished === total) resolve();
       };
@@ -170,33 +213,9 @@ export default class RsProgressiveVolumeLoader
     return await this.loadingVolumePromise;
   }
 
-  public getVolume(): DicomVolume | null {
-    if (!this.meta) return null;
-    if (!this.volume) this.volume = this.createVolume(this.meta, this.partialVolumeDescriptor);
-
-    return this.volume;
-  }
-
   private createKey(suffix: string): string {
     const pvd = this.partialVolumeDescriptor;
     const pvdStr = pvd ? `:${pvd.start}:${pvd.end}:${pvd.delta}` : ':full';
     return this.seriesUid + pvdStr + '.' + suffix;
-  }
-
-  public loadedImages(): number[] {
-    return Array.from(this.loadedIndices.values());
-  }
-
-  public abort() {
-    this.transferConnection?.abort();
-    this.emit('abort', { target: this });
-  }
-
-  public pause() {
-    this.transferConnection?.pause();
-  }
-
-  public resume() {
-    this.transferConnection?.resume();
   }
 }

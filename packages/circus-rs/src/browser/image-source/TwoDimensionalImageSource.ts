@@ -14,13 +14,10 @@ import ImageSource, {
   DrawResult,
   ViewStateResizeTransformer
 } from './ImageSource';
-import {
-  DicomVolumeProgressiveLoader,
-  DicomVolumeMetadata
-} from './volume-loader/DicomVolumeLoader';
+import DicomVolumeLoader, { DicomVolumeMetadata, VolumeLoadController } from './volume-loader/DicomVolumeLoader';
 
 interface TwoDimensionalImageSourceOptions {
-  volumeLoader: DicomVolumeProgressiveLoader;
+  volumeLoader: DicomVolumeLoader;
   maxCacheSize?: number;
 }
 
@@ -31,7 +28,7 @@ export default class TwoDimensionalImageSource extends ImageSource {
   private cache: LRU<Promise<ImageBitmap>>;
   private backCanvas: HTMLCanvasElement;
 
-  private volumeLoader: DicomVolumeProgressiveLoader;
+  private loadController: VolumeLoadController;
   private higherPriority: number = 0;
   private draftInterval: number = 300;
 
@@ -40,11 +37,16 @@ export default class TwoDimensionalImageSource extends ImageSource {
     maxCacheSize = 10
   }: TwoDimensionalImageSourceOptions) {
     super();
-    this.volumeLoader = volumeLoader;
+
+    if (!volumeLoader.loadController) {
+      throw new TypeError('The specified volumeLoader does not have loadController.');
+    }
+
+    this.loadController = volumeLoader.loadController;
 
     this.loadSequence = (async () => {
       this.metadata = await volumeLoader.loadMeta();
-      this.volume = volumeLoader.getVolume()!;
+      this.volume = volumeLoader.loadController!.getVolume()!;
       volumeLoader.loadVolume();
     })();
     this.cache = new LRU({ maxSize: maxCacheSize });
@@ -121,8 +123,7 @@ export default class TwoDimensionalImageSource extends ImageSource {
     if (viewState.type !== '2d') throw new Error('Unsupported view state');
 
     const { imageNumber } = viewState;
-    this.volumeLoader.setPriority &&
-      this.volumeLoader.setPriority(imageNumber, ++this.higherPriority);
+    this.loadController.setPriority(imageNumber, ++this.higherPriority);
 
     const drawResult = await this.createDrawResult(viewer, viewState, abortSignal);
 
@@ -142,7 +143,7 @@ export default class TwoDimensionalImageSource extends ImageSource {
   ): Promise<DrawResult> {
     const { imageNumber } = viewState;
 
-    if (this.volumeLoader.loadedImages().some(i => i === imageNumber)) {
+    if (this.loadController.loadedImages().some(i => i === imageNumber)) {
       return await this.createImageResult(viewer, viewState, abortSignal);
     } else {
       return {

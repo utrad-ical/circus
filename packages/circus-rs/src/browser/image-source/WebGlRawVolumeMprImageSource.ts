@@ -1,7 +1,7 @@
 import Viewer from '../viewer/Viewer';
 import ViewState, { MprViewState } from '../ViewState';
 import DicomVolume from '../../common/DicomVolume';
-import { DicomVolumeProgressiveLoader, isProgressiveLoader } from './volume-loader/DicomVolumeLoader';
+import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
 import MprProgram from './gl/MprProgram';
 import MprImageSource from './MprImageSource';
 import {
@@ -16,7 +16,7 @@ import setImmediate from '../util/setImmediate';
 import imageRangeOfSection from '../util/imageRangeOfSection'
 
 export interface WebGlRawVolumeMprImageSourceOptions {
-  volumeLoader: DicomVolumeProgressiveLoader;
+  volumeLoader: DicomVolumeLoader;
   // Specify the interval of updating draft image in ms.
   // If zero is specified, do not return a draft image.
   // Default value is 300 [ms]
@@ -44,7 +44,7 @@ export default class WebGlRawVolumeMprImageSource
 
   private background: RGBA = [0.0, 0.0, 0.0, 1.0];
 
-  private setPriority: (imageIndices: MultiRangeInitializer, priority: number) => void = () => { };
+  private setPriority: (imageIndices: MultiRangeInitializer, priority: number) => void;
   private disposeCallbacks: (() => void)[] = [];
 
   // For debugging
@@ -60,9 +60,12 @@ export default class WebGlRawVolumeMprImageSource
   constructor({ volumeLoader, draftInterval }: WebGlRawVolumeMprImageSourceOptions) {
     super();
 
-    if (!isProgressiveLoader(volumeLoader)) {
-      throw new TypeError('The specified volumeLoader is not a progressive loader.');
+    if (!volumeLoader.loadController) {
+      throw new TypeError('The specified volumeLoader does not have loadController.');
     }
+
+    const loadController = volumeLoader.loadController;
+    this.setPriority = loadController.setPriority;
 
     draftInterval = draftInterval || 200;
 
@@ -83,8 +86,7 @@ export default class WebGlRawVolumeMprImageSource
     this.loadSequence = (async () => {
       this.draftInterval = draftInterval;
       this.metadata = await volumeLoader.loadMeta();
-      this.volume = volumeLoader.getVolume()!;
-      if (volumeLoader.setPriority) this.setPriority = volumeLoader.setPriority.bind(volumeLoader);
+      this.volume = loadController.getVolume()!;
 
       // Assign the length of the longest side of the volume to
       // the length of the side in normalized device coordinates.
@@ -98,13 +100,13 @@ export default class WebGlRawVolumeMprImageSource
       mprProgram.activate();
       const { transfer } = mprProgram.setDicomVolume(this.volume);
 
-      volumeLoader.loadedImages().forEach(imageIndex => transfer(imageIndex));
+      loadController.loadedImages().forEach(imageIndex => transfer(imageIndex));
       const progressListener = ({ imageIndex }: { imageIndex: number; }) => {
         console.log(`transfer ${imageIndex}`);
         transfer(imageIndex);
       };
-      volumeLoader.on('progress', progressListener);
-      this.disposeCallbacks.push(() => volumeLoader.off('progress', progressListener));
+      loadController.on('progress', progressListener);
+      this.disposeCallbacks.push(() => loadController.off('progress', progressListener));
 
       volumeLoader.loadVolume().then(() => this.fullyLoaded = true);
       if (!draftInterval) await volumeLoader.loadVolume();

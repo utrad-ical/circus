@@ -34,7 +34,7 @@ const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
   deps
 ) => {
   const { authorization, globalIpFilter } = options;
-  const { rsLogger, counter, rsSeriesRoutes, rsWebsocketVolumeRoute } = deps;
+  const { rsLogger, counter, rsSeriesRoutes, rsWebsocketVolumeConnectionHandlerCreator } = deps;
 
   // create server process
   const app = new koa();
@@ -88,12 +88,11 @@ const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
   withWebSocketConnectionHandlers({
     '/ws/hello': hello,
     '/ws/bufferedAmountCheck': bufferedAmountCheck,
-    '/ws/volume': rsWebsocketVolumeRoute({
+    '/ws/volume': rsWebsocketVolumeConnectionHandlerCreator({
       // authFunctionProvider: req => async seriesUid => true
       authFunctionProvider: req => seriesUid => new Promise((resolve) => {
         setTimeout(() => resolve(true), 2000)
       })
-
     })
   })(app);
 
@@ -109,7 +108,7 @@ createServer.dependencies = [
   'rsLogger',
   'counter',
   'rsSeriesRoutes',
-  'rsWebsocketVolumeRoute'
+  'rsWebsocketVolumeConnectionHandlerCreator'
 ];
 
 export default createServer;

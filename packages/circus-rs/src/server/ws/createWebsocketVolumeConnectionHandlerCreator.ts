@@ -3,9 +3,11 @@ import WebSocketConnectionHandler from './connection/WebSocketConnectionHandler'
 import volume, { AuthFunctionProvider } from './connection/volume';
 import { VolumeProvider } from '../helper/createVolumeProvider';
 
-export type RsWebsocketVolumeRoute = (option: { authFunctionProvider: AuthFunctionProvider; }) => WebSocketConnectionHandler;
-const createWebsocketVolumeRoute: FunctionService<
-  RsWebsocketVolumeRoute,
+export type RsWebsocketVolumeConnectionHandlerCreator
+  = (option: { authFunctionProvider: AuthFunctionProvider; }) => WebSocketConnectionHandler;
+
+const createWebsocketVolumeConnectionHandlerCreator: FunctionService<
+  RsWebsocketVolumeConnectionHandlerCreator,
   {
     volumeProvider: VolumeProvider;
   },
@@ -16,6 +18,6 @@ const createWebsocketVolumeRoute: FunctionService<
     authFunctionProvider
   });
 }
-createWebsocketVolumeRoute.dependencies = ['volumeProvider'];
+createWebsocketVolumeConnectionHandlerCreator.dependencies = ['volumeProvider'];
 
-export default createWebsocketVolumeRoute;
+export default createWebsocketVolumeConnectionHandlerCreator;

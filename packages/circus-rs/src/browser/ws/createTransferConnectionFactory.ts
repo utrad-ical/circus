@@ -77,7 +77,7 @@ export const createTransferConnectionFactory = (wsClient: WebSocketClient): Tran
             wsClient.send(message);
         }
 
-        const stop = () => {
+        const abort = () => {
             if (wsClient.connected()) {
                 const data = stopTransferMessageData(id);
                 const message = createMessageBuffer(data);
@@ -98,6 +98,6 @@ export const createTransferConnectionFactory = (wsClient: WebSocketClient): Tran
             wsClient.send(message);
         }
 
-        return { id, setPriority, abort: stop, pause, resume };
+        return { id, setPriority, abort, pause, resume };
     };
 };

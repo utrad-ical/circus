@@ -57,7 +57,7 @@ const SeriesDetail: React.FC<{}> = props => {
       setSeriesEntries([
         {
           seriesUid,
-          partialVolumeDescriptor: { start, end, delta: 1 },
+          partialVolumeDescriptor: { start, end: end ?? start, delta: 1 },
           estimateWindowType: 'center'
         }
       ]);

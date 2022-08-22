@@ -13,7 +13,7 @@ import MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume';
 import MultiRange, { Initializer as MultiRangeInitializer } from 'multi-integer-range';
 import { DrawResult } from './ImageSource';
 import setImmediate from '../util/setImmediate';
-import getRequiredImageZIndexRange from '../util/getRequiredImageZIndexRange'
+import imageRangeOfSection from '../util/imageRangeOfSection'
 
 export interface WebGlRawVolumeMprImageSourceOptions {
   volumeLoader: DicomVolumeProgressiveLoader;
@@ -153,8 +153,9 @@ export default class WebGlRawVolumeMprImageSource
 
     if (viewState.type !== 'mpr') throw new TypeError('Unsupported state');
 
-    const [min, max] = getRequiredImageZIndexRange(viewState.section, this.metadata!)
+    const [min, max] = imageRangeOfSection(viewState.section, this.metadata!);
     const images = new MultiRange([[min, max]]);
+
     const priority = this.metadata!.voxelCount[2] / images.length();
     this.setPriority(images, priority);
 

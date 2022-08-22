@@ -1,6 +1,6 @@
 import { Composition, createOrthogonalMprSection, createToolbar, MprViewState, RawVolumeMprImageSource, ReferenceLine, RsHttpClient, Viewer, ViewState, WebGlRawVolumeMprImageSource } from "browser";
 import RsProgressiveVolumeLoader from "../../browser/image-source/volume-loader/RsProgressiveVolumeLoader";
-import WebSocketClient from "../../browser/ws/WebSocketClient";
+import { WebSocketClientImpl as WebSocketClient } from "../../browser/ws/WebSocketClient";
 import { createTransferConnectionFactory } from "../../browser/ws/createTransferConnectionFactory";
 import setting, { toPartialVolumeDescriptor, VolumeSetting } from './setting';
 // import getRequiredImageZIndexRange from "browser/util/getRequiredImageZIndexRange";

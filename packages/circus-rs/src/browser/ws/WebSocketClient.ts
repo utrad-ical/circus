@@ -2,7 +2,7 @@ type ConstructorArgumentsType<T> = T extends { new(...arg1: infer U): any; } ? U
 type WebSocketConstructorArguments = ConstructorArgumentsType<typeof WebSocket>;
 type MessageEventListener = (e: MessageEvent) => void;
 
-interface IWebSocketClient {
+export default interface WebSocketClient {
     addMessageEventListener(listener: MessageEventListener): void;
     removeMessageEventListener(listener: MessageEventListener): void;
     connected(): boolean;
@@ -10,7 +10,7 @@ interface IWebSocketClient {
     send(data: string | ArrayBufferLike | Blob | ArrayBufferView): Promise<void>
 }
 
-export default class WebSocketClient implements IWebSocketClient {
+export class WebSocketClientImpl implements WebSocketClient {
     private wsArguments: WebSocketConstructorArguments;
     private ws: WebSocket | null = null;
     private connecting: Promise<WebSocket> | null = null;

@@ -6,7 +6,6 @@ import {
     stopTransferMessageData,
     parseMessageBuffer,
     isImageTransferData,
-    MessageDataType,
     pauseTransferMessageData,
     resumeTransferMessageData
 } from "../../common/ws/message";

@@ -42,7 +42,7 @@ export * from '../common/geometry';
 
 export { default as RsHttpClient } from './http-client/RsHttpClient';
 export { createTransferConnectionFactory, TransferConnectionFactory } from './ws/createTransferConnectionFactory';
-export { default as WebSocketClient } from './ws/WebSocketClient';
+export { WebSocketClientImpl as WebSocketClient } from './ws/WebSocketClient';
 
 export { default as ImageSource } from './image-source/ImageSource';
 export { default as MprImageSource } from './image-source/MprImageSource';

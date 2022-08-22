@@ -2,7 +2,7 @@
 
 import { DicomVolumeMetadata } from "../image-source/volume-loader/DicomVolumeLoader";
 import { Section } from "common/geometry";
-import { zMinMaxOfSection } from "browser/section-util";
+import { zMinMaxOfSection } from "../section-util";
 
 export default function imageRangeOfSection(section: Section, metadata: DicomVolumeMetadata): [number, number] {
   const [min, max] = zMinMaxOfSection(section);

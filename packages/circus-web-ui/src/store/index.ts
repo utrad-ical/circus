@@ -17,7 +17,20 @@ const reducer = combineReducers({
   taskProgress
 });
 
-export const store = configureStore({ reducer });
+export const store = configureStore({
+  reducer,
+  // turnoff warnings by non-serializable value (type of message in messages/addMessage is React.ReactChild)
+  // https://redux-toolkit.js.org/usage/usage-guide#working-with-non-serializable-data
+  middleware: getDefaultMiddleware =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        // Ignore these action types
+        ignoredActions: ['messages/addMessage'],
+        // Ignore these paths in the state
+        ignoredPaths: ['messages']
+      }
+    })
+});
 export const dispatch = store.dispatch;
 
 export type RootState = ReturnType<typeof reducer>;

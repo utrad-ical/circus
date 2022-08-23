@@ -19,7 +19,7 @@ interface SearchParams {
   filter: object;
   /**
    * Represents a state of a search condition panel,
-   * from whihc `filter` is constructed.
+   * from which `filter` is constructed.
    */
   condition: object;
   sort: string; // of JSON

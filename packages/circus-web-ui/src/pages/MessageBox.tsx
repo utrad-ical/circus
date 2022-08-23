@@ -36,6 +36,7 @@ const StyledDiv = styled.div`
   gap: 10px;
   top: 50px;
   right: 25px;
+  z-index: 2000;
 `;
 
 export default MessageBox;

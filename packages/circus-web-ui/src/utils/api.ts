@@ -85,7 +85,7 @@ const createApiCaller = (initialCredentials: any, apiServer: string) => {
         cancelToken: axiosCancelToken
       });
       return res.data;
-    } catch (err) {
+    } catch (err: any) {
       // By default, all errors are displayed with a minimal message.
       // Set 'handleErrors' option to supress error message for specific error types.
       let handle = options.handleErrors === true;

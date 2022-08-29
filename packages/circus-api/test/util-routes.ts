@@ -177,7 +177,8 @@ export const setUpAppForRoutesTest = async () => {
         {},
         { defaultAuthProvider: authProvider, models, authProvider }
       ),
-      transactionManager
+      transactionManager,
+      rsWebsocketVolumeConnectionHandlerCreator: null as any // dummy
     }
   );
 

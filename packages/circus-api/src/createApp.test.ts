@@ -40,7 +40,10 @@ beforeAll(async () => {
         },
         token: () => () => {}
       } as any,
-      transactionManager: null as any // dummy
+      transactionManager: null as any, // dummy
+      rsWebsocketVolumeConnectionHandlerCreator: () => {
+        return null as any; // dummy
+      }
     }
   );
 

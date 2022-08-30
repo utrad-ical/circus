@@ -16,6 +16,7 @@ import { newSearch } from 'store/searches';
 import styled from 'styled-components';
 import Series from 'types/Series';
 import { useApi } from 'utils/api';
+import { UidDisplay } from '../pages/search/SeriesSearchResults';
 import PartialVolumeDescriptorEditor from './PartialVolumeDescriptorEditor';
 import TimeDisplay from './TimeDisplay';
 
@@ -49,14 +50,9 @@ const RelevantSeries: React.FC<{
     () => props => {
       const { value } = props;
       const columns: DataGridColumnDefinition<any>[] = [
+        { key: 'modality', caption: 'Modality' },
         { key: 'seriesDescription', caption: 'Series Desc' },
-        {
-          key: 'seriesUid',
-          caption: 'Series UID',
-          renderer: ({ value }) => (
-            <SeriesUidSpan>{value.seriesUid}</SeriesUidSpan>
-          )
-        },
+        { key: 'Uid', caption: 'UID', renderer: UidDisplay },
         { key: 'images', caption: 'Images' },
         {
           key: 'seriesDate',
@@ -312,7 +308,7 @@ const SeriesSelector: React.FC<{
       <Panel.Heading>Series</Panel.Heading>
       <Panel.Body>
         <DataGrid columns={columns} value={value} />
-        <div>
+        <SelectAdditionalSeriesDiv>
           {!alwaysShowRelevantSeries && (
             <IconButton
               icon={showRelevantSeries ? 'chevron-up' : 'plus'}
@@ -324,7 +320,7 @@ const SeriesSelector: React.FC<{
           )}
           {showRelevantSeries && (
             <>
-              Showing series from &thinsp;
+              <span>Showing series from</span>
               <ShrinkSelect
                 options={{
                   studyUid: 'the same study',
@@ -337,7 +333,7 @@ const SeriesSelector: React.FC<{
               />
             </>
           )}
-        </div>
+        </SelectAdditionalSeriesDiv>
         {showRelevantSeries &&
           primarySeries &&
           (seriesSearchTarget === 'studyUid' || primarySeries.patientInfo ? (
@@ -361,6 +357,12 @@ const WarninMessageSpan = styled.span`
   display: block;
   text-align: center;
   margin: 1em;
+`;
+
+const SelectAdditionalSeriesDiv = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
 `;
 
 export default SeriesSelector;

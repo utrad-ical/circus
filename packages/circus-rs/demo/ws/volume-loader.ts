@@ -1,12 +1,12 @@
-import { Composition, createOrthogonalMprSection, createToolbar, MprViewState, RawVolumeMprImageSource, ReferenceLine, RsHttpClient, Viewer, ViewState, WebGlRawVolumeMprImageSource } from "browser";
-import RsProgressiveVolumeLoader from "../../browser/image-source/volume-loader/RsProgressiveVolumeLoader";
-import { WebSocketClientImpl as WebSocketClient } from "../../browser/ws/WebSocketClient";
-import { createTransferConnectionFactory } from "../../browser/ws/createTransferConnectionFactory";
+import { Composition, createOrthogonalMprSection, createToolbar, MprViewState, RawVolumeMprImageSource, ReferenceLine, RsHttpClient, Viewer, ViewState, WebGlRawVolumeMprImageSource } from "../../src/browser";
+import RsProgressiveVolumeLoader from "../../src/browser/image-source/volume-loader/RsProgressiveVolumeLoader";
+import { WebSocketClientImpl as WebSocketClient } from "../../src/browser/ws/WebSocketClient";
+import { createTransferConnectionFactory } from "../../src/browser/ws/createTransferConnectionFactory";
 import setting, { toPartialVolumeDescriptor, VolumeSetting } from './setting';
 // import getRequiredImageZIndexRange from "browser/util/getRequiredImageZIndexRange";
 // import MultiRange from "multi-integer-range";
-import handleRotationBy from "browser/tool/state/handleRotationBy";
-import '../../../src/browser/circus-rs.less';
+import handleRotationBy from "../../src/browser/tool/state/handleRotationBy";
+import '../../src/browser/circus-rs.less';
 import '@utrad-ical/circus-icons/dist/circus-rs-font-glyphs.less';
 
 document.addEventListener('DOMContentLoaded', function (e) {

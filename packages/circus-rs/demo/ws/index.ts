@@ -1,11 +1,11 @@
-import { RsHttpClient } from "browser";
-import { createTransferConnectionFactory, TransferConnection, TransferConnectionFactory } from "../../browser/ws/createTransferConnectionFactory";
+import { RsHttpClient } from "../../src/browser";
+import { createTransferConnectionFactory, TransferConnection, TransferConnectionFactory } from "../../src/browser/ws/createTransferConnectionFactory";
 import DebugLogger from "./DebugLogger";
-import { WebSocketClientImpl as WebSocketClient } from "../../browser/ws/WebSocketClient";
-import drawToImageData from "../../browser/image-source/drawToImageData";
+import { WebSocketClientImpl as WebSocketClient } from "../../src/browser/ws/WebSocketClient";
+import drawToImageData from "../../src/browser/image-source/drawToImageData";
 import { pixelFormatInfo } from '@utrad-ical/circus-lib/src/PixelFormat';
 import setting, { toPartialVolumeDescriptor } from './setting';
-import { createRequestParams } from "../../browser/image-source/volume-loader/rs-loader-utils";
+import { createRequestParams } from "../../src/browser/image-source/volume-loader/rs-loader-utils";
 
 document.addEventListener('DOMContentLoaded', function (e) {
     setup()

@@ -23,8 +23,6 @@ import checkSeriesAccessToken from './app/auth/checkSeriesAccessToken';
 import { FunctionService } from '@utrad-ical/circus-lib';
 import createAuthorizer from './helper/createAuthorizer';
 import withWebSocketConnectionHandlers from './ws/withWebSocketConnectionHandlers';
-import hello from './ws/connection/hello';
-import bufferedAmountCheck from './ws/connection/bufferedAmountCheck';
 
 /**
  * Create Koa App.
@@ -86,8 +84,6 @@ const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
 
   // websocket
   withWebSocketConnectionHandlers(rsWSServer, {
-    '/ws/hello': hello,
-    '/ws/bufferedAmountCheck': bufferedAmountCheck,
     '/ws/volume': rsWebsocketVolumeConnectionHandlerCreator({
       // authFunctionProvider: req => async seriesUid => true
       authFunctionProvider: req => seriesUid => new Promise((resolve) => {

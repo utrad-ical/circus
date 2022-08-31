@@ -102,7 +102,7 @@ export default class WebGlRawVolumeMprImageSource
 
       loadController.loadedImages().forEach(imageIndex => transfer(imageIndex));
       const progressListener = ({ imageIndex }: { imageIndex: number; }) => {
-        console.log(`transfer ${imageIndex}`);
+        // console.log(`transfer ${imageIndex}`);
         transfer(imageIndex);
       };
       loadController.on('progress', progressListener);

@@ -52,7 +52,7 @@ const createVolumeLoaderManager = ({
     const id = serializeUtilizeOptions(options);
 
     if (!loaders.has(id)) {
-      console.log(`Create new loader #${id}`);
+      // console.log(`Create new loader #${id}`);
       const loader = new rs.RsProgressiveVolumeLoader({
         rsHttpClient,
         transferConnectionFactory,
@@ -61,7 +61,7 @@ const createVolumeLoaderManager = ({
       loaders.set(id, loader);
     } else if (referenceCounter.get(id) === 0) {
       loaders.get(id)?.loadController?.resume();
-      console.log(`Resume loader #${id}`);
+      // console.log(`Resume loader #${id}`);
     }
 
     referenceCounter.set(id, (referenceCounter.get(id) ?? 0) + 1);
@@ -81,12 +81,12 @@ const createVolumeLoaderManager = ({
   const cleanup = (id: string) => {
 
     loaders.get(id)?.loadController?.pause();
-    console.log(`Pause loader #${id}`);
+    // console.log(`Pause loader #${id}`);
 
     const timeout = setTimeout(() => {
       const count = referenceCounter.get(id) || 0;
       if (count === 0) {
-        console.log(`Delete loader #${id}`);
+        // console.log(`Delete loader #${id}`);
 
         loaders.get(id)?.loadController?.abort();
         loaders.delete(id);

@@ -1,5 +1,9 @@
-import { FunctionService } from '@utrad-ical/circus-lib';
-import { DicomFileRepository, Logger } from '@utrad-ical/circus-lib';
+import {
+  DicomFileRepository,
+  FunctionService,
+  isDicomUid,
+  Logger
+} from '@utrad-ical/circus-lib';
 import { multirange } from 'multi-integer-range';
 import { DicomImporter, DicomTagReader, TransactionManager } from './interface';
 import { DicomUtilityRunner } from './utils/createDicomUtilityRunner';
@@ -16,7 +20,6 @@ const createDicomImporter: FunctionService<
   DicomImporter,
   {
     dicomFileRepository: DicomFileRepository;
-    // models: Models;
     apiLogger: Logger;
     dicomTagReader: DicomTagReader;
     dicomUtilityRunner: DicomUtilityRunner;
@@ -44,8 +47,15 @@ const createDicomImporter: FunctionService<
     if (typeof instanceNumber !== 'number') {
       throw new Error('Instance number not set');
     }
-    // Check if there is already a series with the same series UID
+
     const seriesUid = tags.seriesUid;
+    if (!isDicomUid(seriesUid)) {
+      throw new Error('Series UID of this DICOM file is invalid.');
+    }
+
+    const seriesLoader = await dicomFileRepository.getSeries(seriesUid);
+    await seriesLoader.save(instanceNumber, fileContent);
+
     try {
       await transactionManager.withTransaction(async models => {
         const series = await models.series.findById(seriesUid);
@@ -69,13 +79,11 @@ const createDicomImporter: FunctionService<
         }
       });
       apiLogger.trace(`Import complete: ${seriesUid} #${instanceNumber}`);
-    } catch (err) {
+    } catch (err: any) {
       apiLogger.error(`Import failure: ${seriesUid} #${instanceNumber}`);
       apiLogger.error(err);
+      throw err;
     }
-
-    const seriesLoader = await dicomFileRepository.getSeries(seriesUid);
-    await seriesLoader.save(instanceNumber, fileContent);
   };
 
   return { importDicom };
@@ -83,7 +91,6 @@ const createDicomImporter: FunctionService<
 
 createDicomImporter.dependencies = [
   'dicomFileRepository',
-  'models',
   'apiLogger',
   'dicomTagReader',
   'dicomUtilityRunner',

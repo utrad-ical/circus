@@ -37,11 +37,9 @@ import { dismissMessageOnPageChange } from 'store/messages';
 import PluginJobQueueSearch from './pages/search/PluginJobQueueSearch';
 import browserHistory from './browserHistory';
 import GlobalStyle, { CircusThemeProvider } from './theme';
-import * as rs from '@utrad-ical/circus-rs/src/browser';
 
 import { ApiContext, ApiCaller } from 'utils/api';
 import loginManager, { LoginManagerContext } from 'utils/loginManager';
-import { VolumeLoaderCacheContext } from 'utils/useImageSource';
 import { VolumeLoaderFactoryContext } from 'utils/useVolumeLoader';
 import createVolumeLoaderManager from 'utils/createVolumeLoaderManager';
 
@@ -124,28 +122,6 @@ const VolumeLoaderFactoryProvider: React.FC<{}> = ({ children }) => {
   );
 };
 
-/**
- * Provides a shared cache mechanism for volume loaders.
- */
-const VolumeCacheProvider: React.FC = props => {
-  const server = useSelector(state => state.loginUser.data?.dicomImageServer);
-
-  const volumeLoaderCache = useMemo(() => {
-    if (!server) return null;
-    const rsHttpClient = new rs.RsHttpClient(server);
-    return {
-      rsHttpClient,
-      map: new Map<string, rs.RsVolumeLoader>()
-    };
-  }, [server]);
-
-  return (
-    <VolumeLoaderCacheContext.Provider value={volumeLoaderCache}>
-      {props.children}
-    </VolumeLoaderCacheContext.Provider>
-  );
-};
-
 const TheApp: React.FC<{}> = () => {
   const [manager, setManager] = useState<ReturnType<typeof loginManager>>();
   const [api, setApi] = useState<ApiCaller>();
@@ -216,18 +192,16 @@ const TheApp: React.FC<{}> = () => {
       <ApiContext.Provider value={api}>
         <ReduxStoreProvider store={store}>
           <VolumeLoaderFactoryProvider>
-            <VolumeCacheProvider>
-              <CircusThemeProvider>
-                <GlobalStyle />
-                <Router history={browserHistory}>
-                  <Switch>
-                    <Route exact path="/" component={LoginScreen} />
-                    <Route exact path="/otp" component={OneTimeLogin} />
-                    <AppRoutes />
-                  </Switch>
-                </Router>
-              </CircusThemeProvider>
-            </VolumeCacheProvider>
+            <CircusThemeProvider>
+              <GlobalStyle />
+              <Router history={browserHistory}>
+                <Switch>
+                  <Route exact path="/" component={LoginScreen} />
+                  <Route exact path="/otp" component={OneTimeLogin} />
+                  <AppRoutes />
+                </Switch>
+              </Router>
+            </CircusThemeProvider>
           </VolumeLoaderFactoryProvider>
         </ReduxStoreProvider>
       </ApiContext.Provider>

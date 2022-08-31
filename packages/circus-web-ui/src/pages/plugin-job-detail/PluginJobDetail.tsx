@@ -16,10 +16,6 @@ import styled from 'styled-components';
 import useFeedback, { actions } from './useFeedback';
 import PersonalConsensualSwitch from './PersonalConsensualSwitch';
 import useLoadData from 'utils/useLoadData';
-import {
-  stringifyPartialVolumeDescriptor,
-  VolumeLoaderCacheContext
-} from 'utils/useImageSource';
 import PieProgress from 'components/PieProgress';
 import useLoginUser from 'utils/useLoginUser';
 import { DropdownButton, MenuItem, Modal } from 'components/react-bootstrap';
@@ -33,7 +29,6 @@ import {
   CsResultsContextType,
   FeedbackReport
 } from '@utrad-ical/circus-ui-kit';
-import { RsVolumeLoader } from '@utrad-ical/circus-rs/src/browser';
 import loadDisplay from './loadDisplay';
 import InvestigateJobModal from './InvestigateJobModal';
 import { useVolumeLoaders } from 'utils/useVolumeLoader';

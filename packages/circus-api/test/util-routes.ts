@@ -25,6 +25,7 @@ import createOauthServer from '../src/middleware/auth/createOauthServer';
 import createDefaultAuthProvider from '../src/middleware/auth/authProvider/DefaultAuthProvider';
 import { Database } from 'interface';
 import createTransactionManager from '../src/createTransactionManager';
+import * as ws from 'ws';
 
 /**
  * Holds data used for API route testing.
@@ -169,7 +170,7 @@ export const setUpAppForRoutesTest = async () => {
       dicomImporter,
       core: csCore,
       mhdPacker: null as any, // dummy
-      rsSeriesRoutes: async () => {}, // dummy
+      rsSeriesRoutes: async () => { }, // dummy
       volumeProvider: null as any, // dummy
       taskManager,
       dicomVoxelDumper,
@@ -178,6 +179,10 @@ export const setUpAppForRoutesTest = async () => {
         { defaultAuthProvider: authProvider, models, authProvider }
       ),
       transactionManager,
+      rsWSServer: new ws.Server({
+        noServer: true,
+        skipUTF8Validation: true,
+      }),
       rsWebsocketVolumeConnectionHandlerCreator: () => {
         return null as any; // dummy
       }
@@ -240,8 +245,8 @@ const createMockCsCore = () => {
       start: async () => ((status = 'running'), undefined),
       stop: async () => ((status = 'stopped'), undefined),
       status: async () => status,
-      pm2list: async () => {},
-      pm2killall: async () => {}
+      pm2list: async () => { },
+      pm2killall: async () => { }
     },
     plugin: {
       list: async () => pluginDefinitions,

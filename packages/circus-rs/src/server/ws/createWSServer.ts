@@ -5,8 +5,8 @@ const createWSServer: NoDepFunctionService<
   ws.Server,
   {
     perMessageDeflate?: ws.ServerOptions['perMessageDeflate'];
-  }
-> = async ({ perMessageDeflate }) => {
+  } | undefined
+> = async ({ perMessageDeflate } = {}) => {
   const options: ws.ServerOptions = {
     noServer: true,
     skipUTF8Validation: true,

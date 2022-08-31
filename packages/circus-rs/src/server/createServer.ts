@@ -34,7 +34,7 @@ const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
   deps
 ) => {
   const { authorization, globalIpFilter } = options;
-  const { rsLogger, counter, rsSeriesRoutes, rsWebsocketVolumeConnectionHandlerCreator } = deps;
+  const { rsLogger, counter, rsSeriesRoutes, rsWebsocketVolumeConnectionHandlerCreator, rsWSServer } = deps;
 
   // create server process
   const app = new koa();
@@ -85,7 +85,7 @@ const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
   app.use(router.routes());
 
   // websocket
-  withWebSocketConnectionHandlers({
+  withWebSocketConnectionHandlers(rsWSServer, {
     '/ws/hello': hello,
     '/ws/bufferedAmountCheck': bufferedAmountCheck,
     '/ws/volume': rsWebsocketVolumeConnectionHandlerCreator({
@@ -108,6 +108,7 @@ createServer.dependencies = [
   'rsLogger',
   'counter',
   'rsSeriesRoutes',
+  'rsWSServer',
   'rsWebsocketVolumeConnectionHandlerCreator'
 ];
 

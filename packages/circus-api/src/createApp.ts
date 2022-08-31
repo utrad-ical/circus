@@ -15,6 +15,7 @@ import compose from 'koa-compose';
 import mount from 'koa-mount';
 import Router from 'koa-router';
 import * as path from 'path';
+import * as ws from 'ws';
 import {
   Database,
   Validator,
@@ -79,7 +80,7 @@ async function prepareApiRouter(
     } catch (err: any) {
       throw new TypeError(
         `Meta schema error at ${manifestFile}.\n` +
-          formatValidationErrors(err.errors)
+        formatValidationErrors(err.errors)
       );
     }
     const dir = path.dirname(manifestFile);
@@ -134,6 +135,7 @@ export const createApp: FunctionService<
     blobStorage: Storage;
     core: CsCore;
     rsSeriesRoutes: Koa.Middleware;
+    rsWSServer: ws.Server,
     rsWebsocketVolumeConnectionHandlerCreator: RsWebsocketVolumeConnectionHandlerCreator;
     volumeProvider: VolumeProvider;
     dicomFileRepository: DicomFileRepository;
@@ -156,6 +158,7 @@ export const createApp: FunctionService<
     blobStorage,
     core,
     rsSeriesRoutes,
+    rsWSServer,
     rsWebsocketVolumeConnectionHandlerCreator,
     volumeProvider,
     dicomImporter,
@@ -168,94 +171,94 @@ export const createApp: FunctionService<
     transactionManager
   }
 ) => {
-  const {
-    fixUser,
-    debug,
-    corsOrigin,
-    pluginResultsPath,
-    pluginCachePath,
-    uploadFileSizeMaxBytes,
-    dicomImageServerUrl
-  } = options;
-  // The main Koa instance.
-  const koa = new Koa();
+    const {
+      fixUser,
+      debug,
+      corsOrigin,
+      pluginResultsPath,
+      pluginCachePath,
+      uploadFileSizeMaxBytes,
+      dicomImageServerUrl
+    } = options;
+    // The main Koa instance.
+    const koa = new Koa();
 
-  const deps: Deps = {
-    database,
-    validator,
-    logger,
-    models,
-    blobStorage,
-    dicomFileRepository,
-    dicomTagReader,
-    dicomImporter,
-    pluginResultsPath,
-    pluginCachePath,
-    cs: core,
-    volumeProvider,
-    uploadFileSizeMaxBytes,
-    dicomImageServerUrl,
-    taskManager,
-    mhdPacker,
-    dicomVoxelDumper,
-    transactionManager
-  };
+    const deps: Deps = {
+      database,
+      validator,
+      logger,
+      models,
+      blobStorage,
+      dicomFileRepository,
+      dicomTagReader,
+      dicomImporter,
+      pluginResultsPath,
+      pluginCachePath,
+      cs: core,
+      volumeProvider,
+      uploadFileSizeMaxBytes,
+      dicomImageServerUrl,
+      taskManager,
+      mhdPacker,
+      dicomVoxelDumper,
+      transactionManager
+    };
 
-  const apiDir = path.resolve(__dirname, 'api/**/*.yaml');
+    const apiDir = path.resolve(__dirname, 'api/**/*.yaml');
 
-  const authMiddleware = fixUser
-    ? fixUserMiddleware(deps, fixUser)
-    : oauthServer.authenticate();
+    const authMiddleware = fixUser
+      ? fixUserMiddleware(deps, fixUser)
+      : oauthServer.authenticate();
 
-  const apiRouter = await prepareApiRouter(apiDir, deps, debug, authMiddleware);
+    const apiRouter = await prepareApiRouter(apiDir, deps, debug, authMiddleware);
 
-  // Trust proxy headers such as X-Forwarded-For
-  koa.proxy = true;
+    // Trust proxy headers such as X-Forwarded-For
+    koa.proxy = true;
 
-  // Register middleware stack to the Koa app.
-  koa.use(errorHandler({ includeErrorDetails: debug, logger }));
-  koa.use(cors(corsOrigin));
-  koa.use(
-    mount(
-      '/api',
-      compose([
-        (async (ctx, next) => {
-          if (ctx.method === 'OPTIONS') {
-            ctx.body = null;
-            ctx.status = 200;
-          } else await next();
-        }) as Middleware,
-        bodyParser({
-          enableTypes: ['json'],
-          jsonLimit: '1mb',
-          onerror: (err, ctx) =>
-            ctx.throw(400, 'Invalid JSON as request body.\n' + err.message)
-        }),
-        multer({
-          storage: multer.memoryStorage(),
-          limits: { fileSize: deps.uploadFileSizeMaxBytes }
-        }).array('files'),
+    // Register middleware stack to the Koa app.
+    koa.use(errorHandler({ includeErrorDetails: debug, logger }));
+    koa.use(cors(corsOrigin));
+    koa.use(
+      mount(
+        '/api',
+        compose([
+          (async (ctx, next) => {
+            if (ctx.method === 'OPTIONS') {
+              ctx.body = null;
+              ctx.status = 200;
+            } else await next();
+          }) as Middleware,
+          bodyParser({
+            enableTypes: ['json'],
+            jsonLimit: '1mb',
+            onerror: (err, ctx) =>
+              ctx.throw(400, 'Invalid JSON as request body.\n' + err.message)
+          }),
+          multer({
+            storage: multer.memoryStorage(),
+            limits: { fileSize: deps.uploadFileSizeMaxBytes }
+          }).array('files'),
 
-        apiRouter.routes() as any as Middleware
-      ])
-    )
-  );
-  koa.use(mount('/login', compose([bodyParser(), oauthServer.token()])));
+          apiRouter.routes() as any as Middleware
+        ])
+      )
+    );
+    koa.use(mount('/login', compose([bodyParser(), oauthServer.token()])));
 
-  const rs = new Router();
-  rs.use('/series/:sid', rsSeriesRoutes as any);
-  koa.use(mount('/rs', rs.routes() as any));
-  withWebSocketConnectionHandlers({
-    '/rs/ws/volume': rsWebsocketVolumeConnectionHandlerCreator({
-      // authFunctionProvider: req => async seriesUid => true
-      authFunctionProvider: req => seriesUid => new Promise((resolve) => {
-        setTimeout(() => resolve(true), 2000)
+    const rs = new Router();
+    rs.use('/series/:sid', rsSeriesRoutes as any);
+    koa.use(mount('/rs', rs.routes() as any));
+    withWebSocketConnectionHandlers(rsWSServer, {
+      '/rs/ws/volume': rsWebsocketVolumeConnectionHandlerCreator({
+        // authFunctionProvider: req => async seriesUid => true
+        authFunctionProvider: req => seriesUid => new Promise((resolve) => {
+          setTimeout(() => resolve(true), 2000)
+        })
       })
-    })
-  })(koa);
-  
-  return koa;
-};
+    })(koa);
+
+    return koa;
+  };
 
 createApp.dependencies = [
   'database',
@@ -265,6 +268,7 @@ createApp.dependencies = [
   'blobStorage',
   'core',
   'rsSeriesRoutes',
+  'rsWSServer',
   'rsWebsocketVolumeConnectionHandlerCreator',
   'volumeProvider',
   'dicomFileRepository',

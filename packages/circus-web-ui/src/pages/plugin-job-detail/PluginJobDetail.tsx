@@ -36,6 +36,7 @@ import {
 import { RsVolumeLoader } from '@utrad-ical/circus-rs/src/browser';
 import loadDisplay from './loadDisplay';
 import InvestigateJobModal from './InvestigateJobModal';
+import { useVolumeLoaders } from 'utils/useVolumeLoader';
 
 const StyledDiv = styled.div`
   display: flex;
@@ -104,9 +105,7 @@ const PluginJobDetail: React.FC<{}> = props => {
   const user = useLoginUser();
   const [busy, setBusy] = useState(false);
   const [feedbackState, dispatch] = useFeedback();
-  const { map: volumeLoaderMap, rsHttpClient } = useContext(
-    VolumeLoaderCacheContext
-  )!;
+
   const [showInvestigateModal, setShowInvestigateModal] = useState(false);
 
   const loadJob = useCallback(async () => {
@@ -200,23 +199,8 @@ const PluginJobDetail: React.FC<{}> = props => {
       job,
       plugin: pluginData,
       eventLogger: insertLog,
-      getVolumeLoader: series => {
-        const { seriesUid, partialVolumeDescriptor } = series;
-        const key =
-          seriesUid +
-          '&' +
-          stringifyPartialVolumeDescriptor(partialVolumeDescriptor);
-        if (volumeLoaderMap.has(key)) return volumeLoaderMap.get(key)!;
-        const volumeLoader = new RsVolumeLoader({
-          rsHttpClient,
-          seriesUid,
-          partialVolumeDescriptor
-        });
-        volumeLoaderMap.set(key, volumeLoader);
-        return volumeLoader;
-      },
+      useVolumeLoaders,
       loadAttachment,
-      rsHttpClient,
       loadDisplay: loadDisplay(jobData.pluginData.pluginId)
     };
   }, [
@@ -224,8 +208,6 @@ const PluginJobDetail: React.FC<{}> = props => {
     feedbackState.isConsensual,
     feedbackState.editable,
     insertLog,
-    rsHttpClient,
-    volumeLoaderMap,
     api
   ]);
 

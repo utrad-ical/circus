@@ -1,13 +1,13 @@
 import {
   Annotation,
   Composition,
-  HybridMprImageSource,
   MprViewState,
   RawData,
   Tool,
   toolFactory,
   Vector3D,
-  VoxelCloud
+  VoxelCloud,
+  WebGlRawVolumeMprImageSource
 } from '@utrad-ical/circus-rs/src/browser';
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
@@ -72,8 +72,7 @@ export const AnnotationViewer: React.FC<{
   } = props;
   const {
     job: { series },
-    getVolumeLoader,
-    rsHttpClient
+    useVolumeLoaders
   } = useContext(CsResultsContext);
   const [composition, setComposition] = useState<Composition | null>(null);
 
@@ -83,18 +82,13 @@ export const AnnotationViewer: React.FC<{
     zoom: toolFactory('zoom')
   });
 
-  const seriesDefinition = series[volumeId];
+  const [volumeLoader] = useVolumeLoaders([series[volumeId]]);
 
   useEffect(() => {
-    const volumeLoader = getVolumeLoader(seriesDefinition);
-    const src = new HybridMprImageSource({
-      volumeLoader,
-      rsHttpClient,
-      seriesUid: seriesDefinition.seriesUid
-    });
+    const src = new WebGlRawVolumeMprImageSource({ volumeLoader });
     const composition = new Composition(src);
     setComposition(composition);
-  }, [seriesDefinition]);
+  }, [volumeLoader]);
 
   useEffect(() => {
     if (!composition) return;

@@ -29,8 +29,15 @@ properties:
     maximum: 1
   interpolationMode:
     enum: ['nearestNeighbor', 'trilinear']
-  scrollBars:
-    enum: ['none', 'small', 'large']
+  scrollBarsInfo:
+    type: object
+    properties:
+      size:
+        enum: ['small', 'large']
+      position:
+        enum: ['right', 'left', 'top', 'bottom']
+      visibility:
+        enum: ['none', 'always', 'hover']
   maintainAspectRatio:
     type: boolean
   fixCenterOfGravity:

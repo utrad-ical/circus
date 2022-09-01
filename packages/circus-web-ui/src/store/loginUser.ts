@@ -19,6 +19,12 @@ export type LabelColorsSettings = {
   customColors: string[];
 };
 
+export type ScrollBarsSettings = {
+  size: 'small' | 'large';
+  position: 'right' | 'left' | 'top' | 'bottom';
+  visibility: 'none' | 'always' | 'hover';
+};
+
 export interface UserPreferences {
   seriesSearchPresets?: SearchPreset[];
   caseSearchPresets?: SearchPreset[];
@@ -28,7 +34,7 @@ export interface UserPreferences {
   referenceLine?: boolean;
   initailAlphaForNewLabels?: number;
   interpolationMode?: string;
-  scrollBars?: string;
+  scrollBarsInfo?: ScrollBarsSettings;
   maintainAspectRatio?: boolean;
   fixCenterOfGravity?: boolean;
   dimmedOutlineFor2DLabels?: string;

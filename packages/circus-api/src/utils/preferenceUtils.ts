@@ -8,7 +8,7 @@ export const defaultPreferences = () => {
     referenceLine: false,
     initailAlphaForNewLabels: 1,
     interpolationMode: 'nearestNeighbor',
-    scrollBars: 'none',
+    scrollBarsInfo: {},
     maintainAspectRatio: false,
     fixCenterOfGravity: false,
     dimmedOutlineFor2DLabels: 'show',

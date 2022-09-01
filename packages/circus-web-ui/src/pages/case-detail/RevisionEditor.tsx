@@ -1,5 +1,4 @@
 import IconButton from '@smikitky/rb-components/lib/IconButton';
-import StyledJsonSchemaEditor from 'components/StyledJsonSchemaEditor';
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
@@ -14,6 +13,7 @@ import classNames from 'classnames';
 import Collapser from 'components/Collapser';
 import Icon from 'components/Icon';
 import { createStateChanger } from 'components/ImageViewer';
+import StyledJsonSchemaEditor from 'components/StyledJsonSchemaEditor';
 import produce from 'immer';
 import { debounce } from 'lodash';
 import useToolbar from 'pages/case-detail/useToolbar';
@@ -35,6 +35,7 @@ import {
 } from 'utils/useImageSource';
 import { useUserPreferences } from 'utils/useLoginUser';
 import { Modal } from '../../components/react-bootstrap';
+import { ScrollBarsSettings } from '../../store/loginUser';
 import * as c from './caseStore';
 import {
   buildAnnotation,
@@ -177,10 +178,14 @@ const RevisionEditor: React.FC<{
 
   const [viewOptions, setViewOptions] = useState<ViewOptions>({
     showReferenceLine: preferences.referenceLine ?? false,
-    scrollbar: (preferences.scrollBars ? preferences.scrollBars : 'none') as
-      | 'none'
-      | 'large'
-      | 'small',
+    scrollbar: (preferences.scrollBarsInfo &&
+    preferences.scrollBarsInfo.visibility
+      ? preferences.scrollBarsInfo
+      : {
+          visibility: 'none',
+          size: 'small',
+          position: 'right'
+        }) as ScrollBarsSettings,
     interpolationMode: (preferences.interpolationMode ??
       'nearestNeighbor') as InterpolationMode
   });
@@ -190,7 +195,7 @@ const RevisionEditor: React.FC<{
     updatePreferences({
       ...preferences,
       referenceLine: newViewOptions.showReferenceLine,
-      scrollBars: newViewOptions.scrollbar,
+      scrollBarsInfo: newViewOptions.scrollbar,
       interpolationMode: newViewOptions.interpolationMode
     });
   };
@@ -523,13 +528,20 @@ const RevisionEditor: React.FC<{
           });
       }
 
-      if (viewOptions.scrollbar !== 'none') {
+      if (
+        viewOptions.scrollbar &&
+        viewOptions.scrollbar.visibility &&
+        viewOptions.scrollbar.visibility !== 'none'
+      ) {
         Object.keys(viewers).forEach(key => {
           composition.addAnnotation(
             new rs.Scrollbar(viewers[key], {
               color: undefined,
-              size: viewOptions.scrollbar === 'large' ? 30 : 20,
-              visibility: touchDevice ? 'always' : 'hover'
+              size: viewOptions.scrollbar!.size === 'large' ? 30 : 20,
+              position: viewOptions.scrollbar!.position,
+              visibility: viewOptions.scrollbar!.visibility as
+                | 'always'
+                | 'hover'
             })
           );
         });

@@ -211,6 +211,10 @@ const SeriesSelector: React.FC<{
 
   const handleSeriesRegister = async (seriesUid: string, studyUid: string) => {
     if (value.some(s => s.seriesUid === seriesUid)) {
+      if (primarySeries!.studyUid !== studyUid) {
+        if (!(await confirm('Add the same series with a different studyUid?')))
+          return;
+      }
       if (!(await confirm('Add the same series?'))) return;
     } else if (primarySeries!.studyUid !== studyUid) {
       if (!(await confirm('Add the series with a different studyUid?'))) return;

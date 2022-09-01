@@ -29,6 +29,8 @@ properties:
     maximum: 1
   interpolationMode:
     enum: ['nearestNeighbor', 'trilinear']
+  scrollBars:
+    enum: ['none', 'small', 'large']
   scrollBarsInfo:
     type: object
     properties:

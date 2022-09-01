@@ -35,6 +35,7 @@ export interface UserPreferences {
   initailAlphaForNewLabels?: number;
   interpolationMode?: string;
   scrollBarsInfo?: ScrollBarsSettings;
+  scrollBars?: string;
   maintainAspectRatio?: boolean;
   fixCenterOfGravity?: boolean;
   dimmedOutlineFor2DLabels?: string;

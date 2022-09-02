@@ -129,7 +129,7 @@ const Operation: DataGridRenderer<any> = props => {
   );
 };
 
-const UidDisplay: React.FC<{
+export const UidDisplay: React.FC<{
   value: { seriesUid: string; studyUid: string };
 }> = props => {
   const { seriesUid, studyUid } = props.value;

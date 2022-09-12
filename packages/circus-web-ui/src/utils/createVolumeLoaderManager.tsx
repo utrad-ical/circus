@@ -24,20 +24,27 @@ export interface VolumeLoaderManager {
    * Decreases internal reference counter and disposes after cacheTime [ms] if no longer necessary.
    */
   releaseVolumeLoader: (id: string) => void;
+
+  /**
+   * Disconnect websocket connection.
+   */
+  disconnect: () => void;
 }
 
 const createVolumeLoaderManager = ({
   server,
+  queryString = '',
   cacheTimeout = 60000
 }: {
   server: string;
+  queryString?: string;
   cacheTimeout?: number
 }): VolumeLoaderManager => {
   const secure = server.match(/^https/);
   const host = server.replace(/^.*\/\/(.*)$/, '$1');
 
   const rsHttpClient = new rs.RsHttpClient(`${secure ? 'https' : 'http'}://${host}`);
-  const wsClient = new rs.WebSocketClient(`${secure ? 'wss' : 'ws'}://${host}/ws/volume`);
+  const wsClient = new rs.WebSocketClient(`${secure ? 'wss' : 'ws'}://${host}/ws/volume${queryString ? '?' + queryString : ''}`);
   const transferConnectionFactory = rs.createTransferConnectionFactory(wsClient);
 
   const loaders = new Map<string, rs.DicomVolumeLoader>();
@@ -105,7 +112,9 @@ const createVolumeLoaderManager = ({
     if (count === 1) cleanup(id);
   };
 
-  return { acquireVolumeLoader, getVolumeLoader, releaseVolumeLoader };
+  const disconnect = () => wsClient?.disconnect();
+
+  return { acquireVolumeLoader, getVolumeLoader, releaseVolumeLoader, disconnect };
 }
 
 export const serializeUtilizeOptions = ({ seriesUid, partialVolumeDescriptor, estimateWindowType }: SeriesEntryWithHints) =>

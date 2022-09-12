@@ -250,7 +250,13 @@ export const createApp: FunctionService<
     koa.use(mount('/rs', rs.routes() as any));
     withWebSocketConnectionHandlers(rsWSServer, {
       '/rs/ws/volume': rsWebsocketVolumeConnectionHandlerCreator({
-        authFunctionProvider: req => async seriesUid => true
+        authFunctionProvider: req => {
+          const [, token] = req.url ? req.url.split('?token=') : [];
+          return async seriesUid => {
+            console.log(`Check If the session identified by ${token} can see ${seriesUid}`);
+            return true;
+          };
+        }
       })
     })(koa);
 

@@ -6,7 +6,7 @@ export default interface WebSocketClient {
     addMessageEventListener(listener: MessageEventListener): void;
     removeMessageEventListener(listener: MessageEventListener): void;
     connected(): boolean;
-    dispose(): void | Promise<void>;
+    disconnect(): void | Promise<void>;
     send(data: string | ArrayBufferLike | Blob | ArrayBufferView): Promise<void>
 }
 
@@ -99,7 +99,7 @@ export class WebSocketClientImpl implements WebSocketClient {
         return !!(this.ws && this.ws.readyState === WebSocket.OPEN);
     }
 
-    private disconnect() {
+    public disconnect() {
         const ws = this.ws;
         this.ws = null;
 
@@ -112,10 +112,6 @@ export class WebSocketClientImpl implements WebSocketClient {
                 ws.close();
                 break;
         }
-    }
-
-    public dispose() {
-        this.disconnect();
     }
 
     public async send(data: string | ArrayBufferLike | Blob | ArrayBufferView): Promise<void> {

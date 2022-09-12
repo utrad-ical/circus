@@ -74,13 +74,13 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
           checkingAccessRights.delete(transferId);
           authenticated();
 
-          if (!hasAccessRight) {
-            throw new Error(
+          if (hasAccessRight) {
+            await beginTransfer(transferId, seriesUid, partialVolumeDescriptor);
+          } else {
+            console.error(
               `${connectionId}: Attempted to access ${seriesUid} without proper authorization.`
             );
           }
-
-          await beginTransfer(transferId, seriesUid, partialVolumeDescriptor);
           break;
         }
         case 'SET_PRIORITY': {

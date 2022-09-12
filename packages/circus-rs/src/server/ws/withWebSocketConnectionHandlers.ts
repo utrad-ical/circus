@@ -13,13 +13,15 @@ const withWebSocketConnectionHandlers =
         const server = listen.apply(app, args);
 
         wss.on('connection', function connection(ws: ws.WebSocket, request) {
-          if (!request.url || !(request.url in routes)) return;
-          const handler = routes[request.url];
-          handler(ws, request);
+          const [pathname] = request.url?.split('?') ?? [];
+          if (pathname && pathname in routes) {
+            const handler = routes[pathname];
+            handler(ws, request);
+          }
         });
 
         server.on('upgrade', (request, socket, head) => {
-          const pathname = request.url;
+          const [pathname] = request.url?.split('?') ?? [];
           const { upgrade } = request.headers;
           if (upgrade === 'websocket' && pathname in routes) {
             wss.handleUpgrade(request, socket, head, (ws) => {

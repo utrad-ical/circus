@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, Switch } from 'react-router-dom';
 import Application from 'pages/Application';
@@ -38,10 +38,10 @@ import PluginJobQueueSearch from './pages/search/PluginJobQueueSearch';
 import browserHistory from './browserHistory';
 import GlobalStyle, { CircusThemeProvider } from './theme';
 
-import { ApiContext, ApiCaller } from 'utils/api';
+import { ApiContext, ApiCaller, useApi } from 'utils/api';
 import loginManager, { LoginManagerContext } from 'utils/loginManager';
 import { VolumeLoaderFactoryContext } from 'utils/useVolumeLoader';
-import createVolumeLoaderManager from 'utils/createVolumeLoaderManager';
+import createVolumeLoaderManager, { VolumeLoaderManager } from 'utils/createVolumeLoaderManager';
 
 require('./styles/main.less');
 
@@ -108,12 +108,23 @@ const AppRoutes: React.FC<{}> = () => {
 
 const VolumeLoaderFactoryProvider: React.FC<{}> = ({ children }) => {
   const server = useSelector(state => state.loginUser.data?.dicomImageServer);
+  const api = useApi();
+  const token = api?.getToken();
 
-  const provider = useMemo(() => {
-    if (!server) return null as any;
+  const provider = useMemo<VolumeLoaderManager>(
+    () => server && token
+      ? createVolumeLoaderManager({ server, queryString: `token=${token}` })
+      : (null as any),
+    [server, token]
+  );
 
-    return createVolumeLoaderManager({ server });
-  }, [server]);
+  const currentProvider = useRef<VolumeLoaderManager>();
+  useEffect(() => {
+    if (currentProvider.current && currentProvider.current !== provider) {
+      currentProvider.current.disconnect();
+    }
+    currentProvider.current = provider;
+  }, [provider, currentProvider.current]);
 
   return (
     <VolumeLoaderFactoryContext.Provider value={provider}>

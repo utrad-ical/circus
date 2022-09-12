@@ -29,7 +29,7 @@ properties:
     maximum: 1
   interpolationMode:
     enum: ['nearestNeighbor', 'trilinear']
-  scrollBars:
+  scrollBars: #deprecated
     enum: ['none', 'small', 'large']
   scrollBarsInfo:
     type: object

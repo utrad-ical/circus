@@ -1,42 +1,63 @@
+import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import ModifierKeyBehaviors from '@utrad-ical/circus-rs/src/browser/annotation/ModifierKeyBehaviors';
+import PlaneFigureOption from '@utrad-ical/circus-rs/src/browser/annotation/PlaneFigureOption';
+import { ReferenceValueOption } from '@utrad-ical/circus-rs/src/browser/tool/cloud/WandTool';
 import { InterpolationMode } from '@utrad-ical/circus-rs/src/browser/ViewState';
 import Icon from 'components/Icon';
 import {
   Button,
   Dropdown,
   MenuItem,
+  Modal,
   OverlayTrigger,
-  Tooltip,
   SplitButton,
-  Modal
+  Tooltip
 } from 'components/react-bootstrap';
+import { ToolOptions, ToolOptionSetter } from 'pages/case-detail/useToolbar';
 import React, { useState } from 'react';
+import { MenuItemProps } from 'react-bootstrap';
 import styled from 'styled-components';
 import { WindowPreset } from 'types/Project';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
-import { ToolOptions, ToolOptionSetter } from 'pages/case-detail/useToolbar';
-import { ReferenceValueOption } from '@utrad-ical/circus-rs/src/browser/tool/cloud/WandTool';
-import ModifierKeyBehaviors from '@utrad-ical/circus-rs/src/browser/annotation/ModifierKeyBehaviors';
-import { Editor } from '@smikitky/rb-components/lib/editor-types';
+import { ScrollBarsSettings } from '../../store/loginUser';
 import { LayoutKind } from './caseStore';
-import { MenuItemProps } from 'react-bootstrap';
-import PlaneFigureOption from '@utrad-ical/circus-rs/src/browser/annotation/PlaneFigureOption';
 import ViewWindowEditor, { ViewWindow } from './ViewWindowEditor';
 
 export interface ViewOptions {
   showReferenceLine?: boolean;
-  scrollbar?: ScrollbarOptions;
+  scrollbar?: ScrollBarsSettings;
   interpolationMode?: InterpolationMode;
 }
 
-type ScrollbarOptions = 'none' | 'large' | 'small';
+type ScrollbarVisibilityOptions = 'none' | 'always' | 'hover';
+type ScrollbarSizeOptions = 'small' | 'large';
+type ScrollbarPositionOptions = 'right' | 'left' | 'top' | 'bottom';
 
-const scrollbarOptions: { key: ScrollbarOptions; caption: string }[] = [
+const scrollbarVisibilityOptions: {
+  key: ScrollbarVisibilityOptions;
+  caption: string;
+}[] = [
   { key: 'none', caption: 'None' },
+  { key: 'always', caption: 'Always' },
+  { key: 'hover', caption: 'Hover' }
+];
+const scrollbarSizeOptions: {
+  key: ScrollbarSizeOptions;
+  caption: string;
+}[] = [
   { key: 'small', caption: 'Small' },
   { key: 'large', caption: 'Large' }
 ];
-
+const scrollbarPositionOptions: {
+  key: ScrollbarPositionOptions;
+  caption: string;
+}[] = [
+  { key: 'right', caption: 'Right' },
+  { key: 'left', caption: 'Left' },
+  { key: 'top', caption: 'Top' },
+  { key: 'bottom', caption: 'Bottom' }
+];
 type ZDimmedThresholdOptions = 'hide' | 'show' | 'infinity';
 
 export const zDimmedThresholdOptions: {
@@ -176,12 +197,14 @@ const ToolBar: React.FC<{
     });
   };
 
-  const handleToggleScrollbar = (selection: any) => {
-    onChangeViewOptions({
-      ...viewOptions,
-      scrollbar: selection as ScrollbarOptions
-    });
-  };
+  const handleToggleScrollbar =
+    (option: 'visibility' | 'size' | 'position') => (selection: any) => {
+      const scrollbar = { ...viewOptions.scrollbar, [option]: selection };
+      onChangeViewOptions({
+        ...viewOptions,
+        scrollbar: scrollbar as ScrollBarsSettings
+      });
+    };
 
   const handleToggleInterpolationMode = () => {
     onChangeViewOptions({
@@ -361,19 +384,56 @@ const ToolBar: React.FC<{
             Trilinear filtering
           </MenuItemWithShortcut>
           <MenuItem divider />
-          <MenuItem header>Scroll bars</MenuItem>
-          {scrollbarOptions.map(l => {
+          <MenuItem header>Scroll bars visibility</MenuItem>
+          {scrollbarVisibilityOptions.map(l => {
             return (
               <MenuItem
                 key={l.key}
                 eventKey={l.key}
-                onSelect={handleToggleScrollbar}
+                onSelect={handleToggleScrollbar('visibility')}
               >
-                <CheckMark checked={viewOptions.scrollbar === l.key} />
+                <CheckMark
+                  checked={viewOptions.scrollbar?.visibility === l.key}
+                />
                 {l.caption}
               </MenuItem>
             );
           })}
+          {viewOptions.scrollbar?.visibility &&
+            viewOptions.scrollbar.visibility !== 'none' && (
+              <>
+                <MenuItem header>Scroll bars size</MenuItem>
+                {scrollbarSizeOptions.map(l => {
+                  return (
+                    <MenuItem
+                      key={l.key}
+                      eventKey={l.key}
+                      onSelect={handleToggleScrollbar('size')}
+                    >
+                      <CheckMark
+                        checked={viewOptions.scrollbar?.size === l.key}
+                      />
+                      {l.caption}
+                    </MenuItem>
+                  );
+                })}
+                <MenuItem header>Scroll bars position</MenuItem>
+                {scrollbarPositionOptions.map(l => {
+                  return (
+                    <MenuItem
+                      key={l.key}
+                      eventKey={l.key}
+                      onSelect={handleToggleScrollbar('position')}
+                    >
+                      <CheckMark
+                        checked={viewOptions.scrollbar?.position === l.key}
+                      />
+                      {l.caption}
+                    </MenuItem>
+                  );
+                })}
+              </>
+            )}
           <MenuItem divider />
           <MenuItem header>Shape resizing behavior</MenuItem>
           <MenuItem onClick={handleToggleLockMaintainAspectRatio}>

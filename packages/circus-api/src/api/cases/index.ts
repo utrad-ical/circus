@@ -18,8 +18,10 @@ const maxTagLength = 32;
 
 const maskPatientInfo = (ctx: CircusContext) => {
   return (caseData: any) => {
+    const canViewPersonalInfo =
+      ctx.userPrivileges.globalPrivileges.includes('personalInfoView');
     const wantToView = ctx.user.preferences.personalInfoView;
-    if (!wantToView || caseData.patientInfo === null) {
+    if (!canViewPersonalInfo || !wantToView || caseData.patientInfo === null) {
       delete caseData.patientInfo;
     }
     return caseData;
@@ -120,15 +122,20 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
     if (!checkFilter(customFilter!, searchableFields))
       ctx.throw(status.BAD_REQUEST, 'Bad filter.');
 
-    const patientInfoInFilter = isPatientInfoInFilter(customFilter!);
+    const canViewPersonalInfo =
+      ctx.userPrivileges.globalPrivileges.includes('personalInfoView');
+
+    if (!canViewPersonalInfo && isPatientInfoInFilter(customFilter))
+      ctx.throw(
+        status.BAD_REQUEST,
+        'You cannot search using patient information.'
+      );
+
     const accessibleProjectIds = ctx.userPrivileges.accessibleProjects
-      .filter(
-        p =>
-          p.roles.includes('read') &&
-          (!patientInfoInFilter || p.roles.includes('viewPersonalInfo'))
-      )
+      .filter(p => p.roles.includes('read'))
       .map(p => p.projectId);
-    const patientInfoVisibleProjectIds = ctx.userPrivileges.accessibleProjects
+
+    const canViewPersonalInfoProjectIds = ctx.userPrivileges.accessibleProjects
       .filter(
         p => p.roles.includes('read') && p.roles.includes('viewPersonalInfo')
       )
@@ -170,7 +177,7 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
         $addFields: {
           patientInfo: {
             $cond: [
-              { $in: ['$projectId', patientInfoVisibleProjectIds] },
+              { $in: ['$projectId', canViewPersonalInfoProjectIds] },
               '$seriesDetail.patientInfo',
               null
             ]

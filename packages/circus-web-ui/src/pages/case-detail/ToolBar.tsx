@@ -330,7 +330,11 @@ const ToolBar: React.FC<{
               </MenuItem>
             );
           })}
-          <MenuItem header>Q: Wider, A: Narrower</MenuItem>
+          <MenuItem header>
+            <ShortcutBox>
+              <kbd>Q</kbd>: Wider,&nbsp;<kbd>A</kbd>: Narrower
+            </ShortcutBox>
+          </MenuItem>
         </Dropdown.Menu>
       </Dropdown>
       <ToolButton

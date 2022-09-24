@@ -64,6 +64,25 @@ it('should reject 403 for unauthorized series', async () => {
   expect(res.status).toBe(403);
 });
 
+test('throw 400 if search using patient information for unprivileged user', async () => {
+  const res = await ax.frank.request({
+    url: 'api/series',
+    method: 'get',
+    params: { filter: { 'patientInfo.patientName': 'Koume' } }
+  });
+  expect(res.status).toBe(400);
+});
+
+test('should be searchable if patient information is not used', async () => {
+  const res = await ax.frank.request({
+    url: 'api/series',
+    method: 'get',
+    params: { filter: { seriesUid: '222.333.444.555.666' } }
+  });
+  expect(res.status).toBe(200);
+  expect(res.data.items).toHaveLength(1);
+});
+
 describe('getOrientation', () => {
   it('head-first ascending order', async () => {
     const res = await ax.dave.request({

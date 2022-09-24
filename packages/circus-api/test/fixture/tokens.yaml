@@ -60,3 +60,23 @@
   userId: dave@example.com
   permanentTokenId: null
   permanentTokenDescription: null
+- accessToken: ft5y1dkymhc2jh9wf0hrx7dpghj8u12hdk27dnls
+  accessTokenExpiresAt:
+    $date: 4102412399000
+  refreshToken: pmnbjfuikkwjhgfhfd4dgfj3kdmdxchvbhc8gyuj
+  refreshTokenExpiresAt:
+    $date: 4102412399000
+  clientId: CIRCUS Front UI
+  userId: eve@example.com
+  permanentTokenId: null
+  permanentTokenDescription: null
+- accessToken: s10jkttverbemycvpe7bbbbemxcm38cqvrey54hd
+  accessTokenExpiresAt:
+    $date: 4102412399000
+  refreshToken: w4faf9ujm3d89nllnpeqizlmxfhdexmdjvisgo84
+  refreshTokenExpiresAt:
+    $date: 4102412399000
+  clientId: CIRCUS Front UI
+  userId: frank@example.com
+  permanentTokenId: null
+  permanentTokenDescription: null

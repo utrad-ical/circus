@@ -5,7 +5,11 @@ import isLikeDicom from '../../utils/isLikeDicom';
 import { CircusContext, RouteMiddleware } from '../../typings/middlewares';
 import checkFilter from '../../utils/checkFilter';
 import { fileOrArchiveIterator } from '../../utils/directoryIterator';
-import { extractFilter, performAggregationSearch } from '../performSearch';
+import {
+  extractFilter,
+  performAggregationSearch,
+  isPatientInfoInFilter
+} from '../performSearch';
 import resolveSeriesOrientation from '../../utils/resolveSeriesOrientation';
 import { multirange } from 'multi-integer-range';
 
@@ -193,6 +197,15 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
     if (!checkFilter(customFilter!, fields))
       ctx.throw(status.BAD_REQUEST, 'Bad filter.');
 
+    const canViewPersonalInfo =
+      ctx.userPrivileges.globalPrivileges.includes('personalInfoView');
+
+    if (!canViewPersonalInfo && isPatientInfoInFilter(customFilter))
+      ctx.throw(
+        status.BAD_REQUEST,
+        'You cannot search using patient information.'
+      );
+
     const domainFilter = {
       domain: { $in: ctx.userPrivileges.domains }
     };
@@ -210,13 +223,6 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
       if (myList.resourceType !== 'series')
         ctx.throw(status.BAD_REQUEST, 'This my list is not for series');
     }
-
-    const canViewPersonalInfo =
-      ctx.userPrivileges.globalPrivileges.includes('personalInfoView');
-
-    const baseStages: object[] = canViewPersonalInfo
-      ? []
-      : [{ $unset: 'personalInfo' }];
 
     const searchByMyListStage: object[] = [
       { $match: { myListId } },
@@ -240,9 +246,7 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
     ];
 
     const startModel = myListId ? models.myList : models.series;
-    const lookupStages = myListId
-      ? [...searchByMyListStage, ...baseStages]
-      : baseStages;
+    const lookupStages = myListId ? searchByMyListStage : [];
     const defaultSort = myListId ? { addedToListAt: -1 } : { createdAt: -1 };
 
     // Removes patient info according to the preference

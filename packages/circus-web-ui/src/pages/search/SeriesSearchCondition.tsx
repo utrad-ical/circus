@@ -40,9 +40,9 @@ const basicConditionToMongoQuery = (condition: Condition['basic']) => {
     const val = condition[key];
     switch (key) {
       case 'age':
-        if (typeof val.min === 'number')
+        if (typeof val.min === 'number' && !isNaN(val.min))
           members.push({ 'patientInfo.age': { $gte: val.min } });
-        if (typeof val.max === 'number')
+        if (typeof val.max === 'number' && !isNaN(val.max))
           members.push({ 'patientInfo.age': { $lte: val.max } });
         break;
       case 'seriesDate': {

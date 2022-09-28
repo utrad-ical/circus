@@ -6,11 +6,12 @@ let apiTest: ApiTest,
   alice: AxiosInstance,
   bob: AxiosInstance,
   guest: AxiosInstance,
-  dave: AxiosInstance;
+  dave: AxiosInstance,
+  frank: AxiosInstance;
 
 beforeAll(async () => {
   apiTest = await setUpAppForRoutesTest();
-  ({ alice, bob, guest, dave } = apiTest.axiosInstances);
+  ({ alice, bob, guest, dave, frank } = apiTest.axiosInstances);
 });
 
 afterAll(async () => await apiTest.tearDown());
@@ -18,6 +19,7 @@ afterAll(async () => await apiTest.tearDown());
 // (bob belongs to vega.org domain)
 // (guest belongs to no domain)
 // (dave belongs to sirius.org and vega.org domain)
+// (frank belongs to sirius.org and vega.org domain)
 
 // 111.222.333.444.444: (  1) [sirius.org]
 // 111.222.333.444.555: (150) [sirius.org]
@@ -52,6 +54,27 @@ describe('plugin-job search', () => {
     const res = await guest.get('api/plugin-jobs');
     expect(res.status).toBe(200);
     expect(res.data.items).toHaveLength(0);
+  });
+
+  test('throw 400 if search using patient information for unprivileged user', async () => {
+    // Frank has no global privilege `personalInfoView`.
+    const res = await frank.get('api/plugin-jobs', {
+      params: { filter: { 'patientInfo.patientName': 'Sakura' } }
+    });
+    expect(res.status).toBe(400);
+  });
+
+  test('should be searchable if patient information is not used', async () => {
+    const res = await frank.get('api/plugin-jobs', {
+      params: {
+        filter: {
+          pluginId:
+            'd135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2'
+        }
+      }
+    });
+    expect(res.status).toBe(200);
+    expect(res.data.items).toHaveLength(3);
   });
 });
 

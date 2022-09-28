@@ -196,6 +196,28 @@ const ImageViewer: React.FC<{
     viewer.setActiveTool(tool);
   }, [viewer, tool]);
 
+  // Handle keydown to simulate wheel event
+  useEffect(() => {
+    const container = containerRef.current!;
+    const onKeydown = (e: KeyboardEvent) => {
+      const parent = container.closest('.grid-container-cell');
+      const canvas = container.querySelector('canvas');
+      if (canvas && parent && parent.querySelector('.active')) {
+        if (e.key === 'ArrowLeft') {
+          const wheelEvent = new WheelEvent('wheel', { deltaY: 1 });
+          canvas.dispatchEvent(wheelEvent);
+        } else if (e.key === 'ArrowRight') {
+          const wheelEvent = new WheelEvent('wheel', { deltaY: -1 });
+          canvas.dispatchEvent(wheelEvent);
+        }
+      }
+    };
+    window.addEventListener('keydown', onKeydown);
+    return () => {
+      window.removeEventListener('keydown', onKeydown);
+    };
+  }, []);
+
   return (
     <div className={classnames('image-viewer', className)} ref={containerRef} />
   );

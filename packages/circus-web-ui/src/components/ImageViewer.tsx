@@ -95,6 +95,7 @@ const ImageViewer: React.FC<{
   onDestroyViewer?: (viewer: rs.Viewer) => void;
   onViewStateChange?: (viewer: rs.Viewer, id?: string | number) => void;
   onMouseUp?: () => void;
+  activeKeydown?: boolean;
 }> = props => {
   const {
     className,
@@ -106,7 +107,8 @@ const ImageViewer: React.FC<{
     onCreateViewer = noop,
     onDestroyViewer = noop,
     onViewStateChange = noop,
-    onMouseUp = noop
+    onMouseUp = noop,
+    activeKeydown = false
   } = props;
 
   const [viewer, setViewer] = useState<rs.Viewer | null>(null);
@@ -199,24 +201,23 @@ const ImageViewer: React.FC<{
   // Handle keydown to simulate wheel event
   useEffect(() => {
     const container = containerRef.current!;
-    const onKeydown = (e: KeyboardEvent) => {
-      const parent = container.closest('.grid-container-cell');
+    const handleKeydown = (e: KeyboardEvent) => {
       const canvas = container.querySelector('canvas');
-      if (canvas && parent && parent.querySelector('.active')) {
-        if (e.key === 'ArrowLeft') {
+      if (canvas && activeKeydown) {
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
           const wheelEvent = new WheelEvent('wheel', { deltaY: 1 });
           canvas.dispatchEvent(wheelEvent);
-        } else if (e.key === 'ArrowRight') {
+        } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
           const wheelEvent = new WheelEvent('wheel', { deltaY: -1 });
           canvas.dispatchEvent(wheelEvent);
         }
       }
     };
-    window.addEventListener('keydown', onKeydown);
+    window.addEventListener('keydown', handleKeydown);
     return () => {
-      window.removeEventListener('keydown', onKeydown);
+      window.removeEventListener('keydown', handleKeydown);
     };
-  }, []);
+  }, [activeKeydown]);
 
   return (
     <div className={classnames('image-viewer', className)} ref={containerRef} />

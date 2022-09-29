@@ -242,10 +242,13 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
     initialStateSetter,
     onCreateViewer,
     onDestroyViewer,
-    onViewStateChange
+    onViewStateChange,
+    editingData
   } = useContext(ViewerGridContext)!;
 
   const composition = compositions[seriesIndex].composition;
+  const { activeLayoutKey } = editingData;
+  const active = key === activeLayoutKey;
 
   const combinedInitialStateSetter = useCallback(
     (viewer: Viewer, viewState: MprViewState | TwoDimensionalViewState) => {
@@ -254,8 +257,8 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
           const initialState = getInitial2dViewState(viewer, viewState)!;
           const s1 = initialSection
             ? {
-              ...sectionTo2dViewState(initialState, initialSection)
-            }
+                ...sectionTo2dViewState(initialState, initialSection)
+              }
             : initialState;
           const s2 = initialStateSetter(viewer, s1, key);
           return s2;
@@ -267,8 +270,9 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
           )!;
           const s1 = initialSection
             ? {
-              ...initialState, section: initialSection
-            }
+                ...initialState,
+                section: initialSection
+              }
             : initialState;
           const s2 = initialStateSetter(viewer, s1, key);
           return s2;
@@ -325,6 +329,7 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
       onCreateViewer={onCreateViewer}
       onDestroyViewer={onDestroyViewer}
       onViewStateChange={onViewStateChange}
+      activeKeydown={active}
     />
   );
 };

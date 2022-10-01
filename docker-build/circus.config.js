@@ -26,6 +26,7 @@ module.exports = {
   jobRunner: {
     options: {
       workingDirectory: "/var/circus/data/cs-tmp",
+      doodHostWorkingDirectory: process.env.DOOD_HOST_WORKING_PATH + "/cs-tmp",
       removeTemporaryDirectory: false,
     },
   },

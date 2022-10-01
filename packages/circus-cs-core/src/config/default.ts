@@ -14,6 +14,7 @@ const defaults: circus.Configuration = {
   jobRunner: {
     options: {
       workingDirectory: path.join(os.tmpdir(), 'circus-cs'),
+      doodHostWorkingDirectory: undefined,
       removeTemporaryDirectory: true
     }
   },

@@ -80,25 +80,25 @@ const layoutOptions: {
     key: 'twoByTwo',
     caption: '2 x 2',
     icon: 'circus-layout-four',
-    shortcut: 'X'
+    shortcut: 'Shift+X'
   },
   {
     key: 'axial',
     caption: 'Axial',
     icon: 'circus-orientation-axial',
-    shortcut: 'A'
+    shortcut: 'Shift+A'
   },
   {
     key: 'sagittal',
     caption: 'Sagittal',
     icon: 'circus-orientation-sagittal',
-    shortcut: 'S'
+    shortcut: 'Shift+S'
   },
   {
     key: 'coronal',
     caption: 'Coronal',
     icon: 'circus-orientation-coronal',
-    shortcut: 'C'
+    shortcut: 'Shift+C'
   }
 ];
 
@@ -165,6 +165,18 @@ const ToolBar: React.FC<{
     { label: 'x1/4', level: 0.25 },
     { label: 'x1/8', level: 0.125 }
   ];
+
+  const handleLineWidth = (widen: boolean) => () => {
+    if (!brushEnabled || disabled) return;
+    const pos = widthOptions.findIndex(
+      lineWidth => lineWidth === String(toolOptions.lineWidth)
+    );
+    if ((!widen && pos < 1) || (widen && widthOptions.length - 1 <= pos))
+      return;
+    setToolOption('lineWidth', Number(widthOptions[widen ? pos + 1 : pos - 1]));
+  };
+  useKeyboardShortcut('Q', handleLineWidth(true));
+  useKeyboardShortcut('A', handleLineWidth(false));
 
   const handleToggleReferenceLine = () => {
     onChangeViewOptions({
@@ -300,14 +312,31 @@ const ToolBar: React.FC<{
         shortcut="E"
         disabled={!brushEnabled || disabled}
       />
-      <ShrinkSelect
-        numericalValue
+      <Dropdown
+        id="line-width-dropdown"
         className="line-width-shrinkselect"
-        options={widthOptions}
-        value={toolOptions.lineWidth}
-        onChange={lineWidth => setToolOption('lineWidth', lineWidth)}
         disabled={!brushEnabled || disabled}
-      />
+      >
+        <Dropdown.Toggle>{toolOptions.lineWidth}</Dropdown.Toggle>
+        <Dropdown.Menu>
+          {widthOptions.map(lineWidth => {
+            return (
+              <MenuItem
+                key={lineWidth}
+                eventKey={lineWidth}
+                onSelect={lineWidth => setToolOption('lineWidth', lineWidth)}
+              >
+                {lineWidth}
+              </MenuItem>
+            );
+          })}
+          <MenuItem header>
+            <ShortcutBox>
+              <kbd>Q</kbd>: Wider,&nbsp;<kbd>A</kbd>: Narrower
+            </ShortcutBox>
+          </MenuItem>
+        </Dropdown.Menu>
+      </Dropdown>
       <ToolButton
         name="bucket"
         icon="rs-bucket"

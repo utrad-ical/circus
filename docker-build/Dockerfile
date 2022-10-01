@@ -100,6 +100,8 @@ ENV PATH=/circus:$PATH \
     HOST_DATA_PATH=/var/circus/data \
     LOCAL_HOST_IP=127.0.0.1 \
     DAEMON_MODE=0 \
-    PM2_HOME=/circus/.pm2
+    PM2_HOME=/circus/.pm2 \
+    MY_CONTAINER_ID=12345678 \
+    DOOD_HOST_WORKING_PATH=/var/circus/data 
 
 CMD ["/circus/startup.sh"]

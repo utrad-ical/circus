@@ -1,13 +1,12 @@
-import path from 'path';
+import { FunctionService } from '@utrad-ical/circus-lib';
 import fs from 'fs-extra';
-import DockerRunner from '../util/DockerRunner';
-import { DicomFileRepository, FunctionService } from '@utrad-ical/circus-lib';
-import pluginResultsValidator from './pluginResultsValidator';
-import { MultiRange } from 'multi-integer-range';
-import tarfs from 'tar-fs';
+import path from 'path';
 import stream, { PassThrough } from 'stream';
+import tarfs from 'tar-fs';
 import * as circus from '../interface';
+import DockerRunner from '../util/DockerRunner';
 import buildDicomVolumes from './buildDicomVolumes';
+import pluginResultsValidator from './pluginResultsValidator';
 
 export interface PluginJobRunner {
   run: (jobId: string, job: circus.PluginJobRequest) => Promise<boolean>;
@@ -26,11 +25,16 @@ const pluginJobRunner: FunctionService<
 > = async (
   options: {
     workingDirectory: string;
+    doodHostWorkingDirectory?: string;
     removeTemporaryDirectory?: boolean;
   },
   deps
 ) => {
-  const { workingDirectory, removeTemporaryDirectory } = options;
+  const {
+    workingDirectory,
+    doodHostWorkingDirectory,
+    removeTemporaryDirectory
+  } = options;
   const {
     pluginDefinitionAccessor,
     jobReporter,
@@ -40,13 +44,18 @@ const pluginJobRunner: FunctionService<
 
   if (!workingDirectory) throw new Error('Working directory is not set');
 
-  const baseDir = (jobId: string) => {
+  const baseDir = (jobId: string, forDood?: boolean) => {
     if (typeof jobId !== 'string' || !jobId.length) throw new Error();
-    return path.join(workingDirectory, jobId);
+    return path.join(
+      forDood && doodHostWorkingDirectory
+        ? doodHostWorkingDirectory
+        : workingDirectory,
+      jobId
+    );
   };
 
-  const workDir = (jobId: string, type: WorkDirType) => {
-    return path.join(baseDir(jobId), type);
+  const workDir = (jobId: string, type: WorkDirType, forDood?: boolean) => {
+    return path.join(baseDir(jobId, forDood), type);
   };
 
   const preProcess = async (
@@ -113,8 +122,8 @@ const pluginJobRunner: FunctionService<
       const { stream, promise } = await executePlugin(
         dockerRunner,
         plugin,
-        workDir(jobId, 'in'), // Plugin input dir containing volume data
-        workDir(jobId, 'out') // Plugin output dir that will have CAD results
+        workDir(jobId, 'in', true), // Plugin input dir containing volume data
+        workDir(jobId, 'out', true) // Plugin output dir that will have CAD results
       );
       stream.pipe(
         logStream,
@@ -127,7 +136,7 @@ const pluginJobRunner: FunctionService<
       await jobReporter.report(jobId, 'finished');
       writeLog('Job execution done.\n\n');
       return true;
-    } catch (e) {
+    } catch (e: any) {
       writeLog('Error happened in plug-in job runner:\n' + e.stack + '\n');
       await jobReporter.report(jobId, 'failed', e.message);
       return false;

@@ -45,7 +45,7 @@ interface MarkStyle {
 const defaultMarkStyle: Required<MarkStyle> = {
   color: '#ff00ff',
   dimmedColor: '#ff00ff55',
-  radius: 30,
+  radius: 5, // mm
   width: 3
 };
 
@@ -181,12 +181,12 @@ const Candidate: React.FC<{
         markStyle.dimmedColor ?? defaultMarkStyle.dimmedColor;
       annotation.width = markStyle.width ?? defaultMarkStyle.width;
       annotation.min = [
-        (item.location[0] - r) * metadata.voxelSize[0],
-        (item.location[1] - r) * metadata.voxelSize[1]
+        item.location[0] * metadata.voxelSize[0] - r,
+        item.location[1] * metadata.voxelSize[1] - r
       ];
       annotation.max = [
-        (item.location[0] + r) * metadata.voxelSize[0],
-        (item.location[1] + r) * metadata.voxelSize[1]
+        item.location[0] * metadata.voxelSize[0] + r,
+        item.location[1] * metadata.voxelSize[1] + r
       ];
       annotation.z = item.location[2] * metadata.voxelSize[2];
       composition.addAnnotation(annotation);

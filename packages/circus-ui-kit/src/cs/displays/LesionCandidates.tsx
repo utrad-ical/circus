@@ -69,19 +69,105 @@ export const normalizeCandidates = (input: any): LesionCandidate[] => {
   });
 };
 
+const applyDisplayOptions = (
+  state: rs.MprViewState,
+  voxelSize: any,
+  location: number,
+  displayOptions: any
+) => {
+  const newOrigin = [
+    state.section.origin[0],
+    state.section.origin[1],
+    voxelSize[2] * location
+  ];
+  state = {
+    ...state,
+    section: { ...state.section, origin: newOrigin }
+  };
+  if (displayOptions.window) {
+    state = {
+      ...state,
+      window: { ...displayOptions.window }
+    };
+  }
+  if (displayOptions.crop) {
+    if (
+      state.section.xAxis[0] / state.section.yAxis[1] <
+      (displayOptions.crop.size[0] * voxelSize[0]) /
+        (displayOptions.crop.size[1] * voxelSize[1])
+    ) {
+      const margin =
+        (state.section.yAxis[1] * displayOptions.crop.size[0] * voxelSize[0]) /
+          state.section.xAxis[0] -
+        displayOptions.crop.size[1] * voxelSize[1];
+      const section = {
+        origin: [
+          displayOptions.crop.origin[0] * voxelSize[0],
+          displayOptions.crop.origin[1] * voxelSize[1] - margin / 2,
+          newOrigin[2]
+        ],
+        xAxis: [
+          displayOptions.crop.size[0] * voxelSize[0],
+          state.section.xAxis[1],
+          state.section.xAxis[2]
+        ],
+        yAxis: [
+          state.section.yAxis[0],
+          displayOptions.crop.size[1] * voxelSize[1] + margin,
+          state.section.yAxis[2]
+        ]
+      };
+      state = {
+        ...state,
+        section: { ...section }
+      };
+    } else {
+      const margin =
+        (state.section.xAxis[0] * displayOptions.crop.size[1] * voxelSize[1]) /
+          state.section.yAxis[1] -
+        displayOptions.crop.size[0] * voxelSize[0];
+      const section = {
+        origin: [
+          displayOptions.crop.origin[0] * voxelSize[0] - margin / 2,
+          displayOptions.crop.origin[1] * voxelSize[1],
+          newOrigin[2]
+        ],
+        xAxis: [
+          displayOptions.crop.size[0] * voxelSize[0] + margin,
+          state.section.xAxis[1],
+          state.section.xAxis[2]
+        ],
+        yAxis: [
+          state.section.yAxis[0],
+          displayOptions.crop.size[1] * voxelSize[1],
+          state.section.yAxis[2]
+        ]
+      };
+      state = {
+        ...state,
+        section: { ...section }
+      };
+    }
+  }
+  return state;
+};
+
 const Candidate: React.FC<{
   imageSource: MprImageSource;
   item: LesionCandidate;
   markStyle: MarkStyle;
   tool: Tool;
+  displayOptions: any;
 }> = props => {
-  const { imageSource, item, markStyle, tool, children } = props;
+  const { imageSource, item, markStyle, tool, displayOptions, children } =
+    props;
 
   const stateChanger = useMemo(() => createStateChanger<MprViewState>(), []);
 
-  const composition = useMemo(() => new Composition(imageSource), [
-    imageSource
-  ]);
+  const composition = useMemo(
+    () => new Composition(imageSource),
+    [imageSource]
+  );
 
   useEffect(() => {
     const addAnnotation = async () => {
@@ -109,18 +195,13 @@ const Candidate: React.FC<{
   }, [composition, imageSource]);
 
   const centerState = useCallback<StateChangerFunc<MprViewState>>(
-    state => {
-      const voxelSize = (composition!.imageSource as any).metadata.voxelSize;
-      const newOrigin = [
-        state.section.origin[0],
-        state.section.origin[1],
-        voxelSize[2] * item.location[2]
-      ];
-      return {
-        ...state,
-        section: { ...state.section, origin: newOrigin }
-      };
-    },
+    state =>
+      applyDisplayOptions(
+        state,
+        (composition!.imageSource as any).metadata.voxelSize,
+        item.location[2],
+        displayOptions
+      ),
     [composition, item.location]
   );
 
@@ -183,10 +264,8 @@ export const LesionCandidates: Display<
   const { results } = job;
   const [composition, setComposition] = useState<Composition | null>(null);
   const [error, setError] = useState<Error | null>(null);
-
-  const [currentFeedback, setCurrentFeedback] = useState<
-    LesionCandidateFeedback
-  >(initialFeedbackValue ?? []);
+  const [currentFeedback, setCurrentFeedback] =
+    useState<LesionCandidateFeedback>(initialFeedbackValue ?? []);
 
   const allCandidates = useMemo(
     () => normalizeCandidates(get(results, dataPath)),
@@ -331,6 +410,9 @@ export const LesionCandidates: Display<
               markStyle={markStyle}
               tool={tool}
               imageSource={imageSourceForVolumeId(cand.volumeId ?? 0)}
+              displayOptions={
+                results.metadata.displayOptions[cand.volumeId ?? 0]
+              }
             >
               {feedbackListener && FeedbackListener && (
                 <div className="feedback-listener">

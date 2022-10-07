@@ -73,7 +73,8 @@ const applyDisplayOptions = (
   state: rs.MprViewState,
   voxelSize: any,
   location: number,
-  displayOptions: any
+  displayOptions: any,
+  resolution: [number, number]
 ) => {
   const newOrigin = [
     state.section.origin[0],
@@ -92,13 +93,13 @@ const applyDisplayOptions = (
   }
   if (displayOptions.crop) {
     if (
-      state.section.xAxis[0] / state.section.yAxis[1] <
+      resolution[0] / resolution[1] <
       (displayOptions.crop.size[0] * voxelSize[0]) /
         (displayOptions.crop.size[1] * voxelSize[1])
     ) {
       const margin =
-        (state.section.yAxis[1] * displayOptions.crop.size[0] * voxelSize[0]) /
-          state.section.xAxis[0] -
+        (resolution[1] * displayOptions.crop.size[0] * voxelSize[0]) /
+          resolution[0] -
         displayOptions.crop.size[1] * voxelSize[1];
       const section = {
         origin: [
@@ -106,16 +107,8 @@ const applyDisplayOptions = (
           displayOptions.crop.origin[1] * voxelSize[1] - margin / 2,
           newOrigin[2]
         ],
-        xAxis: [
-          displayOptions.crop.size[0] * voxelSize[0],
-          state.section.xAxis[1],
-          state.section.xAxis[2]
-        ],
-        yAxis: [
-          state.section.yAxis[0],
-          displayOptions.crop.size[1] * voxelSize[1] + margin,
-          state.section.yAxis[2]
-        ]
+        xAxis: [displayOptions.crop.size[0] * voxelSize[0], 0, 0],
+        yAxis: [0, displayOptions.crop.size[1] * voxelSize[1] + margin, 0]
       };
       state = {
         ...state,
@@ -123,8 +116,8 @@ const applyDisplayOptions = (
       };
     } else {
       const margin =
-        (state.section.xAxis[0] * displayOptions.crop.size[1] * voxelSize[1]) /
-          state.section.yAxis[1] -
+        (resolution[0] * displayOptions.crop.size[1] * voxelSize[1]) /
+          resolution[1] -
         displayOptions.crop.size[0] * voxelSize[0];
       const section = {
         origin: [
@@ -132,16 +125,8 @@ const applyDisplayOptions = (
           displayOptions.crop.origin[1] * voxelSize[1],
           newOrigin[2]
         ],
-        xAxis: [
-          displayOptions.crop.size[0] * voxelSize[0] + margin,
-          state.section.xAxis[1],
-          state.section.xAxis[2]
-        ],
-        yAxis: [
-          state.section.yAxis[0],
-          displayOptions.crop.size[1] * voxelSize[1],
-          state.section.yAxis[2]
-        ]
+        xAxis: [displayOptions.crop.size[0] * voxelSize[0] + margin, 0, 0],
+        yAxis: [0, displayOptions.crop.size[1] * voxelSize[1], 0]
       };
       state = {
         ...state,
@@ -200,7 +185,8 @@ const Candidate: React.FC<{
         state,
         (composition!.imageSource as any).metadata.voxelSize,
         item.location[2],
-        displayOptions
+        displayOptions,
+        composition.viewers[0].getResolution()
       ),
     [composition, item.location]
   );
@@ -297,7 +283,8 @@ export const LesionCandidates: Display<
     const src = new HybridMprImageSource({
       volumeLoader,
       rsHttpClient,
-      seriesUid: series.seriesUid
+      seriesUid: series.seriesUid,
+      partialVolumeDescriptor: series.partialVolumeDescriptor
     });
     const composition = new Composition(src);
     setComposition(composition);
@@ -325,7 +312,8 @@ export const LesionCandidates: Display<
     const imageSource = new HybridMprImageSource({
       rsHttpClient,
       seriesUid: series.seriesUid,
-      volumeLoader
+      volumeLoader,
+      partialVolumeDescriptor: series.partialVolumeDescriptor
     });
     setImgSrcMap(map => ({ ...map, [volumeId]: imageSource }));
     return imageSource;

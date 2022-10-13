@@ -45,7 +45,7 @@ interface MarkStyle {
 const defaultMarkStyle: Required<MarkStyle> = {
   color: '#ff00ff',
   dimmedColor: '#ff00ff55',
-  radius: 5, // mm
+  radius: 10, // mm
   width: 3
 };
 

@@ -74,7 +74,7 @@ const createMongoPluginJobReporter: FunctionService<
     callback?: () => void
   ) => {
     const outFile = path.join(resultsDirectory, jobId, 'plugin-log.txt');
-    fs.ensureDir(path.dirname(outFile));
+    await fs.ensureDir(path.dirname(outFile));
     const fileStream = fs.createWriteStream(outFile, 'utf8');
     stream.pipe(fileStream);
     if (callback) {

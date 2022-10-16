@@ -61,6 +61,14 @@ export interface ApiTest {
      * Dave belongs to the "admin" and "power user 2" group.
      */
     dave: AxiosInstance;
+    /**
+     * Eve belongs to the "guest" group.
+     */
+    eve: AxiosInstance;
+    /**
+     * Frank belongs to the "unprivileged user" group.
+     */
+    frank: AxiosInstance;
   };
   csCore: cscore.CsCore;
   dicomFileRepository: DicomFileRepository;
@@ -204,7 +212,9 @@ export const setUpAppForRoutesTest = async () => {
     bob: createAxios('8292766837c1901b0a6954f7bda49710316c57da'),
     guest: createAxios('2c2fbaea8046df924b8b459879b799c111e9b7f1'),
     carol: createAxios('m47mvv02x2yer00gjroc0za00dger4f455cvedfh'),
-    dave: createAxios('98uijkgfhgty43gccccf54rfdvupiazmvr3nwcko')
+    dave: createAxios('98uijkgfhgty43gccccf54rfdvupiazmvr3nwcko'),
+    eve: createAxios('ft5y1dkymhc2jh9wf0hrx7dpghj8u12hdk27dnls'),
+    frank: createAxios('s10jkttverbemycvpe7bbbbemxcm38cqvrey54hd')
   };
 
   const tearDown = async () => {

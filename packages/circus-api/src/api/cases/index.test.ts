@@ -43,8 +43,24 @@ describe('search', () => {
     expect(res.data.items[0].patientInfo.patientName).toBe('Anzu');
   });
 
-  test('search from user with no showPatientInfo privilege', async () => {
-    // Bob has no `showPatientInfo` priviledge for the default project,
+  test('throw 400 if search using patient information for unprivileged user', async () => {
+    // Frank has no global privilege `personalInfoView`.
+    const res = await ax.frank.get('api/cases', {
+      params: { filter: { 'patientInfo.patientName': 'Anzu' } }
+    });
+    expect(res.status).toBe(400);
+  });
+
+  test('should be searchable if patient information is not used', async () => {
+    const res = await ax.frank.get('api/cases', {
+      params: { filter: { caseId: cid } }
+    });
+    expect(res.status).toBe(200);
+    expect(res.data.items).toHaveLength(1);
+  });
+
+  test('search from user with no viewPersonalInfo privilege', async () => {
+    // Bob has no `viewPersonalInfo` privilege for the default project,
     // so the results from this project will be excluded.
     const res = await ax.bob.get('api/cases', {
       params: {

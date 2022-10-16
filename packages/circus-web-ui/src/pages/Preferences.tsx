@@ -4,6 +4,7 @@ import PropertyEditor, {
 } from '@smikitky/rb-components/lib/PropertyEditor';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
+import LabelColorsEditor from 'components/LabelColorsEditor';
 import { labeledSlider } from 'components/LabeledSlider';
 import { Button, FormControl, Panel } from 'components/react-bootstrap';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -11,7 +12,7 @@ import { SearchPreset, UserPreferences } from 'store/loginUser';
 import { useApi } from 'utils/api';
 import { useUserPreferences } from 'utils/useLoginUser';
 import useShowMessage from 'utils/useShowMessage';
-import LabelColorsEditor from 'components/LabelColorsEditor';
+import ScrollbarEditor from './ScrollBarsEditor';
 
 const PresetDeleteEditor: et.Editor<SearchPreset[] | undefined> = props => {
   const { value = [], onChange } = props;
@@ -182,13 +183,9 @@ const circusDBProperties: PropertyEditorProperties<UserPreferences> = [
     }) as et.Editor<string | undefined>
   },
   {
-    key: 'scrollBars',
+    key: 'scrollBarsInfo',
     caption: 'Scroll bars',
-    editor: et.shrinkSelect({
-      none: 'None',
-      small: 'Small',
-      large: 'Large'
-    }) as et.Editor<string | undefined>
+    editor: ScrollbarEditor
   },
   {
     key: 'maintainAspectRatio',

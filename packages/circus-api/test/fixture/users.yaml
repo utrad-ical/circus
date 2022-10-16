@@ -146,3 +146,19 @@
   loginEnabled: false
   groups: [3] # guests
   myLists: []
+- userEmail: frank@example.com
+  loginId: frank
+  # password is 'frankSecret'
+  password: '$2y$10$1dQcsdDALpr3vz97t2dviug/P0uoDsDcmiGgyPbfZrzfgOxc2DOc6'
+  description: Frank
+  lastLoginTime: { $date: 1405266782008 }
+  lastLoginIp: '0.0.0.0'
+  preferences:
+    theme: mode_white
+    personalInfoView: true
+    seriesSearchPresets: []
+    caseSearchPresets: []
+    pluginJobSearchPresets: []
+  loginEnabled: true
+  groups: [5] # unprivileged user
+  myLists: []

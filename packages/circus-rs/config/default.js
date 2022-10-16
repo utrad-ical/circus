@@ -75,5 +75,11 @@ module.exports.default = {
       // Controls the number of maximum threds to parse DICOM files.
       maxConcurrency: os.cpus().length
     }
+  },
+
+  rsWSServer: {
+    options: {
+      perMessageDeflate: false
+    }
   }
 };

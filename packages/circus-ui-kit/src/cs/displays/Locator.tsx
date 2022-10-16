@@ -117,8 +117,8 @@ const distance = (x: number[], y: number[], vs: number[]) => {
   const my = [y[0] * vs[0], y[1] * vs[1], y[2] * vs[2]];
   return Math.sqrt(
     (mx[0] - my[0]) * (mx[0] - my[0]) +
-      (mx[1] - my[1]) * (mx[1] - my[1]) +
-      (mx[2] - my[2]) * (mx[2] - my[2])
+    (mx[1] - my[1]) * (mx[1] - my[1]) +
+    (mx[2] - my[2]) * (mx[2] - my[2])
   );
 };
 
@@ -133,8 +133,7 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
     job,
     consensual,
     editable,
-    rsHttpClient,
-    getVolumeLoader,
+    useVolumeLoaders,
     eventLogger
   } = useCsResults();
 
@@ -155,9 +154,9 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
 
   const [currentFeedback, setCurrentFeedback] = useState<LocatorFeedback>(
     initialFeedbackValue ??
-      (consensual
-        ? integrateEntries(personalOpinions, consensualIntegration)
-        : [])
+    (consensual
+      ? integrateEntries(personalOpinions, consensualIntegration)
+      : [])
   );
 
   const [showViewer, setShowViewer] = useState(currentFeedback.length > 0);
@@ -178,21 +177,18 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
 
   const stateChanger = useMemo(() => createStateChanger<rs.MprViewState>(), []);
 
+  const volumeLoaders = useVolumeLoaders(job.series);
+
   useEffect(() => {
     if (!editable && currentFeedback.length === 0) return;
-    const targetSeries = job.series[volumeId];
-    const volumeLoader = getVolumeLoader(targetSeries);
-    const imageSource = new rs.HybridMprImageSource({
-      volumeLoader,
-      seriesUid: targetSeries.seriesUid,
-      rsHttpClient
-    });
+    const volumeLoader = volumeLoaders[volumeId];
+    const imageSource = new rs.WebGlRawVolumeMprImageSource({ volumeLoader });
     const comp = new rs.Composition(imageSource);
     imageSource.ready().then(() => {
       voxelSizeRef.current = imageSource.metadata!.voxelSize;
     });
     setComposition(comp);
-  }, [job.series, volumeId]);
+  }, [volumeLoaders, volumeId]);
 
   const log = (action: string, data?: any) => {
     if (!excludeFromActionLog) eventLogger(action, data);

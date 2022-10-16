@@ -70,9 +70,14 @@ module.exports = {
     contentBase: path.join(__dirname, 'public'),
     historyApiFallback: { disableDotRule: true },
     proxy: {
-      '/api': 'http://localhost:8080',
-      '/login': 'http://localhost:8080',
-      '/rs': 'http://localhost:8080'
+      '/api': process.env.DEV_PROXY || 'http://localhost:8080',
+      '/login': process.env.DEV_PROXY || 'http://localhost:8080',
+      '/rs/ws': {
+        target: process.env.DEV_PROXY || 'http://localhost:8080',
+        ws: true,
+        changeOrigin: true
+      },
+      '/rs': process.env.DEV_PROXY || 'http://localhost:8080',
     }
   },
   devtool: 'source-map',

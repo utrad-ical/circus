@@ -176,12 +176,12 @@ const createUncachedVolumeProvider: FunctionService<
 
       verifyMetadataOf3dImage = like3d
         ? metadata => {
-            if (
-              !determineIf3dImageFromMetadata(metadata) ||
-              imageOrientationPatient !== metadata.imageOrientationPatient
-            )
-              throw new Error('Contains image that do not look like 3d image.');
-          }
+          if (
+            !determineIf3dImageFromMetadata(metadata) ||
+            imageOrientationPatient !== metadata.imageOrientationPatient
+          )
+            throw new Error('Contains image that do not look like 3d image.');
+        }
         : undefined;
 
       return like3d;

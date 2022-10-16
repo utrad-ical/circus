@@ -21,7 +21,7 @@ const LabelSelector: React.FC<{
   editingData: EditingData;
   updateEditingData: EditingDataUpdater;
   seriesData: { [seriesUid: string]: Series };
-  volumeLoadedStatus: boolean[];
+  volumeLoadingProgresses: number[];
   disabled?: boolean;
   multipleSeriesShown: boolean;
   metadata: (DicomVolumeMetadata | undefined)[];
@@ -30,7 +30,7 @@ const LabelSelector: React.FC<{
     editingData,
     updateEditingData,
     seriesData,
-    volumeLoadedStatus,
+    volumeLoadingProgresses,
     disabled,
     multipleSeriesShown,
     metadata
@@ -48,7 +48,7 @@ const LabelSelector: React.FC<{
         <SeriesItem
           key={`${seriesIndex}:${series.seriesUid}`}
           seriesInfo={seriesData[series.seriesUid]}
-          volumeLoaded={volumeLoadedStatus[seriesIndex]}
+          volumeLoadingProgress={volumeLoadingProgresses[seriesIndex]}
           editingData={editingData}
           updateEditingData={updateEditingData}
           seriesIndex={seriesIndex}
@@ -88,7 +88,7 @@ const SeriesItem: React.FC<{
   editingData: EditingData;
   updateEditingData: EditingDataUpdater;
   seriesInfo: Series;
-  volumeLoaded: boolean;
+  volumeLoadingProgress: number;
   seriesIndex: number;
   activeLabel: InternalLabel | null;
   disabled?: boolean;
@@ -100,7 +100,7 @@ const SeriesItem: React.FC<{
     editingData,
     updateEditingData,
     seriesInfo,
-    volumeLoaded,
+    volumeLoadingProgress,
     activeLabel,
     disabled,
     multipleSeriesShown,
@@ -190,9 +190,10 @@ const SeriesItem: React.FC<{
           <Icon icon="circus-series" />
           {shown && <div className="box" style={{ backgroundColor: color }} />}
           Series #{seriesIndex}
-          {!volumeLoaded && (
+          {volumeLoadingProgress < 1 && (
             <span className="series-loading">
               <LoadingIndicator delay={300} /> loading...
+              {(volumeLoadingProgress * 100).toFixed(1)}%
             </span>
           )}
         </div>
@@ -518,8 +519,8 @@ export const Label: React.FC<{
           editingData.allLabelsHidden
             ? 'allHidden'
             : label.hidden
-            ? 'hidden'
-            : 'normal'
+              ? 'hidden'
+              : 'normal'
         }
         hintText={hint}
       />

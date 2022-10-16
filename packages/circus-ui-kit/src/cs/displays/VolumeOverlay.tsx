@@ -51,7 +51,7 @@ export const VolumeOverlay: Display<VolumeOverlayOptions, void> = props => {
       only
     }
   } = props;
-  const { job, loadAttachment, getVolumeLoader, rsHttpClient } = useCsResults();
+  const { job, loadAttachment } = useCsResults();
   const { results } = job;
 
   const [error, setError] = useErrorMessage();
@@ -75,13 +75,13 @@ export const VolumeOverlay: Display<VolumeOverlayOptions, void> = props => {
           if (res.status !== 200) {
             throw new Error(
               `Failed to load volume file ` +
-                `(name: ${v.name}, status: ${res.status}, file: ${name})`
+              `(name: ${v.name}, status: ${res.status}, file: ${name})`
             );
           }
 
           return /\.gz$/.test(name)
             ? (gunzipSync(new Uint8Array(await res.arrayBuffer()))
-                .buffer as ArrayBuffer)
+              .buffer as ArrayBuffer)
             : await res.arrayBuffer();
         })
       );

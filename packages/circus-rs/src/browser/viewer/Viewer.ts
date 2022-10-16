@@ -66,6 +66,8 @@ export default class Viewer extends EventEmitter {
    */
   private currentRender: Promise<any> | null = null;
 
+  private abortController: AbortController;
+
   private isObservingDivSize: boolean = false;
 
   /**
@@ -92,6 +94,9 @@ export default class Viewer extends EventEmitter {
     if (!(div instanceof HTMLDivElement)) {
       throw new Error('Tried to create a viewer without a container');
     }
+
+    // Used to cancel the subsequent results after intial result
+    this.abortController = new AbortController();
 
     // Removes everything which was already in the div
     div.innerHTML = '';
@@ -291,17 +296,11 @@ export default class Viewer extends EventEmitter {
       const viewState = this.requestingViewState || this.viewState;
       if (!viewState) return false;
 
-      // Used to cancel the subsequent results after intial result
-      const abortController = new AbortController();
-
       const handleImageDraw = (
         drawnState: ViewState,
         drawResult: DrawResult
       ) => {
         if (this.currentRender !== p) return true; // happens on subsequent results
-        const image = isDraft(drawResult) ? drawResult.draft : drawResult;
-        this.cachedSourceImage = image;
-        this.cachedSourceImageIsDraft = isDraft(drawResult);
 
         const prevState = this.viewState;
         if (prevState !== drawnState) {
@@ -311,14 +310,23 @@ export default class Viewer extends EventEmitter {
         if (this.requestingViewState === drawnState)
           this.requestingViewState = undefined;
 
-        if (isDraft(drawResult) && !this.nextRender) {
-          drawResult.next.then(drawResult =>
-            handleImageDraw(drawnState, drawResult)
-          );
+        if (isDraft(drawResult)) {
+          this.cachedSourceImageIsDraft = true;
+          this.cachedSourceImage = drawResult.draft;
+          if (!this.nextRender) {
+            drawResult.next().then(drawResult =>
+              handleImageDraw(drawnState, drawResult)
+            );
+          }
         } else {
-          abortController.abort();
+          this.cachedSourceImageIsDraft = false;
+          this.cachedSourceImage = drawResult;
+        }
+
+        if (!isDraft(drawResult) || this.nextRender) {
           this.currentRender = null;
         }
+
         this.renderAnnotations();
 
         if (prevState !== drawnState) {
@@ -338,7 +346,7 @@ export default class Viewer extends EventEmitter {
       this.currentRender = p;
       this.nextRender = null;
       return src
-        .draw(this, viewState, abortController.signal)
+        .draw(this, viewState, this.abortController.signal)
         .then(drawResult => handleImageDraw(viewState, drawResult));
     });
     // Remember this render() call as the most recent one,
@@ -405,7 +413,9 @@ export default class Viewer extends EventEmitter {
     if (this.composition) {
       this.cancelNextRender();
       this.detachCurrentComposition();
+      this.abortController.abort();
     }
+
     this.composition = composition;
     this.composition.registerViewer(this);
     this.imageReady = false;
@@ -477,6 +487,7 @@ export default class Viewer extends EventEmitter {
   public dispose(): void {
     this.cancelNextRender();
     this.detachCurrentComposition();
+    this.abortController.abort();
     this.stopResizeObserver();
     this.removeAllListeners();
   }

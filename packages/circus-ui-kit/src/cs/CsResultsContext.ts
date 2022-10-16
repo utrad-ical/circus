@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import {
-  RsHttpClient,
-  DicomVolumeLoader
+  DicomVolumeLoader,
+  EstimateWindowType
 } from '@utrad-ical/circus-rs/src/browser';
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import { Display } from './Display';
@@ -84,13 +84,13 @@ export interface CsResultsContextType {
    */
   eventLogger: EventLogger;
   /**
-   * HTTP Client that allows you to connect to a CIRCUS RS server.
+   * Hook to use volume loader.
    */
-  rsHttpClient: RsHttpClient;
-  /**
-   * Returns access to cached volume loader.
-   */
-  getVolumeLoader: (series: SeriesDefinition) => DicomVolumeLoader;
+  useVolumeLoaders: (series: ({
+    seriesUid: string;
+    partialVolumeDescriptor: PartialVolumeDescriptor;
+    estimateWindowType?: EstimateWindowType;
+  })[]) => DicomVolumeLoader[]
   /**
    * Dynamically loads a display.
    */

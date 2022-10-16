@@ -19,6 +19,19 @@ interface Options {
   fallbackToDefault?: boolean;
 }
 
+export const fetchUserFromToken = async (token: string, models: Models) => {
+  const entry = await models.token.findById(token);
+  if (!entry) return null;
+  const user = await models.user.findByIdOrFail(entry.userId);
+  const userPrivileges = await determineUserAccessInfo(models, user);
+  return {
+    accessToken: entry.accessToken,
+    accessTokenExpiresAt: entry.accessTokenExpiresAt,
+    client: { id: entry.clientId },
+    user: { user, userPrivileges }
+  };
+};
+
 /**
  * Creates an OAuth2 server that interacts with backend mongo.
  */
@@ -36,16 +49,7 @@ export const createOauthServer: FunctionService<
   const oauthModel = {
     getAccessToken: async function (bearerToken: string) {
       // debug && console.log('getAccessToken', arguments);
-      const entry = await models.token.findById(bearerToken);
-      if (!entry) return null;
-      const user = await models.user.findByIdOrFail(entry.userId);
-      const userPrivileges = await determineUserAccessInfo(models, user);
-      return {
-        accessToken: entry.accessToken,
-        accessTokenExpiresAt: entry.accessTokenExpiresAt,
-        client: { id: entry.clientId },
-        user: { user, userPrivileges }
-      };
+      return fetchUserFromToken(bearerToken, models);
     },
     getClient: async function (clientId: string /* clientSecret */) {
       // debug && console.log('getClient', arguments);

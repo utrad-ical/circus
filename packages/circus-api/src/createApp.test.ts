@@ -3,6 +3,7 @@ import { setUpKoaTestWith, TestServer } from '../test/util-koa';
 import createTestLogger from '../test/util-logger';
 import { usingModels } from '../test/util-mongo';
 import createApp from './createApp';
+import * as ws from 'ws';
 
 let testServer: TestServer, ax: AxiosInstance;
 
@@ -17,7 +18,8 @@ beforeAll(async () => {
       fixUser: 'alice@example.com',
       uploadFileSizeMaxBytes: 200 * 1024 * 1024,
       pluginResultsPath: '', // dummy
-      dicomImageServerUrl: '' // dummy
+      dicomImageServerUrl: '', // dummy
+      pluginCachePath: '', // dummy
     },
     {
       validator,
@@ -40,7 +42,14 @@ beforeAll(async () => {
         },
         token: () => () => {}
       } as any,
-      transactionManager: null as any // dummy
+      transactionManager: null as any, // dummy
+      rsWSServer: new ws.Server({
+        noServer: true,
+        skipUTF8Validation: true,
+      }),
+      rsWebsocketVolumeConnectionHandlerCreator: () => {
+        return null as any; // dummy
+      },
     }
   );
 

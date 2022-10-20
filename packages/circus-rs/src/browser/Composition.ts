@@ -104,4 +104,9 @@ export default class Composition extends EventEmitter {
   public dispatchAnnotationChange(annotation: Annotation): void {
     this.emit('annotationChange', annotation);
   }
+
+  public dispose()
+  {
+    this.imageSource.dispose();
+  }
 }

@@ -1,5 +1,5 @@
 import Viewer from '../viewer/Viewer';
-import ViewState from '../ViewState';
+import ViewState, { MprViewState } from '../ViewState';
 import DicomVolume from '../../common/DicomVolume';
 import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
 import MprProgram from './gl/MprProgram';
@@ -10,12 +10,17 @@ import {
   resolveImageData
 } from './gl/webgl-util';
 import MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume';
-import PriorityIntegerCaller from '../../common/PriorityIntegerCaller';
-import { Initializer as MultiRangeInitializer } from 'multi-integer-range';
+import MultiRange, { Initializer as MultiRangeInitializer } from 'multi-integer-range';
+import { DrawResult } from './ImageSource';
+import setImmediate from '../util/setImmediate';
+import imageRangeOfSection from '../util/imageRangeOfSection'
 
 export interface WebGlRawVolumeMprImageSourceOptions {
   volumeLoader: DicomVolumeLoader;
-  beginTransferOnVolumeLoaded?: boolean;
+  // Specify the interval of updating draft image in ms.
+  // If zero is specified, do not return a draft image.
+  // Default value is 300 [ms]
+  draftInterval?: number;
 }
 type RGBA = [number, number, number, number];
 
@@ -27,9 +32,10 @@ type CaptureCanvasCallback = (canvas: HTMLCanvasElement) => void;
 
 export default class WebGlRawVolumeMprImageSource
   extends MprImageSource
-  implements MprImageSourceWithDicomVolume
-{
+  implements MprImageSourceWithDicomVolume {
   private volume: DicomVolume | undefined;
+  private fullyLoaded: boolean = false;
+  private draftInterval: number = 0;
 
   private backCanvas: HTMLCanvasElement;
   private glContext: WebGLRenderingContext;
@@ -38,8 +44,8 @@ export default class WebGlRawVolumeMprImageSource
 
   private background: RGBA = [0.0, 0.0, 0.0, 1.0];
 
-  private priorityIntegerCaller: PriorityIntegerCaller | undefined = undefined;
-  private priorityCounter: number = 0;
+  private setPriority: (imageIndices: MultiRangeInitializer, priority: number) => void;
+  private disposeCallbacks: (() => void)[] = [];
 
   // For debugging
   public static captureCanvasCallbacks: CaptureCanvasCallback[] = [];
@@ -51,11 +57,17 @@ export default class WebGlRawVolumeMprImageSource
     );
   }
 
-  constructor({
-    volumeLoader,
-    beginTransferOnVolumeLoaded = false
-  }: WebGlRawVolumeMprImageSourceOptions) {
+  constructor({ volumeLoader, draftInterval }: WebGlRawVolumeMprImageSourceOptions) {
     super();
+
+    if (!volumeLoader.loadController) {
+      throw new TypeError('The specified volumeLoader does not have loadController.');
+    }
+
+    const loadController = volumeLoader.loadController;
+    this.setPriority = loadController.setPriority;
+
+    draftInterval = draftInterval || 200;
 
     const backCanvas = this.createBackCanvas();
     const glContext = getWebGLContext(backCanvas);
@@ -72,7 +84,9 @@ export default class WebGlRawVolumeMprImageSource
     );
 
     this.loadSequence = (async () => {
+      this.draftInterval = draftInterval;
       this.metadata = await volumeLoader.loadMeta();
+      this.volume = loadController.getVolume()!;
 
       // Assign the length of the longest side of the volume to
       // the length of the side in normalized device coordinates.
@@ -83,18 +97,24 @@ export default class WebGlRawVolumeMprImageSource
         voxelCount[2] * voxelSize[2]
       );
       mprProgram.setMmInNdc(1.0 / longestSideLengthInMmOfTheVolume);
-
-      this.volume = await volumeLoader.loadVolume();
-
       mprProgram.activate();
-      const { images, transfer } = mprProgram.setDicomVolume(this.volume);
-      this.priorityIntegerCaller = new PriorityIntegerCaller(
-        async (z: number) => transfer(z)
-      );
-      if (beginTransferOnVolumeLoaded) {
-        this.priorityIntegerCaller.append(images, this.priorityCounter++);
-      }
+      const { transfer } = mprProgram.setDicomVolume(this.volume);
+
+      loadController.loadedImages().forEach(imageIndex => transfer(imageIndex));
+      const progressListener = ({ imageIndex }: { imageIndex: number; }) => {
+        // console.log(`transfer ${imageIndex}`);
+        transfer(imageIndex);
+      };
+      loadController.on('progress', progressListener);
+      this.disposeCallbacks.push(() => loadController.off('progress', progressListener));
+
+      volumeLoader.loadVolume().then(() => this.fullyLoaded = true);
+      if (!draftInterval) await volumeLoader.loadVolume();
     })();
+  }
+
+  public dispose() {
+    this.disposeCallbacks.forEach(callback => callback());
   }
 
   public getLoadedDicomVolume() {
@@ -111,6 +131,8 @@ export default class WebGlRawVolumeMprImageSource
 
     // backCanvas.addEventListener('webglcontextlost', _ev => {}, false);
     // backCanvas.addEventListener('webglcontextrestored', _ev => {}, false);
+
+    this.disposeCallbacks.push(() => void (backCanvas.remove()));
 
     return backCanvas;
   }
@@ -129,36 +151,46 @@ export default class WebGlRawVolumeMprImageSource
    * @param viewState
    * @returns {Promise<ImageData>}
    */
-  public async draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
+  public async draw(viewer: Viewer, viewState: ViewState, abortSignal: AbortSignal): Promise<DrawResult> {
+
+    if (viewState.type !== 'mpr') throw new TypeError('Unsupported state');
+
+    const [min, max] = imageRangeOfSection(viewState.section, this.metadata!);
+    const images = new MultiRange([[min, max]]);
+
+    const priority = this.metadata!.voxelCount[2] / images.length();
+    this.setPriority(images, priority);
+
+    const drawResult = this.createDrawResult(viewer, viewState, abortSignal);
+
+    // If we use Promise.resolve directly, the then-calleback is called
+    // before any stacked UI events are handled.
+    // Use the polyfilled setImmediate to delay it.
+    // Cf. http://stackoverflow.com/q/27647742/1209240
+    return new Promise(resolve => {
+      setImmediate(() => resolve(drawResult!));
+    });
+  }
+
+  private async createDrawResult(viewer: Viewer, viewState: MprViewState, abortSignal: AbortSignal): Promise<DrawResult> {
+    const imageData = await this.createImageData(viewer, viewState, abortSignal);
+
+    return this.fullyLoaded
+      ? imageData
+      : {
+        draft: imageData,
+        next: async () => {
+          await new Promise<void>((resolve) => setTimeout(() => resolve(), this.draftInterval));
+          return await this.createDrawResult(viewer, viewState, abortSignal);
+        }
+      };
+  }
+
+  private async createImageData(viewer: Viewer, viewState: ViewState, abortSignal: AbortSignal): Promise<ImageData> {
     if (viewState.type !== 'mpr') throw new Error('Unsupported view state.');
 
     if (!this.mprProgram.isActive())
       throw new Error('The program is not active');
-
-    // Wait to transfer required images.
-    const sectionVertexZValues = [
-      viewState.section.origin[2],
-      viewState.section.origin[2] + viewState.section.xAxis[2],
-      viewState.section.origin[2] +
-        viewState.section.xAxis[2] +
-        viewState.section.yAxis[2],
-      viewState.section.origin[2] + viewState.section.yAxis[2]
-    ];
-    const minImage = Math.max(
-      0,
-      Math.floor(
-        Math.min(...sectionVertexZValues) / this.metadata!.voxelSize[2] - 0.5
-      )
-    );
-    const maxImage = Math.min(
-      this.metadata!.voxelCount[2] - 1,
-      Math.floor(
-        Math.max(...sectionVertexZValues) / this.metadata!.voxelSize[2] - 0.5
-      ) + 1
-    );
-    const requiredRange: MultiRangeInitializer = [[minImage, maxImage]];
-    this.priorityIntegerCaller!.append(requiredRange, this.priorityCounter++);
-    await this.priorityIntegerCaller!.waitFor(requiredRange);
 
     // Adjust viewport
     this.updateViewportSize(viewer.getResolution());

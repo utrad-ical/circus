@@ -30,8 +30,7 @@ const Tester: React.FC<{
       editable,
       loadAttachment: mockAttachmentLoader,
       eventLogger: () => {},
-      rsHttpClient: null as any,
-      getVolumeLoader: null as any,
+      useVolumeLoaders: () => [],
       loadDisplay: null as any
     };
   }, [consensual, editable]);

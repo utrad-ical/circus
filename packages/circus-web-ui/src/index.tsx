@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, Switch } from 'react-router-dom';
 import Application from 'pages/Application';
@@ -37,11 +37,11 @@ import { dismissMessageOnPageChange } from 'store/messages';
 import PluginJobQueueSearch from './pages/search/PluginJobQueueSearch';
 import browserHistory from './browserHistory';
 import GlobalStyle, { CircusThemeProvider } from './theme';
-import * as rs from '@utrad-ical/circus-rs/src/browser';
 
-import { ApiContext, ApiCaller } from 'utils/api';
+import { ApiContext, ApiCaller, useApi } from 'utils/api';
 import loginManager, { LoginManagerContext } from 'utils/loginManager';
-import { VolumeLoaderCacheContext } from 'utils/useImageSource';
+import { VolumeLoaderFactoryContext } from 'utils/useVolumeLoader';
+import createVolumeLoaderManager, { VolumeLoaderManager } from 'utils/createVolumeLoaderManager';
 
 require('./styles/main.less');
 
@@ -106,25 +106,30 @@ const AppRoutes: React.FC<{}> = () => {
   );
 };
 
-/**
- * Provides a shared cache mechanism for volume loaders.
- */
-const VolumeCacheProvider: React.FC = props => {
+const VolumeLoaderFactoryProvider: React.FC<{}> = ({ children }) => {
   const server = useSelector(state => state.loginUser.data?.dicomImageServer);
+  const api = useApi();
+  const token = api?.getToken();
 
-  const volumeLoaderCache = useMemo(() => {
-    if (!server) return null;
-    const rsHttpClient = new rs.RsHttpClient(server);
-    return {
-      rsHttpClient,
-      map: new Map<string, rs.RsVolumeLoader>()
-    };
-  }, [server]);
+  const provider = useMemo<VolumeLoaderManager>(
+    () => server && token
+      ? createVolumeLoaderManager({ server, queryString: `token=${token}` })
+      : (null as any),
+    [server, token]
+  );
+
+  const currentProvider = useRef<VolumeLoaderManager>();
+  useEffect(() => {
+    if (currentProvider.current && currentProvider.current !== provider) {
+      currentProvider.current.disconnect();
+    }
+    currentProvider.current = provider;
+  }, [provider, currentProvider.current]);
 
   return (
-    <VolumeLoaderCacheContext.Provider value={volumeLoaderCache}>
-      {props.children}
-    </VolumeLoaderCacheContext.Provider>
+    <VolumeLoaderFactoryContext.Provider value={provider}>
+      {children}
+    </VolumeLoaderFactoryContext.Provider>
   );
 };
 
@@ -197,7 +202,7 @@ const TheApp: React.FC<{}> = () => {
     <LoginManagerContext.Provider value={manager}>
       <ApiContext.Provider value={api}>
         <ReduxStoreProvider store={store}>
-          <VolumeCacheProvider>
+          <VolumeLoaderFactoryProvider>
             <CircusThemeProvider>
               <GlobalStyle />
               <Router history={browserHistory}>
@@ -208,7 +213,7 @@ const TheApp: React.FC<{}> = () => {
                 </Switch>
               </Router>
             </CircusThemeProvider>
-          </VolumeCacheProvider>
+          </VolumeLoaderFactoryProvider>
         </ReduxStoreProvider>
       </ApiContext.Provider>
     </LoginManagerContext.Provider>

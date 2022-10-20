@@ -3,7 +3,7 @@ import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
 import ModifierKeyBehaviors from '@utrad-ical/circus-rs/src/browser/annotation/ModifierKeyBehaviors';
-import { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
+import { DicomVolumeMetadata, ProgressEventListener } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
 import {
   sectionFrom2dViewState,
   sectionTo2dViewState
@@ -19,7 +19,6 @@ import { debounce } from 'lodash';
 import useToolbar from 'pages/case-detail/useToolbar';
 import React, {
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -29,10 +28,6 @@ import styled from 'styled-components';
 import Project from 'types/Project';
 import Series from 'types/Series';
 import isTouchDevice from 'utils/isTouchDevice';
-import {
-  usePendingVolumeLoaders,
-  VolumeLoaderCacheContext
-} from 'utils/useImageSource';
 import { useUserPreferences } from 'utils/useLoginUser';
 import { Modal } from '../../components/react-bootstrap';
 import { ScrollBarsSettings } from '../../store/loginUser';
@@ -57,6 +52,7 @@ import SideContainer from './SideContainer';
 import ToolBar, { ViewOptions, zDimmedThresholdOptions } from './ToolBar';
 import ViewerGrid from './ViewerGrid';
 import { ViewWindow } from './ViewWindowEditor';
+import { useVolumeLoaders } from 'utils/useVolumeLoader';
 
 const useCompositions = (
   series: {
@@ -64,28 +60,31 @@ const useCompositions = (
     partialVolumeDescriptor: PartialVolumeDescriptor;
   }[]
 ) => {
-  const { rsHttpClient } = useContext(VolumeLoaderCacheContext)!;
   const [results, setResults] = useState<
     {
       metadata?: DicomVolumeMetadata;
       composition?: Composition;
-      volumeLoaded: boolean;
+      progress: number;
     }[]
   >(() =>
     series.map(() => ({
       metadata: undefined,
       composition: undefined,
-      volumeLoaded: false
+      progress: 0,
     }))
   );
 
-  const volumeLoaders = usePendingVolumeLoaders(series);
+  const volumeLoaders = useVolumeLoaders(series);
 
   useEffect(() => {
-    series.forEach(async ({ seriesUid, partialVolumeDescriptor }, volId) => {
+
+    const abortController = new AbortController;
+
+    series.forEach(async ({ }, volId) => {
       const volumeLoader = volumeLoaders[volId];
 
       const metadata = await volumeLoader.loadMeta();
+      if (abortController.signal.aborted) return;
 
       const src = (() => {
         switch (metadata.mode) {
@@ -95,17 +94,12 @@ const useCompositions = (
               maxCacheSize: 10
             });
           default:
-            return new rs.WebGlHybridMprImageSource({
-              rsHttpClient,
-              seriesUid,
-              partialVolumeDescriptor,
-              volumeLoader,
-              estimateWindowType: 'none'
-            });
+            return new rs.WebGlRawVolumeMprImageSource({ volumeLoader });
         }
       })();
 
       const composition = new Composition(src);
+      abortController.signal.addEventListener('abort', () => composition.dispose());
 
       setResults(results => [
         ...results.slice(0, volId),
@@ -113,22 +107,37 @@ const useCompositions = (
         ...results.slice(volId + 1)
       ]);
 
+      const progressListener: ProgressEventListener = ({ finished, total }) => {
+        setResults(results =>
+          produce(results, draft => {
+            draft[volId].progress = (finished || 0) / (total || 1);
+          })
+        );
+      };
+
+      volumeLoader.loadController?.on('progress', progressListener);
+      abortController.signal.addEventListener('abort', () => volumeLoader.loadController?.off('progress', progressListener));
+
       await volumeLoader.loadVolume();
+      if (abortController.signal.aborted) return;
 
       setResults(results =>
         produce(results, draft => {
-          draft[volId].volumeLoaded = true;
+          draft[volId].progress = 1;
         })
       );
     });
-  }, [rsHttpClient, series, volumeLoaders]);
+
+    return () => abortController.abort();
+
+  }, [series, volumeLoaders]);
 
   useEffect(() => {
     setResults(
       series.map(() => ({
         metadata: undefined,
         composition: undefined,
-        volumeLoaded: false
+        progress: 0,
       }))
     );
   }, [series]);
@@ -219,9 +228,9 @@ const RevisionEditor: React.FC<{
   const [planeFigureOption, setPlaneFigureOption] = useState({
     zDimmedThreshold: preferences.dimmedOutlineFor2DLabels
       ? zDimmedThresholdOptions.find(
-          zDimmedThresholdOption =>
-            zDimmedThresholdOption.key === preferences.dimmedOutlineFor2DLabels
-        )!.value
+        zDimmedThresholdOption =>
+          zDimmedThresholdOption.key === preferences.dimmedOutlineFor2DLabels
+      )!.value
       : 3
   });
 
@@ -273,12 +282,11 @@ const RevisionEditor: React.FC<{
   const metaLoadedAll = compositions.every(comp => !!comp.metadata);
   const metadata = compositions.map(entry => entry.metadata);
 
-  const volumeLoadedStatus = compositions.map(entry => entry.volumeLoaded);
-  const activeVolumeLoaded = volumeLoadedStatus[editingData.activeSeriesIndex];
+  const volumeLoadingProgresses = compositions.map(entry => entry.progress);
   const activeSeriesMetadata =
     compositions[editingData.activeSeriesIndex].metadata;
 
-  const wandEnabled = activeVolumeLoaded;
+  const wandEnabled = volumeLoadingProgresses[editingData.activeSeriesIndex] === 1;
 
   const windowEnabled = !(
     metaLoadedAll &&
@@ -862,7 +870,7 @@ const RevisionEditor: React.FC<{
           />
           <LabelSelector
             seriesData={seriesData}
-            volumeLoadedStatus={volumeLoadedStatus}
+            volumeLoadingProgresses={volumeLoadingProgresses}
             editingData={editingData}
             updateEditingData={updateEditingData}
             disabled={busy}

@@ -1,11 +1,11 @@
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import {
   Composition,
-  HybridMprImageSource,
   MprImageSource,
   PlaneFigure,
   MprViewState,
-  Tool
+  Tool,
+  WebGlRawVolumeMprImageSource
 } from '@utrad-ical/circus-rs/src/browser';
 import classnames from 'classnames';
 import get from 'lodash.get';
@@ -239,14 +239,8 @@ export const LesionCandidates: Display<
     personalOpinions,
     onFeedbackChange
   } = props;
-  const {
-    consensual,
-    job,
-    getVolumeLoader,
-    rsHttpClient,
-    loadDisplay,
-    eventLogger
-  } = useCsResults();
+  const { consensual, job, useVolumeLoaders, loadDisplay, eventLogger } =
+    useCsResults();
   const { results } = job;
   const [composition, setComposition] = useState<Composition | null>(null);
   const [error, setError] = useState<Error | null>(null);
@@ -276,16 +270,15 @@ export const LesionCandidates: Display<
     [allCandidates, sortOrder, sortKey, maxCandidates]
   );
 
+  const volumeLoaders = useVolumeLoaders(job.series);
+
   useEffect(() => {
-    const volumeId = 0;
-    const series = job.series[volumeId];
-    const volumeLoader = getVolumeLoader(series);
-    const src = new HybridMprImageSource({
-      volumeLoader,
-      rsHttpClient,
-      seriesUid: series.seriesUid,
-      partialVolumeDescriptor: series.partialVolumeDescriptor
-    });
+    const [volumeLoader, ...restVolumeLoaders] = volumeLoaders;
+    restVolumeLoaders.forEach(volumeLoader =>
+      volumeLoader.loadController?.pause()
+    );
+
+    const src = new WebGlRawVolumeMprImageSource({ volumeLoader });
     const composition = new Composition(src);
     setComposition(composition);
   }, []);
@@ -307,14 +300,9 @@ export const LesionCandidates: Display<
 
   const imageSourceForVolumeId = (volumeId: number) => {
     if (imgSrcMap[volumeId]) return imgSrcMap[volumeId];
-    const series = job.series[volumeId];
-    const volumeLoader = getVolumeLoader(series);
-    const imageSource = new HybridMprImageSource({
-      rsHttpClient,
-      seriesUid: series.seriesUid,
-      volumeLoader,
-      partialVolumeDescriptor: series.partialVolumeDescriptor
-    });
+    const volumeLoader = volumeLoaders[volumeId]!;
+    volumeLoader.loadController?.resume();
+    const imageSource = new WebGlRawVolumeMprImageSource({ volumeLoader });
     setImgSrcMap(map => ({ ...map, [volumeId]: imageSource }));
     return imageSource;
   };

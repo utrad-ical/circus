@@ -77,6 +77,11 @@ const defaults: Configuration = {
     options: {
       maxCommitTimeMS: 10000
     }
+  },
+  rsWSServer: {
+    options: {
+      perMessageDeflate: false
+    }
   }
 };
 

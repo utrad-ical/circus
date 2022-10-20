@@ -9,9 +9,14 @@ import drawToImageData from './drawToImageData';
 import MprImageSource from './MprImageSource';
 import { Vector3 } from 'three';
 import MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume';
+import { DrawResult } from './ImageSource';
 
 export interface RawVolumeMprImageSourceOptions {
   volumeLoader: DicomVolumeLoader;
+  // Specify the interval of updating draft image in ms.
+  // If zero is specified, do not return a draft image.
+  // Default value is 300 [ms]
+  draftInterval?: number;
 }
 
 /**
@@ -20,23 +25,35 @@ export interface RawVolumeMprImageSourceOptions {
  */
 export default class RawVolumeMprImageSource
   extends MprImageSource
-  implements MprImageSourceWithDicomVolume
-{
+  implements MprImageSourceWithDicomVolume {
   private volume: DicomVolume | undefined;
+  private fullyLoaded: boolean = false;
 
-  constructor({ volumeLoader }: RawVolumeMprImageSourceOptions) {
+  private draftInterval: number = 0;
+
+  constructor({ volumeLoader, draftInterval }: RawVolumeMprImageSourceOptions) {
     super();
+
+    if (!volumeLoader.loadController) {
+      throw new TypeError('The specified volumeLoader does not have loadController.');
+    }
+
+    draftInterval = draftInterval || 300;
+
     this.loadSequence = (async () => {
+      this.draftInterval = draftInterval;
       this.metadata = await volumeLoader.loadMeta();
-      this.volume = await volumeLoader.loadVolume();
+      volumeLoader.loadVolume().then(() => this.fullyLoaded = true);
+      this.volume = volumeLoader.loadController!.getVolume()!;
+      if (!draftInterval) await volumeLoader.loadVolume();
     })();
   }
 
   public getLoadedDicomVolume() {
-    return this.volume;
+    return this.fullyLoaded && this.volume || undefined;
   }
 
-  public draw(viewer: Viewer, viewState: ViewState): Promise<ImageData> {
+  public draw(viewer: Viewer, viewState: ViewState, abortSignal: AbortSignal): Promise<DrawResult> {
     const outSize = viewer.getResolution();
     const mprOutput = new Uint8Array(outSize[0] * outSize[1]);
     const metadata = this.metadata!;
@@ -62,12 +79,21 @@ export default class RawVolumeMprImageSource
     );
     const imageData = drawToImageData(outSize, mprOutput);
 
+    const next = async () => {
+      await new Promise<void>((resolve) => setTimeout(() => resolve(), this.draftInterval));
+      return await this.draw(viewer, viewState, abortSignal);
+    };
+
+    const drawResult: DrawResult = this.fullyLoaded
+      ? imageData
+      : { draft: imageData, next };
+
     // If we use Promise.resolve directly, the then-calleback is called
     // before any stacked UI events are handled.
     // Use the polyfilled setImmediate to delay it.
     // Cf. http://stackoverflow.com/q/27647742/1209240
     return new Promise(resolve => {
-      setImmediate(() => resolve(imageData));
+      setImmediate(() => resolve(drawResult));
     });
   }
 }

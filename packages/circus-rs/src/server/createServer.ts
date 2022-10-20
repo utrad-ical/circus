@@ -22,6 +22,7 @@ import checkSeriesAccessToken from './app/auth/checkSeriesAccessToken';
 // application
 import { FunctionService } from '@utrad-ical/circus-lib';
 import createAuthorizer from './helper/createAuthorizer';
+import withWebSocketConnectionHandlers from './ws/withWebSocketConnectionHandlers';
 
 /**
  * Create Koa App.
@@ -31,7 +32,7 @@ const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
   deps
 ) => {
   const { authorization, globalIpFilter } = options;
-  const { rsLogger, counter, rsSeriesRoutes } = deps;
+  const { rsLogger, counter, rsSeriesRoutes, rsWebsocketVolumeConnectionHandlerCreator, rsWSServer } = deps;
 
   // create server process
   const app = new koa();
@@ -81,6 +82,16 @@ const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
 
   app.use(router.routes());
 
+  // websocket
+  withWebSocketConnectionHandlers(rsWSServer, {
+    '/ws/volume': rsWebsocketVolumeConnectionHandlerCreator({
+      // authFunctionProvider: req => async seriesUid => true
+      authFunctionProvider: req => seriesUid => new Promise((resolve) => {
+        setTimeout(() => resolve(true), 2000)
+      })
+    })
+  })(app);
+
   // This is a default handler to catch all unknown requests of all types of verbs
   app.use(async (ctx: koa.DefaultContext, next: koa.Next) => {
     ctx.throw(httpStatus.NOT_FOUND);
@@ -89,6 +100,12 @@ const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
   return app;
 };
 
-createServer.dependencies = ['rsLogger', 'counter', 'rsSeriesRoutes'];
+createServer.dependencies = [
+  'rsLogger',
+  'counter',
+  'rsSeriesRoutes',
+  'rsWSServer',
+  'rsWebsocketVolumeConnectionHandlerCreator'
+];
 
 export default createServer;

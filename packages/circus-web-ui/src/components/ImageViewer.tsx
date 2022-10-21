@@ -202,6 +202,14 @@ const ImageViewer: React.FC<{
   useEffect(() => {
     const container = containerRef.current!;
     const handleKeydown = (e: KeyboardEvent) => {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
+        e.target instanceof HTMLAnchorElement ||
+        e.target instanceof HTMLSelectElement ||
+        e.target instanceof HTMLButtonElement
+      )
+        return;
       const canvas = container.querySelector('canvas');
       if (canvas && activeKeydown) {
         if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {

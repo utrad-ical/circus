@@ -282,15 +282,26 @@ const ToolBar: React.FC<{
         shortcut="W"
         disabled={!windowEnabled || disabled}
       >
-        {windowPresets.map((p: WindowPreset, i) => (
-          <MenuItem
-            key={i + 1}
-            eventKey={i + 1}
-            onClick={() => handleApplyWindow(p)}
-          >
-            <b>{p.label}</b> {`(L: ${p.level} / W: ${p.width})`}
-          </MenuItem>
-        ))}
+        {windowPresets.map((p: WindowPreset, i: number) =>
+          i < 9 ? (
+            <MenuItemWithShortcut
+              key={i + 1}
+              eventKey={i + 1}
+              shortcut={String(i + 1)}
+              onClick={() => handleApplyWindow(p)}
+            >
+              <b>{p.label}</b> {`(L: ${p.level} / W: ${p.width})`}
+            </MenuItemWithShortcut>
+          ) : (
+            <MenuItem
+              key={i + 1}
+              eventKey={i + 1}
+              onClick={() => handleApplyWindow(p)}
+            >
+              <b>{p.label}</b> {`(L: ${p.level} / W: ${p.width})`}
+            </MenuItem>
+          )
+        )}
         <MenuItem key={99999} eventKey={99999} onClick={handleApplyWindow}>
           Manual
         </MenuItem>

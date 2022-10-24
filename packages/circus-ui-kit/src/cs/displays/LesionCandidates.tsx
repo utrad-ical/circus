@@ -45,7 +45,7 @@ interface MarkStyle {
 const defaultMarkStyle: Required<MarkStyle> = {
   color: '#ff00ff',
   dimmedColor: '#ff00ff55',
-  radius: 30,
+  radius: 10, // mm
   width: 3
 };
 
@@ -69,19 +69,90 @@ export const normalizeCandidates = (input: any): LesionCandidate[] => {
   });
 };
 
+const applyDisplayOptions = (
+  state: rs.MprViewState,
+  voxelSize: any,
+  location: number,
+  displayOptions: any,
+  resolution: [number, number]
+) => {
+  const newOrigin = [
+    state.section.origin[0],
+    state.section.origin[1],
+    voxelSize[2] * location
+  ];
+  state = {
+    ...state,
+    section: { ...state.section, origin: newOrigin }
+  };
+  if (displayOptions.window) {
+    state = {
+      ...state,
+      window: { ...displayOptions.window }
+    };
+  }
+  if (displayOptions.crop) {
+    if (
+      resolution[0] / resolution[1] <
+      (displayOptions.crop.size[0] * voxelSize[0]) /
+        (displayOptions.crop.size[1] * voxelSize[1])
+    ) {
+      const margin =
+        (resolution[1] * displayOptions.crop.size[0] * voxelSize[0]) /
+          resolution[0] -
+        displayOptions.crop.size[1] * voxelSize[1];
+      const section = {
+        origin: [
+          displayOptions.crop.origin[0] * voxelSize[0],
+          displayOptions.crop.origin[1] * voxelSize[1] - margin / 2,
+          newOrigin[2]
+        ],
+        xAxis: [displayOptions.crop.size[0] * voxelSize[0], 0, 0],
+        yAxis: [0, displayOptions.crop.size[1] * voxelSize[1] + margin, 0]
+      };
+      state = {
+        ...state,
+        section: { ...section }
+      };
+    } else {
+      const margin =
+        (resolution[0] * displayOptions.crop.size[1] * voxelSize[1]) /
+          resolution[1] -
+        displayOptions.crop.size[0] * voxelSize[0];
+      const section = {
+        origin: [
+          displayOptions.crop.origin[0] * voxelSize[0] - margin / 2,
+          displayOptions.crop.origin[1] * voxelSize[1],
+          newOrigin[2]
+        ],
+        xAxis: [displayOptions.crop.size[0] * voxelSize[0] + margin, 0, 0],
+        yAxis: [0, displayOptions.crop.size[1] * voxelSize[1], 0]
+      };
+      state = {
+        ...state,
+        section: { ...section }
+      };
+    }
+  }
+  return state;
+};
+
 const Candidate: React.FC<{
   imageSource: MprImageSource;
   item: LesionCandidate;
   markStyle: MarkStyle;
   tool: Tool;
+  displayOptions: any;
 }> = props => {
-  const { imageSource, item, markStyle, tool, children } = props;
+  const { imageSource, item, markStyle, tool, displayOptions, children } =
+    props;
 
   const stateChanger = useMemo(() => createStateChanger<MprViewState>(), []);
 
-  const composition = useMemo(() => new Composition(imageSource), [
-    imageSource
-  ]);
+  const composition = useMemo(
+    () => new Composition(imageSource),
+    [imageSource]
+  );
 
   useEffect(() => {
     const addAnnotation = async () => {
@@ -95,12 +166,12 @@ const Candidate: React.FC<{
         markStyle.dimmedColor ?? defaultMarkStyle.dimmedColor;
       annotation.width = markStyle.width ?? defaultMarkStyle.width;
       annotation.min = [
-        (item.location[0] - r) * metadata.voxelSize[0],
-        (item.location[1] - r) * metadata.voxelSize[1]
+        item.location[0] * metadata.voxelSize[0] - r,
+        item.location[1] * metadata.voxelSize[1] - r
       ];
       annotation.max = [
-        (item.location[0] + r) * metadata.voxelSize[0],
-        (item.location[1] + r) * metadata.voxelSize[1]
+        item.location[0] * metadata.voxelSize[0] + r,
+        item.location[1] * metadata.voxelSize[1] + r
       ];
       annotation.z = item.location[2] * metadata.voxelSize[2];
       composition.addAnnotation(annotation);
@@ -109,18 +180,14 @@ const Candidate: React.FC<{
   }, [composition, imageSource]);
 
   const centerState = useCallback<StateChangerFunc<MprViewState>>(
-    state => {
-      const voxelSize = (composition!.imageSource as any).metadata.voxelSize;
-      const newOrigin = [
-        state.section.origin[0],
-        state.section.origin[1],
-        voxelSize[2] * item.location[2]
-      ];
-      return {
-        ...state,
-        section: { ...state.section, origin: newOrigin }
-      };
-    },
+    state =>
+      applyDisplayOptions(
+        state,
+        (composition!.imageSource as any).metadata.voxelSize,
+        item.location[2],
+        displayOptions,
+        composition.viewers[0].getResolution()
+      ),
     [composition, item.location]
   );
 
@@ -172,20 +239,13 @@ export const LesionCandidates: Display<
     personalOpinions,
     onFeedbackChange
   } = props;
-  const {
-    consensual,
-    job,
-    useVolumeLoaders,
-    loadDisplay,
-    eventLogger
-  } = useCsResults();
+  const { consensual, job, useVolumeLoaders, loadDisplay, eventLogger } =
+    useCsResults();
   const { results } = job;
   const [composition, setComposition] = useState<Composition | null>(null);
   const [error, setError] = useState<Error | null>(null);
-
-  const [currentFeedback, setCurrentFeedback] = useState<
-    LesionCandidateFeedback
-  >(initialFeedbackValue ?? []);
+  const [currentFeedback, setCurrentFeedback] =
+    useState<LesionCandidateFeedback>(initialFeedbackValue ?? []);
 
   const allCandidates = useMemo(
     () => normalizeCandidates(get(results, dataPath)),
@@ -214,7 +274,9 @@ export const LesionCandidates: Display<
 
   useEffect(() => {
     const [volumeLoader, ...restVolumeLoaders] = volumeLoaders;
-    restVolumeLoaders.forEach(volumeLoader => volumeLoader.loadController?.pause());
+    restVolumeLoaders.forEach(volumeLoader =>
+      volumeLoader.loadController?.pause()
+    );
 
     const src = new WebGlRawVolumeMprImageSource({ volumeLoader });
     const composition = new Composition(src);
@@ -312,9 +374,9 @@ export const LesionCandidates: Display<
           );
           const candPersonalOpinions = consensual
             ? personalOpinions.map(fb => {
-              const target = fb.data.find(c => c.id === cand.id);
-              return { ...fb, data: target?.value };
-            })
+                const target = fb.data.find(c => c.id === cand.id);
+                return { ...fb, data: target?.value };
+              })
             : [];
           const tool = tools.current!.find(t => t.name === toolName)?.tool!;
           return (
@@ -324,6 +386,9 @@ export const LesionCandidates: Display<
               markStyle={markStyle}
               tool={tool}
               imageSource={imageSourceForVolumeId(cand.volumeId ?? 0)}
+              displayOptions={
+                results.metadata.displayOptions[cand.volumeId ?? 0]
+              }
             >
               {feedbackListener && FeedbackListener && (
                 <div className="feedback-listener">

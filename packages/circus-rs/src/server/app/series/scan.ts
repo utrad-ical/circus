@@ -34,7 +34,7 @@ export default function scan({ imageEncoder }: ScanOptions): koa.Middleware {
     'size!': ['Output image size', null, isTuple(2), parseTuple(2, true)],
     interpolation: ['Interpolation mode', false, null, parseBoolean],
     ww: ['Window width', undefined, 'isFloat', 'toFloat'],
-    wl: ['Window width', undefined, 'isFloat', 'toFloat'],
+    wl: ['Window level', undefined, 'isFloat', 'toFloat'],
     format: ['Output type', 'arraybuffer', s => s === 'png', () => 'png']
   };
 
@@ -68,7 +68,7 @@ export default function scan({ imageEncoder }: ScanOptions): koa.Middleware {
 
     // Note: Even though the necessary image is only "2, 4, 6",
     // get "2, 3, 4, 5, 6" (in consideration of interpolation)
-    const zAxisRange = getZRange(section);
+    const zAxisRange = getZRange(section, interpolation);
     const z2i = zIndexToImageNo(state.partialVolumeDescriptor);
     const waitForImages = zAxisRange
       .map(z => z2i(z))
@@ -120,7 +120,7 @@ function zIndexToImageNo(
   }
 }
 
-function getZRange(section: Section): number[] {
+function getZRange(section: Section, interpolation: boolean): number[] {
   const { origin, xAxis, yAxis } = vectorizeSection(section);
   const zIndices = [
     origin.z,
@@ -128,7 +128,7 @@ function getZRange(section: Section): number[] {
     origin.z + yAxis.z,
     origin.z + xAxis.z + yAxis.z
   ];
-  const zMin = Math.floor(Math.min(...zIndices));
+  const zMin = Math.floor(Math.min(...zIndices)) - (interpolation ? 1 : 0);
   const zMax = Math.ceil(Math.max(...zIndices));
   return multirange([[zMin, zMax]]).toArray();
 }

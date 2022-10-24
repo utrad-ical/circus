@@ -197,7 +197,7 @@ const prepare = ({ volume, load, images }: VolumeAccessor, partialVolumeDescript
 
   const imageIndices = Array.from(zIndices.keys());
 
-  const queue = new PriorityIntegerQueue;
+  const queue = new PriorityIntegerQueue({ lifoForSamePriority: true });
   queue.append(imageIndices);
 
   const fillImageToVolume = async (zIndex: number) => {

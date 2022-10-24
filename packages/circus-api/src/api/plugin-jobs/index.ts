@@ -1,5 +1,9 @@
 import status from 'http-status';
-import { extractFilter, performAggregationSearch } from '../performSearch';
+import {
+  extractFilter,
+  isPatientInfoInFilter,
+  performAggregationSearch
+} from '../performSearch';
 import checkFilter from '../../utils/checkFilter';
 import generateUniqueId from '../../utils/generateUniqueId';
 import path from 'path';
@@ -87,6 +91,15 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
     if (!checkFilter(customFilter!, searchableFields))
       ctx.throw(status.BAD_REQUEST, 'Bad filter.');
 
+    const canViewPersonalInfo =
+      ctx.userPrivileges.globalPrivileges.includes('personalInfoView');
+
+    if (!canViewPersonalInfo && isPatientInfoInFilter(customFilter))
+      ctx.throw(
+        status.BAD_REQUEST,
+        'You cannot search using patient information.'
+      );
+
     const domainFilter = {
       domain: { $in: ctx.userPrivileges.domains }
     };
@@ -104,9 +117,6 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
       if (myList.resourceType !== 'pluginJobs')
         ctx.throw(status.BAD_REQUEST, 'This my list is not for plugin jobs');
     }
-
-    const canViewPersonalInfo =
-      ctx.userPrivileges.globalPrivileges.includes('personalInfoView');
 
     const baseStage: object[] = [
       {

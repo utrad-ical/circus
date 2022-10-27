@@ -25,12 +25,14 @@ const useKeyboardShortcut = (key: string | undefined, callback: Function) => {
   useEffect(() => {
     if (!key) return;
     const handler = (ev: KeyboardEvent) => {
-      if (
-        ev.target instanceof HTMLInputElement ||
-        ev.target instanceof HTMLTextAreaElement
-      )
-        return;
       for (const hotKey of hotKeys) {
+        if (
+          !hotKey.ctrlKey &&
+          (ev.target instanceof HTMLInputElement ||
+            ev.target instanceof HTMLTextAreaElement)
+        )
+          return;
+
         if (
           hotKey.shiftKey === ev.shiftKey &&
           hotKey.ctrlKey === ev.ctrlKey &&

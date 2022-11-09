@@ -1,0 +1,23 @@
+{
+  "pluginName": "SampleCAD",
+  "version": "1.0.0",
+  "description": "template of CIRCUS CAD Plug-in + custom viewer.",
+  "icon": {
+    "glyph": "cpu",
+    "color": "#aaaaaa",
+    "backgroundColor": "#ffffff"
+  },
+  "displayStrategy": [
+    {
+      "feedbackKey": "sampleCad",
+      "caption": "test sample cad",
+      "type": "@SampleViewer",
+      "options": {
+        "feedbackListener": {
+          "type": "sampleCad",
+          "options": {}
+        }
+      }
+    }
+  ]
+}

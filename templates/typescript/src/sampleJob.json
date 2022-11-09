@@ -1,0 +1,43 @@
+{
+  "_id": {
+    "$oid": "000000000000000000000000"
+  },
+  "jobId": "00000000000000000000000000",
+  "pluginId": "0000000000000000000000000000000000000000000000000000000000000000",
+  "series": [
+    {
+      "seriesUid": "0.0.00.0.0000.0.0.00.000000.0000000000000000000000000.0.0.0",
+      "partialVolumeDescriptor": {
+        "start": 1,
+        "end": 344,
+        "delta": 1
+      }
+    }
+  ],
+  "userEmail": "sample@mail.ac.jp",
+  "status": "finished",
+  "errorMessage": null,
+  "results": {
+    "results": {
+      "item01": "test",
+      "item02": "test?",
+      "item03": "test.",
+      "item04": "test!",
+      "test": "test...",
+      "location": [111, 222, 333]
+    }
+  },
+  "startedAt": {
+    "$date": "2022-04-12T02:24:43.589Z"
+  },
+  "feedbacks": [],
+  "finishedAt": {
+    "$date": "2022-04-12T02:24:51.826Z"
+  },
+  "createdAt": {
+    "$date": "2022-04-12T02:24:43.581Z"
+  },
+  "updatedAt": {
+    "$date": "2022-04-12T02:24:43.581Z"
+  }
+}

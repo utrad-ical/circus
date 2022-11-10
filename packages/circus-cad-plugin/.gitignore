@@ -1,6 +1,0 @@
-node_modules
-*/node_modules
-templates/typescript/dist
-templates/typescript/docker/displays
-.*
-*.tgz

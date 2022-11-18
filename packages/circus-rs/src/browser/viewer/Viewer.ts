@@ -51,7 +51,7 @@ export default class Viewer extends EventEmitter {
 
   private imageReady: boolean = false;
 
-  private isDragging: boolean = false;
+  public isDragging: boolean = false;
 
   /**
    * When render() is called while there is already another rendering procedure in progress,
@@ -314,9 +314,9 @@ export default class Viewer extends EventEmitter {
           this.cachedSourceImageIsDraft = true;
           this.cachedSourceImage = drawResult.draft;
           if (!this.nextRender) {
-            drawResult.next().then(drawResult =>
-              handleImageDraw(drawnState, drawResult)
-            );
+            drawResult
+              .next()
+              .then(drawResult => handleImageDraw(drawnState, drawResult));
           }
         } else {
           this.cachedSourceImageIsDraft = false;

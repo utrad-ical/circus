@@ -12,6 +12,7 @@ import { SearchPreset, UserPreferences } from 'store/loginUser';
 import { useApi } from 'utils/api';
 import { useUserPreferences } from 'utils/useLoginUser';
 import useShowMessage from 'utils/useShowMessage';
+import { WindowPropagationScope } from '../store/loginUser';
 import ScrollbarEditor from './ScrollBarsEditor';
 
 const PresetDeleteEditor: et.Editor<SearchPreset[] | undefined> = props => {
@@ -181,6 +182,15 @@ const circusDBProperties: PropertyEditorProperties<UserPreferences> = [
       nearestNeighbor: 'Nearest neighbor',
       trilinearFiltering: 'Trilinear filtering'
     }) as et.Editor<string | undefined>
+  },
+  {
+    key: 'windowPropagationScope',
+    caption: 'window propagation scope',
+    editor: et.shrinkSelect({
+      central: 'Centrally control',
+      viewer: 'Per viewer',
+      series: 'Per series'
+    }) as et.Editor<WindowPropagationScope | undefined>
   },
   {
     key: 'scrollBarsInfo',

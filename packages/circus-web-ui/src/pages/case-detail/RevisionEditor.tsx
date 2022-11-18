@@ -3,7 +3,10 @@ import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
 import ModifierKeyBehaviors from '@utrad-ical/circus-rs/src/browser/annotation/ModifierKeyBehaviors';
-import { DicomVolumeMetadata, ProgressEventListener } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
+import {
+  DicomVolumeMetadata,
+  ProgressEventListener
+} from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
 import {
   sectionFrom2dViewState,
   sectionTo2dViewState
@@ -29,8 +32,12 @@ import Project from 'types/Project';
 import Series from 'types/Series';
 import isTouchDevice from 'utils/isTouchDevice';
 import { useUserPreferences } from 'utils/useLoginUser';
+import { useVolumeLoaders } from 'utils/useVolumeLoader';
 import { Modal } from '../../components/react-bootstrap';
-import { ScrollBarsSettings } from '../../store/loginUser';
+import {
+  ScrollBarsSettings,
+  WindowPropagationScope
+} from '../../store/loginUser';
 import * as c from './caseStore';
 import {
   buildAnnotation,
@@ -52,7 +59,6 @@ import SideContainer from './SideContainer';
 import ToolBar, { ViewOptions, zDimmedThresholdOptions } from './ToolBar';
 import ViewerGrid from './ViewerGrid';
 import { ViewWindow } from './ViewWindowEditor';
-import { useVolumeLoaders } from 'utils/useVolumeLoader';
 
 const useCompositions = (
   series: {
@@ -70,17 +76,16 @@ const useCompositions = (
     series.map(() => ({
       metadata: undefined,
       composition: undefined,
-      progress: 0,
+      progress: 0
     }))
   );
 
   const volumeLoaders = useVolumeLoaders(series);
 
   useEffect(() => {
+    const abortController = new AbortController();
 
-    const abortController = new AbortController;
-
-    series.forEach(async ({ }, volId) => {
+    series.forEach(async ({}, volId) => {
       const volumeLoader = volumeLoaders[volId];
 
       const metadata = await volumeLoader.loadMeta();
@@ -99,7 +104,9 @@ const useCompositions = (
       })();
 
       const composition = new Composition(src);
-      abortController.signal.addEventListener('abort', () => composition.dispose());
+      abortController.signal.addEventListener('abort', () =>
+        composition.dispose()
+      );
 
       setResults(results => [
         ...results.slice(0, volId),
@@ -116,7 +123,9 @@ const useCompositions = (
       };
 
       volumeLoader.loadController?.on('progress', progressListener);
-      abortController.signal.addEventListener('abort', () => volumeLoader.loadController?.off('progress', progressListener));
+      abortController.signal.addEventListener('abort', () =>
+        volumeLoader.loadController?.off('progress', progressListener)
+      );
 
       await volumeLoader.loadVolume();
       if (abortController.signal.aborted) return;
@@ -129,7 +138,6 @@ const useCompositions = (
     });
 
     return () => abortController.abort();
-
   }, [series, volumeLoaders]);
 
   useEffect(() => {
@@ -137,7 +145,7 @@ const useCompositions = (
       series.map(() => ({
         metadata: undefined,
         composition: undefined,
-        progress: 0,
+        progress: 0
       }))
     );
   }, [series]);
@@ -196,7 +204,8 @@ const RevisionEditor: React.FC<{
           position: 'right'
         }) as ScrollBarsSettings,
     interpolationMode: (preferences.interpolationMode ??
-      'nearestNeighbor') as InterpolationMode
+      'nearestNeighbor') as InterpolationMode,
+    windowPropagationScope: preferences.windowPropagationScope ?? 'central'
   });
 
   const saveViewOptions = (newViewOptions: ViewOptions) => {
@@ -205,7 +214,8 @@ const RevisionEditor: React.FC<{
       ...preferences,
       referenceLine: newViewOptions.showReferenceLine,
       scrollBarsInfo: newViewOptions.scrollbar,
-      interpolationMode: newViewOptions.interpolationMode
+      interpolationMode: newViewOptions.interpolationMode,
+      windowPropagationScope: newViewOptions.windowPropagationScope
     });
   };
 
@@ -228,9 +238,9 @@ const RevisionEditor: React.FC<{
   const [planeFigureOption, setPlaneFigureOption] = useState({
     zDimmedThreshold: preferences.dimmedOutlineFor2DLabels
       ? zDimmedThresholdOptions.find(
-        zDimmedThresholdOption =>
-          zDimmedThresholdOption.key === preferences.dimmedOutlineFor2DLabels
-      )!.value
+          zDimmedThresholdOption =>
+            zDimmedThresholdOption.key === preferences.dimmedOutlineFor2DLabels
+        )!.value
       : 3
   });
 
@@ -286,7 +296,8 @@ const RevisionEditor: React.FC<{
   const activeSeriesMetadata =
     compositions[editingData.activeSeriesIndex].metadata;
 
-  const wandEnabled = volumeLoadingProgresses[editingData.activeSeriesIndex] === 1;
+  const wandEnabled =
+    volumeLoadingProgresses[editingData.activeSeriesIndex] === 1;
 
   const windowEnabled = !(
     metaLoadedAll &&
@@ -335,7 +346,6 @@ const RevisionEditor: React.FC<{
     { activeToolName, toolOptions },
     { setActiveTool, setToolOption }
   ] = useToolbar();
-
   const [editorEnabled, setEditorEnabled] = useState<boolean>(false);
   const toolNameAtEditorDisabledRef = useRef<string>();
   const activeToolIsEditor = [
@@ -487,6 +497,13 @@ const RevisionEditor: React.FC<{
       editingData;
     // wait until composition is synced
     if (compositions.length !== revision.series.length) return;
+    const viewerId = editingData.activeLayoutKey;
+    const viewState =
+      viewerId && viewerId in viewers && viewers[viewerId].getState();
+    viewState &&
+      'window' in viewState &&
+      viewState.window &&
+      setCurrentWindow(viewState.window);
     compositions.forEach((entry, seriesIndex) => {
       const composition = entry.composition;
       if (!composition) return;
@@ -653,8 +670,30 @@ const RevisionEditor: React.FC<{
   };
 
   const handleApplyWindow = useCallback(
-    (window: rs.ViewWindow) => stateChanger(state => ({ ...state, window })),
-    [stateChanger]
+    (window: rs.ViewWindow) => {
+      const targetKeys =
+        viewOptions.windowPropagationScope === 'viewer'
+          ? editingData.activeLayoutKey
+          : viewOptions.windowPropagationScope === 'series'
+          ? editingData.layoutItems
+              .filter(
+                item => item.seriesIndex === editingData.activeSeriesIndex
+              )
+              .map(item => item.key)
+          : editingData.layoutItems.map(item => item.key);
+      if (!targetKeys) return;
+      stateChanger((state, viewer, id) => {
+        if (targetKeys.indexOf(id as string) < 0) return state;
+        return { ...state, window };
+      });
+    },
+    [
+      stateChanger,
+      editingData.activeLayoutKey,
+      editingData.activeSeriesIndex,
+      editingData.layoutItems,
+      viewOptions.windowPropagationScope
+    ]
   );
 
   const handleMagnify = useCallback(
@@ -711,37 +750,49 @@ const RevisionEditor: React.FC<{
 
   const propagateWindowState = useMemo(
     () =>
-      debounce((viewer: Viewer, id: string) => {
-        const viewState = viewer.getState();
-        if (!viewState) return;
-        const window =
-          viewState.type === 'mpr' || viewState.type === '2d'
-            ? viewState.window
-            : undefined;
-        const seriesIndex = editingData.layoutItems.find(
-          item => item.key === id
-        )!.seriesIndex;
-        const targetKeys = editingData.layoutItems
-          .filter(item => item.seriesIndex === seriesIndex)
-          .map(item => item.key);
-        stateChanger((state, viewer, id) => {
-          if (targetKeys.indexOf(id as string) < 0) return state;
-          if (!state.window) return state;
-          if (!window) return state;
-          if (
-            state.window.width !== window.width ||
-            state.window.level !== window.level
-          ) {
-            return { ...state, window };
-          }
-          return state;
-        });
-      }, 500),
-    [editingData.layoutItems, stateChanger]
+      debounce(
+        (
+          viewer: Viewer,
+          id: string,
+          windowPropagationScope: WindowPropagationScope
+        ) => {
+          if (windowPropagationScope === 'viewer') return;
+          const viewState = viewer.getState();
+          if (!viewState) return;
+          const window =
+            viewState.type === 'mpr' || viewState.type === '2d'
+              ? viewState.window
+              : undefined;
+          const seriesIndex = editingData.layoutItems.find(
+            item => item.key === id
+          )!.seriesIndex;
+          const targetKeys =
+            windowPropagationScope === 'series'
+              ? editingData.layoutItems
+                  .filter(item => item.seriesIndex === seriesIndex)
+                  .map(item => item.key)
+              : editingData.layoutItems.map(item => item.key);
+          stateChanger((state, viewer, id) => {
+            if (targetKeys.indexOf(id as string) < 0) return state;
+            if (!state.window) return state;
+            if (!window) return state;
+            if (
+              state.window.width !== window.width ||
+              state.window.level !== window.level
+            ) {
+              return { ...state, window };
+            }
+            return state;
+          });
+        },
+        500
+      ),
+    [stateChanger, editingData.layoutItems]
   );
 
   const handleViewStateChange = useCallback(
     (viewer: Viewer, id?: string | number) => {
+      if (!editingData.layoutItems) return;
       const seriesIndex = editingData.layoutItems.find(
         item => item.key === id
       )!.seriesIndex;
@@ -752,9 +803,20 @@ const RevisionEditor: React.FC<{
       if (!window) return;
       viewWindows.current[seriesIndex] = window;
       setCurrentWindow(window);
-      propagateWindowState(viewer, id as string);
+      activeToolName == 'window' &&
+        viewer.isDragging &&
+        propagateWindowState(
+          viewer,
+          id as string,
+          viewOptions.windowPropagationScope ?? 'central'
+        );
     },
-    [editingData.layoutItems, propagateWindowState]
+    [
+      propagateWindowState,
+      editingData.layoutItems,
+      viewOptions.windowPropagationScope,
+      activeToolName
+    ]
   );
 
   const getWindow = (metadata: DicomVolumeMetadata | undefined) => {

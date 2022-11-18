@@ -27,6 +27,8 @@ properties:
     type: number
     minimum: 0
     maximum: 1
+  windowPropagationScope:
+    enum: ['central', 'viewer', 'series']
   interpolationMode:
     enum: ['nearestNeighbor', 'trilinear']
   scrollBars: #deprecated

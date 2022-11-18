@@ -1,15 +1,15 @@
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import {
-  sectionTo2dViewState,
   createOrthogonalMprSection,
-  OrientationString
+  OrientationString,
+  sectionTo2dViewState
 } from '@utrad-ical/circus-rs/src/browser/section-util';
 import ToolBaseClass from '@utrad-ical/circus-rs/src/browser/tool/Tool';
 import { toolFactory } from '@utrad-ical/circus-rs/src/browser/tool/tool-initializer';
+import setImmediate from '@utrad-ical/circus-rs/src/browser/util/setImmediate';
 import classnames from 'classnames';
 import { EventEmitter } from 'events';
 import React, { useEffect, useRef, useState } from 'react';
-import setImmediate from '@utrad-ical/circus-rs/src/browser/util/setImmediate';
 
 export const setOrthogonalOrientation = (orientation: OrientationString) => {
   return (viewer: rs.Viewer, initialViewState: rs.MprViewState) => {
@@ -152,7 +152,7 @@ const ImageViewer: React.FC<{
     };
     viewer.on('stateChange', handler);
     return () => {
-      viewer.off('stageChange', handler);
+      viewer.off('stateChange', handler);
     };
   }, [viewer, onViewStateChange, id]);
 

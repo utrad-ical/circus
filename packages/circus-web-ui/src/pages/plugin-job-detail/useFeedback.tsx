@@ -83,15 +83,20 @@ const slice = createSlice({
         state.editable = false;
         return;
       }
-      // 2. If current user's personal feedback is registered, show it
+      // 2. If current user's personal feedback is registered,
+      //    follow the 'preferConsensual' option
       if (myPersonal) {
-        state.currentData = myPersonal.data;
-        state.message = registeredMessage(myPersonal);
-        state.editable = false;
-        return;
+        if (preferConsensual) {
+          state.isConsensual = true;
+          state.editable = true;
+        } else {
+          state.currentData = myPersonal.data;
+          state.message = registeredMessage(myPersonal);
+          state.editable = false;
+          return;
+        }
       }
       // 3. Otherwise, enter personal mode and show empty feedback
-      if (preferConsensual) state.isConsensual = true;
       state.editable = true;
     },
     validFeedbackEntered: (state, action: PayloadAction<{ value?: any }>) => {

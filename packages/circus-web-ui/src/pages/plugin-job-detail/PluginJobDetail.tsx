@@ -32,6 +32,7 @@ import {
 import loadDisplay from './loadDisplay';
 import InvestigateJobModal from './InvestigateJobModal';
 import { useVolumeLoaders } from 'utils/useVolumeLoader';
+import useQuery from 'utils/useQuery';
 
 const StyledDiv = styled.div`
   display: flex;
@@ -96,6 +97,8 @@ const Menu: React.FC<{
 const PluginJobDetail: React.FC<{}> = props => {
   const api = useApi();
   const jobId: string = useParams<any>().jobId;
+  const initialMode =
+    useQuery().get('initialMode') === 'consensual' ? 'consensual' : 'personal';
 
   const user = useLoginUser();
   const [busy, setBusy] = useState(false);
@@ -118,14 +121,14 @@ const PluginJobDetail: React.FC<{}> = props => {
         actions.reset({
           feedbacks: job.feedbacks,
           myUserEmail: user.userEmail,
-          preferConsensual: false
+          preferConsensual: initialMode === 'consensual'
         })
       );
       return { job, pluginData, seriesData };
     } finally {
       setBusy(false);
     }
-  }, [api, dispatch, jobId, user.userEmail]);
+  }, [api, initialMode, dispatch, jobId, user.userEmail]);
 
   const [jobData, , reloadJob] = useLoadData(loadJob);
 

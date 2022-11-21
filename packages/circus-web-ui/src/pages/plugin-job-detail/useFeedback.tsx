@@ -64,10 +64,10 @@ const slice = createSlice({
       action: PayloadAction<{
         feedbacks: FeedbackEntry<any>[];
         myUserEmail: string;
-        preferConsensual: boolean;
+        preferMode: 'personal' | 'consensual' | null;
       }>
     ) => {
-      const { feedbacks, myUserEmail, preferConsensual } = action.payload;
+      const { feedbacks, myUserEmail, preferMode } = action.payload;
       state.feedbacks = feedbacks;
       state.myUserEmail = myUserEmail;
       state.actionLog = [];
@@ -75,18 +75,24 @@ const slice = createSlice({
       const myPersonal = feedbacks.find(
         f => !f.isConsensual && f.userEmail === myUserEmail
       );
-      // 1. If consensual feedback is registered, show it
+      // 1. If consensual feedback is registered, show it by default
       if (consensual) {
-        state.isConsensual = true;
-        state.currentData = consensual.data;
-        state.message = registeredMessage(consensual);
-        state.editable = false;
-        return;
+        if (preferMode === 'personal' && myPersonal) {
+          state.currentData = myPersonal.data;
+          state.message = registeredMessage(myPersonal);
+          state.editable = false;
+          return;
+        } else {
+          state.isConsensual = true;
+          state.currentData = consensual.data;
+          state.message = registeredMessage(consensual);
+          state.editable = false;
+          return;
+        }
       }
-      // 2. If current user's personal feedback is registered,
-      //    follow the 'preferConsensual' option
+      // 2. If current user's personal feedback is registered show it by default
       if (myPersonal) {
-        if (preferConsensual) {
+        if (preferMode === 'consensual') {
           state.isConsensual = true;
           state.editable = true;
         } else {

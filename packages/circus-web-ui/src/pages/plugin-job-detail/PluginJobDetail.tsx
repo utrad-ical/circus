@@ -97,8 +97,7 @@ const Menu: React.FC<{
 const PluginJobDetail: React.FC<{}> = props => {
   const api = useApi();
   const jobId: string = useParams<any>().jobId;
-  const initialMode =
-    useQuery().get('initialMode') === 'consensual' ? 'consensual' : 'personal';
+  const initialMode = useQuery().get('initialmode') ?? '';
 
   const user = useLoginUser();
   const [busy, setBusy] = useState(false);
@@ -121,7 +120,9 @@ const PluginJobDetail: React.FC<{}> = props => {
         actions.reset({
           feedbacks: job.feedbacks,
           myUserEmail: user.userEmail,
-          preferConsensual: initialMode === 'consensual'
+          preferMode: ['consensual', 'personal'].includes(initialMode)
+            ? (initialMode as 'personal' | 'consensual')
+            : null
         })
       );
       return { job, pluginData, seriesData };

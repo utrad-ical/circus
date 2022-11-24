@@ -185,11 +185,11 @@ const circusDBProperties: PropertyEditorProperties<UserPreferences> = [
   },
   {
     key: 'windowPropagationScope',
-    caption: 'window propagation scope',
+    caption: 'Window propagation scope',
     editor: et.shrinkSelect({
-      central: 'Centrally control',
-      viewer: 'Per viewer',
-      series: 'Per series'
+      all: 'All',
+      series: 'Per series',
+      viewer: 'Per viewer'
     }) as et.Editor<WindowPropagationScope | undefined>
   },
   {

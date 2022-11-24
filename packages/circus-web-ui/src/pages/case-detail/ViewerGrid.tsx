@@ -58,6 +58,7 @@ interface ViewerGridContextValue {
     MprViewState | TwoDimensionalViewState
   >;
   onViewStateChange: (viewer: Viewer, id?: string | number) => void;
+  onMouseDown?: (id?: string | number) => void;
   multipleSeriesShown: boolean;
 }
 
@@ -243,6 +244,7 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
     onCreateViewer,
     onDestroyViewer,
     onViewStateChange,
+    onMouseDown,
     editingData
   } = useContext(ViewerGridContext)!;
 
@@ -329,6 +331,7 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
       onCreateViewer={onCreateViewer}
       onDestroyViewer={onDestroyViewer}
       onViewStateChange={onViewStateChange}
+      onMouseDown={onMouseDown}
       activeKeydown={active}
     />
   );
@@ -359,6 +362,7 @@ const ViewerGrid: React.FC<{
     MprViewState | TwoDimensionalViewState
   >;
   onViewStateChange: (viewer: Viewer, id?: string | number) => void;
+  onMouseDown?: (id?: string | number) => void;
   multipleSeriesShown: boolean;
 }> = props => {
   const {
@@ -371,6 +375,7 @@ const ViewerGrid: React.FC<{
     onDestroyViewer,
     initialStateSetter,
     onViewStateChange,
+    onMouseDown = () => {},
     multipleSeriesShown
   } = props;
 
@@ -385,6 +390,7 @@ const ViewerGrid: React.FC<{
       onDestroyViewer,
       onViewStateChange,
       initialStateSetter,
+      onMouseDown,
       multipleSeriesShown
     }),
     [
@@ -397,6 +403,7 @@ const ViewerGrid: React.FC<{
       onDestroyViewer,
       onViewStateChange,
       initialStateSetter,
+      onMouseDown,
       multipleSeriesShown
     ]
   );

@@ -25,7 +25,7 @@ export type ScrollBarsSettings = {
   visibility: 'none' | 'always' | 'hover';
 };
 
-export type WindowPropagationScope = 'central' | 'viewer' | 'series';
+export type WindowPropagationScope = 'all' | 'series' | 'viewer';
 
 export interface UserPreferences {
   seriesSearchPresets?: SearchPreset[];

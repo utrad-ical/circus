@@ -205,7 +205,7 @@ const RevisionEditor: React.FC<{
         }) as ScrollBarsSettings,
     interpolationMode: (preferences.interpolationMode ??
       'nearestNeighbor') as InterpolationMode,
-    windowPropagationScope: preferences.windowPropagationScope ?? 'central'
+    windowPropagationScope: preferences.windowPropagationScope ?? 'all'
   });
 
   const saveViewOptions = (newViewOptions: ViewOptions) => {
@@ -792,7 +792,8 @@ const RevisionEditor: React.FC<{
 
   const handleViewStateChange = useCallback(
     (viewer: Viewer, id?: string | number) => {
-      if (!editingData.layoutItems) return;
+      if (!editingData.layoutItems || editingData.activeLayoutKey !== id)
+        return;
       const seriesIndex = editingData.layoutItems.find(
         item => item.key === id
       )!.seriesIndex;
@@ -801,23 +802,40 @@ const RevisionEditor: React.FC<{
       if (viewState.type !== 'mpr' && viewState.type !== '2d') return;
       const window = viewState.window;
       if (!window) return;
-      viewWindows.current[seriesIndex] = window;
       setCurrentWindow(window);
-      activeToolName == 'window' &&
+      window.level !== viewWindows.current[seriesIndex].level &&
+        window.width !== viewWindows.current[seriesIndex].width &&
         viewer.isDragging &&
         propagateWindowState(
           viewer,
           id as string,
-          viewOptions.windowPropagationScope ?? 'central'
+          viewOptions.windowPropagationScope ?? 'all'
         );
+      viewWindows.current[seriesIndex] = window;
     },
     [
       propagateWindowState,
       editingData.layoutItems,
       viewOptions.windowPropagationScope,
-      activeToolName
+      editingData.activeLayoutKey
     ]
   );
+
+  const handleChangeActiveLayoutKey = (id?: string | number) => {
+    if (!id || editingData.activeLayoutKey === id) return;
+    const key = typeof id === 'string' ? id : editingData.layoutItems[id].key;
+    const seriesIndex = editingData.layoutItems.find(
+      item => item.key === key
+    )!.seriesIndex;
+    updateEditingData(d => {
+      d.activeLayoutKey = key;
+      if (d.activeSeriesIndex !== seriesIndex) {
+        d.activeSeriesIndex = seriesIndex;
+        d.activeLabelIndex =
+          revision.series[seriesIndex].labels.length > 0 ? 0 : -1;
+      }
+    }, 'select active editor');
+  };
 
   const getWindow = (metadata: DicomVolumeMetadata | undefined) => {
     if (!metadata) throw new Error('No metadata available.');
@@ -1025,6 +1043,7 @@ const RevisionEditor: React.FC<{
             onDestroyViewer={handleDestroyViewer}
             initialStateSetter={initialStateSetter}
             onViewStateChange={handleViewStateChange}
+            onMouseDown={handleChangeActiveLayoutKey}
             multipleSeriesShown={multipleSeriesShown}
           />
         )}

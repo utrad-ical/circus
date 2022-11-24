@@ -78,9 +78,9 @@ export const windowPropagationScopeOptions: {
   key: WindowPropagationScope;
   caption: string;
 }[] = [
-  { key: 'central', caption: 'Centrally control' },
-  { key: 'viewer', caption: 'Per viewer' },
-  { key: 'series', caption: 'Per series' }
+  { key: 'all', caption: 'All' },
+  { key: 'series', caption: 'Per series' },
+  { key: 'viewer', caption: 'Per viewer' }
 ];
 
 const layoutOptions: {
@@ -326,6 +326,7 @@ const ToolBar: React.FC<{
           Manual
         </MenuItem>
         <MenuItem divider />
+        <MenuItem header>Target</MenuItem>
         {windowPropagationScopeOptions.map(l => {
           return (
             <MenuItem

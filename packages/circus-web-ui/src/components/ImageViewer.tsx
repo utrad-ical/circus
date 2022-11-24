@@ -95,6 +95,7 @@ const ImageViewer: React.FC<{
   onDestroyViewer?: (viewer: rs.Viewer) => void;
   onViewStateChange?: (viewer: rs.Viewer, id?: string | number) => void;
   onMouseUp?: () => void;
+  onMouseDown?: (id?: string | number) => void;
   activeKeydown?: boolean;
 }> = props => {
   const {
@@ -108,6 +109,7 @@ const ImageViewer: React.FC<{
     onDestroyViewer = noop,
     onViewStateChange = noop,
     onMouseUp = noop,
+    onMouseDown = noop,
     activeKeydown = false
   } = props;
 
@@ -164,6 +166,17 @@ const ImageViewer: React.FC<{
       container.removeEventListener('mouseup', onMouseUp);
     };
   }, [onMouseUp]);
+
+  // Handle onMouseUp
+  useEffect(() => {
+    if (!id) return;
+    const container = containerRef.current!;
+    const handleMouseDown = () => onMouseDown(id);
+    container.addEventListener('mousedown', handleMouseDown);
+    return () => {
+      container.removeEventListener('mousedown', handleMouseDown);
+    };
+  }, [onMouseDown, id]);
 
   // Handle composition change
   useEffect(() => {

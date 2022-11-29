@@ -1,6 +1,5 @@
 import classnames from 'classnames';
 import Icon from 'components/Icon';
-import { Button } from 'components/react-bootstrap';
 import TaskNotifier from 'components/TaskNotifier';
 import React, { Fragment } from 'react';
 import { useSelector } from 'react-redux';

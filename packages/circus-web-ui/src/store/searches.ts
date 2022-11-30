@@ -237,16 +237,14 @@ export const updateSearch = (
       const removedIds = search.selected.filter(
         selectedId => !search.results?.indexes.some(id => id === selectedId)
       );
-      if (removedIds.length > 0) {
-        for (const removedId of removedIds) {
-          dispatch(
-            selectionStatusChanged({
-              searchName,
-              id: removedId,
-              isSelected: false
-            })
-          );
-        }
+      for (const removedId of removedIds) {
+        dispatch(
+          selectionStatusChanged({
+            searchName,
+            id: removedId,
+            isSelected: false
+          })
+        );
       }
     }
   };

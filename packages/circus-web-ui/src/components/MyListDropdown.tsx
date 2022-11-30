@@ -32,7 +32,7 @@ const MyListDropdown: React.FC<{
       changedCount === 1 ? ' item was' : ' items were'
     } ${operation === 'add' ? 'added to the list.' : 'removed from the list.'}`;
     dispatch(showMessage(message, 'info', { short: true }));
-    dispatch(updateSearch(api, searchName, {}));
+    dispatch(updateSearch(api, searchName, {}, operation === 'remove'));
   };
 
   const myLists = user.myLists.filter(

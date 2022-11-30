@@ -220,15 +220,35 @@ export const newSearch = (
 export const updateSearch = (
   api: ApiCaller,
   searchName: string,
-  partialParams: Partial<SearchParams>
+  partialParams: Partial<SearchParams>,
+  updateSelected?: boolean
 ): AppThunk => {
   return async (dispatch, getState) => {
-    const state = getState();
-    const search = state.searches.searches[searchName];
+    let state = getState();
+    let search = state.searches.searches[searchName];
     if (!search) throw new Error('There is no previous search.');
     if (search.isFetching) throw new Error('Previous search has not finished.');
     const newParams = { ...search.params, ...partialParams };
     await executeQuery(dispatch, api, searchName, newParams);
+
+    if (updateSelected) {
+      state = getState();
+      search = state.searches.searches[searchName];
+      const removedIds = search.selected.filter(
+        selectedId => !search.results?.indexes.some(id => id === selectedId)
+      );
+      if (removedIds.length > 0) {
+        for (const removedId of removedIds) {
+          dispatch(
+            selectionStatusChanged({
+              searchName,
+              id: removedId,
+              isSelected: false
+            })
+          );
+        }
+      }
+    }
   };
 };
 

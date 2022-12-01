@@ -39,6 +39,8 @@ import RevisionSelector from './RevisionSelector';
 import SaveModal from './SaveModal';
 import TagEditor from './TagEditor';
 
+const pageTransitionMessage = `Are you sure you want to leave?\nIf you leave before saving, your changes will be lost.`;
+
 const CaseDetail: React.FC<{}> = () => {
   const caseId = useParams<any>().caseId;
   const [caseStore, caseDispatch] = useReducer(
@@ -126,6 +128,7 @@ const CaseDetail: React.FC<{}> = () => {
   }, [api, caseStore.caseData, caseStore.editingRevisionIndex, f]);
 
   const handleRevisionSelect = async (index: number) => {
+    if (isUpdated && !(await confirm(pageTransitionMessage))) return;
     caseDispatch(c.startLoadRevision({ revisionIndex: index }));
   };
 
@@ -214,10 +217,7 @@ const CaseDetail: React.FC<{}> = () => {
 
   return (
     <FullSpanContainer>
-      <Prompt
-        when={isUpdated}
-        message={`Are you sure you want to leave?\nIf you leave before saving, your changes will be lost.`}
-      />
+      <Prompt when={isUpdated} message={pageTransitionMessage} />
       <CaseInfoCollapser title="Case Info">
         <PatientInfoBox value={caseStore.patientInfo} />
         <ProjectDisplay

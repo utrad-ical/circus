@@ -51,8 +51,9 @@ export default class Viewer extends EventEmitter {
 
   private imageReady: boolean = false;
 
-  public isDragging: boolean = false;
+  private isDragging: boolean = false;
 
+  readonly getDraggingState: boolean = false;
   /**
    * When render() is called while there is already another rendering procedure in progress,
    * We will keep that render Promise with a "suspended" status.

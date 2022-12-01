@@ -221,7 +221,7 @@ export const updateSearch = (
   api: ApiCaller,
   searchName: string,
   partialParams: Partial<SearchParams>,
-  updateSelected?: boolean
+  onExecutePostProcess?: (search: SearchResult) => void
 ): AppThunk => {
   return async (dispatch, getState) => {
     let state = getState();
@@ -231,21 +231,10 @@ export const updateSearch = (
     const newParams = { ...search.params, ...partialParams };
     await executeQuery(dispatch, api, searchName, newParams);
 
-    if (updateSelected) {
+    if (onExecutePostProcess) {
       state = getState();
       search = state.searches.searches[searchName];
-      const removedIds = search.selected.filter(
-        selectedId => !search.results?.indexes.some(id => id === selectedId)
-      );
-      for (const removedId of removedIds) {
-        dispatch(
-          selectionStatusChanged({
-            searchName,
-            id: removedId,
-            isSelected: false
-          })
-        );
-      }
+      onExecutePostProcess(search);
     }
   };
 };

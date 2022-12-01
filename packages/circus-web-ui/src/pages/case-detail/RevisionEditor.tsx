@@ -3,7 +3,10 @@ import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
 import ModifierKeyBehaviors from '@utrad-ical/circus-rs/src/browser/annotation/ModifierKeyBehaviors';
-import { DicomVolumeMetadata, ProgressEventListener } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
+import {
+  DicomVolumeMetadata,
+  ProgressEventListener
+} from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
 import {
   sectionFrom2dViewState,
   sectionTo2dViewState
@@ -27,8 +30,10 @@ import React, {
 import styled from 'styled-components';
 import Project from 'types/Project';
 import Series from 'types/Series';
+import { useApi } from 'utils/api';
 import isTouchDevice from 'utils/isTouchDevice';
 import { useUserPreferences } from 'utils/useLoginUser';
+import { useVolumeLoaders } from 'utils/useVolumeLoader';
 import { Modal } from '../../components/react-bootstrap';
 import { ScrollBarsSettings } from '../../store/loginUser';
 import * as c from './caseStore';
@@ -52,7 +57,6 @@ import SideContainer from './SideContainer';
 import ToolBar, { ViewOptions, zDimmedThresholdOptions } from './ToolBar';
 import ViewerGrid from './ViewerGrid';
 import { ViewWindow } from './ViewWindowEditor';
-import { useVolumeLoaders } from 'utils/useVolumeLoader';
 
 const useCompositions = (
   series: {
@@ -70,17 +74,16 @@ const useCompositions = (
     series.map(() => ({
       metadata: undefined,
       composition: undefined,
-      progress: 0,
+      progress: 0
     }))
   );
 
   const volumeLoaders = useVolumeLoaders(series);
 
   useEffect(() => {
+    const abortController = new AbortController();
 
-    const abortController = new AbortController;
-
-    series.forEach(async ({ }, volId) => {
+    series.forEach(async ({}, volId) => {
       const volumeLoader = volumeLoaders[volId];
 
       const metadata = await volumeLoader.loadMeta();
@@ -99,7 +102,9 @@ const useCompositions = (
       })();
 
       const composition = new Composition(src);
-      abortController.signal.addEventListener('abort', () => composition.dispose());
+      abortController.signal.addEventListener('abort', () =>
+        composition.dispose()
+      );
 
       setResults(results => [
         ...results.slice(0, volId),
@@ -116,7 +121,9 @@ const useCompositions = (
       };
 
       volumeLoader.loadController?.on('progress', progressListener);
-      abortController.signal.addEventListener('abort', () => volumeLoader.loadController?.off('progress', progressListener));
+      abortController.signal.addEventListener('abort', () =>
+        volumeLoader.loadController?.off('progress', progressListener)
+      );
 
       await volumeLoader.loadVolume();
       if (abortController.signal.aborted) return;
@@ -129,7 +136,6 @@ const useCompositions = (
     });
 
     return () => abortController.abort();
-
   }, [series, volumeLoaders]);
 
   useEffect(() => {
@@ -137,7 +143,7 @@ const useCompositions = (
       series.map(() => ({
         metadata: undefined,
         composition: undefined,
-        progress: 0,
+        progress: 0
       }))
     );
   }, [series]);
@@ -165,7 +171,7 @@ const RevisionEditor: React.FC<{
     refreshCounter,
     busy
   } = props;
-
+  const api = useApi();
   const viewersRef = useRef<{ [key: string]: Viewer }>({});
   const viewers = viewersRef.current;
 
@@ -228,9 +234,9 @@ const RevisionEditor: React.FC<{
   const [planeFigureOption, setPlaneFigureOption] = useState({
     zDimmedThreshold: preferences.dimmedOutlineFor2DLabels
       ? zDimmedThresholdOptions.find(
-        zDimmedThresholdOption =>
-          zDimmedThresholdOption.key === preferences.dimmedOutlineFor2DLabels
-      )!.value
+          zDimmedThresholdOption =>
+            zDimmedThresholdOption.key === preferences.dimmedOutlineFor2DLabels
+        )!.value
       : 3
   });
 
@@ -286,7 +292,8 @@ const RevisionEditor: React.FC<{
   const activeSeriesMetadata =
     compositions[editingData.activeSeriesIndex].metadata;
 
-  const wandEnabled = volumeLoadingProgresses[editingData.activeSeriesIndex] === 1;
+  const wandEnabled =
+    volumeLoadingProgresses[editingData.activeSeriesIndex] === 1;
 
   const windowEnabled = !(
     metaLoadedAll &&
@@ -627,7 +634,7 @@ const RevisionEditor: React.FC<{
     setSeriesDialogOpen(true);
   };
 
-  const handleSeriesDialogResolve = (
+  const handleSeriesDialogResolve = async (
     result: SeriesEntryWithLabels[] | null
   ) => {
     if (busy) return;
@@ -637,6 +644,30 @@ const RevisionEditor: React.FC<{
     const layoutKind = activeSeriesMetadata.mode !== '3d' ? '2d' : 'twoByTwo';
     setSeriesDialogOpen(false);
     if (result === null) return; // dialog cancelled
+    const seriesUids = Array.from(
+      new Set(result.map((s: any) => s.seriesUid)).values()
+    ) as string[];
+    const targetSeriesUids = seriesUids.filter(uid =>
+      Object.keys(seriesData).some(key => key !== uid)
+    );
+
+    if (0 < targetSeriesUids.length) {
+      const newSeriesData = Object.fromEntries(
+        await Promise.all(
+          targetSeriesUids.map(async seriesUid => [
+            seriesUid,
+            await api('series/' + seriesUid)
+          ])
+        )
+      ) as {
+        [seriesUid: string]: Series;
+      };
+      caseDispatch(
+        c.updateSeriesData({
+          seriesData: { ...seriesData, ...newSeriesData }
+        })
+      );
+    }
     updateEditingData(d => {
       d.revision.series = result;
       d.activeSeriesIndex = activeSeriesIndex;

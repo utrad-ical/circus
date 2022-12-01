@@ -74,7 +74,7 @@ export const handlePostRevision: RouteMiddleware = ({
     const blobIds: string[] = rev.series
       .map((s: any) => {
         return s.labels
-          .filter((l: any) => l.type === 'voxel' && l.voxels !== null)
+          .filter((l: any) => l.type === 'voxel' && l.data.voxels !== null)
           .map((l: any) => l.data.voxels);
       })
       .flat();

@@ -44,6 +44,17 @@ describe('plugin-job search', () => {
     expect(res.data.items[0].patientInfo.age).toBe(20);
   });
 
+  test('Filter by series info', async () => {
+    const res = await dave.get('api/plugin-jobs', {
+      params: {
+        // filter: JSON.stringify({ modality: 'CR' })
+        filter: JSON.stringify({ seriesDate: { $lt: { $date: '2017-10-10' } } })
+      }
+    });
+    expect(res.status).toBe(200);
+    expect(res.data.items).toHaveLength(2);
+  });
+
   test('Filter by power user domain', async () => {
     const res = await bob.get('api/plugin-jobs');
     expect(res.status).toBe(200);

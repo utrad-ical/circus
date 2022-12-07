@@ -803,9 +803,11 @@ const RevisionEditor: React.FC<{
       const window = viewState.window;
       if (!window) return;
       setCurrentWindow(window);
-      window.level !== viewWindows.current[seriesIndex].level &&
+
+      activeToolName === 'window' &&
+        window.level !== viewWindows.current[seriesIndex].level &&
         window.width !== viewWindows.current[seriesIndex].width &&
-        viewer.isDragging &&
+        viewer.getDraggingState() &&
         propagateWindowState(
           viewer,
           id as string,
@@ -817,7 +819,8 @@ const RevisionEditor: React.FC<{
       propagateWindowState,
       editingData.layoutItems,
       viewOptions.windowPropagationScope,
-      editingData.activeLayoutKey
+      editingData.activeLayoutKey,
+      activeToolName
     ]
   );
 

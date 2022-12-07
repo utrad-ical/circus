@@ -33,6 +33,7 @@ const MyListDropdown: React.FC<{
       changedCount === 1 ? ' item was' : ' items were'
     } ${operation === 'add' ? 'added to the list.' : 'removed from the list.'}`;
     const onExecutePostProcess = (search: SearchResult) => {
+      if (!search.params.resource.endPoint.includes(myListId)) return;
       const removedIds = search.selected.filter(
         selectedId => !search.results?.indexes.some(id => id === selectedId)
       );

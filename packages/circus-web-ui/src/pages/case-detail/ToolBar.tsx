@@ -20,7 +20,10 @@ import { MenuItemProps } from 'react-bootstrap';
 import styled from 'styled-components';
 import { WindowPreset } from 'types/Project';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
-import { ScrollBarsSettings } from '../../store/loginUser';
+import {
+  ScrollBarsSettings,
+  WindowPropagationScope
+} from '../../store/loginUser';
 import { LayoutKind } from './caseStore';
 import ViewWindowEditor, { ViewWindow } from './ViewWindowEditor';
 
@@ -28,6 +31,7 @@ export interface ViewOptions {
   showReferenceLine?: boolean;
   scrollbar?: ScrollBarsSettings;
   interpolationMode?: InterpolationMode;
+  windowPropagationScope?: WindowPropagationScope;
 }
 
 type ScrollbarVisibilityOptions = 'none' | 'always' | 'hover';
@@ -68,6 +72,15 @@ export const zDimmedThresholdOptions: {
   { key: 'hide', caption: 'None', value: 0 },
   { key: 'show', caption: '± 2', value: 3 },
   { key: 'infinity', caption: '∞', value: Infinity }
+];
+
+export const windowPropagationScopeOptions: {
+  key: WindowPropagationScope;
+  caption: string;
+}[] = [
+  { key: 'all', caption: 'All' },
+  { key: 'series', caption: 'Per series' },
+  { key: 'viewer', caption: 'Per viewer' }
 ];
 
 const layoutOptions: {
@@ -228,6 +241,13 @@ const ToolBar: React.FC<{
     });
   };
 
+  const handleToggleWindowPropagationScope = (selection: any) => {
+    onChangeViewOptions({
+      ...viewOptions,
+      windowPropagationScope: selection as WindowPropagationScope
+    });
+  };
+
   const handleApplyWindow = async (selection: any) => {
     if ('level' in selection && 'width' in selection) {
       const window = selection as WindowPreset;
@@ -305,6 +325,22 @@ const ToolBar: React.FC<{
         <MenuItem key={99999} eventKey={99999} onClick={handleApplyWindow}>
           Manual
         </MenuItem>
+        <MenuItem divider />
+        <MenuItem header>Target</MenuItem>
+        {windowPropagationScopeOptions.map(l => {
+          return (
+            <MenuItem
+              key={l.key}
+              eventKey={l.key}
+              onSelect={handleToggleWindowPropagationScope}
+            >
+              <CheckMark
+                checked={viewOptions.windowPropagationScope === l.key}
+              />
+              {l.caption}
+            </MenuItem>
+          );
+        })}
       </ToolButton>
       &thinsp;
       <ToolButton

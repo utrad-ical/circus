@@ -1,13 +1,26 @@
-import { PartialVolumeDescriptor, partialVolumeDescriptorToArray } from '@utrad-ical/circus-lib';
+import {
+  PartialVolumeDescriptor,
+  partialVolumeDescriptorToArray
+} from '@utrad-ical/circus-lib';
 import PriorityIntegerQueue from '../../common/PriorityIntegerQueue';
-import { MultiRange, Initializer as MultiRangeInitializer } from 'multi-integer-range';
-import { TransferImageMessage, transferImageMessageData } from '../../common/ws/message';
+import {
+  MultiRange,
+  Initializer as MultiRangeInitializer
+} from 'multi-integer-range';
+import {
+  TransferImageMessage,
+  transferImageMessageData
+} from '../../common/ws/message';
 import { VolumeAccessor, VolumeProvider } from '../helper/createVolumeProvider';
 
 const PARTIAL_VOLUME_PRIORITY = 1;
 
 interface ImageTransferAgent {
-  beginTransfer: (transferId: string, seriesUid: string, partialVolumeDescriptor?: PartialVolumeDescriptor) => Promise<TransferConnection>;
+  beginTransfer: (
+    transferId: string,
+    seriesUid: string,
+    partialVolumeDescriptor?: PartialVolumeDescriptor
+  ) => Promise<TransferConnection>;
   getConnection: (transferId: string) => Promise<TransferConnection | null>;
   dispose: () => void;
 }
@@ -35,9 +48,11 @@ const createImageTransferAgent = ({
   imageDataEmitter,
   volumeProvider
 }: CreateImageTransferAgentOptions): ImageTransferAgent => {
-
   const transferConnections = new Map<string, TransferConnection>();
-  const pendingsUntilTransferStarts = new Map<string, Promise<TransferConnection | null>>();
+  const pendingsUntilTransferStarts = new Map<
+    string,
+    Promise<TransferConnection | null>
+  >();
 
   let inOperation = false;
   const startOperationIfNecessary = () => {
@@ -51,7 +66,6 @@ const createImageTransferAgent = ({
   };
 
   const next = async () => {
-
     if (transferConnections.size === 0) return stopOperation();
 
     const transferIds = Array.from(transferConnections.keys());
@@ -79,17 +93,24 @@ const createImageTransferAgent = ({
     seriesUid: string,
     partialVolumeDescriptor?: PartialVolumeDescriptor
   ) => {
-
-    if (pendingsUntilTransferStarts.has(transferId) || transferConnections.has(transferId)) {
-      throw new Error(`The transfer ${transferId} is already in progress.`)
+    if (
+      pendingsUntilTransferStarts.has(transferId) ||
+      transferConnections.has(transferId)
+    ) {
+      throw new Error(`The transfer ${transferId} is already in progress.`);
     }
 
     // Mark as in preparation.
-    let resolvePending: (con: TransferConnection | null) => void = () => { };
-    pendingsUntilTransferStarts.set(transferId, new Promise<TransferConnection | null>((resolve) => resolvePending = resolve));
+    let resolvePending: (con: TransferConnection | null) => void = () => {};
+    pendingsUntilTransferStarts.set(
+      transferId,
+      new Promise<TransferConnection | null>(
+        resolve => (resolvePending = resolve)
+      )
+    );
 
     // Supprot abort
-    const abortSignal = new AbortController;
+    const abortSignal = new AbortController();
     abortSignal.signal.addEventListener('abort', () => {
       if (pendingsUntilTransferStarts.has(transferId)) {
         resolvePending(null);
@@ -104,9 +125,15 @@ const createImageTransferAgent = ({
     const abort = abortSignal.abort.bind(abortSignal);
 
     const startTime = new Date().getTime();
-    const { queue, fillImageToVolume } = prepare(await volumeProvider(seriesUid), partialVolumeDescriptor);
+    const { queue, fillImageToVolume } = prepare(
+      await volumeProvider(seriesUid),
+      partialVolumeDescriptor
+    );
 
-    const setPriority = async (target: MultiRangeInitializer, priority: number) => {
+    const setPriority = async (
+      target: MultiRangeInitializer,
+      priority: number
+    ) => {
       const targetRange = new MultiRange(target).intersect(queue.toArray());
       if (0 < targetRange.segmentLength()) {
         // console.log(`Set priority ${priority} / ${targetRange.toString()}`);
@@ -116,15 +143,19 @@ const createImageTransferAgent = ({
 
     const transferNextImage = async () => {
       if (paused) return;
-      const imageIndex = queue.shift();
+      const { value: imageIndex, priority } = queue.shift();
       if (imageIndex !== undefined) {
         try {
           const data = transferImageMessageData(transferId, imageIndex);
-          const buffer = await fillImageToVolume(imageIndex);
+          const buffer = await fillImageToVolume(imageIndex, priority);
           await imageDataEmitter(data, buffer);
         } catch (err) {
           abort();
-          throw new Error(`Failed to emit image#${imageIndex} for tr#${transferId}: ${(err as Error).message}`);
+          throw new Error(
+            `Failed to emit image#${imageIndex} for tr#${transferId}: ${
+              (err as Error).message
+            }`
+          );
         }
       } else {
         abort();
@@ -132,8 +163,8 @@ const createImageTransferAgent = ({
     };
 
     let paused = false;
-    const pause = () => paused = true;
-    const resume = () => paused = false;
+    const pause = () => (paused = true);
+    const resume = () => (paused = false);
 
     const transferConnection: TransferConnection = {
       id: () => transferId,
@@ -156,7 +187,9 @@ const createImageTransferAgent = ({
     return transferConnection;
   };
 
-  const getConnection = async (transferId: string): Promise<TransferConnection | null> => {
+  const getConnection = async (
+    transferId: string
+  ): Promise<TransferConnection | null> => {
     if (transferConnections.has(transferId)) {
       return transferConnections.get(transferId)!;
     }
@@ -167,24 +200,28 @@ const createImageTransferAgent = ({
   };
 
   const dispose = () => {
-    Array.from(transferConnections.values()).map(
-      (connection) => connection.abort()
+    Array.from(transferConnections.values()).map(connection =>
+      connection.abort()
     );
     transferConnections.clear();
   };
 
   return { beginTransfer, getConnection, dispose };
-}
+};
 
-const prepare = ({ volume, load, images }: VolumeAccessor, partialVolumeDescriptor?: PartialVolumeDescriptor) => {
-
+const prepare = (
+  { volume, load, images }: VolumeAccessor,
+  partialVolumeDescriptor?: PartialVolumeDescriptor
+) => {
   // Maps a zero-based volume z-index to the corresponding image number,
   // The number is the number to be specified when call load() function.
   const zIndices = new Map<number, number>();
 
   if (partialVolumeDescriptor) {
     // Set zIndices for the partial volume.
-    const partialImages = partialVolumeDescriptorToArray(partialVolumeDescriptor);
+    const partialImages = partialVolumeDescriptorToArray(
+      partialVolumeDescriptor
+    );
     partialImages.forEach((v, i) => zIndices.set(i, v));
     // It has already started loading by volumeProvider.
     // So set higher priority to the images in partial volume.
@@ -200,15 +237,15 @@ const prepare = ({ volume, load, images }: VolumeAccessor, partialVolumeDescript
   const queue = new PriorityIntegerQueue({ lifoForSamePriority: true });
   queue.append(imageIndices);
 
-  const fillImageToVolume = async (zIndex: number) => {
+  const fillImageToVolume = async (zIndex: number, priority?: number) => {
     const imageNo = zIndices.get(zIndex);
     // console.log(`zIndex: ${zIndex} => #${imageNo}`);
     if (!imageNo) throw new Error('Invalid image request');
-    await load(imageNo);
+    await load(imageNo, priority ?? 0);
     return volume.getSingleImage(imageNo - 1);
   };
 
   return { queue, fillImageToVolume };
-}
+};
 
 export default createImageTransferAgent;

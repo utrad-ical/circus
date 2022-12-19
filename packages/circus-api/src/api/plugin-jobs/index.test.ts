@@ -48,7 +48,9 @@ describe('plugin-job search', () => {
     const res = await dave.get('api/plugin-jobs', {
       params: {
         // filter: JSON.stringify({ modality: 'CR' })
-        filter: JSON.stringify({ seriesDate: { $lt: { $date: '2017-10-10' } } })
+        filter: JSON.stringify({
+          seriesDate: { $lt: { $date: '2017-10-10T00:00:00Z' } }
+        })
       }
     });
     expect(res.status).toBe(200);

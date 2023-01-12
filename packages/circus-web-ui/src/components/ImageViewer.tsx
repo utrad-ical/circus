@@ -1,15 +1,15 @@
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import {
-  sectionTo2dViewState,
   createOrthogonalMprSection,
-  OrientationString
+  OrientationString,
+  sectionTo2dViewState
 } from '@utrad-ical/circus-rs/src/browser/section-util';
 import ToolBaseClass from '@utrad-ical/circus-rs/src/browser/tool/Tool';
 import { toolFactory } from '@utrad-ical/circus-rs/src/browser/tool/tool-initializer';
+import setImmediate from '@utrad-ical/circus-rs/src/browser/util/setImmediate';
 import classnames from 'classnames';
 import { EventEmitter } from 'events';
 import React, { useEffect, useRef, useState } from 'react';
-import setImmediate from '@utrad-ical/circus-rs/src/browser/util/setImmediate';
 
 export const setOrthogonalOrientation = (orientation: OrientationString) => {
   return (viewer: rs.Viewer, initialViewState: rs.MprViewState) => {
@@ -95,6 +95,7 @@ const ImageViewer: React.FC<{
   onDestroyViewer?: (viewer: rs.Viewer) => void;
   onViewStateChange?: (viewer: rs.Viewer, id?: string | number) => void;
   onMouseUp?: () => void;
+  onMouseDown?: (id?: string | number) => void;
   activeKeydown?: boolean;
 }> = props => {
   const {
@@ -108,6 +109,7 @@ const ImageViewer: React.FC<{
     onDestroyViewer = noop,
     onViewStateChange = noop,
     onMouseUp = noop,
+    onMouseDown = noop,
     activeKeydown = false
   } = props;
 
@@ -152,7 +154,7 @@ const ImageViewer: React.FC<{
     };
     viewer.on('stateChange', handler);
     return () => {
-      viewer.off('stageChange', handler);
+      viewer.off('stateChange', handler);
     };
   }, [viewer, onViewStateChange, id]);
 
@@ -164,6 +166,17 @@ const ImageViewer: React.FC<{
       container.removeEventListener('mouseup', onMouseUp);
     };
   }, [onMouseUp]);
+
+  // Handle onMouseUp
+  useEffect(() => {
+    if (!id) return;
+    const container = containerRef.current!;
+    const handleMouseDown = () => onMouseDown(id);
+    container.addEventListener('mousedown', handleMouseDown);
+    return () => {
+      container.removeEventListener('mousedown', handleMouseDown);
+    };
+  }, [onMouseDown, id]);
 
   // Handle composition change
   useEffect(() => {

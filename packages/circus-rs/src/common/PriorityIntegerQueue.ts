@@ -72,16 +72,17 @@ export default class PriorityIntegerQueue {
     this.cleanup();
   }
 
-  public shift(): number | undefined {
-    if (!this.entries.length) return undefined;
+  public shift(): { value: number | undefined; priority: number | undefined } {
+    if (!this.entries.length) return { value: undefined, priority: undefined };
     const top = this.entries[this.entries.length - 1];
+    const priority = top.priority;
     const topFragment = top.fragments[top.fragments.length - 1];
     const result = topFragment.shift();
     if (topFragment.segmentLength() === 0) top.fragments.pop();
     if (top.fragments.length === 0) {
       this.entries.pop();
     }
-    return result;
+    return { value: result, priority: priority };
   }
 
   public clear(): void {

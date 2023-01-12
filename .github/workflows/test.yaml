@@ -20,9 +20,11 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Start mongod
+        shell: bash
         run: |
           docker run --name mongo -p 27017:27017 -d mongo:4.2.2-bionic --replSet replset
-          echo "rs.initiate();" | mongo
+          sleep 5s
+          docker exec mongo /bin/bash -c "echo \"rs.initiate();\" | mongo"
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:

@@ -3,7 +3,7 @@
   width: 1024
   height: 1024
   images: '1'
-  seriesDate: { $date: '2017-10-10T00:11:11' }
+  seriesDate: { $date: '2017-10-10T00:11:11+09:00' }
   modality: CR
   seriesDescription: chest PA
   bodyPart: Chest
@@ -14,13 +14,13 @@
   patientInfo: { patientId: '015', patientName: 'Sakura', age: 20 }
   parameters: {}
   domain: sirius.org
-  createdAt: { $date: '2020-11-11T00:11:22' }
+  createdAt: { $date: '2020-11-11T00:11:22+09:00' }
 - seriesUid: 111.222.333.444.555
   studyUid: 111.222.333.888.999.1000
   width: 512
   height: 512
   images: '1-150'
-  seriesDate: { $date: '2017-10-10T00:11:22' }
+  seriesDate: { $date: '2017-10-10T00:11:22+09:00' }
   modality: CT
   seriesDescription: chest 2mm
   bodyPart: Chest
@@ -31,13 +31,13 @@
   patientInfo: { patientId: '017', patientName: 'Koume', age: 70 }
   parameters: {}
   domain: sirius.org
-  createdAt: { $date: '2017-11-11T00:11:22' }
+  createdAt: { $date: '2017-11-11T00:11:22+09:00' }
 - seriesUid: 111.222.333.444.666
   studyUid: 111.222.333.888.999.1001
   width: 512
   height: 512
   images: '1-100'
-  seriesDate: { $date: '2017-10-11T00:15:00' }
+  seriesDate: { $date: '2017-10-11T00:15:00+09:00' }
   modality: MR
   seriesDescription: Brain MRA 1mm
   bodyPart: Head
@@ -53,7 +53,7 @@
   width: 512
   height: 512
   images: '1-236'
-  seriesDate: { $date: '2017-10-12T00:11:00' }
+  seriesDate: { $date: '2017-10-12T00:11:00+09:00' }
   modality: CT
   seriesDescription: chest 2mm
   bodyPart: Chest
@@ -69,7 +69,7 @@
   width: 512
   height: 512
   images: '1-150'
-  seriesDate: { $date: '2020-04-15T00:11:22' }
+  seriesDate: { $date: '2020-04-15T00:11:22+09:00' }
   modality: CT
   seriesDescription: chest 2mm
   bodyPart: Chest
@@ -85,7 +85,7 @@
   width: 1024
   height: 1024
   images: '1'
-  seriesDate: { $date: '2020-04-10T00:11:11' }
+  seriesDate: { $date: '2020-04-10T00:11:11+09:00' }
   modality: CR
   seriesDescription: chest PA
   bodyPart: Chest
@@ -101,7 +101,7 @@
   width: 512
   height: 512
   images: '1-236'
-  seriesDate: { $date: '2017-10-12T00:11:00' }
+  seriesDate: { $date: '2017-10-12T00:11:00+09:00' }
   modality: CT
   seriesDescription: chest 2mm
   bodyPart: Chest
@@ -117,7 +117,7 @@
   width: 512
   height: 512
   images: '1-10'
-  seriesDate: { $date: '2022-05-12T00:00:00' }
+  seriesDate: { $date: '2022-05-12T00:00:00+09:00' }
   modality: MR
   seriesDescription: head_first
   bodyPart: CHESTABDOMEN
@@ -133,7 +133,7 @@
   width: 512
   height: 512
   images: '1-10'
-  seriesDate: { $date: '2022-05-12T00:00:00' }
+  seriesDate: { $date: '2022-05-12T00:00:00+09:00' }
   modality: MR
   seriesDescription: foot_first
   bodyPart: CHESTABDOMEN

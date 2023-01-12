@@ -3,7 +3,7 @@ import PriorityIntegerQueue from './PriorityIntegerQueue';
 const extract = (queue: PriorityIntegerQueue) => {
   const result: number[] = [];
   let i: number | undefined;
-  while ((i = queue.shift()) !== undefined) {
+  while ((i = queue.shift().value) !== undefined) {
     result.push(i);
   }
   return result;

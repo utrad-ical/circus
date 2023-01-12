@@ -80,6 +80,10 @@ const searchableFields = [
   'patientInfo.patientName',
   'patientInfo.age',
   'patientInfo.sex',
+  'seriesUid',
+  'studyUid',
+  'seriesDate',
+  'modality',
   'createdAt',
   'updatedAt',
   'finishedAt'
@@ -124,25 +128,27 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
           from: 'series',
           localField: 'series.seriesUid',
           foreignField: 'seriesUid',
-          as: 'seriesDetail'
+          as: 'seriesInfo'
         }
       },
       {
         $unwind: {
-          path: '$seriesDetail',
+          path: '$seriesInfo',
           includeArrayIndex: 'volId'
         }
       },
-      {
-        $match: { volId: 0 }
-      },
+      { $match: { volId: 0 } }, // primary series only
       {
         $addFields: {
           // Conditionally appends "patientInfo" field
           ...(canViewPersonalInfo
-            ? { patientInfo: '$seriesDetail.patientInfo' }
+            ? { patientInfo: '$seriesInfo.patientInfo' }
             : {}),
-          domain: '$seriesDetail.domain'
+          seriesUid: '$series.seriesUid', // primary series UID only
+          studyUid: '$seriesInfo.studyUid',
+          seriesDate: '$seriesInfo.seriesDate',
+          modality: '$seriesInfo.modality',
+          domain: '$seriesInfo.domain'
         }
       }
     ];
@@ -186,7 +192,11 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
             volId: false,
             results: false,
             primarySeries: false,
-            seriesDetail: false,
+            seriesInfo: false,
+            seriesUid: false,
+            studyUid: false,
+            modality: false,
+            seriesDate: false,
             addedToListAt: false
           }
         }

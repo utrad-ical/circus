@@ -25,6 +25,8 @@ export type ScrollBarsSettings = {
   visibility: 'none' | 'always' | 'hover';
 };
 
+export type WindowPropagationScope = 'all' | 'series' | 'viewer';
+
 export interface UserPreferences {
   seriesSearchPresets?: SearchPreset[];
   caseSearchPresets?: SearchPreset[];
@@ -34,6 +36,7 @@ export interface UserPreferences {
   referenceLine?: boolean;
   initailAlphaForNewLabels?: number;
   interpolationMode?: string;
+  windowPropagationScope?: WindowPropagationScope;
   scrollBarsInfo?: ScrollBarsSettings;
   scrollBars?: string;
   maintainAspectRatio?: boolean;

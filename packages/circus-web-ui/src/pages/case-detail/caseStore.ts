@@ -312,6 +312,15 @@ const slice = createSlice({
       if (!valid) {
         s.labelsWithInvalidAttributes.push(key);
       }
+    },
+    updateSeriesData: (
+      s,
+      action: PayloadAction<{
+        seriesData: { [seriesUid: string]: Series };
+      }>
+    ) => {
+      const { seriesData } = action.payload;
+      s.seriesData = seriesData;
     }
   }
 });
@@ -332,5 +341,6 @@ export const {
   undo,
   redo,
   validateCaseAttributes,
-  validateLabelAttributes
+  validateLabelAttributes,
+  updateSeriesData
 } = slice.actions;

@@ -104,7 +104,7 @@ export default class PriorityIntegerCaller {
 
   private async next(): Promise<void> {
     while (this.processing.length < this.maxConcurrency) {
-      const target = this.queue.shift();
+      const { value: target } = this.queue.shift();
       if (target === undefined) {
         if (this.processing.length === 0) {
           this.inOperation = false;

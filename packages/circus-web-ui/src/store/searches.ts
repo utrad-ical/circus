@@ -220,15 +220,22 @@ export const newSearch = (
 export const updateSearch = (
   api: ApiCaller,
   searchName: string,
-  partialParams: Partial<SearchParams>
+  partialParams: Partial<SearchParams>,
+  onExecutePostProcess?: (search: SearchResult) => void
 ): AppThunk => {
   return async (dispatch, getState) => {
-    const state = getState();
-    const search = state.searches.searches[searchName];
+    let state = getState();
+    let search = state.searches.searches[searchName];
     if (!search) throw new Error('There is no previous search.');
     if (search.isFetching) throw new Error('Previous search has not finished.');
     const newParams = { ...search.params, ...partialParams };
     await executeQuery(dispatch, api, searchName, newParams);
+
+    if (onExecutePostProcess) {
+      state = getState();
+      search = state.searches.searches[searchName];
+      onExecutePostProcess(search);
+    }
   };
 };
 

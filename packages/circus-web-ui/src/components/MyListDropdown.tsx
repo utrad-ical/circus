@@ -7,6 +7,7 @@ import { useDispatch } from 'react-redux';
 import { useApi } from 'utils/api';
 import { showMessage } from 'store/messages';
 import { updateSearch } from 'store/searches';
+import { SearchResult, selectionStatusChanged } from '../store/searches';
 
 const MyListDropdown: React.FC<{
   resourceType: string;
@@ -31,8 +32,26 @@ const MyListDropdown: React.FC<{
     const message = `${changedCount}${
       changedCount === 1 ? ' item was' : ' items were'
     } ${operation === 'add' ? 'added to the list.' : 'removed from the list.'}`;
+    const onExecutePostProcess = (search: SearchResult) => {
+      if (!search.params.resource.endPoint.includes(myListId)) return;
+      const removedIds = search.selected.filter(
+        selectedId => !search.results?.indexes.some(id => id === selectedId)
+      );
+      for (const removedId of removedIds) {
+        dispatch(
+          selectionStatusChanged({
+            searchName,
+            id: removedId,
+            isSelected: false
+          })
+        );
+      }
+    };
+
     dispatch(showMessage(message, 'info', { short: true }));
-    dispatch(updateSearch(api, searchName, {}));
+    operation === 'remove' && searchName === 'myCaseList'
+      ? dispatch(updateSearch(api, searchName, {}, onExecutePostProcess))
+      : dispatch(updateSearch(api, searchName, {}));
   };
 
   const myLists = user.myLists.filter(

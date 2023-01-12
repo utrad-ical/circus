@@ -7,4 +7,4 @@ routes:
     description: >
       Gets the information about the specified user.
       This endpoint is available to all users, but returns only minimum information about the user.
-    responseSchema: user|only userEmail,description|dbEntry
+    responseSchema: user|only userEmail,loginId,description|dbEntry

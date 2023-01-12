@@ -6,6 +6,7 @@ export const handleGet: RouteMiddleware = ({ models }) => {
     const user = await models.user.findByIdOrFail(userEmail);
     ctx.body = {
       userEmail: user.userEmail,
+      loginId: user.loginId,
       description: user.description,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt

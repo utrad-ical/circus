@@ -18,6 +18,7 @@ test('return user info by userEmail', async () => {
   expect(res.status).toBe(200);
   expect(res.data).toMatchObject({
     userEmail: 'alice@example.com',
+    loginId: 'alice',
     description: 'Alice'
   });
 });

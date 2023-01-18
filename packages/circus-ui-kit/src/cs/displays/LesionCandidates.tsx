@@ -2,8 +2,8 @@ import * as rs from '@utrad-ical/circus-rs/src/browser';
 import {
   Composition,
   MprImageSource,
-  PlaneFigure,
   MprViewState,
+  PlaneFigure,
   Tool,
   WebGlRawVolumeMprImageSource
 } from '@utrad-ical/circus-rs/src/browser';
@@ -17,14 +17,14 @@ import React, {
   useState
 } from 'react';
 import styled from 'styled-components';
-import { useCsResults } from '../CsResultsContext';
-import { Display, DisplayDefinition, FeedbackReport } from '../Display';
+import { Button } from '../../ui/Button';
 import {
   createStateChanger,
   ImageViewer,
   StateChangerFunc
 } from '../../ui/ImageViewer';
-import { Button } from '../../ui/Button';
+import { useCsResults } from '../CsResultsContext';
+import { Display, DisplayDefinition, FeedbackReport } from '../Display';
 
 interface LesionCandidate {
   id?: number;
@@ -177,6 +177,9 @@ const Candidate: React.FC<{
       composition.addAnnotation(annotation);
     };
     addAnnotation();
+    return () => {
+      composition.dispose();
+    };
   }, [composition, imageSource]);
 
   const centerState = useCallback<StateChangerFunc<MprViewState>>(
@@ -242,10 +245,13 @@ export const LesionCandidates: Display<
   const { consensual, job, useVolumeLoaders, loadDisplay, eventLogger } =
     useCsResults();
   const { results } = job;
-  const [composition, setComposition] = useState<Composition | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [currentFeedback, setCurrentFeedback] =
     useState<LesionCandidateFeedback>(initialFeedbackValue ?? []);
+  // Prepare compositions
+  const [imgSrcMap, setImgSrcMap] = useState<{
+    [volumeId: number]: MprImageSource;
+  }>({});
 
   const allCandidates = useMemo(
     () => normalizeCandidates(get(results, dataPath)),
@@ -273,14 +279,10 @@ export const LesionCandidates: Display<
   const volumeLoaders = useVolumeLoaders(job.series);
 
   useEffect(() => {
-    const [volumeLoader, ...restVolumeLoaders] = volumeLoaders;
-    restVolumeLoaders.forEach(volumeLoader =>
-      volumeLoader.loadController?.pause()
-    );
-
-    const src = new WebGlRawVolumeMprImageSource({ volumeLoader });
-    const composition = new Composition(src);
-    setComposition(composition);
+    volumeLoaders.forEach((volumeLoader, volumeId) => {
+      const src = new WebGlRawVolumeMprImageSource({ volumeLoader });
+      setImgSrcMap(map => ({ ...map, [volumeId]: src }));
+    });
   }, []);
 
   const tools = useRef<{ name: string; icon: string; tool: rs.Tool }[]>();
@@ -292,11 +294,6 @@ export const LesionCandidates: Display<
     ];
   }
   const [toolName, setToolName] = useState('pager');
-
-  // Prepare compositions
-  const [imgSrcMap, setImgSrcMap] = useState<{
-    [volumeId: number]: MprImageSource;
-  }>({});
 
   const imageSourceForVolumeId = (volumeId: number) => {
     if (imgSrcMap[volumeId]) return imgSrcMap[volumeId];
@@ -345,7 +342,11 @@ export const LesionCandidates: Display<
     load();
   }, [feedbackListener]);
 
-  if (!composition || (feedbackListener && !FeedbackListener)) return null;
+  if (
+    Object.keys(imgSrcMap).length < 1 ||
+    (feedbackListener && !FeedbackListener)
+  )
+    return null;
 
   if (error) return <div className="alert alert-danger">{error.message}</div>;
 

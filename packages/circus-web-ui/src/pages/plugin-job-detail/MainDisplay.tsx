@@ -99,6 +99,12 @@ const MainDisplay: Display<FeedbackTarget[], any> = props => {
       .map(f => ({ ...f, data: f.data[key] }));
   };
 
+  const consensualOpinionsForKey = (key: string): FeedbackEntry<any>[] => {
+    return job.feedbacks
+      .filter(f => f.isConsensual)
+      .map(f => ({ ...f, data: f.data[key] }));
+  };
+
   const displayReady = displayStrategy.every(
     s => feedbackMeta[s.feedbackKey].display !== undefined
   );
@@ -120,14 +126,14 @@ const MainDisplay: Display<FeedbackTarget[], any> = props => {
       <div className="feedback-targets">
         {displayStrategy.map(strategy => {
           const { feedbackKey, caption, options = {} } = strategy;
-          const Display: Display<typeof options, any> = feedbackMeta[
-            feedbackKey
-          ].display!;
+          const Display: Display<typeof options, any> =
+            feedbackMeta[feedbackKey].display!;
           return (
             <Section key={feedbackKey} title={caption ?? feedbackKey ?? ''}>
               <Display
                 initialFeedbackValue={initialFeedbackValue[feedbackKey]}
                 personalOpinions={personalOpinionsForKey(feedbackKey)}
+                consensualOpinions={consensualOpinionsForKey(feedbackKey)}
                 options={options}
                 onFeedbackChange={state => handleChange(feedbackKey, state)}
               />

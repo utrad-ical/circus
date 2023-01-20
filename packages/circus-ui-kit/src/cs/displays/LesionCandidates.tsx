@@ -240,6 +240,7 @@ export const LesionCandidates: Display<
       excludeFromActionLog
     },
     personalOpinions,
+    consensualOpinions,
     onFeedbackChange
   } = props;
   const { consensual, job, useVolumeLoaders, loadDisplay, eventLogger } =
@@ -379,6 +380,10 @@ export const LesionCandidates: Display<
                 return { ...fb, data: target?.value };
               })
             : [];
+          const candConsensualOpinions = consensualOpinions.map(fb => {
+            const target = fb.data.find(c => c.id === cand.id);
+            return { ...fb, data: target?.value };
+          });
           const tool = tools.current!.find(t => t.name === toolName)?.tool!;
           return (
             <Candidate
@@ -396,6 +401,7 @@ export const LesionCandidates: Display<
                   <FeedbackListener
                     initialFeedbackValue={feedbackItem?.value}
                     personalOpinions={candPersonalOpinions}
+                    consensualOpinions={candConsensualOpinions}
                     options={feedbackListener.options}
                     onFeedbackChange={status =>
                       handleFeedbackChange(cand.id!, status)

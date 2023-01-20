@@ -34,6 +34,11 @@ interface DisplayProps<O extends object, F extends unknown> {
    * Set to `undefined` when not in consensual mode.
    */
   personalOpinions: readonly FeedbackEntry<F>[];
+  /**
+   * Holds consensual feedback data.
+   * Set to [] when there is not consensual feedback data.
+   */
+  consensualOpinions: readonly FeedbackEntry<F>[];
   options: O;
   /**
    * Triggers when the feedback data is changed.

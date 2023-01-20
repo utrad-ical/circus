@@ -127,11 +127,12 @@ const slice = createSlice({
       state.actionLog = [];
     },
     enterPersonalMode: (state, action: PayloadAction<{}>) => {
+      const consensual = state.feedbacks.find(f => f.isConsensual);
       const myPersonal = state.feedbacks.find(
         f => !f.isConsensual && f.userEmail === state.myUserEmail
       );
       state.isConsensual = false;
-      state.editable = !myPersonal;
+      state.editable = !myPersonal && !consensual;
       state.currentData = myPersonal ? myPersonal.data : {};
       state.message = myPersonal ? registeredMessage(myPersonal) : '';
       state.actionLog = [];

@@ -292,9 +292,6 @@ const PluginJobDetail: React.FC<{}> = props => {
                 ? feedbackState.feedbacks.filter(fb => !fb.isConsensual)
                 : []
             }
-            consensualOpinions={
-              feedbackState.feedbacks.filter(fb => fb.isConsensual) && []
-            }
             onFeedbackChange={handleFeedbackChange}
           />
         </CsResultsContext.Provider>

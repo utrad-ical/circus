@@ -30,7 +30,6 @@ export const Choice: Display<ChoiceOptions, string | number> = props => {
   const {
     initialFeedbackValue,
     personalOpinions,
-    consensualOpinions,
     onFeedbackChange,
     options: {
       ui = 'toggleButtons',
@@ -64,10 +63,8 @@ export const Choice: Display<ChoiceOptions, string | number> = props => {
   }, [personalOpinions]);
 
   const [selected, setSelected] = useState<string | number | undefined>(() => {
-    if (!consensual) return initialFeedbackValue;
-    // If consensual feedbacks is registered, select it
-    if (0 < consensualOpinions.length)
-      return consensualOpinions.map(c => c.data)[0];
+    if (!consensual || (consensual && !editable)) return initialFeedbackValue;
+
     // If all personal feedbacks agree, preselect it
     if (personalCounts.size === 1) return Array.from(personalCounts.keys())[0];
     return undefined;

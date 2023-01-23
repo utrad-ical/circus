@@ -99,12 +99,6 @@ const MainDisplay: Display<FeedbackTarget[], any> = props => {
       .map(f => ({ ...f, data: f.data[key] }));
   };
 
-  const consensualOpinionsForKey = (key: string): FeedbackEntry<any>[] => {
-    return job.feedbacks
-      .filter(f => f.isConsensual)
-      .map(f => ({ ...f, data: f.data[key] }));
-  };
-
   const displayReady = displayStrategy.every(
     s => feedbackMeta[s.feedbackKey].display !== undefined
   );
@@ -133,7 +127,6 @@ const MainDisplay: Display<FeedbackTarget[], any> = props => {
               <Display
                 initialFeedbackValue={initialFeedbackValue[feedbackKey]}
                 personalOpinions={personalOpinionsForKey(feedbackKey)}
-                consensualOpinions={consensualOpinionsForKey(feedbackKey)}
                 options={options}
                 onFeedbackChange={state => handleChange(feedbackKey, state)}
               />

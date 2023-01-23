@@ -117,25 +117,16 @@ const distance = (x: number[], y: number[], vs: number[]) => {
   const my = [y[0] * vs[0], y[1] * vs[1], y[2] * vs[2]];
   return Math.sqrt(
     (mx[0] - my[0]) * (mx[0] - my[0]) +
-    (mx[1] - my[1]) * (mx[1] - my[1]) +
-    (mx[2] - my[2]) * (mx[2] - my[2])
+      (mx[1] - my[1]) * (mx[1] - my[1]) +
+      (mx[2] - my[2]) * (mx[2] - my[2])
   );
 };
 
 export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
-  const {
-    options,
-    personalOpinions,
-    initialFeedbackValue,
-    onFeedbackChange
-  } = props;
-  const {
-    job,
-    consensual,
-    editable,
-    useVolumeLoaders,
-    eventLogger
-  } = useCsResults();
+  const { options, personalOpinions, initialFeedbackValue, onFeedbackChange } =
+    props;
+  const { job, consensual, editable, useVolumeLoaders, eventLogger } =
+    useCsResults();
 
   const {
     volumeId = 0,
@@ -154,9 +145,9 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
 
   const [currentFeedback, setCurrentFeedback] = useState<LocatorFeedback>(
     initialFeedbackValue ??
-    (consensual
-      ? integrateEntries(personalOpinions, consensualIntegration)
-      : [])
+      (consensual
+        ? integrateEntries(personalOpinions, consensualIntegration)
+        : [])
   );
 
   const [showViewer, setShowViewer] = useState(currentFeedback.length > 0);
@@ -336,7 +327,7 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
                 <th>#</th>
                 <th>Position</th>
                 {typeof snapThresholdMm === 'number' && <th>Snapped to</th>}
-                {consensual && <th>Entered By</th>}
+                {consensual && editable && <th>Entered By</th>}
                 <th />
               </tr>
             </thead>
@@ -348,7 +339,11 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
                   {typeof snapThresholdMm === 'number' && (
                     <td>{item.snappedLesionCandidate ?? '-'}</td>
                   )}
-                  {consensual && <td>{item[enteredBy]!.join(', ')}</td>}
+                  {consensual && editable && (
+                    <td>
+                      {item[enteredBy] ? item[enteredBy]!.join(', ') : ''}
+                    </td>
+                  )}
                   <td>
                     <Button
                       size="xs"

@@ -178,7 +178,7 @@ export const setUpAppForRoutesTest = async () => {
       dicomImporter,
       core: csCore,
       mhdPacker: null as any, // dummy
-      rsSeriesRoutes: async () => { }, // dummy
+      rsSeriesRoutes: async () => {}, // dummy
       volumeProvider: null as any, // dummy
       taskManager,
       dicomVoxelDumper,
@@ -189,10 +189,18 @@ export const setUpAppForRoutesTest = async () => {
       transactionManager,
       rsWSServer: new ws.Server({
         noServer: true,
-        skipUTF8Validation: true,
+        skipUTF8Validation: true
       }),
       rsWebsocketVolumeConnectionHandlerCreator: () => {
         return null as any; // dummy
+      },
+      seriesOrientationResolver: async (
+        seriesUid: string,
+        start: number,
+        end: number
+      ) => {
+        if (seriesUid === '111.222.333.444.555') throw new Error('no image');
+        return { start, end, delta: end >= start ? 1 : -1 };
       }
     }
   );
@@ -255,8 +263,8 @@ const createMockCsCore = () => {
       start: async () => ((status = 'running'), undefined),
       stop: async () => ((status = 'stopped'), undefined),
       status: async () => status,
-      pm2list: async () => { },
-      pm2killall: async () => { }
+      pm2list: async () => {},
+      pm2killall: async () => {}
     },
     plugin: {
       list: async () => pluginDefinitions,

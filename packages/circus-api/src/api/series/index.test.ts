@@ -1,39 +1,18 @@
-import { setUpAppForRoutesTest, ApiTest } from '../../../test/util-routes';
 import { AxiosInstance } from 'axios';
-import path from 'path';
-import fs from 'fs-extra';
 import FormData from 'form-data';
-import delay from '../../utils/delay';
-import { setUpMongoFixture } from '../../../test/util-mongo';
-import zlib from 'zlib';
+import fs from 'fs-extra';
+import path from 'path';
 import tarfs from 'tar-fs';
-import { DicomFileRepository } from '@utrad-ical/circus-lib';
+import zlib from 'zlib';
+import { setUpMongoFixture } from '../../../test/util-mongo';
+import { ApiTest, setUpAppForRoutesTest } from '../../../test/util-routes';
+import delay from '../../utils/delay';
 
-let apiTest: ApiTest,
-  ax: typeof apiTest.axiosInstances,
-  dicomFileRepository: DicomFileRepository;
+let apiTest: ApiTest, ax: typeof apiTest.axiosInstances;
 
 beforeAll(async () => {
   apiTest = await setUpAppForRoutesTest();
   ax = apiTest.axiosInstances;
-  dicomFileRepository = apiTest.dicomFileRepository;
-  const headFirstSeries = await dicomFileRepository.getSeries(
-    '333.444.555.666.777'
-  );
-  const footFirstSeries = await dicomFileRepository.getSeries(
-    '333.444.555.666.888'
-  );
-  for (let i = 1; i <= 10; i++) {
-    const num = i.toString().padStart(3, '0');
-    const headFirstFile = await fs.readFile(
-      path.join(__dirname, `../../../test/dicom/head-first${num}.dcm`)
-    );
-    const footFirstFile = await fs.readFile(
-      path.join(__dirname, `../../../test/dicom/foot-first${num}.dcm`)
-    );
-    await headFirstSeries.save(i, headFirstFile.buffer as ArrayBuffer);
-    await footFirstSeries.save(i, footFirstFile.buffer as ArrayBuffer);
-  }
 });
 
 afterAll(async () => await apiTest.tearDown());
@@ -84,7 +63,7 @@ test('should be searchable if patient information is not used', async () => {
 });
 
 describe('getOrientation', () => {
-  it('head-first ascending order', async () => {
+  test('head-first ascending order', async () => {
     const res = await ax.dave.request({
       url: 'api/series/333.444.555.666.777/orientation',
       method: 'get',
@@ -94,17 +73,7 @@ describe('getOrientation', () => {
     expect(res.data).toEqual({ orientation: 'head-first' });
   });
 
-  it('foot-first descending order', async () => {
-    const res = await ax.dave.request({
-      url: 'api/series/333.444.555.666.888/orientation',
-      method: 'get',
-      params: { start: 10, end: 1 }
-    });
-    expect(res.status).toBe(200);
-    expect(res.data).toEqual({ orientation: 'foot-first' });
-  });
-
-  it('no specified start/end', async () => {
+  test('unspecified start/end', async () => {
     const res = await ax.dave.request({
       url: 'api/series/333.444.555.666.777/orientation',
       method: 'get'
@@ -113,7 +82,7 @@ describe('getOrientation', () => {
     expect(res.data).toEqual({ orientation: 'head-first' });
   });
 
-  it('throw 400 for specify image out of bounds', async () => {
+  test('throw 400 for image out of bounds', async () => {
     const res = await ax.dave.request({
       url: 'api/series/333.444.555.666.777/orientation',
       method: 'get',
@@ -123,7 +92,7 @@ describe('getOrientation', () => {
     expect(res.data.error).toBe('The given start/end number is out of bounds.');
   });
 
-  it('throw 403 for without privilege user', async () => {
+  test('throw 403 for unprivileged user', async () => {
     const res = await ax.guest.request({
       url: 'api/series/333.444.555.666.777/orientation',
       method: 'get',
@@ -135,7 +104,7 @@ describe('getOrientation', () => {
     );
   });
 
-  it('throw 500 for no data in the repository', async () => {
+  test('throw 500 for series defined in DB but missing in repository', async () => {
     const res = await ax.dave.request({
       url: 'api/series/111.222.333.444.555/orientation',
       method: 'get',

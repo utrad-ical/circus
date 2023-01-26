@@ -40,6 +40,7 @@ import typeCheck from './middleware/typeCheck';
 import validateInOut from './middleware/validateInOut';
 import Storage from './storage/Storage';
 import { Deps } from './typings/middlewares';
+import { SeriesOrientationResolver } from 'utils/createSeriesOrientationResolver';
 
 function handlerName(route: Route) {
   if (route.handler) return route.handler;
@@ -148,6 +149,7 @@ export const createApp: FunctionService<
     dicomVoxelDumper: DicomVoxelDumper;
     oauthServer: KoaOAuth2Server;
     transactionManager: TransactionManager;
+    seriesOrientationResolver: SeriesOrientationResolver;
   },
   CreateAppOptions
 > = async (
@@ -170,7 +172,8 @@ export const createApp: FunctionService<
     mhdPacker,
     dicomVoxelDumper,
     oauthServer,
-    transactionManager
+    transactionManager,
+    seriesOrientationResolver
   }
 ) => {
   const {
@@ -203,7 +206,8 @@ export const createApp: FunctionService<
     taskManager,
     mhdPacker,
     dicomVoxelDumper,
-    transactionManager
+    transactionManager,
+    seriesOrientationResolver
   };
 
   const apiDir = path.resolve(__dirname, 'api/**/*.yaml');
@@ -297,7 +301,8 @@ createApp.dependencies = [
   'mhdPacker',
   'dicomVoxelDumper',
   'oauthServer',
-  'transactionManager'
+  'transactionManager',
+  'seriesOrientationResolver'
 ];
 
 export default createApp;

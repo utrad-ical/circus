@@ -207,6 +207,24 @@ describe('plugin-job registration', () => {
     expect(res.status).toBe(400);
   });
 
+  test('should register a job with automatic PVD', async () => {
+    const res = await dave.request({
+      method: 'post',
+      url: 'api/plugin-jobs',
+      data: {
+        pluginId:
+          'd135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2',
+        series: [
+          {
+            seriesUid: '111.222.333.444.777',
+            partialVolumeDescriptor: 'auto'
+          }
+        ]
+      }
+    });
+    expect(res.status).toBe(201);
+  });
+
   test('should reject for unmatched series domain', async () => {
     const res = await bob.request({
       method: 'post',

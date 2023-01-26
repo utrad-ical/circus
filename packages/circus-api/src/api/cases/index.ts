@@ -1,18 +1,19 @@
 import status from 'http-status';
 import {
-  extractFilter,
-  isPatientInfoInFilter,
-  performAggregationSearch
-} from '../performSearch';
-import checkFilter from '../../utils/checkFilter';
-import { RouteMiddleware, CircusContext } from '../../typings/middlewares';
-import makeNewCase from '../../case/makeNewCase';
-import {
   CaseExportTarget,
   CompressionFormat,
   LabelPackType,
   LineEndingType
 } from '../../case/createMhdPacker';
+import makeNewCase from '../../case/makeNewCase';
+import { CircusContext, RouteMiddleware } from '../../typings/middlewares';
+import checkFilter from '../../utils/checkFilter';
+import resolveAutoPvdOfSeries from '../../utils/resolveAutoPvdOfSeries';
+import {
+  extractFilter,
+  isPatientInfoInFilter,
+  performAggregationSearch
+} from '../performSearch';
 
 const maxTagLength = 32;
 
@@ -36,7 +37,10 @@ export const handleGet: RouteMiddleware = () => {
   };
 };
 
-export const handlePost: RouteMiddleware = ({ transactionManager }) => {
+export const handlePost: RouteMiddleware = ({
+  transactionManager,
+  seriesOrientationResolver
+}) => {
   return async (ctx, next) => {
     await transactionManager.withTransaction(async models => {
       const project = await models.project.findByIdOrFail(
@@ -47,7 +51,11 @@ export const handlePost: RouteMiddleware = ({ transactionManager }) => {
         ctx.user,
         ctx.userPrivileges,
         project,
-        ctx.request.body.series,
+        await resolveAutoPvdOfSeries(
+          ctx.request.body.series,
+          models,
+          seriesOrientationResolver
+        ),
         ctx.request.body.tags
       );
       ctx.body = { caseId };

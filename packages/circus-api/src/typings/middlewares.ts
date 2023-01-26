@@ -14,6 +14,7 @@ import { CsCore, DicomVoxelDumper } from '@utrad-ical/circus-cs-core';
 import { Logger, DicomFileRepository } from '@utrad-ical/circus-lib';
 import { TaskManager } from '../createTaskManager';
 import { MhdPacker } from '../case/createMhdPacker';
+import { SeriesOrientationResolver } from 'utils/createSeriesOrientationResolver';
 
 export interface Deps {
   validator: Validator;
@@ -34,6 +35,7 @@ export interface Deps {
   mhdPacker: MhdPacker;
   dicomVoxelDumper: DicomVoxelDumper;
   transactionManager: TransactionManager;
+  seriesOrientationResolver: SeriesOrientationResolver;
 }
 
 interface CustomCtxMembers {

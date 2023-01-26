@@ -120,9 +120,8 @@ const MainDisplay: Display<FeedbackTarget[], any> = props => {
       <div className="feedback-targets">
         {displayStrategy.map(strategy => {
           const { feedbackKey, caption, options = {} } = strategy;
-          const Display: Display<typeof options, any> = feedbackMeta[
-            feedbackKey
-          ].display!;
+          const Display: Display<typeof options, any> =
+            feedbackMeta[feedbackKey].display!;
           return (
             <Section key={feedbackKey} title={caption ?? feedbackKey ?? ''}>
               <Display

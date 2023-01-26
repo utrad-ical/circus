@@ -22,12 +22,12 @@ import TimeDisplay from './TimeDisplay';
 
 const PartialVolumeRenderer: React.FC<{
   index: number;
-  value: PartialVolumeDescriptor | undefined;
+  value: PartialVolumeDescriptor | 'auto';
   images: string; // multi-integer-range string (eg '1-20,30')
   onClick: () => void;
 }> = props => {
   const { value, images, onClick } = props;
-  const applied = !!value;
+  const applied = value !== 'auto';
 
   return (
     <IconButton
@@ -36,7 +36,7 @@ const PartialVolumeRenderer: React.FC<{
       onClick={onClick}
       bsStyle={applied ? 'success' : 'default'}
     >
-      {applied ? describePartialVolumeDescriptor(value!, 3) : 'full'}
+      {applied ? describePartialVolumeDescriptor(value!, 3) : 'auto'}
     </IconButton>
   );
 };
@@ -89,7 +89,7 @@ const RelevantSeries: React.FC<{
 
 export interface SeriesEntry {
   seriesUid: string;
-  partialVolumeDescriptor?: PartialVolumeDescriptor;
+  partialVolumeDescriptor: PartialVolumeDescriptor | 'auto';
 }
 
 const SeriesSelector: React.FC<{
@@ -204,7 +204,7 @@ const SeriesSelector: React.FC<{
 
     onChange(
       produce(value, value => {
-        value[index].partialVolumeDescriptor = result.descriptor || undefined;
+        value[index].partialVolumeDescriptor = result.descriptor || 'auto';
       })
     );
   };
@@ -212,16 +212,17 @@ const SeriesSelector: React.FC<{
   const handleSeriesRegister = async (seriesUid: string, studyUid: string) => {
     if (value.some(s => s.seriesUid === seriesUid)) {
       if (primarySeries!.studyUid !== studyUid) {
-        if (!(await confirm('Add the same series with a different studyUid?')))
+        if (!(await confirm('Add the same series with a different Study UID?')))
           return;
       }
       if (!(await confirm('Add the same series?'))) return;
     } else if (primarySeries!.studyUid !== studyUid) {
-      if (!(await confirm('Add the series with a different studyUid?'))) return;
+      if (!(await confirm('Add the series with a different Study UID?')))
+        return;
     }
     const newEntry: SeriesEntry = {
       seriesUid,
-      partialVolumeDescriptor: undefined
+      partialVolumeDescriptor: 'auto'
     };
     onChange([...value, newEntry]);
   };

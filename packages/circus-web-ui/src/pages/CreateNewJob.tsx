@@ -9,7 +9,6 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useApi } from 'utils/api';
-import fillPartialVolumeDescriptors from 'utils/partialVolumeDescriptor';
 import useLocalPreference from 'utils/useLocalPreference';
 import useLoginUser from 'utils/useLoginUser';
 import useShowMessage from 'utils/useShowMessage';
@@ -37,7 +36,7 @@ const CreateNewJob: React.FC<{}> = props => {
       setBusy(true);
       const plugins = (await api('plugins')) as Plugin[];
       setPlugins(plugins);
-      setSelectedSeries([{ seriesUid, partialVolumeDescriptor: undefined }]);
+      setSelectedSeries([{ seriesUid, partialVolumeDescriptor: 'auto' }]);
       setBusy(false);
     };
     load();
@@ -61,11 +60,7 @@ const CreateNewJob: React.FC<{}> = props => {
         method: 'post',
         data: {
           pluginId: selectedPlugin,
-          series: await fillPartialVolumeDescriptors(
-            selectedSeries,
-            api,
-            appState
-          ),
+          series: selectedSeries,
           ...(force ? { force: true } : {})
         },
         handleErrors: [400]
@@ -76,7 +71,7 @@ const CreateNewJob: React.FC<{}> = props => {
     try {
       try {
         await callApi(false);
-      } catch (err) {
+      } catch (err: any) {
         if (/duplicate job/i.test(err?.response?.data?.error)) {
           const res = await confirm(
             'There is a duplicate job similar to this one. ' +

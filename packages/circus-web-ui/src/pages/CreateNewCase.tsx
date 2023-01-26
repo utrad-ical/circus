@@ -7,7 +7,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useApi } from 'utils/api';
-import fillPartialVolumeDescriptors from 'utils/partialVolumeDescriptor';
 import useLoginUser from 'utils/useLoginUser';
 
 const CreateNewCase: React.FC<{}> = props => {
@@ -27,7 +26,7 @@ const CreateNewCase: React.FC<{}> = props => {
 
   useEffect(() => {
     const load = async () => {
-      setSelectedSeries([{ seriesUid, partialVolumeDescriptor: undefined }]);
+      setSelectedSeries([{ seriesUid, partialVolumeDescriptor: 'auto' }]);
     };
     load();
   }, [api, seriesUid]);
@@ -47,11 +46,7 @@ const CreateNewCase: React.FC<{}> = props => {
       data: {
         projectId: selectedProject,
         tags: selectedTags,
-        series: await fillPartialVolumeDescriptors(
-          selectedSeries,
-          api,
-          appState
-        )
+        series: selectedSeries
       }
     });
     if (res.caseId) {

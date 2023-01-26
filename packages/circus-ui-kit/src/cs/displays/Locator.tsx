@@ -8,10 +8,10 @@ import React, {
   useState
 } from 'react';
 import styled from 'styled-components';
-import { FeedbackEntry, Job, useCsResults } from '../CsResultsContext';
-import { Display } from '../Display';
-import { createStateChanger, ImageViewer } from '../../ui/ImageViewer';
 import { Button } from '../../ui/Button';
+import { createStateChanger, ImageViewer } from '../../ui/ImageViewer';
+import { FeedbackEntry, useCsResults } from '../CsResultsContext';
+import { Display } from '../Display';
 import { defaultDataPath, normalizeCandidates } from './LesionCandidates';
 
 type IntegrationOptions = 'off' | 'snapped';
@@ -50,17 +50,7 @@ export interface Location {
 
 export type LocatorFeedback = Array<Location>;
 
-const applyDisplayOptions = (
-  state: rs.MprViewState,
-  job: Job,
-  volumeId: number
-) => {
-  const displayOptions =
-    job.results.metadata &&
-    Array.isArray(job.results.metadata.displayOptions) &&
-    job.results.metadata.displayOptions.find(
-      (o: any) => o.volumeId === volumeId
-    );
+const applyDisplayOptions = (state: rs.MprViewState, displayOptions: any) => {
   if (!displayOptions) return state;
   if (displayOptions.window) {
     state = { ...state, window: { ...displayOptions.window } };
@@ -179,6 +169,9 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
       voxelSizeRef.current = imageSource.metadata!.voxelSize;
     });
     setComposition(comp);
+    return () => {
+      comp.dispose();
+    };
   }, [volumeLoaders, volumeId]);
 
   const log = (action: string, data?: any) => {
@@ -290,7 +283,11 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
   };
 
   const initialStateSetter = useCallback(
-    (state: rs.MprViewState) => applyDisplayOptions(state, job, volumeId),
+    (state: rs.MprViewState) =>
+      applyDisplayOptions(
+        state,
+        results.metadata.displayOptions[volumeId ?? 0]
+      ),
     [volumeId, job]
   );
 

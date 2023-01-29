@@ -8,7 +8,7 @@ properties:
   series:
     type: array
     items:
-      $ref: seriesEntry
+      $ref: seriesEntryWithAutoPvd
     minLength: 1
   tags:
     type: array

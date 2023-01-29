@@ -1,17 +1,20 @@
+import fs from 'fs';
+import glob from 'glob-promise';
 import status from 'http-status';
+import mime from 'mime';
+import path from 'path';
+import makeNewPluginJob from '../../plugin-job/makeNewPluginJob';
+import { CircusContext, RouteMiddleware } from '../../typings/middlewares';
+import checkFilter from '../../utils/checkFilter';
+import generateUniqueId from '../../utils/generateUniqueId';
+import resolveAutoPvdOfSeries, {
+  AutoPvdSeriesEntry
+} from '../../utils/resolveAutoPvdOfSeries';
 import {
   extractFilter,
   isPatientInfoInFilter,
   performAggregationSearch
 } from '../performSearch';
-import checkFilter from '../../utils/checkFilter';
-import generateUniqueId from '../../utils/generateUniqueId';
-import path from 'path';
-import fs from 'fs';
-import glob from 'glob-promise';
-import mime from 'mime';
-import { RouteMiddleware, CircusContext } from '../../typings/middlewares';
-import makeNewPluginJob from '../../plugin-job/makeNewPluginJob';
 
 const maskPatientInfo = (ctx: CircusContext) => {
   return (pluginJobData: any) => {
@@ -25,19 +28,39 @@ const maskPatientInfo = (ctx: CircusContext) => {
   };
 };
 
-export const handlePost: RouteMiddleware = ({ transactionManager, cs }) => {
+export interface PluginJobSeriesRequest extends AutoPvdSeriesEntry {
+  requiredPrivateTags?: string;
+}
+
+interface RawPluginJobRequest {
+  priority?: number;
+  pluginId: string;
+  series: PluginJobSeriesRequest[];
+  force?: boolean;
+}
+
+export const handlePost: RouteMiddleware = ({
+  transactionManager,
+  cs,
+  seriesOrientationResolver
+}) => {
   return async (ctx, next) => {
-    const { priority, ...request } = ctx.request.body;
+    const { priority, pluginId, series, force } = ctx.request
+      .body as RawPluginJobRequest;
     await transactionManager.withTransaction(async models => {
+      const resolvedSeries = await resolveAutoPvdOfSeries(
+        series,
+        models,
+        seriesOrientationResolver
+      );
       const jobId = await makeNewPluginJob(
         models,
-        request,
+        { pluginId, series: resolvedSeries, force },
         ctx.userPrivileges,
         ctx.user.userEmail,
         cs,
         priority
       );
-
       ctx.body = { jobId };
       ctx.status = status.CREATED;
     });

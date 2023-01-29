@@ -1,16 +1,23 @@
-import generateUniqueId from '../utils/generateUniqueId';
-import duplicateJobExists from '../api/duplicateJobExists';
 import { CsCore } from '@utrad-ical/circus-cs-core';
+import status from 'http-status';
+import { SeriesEntry } from 'typings/circus';
+import duplicateJobExists from '../api/duplicateJobExists';
 import { Models } from '../interface';
 import {
   fetchAndLockAccessibleSeries,
   UserPrivilegeInfo
 } from '../privilegeUtils';
-import status from 'http-status';
+import generateUniqueId from '../utils/generateUniqueId';
+
+export interface PluginJobRequest {
+  pluginId: string;
+  series: SeriesEntry[];
+  force?: boolean;
+}
 
 const makeNewPluginJob = async (
   models: Models,
-  request: any,
+  request: PluginJobRequest,
   userPrivileges: UserPrivilegeInfo,
   userEmail: string,
   cs: CsCore,

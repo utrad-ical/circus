@@ -1,17 +1,16 @@
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import archiver from 'archiver';
 import status from 'http-status';
-import isLikeDicom from '../../utils/isLikeDicom';
+import { multirange } from 'multi-integer-range';
 import { CircusContext, RouteMiddleware } from '../../typings/middlewares';
 import checkFilter from '../../utils/checkFilter';
 import { fileOrArchiveIterator } from '../../utils/directoryIterator';
+import isLikeDicom from '../../utils/isLikeDicom';
 import {
   extractFilter,
-  performAggregationSearch,
-  isPatientInfoInFilter
+  isPatientInfoInFilter,
+  performAggregationSearch
 } from '../performSearch';
-import resolveSeriesOrientation from '../../utils/resolveSeriesOrientation';
-import { multirange } from 'multi-integer-range';
 
 const maskPatientInfo = (ctx: CircusContext) => {
   return (series: any) => {
@@ -39,15 +38,9 @@ export const handleGet: RouteMiddleware = ({ models }) => {
   };
 };
 
-interface OrientationFilter {
-  start?: number;
-  end?: number;
-}
-
 export const handleGetOrientation: RouteMiddleware = ({
   models,
-  dicomFileRepository,
-  dicomTagReader
+  seriesOrientationResolver
 }) => {
   return async (ctx, next) => {
     const uid = ctx.params.seriesUid;
@@ -78,11 +71,10 @@ export const handleGetOrientation: RouteMiddleware = ({
     }
 
     try {
-      const result = await resolveSeriesOrientation(
+      const result = await seriesOrientationResolver(
         series.seriesUid,
         start,
-        end,
-        { dicomFileRepository, dicomTagReader }
+        end
       );
 
       const resolvedOrientation =

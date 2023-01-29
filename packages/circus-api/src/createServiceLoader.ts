@@ -23,6 +23,7 @@ import createDicomUtilityRunner, {
 import { TaskManager } from './createTaskManager';
 import { MhdPacker } from './case/createMhdPacker';
 import KoaOAuth2Server from './middleware/auth/KoaOAuth2Server';
+import { SeriesOrientationResolver } from 'utils/createSeriesOrientationResolver';
 
 export type Services = CsCoreServices &
   RsServices & {
@@ -41,6 +42,7 @@ export type Services = CsCoreServices &
     authProvider: AuthProvider;
     defaultAuthProvider: AuthProvider;
     transactionManager: TransactionManager;
+    seriesOrientationResolver: SeriesOrientationResolver;
   };
 
 export type ApiServiceLoader = ServiceLoader<Services>;
@@ -96,6 +98,10 @@ const createServiceLoader = async (config: any) => {
   loader.registerModule(
     'transactionManager',
     path.join(__dirname, 'createTransactionManager')
+  );
+  loader.registerModule(
+    'seriesOrientationResolver',
+    path.join(__dirname, 'utils/createSeriesOrientationResolver')
   );
   return loader as ApiServiceLoader;
 };

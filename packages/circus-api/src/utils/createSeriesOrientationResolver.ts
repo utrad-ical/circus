@@ -1,24 +1,28 @@
-import { DicomFileRepository } from '@utrad-ical/circus-lib';
-import { DicomTagReader } from '../interface';
+import { DicomFileRepository, FunctionService } from '@utrad-ical/circus-lib';
 import PartialVolumeDescriptor from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
+import { DicomTagReader } from 'interface';
+
+export type SeriesOrientationResolver = (
+  seriesUid: string,
+  start: number,
+  end: number
+) => Promise<PartialVolumeDescriptor>;
+
+interface Deps {
+  dicomTagReader: DicomTagReader;
+  dicomFileRepository: DicomFileRepository;
+}
 
 /**
  * Determines whether the given series (or its subset)
  * is head-first or foot-first, and returns the appropreate
  * PartialVolumeDescriptor.
  */
-
-const resolveSeriesOrientation = async (
+export const resolveSeriesOrientation = async (
   seriesUid: string,
   start: number,
   end: number,
-  {
-    dicomFileRepository,
-    dicomTagReader
-  }: {
-    dicomFileRepository: DicomFileRepository;
-    dicomTagReader: DicomTagReader;
-  }
+  { dicomFileRepository, dicomTagReader }: Deps
 ) => {
   const isAscendingOrder = start <= end ? true : false;
 
@@ -57,4 +61,18 @@ const resolveSeriesOrientation = async (
   }
 };
 
-export default resolveSeriesOrientation;
+const createSeriesOrientationResolver: FunctionService<
+  SeriesOrientationResolver,
+  Deps
+> = async (_, deps) => {
+  return async (seriesUid: string, start: number, end: number) => {
+    return await resolveSeriesOrientation(seriesUid, start, end, deps);
+  };
+};
+
+createSeriesOrientationResolver.dependencies = [
+  'dicomTagReader',
+  'dicomFileRepository'
+];
+
+export default createSeriesOrientationResolver;

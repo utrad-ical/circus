@@ -1,10 +1,7 @@
 $schema: 'http://json-schema.org/schema#'
 $async: true
-title: PluginJobSeries
+title: SeriesEntryWithAutoPvd
 type: object
-description: >
-  Represents series information used to build
-  raw volume consumed by CAD plug-ins.
 properties:
   seriesUid:
     type: string
@@ -13,9 +10,5 @@ properties:
     oneOf:
       - const: 'auto'
       - $ref: partialVolumeDescriptor
-  requiredPrivateTags:
-    type: string
+required: ['seriesUid', 'partialVolumeDescriptor']
 additionalProperties: false
-required:
-  - seriesUid
-  - partialVolumeDescriptor

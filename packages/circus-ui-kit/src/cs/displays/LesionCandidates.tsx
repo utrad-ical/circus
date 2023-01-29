@@ -422,8 +422,8 @@ const StyledDiv = styled.div`
   }
   .entries {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    grid-gap: 5px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 7px;
     justify-content: space-between;
     .lesion-candidate {
       border: 1px solid silver;
@@ -438,7 +438,7 @@ const StyledDiv = styled.div`
       }
       .image-viewer {
         width: 100%;
-        height: 400px;
+        height: 300px;
       }
     }
     .feedback-listener {

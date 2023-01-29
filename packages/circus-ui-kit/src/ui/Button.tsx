@@ -57,9 +57,9 @@ export const Button: React.FC<{
 });
 
 const paddings: { [size: string]: string } = {
-  xs: '1px 5px',
-  sm: '5px 10px',
-  default: '6px 12px'
+  xs: '1px 3px',
+  sm: '5px 5px',
+  default: '6px 7px'
 };
 
 const fontSizes: { [size: string]: string } = {
@@ -83,6 +83,7 @@ const StyledButton = styled.button`
     filter: brightness(80%);
   }
   &:disabled {
+    filter: none;
     opacity: 0.5;
   }
 `;

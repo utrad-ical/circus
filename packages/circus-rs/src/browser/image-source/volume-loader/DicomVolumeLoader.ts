@@ -38,7 +38,10 @@ interface ProgressEvents {
   abort: AbortEventListener;
 }
 
-export type ProgressEventEmitter = StrictEventEmitter<EventEmitter, ProgressEvents>;
+export type ProgressEventEmitter = StrictEventEmitter<
+  EventEmitter,
+  ProgressEvents
+>;
 
 export interface VolumeLoadController extends ProgressEventEmitter {
   getVolume(): DicomVolume | null;

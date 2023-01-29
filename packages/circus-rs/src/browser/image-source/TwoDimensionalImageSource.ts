@@ -14,7 +14,10 @@ import ImageSource, {
   DrawResult,
   ViewStateResizeTransformer
 } from './ImageSource';
-import DicomVolumeLoader, { DicomVolumeMetadata, VolumeLoadController } from './volume-loader/DicomVolumeLoader';
+import DicomVolumeLoader, {
+  DicomVolumeMetadata,
+  VolumeLoadController
+} from './volume-loader/DicomVolumeLoader';
 
 interface TwoDimensionalImageSourceOptions {
   volumeLoader: DicomVolumeLoader;
@@ -39,7 +42,9 @@ export default class TwoDimensionalImageSource extends ImageSource {
     super();
 
     if (!volumeLoader.loadController) {
-      throw new TypeError('The specified volumeLoader does not have loadController.');
+      throw new TypeError(
+        'The specified volumeLoader does not have loadController.'
+      );
     }
 
     this.loadController = volumeLoader.loadController;
@@ -71,10 +76,10 @@ export default class TwoDimensionalImageSource extends ImageSource {
       metadata.pixelFormat === 'rgba8'
         ? undefined
         : metadata.dicomWindow
-          ? { ...metadata.dicomWindow }
-          : metadata.estimatedWindow
-            ? { ...metadata.estimatedWindow }
-            : { level: 50, width: 100 };
+        ? { ...metadata.dicomWindow }
+        : metadata.estimatedWindow
+        ? { ...metadata.estimatedWindow }
+        : { level: 50, width: 100 };
 
     const initialState: TwoDimensionalViewState = {
       type: '2d',
@@ -125,7 +130,11 @@ export default class TwoDimensionalImageSource extends ImageSource {
     const { imageNumber } = viewState;
     this.loadController.setPriority(imageNumber, ++this.higherPriority);
 
-    const drawResult = await this.createDrawResult(viewer, viewState, abortSignal);
+    const drawResult = await this.createDrawResult(
+      viewer,
+      viewState,
+      abortSignal
+    );
 
     // If we use Promise.resolve directly, the then-calleback is called
     // before any stacked UI events are handled.

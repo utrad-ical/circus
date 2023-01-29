@@ -19,7 +19,7 @@ beforeAll(async () => {
       uploadFileSizeMaxBytes: 200 * 1024 * 1024,
       pluginResultsPath: '', // dummy
       dicomImageServerUrl: '', // dummy
-      pluginCachePath: '', // dummy
+      pluginCachePath: '' // dummy
     },
     {
       validator,
@@ -45,11 +45,11 @@ beforeAll(async () => {
       transactionManager: null as any, // dummy
       rsWSServer: new ws.Server({
         noServer: true,
-        skipUTF8Validation: true,
+        skipUTF8Validation: true
       }),
       rsWebsocketVolumeConnectionHandlerCreator: () => {
         return null as any; // dummy
-      },
+      }
     }
   );
 

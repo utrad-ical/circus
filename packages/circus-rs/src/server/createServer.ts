@@ -32,7 +32,13 @@ const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
   deps
 ) => {
   const { authorization, globalIpFilter } = options;
-  const { rsLogger, counter, rsSeriesRoutes, rsWebsocketVolumeConnectionHandlerCreator, rsWSServer } = deps;
+  const {
+    rsLogger,
+    counter,
+    rsSeriesRoutes,
+    rsWebsocketVolumeConnectionHandlerCreator,
+    rsWSServer
+  } = deps;
 
   // create server process
   const app = new koa();
@@ -86,9 +92,10 @@ const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
   withWebSocketConnectionHandlers(rsWSServer, {
     '/ws/volume': rsWebsocketVolumeConnectionHandlerCreator({
       // authFunctionProvider: req => async seriesUid => true
-      authFunctionProvider: req => seriesUid => new Promise((resolve) => {
-        setTimeout(() => resolve(true), 2000)
-      })
+      authFunctionProvider: req => seriesUid =>
+        new Promise(resolve => {
+          setTimeout(() => resolve(true), 2000);
+        })
     })
   })(app);
 

@@ -86,11 +86,13 @@ export interface CsResultsContextType {
   /**
    * Hook to use volume loader.
    */
-  useVolumeLoaders: (series: ({
-    seriesUid: string;
-    partialVolumeDescriptor: PartialVolumeDescriptor;
-    estimateWindowType?: EstimateWindowType;
-  })[]) => DicomVolumeLoader[]
+  useVolumeLoaders: (
+    series: {
+      seriesUid: string;
+      partialVolumeDescriptor: PartialVolumeDescriptor;
+      estimateWindowType?: EstimateWindowType;
+    }[]
+  ) => DicomVolumeLoader[];
   /**
    * Dynamically loads a display.
    */

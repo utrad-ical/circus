@@ -3,14 +3,15 @@ import * as ws from 'ws';
 
 const createWSServer: NoDepFunctionService<
   ws.Server,
-  {
-    perMessageDeflate?: ws.ServerOptions['perMessageDeflate'];
-  } | undefined
+  | {
+      perMessageDeflate?: ws.ServerOptions['perMessageDeflate'];
+    }
+  | undefined
 > = async ({ perMessageDeflate } = {}) => {
   const options: ws.ServerOptions = {
     noServer: true,
     skipUTF8Validation: true,
-    perMessageDeflate,
+    perMessageDeflate
     // perMessageDeflate: {
     //   zlibDeflateOptions: {
     //     // See zlib defaults.
@@ -32,6 +33,6 @@ const createWSServer: NoDepFunctionService<
     // }
   };
   return new ws.Server(options);
-}
+};
 
 export default createWSServer;

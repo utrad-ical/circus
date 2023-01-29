@@ -10,7 +10,10 @@ export type ViewStateResizeTransformer = (
 ) => ViewState;
 
 export type DrawResult = ImageData | DraftDrawResult;
-export type DraftDrawResult = { draft: ImageData; next: () => Promise<DrawResult> };
+export type DraftDrawResult = {
+  draft: ImageData;
+  next: () => Promise<DrawResult>;
+};
 
 export function isDraft(result: DrawResult): result is DraftDrawResult {
   return 'draft' in result;
@@ -56,7 +59,5 @@ export default abstract class ImageSource extends EventEmitter {
     return v => v;
   }
 
-  public dispose(): void {
-
-  }
+  public dispose(): void {}
 }

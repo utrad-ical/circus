@@ -8,9 +8,8 @@ export default function volumeTextureTransferer(
   volume: RawData
 ) {
   const voxelCount = volume.getDimension();
-  const { sliceSize, sliceGridSize, textureSize } = detectTextureLayout(
-    voxelCount
-  );
+  const { sliceSize, sliceGridSize, textureSize } =
+    detectTextureLayout(voxelCount);
 
   const getOriginOfSlice = (z: number) => [
     (z % sliceGridSize[0]) * sliceSize[0],

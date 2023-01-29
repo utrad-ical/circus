@@ -22,7 +22,7 @@ type Option = {
 
 const volume: (option: Option) => WebSocketConnectionHandler = ({
   volumeProvider,
-  authFunctionProvider,
+  authFunctionProvider
 }) => {
   return (ws, req) => {
     const connectionId = ++lastWsConnectionId;
@@ -32,10 +32,12 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
 
     ws.binaryType = 'arraybuffer';
 
-    const untilBufferIsFlushed = () => new Promise<void>((resolve) => {
-      const check = () => void (0 === ws.bufferedAmount ? resolve() : setImmediate(check));
-      check();
-    });
+    const untilBufferIsFlushed = () =>
+      new Promise<void>(resolve => {
+        const check = () =>
+          void (0 === ws.bufferedAmount ? resolve() : setImmediate(check));
+        check();
+      });
 
     const imageDataEmitter = async (
       data: TransferImageMessage,
@@ -49,8 +51,10 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
       await untilBufferIsFlushed();
     };
 
-    const { beginTransfer, getConnection, dispose }
-      = createImageTransferAgent({ imageDataEmitter, volumeProvider });
+    const { beginTransfer, getConnection, dispose } = createImageTransferAgent({
+      imageDataEmitter,
+      volumeProvider
+    });
 
     ws.on('close', () => {
       // console.log(`${connectionId}: Close`);
@@ -60,15 +64,16 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
     const checkingAccessRights = new Map<string, Promise<void>>();
 
     const handleMessageData = async (data: ImageTransferMessageData) => {
-
       switch (data.messageType) {
         case 'BEGIN_TRANSFER': {
-          const { transferId, seriesUid, partialVolumeDescriptor } =
-            data;
+          const { transferId, seriesUid, partialVolumeDescriptor } = data;
 
           // console.log(`tr#${transferId} BEGIN_TRANSFER / ${seriesUid}`);
-          let authenticated: () => void = () => { };
-          checkingAccessRights.set(transferId, new Promise((resolve) => authenticated = resolve));
+          let authenticated: () => void = () => {};
+          checkingAccessRights.set(
+            transferId,
+            new Promise(resolve => (authenticated = resolve))
+          );
 
           const hasAccessRight = await authFunction(seriesUid);
           checkingAccessRights.delete(transferId);

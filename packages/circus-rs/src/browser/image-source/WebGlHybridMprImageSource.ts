@@ -19,8 +19,10 @@ interface WebGlHybridImageSourceOptions
  * It can draw MPR images as soon as the former gets ready,
  * and then switch to WebGlRawVolumeMprImageSource when it is ready.
  */
-export default class WebGlHybridMprImageSource extends MprImageSource
-  implements MprImageSourceWithDicomVolume {
+export default class WebGlHybridMprImageSource
+  extends MprImageSource
+  implements MprImageSourceWithDicomVolume
+{
   private dynSource: DynamicMprImageSource;
   private volSource: WebGlRawVolumeMprImageSource;
   private volumeReady: boolean = false;

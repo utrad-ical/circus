@@ -644,11 +644,9 @@ export const zMinMaxOfSection = (section: Section) => {
   const sectionVertexZValues = [
     section.origin[2],
     section.origin[2] + section.xAxis[2],
-    section.origin[2] +
-    section.xAxis[2] +
-    section.yAxis[2],
+    section.origin[2] + section.xAxis[2] + section.yAxis[2],
     section.origin[2] + section.yAxis[2]
   ];
 
   return [Math.min(...sectionVertexZValues), Math.max(...sectionVertexZValues)];
-}
+};

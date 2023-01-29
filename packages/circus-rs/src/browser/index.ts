@@ -41,7 +41,10 @@ export * from '@utrad-ical/circus-lib/src/PixelFormat';
 export * from '../common/geometry';
 
 export { default as RsHttpClient } from './http-client/RsHttpClient';
-export { createTransferConnectionFactory, TransferConnectionFactory } from './ws/createTransferConnectionFactory';
+export {
+  createTransferConnectionFactory,
+  TransferConnectionFactory
+} from './ws/createTransferConnectionFactory';
 export { WebSocketClientImpl as WebSocketClient } from './ws/WebSocketClient';
 
 export { default as ImageSource } from './image-source/ImageSource';
@@ -54,7 +57,10 @@ export { default as TwoDimensionalImageSource } from './image-source/TwoDimensio
 export { default as WebGlRawVolumeMprImageSource } from './image-source/WebGlRawVolumeMprImageSource';
 export { default as WebGlHybridMprImageSource } from './image-source/WebGlHybridMprImageSource';
 
-export { default as DicomVolumeLoader, VolumeLoadController } from './image-source/volume-loader/DicomVolumeLoader';
+export {
+  default as DicomVolumeLoader,
+  VolumeLoadController
+} from './image-source/volume-loader/DicomVolumeLoader';
 export { default as MockVolumeLoader } from './image-source/volume-loader/MockVolumeLoader';
 export { default as MixVolumeLoader } from './image-source/volume-loader/MixVolumeLoader';
 export { default as RsVolumeLoader } from './image-source/volume-loader/RsVolumeLoader';

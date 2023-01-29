@@ -25,7 +25,8 @@ export interface RawVolumeMprImageSourceOptions {
  */
 export default class RawVolumeMprImageSource
   extends MprImageSource
-  implements MprImageSourceWithDicomVolume {
+  implements MprImageSourceWithDicomVolume
+{
   private volume: DicomVolume | undefined;
   private fullyLoaded: boolean = false;
 
@@ -35,7 +36,9 @@ export default class RawVolumeMprImageSource
     super();
 
     if (!volumeLoader.loadController) {
-      throw new TypeError('The specified volumeLoader does not have loadController.');
+      throw new TypeError(
+        'The specified volumeLoader does not have loadController.'
+      );
     }
 
     draftInterval = draftInterval || 300;
@@ -43,17 +46,21 @@ export default class RawVolumeMprImageSource
     this.loadSequence = (async () => {
       this.draftInterval = draftInterval;
       this.metadata = await volumeLoader.loadMeta();
-      volumeLoader.loadVolume().then(() => this.fullyLoaded = true);
+      volumeLoader.loadVolume().then(() => (this.fullyLoaded = true));
       this.volume = volumeLoader.loadController!.getVolume()!;
       if (!draftInterval) await volumeLoader.loadVolume();
     })();
   }
 
   public getLoadedDicomVolume() {
-    return this.fullyLoaded && this.volume || undefined;
+    return (this.fullyLoaded && this.volume) || undefined;
   }
 
-  public draw(viewer: Viewer, viewState: ViewState, abortSignal: AbortSignal): Promise<DrawResult> {
+  public draw(
+    viewer: Viewer,
+    viewState: ViewState,
+    abortSignal: AbortSignal
+  ): Promise<DrawResult> {
     const outSize = viewer.getResolution();
     const mprOutput = new Uint8Array(outSize[0] * outSize[1]);
     const metadata = this.metadata!;
@@ -80,7 +87,9 @@ export default class RawVolumeMprImageSource
     const imageData = drawToImageData(outSize, mprOutput);
 
     const next = async () => {
-      await new Promise<void>((resolve) => setTimeout(() => resolve(), this.draftInterval));
+      await new Promise<void>(resolve =>
+        setTimeout(() => resolve(), this.draftInterval)
+      );
       return await this.draw(viewer, viewState, abortSignal);
     };
 

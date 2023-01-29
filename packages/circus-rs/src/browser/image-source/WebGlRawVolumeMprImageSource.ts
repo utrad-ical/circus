@@ -10,10 +10,12 @@ import {
   resolveImageData
 } from './gl/webgl-util';
 import MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume';
-import MultiRange, { Initializer as MultiRangeInitializer } from 'multi-integer-range';
+import MultiRange, {
+  Initializer as MultiRangeInitializer
+} from 'multi-integer-range';
 import { DrawResult } from './ImageSource';
 import setImmediate from '../util/setImmediate';
-import imageRangeOfSection from '../util/imageRangeOfSection'
+import imageRangeOfSection from '../util/imageRangeOfSection';
 
 export interface WebGlRawVolumeMprImageSourceOptions {
   volumeLoader: DicomVolumeLoader;
@@ -32,7 +34,8 @@ type CaptureCanvasCallback = (canvas: HTMLCanvasElement) => void;
 
 export default class WebGlRawVolumeMprImageSource
   extends MprImageSource
-  implements MprImageSourceWithDicomVolume {
+  implements MprImageSourceWithDicomVolume
+{
   private volume: DicomVolume | undefined;
   private fullyLoaded: boolean = false;
   private draftInterval: number = 0;
@@ -44,7 +47,10 @@ export default class WebGlRawVolumeMprImageSource
 
   private background: RGBA = [0.0, 0.0, 0.0, 1.0];
 
-  private setPriority: (imageIndices: MultiRangeInitializer, priority: number) => void;
+  private setPriority: (
+    imageIndices: MultiRangeInitializer,
+    priority: number
+  ) => void;
   private disposeCallbacks: (() => void)[] = [];
 
   // For debugging
@@ -57,11 +63,16 @@ export default class WebGlRawVolumeMprImageSource
     );
   }
 
-  constructor({ volumeLoader, draftInterval }: WebGlRawVolumeMprImageSourceOptions) {
+  constructor({
+    volumeLoader,
+    draftInterval
+  }: WebGlRawVolumeMprImageSourceOptions) {
     super();
 
     if (!volumeLoader.loadController) {
-      throw new TypeError('The specified volumeLoader does not have loadController.');
+      throw new TypeError(
+        'The specified volumeLoader does not have loadController.'
+      );
     }
 
     const loadController = volumeLoader.loadController;
@@ -101,14 +112,16 @@ export default class WebGlRawVolumeMprImageSource
       const { transfer } = mprProgram.setDicomVolume(this.volume);
 
       loadController.loadedImages().forEach(imageIndex => transfer(imageIndex));
-      const progressListener = ({ imageIndex }: { imageIndex: number; }) => {
+      const progressListener = ({ imageIndex }: { imageIndex: number }) => {
         // console.log(`transfer ${imageIndex}`);
         transfer(imageIndex);
       };
       loadController.on('progress', progressListener);
-      this.disposeCallbacks.push(() => loadController.off('progress', progressListener));
+      this.disposeCallbacks.push(() =>
+        loadController.off('progress', progressListener)
+      );
 
-      volumeLoader.loadVolume().then(() => this.fullyLoaded = true);
+      volumeLoader.loadVolume().then(() => (this.fullyLoaded = true));
       if (!draftInterval) await volumeLoader.loadVolume();
     })();
   }
@@ -132,7 +145,7 @@ export default class WebGlRawVolumeMprImageSource
     // backCanvas.addEventListener('webglcontextlost', _ev => {}, false);
     // backCanvas.addEventListener('webglcontextrestored', _ev => {}, false);
 
-    this.disposeCallbacks.push(() => void (backCanvas.remove()));
+    this.disposeCallbacks.push(() => void backCanvas.remove());
 
     return backCanvas;
   }
@@ -151,8 +164,11 @@ export default class WebGlRawVolumeMprImageSource
    * @param viewState
    * @returns {Promise<ImageData>}
    */
-  public async draw(viewer: Viewer, viewState: ViewState, abortSignal: AbortSignal): Promise<DrawResult> {
-
+  public async draw(
+    viewer: Viewer,
+    viewState: ViewState,
+    abortSignal: AbortSignal
+  ): Promise<DrawResult> {
     if (viewState.type !== 'mpr') throw new TypeError('Unsupported state');
 
     const [min, max] = imageRangeOfSection(viewState.section, this.metadata!);
@@ -172,21 +188,35 @@ export default class WebGlRawVolumeMprImageSource
     });
   }
 
-  private async createDrawResult(viewer: Viewer, viewState: MprViewState, abortSignal: AbortSignal): Promise<DrawResult> {
-    const imageData = await this.createImageData(viewer, viewState, abortSignal);
+  private async createDrawResult(
+    viewer: Viewer,
+    viewState: MprViewState,
+    abortSignal: AbortSignal
+  ): Promise<DrawResult> {
+    const imageData = await this.createImageData(
+      viewer,
+      viewState,
+      abortSignal
+    );
 
     return this.fullyLoaded
       ? imageData
       : {
-        draft: imageData,
-        next: async () => {
-          await new Promise<void>((resolve) => setTimeout(() => resolve(), this.draftInterval));
-          return await this.createDrawResult(viewer, viewState, abortSignal);
-        }
-      };
+          draft: imageData,
+          next: async () => {
+            await new Promise<void>(resolve =>
+              setTimeout(() => resolve(), this.draftInterval)
+            );
+            return await this.createDrawResult(viewer, viewState, abortSignal);
+          }
+        };
   }
 
-  private async createImageData(viewer: Viewer, viewState: ViewState, abortSignal: AbortSignal): Promise<ImageData> {
+  private async createImageData(
+    viewer: Viewer,
+    viewState: ViewState,
+    abortSignal: AbortSignal
+  ): Promise<ImageData> {
     if (viewState.type !== 'mpr') throw new Error('Unsupported view state.');
 
     if (!this.mprProgram.isActive())

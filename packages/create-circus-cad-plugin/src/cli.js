@@ -1,31 +1,31 @@
-import arg from "arg";
-import inquirer from "inquirer";
-import { createCircusCadPlugin } from "./main";
+import arg from 'arg';
+import inquirer from 'inquirer';
+import { createCircusCadPlugin } from './main';
 
 function parseArgumentsIntoOptions(rawArgs) {
   const args = arg(
     {
-      "--install": Boolean,
-      "-i": "--install",
+      '--install': Boolean,
+      '-i': '--install'
     },
     {
-      argv: rawArgs.slice(2),
+      argv: rawArgs.slice(2)
     }
   );
   return {
-    install: args["--install"] || false,
+    install: args['--install'] || false
   };
 }
 
 async function promptForMissingOptions(options) {
-  const defaultTemplate = "TypeScript";
+  const defaultTemplate = 'TypeScript';
   const questions = [];
   if (!options.install) {
     questions.push({
-      type: "confirm",
-      name: "install",
-      message: "Install dependencies",
-      default: true,
+      type: 'confirm',
+      name: 'install',
+      message: 'Install dependencies',
+      default: true
     });
   }
 
@@ -33,7 +33,7 @@ async function promptForMissingOptions(options) {
   return {
     ...options,
     template: defaultTemplate,
-    install: options.install || answers.install,
+    install: options.install || answers.install
   };
 }
 

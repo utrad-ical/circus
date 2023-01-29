@@ -8,10 +8,10 @@ import React, {
   useState
 } from 'react';
 import styled from 'styled-components';
-import { FeedbackEntry, Job, useCsResults } from '../CsResultsContext';
-import { Display } from '../Display';
-import { createStateChanger, ImageViewer } from '../../ui/ImageViewer';
 import { Button } from '../../ui/Button';
+import { createStateChanger, ImageViewer } from '../../ui/ImageViewer';
+import { FeedbackEntry, useCsResults } from '../CsResultsContext';
+import { Display } from '../Display';
 import { defaultDataPath, normalizeCandidates } from './LesionCandidates';
 
 type IntegrationOptions = 'off' | 'snapped';
@@ -50,17 +50,7 @@ export interface Location {
 
 export type LocatorFeedback = Array<Location>;
 
-const applyDisplayOptions = (
-  state: rs.MprViewState,
-  job: Job,
-  volumeId: number
-) => {
-  const displayOptions =
-    job.results.metadata &&
-    Array.isArray(job.results.metadata.displayOptions) &&
-    job.results.metadata.displayOptions.find(
-      (o: any) => o.volumeId === volumeId
-    );
+const applyDisplayOptions = (state: rs.MprViewState, displayOptions: any) => {
   if (!displayOptions) return state;
   if (displayOptions.window) {
     state = { ...state, window: { ...displayOptions.window } };
@@ -117,25 +107,16 @@ const distance = (x: number[], y: number[], vs: number[]) => {
   const my = [y[0] * vs[0], y[1] * vs[1], y[2] * vs[2]];
   return Math.sqrt(
     (mx[0] - my[0]) * (mx[0] - my[0]) +
-    (mx[1] - my[1]) * (mx[1] - my[1]) +
-    (mx[2] - my[2]) * (mx[2] - my[2])
+      (mx[1] - my[1]) * (mx[1] - my[1]) +
+      (mx[2] - my[2]) * (mx[2] - my[2])
   );
 };
 
 export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
-  const {
-    options,
-    personalOpinions,
-    initialFeedbackValue,
-    onFeedbackChange
-  } = props;
-  const {
-    job,
-    consensual,
-    editable,
-    useVolumeLoaders,
-    eventLogger
-  } = useCsResults();
+  const { options, personalOpinions, initialFeedbackValue, onFeedbackChange } =
+    props;
+  const { job, consensual, editable, useVolumeLoaders, eventLogger } =
+    useCsResults();
 
   const {
     volumeId = 0,
@@ -154,9 +135,9 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
 
   const [currentFeedback, setCurrentFeedback] = useState<LocatorFeedback>(
     initialFeedbackValue ??
-    (consensual
-      ? integrateEntries(personalOpinions, consensualIntegration)
-      : [])
+      (consensual
+        ? integrateEntries(personalOpinions, consensualIntegration)
+        : [])
   );
 
   const [showViewer, setShowViewer] = useState(currentFeedback.length > 0);
@@ -188,6 +169,9 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
       voxelSizeRef.current = imageSource.metadata!.voxelSize;
     });
     setComposition(comp);
+    return () => {
+      comp.dispose();
+    };
   }, [volumeLoaders, volumeId]);
 
   const log = (action: string, data?: any) => {
@@ -299,7 +283,11 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
   };
 
   const initialStateSetter = useCallback(
-    (state: rs.MprViewState) => applyDisplayOptions(state, job, volumeId),
+    (state: rs.MprViewState) =>
+      applyDisplayOptions(
+        state,
+        results.metadata.displayOptions[volumeId ?? 0]
+      ),
     [volumeId, job]
   );
 
@@ -336,7 +324,7 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
                 <th>#</th>
                 <th>Position</th>
                 {typeof snapThresholdMm === 'number' && <th>Snapped to</th>}
-                {consensual && <th>Entered By</th>}
+                {consensual && editable && <th>Entered By</th>}
                 <th />
               </tr>
             </thead>
@@ -348,7 +336,11 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
                   {typeof snapThresholdMm === 'number' && (
                     <td>{item.snappedLesionCandidate ?? '-'}</td>
                   )}
-                  {consensual && <td>{item[enteredBy]!.join(', ')}</td>}
+                  {consensual && editable && (
+                    <td>
+                      {item[enteredBy] ? item[enteredBy]!.join(', ') : ''}
+                    </td>
+                  )}
                   <td>
                     <Button
                       size="xs"

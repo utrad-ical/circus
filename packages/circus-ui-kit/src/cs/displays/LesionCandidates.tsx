@@ -143,9 +143,17 @@ const Candidate: React.FC<{
   markStyle: MarkStyle;
   tool: Tool;
   displayOptions: any;
+  imageNumber: number;
 }> = props => {
-  const { imageSource, item, markStyle, tool, displayOptions, children } =
-    props;
+  const {
+    imageSource,
+    item,
+    markStyle,
+    tool,
+    displayOptions,
+    children,
+    imageNumber
+  } = props;
 
   const stateChanger = useMemo(() => createStateChanger<MprViewState>(), []);
 
@@ -201,6 +209,7 @@ const Candidate: React.FC<{
       <div className="header">
         <div className="attributes">
           <div>Rank: {item.rank}</div>
+          <div>Image No: {imageNumber}</div>
           <div>Loc: {JSON.stringify(item.location)}</div>
           <div>Confidence: {item.confidence}</div>
         </div>
@@ -244,7 +253,7 @@ export const LesionCandidates: Display<
   } = props;
   const { consensual, job, useVolumeLoaders, loadDisplay, eventLogger } =
     useCsResults();
-  const { results } = job;
+  const { results, series } = job;
   const [error, setError] = useState<Error | null>(null);
   const [currentFeedback, setCurrentFeedback] =
     useState<LesionCandidateFeedback>(initialFeedbackValue ?? []);
@@ -342,6 +351,11 @@ export const LesionCandidates: Display<
     load();
   }, [feedbackListener]);
 
+  const imageNumber = (volumeId: number, locationZ: number) => {
+    const { start, delta } = series[volumeId].partialVolumeDescriptor;
+    return start + locationZ * delta;
+  };
+
   if (
     Object.keys(imgSrcMap).length < 1 ||
     (feedbackListener && !FeedbackListener)
@@ -390,6 +404,7 @@ export const LesionCandidates: Display<
               displayOptions={
                 results.metadata.displayOptions[cand.volumeId ?? 0]
               }
+              imageNumber={imageNumber(cand.volumeId ?? 0, cand.location[2])}
             >
               {feedbackListener && FeedbackListener && (
                 <div className="feedback-listener">

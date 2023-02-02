@@ -80,7 +80,7 @@ const Operation: DataGridRenderer<any> = props => {
         noCaret
         onSelect={handleMenuClick}
       >
-        <MenuItem eventKey="cancel" disabled={job.status !== 'in_quue'}>
+        <MenuItem eventKey="cancel" disabled={job.status !== 'in_queue'}>
           Cancel
         </MenuItem>
         <MenuItem eventKey="invalidate" disabled={job.status !== 'finished'}>

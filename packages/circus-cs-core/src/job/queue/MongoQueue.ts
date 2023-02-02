@@ -58,7 +58,7 @@ const createMongoQueue: FunctionService<
   const removeFromQueue = async (jobId: string) => {
     const result = await collection.findOneAndDelete({
       jobId,
-      state: 'in_queue'
+      state: 'wait'
     });
     return !!result.value;
   };

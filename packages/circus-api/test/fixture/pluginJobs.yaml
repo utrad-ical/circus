@@ -69,3 +69,19 @@
   finishedAt: { $date: '2020-04-04T12:05:00Z' }
   feedbacks: []
   results: {}
+
+- jobId: 01gr80z2v58f9jytq60snybgfa
+  pluginId: d135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2
+  userEmail: bob@example.com
+  status: in_queue
+  series:
+    - seriesUid: 111.222.333.444.777
+      partialVolumeDescriptor:
+        start: 3
+        end: 7
+        delta: 2
+  errorMessage: null
+  startedAt: { $date: '2021-07-01T15:00:00Z' }
+  finishedAt: null
+  feedbacks: []
+  results: {}

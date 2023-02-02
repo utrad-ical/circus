@@ -1,6 +1,7 @@
 import { setUpAppForRoutesTest, ApiTest } from '../../../test/util-routes';
 import { AxiosInstance } from 'axios';
 import { setUpMongoFixture } from '../../../test/util-mongo';
+import status from 'http-status';
 
 let apiTest: ApiTest,
   alice: AxiosInstance,
@@ -60,7 +61,7 @@ describe('plugin-job search', () => {
   test('Filter by power user domain', async () => {
     const res = await bob.get('api/plugin-jobs');
     expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(2);
+    expect(res.data.items).toHaveLength(3);
   });
 
   test('Filter by guest domain', async () => {
@@ -87,7 +88,7 @@ describe('plugin-job search', () => {
       }
     });
     expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(3);
+    expect(res.data.items).toHaveLength(4);
   });
 });
 
@@ -271,6 +272,48 @@ describe('plugin-job registration', () => {
       const res = await bob.post('api/plugin-jobs', { ...job, force: true });
       expect(res.status).toBe(201);
     });
+  });
+});
+
+describe('job cancellation', () => {
+  test('cancel a job', async () => {
+    const res = await dave.request({
+      method: 'patch',
+      url: 'api/plugin-jobs/01gr80z2v58f9jytq60snybgfa',
+      data: { status: 'cancelled' }
+    });
+    console.log(res.data);
+    expect(res.status).toBe(status.NO_CONTENT);
+  });
+
+  test('cancellation fails if status is not in_queue', async () => {
+    const res = await dave.request({
+      method: 'patch',
+      url: 'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa',
+      data: { status: 'cancelled' }
+    });
+    expect(res.status).toBe(status.UNPROCESSABLE_ENTITY);
+  });
+});
+
+describe('job invalidation', () => {
+  test('invalidate a job', async () => {
+    const res = await dave.request({
+      method: 'patch',
+      url: 'api/plugin-jobs/01f5dt3qn9877g072t9y7h7pjp',
+      data: { status: 'invalidated' }
+    });
+    console.log(res.data);
+    expect(res.status).toBe(status.NO_CONTENT);
+  });
+
+  test('invalidation fails if status is not in_queue', async () => {
+    const res = await dave.request({
+      method: 'patch',
+      url: 'api/plugin-jobs/01dxgwvhwhyjt8hd4srsf9z4te',
+      data: { status: 'invalidated' }
+    });
+    expect(res.status).toBe(status.UNPROCESSABLE_ENTITY);
   });
 });
 

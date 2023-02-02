@@ -1,4 +1,5 @@
 import Icon from '@smikitky/rb-components/lib/Icon';
+import { confirm } from '@smikitky/rb-components/lib/modal';
 import DataGrid, {
   DataGridColumnDefinition,
   DataGridRenderer
@@ -8,7 +9,11 @@ import IdDisplay from 'components/IdDisplay';
 import MyListDropdown from 'components/MyListDropdown';
 import PatientInfoBox from 'components/PatientInfoBox';
 import PluginDisplay from 'components/PluginDisplay';
-import { ProgressBar } from 'components/react-bootstrap';
+import {
+  DropdownButton,
+  MenuItem,
+  ProgressBar
+} from 'components/react-bootstrap';
 import SearchResultsView, {
   makeSortOptions,
   patientInfoSearchOptions
@@ -20,33 +25,69 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import * as searches from 'store/searches';
 import styled from 'styled-components';
+import { useApi } from 'utils/api';
 import browserHistory from '../../browserHistory';
+import useShowMessage from 'utils/useShowMessage';
 
 const Operation: DataGridRenderer<any> = props => {
   const { value: job } = props;
   const dispatch = useDispatch();
+  const location = useLocation();
+  const api = useApi();
+  const showMessage = useShowMessage();
   const searchName =
-    useLocation().pathname.indexOf('/browse/plugin-jobs/mylist') === 0
+    location.pathname.indexOf('/browse/plugin-jobs/mylist') === 0
       ? 'myPluginJobList'
       : 'pluginJob';
   const search = useSelector(state => state.searches.searches[searchName]);
-  const handleClick = () => {
+
+  const handleViewClick = () => {
     if (job.status !== 'finished') return;
     dispatch(searches.setNextPreviousList(search?.results?.indexes ?? []));
     const url = `/plugin-job/${job.jobId}`;
     browserHistory.push(url);
   };
 
+  const handleMenuClick = async (selection: any) => {
+    if (!(await confirm(`Are you sure you want to ${selection} this job?`))) {
+      return;
+    }
+    await api(`/plugin-jobs/${job.jobId}`, {
+      method: 'PATCH',
+      data: { status: selection === 'cancel' ? 'cancelled' : 'invalidated' }
+    });
+    showMessage(`Job ${selection}ed successfully.`, 'success', { short: true });
+    dispatch(searches.updateSearch(api, searchName, {}));
+  };
+
   return (
-    <IconButton
-      disabled={job.status !== 'finished'}
-      icon="circus-series"
-      bsSize="sm"
-      bsStyle="primary"
-      onClick={handleClick}
-    >
-      View
-    </IconButton>
+    <Fragment>
+      <IconButton
+        disabled={job.status !== 'finished'}
+        icon="circus-series"
+        bsSize="sm"
+        bsStyle="primary"
+        onClick={handleViewClick}
+      >
+        View
+      </IconButton>
+      &thinsp;
+      <DropdownButton
+        bsSize="sm"
+        title={<Icon icon="glyphicon-option-horizontal" />}
+        id={`dropdown-`}
+        pullRight
+        noCaret
+        onSelect={handleMenuClick}
+      >
+        <MenuItem eventKey="cancel" disabled={job.status !== 'in_quue'}>
+          Cancel
+        </MenuItem>
+        <MenuItem eventKey="invalidate" disabled={job.status !== 'finished'}>
+          Invalidate
+        </MenuItem>
+      </DropdownButton>
+    </Fragment>
   );
 };
 
@@ -72,11 +113,9 @@ const StatusRenderer: DataGridRenderer<any> = props => {
   if (status === 'processing') {
     return <ProgressBar active bsStyle="info" now={100} label="processing" />;
   }
-  const className = {
-    in_queue: 'text-info',
-    finished: 'text-success',
-    invalidated: 'text-muted'
-  }[status as 'in_queue' | 'finished' | 'invalidated'];
+  const className = { in_queue: 'text-info', finished: 'text-success' }[
+    status as 'in_queue' | 'finished'
+  ];
   return <span className={className || 'text-danger'}>{status}</span>;
 };
 

@@ -68,31 +68,27 @@ export const handlePost: RouteMiddleware = ({
 };
 
 /**
- * Cancels a job.
+ * Cancels or invalidates a job.
  */
-export const handlePatch: RouteMiddleware = ({ models, cs }) => {
+export const handlePatch: RouteMiddleware = ({ transactionManager }) => {
   return async (ctx, next) => {
     const jobId = ctx.params.jobId;
-    const job = await models.pluginJob.findByIdOrFail(jobId);
-    if (
-      ctx.request.body.status !== 'cancelled' ||
-      Object.keys(ctx.request.body).length !== 1
-    ) {
-      ctx.throw(status.BAD_REQUEST);
-    }
-    if (job.status !== 'in_queue') {
-      ctx.throw(
-        status.UNPROCESSABLE_ENTITY,
-        `You cannot cancel this job because its status is "${job.status}".`
-      );
-    }
-    ctx.throw(
-      status.NOT_IMPLEMENTED,
-      'Job cancel function is not implemented on current version.'
-    );
-    // await cs.job.cancel(jobId);
-    // await models.pluginJob.upsert(jobId, { status: 'cancelled' });
-    // ctx.body = status.NO_CONTENT;
+    const newStatus = ctx.request.body.status as 'cancelled' | 'invalidated';
+    await transactionManager.withTransaction(async models => {
+      const job = await models.pluginJob.findByIdOrFail(jobId);
+      if (
+        (newStatus === 'cancelled' && job.status !== 'in_queue') ||
+        (newStatus === 'invalidated' && job.status !== 'finished')
+      ) {
+        const verb = newStatus === 'cancelled' ? 'cancel' : 'invalidate';
+        ctx.throw(
+          status.UNPROCESSABLE_ENTITY,
+          `You cannot ${verb} this job because its status is "${job.status}".`
+        );
+      }
+      await models.pluginJob.modifyOne(jobId, { status: newStatus });
+    });
+    ctx.status = status.NO_CONTENT;
   };
 };
 

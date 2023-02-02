@@ -32,8 +32,15 @@ routes:
   - verb: patch
     path: /plugin-jobs/:jobId
     requiredSeriesDomainCheck: true
+    requestSchema:
+      type: object
+      properties:
+        status:
+          enum: ['cancelled', 'invalidated']
+      requied: ['status']
+      additionalProperties: false
     description: >
-      Cancels an existing plug-in job.
+      Cancels or invalidates an existing plug-in job.
   # Search and Fetch Results
   - verb: get
     path: /plugin-jobs

@@ -13,7 +13,11 @@ const duplicateJobExists = async (
   const { pluginId, series } = request;
 
   const filter: any = {
-    $and: [{ status: { $ne: 'invalidated' } }, { status: { $ne: 'failed' } }],
+    $and: [
+      { status: { $ne: 'invalidated' } },
+      { status: { $ne: 'failed' } },
+      { status: { $ne: 'cancelled' } }
+    ],
     pluginId: pluginId,
     series: { $size: series.length }
   };

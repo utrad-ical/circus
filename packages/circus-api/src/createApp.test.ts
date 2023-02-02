@@ -28,6 +28,7 @@ beforeAll(async () => {
       apiLogger,
       dicomFileRepository: null as any, // dummy
       dicomTagReader: null as any, // dummy
+      seriesOrientationResolver: null as any, // dummy
       blobStorage: null as any, // dummy
       dicomImporter: null as any,
       rsSeriesRoutes: async () => {},

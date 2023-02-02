@@ -70,7 +70,7 @@ export const handlePost: RouteMiddleware = ({
 /**
  * Cancels or invalidates a job.
  */
-export const handlePatch: RouteMiddleware = ({ transactionManager }) => {
+export const handlePatch: RouteMiddleware = ({ transactionManager, cs }) => {
   return async (ctx, next) => {
     const jobId = ctx.params.jobId;
     const newStatus = ctx.request.body.status as 'cancelled' | 'invalidated';
@@ -85,6 +85,15 @@ export const handlePatch: RouteMiddleware = ({ transactionManager }) => {
           status.UNPROCESSABLE_ENTITY,
           `You cannot ${verb} this job because its status is "${job.status}".`
         );
+      }
+      if (newStatus === 'cancelled') {
+        const deleted = await cs.job.removeFromQueue(jobId);
+        if (!deleted) {
+          ctx.throw(
+            status.UNPROCESSABLE_ENTITY,
+            'You cannot cancel this job because it is already being processed.'
+          );
+        }
       }
       await models.pluginJob.modifyOne(jobId, { status: newStatus });
     });

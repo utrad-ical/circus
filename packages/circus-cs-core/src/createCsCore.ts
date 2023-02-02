@@ -25,7 +25,8 @@ const createCsCore: FunctionService<
     plugin: pluginDefinitionAccessor,
     job: {
       list: queue.list,
-      register: pluginJobRegisterer.register
+      register: pluginJobRegisterer.register,
+      removeFromQueue: queue.removeFromQueue
     }
   };
 };

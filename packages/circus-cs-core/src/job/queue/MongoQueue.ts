@@ -55,7 +55,15 @@ const createMongoQueue: FunctionService<
       throw new Error('Tried to mark a job as done before it gets started.');
   };
 
-  return { list, enqueue, dequeue, settle };
+  const removeFromQueue = async (jobId: string) => {
+    const result = await collection.findOneAndDelete({
+      jobId,
+      state: 'in_queue'
+    });
+    return !!result.value;
+  };
+
+  return { list, enqueue, dequeue, settle, removeFromQueue };
 };
 
 createMongoQueue.dependencies = ['mongoClientPool'];

@@ -32,9 +32,14 @@ export interface Queue<T> {
   dequeue: () => Promise<QueueItem<T> | null>;
 
   /**
-   * Removes the job from queue.
+   * Removes a processing job from queue (either successfully or not).
    */
   settle: (jobId: string) => Promise<void>;
+
+  /**
+   * Removes a job from queue only when it is not processing.
+   */
+  removeFromQueue: (jobId: string) => Promise<boolean>;
 }
 
 export interface QueueItem<T> {
@@ -175,6 +180,7 @@ export interface CsCore {
       payload: PluginJobRequest,
       priority?: number
     ) => Promise<void>;
+    removeFromQueue: (jobId: string) => Promise<boolean>;
   };
 }
 

@@ -281,7 +281,8 @@ const createMockCsCore = () => {
           : queue.filter(job => job.state === state)
         ).map(item => Object.assign({}, item)),
       register: async (jobId: string, payload: any, priority = 0) =>
-        Promise.resolve()
+        Promise.resolve(),
+      removeFromQueue: async (jobId: string) => true
     }
   } as cscore.CsCore;
 

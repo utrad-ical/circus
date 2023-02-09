@@ -93,10 +93,11 @@ describe('plugin-job search', () => {
 });
 
 describe('search by mylist', () => {
-  beforeEach(async () => {
-    await setUpMongoFixture(apiTest.database.db, ['users']);
+  afterEach(async () => {
+    await setUpMongoFixture(apiTest.database.db, ['users', 'groups']);
   });
   const myListId = '01ezahm939cbyfk73g3jhw1d0b';
+
   test('search succeeds', async () => {
     const res = await dave.get(`api/plugin-jobs/list/${myListId}`);
     expect(res.status).toBe(200);
@@ -282,7 +283,6 @@ describe('job cancellation', () => {
       url: 'api/plugin-jobs/01gr80z2v58f9jytq60snybgfa',
       data: { status: 'cancelled' }
     });
-    console.log(res.data);
     expect(res.status).toBe(status.NO_CONTENT);
   });
 
@@ -303,7 +303,6 @@ describe('job invalidation', () => {
       url: 'api/plugin-jobs/01f5dt3qn9877g072t9y7h7pjp',
       data: { status: 'invalidated' }
     });
-    console.log(res.data);
     expect(res.status).toBe(status.NO_CONTENT);
   });
 
@@ -326,23 +325,64 @@ test('should return a finished plug-in job', async () => {
   expect(res.data.status).toBe('finished');
 });
 
-describe('feedback', () => {
+describe('register feedback', () => {
   test('should register a new feedback entry', async () => {
     const res = await dave.request({
-      url: 'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/feedback/personal',
+      url: 'api/plugin-jobs/01dxgwvhwhyjt8hd4srsf9z4te/feedback/personal',
       method: 'post',
       data: { data: { lesionCandidates: [] }, actionLog: [] }
     });
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(status.OK);
   });
 
   test('should return a list of feedback entries', async () => {
     const res = await dave.request({
-      url: 'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/feedback',
+      url: 'api/plugin-jobs/01dxgwvhwhyjt8hd4srsf9z4te/feedback',
       method: 'get'
     });
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(status.OK);
     expect(res.data).toHaveLength(1);
+  });
+});
+
+describe('delete feedback', () => {
+  const jobId = '01dxgwv3k0medrvhdag4mpw9wa';
+
+  const getCount = async () => {
+    const res = await alice.get(`api/plugin-jobs/${jobId}/feedback`);
+    return res.data.length;
+  };
+
+  beforeEach(async () => {
+    await setUpMongoFixture(apiTest.database.db, ['users', 'pluginJobs']);
+  });
+
+  test('delete one feedback', async () => {
+    const res = await alice.delete(
+      `api/plugin-jobs/${jobId}/feedback/01grtppnyxbdherkv2krd2n72a`
+    );
+    expect(res.status).toBe(status.NO_CONTENT);
+    expect(await getCount()).toBe(2);
+  });
+
+  test('return 404 for non-existing feedback', async () => {
+    const res = await alice.delete(
+      `api/plugin-jobs/${jobId}/feedback/thisfeedbackdoesnotexist`
+    );
+    expect(res.status).toBe(status.NOT_FOUND);
+  });
+
+  test('delete all feedback', async () => {
+    const res = await alice.delete(`api/plugin-jobs/${jobId}/feedback/all`);
+    expect(res.status).toBe(status.NO_CONTENT);
+    expect(await getCount()).toBe(0);
+  });
+
+  test('refuse to delete personal feedback when consensual feedback exists', async () => {
+    const res = await alice.delete(
+      `api/plugin-jobs/${jobId}/feedback/01grtppgk4kvgx8q5htj5530rp`
+    );
+    expect(res.status).toBe(status.BAD_REQUEST);
   });
 });
 

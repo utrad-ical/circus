@@ -33,6 +33,7 @@ import loadDisplay from './loadDisplay';
 import InvestigateJobModal from './InvestigateJobModal';
 import { useVolumeLoaders } from 'utils/useVolumeLoader';
 import useQuery from 'utils/useQuery';
+import DeleteFeedbackModal from './DeleteFeedbackModal';
 
 const StyledDiv = styled.div`
   display: flex;
@@ -82,9 +83,9 @@ const Menu: React.FC<{
       pullRight
       noCaret
     >
-      <MenuItem eventKey="deleteAllFeedback">
+      <MenuItem eventKey="deleteFeedback">
         <Icon icon="remove" />
-        &ensp;Delete all feedback
+        &ensp;Delete feedback
       </MenuItem>
       <MenuItem eventKey="investigate">
         <Icon icon="search" />
@@ -104,6 +105,7 @@ const PluginJobDetail: React.FC<{}> = props => {
   const [feedbackState, dispatch] = useFeedback();
 
   const [showInvestigateModal, setShowInvestigateModal] = useState(false);
+  const [showDeleteFeedbackModal, setShowDeleteFeedbackModal] = useState(false);
 
   const loadJob = useCallback(async () => {
     setBusy(true);
@@ -133,36 +135,18 @@ const PluginJobDetail: React.FC<{}> = props => {
 
   const [jobData, , reloadJob] = useLoadData(loadJob);
 
-  const handleMenuSelect = useCallback(
-    async selected => {
-      switch (selected) {
-        case 'deleteAllFeedback': {
-          const confirm = await modal.confirm(
-            <span>
-              Do you want to remove <b>all</b> feedback data?
-            </span>
-          );
-          if (!confirm) return;
-          try {
-            setBusy(true);
-            await api(`plugin-jobs/${jobId}/feedback/all`, {
-              method: 'delete'
-            });
-            await modal.alert('All feedback data were deleted.');
-            reloadJob();
-          } finally {
-            setBusy(false);
-          }
-          break;
-        }
-        case 'investigate': {
-          setShowInvestigateModal(true);
-          break;
-        }
+  const handleMenuSelect = useCallback(async selected => {
+    switch (selected) {
+      case 'deleteFeedback': {
+        setShowDeleteFeedbackModal(true);
+        break;
       }
-    },
-    [api, jobId, reloadJob]
-  );
+      case 'investigate': {
+        setShowInvestigateModal(true);
+        break;
+      }
+    }
+  }, []);
 
   const insertLog = useCallback(
     (action: string, data?: any) => {
@@ -325,6 +309,13 @@ const PluginJobDetail: React.FC<{}> = props => {
             onHide={() => setShowInvestigateModal(false)}
           >
             <InvestigateJobModal />
+          </Modal>
+          <Modal
+            bsSize="lg"
+            show={showDeleteFeedbackModal}
+            onHide={() => setShowDeleteFeedbackModal(false)}
+          >
+            <DeleteFeedbackModal />
           </Modal>
         </CsResultsContext.Provider>
       </StyledDiv>

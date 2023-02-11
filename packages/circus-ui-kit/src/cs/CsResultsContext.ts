@@ -7,6 +7,7 @@ import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import { Display } from './Display';
 
 export interface FeedbackEntry<T> {
+  feedbackId: string;
   userEmail: string;
   createdAt: string; // ISO date string
   isConsensual: boolean;

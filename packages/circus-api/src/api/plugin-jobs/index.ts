@@ -349,6 +349,28 @@ export const handleDeleteFeedback: RouteMiddleware = ({
     await transactionManager.withTransaction(async models => {
       const { jobId, feedbackId } = ctx.params;
       const job = await models.pluginJob.findByIdOrFail(jobId);
+
+      // Throw 404 if feedbackId is not found
+      if (
+        feedbackId !== 'all' &&
+        !job.feedbacks.find((f: any) => f.feedbackId === feedbackId)
+      ) {
+        ctx.throw(status.NOT_FOUND, 'Feedback not found.');
+      }
+
+      // Throw 400 if deleting personal feedback when consensual feedback exists
+      if (
+        feedbackId !== 'all' &&
+        job.feedbacks.find((f: any) => f.isConsensual) &&
+        job.feedbacks.find((f: any) => f.feedbackId === feedbackId)
+          ?.isConsensual === false
+      ) {
+        ctx.throw(
+          status.BAD_REQUEST,
+          'Cannot delete personal feedback when consensual feedback exists.'
+        );
+      }
+
       const newList =
         feedbackId === 'all'
           ? []

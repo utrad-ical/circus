@@ -17,7 +17,25 @@
   errorMessage: null
   startedAt: { $date: '2018-01-01T12:00:00Z' }
   finishedAt: { $date: '2018-01-01T12:01:00Z' }
-  feedbacks: []
+  feedbacks:
+    - feedbackId: 01grtpb4zhxmdcwcjpk4519nj3
+      userEmail: alice@example.com
+      isConsensual: false
+      data: { lesionCandidates: [] }
+      actionLog: []
+      createdAt: { $date: '2018-01-05T15:00:00Z' }
+    - feedbackId: 01grtppgk4kvgx8q5htj5530rp
+      userEmail: bob@example.com
+      isConsensual: false
+      data: { lesionCandidates: [] }
+      actionLog: []
+      createdAt: { $date: '2018-01-05T15:05:00Z' }
+    - feedbackId: 01grtppnyxbdherkv2krd2n72a
+      userEmail: bob@example.com
+      isConsensual: true
+      data: { lesionCandidates: [] }
+      actionLog: []
+      createdAt: { $date: '2018-01-05T15:10:00Z' }
   results: {}
 
 - jobId: 01dxgwvcw65d9av37p2bsy57vb

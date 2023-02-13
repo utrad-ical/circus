@@ -177,6 +177,11 @@ export default class WebGlRawVolumeMprImageSource
     const priority = this.metadata!.voxelCount[2] / images.length();
     this.setPriority(images, priority);
 
+    const margin = 1
+    const adjacentImages = new MultiRange([[min-margin, max+margin]]).subtract(images);
+    const adjacentpriority = priority-1 <= 0 ? priority : priority-1
+    this.setPriority(adjacentImages, adjacentpriority);
+
     const drawResult = this.createDrawResult(viewer, viewState, abortSignal);
 
     // If we use Promise.resolve directly, the then-calleback is called

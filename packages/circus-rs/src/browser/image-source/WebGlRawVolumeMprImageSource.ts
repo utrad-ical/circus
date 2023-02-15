@@ -34,8 +34,7 @@ type CaptureCanvasCallback = (canvas: HTMLCanvasElement) => void;
 
 export default class WebGlRawVolumeMprImageSource
   extends MprImageSource
-  implements MprImageSourceWithDicomVolume
-{
+  implements MprImageSourceWithDicomVolume {
   private volume: DicomVolume | undefined;
   private fullyLoaded: boolean = false;
   private draftInterval: number = 0;
@@ -177,10 +176,10 @@ export default class WebGlRawVolumeMprImageSource
     const priority = this.metadata!.voxelCount[2] / images.length();
     this.setPriority(images, priority);
 
-    const margin = 1
-    const adjacentImages = new MultiRange([[min-margin, max+margin]]).subtract(images);
-    const adjacentpriority = priority-1 <= 0 ? priority : priority-1
-    this.setPriority(adjacentImages, adjacentpriority);
+    const margin = 5
+    const adjacentImages = new MultiRange([[min - margin, max + margin]]).subtract(images);
+    const adjacentPriority = Math.max(0, priority - 1)
+    this.setPriority(adjacentImages, adjacentPriority);
 
     const drawResult = this.createDrawResult(viewer, viewState, abortSignal);
 
@@ -207,14 +206,14 @@ export default class WebGlRawVolumeMprImageSource
     return this.fullyLoaded
       ? imageData
       : {
-          draft: imageData,
-          next: async () => {
-            await new Promise<void>(resolve =>
-              setTimeout(() => resolve(), this.draftInterval)
-            );
-            return await this.createDrawResult(viewer, viewState, abortSignal);
-          }
-        };
+        draft: imageData,
+        next: async () => {
+          await new Promise<void>(resolve =>
+            setTimeout(() => resolve(), this.draftInterval)
+          );
+          return await this.createDrawResult(viewer, viewState, abortSignal);
+        }
+      };
   }
 
   private async createImageData(

@@ -24,7 +24,7 @@ export const options = () => {
 export const help = () => {
   return (
     'Create a new clinical case to DB.\n' +
-    'Usage: node circus register-case ProjectIdOrName --user=UesrNameOrEmail {--tags=tag1,tag2} SeriesUid1 [SeriesUid2 ...]'
+    'Usage: node circus register-case ProjectIdOrName --user=UserNameOrEmail {--tags=tag1,tag2} SeriesUid1 [SeriesUid2 ...]'
   );
 };
 

@@ -103,6 +103,7 @@ ENV PATH=/circus:$PATH \
     PM2_HOME=/circus/.pm2 \
     MY_CONTAINER_ID=12345678 \
     DOOD_HOST_WORKING_PATH=/var/circus/data \
-    AUTO_BOOT_JOB_MANAGER=0
+    AUTO_BOOT_JOB_MANAGER=0 \
+    PLUGIN_AUTO_EXEC_TOKEN=12345678
 
 CMD ["/circus/startup.sh"]

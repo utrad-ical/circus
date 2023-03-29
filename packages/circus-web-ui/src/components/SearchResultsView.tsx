@@ -179,7 +179,7 @@ const SearchResultsView: React.FC<{
       <div className="search-results-header">
         <div>{children}</div>
         <div>
-          {totalItems + ' Result' + (totalItems > 1 ? 's' : '')}
+          {totalItems + ' Result' + (totalItems !== 1 ? 's' : '')}
           &emsp;
           <ShrinkSelect
             bsSize="sm"

@@ -20,7 +20,7 @@ const CsVolumeDoanloadOptionsEditor: Editor<CsVolumeDownloadOptions> = props => 
   return (
     <div>
       Exporting{' '}
-      {value.series.length > 1
+      {value.series.length !== 1
         ? `${value.series.length} volumes`
         : `one volume`}
       <div className="row">

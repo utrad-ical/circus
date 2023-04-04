@@ -188,11 +188,9 @@ const SeriesSelector: React.FC<{
       (props: any) => (
         <PartialVolumeDescriptorEditor
           initialValue={
-            value[index].partialVolumeDescriptor ?? {
-              start: mr.min(),
-              end: mr.max(),
-              delta: 1
-            }
+            typeof value[index].partialVolumeDescriptor === 'object'
+              ? value[index].partialVolumeDescriptor
+              : { start: mr.min(), end: mr.max(), delta: 1 }
           }
           images={mr}
           {...props}

@@ -81,10 +81,12 @@ const conditionToFilter = (condition: any) => {
     case 'basic':
       return basicConditionToMongoQuery(condition.basic);
     case 'advanced':
-      return conditionToMongoQuery(condition.advanced, [
-        'createdAt',
-        'finishedAt'
-      ]);
+      return conditionToMongoQuery(
+        condition.advanced,
+        ['createdAt', 'finishedAt'],
+        true,
+        false
+      );
   }
   throw new Error('Unkonwn condition type');
 };

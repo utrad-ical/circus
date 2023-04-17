@@ -96,7 +96,9 @@ const conditionToFilter = (condition: Condition) => {
         condition.advanced,
         Object.keys(advancedConditionKeys).filter(
           k => advancedConditionKeys[k].type === 'date'
-        )
+        ),
+        true,
+        false
       );
   }
   throw new Error('Unkonwn condition type');

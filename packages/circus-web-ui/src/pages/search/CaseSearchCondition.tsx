@@ -57,10 +57,12 @@ const conditionToFilter = (condition: Condition) => {
       tabFilter = basicConditionToMongoQuery(condition.basic);
       break;
     case 'advanced':
-      tabFilter = conditionToMongoQuery(condition.advanced, [
-        'createdAt',
-        'updatedAt'
-      ]);
+      tabFilter = conditionToMongoQuery(
+        condition.advanced,
+        ['createdAt', 'updatedAt'],
+        true,
+        false
+      );
       break;
     default:
       throw new Error('Unknown conditoin type.');
@@ -141,10 +143,10 @@ const ConditionEditor: React.FC<{
     [accessibleProjects]
   );
 
-  useEffect(() => updateTagList(value.projects), [
-    value.projects,
-    updateTagList
-  ]);
+  useEffect(
+    () => updateTagList(value.projects),
+    [value.projects, updateTagList]
+  );
 
   const handleSelectedProjectsChange = (projectIds: string[]) => {
     updateTagList(projectIds);

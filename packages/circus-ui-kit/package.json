@@ -22,7 +22,7 @@
     "styled-components": "^5.1.0"
   },
   "dependencies": {
-    "@smikitky/rb-components": "^6.1.0",
+    "@smikitky/rb-components": "^7.0.0",
     "@utrad-ical/circus-icons": "^0.2.0",
     "@utrad-ical/circus-lib": "^0.17.0",
     "@utrad-ical/circus-rs": "^0.27.0",

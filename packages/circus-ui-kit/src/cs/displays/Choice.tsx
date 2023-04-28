@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { useCsResults } from '../CsResultsContext';
 import { Display } from '../Display';
 import { Button } from '../../ui/Button';
+import Tooltip from '../../ui/Tooltip';
 
 interface Choice {
   value: number | string;
@@ -49,24 +50,27 @@ export const Choice: Display<ChoiceOptions, string | number> = props => {
     [consensual]
   );
 
-  const personalCounts = useMemo(() => {
-    const counts = new Map<string | number, number>();
-    if (!consensual) return counts;
+  const personalVoteDetails = useMemo(() => {
+    const voteDetails = new Map<string | number, string[]>();
+    if (!consensual) return voteDetails;
     personalOpinions.forEach(p => {
       const pdef = personalButtons
         .map(normalizeChoiceOption)
         .find(def => p.data == def.value) as PersonalChoice;
       const fb = pdef?.consensualMapsTo ?? p.data;
-      return counts.set(fb, (counts.get(fb) ?? 0) + 1);
+      const updatedCounts = voteDetails.get(fb) ?? [];
+      updatedCounts.push(p.userEmail.split('@')[0]);
+      return voteDetails.set(fb, updatedCounts);
     });
-    return counts;
+    return voteDetails;
   }, [personalOpinions]);
 
   const [selected, setSelected] = useState<string | number | undefined>(() => {
     if (!consensual || (consensual && !editable)) return initialFeedbackValue;
 
     // If all personal feedbacks agree, preselect it
-    if (personalCounts.size === 1) return Array.from(personalCounts.keys())[0];
+    if (personalVoteDetails.size === 1)
+      return Array.from(personalVoteDetails.keys())[0];
     return undefined;
   });
 
@@ -95,7 +99,7 @@ export const Choice: Display<ChoiceOptions, string | number> = props => {
       <UI
         choices={buttons}
         onSelect={handleSelect}
-        opinions={personalCounts}
+        opinions={personalVoteDetails}
         selected={selected}
         disabled={!editable}
       />
@@ -106,7 +110,7 @@ export const Choice: Display<ChoiceOptions, string | number> = props => {
 type ChoiceUI = React.FC<{
   choices: Choice[];
   onSelect: (value: string | number) => void;
-  opinions?: Map<string | number, number>;
+  opinions?: Map<string | number, string[]>;
   selected: string | number | undefined;
   disabled: boolean;
 }>;
@@ -115,20 +119,38 @@ const ToggleButtons: ChoiceUI = props => {
   const { choices, onSelect, opinions, selected, disabled } = props;
   return (
     <ToggleButtonsContainer>
-      {choices.map(choice => (
-        <Button
-          key={choice.value}
-          onClick={() => onSelect(choice.value)}
-          disabled={disabled}
-          color={choice.color}
-          selected={choice.value === selected}
-        >
-          {(opinions?.get(choice.value) ?? 0) > 0 && (
-            <span className="opinions">{opinions?.get(choice.value)}</span>
-          )}
-          {choice.caption}
-        </Button>
-      ))}
+      {choices.map(choice =>
+        (opinions?.get(choice.value) ?? []).length > 0 ? (
+          <Tooltip
+            text={opinions?.get(choice.value)?.join(', ') ?? ''}
+            key={choice.value}
+          >
+            <Button
+              onClick={() => onSelect(choice.value)}
+              disabled={disabled}
+              color={choice.color}
+              selected={choice.value === selected}
+              className="button-with-tooltip"
+            >
+              <span className="opinions">
+                {opinions?.get(choice.value)?.length}
+              </span>
+
+              {choice.caption}
+            </Button>
+          </Tooltip>
+        ) : (
+          <Button
+            key={choice.value}
+            onClick={() => onSelect(choice.value)}
+            disabled={disabled}
+            color={choice.color}
+            selected={choice.value === selected}
+          >
+            {choice.caption}
+          </Button>
+        )
+      )}
     </ToggleButtonsContainer>
   );
 };
@@ -146,6 +168,9 @@ const ToggleButtonsContainer = styled.div`
     border-radius: 5px;
     font-size: 80%;
     margin-right: 3px;
+  }
+  .button-with-tooltip {
+    width: 100%;
   }
 `;
 

@@ -98,6 +98,10 @@ export interface CsResultsContextType {
    * Dynamically loads a display.
    */
   loadDisplay: <O extends object, F>(name: string) => Promise<Display<O, F>>;
+  /**
+   * Get user description from email address.
+   */
+  UserDisplay: React.FC<{ userEmail: string }>;
 }
 
 export const CsResultsContext = React.createContext<CsResultsContextType>(

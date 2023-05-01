@@ -39,7 +39,7 @@ export const Choice: Display<ChoiceOptions, string | number> = props => {
       excludeFromActionLog
     }
   } = props;
-  const { consensual, editable, eventLogger } = useCsResults();
+  const { consensual, editable, eventLogger, UserDisplay } = useCsResults();
 
   const buttons = useMemo(
     () =>
@@ -58,9 +58,9 @@ export const Choice: Display<ChoiceOptions, string | number> = props => {
         .map(normalizeChoiceOption)
         .find(def => p.data == def.value) as PersonalChoice;
       const fb = pdef?.consensualMapsTo ?? p.data;
-      const updatedCounts = voteDetails.get(fb) ?? [];
-      updatedCounts.push(p.userEmail.split('@')[0]);
-      return voteDetails.set(fb, updatedCounts);
+      const updatedDetails = voteDetails.get(fb) ?? [];
+      updatedDetails.push(p.userEmail);
+      return voteDetails.set(fb, updatedDetails);
     });
     return voteDetails;
   }, [personalOpinions]);
@@ -102,6 +102,7 @@ export const Choice: Display<ChoiceOptions, string | number> = props => {
         opinions={personalVoteDetails}
         selected={selected}
         disabled={!editable}
+        UserDisplay={UserDisplay}
       />
     </div>
   );
@@ -113,18 +114,30 @@ type ChoiceUI = React.FC<{
   opinions?: Map<string | number, string[]>;
   selected: string | number | undefined;
   disabled: boolean;
+  UserDisplay: React.FC<{ userEmail: string }>;
 }>;
 
 const ToggleButtons: ChoiceUI = props => {
-  const { choices, onSelect, opinions, selected, disabled } = props;
+  const { choices, onSelect, opinions, selected, disabled, UserDisplay } =
+    props;
+
+  const tooltipText = (choice: string | number) => {
+    const emails = opinions?.get(choice);
+    return emails && emails.length > 0
+      ? emails.map((email, index) => (
+          <React.Fragment key={email}>
+            <UserDisplay userEmail={email} />
+            {index < emails.length - 1 && ', '}
+          </React.Fragment>
+        ))
+      : '';
+  };
+
   return (
     <ToggleButtonsContainer>
       {choices.map(choice =>
         (opinions?.get(choice.value) ?? []).length > 0 ? (
-          <Tooltip
-            text={opinions?.get(choice.value)?.join(', ') ?? ''}
-            key={choice.value}
-          >
+          <Tooltip text={tooltipText(choice.value)} key={choice.value}>
             <Button
               onClick={() => onSelect(choice.value)}
               disabled={disabled}

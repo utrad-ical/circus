@@ -4,7 +4,7 @@ import styled from 'styled-components';
 
 interface TooltipProps {
   children: React.ReactNode;
-  text: string;
+  text: React.ReactNode;
   options?: {
     position: 'top' | 'bottom';
     aligned: 'left' | 'center' | 'right';

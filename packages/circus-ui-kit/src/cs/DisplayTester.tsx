@@ -31,7 +31,12 @@ const Tester: React.FC<{
       loadAttachment: mockAttachmentLoader,
       eventLogger: () => {},
       useVolumeLoaders: () => [],
-      loadDisplay: null as any
+      loadDisplay: null as any,
+      UserDisplay: (
+        props: React.PropsWithChildren<{
+          userEmail: string;
+        }>
+      ) => <span title={props.userEmail}></span>
     };
   }, [consensual, editable]);
 

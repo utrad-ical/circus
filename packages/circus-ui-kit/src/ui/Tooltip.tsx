@@ -15,7 +15,10 @@ interface StyledTooltipProps {
   upperLeft: { x: number; y: number };
   options: { position: 'top' | 'bottom'; aligned: 'left' | 'center' | 'right' };
   tooltipSize: { width: number; height: number };
+  childCenter: { x: number; y: number };
 }
+
+const arrowSize = 6;
 
 const StyledTooltip = styled.div<StyledTooltipProps>`
   position: absolute;
@@ -25,19 +28,20 @@ const StyledTooltip = styled.div<StyledTooltipProps>`
   color: white;
   padding: 5px;
   border-radius: 3px;
+  white-space: nowrap;
   &:after {
     content: '';
     position: absolute;
     bottom: ${(props: StyledTooltipProps) =>
-      props.options.position === 'top' ? '-10px' : '100%'};
+      props.options.position === 'top' ? `${-arrowSize * 2 + 1}px` : '100%'};
     left: ${(props: StyledTooltipProps) =>
       props.options.aligned === 'left'
-        ? '7px'
+        ? `${arrowSize + 1}px`
         : props.options.aligned === 'center'
-        ? '50%'
-        : `${props.tooltipSize.width - 7}px`};
-    margin-left: -6px;
-    border-width: 6px;
+        ? `${props.childCenter.x - props.upperLeft.x}px`
+        : `${props.tooltipSize.width - (arrowSize + 1)}px`};
+    margin-left: ${() => `${-arrowSize}px`};
+    border-width: ${() => `${arrowSize}px`};
     border-style: solid;
     border-color: ${(props: StyledTooltipProps) =>
       props.options.position === 'top'
@@ -57,21 +61,32 @@ const Tooltip: React.FC<TooltipProps> = ({
   const childRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [childCenter, setChildCenter] = useState({ x: 0, y: 0 });
   const [tooltipSize, setTooltipSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     if (childRef.current) {
       const rect = childRef.current.getBoundingClientRect();
-      let x = rect.left + rect.width / 2 - tooltipSize.width / 2;
+      setChildCenter({
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2
+      });
+
+      let x = Math.max(rect.left + rect.width / 2 - tooltipSize.width / 2, 0);
+      const { innerWidth: width, innerHeight: height } = window;
+      if (x + tooltipSize.width > width) {
+        x = width - tooltipSize.width;
+      }
+
       if (options.aligned === 'left') {
         x = rect.left;
       } else if (options.aligned === 'right') {
         x = rect.right - tooltipSize.width;
       }
       if (options.position === 'top') {
-        setPosition({ x, y: rect.top - tooltipSize.height - 6 });
+        setPosition({ x, y: rect.top - tooltipSize.height - arrowSize });
       } else {
-        setPosition({ x, y: rect.bottom + 6 });
+        setPosition({ x, y: rect.bottom + arrowSize });
       }
     }
   }, [childRef, tooltipSize]);
@@ -116,6 +131,7 @@ const Tooltip: React.FC<TooltipProps> = ({
             upperLeft={position}
             options={options}
             tooltipSize={tooltipSize}
+            childCenter={childCenter}
           >
             {text}
           </StyledTooltip>,

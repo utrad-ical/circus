@@ -127,7 +127,11 @@ const ToggleButtons: ChoiceUI = props => {
       ? emails.map((email, index) => (
           <React.Fragment key={email}>
             <UserDisplay userEmail={email} />
-            {index < emails.length - 1 && ', '}
+            {index < emails.length - 1 && (
+              <>
+                ,<br />
+              </>
+            )}
           </React.Fragment>
         ))
       : '';

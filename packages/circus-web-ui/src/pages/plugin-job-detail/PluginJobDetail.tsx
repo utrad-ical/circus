@@ -34,6 +34,7 @@ import InvestigateJobModal from './InvestigateJobModal';
 import { useVolumeLoaders } from 'utils/useVolumeLoader';
 import useQuery from 'utils/useQuery';
 import DeleteFeedbackModal from './DeleteFeedbackModal';
+import UserDisplay from 'components/UserDisplay';
 
 const StyledDiv = styled.div`
   display: flex;
@@ -184,7 +185,8 @@ const PluginJobDetail: React.FC<{}> = props => {
       eventLogger: insertLog,
       useVolumeLoaders,
       loadAttachment,
-      loadDisplay: loadDisplay(jobData.pluginData.pluginId)
+      loadDisplay: loadDisplay(jobData.pluginData.pluginId),
+      UserDisplay
     };
   }, [
     jobData,

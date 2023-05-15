@@ -115,8 +115,14 @@ const distance = (x: number[], y: number[], vs: number[]) => {
 export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
   const { options, personalOpinions, initialFeedbackValue, onFeedbackChange } =
     props;
-  const { job, consensual, editable, useVolumeLoaders, eventLogger } =
-    useCsResults();
+  const {
+    job,
+    consensual,
+    editable,
+    useVolumeLoaders,
+    eventLogger,
+    UserDisplay
+  } = useCsResults();
 
   const {
     volumeId = 0,
@@ -257,7 +263,7 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
       Math.round(newPoint.location![2] / voxelSize[2])
     ];
     let snappedLesionCandidate: number | undefined = undefined;
-    if (snapThresholdMm > 0) {
+    if (typeof snapThresholdMm === 'number' && snapThresholdMm > 0) {
       let minDistance = Infinity;
       const candidates = normalizeCandidates(get(results, snapDataPath));
       candidates.forEach(cand => {
@@ -338,7 +344,17 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
                   )}
                   {consensual && editable && (
                     <td>
-                      {item[enteredBy] ? item[enteredBy]!.join(', ') : ''}
+                      {(() => {
+                        const emails = item[enteredBy];
+                        return emails
+                          ? emails.map((email, index) => (
+                              <React.Fragment key={email}>
+                                <UserDisplay userEmail={email} />
+                                {index < emails.length - 1 && ', '}
+                              </React.Fragment>
+                            ))
+                          : '';
+                      })()}
                     </td>
                   )}
                   <td>

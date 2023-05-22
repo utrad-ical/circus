@@ -148,6 +148,7 @@ const ToggleButtons: ChoiceUI = props => {
               color={choice.color}
               selected={choice.value === selected}
               className="button-with-tooltip"
+              style={disabled ? { pointerEvents: 'none' } : {}}
             >
               <span className="opinions">
                 {opinions?.get(choice.value)?.length}

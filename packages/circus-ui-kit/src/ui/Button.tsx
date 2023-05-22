@@ -22,6 +22,7 @@ export const Button: React.FC<{
   className?: string;
   selected?: boolean;
   disabled?: boolean;
+  style?: React.CSSProperties;
   onClick?: React.MouseEventHandler;
 }> = forwardRef((props, ref) => {
   const {
@@ -31,6 +32,7 @@ export const Button: React.FC<{
     className,
     selected,
     disabled,
+    style,
     onClick,
     children
   } = props;
@@ -48,6 +50,7 @@ export const Button: React.FC<{
       size={size}
       onClick={onClick}
       disabled={disabled}
+      style={style}
       className={classNames(className, { selected })}
     >
       {icon && <span className={iconClass} />}

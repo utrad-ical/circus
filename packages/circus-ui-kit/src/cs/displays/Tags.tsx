@@ -144,6 +144,14 @@ export const Tags: Display<TagsOptions, string[]> = props => {
       setWarningMessage('Empty text.');
       return;
     }
+    const re = new RegExp(freeTextPattern);
+    if (!re.test(freeText)) {
+      setWarningMessage(
+        `Invalid text. Free text must match the following pattern: ${freeTextPattern}`
+      );
+      return;
+    }
+
     setTags([...tags, freeText]);
     setFreeText('');
     setWarningMessage(undefined);

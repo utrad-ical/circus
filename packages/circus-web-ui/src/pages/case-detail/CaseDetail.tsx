@@ -493,14 +493,15 @@ const RelevantCases: React.FC<{
           )
         },
         {
-          key: 'createdAt',
-          caption: 'Created At',
-          renderer: ({ value }) => <TimeDisplay value={value.createdAt} />
-        },
-        {
-          key: 'updatedAt',
-          caption: 'Updated At',
-          renderer: ({ value }) => <TimeDisplay value={value.updatedAt} />
+          caption: 'Create/Update',
+          className: 'created-at',
+          renderer: props => (
+            <>
+              <TimeDisplay value={props.value.createdAt} />
+              <br />
+              <TimeDisplay value={props.value.updatedAt} />
+            </>
+          )
         },
         {
           caption: 'Tags',

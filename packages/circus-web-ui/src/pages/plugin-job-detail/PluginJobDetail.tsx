@@ -116,14 +116,15 @@ const RelevantJobs: React.FC<{
           )
         },
         {
-          key: 'registeredAt',
-          caption: 'Registered At',
-          renderer: ({ value }) => <TimeDisplay value={value.createdAt} />
-        },
-        {
-          key: 'finishedAt',
-          caption: 'Finished At',
-          renderer: ({ value }) => <TimeDisplay value={value.finishedAt} />
+          caption: 'Register/Finish',
+          className: 'execution-time',
+          renderer: props => (
+            <>
+              <TimeDisplay value={props.value.createdAt} />
+              <br />
+              <TimeDisplay value={props.value.finishedAt} invalidLabel="-" />
+            </>
+          )
         },
         {
           caption: 'Status',

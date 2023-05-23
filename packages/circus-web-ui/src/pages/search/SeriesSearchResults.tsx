@@ -4,39 +4,25 @@ import DataGrid, {
   DataGridRenderer
 } from 'components/DataGrid';
 import Icon from 'components/Icon';
-import IdDisplay from 'components/IdDisplay';
 import MyListDropdown from 'components/MyListDropdown';
-import PatientInfoBox from 'components/PatientInfoBox';
-import { DropdownButton, MenuItem } from 'components/react-bootstrap';
 import SearchResultsView, {
   makeSortOptions,
   patientInfoSearchOptions
 } from 'components/SearchResultsView';
-import TimeDisplay from 'components/TimeDisplay';
+import { DropdownButton, MenuItem } from 'components/react-bootstrap';
 import { multirange } from 'multi-integer-range';
-import React, { Fragment, useMemo } from 'react';
+import React, { Fragment } from 'react';
 import { useSelector } from 'react-redux';
 import { dispatch } from 'store';
 import { showMessage } from 'store/messages';
-import styled from 'styled-components';
 import { useApi } from 'utils/api';
 import { useLoginManager } from 'utils/loginManager';
-
-const ModalitySpan = styled.span`
-  display: inline-block;
-  min-width: 50px;
-  padding: 0;
-  font-size: 110%;
-  border-radius: 3px;
-  text-align: center;
-  background-color: #777777;
-  color: white;
-`;
-
-const Modality: DataGridRenderer<any> = props => {
-  const series = props.value;
-  return <ModalitySpan>{series.modality}</ModalitySpan>;
-};
+import {
+  Modality,
+  PatientInfo,
+  Times,
+  UidDisplay
+} from './SearchResultRenderer';
 
 const Operation: DataGridRenderer<any> = props => {
   const { value: series } = props;
@@ -129,26 +115,9 @@ const Operation: DataGridRenderer<any> = props => {
   );
 };
 
-export const UidDisplay: React.FC<{
-  value: { seriesUid: string; studyUid: string };
-}> = props => {
-  const { seriesUid, studyUid } = props.value;
-  const ids = useMemo(
-    () => ({ 'Series UID': seriesUid, 'Study UID': studyUid }),
-    [seriesUid, studyUid]
-  );
-  return <IdDisplay value={ids} />;
-};
-
 const columns: DataGridColumnDefinition<any>[] = [
   { caption: '', className: 'modality', renderer: Modality },
-  {
-    caption: 'Patient',
-    className: 'patient',
-    renderer: ({ value: { patientInfo } }) => {
-      return <PatientInfoBox value={patientInfo} />;
-    }
-  },
+  { caption: 'Patient', className: 'patient', renderer: PatientInfo },
   { caption: 'Series Desc', key: 'seriesDescription' },
   { caption: 'UID', key: 'seriesUid', renderer: UidDisplay },
   {
@@ -172,13 +141,7 @@ const columns: DataGridColumnDefinition<any>[] = [
   {
     caption: 'Series/Import date',
     className: 'series-import',
-    renderer: props => (
-      <>
-        <TimeDisplay value={props.value.seriesDate} />
-        <br />
-        <TimeDisplay value={props.value.createdAt} />
-      </>
-    )
+    renderer: Times('seriesDate', 'createdAt')
   },
   { caption: '', className: 'operation', renderer: Operation }
 ];

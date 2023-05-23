@@ -9,7 +9,7 @@ import IconButton from 'components/IconButton';
 import PatientInfoBox from 'components/PatientInfoBox';
 import ProjectDisplay from 'components/ProjectDisplay';
 import SearchResultsView from 'components/SearchResultsView';
-import Tag, { TagList } from 'components/Tag';
+import Tag from 'components/Tag';
 import TimeDisplay from 'components/TimeDisplay';
 import {
   Button,
@@ -36,6 +36,7 @@ import Series from 'types/Series';
 import { useApi } from 'utils/api';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
 import useLoginUser from 'utils/useLoginUser';
+import { Project, Tags, Times } from '../search/SearchResultRenderer';
 import RevisionEditor from './RevisionEditor';
 import RevisionSelector from './RevisionSelector';
 import SaveModal from './SaveModal';
@@ -485,31 +486,13 @@ const RelevantCases: React.FC<{
     () => props => {
       const { value } = props;
       const columns: DataGridColumnDefinition<any>[] = [
-        {
-          caption: 'Project',
-          className: 'project',
-          renderer: ({ value }) => (
-            <ProjectDisplay projectId={value.projectId} size="xs" withName />
-          )
-        },
+        { caption: 'Project', className: 'project', renderer: Project('xs') },
         {
           caption: 'Create/Update',
           className: 'created-at',
-          renderer: props => (
-            <>
-              <TimeDisplay value={props.value.createdAt} />
-              <br />
-              <TimeDisplay value={props.value.updatedAt} />
-            </>
-          )
+          renderer: Times()
         },
-        {
-          caption: 'Tags',
-          className: 'tags',
-          renderer: ({ value: item }) => {
-            return <TagList tags={item.tags} projectId={item.projectId} />;
-          }
-        },
+        { caption: 'Tags', className: 'tags', renderer: Tags },
         {
           key: 'action',
           caption: '',

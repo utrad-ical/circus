@@ -16,7 +16,7 @@ import { newSearch } from 'store/searches';
 import styled from 'styled-components';
 import Series from 'types/Series';
 import { useApi } from 'utils/api';
-import { UidDisplay } from '../pages/search/SeriesSearchResults';
+import { UidDisplay } from '../pages/search/SearchResultRenderer';
 import PartialVolumeDescriptorEditor from './PartialVolumeDescriptorEditor';
 import TimeDisplay from './TimeDisplay';
 

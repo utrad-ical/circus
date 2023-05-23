@@ -5,29 +5,29 @@ import DataGrid, {
   DataGridRenderer
 } from 'components/DataGrid';
 import IconButton from 'components/IconButton';
-import IdDisplay from 'components/IdDisplay';
 import MyListDropdown from 'components/MyListDropdown';
-import PatientInfoBox from 'components/PatientInfoBox';
-import PluginDisplay from 'components/PluginDisplay';
-import {
-  DropdownButton,
-  MenuItem,
-  ProgressBar
-} from 'components/react-bootstrap';
 import SearchResultsView, {
   makeSortOptions,
   patientInfoSearchOptions
 } from 'components/SearchResultsView';
-import TimeDisplay from 'components/TimeDisplay';
-import UserDisplay from 'components/UserDisplay';
-import React, { Fragment, useMemo } from 'react';
+import { DropdownButton, MenuItem } from 'components/react-bootstrap';
+import React, { Fragment } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import * as searches from 'store/searches';
 import styled from 'styled-components';
 import { useApi } from 'utils/api';
-import browserHistory from '../../browserHistory';
 import useShowMessage from 'utils/useShowMessage';
+import browserHistory from '../../browserHistory';
+import {
+  Executer,
+  FeedbackRenderer,
+  JobId,
+  PatientInfo,
+  PluginRenderer,
+  Status,
+  Times
+} from './SearchResultRenderer';
 
 const Operation: DataGridRenderer<any> = props => {
   const { value: job } = props;
@@ -91,103 +91,18 @@ const Operation: DataGridRenderer<any> = props => {
   );
 };
 
-const PluginRenderer: DataGridRenderer<any> = props => {
-  const {
-    value: { pluginId }
-  } = props;
-  return <PluginDisplay size="lg" pluginId={pluginId} />;
-};
-
-const JobId: React.FC<{
-  value: any;
-}> = props => {
-  const { jobId } = props.value;
-  const ids = useMemo(() => ({ 'Job ID': jobId }), [jobId]);
-  return <IdDisplay value={ids} />;
-};
-
-const StatusRenderer: DataGridRenderer<any> = props => {
-  const {
-    value: { status }
-  } = props;
-  if (status === 'processing') {
-    return <ProgressBar active bsStyle="info" now={100} label="processing" />;
-  }
-  const className = { in_queue: 'text-info', finished: 'text-success' }[
-    status as 'in_queue' | 'finished'
-  ];
-  return <span className={className || 'text-danger'}>{status}</span>;
-};
-
-const FeedbackRenderer: DataGridRenderer<any> = props => {
-  const {
-    value: { feedbacks = [] }
-  } = props;
-  const personals = feedbacks.filter((f: any) => !f.isConsensual).length;
-  const consensual = feedbacks.filter((f: any) => f.isConsensual).length;
-  const title = `${personals} personal feedback ${
-    personals === 1 ? 'entry' : 'entries'
-  }`;
-  return (
-    <span title={title}>
-      {personals > 0 && (
-        <span>
-          <Icon icon="user" />
-          {personals > 0 && personals}
-        </span>
-      )}
-      {consensual > 0 && <Icon icon="tower" />}
-      {!personals && !consensual && <span className="feedback-none">none</span>}
-    </span>
-  );
-};
-
 const columns: DataGridColumnDefinition<any>[] = [
-  {
-    caption: 'Plugin',
-    className: 'plugin',
-    renderer: PluginRenderer
-  },
-  {
-    caption: 'Patient',
-    className: 'patient',
-    renderer: ({ value: { patientInfo } }) => {
-      return <PatientInfoBox value={patientInfo} />;
-    }
-  },
-  {
-    caption: 'Job ID',
-    className: 'job-id',
-    renderer: JobId
-  },
-  {
-    caption: 'Executed by',
-    className: 'executed-by',
-    renderer: ({ value: { userEmail } }) => {
-      return <UserDisplay userEmail={userEmail} />;
-    }
-  },
+  { caption: 'Plugin', className: 'plugin', renderer: PluginRenderer() },
+  { caption: 'Patient', className: 'patient', renderer: PatientInfo },
+  { caption: 'Job ID', className: 'job-id', renderer: JobId },
+  { caption: 'Executed by', className: 'executed-by', renderer: Executer },
   {
     caption: 'Register/Finish',
     className: 'execution-time',
-    renderer: props => (
-      <Fragment>
-        <TimeDisplay value={props.value.createdAt} />
-        <br />
-        <TimeDisplay value={props.value.finishedAt} invalidLabel="-" />
-      </Fragment>
-    )
+    renderer: Times('createdAt', 'finishedAt')
   },
-  {
-    caption: 'Status',
-    className: 'status',
-    renderer: StatusRenderer
-  },
-  {
-    caption: 'FB',
-    className: 'feedback',
-    renderer: FeedbackRenderer
-  },
+  { caption: 'Status', className: 'status', renderer: Status },
+  { caption: 'FB', className: 'feedback', renderer: FeedbackRenderer },
   { caption: '', className: 'operation', renderer: Operation }
 ];
 

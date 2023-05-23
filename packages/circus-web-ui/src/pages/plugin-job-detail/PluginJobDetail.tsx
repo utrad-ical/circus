@@ -14,14 +14,8 @@ import PatientInfoBox from 'components/PatientInfoBox';
 import PieProgress from 'components/PieProgress';
 import PluginDisplay from 'components/PluginDisplay';
 import SearchResultsView from 'components/SearchResultsView';
-import TimeDisplay from 'components/TimeDisplay';
 import UserDisplay from 'components/UserDisplay';
-import {
-  DropdownButton,
-  MenuItem,
-  Modal,
-  ProgressBar
-} from 'components/react-bootstrap';
+import { DropdownButton, MenuItem, Modal } from 'components/react-bootstrap';
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
@@ -32,6 +26,12 @@ import useLoadData from 'utils/useLoadData';
 import useLoginUser from 'utils/useLoginUser';
 import useQuery from 'utils/useQuery';
 import { useVolumeLoaders } from 'utils/useVolumeLoader';
+import {
+  FeedbackRenderer,
+  PluginRenderer,
+  Status,
+  Times
+} from '../search/SearchResultRenderer';
 import DeleteFeedbackModal from './DeleteFeedbackModal';
 import InvestigateJobModal from './InvestigateJobModal';
 import MainDisplay from './MainDisplay';
@@ -111,71 +111,15 @@ const RelevantJobs: React.FC<{
         {
           caption: 'Plugin',
           className: 'plugin',
-          renderer: ({ value: { pluginId } }) => (
-            <PluginDisplay size="xs" pluginId={pluginId} />
-          )
+          renderer: PluginRenderer('xs')
         },
         {
           caption: 'Register/Finish',
           className: 'execution-time',
-          renderer: props => (
-            <>
-              <TimeDisplay value={props.value.createdAt} />
-              <br />
-              <TimeDisplay value={props.value.finishedAt} invalidLabel="-" />
-            </>
-          )
+          renderer: Times('createdAt', 'finishedAt')
         },
-        {
-          caption: 'Status',
-          className: 'status',
-          renderer: ({ value: { status } }) => {
-            if (status === 'processing') {
-              return (
-                <ProgressBar
-                  active
-                  bsStyle="info"
-                  now={100}
-                  label="processing"
-                />
-              );
-            }
-            const className = {
-              in_queue: 'text-info',
-              finished: 'text-success'
-            }[status as 'in_queue' | 'finished'];
-            return <span className={className || 'text-danger'}>{status}</span>;
-          }
-        },
-        {
-          caption: 'FB',
-          className: 'feedback',
-          renderer: ({ value: { feedbacks = [] } }) => {
-            const personals = feedbacks.filter(
-              (f: any) => !f.isConsensual
-            ).length;
-            const consensual = feedbacks.filter(
-              (f: any) => f.isConsensual
-            ).length;
-            const title = `${personals} personal feedback ${
-              personals === 1 ? 'entry' : 'entries'
-            }`;
-            return (
-              <span title={title}>
-                {personals > 0 && (
-                  <span>
-                    <Icon icon="user" />
-                    {personals > 0 && personals}
-                  </span>
-                )}
-                {consensual > 0 && <Icon icon="tower" />}
-                {!personals && !consensual && (
-                  <span className="feedback-none">none</span>
-                )}
-              </span>
-            );
-          }
-        },
+        { caption: 'Status', className: 'status', renderer: Status },
+        { caption: 'FB', className: 'feedback', renderer: FeedbackRenderer },
         {
           key: 'action',
           caption: '',

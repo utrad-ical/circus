@@ -22,6 +22,7 @@ interface TagsOptions {
   minItems?: number;
   maxItems?: number;
   initialValue?: string[];
+  freeTextLabel?: string;
 }
 
 const isArrayOfStrings = (arr: unknown): arr is string[] => {
@@ -73,7 +74,8 @@ export const Tags: Display<TagsOptions, string[]> = props => {
     freeTextPattern = '.*',
     minItems = 0,
     maxItems = 10,
-    initialValue = []
+    initialValue = [],
+    freeTextLabel = undefined
   } = options ?? {};
   const { consensual, editable, UserDisplay } = useCsResults();
 
@@ -225,88 +227,98 @@ export const Tags: Display<TagsOptions, string[]> = props => {
   return (
     <StyledFormGroup validationState={invalidMessage ? 'error' : undefined}>
       {label && <ControlLabel>{label}</ControlLabel>}
-      <div className="array">
-        {tags.map((tag, index) =>
-          (personalVoteDetails?.get(tag) ?? []).length > 0 ? (
-            <Tooltip text={tooltipText(tag)} key={tag}>
+      <div className="tags">
+        <div className="array">
+          {tags.map((tag, index) =>
+            (personalVoteDetails?.get(tag) ?? []).length > 0 ? (
+              <Tooltip text={tooltipText(tag)} key={tag}>
+                <div key={index} className="array-item">
+                  <div>{tag}</div>
+                  {editable ? (
+                    <a onClick={() => handleTagRemove(index)}>&times;</a>
+                  ) : index !== tags.length - 1 ? (
+                    <div className="separator">,</div>
+                  ) : null}
+                </div>
+              </Tooltip>
+            ) : (
               <div key={index} className="array-item">
-                <FormControl type="text" value={tag} readOnly />
-                <button
-                  type="button"
-                  className="btn btn-danger"
-                  onClick={() => handleTagRemove(index)}
-                  disabled={!editable}
-                >
-                  &times;
-                </button>
+                <div>{tag}</div>
+                {editable ? (
+                  <a onClick={() => handleTagRemove(index)}>&times;</a>
+                ) : index !== tags.length - 1 ? (
+                  <div className="separator">,</div>
+                ) : null}
               </div>
-            </Tooltip>
-          ) : (
-            <div key={index} className="array-item">
-              <FormControl type="text" value={tag} readOnly />
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={() => handleTagRemove(index)}
-                disabled={!editable}
-              >
-                &times;
-              </button>
-            </div>
-          )
-        )}
-      </div>
-      <div className="chooseTags">
-        {predefinedTags.length > 0 && (
-          <Dropdown
-            id="chooseTagsFromPreset"
-            className="fromPreset"
-            onSelect={handleTagSelect as any}
-            disabled={!editable}
-          >
-            <Dropdown.Toggle>Choose Tag from preset</Dropdown.Toggle>
-            <Dropdown.Menu>
-              {predefinedTags.map(tag => (
-                <MenuItem key={tag} eventKey={tag}>
-                  {tag}
-                </MenuItem>
-              ))}
-            </Dropdown.Menu>
-          </Dropdown>
-        )}
-        {acceptFreeText && (
-          <div className="fromFreeText">
-            <label>Tag from free text </label>
-            <FormControl
-              type="text"
+            )
+          )}
+        </div>
+        <div className="chooseTags">
+          {predefinedTags.length > 0 && (
+            <Dropdown
+              id="chooseTagsFromPreset"
+              className="fromPreset"
+              onSelect={handleTagSelect as any}
               disabled={!editable}
-              value={freeText}
-              onChange={handleFreeTextChange as any}
-            />
-            <Button onClick={() => handleAddFreeText()} disabled={!editable}>
-              Add
-            </Button>
-            <div className="warningMessage">{warningMessage ?? ''}</div>
-          </div>
-        )}
+            >
+              <Dropdown.Toggle></Dropdown.Toggle>
+              <Dropdown.Menu>
+                {predefinedTags.map(tag => (
+                  <MenuItem key={tag} eventKey={tag}>
+                    {tag}
+                  </MenuItem>
+                ))}
+              </Dropdown.Menu>
+            </Dropdown>
+          )}
+          {acceptFreeText && (
+            <div className="fromFreeText">
+              {freeTextLabel && <label>{freeTextLabel}</label>}
+              <FormControl
+                type="text"
+                disabled={!editable}
+                value={freeText}
+                onChange={handleFreeTextChange as any}
+              />
+              <Button onClick={() => handleAddFreeText()} disabled={!editable}>
+                Add
+              </Button>
+              <div className="warningMessage">{warningMessage ?? ''}</div>
+            </div>
+          )}
+        </div>
       </div>
     </StyledFormGroup>
   );
 };
 
 const StyledFormGroup = styled(FormGroup)`
+  .tags {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
   .array {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 1rem;
     .array-item {
-      min-width: 10em;
       display: flex;
+      align-items: center;
+      a {
+        font-weight: bold;
+        text-decoration: none;
+        margin-left: 0.25rem;
+        font-size: 1.5em;
+        :hover {
+          cursor: pointer;
+        }
+      }
     }
   }
   .chooseTags {
     display: flex;
-    margin-top: 1rem;
   }
   .fromFreeText {
     display: grid;

@@ -7,7 +7,7 @@ import {
   Numeric,
   Text,
   VolumeOverlay,
-  PngViewer
+  ImageResultViewer
 } from '@utrad-ical/circus-ui-kit';
 
 // https://github.com/module-federation/module-federation-examples/tree/master/advanced-api/dynamic-remotes
@@ -20,7 +20,7 @@ const builtInDisplays: { [name: string]: Display<any, any> } = {
   Numeric,
   Text,
   VolumeOverlay,
-  PngViewer
+  ImageResultViewer
 };
 
 const loaded = new Map<string, true>();

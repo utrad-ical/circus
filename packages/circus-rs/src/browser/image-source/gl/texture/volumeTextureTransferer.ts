@@ -4,16 +4,20 @@ import { transferFunctionOrigin } from './transfer-function-constants';
 
 export default function volumeTextureTransferer(
   gl: WebGLRenderingContext,
-  texture: WebGLTexture,
-  volume: RawData
+  textures: WebGLTexture[],
+  volume: RawData,
+  maxSliceCount = 512
 ) {
   const voxelCount = volume.getDimension();
-  const { sliceSize, sliceGridSize, textureSize } =
-    detectTextureLayout(voxelCount);
+  const { sliceSize, sliceGridSize, textureSize } = detectTextureLayout([
+    voxelCount[0],
+    voxelCount[1],
+    maxSliceCount
+  ]);
 
   const getOriginOfSlice = (z: number) => [
-    (z % sliceGridSize[0]) * sliceSize[0],
-    Math.floor(z / sliceGridSize[0]) * sliceSize[1]
+    ((z % maxSliceCount) % sliceGridSize[0]) * sliceSize[0],
+    Math.floor((z % maxSliceCount) / sliceGridSize[0]) * sliceSize[1]
   ];
 
   const width = voxelCount[0]; // < sliceSize[0]
@@ -59,44 +63,50 @@ export default function volumeTextureTransferer(
   const transfer = (z: number) => {
     const singleImageBuffer = createSingleImageBuffer(z);
     const [xoffset, yoffset] = getOriginOfSlice(z);
-
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texSubImage2D(
-      gl.TEXTURE_2D,
-      0, // level
-      xoffset,
-      yoffset,
-      width,
-      height,
-      formatType, // format
-      gl.UNSIGNED_BYTE, // type
-      singleImageBuffer
-    );
-    gl.bindTexture(gl.TEXTURE_2D, null);
+    const textureIndex = Math.floor(z / maxSliceCount);
+    if (textureIndex < textures.length) {
+      gl.bindTexture(gl.TEXTURE_2D, textures[textureIndex]);
+      gl.texSubImage2D(
+        gl.TEXTURE_2D,
+        0, // level
+        xoffset,
+        yoffset,
+        width,
+        height,
+        formatType, // format
+        gl.UNSIGNED_BYTE, // type
+        singleImageBuffer
+      );
+      gl.bindTexture(gl.TEXTURE_2D, null);
+    } else {
+      throw new RangeError(`Texture index (${textureIndex}) out of bounds`);
+    }
   };
 
   const [tw, th] = textureSize;
 
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.texImage2D(
-    gl.TEXTURE_2D,
-    0, // level
-    formatType, // internalformat
-    tw, // width
-    th, // height
-    0, // border
-    formatType, // format
-    gl.UNSIGNED_BYTE, // type
-    null // new Uint8Array(tw * th * formatBytes) // buffer
-  );
+  textures.forEach(texture => {
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0, // level
+      formatType, // internalformat
+      tw, // width
+      th, // height
+      0, // border
+      formatType, // format
+      gl.UNSIGNED_BYTE, // type
+      null // new Uint8Array(tw * th * formatBytes) // buffer
+    );
 
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-  // unbind texture
-  gl.bindTexture(gl.TEXTURE_2D, null);
+    // unbind texture
+    gl.bindTexture(gl.TEXTURE_2D, null);
+  });
 
   const images = new Array(voxelCount[2] - 1).fill(0).map((v, i) => i);
 

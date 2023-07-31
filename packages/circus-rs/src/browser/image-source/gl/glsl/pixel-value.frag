@@ -17,13 +17,34 @@ float extractMaskValueFromTexel(vec4 texel) {
  * Arguments must be all integer (fract(x) == 0.0, etc)
  */
 vec4 getTexelOf(float x, float y, float z) {
-  float sliceColNo = mod(z, uSliceGridSize[0]);
-  float sliceRowNo = floor(z / uSliceGridSize[0]);
+
+  float textureId = floor(z / float(uMaxSliceCount));
+  float sliceNo = mod(z, float(uMaxSliceCount));
+
+  float sliceColNo = mod(sliceNo, uSliceGridSize[0]);
+  float sliceRowNo = floor(sliceNo / uSliceGridSize[0]);
 
   float s = x / uTextureSize[0] + sliceColNo / uSliceGridSize[0];
   float t = y / uTextureSize[1] + sliceRowNo / uSliceGridSize[1];
 
-  return texture2D(uVolumeTextureSampler, vec2(s, t));
+  if(int(textureId) == 0){
+    return texture2D(uVolumeTextureSamplers[0], vec2(s, t));
+  } else if(int(textureId) == 1){
+    return texture2D(uVolumeTextureSamplers[1], vec2(s, t));
+  } else if(int(textureId) == 2){
+    return texture2D(uVolumeTextureSamplers[2], vec2(s, t));
+  } else if(int(textureId) == 3){
+    return texture2D(uVolumeTextureSamplers[3], vec2(s, t));
+  } else if(int(textureId) == 4){
+    return texture2D(uVolumeTextureSamplers[4], vec2(s, t));
+  } else if(int(textureId) == 5){
+    return texture2D(uVolumeTextureSamplers[5], vec2(s, t));
+  } else if(int(textureId) == 6){
+    return texture2D(uVolumeTextureSamplers[6], vec2(s, t));
+  } else if(int(textureId) == 7){
+    return texture2D(uVolumeTextureSamplers[7], vec2(s, t));
+  }
+
 }
 
 float getVoxelValueAt(float x, float y, float z) {

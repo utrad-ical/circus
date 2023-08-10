@@ -22,6 +22,9 @@ import {
   fragmentShaderSource
 } from './glsl/mprShaderSource';
 
+const maxTextures = 8;
+const maxSliceCount = 1024;
+
 export default class MprProgram extends ShaderProgram {
   /**
    * 1mm in normalized device coordinates.
@@ -36,11 +39,13 @@ export default class MprProgram extends ShaderProgram {
   private uModelViewMatrix: SetUniform['uniformMatrix4fv'];
   private uDebugFlag: SetUniform['uniform1i'];
 
+  private uMaxSliceCount: SetUniform['uniform1i'];
+
   private aVertexPositionBuffer: AttribBufferer;
   private aVertexIndexBuffer: VertexElementBufferer;
 
-  private volumeTexture: WebGLTexture | undefined = undefined;
-  private uVolumeTextureSampler: SetUniform['uniform1i'];
+  private volumeTextures: WebGLTexture[] = [];
+  private uVolumeTextureSamplers: WebGLUniformLocation[];
   private uTextureSize: SetUniform['uniform2fv'];
   private uSliceGridSize: SetUniform['uniform2fv'];
 
@@ -63,6 +68,7 @@ export default class MprProgram extends ShaderProgram {
     this.uWindowWidth = this.uniform1f('uWindowWidth');
     this.uWindowLevel = this.uniform1f('uWindowLevel');
     this.uDebugFlag = this.uniform1i('uDebugFlag');
+    this.uMaxSliceCount = this.uniform1i('uMaxSliceCount');
 
     // Buffers
     this.aVertexIndexBuffer = this.vertexElementBuffer();
@@ -72,11 +78,27 @@ export default class MprProgram extends ShaderProgram {
     });
 
     // Textures
-    this.uVolumeTextureSampler = this.uniform1i('uVolumeTextureSampler');
     this.uTextureSize = this.uniform2fv('uTextureSize');
     this.uSliceGridSize = this.uniform2fv('uSliceGridSize');
 
     this.uTransferFunctionSampler = this.uniform1i('uTransferFunctionSampler');
+    // Initialization of uVolumeTextureSamplers
+
+    this.uVolumeTextureSamplers = Array.from(
+      { length: maxTextures },
+      (_, i) => {
+        const location = this.gl.getUniformLocation(
+          this.program,
+          `uVolumeTextureSamplers[${i}]`
+        );
+        if (location === null) {
+          throw new Error(
+            `Failed to get the storage location of uVolumeTextureSamplers[${i}]`
+          );
+        }
+        return location;
+      }
+    );
   }
 
   public setMmInNdc(mmInNdc: number) {
@@ -98,12 +120,17 @@ export default class MprProgram extends ShaderProgram {
     ]);
     this.uVolumeDimension(dimension);
 
-    this.volumeTexture = this.createTexture();
+    const numTextures = Math.ceil(dimension[2] / maxSliceCount);
+    this.uMaxSliceCount(maxSliceCount);
+    this.volumeTextures = [...Array(numTextures)].map(() =>
+      this.createTexture()
+    );
 
     const { images, layout, transfer } = volumeTextureTransferer(
       this.gl,
-      this.volumeTexture,
-      volume
+      this.volumeTextures,
+      volume,
+      maxSliceCount
     );
 
     const { textureSize, sliceGridSize } = layout;
@@ -194,16 +221,18 @@ export default class MprProgram extends ShaderProgram {
     const gl = this.gl;
 
     // Activate textures
-    if (this.volumeTexture) {
-      this.uVolumeTextureSampler(0);
-      gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, this.volumeTexture);
+    if (this.volumeTextures) {
+      for (let i = 0; i < this.volumeTextures.length; i++) {
+        gl.activeTexture(gl.TEXTURE0 + i);
+        gl.bindTexture(gl.TEXTURE_2D, this.volumeTextures[i]);
+        this.gl.uniform1i(this.uVolumeTextureSamplers[i], i);
+      }
     }
 
     // Transfer function
     if (this.transferFunctionTexture) {
-      this.uTransferFunctionSampler(1);
-      gl.activeTexture(gl.TEXTURE1);
+      this.uTransferFunctionSampler(this.volumeTextures.length);
+      gl.activeTexture(gl.TEXTURE0 + this.volumeTextures.length);
       gl.bindTexture(gl.TEXTURE_2D, this.transferFunctionTexture);
     }
 

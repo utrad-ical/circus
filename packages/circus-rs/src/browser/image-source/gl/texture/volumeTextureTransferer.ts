@@ -12,7 +12,7 @@ export default function volumeTextureTransferer(
   const { sliceSize, sliceGridSize, textureSize } = detectTextureLayout([
     voxelCount[0],
     voxelCount[1],
-    maxSliceCount
+    Math.min(maxSliceCount, voxelCount[2])
   ]);
 
   const getOriginOfSlice = (z: number) => [

@@ -23,7 +23,7 @@ import {
 } from './glsl/mprShaderSource';
 
 const maxTextures = 8;
-const maxSliceCount = 1024;
+const maxCount = 512 * 512 * 1024;
 
 export default class MprProgram extends ShaderProgram {
   /**
@@ -120,6 +120,7 @@ export default class MprProgram extends ShaderProgram {
     ]);
     this.uVolumeDimension(dimension);
 
+    const maxSliceCount = maxCount / (dimension[0] * dimension[1]);
     const numTextures = Math.ceil(dimension[2] / maxSliceCount);
     this.uMaxSliceCount(maxSliceCount);
     this.volumeTextures = [...Array(numTextures)].map(() =>

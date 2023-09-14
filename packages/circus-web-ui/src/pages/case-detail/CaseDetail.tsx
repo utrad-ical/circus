@@ -2,11 +2,15 @@ import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import { alert, confirm } from '@smikitky/rb-components/lib/modal';
 import CaseExportModal from 'components/CaseExportModal';
 import Collapser from 'components/Collapser';
+import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
 import FullSpanContainer from 'components/FullSpanContainer';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import PatientInfoBox from 'components/PatientInfoBox';
 import ProjectDisplay from 'components/ProjectDisplay';
+import SearchResultsView from 'components/SearchResultsView';
+import Tag from 'components/Tag';
+import TimeDisplay from 'components/TimeDisplay';
 import {
   Button,
   DropdownButton,
@@ -14,19 +18,29 @@ import {
   MenuItem,
   Modal
 } from 'components/react-bootstrap';
-import Tag from 'components/Tag';
-import TimeDisplay from 'components/TimeDisplay';
 import produce from 'immer';
-import React, { useCallback, useEffect, useReducer, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useState
+} from 'react';
 import { useDispatch } from 'react-redux';
 import { Prompt } from 'react-router';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { showMessage } from 'store/messages';
+import { newSearch } from 'store/searches';
 import styled from 'styled-components';
 import Series from 'types/Series';
 import { useApi } from 'utils/api';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
 import useLoginUser from 'utils/useLoginUser';
+import { Project, Tags, Times } from '../search/SearchResultRenderer';
+import RevisionEditor from './RevisionEditor';
+import RevisionSelector from './RevisionSelector';
+import SaveModal from './SaveModal';
+import TagEditor from './TagEditor';
 import caseStoreReducer, * as c from './caseStore';
 import {
   EditingDataLayoutInitializer,
@@ -34,10 +48,6 @@ import {
   externalRevisionToInternal,
   saveRevision
 } from './revisionData';
-import RevisionEditor from './RevisionEditor';
-import RevisionSelector from './RevisionSelector';
-import SaveModal from './SaveModal';
-import TagEditor from './TagEditor';
 
 const pageTransitionMessage = `Are you sure you want to leave?\nIf you leave before saving, your changes will be lost.`;
 
@@ -56,6 +66,7 @@ const CaseDetail: React.FC<{}> = () => {
   const [tags, setTags] = useState<string[]>([]);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [activeRelevantCases, setActiveRelevantCases] = useState(false);
 
   const user = useLoginUser();
   const accessibleProjects = user.accessibleProjects;
@@ -96,6 +107,8 @@ const CaseDetail: React.FC<{}> = () => {
 
       const patientInfo =
         seriesData[latestRevision.series[0].seriesUid].patientInfo;
+      patientInfo && setActiveRelevantCases(true);
+
       if (!project) {
         throw new Error('You do not have access to this project.');
       }
@@ -126,6 +139,28 @@ const CaseDetail: React.FC<{}> = () => {
     };
     loadRevisionData();
   }, [api, caseStore.caseData, caseStore.editingRevisionIndex, f]);
+
+  useEffect(() => {
+    if (
+      !activeRelevantCases ||
+      !caseStore.patientInfo ||
+      !caseStore.patientInfo.patientId
+    )
+      return;
+
+    const filter = {
+      'patientInfo.patientId': caseStore.patientInfo.patientId
+    };
+
+    dispatch(
+      newSearch(api, 'relevantCases', {
+        resource: { endPoint: 'cases', primaryKey: 'caseId' },
+        filter,
+        condition: {},
+        sort: '{"updatedAt":-1}'
+      })
+    );
+  }, [api, dispatch, caseStore.patientInfo]);
 
   const handleRevisionSelect = async (index: number) => {
     if (isUpdated && !(await confirm(pageTransitionMessage))) return;
@@ -219,7 +254,19 @@ const CaseDetail: React.FC<{}> = () => {
     <FullSpanContainer>
       <Prompt when={isUpdated} message={pageTransitionMessage} />
       <CaseInfoCollapser title="Case Info">
-        <PatientInfoBox value={caseStore.patientInfo} />
+        {activeRelevantCases ? (
+          <DropdownButton
+            id="casemenu"
+            title={<PatientInfoBox value={caseStore.patientInfo} />}
+            noCaret
+            disabled={busy}
+            style={{ textAlign: 'left', border: 'none', padding: '0px' }}
+          >
+            <RelevantCases currentCaseId={caseId} />
+          </DropdownButton>
+        ) : (
+          <PatientInfoBox value={caseStore.patientInfo} />
+        )}
         <ProjectDisplay
           projectId={projectData.projectId}
           withName
@@ -429,3 +476,50 @@ const StyledMenuBarDiv = styled.div`
     padding: 3px;
   }
 `;
+
+const RelevantCases: React.FC<{
+  currentCaseId: string;
+}> = props => {
+  const { currentCaseId } = props;
+
+  const RelevantCasesDataView: React.FC<any> = useMemo(
+    () => props => {
+      const { value } = props;
+      const columns: DataGridColumnDefinition<any>[] = [
+        { caption: 'Project', className: 'project', renderer: Project('xs') },
+        {
+          caption: 'Create/Update',
+          className: 'created-at',
+          renderer: Times()
+        },
+        { caption: 'Tags', className: 'tags', renderer: Tags },
+        {
+          key: 'action',
+          caption: '',
+          renderer: ({ value }) =>
+            currentCaseId === value.caseId ? null : (
+              <div className="register">
+                <Link to={`/case/${value.caseId}`}>
+                  <IconButton icon="circus-case" bsSize="sm" bsStyle="primary">
+                    View
+                  </IconButton>
+                </Link>
+              </div>
+            )
+        }
+      ];
+      return <DataGrid value={value} columns={columns} />;
+    },
+    []
+  );
+
+  return (
+    <div style={{ whiteSpace: 'nowrap', margin: '1em' }}>
+      <div>Showing cases from the same patient</div>
+      <SearchResultsView
+        name="relevantCases"
+        dataView={RelevantCasesDataView}
+      />
+    </div>
+  );
+};

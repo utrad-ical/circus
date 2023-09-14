@@ -1,40 +1,43 @@
-import React, {
-  Fragment,
-  useState,
-  useMemo,
-  useContext,
-  useCallback
-} from 'react';
-import { useApi } from 'utils/api';
-import PatientInfoBox from 'components/PatientInfoBox';
-import FullSpanContainer from 'components/FullSpanContainer';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
-import * as modal from '@smikitky/rb-components/lib/modal';
-import PluginDisplay from 'components/PluginDisplay';
-import IconButton from 'components/IconButton';
-import styled from 'styled-components';
-import useFeedback, { actions } from './useFeedback';
-import PersonalConsensualSwitch from './PersonalConsensualSwitch';
-import useLoadData from 'utils/useLoadData';
-import PieProgress from 'components/PieProgress';
-import useLoginUser from 'utils/useLoginUser';
-import { DropdownButton, MenuItem, Modal } from 'components/react-bootstrap';
-import Icon from 'components/Icon';
-import { useParams } from 'react-router-dom';
-import MainDisplay from './MainDisplay';
 import {
-  Job,
-  Plugin,
   CsResultsContext,
   CsResultsContextType,
-  FeedbackReport
+  FeedbackReport,
+  Job,
+  Plugin
 } from '@utrad-ical/circus-ui-kit';
-import loadDisplay from './loadDisplay';
-import InvestigateJobModal from './InvestigateJobModal';
-import { useVolumeLoaders } from 'utils/useVolumeLoader';
-import useQuery from 'utils/useQuery';
-import DeleteFeedbackModal from './DeleteFeedbackModal';
+import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
+import FullSpanContainer from 'components/FullSpanContainer';
+import Icon from 'components/Icon';
+import IconButton from 'components/IconButton';
+import PatientInfoBox from 'components/PatientInfoBox';
+import PieProgress from 'components/PieProgress';
+import PluginDisplay from 'components/PluginDisplay';
+import SearchResultsView from 'components/SearchResultsView';
 import UserDisplay from 'components/UserDisplay';
+import { DropdownButton, MenuItem, Modal } from 'components/react-bootstrap';
+import React, { Fragment, useCallback, useMemo, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { Link, useParams } from 'react-router-dom';
+import { newSearch } from 'store/searches';
+import styled from 'styled-components';
+import { useApi } from 'utils/api';
+import useLoadData from 'utils/useLoadData';
+import useLoginUser from 'utils/useLoginUser';
+import useQuery from 'utils/useQuery';
+import { useVolumeLoaders } from 'utils/useVolumeLoader';
+import {
+  FeedbackRenderer,
+  PluginRenderer,
+  Status,
+  Times
+} from '../search/SearchResultRenderer';
+import DeleteFeedbackModal from './DeleteFeedbackModal';
+import InvestigateJobModal from './InvestigateJobModal';
+import MainDisplay from './MainDisplay';
+import PersonalConsensualSwitch from './PersonalConsensualSwitch';
+import loadDisplay from './loadDisplay';
+import useFeedback, { actions } from './useFeedback';
 
 const StyledDiv = styled.div`
   display: flex;
@@ -96,6 +99,60 @@ const Menu: React.FC<{
   );
 });
 
+const RelevantJobs: React.FC<{
+  currentJobId: string;
+}> = props => {
+  const { currentJobId } = props;
+
+  const RelevantJobsDataView: React.FC<any> = useMemo(
+    () => props => {
+      const { value } = props;
+      const columns: DataGridColumnDefinition<any>[] = [
+        {
+          caption: 'Plugin',
+          className: 'plugin',
+          renderer: PluginRenderer('xs')
+        },
+        {
+          caption: 'Register/Finish',
+          className: 'execution-time',
+          renderer: Times('createdAt', 'finishedAt')
+        },
+        { caption: 'Status', className: 'status', renderer: Status },
+        { caption: 'FB', className: 'feedback', renderer: FeedbackRenderer },
+        {
+          key: 'action',
+          caption: '',
+          renderer: ({ value }) =>
+            currentJobId === value.jobId ? null : (
+              <div className="register">
+                <Link to={`/plugin-job/${value.jobId}`}>
+                  <IconButton
+                    disabled={value.status !== 'finished'}
+                    icon="circus-series"
+                    bsSize="sm"
+                    bsStyle="primary"
+                  >
+                    View
+                  </IconButton>
+                </Link>
+              </div>
+            )
+        }
+      ];
+      return <DataGrid value={value} columns={columns} />;
+    },
+    []
+  );
+
+  return (
+    <div style={{ whiteSpace: 'nowrap', margin: '1em' }}>
+      <div>Showing jobs from the same patient</div>
+      <SearchResultsView name="relevantJobs" dataView={RelevantJobsDataView} />
+    </div>
+  );
+};
+
 const PluginJobDetail: React.FC<{}> = props => {
   const api = useApi();
   const jobId: string = useParams<any>().jobId;
@@ -107,6 +164,7 @@ const PluginJobDetail: React.FC<{}> = props => {
 
   const [showInvestigateModal, setShowInvestigateModal] = useState(false);
   const [showDeleteFeedbackModal, setShowDeleteFeedbackModal] = useState(false);
+  const dispatchForJobSearch = useDispatch();
 
   const loadJob = useCallback(async () => {
     setBusy(true);
@@ -128,6 +186,26 @@ const PluginJobDetail: React.FC<{}> = props => {
             : null
         })
       );
+
+      if (
+        job.series[0].seriesUid &&
+        seriesData[job.series[0].seriesUid].patientInfo
+      ) {
+        const filter = {
+          'patientInfo.patientId':
+            seriesData[job.series[0].seriesUid].patientInfo.patientId
+        };
+
+        dispatchForJobSearch(
+          newSearch(api, 'relevantJobs', {
+            resource: { endPoint: 'plugin-jobs', primaryKey: 'jobId' },
+            filter,
+            condition: {},
+            sort: '{"createdAt":-1}'
+          })
+        );
+      }
+
       return { job, pluginData, seriesData };
     } finally {
       setBusy(false);
@@ -254,7 +332,23 @@ const PluginJobDetail: React.FC<{}> = props => {
     <FullSpanContainer>
       <StyledDiv>
         <div className="job-detail-header">
-          <PatientInfoBox value={seriesData[primarySeriesUid].patientInfo} />
+          {seriesData[primarySeriesUid].patientInfo ? (
+            <DropdownButton
+              id="jobmenu"
+              title={
+                <PatientInfoBox
+                  value={seriesData[primarySeriesUid].patientInfo}
+                />
+              }
+              noCaret
+              disabled={busy}
+              style={{ textAlign: 'left', border: 'none', padding: '0px' }}
+            >
+              <RelevantJobs currentJobId={jobId} />
+            </DropdownButton>
+          ) : (
+            <PatientInfoBox value={seriesData[primarySeriesUid].patientInfo} />
+          )}
           <div className="feedback-mode-switch">
             <PersonalConsensualSwitch
               feedbackState={feedbackState}

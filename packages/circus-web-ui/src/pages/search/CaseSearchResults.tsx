@@ -3,24 +3,27 @@ import CaseExportModal from 'components/CaseExportModal';
 import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
-import IdDisplay from 'components/IdDisplay';
 import MyListDropdown from 'components/MyListDropdown';
-import PatientInfoBox from 'components/PatientInfoBox';
-import ProjectDisplay from 'components/ProjectDisplay';
-import { DropdownButton, MenuItem } from 'components/react-bootstrap';
 import SearchResultsView, {
   makeSortOptions,
   patientInfoSearchOptions
 } from 'components/SearchResultsView';
-import { PhysicalTag, TagList } from 'components/Tag';
-import TimeDisplay from 'components/TimeDisplay';
-import React, { Fragment, useMemo, useState } from 'react';
+import { PhysicalTag } from 'components/Tag';
+import { DropdownButton, MenuItem } from 'components/react-bootstrap';
+import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation } from 'react-router-dom';
 import * as searches from 'store/searches';
 import { updateSearch } from 'store/searches';
 import { useApi } from 'utils/api';
 import useLoginUser from 'utils/useLoginUser';
+import {
+  CaseId,
+  PatientInfo,
+  Project,
+  Tags,
+  Times
+} from './SearchResultRenderer';
 
 const Operation: React.FC<{
   value: any;
@@ -52,49 +55,12 @@ const Operation: React.FC<{
   );
 };
 
-const Project: React.FC<{
-  value: any;
-}> = props => {
-  const item = props.value;
-  return <ProjectDisplay projectId={item.projectId} size="xl" withName />;
-};
-
-const CaseId: React.FC<{
-  value: any;
-}> = props => {
-  const { caseId } = props.value;
-  const ids = useMemo(() => ({ 'Case ID': caseId }), [caseId]);
-  return <IdDisplay value={ids} />;
-};
-
 const columns: DataGridColumnDefinition<any>[] = [
-  { caption: 'Project', className: 'project', renderer: Project },
-  {
-    caption: 'Patient',
-    className: 'patient',
-    renderer: ({ value: { patientInfo } }) => {
-      return <PatientInfoBox value={patientInfo} />;
-    }
-  },
+  { caption: 'Project', className: 'project', renderer: Project() },
+  { caption: 'Patient', className: 'patient', renderer: PatientInfo },
   { caption: 'Case ID', className: 'caseId', renderer: CaseId },
-  {
-    caption: 'Create/Update',
-    className: 'created-at',
-    renderer: props => (
-      <Fragment>
-        <TimeDisplay value={props.value.createdAt} />
-        <br />
-        <TimeDisplay value={props.value.updatedAt} />
-      </Fragment>
-    )
-  },
-  {
-    caption: 'Tags',
-    className: 'tags',
-    renderer: ({ value: item }) => {
-      return <TagList tags={item.tags} projectId={item.projectId} />;
-    }
-  },
+  { caption: 'Create/Update', className: 'created-at', renderer: Times() },
+  { caption: 'Tags', className: 'tags', renderer: Tags },
   { caption: '', className: 'operation', renderer: Operation }
 ];
 

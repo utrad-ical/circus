@@ -8,5 +8,6 @@ export * from './cs/displays/LesionCandidates';
 export * from './cs/displays/Numeric';
 export * from './cs/displays/Text';
 export * from './cs/displays/VolumeOverlay';
+export * from './cs/displays/Gallery';
 export * from './ui/Button';
 export * from './ui/ImageViewer';

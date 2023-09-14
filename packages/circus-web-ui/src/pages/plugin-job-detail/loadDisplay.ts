@@ -6,7 +6,8 @@ import {
   LesionCandidates,
   Numeric,
   Text,
-  VolumeOverlay
+  VolumeOverlay,
+  Gallery
 } from '@utrad-ical/circus-ui-kit';
 
 // https://github.com/module-federation/module-federation-examples/tree/master/advanced-api/dynamic-remotes
@@ -18,7 +19,8 @@ const builtInDisplays: { [name: string]: Display<any, any> } = {
   LesionCandidates,
   Numeric,
   Text,
-  VolumeOverlay
+  VolumeOverlay,
+  Gallery
 };
 
 const loaded = new Map<string, true>();

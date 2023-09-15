@@ -216,7 +216,8 @@ const prepare = (
   // Maps a zero-based volume z-index to the corresponding image number,
   // The number is the number to be specified when call load() function.
   const zIndices = new Map<number, number>();
-
+  const imageNoToZ = (imageNo: number) =>
+    new MultiRange(images).toArray().indexOf(imageNo);
   if (partialVolumeDescriptor) {
     // Set zIndices for the partial volume.
     const partialImages = partialVolumeDescriptorToArray(
@@ -241,8 +242,10 @@ const prepare = (
     const imageNo = zIndices.get(zIndex);
     // console.log(`zIndex: ${zIndex} => #${imageNo}`);
     if (!imageNo) throw new Error('Invalid image request');
+    const z = imageNoToZ(imageNo);
+    if (z === -1) throw new Error('Invalid image request');
     await load(imageNo, priority ?? 0);
-    return volume.getSingleImage(imageNo - 1);
+    return volume.getSingleImage(z);
   };
 
   return { queue, fillImageToVolume };

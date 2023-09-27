@@ -69,6 +69,9 @@ export const normalizeCandidates = (input: any): LesionCandidate[] => {
   });
 };
 
+const entriesGap = 7;
+const entriesColumnsMinWidth = 300;
+
 const applyDisplayOptions = (
   state: rs.MprViewState,
   voxelSize: any,
@@ -246,6 +249,7 @@ export const LesionCandidates: Display<
     useCsResults();
   const { results } = job;
   const [error, setError] = useState<Error | null>(null);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [currentFeedback, setCurrentFeedback] =
     useState<LesionCandidateFeedback>(initialFeedbackValue ?? []);
   // Prepare compositions
@@ -283,6 +287,11 @@ export const LesionCandidates: Display<
       const src = new WebGlRawVolumeMprImageSource({ volumeLoader });
       setImgSrcMap(map => ({ ...map, [volumeId]: src }));
     });
+    window.addEventListener('resize', () => setWindowWidth(window.innerWidth));
+    return () =>
+      window.removeEventListener('resize', () =>
+        setWindowWidth(window.innerWidth)
+      );
   }, []);
 
   const tools = useRef<{ name: string; icon: string; tool: rs.Tool }[]>();
@@ -330,6 +339,22 @@ export const LesionCandidates: Display<
     }
   }, [currentFeedback]);
 
+  const entriesWidth = useMemo(() => {
+    if (visibleCandidates.length === 0) return {};
+    if (
+      visibleCandidates.length <
+      (windowWidth - entriesGap * (visibleCandidates.length - 1)) /
+        (entriesColumnsMinWidth * 2)
+    )
+      return {
+        width: `${
+          visibleCandidates.length * entriesColumnsMinWidth * 2 +
+          entriesGap * (visibleCandidates.length - 1)
+        }px`
+      };
+    else return {};
+  }, [windowWidth]);
+
   const [FeedbackListener, setFeedbackListener] = useState<
     Display<any, any> | undefined
   >(undefined);
@@ -363,7 +388,7 @@ export const LesionCandidates: Display<
           />
         ))}
       </div>
-      <div className="entries">
+      <div className="entries" style={entriesWidth}>
         {visibleCandidates.length === 0 && (
           <div className="alert alert-info">
             There is no candidate to display.
@@ -422,8 +447,11 @@ const StyledDiv = styled.div`
   }
   .entries {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 7px;
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(${entriesColumnsMinWidth}px, 1fr)
+    );
+    gap: ${entriesGap}px;
     justify-content: space-between;
     .lesion-candidate {
       border: 1px solid silver;

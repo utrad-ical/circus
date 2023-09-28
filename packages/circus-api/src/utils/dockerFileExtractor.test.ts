@@ -48,7 +48,7 @@ describe('extractToPath', () => {
     try {
       await expect(() =>
         extractor.extractToPath('/dummy-path', testDir)
-      ).rejects.toThrow(/No such container:path/);
+      ).rejects.toThrow(/No such container:path|Could not find the file/);
     } finally {
       extractor.dispose();
     }

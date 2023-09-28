@@ -235,6 +235,7 @@ export default class TwoDimensionalImageSource extends ImageSource {
     image: ImageBitmap
   ): ImageData {
     const outSize = viewer.getResolution();
+    const pixelSpacing = this.metadata?.voxelSize ?? [1, 1, 1];
     this.backCanvas.width = outSize[0];
     this.backCanvas.height = outSize[1];
 
@@ -246,8 +247,8 @@ export default class TwoDimensionalImageSource extends ImageSource {
 
     const sx = origin[0];
     const sy = origin[1];
-    const sw = xAxis[0];
-    const sh = yLength;
+    const sw = xAxis[0] / pixelSpacing[0];
+    const sh = yLength / pixelSpacing[1];
     const dx = 0;
     const dy = 0;
     const dw = outSize[0];

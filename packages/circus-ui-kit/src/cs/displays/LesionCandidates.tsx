@@ -422,10 +422,11 @@ const StyledDiv = styled.div`
   }
   .entries {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 7px;
     justify-content: space-between;
     .lesion-candidate {
+      max-width: 600px;
       border: 1px solid silver;
       .header {
         padding: 3px;

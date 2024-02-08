@@ -33,6 +33,7 @@ test('determineUserAccessInfo', async () => {
   ]);
   sameMembers(privA.domains, ['sirius.org']);
   expect(privA.accessibleProjects).toEqual([]);
+  expect(privA.accessiblePlugins).toEqual([]);
 
   const bob = await models.user.findByIdOrFail('bob@example.com');
   const privB = await determineUserAccessInfo(models, bob);
@@ -40,12 +41,19 @@ test('determineUserAccessInfo', async () => {
   sameMembers(privB.domains, ['vega.org', 'altair.org']);
   expect(privB.accessibleProjects).toHaveLength(1);
   sameMembers(privB.accessibleProjects[0].roles, ['read', 'write', 'moderate']);
+  expect(privB.accessiblePlugins).toHaveLength(1);
+  sameMembers(privB.accessiblePlugins[0].roles, [
+    'readPlugin',
+    'executePlugin',
+    'inputPersonalFeedback'
+  ]);
 
   const guest = await models.user.findByIdOrFail('guest@example.com');
   const privG = await determineUserAccessInfo(models, guest);
   sameMembers(privG.globalPrivileges, []);
   sameMembers(privG.domains, []);
   expect(privG.accessibleProjects).toEqual([]);
+  expect(privG.accessiblePlugins).toEqual([]);
 });
 
 test('fetchAndLockAccessibleSeries', async () => {

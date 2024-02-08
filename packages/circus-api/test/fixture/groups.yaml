@@ -7,6 +7,13 @@
   addSeriesProjects: []
   viewPersonalInfoProjects: []
   moderateProjects: []
+  readPlugin: []
+  executePlugin: []
+  manageJobs: []
+  inputPersonalFeedback: []
+  inputConsensualFeedback: []
+  manageFeedback: []
+  viewPersonalInfo: []
 - groupId: 2 # member: bob
   groupName: powerUser
   privileges: ['personalInfoView', 'downloadVolume']
@@ -16,6 +23,15 @@
   addSeriesProjects: []
   viewPersonalInfoProjects: []
   moderateProjects: ['8883fdef6f5144f50eb2a83cd34baa44']
+  readPlugin: [d135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2]
+  executePlugin:
+    [d135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2]
+  manageJobs: []
+  inputPersonalFeedback:
+    [d135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2]
+  inputConsensualFeedback: []
+  manageFeedback: []
+  viewPersonalInfo: []
 - groupId: 3 # member: guest, eve
   groupName: guests
   privileges: []
@@ -25,6 +41,13 @@
   addSeriesProjects: []
   viewPersonalInfoProjects: []
   moderateProjects: []
+  readPlugin: []
+  executePlugin: []
+  manageJobs: []
+  inputPersonalFeedback: []
+  inputConsensualFeedback: []
+  manageFeedback: []
+  viewPersonalInfo: []
 - groupId: 4 # member: carol, dave
   groupName: powerUser2
   privileges: ['personalInfoView', 'downloadVolume']
@@ -34,6 +57,17 @@
   addSeriesProjects: []
   viewPersonalInfoProjects: ['8883fdef6f5144f50eb2a83cd34baa44']
   moderateProjects: ['8883fdef6f5144f50eb2a83cd34baa44']
+  readPlugin: [d135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2]
+  executePlugin:
+    [d135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2]
+  manageJobs: []
+  inputPersonalFeedback:
+    [d135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2]
+  inputConsensualFeedback:
+    [d135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2]
+  manageFeedback: []
+  viewPersonalInfo:
+    [d135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2]
 - groupId: 5 # member: frank
   groupName: unprivilegedUser
   privileges: []
@@ -43,3 +77,10 @@
   addSeriesProjects: []
   viewPersonalInfoProjects: ['8883fdef6f5144f50eb2a83cd34baa44']
   moderateProjects: []
+  readPlugin: [d135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2]
+  executePlugin: []
+  manageJobs: []
+  inputPersonalFeedback: []
+  inputConsensualFeedback: []
+  manageFeedback: []
+  viewPersonalInfo: []

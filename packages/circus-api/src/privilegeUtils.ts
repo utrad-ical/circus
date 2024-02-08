@@ -6,16 +6,43 @@ import {
   partialVolumeDescriptorToArray
 } from '@utrad-ical/circus-lib';
 
+const dbRoleNames = [
+  'read',
+  'write',
+  'viewPersonalInfo',
+  'moderate',
+  'addSeries'
+] as const;
+type DbRoleName = typeof dbRoleNames[number];
+
 interface ProjectPrivilege {
   projectId: string;
-  roles: string[];
+  roles: DbRoleName[];
   project: any;
+}
+
+const csRoleNames = [
+  'readPlugin',
+  'executePlugin',
+  'manageJobs',
+  'inputPersonalFeedback',
+  'inputConsensualFeedback',
+  'manageFeedback',
+  'viewPersonalInfo'
+] as const;
+type CsRoleName = typeof csRoleNames[number];
+
+interface PluginPrivilege {
+  pluginId: string;
+  roles: CsRoleName[];
+  plugin: any;
 }
 
 export interface UserPrivilegeInfo {
   domains: string[];
   globalPrivileges: string[];
   accessibleProjects: ProjectPrivilege[];
+  accessiblePlugins: PluginPrivilege[];
 }
 
 /**
@@ -25,6 +52,7 @@ export const determineUserAccessInfo = async (models: Models, user: any) => {
   const globalPrivileges: { [priv: string]: boolean } = {};
   const domains: { [domain: string]: boolean } = {};
   const accessibleProjects: { [projectId: string]: ProjectPrivilege } = {};
+  const accessiblePlugins: { [pluginId: string]: PluginPrivilege } = {};
   for (const groupId of user.groups) {
     const group = await models.group.findByIdOrFail(groupId);
     for (const priv of group.privileges) {
@@ -33,14 +61,7 @@ export const determineUserAccessInfo = async (models: Models, user: any) => {
     for (const domain of group.domains) {
       domains[domain] = true;
     }
-    const roleNames = [
-      'read',
-      'write',
-      'viewPersonalInfo',
-      'moderate',
-      'addSeries'
-    ];
-    for (const role of roleNames) {
+    for (const role of dbRoleNames) {
       for (const pId of group[`${role}Projects`]) {
         if (!(pId in accessibleProjects)) {
           accessibleProjects[pId] = {
@@ -54,15 +75,34 @@ export const determineUserAccessInfo = async (models: Models, user: any) => {
         }
       }
     }
+    for (const role of csRoleNames) {
+      for (const pId of group[`${role}`]) {
+        if (!(pId in accessiblePlugins)) {
+          accessiblePlugins[pId] = {
+            pluginId: pId,
+            roles: [],
+            plugin: null
+          };
+        }
+        if (accessiblePlugins[pId].roles.indexOf(role) < 0) {
+          accessiblePlugins[pId].roles.push(role);
+        }
+      }
+    }
   }
   for (const p in accessibleProjects) {
     const project = await models.project.findByIdOrFail(p);
     accessibleProjects[p].project = project;
   }
+  for (const p in accessiblePlugins) {
+    const plugin = await models.plugin.findByIdOrFail(p);
+    accessiblePlugins[p].plugin = plugin;
+  }
   return {
     domains: Object.keys(domains),
     globalPrivileges: Object.keys(globalPrivileges),
-    accessibleProjects: Object.values(accessibleProjects)
+    accessibleProjects: Object.values(accessibleProjects),
+    accessiblePlugins: Object.values(accessiblePlugins)
   } as UserPrivilegeInfo;
 };
 

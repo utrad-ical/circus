@@ -57,4 +57,46 @@ properties:
       type: string
     description: >
       The list of project IDs which the members of this group have the moderator privilege.
+  readPlugin:
+    type: array
+    items:
+      type: string
+    description: >
+      The list of plugin IDs which the members of this group have read access.
+  executePlugin:
+    type: array
+    items:
+      type: string
+    description: >
+      The list of plugin IDs which the members of this group can execute.
+  manageJobs:
+    type: array
+    items:
+      type: string
+    description: >
+      The list of plugin IDs which the members of this group can invalidate succeeded jobs.
+  inputConsensualFeedback:
+    type: array
+    items:
+      type: string
+    description: >
+      The list of plugin IDs which the members of this group can input consensual feedback.
+  inputPersonalFeedback:
+    type: array
+    items:
+      type: string
+    description: >
+      The list of plugin IDs which the members of this group can input personal feedback.
+  manageFeedback:
+    type: array
+    items:
+      type: string
+    description: >
+      The list of plugin IDs which the members of this group can delete feedbacks.
+  viewPersonalInfo:
+    type: array
+    items:
+      type: string
+    description: >
+      The list of plugin IDs which the members of this group can access personal information.
 additionalProperties: false

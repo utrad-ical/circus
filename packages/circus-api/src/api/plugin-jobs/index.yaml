@@ -5,6 +5,7 @@ routes:
   # Job Management
   - verb: post
     path: /plugin-jobs
+    requiredPluginPrivilege: executePlugin
     description: >
       Creates a new plug-in job.
     requestSchema:
@@ -32,6 +33,7 @@ routes:
   - verb: patch
     path: /plugin-jobs/:jobId
     requiredSeriesDomainCheck: true
+    requiredPluginPrivilege: manageJobs
     requestSchema:
       type: object
       properties:
@@ -44,12 +46,14 @@ routes:
   # Search and Fetch Results
   - verb: get
     path: /plugin-jobs
+    requiredPluginPrivilege: readPlugin
     handler: handleSearch
     description: >
       Performs search for the plug-in job.
     responseSchema: pluginJobSearchResult|addProperty patientInfo patientInfo|searchResult
   - verb: get
     path: /plugin-jobs/list/:myListId
+    requiredPluginPrivilege: readPlugin
     handler: handleSearch
     description: >
       Performs search based on a my list ID.
@@ -57,6 +61,7 @@ routes:
   - verb: get
     path: /plugin-jobs/:jobId
     requiredSeriesDomainCheck: true
+    requiredPluginPrivilege: readPlugin
     description: >
       Returns the detail of the specified plug-in job.
     responseSchema: pluginJob|dbEntry
@@ -64,12 +69,14 @@ routes:
   - verb: get
     path: /plugin-jobs/:jobId/attachment
     requiredSeriesDomainCheck: true
+    requiredPluginPrivilege: readPlugin
     description: >
       Return the list of attachments from the plug-in.
     handler: handleGetAttachmentList
   - verb: get
     path: /plugin-jobs/:jobId/attachment/:path+
     requiredSeriesDomainCheck: true
+    requiredPluginPrivilege: readPlugin
     description: >
       Returns the specified file output from the plug-in.
     handler: handleGetAttachment
@@ -84,6 +91,7 @@ routes:
   - verb: get
     path: /plugin-jobs/:jobId/feedback
     requiredSeriesDomainCheck: true
+    requiredPluginPrivilege: readPlugin
     description: >
       Lists feedback entries for the specified plug-in job.
     responseSchema:
@@ -96,5 +104,6 @@ routes:
     requiredGlobalPrivilege: manageServer
     path: /plugin-jobs/:jobId/feedback/:feedbackId
     requiredSeriesDomainCheck: true
+    requiredPluginPrivilege: manageFeedback
     description: >
       Removes feedback items.

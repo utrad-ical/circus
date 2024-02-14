@@ -5,7 +5,6 @@ routes:
   # Job Management
   - verb: post
     path: /plugin-jobs
-    requiredPluginPrivilege: executePlugin
     description: >
       Creates a new plug-in job.
     requestSchema:
@@ -33,7 +32,7 @@ routes:
   - verb: patch
     path: /plugin-jobs/:jobId
     requiredSeriesDomainCheck: true
-    requiredPluginPrivilege: manageJobs
+    requiredPluginPrivilege: 'executePlugin'
     requestSchema:
       type: object
       properties:
@@ -46,7 +45,6 @@ routes:
   # Search and Fetch Results
   - verb: get
     path: /plugin-jobs
-    requiredPluginPrivilege: readPlugin
     handler: handleSearch
     description: >
       Performs search for the plug-in job.

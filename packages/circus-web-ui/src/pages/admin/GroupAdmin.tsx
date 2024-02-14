@@ -4,6 +4,7 @@ import { useApi } from 'utils/api';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import ProjectSelectorMultiple from 'components/ProjectSelectorMultiple';
+import PluginSelectorMultiple from 'components/PluginSelectorMultiple';
 import { DataGridColumnDefinition } from 'components/DataGrid';
 
 const makeEmptyItem = () => {
@@ -79,6 +80,17 @@ const GroupAdmin: React.FC<any> = props => {
         <ProjectSelectorMultiple projects={projectOptions} {...props} />
       );
 
+      const plugins = (await api('admin/plugins?unlimited=1')).items as {
+        pluginId: string;
+      }[];
+      const pluginOptions = plugins.map(plugin => ({
+        pluginId: plugin.pluginId,
+        plugin
+      }));
+      const pluginSelect: React.FC<any> = props => (
+        <PluginSelectorMultiple plugins={pluginOptions} {...props} />
+      );
+
       setEditorProperties([
         { key: 'groupName', caption: 'Group Name', editor: et.text() }, // 0
         {
@@ -115,6 +127,41 @@ const GroupAdmin: React.FC<any> = props => {
           key: 'moderateProjects',
           caption: 'Moderate Projects',
           editor: projectSelect
+        },
+        {
+          key: 'readPlugin',
+          caption: 'Readable Plugins',
+          editor: pluginSelect
+        },
+        {
+          key: 'executePlugin',
+          caption: 'Executable Plugins',
+          editor: pluginSelect
+        },
+        {
+          key: 'manageJobs',
+          caption: 'Manage Plugin Jobs',
+          editor: pluginSelect
+        },
+        {
+          key: 'inputPersonalFeedback',
+          caption: 'Input Personal Feedback',
+          editor: pluginSelect
+        },
+        {
+          key: 'inputConsensualFeedback',
+          caption: 'Input Consensual Feedback',
+          editor: pluginSelect
+        },
+        {
+          key: 'manageFeedback',
+          caption: 'Manage Feedback',
+          editor: pluginSelect
+        },
+        {
+          key: 'viewPersonalInfo',
+          caption: 'View Personal Info Plugin Jobs',
+          editor: pluginSelect
         }
       ]);
     };

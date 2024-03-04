@@ -33,7 +33,10 @@ test('determineUserAccessInfo', async () => {
   ]);
   sameMembers(privA.domains, ['sirius.org']);
   expect(privA.accessibleProjects).toEqual([]);
-  expect(privA.accessiblePlugins).toEqual([]);
+  sameMembers(privA.accessiblePlugins[0].roles, [
+    'readPlugin',
+    'manageFeedback'
+  ]);
 
   const bob = await models.user.findByIdOrFail('bob@example.com');
   const privB = await determineUserAccessInfo(models, bob);

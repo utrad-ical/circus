@@ -51,7 +51,6 @@ routes:
     responseSchema: pluginJobSearchResult|addProperty patientInfo patientInfo|searchResult
   - verb: get
     path: /plugin-jobs/list/:myListId
-    requiredPluginPrivilege: readPlugin
     handler: handleSearch
     description: >
       Performs search based on a my list ID.

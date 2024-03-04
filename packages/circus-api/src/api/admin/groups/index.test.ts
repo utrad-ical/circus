@@ -50,7 +50,14 @@ const basicGroupData = {
   writeProjects: [],
   addSeriesProjects: [],
   viewPersonalInfoProjects: [],
-  moderateProjects: []
+  moderateProjects: [],
+  readPlugin: [],
+  executePlugin: [],
+  manageJobs: [],
+  inputPersonalFeedback: [],
+  inputConsensualFeedback: [],
+  manageFeedback: [],
+  viewPersonalInfo: []
 };
 
 it('should add a new group', async () => {

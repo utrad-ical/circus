@@ -6,7 +6,7 @@ import {
   partialVolumeDescriptorToArray
 } from '@utrad-ical/circus-lib';
 
-const dbRoleNames = [
+export const dbRoleNames = [
   'read',
   'write',
   'viewPersonalInfo',
@@ -21,7 +21,7 @@ interface ProjectPrivilege {
   project: any;
 }
 
-const csRoleNames = [
+export const csRoleNames = [
   'readPlugin',
   'executePlugin',
   'manageJobs',

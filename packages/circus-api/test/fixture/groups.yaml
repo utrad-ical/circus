@@ -7,12 +7,13 @@
   addSeriesProjects: []
   viewPersonalInfoProjects: []
   moderateProjects: []
-  readPlugin: []
+  readPlugin: [d135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2]
   executePlugin: []
   manageJobs: []
   inputPersonalFeedback: []
   inputConsensualFeedback: []
-  manageFeedback: []
+  manageFeedback:
+    [d135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2]
   viewPersonalInfo: []
 - groupId: 2 # member: bob
   groupName: powerUser
@@ -60,7 +61,7 @@
   readPlugin: [d135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2]
   executePlugin:
     [d135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2]
-  manageJobs: []
+  manageJobs: [d135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2]
   inputPersonalFeedback:
     [d135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2]
   inputConsensualFeedback:

@@ -4,7 +4,6 @@ description: >
 routes:
   - verb: get
     path: /plugin-displays/:pluginId/:path+
-    requiredPluginPrivilege: readPlugin
     noAuthentication: true
     description: >
       Returns the display using Webpack Module Federation.

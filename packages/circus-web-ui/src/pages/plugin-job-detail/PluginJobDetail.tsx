@@ -175,10 +175,16 @@ const PluginJobDetail: React.FC<{}> = props => {
       const job = (await api(`plugin-jobs/${jobId}`)) as Job;
       const pluginData = (await api(`plugins/${job.pluginId}`)) as Plugin;
       const seriesData: { [seriesUid: string]: any } = {};
+      const viewPersonalInfoFlag = user.accessiblePlugins
+        .filter(p => p.roles.includes('viewPersonalInfo'))
+        .some(p => p.pluginId === job.pluginId);
       for (const s of job.series) {
         const seriesUid = s.seriesUid;
         if (seriesUid in seriesData) continue;
         seriesData[seriesUid] = await api(`series/${seriesUid}`);
+        if (!viewPersonalInfoFlag) {
+          delete seriesData[seriesUid].patientInfo;
+        }
       }
       dispatch(
         actions.reset({

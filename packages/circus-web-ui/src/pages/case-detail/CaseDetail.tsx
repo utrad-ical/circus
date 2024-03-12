@@ -105,8 +105,12 @@ const CaseDetail: React.FC<{}> = () => {
         )
       ) as { [seriesUid: string]: Series };
 
-      const patientInfo =
-        seriesData[latestRevision.series[0].seriesUid].patientInfo;
+      const viewPersonalInfoFlag = user.accessibleProjects
+        .filter(p => p.roles.includes('viewPersonalInfo'))
+        .some(p => p.projectId === caseData.projectId);
+      const patientInfo = viewPersonalInfoFlag
+        ? seriesData[latestRevision.series[0].seriesUid].patientInfo
+        : undefined;
       patientInfo && setActiveRelevantCases(true);
 
       if (!project) {

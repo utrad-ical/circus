@@ -52,7 +52,7 @@ export const command: Command<{
     try {
       await validator.validate(
         'plugin' +
-          '|only pluginName,version,description,icon,displayStrategy' +
+          '|only type,pluginName,version,description,icon,displayStrategy' +
           '|allRequiredExcept icon,displayStrategy',
         manifest
       );
@@ -65,6 +65,10 @@ export const command: Command<{
       } else {
         throw err;
       }
+    }
+
+    if (manifest.type !== 'CAD') {
+      throw new Error('The plug-in type must be "CAD".');
     }
 
     const doc = {

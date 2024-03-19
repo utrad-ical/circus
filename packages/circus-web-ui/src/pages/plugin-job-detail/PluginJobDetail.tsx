@@ -164,6 +164,9 @@ const PluginJobDetail: React.FC<{}> = props => {
 
   const [showInvestigateModal, setShowInvestigateModal] = useState(false);
   const [showDeleteFeedbackModal, setShowDeleteFeedbackModal] = useState(false);
+  const [noPermissionMessage, setNoPermissionMessage] = useState<string | null>(
+    null
+  );
   const dispatchForJobSearch = useDispatch();
 
   const loadJob = useCallback(async () => {
@@ -172,10 +175,16 @@ const PluginJobDetail: React.FC<{}> = props => {
       const job = (await api(`plugin-jobs/${jobId}`)) as Job;
       const pluginData = (await api(`plugins/${job.pluginId}`)) as Plugin;
       const seriesData: { [seriesUid: string]: any } = {};
+      const viewPersonalInfoFlag = user.accessiblePlugins
+        .filter(p => p.roles.includes('viewPersonalInfo'))
+        .some(p => p.pluginId === job.pluginId);
       for (const s of job.series) {
         const seriesUid = s.seriesUid;
         if (seriesUid in seriesData) continue;
         seriesData[seriesUid] = await api(`series/${seriesUid}`);
+        if (!viewPersonalInfoFlag) {
+          delete seriesData[seriesUid].patientInfo;
+        }
       }
       dispatch(
         actions.reset({
@@ -255,9 +264,27 @@ const PluginJobDetail: React.FC<{}> = props => {
     loadAttachment.list = () =>
       api(`plugin-jobs/${job.jobId}/attachment`) as Promise<string[]>;
 
+    const inputtableFeedback = user.accessiblePlugins
+      .filter(p =>
+        p.roles.includes(
+          feedbackState.isConsensual
+            ? 'inputConsensualFeedback'
+            : 'inputPersonalFeedback'
+        )
+      )
+      .some(p => p.pluginId === job.pluginId);
+
+    setNoPermissionMessage(
+      inputtableFeedback
+        ? null
+        : `You do not have permission to input ${
+            feedbackState.isConsensual ? 'consensual' : 'personal'
+          } feedback`
+    );
+
     return {
       consensual: feedbackState.isConsensual,
-      editable: feedbackState.editable,
+      editable: inputtableFeedback && feedbackState.editable,
       job,
       plugin: pluginData,
       eventLogger: insertLog,
@@ -376,6 +403,11 @@ const PluginJobDetail: React.FC<{}> = props => {
           />
         </CsResultsContext.Provider>
         <div className="job-detail-footer">
+          {noPermissionMessage && (
+            <span className="regisiter-message text-danger">
+              {noPermissionMessage}
+            </span>
+          )}
           {feedbackState.message && (
             <span className="regisiter-message text-success">
               {feedbackState.message}

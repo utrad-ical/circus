@@ -61,7 +61,7 @@ describe('plugin-job search', () => {
   test('Filter by power user domain', async () => {
     const res = await bob.get('api/plugin-jobs');
     expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(3);
+    expect(res.data.items).toHaveLength(2);
   });
 
   test('Filter by guest domain', async () => {

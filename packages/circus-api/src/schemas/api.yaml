@@ -40,6 +40,12 @@ properties:
             - type: array
               items:
                 type: string
+        requiredPluginPrivilege:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
         requiredSeriesDomainCheck:
           oneOf:
             - type: string

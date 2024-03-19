@@ -12,11 +12,14 @@ import useLoginUser from 'utils/useLoginUser';
 const CreateNewCase: React.FC<{}> = props => {
   const user = useLoginUser()!;
   const writableProjects = useMemo(
-    () => user.accessibleProjects.filter(p => p.roles.indexOf('write') >= 0),
+    () =>
+      user.accessibleProjects.filter(
+        p => p.roles.includes('write') && p.roles.includes('read')
+      ),
     [user]
   );
   const [selectedProject, setSelectedProject] = useState(
-    writableProjects[0].projectId
+    writableProjects[0] && writableProjects[0].projectId
   );
   const [selectedSeries, setSelectedSeries] = useState<SeriesEntry[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);

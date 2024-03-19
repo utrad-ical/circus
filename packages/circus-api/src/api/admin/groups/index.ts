@@ -29,7 +29,6 @@ const checkPermissionsConsistency = (permissions: any) => {
   for (const role of dbRoleNames.filter(r => r !== 'read')) {
     const projectIds = permissions[`${role}Projects`];
     if (projectIds) {
-      console.log('projectIds', projectIds);
       for (const projectId of projectIds) {
         if (!readableProjectIds.includes(projectId)) {
           throw new Error(`All projects with ${role}Projects must be readable`);

@@ -114,7 +114,7 @@ describe('plugin-job privilege checker', () => {
     const resource = 'plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa';
     userEmail = 'alice@example.com';
     const res = await ax.get(resource);
-    console.log(res.data);
+    // console.log(res.data);
     expect(res.data).toBe('Protected Area');
   });
 

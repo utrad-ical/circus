@@ -322,31 +322,7 @@ export const handlePostFeedback: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const jobId = ctx.params.jobId;
     const job = await models.pluginJob.findByIdOrFail(jobId);
-
-    const mode = ctx.params.mode;
-    if (mode !== 'personal' && mode !== 'consensual') {
-      ctx.throw(status.BAD_REQUEST, 'Invalid feedback mode string.');
-    }
-    const isConsensual = mode === 'consensual';
-
-    const jobDoc = await models.pluginJob.findByIdOrFail(jobId);
-    const pluginId = jobDoc.pluginId;
-
-    if (
-      !ctx.userPrivileges.accessiblePlugins.some(
-        p =>
-          p.roles.includes(
-            isConsensual ? 'inputConsensualFeedback' : 'inputPersonalFeedback'
-          ) && p.pluginId === pluginId
-      )
-    ) {
-      ctx.throw(
-        401,
-        `You do not have permission to input ${
-          isConsensual ? 'consensual' : 'personal'
-        } feedback.`
-      );
-    }
+    const isConsensual = ctx.request.url.split('/')[4] === 'consensual';
 
     const feedbacks = job.feedbacks as any[]; // TODO: Fix typing
     if (feedbacks.find(f => f.isConsensual)) {

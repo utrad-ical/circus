@@ -25,10 +25,15 @@ const checkPrivilege: (
       const okay = requiredGlobalPrivilege.every(rp =>
         globalPrivileges.some(pp => pp === rp)
       );
+      const failedPrivileges = requiredGlobalPrivilege.filter(
+        rp => !globalPrivileges.some(pp => pp === rp)
+      );
       if (!okay) {
         ctx.throw(
           status.UNAUTHORIZED,
-          'You do not have sufficient privilege to access this resource.'
+          `You do not have sufficient privilege to access this resource.${failedPrivileges.join(
+            ','
+          )}`
         );
       }
     }

@@ -4,7 +4,6 @@ description: >
 routes:
   - verb: get
     path: /plugin-job-queue
-    requiredPluginPrivilege: executePlugin
     description: >
       Returns plugin job queue.
     responseSchema: pluginJob|searchResult

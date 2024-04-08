@@ -115,12 +115,12 @@ const GroupAdmin: React.FC<any> = props => {
         [
           {
             key: 'readProjects',
-            caption: 'Readable',
+            caption: 'Read Cases',
             editor: projectSelect
           },
           {
             key: 'writeProjects',
-            caption: 'Writable',
+            caption: 'Write New Cases',
             editor: projectSelect
           },
           {
@@ -135,34 +135,34 @@ const GroupAdmin: React.FC<any> = props => {
           },
           {
             key: 'moderateProjects',
-            caption: 'Moderate',
+            caption: 'Moderate Cases',
             editor: projectSelect
           }
         ],
         [
           {
             key: 'readPlugin',
-            caption: 'Readable',
+            caption: 'Read Results',
             editor: pluginSelect
           },
           {
             key: 'executePlugin',
-            caption: 'Executable',
+            caption: 'Execute New Plug-in Jobs',
             editor: pluginSelect
           },
           {
             key: 'manageJobs',
-            caption: 'Manage Plugin Jobs',
+            caption: 'Manage Plug-in Jobs',
             editor: pluginSelect
           },
           {
             key: 'inputPersonalFeedback',
-            caption: 'Personal Feedback',
+            caption: 'Input Personal Feedback',
             editor: pluginSelect
           },
           {
             key: 'inputConsensualFeedback',
-            caption: 'Consensual Feedback',
+            caption: 'Input Consensual Feedback',
             editor: pluginSelect
           },
           {
@@ -194,8 +194,8 @@ const GroupAdmin: React.FC<any> = props => {
       targetName={item => item.groupName}
       subtitles={[
         { icon: 'record', title: 'General' },
-        { icon: 'circus-case', title: 'DB (Project based preferences)' },
-        { icon: 'circus-job', title: 'CS (Plugin based preferences)' }
+        { icon: 'circus-case', title: 'CIRCUS DB (Project based preferences)' },
+        { icon: 'circus-job', title: 'CIRCUS CS (Plug-in based preferences)' }
       ]}
     />
   );

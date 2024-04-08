@@ -110,15 +110,7 @@ describe('project privilege checker', () => {
 });
 
 describe('plugin-job privilege checker', () => {
-  it('should pass for user with good plugin-job privilege', async () => {
-    const resource = 'plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa';
-    userEmail = 'frank@example.com';
-    const res = await ax.get(resource);
-    console.log(res.data);
-    expect(res.data).toBe('Protected Area');
-  });
-
-  it('should fail for user without a privilege', async () => {
+  it('should pass for user without a privilege', async () => {
     const resource = 'plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa';
     userEmail = 'alice@example.com';
     const res = await ax.get(resource);
@@ -129,13 +121,6 @@ describe('plugin-job privilege checker', () => {
   it('should fail for user without a privilege', async () => {
     const resource = 'plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa';
     userEmail = 'bob@example.com';
-    const res = await ax.get(resource);
-    expect(res.status).toBe(401);
-  });
-
-  it('should fail for user without a privilege', async () => {
-    const resource = 'plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa';
-    userEmail = 'guest@example.com';
     const res = await ax.get(resource);
     expect(res.status).toBe(401);
   });

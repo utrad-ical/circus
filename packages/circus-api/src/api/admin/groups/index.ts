@@ -1,9 +1,5 @@
 import status from 'http-status';
-import {
-  csRoleNames,
-  dbRoleNames,
-  globalPrivileges
-} from '../../../privilegeUtils';
+import { globalPrivileges } from '../../../privilegeUtils';
 import { RouteMiddleware } from '../../../typings/middlewares';
 import performSearch from '../../performSearch';
 
@@ -24,26 +20,37 @@ export const handleGet: RouteMiddleware = ({ models }) => {
   };
 };
 
+const permissionsDependencies = {
+  writeProjects: ['readProjects'],
+  viewPersonalInfoProjects: ['readProjects'],
+  moderateProjects: ['readProjects'],
+  addSeriesProjects: ['readProjects'],
+  executePlugin: ['readPlugin'],
+  manageJobs: ['readPlugin'],
+  inputPersonalFeedback: ['readPlugin'],
+  inputConsensualFeedback: ['readPlugin'],
+  manageFeedback: ['readPlugin'],
+  viewPersonalInfo: ['readPlugin']
+};
+
 const checkPermissionsConsistency = (permissions: any) => {
-  const readableProjectIds = permissions['readProjects'];
-  for (const role of dbRoleNames.filter(r => r !== 'read')) {
-    const projectIds = permissions[`${role}Projects`];
-    if (projectIds) {
-      for (const projectId of projectIds) {
-        if (!readableProjectIds.includes(projectId)) {
-          throw new Error(`All projects with ${role}Projects must be readable`);
-        }
-      }
-    }
-  }
-  const readablePluginIds = permissions['readPlugin'];
-  for (const role of csRoleNames.filter(r => r !== 'readPlugin')) {
-    const pluginIds = permissions[role];
-    if (pluginIds) {
-      for (const pluginId of pluginIds) {
-        if (!readablePluginIds.includes(pluginId)) {
-          throw new Error(`All plugins with ${role} must be readable`);
-        }
+  for (const [permission, dependencies] of Object.entries(
+    permissionsDependencies
+  )) {
+    const ids = permissions[permission] || [];
+
+    for (const dependency of dependencies) {
+      const dependentIds = permissions[dependency] || [];
+
+      const inconsistentIds = ids.filter(
+        (id: any) => !dependentIds.includes(id)
+      );
+      if (inconsistentIds.length > 0) {
+        throw new Error(
+          `All items with ${permission} must have ${dependency}. Inconsistent IDs: ${inconsistentIds.join(
+            ', '
+          )}`
+        );
       }
     }
   }

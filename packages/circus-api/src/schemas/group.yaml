@@ -6,11 +6,11 @@ properties:
   groupId:
     type: number
     description: >
-      :key: Group ID, which is an incremental number only unique per installation.
+      A unique incremental identifier for the group within a single installation.
   groupName:
     type: string
     description: >
-      Group name.
+      The name of the group.
   privileges:
     type: array
     items:
@@ -21,82 +21,84 @@ properties:
         - personalInfoView
         - downloadVolume
         - issueOnetime
+    description: >
+      A list of privileges assigned to the group.
   domains:
     type: array
     items:
       type: string
     description: >
-      The list of domains which the members of this groups will be granted access.
+      Domains that group members are allowed to access.
   readProjects:
     type: array
     items:
       type: string
     description: >
-      The list of project IDs which the members of this group have read access.
+      Project IDs that group members have read access to.
   writeProjects:
     type: array
     items:
       type: string
     description: >
-      The list of project IDs which the members of this group have write access.
+      Project IDs that group members have write access to.
   addSeriesProjects:
     type: array
     items:
       type: string
     description: >
-      The list of project IDs which the members of this group can add series to existing cases.
+      Project IDs where group members can add series to existing cases.
   viewPersonalInfoProjects:
     type: array
     items:
       type: string
     description: >
-      The list of project IDs which the members of this group can access personal information.
+      Project IDs where group members can view personal information.
   moderateProjects:
     type: array
     items:
       type: string
     description: >
-      The list of project IDs which the members of this group have the moderator privilege.
+      Project IDs where group members have moderation privileges.
   readPlugin:
     type: array
     items:
       type: string
     description: >
-      The list of plugin IDs which the members of this group have read access.
+      Plugin IDs that group members have read access to.
   executePlugin:
     type: array
     items:
       type: string
     description: >
-      The list of plugin IDs which the members of this group can execute.
+      Plugin IDs that group members can execute.
   manageJobs:
     type: array
     items:
       type: string
     description: >
-      The list of plugin IDs which the members of this group can invalidate succeeded jobs.
+      Plugin IDs where group members can manage and invalidate succeeded jobs.
   inputConsensualFeedback:
     type: array
     items:
       type: string
     description: >
-      The list of plugin IDs which the members of this group can input consensual feedback.
+      Plugin IDs where group members can input consensual feedback.
   inputPersonalFeedback:
     type: array
     items:
       type: string
     description: >
-      The list of plugin IDs which the members of this group can input personal feedback.
+      Plugin IDs where group members can input personal feedback.
   manageFeedback:
     type: array
     items:
       type: string
     description: >
-      The list of plugin IDs which the members of this group can delete feedbacks.
+      Plugin IDs where group members can manage and delete feedback.
   viewPersonalInfo:
     type: array
     items:
       type: string
     description: >
-      The list of plugin IDs which the members of this group can access personal information.
+      Plugin IDs where group members can view personal information.
 additionalProperties: false

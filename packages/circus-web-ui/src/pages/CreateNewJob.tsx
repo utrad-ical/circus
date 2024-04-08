@@ -123,7 +123,7 @@ const CreateNewJob: React.FC<{}> = props => {
       </h1>
       <SeriesSelector value={selectedSeries} onChange={setSelectedSeries} />
       <div>
-        Plugin:&ensp;
+        Plug-in:&ensp;
         <ShrinkSelect
           options={pluginOptions}
           value={selectedPlugin!}

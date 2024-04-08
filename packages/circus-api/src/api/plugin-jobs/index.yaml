@@ -79,10 +79,19 @@ routes:
     handler: handleGetAttachment
   # Feedback
   - verb: post
-    path: /plugin-jobs/:jobId/feedback/:mode
+    path: /plugin-jobs/:jobId/feedback/consensual
     requiredSeriesDomainCheck: true
+    requiredPluginPrivilege: inputConsensualFeedback
     description: >
-      Creates a new feedback entry for the specified plug-in job.
+      Creates a new consensual feedback entry for the specified plug-in job.
+    requestSchema: pluginJobFeedback|only data,actionLog
+    handler: handlePostFeedback
+  - verb: post
+    path: /plugin-jobs/:jobId/feedback/personal
+    requiredSeriesDomainCheck: true
+    requiredPluginPrivilege: inputPersonalFeedback
+    description: >
+      Creates a new personal feedback entry for the specified plug-in job.
     requestSchema: pluginJobFeedback|only data,actionLog
     handler: handlePostFeedback
   - verb: get
@@ -98,7 +107,6 @@ routes:
     handler: handleGetFeedback
   - verb: delete
     handler: handleDeleteFeedback
-    requiredGlobalPrivilege: manageServer
     path: /plugin-jobs/:jobId/feedback/:feedbackId
     requiredSeriesDomainCheck: true
     requiredPluginPrivilege: manageFeedback

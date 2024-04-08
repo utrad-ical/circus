@@ -58,6 +58,7 @@ test('registers a CAD plug-in', async () => {
 
 test('rejects a broken CAD definition file', async () => {
   pluginDefFileContent = {
+    type: 'CAD',
     pluginName: 'my awesome cad',
     version: '1.4.x.y',
     description: 'detects everything'

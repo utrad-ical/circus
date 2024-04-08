@@ -18,7 +18,7 @@ const MyPluginJobList: React.FC<{}> = props => {
 
   return (
     <MyListPage
-      title="My Plugin Job List"
+      title="My Plug-in Job List"
       resource={resource}
       resourceType="pluginJobs"
       toUrl={myListId => `/browse/plugin-jobs/mylist/${myListId}`}

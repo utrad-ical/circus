@@ -1,10 +1,11 @@
-import EditorPage from './EditorPage';
-import React, { useState, useEffect } from 'react';
-import { useApi } from 'utils/api';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import * as et from '@smikitky/rb-components/lib/editor-types';
-import ProjectSelectorMultiple from 'components/ProjectSelectorMultiple';
 import { DataGridColumnDefinition } from 'components/DataGrid';
+import PluginSelectorMultiple from 'components/PluginSelectorMultiple';
+import ProjectSelectorMultiple from 'components/ProjectSelectorMultiple';
+import React, { useEffect, useState } from 'react';
+import { useApi } from 'utils/api';
+import EditorPage from './EditorPage';
 
 const makeEmptyItem = () => {
   return {
@@ -15,7 +16,14 @@ const makeEmptyItem = () => {
     writeProjects: [],
     addSeriesProjects: [],
     viewPersonalInfoProjects: [],
-    moderateProjects: []
+    moderateProjects: [],
+    readPlugin: [],
+    executePlugin: [],
+    manageJobs: [],
+    inputPersonalFeedback: [],
+    inputConsensualFeedback: [],
+    manageFeedback: [],
+    viewPersonalInfo: []
   };
 };
 
@@ -79,43 +87,95 @@ const GroupAdmin: React.FC<any> = props => {
         <ProjectSelectorMultiple projects={projectOptions} {...props} />
       );
 
+      const plugins = (await api('admin/plugins?unlimited=1')).items as {
+        pluginId: string;
+      }[];
+      const pluginOptions = plugins.map(plugin => ({
+        pluginId: plugin.pluginId,
+        plugin
+      }));
+      const pluginSelect: React.FC<any> = props => (
+        <PluginSelectorMultiple plugins={pluginOptions} {...props} />
+      );
+
       setEditorProperties([
-        { key: 'groupName', caption: 'Group Name', editor: et.text() }, // 0
-        {
-          key: 'privileges',
-          caption: 'Privileges',
-          editor: et.multiSelect(privileges, { type: 'checkbox' })
-        },
-        {
-          key: 'domains',
-          caption: 'Accessible Domains',
-          editor: et.multiSelect(domains, { type: 'checkbox' })
-        },
-        {
-          key: 'readProjects',
-          caption: 'Readable Projects',
-          editor: projectSelect
-        },
-        {
-          key: 'writeProjects',
-          caption: 'Writable Projects',
-          editor: projectSelect
-        },
-        {
-          key: 'addSeriesProjects',
-          caption: 'Add Series Projects',
-          editor: projectSelect
-        },
-        {
-          key: 'viewPersonalInfoProjects',
-          caption: 'View Personal Info Projects',
-          editor: projectSelect
-        },
-        {
-          key: 'moderateProjects',
-          caption: 'Moderate Projects',
-          editor: projectSelect
-        }
+        [
+          { key: 'groupName', caption: 'Group Name', editor: et.text() }, // 0
+          {
+            key: 'privileges',
+            caption: 'Privileges',
+            editor: et.multiSelect(privileges, { type: 'checkbox' })
+          },
+          {
+            key: 'domains',
+            caption: 'Accessible Domains',
+            editor: et.multiSelect(domains, { type: 'checkbox' })
+          }
+        ],
+        [
+          {
+            key: 'readProjects',
+            caption: 'Read Cases',
+            editor: projectSelect
+          },
+          {
+            key: 'writeProjects',
+            caption: 'Write New Cases',
+            editor: projectSelect
+          },
+          {
+            key: 'addSeriesProjects',
+            caption: 'Add Series',
+            editor: projectSelect
+          },
+          {
+            key: 'viewPersonalInfoProjects',
+            caption: 'View Personal Info',
+            editor: projectSelect
+          },
+          {
+            key: 'moderateProjects',
+            caption: 'Moderate Cases',
+            editor: projectSelect
+          }
+        ],
+        [
+          {
+            key: 'readPlugin',
+            caption: 'Read Results',
+            editor: pluginSelect
+          },
+          {
+            key: 'executePlugin',
+            caption: 'Execute New Plug-in Jobs',
+            editor: pluginSelect
+          },
+          {
+            key: 'manageJobs',
+            caption: 'Manage Plug-in Jobs',
+            editor: pluginSelect
+          },
+          {
+            key: 'inputPersonalFeedback',
+            caption: 'Input Personal Feedback',
+            editor: pluginSelect
+          },
+          {
+            key: 'inputConsensualFeedback',
+            caption: 'Input Consensual Feedback',
+            editor: pluginSelect
+          },
+          {
+            key: 'manageFeedback',
+            caption: 'Manage Feedback',
+            editor: pluginSelect
+          },
+          {
+            key: 'viewPersonalInfo',
+            caption: 'View Personal Info',
+            editor: pluginSelect
+          }
+        ]
       ]);
     };
     didMount();
@@ -132,6 +192,11 @@ const GroupAdmin: React.FC<any> = props => {
       listColumns={listColumns}
       makeEmptyItem={makeEmptyItem}
       targetName={item => item.groupName}
+      subtitles={[
+        { icon: 'record', title: 'General' },
+        { icon: 'circus-case', title: 'CIRCUS DB (Project based preferences)' },
+        { icon: 'circus-job', title: 'CIRCUS CS (Plug-in based preferences)' }
+      ]}
     />
   );
 };

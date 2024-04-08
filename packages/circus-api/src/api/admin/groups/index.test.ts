@@ -50,7 +50,14 @@ const basicGroupData = {
   writeProjects: [],
   addSeriesProjects: [],
   viewPersonalInfoProjects: [],
-  moderateProjects: []
+  moderateProjects: [],
+  readPlugin: [],
+  executePlugin: [],
+  manageJobs: [],
+  inputPersonalFeedback: [],
+  inputConsensualFeedback: [],
+  manageFeedback: [],
+  viewPersonalInfo: []
 };
 
 it('should add a new group', async () => {
@@ -85,6 +92,65 @@ it('should return error for invalid group update', async () => {
   });
   expect(res3.status).toBe(400);
   expect(res3.data.error).toMatch(/Group ID cannot be specified/);
+});
+
+const permissionsDependencies = {
+  writeProjects: ['readProjects'],
+  viewPersonalInfoProjects: ['readProjects'],
+  moderateProjects: ['readProjects'],
+  addSeriesProjects: ['readProjects'],
+  executePlugin: ['readPlugin'],
+  manageJobs: ['readPlugin'],
+  inputPersonalFeedback: ['readPlugin'],
+  inputConsensualFeedback: ['readPlugin'],
+  manageFeedback: ['readPlugin'],
+  viewPersonalInfo: ['readPlugin']
+};
+
+const updateGroupData = async (
+  data: typeof basicGroupData,
+  expectedStatus: number
+) => {
+  const res = await axios.request({
+    method: 'patch',
+    url: 'api/admin/groups/1',
+    data
+  });
+  expect(res.status).toBe(expectedStatus);
+};
+
+describe('group permission updates', () => {
+  describe('success cases', () => {
+    it.each(Object.entries(permissionsDependencies))(
+      '%s: should update successfully when dependencies are met',
+      async (permission, dependencies) => {
+        const data = {
+          ...basicGroupData,
+          [permission]: ['sampleId'],
+          ...dependencies.reduce(
+            (acc, dep) => ({ ...acc, [dep]: ['sampleId'] }),
+            {}
+          )
+        };
+
+        await updateGroupData(data, 204);
+      }
+    );
+  });
+
+  describe('failure cases', () => {
+    it.each(Object.entries(permissionsDependencies))(
+      '%s: should fail to update when dependencies are not met',
+      async permission => {
+        const data = {
+          ...basicGroupData,
+          [permission]: ['sampleId']
+        };
+
+        await updateGroupData(data, 400);
+      }
+    );
+  });
 });
 
 it('should return global-privileges', async () => {

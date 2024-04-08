@@ -5,14 +5,13 @@ import CsVolumeDownloadModal from 'components/CsVolumeDownloadModal';
 import IconButton from 'components/IconButton';
 import PluginDisplay from 'components/PluginDisplay';
 import SeriesSelector, { SeriesEntry } from 'components/SeriesSelector';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useApi } from 'utils/api';
 import useLocalPreference from 'utils/useLocalPreference';
 import useLoginUser from 'utils/useLoginUser';
 import useShowMessage from 'utils/useShowMessage';
-import Plugin from '../types/Plugin';
 
 const CreateNewJob: React.FC<{}> = props => {
   const [selectedPlugin, setSelectedPlugin] = useState<string | null>(null);
@@ -22,20 +21,24 @@ const CreateNewJob: React.FC<{}> = props => {
   );
   const [selectedSeries, setSelectedSeries] = useState<SeriesEntry[]>([]);
   const [busy, setBusy] = useState(true);
-  const [plugins, setPlugins] = useState<Plugin[] | null>(null);
   const [showVolumeDownloadModal, setShowVolumeDownloadModal] = useState(false);
 
   const api = useApi();
-  const appState = useSelector(state => state);
   const user = useLoginUser();
+  const accessiblePlugins = useMemo(
+    () =>
+      user.accessiblePlugins.filter(
+        p => p.roles.includes('executePlugin') && p.roles.includes('readPlugin')
+      ),
+    [user]
+  );
+
   const showMessage = useShowMessage();
   const seriesUid = useParams<any>().seriesUid;
 
   useEffect(() => {
     const load = async () => {
       setBusy(true);
-      const plugins = (await api('plugins')) as Plugin[];
-      setPlugins(plugins);
       setSelectedSeries([{ seriesUid, partialVolumeDescriptor: 'auto' }]);
       setBusy(false);
     };
@@ -45,14 +48,14 @@ const CreateNewJob: React.FC<{}> = props => {
   // Pre-select previously-used plug-in
   useEffect(() => {
     if (
-      plugins &&
+      accessiblePlugins &&
       !selectedPlugin &&
       defaultPlugin &&
-      plugins.find(p => p.pluginId === defaultPlugin)
+      accessiblePlugins.find(p => p.pluginId === defaultPlugin)
     ) {
       setSelectedPlugin(defaultPlugin);
     }
-  }, [defaultPlugin, plugins, selectedPlugin]);
+  }, [defaultPlugin, accessiblePlugins, selectedPlugin]);
 
   const handleCreate = async () => {
     const callApi = async (force = false) => {
@@ -93,11 +96,11 @@ const CreateNewJob: React.FC<{}> = props => {
     setShowVolumeDownloadModal(true);
   };
 
-  if (!Array.isArray(plugins)) {
+  if (!Array.isArray(accessiblePlugins)) {
     return <LoadingIndicator />;
   }
 
-  if (!plugins.length) {
+  if (!accessiblePlugins.length) {
     return (
       <div className="alert alert-danger">There is no plug-in installed.</div>
     );
@@ -106,7 +109,7 @@ const CreateNewJob: React.FC<{}> = props => {
   const canCreate = !busy && selectedPlugin && selectedSeries.length > 0;
 
   const pluginOptions: { [pluginId: string]: any } = {};
-  plugins.forEach(plugin => {
+  accessiblePlugins.forEach(plugin => {
     pluginOptions[plugin.pluginId] = {
       caption: <PluginDisplay pluginId={plugin.pluginId} />
     };
@@ -120,7 +123,7 @@ const CreateNewJob: React.FC<{}> = props => {
       </h1>
       <SeriesSelector value={selectedSeries} onChange={setSelectedSeries} />
       <div>
-        Plugin:&ensp;
+        Plug-in:&ensp;
         <ShrinkSelect
           options={pluginOptions}
           value={selectedPlugin!}

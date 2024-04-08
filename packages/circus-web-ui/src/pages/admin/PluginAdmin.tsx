@@ -11,7 +11,7 @@ import { DataGridColumnDefinition } from 'components/DataGrid';
 
 const makeEmptyItem = () => {
   return {
-    pluginName: 'new plugin',
+    pluginName: 'new plug-in',
     pluginVersion: '1.0.1',
     icon: {
       glyph: 'calc',

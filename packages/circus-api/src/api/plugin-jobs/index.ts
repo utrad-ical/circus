@@ -75,6 +75,18 @@ export const handlePatch: RouteMiddleware = ({ transactionManager, cs }) => {
     const jobId = ctx.params.jobId;
     const newStatus = ctx.request.body.status as 'cancelled' | 'invalidated';
     await transactionManager.withTransaction(async models => {
+      const jobDoc = await models.pluginJob.findByIdOrFail(jobId);
+      const pluginId = jobDoc.pluginId;
+
+      if (
+        newStatus === 'invalidated' &&
+        !ctx.userPrivileges.accessiblePlugins.some(
+          p => p.roles.includes('manageJobs') && p.pluginId === pluginId
+        )
+      ) {
+        ctx.throw(401, `You do not have permission to invalidate this job.`);
+      }
+
       const job = await models.pluginJob.findByIdOrFail(jobId);
       if (
         (newStatus === 'cancelled' && job.status !== 'in_queue') ||
@@ -135,7 +147,23 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
     const domainFilter = {
       domain: { $in: ctx.userPrivileges.domains }
     };
-    const filter = { $and: [customFilter!, domainFilter] };
+
+    const accessiblePluginIds = ctx.userPrivileges.accessiblePlugins
+      .filter(p => p.roles.includes('readPlugin'))
+      .map(p => p.pluginId);
+    const accessiblePluginFilter = {
+      pluginId: { $in: accessiblePluginIds }
+    };
+    const filter = {
+      $and: [customFilter!, domainFilter, accessiblePluginFilter]
+    };
+
+    const canViewPersonalInfoPluginIds = ctx.userPrivileges.accessiblePlugins
+      .filter(
+        p =>
+          p.roles.includes('readPlugin') && p.roles.includes('viewPersonalInfo')
+      )
+      .map(p => p.pluginId);
 
     const myListId = ctx.params.myListId;
     const user = ctx.user;
@@ -168,10 +196,13 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
       { $match: { volId: 0 } }, // primary series only
       {
         $addFields: {
-          // Conditionally appends "patientInfo" field
-          ...(canViewPersonalInfo
-            ? { patientInfo: '$seriesInfo.patientInfo' }
-            : {}),
+          patientInfo: {
+            $cond: [
+              { $in: ['$pluginId', canViewPersonalInfoPluginIds] },
+              '$seriesInfo.patientInfo',
+              null
+            ]
+          },
           seriesUid: '$series.seriesUid', // primary series UID only
           studyUid: '$seriesInfo.studyUid',
           seriesDate: '$seriesInfo.seriesDate',
@@ -291,12 +322,7 @@ export const handlePostFeedback: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const jobId = ctx.params.jobId;
     const job = await models.pluginJob.findByIdOrFail(jobId);
-
-    const mode = ctx.params.mode;
-    if (mode !== 'personal' && mode !== 'consensual') {
-      ctx.throw(status.BAD_REQUEST, 'Invalid feedback mode string.');
-    }
-    const isConsensual = mode === 'consensual';
+    const isConsensual = ctx.request.url.split('/')[4] === 'consensual';
 
     const feedbacks = job.feedbacks as any[]; // TODO: Fix typing
     if (feedbacks.find(f => f.isConsensual)) {

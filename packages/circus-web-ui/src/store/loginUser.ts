@@ -1,4 +1,5 @@
 import Project, { ProjectRoles } from '../types/Project';
+import Plugin, { PluginRoles } from '../types/Plugin';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export type GlobalPrivilege =
@@ -79,6 +80,11 @@ export interface LoginUser {
       projectId: string;
       project: Project;
       roles: ProjectRoles[];
+    }>;
+    accessiblePlugins: Array<{
+      pluginId: string;
+      plugin: Plugin;
+      roles: PluginRoles[];
     }>;
   };
 }

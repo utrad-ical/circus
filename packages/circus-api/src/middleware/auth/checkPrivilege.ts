@@ -16,6 +16,7 @@ const checkPrivilege: (
 ) => CircusMiddeware = ({ models }, route) => {
   const requiredGlobalPrivilege = wrap(route.requiredGlobalPrivilege);
   const requiredProjectPrivilege = wrap(route.requiredProjectPrivilege);
+  const requiredPluginPrivilege = wrap(route.requiredPluginPrivilege);
   const requiredSeriesDomainCheck = wrap(route.requiredSeriesDomainCheck);
 
   return async function checkPrivilege(ctx, next) {
@@ -24,10 +25,15 @@ const checkPrivilege: (
       const okay = requiredGlobalPrivilege.every(rp =>
         globalPrivileges.some(pp => pp === rp)
       );
+      const failedPrivileges = requiredGlobalPrivilege.filter(
+        rp => !globalPrivileges.some(pp => pp === rp)
+      );
       if (!okay) {
         ctx.throw(
           status.UNAUTHORIZED,
-          'You do not have sufficient privilege to access this resource.'
+          `You do not have sufficient privilege to access this resource.${failedPrivileges.join(
+            ','
+          )}`
         );
       }
     }
@@ -66,6 +72,45 @@ const checkPrivilege: (
           `You do not have "${requiredProjectPrivilege.join(
             ','
           )}" privilege of this project.`
+        );
+      }
+    }
+
+    if (requiredPluginPrivilege) {
+      let pluginId: string;
+
+      // Check plugin privilege either via jobId or directly via pluginId
+      if (ctx.params.jobId) {
+        const jobId = ctx.params.jobId;
+        const jobDoc = await models.pluginJob.findByIdOrFail(jobId);
+        ctx.job = jobDoc;
+        pluginId = jobDoc.pluginId;
+      } else if (ctx.params.pluginId) {
+        pluginId = ctx.params.pluginId;
+      } else {
+        ctx.throw(
+          status.BAD_REQUEST,
+          'No plugin or job specified to check plugin privilege.'
+        );
+      }
+      ctx.plugin = await models.plugin.findById(pluginId!);
+
+      const { accessiblePlugins } = ctx.userPrivileges;
+      let ok = true;
+      const plugin = accessiblePlugins.find(p => p.pluginId === pluginId);
+      if (plugin) {
+        ok = requiredPluginPrivilege.every(rp =>
+          plugin.roles.some((r: any) => r === rp)
+        );
+      } else {
+        ok = false;
+      }
+      if (!ok) {
+        ctx.throw(
+          status.UNAUTHORIZED,
+          `You do not have "${requiredPluginPrivilege.join(
+            ','
+          )}" privilege of this plugin.`
         );
       }
     }

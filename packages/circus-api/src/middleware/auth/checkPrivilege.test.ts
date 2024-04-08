@@ -45,7 +45,13 @@ beforeAll(async () => {
     );
     router.get(
       '/plugin-jobs/:jobId',
-      checkPrivilege({ models }, { requiredSeriesDomainCheck: true }),
+      checkPrivilege(
+        { models },
+        {
+          requiredSeriesDomainCheck: true,
+          requiredPluginPrivilege: 'readPlugin'
+        }
+      ),
       async (ctx, next) => (ctx.body = 'Protected Area')
     );
     app.use(router.routes());
@@ -104,10 +110,11 @@ describe('project privilege checker', () => {
 });
 
 describe('plugin-job privilege checker', () => {
-  it('should pass for user with good plugin-job privilege', async () => {
+  it('should pass for user without a privilege', async () => {
     const resource = 'plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa';
     userEmail = 'alice@example.com';
     const res = await ax.get(resource);
+    console.log(res.data);
     expect(res.data).toBe('Protected Area');
   });
 

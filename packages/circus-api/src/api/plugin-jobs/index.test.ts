@@ -17,10 +17,12 @@ beforeAll(async () => {
 
 afterAll(async () => await apiTest.tearDown());
 
-// (bob belongs to vega.org domain)
+// (alice belongs to sirius.org domain, and has readPlugin and manageFeedback permissions)
+// (bob belongs to vega.org domain, and has readPlugin, executePlugin and inputPersonalFeedback permissions)
 // (guest belongs to no domain)
-// (dave belongs to sirius.org and vega.org domain)
-// (frank belongs to sirius.org and vega.org domain)
+// (dave belongs to sirius.org and vega.org domain, and
+//  has readPlugin, executePlugin, manageJobs, inputConsensualFeedback, inputPersonalFeedback, manageFeedback, and viewPersonalInfo permissions)
+// (frank belongs to sirius.org and vega.org domain, and has readPlugin permission)
 
 // 111.222.333.444.444: (  1) [sirius.org]
 // 111.222.333.444.555: (150) [sirius.org]
@@ -61,7 +63,7 @@ describe('plugin-job search', () => {
   test('Filter by power user domain', async () => {
     const res = await bob.get('api/plugin-jobs');
     expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(3);
+    expect(res.data.items).toHaveLength(2);
   });
 
   test('Filter by guest domain', async () => {
@@ -76,6 +78,17 @@ describe('plugin-job search', () => {
       params: { filter: { 'patientInfo.patientName': 'Sakura' } }
     });
     expect(res.status).toBe(400);
+  });
+
+  test('should not be able to filter by patientInfo if user has no viewPersonalInfo', async () => {
+    // Alice has global privilege `personalInfoView` but no viewPersonalInfo for plugins.
+    const res = await alice.get('api/plugin-jobs', {
+      params: {
+        filter: JSON.stringify({ 'patientInfo.patientName': 'Sakura' })
+      }
+    });
+    expect(res.status).toBe(200);
+    expect(res.data.items).toHaveLength(0);
   });
 
   test('should be searchable if patient information is not used', async () => {
@@ -156,7 +169,7 @@ describe('search by mylist', () => {
 });
 
 describe('plugin-job registration', () => {
-  test('should register a new plug-in job', async () => {
+  test('should register a new plug-in job if a user has executePlugin', async () => {
     const res = await dave.request({
       method: 'post',
       url: 'api/plugin-jobs',
@@ -172,6 +185,24 @@ describe('plugin-job registration', () => {
       }
     });
     expect(res.status).toBe(201);
+  });
+
+  test('should not register a new plug-in job if a user has no executePlugin', async () => {
+    const res = await frank.request({
+      method: 'post',
+      url: 'api/plugin-jobs',
+      data: {
+        pluginId:
+          'd135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2',
+        series: [
+          {
+            seriesUid: '111.222.333.444.555',
+            partialVolumeDescriptor: { start: 25, end: 85, delta: 3 }
+          }
+        ]
+      }
+    });
+    expect(res.status).toBe(400);
   });
 
   test('should reject if series image out of range', async () => {
@@ -314,6 +345,15 @@ describe('job invalidation', () => {
     });
     expect(res.status).toBe(status.UNPROCESSABLE_ENTITY);
   });
+
+  test('invalidation fails if a user has no manageJobs', async () => {
+    const res = await frank.request({
+      method: 'patch',
+      url: 'api/plugin-jobs/01f5dt3qn9877g072t9y7h7pjp',
+      data: { status: 'invalidated' }
+    });
+    expect(res.status).toBe(status.UNAUTHORIZED);
+  });
 });
 
 test('should return a finished plug-in job', async () => {
@@ -363,6 +403,13 @@ describe('delete feedback', () => {
     );
     expect(res.status).toBe(status.NO_CONTENT);
     expect(await getCount()).toBe(2);
+  });
+
+  test('should not delete one feedback if a user has no manageFeedback', async () => {
+    const res = await frank.delete(
+      `api/plugin-jobs/${jobId}/feedback/01grtppnyxbdherkv2krd2n72a`
+    );
+    expect(res.status).toBe(status.UNAUTHORIZED);
   });
 
   test('return 404 for non-existing feedback', async () => {

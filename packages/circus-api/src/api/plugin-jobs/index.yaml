@@ -32,6 +32,7 @@ routes:
   - verb: patch
     path: /plugin-jobs/:jobId
     requiredSeriesDomainCheck: true
+    requiredPluginPrivilege: 'executePlugin'
     requestSchema:
       type: object
       properties:
@@ -57,6 +58,7 @@ routes:
   - verb: get
     path: /plugin-jobs/:jobId
     requiredSeriesDomainCheck: true
+    requiredPluginPrivilege: readPlugin
     description: >
       Returns the detail of the specified plug-in job.
     responseSchema: pluginJob|dbEntry
@@ -64,26 +66,38 @@ routes:
   - verb: get
     path: /plugin-jobs/:jobId/attachment
     requiredSeriesDomainCheck: true
+    requiredPluginPrivilege: readPlugin
     description: >
       Return the list of attachments from the plug-in.
     handler: handleGetAttachmentList
   - verb: get
     path: /plugin-jobs/:jobId/attachment/:path+
     requiredSeriesDomainCheck: true
+    requiredPluginPrivilege: readPlugin
     description: >
       Returns the specified file output from the plug-in.
     handler: handleGetAttachment
   # Feedback
   - verb: post
-    path: /plugin-jobs/:jobId/feedback/:mode
+    path: /plugin-jobs/:jobId/feedback/consensual
     requiredSeriesDomainCheck: true
+    requiredPluginPrivilege: inputConsensualFeedback
     description: >
-      Creates a new feedback entry for the specified plug-in job.
+      Creates a new consensual feedback entry for the specified plug-in job.
+    requestSchema: pluginJobFeedback|only data,actionLog
+    handler: handlePostFeedback
+  - verb: post
+    path: /plugin-jobs/:jobId/feedback/personal
+    requiredSeriesDomainCheck: true
+    requiredPluginPrivilege: inputPersonalFeedback
+    description: >
+      Creates a new personal feedback entry for the specified plug-in job.
     requestSchema: pluginJobFeedback|only data,actionLog
     handler: handlePostFeedback
   - verb: get
     path: /plugin-jobs/:jobId/feedback
     requiredSeriesDomainCheck: true
+    requiredPluginPrivilege: readPlugin
     description: >
       Lists feedback entries for the specified plug-in job.
     responseSchema:
@@ -93,8 +107,8 @@ routes:
     handler: handleGetFeedback
   - verb: delete
     handler: handleDeleteFeedback
-    requiredGlobalPrivilege: manageServer
     path: /plugin-jobs/:jobId/feedback/:feedbackId
     requiredSeriesDomainCheck: true
+    requiredPluginPrivilege: manageFeedback
     description: >
       Removes feedback items.

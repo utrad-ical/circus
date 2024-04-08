@@ -42,6 +42,7 @@ interface CustomCtxMembers {
   params: { [key: string]: string };
   user: any;
   project: any;
+  plugin: any;
   case: any;
   job: any;
   userPrivileges: UserPrivilegeInfo;

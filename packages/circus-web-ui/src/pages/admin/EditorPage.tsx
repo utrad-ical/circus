@@ -1,17 +1,18 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Button, Panel } from 'components/react-bootstrap';
 import IconButton from '@smikitky/rb-components/lib/IconButton';
 import PropertyEditor, {
   PropertyEditorProperties
 } from '@smikitky/rb-components/lib/PropertyEditor';
+import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
+import Icon from 'components/Icon';
+import SearchResultsView from 'components/SearchResultsView';
+import { Button, Panel } from 'components/react-bootstrap';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { SearchResource, newSearch } from 'store/searches';
+import styled from 'styled-components';
 import { useApi } from 'utils/api';
 import { useLoginManager } from 'utils/loginManager';
 import AdminContainer from './AdminContainer';
-import { newSearch, SearchResource } from 'store/searches';
-import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
-import SearchResultsView from 'components/SearchResultsView';
-import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
 
 const StyledDataGrid = styled(DataGrid)`
   .label {
@@ -20,12 +21,21 @@ const StyledDataGrid = styled(DataGrid)`
   }
 `;
 
+const StyledSubTitle = styled.div`
+  font-weight: bold;
+  font-size: 110%;
+  margin: 10px 0;
+`;
+
+type Subtitle = { icon?: string; title: string };
+
 const EditorPage: React.FC<{
   listColumns: DataGridColumnDefinition[];
   preCommitHook?: (target: any) => Promise<boolean | void>;
   searchName: string;
   resource: SearchResource;
   title: string;
+  subtitles?: Subtitle[];
   targetName?: (item: any) => string;
   icon: string;
   makeEmptyItem: () => any;
@@ -36,6 +46,9 @@ const EditorPage: React.FC<{
   const [complaints, setComplaints] = useState<{
     [key: string]: string;
   } | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(
+    undefined
+  );
   const loginManager = useLoginManager();
   const api = useApi();
   const dispatch = useDispatch();
@@ -46,6 +59,7 @@ const EditorPage: React.FC<{
     searchName,
     resource,
     title,
+    subtitles,
     targetName,
     icon,
     makeEmptyItem,
@@ -74,6 +88,7 @@ const EditorPage: React.FC<{
       };
       setTarget(makeTargetName(item));
       setEditing(item);
+      setErrorMessage(undefined);
       setComplaints({});
     },
     [targetName, resource.primaryKey]
@@ -122,7 +137,8 @@ const EditorPage: React.FC<{
       setEditing(null);
       await loadItems();
       loginManager.refreshUserInfo(true); // Full user data refresh
-    } catch (err) {
+    } catch (err: any) {
+      setErrorMessage(err.response?.data?.error || err.message);
       setComplaints(err.data.errors);
     }
   };
@@ -130,6 +146,7 @@ const EditorPage: React.FC<{
   const handleCancelClick = () => {
     setEditing(null);
     setComplaints({});
+    setErrorMessage(undefined);
   };
 
   const handleCreateItemClick = () => {
@@ -158,8 +175,10 @@ const EditorPage: React.FC<{
           target={target}
           properties={editorProperties}
           excludeProperty={target ? resource.primaryKey : undefined}
+          subtitles={subtitles}
           onSaveClick={commitItem}
           onCancelClick={handleCancelClick}
+          errorMessage={errorMessage}
         />
       )}
     </AdminContainer>
@@ -171,7 +190,7 @@ export default EditorPage;
 const pickProperties = (item: any, properties: any[]): any => {
   // Remove keys not in the editor property list
   const result: any = {};
-  for (const p of properties) {
+  for (const p of properties.flat()) {
     result[p.key] = item[p.key];
   }
   return result;
@@ -185,6 +204,8 @@ const Editor: React.FC<{
   onSaveClick: any;
   onCancelClick: any;
   excludeProperty?: string;
+  subtitles?: Subtitle[];
+  errorMessage?: string;
 }> = props => {
   const {
     target,
@@ -193,7 +214,9 @@ const Editor: React.FC<{
     complaints,
     onSaveClick = () => {},
     onCancelClick = () => {},
-    excludeProperty
+    excludeProperty,
+    subtitles,
+    errorMessage
   } = props;
 
   const [currentData, setCurrentData] = useState(() =>
@@ -208,9 +231,10 @@ const Editor: React.FC<{
     onSaveClick(currentData);
   };
 
-  const filteredProperties = properties.filter(
-    (p: any) => !excludeProperty || excludeProperty !== p.key
-  );
+  const filteredProperties = (targetProperties: any) =>
+    targetProperties.filter(
+      (p: any) => !excludeProperty || excludeProperty !== p.key
+    );
 
   return (
     <Panel bsStyle="primary">
@@ -224,12 +248,43 @@ const Editor: React.FC<{
         )}
       </Panel.Heading>
       <Panel.Body>
-        <PropertyEditor
-          value={currentData}
-          complaints={complaints}
-          properties={filteredProperties}
-          onChange={setCurrentData}
-        />
+        {subtitles ? (
+          subtitles.map((subtitle, i) => (
+            <React.Fragment key={i}>
+              {i > 0 && <hr />}
+              <StyledSubTitle>
+                {subtitle.icon && (
+                  <>
+                    <Icon icon={subtitle.icon} />
+                    &nbsp;
+                  </>
+                )}
+                {subtitle.title}
+              </StyledSubTitle>
+              <PropertyEditor
+                value={currentData}
+                complaints={complaints}
+                properties={filteredProperties(properties[i])}
+                onChange={setCurrentData}
+              />
+            </React.Fragment>
+          ))
+        ) : (
+          <PropertyEditor
+            value={currentData}
+            complaints={complaints}
+            properties={filteredProperties(properties)}
+            onChange={setCurrentData}
+          />
+        )}
+        {errorMessage && (
+          <>
+            <hr />
+            <div className="alert alert-danger">
+              <strong>Error:</strong> {errorMessage}
+            </div>
+          </>
+        )}
       </Panel.Body>
       <Panel.Footer className="text-center">
         <Button bsStyle="link" onClick={onCancelClick}>

@@ -9,5 +9,6 @@ export * from './cs/displays/Numeric';
 export * from './cs/displays/Text';
 export * from './cs/displays/VolumeOverlay';
 export * from './cs/displays/Gallery';
+export * from './cs/displays/Tags';
 export * from './ui/Button';
 export * from './ui/ImageViewer';

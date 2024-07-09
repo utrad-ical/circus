@@ -76,7 +76,7 @@ export interface ApiTest {
    * Shuts down the test Koa server and the DB connection.
    * Make sure to call this on `afterAll()`.
    */
-  tearDown: () => void;
+  tearDown: () => Promise<void>;
   /**
    * The URL of the test Koa endpoint server.
    * The members of `axiosInstances` are configured to use this by default.

@@ -13,9 +13,18 @@ let apiTest: ApiTest, ax: typeof apiTest.axiosInstances;
 beforeAll(async () => {
   apiTest = await setUpAppForRoutesTest();
   ax = apiTest.axiosInstances;
+  console.log('apiTest initialized:', apiTest);
 });
 
-afterAll(async () => await apiTest.tearDown());
+afterAll(async () => {
+  if (apiTest && typeof apiTest.tearDown === 'function') {
+    console.log('Calling tearDown');
+    await apiTest.tearDown();
+    console.log('tearDown called successfully');
+  } else {
+    console.error('tearDown is not a function or apiTest is undefined');
+  }
+});
 
 it('should perform search', async () => {
   const res = await ax.dave.request({

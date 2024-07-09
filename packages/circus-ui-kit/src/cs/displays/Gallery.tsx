@@ -12,17 +12,21 @@ import { useErrorMessage } from './utils/useErrorMessage';
 import classnames from 'classnames';
 import styled from 'styled-components';
 
+export type GalleryLabelPosition = 'left' | 'right' | 'top' | 'bottom';
+
 export interface GalleryOptions {
   /**
    * Image file infomation list to display.
    */
   imageInfo: {
     fileName: string;
+    maxWidth?: number;
+    maxHeight?: number;
     labelData?: {
       customLabel?: string;
       dataPath?: string;
     }[];
-    labelPosition?: 'left' | 'right' | 'top' | 'bottom';
+    labelPosition?: GalleryLabelPosition;
   }[];
   /**
    * Number of images per column. Sum of imageCountsPerColumn must be the length of imageInfo.
@@ -82,7 +86,7 @@ const getTargetLabels = (
 };
 
 export const Gallery: Display<GalleryOptions, void> = props => {
-  let {
+  const {
     options: { imageInfo = [], imageCountsPerColumn = [] }
   } = props;
   const { job, loadAttachment } = useCsResults();
@@ -113,16 +117,16 @@ export const Gallery: Display<GalleryOptions, void> = props => {
   }, [job, loadAttachment]);
 
   if (error) return error;
-  if (imageCountsPerColumn.reduce((a, b) => a + b, 0) !== imageInfo.length) {
-    imageCountsPerColumn = Array(imageInfo.length).fill(1);
-  }
+
+  const imagesForEachRow =
+    imageCountsPerColumn.reduce((a, b) => a + b, 0) === imageInfo.length
+      ? imageCountsPerColumn
+      : Array(imageInfo.length).fill(1);
 
   return (
     <>
-      {imageCountsPerColumn.map((count, i) => {
-        const startId = imageCountsPerColumn
-          .slice(0, i)
-          .reduce((a, b) => a + b, 0);
+      {imagesForEachRow.map((count, i) => {
+        const startId = imagesForEachRow.slice(0, i).reduce((a, b) => a + b, 0);
         const targetImageInfo = imageInfo.slice(startId, startId + count);
 
         return (
@@ -136,6 +140,10 @@ export const Gallery: Display<GalleryOptions, void> = props => {
                   className="image"
                   ref={imgRefs.current[i + startId]}
                   alt={`Image ${info.fileName}`}
+                  style={{
+                    maxWidth: info.maxWidth ?? 'initial',
+                    maxHeight: info.maxHeight ?? 'initial'
+                  }}
                 />
                 <div className="labels">
                   {labels[i + startId]?.map((label, labelInd) => (

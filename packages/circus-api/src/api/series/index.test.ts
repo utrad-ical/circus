@@ -11,18 +11,34 @@ import delay from '../../utils/delay';
 let apiTest: ApiTest, ax: typeof apiTest.axiosInstances;
 
 beforeAll(async () => {
-  apiTest = await setUpAppForRoutesTest();
-  ax = apiTest.axiosInstances;
-  console.log('apiTest initialized:', apiTest);
+  try {
+    apiTest = await setUpAppForRoutesTest();
+    ax = apiTest.axiosInstances;
+
+    if (typeof apiTest.tearDown !== 'function') {
+      console.error('apiTest.tearDown is not a function', apiTest);
+      throw new Error('apiTest.tearDown is not a function');
+    }
+
+    console.log('apiTest initialized:', apiTest);
+  } catch (error) {
+    console.error('Error during setup:', error);
+    throw error;
+  }
 });
 
 afterAll(async () => {
-  if (apiTest && typeof apiTest.tearDown === 'function') {
-    console.log('Calling tearDown');
-    await apiTest.tearDown();
-    console.log('tearDown called successfully');
-  } else {
-    console.error('tearDown is not a function or apiTest is undefined');
+  try {
+    if (apiTest && typeof apiTest.tearDown === 'function') {
+      console.log('Calling tearDown');
+      await apiTest.tearDown();
+      console.log('tearDown called successfully');
+    } else {
+      console.error('tearDown is not a function or apiTest is undefined');
+    }
+  } catch (error) {
+    console.error('Error during teardown:', error);
+    throw error;
   }
 });
 

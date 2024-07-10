@@ -40,6 +40,7 @@ describe('search', () => {
       method: 'get'
     });
     expect(res.status).toBe(200);
+    console.log(res.data.items);
     expect(res.data.items).toHaveLength(4);
     expect(res.data.items.some((item: any) => item.revisions)).toBe(false);
   });

@@ -88,6 +88,7 @@ export interface ApiTest {
 
 export const setUpAppForRoutesTest = async () => {
   try {
+    console.log('Setting up app for routes test');
     const database = await connectMongo();
     const db = database.db;
 
@@ -226,6 +227,13 @@ export const setUpAppForRoutesTest = async () => {
       eve: createAxios('ft5y1dkymhc2jh9wf0hrx7dpghj8u12hdk27dnls'),
       frank: createAxios('s10jkttverbemycvpe7bbbbemxcm38cqvrey54hd')
     };
+
+    const res = await axiosInstances.bob.request({
+      url: 'api/cases',
+      method: 'get'
+    });
+    console.log('Response from the server:', res.status);
+    console.log(`Response data items:`, res.data.items);
 
     const tearDown = async () => {
       testServer.tearDown();

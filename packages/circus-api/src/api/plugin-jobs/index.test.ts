@@ -11,11 +11,34 @@ let apiTest: ApiTest,
   frank: AxiosInstance;
 
 beforeAll(async () => {
-  apiTest = await setUpAppForRoutesTest();
-  ({ alice, bob, guest, dave, frank } = apiTest.axiosInstances);
+  console.log('beforeAll started');
+  try {
+    apiTest = await setUpAppForRoutesTest();
+    console.log('apiTest initialized:', apiTest);
+    ({ alice, bob, guest, dave, frank } = apiTest.axiosInstances);
+  } catch (error) {
+    console.error('Error during setup:', error);
+    throw error;
+  }
+  console.log('beforeAll completed');
 });
 
-afterAll(async () => await apiTest.tearDown());
+afterAll(async () => {
+  console.log('afterAll started');
+  try {
+    if (apiTest && typeof apiTest.tearDown === 'function') {
+      console.log('Calling tearDown');
+      await apiTest.tearDown();
+      console.log('tearDown called successfully');
+    } else {
+      console.error('tearDown is not a function or apiTest is undefined');
+    }
+  } catch (error) {
+    console.error('Error during teardown:', error);
+    throw error;
+  }
+  console.log('afterAll completed');
+});
 
 // (alice belongs to sirius.org domain, and has readPlugin and manageFeedback permissions)
 // (bob belongs to vega.org domain, and has readPlugin, executePlugin and inputPersonalFeedback permissions)

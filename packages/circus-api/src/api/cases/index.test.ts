@@ -3,10 +3,33 @@ import { setUpAppForRoutesTest, ApiTest } from '../../../test/util-routes';
 
 let apiTest: ApiTest, ax: typeof apiTest.axiosInstances;
 beforeAll(async () => {
-  apiTest = await setUpAppForRoutesTest();
-  ax = apiTest.axiosInstances;
+  console.log('beforeAll started');
+  try {
+    apiTest = await setUpAppForRoutesTest();
+    ax = apiTest.axiosInstances;
+    console.log('apiTest initialized:', apiTest);
+  } catch (error) {
+    console.error('Error during setup:', error);
+    throw error;
+  }
+  console.log('beforeAll completed');
 });
-afterAll(async () => await apiTest.tearDown());
+afterAll(async () => {
+  console.log('afterAll started');
+  try {
+    if (apiTest && typeof apiTest.tearDown === 'function') {
+      console.log('Calling tearDown');
+      await apiTest.tearDown();
+      console.log('tearDown called successfully');
+    } else {
+      console.error('tearDown is not a function or apiTest is undefined');
+    }
+  } catch (error) {
+    console.error('Error during teardown:', error);
+    throw error;
+  }
+  console.log('afterAll completed');
+});
 
 const cid = 'faeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715b';
 

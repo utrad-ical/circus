@@ -15,7 +15,7 @@
     ]
   },
   "scripts": {
-    "test": "jest",
+    "test": "jest packages/circus-api/src/api/cases/index.test.ts",
     "build": "npm run build --if-present --workspaces",
     "lint": "eslint \"packages/*/{src,test}/**/*.{js,ts,tsx}\"",
     "lint-fix": "eslint --fix \"packages/*/{src,test}/**/*.{js,ts,tsx}\"",

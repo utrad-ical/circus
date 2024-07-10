@@ -87,173 +87,161 @@ export interface ApiTest {
 }
 
 export const setUpAppForRoutesTest = async () => {
-  try {
-    console.log('Setting up app for routes test');
-    const database = await connectMongo();
-    const db = database.db;
+  console.log('Setting up app for routes test');
+  const database = await connectMongo();
+  const db = database.db;
 
-    await setUpMongoFixture(db, [
-      'series',
-      'clinicalCases',
-      'groups',
-      'projects',
-      'users',
-      'serverParams',
-      'tokens',
-      'tasks',
-      'pluginJobs',
-      'pluginDefinitions',
-      'myLists',
-      'onetimeUrls'
-    ]);
+  await setUpMongoFixture(db, [
+    'series',
+    'clinicalCases',
+    'groups',
+    'projects',
+    'users',
+    'serverParams',
+    'tokens',
+    'tasks',
+    'pluginJobs',
+    'pluginDefinitions',
+    'myLists',
+    'onetimeUrls'
+  ]);
 
-    const validator = await createValidator(undefined);
-    const models = await createModels(undefined, {
-      database: database,
-      validator
-    });
-    const transactionManager = await createTransactionManager(
-      { maxCommitTimeMS: 10000 },
-      { database: database, validator }
-    );
-    const csCore = createMockCsCore();
-    const apiLogger = await createTestLogger();
-    const dicomTagReader = await createDicomTagReader({});
-    const dicomUtilityRunner = await createDicomUtilityRunner({});
-    const dicomFileRepository = new MemoryDicomFileRepository({});
-    const dicomImporter = await createDicomImporter(
-      {},
-      {
-        dicomFileRepository,
-        apiLogger,
-        dicomUtilityRunner,
-        dicomTagReader,
-        transactionManager
-      }
-    );
-
-    const downloadFileDirectory = path.join(__dirname, 'download-test');
-    const taskManager = await createTaskManager(
-      {
-        downloadFileDirectory,
-        timeoutMs: 3600 * 1000
-      },
-      { models, apiLogger }
-    );
-
-    const dicomVoxelDumper: DicomVoxelDumper = {
-      dump: (series: any, archiver: Archiver) => {
-        const events = new EventEmitter();
-        (async () => {
-          archiver.append('abc', { name: 'dummy.txt' });
-          events.emit('volume', 0);
-          archiver.finalize();
-        })();
-        return { stream: archiver, events };
-      }
-    };
-
-    const authProvider = await createDefaultAuthProvider({}, { models });
-
-    const blobStorage = await createMemoryStorage(undefined);
-    await blobStorage.write(
-      '5a616841a4fdd6066ee5c7e2d3118e0963ec1fc6',
-      Buffer.from('dummy', 'utf-8')
-    );
-
-    const app = await createApp(
-      {
-        debug: true,
-        pluginResultsPath: path.join(__dirname, 'plugin-results'),
-        pluginCachePath: path.join(__dirname, 'plugin-cache'),
-        uploadFileSizeMaxBytes: 200 * 1024 * 1024,
-        dicomImageServerUrl: '' // dummy
-      },
-      {
-        validator,
-        database,
-        apiLogger,
-        models,
-        blobStorage,
-        dicomFileRepository,
-        dicomTagReader,
-        dicomImporter,
-        core: csCore,
-        mhdPacker: null as any, // dummy
-        rsSeriesRoutes: async () => {}, // dummy
-        volumeProvider: null as any, // dummy
-        taskManager,
-        dicomVoxelDumper,
-        oauthServer: await createOauthServer(
-          {},
-          { defaultAuthProvider: authProvider, models, authProvider }
-        ),
-        transactionManager,
-        rsWSServer: new ws.Server({
-          noServer: true,
-          skipUTF8Validation: true
-        }),
-        rsWebsocketVolumeConnectionHandlerCreator: () => {
-          return null as any; // dummy
-        },
-        seriesOrientationResolver: async (
-          seriesUid: string,
-          start: number,
-          end: number
-        ) => {
-          if (seriesUid === '111.222.333.444.555') throw new Error('no image');
-          return { start, end, delta: end >= start ? 1 : -1 };
-        }
-      }
-    );
-
-    const testServer = await setUpKoaTestWith(app);
-    console.log(`Test server initialized at: ${testServer.url}`);
-
-    // Prepare axios instances that kick HTTP requests as these users
-    const createAxios = (token: string) =>
-      axios.create({
-        baseURL: testServer.url,
-        headers: { Authorization: `Bearer ${token}` },
-        validateStatus: () => true
-      });
-
-    const axiosInstances = {
-      alice: createAxios('2311aee0435c36ae14c39835539a931a6344714a'),
-      bob: createAxios('8292766837c1901b0a6954f7bda49710316c57da'),
-      guest: createAxios('2c2fbaea8046df924b8b459879b799c111e9b7f1'),
-      carol: createAxios('m47mvv02x2yer00gjroc0za00dger4f455cvedfh'),
-      dave: createAxios('98uijkgfhgty43gccccf54rfdvupiazmvr3nwcko'),
-      eve: createAxios('ft5y1dkymhc2jh9wf0hrx7dpghj8u12hdk27dnls'),
-      frank: createAxios('s10jkttverbemycvpe7bbbbemxcm38cqvrey54hd')
-    };
-
-    const res = await axiosInstances.bob.request({
-      url: 'api/cases',
-      method: 'get'
-    });
-    console.log('Response from the server:', res.status);
-    console.log(`Response data items:`, res.data.items);
-
-    const tearDown = async () => {
-      testServer.tearDown();
-      await database.dispose();
-    };
-
-    return {
-      database,
-      axiosInstances,
-      csCore,
-      tearDown,
-      url: testServer.url,
+  const validator = await createValidator(undefined);
+  const models = await createModels(undefined, {
+    database: database,
+    validator
+  });
+  const transactionManager = await createTransactionManager(
+    { maxCommitTimeMS: 10000 },
+    { database: database, validator }
+  );
+  const csCore = createMockCsCore();
+  const apiLogger = await createTestLogger();
+  const dicomTagReader = await createDicomTagReader({});
+  const dicomUtilityRunner = await createDicomUtilityRunner({});
+  const dicomFileRepository = new MemoryDicomFileRepository({});
+  const dicomImporter = await createDicomImporter(
+    {},
+    {
       dicomFileRepository,
+      apiLogger,
+      dicomUtilityRunner,
+      dicomTagReader,
+      transactionManager
+    }
+  );
+
+  const downloadFileDirectory = path.join(__dirname, 'download-test');
+  const taskManager = await createTaskManager(
+    {
+      downloadFileDirectory,
+      timeoutMs: 3600 * 1000
+    },
+    { models, apiLogger }
+  );
+
+  const dicomVoxelDumper: DicomVoxelDumper = {
+    dump: (series: any, archiver: Archiver) => {
+      const events = new EventEmitter();
+      (async () => {
+        archiver.append('abc', { name: 'dummy.txt' });
+        events.emit('volume', 0);
+        archiver.finalize();
+      })();
+      return { stream: archiver, events };
+    }
+  };
+
+  const authProvider = await createDefaultAuthProvider({}, { models });
+
+  const blobStorage = await createMemoryStorage(undefined);
+  await blobStorage.write(
+    '5a616841a4fdd6066ee5c7e2d3118e0963ec1fc6',
+    Buffer.from('dummy', 'utf-8')
+  );
+
+  const app = await createApp(
+    {
+      debug: true,
+      pluginResultsPath: path.join(__dirname, 'plugin-results'),
+      pluginCachePath: path.join(__dirname, 'plugin-cache'),
+      uploadFileSizeMaxBytes: 200 * 1024 * 1024,
+      dicomImageServerUrl: '' // dummy
+    },
+    {
+      validator,
+      database,
+      apiLogger,
+      models,
+      blobStorage,
+      dicomFileRepository,
+      dicomTagReader,
+      dicomImporter,
+      core: csCore,
+      mhdPacker: null as any, // dummy
+      rsSeriesRoutes: async () => {}, // dummy
+      volumeProvider: null as any, // dummy
       taskManager,
-      downloadFileDirectory
-    } as ApiTest;
-  } catch (error) {
-    console.error('Error in setUpAppForRoutesTest:', error);
-    throw error;
-  }
+      dicomVoxelDumper,
+      oauthServer: await createOauthServer(
+        {},
+        { defaultAuthProvider: authProvider, models, authProvider }
+      ),
+      transactionManager,
+      rsWSServer: new ws.Server({
+        noServer: true,
+        skipUTF8Validation: true
+      }),
+      rsWebsocketVolumeConnectionHandlerCreator: () => {
+        return null as any; // dummy
+      },
+      seriesOrientationResolver: async (
+        seriesUid: string,
+        start: number,
+        end: number
+      ) => {
+        if (seriesUid === '111.222.333.444.555') throw new Error('no image');
+        return { start, end, delta: end >= start ? 1 : -1 };
+      }
+    }
+  );
+
+  const testServer = await setUpKoaTestWith(app);
+  console.log(`Test server initialized at: ${testServer.url}`);
+
+  // Prepare axios instances that kick HTTP requests as these users
+  const createAxios = (token: string) =>
+    axios.create({
+      baseURL: testServer.url,
+      headers: { Authorization: `Bearer ${token}` },
+      validateStatus: () => true
+    });
+
+  const axiosInstances = {
+    alice: createAxios('2311aee0435c36ae14c39835539a931a6344714a'),
+    bob: createAxios('8292766837c1901b0a6954f7bda49710316c57da'),
+    guest: createAxios('2c2fbaea8046df924b8b459879b799c111e9b7f1'),
+    carol: createAxios('m47mvv02x2yer00gjroc0za00dger4f455cvedfh'),
+    dave: createAxios('98uijkgfhgty43gccccf54rfdvupiazmvr3nwcko'),
+    eve: createAxios('ft5y1dkymhc2jh9wf0hrx7dpghj8u12hdk27dnls'),
+    frank: createAxios('s10jkttverbemycvpe7bbbbemxcm38cqvrey54hd')
+  };
+
+  const tearDown = async () => {
+    testServer.tearDown();
+    await database.dispose();
+  };
+
+  return {
+    database,
+    axiosInstances,
+    csCore,
+    tearDown,
+    url: testServer.url,
+    dicomFileRepository,
+    taskManager,
+    downloadFileDirectory
+  } as ApiTest;
 };
 
 const createMockCsCore = () => {

@@ -19,44 +19,83 @@ export const connectMongo = async () => {
   return await connectDb({ mongoUrl: url }, null);
 };
 
+async function acquireLock(
+  db: mongo.Db,
+  lockName: string,
+  timeout = 30000
+): Promise<void> {
+  const lockCollection = db.collection('locks');
+  const end = Date.now() + timeout;
+
+  while (Date.now() < end) {
+    const result = await lockCollection.findOneAndUpdate(
+      { name: lockName, locked: false },
+      { $set: { locked: true, timestamp: new Date() } },
+      { upsert: true, returnDocument: 'after' }
+    );
+
+    if (result.value && result.value.locked) {
+      return;
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+
+  throw new Error(`Failed to acquire lock: ${lockName}`);
+}
+
+async function releaseLock(db: mongo.Db, lockName: string): Promise<void> {
+  const lockCollection = db.collection('locks');
+  await lockCollection.updateOne(
+    { name: lockName },
+    { $set: { locked: false } }
+  );
+}
+
 export const setUpMongoFixture = async (
   db: mongo.Db,
   collections: string[]
 ) => {
-  if (!Array.isArray(collections)) {
-    throw new TypeError('collections must be an array of string');
-  }
-  for (const colName of collections) {
-    const col = db.collection(colName);
-    await col.deleteMany({});
-    const content = yaml(
-      await fs.readFile(
-        path.join(__dirname, 'fixture', colName + '.yaml'),
-        'utf8'
-      )
-    );
-    if (content) {
-      const data: any = EJSON.parse(JSON.stringify(content));
-      for (const row of data) {
-        if (!row.createdAt) row.createdAt = new Date();
-        if (!row.updatedAt) row.updatedAt = new Date();
-      }
-      try {
-        await col.insertMany(data);
-      } catch (err: any) {
-        console.log(err.errors);
-        throw err;
-      }
-      if (['groups'].indexOf(colName) >= 0) {
-        await db
-          .collection('sequences')
-          .updateOne(
-            { key: colName },
-            { $set: { updatedAt: new Date(), value: data.length + 1 } },
-            { upsert: true }
-          );
+  const lockName = 'setupMongoFixtureLock';
+  await acquireLock(db, lockName);
+  try {
+    if (!Array.isArray(collections)) {
+      throw new TypeError('collections must be an array of string');
+    }
+    for (const colName of collections) {
+      const col = db.collection(colName);
+      await col.deleteMany({});
+      const content = yaml(
+        await fs.readFile(
+          path.join(__dirname, 'fixture', colName + '.yaml'),
+          'utf8'
+        )
+      );
+      if (content) {
+        const data: any = EJSON.parse(JSON.stringify(content));
+        for (const row of data) {
+          if (!row.createdAt) row.createdAt = new Date();
+          if (!row.updatedAt) row.updatedAt = new Date();
+        }
+        try {
+          await col.insertMany(data);
+        } catch (err: any) {
+          console.log(err.errors);
+          throw err;
+        }
+        if (['groups'].indexOf(colName) >= 0) {
+          await db
+            .collection('sequences')
+            .updateOne(
+              { key: colName },
+              { $set: { updatedAt: new Date(), value: data.length + 1 } },
+              { upsert: true }
+            );
+        }
       }
     }
+  } finally {
+    await releaseLock(db, lockName);
   }
 };
 

@@ -43,8 +43,11 @@ jobs:
       - name: Build modules
         run: |
           npm run build --if-present --workspaces
+      - name: Get number of CPU cores
+        uses: SimenB/github-actions-cpu-cores@v2
+        id: cpu-cores
       - name: Run test
-        run: npm test -- --max-workers 1
+        run: npm test -- --max-workers ${{ steps.cpu-cores.outputs.count }}
         env:
           CI: true
           CIRCUS_MONGO_TEST_URL: 'mongodb://localhost:27017/circus-api-test'

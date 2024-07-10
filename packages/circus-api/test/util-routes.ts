@@ -207,6 +207,7 @@ export const setUpAppForRoutesTest = async () => {
     );
 
     const testServer = await setUpKoaTestWith(app);
+    console.log(`Test server initialized at: ${testServer.url}`);
 
     // Prepare axios instances that kick HTTP requests as these users
     const createAxios = (token: string) =>

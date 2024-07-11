@@ -18,26 +18,22 @@ export const setUpKoaTest = async (setUpFunc: (app: Koa) => Promise<void>) => {
   return setUpKoaTestWith(koa);
 };
 
-export const setUpKoaTestWith = (koa: Koa): Promise<TestServer> => {
-  const port = 0;
+export const setUpKoaTestWith = (koa: Koa) => {
+  const port = Number(process.env.API_TEST_PORT) || 8090;
   const host = 'localhost';
   return new Promise<TestServer>((resolve, reject) => {
-    const httpd = koa.listen(port, host, () => {
-      const address = httpd.address();
-      if (address && typeof address === 'object' && address.port) {
-        const assignedPort = address.port;
-        resolve({
-          url: `http://${host}:${assignedPort}/`,
-          koa,
-          tearDown: () => {
-            return new Promise<void>((resolve, reject) => {
-              httpd.close(err => (err ? reject(err) : resolve()));
-            });
-          }
-        });
-      } else {
-        reject(new Error('Failed to get assigned port'));
-      }
+    const httpd = koa.listen(port, host);
+    const tearDown = () => {
+      return new Promise<void>((resolve, reject) => {
+        httpd.close(err => (err ? reject(err) : resolve()));
+      });
+    };
+    httpd.on('listening', () => {
+      resolve({
+        url: `http://${host}:${port}/`,
+        koa,
+        tearDown
+      });
     });
     httpd.on('error', reject);
   });

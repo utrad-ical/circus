@@ -26,7 +26,6 @@ export const setUpKoaTestWith = (koa: Koa): Promise<TestServer> => {
       const address = httpd.address();
       if (address && typeof address === 'object' && address.port) {
         const assignedPort = address.port;
-        console.log(`Server is running on port ${assignedPort}`);
         resolve({
           url: `http://${host}:${assignedPort}/`,
           koa,

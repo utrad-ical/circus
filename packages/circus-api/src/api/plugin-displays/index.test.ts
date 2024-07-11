@@ -31,21 +31,7 @@ beforeAll(async () => {
   ax = apiTest.axiosInstances;
 });
 afterAll(async () => {
-  console.log('afterAll started');
-  try {
-    if (apiTest && typeof apiTest.tearDown === 'function') {
-      console.log('Calling tearDown');
-      await apiTest.tearDown();
-      console.log('tearDown called successfully');
-    } else {
-      console.error('tearDown is not a function or apiTest is undefined');
-    }
-  } catch (error) {
-    console.error('Error during teardown:', error);
-    throw error;
-  }
-  console.log('afterAll completed');
-
+  await apiTest.tearDown();
   await fs.remove(mockPluginDir);
 });
 

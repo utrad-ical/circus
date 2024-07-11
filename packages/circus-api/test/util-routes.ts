@@ -87,7 +87,6 @@ export interface ApiTest {
 }
 
 export const setUpAppForRoutesTest = async () => {
-  console.log('Setting up app for routes test');
   const database = await connectMongo();
   const db = database.db;
 
@@ -207,7 +206,6 @@ export const setUpAppForRoutesTest = async () => {
   );
 
   const testServer = await setUpKoaTestWith(app);
-  console.log(`Test server initialized at: ${testServer.url}`);
 
   // Prepare axios instances that kick HTTP requests as these users
   const createAxios = (token: string) =>

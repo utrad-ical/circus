@@ -44,7 +44,7 @@ jobs:
         run: |
           npm run build --if-present --workspaces
       - name: Run test
-        run: npm test
+        run: npm test -- --max-workers 1
         env:
           CI: true
           CIRCUS_MONGO_TEST_URL: 'mongodb://localhost:27017/circus-api-test'

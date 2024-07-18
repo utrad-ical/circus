@@ -7,7 +7,7 @@ beforeAll(async () => {
   apiTest = await setUpAppForRoutesTest();
 });
 
-afterAll(async () => apiTest.tearDown());
+afterAll(async () => await apiTest.tearDown());
 
 beforeEach(async () => {
   axios = apiTest.axiosInstances.alice;

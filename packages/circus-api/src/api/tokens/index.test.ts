@@ -7,7 +7,7 @@ beforeAll(async () => {
   apiTest = await setUpAppForRoutesTest();
   axios = apiTest.axiosInstances.alice;
 });
-afterAll(async () => apiTest.tearDown());
+afterAll(async () => await apiTest.tearDown());
 
 test('Create / search / delete token', async () => {
   const res1 = await axios.post('/api/tokens', { description: 'stella' });

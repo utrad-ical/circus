@@ -31,7 +31,7 @@ beforeAll(async () => {
   ax = apiTest.axiosInstances;
 });
 afterAll(async () => {
-  apiTest.tearDown();
+  await apiTest.tearDown();
   await fs.remove(mockPluginDir);
 });
 

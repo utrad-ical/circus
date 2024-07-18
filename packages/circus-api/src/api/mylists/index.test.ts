@@ -8,7 +8,7 @@ beforeAll(async () => {
   ax = apiTest.axiosInstances;
   db = apiTest.database.db;
 });
-afterAll(() => apiTest.tearDown());
+afterAll(async () => await apiTest.tearDown());
 
 test('list all my lists', async () => {
   const res = await ax.bob.get('api/mylists');

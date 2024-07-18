@@ -6,9 +6,7 @@ beforeAll(async () => {
   apiTest = await setUpAppForRoutesTest();
   dave = apiTest.axiosInstances.dave;
 });
-afterAll(async () => {
-  apiTest.tearDown();
-});
+afterAll(async () => await apiTest.tearDown());
 
 test('get project', async () => {
   const res = await dave.get('api/projects/8883fdef6f5144f50eb2a83cd34baa44');

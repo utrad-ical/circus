@@ -8,7 +8,7 @@ beforeAll(async () => {
   apiTest = await setUpAppForRoutesTest();
   axios = apiTest.axiosInstances.alice;
 });
-afterAll(async () => apiTest.tearDown());
+afterAll(async () => await apiTest.tearDown());
 
 describe('search', () => {
   test('should return the list of tasks of the user', async () => {

@@ -198,7 +198,7 @@ export function createOrthogonalMprSection(
   let section: Section;
   switch (orientation) {
     case 'axial': {
-      if (typeof position === 'undefined') position = vs.z / 2;
+      if (typeof position === 'undefined') position = Math.floor(vs.z / 2);
       const rect = fitRectangle(res, new Vector2(vs.x, vs.y));
       const size = rect.getSize(new Vector2());
       const mmpp = [vs.x / size.x, vs.y / size.y];
@@ -210,7 +210,7 @@ export function createOrthogonalMprSection(
       break;
     }
     case 'sagittal': {
-      if (typeof position === 'undefined') position = vs.x / 2;
+      if (typeof position === 'undefined') position = Math.floor(vs.x / 2);
       const rect = fitRectangle(res, new Vector2(vs.y, vs.z));
       const size = rect.getSize(new Vector2());
       const mmpp = [vs.y / size.x, vs.z / size.y];
@@ -222,7 +222,7 @@ export function createOrthogonalMprSection(
       break;
     }
     case 'coronal': {
-      if (typeof position === 'undefined') position = vs.y / 2;
+      if (typeof position === 'undefined') position = Math.floor(vs.y / 2);
       const rect = fitRectangle(res, new Vector2(vs.x, vs.z));
       const size = rect.getSize(new Vector2());
       const mmpp = [vs.x / size.x, vs.z / size.y];

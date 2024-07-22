@@ -101,11 +101,13 @@ export const Tags: Display<TagsOptions, string[]> = props => {
     const voteDetails = new Map<string, string[]>();
     if (!consensual) return voteDetails;
     personalOpinions.forEach(p => {
-      p.data.forEach(selectedTag => {
-        const updatedDetails = voteDetails.get(selectedTag) ?? [];
-        updatedDetails.push(p.userEmail);
-        return voteDetails.set(selectedTag, updatedDetails);
-      });
+      if (Array.isArray(p.data)) {
+        p.data.forEach(selectedTag => {
+          const updatedDetails = voteDetails.get(selectedTag) ?? [];
+          updatedDetails.push(p.userEmail);
+          voteDetails.set(selectedTag, updatedDetails);
+        });
+      }
     });
     return voteDetails;
   }, [personalOpinions]);

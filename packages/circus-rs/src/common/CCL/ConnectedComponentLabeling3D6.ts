@@ -158,8 +158,8 @@ const CCL: CCL3D = (
         ? nSlices
         : height
       : width < nSlices
-      ? nSlices
-      : width;
+        ? nSlices
+        : width;
   const UL = new Uint16Array((labelCount + 1) * 3).map(() => max);
   const LR = new Uint16Array((labelCount + 1) * 3);
 

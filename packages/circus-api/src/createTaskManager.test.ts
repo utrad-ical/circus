@@ -44,7 +44,7 @@ const newDummyCtx = () =>
       error.expose = true;
       throw error;
     }
-  } as any);
+  }) as any;
 
 describe('register', () => {
   test('without download file', async () => {
@@ -193,7 +193,7 @@ test('fail download when the download file is gone', async () => {
   const taskId = 'aaaabbbbcccc4444';
   try {
     await manager.download(ctx, taskId);
-  } catch (err) {
+  } catch (err: any) {
     expect(err.status).toBe(404);
   }
 });

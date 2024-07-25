@@ -12,7 +12,7 @@ parentPort!.on('message', (buffer: ArrayBuffer) => {
   } catch (err: any) {
     // returning a string means an error
     parentPort!.postMessage(
-      typeof err === 'string' ? err : err.message ?? 'Unknown error'
+      typeof err === 'string' ? err : (err.message ?? 'Unknown error')
     );
   }
 });

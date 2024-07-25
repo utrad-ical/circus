@@ -34,7 +34,7 @@ export const processorTypes = [
   'booleanOperations'
 ] as const;
 
-export type ProcessorType = typeof processorTypes[number];
+export type ProcessorType = (typeof processorTypes)[number];
 
 export type ProcessorProgress =
   | { readonly value: number; readonly label: string }

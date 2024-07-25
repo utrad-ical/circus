@@ -13,7 +13,7 @@ export const dbRoleNames = [
   'moderate',
   'addSeries'
 ] as const;
-type DbRoleName = typeof dbRoleNames[number];
+type DbRoleName = (typeof dbRoleNames)[number];
 
 interface ProjectPrivilege {
   projectId: string;
@@ -30,7 +30,7 @@ export const csRoleNames = [
   'manageFeedback',
   'viewPersonalInfo'
 ] as const;
-type CsRoleName = typeof csRoleNames[number];
+type CsRoleName = (typeof csRoleNames)[number];
 
 interface PluginPrivilege {
   pluginId: string;

@@ -347,8 +347,8 @@ export const handlePatchTags: RouteMiddleware = ({ models }) => {
       operation === 'add'
         ? { $addToSet: { tags: { $each: tags } } }
         : operation === 'remove'
-        ? { $pull: { tags: { $in: tags } } }
-        : { $set: { tags: tags } };
+          ? { $pull: { tags: { $in: tags } } }
+          : { $set: { tags: tags } };
     await models.clinicalCase.unsafe_updateMany(
       { caseId: { $in: caseIds } },
       updateOp

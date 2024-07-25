@@ -80,8 +80,8 @@ const hfVoxelProcessor: VoxelLabelProcessor<
             dimension === 3 || orientation === 'Axial'
               ? i + j * width + k * width * height
               : orientation === 'Coronal'
-              ? k + i * nSlices + j * width * nSlices
-              : j + k * height + i * height * nSlices;
+                ? k + i * nSlices + j * width * nSlices
+                : j + k * height + i * height * nSlices;
           initializedInput[pos] = input[pos0];
         }
       }
@@ -101,24 +101,30 @@ const hfVoxelProcessor: VoxelLabelProcessor<
               bufferSize
             )
           : orientation === 'Axial'
-          ? HoleFilling2D(
-              initializedInput,
-              width,
-              height,
-              nSlices,
-              neighbors,
-              bufferSize
-            )
-          : orientation === 'Sagital'
-          ? HoleFilling2D(
-              initializedInput,
-              height,
-              nSlices,
-              width,
-              neighbors,
-              bufferSize
-            )
-          : HoleFilling2D(initializedInput, nSlices, width, height, neighbors);
+            ? HoleFilling2D(
+                initializedInput,
+                width,
+                height,
+                nSlices,
+                neighbors,
+                bufferSize
+              )
+            : orientation === 'Sagital'
+              ? HoleFilling2D(
+                  initializedInput,
+                  height,
+                  nSlices,
+                  width,
+                  neighbors,
+                  bufferSize
+                )
+              : HoleFilling2D(
+                  initializedInput,
+                  nSlices,
+                  width,
+                  height,
+                  neighbors
+                );
     } catch (err: any) {
       console.log('error', err.message);
       alert(`${name} is too complex.\nPlease modify ${name}.`);
@@ -133,8 +139,8 @@ const hfVoxelProcessor: VoxelLabelProcessor<
             dimension === 3 || orientation === 'Axial'
               ? i + j * width + k * width * height
               : orientation === 'Coronal'
-              ? k + i * nSlices + j * width * nSlices
-              : j + k * height + i * height * nSlices;
+                ? k + i * nSlices + j * width * nSlices
+                : j + k * height + i * height * nSlices;
           output[pos0] = holeFillingResult.result[pos];
         }
       }

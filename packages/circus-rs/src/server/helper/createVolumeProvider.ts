@@ -68,9 +68,8 @@ const createUncachedVolumeProvider: FunctionService<
     const imageMetadata: Map<number, DicomMetadata> = new Map();
     const fetch = async (imageNo: number) => {
       const unparsedBuffer = await load(imageNo);
-      const { metadata, pixelData } = await dicomExtractorWorker(
-        unparsedBuffer
-      );
+      const { metadata, pixelData } =
+        await dicomExtractorWorker(unparsedBuffer);
       imageMetadata.set(imageNo, metadata);
       return pixelData!;
     };

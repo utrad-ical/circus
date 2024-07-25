@@ -92,8 +92,8 @@ export default class Composition extends EventEmitter {
       viewer instanceof Array
         ? viewer
         : viewer instanceof Viewer
-        ? [viewer]
-        : this.viewers;
+          ? [viewer]
+          : this.viewers;
     viewers.forEach(v => v.renderAnnotations());
   }
 

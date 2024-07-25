@@ -14,8 +14,8 @@ export function mosaic(
         ? NSlice
         : height
       : width < NSlice
-      ? NSlice
-      : width
+        ? NSlice
+        : width
   );
   const LR = new Uint16Array((num + 1) * 3);
 
@@ -97,7 +97,7 @@ export function sampleImg(
   const [width, height, NSlice] = [16, 16, 16];
   if (neighbor === 6 || neighbor === 26) {
     // prettier-ignore
-    const img =  new Uint8Array([
+    const img = new Uint8Array([
       1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       0, 1, 1, 1, 0, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -218,7 +218,7 @@ export function sampleImg(
     }
   } else {
     // prettier-ignore
-    const img =  new Uint8Array([
+    const img = new Uint8Array([
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -238,7 +238,7 @@ export function sampleImg(
     ]);
     if (neighbor === 4) {
       // prettier-ignore
-      const label =  new Uint8Array([
+      const label = new Uint8Array([
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -265,7 +265,7 @@ export function sampleImg(
       return [img, label, 8, volume, UL, LR];
     } else {
       // prettier-ignore
-      const label =  new Uint8Array([
+      const label = new Uint8Array([
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

@@ -10,7 +10,7 @@ import { Processor, ProcessorProgress } from './processor-types';
 import boWorker from 'worker-loader!./bo-worker';
 
 export const booleanOperationTypes = ['add', 'subtract', 'intersect'] as const;
-export type BooleanOperationType = typeof booleanOperationTypes[number];
+export type BooleanOperationType = (typeof booleanOperationTypes)[number];
 
 export interface BooleanOperationsOptions {
   operation: BooleanOperationType;

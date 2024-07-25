@@ -27,7 +27,6 @@
     "@babel/register": "^7.18.9",
     "@utrad-ical/circus-icons": "^0.2.0",
     "@utrad-ical/circus-lib": "^0.17.0",
-    "async-cache": "^1.1.0",
     "axios": "^0.19.2",
     "dicom-parser": "^1.8.4",
     "extend": "^3.0.2",
@@ -40,6 +39,7 @@
     "koa-json": "^2.0.2",
     "koa-mount": "^3.0.0",
     "koa-router": "^7.4.0",
+    "lru-cache": "^11.0.0",
     "minimist": "^1.2.0",
     "multi-integer-range": "^4.0.8",
     "pngjs": "^3.4.0",
@@ -53,7 +53,6 @@
     "ws": "^8.8.0"
   },
   "devDependencies": {
-    "@types/async-cache": "^1.1.0",
     "@types/compression": "0.0.33",
     "@types/http-status": "^0.2.30",
     "@types/koa": "^2.11.3",

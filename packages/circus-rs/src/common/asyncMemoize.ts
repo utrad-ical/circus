@@ -1,4 +1,4 @@
-import AsyncCache from 'async-cache';
+import { LRUCache } from 'lru-cache';
 
 interface AsyncLoader<T> {
   (key: string): Promise<T>;
@@ -11,40 +11,40 @@ export interface AsyncCachedLoader<T> extends AsyncLoader<T> {
 
 interface CacheOptions<T> {
   max?: number;
-  maxAge?: number;
+  ttl?: number;
   length?: (value: T, key?: string) => number;
+  ttlAutopurge?: boolean;
 }
 
 /**
  * Memoize an async function that takes a single string key.
- * Backed by async-cache.
+ * Backed by lru-cache.
  */
 export default function asyncMemoize<T>(
   func: AsyncLoader<T>,
   options: CacheOptions<T> = {}
 ): AsyncCachedLoader<T> {
-  const cache = new AsyncCache<T>({
-    load: async (key, cb) => {
-      try {
-        cb(null, await func(key));
-      } catch (err) {
-        cb(err, null as any as T);
-      }
-    },
+  const cache = new LRUCache<string, { value: Promise<T>, size: number }>({
     max: options.max,
-    maxAge: options.maxAge,
-    length: options.length
+    ttl: options.ttl ?? 0,
+    ttlAutopurge: options.ttlAutopurge ?? true,
+    sizeCalculation: (entry) => entry.size
   });
 
-  const memoized: AsyncLoader<T> = (key: string) =>
-    new Promise((resolve, reject) =>
-      cache.get(key, (err: Error, result: T) => {
-        if (err) reject(err);
-        else resolve(result);
-      })
-    );
-  const getLength = () => (cache as any)._cache.length;
-  const getCount = () => cache.itemCount;
+  const memoized: AsyncLoader<T> = async (key: string) => {
+    if (cache.has(key)) {
+      return cache.get(key)!.value;
+    }
+
+    const promise = func(key);
+    const size = options.length ? await promise.then(result => options.length!(result, key)) : 0;
+
+    cache.set(key, { value: promise, size });
+    return promise;
+  };
+
+  const getLength = () => cache.size;
+  const getCount = () => cache.size;
 
   return Object.assign(memoized, { getLength, getCount });
 }

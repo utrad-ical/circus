@@ -16,7 +16,7 @@
   },
   "scripts": {
     "test": "jest",
-    "build": "npm run build --if-present --workspaces",
+    "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider npm run build --if-present --workspaces",
     "lint": "eslint \"packages/*/{src,test}/**/*.{js,ts,tsx}\"",
     "lint-fix": "eslint --fix \"packages/*/{src,test}/**/*.{js,ts,tsx}\"",
     "lint-prettier": "prettier --check \"packages/*/{src,test}/**/*.{js,ts,less,json,yaml,yml}\"",
@@ -31,6 +31,7 @@
     "@typescript-eslint/eslint-plugin": "^2.31.0",
     "@typescript-eslint/parser": "^2.31.0",
     "babel-jest": "^26.0.1",
+    "cross-env": "^7.0.3",
     "dotenv": "^16.0.3",
     "eslint": "^6.8.0",
     "eslint-plugin-jest": "^23.9.0",

@@ -6,7 +6,7 @@ jobs:
   prettier-check:
     runs-on: ubuntu-latest
     env:
-      NODE_VERSION: 16.x
+      NODE_VERSION: 22.x
     steps:
       - uses: actions/checkout@v3
       - name: Set up Node.js ${{ env.NODE_VERSION }}
@@ -28,7 +28,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [12.x, 14.x, 16.x]
+        node-version: [18.x, 20.x, 22.x]
       fail-fast: false
 
     # services:

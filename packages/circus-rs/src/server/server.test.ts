@@ -18,7 +18,7 @@ const testConfig = () =>
     dicomFileRepository: { type: 'MemoryDicomFileRepository', options: {} },
     imageEncoder: { type: 'PngJsImageEncoder', options: {} },
     volumeProvider: { options: { cache: { memoryThreshold: 2147483648 } } }
-  } as Configuration);
+  }) as Configuration;
 
 const axios = _axios.create({
   baseURL: `http://localhost:${port}`,

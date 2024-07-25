@@ -303,9 +303,11 @@ export const readDicomTags = async (
   };
 };
 
-const createDicomTagReader: NoDepFunctionService<DicomTagReader, Options> =
-  async options => {
-    return (data: ArrayBuffer) => readDicomTags(data, options);
-  };
+const createDicomTagReader: NoDepFunctionService<
+  DicomTagReader,
+  Options
+> = async options => {
+  return (data: ArrayBuffer) => readDicomTags(data, options);
+};
 
 export default createDicomTagReader;

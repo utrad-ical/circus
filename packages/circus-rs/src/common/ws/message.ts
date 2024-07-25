@@ -49,7 +49,7 @@ const messageDataTypes = [
   'TRANSFER_IMAGE'
 ] as const;
 
-export type MessageDataType = typeof messageDataTypes[number];
+export type MessageDataType = (typeof messageDataTypes)[number];
 
 export type ImageTransferMessageData =
   | BeginTransferMessageData

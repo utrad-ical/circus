@@ -63,20 +63,20 @@ const iiVoxelProcessor: VoxelLabelProcessor<
     orientation === 'Axial'
       ? width
       : orientation === 'Coronal'
-      ? nSlices
-      : height;
+        ? nSlices
+        : height;
   const transposedHeight =
     orientation === 'Axial'
       ? height
       : orientation === 'Coronal'
-      ? width
-      : nSlices;
+        ? width
+        : nSlices;
   const transposedNSlices =
     orientation === 'Axial'
       ? nSlices
       : orientation === 'Coronal'
-      ? height
-      : width;
+        ? height
+        : width;
 
   if (window.Worker) {
     const myWorker = new iiWorker();

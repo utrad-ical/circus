@@ -134,8 +134,8 @@ export default class VolumeRenderingImageSource extends MprImageSource {
     const window = metadata.dicomWindow
       ? { ...metadata.dicomWindow }
       : metadata.estimatedWindow
-      ? { ...metadata.estimatedWindow }
-      : { level: 50, width: 100 };
+        ? { ...metadata.estimatedWindow }
+        : { level: 50, width: 100 };
 
     // Create initial section as axial section watched from head to toe.
     const section = createOrthogonalMprSection(

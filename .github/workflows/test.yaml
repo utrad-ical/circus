@@ -66,15 +66,18 @@ jobs:
         env:
           NODE_OPTIONS: '--openssl-legacy-provider'
       - name: Run test
-        run: npm test -- --max-workers 1
+        run: |
+          mkdir -p ./logs
+          npm test -- --max-workers 1
         env:
           CI: true
           CIRCUS_MONGO_TEST_URL: 'mongodb://localhost:27017/circus-api-test'
+          CIRCUS_LOG_PATH: ./logs
       - name: Upload test log
         uses: actions/upload-artifact@v2
         with:
           name: circus-logs
-          path: /var/circus/data/logs
+          path: ./logs
       - name: Stop mongod
         run: |
           docker stop mongo

@@ -70,6 +70,11 @@ jobs:
         env:
           CI: true
           CIRCUS_MONGO_TEST_URL: 'mongodb://localhost:27017/circus-api-test'
+      - name: Upload test log
+        uses: actions/upload-artifact@v2
+        with:
+          name: circus-logs
+          path: /var/circus/data/logs
       - name: Stop mongod
         run: |
           docker stop mongo

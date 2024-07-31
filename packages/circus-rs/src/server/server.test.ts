@@ -14,7 +14,10 @@ const port = 1024;
 const testConfig = () =>
   ({
     rsServer: { options: { port, globalIpFilter: '(^|:?)127.0.0.1$' } },
-    rsLogger: { type: 'NullLogger' },
+    rsLogger: {
+      type: 'FileLogger',
+      options: { fileName: '/var/circus/data/logs/circus-rs' }
+    },
     dicomFileRepository: { type: 'MemoryDicomFileRepository', options: {} },
     imageEncoder: { type: 'PngJsImageEncoder', options: {} },
     volumeProvider: { options: { cache: { memoryThreshold: 2147483648 } } }

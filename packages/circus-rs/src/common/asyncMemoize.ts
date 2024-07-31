@@ -10,7 +10,7 @@ export interface AsyncCachedLoader<T> extends AsyncLoader<T> {
 }
 
 interface CacheOptions<T> {
-  max?: number;
+  maxSize?: number;
   ttl?: number;
   length?: (value: T, key?: string) => number;
   ttlAutopurge?: boolean;
@@ -24,11 +24,11 @@ export default function asyncMemoize<T>(
   func: AsyncLoader<T>,
   options: CacheOptions<T> = {}
 ): AsyncCachedLoader<T> {
-  const cache = new LRUCache<string, { value: Promise<T>, size: number }>({
-    max: options.max,
+  const cache = new LRUCache<string, { value: Promise<T>; size: number }>({
+    maxSize: options.maxSize,
     ttl: options.ttl ?? 0,
     ttlAutopurge: options.ttlAutopurge ?? true,
-    sizeCalculation: (entry) => entry.size
+    sizeCalculation: entry => entry.size
   });
 
   const memoized: AsyncLoader<T> = async (key: string) => {
@@ -37,7 +37,9 @@ export default function asyncMemoize<T>(
     }
 
     const promise = func(key);
-    const size = options.length ? await promise.then(result => options.length!(result, key)) : 0;
+    const size = options.length
+      ? await promise.then(result => options.length!(result, key))
+      : 0;
 
     cache.set(key, { value: promise, size });
     return promise;

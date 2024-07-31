@@ -175,12 +175,12 @@ const createUncachedVolumeProvider: FunctionService<
 
       verifyMetadataOf3dImage = like3d
         ? metadata => {
-          if (
-            !determineIf3dImageFromMetadata(metadata) ||
-            imageOrientationPatient !== metadata.imageOrientationPatient
-          )
-            throw new Error('Contains image that do not look like 3d image.');
-        }
+            if (
+              !determineIf3dImageFromMetadata(metadata) ||
+              imageOrientationPatient !== metadata.imageOrientationPatient
+            )
+              throw new Error('Contains image that do not look like 3d image.');
+          }
         : undefined;
 
       return like3d;
@@ -268,7 +268,7 @@ const createVolumeProvider: FunctionService<
   const rawVolumeProvider = await createUncachedVolumeProvider(restOpts, deps);
   const { memoryThreshold = 2147483648, ttl = 3600 } = cacheOpts;
   return asyncMemoize(rawVolumeProvider, {
-    max: memoryThreshold,
+    maxSize: memoryThreshold,
     ttl: ttl * 1000,
     length: accessor => accessor.volume.data.byteLength
   });

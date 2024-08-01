@@ -13,7 +13,9 @@ const port = 1024;
 
 const testConfig = () =>
   ({
-    rsServer: { options: { port, globalIpFilter: '(^|:?)127.0.0.1$' } },
+    rsServer: {
+      options: { port, globalIpFilter: '(^|:?)127.0.0.1$|(^|:?)::1$' }
+    },
     rsLogger: { type: 'NullLogger' },
     dicomFileRepository: { type: 'MemoryDicomFileRepository', options: {} },
     imageEncoder: { type: 'PngJsImageEncoder', options: {} },
@@ -238,7 +240,7 @@ describe('with authentication', () => {
     const config = testConfig();
     config.rsServer!.options!.authorization = {
       enabled: true,
-      tokenRequestIpFilter: '(^|:?)127.0.0.1$',
+      tokenRequestIpFilter: '(^|:?)127.0.0.1$|(^|:?)::1$',
       expire: 1800
     };
     stopServer = await startTestServer(config);

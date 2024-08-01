@@ -13,9 +13,7 @@ const port = 1024;
 
 const testConfig = () =>
   ({
-    rsServer: {
-      options: { port, globalIpFilter: '(^|:?)127.0.0.1$|(^|:?)::1$' }
-    },
+    rsServer: { options: { port, globalIpFilter: '(^|:?)127.0.0.1$' } },
     rsLogger: process.env.CIRCUS_LOG_PATH
       ? {
           type: 'FileLogger',
@@ -245,7 +243,7 @@ describe('with authentication', () => {
     const config = testConfig();
     config.rsServer!.options!.authorization = {
       enabled: true,
-      tokenRequestIpFilter: '(^|:?)127.0.0.1$|(^|:?)::1$',
+      tokenRequestIpFilter: '(^|:?)127.0.0.1$',
       expire: 1800
     };
     stopServer = await startTestServer(config);

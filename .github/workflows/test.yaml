@@ -74,10 +74,12 @@ jobs:
           CIRCUS_MONGO_TEST_URL: 'mongodb://localhost:27017/circus-api-test'
           CIRCUS_LOG_PATH: ./logs
       - name: Upload test log
+        if: always()
         uses: actions/upload-artifact@v2
         with:
           name: circus-logs
           path: ./logs
       - name: Stop mongod
+        if: always()
         run: |
           docker stop mongo

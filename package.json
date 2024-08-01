@@ -21,7 +21,16 @@
     "lint-fix": "eslint --fix \"packages/*/{src,test}/**/*.{js,ts,tsx}\"",
     "lint-prettier": "prettier --check \"packages/*/{src,test}/**/*.{js,ts,less,json,yaml,yml}\"",
     "prettier": "prettier --write \"packages/*/{src,test}/**/*.{js,ts,less,json,yaml,yml}\"",
-    "build-ts": "tsc -b"
+    "build-ts": "tsc -b",
+    "typecheck": "npm run typecheck:circus-api && npm run typecheck:circus-cs-core && npm run typecheck:circus-icons && npm run typecheck:circus-lib && npm run typecheck:circus-rs && npm run typecheck:circus-ui-kit && npm run typecheck:circus-web-ui && npm run typecheck:create-circus-cad-plugin",
+    "typecheck:circus-api": "cd packages/circus-api && tsc --noEmit",
+    "typecheck:circus-cs-core": "cd packages/circus-cs-core && tsc --noEmit",
+    "typecheck:circus-icons": "cd packages/circus-icons && tsc --noEmit",
+    "typecheck:circus-lib": "cd packages/circus-lib && tsc --noEmit",
+    "typecheck:circus-rs": "cd packages/circus-rs && tsc --noEmit",
+    "typecheck:circus-ui-kit": "cd packages/circus-ui-kit && tsc --noEmit",
+    "typecheck:circus-web-ui": "cd packages/circus-web-ui && tsc --noEmit",
+    "typecheck:create-circus-cad-plugin": "cd packages/create-circus-cad-plugin && tsc --noEmit"
   },
   "devDependencies": {
     "@babel/core": "^7.18.9",
@@ -39,7 +48,7 @@
     "eslint-plugin-react-hooks": "^4.0.0",
     "jest": "^26.0.1",
     "prettier": "^3.3.3",
-    "typescript": "^4.2.4"
+    "typescript": "^5.5.4"
   },
   "prettier": {
     "singleQuote": true,

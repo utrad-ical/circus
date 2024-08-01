@@ -82,7 +82,7 @@
     "svg2ttf": "^4.1.0",
     "svgicons2svgfont": "^5.0.2",
     "ttf2woff": "^2.0.1",
-    "typescript": "^4.2.4",
+    "typescript": "^5.5.4",
     "url-loader": "^4.1.1",
     "webpack": "^5.49.0",
     "webpack-dev-server": "^3.11.2",

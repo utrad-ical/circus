@@ -50,7 +50,7 @@ export default async function loopRun<T>(
         } finally {
           if (nextJob) await queue.settle(nextJob.jobId);
         }
-      } catch (e) {
+      } catch (e: any) {
         logger.fatal(e.message);
       }
       await cancellableTimer.waitForNext();

@@ -31,7 +31,7 @@ export default async function pluginResultsValidator(
       );
 
     return rawResults;
-  } catch (e) {
+  } catch (e: any) {
     throw new Error(`Plug-in validation failed: ${e.message}`);
   }
 }

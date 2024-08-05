@@ -30,7 +30,7 @@ const validateInOut: (
           ctx.request.body,
           'toDate'
         );
-      } catch (err) {
+      } catch (err: any) {
         err.phase = 'request';
         throw err;
       }
@@ -43,7 +43,7 @@ const validateInOut: (
           ctx.body,
           'fromDate'
         );
-      } catch (err) {
+      } catch (err: any) {
         err.phase = 'response';
         throw err;
       }

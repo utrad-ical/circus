@@ -1,5 +1,5 @@
-import { setUpMongoFixture } from '../../../test/util-mongo';
-import { setUpAppForRoutesTest, ApiTest } from '../../../test/util-routes';
+import { setUpMongoFixture } from '../../test/util-mongo';
+import { setUpAppForRoutesTest, ApiTest } from '../../test/util-routes';
 
 let apiTest: ApiTest, ax: typeof apiTest.axiosInstances;
 beforeAll(async () => {

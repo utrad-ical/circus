@@ -1,17 +1,19 @@
 import { RouteMiddleware } from '../../../typings/middlewares';
+import { QueueState } from '@utrad-ical/circus-cs-core';
 
 export const handleGet: RouteMiddleware = ({ cs, models }) => {
   return async (ctx, next) => {
     const urlQuery = ctx.request.query;
+    const limit = parseQueryParam(urlQuery.limit, 20);
+    const page = parseQueryParam(urlQuery.page, 1);
 
-    const limit = urlQuery.limit ? parseInt(urlQuery.limit, 10) : 20;
-    const page = urlQuery.page ? parseInt(urlQuery.page, 10) : 1;
-
-    const state = ['wait', 'processing', 'all'].some(
-      state => state === urlQuery.state
-    )
-      ? urlQuery.state
-      : undefined;
+    const stateParam = Array.isArray(urlQuery.state)
+      ? urlQuery.state[0]
+      : urlQuery.state;
+    const state =
+      stateParam && ['wait', 'processing', 'all'].includes(stateParam)
+        ? (stateParam as QueueState | 'all')
+        : undefined;
 
     const allQueueItems = (await cs.job.list(state)) as any[];
     const items = await Promise.all(
@@ -26,4 +28,16 @@ export const handleGet: RouteMiddleware = ({ cs, models }) => {
       totalItems: allQueueItems.length
     };
   };
+};
+
+const parseQueryParam = (
+  param: string | string[] | undefined,
+  defaultValue: number
+): number => {
+  if (Array.isArray(param)) {
+    return parseInt(param[0], 10);
+  } else if (typeof param === 'string') {
+    return parseInt(param, 10);
+  }
+  return defaultValue;
 };

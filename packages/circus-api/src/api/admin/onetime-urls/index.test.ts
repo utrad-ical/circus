@@ -1,5 +1,5 @@
-import { setUpAppForRoutesTest, ApiTest } from '../../../../test/util-routes';
-import { setUpMongoFixture } from '../../../../test/util-mongo';
+import { setUpAppForRoutesTest, ApiTest } from '../../../test/util-routes';
+import { setUpMongoFixture } from '../../../test/util-mongo';
 import { AxiosInstance } from 'axios';
 
 let apiTest: ApiTest, axios: AxiosInstance;

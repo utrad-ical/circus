@@ -22,7 +22,7 @@ const errorHandler: (options: Options) => koa.Middleware = ({
       if (ctx.status === status.NOT_FOUND) {
         ctx.throw(status.NOT_FOUND, 'Not found');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       logger.trace(err);
       if (err instanceof Ajv.ValidationError) {
         // JSON validation error occurred.
@@ -52,13 +52,18 @@ const errorHandler: (options: Options) => koa.Middleware = ({
         return;
       } else {
         // Other exceptions thrown.
-        if (!err.status) {
+        const error = err as {
+          status?: number;
+          message?: string;
+          stack?: string;
+        };
+        if (!error.status) {
           // Exception without `status` means some unexpected
           // run-time error happened outside of `ctx.throw()`.
-          logger.error(err);
+          logger.error(error);
           ctx.status = status.INTERNAL_SERVER_ERROR;
           if (includeErrorDetails) {
-            ctx.body = { error: err.message, stack: err.stack };
+            ctx.body = { error: error.message, stack: error.stack };
           } else {
             ctx.body = { error: 'Internal server error.' };
           }
@@ -66,10 +71,10 @@ const errorHandler: (options: Options) => koa.Middleware = ({
           // Exception with `status` means `ctx.throw()` was
           // manually called somewhere in our codebase.
           // (We have successfully handled an exceptional event!)
-          logger.info('HTTP error with status ' + err.status);
-          logger.info(err);
-          ctx.status = err.status;
-          ctx.body = { error: err.message };
+          logger.info('HTTP error with status ' + error.status);
+          logger.info(error);
+          ctx.status = error.status;
+          ctx.body = { error: error.message };
         }
       }
     }

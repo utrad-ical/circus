@@ -1,4 +1,4 @@
-import { setUpMongoFixture, usingModels } from '../../test/util-mongo';
+import { setUpMongoFixture, usingModels } from '../test/util-mongo';
 import { command } from './clear-token';
 import { CommandFunc } from './Command';
 

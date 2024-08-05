@@ -3,8 +3,8 @@ import createTaskManager, {
   TaskManager
 } from './createTaskManager';
 import { Models } from './interface';
-import { setUpMongoFixture, usingModels } from '../test/util-mongo';
-import { readFromStream, readFromStreamTillEnd } from '../test/util-stream';
+import { setUpMongoFixture, usingModels } from './test/util-mongo';
+import { readFromStream, readFromStreamTillEnd } from './test/util-stream';
 import path from 'path';
 import fs from 'fs-extra';
 import createNullLogger from '@utrad-ical/circus-lib/src/logger/NullLogger';

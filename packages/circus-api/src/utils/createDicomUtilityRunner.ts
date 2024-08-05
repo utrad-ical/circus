@@ -11,6 +11,7 @@ interface Options {
 
 export interface DicomUtilityRunner {
   compress: (buf: ArrayBuffer) => Promise<ArrayBuffer>;
+  dispose: () => Promise<void>;
 }
 
 const createDicomUtilityRunner: NoDepFunctionService<

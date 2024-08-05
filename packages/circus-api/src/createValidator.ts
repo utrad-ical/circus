@@ -7,13 +7,33 @@ import * as path from 'path';
 import { isDicomUid, NoDepFunctionService } from '@utrad-ical/circus-lib';
 import { Validator } from './interface';
 
-const loadSchemaFiles = async (schemaRoot: string) => {
+interface Schema {
+  $async?: boolean;
+  $id?: string;
+  oneOf?: any[];
+  properties?: object;
+  additionalProperties?: boolean;
+  [key: string]: any;
+}
+
+const loadSchemaFiles = async (
+  schemaRoot: string
+): Promise<{ [name: string]: Schema }> => {
   // Search all the schema YAML files under the root directory
-  const schemaFiles = await glob(path.join(schemaRoot + '/*.yaml'));
-  const schemas: { [name: string]: any } = {};
+  const schemaFiles = await glob(path.join(schemaRoot, '*.yaml'));
+  const schemas: { [name: string]: Schema } = {};
   for (const schemaFile of schemaFiles) {
     const basename = path.basename(schemaFile, '.yaml');
-    const schemaData = yaml.safeLoad(await fs.readFile(schemaFile, 'utf8'));
+    const schemaData = yaml.safeLoad(
+      await fs.readFile(schemaFile, 'utf8')
+    ) as Schema;
+
+    if (typeof schemaData !== 'object' || schemaData === null) {
+      throw new TypeError(
+        `Schema file "${basename}" does not contain a valid schema object`
+      );
+    }
+
     if (schemaData.$async !== true || schemaData.$id) {
       throw new TypeError(
         `Schemas "${basename}" must be async and have no $id field`

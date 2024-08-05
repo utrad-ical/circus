@@ -2,7 +2,7 @@ import errorHandler from './errorHandler';
 import axios, { AxiosInstance } from 'axios';
 import Router from 'koa-router';
 import Ajv from 'ajv';
-import { setUpKoaTest, TestServer } from '../../test/util-koa';
+import { setUpKoaTest, TestServer } from '../test/util-koa';
 import createNullLogger from '@utrad-ical/circus-lib/src/logger/NullLogger';
 
 let testServer: TestServer, ax: AxiosInstance;
@@ -20,7 +20,7 @@ beforeAll(async () => {
       const schema = { $async: true, type: 'number' };
       try {
         await ajv.validate(schema, 'hi'); // validation fails
-      } catch (err) {
+      } catch (err: any) {
         err.phase = 'request';
         throw err;
       }
@@ -31,7 +31,7 @@ beforeAll(async () => {
       const schema = { $async: true, type: 'number' };
       try {
         await ajv.validate(schema, 'hi'); // validation fails
-      } catch (err) {
+      } catch (err: any) {
         err.phase = 'response';
         throw err;
       }

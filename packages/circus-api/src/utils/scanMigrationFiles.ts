@@ -12,7 +12,7 @@ const scanMigrationFiles = async () => {
       const rev = parseInt(/^(\d+)/.exec(base)![0], 10);
       if (rev <= 0) throw new RangeError('rev: ' + rev);
       results[rev] = file;
-    } catch (err) {
+    } catch (err: any) {
       throw new Error('Invalid migration file name format: ' + err.message);
     }
   });

@@ -1,4 +1,4 @@
-import { usingModels, setUpMongoFixture } from '../../test/util-mongo';
+import { usingModels, setUpMongoFixture } from '../test/util-mongo';
 import { Models } from '../interface';
 import duplicateJobExists from './duplicateJobExists';
 

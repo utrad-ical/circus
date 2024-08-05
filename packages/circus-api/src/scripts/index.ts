@@ -53,7 +53,7 @@ const main = async () => {
       } finally {
         await loader.dispose();
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(chalk.red('ERROR:'));
       console.error(err.message);
       err.errors && console.error(err.errors);

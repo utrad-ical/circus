@@ -1,6 +1,6 @@
-import { setUpAppForRoutesTest, ApiTest } from '../../../test/util-routes';
+import { setUpAppForRoutesTest, ApiTest } from '../../test/util-routes';
 import { AxiosInstance } from 'axios';
-import { setUpMongoFixture } from '../../../test/util-mongo';
+import { setUpMongoFixture } from '../../test/util-mongo';
 import status from 'http-status';
 
 let apiTest: ApiTest,

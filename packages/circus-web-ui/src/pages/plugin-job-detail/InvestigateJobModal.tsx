@@ -140,7 +140,10 @@ const SeriesEntries: React.FC<{ value: SeriesEntry[] }> = props => {
           <div>#{i}</div>
           <div>
             {s.seriesUid} (
-            {describePartialVolumeDescriptor(s.partialVolumeDescriptor!)})
+            {s.partialVolumeDescriptor !== 'auto'
+              ? describePartialVolumeDescriptor(s.partialVolumeDescriptor!)
+              : 'auto'}
+            )
           </div>
         </React.Fragment>
       ))}

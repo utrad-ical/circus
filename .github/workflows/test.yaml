@@ -53,6 +53,13 @@ jobs:
         run: npm i -g npm@10
       - name: Install dependencies
         run: npm ci
+      - name: Run TypeScript Check
+        run: |
+          npm run typecheck
+          if [ $? -ne 0 ]; then
+            echo "TypeScript check failed."
+            exit 1
+          fi
       - name: Pull dicom_utility from Docker Hub
         run: |
           docker pull hello-world

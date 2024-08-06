@@ -61,10 +61,7 @@ jobs:
           cd packages/circus-cs-core/test/docker
           node build.js
       - name: Build modules
-        run: |
-          npm run build --if-present --workspaces
-        env:
-          NODE_OPTIONS: '--openssl-legacy-provider'
+        run: npm run build
       - name: Run TypeScript Check
         run: |
           npm run typecheck

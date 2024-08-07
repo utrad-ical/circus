@@ -5,7 +5,8 @@
   "main": "lib/index.js",
   "scripts": {
     "prepublishOnly": "npm run build",
-    "build": "rimraf ./lib *.tsbuildinfo && tsc"
+    "build": "rimraf ./lib *.tsbuildinfo && tsc",
+    "typecheck": "tsc --noEmit"
   },
   "repository": {
     "type": "git",

@@ -24,15 +24,7 @@
     "prebuild-ts": "cd packages/circus-rs && npm run prebuild",
     "build-ts": "tsc -b",
     "postbuild-ts": "cd packages/circus-rs && npm run postbuild",
-    "typecheck": "npm run typecheck:circus-api && npm run typecheck:circus-cs-core && npm run typecheck:circus-icons && npm run typecheck:circus-lib && npm run typecheck:circus-rs && npm run typecheck:circus-ui-kit && npm run typecheck:circus-web-ui && npm run typecheck:create-circus-cad-plugin",
-    "typecheck:circus-api": "cd packages/circus-api && tsc --noEmit",
-    "typecheck:circus-cs-core": "cd packages/circus-cs-core && tsc --noEmit",
-    "typecheck:circus-icons": "cd packages/circus-icons && tsc --noEmit",
-    "typecheck:circus-lib": "cd packages/circus-lib && tsc --noEmit",
-    "typecheck:circus-rs": "cd packages/circus-rs && tsc --noEmit",
-    "typecheck:circus-ui-kit": "cd packages/circus-ui-kit && tsc --noEmit",
-    "typecheck:circus-web-ui": "cd packages/circus-web-ui && tsc --noEmit",
-    "typecheck:create-circus-cad-plugin": "cd packages/create-circus-cad-plugin && tsc --noEmit"
+    "typecheck": "npm run typecheck --if-present --workspaces"
   },
   "devDependencies": {
     "@babel/core": "^7.18.9",

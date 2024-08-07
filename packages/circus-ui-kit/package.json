@@ -4,7 +4,8 @@
   "description": "React components used by CIRCUS projects",
   "main": "lib/index.js",
   "scripts": {
-    "build": "tsc --build"
+    "build": "tsc --build",
+    "typecheck": "tsc --noEmit"
   },
   "repository": {
     "type": "git",
@@ -19,7 +20,8 @@
   },
   "devDependencies": {
     "react": "^17.0.2",
-    "styled-components": "^5.1.0"
+    "styled-components": "^5.1.0",
+    "typescript": "^5.5.4"
   },
   "dependencies": {
     "@smikitky/rb-components": "^7.0.0",

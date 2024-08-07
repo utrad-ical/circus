@@ -61,7 +61,7 @@ jobs:
           cd packages/circus-cs-core/test/docker
           node build.js
       - name: Build modules
-        run: npm run build
+        run: npm run build-ts
       - name: Run TypeScript Check
         run: |
           npm run typecheck

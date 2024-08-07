@@ -1,12 +1,12 @@
 import { Action, configureStore } from '@reduxjs/toolkit';
-import { combineReducers } from 'redux';
-import { ThunkAction } from 'redux-thunk';
-import searches from './searches';
+import { AnyAction, combineReducers, Dispatch } from 'redux';
+import { ThunkAction, ThunkDispatch } from 'redux-thunk';
 import loginUser from './loginUser';
 import messages from './messages';
 import plugins from './plugins';
-import users from './users';
+import searches from './searches';
 import taskProgress from './taskProgress';
+import users from './users';
 
 const reducer = combineReducers({
   searches,
@@ -34,7 +34,8 @@ export const store = configureStore({
 export const dispatch = store.dispatch;
 
 export type RootState = ReturnType<typeof reducer>;
-export type AppDispatch = typeof dispatch;
+export type AppDispatch = ThunkDispatch<RootState, unknown, AnyAction> &
+  Dispatch<AnyAction>;
 
 /**
  * The thunk action type. See the advanced tutorial of Redux Toolkit.

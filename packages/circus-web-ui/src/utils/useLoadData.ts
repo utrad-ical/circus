@@ -31,7 +31,7 @@ const useLoadData = <T>(
           setIsLoading(false);
           setData(res);
         }
-      } catch (err) {
+      } catch (err: any) {
         if (!clearedUp) {
           loading = false;
           setData(err);

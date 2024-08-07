@@ -5,7 +5,7 @@ import errorHandler from './errorHandler';
 import axios from 'axios';
 import Router from 'koa-router';
 import * as path from 'path';
-import { setUpKoaTest, TestServer } from '../../test/util-koa';
+import { setUpKoaTest, TestServer } from '../test/util-koa';
 import createNullLogger from '@utrad-ical/circus-lib/src/logger/NullLogger';
 
 let testServer: TestServer;

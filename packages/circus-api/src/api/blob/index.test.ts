@@ -1,4 +1,4 @@
-import { setUpAppForRoutesTest, ApiTest } from '../../../test/util-routes';
+import { setUpAppForRoutesTest, ApiTest } from '../../test/util-routes';
 import { AxiosInstance } from 'axios';
 import { createGzip } from 'zlib';
 

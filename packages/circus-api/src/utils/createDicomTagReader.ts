@@ -48,7 +48,7 @@ const parseBirthDate = (da: string | undefined) => {
 };
 
 const extractPatientName = (
-  dataset: parser.DicomDataset,
+  dataset: parser.DataSet,
   encConverter: EncConverter
 ) => {
   const element = dataset.elements['x00100010'];
@@ -100,7 +100,7 @@ export const extractAge = (
 };
 
 const readNumberList = (
-  dataSet: parser.DicomDataset,
+  dataSet: parser.DataSet,
   key: string,
   accessor: string,
   valueBytes: number
@@ -116,10 +116,10 @@ const readNumberList = (
 };
 
 const readElement = (
-  dataSet: parser.DicomDataset,
+  dataSet: parser.DataSet,
   key: string,
   vr: string,
-  rootDataSet: parser.DicomDataset
+  rootDataSet: parser.DataSet
 ): string | number | number[] | undefined => {
   if (vr.indexOf('|') >= 0) {
     // This means the true VR type depends on other DICOM element.
@@ -184,7 +184,7 @@ export interface Parameters {
   PixelValueUnits?: string;
 }
 
-const extractParameters = (dataset: parser.DicomDataset) => {
+const extractParameters = (dataset: parser.DataSet) => {
   const data: Parameters = {
     TransferSyntaxUID: dataset.string('x00020010'),
     pixelSpacingX: dataset.floatString('x00280030', 0),

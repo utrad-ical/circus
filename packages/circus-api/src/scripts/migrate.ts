@@ -38,7 +38,7 @@ export const command: Command<{ database: Database; models: Models }> = async (
           { $set: { revision: i, updatedAt: new Date() } },
           { upsert: true }
         );
-      } catch (err) {
+      } catch (err: any) {
         console.error(chalk.red('Error: ', name));
         console.error(err.message);
         if (err.errors) console.error(err.errors);

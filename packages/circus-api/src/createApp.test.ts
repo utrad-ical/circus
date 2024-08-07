@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
-import { setUpKoaTestWith, TestServer } from '../test/util-koa';
-import createTestLogger from '../test/util-logger';
-import { usingModels } from '../test/util-mongo';
+import { setUpKoaTestWith, TestServer } from './test/util-koa';
+import createTestLogger from './test/util-logger';
+import { usingModels } from './test/util-mongo';
 import createApp from './createApp';
 import * as ws from 'ws';
 

@@ -1,5 +1,5 @@
-import { setUpKoaTest, TestServer } from '../../test/util-koa';
-import { setUpMongoFixture, usingMongo } from '../../test/util-mongo';
+import { setUpKoaTest, TestServer } from '../test/util-koa';
+import { setUpMongoFixture, usingMongo } from '../test/util-mongo';
 
 import performSearch, {
   runAggregation,

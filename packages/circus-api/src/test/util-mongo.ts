@@ -3,10 +3,10 @@ import * as fs from 'fs-extra';
 import { safeLoad as yaml } from 'js-yaml';
 import mongo from 'mongodb';
 import * as path from 'path';
-import createValidator from '../src/createValidator';
-import { Database, Validator, Models } from '../src/interface';
-import connectDb from '../src/db/connectDb';
-import createModels, { makeModels } from '../src/db/createModels';
+import createValidator from '../createValidator';
+import { Database, Validator, Models } from '../interface';
+import connectDb from '../db/connectDb';
+import createModels, { makeModels } from '../db/createModels';
 
 /**
  * Connects to a test MongoDB instance.
@@ -31,7 +31,7 @@ export const setUpMongoFixture = async (
     await col.deleteMany({});
     const content = yaml(
       await fs.readFile(
-        path.join(__dirname, 'fixture', colName + '.yaml'),
+        path.join(__dirname, '../../test/fixture', colName + '.yaml'),
         'utf8'
       )
     );

@@ -1,4 +1,4 @@
-import { setUpMongoFixture, usingSessionModels } from '../test/util-mongo';
+import { setUpMongoFixture, usingSessionModels } from './test/util-mongo';
 import { Models } from './interface';
 import {
   determineUserAccessInfo,

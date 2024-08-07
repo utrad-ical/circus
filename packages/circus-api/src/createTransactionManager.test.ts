@@ -1,6 +1,6 @@
 import createTransactionManager from './createTransactionManager';
 import mongo, { ClientSession } from 'mongodb';
-import { setUpMongoFixture, usingMongo } from '../test/util-mongo';
+import { setUpMongoFixture, usingMongo } from './test/util-mongo';
 import createValidator from './createValidator';
 import createCollectionAccessor from '../src/db/createCollectionAccessor';
 import { Database, Validator, TransactionManager } from './interface';

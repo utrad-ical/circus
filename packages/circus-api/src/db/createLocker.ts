@@ -39,7 +39,7 @@ const createLocker = (
           { deleteMany: { filter: { target, createdAt: { $lt: minTime } } } },
           { insertOne: { document: { target, myId, createdAt: now } } }
         ]);
-    } catch (err) {
+    } catch (err: any) {
       if (err.code === 11000) {
         throw new Error('Resource busy.');
       } else {

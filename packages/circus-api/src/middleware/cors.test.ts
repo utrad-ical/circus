@@ -1,6 +1,6 @@
 import cors from './cors';
 import axios from 'axios';
-import { setUpKoaTest } from '../../test/util-koa';
+import { setUpKoaTest } from '../test/util-koa';
 
 test('cors', async () => {
   const testServer = await setUpKoaTest(async app => {

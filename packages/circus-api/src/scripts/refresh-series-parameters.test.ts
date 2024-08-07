@@ -1,5 +1,5 @@
 import { command } from './refresh-series-parameters';
-import { setUpMongoFixture, usingModels } from '../../test/util-mongo';
+import { setUpMongoFixture, usingModels } from '../test/util-mongo';
 import { Models, DicomTagReader } from '../interface';
 import { CommandFunc } from './Command';
 import { DicomFileRepository } from '@utrad-ical/circus-lib';

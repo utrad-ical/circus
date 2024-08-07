@@ -85,13 +85,13 @@ const checkEnv: FunctionService<
     for (const entry of checkEntries) {
       try {
         process.stdout.write(
-          (entry.title + ' '.repeat(35)).substr(0, 35) + ': '
+          (entry.title + ' '.repeat(35)).substring(0, 35) + ': '
         );
         const message = await entry.fn();
         process.stdout.write(chalk.cyanBright('[OK]\n'));
         if (message) console.log('  ' + chalk.gray(message));
         passedCount++;
-      } catch (e) {
+      } catch (e: any) {
         process.stdout.write(chalk.redBright('[NG]\n'));
         console.error('  ' + e.message);
       }

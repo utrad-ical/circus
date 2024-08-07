@@ -1,8 +1,11 @@
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import { SeriesEntry } from 'components/SeriesSelector';
+import produce from 'immer';
 import { multirange } from 'multi-integer-range';
 import Series from 'types/Series';
 import { RootState } from '../store';
 import { ApiCaller } from './api';
+import asyncMap from './asyncMap';
 
 export const defaultPvd = (images: string): PartialVolumeDescriptor => {
   const mr = multirange(images);
@@ -22,3 +25,27 @@ export const defaultPvdFromSeries = async (
     ((await api('series/' + seriesUid)) as Series);
   return defaultPvd(series.images);
 };
+
+/**
+ * Fills a partial volume descriptor when empty, and
+ * returns an array of `SeriesEntry` suitable for job/case registration.
+ */
+export const fillPartialVolumeDescriptors = async (
+  entries: SeriesEntry[],
+  api: ApiCaller,
+  state?: RootState
+): Promise<SeriesEntry[]> => {
+  return await asyncMap(entries, async entry =>
+    produce(entry, async entry => {
+      if (!entry.partialVolumeDescriptor) {
+        entry.partialVolumeDescriptor = await defaultPvdFromSeries(
+          entry.seriesUid,
+          api,
+          state
+        );
+      }
+    })
+  );
+};
+
+export default fillPartialVolumeDescriptors;

@@ -65,7 +65,7 @@ module.exports.default = {
         // threshold: upper limit of heap memory size. (in bytes)
         memoryThreshold: 2147483648,
         // upper limit seconds of heap.
-        maxAge: 3600
+        ttl: 3600
       }
     }
   },

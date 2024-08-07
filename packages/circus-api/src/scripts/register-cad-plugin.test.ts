@@ -1,4 +1,4 @@
-import { setUpMongoFixture, usingModels } from '../../test/util-mongo';
+import { setUpMongoFixture, usingModels } from '../test/util-mongo';
 import { CommandFunc } from './Command';
 import { command } from './register-cad-plugin';
 

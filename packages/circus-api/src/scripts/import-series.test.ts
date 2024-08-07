@@ -1,7 +1,7 @@
 import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib';
 import path from 'path';
-import createTestLogger from '../../test/util-logger';
-import { setUpMongoFixture, usingModels } from '../../test/util-mongo';
+import createTestLogger from '../test/util-logger';
+import { setUpMongoFixture, usingModels } from '../test/util-mongo';
 import createDicomImporter from '../createDicomImporter';
 import { Models } from '../interface';
 import { CommandFunc } from './Command';

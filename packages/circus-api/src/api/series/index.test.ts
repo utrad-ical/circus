@@ -4,8 +4,8 @@ import fs from 'fs-extra';
 import path from 'path';
 import tarfs from 'tar-fs';
 import zlib from 'zlib';
-import { setUpMongoFixture } from '../../../test/util-mongo';
-import { ApiTest, setUpAppForRoutesTest } from '../../../test/util-routes';
+import { setUpMongoFixture } from '../../test/util-mongo';
+import { ApiTest, setUpAppForRoutesTest } from '../../test/util-routes';
 import delay from '../../utils/delay';
 
 let apiTest: ApiTest, ax: typeof apiTest.axiosInstances;

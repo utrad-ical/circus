@@ -1,4 +1,4 @@
-import { setUpMongoFixture, usingSessionModels } from '../../test/util-mongo';
+import { setUpMongoFixture, usingSessionModels } from '../test/util-mongo';
 import { Database, TransactionManager, Validator } from '../interface';
 import { CommandFunc } from './Command';
 import { command } from './register-case';

@@ -105,7 +105,7 @@ export const command: Command<{
         });
         await waitForStream(stream);
         console.log(chalk.green('Exported '), caseId);
-      } catch (err) {
+      } catch (err: any) {
         if (continueOnError) {
           console.error(err.message);
           continue;

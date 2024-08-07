@@ -1,4 +1,4 @@
-import { setUpAppForRoutesTest, ApiTest } from '../../../test/util-routes';
+import { setUpAppForRoutesTest, ApiTest } from '../../test/util-routes';
 import path from 'path';
 import fs from 'fs-extra';
 

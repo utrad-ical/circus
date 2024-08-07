@@ -67,7 +67,7 @@ const GeneralAdmin: React.FC<{}> = props => {
         short: true
       });
       loadSettings();
-    } catch (err) {
+    } catch (err: any) {
       setComplaints(err.data.errors);
     }
   };

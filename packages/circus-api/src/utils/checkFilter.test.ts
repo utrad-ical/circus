@@ -23,12 +23,14 @@ describe('checkFilter', () => {
     expect(checkFilter({ birthday: new Date() }, fields)).toBe(true);
     expect(
       checkFilter(
-        EJSON.parse('{"birthday":{"$lt":{"$date":"2015-11-11T00:22:33Z"}}}'),
+        EJSON.parse(
+          '{"birthday":{"$lt":{"$date":"2015-11-11T00:22:33Z"}}}'
+        ) as object,
         fields
       )
     ).toBe(true);
-    expect(checkFilter(EJSON.parse('{"name":{"$regex":"^An"}}'), fields)).toBe(
-      true
-    );
+    expect(
+      checkFilter(EJSON.parse('{"name":{"$regex":"^An"}}') as object, fields)
+    ).toBe(true);
   });
 });

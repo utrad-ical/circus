@@ -1,5 +1,5 @@
 import createDefaultAuthProvider from './DefaultAuthProvider';
-import { usingModels, setUpMongoFixture } from '../../../../test/util-mongo';
+import { usingModels, setUpMongoFixture } from '../../../test/util-mongo';
 import { Models } from '../../../interface';
 
 const modelsPromise = usingModels();

@@ -2,29 +2,29 @@ import axios, { AxiosInstance } from 'axios';
 import fs from 'fs-extra';
 import { safeLoad as yaml } from 'js-yaml';
 import path from 'path';
-import createApp from '../src/createApp';
+import createApp from '../createApp';
 import { setUpKoaTestWith } from './util-koa';
 import { connectMongo, setUpMongoFixture } from './util-mongo';
 import * as cscore from '@utrad-ical/circus-cs-core';
 import createTestLogger from './util-logger';
-import createValidator from '../src/createValidator';
-import createModels from '../src/db/createModels';
-import createMemoryStorage from '../src/storage/MemoryStorage';
-import createDicomImporter from '../src/createDicomImporter';
+import createValidator from '../createValidator';
+import createModels from '../db/createModels';
+import createMemoryStorage from '../storage/MemoryStorage';
+import createDicomImporter from '../createDicomImporter';
 import {
   MemoryDicomFileRepository,
   DicomFileRepository
 } from '@utrad-ical/circus-lib';
-import createDicomTagReader from '../src/utils/createDicomTagReader';
-import createDicomUtilityRunner from '../src/utils/createDicomUtilityRunner';
-import createTaskManager, { TaskManager } from '../src/createTaskManager';
+import createDicomTagReader from '../utils/createDicomTagReader';
+import createDicomUtilityRunner from '../utils/createDicomUtilityRunner';
+import createTaskManager, { TaskManager } from '../createTaskManager';
 import { DicomVoxelDumper } from '@utrad-ical/circus-cs-core';
 import { Archiver } from 'archiver';
 import { EventEmitter } from 'events';
-import createOauthServer from '../src/middleware/auth/createOauthServer';
-import createDefaultAuthProvider from '../src/middleware/auth/authProvider/DefaultAuthProvider';
+import createOauthServer from '../middleware/auth/createOauthServer';
+import createDefaultAuthProvider from '../middleware/auth/authProvider/DefaultAuthProvider';
 import { Database } from 'interface';
-import createTransactionManager from '../src/createTransactionManager';
+import createTransactionManager from '../createTransactionManager';
 import * as ws from 'ws';
 
 /**
@@ -130,7 +130,10 @@ export const setUpAppForRoutesTest = async () => {
     }
   );
 
-  const downloadFileDirectory = path.join(__dirname, 'download-test');
+  const downloadFileDirectory = path.join(
+    __dirname,
+    '../../test/download-test'
+  );
   const taskManager = await createTaskManager(
     {
       downloadFileDirectory,
@@ -162,8 +165,8 @@ export const setUpAppForRoutesTest = async () => {
   const app = await createApp(
     {
       debug: true,
-      pluginResultsPath: path.join(__dirname, 'plugin-results'),
-      pluginCachePath: path.join(__dirname, 'plugin-cache'),
+      pluginResultsPath: path.join(__dirname, '../../test/plugin-results'),
+      pluginCachePath: path.join(__dirname, '../../test/plugin-cache'),
       uploadFileSizeMaxBytes: 200 * 1024 * 1024,
       dicomImageServerUrl: '' // dummy
     },
@@ -246,7 +249,7 @@ const createMockCsCore = () => {
   let status: 'running' | 'stopped' = 'stopped';
   const pluginDefinitions = yaml(
     fs.readFileSync(
-      path.join(__dirname, 'fixture/pluginDefinitions.yaml'),
+      path.join(__dirname, '../../test/fixture/pluginDefinitions.yaml'),
       'utf8'
     )
   ) as cscore.PluginDefinition[];

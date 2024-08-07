@@ -1,4 +1,4 @@
-import { usingMongo } from '../../test/util-mongo';
+import { usingMongo } from '../test/util-mongo';
 import delay from '../utils/delay';
 import createLocker from './createLocker';
 import mongo from 'mongodb';

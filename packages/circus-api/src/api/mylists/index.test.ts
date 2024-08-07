@@ -1,5 +1,5 @@
-import { setUpMongoFixture } from '../../../test/util-mongo';
-import { setUpAppForRoutesTest, ApiTest } from '../../../test/util-routes';
+import { setUpMongoFixture } from '../../test/util-mongo';
+import { setUpAppForRoutesTest, ApiTest } from '../../test/util-routes';
 import mongo from 'mongodb';
 
 let apiTest: ApiTest, ax: typeof apiTest.axiosInstances, db: mongo.Db;

@@ -119,7 +119,7 @@ const FileUpload: React.FC<{
       setFiles([]);
       setUploading(false);
       typeof onUploaded === 'function' && onUploaded(res);
-    } catch (err) {
+    } catch (err: any) {
       setUploading(false);
       showMessage(`Upload failed (Error ${err.status})`, 'danger');
       throw err;

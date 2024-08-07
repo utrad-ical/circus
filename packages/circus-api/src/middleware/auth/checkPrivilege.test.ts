@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import Router from 'koa-router';
-import { setUpKoaTest, TestServer } from '../../../test/util-koa';
-import { setUpMongoFixture, usingModels } from '../../../test/util-mongo';
+import { setUpKoaTest, TestServer } from '../../test/util-koa';
+import { setUpMongoFixture, usingModels } from '../../test/util-mongo';
 import { determineUserAccessInfo } from '../../privilegeUtils';
 import checkPrivilege from './checkPrivilege';
 

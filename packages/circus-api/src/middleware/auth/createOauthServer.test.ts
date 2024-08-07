@@ -2,8 +2,8 @@ import axios, { AxiosInstance } from 'axios';
 import bodyparser from 'koa-bodyparser';
 import Router from 'koa-router';
 import * as qs from 'querystring';
-import { setUpKoaTest, TestServer } from '../../../test/util-koa';
-import { setUpMongoFixture, usingModels } from '../../../test/util-mongo';
+import { setUpKoaTest, TestServer } from '../../test/util-koa';
+import { setUpMongoFixture, usingModels } from '../../test/util-mongo';
 import errorHandler from '../errorHandler';
 import createOauthServer from './createOauthServer';
 import createNullLogger from '@utrad-ical/circus-lib/src/logger/NullLogger';
@@ -20,7 +20,10 @@ beforeAll(async () => {
   db = database.db;
   const authProvider = await DefaultAuthProvider({}, { models });
   testServer = await setUpKoaTest(async app => {
-    const oauth = await createOauthServer({}, { models, authProvider });
+    const oauth = await createOauthServer(
+      {},
+      { models, authProvider, defaultAuthProvider: authProvider }
+    );
 
     const router = new Router();
     router.post('/token', oauth.token(null) as any);

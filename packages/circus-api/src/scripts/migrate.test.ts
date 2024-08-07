@@ -1,4 +1,4 @@
-import { deleteAllCollections, usingModels } from '../../test/util-mongo';
+import { deleteAllCollections, usingModels } from '../test/util-mongo';
 import { command } from './migrate';
 
 const modelsPromise = usingModels();

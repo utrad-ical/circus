@@ -1,5 +1,5 @@
 import { AxiosInstance } from 'axios';
-import { ApiTest, setUpAppForRoutesTest } from '../../../test/util-routes';
+import { ApiTest, setUpAppForRoutesTest } from '../../test/util-routes';
 import httpStatus from 'http-status';
 
 let apiTest: ApiTest, axios: AxiosInstance;

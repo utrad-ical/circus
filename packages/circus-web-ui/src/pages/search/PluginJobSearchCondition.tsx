@@ -1,18 +1,18 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { modalities } from '../../modalities';
-import ConditionFrame, { Condition } from './ConditionFrame';
-import { escapeRegExp } from 'utils/util';
-import * as et from '@smikitky/rb-components/lib/editor-types';
+import { conditionToMongoQuery } from '@smikitky/rb-components/lib/ConditionEditor';
 import DateRangePicker, {
   DateRange,
   dateRangeToMongoQuery
 } from '@smikitky/rb-components/lib/DateRangePicker';
-import AgeMinMax from 'components/AgeMinMax';
-import { conditionToMongoQuery } from '@smikitky/rb-components/lib/ConditionEditor';
-import SearchPanel from 'pages/search/SearchPanel';
-import { useApi } from 'utils/api';
-import PluginDisplay from 'components/PluginDisplay';
+import * as et from '@smikitky/rb-components/lib/editor-types';
 import { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
+import AgeMinMax from 'components/AgeMinMax';
+import PluginDisplay from 'components/PluginDisplay';
+import SearchPanel from 'pages/search/SearchPanel';
+import React, { useMemo } from 'react';
+import useLoginUser from 'utils/useLoginUser';
+import { escapeRegExp } from 'utils/util';
+import { modalities } from '../../modalities';
+import ConditionFrame, { Condition } from './ConditionFrame';
 
 const sexOptions: { [key: string]: string } = {
   all: 'All',
@@ -72,8 +72,8 @@ const basicConditionToMongoQuery = (condition: any) => {
   return members.length > 1
     ? { $and: members }
     : members.length === 1
-    ? members[0]
-    : {};
+      ? members[0]
+      : {};
 };
 
 const conditionToFilter = (condition: any) => {
@@ -102,21 +102,20 @@ const ConditionEditor: React.FC<{
 }> = props => {
   const { value, onChange } = props;
 
-  const api = useApi();
-  const [plugins, setPlugins] = useState<any[]>([]);
-
-  useEffect(() => {
-    const load = async () => {
-      setPlugins(await api('/plugins'));
-    };
-    load();
-  }, [api]);
+  const user = useLoginUser();
+  const accessiblePlugins = useMemo(
+    () =>
+      user.accessiblePlugins.filter(
+        p => p.roles.includes('executePlugin') && p.roles.includes('readPlugin')
+      ),
+    [user]
+  );
 
   const basicConditionProperties = useMemo<
     PropertyEditorProperties<any>
   >(() => {
     const pluginOptions: { [key: string]: any } = { all: 'All' };
-    plugins.forEach(p => (pluginOptions[p.pluginId] = p.pluginId));
+    accessiblePlugins.forEach(p => (pluginOptions[p.pluginId] = p.pluginId));
     return [
       {
         key: 'pluginId',
@@ -138,14 +137,14 @@ const ConditionEditor: React.FC<{
         editor: et.shrinkSelect(statusOptions)
       }
     ];
-  }, [plugins]);
+  }, [accessiblePlugins]);
 
   const advancedConditionKeys = useMemo(() => {
     const pluginOptions: { [key: string]: any } = {};
-    plugins.forEach(
+    accessiblePlugins.forEach(
       p =>
         (pluginOptions[p.pluginId] = {
-          caption: `${p.pluginName} v.${p.version}`
+          caption: `${p.plugin.pluginName} v.${p.plugin.version}`
         })
     );
     return {
@@ -170,7 +169,7 @@ const ConditionEditor: React.FC<{
         spec: { options: statusList }
       }
     };
-  }, [plugins]);
+  }, [accessiblePlugins]);
 
   return (
     <ConditionFrame

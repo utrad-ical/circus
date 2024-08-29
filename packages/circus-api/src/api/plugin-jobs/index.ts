@@ -115,6 +115,7 @@ export const handlePatch: RouteMiddleware = ({ transactionManager, cs }) => {
 
 const searchableFields = [
   'pluginId',
+  'jobId',
   'status',
   'patientInfo.patientId',
   'patientInfo.patientName',

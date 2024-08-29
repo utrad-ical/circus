@@ -102,6 +102,11 @@ interface RunAggregationOptions {
   transform?: (data: any) => any;
 }
 
+interface AggregationResult {
+  items: any[];
+  totalItems: { count: number }[];
+}
+
 export const runAggregation = async (
   model: CollectionAccessor,
   options: RunAggregationOptions
@@ -116,7 +121,7 @@ export const runAggregation = async (
     transform
   } = options;
 
-  const result = await model.aggregate([
+  const result = (await model.aggregate([
     ...lookupStages,
     ...(filter ? [{ $match: filter }] : []),
     {
@@ -130,7 +135,7 @@ export const runAggregation = async (
         totalItems: [{ $count: 'count' }]
       }
     }
-  ]);
+  ])) as AggregationResult[];
 
   const totalItems = result[0].totalItems.length
     ? result[0].totalItems[0].count

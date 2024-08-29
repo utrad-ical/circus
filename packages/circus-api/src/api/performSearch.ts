@@ -130,7 +130,7 @@ export const runAggregation = async (
           ...(sort && Object.keys(sort).length >= 1 ? [{ $sort: sort }] : []),
           ...(skip ? [{ $skip: skip }] : []),
           ...(limit ? [{ $limit: limit }] : []),
-          ...modifyStages
+          ...(modifyStages.length > 0 ? modifyStages : [{ $match: {} }])
         ],
         totalItems: [{ $count: 'count' }]
       }

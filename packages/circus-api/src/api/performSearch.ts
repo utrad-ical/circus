@@ -115,23 +115,27 @@ export const runAggregation = async (
     limit,
     transform
   } = options;
-  const count = await model.aggregate([
+
+  const result = await model.aggregate([
     ...lookupStages,
     ...(filter ? [{ $match: filter }] : []),
-    { $count: 'count' }
+    {
+      $facet: {
+        items: [
+          ...(sort && Object.keys(sort).length >= 1 ? [{ $sort: sort }] : []),
+          ...(skip ? [{ $skip: skip }] : []),
+          ...(limit ? [{ $limit: limit }] : []),
+          ...modifyStages
+        ],
+        totalItems: [{ $count: 'count' }]
+      }
+    }
   ]);
-  const totalItems = count.length ? (count[0].count as number) : 0;
 
-  const rawItems = await model.aggregate([
-    ...lookupStages,
-    ...(filter ? [{ $match: filter }] : []),
-    ...(sort && Object.keys(sort).length >= 1 ? [{ $sort: sort }] : []),
-    ...(skip ? [{ $skip: skip }] : []),
-    ...(limit ? [{ $limit: limit }] : []),
-    ...modifyStages
-  ]);
-
-  const items = transform ? rawItems.map(transform) : rawItems;
+  const totalItems = result[0].totalItems.length
+    ? result[0].totalItems[0].count
+    : 0;
+  const items = transform ? result[0].items.map(transform) : result[0].items;
   return { items, totalItems };
 };
 

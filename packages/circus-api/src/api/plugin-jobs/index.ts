@@ -155,7 +155,7 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
       pluginId: { $in: accessiblePluginIds }
     };
     const filter = {
-      $and: [customFilter!, domainFilter, accessiblePluginFilter]
+      $and: [customFilter!, domainFilter]
     };
 
     const canViewPersonalInfoPluginIds = ctx.userPrivileges.accessiblePlugins
@@ -180,6 +180,9 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
 
     const baseStage: object[] = [
       {
+        $match: accessiblePluginFilter
+      },
+      {
         $lookup: {
           from: 'series',
           localField: 'series.seriesUid',
@@ -188,12 +191,10 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
         }
       },
       {
-        $unwind: {
-          path: '$seriesInfo',
-          includeArrayIndex: 'volId'
+        $addFields: {
+          seriesInfo: { $arrayElemAt: ['$seriesInfo', 0] } // primary series only
         }
       },
-      { $match: { volId: 0 } }, // primary series only
       {
         $addFields: {
           patientInfo: {

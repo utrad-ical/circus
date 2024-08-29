@@ -102,6 +102,11 @@ interface RunAggregationOptions {
   transform?: (data: any) => any;
 }
 
+interface AggregationResult {
+  items: any[];
+  totalItems: { count: number }[];
+}
+
 export const runAggregation = async (
   model: CollectionAccessor,
   options: RunAggregationOptions
@@ -115,23 +120,27 @@ export const runAggregation = async (
     limit,
     transform
   } = options;
-  const count = await model.aggregate([
+
+  const result = (await model.aggregate([
     ...lookupStages,
     ...(filter ? [{ $match: filter }] : []),
-    { $count: 'count' }
-  ]);
-  const totalItems = count.length ? (count[0].count as number) : 0;
+    {
+      $facet: {
+        items: [
+          ...(sort && Object.keys(sort).length >= 1 ? [{ $sort: sort }] : []),
+          ...(skip ? [{ $skip: skip }] : []),
+          ...(limit ? [{ $limit: limit }] : []),
+          ...(modifyStages.length > 0 ? modifyStages : [{ $match: {} }])
+        ],
+        totalItems: [{ $count: 'count' }]
+      }
+    }
+  ])) as AggregationResult[];
 
-  const rawItems = await model.aggregate([
-    ...lookupStages,
-    ...(filter ? [{ $match: filter }] : []),
-    ...(sort && Object.keys(sort).length >= 1 ? [{ $sort: sort }] : []),
-    ...(skip ? [{ $skip: skip }] : []),
-    ...(limit ? [{ $limit: limit }] : []),
-    ...modifyStages
-  ]);
-
-  const items = transform ? rawItems.map(transform) : rawItems;
+  const totalItems = result[0].totalItems.length
+    ? result[0].totalItems[0].count
+    : 0;
+  const items = transform ? result[0].items.map(transform) : result[0].items;
   return { items, totalItems };
 };
 

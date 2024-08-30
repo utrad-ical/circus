@@ -100,6 +100,7 @@ interface RunAggregationOptions {
   skip?: number;
   limit?: number;
   transform?: (data: any) => any;
+  maxCount?: number;
 }
 
 interface AggregationResult {
@@ -118,7 +119,8 @@ export const runAggregation = async (
     sort,
     skip,
     limit,
-    transform
+    transform,
+    maxCount
   } = options;
 
   const result = (await model.aggregate([
@@ -132,7 +134,10 @@ export const runAggregation = async (
           ...(limit ? [{ $limit: limit }] : []),
           ...(modifyStages.length > 0 ? modifyStages : [{ $match: {} }])
         ],
-        totalItems: [{ $count: 'count' }]
+        totalItems: [
+          ...(maxCount ? [{ $limit: maxCount }] : []),
+          { $count: 'count' }
+        ]
       }
     }
   ])) as AggregationResult[];
@@ -170,10 +175,11 @@ export const performAggregationSearch = async (
       filter,
       lookupStages,
       modifyStages,
-      sort: query.sort,
+      sort: opts.sort ?? query.sort,
       skip: query.skip,
       limit: query.limit,
-      transform: opts.transform
+      transform: opts.transform,
+      maxCount: opts.maxCount
     });
     ctx.body = { items, totalItems, page: query.page };
   } catch (err: any) {
@@ -189,6 +195,8 @@ interface Options {
   transform?: (data: any) => any;
   allowUnlimited?: boolean;
   defaultSort: object;
+  sort?: object;
+  maxCount?: number;
 }
 
 const performSearch = async (

@@ -1,18 +1,18 @@
-import { conditionToMongoQuery } from '@smikitky/rb-components/lib/ConditionEditor';
+import React, { useState, useEffect, useMemo } from 'react';
+import { modalities } from '../../modalities';
+import ConditionFrame, { Condition } from './ConditionFrame';
+import { escapeRegExp } from 'utils/util';
+import * as et from '@smikitky/rb-components/lib/editor-types';
 import DateRangePicker, {
   DateRange,
   dateRangeToMongoQuery
 } from '@smikitky/rb-components/lib/DateRangePicker';
-import * as et from '@smikitky/rb-components/lib/editor-types';
-import { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
 import AgeMinMax from 'components/AgeMinMax';
-import PluginDisplay from 'components/PluginDisplay';
+import { conditionToMongoQuery } from '@smikitky/rb-components/lib/ConditionEditor';
 import SearchPanel from 'pages/search/SearchPanel';
-import React, { useMemo } from 'react';
-import useLoginUser from 'utils/useLoginUser';
-import { escapeRegExp } from 'utils/util';
-import { modalities } from '../../modalities';
-import ConditionFrame, { Condition } from './ConditionFrame';
+import { useApi } from 'utils/api';
+import PluginDisplay from 'components/PluginDisplay';
+import { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
 
 const sexOptions: { [key: string]: string } = {
   all: 'All',
@@ -102,26 +102,28 @@ const ConditionEditor: React.FC<{
 }> = props => {
   const { value, onChange } = props;
 
-  const user = useLoginUser();
-  const accessiblePlugins = useMemo(
-    () =>
-      user.accessiblePlugins.filter(
-        p => p.roles.includes('executePlugin') && p.roles.includes('readPlugin')
-      ),
-    [user]
-  );
+  const api = useApi();
+  const [plugins, setPlugins] = useState<any[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      setPlugins(await api('/plugins'));
+    };
+    load();
+  }, [api]);
 
   const basicConditionProperties = useMemo<
     PropertyEditorProperties<any>
   >(() => {
     const pluginOptions: { [key: string]: any } = { all: 'All' };
-    accessiblePlugins.forEach(p => (pluginOptions[p.pluginId] = p.pluginId));
+    plugins.forEach(p => (pluginOptions[p.pluginId] = p.pluginId));
     return [
       {
         key: 'pluginId',
         caption: 'Plugin',
         editor: et.shrinkSelect(pluginOptions, { renderer: PluginRenderer })
       },
+      { key: 'jobId', caption: 'Job ID', editor: et.text() },
       { key: 'patientId', caption: 'Patient ID', editor: et.text() },
       { key: 'patientName', caption: 'Pt. Name', editor: et.text() },
       { key: 'age', caption: 'Age', editor: AgeMinMax },
@@ -137,14 +139,14 @@ const ConditionEditor: React.FC<{
         editor: et.shrinkSelect(statusOptions)
       }
     ];
-  }, [accessiblePlugins]);
+  }, [plugins]);
 
   const advancedConditionKeys = useMemo(() => {
     const pluginOptions: { [key: string]: any } = {};
-    accessiblePlugins.forEach(
+    plugins.forEach(
       p =>
         (pluginOptions[p.pluginId] = {
-          caption: `${p.plugin.pluginName} v.${p.plugin.version}`
+          caption: `${p.pluginName} v.${p.version}`
         })
     );
     return {
@@ -153,6 +155,7 @@ const ConditionEditor: React.FC<{
         type: 'select',
         spec: { options: pluginOptions }
       },
+      jobId: { caption: 'job ID', type: 'text' },
       'patientInfo.patientId': { caption: 'patient ID', type: 'text' },
       'patientInfo.patientName': { caption: 'patient name', type: 'text' },
       'patientInfo.age': { caption: 'age', type: 'number' },
@@ -169,7 +172,7 @@ const ConditionEditor: React.FC<{
         spec: { options: statusList }
       }
     };
-  }, [accessiblePlugins]);
+  }, [plugins]);
 
   return (
     <ConditionFrame

@@ -72,8 +72,8 @@ const basicConditionToMongoQuery = (condition: any) => {
   return members.length > 1
     ? { $and: members }
     : members.length === 1
-      ? members[0]
-      : {};
+    ? members[0]
+    : {};
 };
 
 const conditionToFilter = (condition: any) => {
@@ -123,7 +123,6 @@ const ConditionEditor: React.FC<{
         caption: 'Plugin',
         editor: et.shrinkSelect(pluginOptions, { renderer: PluginRenderer })
       },
-      { key: 'jobId', caption: 'Job ID', editor: et.text() },
       { key: 'patientId', caption: 'Patient ID', editor: et.text() },
       { key: 'patientName', caption: 'Pt. Name', editor: et.text() },
       { key: 'age', caption: 'Age', editor: AgeMinMax },
@@ -155,7 +154,6 @@ const ConditionEditor: React.FC<{
         type: 'select',
         spec: { options: pluginOptions }
       },
-      jobId: { caption: 'job ID', type: 'text' },
       'patientInfo.patientId': { caption: 'patient ID', type: 'text' },
       'patientInfo.patientName': { caption: 'patient name', type: 'text' },
       'patientInfo.age': { caption: 'age', type: 'number' },

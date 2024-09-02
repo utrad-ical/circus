@@ -241,6 +241,23 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
       : baseStage;
     const defaultSort = myListId ? { addedToListAt: -1 } : { createdAt: -1 };
 
+    let sortQuery;
+    if (ctx.query.sort) {
+      try {
+        sortQuery = JSON.parse(
+          Array.isArray(ctx.query.sort) ? ctx.query.sort[0] : ctx.query.sort
+        );
+      } catch (e) {
+        ctx.throw(status.BAD_REQUEST, 'Invalid sort parameter.');
+      }
+    } else if (ctx.query.sort !== undefined) {
+      ctx.throw(status.BAD_REQUEST, 'Invalid sort parameter.');
+    }
+    if (sortQuery && sortQuery.createdAt) {
+      baseStage.unshift({ $sort: sortQuery });
+      sortQuery = [];
+    }
+
     await performAggregationSearch(
       startModel,
       filter,
@@ -262,7 +279,12 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
           }
         }
       ],
-      { defaultSort, transform: maskPatientInfo(ctx) }
+      {
+        defaultSort,
+        transform: maskPatientInfo(ctx),
+        sort: sortQuery,
+        maxCount: 10000
+      }
     );
   };
 };

@@ -17,15 +17,13 @@ it('should return list of all plugins', async () => {
   const res = await axios.get('api/plugins');
   expect(res.status).toBe(200);
   expect(res.data).toBeInstanceOf(Array);
-  expect(
-    res.data.some((p: any) => p.pluginName === 'MOCK-VALIDATION-FAILURE')
-  ).toBe(true);
+  expect(res.data.some((p: any) => p.pluginName === 'MOCK-EMPTY')).toBe(true);
 });
 
 it('should return plugin definition specified by pluginId', async () => {
   const res = await axios.get(
-    'api/plugins/74c50a99530ef149c16bc6f0cf71b987470282c54e436e9bec6da704f1fcac9c'
+    'api/plugins/d135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2'
   );
   expect(res.status).toBe(200);
-  expect(res.data.pluginName).toBe('MOCK-VALIDATION-FAILURE');
+  expect(res.data.pluginName).toBe('MOCK-EMPTY');
 });

@@ -41,7 +41,9 @@ import GlobalStyle, { CircusThemeProvider } from './theme';
 import { ApiContext, ApiCaller, useApi } from 'utils/api';
 import loginManager, { LoginManagerContext } from 'utils/loginManager';
 import { VolumeLoaderFactoryContext } from 'utils/useVolumeLoader';
-import createVolumeLoaderManager, { VolumeLoaderManager } from 'utils/createVolumeLoaderManager';
+import createVolumeLoaderManager, {
+  VolumeLoaderManager
+} from 'utils/createVolumeLoaderManager';
 
 require('./styles/main.less');
 
@@ -112,9 +114,10 @@ const VolumeLoaderFactoryProvider: React.FC<{}> = ({ children }) => {
   const token = api?.getToken();
 
   const provider = useMemo<VolumeLoaderManager>(
-    () => server && token
-      ? createVolumeLoaderManager({ server, queryString: `token=${token}` })
-      : (null as any),
+    () =>
+      server && token
+        ? createVolumeLoaderManager({ server, queryString: `token=${token}` })
+        : (null as any),
     [server, token]
   );
 
@@ -124,7 +127,7 @@ const VolumeLoaderFactoryProvider: React.FC<{}> = ({ children }) => {
       currentProvider.current.disconnect();
     }
     currentProvider.current = provider;
-  }, [provider, currentProvider.current]);
+  }, [provider]);
 
   return (
     <VolumeLoaderFactoryContext.Provider value={provider}>

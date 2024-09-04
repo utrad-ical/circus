@@ -167,8 +167,7 @@ export default class RsProgressiveVolumeLoader implements DicomVolumeLoader {
       this.volume = this.createVolume(this.meta, this.partialVolumeDescriptor);
 
     const cacheKey = this.createKey('buffer');
-    let buffer: ArrayBuffer | undefined;
-    buffer = await this.cache.getVolume(cacheKey);
+    const buffer: ArrayBuffer | undefined = await this.cache.getVolume(cacheKey);
     if (buffer) {
       this.volume.assign(buffer as ArrayBuffer);
     } else {
@@ -218,10 +217,10 @@ export default class RsProgressiveVolumeLoader implements DicomVolumeLoader {
   ) {
     const voxelCount: typeof meta.voxelCount = partialVolumeDescriptor
       ? [
-          meta.voxelCount[0],
-          meta.voxelCount[1],
-          partialVolumeDescriptorToArray(partialVolumeDescriptor).length
-        ]
+        meta.voxelCount[0],
+        meta.voxelCount[1],
+        partialVolumeDescriptorToArray(partialVolumeDescriptor).length
+      ]
       : meta.voxelCount;
     const volume = new DicomVolume(voxelCount, meta.pixelFormat);
     volume.setVoxelSize(meta.voxelSize);

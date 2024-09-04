@@ -11,7 +11,7 @@ export const OptionsEditor: Editor<DuplicateOptions> = props => {
   const { value, onChange } = props;
   return (
     <div>
-      <label>New label's name&nbsp; </label>
+      <label>New label&rsquo;s name&nbsp; </label>
       <FormControl
         type="text"
         autoFocus

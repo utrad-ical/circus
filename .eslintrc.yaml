@@ -8,6 +8,7 @@ parserOptions:
   sourceType: module
 plugins:
   - jest
+  - react
   - '@typescript-eslint'
 env:
   es2021: true
@@ -30,15 +31,16 @@ rules:
       'error',
       { 'selector': 'TSEnumDeclaration', 'message': "Don't declare enums" },
     ]
-
+  'react/prop-types': 'off'
+  'react/display-name': 'off'
 overrides:
+  - files: ["**/*.ts", "**/*.tsx"]
+    rules:
+      'no-undef': 'off'
   - files: packages/circus-web-ui/src/**/*.{js,ts,tsx}
     plugins:
-      - react
       - react-hooks
     rules:
       'react-hooks/rules-of-hooks': 'error'
       'react-hooks/exhaustive-deps': 'error'
-      'react/prop-types': 'off'
-      'react/display-name': 'off'
       'react/jsx-closing-bracket-location': ['error', 'line-aligned']

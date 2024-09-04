@@ -1,7 +1,7 @@
 import { alert } from '@smikitky/rb-components/lib/modal';
 import { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
-import HoleFilling2D, {
-  HoleFilling3D
+import holeFilling2D, {
+  holeFilling3D
 } from '@utrad-ical/circus-rs/src/common/CCL/holeFilling';
 import hfWorker from 'worker-loader!./hf-worker';
 import performLabelCreatingVoxelProcessing, {
@@ -62,8 +62,7 @@ const hfVoxelProcessor: VoxelLabelProcessor<
           ]
         },
         names: [
-          `${name}: ${dimension}D hole filling${
-            dimension !== 3 ? ' (' + orientation + ')' : ''
+          `${name}: ${dimension}D hole filling${dimension !== 3 ? ' (' + orientation + ')' : ''
           }`
         ]
       });
@@ -92,7 +91,16 @@ const hfVoxelProcessor: VoxelLabelProcessor<
     try {
       holeFillingResult =
         dimension === 3
-          ? HoleFilling3D(
+          ? holeFilling3D(
+            initializedInput,
+            width,
+            height,
+            nSlices,
+            neighbors,
+            bufferSize
+          )
+          : orientation === 'Axial'
+            ? holeFilling2D(
               initializedInput,
               width,
               height,
@@ -100,31 +108,22 @@ const hfVoxelProcessor: VoxelLabelProcessor<
               neighbors,
               bufferSize
             )
-          : orientation === 'Axial'
-            ? HoleFilling2D(
+            : orientation === 'Sagital'
+              ? holeFilling2D(
                 initializedInput,
-                width,
                 height,
                 nSlices,
+                width,
                 neighbors,
                 bufferSize
               )
-            : orientation === 'Sagital'
-              ? HoleFilling2D(
-                  initializedInput,
-                  height,
-                  nSlices,
-                  width,
-                  neighbors,
-                  bufferSize
-                )
-              : HoleFilling2D(
-                  initializedInput,
-                  nSlices,
-                  width,
-                  height,
-                  neighbors
-                );
+              : holeFilling2D(
+                initializedInput,
+                nSlices,
+                width,
+                height,
+                neighbors
+              );
     } catch (err: any) {
       console.log('error', err.message);
       alert(`${name} is too complex.\nPlease modify ${name}.`);
@@ -158,8 +157,7 @@ const hfVoxelProcessor: VoxelLabelProcessor<
         ]
       },
       names: [
-        `${name}: ${dimension}D hole filling${
-          dimension !== 3 ? ' (' + orientation + ')' : ''
+        `${name}: ${dimension}D hole filling${dimension !== 3 ? ' (' + orientation + ')' : ''
         }`
       ]
     });

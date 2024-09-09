@@ -98,7 +98,7 @@ const CaseSearchResultsView: React.FC<{
   const { searchName, refreshable = true } = props;
   const search = useSelector(state => state.searches.searches[searchName]);
   const items = useSelector(state => state.searches.items.cases);
-  const selected = search?.selected ?? [];
+  const selected = useMemo(() => search?.selected ?? [], [search]);
   const { accessibleProjects } = useLoginUser()!;
   const api = useApi();
   const user = useLoginUser();

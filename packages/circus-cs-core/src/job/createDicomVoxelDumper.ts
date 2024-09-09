@@ -71,7 +71,7 @@ const returnNumberOrNumberList = (
   return numbers.length === 1 ? numbers[0] : numbers;
 };
 
-interface Options { }
+interface Options {}
 
 export const stringifyUN = (data: ArrayBuffer, tag: string) => {
   const arr = new Uint8Array(data);
@@ -139,7 +139,8 @@ const dataSetToObject = (
         return returnNumberOrNumberList(dataset, tag, 'uint16', 2);
       case 'SS':
         return returnNumberOrNumberList(dataset, tag, 'int16', 2);
-      case 'UN': { // UNKNOWN
+      case 'UN': {
+        // UNKNOWN
         const bin = Buffer.from(
           dataset.byteArray.buffer,
           element.dataOffset,
@@ -246,12 +247,12 @@ const createDicomVoxelDumper: FunctionService<
         firstSliceMetadata.pixelSpacing[0],
         firstSliceMetadata.pixelSpacing[1],
         firstSliceMetadata.pitch ??
-        (firstSlice && secondSlice
-          ? Math.abs(
-            firstSlice.metadata.sliceLocation! -
-            secondSlice.metadata.sliceLocation!
-          )
-          : 1)
+          (firstSlice && secondSlice
+            ? Math.abs(
+                firstSlice.metadata.sliceLocation! -
+                  secondSlice.metadata.sliceLocation!
+              )
+            : 1)
       ],
       `${volId}.raw`,
       'lf'

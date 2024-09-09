@@ -104,46 +104,43 @@ const RelevantJobs: React.FC<{
 }> = props => {
   const { currentJobId } = props;
 
-  const RelevantJobsDataView: React.FC<any> = useMemo(
-    () => props => {
-      const { value } = props;
-      const columns: DataGridColumnDefinition<any>[] = [
-        {
-          caption: 'Plugin',
-          className: 'plugin',
-          renderer: PluginRenderer('xs')
-        },
-        {
-          caption: 'Register/Finish',
-          className: 'execution-time',
-          renderer: Times('createdAt', 'finishedAt')
-        },
-        { caption: 'Status', className: 'status', renderer: Status },
-        { caption: 'FB', className: 'feedback', renderer: FeedbackRenderer },
-        {
-          key: 'action',
-          caption: '',
-          renderer: ({ value }) =>
-            currentJobId === value.jobId ? null : (
-              <div className="register">
-                <Link to={`/plugin-job/${value.jobId}`}>
-                  <IconButton
-                    disabled={value.status !== 'finished'}
-                    icon="circus-series"
-                    bsSize="sm"
-                    bsStyle="primary"
-                  >
-                    View
-                  </IconButton>
-                </Link>
-              </div>
-            )
-        }
-      ];
-      return <DataGrid value={value} columns={columns} />;
-    },
-    []
-  );
+  const RelevantJobsDataView: React.FC<any> = React.memo(props => {
+    const { value } = props;
+    const columns: DataGridColumnDefinition<any>[] = [
+      {
+        caption: 'Plugin',
+        className: 'plugin',
+        renderer: PluginRenderer('xs')
+      },
+      {
+        caption: 'Register/Finish',
+        className: 'execution-time',
+        renderer: Times('createdAt', 'finishedAt')
+      },
+      { caption: 'Status', className: 'status', renderer: Status },
+      { caption: 'FB', className: 'feedback', renderer: FeedbackRenderer },
+      {
+        key: 'action',
+        caption: '',
+        renderer: ({ value }) =>
+          currentJobId === value.jobId ? null : (
+            <div className="register">
+              <Link to={`/plugin-job/${value.jobId}`}>
+                <IconButton
+                  disabled={value.status !== 'finished'}
+                  icon="circus-series"
+                  bsSize="sm"
+                  bsStyle="primary"
+                >
+                  View
+                </IconButton>
+              </Link>
+            </div>
+          )
+      }
+    ];
+    return <DataGrid value={value} columns={columns} />;
+  });
 
   return (
     <div style={{ whiteSpace: 'nowrap', margin: '1em' }}>
@@ -167,6 +164,10 @@ const PluginJobDetail: React.FC<{}> = props => {
   const [noPermissionMessage, setNoPermissionMessage] = useState<string | null>(
     null
   );
+  const memoizedAccessiblePlugins = useMemo(
+    () => user.accessiblePlugins,
+    [user]
+  );
   const dispatchForJobSearch = useDispatch();
 
   const loadJob = useCallback(async () => {
@@ -175,7 +176,7 @@ const PluginJobDetail: React.FC<{}> = props => {
       const job = (await api(`plugin-jobs/${jobId}`)) as Job;
       const pluginData = (await api(`plugins/${job.pluginId}`)) as Plugin;
       const seriesData: { [seriesUid: string]: any } = {};
-      const viewPersonalInfoFlag = user.accessiblePlugins
+      const viewPersonalInfoFlag = memoizedAccessiblePlugins
         .filter(p => p.roles.includes('viewPersonalInfo'))
         .some(p => p.pluginId === job.pluginId);
       for (const s of job.series) {
@@ -219,7 +220,15 @@ const PluginJobDetail: React.FC<{}> = props => {
     } finally {
       setBusy(false);
     }
-  }, [api, initialMode, dispatch, jobId, user.userEmail]);
+  }, [
+    api,
+    initialMode,
+    dispatch,
+    jobId,
+    user.userEmail,
+    memoizedAccessiblePlugins,
+    dispatchForJobSearch
+  ]);
 
   const [jobData, , reloadJob] = useLoadData(loadJob);
 
@@ -264,7 +273,7 @@ const PluginJobDetail: React.FC<{}> = props => {
     loadAttachment.list = () =>
       api(`plugin-jobs/${job.jobId}/attachment`) as Promise<string[]>;
 
-    const inputtableFeedback = user.accessiblePlugins
+    const inputtableFeedback = memoizedAccessiblePlugins
       .filter(p =>
         p.roles.includes(
           feedbackState.isConsensual
@@ -298,7 +307,8 @@ const PluginJobDetail: React.FC<{}> = props => {
     feedbackState.isConsensual,
     feedbackState.editable,
     insertLog,
-    api
+    api,
+    memoizedAccessiblePlugins
   ]);
 
   const handleFeedbackChange = useCallback(

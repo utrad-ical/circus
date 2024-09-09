@@ -62,7 +62,8 @@ const hfVoxelProcessor: VoxelLabelProcessor<
           ]
         },
         names: [
-          `${name}: ${dimension}D hole filling${dimension !== 3 ? ' (' + orientation + ')' : ''
+          `${name}: ${dimension}D hole filling${
+            dimension !== 3 ? ' (' + orientation + ')' : ''
           }`
         ]
       });
@@ -92,15 +93,6 @@ const hfVoxelProcessor: VoxelLabelProcessor<
       holeFillingResult =
         dimension === 3
           ? holeFilling3D(
-            initializedInput,
-            width,
-            height,
-            nSlices,
-            neighbors,
-            bufferSize
-          )
-          : orientation === 'Axial'
-            ? holeFilling2D(
               initializedInput,
               width,
               height,
@@ -108,22 +100,31 @@ const hfVoxelProcessor: VoxelLabelProcessor<
               neighbors,
               bufferSize
             )
-            : orientation === 'Sagital'
-              ? holeFilling2D(
+          : orientation === 'Axial'
+            ? holeFilling2D(
                 initializedInput,
+                width,
                 height,
                 nSlices,
-                width,
                 neighbors,
                 bufferSize
               )
+            : orientation === 'Sagital'
+              ? holeFilling2D(
+                  initializedInput,
+                  height,
+                  nSlices,
+                  width,
+                  neighbors,
+                  bufferSize
+                )
               : holeFilling2D(
-                initializedInput,
-                nSlices,
-                width,
-                height,
-                neighbors
-              );
+                  initializedInput,
+                  nSlices,
+                  width,
+                  height,
+                  neighbors
+                );
     } catch (err: any) {
       console.log('error', err.message);
       alert(`${name} is too complex.\nPlease modify ${name}.`);
@@ -157,7 +158,8 @@ const hfVoxelProcessor: VoxelLabelProcessor<
         ]
       },
       names: [
-        `${name}: ${dimension}D hole filling${dimension !== 3 ? ' (' + orientation + ')' : ''
+        `${name}: ${dimension}D hole filling${
+          dimension !== 3 ? ' (' + orientation + ')' : ''
         }`
       ]
     });

@@ -31,24 +31,15 @@ ctx.addEventListener('message', event => {
   }
   let holeFillingResult:
     | {
-      result: Uint8Array;
-      holeNum: number;
-      holeVolume: number;
-    }
+        result: Uint8Array;
+        holeNum: number;
+        holeVolume: number;
+      }
     | string;
   try {
     holeFillingResult =
       dimension === 3
         ? holeFilling3D(
-          initializedInput,
-          width,
-          height,
-          nSlices,
-          neighbors,
-          bufferSize
-        )
-        : orientation === 'Axial'
-          ? holeFilling2D(
             initializedInput,
             width,
             height,
@@ -56,23 +47,32 @@ ctx.addEventListener('message', event => {
             neighbors,
             bufferSize
           )
-          : orientation === 'Sagital'
-            ? holeFilling2D(
+        : orientation === 'Axial'
+          ? holeFilling2D(
               initializedInput,
+              width,
               height,
               nSlices,
-              width,
               neighbors,
               bufferSize
             )
+          : orientation === 'Sagital'
+            ? holeFilling2D(
+                initializedInput,
+                height,
+                nSlices,
+                width,
+                neighbors,
+                bufferSize
+              )
             : holeFilling2D(
-              initializedInput,
-              nSlices,
-              width,
-              height,
-              neighbors,
-              bufferSize
-            );
+                initializedInput,
+                nSlices,
+                width,
+                height,
+                neighbors,
+                bufferSize
+              );
     const output = new Uint8Array(width * height * nSlices);
     for (let k = 0; k < nSlices; k++) {
       for (let j = 0; j < height; j++) {

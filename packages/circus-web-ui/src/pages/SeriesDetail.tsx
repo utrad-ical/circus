@@ -1,9 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useMemo,
-  useCallback
-} from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Row, Col, Panel } from 'components/react-bootstrap';
 import { useApi } from 'utils/api';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';

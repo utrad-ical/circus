@@ -39,7 +39,7 @@ export const Numeric: Display<NumberOptions, number> = props => {
     if (consensual && editable) {
       // Calculate mean
       const sum = personalOpinions
-        .map(o => Number(o.data) ?? 0)
+        .map(o => Number(o.data) || 0)
         .reduce((a, b) => a + b, 0);
       return sum / personalOpinions.length;
     }

@@ -29,12 +29,8 @@ interface TextOptions {
  * Text display collects user feedback as a string.
  */
 export const Text: Display<TextOptions, string> = props => {
-  const {
-    options,
-    initialFeedbackValue,
-    onFeedbackChange,
-    personalOpinions
-  } = props;
+  const { options, initialFeedbackValue, onFeedbackChange, personalOpinions } =
+    props;
   const { label, maxLength = 64, minLength, pattern } = options;
   const { consensual, editable } = useCsResults();
 
@@ -43,9 +39,7 @@ export const Text: Display<TextOptions, string> = props => {
     if (consensual && editable) {
       // Join unique personal opinions
       return Array.from(
-        new Set<string>(
-          personalOpinions.map(o => String(o.data) ?? '')
-        ).values()
+        new Set<string>(personalOpinions.map(o => String(o.data))).values()
       ).join(', ');
     }
     return '';

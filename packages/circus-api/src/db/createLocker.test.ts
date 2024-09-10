@@ -4,13 +4,18 @@ import createLocker from './createLocker';
 import mongo from 'mongodb';
 
 let db: mongo.Db, locker: ReturnType<typeof createLocker>;
-
+let disposeMongo: () => Promise<void>;
 const dbPromise = usingMongo();
 
 beforeAll(async () => {
-  db = (await dbPromise).db;
+  db = (await dbPromise).database.db;
+  disposeMongo = (await dbPromise).dispose;
   await db.collection('locks').deleteMany({});
   locker = await createLocker(db);
+});
+
+afterAll(async () => {
+  await disposeMongo();
 });
 
 it('should perform locking of one resource', async () => {

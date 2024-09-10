@@ -12,11 +12,12 @@ interface MonthData {
 }
 
 let testCollection: CollectionAccessor<MonthData>, db: mongo.Db;
-
+let disposeMongo: () => Promise<void>;
 const dbPromise = usingMongo();
 
 beforeAll(async () => {
-  db = (await dbPromise).db;
+  db = (await dbPromise).database.db;
+  disposeMongo = (await dbPromise).dispose;
   const validator = await createValidator({
     schemaRoot: __dirname + '/../../test/test-schemas'
   });
@@ -34,6 +35,9 @@ beforeEach(async () => {
 afterAll(async () => {
   const col = db.collection('months');
   await col.deleteMany({});
+  if (disposeMongo) {
+    await disposeMongo();
+  }
 });
 
 describe('#insert', () => {
@@ -173,7 +177,7 @@ describe('#findById', () => {
       const validator = await createValidator({
         schemaRoot: __dirname + '/../../test/test-schemas'
       });
-      session = (await dbPromise).connection.startSession();
+      session = (await dbPromise).database.connection.startSession();
       sessionCollection = createCollectionAccessor<MonthData>(db, validator, {
         schema: 'months',
         collectionName: 'months',

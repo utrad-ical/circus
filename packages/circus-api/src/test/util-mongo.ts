@@ -70,18 +70,20 @@ export const deleteAllCollections = async (db: mongo.Db) => {
 /**
  * Initializes a test Mongo database.
  * The return value must be `await`-ed inside `test`, `beforeEach`, etc.
- * This internally calls `afterAll()` and thus automatically closes
- * the connection after the tests have finished.
+ * You must manually call `dispose()` inside `afterAll()` to properly close
+ * the Mongo connection after the tests have finished.
  */
 export const usingMongo = () => {
-  return new Promise<Database>(resolve => {
+  return new Promise<{ database: Database, dispose: () => Promise<void> }>(resolve => {
     let database: Database;
     beforeAll(async () => {
       database = await connectMongo();
-      resolve(database);
-    });
-    afterAll(async () => {
-      await database.dispose();
+      resolve({
+        database: database,
+        dispose: async () => {
+          await database.dispose();
+        }
+      });
     });
   });
 };

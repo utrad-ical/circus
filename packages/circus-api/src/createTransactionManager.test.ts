@@ -29,12 +29,18 @@ let database: Database, validator: Validator, db: mongo.Db;
 const dbPromise = usingMongo();
 
 beforeAll(async () => {
-  database = await dbPromise;
-  ({ db } = await dbPromise);
+  database = (await dbPromise).database;
+  db = database.db;
   validator = await createValidator({
     schemaRoot: __dirname + '/../test/test-schemas'
   });
   await setUpMongoFixture(db, ['bankAccounts']);
+});
+
+afterAll(async () => {
+  if (database.dispose) {
+    await database.dispose()
+  }
 });
 
 describe('createTransactionManager', () => {

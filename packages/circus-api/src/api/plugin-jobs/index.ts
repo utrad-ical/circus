@@ -199,7 +199,12 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
                 $filter: {
                   input: '$seriesInfo',
                   as: 'series',
-                  cond: { $eq: ['$$series.seriesUid', { $arrayElemAt: ['$series.seriesUid', 0] }] } // primary series only
+                  cond: {
+                    $eq: [
+                      '$$series.seriesUid',
+                      { $arrayElemAt: ['$series.seriesUid', 0] } // primary series only
+                    ]
+                  }
                 }
               },
               0

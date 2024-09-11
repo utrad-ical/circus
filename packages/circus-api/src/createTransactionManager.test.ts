@@ -39,7 +39,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   if (database.dispose) {
-    await database.dispose()
+    await database.dispose();
   }
 });
 

@@ -74,18 +74,20 @@ export const deleteAllCollections = async (db: mongo.Db) => {
  * the Mongo connection after the tests have finished.
  */
 export const usingMongo = () => {
-  return new Promise<{ database: Database, dispose: () => Promise<void> }>(resolve => {
-    let database: Database;
-    beforeAll(async () => {
-      database = await connectMongo();
-      resolve({
-        database: database,
-        dispose: async () => {
-          await database.dispose();
-        }
+  return new Promise<{ database: Database; dispose: () => Promise<void> }>(
+    resolve => {
+      let database: Database;
+      beforeAll(async () => {
+        database = await connectMongo();
+        resolve({
+          database: database,
+          dispose: async () => {
+            await database.dispose();
+          }
+        });
       });
-    });
-  });
+    }
+  );
 };
 
 /**

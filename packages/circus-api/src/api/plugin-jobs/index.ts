@@ -193,7 +193,18 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
       },
       {
         $addFields: {
-          seriesInfo: { $arrayElemAt: ['$seriesInfo', 0] } // primary series only
+          seriesInfo: {
+            $arrayElemAt: [
+              {
+                $filter: {
+                  input: '$seriesInfo',
+                  as: 'series',
+                  cond: { $eq: ['$$series.seriesUid', { $arrayElemAt: ['$series.seriesUid', 0] }] } // primary series only
+                }
+              },
+              0
+            ]
+          }
         }
       },
       {

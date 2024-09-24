@@ -343,7 +343,7 @@ const SeriesSelector: React.FC<{
             <RelevantSeries onSeriesRegister={handleSeriesRegister} />
           ) : (
             <WarninMessageSpan>
-              You don't have permission to access personal information.
+              You don&rsquo;t have permission to access personal information.
             </WarninMessageSpan>
           ))}
       </Panel.Body>

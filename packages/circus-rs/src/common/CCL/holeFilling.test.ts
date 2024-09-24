@@ -1,4 +1,4 @@
-import HoleFilling2D, { HoleFilling3D } from './holeFilling';
+import holeFilling2D, { holeFilling3D } from './holeFilling';
 
 const mosaic = (
   width: number,
@@ -65,8 +65,8 @@ function HolleFillingTest(
   return () => {
     const holeFillingResult =
       dimension === 3
-        ? HoleFilling3D(array, width, height, NSlice, neighbor === 26 ? 26 : 6)
-        : HoleFilling2D(array, width, height, NSlice, neighbor === 8 ? 8 : 4);
+        ? holeFilling3D(array, width, height, NSlice, neighbor === 26 ? 26 : 6)
+        : holeFilling2D(array, width, height, NSlice, neighbor === 8 ? 8 : 4);
     let flag =
       holeNum === holeFillingResult.holeNum
         ? holeVolume === holeFillingResult.holeVolume

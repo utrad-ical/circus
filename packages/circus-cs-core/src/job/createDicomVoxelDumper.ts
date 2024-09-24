@@ -139,13 +139,15 @@ const dataSetToObject = (
         return returnNumberOrNumberList(dataset, tag, 'uint16', 2);
       case 'SS':
         return returnNumberOrNumberList(dataset, tag, 'int16', 2);
-      case 'UN': // UNKNOWN
+      case 'UN': {
+        // UNKNOWN
         const bin = Buffer.from(
           dataset.byteArray.buffer,
           element.dataOffset,
           element.length
         );
         return stringifyUN(bin, tag);
+      }
       case 'SH':
       case 'LO':
       case 'ST':

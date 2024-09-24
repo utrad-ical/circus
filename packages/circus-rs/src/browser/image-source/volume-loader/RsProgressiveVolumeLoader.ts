@@ -167,8 +167,8 @@ export default class RsProgressiveVolumeLoader implements DicomVolumeLoader {
       this.volume = this.createVolume(this.meta, this.partialVolumeDescriptor);
 
     const cacheKey = this.createKey('buffer');
-    let buffer: ArrayBuffer | undefined;
-    buffer = await this.cache.getVolume(cacheKey);
+    const buffer: ArrayBuffer | undefined =
+      await this.cache.getVolume(cacheKey);
     if (buffer) {
       this.volume.assign(buffer as ArrayBuffer);
     } else {

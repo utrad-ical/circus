@@ -20,7 +20,7 @@ type HoleFilling3D = (
  * @param neighbor neighbor of CCL
  * @param bufferSize max number of labels, must be < 2**16
  */
-const HoleFilling2D: HoleFilling3D = (
+const holeFilling2D: HoleFilling3D = (
   array,
   width,
   height,
@@ -60,7 +60,7 @@ const HoleFilling2D: HoleFilling3D = (
   return { result: result, holeNum: holeNum, holeVolume: holeVolume };
 };
 
-const HoleFilling3D: HoleFilling3D = (
+const holeFilling3D: HoleFilling3D = (
   array,
   width,
   height,
@@ -111,5 +111,5 @@ const HoleFilling3D: HoleFilling3D = (
 
   return { result: result, holeNum: holeNum, holeVolume: holeVolume };
 };
-export default HoleFilling2D;
-export { HoleFilling3D };
+export default holeFilling2D;
+export { holeFilling3D };

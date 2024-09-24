@@ -1,7 +1,7 @@
 import { alert } from '@smikitky/rb-components/lib/modal';
 import { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
-import HoleFilling2D, {
-  HoleFilling3D
+import holeFilling2D, {
+  holeFilling3D
 } from '@utrad-ical/circus-rs/src/common/CCL/holeFilling';
 import hfWorker from 'worker-loader!./hf-worker';
 import performLabelCreatingVoxelProcessing, {
@@ -92,7 +92,7 @@ const hfVoxelProcessor: VoxelLabelProcessor<
     try {
       holeFillingResult =
         dimension === 3
-          ? HoleFilling3D(
+          ? holeFilling3D(
               initializedInput,
               width,
               height,
@@ -101,7 +101,7 @@ const hfVoxelProcessor: VoxelLabelProcessor<
               bufferSize
             )
           : orientation === 'Axial'
-            ? HoleFilling2D(
+            ? holeFilling2D(
                 initializedInput,
                 width,
                 height,
@@ -110,7 +110,7 @@ const hfVoxelProcessor: VoxelLabelProcessor<
                 bufferSize
               )
             : orientation === 'Sagital'
-              ? HoleFilling2D(
+              ? holeFilling2D(
                   initializedInput,
                   height,
                   nSlices,
@@ -118,7 +118,7 @@ const hfVoxelProcessor: VoxelLabelProcessor<
                   neighbors,
                   bufferSize
                 )
-              : HoleFilling2D(
+              : holeFilling2D(
                   initializedInput,
                   nSlices,
                   width,

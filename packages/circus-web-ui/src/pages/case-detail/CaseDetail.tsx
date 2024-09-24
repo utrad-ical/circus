@@ -69,7 +69,7 @@ const CaseDetail: React.FC<{}> = () => {
   const [activeRelevantCases, setActiveRelevantCases] = useState(false);
 
   const user = useLoginUser();
-  const accessibleProjects = user.accessibleProjects;
+  const accessibleProjects = useMemo(() => user.accessibleProjects, [user]);
   const isUpdated = caseStore.currentHistoryIndex > 0;
 
   // warn before reloading or closing page with unsaved changes
@@ -105,7 +105,7 @@ const CaseDetail: React.FC<{}> = () => {
         )
       ) as { [seriesUid: string]: Series };
 
-      const viewPersonalInfoFlag = user.accessibleProjects
+      const viewPersonalInfoFlag = accessibleProjects
         .filter(p => p.roles.includes('viewPersonalInfo'))
         .some(p => p.projectId === caseData.projectId);
       const patientInfo = viewPersonalInfoFlag
@@ -164,7 +164,7 @@ const CaseDetail: React.FC<{}> = () => {
         sort: '{"updatedAt":-1}'
       })
     );
-  }, [api, dispatch, caseStore.patientInfo]);
+  }, [api, dispatch, caseStore.patientInfo, activeRelevantCases]);
 
   const handleRevisionSelect = async (index: number) => {
     if (isUpdated && !(await confirm(pageTransitionMessage))) return;
@@ -486,36 +486,33 @@ const RelevantCases: React.FC<{
 }> = props => {
   const { currentCaseId } = props;
 
-  const RelevantCasesDataView: React.FC<any> = useMemo(
-    () => props => {
-      const { value } = props;
-      const columns: DataGridColumnDefinition<any>[] = [
-        { caption: 'Project', className: 'project', renderer: Project('xs') },
-        {
-          caption: 'Create/Update',
-          className: 'created-at',
-          renderer: Times()
-        },
-        { caption: 'Tags', className: 'tags', renderer: Tags },
-        {
-          key: 'action',
-          caption: '',
-          renderer: ({ value }) =>
-            currentCaseId === value.caseId ? null : (
-              <div className="register">
-                <Link to={`/case/${value.caseId}`}>
-                  <IconButton icon="circus-case" bsSize="sm" bsStyle="primary">
-                    View
-                  </IconButton>
-                </Link>
-              </div>
-            )
-        }
-      ];
-      return <DataGrid value={value} columns={columns} />;
-    },
-    []
-  );
+  const RelevantCasesDataView: React.FC<any> = React.memo(props => {
+    const { value } = props;
+    const columns: DataGridColumnDefinition<any>[] = [
+      { caption: 'Project', className: 'project', renderer: Project('xs') },
+      {
+        caption: 'Create/Update',
+        className: 'created-at',
+        renderer: Times()
+      },
+      { caption: 'Tags', className: 'tags', renderer: Tags },
+      {
+        key: 'action',
+        caption: '',
+        renderer: ({ value }) =>
+          currentCaseId === value.caseId ? null : (
+            <div className="register">
+              <Link to={`/case/${value.caseId}`}>
+                <IconButton icon="circus-case" bsSize="sm" bsStyle="primary">
+                  View
+                </IconButton>
+              </Link>
+            </div>
+          )
+      }
+    ];
+    return <DataGrid value={value} columns={columns} />;
+  });
 
   return (
     <div style={{ whiteSpace: 'nowrap', margin: '1em' }}>

@@ -1,6 +1,6 @@
 const ctx: DedicatedWorkerGlobalScope = self as any;
-import HoleFilling2D, {
-  HoleFilling3D
+import holeFilling2D, {
+  holeFilling3D
 } from '@utrad-ical/circus-rs/src/common/CCL/holeFilling';
 
 ctx.addEventListener('message', event => {
@@ -39,7 +39,7 @@ ctx.addEventListener('message', event => {
   try {
     holeFillingResult =
       dimension === 3
-        ? HoleFilling3D(
+        ? holeFilling3D(
             initializedInput,
             width,
             height,
@@ -48,7 +48,7 @@ ctx.addEventListener('message', event => {
             bufferSize
           )
         : orientation === 'Axial'
-          ? HoleFilling2D(
+          ? holeFilling2D(
               initializedInput,
               width,
               height,
@@ -57,7 +57,7 @@ ctx.addEventListener('message', event => {
               bufferSize
             )
           : orientation === 'Sagital'
-            ? HoleFilling2D(
+            ? holeFilling2D(
                 initializedInput,
                 height,
                 nSlices,
@@ -65,7 +65,7 @@ ctx.addEventListener('message', event => {
                 neighbors,
                 bufferSize
               )
-            : HoleFilling2D(
+            : holeFilling2D(
                 initializedInput,
                 nSlices,
                 width,

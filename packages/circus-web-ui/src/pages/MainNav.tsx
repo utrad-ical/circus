@@ -382,7 +382,11 @@ const MainNav: React.FC<{}> = props => {
           </Menu>
           <Menu name="Tool">
             <li>
-              <a href="https://circus-project.net/" target="_blank">
+              <a
+                href="https://circus-project.net/"
+                target="_blank"
+                rel="noreferrer"
+              >
                 <Icon icon="search" />
                 &ensp;Documentation
               </a>

@@ -5,25 +5,28 @@ import { Display } from '../Display';
 import { Button } from '../../ui/Button';
 import Tooltip from '../../ui/Tooltip';
 
-interface Choice {
+interface ChoiceItem {
   value: number | string;
   caption: string;
   color?: string;
 }
 
-interface PersonalChoice extends Choice {
+interface PersonalChoiceItem extends ChoiceItem {
   consensualMapsTo?: number | string;
 }
 
 interface ChoiceOptions {
   ui?: 'toggleButtons' | 'dropdown';
   multiple?: boolean;
-  personal: (string | PersonalChoice)[];
-  consensual?: (string | Choice)[];
+  personal: (string | PersonalChoiceItem)[];
+  consensual?: (string | ChoiceItem)[];
   excludeFromActionLog?: boolean;
 }
 
-const normalizeChoiceOption = (def: string | Choice, index: number): Choice => {
+const normalizeChoiceOption = (
+  def: string | ChoiceItem,
+  index: number
+): ChoiceItem => {
   return typeof def === 'string' ? { value: index, caption: def } : def;
 };
 
@@ -56,7 +59,7 @@ export const Choice: Display<ChoiceOptions, string | number> = props => {
     personalOpinions.forEach(p => {
       const pdef = personalButtons
         .map(normalizeChoiceOption)
-        .find(def => p.data == def.value) as PersonalChoice;
+        .find(def => p.data == def.value) as PersonalChoiceItem;
       const fb = pdef?.consensualMapsTo ?? p.data;
       const updatedDetails = voteDetails.get(fb) ?? [];
       updatedDetails.push(p.userEmail);
@@ -109,7 +112,7 @@ export const Choice: Display<ChoiceOptions, string | number> = props => {
 };
 
 type ChoiceUI = React.FC<{
-  choices: Choice[];
+  choices: ChoiceItem[];
   onSelect: (value: string | number) => void;
   opinions?: Map<string | number, string[]>;
   selected: string | number | undefined;
@@ -200,8 +203,10 @@ const Select: ChoiceUI = props => {
       onChange={ev => onSelect(ev.target.value)}
       disabled={disabled}
     >
-      {choices.map(choice => (
-        <option value={choice.value}>{choice.caption}</option>
+      {choices.map((choice, index) => (
+        <option value={choice.value} key={index}>
+          {choice.caption}
+        </option>
       ))}
     </select>
   );

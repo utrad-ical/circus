@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 RUN sed -i.bak -e "s%http://[^ ]\+%http://ftp.jaist.ac.jp/pub/Linux/ubuntu/%g" /etc/apt/sources.list
 
@@ -20,10 +20,10 @@ RUN apt-get install -y\
         gnupg
 
 # Get GPG keys
-RUN curl -SL https://www.mongodb.org/static/pgp/server-5.0.asc | apt-key add - &&\
-    echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/5.0 multiverse"\
-     | tee /etc/apt/sources.list.d/mongodb-org-5.0.list
-RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - &&\
+RUN curl -fsSL https://www.mongodb.org/static/pgp/server-8.0.asc | \
+    gpg -o /usr/share/keyrings/mongodb-server-8.0.gpg \
+    --dearmor
+RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - && \
     touch /etc/apt/sources.list.d/nginx.list &&\
     echo "deb http://nginx.org/packages/ubuntu/ precise nginx" >> /etc/apt/sources.list.d/nginx.list &&\
     echo "deb-src http://nginx.org/packages/ubuntu/ precise nginx" >> /etc/apt/sources.list.d/nginx.list &&\
@@ -34,27 +34,31 @@ RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - &&\
     $(lsb_release -cs) \
     stable"
 
+RUN echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/8.0 multiverse" | \
+    tee /etc/apt/sources.list.d/mongodb-org-8.0.list
+
 RUN apt-get update &&\
     apt-get install -y\
         nodejs \
-        mongodb-org=5.0.6 \
-        mongodb-org-server=5.0.6 \
-        mongodb-org-shell=5.0.6 \
-        mongodb-org-mongos=5.0.6 \
-        mongodb-org-tools=5.0.6 \
         nginx \
-        docker-ce-cli=5:20.10.12~3-0~ubuntu-focal &&\
+        docker-ce-cli=5:27.0.3-1~ubuntu.22.04~jammy \
+        mongodb-org=8.0.0 \
+        mongodb-org-database=8.0.0 \
+        mongodb-org-server=8.0.0 \
+        mongodb-org-mongos=8.0.0 \
+        mongodb-org-tools=8.0.0 \
+        mongodb-mongosh=2.3.1 &&\
     apt-get clean
-
+    
 # Settings for MongoDB
 RUN sed -i '8s@  dbPath: /var/lib/mongodb@  dbPath: /var/circus/data/mongodb@g' /etc/mongod.conf && \
-    sed -i '18s@/var/log/mongodb/mongod.log@/var/circus/data/logs/mongodb/mongod.log@g' /etc/mongod.conf && \
-    sed -i '19i\  logRotate: reopen' /etc/mongod.conf && \
-    sed -i '24s/127.0.0.1/0.0.0.0/' /etc/mongod.conf && \
-    sed -i '30i\  fork: true' /etc/mongod.conf && \
-    sed -i -e '36s:^#::' /etc/mongod.conf && \
-    sed -i '37i\  replSetName: "rs0"' /etc/mongod.conf
-
+    sed -i '16s@/var/log/mongodb/mongod.log@/var/circus/data/logs/mongodb/mongod.log@g' /etc/mongod.conf && \
+    sed -i '17i\  logRotate: reopen' /etc/mongod.conf && \
+    sed -i '22s/127.0.0.1/0.0.0.0/' /etc/mongod.conf && \
+    sed -i '28i\  fork: true' /etc/mongod.conf && \
+    sed -i -e '34s:^#::' /etc/mongod.conf && \
+    sed -i '35i\  replSetName: "rs0"' /etc/mongod.conf
+   
 COPY . /var/circus/
 RUN npm install -g pm2
 
@@ -85,9 +89,10 @@ RUN mkdir -p /circus/.pm2 && \
 COPY docker-build/circus.config.js /var/circus/circus.config.js
 COPY docker-build/startup.sh /circus/startup.sh
 COPY docker-build/services.sh /circus/services.sh
+COPY docker-build/mongodb_dump.sh /circus/mongodb_dump.sh
 COPY docker-build/data_initialization.sh /circus/data_initialization.sh
 COPY docker-build/cad_plugin_registration.sh /circus/cad_plugin_registration.sh
-COPY docker-build/mongodb_dump.sh /circus/mongodb_dump.sh
+
 
 RUN chmod 755 /circus/*.sh && \
     chmod 777 /var/circus/circus.config.js

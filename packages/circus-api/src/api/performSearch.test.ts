@@ -13,11 +13,13 @@ import path from 'path';
 import axios from 'axios';
 
 let testServer: TestServer, items: CollectionAccessor;
+let disposeMongo: () => Promise<void>;
 
 const dbPromise = usingMongo();
 
 beforeAll(async () => {
-  const db = (await dbPromise).db;
+  const db = (await dbPromise).database.db;
+  disposeMongo = (await dbPromise).dispose;
   await setUpMongoFixture(db, ['items']);
   testServer = await setUpKoaTest(async app => {
     const validator = await createValidator({
@@ -44,6 +46,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  await disposeMongo();
   await testServer.tearDown();
 });
 

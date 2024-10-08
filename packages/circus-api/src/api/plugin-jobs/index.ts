@@ -184,9 +184,14 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
         $match: accessiblePluginFilter
       },
       {
+        $addFields: {
+          primarySeriesUid: { $arrayElemAt: ['$series.seriesUid', 0] } // extract the first seriesUid
+        }
+      },
+      {
         $lookup: {
           from: 'series',
-          localField: 'series.seriesUid',
+          localField: 'primarySeriesUid',
           foreignField: 'seriesUid',
           as: 'seriesInfo'
         }
@@ -275,7 +280,8 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
             studyUid: false,
             modality: false,
             seriesDate: false,
-            addedToListAt: false
+            addedToListAt: false,
+            primarySeriesUid: false
           }
         }
       ],

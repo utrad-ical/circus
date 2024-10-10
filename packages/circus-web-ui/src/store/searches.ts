@@ -186,7 +186,7 @@ const executeQuery = async (
     dispatch(startSearch({ searchName, params }));
     const data = await api(params.resource.endPoint, {
       params: {
-        filter: params.filter,
+        filter: JSON.stringify(params.filter),
         sort: params.sort,
         page: params.page,
         limit: params.limit

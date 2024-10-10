@@ -67,7 +67,6 @@
     "@types/archiver": "^5.1.0",
     "@types/bytes": "^3.1.0",
     "@types/fs-extra": "^8.1.0",
-    "@types/jszip": "^3.1.7",
     "@types/koa": "^2.11.3",
     "@types/koa__multer": "^2.0.1",
     "@types/koa-bodyparser": "^4.3.0",

@@ -28,7 +28,7 @@
     "@babel/register": "^7.18.9",
     "@utrad-ical/circus-icons": "^0.2.0",
     "@utrad-ical/circus-lib": "^0.17.0",
-    "axios": "^0.19.2",
+    "axios": "^1.7.7",
     "dicom-parser": "^1.8.4",
     "extend": "^3.0.2",
     "gl-matrix": "^2.4.0",

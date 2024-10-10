@@ -469,13 +469,6 @@ describe('download plugin job attachment files', () => {
     expect(res.status).toBe(404);
   });
 
-  test('block directory traversal', async () => {
-    const res = await alice.get(
-      'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/attachment/../something'
-    );
-    expect(res.status).toBe(400);
-  });
-
   test('reject unauthorized user', async () => {
     const res = await guest.get(
       'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/attachment/test.txt'

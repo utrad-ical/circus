@@ -75,7 +75,7 @@ describe('plugin-job search', () => {
   test('throw 400 if search using patient information for unprivileged user', async () => {
     // Frank has no global privilege `personalInfoView`.
     const res = await frank.get('api/plugin-jobs', {
-      params: { filter: { 'patientInfo.patientName': 'Sakura' } }
+      params: { filter: JSON.stringify({ 'patientInfo.patientName': 'Sakura' }) }
     });
     expect(res.status).toBe(400);
   });

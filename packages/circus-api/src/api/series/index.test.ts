@@ -47,7 +47,7 @@ test('throw 400 if search using patient information for unprivileged user', asyn
   const res = await ax.frank.request({
     url: 'api/series',
     method: 'get',
-    params: { filter: { 'patientInfo.patientName': 'Koume' } }
+    params: { filter: JSON.stringify({ 'patientInfo.patientName': 'Koume' }) }
   });
   expect(res.status).toBe(400);
 });
@@ -56,7 +56,7 @@ test('should be searchable if patient information is not used', async () => {
   const res = await ax.frank.request({
     url: 'api/series',
     method: 'get',
-    params: { filter: { seriesUid: '222.333.444.555.666' } }
+    params: { filter: JSON.stringify({ seriesUid: '222.333.444.555.666' }) }
   });
   expect(res.status).toBe(200);
   expect(res.data.items).toHaveLength(1);
@@ -108,7 +108,7 @@ describe('getOrientation', () => {
     const res = await ax.dave.request({
       url: 'api/series/111.222.333.444.555/orientation',
       method: 'get',
-      params: { filter: { start: 1, end: 10 } }
+      params: { filter: JSON.stringify({ start: 1, end: 10 }) }
     });
     expect(res.status).toBe(500);
     expect(res.data.error).toBe('no image');

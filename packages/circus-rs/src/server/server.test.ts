@@ -2,7 +2,6 @@ import configureServiceLoader, { RsServices } from './configureServiceLoader';
 import fs from 'fs';
 import zlib from 'zlib';
 import _axios from 'axios';
-import adapter from 'axios/lib/adapters/http';
 import { Server } from 'http';
 import { ServiceLoader } from '@utrad-ical/circus-lib';
 import status from 'http-status';
@@ -24,8 +23,7 @@ const testConfig = () =>
 
 const axios = _axios.create({
   baseURL: `http://localhost:${port}`,
-  validateStatus: () => true,
-  adapter // Makes Axios use Node's http, instead of DOM XHR
+  validateStatus: () => true
 });
 
 const testdir = path.join(__dirname, '../../test-data/dicom/');

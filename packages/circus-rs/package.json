@@ -78,7 +78,7 @@
     "less": "^3.11.1",
     "less-loader": "^10.0.1",
     "merge": "^1.2.1",
-    "rimraf": "^2.6.3",
+    "rimraf": "^5.0.10",
     "style-loader": "^3.2.1",
     "svg2ttf": "^4.1.0",
     "svgicons2svgfont": "^5.0.2",

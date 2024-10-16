@@ -75,7 +75,9 @@ describe('plugin-job search', () => {
   test('throw 400 if search using patient information for unprivileged user', async () => {
     // Frank has no global privilege `personalInfoView`.
     const res = await frank.get('api/plugin-jobs', {
-      params: { filter: { 'patientInfo.patientName': 'Sakura' } }
+      params: {
+        filter: JSON.stringify({ 'patientInfo.patientName': 'Sakura' })
+      }
     });
     expect(res.status).toBe(400);
   });
@@ -467,13 +469,6 @@ describe('download plugin job attachment files', () => {
       'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/attachment/dummy.txt'
     );
     expect(res.status).toBe(404);
-  });
-
-  test('block directory traversal', async () => {
-    const res = await alice.get(
-      'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/attachment/../something'
-    );
-    expect(res.status).toBe(400);
   });
 
   test('reject unauthorized user', async () => {

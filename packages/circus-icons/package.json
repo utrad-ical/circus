@@ -16,7 +16,7 @@
   "devDependencies": {
     "glob": "^7.1.6",
     "glob-promise": "^4.1.0",
-    "svg2ttf": "^5.2.0",
+    "svg2ttf": "^6.0.3",
     "svgicons2svgfont": "^9.1.1",
     "ttf2woff": "^2.0.2"
   }

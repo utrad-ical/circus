@@ -46,14 +46,14 @@ describe('search', () => {
   test('throw 400 if search using patient information for unprivileged user', async () => {
     // Frank has no global privilege `personalInfoView`.
     const res = await ax.frank.get('api/cases', {
-      params: { filter: { 'patientInfo.patientName': 'Anzu' } }
+      params: { filter: JSON.stringify({ 'patientInfo.patientName': 'Anzu' }) }
     });
     expect(res.status).toBe(400);
   });
 
   test('should be searchable if patient information is not used', async () => {
     const res = await ax.frank.get('api/cases', {
-      params: { filter: { caseId: cid } }
+      params: { filter: JSON.stringify({ caseId: cid }) }
     });
     expect(res.status).toBe(200);
     expect(res.data.items).toHaveLength(1);

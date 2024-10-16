@@ -19,7 +19,10 @@ module.exports = {
   },
   resolve: {
     modules: [path.join(__dirname, 'src'), 'node_modules'],
-    extensions: ['.js', '.jsx', '.ts', '.tsx']
+    extensions: ['.js', '.jsx', '.ts', '.tsx'],
+    fallback: {
+      querystring: require.resolve('querystring-es3')
+    }
   },
   module: {
     rules: [
@@ -59,26 +62,34 @@ module.exports = {
     }),
     new webpack.container.ModuleFederationPlugin({
       shared: [
-        { react: { singleton: true, eager: true } },
-        { 'react-dom': { singleton: true, eager: true } },
+        { react: { singleton: true, eager: true, requiredVersion: '^17.0.2' } },
+        {
+          'react-dom': {
+            singleton: true,
+            eager: true,
+            requiredVersion: '^17.0.2'
+          }
+        },
         { '@utrad-ical/circus-ui-kit': { singleton: true, eager: true } }
       ]
     })
   ],
   devServer: {
     port: process.env.CIRCUS_PORT || 8081,
-    contentBase: path.join(__dirname, 'public'),
+    static: { directory: path.join(__dirname, 'public') },
     historyApiFallback: { disableDotRule: true },
-    proxy: {
-      '/api': process.env.DEV_PROXY || 'http://localhost:8080',
-      '/login': process.env.DEV_PROXY || 'http://localhost:8080',
-      '/rs/ws': {
+    proxy: [
+      {
+        context: ['/api', '/login', '/rs'],
+        target: process.env.DEV_PROXY || 'http://localhost:8080'
+      },
+      {
+        context: ['/rs/ws'],
         target: process.env.DEV_PROXY || 'http://localhost:8080',
         ws: true,
         changeOrigin: true
-      },
-      '/rs': process.env.DEV_PROXY || 'http://localhost:8080',
-    }
+      }
+    ]
   },
   devtool: 'source-map',
   cache: {

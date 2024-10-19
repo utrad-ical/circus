@@ -101,7 +101,6 @@ ENV PATH=/circus:$PATH \
     LOCAL_HOST_IP=127.0.0.1 \
     DAEMON_MODE=0 \
     PM2_HOME=/circus/.pm2 \
-    MY_CONTAINER_ID=12345678 \
     DOOD_HOST_WORKING_PATH=/var/circus/data \
     AUTO_BOOT_JOB_MANAGER=0
 

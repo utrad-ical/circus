@@ -136,41 +136,23 @@ type CustomFilter = {
 };
 
 const extractPatientInfoFilter = (customFilter: CustomFilter) => {
-  if (!customFilter || customFilter.$or)
-    return { extractedPatientInfoFilter: null, remainingFilter: customFilter };
+  if (!customFilter || customFilter.$or) return null;
   if (!customFilter.$and) {
     const key = Object.keys(customFilter);
-    if (key.length === 0)
-      return {
-        extractedPatientInfoFilter: null,
-        remainingFilter: customFilter
-      };
-    if (key[0].startsWith('patientInfo.'))
-      return { extractedPatientInfoFilter: customFilter, remainingFilter: {} };
-    else
-      return {
-        extractedPatientInfoFilter: null,
-        remainingFilter: customFilter
-      };
+    if (key.length === 0) return null;
+    if (key[0].startsWith('patientInfo.')) return customFilter;
+    else return null;
   }
   const patientInfoFilters: Record<string, any>[] = [];
-  const remainingFilters: Record<string, any>[] = [];
 
   customFilter.$and.forEach(condition => {
     const key = Object.keys(condition)[0];
     if (key.startsWith('patientInfo.')) {
       patientInfoFilters.push(condition);
-    } else {
-      remainingFilters.push(condition);
     }
   });
 
-  return {
-    extractedPatientInfoFilter:
-      patientInfoFilters.length > 0 ? { $and: patientInfoFilters } : null,
-    remainingFilter:
-      remainingFilters.length > 0 ? { $and: remainingFilters } : {}
-  };
+  return patientInfoFilters.length > 0 ? { $and: patientInfoFilters } : null;
 };
 
 export const handleSearch: RouteMiddleware = ({ models }) => {
@@ -191,8 +173,7 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
     const domainFilter = {
       domain: { $in: ctx.userPrivileges.domains }
     };
-    const { extractedPatientInfoFilter, remainingFilter } =
-      extractPatientInfoFilter(customFilter);
+    const extractedPatientInfoFilter = extractPatientInfoFilter(customFilter);
     const targetSeries = extractedPatientInfoFilter
       ? await models.series.findAll(extractedPatientInfoFilter)
       : null;
@@ -206,7 +187,7 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
       pluginId: { $in: accessiblePluginIds }
     };
     const filter = {
-      $and: [remainingFilter!, domainFilter]
+      $and: [customFilter, domainFilter]
     };
 
     const canViewPersonalInfoPluginIds = ctx.userPrivileges.accessiblePlugins

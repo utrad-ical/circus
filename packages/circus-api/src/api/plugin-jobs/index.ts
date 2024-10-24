@@ -24,6 +24,10 @@ const maskPatientInfo = (ctx: CircusContext) => {
     if (!canView || !wantToView || pluginJobData.patientInfo === null) {
       delete pluginJobData.patientInfo;
     }
+    if (Array.isArray(pluginJobData.patientInfo)) {
+      pluginJobData.patientInfo = pluginJobData.patientInfo[0];
+    }
+    pluginJobData.domain = pluginJobData.domain[0];
     return pluginJobData;
   };
 };
@@ -184,21 +188,11 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
         $match: accessiblePluginFilter
       },
       {
-        $addFields: {
-          primarySeriesUid: { $arrayElemAt: ['$series.seriesUid', 0] } // extract the first seriesUid
-        }
-      },
-      {
         $lookup: {
           from: 'series',
-          localField: 'primarySeriesUid',
+          localField: 'series.seriesUid',
           foreignField: 'seriesUid',
           as: 'seriesInfo'
-        }
-      },
-      {
-        $addFields: {
-          seriesInfo: { $arrayElemAt: ['$seriesInfo', 0] } // primary series only
         }
       },
       {
@@ -210,7 +204,7 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
               null
             ]
           },
-          seriesUid: '$series.seriesUid', // primary series UID only
+          seriesUid: '$series.seriesUid',
           studyUid: '$seriesInfo.studyUid',
           seriesDate: '$seriesInfo.seriesDate',
           modality: '$seriesInfo.modality',

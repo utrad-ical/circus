@@ -1,6 +1,6 @@
 import arg from 'arg';
 import inquirer from 'inquirer';
-import { createCircusCadPlugin } from './main';
+import { createCircusCadPlugin } from './main.mjs';
 
 function parseArgumentsIntoOptions(rawArgs) {
   const args = arg(

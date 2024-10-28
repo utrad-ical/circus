@@ -5,7 +5,7 @@ import ncp from 'ncp';
 import path from 'path';
 import { promisify } from 'util';
 import Listr from 'listr';
-import { projectInstall } from 'pkg-install';
+import { execa } from 'execa';
 
 const access = promisify(fs.access);
 const copy = promisify(ncp);
@@ -14,6 +14,16 @@ async function copyTemplateFiles(options) {
   return copy(options.templateDirectory, options.targetDirectory, {
     clobber: false
   });
+}
+
+async function installDependencies(directory) {
+  try {
+    await execa('npm', ['install'], { cwd: directory });
+    console.log(chalk.green.bold('Dependencies installed successfully.'));
+  } catch (error) {
+    console.error(chalk.red.bold('Failed to install dependencies:'), error);
+    process.exit(1);
+  }
 }
 
 export async function createCircusCadPlugin(options) {
@@ -44,10 +54,7 @@ export async function createCircusCadPlugin(options) {
     },
     {
       title: 'Install dependencies',
-      task: () =>
-        projectInstall({
-          cwd: options.targetDirectory
-        }),
+      task: () => installDependencies(options.targetDirectory),
       enabled: () => options.install
     }
   ]);

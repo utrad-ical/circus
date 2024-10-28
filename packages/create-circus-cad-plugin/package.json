@@ -1,8 +1,9 @@
 {
   "name": "@utrad-ical/create-circus-cad-plugin",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "The base template for create circus CAD plugin.",
   "main": "src/index.js",
+  "type": "module",
   "bin": {
     "create-circus-cad-plugin": "bin/create-circus-cad-plugin"
   },
@@ -25,11 +26,10 @@
   "license": "MIT",
   "dependencies": {
     "arg": "^5.0.1",
-    "chalk": "^4.1.2",
-    "esm": "^3.2.25",
-    "inquirer": "^8.2.2",
+    "chalk": "^5.3.0",
+    "execa": "^9.5.0",
+    "inquirer": "^12.0.1",
     "listr": "^0.14.3",
-    "ncp": "^2.0.0",
-    "pkg-install": "^1.0.0"
+    "ncp": "^2.0.0"
   }
 }

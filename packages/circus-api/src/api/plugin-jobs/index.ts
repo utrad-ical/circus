@@ -15,6 +15,7 @@ import {
   isPatientInfoInFilter,
   performAggregationSearch
 } from '../performSearch';
+import { FilterQuery } from 'mongodb';
 
 const maskPatientInfo = (ctx: CircusContext) => {
   return (pluginJobData: any) => {
@@ -134,6 +135,42 @@ const searchableFields = [
   'finishedAt'
 ];
 
+type CustomFilter<T = any> = FilterQuery<T>;
+
+const extractPatientIdNameFilter = (customFilter: CustomFilter) => {
+  if (!customFilter || customFilter.$or) return null;
+
+  const targetFilter = ['patientInfo.patientId', 'patientInfo.patientName'];
+
+  if (!customFilter.$and) {
+    const key =
+      Object.keys(customFilter).length > 0
+        ? Object.keys(customFilter)[0]
+        : null;
+    if (!key) return null;
+    if (targetFilter.includes(key)) {
+      const value = customFilter[key];
+      if (typeof value !== 'object' || '$eq' in value) return customFilter;
+    }
+    return null;
+  }
+
+  const patientInfoFilters: Record<string, any>[] = [];
+  let includeFixedValue = false;
+
+  customFilter.$and.forEach(condition => {
+    const key = Object.keys(condition)[0];
+    if (key.startsWith('patientInfo.')) {
+      patientInfoFilters.push(condition);
+    }
+    if (targetFilter.includes(key)) {
+      const value = condition[key];
+      if (typeof value !== 'object' || '$eq' in value) includeFixedValue = true;
+    }
+  });
+  return includeFixedValue ? { $and: patientInfoFilters } : null;
+};
+
 export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const customFilter = extractFilter(ctx);
@@ -153,6 +190,13 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
       domain: { $in: ctx.userPrivileges.domains }
     };
 
+    const extractedPatientInfoFilter = extractPatientIdNameFilter(customFilter);
+    const targetSeries = extractedPatientInfoFilter
+      ? await models.series.findAll(extractedPatientInfoFilter)
+      : null;
+    const targetSeriesUids = targetSeries
+      ? targetSeries.map(doc => doc.seriesUid)
+      : null;
     const accessiblePluginIds = ctx.userPrivileges.accessiblePlugins
       .filter(p => p.roles.includes('readPlugin'))
       .map(p => p.pluginId);
@@ -212,6 +256,11 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
         }
       }
     ];
+
+    targetSeriesUids &&
+      baseStage.unshift({
+        $match: { 'series.seriesUid': { $in: targetSeriesUids } }
+      });
 
     const searchByMyListStage: object[] = [
       { $match: { myListId } },

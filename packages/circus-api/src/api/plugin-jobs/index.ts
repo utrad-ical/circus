@@ -137,37 +137,60 @@ const searchableFields = [
 
 type CustomFilter<T = any> = FilterQuery<T>;
 
-const extractPatientIdNameFilter = (customFilter: CustomFilter) => {
+/**
+ * Identifies and collects filters with fixed value in patientInfo.patientId or
+ * patientInfo.patientName. Recursively extracts filters starting with "patientInfo."
+ * for use in subsequent steps to obtain a list of seriesUid, enabling query
+ * optimization through pre-filtering and result limitation.
+ */
+export const extractPatientIdNameFilter = (
+  customFilter: CustomFilter
+): CustomFilter | null => {
   if (!customFilter || customFilter.$or) return null;
 
   const targetFilter = ['patientInfo.patientId', 'patientInfo.patientName'];
 
-  if (!customFilter.$and) {
-    const key =
-      Object.keys(customFilter).length > 0
-        ? Object.keys(customFilter)[0]
-        : null;
-    if (!key) return null;
-    if (targetFilter.includes(key)) {
-      const value = customFilter[key];
-      if (typeof value !== 'object' || '$eq' in value) return customFilter;
+  // A function that recursively collects filters starting with "patientInfo."
+  const collectPatientInfoFilters = (
+    filter: CustomFilter
+  ): Record<string, any>[] => {
+    const patientInfoFilters: Record<string, any>[] = [];
+
+    if (filter.$and && Array.isArray(filter.$and)) {
+      filter.$and.forEach(subCondition => {
+        patientInfoFilters.push(...collectPatientInfoFilters(subCondition));
+      });
+    } else {
+      const key = Object.keys(filter)[0];
+      if (key && key.startsWith('patientInfo.')) {
+        patientInfoFilters.push(filter);
+      }
     }
+
+    return patientInfoFilters;
+  };
+
+  // CustomFilter does not have $and
+  if (!customFilter.$and) {
+    const key = Object.keys(customFilter)[0];
+    if (!key || !targetFilter.includes(key)) return null;
+
+    const value = customFilter[key];
+    if (typeof value !== 'object' || '$eq' in value) return customFilter;
+
     return null;
   }
 
-  const patientInfoFilters: Record<string, any>[] = [];
-  let includeFixedValue = false;
-
-  customFilter.$and.forEach(condition => {
+  // Recursively collects filters starting with "patientInfo."
+  const patientInfoFilters = collectPatientInfoFilters(customFilter);
+  const includeFixedValue = patientInfoFilters.some(condition => {
     const key = Object.keys(condition)[0];
-    if (key.startsWith('patientInfo.')) {
-      patientInfoFilters.push(condition);
-    }
-    if (targetFilter.includes(key)) {
-      const value = condition[key];
-      if (typeof value !== 'object' || '$eq' in value) includeFixedValue = true;
-    }
+    return (
+      targetFilter.includes(key) &&
+      (typeof condition[key] !== 'object' || '$eq' in condition[key])
+    );
   });
+
   return includeFixedValue ? { $and: patientInfoFilters } : null;
 };
 

@@ -15,6 +15,7 @@ import {
   isPatientInfoInFilter,
   performAggregationSearch
 } from '../performSearch';
+import { FilterQuery } from 'mongodb';
 
 const maskPatientInfo = (ctx: CircusContext) => {
   return (pluginJobData: any) => {
@@ -134,6 +135,65 @@ const searchableFields = [
   'finishedAt'
 ];
 
+type CustomFilter<T = any> = FilterQuery<T>;
+
+/**
+ * Identifies and collects filters with fixed value in patientInfo.patientId or
+ * patientInfo.patientName. Recursively extracts filters starting with "patientInfo."
+ * for use in subsequent steps to obtain a list of seriesUid, enabling query
+ * optimization through pre-filtering and result limitation.
+ */
+export const extractPatientIdNameFilter = (
+  customFilter: CustomFilter
+): CustomFilter | null => {
+  if (!customFilter || customFilter.$or) return null;
+
+  const targetFilter = ['patientInfo.patientId', 'patientInfo.patientName'];
+
+  // A function that recursively collects filters starting with "patientInfo."
+  const collectPatientInfoFilters = (
+    filter: CustomFilter
+  ): Record<string, any>[] => {
+    const patientInfoFilters: Record<string, any>[] = [];
+
+    if (filter.$and && Array.isArray(filter.$and)) {
+      filter.$and.forEach(subCondition => {
+        patientInfoFilters.push(...collectPatientInfoFilters(subCondition));
+      });
+    } else {
+      const key = Object.keys(filter)[0];
+      if (key && key.startsWith('patientInfo.')) {
+        patientInfoFilters.push(filter);
+      }
+    }
+
+    return patientInfoFilters;
+  };
+
+  // CustomFilter does not have $and
+  if (!customFilter.$and) {
+    const key = Object.keys(customFilter)[0];
+    if (!key || !targetFilter.includes(key)) return null;
+
+    const value = customFilter[key];
+    if (typeof value !== 'object' || '$eq' in value) return customFilter;
+
+    return null;
+  }
+
+  // Recursively collects filters starting with "patientInfo."
+  const patientInfoFilters = collectPatientInfoFilters(customFilter);
+  const includeFixedValue = patientInfoFilters.some(condition => {
+    const key = Object.keys(condition)[0];
+    return (
+      targetFilter.includes(key) &&
+      (typeof condition[key] !== 'object' || '$eq' in condition[key])
+    );
+  });
+
+  return includeFixedValue ? { $and: patientInfoFilters } : null;
+};
+
 export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const customFilter = extractFilter(ctx);
@@ -153,6 +213,13 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
       domain: { $in: ctx.userPrivileges.domains }
     };
 
+    const extractedPatientInfoFilter = extractPatientIdNameFilter(customFilter);
+    const targetSeries = extractedPatientInfoFilter
+      ? await models.series.findAll(extractedPatientInfoFilter)
+      : null;
+    const targetSeriesUids = targetSeries
+      ? targetSeries.map(doc => doc.seriesUid)
+      : null;
     const accessiblePluginIds = ctx.userPrivileges.accessiblePlugins
       .filter(p => p.roles.includes('readPlugin'))
       .map(p => p.pluginId);
@@ -212,6 +279,11 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
         }
       }
     ];
+
+    targetSeriesUids &&
+      baseStage.unshift({
+        $match: { 'series.seriesUid': { $in: targetSeriesUids } }
+      });
 
     const searchByMyListStage: object[] = [
       { $match: { myListId } },

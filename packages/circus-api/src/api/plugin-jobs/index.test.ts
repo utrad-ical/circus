@@ -2,6 +2,7 @@ import { setUpAppForRoutesTest, ApiTest } from '../../test/util-routes';
 import { AxiosInstance } from 'axios';
 import { setUpMongoFixture } from '../../test/util-mongo';
 import status from 'http-status';
+import { extractPatientIdNameFilter } from '.';
 
 let apiTest: ApiTest,
   alice: AxiosInstance,
@@ -476,5 +477,93 @@ describe('download plugin job attachment files', () => {
       'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/attachment/test.txt'
     );
     expect(res.status).toBe(401);
+  });
+});
+
+describe('extractPatientIdNameFilter', () => {
+  test('return filter when customFilter contains a fixed value in patientInfo.patientId without $and', () => {
+    const customFilter = { 'patientInfo.patientId': '015' };
+    expect(extractPatientIdNameFilter(customFilter)).toEqual(customFilter);
+  });
+
+  test('return null when customFilter contains a fixed value in status without $and', () => {
+    const customFilter = { status: 'failed' };
+    expect(extractPatientIdNameFilter(customFilter)).toBe(null);
+  });
+
+  test('return null when $and exists but targetFilter does not contain a fixed value', () => {
+    const customFilter = {
+      $and: [
+        { 'patientInfo.patientId': { $regex: '^0' } },
+        { status: 'failed' },
+        { createdAt: { $lt: { $date: '2017-10-10T00:00:00Z' } } }
+      ]
+    };
+    expect(extractPatientIdNameFilter(customFilter)).toBe(null);
+  });
+
+  test('return filter when $and exists and targetFilter contains a fixed value', () => {
+    const customFilter = { $and: [{ 'patientInfo.patientName': 'sakura' }] };
+    expect(extractPatientIdNameFilter(customFilter)).toEqual(customFilter);
+  });
+
+  test('return null when customFilter is an empty object', () => {
+    expect(extractPatientIdNameFilter({})).toBe(null);
+  });
+
+  test('return null when customFilter contains $or condition', () => {
+    const customFilter = {
+      $or: [
+        { 'patientInfo.patientName': 'sakura' },
+        { 'patientInfo.patientName': 'umeko' }
+      ]
+    };
+    expect(extractPatientIdNameFilter(customFilter)).toBe(null);
+  });
+
+  test('return filters when multiple conditions are present in $and', () => {
+    const customFilter = {
+      $and: [
+        { 'patientInfo.patientName': 'sakura' },
+        { status: 'failed' },
+        { createdAt: { $lt: { $date: '2017-10-10T00:00:00Z' } } },
+        { 'patientInfo.age': { $lt: 50 } }
+      ]
+    };
+    const expected = {
+      $and: [
+        { 'patientInfo.patientName': 'sakura' },
+        { 'patientInfo.age': { $lt: 50 } }
+      ]
+    };
+    expect(extractPatientIdNameFilter(customFilter)).toEqual(expected);
+  });
+
+  test('return filters when $and contains nested $and', () => {
+    const customFilter = {
+      $and: [
+        { 'patientInfo.patientName': 'sakura' },
+        {
+          $or: [
+            { status: 'failed' },
+            { status: 'cancelled' },
+            { 'patientInfo.age': { $lt: 1 } }
+          ]
+        },
+        {
+          $and: [
+            { 'patientInfo.Id': { $regex: '^0' } },
+            { createdAt: { $lt: { $date: '2017-10-10T00:00:00Z' } } }
+          ]
+        }
+      ]
+    };
+    const expected = {
+      $and: [
+        { 'patientInfo.patientName': 'sakura' },
+        { 'patientInfo.Id': { $regex: '^0' } }
+      ]
+    };
+    expect(extractPatientIdNameFilter(customFilter)).toEqual(expected);
   });
 });

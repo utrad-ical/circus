@@ -1,0 +1,31 @@
+name: Publish NPM Packages
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 22.x
+          registry-url: 'https://registry.npmjs.org/'
+      - run: npm ci
+      - run: npm run build
+      - name: Publish
+        run: |
+          PACKAGES="circus-lib circus-icons circus-ui-kit circus-rs create-circus-cad-plugin"
+          for PACKAGE in $PACKAGES; do
+            cd packages/$PACKAGE
+            CURRENT_VERSION=$(npm info @utrad-ical/$PACKAGE version)
+            PACKAGE_VERSION=$(node -p "require('./package.json').version")
+            if [ "$PACKAGE_VERSION" \> "$CURRENT_VERSION" ]; then
+              npm publish --access public
+            fi
+            cd -
+          done
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -5,7 +5,7 @@ interface AuthorizationInfo {
 export default class AuthorizationCache {
   private config: any;
   private cache: AuthorizationInfo = {};
-  private disposalTimer: NodeJS.Timer;
+  private disposalTimer: NodeJS.Timeout | undefined;
 
   constructor(config: any) {
     this.config = config || {};

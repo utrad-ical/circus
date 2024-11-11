@@ -8,7 +8,7 @@ import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
 import IconButton from 'components/IconButton';
 import { Panel } from 'components/react-bootstrap';
 import SearchResultsView from 'components/SearchResultsView';
-import produce from 'immer';
+import { produce } from 'immer';
 import { multirange } from 'multi-integer-range';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';

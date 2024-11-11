@@ -1,6 +1,6 @@
 import { Editor } from '@smikitky/rb-components/lib/editor-types';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
-import produce from 'immer';
+import { produce } from 'immer';
 import { ExternalLabel } from 'pages/case-detail/labelData';
 import { Revision } from 'pages/case-detail/revisionData';
 import RevisionSelector from 'pages/case-detail/RevisionSelector';
@@ -47,16 +47,17 @@ const createCaseExportOptionsEditor: (
   };
 
   const RevSelector = useMemo<Editor<number>>(
-    () => ({ value, onChange }) => {
-      if (!revisions) return null;
-      return (
-        <RevisionSelector
-          selected={value}
-          onSelect={onChange}
-          revisions={revisions}
-        />
-      );
-    },
+    () =>
+      ({ value, onChange }) => {
+        if (!revisions) return null;
+        return (
+          <RevisionSelector
+            selected={value}
+            onSelect={onChange}
+            revisions={revisions}
+          />
+        );
+      },
     []
   );
 

@@ -1,6 +1,6 @@
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import { SeriesEntry } from 'components/SeriesSelector';
-import produce from 'immer';
+import { createDraft, finishDraft } from 'immer';
 import { multirange } from 'multi-integer-range';
 import Series from 'types/Series';
 import { RootState } from '../store';
@@ -35,17 +35,17 @@ export const fillPartialVolumeDescriptors = async (
   api: ApiCaller,
   state?: RootState
 ): Promise<SeriesEntry[]> => {
-  return await asyncMap(entries, async entry =>
-    produce(entry, async entry => {
-      if (!entry.partialVolumeDescriptor) {
-        entry.partialVolumeDescriptor = await defaultPvdFromSeries(
-          entry.seriesUid,
-          api,
-          state
-        );
-      }
-    })
-  );
+  const draft = createDraft(entries);
+  await asyncMap(draft, async entry => {
+    if (!entry.partialVolumeDescriptor) {
+      entry.partialVolumeDescriptor = await defaultPvdFromSeries(
+        entry.seriesUid,
+        api,
+        state
+      );
+    }
+  });
+  return finishDraft(draft);
 };
 
 export default fillPartialVolumeDescriptors;

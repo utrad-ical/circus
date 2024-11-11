@@ -18,7 +18,7 @@ import {
   MenuItem,
   Modal
 } from 'components/react-bootstrap';
-import produce from 'immer';
+import { produce } from 'immer';
 import React, {
   useCallback,
   useEffect,

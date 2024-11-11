@@ -1,6 +1,6 @@
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import { LayoutInfo } from 'components/GridContainer';
-import produce from 'immer';
+import { createDraft, finishDraft } from 'immer';
 import { ApiCaller } from 'utils/api';
 import asyncMap from '../../utils/asyncMap';
 import {
@@ -96,14 +96,14 @@ export const externalRevisionToInternal = async (
   revision: Revision<ExternalLabel>,
   api: ApiCaller
 ): Promise<Revision<InternalLabel>> => {
-  return await produce(revision, async revision => {
-    for (const series of revision.series) {
-      (series as any).labels = await asyncMap(series.labels, label =>
-        externalLabelToInternal(label, api)
-      );
-    }
-    return revision as Revision<InternalLabel>;
-  });
+  const draft = createDraft(revision);
+  for (const series of draft.series) {
+    (series as any).labels = await asyncMap(series.labels, label =>
+      externalLabelToInternal(label, api)
+    );
+  }
+
+  return finishDraft(draft) as Revision<InternalLabel>;
 };
 
 const internalSeriesToExternal = async (
@@ -113,10 +113,10 @@ const internalSeriesToExternal = async (
   const newLabels = await asyncMap(series.labels, async label =>
     internalLabelToExternal(label, api)
   );
-  return produce(series, series => {
-    (series as any).labels = newLabels;
-    return series as SeriesEntryWithLabels<ExternalLabel>;
-  });
+
+  const draft = createDraft(series);
+  draft.labels = newLabels as any;
+  return finishDraft(draft) as SeriesEntryWithLabels<ExternalLabel>;
 };
 
 /**

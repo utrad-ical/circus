@@ -1,6 +1,6 @@
 import { EditingData, EditingDataUpdater } from './revisionData';
 import { InternalLabel } from './labelData';
-import produce from 'immer';
+import { produce } from 'immer';
 // Small wrapper around updateEditingData
 const createCurrentLabelsUpdator = (
   editingData: EditingData,

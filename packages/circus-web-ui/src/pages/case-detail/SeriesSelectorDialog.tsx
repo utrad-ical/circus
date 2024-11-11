@@ -1,6 +1,6 @@
 import { Button, Modal } from 'components/react-bootstrap';
 import SeriesSelector, { SeriesEntry } from 'components/SeriesSelector';
-import produce from 'immer';
+import { produce } from 'immer';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useApi } from 'utils/api';
@@ -28,12 +28,15 @@ const SeriesSelectorDialog: React.FC<{
 
   const handleResolve = async () => {
     // Fill label arrays
-    const labelAdded: SeriesEntryWithLabels[] = produce(entries, entries => {
-      entries.forEach(entry => {
-        if (!('labels' in entry)) (entry as any).labels = [];
-      });
-      return entries as SeriesEntryWithLabels[];
-    });
+    const labelAdded: SeriesEntryWithLabels[] = produce(
+      entries as SeriesEntryWithLabels[],
+      entries => {
+        entries.forEach(entry => {
+          if (!('labels' in entry)) (entry as any).labels = [];
+        });
+        return entries as SeriesEntryWithLabels[];
+      }
+    );
     // fill empty PVDs
     const pvdFilled = (await fillPartialVolumeDescriptors(
       labelAdded,

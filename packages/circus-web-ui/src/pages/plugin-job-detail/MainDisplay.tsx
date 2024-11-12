@@ -8,7 +8,7 @@ import {
 } from '@utrad-ical/circus-ui-kit';
 import Section from './Section';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
-import produce from 'immer';
+import { produce } from 'immer';
 
 const MainDisplay: Display<FeedbackTarget[], any> = props => {
   const {

@@ -17,7 +17,7 @@ import Collapser from 'components/Collapser';
 import Icon from 'components/Icon';
 import { createStateChanger } from 'components/ImageViewer';
 import StyledJsonSchemaEditor from 'components/StyledJsonSchemaEditor';
-import produce from 'immer';
+import { produce } from 'immer';
 import { debounce } from 'lodash';
 import useToolbar from 'pages/case-detail/useToolbar';
 import React, {
@@ -255,8 +255,8 @@ const RevisionEditor: React.FC<{
         newPlaneFigureOption.zDimmedThreshold === 0
           ? 'hide'
           : isFinite(newPlaneFigureOption.zDimmedThreshold)
-          ? 'infinity'
-          : 'show'
+            ? 'infinity'
+            : 'show'
     });
   };
 
@@ -700,12 +700,12 @@ const RevisionEditor: React.FC<{
         viewOptions.windowPropagationScope === 'viewer'
           ? editingData.activeLayoutKey
           : viewOptions.windowPropagationScope === 'series'
-          ? editingData.layoutItems
-              .filter(
-                item => item.seriesIndex === editingData.activeSeriesIndex
-              )
-              .map(item => item.key)
-          : editingData.layoutItems.map(item => item.key);
+            ? editingData.layoutItems
+                .filter(
+                  item => item.seriesIndex === editingData.activeSeriesIndex
+                )
+                .map(item => item.key)
+            : editingData.layoutItems.map(item => item.key);
       if (!targetKeys) return;
       stateChanger((state, viewer, id) => {
         if (targetKeys.indexOf(id as string) < 0) return state;

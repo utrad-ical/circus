@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import styled from 'styled-components';
-import produce from 'immer';
+import { produce } from 'immer';
 
 export const defaultDragDataMimeType = 'text/grid-container-drop';
 
@@ -300,10 +300,8 @@ const GridContainer = <T extends { key: string }>(
     className
   } = props;
 
-  const [
-    dropDestination,
-    setDropDestination
-  ] = useState<DropDestination | null>(null);
+  const [dropDestination, setDropDestination] =
+    useState<DropDestination | null>(null);
   const [fromKey, setFromKey] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 

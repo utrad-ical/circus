@@ -7,7 +7,7 @@ import {
 } from '@utrad-ical/circus-rs/src/browser/section-util';
 import focusBy from '@utrad-ical/circus-rs/src/browser/tool/state/focusBy';
 import { gzipSync } from 'fflate';
-import produce from 'immer';
+import { produce, createDraft, finishDraft } from 'immer';
 import { ApiCaller } from 'utils/api';
 import { sha1 } from 'utils/util';
 
@@ -306,12 +306,11 @@ export const internalLabelToExternal = async (
     }
   };
 
-  return produce(label, async label => {
-    if (label.type === 'voxel') label.data = await saveVoxels();
-    delete (label as any).temporaryKey;
-    delete (label as any).hidden;
-    return label as ExternalLabel;
-  });
+  const draft = createDraft(label);
+  if (draft.type === 'voxel') draft.data = await saveVoxels();
+  delete (draft as any).temporaryKey;
+  delete (draft as any).hidden;
+  return finishDraft(draft) as ExternalLabel;
 };
 
 const rgbaColor = (rgb: string, alpha: number): string =>

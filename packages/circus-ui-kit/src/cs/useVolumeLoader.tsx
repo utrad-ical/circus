@@ -1,16 +1,9 @@
 import React, { useContext, useEffect, useMemo, useRef } from 'react';
-import * as rs from '@utrad-ical/circus-rs/src/browser';
-import PartialVolumeDescriptor from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
 import {
   serializeUtilizeOptions,
+  SeriesEntryWithHints,
   VolumeLoaderManager
 } from './createVolumeLoaderManager';
-
-export interface SeriesEntryWithHints {
-  seriesUid: string;
-  partialVolumeDescriptor: PartialVolumeDescriptor;
-  estimateWindowType?: rs.EstimateWindowType;
-}
 
 export const VolumeLoaderFactoryContext =
   React.createContext<VolumeLoaderManager>(null as any);

@@ -30,7 +30,6 @@ const Tester: React.FC<{
       editable,
       loadAttachment: mockAttachmentLoader,
       eventLogger: () => {},
-      useVolumeLoaders: () => [],
       loadDisplay: null as any,
       UserDisplay: (
         props: React.PropsWithChildren<{

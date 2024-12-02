@@ -1,4 +1,6 @@
 export * from './cs/usePluginAttachment';
+export * from './cs/useVolumeLoader';
+export * from './cs/createVolumeLoaderManager';
 export * from './cs/CsResultsContext';
 export * from './cs/Display';
 export * from './cs/displays/Choice';

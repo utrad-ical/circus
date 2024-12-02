@@ -1,4 +1,5 @@
 import * as rs from '@utrad-ical/circus-rs/src/browser';
+import { useVolumeLoaders } from '../useVolumeLoader';
 import get from 'lodash.get';
 import React, {
   useCallback,
@@ -115,14 +116,8 @@ const distance = (x: number[], y: number[], vs: number[]) => {
 export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
   const { options, personalOpinions, initialFeedbackValue, onFeedbackChange } =
     props;
-  const {
-    job,
-    consensual,
-    editable,
-    useVolumeLoaders,
-    eventLogger,
-    UserDisplay
-  } = useCsResults();
+  const { job, consensual, editable, eventLogger, UserDisplay } =
+    useCsResults();
 
   const {
     volumeId = 0,

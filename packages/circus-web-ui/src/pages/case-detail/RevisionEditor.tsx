@@ -33,7 +33,7 @@ import Series from 'types/Series';
 import { useApi } from 'utils/api';
 import isTouchDevice from 'utils/isTouchDevice';
 import { useUserPreferences } from 'utils/useLoginUser';
-import { useVolumeLoaders } from 'utils/useVolumeLoader';
+import { useVolumeLoaders } from '@utrad-ical/circus-ui-kit';
 import { Modal } from '../../components/react-bootstrap';
 import {
   ScrollBarsSettings,

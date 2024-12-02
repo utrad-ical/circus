@@ -25,7 +25,7 @@ import { useApi } from 'utils/api';
 import useLoadData from 'utils/useLoadData';
 import useLoginUser from 'utils/useLoginUser';
 import useQuery from 'utils/useQuery';
-import { useVolumeLoaders } from 'utils/useVolumeLoader';
+import { useVolumeLoaders } from '@utrad-ical/circus-ui-kit';
 import {
   FeedbackRenderer,
   PluginRenderer,

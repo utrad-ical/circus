@@ -9,11 +9,12 @@ import {
   VoxelCloud,
   WebGlRawVolumeMprImageSource
 } from '@utrad-ical/circus-rs/src/browser';
-import React, { useContext, useEffect, useState, useRef } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { ImageViewer, StateChangerFunc } from '../ui/ImageViewer';
 import { CsResultsContext } from './CsResultsContext';
 import { ColorDefinition, normalizeColor } from './displays/utils/color';
+import { useVolumeLoaders } from './useVolumeLoader';
 
 type ToolName = 'pager' | 'zoom' | 'pan';
 
@@ -71,8 +72,7 @@ export const AnnotationViewer: React.FC<{
     height
   } = props;
   const {
-    job: { series },
-    useVolumeLoaders
+    job: { series }
   } = useContext(CsResultsContext);
   const [composition, setComposition] = useState<Composition | null>(null);
 

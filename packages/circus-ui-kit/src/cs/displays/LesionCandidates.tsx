@@ -8,6 +8,7 @@ import {
   WebGlRawVolumeMprImageSource
 } from '@utrad-ical/circus-rs/src/browser';
 import classnames from 'classnames';
+import { useVolumeLoaders } from '../useVolumeLoader';
 import get from 'lodash.get';
 import React, {
   useCallback,
@@ -242,8 +243,7 @@ export const LesionCandidates: Display<
     personalOpinions,
     onFeedbackChange
   } = props;
-  const { consensual, job, useVolumeLoaders, loadDisplay, eventLogger } =
-    useCsResults();
+  const { consensual, job, loadDisplay, eventLogger } = useCsResults();
   const { results } = job;
   const [error, setError] = useState<Error | null>(null);
   const [currentFeedback, setCurrentFeedback] =

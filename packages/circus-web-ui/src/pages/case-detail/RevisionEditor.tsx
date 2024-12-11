@@ -175,7 +175,8 @@ const RevisionEditor: React.FC<{
     busy
   } = props;
   const api = useApi();
-  const viewersRef = useRef<{ [key: string]: Viewer }>({});
+  const viewersRef = useRef<{ [key: string]: Viewer }>();
+  viewersRef.current ??= {};
   const viewers = viewersRef.current;
 
   const viewWindows = useRef<rs.ViewWindow[]>([]);

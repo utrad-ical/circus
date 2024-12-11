@@ -48,12 +48,15 @@ const DownloadModal = <T extends any>(props: {
 
   const downloadTask = useTaskDownloadHandler(taskId!);
 
-  const modalRoot = useRef<HTMLDivElement>(document.createElement('div'));
+  const [modalRoot, setModalRoot] = useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    document.body.appendChild(modalRoot.current);
-    () => {
-      document.body.removeChild(modalRoot.current);
+    const root = document.createElement('div');
+    document.body.appendChild(root);
+    setModalRoot(root);
+
+    return () => {
+      document.body.removeChild(root);
     };
   }, []);
 
@@ -127,7 +130,8 @@ const DownloadModal = <T extends any>(props: {
     </Modal.Dialog>
   );
 
-  return createPortal(dialog, modalRoot.current);
+  if (!modalRoot) return <></>;
+  return createPortal(dialog, modalRoot);
 };
 
 const StyledModalBody = styled(Modal.Body)`

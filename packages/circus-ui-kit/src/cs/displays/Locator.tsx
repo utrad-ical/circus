@@ -149,13 +149,12 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
     undefined
   );
 
-  const toolRef = useRef<{ pager: any; point: any }>();
-  if (!toolRef.current) {
-    toolRef.current = {
-      pager: rs.toolFactory('pager'),
-      point: rs.toolFactory('point')
-    };
-  }
+  const toolsRef = useRef<{ pager: rs.Tool; point: rs.Tool }>();
+  toolsRef.current ??= {
+    pager: rs.toolFactory('pager'),
+    point: rs.toolFactory('point')
+  };
+  const tools = toolsRef.current;
 
   const stateChanger = useMemo(() => createStateChanger<rs.MprViewState>(), []);
 
@@ -313,7 +312,7 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
         <ImageViewer
           className="locator"
           initialStateSetter={initialStateSetter}
-          tool={toolRef.current[editable ? 'point' : 'pager']}
+          tool={tools[editable ? 'point' : 'pager']}
           stateChanger={stateChanger}
           composition={composition}
           onMouseUp={handleMouseUp}

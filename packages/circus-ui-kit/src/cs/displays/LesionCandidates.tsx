@@ -285,14 +285,14 @@ export const LesionCandidates: Display<
     });
   }, []);
 
-  const tools = useRef<{ name: string; icon: string; tool: rs.Tool }[]>();
-  if (!tools.current) {
-    tools.current = [
-      { name: 'pager', icon: 'rs-pager', tool: rs.toolFactory('pager') },
-      { name: 'zoom', icon: 'rs-zoom', tool: rs.toolFactory('zoom') },
-      { name: 'hand', icon: 'rs-hand', tool: rs.toolFactory('hand') }
-    ];
-  }
+  const toolsRef = useRef<{ name: string; icon: string; tool: rs.Tool }[]>();
+  toolsRef.current ??= [
+    { name: 'pager', icon: 'rs-pager', tool: rs.toolFactory('pager') },
+    { name: 'zoom', icon: 'rs-zoom', tool: rs.toolFactory('zoom') },
+    { name: 'hand', icon: 'rs-hand', tool: rs.toolFactory('hand') }
+  ];
+  const tools = toolsRef.current;
+
   const [toolName, setToolName] = useState('pager');
 
   const imageSourceForVolumeId = (volumeId: number) => {
@@ -353,7 +353,7 @@ export const LesionCandidates: Display<
   return (
     <StyledDiv>
       <div className="tools">
-        {tools.current!.map(t => (
+        {tools.map(t => (
           <Button
             key={t.name}
             size="sm"
@@ -379,7 +379,7 @@ export const LesionCandidates: Display<
                 return { ...fb, data: target?.value };
               })
             : [];
-          const tool = tools.current!.find(t => t.name === toolName)?.tool!;
+          const tool = tools.find(t => t.name === toolName)?.tool!;
           return (
             <Candidate
               key={cand.id}

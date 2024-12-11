@@ -76,11 +76,13 @@ export const AnnotationViewer: React.FC<{
   } = useContext(CsResultsContext);
   const [composition, setComposition] = useState<Composition | null>(null);
 
-  const tools = useRef<{ [name in ToolName]: Tool }>({
+  const toolsRef = useRef<{ [name in ToolName]: Tool }>();
+  toolsRef.current ??= {
     pager: toolFactory('pager'),
     pan: toolFactory('pan'),
     zoom: toolFactory('zoom')
-  });
+  };
+  const tools = toolsRef.current;
 
   const [volumeLoader] = useVolumeLoaders([series[volumeId]]);
 
@@ -104,7 +106,7 @@ export const AnnotationViewer: React.FC<{
   return (
     <StyledDiv className="annotation-viewer" width={width} height={height}>
       <ImageViewer
-        tool={tools.current[toolName] ?? tools.current.pager}
+        tool={tools[toolName] ?? tools.pager}
         composition={composition}
         initialStateSetter={initialStateSetter}
       />

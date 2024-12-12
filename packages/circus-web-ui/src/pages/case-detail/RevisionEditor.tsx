@@ -604,7 +604,8 @@ const RevisionEditor: React.FC<{
     modifierKeyBehaviors,
     planeFigureOption,
     touchDevice,
-    viewers
+    viewers,
+    handleAnnotationChange
   ]);
 
   useEffect(() => {

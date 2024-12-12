@@ -138,7 +138,13 @@ const ImageViewer: React.FC<{
       viewer.removeAllListeners();
       viewer.dispose();
     };
-  }, [id, onCreateViewer, onDestroyViewer, composition]);
+  }, [
+    id,
+    onCreateViewer,
+    onDestroyViewer,
+    composition,
+    savedInitialStateSetter
+  ]);
 
   // Handle view state change
   useEffect(() => {

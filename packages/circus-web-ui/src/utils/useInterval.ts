@@ -7,7 +7,7 @@ import useEffectEvent from './useEffectEvent';
  */
 const useInterval = (callback: () => void, intervalMs: number | null) => {
   // Remember the latest callback
-  const savedCallback = useEffectEvent(callback);
+  const savedCallback = useEffectEvent(() => callback());
 
   // Set up the interval
   useEffect(() => {
@@ -16,7 +16,7 @@ const useInterval = (callback: () => void, intervalMs: number | null) => {
       const id = setInterval(tick, intervalMs);
       return () => clearInterval(id);
     }
-  }, [intervalMs]);
+  }, [intervalMs, savedCallback]);
 };
 
 export default useInterval;

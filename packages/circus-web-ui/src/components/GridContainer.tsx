@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useLayoutEffect } from 'react';
 import styled from 'styled-components';
 import { produce } from 'immer';
 
@@ -303,6 +303,7 @@ const GridContainer = <T extends { key: string }>(
   const [dropDestination, setDropDestination] =
     useState<DropDestination | null>(null);
   const [fromKey, setFromKey] = useState<string | null>(null);
+  const [gridLineStyle, setGridLineStyle] = useState<React.CSSProperties>({});
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleDragStart = (
@@ -321,16 +322,18 @@ const GridContainer = <T extends { key: string }>(
     };
   };
 
-  const gridLineToCss = (dropIndicator: DropDestination) => {
-    const rect = containerRef.current!.getBoundingClientRect();
+  const gridLineToCss = (
+    dropIndicator: DropDestination,
+    rect: DOMRect,
+    layout: LayoutInfo,
+    gutterWidth: number
+  ) => {
     const cellWidth = rect.width / layout.columns;
     const cellHeight = rect.height / layout.rows;
     if (dropIndicator.type === 'column') {
       return {
         display: 'block',
-        left: `${
-          cellWidth * (dropIndicator.colLineIndex - 1) - gutterWidth / 2
-        }px`,
+        left: `${cellWidth * (dropIndicator.colLineIndex - 1) - gutterWidth / 2}px`,
         width: `${gutterWidth}px`,
         top: 0,
         bottom: 0
@@ -338,15 +341,28 @@ const GridContainer = <T extends { key: string }>(
     } else if (dropIndicator.type === 'row') {
       return {
         display: 'block',
-        top: `${
-          cellHeight * (dropIndicator.rowLineIndex - 1) - gutterWidth / 2
-        }px`,
+        top: `${cellHeight * (dropIndicator.rowLineIndex - 1) - gutterWidth / 2}px`,
         height: `${gutterWidth}px`,
         left: 0,
         right: 0
       };
     } else throw new Error('Invalid drop indicator value');
   };
+
+  useLayoutEffect(() => {
+    if (
+      containerRef.current &&
+      dropDestination &&
+      (dropDestination.type === 'column' || dropDestination.type === 'row')
+    ) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setGridLineStyle(
+        gridLineToCss(dropDestination, rect, layout, gutterWidth)
+      );
+    } else {
+      setGridLineStyle({});
+    }
+  }, [dropDestination, layout, gutterWidth]);
 
   const mousePosToGridPos = (clientX: number, clientY: number) => {
     const rect = containerRef.current!.getBoundingClientRect();
@@ -534,11 +550,7 @@ const GridContainer = <T extends { key: string }>(
       />
       <div
         className="grid-container-line-drop-indicator"
-        style={
-          dropDestination?.type === 'column' || dropDestination?.type === 'row'
-            ? gridLineToCss(dropDestination)
-            : {}
-        }
+        style={gridLineStyle}
       />
     </StyledDiv>
   );

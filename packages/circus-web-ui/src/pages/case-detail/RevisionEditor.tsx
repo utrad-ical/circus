@@ -33,7 +33,7 @@ import Series from 'types/Series';
 import { useApi } from 'utils/api';
 import isTouchDevice from 'utils/isTouchDevice';
 import { useUserPreferences } from 'utils/useLoginUser';
-import { useVolumeLoaders } from 'utils/useVolumeLoader';
+import { useVolumeLoaders } from '@utrad-ical/circus-ui-kit';
 import { Modal } from '../../components/react-bootstrap';
 import {
   ScrollBarsSettings,
@@ -84,6 +84,7 @@ const useCompositions = (
   const volumeLoaders = useVolumeLoaders(series);
 
   useEffect(() => {
+    if (!volumeLoaders) return;
     const abortController = new AbortController();
 
     series.forEach(async ({}, volId) => {
@@ -175,7 +176,8 @@ const RevisionEditor: React.FC<{
     busy
   } = props;
   const api = useApi();
-  const viewersRef = useRef<{ [key: string]: Viewer }>({});
+  const viewersRef = useRef<{ [key: string]: Viewer }>();
+  viewersRef.current ??= {};
   const viewers = viewersRef.current;
 
   const viewWindows = useRef<rs.ViewWindow[]>([]);

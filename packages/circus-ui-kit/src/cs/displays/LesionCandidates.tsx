@@ -8,6 +8,7 @@ import {
   WebGlRawVolumeMprImageSource
 } from '@utrad-ical/circus-rs/src/browser';
 import classnames from 'classnames';
+import { useVolumeLoaders } from '../useVolumeLoader';
 import get from 'lodash.get';
 import React, {
   useCallback,
@@ -242,8 +243,7 @@ export const LesionCandidates: Display<
     personalOpinions,
     onFeedbackChange
   } = props;
-  const { consensual, job, useVolumeLoaders, loadDisplay, eventLogger } =
-    useCsResults();
+  const { consensual, job, loadDisplay, eventLogger } = useCsResults();
   const { results } = job;
   const [error, setError] = useState<Error | null>(null);
   const [currentFeedback, setCurrentFeedback] =
@@ -279,23 +279,27 @@ export const LesionCandidates: Display<
   const volumeLoaders = useVolumeLoaders(job.series);
 
   useEffect(() => {
+    if (!volumeLoaders) return;
     volumeLoaders.forEach((volumeLoader, volumeId) => {
       const src = new WebGlRawVolumeMprImageSource({ volumeLoader });
       setImgSrcMap(map => ({ ...map, [volumeId]: src }));
     });
-  }, []);
+  }, [volumeLoaders]);
 
-  const tools = useRef<{ name: string; icon: string; tool: rs.Tool }[]>();
-  if (!tools.current) {
-    tools.current = [
-      { name: 'pager', icon: 'rs-pager', tool: rs.toolFactory('pager') },
-      { name: 'zoom', icon: 'rs-zoom', tool: rs.toolFactory('zoom') },
-      { name: 'hand', icon: 'rs-hand', tool: rs.toolFactory('hand') }
-    ];
-  }
+  const toolsRef = useRef<{ name: string; icon: string; tool: rs.Tool }[]>();
+  toolsRef.current ??= [
+    { name: 'pager', icon: 'rs-pager', tool: rs.toolFactory('pager') },
+    { name: 'zoom', icon: 'rs-zoom', tool: rs.toolFactory('zoom') },
+    { name: 'hand', icon: 'rs-hand', tool: rs.toolFactory('hand') }
+  ];
+  const tools = toolsRef.current;
+
   const [toolName, setToolName] = useState('pager');
 
-  const imageSourceForVolumeId = (volumeId: number) => {
+  const imageSourceForVolumeId = (
+    volumeId: number,
+    volumeLoaders: rs.DicomVolumeLoader[]
+  ) => {
     if (imgSrcMap[volumeId]) return imgSrcMap[volumeId];
     const volumeLoader = volumeLoaders[volumeId]!;
     volumeLoader.loadController?.resume();
@@ -349,11 +353,12 @@ export const LesionCandidates: Display<
     return null;
 
   if (error) return <div className="alert alert-danger">{error.message}</div>;
+  if (!volumeLoaders) return null;
 
   return (
     <StyledDiv>
       <div className="tools">
-        {tools.current!.map(t => (
+        {tools.map(t => (
           <Button
             key={t.name}
             size="sm"
@@ -379,14 +384,17 @@ export const LesionCandidates: Display<
                 return { ...fb, data: target?.value };
               })
             : [];
-          const tool = tools.current!.find(t => t.name === toolName)?.tool!;
+          const tool = tools.find(t => t.name === toolName)?.tool!;
           return (
             <Candidate
               key={cand.id}
               item={cand}
               markStyle={markStyle}
               tool={tool}
-              imageSource={imageSourceForVolumeId(cand.volumeId ?? 0)}
+              imageSource={imageSourceForVolumeId(
+                cand.volumeId ?? 0,
+                volumeLoaders
+              )}
               displayOptions={
                 results.metadata.displayOptions[cand.volumeId ?? 0]
               }

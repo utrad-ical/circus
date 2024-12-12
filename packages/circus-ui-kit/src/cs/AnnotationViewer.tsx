@@ -9,11 +9,12 @@ import {
   VoxelCloud,
   WebGlRawVolumeMprImageSource
 } from '@utrad-ical/circus-rs/src/browser';
-import React, { useContext, useEffect, useState, useRef } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { ImageViewer, StateChangerFunc } from '../ui/ImageViewer';
 import { CsResultsContext } from './CsResultsContext';
 import { ColorDefinition, normalizeColor } from './displays/utils/color';
+import { useVolumeLoaders } from './useVolumeLoader';
 
 type ToolName = 'pager' | 'zoom' | 'pan';
 
@@ -71,20 +72,23 @@ export const AnnotationViewer: React.FC<{
     height
   } = props;
   const {
-    job: { series },
-    useVolumeLoaders
+    job: { series }
   } = useContext(CsResultsContext);
   const [composition, setComposition] = useState<Composition | null>(null);
 
-  const tools = useRef<{ [name in ToolName]: Tool }>({
+  const toolsRef = useRef<{ [name in ToolName]: Tool }>();
+  toolsRef.current ??= {
     pager: toolFactory('pager'),
     pan: toolFactory('pan'),
     zoom: toolFactory('zoom')
-  });
+  };
+  const tools = toolsRef.current;
 
-  const [volumeLoader] = useVolumeLoaders([series[volumeId]]);
+  const [volumeLoader] = useVolumeLoaders([series[volumeId]]) ?? [null];
 
   useEffect(() => {
+    if (!volumeLoader) return;
+
     const src = new WebGlRawVolumeMprImageSource({ volumeLoader });
     const composition = new Composition(src);
     setComposition(composition);
@@ -104,7 +108,7 @@ export const AnnotationViewer: React.FC<{
   return (
     <StyledDiv className="annotation-viewer" width={width} height={height}>
       <ImageViewer
-        tool={tools.current[toolName] ?? tools.current.pager}
+        tool={tools[toolName] ?? tools.pager}
         composition={composition}
         initialStateSetter={initialStateSetter}
       />

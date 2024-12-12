@@ -1,4 +1,5 @@
 import * as rs from '@utrad-ical/circus-rs/src/browser';
+import { useVolumeLoaders } from '../useVolumeLoader';
 import get from 'lodash.get';
 import React, {
   useCallback,
@@ -115,14 +116,8 @@ const distance = (x: number[], y: number[], vs: number[]) => {
 export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
   const { options, personalOpinions, initialFeedbackValue, onFeedbackChange } =
     props;
-  const {
-    job,
-    consensual,
-    editable,
-    useVolumeLoaders,
-    eventLogger,
-    UserDisplay
-  } = useCsResults();
+  const { job, consensual, editable, eventLogger, UserDisplay } =
+    useCsResults();
 
   const {
     volumeId = 0,
@@ -154,20 +149,19 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
     undefined
   );
 
-  const toolRef = useRef<{ pager: any; point: any }>();
-  if (!toolRef.current) {
-    toolRef.current = {
-      pager: rs.toolFactory('pager'),
-      point: rs.toolFactory('point')
-    };
-  }
+  const toolsRef = useRef<{ pager: rs.Tool; point: rs.Tool }>();
+  toolsRef.current ??= {
+    pager: rs.toolFactory('pager'),
+    point: rs.toolFactory('point')
+  };
+  const tools = toolsRef.current;
 
   const stateChanger = useMemo(() => createStateChanger<rs.MprViewState>(), []);
 
   const volumeLoaders = useVolumeLoaders(job.series);
 
   useEffect(() => {
-    if (!editable && currentFeedback.length === 0) return;
+    if ((!editable && currentFeedback.length === 0) || !volumeLoaders) return;
     const volumeLoader = volumeLoaders[volumeId];
     const imageSource = new rs.WebGlRawVolumeMprImageSource({ volumeLoader });
     const comp = new rs.Composition(imageSource);
@@ -318,7 +312,7 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
         <ImageViewer
           className="locator"
           initialStateSetter={initialStateSetter}
-          tool={toolRef.current[editable ? 'point' : 'pager']}
+          tool={tools[editable ? 'point' : 'pager']}
           stateChanger={stateChanger}
           composition={composition}
           onMouseUp={handleMouseUp}

@@ -1,13 +1,14 @@
+import { FlatCompat } from '@eslint/eslintrc';
+import js from '@eslint/js';
+import typescriptEslint from '@typescript-eslint/eslint-plugin';
+import tsParser from '@typescript-eslint/parser';
 import jest from 'eslint-plugin-jest';
 import react from 'eslint-plugin-react';
-import typescriptEslint from '@typescript-eslint/eslint-plugin';
-import globals from 'globals';
-import tsParser from '@typescript-eslint/parser';
+import reactCompiler from 'eslint-plugin-react-compiler';
 import reactHooks from 'eslint-plugin-react-hooks';
+import globals from 'globals';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import js from '@eslint/js';
-import { FlatCompat } from '@eslint/eslintrc';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,7 +23,8 @@ export default [
   {
     plugins: {
       react,
-      '@typescript-eslint': typescriptEslint
+      '@typescript-eslint': typescriptEslint,
+      'react-compiler': reactCompiler
     },
 
     languageOptions: {
@@ -68,7 +70,8 @@ export default [
       ],
 
       'react/prop-types': 'off',
-      'react/display-name': 'off'
+      'react/display-name': 'off',
+      'react-compiler/react-compiler': 'error'
     }
   },
   {

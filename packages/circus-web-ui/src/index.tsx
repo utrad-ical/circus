@@ -40,10 +40,11 @@ import GlobalStyle, { CircusThemeProvider } from './theme';
 
 import { ApiContext, ApiCaller, useApi } from 'utils/api';
 import loginManager, { LoginManagerContext } from 'utils/loginManager';
-import { VolumeLoaderFactoryContext } from 'utils/useVolumeLoader';
-import createVolumeLoaderManager, {
+import { VolumeLoaderFactoryContext } from '@utrad-ical/circus-ui-kit';
+import {
+  createVolumeLoaderManager,
   VolumeLoaderManager
-} from 'utils/createVolumeLoaderManager';
+} from '@utrad-ical/circus-ui-kit';
 
 require('./styles/main.less');
 

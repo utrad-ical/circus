@@ -1,9 +1,5 @@
-import React, { useContext } from 'react';
-import {
-  DicomVolumeLoader,
-  EstimateWindowType
-} from '@utrad-ical/circus-rs/src/browser';
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import React, { useContext } from 'react';
 import { Display } from './Display';
 
 export interface FeedbackEntry<T> {
@@ -84,16 +80,6 @@ export interface CsResultsContextType {
    * Can be uesd to log events happened in the plug-in result screen.
    */
   eventLogger: EventLogger;
-  /**
-   * Hook to use volume loader.
-   */
-  useVolumeLoaders: (
-    series: {
-      seriesUid: string;
-      partialVolumeDescriptor: PartialVolumeDescriptor;
-      estimateWindowType?: EstimateWindowType;
-    }[]
-  ) => DicomVolumeLoader[];
   /**
    * Dynamically loads a display.
    */

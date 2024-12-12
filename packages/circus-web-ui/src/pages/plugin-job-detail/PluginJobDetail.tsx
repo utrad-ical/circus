@@ -25,7 +25,6 @@ import { useApi } from 'utils/api';
 import useLoadData from 'utils/useLoadData';
 import useLoginUser from 'utils/useLoginUser';
 import useQuery from 'utils/useQuery';
-import { useVolumeLoaders } from 'utils/useVolumeLoader';
 import {
   FeedbackRenderer,
   PluginRenderer,
@@ -297,7 +296,6 @@ const PluginJobDetail: React.FC<{}> = props => {
       job,
       plugin: pluginData,
       eventLogger: insertLog,
-      useVolumeLoaders,
       loadAttachment,
       loadDisplay: loadDisplay(jobData.pluginData.pluginId),
       UserDisplay

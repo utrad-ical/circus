@@ -87,7 +87,7 @@ const Board: React.FC<{
       sliceNumber === Math.floor(structure.nSlices / 2)
     )
       return;
-    const array = structure.array;
+    const array = [...structure.array];
     const pos =
       i +
       j * structure.width +

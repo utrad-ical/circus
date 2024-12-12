@@ -9,7 +9,10 @@ import useLoadData from 'utils/useLoadData';
 import styled from 'styled-components';
 import { Link, useParams } from 'react-router-dom';
 import IconButton from 'components/IconButton';
-import { SeriesEntryWithHints, useVolumeLoaders } from 'utils/useVolumeLoader';
+import {
+  SeriesEntryWithHints,
+  useVolumeLoaders
+} from '@utrad-ical/circus-ui-kit';
 
 const StyledImageViewer = styled(ImageViewer)`
   background: black;
@@ -40,7 +43,7 @@ const SeriesDetail: React.FC<{}> = props => {
   const [seriesEntries, setSeriesEntries] = useState<SeriesEntryWithHints[]>(
     []
   );
-  const [volumeLoader] = useVolumeLoaders(seriesEntries);
+  const [volumeLoader] = useVolumeLoaders(seriesEntries) ?? [null];
 
   useEffect(() => {
     const { seriesUid, images } = seriesData || {};

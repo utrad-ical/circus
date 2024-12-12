@@ -12,6 +12,7 @@ import {
   sectionTo2dViewState
 } from '@utrad-ical/circus-rs/src/browser/section-util';
 import { InterpolationMode } from '@utrad-ical/circus-rs/src/browser/ViewState';
+import { useVolumeLoaders } from '@utrad-ical/circus-ui-kit';
 import classNames from 'classnames';
 import Collapser from 'components/Collapser';
 import Icon from 'components/Icon';
@@ -32,8 +33,8 @@ import Project from 'types/Project';
 import Series from 'types/Series';
 import { useApi } from 'utils/api';
 import isTouchDevice from 'utils/isTouchDevice';
+import useEffectEvent from 'utils/useEffectEvent';
 import { useUserPreferences } from 'utils/useLoginUser';
-import { useVolumeLoaders } from '@utrad-ical/circus-ui-kit';
 import { Modal } from '../../components/react-bootstrap';
 import {
   ScrollBarsSettings,
@@ -401,89 +402,86 @@ const RevisionEditor: React.FC<{
     return new Set(seriesIndexes).size > 1;
   }, [editingData.layout, editingData.layoutItems]);
 
-  const handleAnnotationChange = (
-    annotation:
-      | rs.VoxelCloud
-      | rs.SolidFigure
-      | rs.PlaneFigure
-      | rs.Point
-      | rs.Ruler
-  ) => {
-    const { revision } = editingData;
-    const seriesIndex = revision.series.findIndex(
-      s => s.labels.findIndex(v => v.temporaryKey === annotation.id) >= 0
-    );
-    const activeImageSource =
-      compositions[editingData.activeSeriesIndex].composition?.imageSource;
-    if (
-      activeImageSource instanceof rs.TwoDimensionalImageSource &&
-      (annotation instanceof rs.VoxelCloud ||
-        annotation instanceof rs.SolidFigure)
-    ) {
-      alert('Unsupported image source.');
-      return;
-    }
-
-    const labelIndex = revision.series[seriesIndex].labels.findIndex(
-      v => v.temporaryKey === annotation.id
-    );
-
-    const newLabel = () => {
-      const label = revision.series[seriesIndex].labels[labelIndex];
-      if (annotation instanceof rs.VoxelCloud && annotation.volume) {
-        return produce(label, (l: InternalLabelDataOf<'voxel'>) => {
-          l.data.origin = annotation.origin;
-          l.data.size = annotation.volume!.getDimension();
-          l.data.volumeArrayBuffer = annotation.volume!.data;
-        });
-      } else if (
-        annotation instanceof rs.SolidFigure &&
-        annotation.validate()
+  const handleAnnotationChange = useEffectEvent(
+    (
+      annotation:
+        | rs.VoxelCloud
+        | rs.SolidFigure
+        | rs.PlaneFigure
+        | rs.Point
+        | rs.Ruler
+    ) => {
+      const { revision } = editingData;
+      const seriesIndex = revision.series.findIndex(
+        s => s.labels.findIndex(v => v.temporaryKey === annotation.id) >= 0
+      );
+      const activeImageSource =
+        compositions[editingData.activeSeriesIndex].composition?.imageSource;
+      if (
+        activeImageSource instanceof rs.TwoDimensionalImageSource &&
+        (annotation instanceof rs.VoxelCloud ||
+          annotation instanceof rs.SolidFigure)
       ) {
-        return produce(
-          label,
-          (l: InternalLabelDataOf<'ellipsoid' | 'cuboid'>) => {
-            l.data.min = annotation.min!;
-            l.data.max = annotation.max!;
-          }
-        );
-      } else if (
-        annotation instanceof rs.PlaneFigure &&
-        annotation.validate()
-      ) {
-        return produce(
-          label,
-          (l: InternalLabelDataOf<'rectangle' | 'ellipse'>) => {
-            l.data.min = annotation.min!;
-            l.data.max = annotation.max!;
-            l.data.z = annotation.z as number;
-          }
-        );
-      } else if (annotation instanceof rs.Point && annotation.validate()) {
-        return produce(label, (l: InternalLabelDataOf<'point'>) => {
-          l.data.location = annotation.location!;
-        });
-      } else if (annotation instanceof rs.Ruler && annotation.validate()) {
-        return produce(label, (l: InternalLabelDataOf<'ruler'>) => {
-          l.data.section = annotation.section!;
-          l.data.start = annotation.start!;
-          l.data.end = annotation.end!;
-          l.data.labelPosition = annotation.labelPosition;
-        });
-      } else {
-        return label;
+        alert('Unsupported image source.');
+        return;
       }
-    };
 
-    updateEditingData(d => {
-      d.revision.series[seriesIndex].labels[labelIndex] = newLabel();
-    });
-  };
+      const labelIndex = revision.series[seriesIndex].labels.findIndex(
+        v => v.temporaryKey === annotation.id
+      );
 
-  const latestHandleAnnotationChange = useRef<any>();
-  useEffect(() => {
-    latestHandleAnnotationChange.current = handleAnnotationChange;
-  });
+      const newLabel = () => {
+        const label = revision.series[seriesIndex].labels[labelIndex];
+        if (annotation instanceof rs.VoxelCloud && annotation.volume) {
+          return produce(label, (l: InternalLabelDataOf<'voxel'>) => {
+            l.data.origin = annotation.origin;
+            l.data.size = annotation.volume!.getDimension();
+            l.data.volumeArrayBuffer = annotation.volume!.data;
+          });
+        } else if (
+          annotation instanceof rs.SolidFigure &&
+          annotation.validate()
+        ) {
+          return produce(
+            label,
+            (l: InternalLabelDataOf<'ellipsoid' | 'cuboid'>) => {
+              l.data.min = annotation.min!;
+              l.data.max = annotation.max!;
+            }
+          );
+        } else if (
+          annotation instanceof rs.PlaneFigure &&
+          annotation.validate()
+        ) {
+          return produce(
+            label,
+            (l: InternalLabelDataOf<'rectangle' | 'ellipse'>) => {
+              l.data.min = annotation.min!;
+              l.data.max = annotation.max!;
+              l.data.z = annotation.z as number;
+            }
+          );
+        } else if (annotation instanceof rs.Point && annotation.validate()) {
+          return produce(label, (l: InternalLabelDataOf<'point'>) => {
+            l.data.location = annotation.location!;
+          });
+        } else if (annotation instanceof rs.Ruler && annotation.validate()) {
+          return produce(label, (l: InternalLabelDataOf<'ruler'>) => {
+            l.data.section = annotation.section!;
+            l.data.start = annotation.start!;
+            l.data.end = annotation.end!;
+            l.data.labelPosition = annotation.labelPosition;
+          });
+        } else {
+          return label;
+        }
+      };
+
+      updateEditingData(d => {
+        d.revision.series[seriesIndex].labels[labelIndex] = newLabel();
+      });
+    }
+  );
 
   const orientationColor = (id: string) => {
     const orientationColors: { [index: string]: string } = {
@@ -512,7 +510,7 @@ const RevisionEditor: React.FC<{
       if (!composition) return;
 
       composition.on('annotationChange', annotation =>
-        latestHandleAnnotationChange.current(annotation)
+        handleAnnotationChange(annotation)
       );
 
       const activeLabel =

@@ -10,6 +10,7 @@ import setImmediate from '@utrad-ical/circus-rs/src/browser/util/setImmediate';
 import classnames from 'classnames';
 import { EventEmitter } from 'events';
 import React, { useEffect, useRef, useState } from 'react';
+import useEffectEvent from 'utils/useEffectEvent';
 
 export const setOrthogonalOrientation = (orientation: OrientationString) => {
   return (viewer: rs.Viewer, initialViewState: rs.MprViewState) => {
@@ -117,10 +118,7 @@ const ImageViewer: React.FC<{
   const containerRef = useRef<HTMLDivElement>(null);
   const initialStateSet = useRef<boolean>(false);
 
-  const savedInitialStateSetter = useRef(initialStateSetter);
-  useEffect(() => {
-    savedInitialStateSetter.current = initialStateSetter;
-  }, [initialStateSetter]);
+  const savedInitialStateSetter = useEffectEvent(initialStateSetter);
 
   // Handle creation of viewer
   useEffect(() => {
@@ -128,13 +126,9 @@ const ImageViewer: React.FC<{
     onCreateViewer(viewer, id);
     setViewer(viewer);
     viewer.on('imageReady', () => {
-      if (typeof savedInitialStateSetter.current === 'function') {
+      if (typeof savedInitialStateSetter === 'function') {
         const baseState = composition!.imageSource.initialState(viewer);
-        const viewState = savedInitialStateSetter.current(
-          viewer,
-          baseState,
-          id
-        );
+        const viewState = savedInitialStateSetter(viewer, baseState, id);
         viewer.setState(viewState);
       }
       initialStateSet.current = true;
@@ -144,7 +138,13 @@ const ImageViewer: React.FC<{
       viewer.removeAllListeners();
       viewer.dispose();
     };
-  }, [id, onCreateViewer, onDestroyViewer, composition]);
+  }, [
+    id,
+    onCreateViewer,
+    onDestroyViewer,
+    composition,
+    savedInitialStateSetter
+  ]);
 
   // Handle view state change
   useEffect(() => {

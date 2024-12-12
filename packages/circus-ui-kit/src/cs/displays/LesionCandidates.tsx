@@ -279,11 +279,12 @@ export const LesionCandidates: Display<
   const volumeLoaders = useVolumeLoaders(job.series);
 
   useEffect(() => {
+    if (!volumeLoaders) return;
     volumeLoaders.forEach((volumeLoader, volumeId) => {
       const src = new WebGlRawVolumeMprImageSource({ volumeLoader });
       setImgSrcMap(map => ({ ...map, [volumeId]: src }));
     });
-  }, []);
+  }, [volumeLoaders]);
 
   const toolsRef = useRef<{ name: string; icon: string; tool: rs.Tool }[]>();
   toolsRef.current ??= [
@@ -295,7 +296,10 @@ export const LesionCandidates: Display<
 
   const [toolName, setToolName] = useState('pager');
 
-  const imageSourceForVolumeId = (volumeId: number) => {
+  const imageSourceForVolumeId = (
+    volumeId: number,
+    volumeLoaders: rs.DicomVolumeLoader[]
+  ) => {
     if (imgSrcMap[volumeId]) return imgSrcMap[volumeId];
     const volumeLoader = volumeLoaders[volumeId]!;
     volumeLoader.loadController?.resume();
@@ -349,6 +353,7 @@ export const LesionCandidates: Display<
     return null;
 
   if (error) return <div className="alert alert-danger">{error.message}</div>;
+  if (!volumeLoaders) return null;
 
   return (
     <StyledDiv>
@@ -386,7 +391,10 @@ export const LesionCandidates: Display<
               item={cand}
               markStyle={markStyle}
               tool={tool}
-              imageSource={imageSourceForVolumeId(cand.volumeId ?? 0)}
+              imageSource={imageSourceForVolumeId(
+                cand.volumeId ?? 0,
+                volumeLoaders
+              )}
               displayOptions={
                 results.metadata.displayOptions[cand.volumeId ?? 0]
               }

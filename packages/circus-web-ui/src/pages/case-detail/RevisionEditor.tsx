@@ -84,6 +84,7 @@ const useCompositions = (
   const volumeLoaders = useVolumeLoaders(series);
 
   useEffect(() => {
+    if (!volumeLoaders) return;
     const abortController = new AbortController();
 
     series.forEach(async ({}, volId) => {

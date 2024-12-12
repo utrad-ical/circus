@@ -1,4 +1,5 @@
-import React, { useContext, useEffect, useMemo, useRef } from 'react';
+import * as rs from '@utrad-ical/circus-rs/src/browser';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   serializeUtilizeOptions,
   SeriesEntryWithHints,
@@ -12,35 +13,53 @@ export const useVolumeLoaders = (series: SeriesEntryWithHints[]) => {
   const { acquireVolumeLoader, releaseVolumeLoader, getVolumeLoader } =
     useContext(VolumeLoaderFactoryContext)!;
 
-  const runningLoaders = useRef<Set<string>>(new Set());
+  const [runningLoaders, setRunningLoaders] = useState<Set<string>>(new Set());
+  const [volumeLoaders, setVolumeLoaders] = useState<
+    rs.DicomVolumeLoader[] | null
+  >(null);
 
   useEffect(() => {
-    const currentLoaders = runningLoaders.current;
-    return () => {
-      currentLoaders.forEach(id => {
-        releaseVolumeLoader(id);
-        currentLoaders.delete(id);
-      });
-    };
-  }, [releaseVolumeLoader]);
-
-  return useMemo(() => {
     const seriesKeys = series.map(o => serializeUtilizeOptions(o));
 
-    Array.from(runningLoaders.current.values())
-      .filter(id => !seriesKeys.some(key => key === id))
-      .forEach(id => {
-        releaseVolumeLoader(id);
-        runningLoaders.current.delete(id);
-      });
+    setRunningLoaders(prevLoaders => {
+      const newLoaders = new Set(prevLoaders);
 
-    return series.map((options: SeriesEntryWithHints) => {
-      const key = serializeUtilizeOptions(options);
-      if (!runningLoaders.current.has(key)) {
-        acquireVolumeLoader(options);
-        runningLoaders.current.add(key);
-      }
-      return getVolumeLoader(key);
+      //release volumeLoaders that is no longer in use
+      Array.from(newLoaders.values())
+        .filter(id => !seriesKeys.some(key => key === id))
+        .forEach(id => {
+          releaseVolumeLoader(id);
+          newLoaders.delete(id);
+        });
+
+      //obtain unacquired volumeLoaders
+      setVolumeLoaders(
+        seriesKeys.map((key, ind) => {
+          if (!newLoaders.has(key)) {
+            acquireVolumeLoader(series[ind]);
+            newLoaders.add(key);
+          }
+          return getVolumeLoader(key);
+        })
+      );
+      return newLoaders;
     });
-  }, [acquireVolumeLoader, getVolumeLoader, releaseVolumeLoader, series]);
+
+    return () => {
+      setRunningLoaders(prevLoaders => {
+        const newLoaders = new Set(prevLoaders);
+        newLoaders.forEach(id => {
+          releaseVolumeLoader(id);
+          newLoaders.delete(id);
+        });
+        return newLoaders;
+      });
+    };
+  }, [series]);
+
+  const seriesKeys = series.map(o => serializeUtilizeOptions(o));
+
+  if (seriesKeys.some(key => !runningLoaders.has(key))) return null;
+
+  return volumeLoaders;
 };

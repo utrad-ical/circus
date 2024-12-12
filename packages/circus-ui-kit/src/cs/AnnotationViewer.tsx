@@ -84,9 +84,11 @@ export const AnnotationViewer: React.FC<{
   };
   const tools = toolsRef.current;
 
-  const [volumeLoader] = useVolumeLoaders([series[volumeId]]);
+  const [volumeLoader] = useVolumeLoaders([series[volumeId]]) ?? [null];
 
   useEffect(() => {
+    if (!volumeLoader) return;
+
     const src = new WebGlRawVolumeMprImageSource({ volumeLoader });
     const composition = new Composition(src);
     setComposition(composition);

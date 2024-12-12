@@ -161,7 +161,7 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
   const volumeLoaders = useVolumeLoaders(job.series);
 
   useEffect(() => {
-    if (!editable && currentFeedback.length === 0) return;
+    if ((!editable && currentFeedback.length === 0) || !volumeLoaders) return;
     const volumeLoader = volumeLoaders[volumeId];
     const imageSource = new rs.WebGlRawVolumeMprImageSource({ volumeLoader });
     const comp = new rs.Composition(imageSource);

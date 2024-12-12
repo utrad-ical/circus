@@ -43,7 +43,7 @@ const SeriesDetail: React.FC<{}> = props => {
   const [seriesEntries, setSeriesEntries] = useState<SeriesEntryWithHints[]>(
     []
   );
-  const [volumeLoader] = useVolumeLoaders(seriesEntries);
+  const [volumeLoader] = useVolumeLoaders(seriesEntries) ?? [null];
 
   useEffect(() => {
     const { seriesUid, images } = seriesData || {};

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, StrictMode } from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, Switch } from 'react-router-dom';
 import Application from 'pages/Application';
@@ -224,4 +224,9 @@ const TheApp: React.FC<{}> = () => {
   );
 };
 
-ReactDOM.render(<TheApp />, document.getElementById('app'));
+ReactDOM.render(
+  <StrictMode>
+    <TheApp />
+  </StrictMode>,
+  document.getElementById('app')
+);

@@ -27,7 +27,7 @@ import React, {
   useState
 } from 'react';
 import { useDispatch } from 'react-redux';
-import { Prompt } from 'react-router';
+import { useBlocker } from 'utils/useBlocker';
 import { Link, useParams } from 'react-router-dom';
 import { showMessage } from 'store/messages';
 import { newSearch } from 'store/searches';
@@ -52,7 +52,7 @@ import {
 const pageTransitionMessage = `Are you sure you want to leave?\nIf you leave before saving, your changes will be lost.`;
 
 const CaseDetail: React.FC<{}> = () => {
-  const caseId = useParams<any>().caseId;
+  const caseId = useParams<{ caseId: string }>().caseId;
   const [caseStore, caseDispatch] = useReducer(
     caseStoreReducer,
     caseStoreReducer(undefined as any, { type: 'dummy' }) // gets initial state
@@ -72,6 +72,15 @@ const CaseDetail: React.FC<{}> = () => {
   const accessibleProjects = useMemo(() => user.accessibleProjects, [user]);
   const isUpdated = caseStore.currentHistoryIndex > 0;
 
+  useBlocker(
+    isUpdated,
+    (tx) => {
+      if (window.confirm(pageTransitionMessage)) {
+        tx.retry(); 
+      }
+    }
+  );
+
   // warn before reloading or closing page with unsaved changes
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
@@ -86,6 +95,9 @@ const CaseDetail: React.FC<{}> = () => {
   }, [isUpdated]);
 
   useEffect(() => {
+    if (!caseId) {
+      throw new Error('caseId is missing.');
+    }
     const loadCase = async () => {
       const caseData = await api('cases/' + caseId);
       setTags(caseData.tags ?? []);
@@ -165,6 +177,10 @@ const CaseDetail: React.FC<{}> = () => {
       })
     );
   }, [api, dispatch, caseStore.patientInfo, activeRelevantCases]);
+
+  if (!caseId) {
+    return null;
+  }
 
   const handleRevisionSelect = async (index: number) => {
     if (isUpdated && !(await confirm(pageTransitionMessage))) return;
@@ -256,7 +272,6 @@ const CaseDetail: React.FC<{}> = () => {
 
   return (
     <FullSpanContainer>
-      <Prompt when={isUpdated} message={pageTransitionMessage} />
       <CaseInfoCollapser title="Case Info">
         {activeRelevantCases ? (
           <DropdownButton

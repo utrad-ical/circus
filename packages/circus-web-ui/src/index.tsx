@@ -1,50 +1,49 @@
-import React, { useState, useEffect, useMemo, useRef, StrictMode } from 'react';
-import ReactDOM from 'react-dom';
-import { Router, Route, Switch } from 'react-router-dom';
 import Application from 'pages/Application';
+import React, { StrictMode, useEffect, useMemo, useRef, useState } from 'react';
+import ReactDOM from 'react-dom';
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 
-import LoginScreen from 'pages/LoginScreen';
-import OneTimeLogin from 'pages/OneTimeLogin';
-import HomePage from 'pages/HomePage';
-import SeriesSearch from 'pages/search/SeriesSearch';
-import CreateNewCase from 'pages/CreateNewCase';
-import CaseSearch from 'pages/search/CaseSearch';
-import MySeriesList from 'pages/mylist/MySeriesList';
-import MyCaseList from 'pages/mylist/MyCaseList';
-import MyPluginJobList from 'pages/mylist/MyPluginJobList';
-import CaseDetail from 'pages/case-detail/CaseDetail';
-import CreateNewJob from 'pages/CreateNewJob';
-import PluginJobSearch from 'pages/search/PluginJobSearch';
-import ImportSeries from 'pages/ImportSeries';
-import ImportCase from 'pages/ImportCase';
-import SeriesDetail from 'pages/SeriesDetail';
-import PluginJobDetail from 'pages/plugin-job-detail/PluginJobDetail';
-import TaskList from 'pages/TaskList';
 import AdminIndex from 'pages/admin/AdminIndex';
 import GeneralAdmin from 'pages/admin/GeneralAdmin';
 import GroupAdmin from 'pages/admin/GroupAdmin';
-import UserAdmin from 'pages/admin/UserAdmin';
-import ProjectAdmin from 'pages/admin/ProjectAdmin';
+import PluginAdmin from 'pages/admin/PluginAdmin';
 import PluginJobManagerAdmin from 'pages/admin/PluginJobManagerAdmin';
 import PluginJobQueueAdmin from 'pages/admin/PluginJobQueueAdmin';
-import PluginAdmin from 'pages/admin/PluginAdmin';
+import ProjectAdmin from 'pages/admin/ProjectAdmin';
+import UserAdmin from 'pages/admin/UserAdmin';
+import CaseDetail from 'pages/case-detail/CaseDetail';
+import CreateNewCase from 'pages/CreateNewCase';
+import CreateNewJob from 'pages/CreateNewJob';
+import HomePage from 'pages/HomePage';
+import ImportCase from 'pages/ImportCase';
+import ImportSeries from 'pages/ImportSeries';
+import LoginScreen from 'pages/LoginScreen';
+import MyCaseList from 'pages/mylist/MyCaseList';
+import MyPluginJobList from 'pages/mylist/MyPluginJobList';
+import MySeriesList from 'pages/mylist/MySeriesList';
+import OneTimeLogin from 'pages/OneTimeLogin';
+import PluginJobDetail from 'pages/plugin-job-detail/PluginJobDetail';
 import Preferences from 'pages/Preferences';
+import CaseSearch from 'pages/search/CaseSearch';
+import PluginJobSearch from 'pages/search/PluginJobSearch';
+import SeriesSearch from 'pages/search/SeriesSearch';
+import SeriesDetail from 'pages/SeriesDetail';
+import TaskList from 'pages/TaskList';
 import TokenManagement from 'pages/TokenManagement';
 
-import { store } from './store';
 import { Provider as ReduxStoreProvider, useSelector } from 'react-redux';
 import { dismissMessageOnPageChange } from 'store/messages';
 import PluginJobQueueSearch from './pages/search/PluginJobQueueSearch';
-import browserHistory from './browserHistory';
+import { store } from './store';
 import GlobalStyle, { CircusThemeProvider } from './theme';
 
-import { ApiContext, ApiCaller, useApi } from 'utils/api';
-import loginManager, { LoginManagerContext } from 'utils/loginManager';
-import { VolumeLoaderFactoryContext } from '@utrad-ical/circus-ui-kit';
 import {
   createVolumeLoaderManager,
+  VolumeLoaderFactoryContext,
   VolumeLoaderManager
 } from '@utrad-ical/circus-ui-kit';
+import { ApiCaller, ApiContext, useApi } from 'utils/api';
+import loginManager, { LoginManagerContext } from 'utils/loginManager';
 
 require('./styles/main.less');
 
@@ -55,56 +54,62 @@ require('bootstrap/fonts/glyphicons-halflings-regular.ttf');
 const AppRoutes: React.FC<{}> = () => {
   return (
     <Application>
-      <Switch>
-        <Route path="/home" component={HomePage} />
-        <Route path="/plugin-job-queue" component={PluginJobQueueSearch} />
-        <Route path="/import-series" component={ImportSeries} />
-        <Route path="/import-case" component={ImportCase} />
-        <Route path="/new-case/:seriesUid" component={CreateNewCase} />
-        <Route path="/new-job/:seriesUid" component={CreateNewJob} />
-        <Route path="/admin/general" component={GeneralAdmin} />
-        <Route path="/admin/group" component={GroupAdmin} />
-        <Route path="/admin/user" component={UserAdmin} />
-        <Route path="/admin/project" component={ProjectAdmin} />
+      <Routes>
+        <Route path="/home" element={<HomePage />} />
+        <Route path="/plugin-job-queue" element={<PluginJobQueueSearch />} />
+        <Route path="/import-series" element={<ImportSeries />} />
+        <Route path="/import-case" element={<ImportCase />} />
+        <Route path="/new-case/:seriesUid" element={<CreateNewCase />} />
+        <Route path="/new-job/:seriesUid" element={<CreateNewJob />} />
+        <Route path="/admin/general" element={<GeneralAdmin />} />
+        <Route path="/admin/group" element={<GroupAdmin />} />
+        <Route path="/admin/user" element={<UserAdmin />} />
+        <Route path="/admin/project" element={<ProjectAdmin />} />
         <Route
           path="/admin/plugin-job-manager"
-          component={PluginJobManagerAdmin}
+          element={<PluginJobManagerAdmin />}
         />
-        <Route path="/admin/plugins" component={PluginAdmin} />
-        <Route path="/admin/plugin-job-queue" component={PluginJobQueueAdmin} />
-        <Route path="/admin" exact component={AdminIndex} />
+        <Route path="/admin/plugins" element={<PluginAdmin />} />
+        <Route
+          path="/admin/plugin-job-queue"
+          element={<PluginJobQueueAdmin />}
+        />
+        <Route path="/admin" element={<AdminIndex />}></Route>
 
         <Route
           path="/browse/series/mylist/:myListId?"
-          component={MySeriesList}
+          element={<MySeriesList />}
         />
         <Route
           path="/browse/series/preset/:presetName"
-          component={SeriesSearch}
+          element={<SeriesSearch />}
         />
-        <Route path="/series/:uid" component={SeriesDetail} />
-        <Route path="/browse/series" component={SeriesSearch} />
+        <Route path="/series/:uid" element={<SeriesDetail />} />
+        <Route path="/browse/series" element={<SeriesSearch />} />
 
-        <Route path="/browse/case/mylist/:myListId?" component={MyCaseList} />
-        <Route path="/browse/case/preset/:presetName" component={CaseSearch} />
-        <Route path="/case/:caseId" component={CaseDetail} />
-        <Route path="/browse/case" component={CaseSearch} />
+        <Route path="/browse/case/mylist/:myListId?" element={<MyCaseList />} />
+        <Route
+          path="/browse/case/preset/:presetName"
+          element={<CaseSearch />}
+        />
+        <Route path="/case/:caseId" element={<CaseDetail />} />
+        <Route path="/browse/case" element={<CaseSearch />} />
 
         <Route
           path="/browse/plugin-jobs/mylist/:myListId?"
-          component={MyPluginJobList}
+          element={<MyPluginJobList />}
         />
         <Route
           path="/browse/plugin-jobs/preset/:presetName"
-          component={PluginJobSearch}
+          element={<PluginJobSearch />}
         />
-        <Route path="/plugin-job/:jobId" component={PluginJobDetail} />
-        <Route path="/browse/plugin-jobs" component={PluginJobSearch} />
+        <Route path="/plugin-job/:jobId" element={<PluginJobDetail />} />
+        <Route path="/browse/plugin-jobs" element={<PluginJobSearch />} />
 
-        <Route path="/task-list" component={TaskList} />
-        <Route path="/preference" component={Preferences} />
-        <Route path="/tokens" component={TokenManagement} />
-      </Switch>
+        <Route path="/task-list" element={<TaskList />} />
+        <Route path="/preference" element={<Preferences />} />
+        <Route path="/tokens" element={<TokenManagement />} />
+      </Routes>
     </Application>
   );
 };
@@ -134,6 +139,29 @@ const VolumeLoaderFactoryProvider: React.FC<{}> = ({ children }) => {
     <VolumeLoaderFactoryContext.Provider value={provider}>
       {children}
     </VolumeLoaderFactoryContext.Provider>
+  );
+};
+
+const InnerApp: React.FC<{ manager: ReturnType<typeof loginManager> }> = ({
+  manager
+}) => {
+  const location = useLocation();
+  useEffect(() => {
+    // Hide message boxes which should not persist across page changes
+    store.dispatch(dismissMessageOnPageChange());
+    // Load user information again to check login status
+    if (location.pathname !== '/') {
+      manager?.refreshUserInfo(false);
+    }
+  }, [manager, location.pathname]);
+
+  if (location.pathname === '/') return <LoginScreen />;
+  return (
+    <Routes>
+      <Route path="/" element={<LoginScreen />} />
+      <Route path="/otp" element={<OneTimeLogin />} />
+      <Route path="/*" element={<AppRoutes />} />
+    </Routes>
   );
 };
 
@@ -188,18 +216,6 @@ const TheApp: React.FC<{}> = () => {
     }
   }, []);
 
-  useEffect(() => {
-    // Handles history change
-    browserHistory.listen(location => {
-      // Hide message boxes which should not persist across page changes
-      store.dispatch(dismissMessageOnPageChange());
-      // Load user information again to check login status
-      if (location.pathname !== '/') {
-        manager?.refreshUserInfo(false);
-      }
-    });
-  }, [manager]);
-
   if (!manager) return null;
 
   return (
@@ -209,13 +225,9 @@ const TheApp: React.FC<{}> = () => {
           <VolumeLoaderFactoryProvider>
             <CircusThemeProvider>
               <GlobalStyle />
-              <Router history={browserHistory}>
-                <Switch>
-                  <Route exact path="/" component={LoginScreen} />
-                  <Route exact path="/otp" component={OneTimeLogin} />
-                  <AppRoutes />
-                </Switch>
-              </Router>
+              <BrowserRouter>
+                <InnerApp manager={manager} />
+              </BrowserRouter>
             </CircusThemeProvider>
           </VolumeLoaderFactoryProvider>
         </ReduxStoreProvider>

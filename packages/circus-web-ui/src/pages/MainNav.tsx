@@ -3,11 +3,10 @@ import Icon from 'components/Icon';
 import TaskNotifier from 'components/TaskNotifier';
 import React, { Fragment } from 'react';
 import { useSelector } from 'react-redux';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { MyList } from 'store/loginUser';
 import styled from 'styled-components';
 import useLoginUser from 'utils/useLoginUser';
-import browserHistory from '../browserHistory';
 
 const MainMenu: React.FC<{}> = props => <ul>{props.children}</ul>;
 
@@ -260,6 +259,7 @@ const MainNav: React.FC<{}> = props => {
   const user = useLoginUser();
   const pathname = useLocation().pathname;
   let nextPreviousList = useSelector(state => state.searches.nextPreviousList);
+  const navigate = useNavigate();
 
   if (!user) return null;
   const loginUserName = user.description;
@@ -273,7 +273,7 @@ const MainNav: React.FC<{}> = props => {
 
   const onLogout = async (ev: React.MouseEvent) => {
     ev.preventDefault();
-    browserHistory.push('/');
+    navigate('/');
   };
 
   const currentCase = pathname.split('/').slice(-1)[0];

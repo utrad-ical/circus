@@ -1,7 +1,12 @@
 import Application from 'pages/Application';
 import React, { StrictMode, useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
+import {
+  createBrowserRouter,
+  Outlet,
+  RouterProvider,
+  useLocation
+} from 'react-router-dom';
 
 import AdminIndex from 'pages/admin/AdminIndex';
 import GeneralAdmin from 'pages/admin/GeneralAdmin';
@@ -51,69 +56,6 @@ require('bootstrap/fonts/glyphicons-halflings-regular.woff');
 require('bootstrap/fonts/glyphicons-halflings-regular.woff2');
 require('bootstrap/fonts/glyphicons-halflings-regular.ttf');
 
-const AppRoutes: React.FC<{}> = () => {
-  return (
-    <Application>
-      <Routes>
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/plugin-job-queue" element={<PluginJobQueueSearch />} />
-        <Route path="/import-series" element={<ImportSeries />} />
-        <Route path="/import-case" element={<ImportCase />} />
-        <Route path="/new-case/:seriesUid" element={<CreateNewCase />} />
-        <Route path="/new-job/:seriesUid" element={<CreateNewJob />} />
-        <Route path="/admin/general" element={<GeneralAdmin />} />
-        <Route path="/admin/group" element={<GroupAdmin />} />
-        <Route path="/admin/user" element={<UserAdmin />} />
-        <Route path="/admin/project" element={<ProjectAdmin />} />
-        <Route
-          path="/admin/plugin-job-manager"
-          element={<PluginJobManagerAdmin />}
-        />
-        <Route path="/admin/plugins" element={<PluginAdmin />} />
-        <Route
-          path="/admin/plugin-job-queue"
-          element={<PluginJobQueueAdmin />}
-        />
-        <Route path="/admin" element={<AdminIndex />}></Route>
-
-        <Route
-          path="/browse/series/mylist/:myListId?"
-          element={<MySeriesList />}
-        />
-        <Route
-          path="/browse/series/preset/:presetName"
-          element={<SeriesSearch />}
-        />
-        <Route path="/series/:uid" element={<SeriesDetail />} />
-        <Route path="/browse/series" element={<SeriesSearch />} />
-
-        <Route path="/browse/case/mylist/:myListId?" element={<MyCaseList />} />
-        <Route
-          path="/browse/case/preset/:presetName"
-          element={<CaseSearch />}
-        />
-        <Route path="/case/:caseId" element={<CaseDetail />} />
-        <Route path="/browse/case" element={<CaseSearch />} />
-
-        <Route
-          path="/browse/plugin-jobs/mylist/:myListId?"
-          element={<MyPluginJobList />}
-        />
-        <Route
-          path="/browse/plugin-jobs/preset/:presetName"
-          element={<PluginJobSearch />}
-        />
-        <Route path="/plugin-job/:jobId" element={<PluginJobDetail />} />
-        <Route path="/browse/plugin-jobs" element={<PluginJobSearch />} />
-
-        <Route path="/task-list" element={<TaskList />} />
-        <Route path="/preference" element={<Preferences />} />
-        <Route path="/tokens" element={<TokenManagement />} />
-      </Routes>
-    </Application>
-  );
-};
-
 const VolumeLoaderFactoryProvider: React.FC<{}> = ({ children }) => {
   const server = useSelector(state => state.loginUser.data?.dicomImageServer);
   const api = useApi();
@@ -142,7 +84,7 @@ const VolumeLoaderFactoryProvider: React.FC<{}> = ({ children }) => {
   );
 };
 
-const InnerApp: React.FC<{ manager: ReturnType<typeof loginManager> }> = ({
+const RootApp: React.FC<{ manager: ReturnType<typeof loginManager> }> = ({
   manager
 }) => {
   const location = useLocation();
@@ -155,14 +97,7 @@ const InnerApp: React.FC<{ manager: ReturnType<typeof loginManager> }> = ({
     }
   }, [manager, location.pathname]);
 
-  if (location.pathname === '/') return <LoginScreen />;
-  return (
-    <Routes>
-      <Route path="/" element={<LoginScreen />} />
-      <Route path="/otp" element={<OneTimeLogin />} />
-      <Route path="/*" element={<AppRoutes />} />
-    </Routes>
-  );
+  return <Outlet />;
 };
 
 const TheApp: React.FC<{}> = () => {
@@ -218,22 +153,101 @@ const TheApp: React.FC<{}> = () => {
 
   if (!manager) return null;
 
-  return (
-    <LoginManagerContext.Provider value={manager}>
-      <ApiContext.Provider value={api}>
-        <ReduxStoreProvider store={store}>
-          <VolumeLoaderFactoryProvider>
-            <CircusThemeProvider>
-              <GlobalStyle />
-              <BrowserRouter>
-                <InnerApp manager={manager} />
-              </BrowserRouter>
-            </CircusThemeProvider>
-          </VolumeLoaderFactoryProvider>
-        </ReduxStoreProvider>
-      </ApiContext.Provider>
-    </LoginManagerContext.Provider>
-  );
+  const router = createBrowserRouter([
+    {
+      path: '/',
+      element: (
+        <LoginManagerContext.Provider value={manager}>
+          <ApiContext.Provider value={api}>
+            <ReduxStoreProvider store={store}>
+              <VolumeLoaderFactoryProvider>
+                <CircusThemeProvider>
+                  <GlobalStyle />
+                  <RootApp manager={manager} />
+                </CircusThemeProvider>
+              </VolumeLoaderFactoryProvider>
+            </ReduxStoreProvider>
+          </ApiContext.Provider>
+        </LoginManagerContext.Provider>
+      ),
+      children: [
+        { index: true, element: <LoginScreen /> },
+        { path: 'otp', element: <OneTimeLogin /> },
+        {
+          path: '',
+          element: (
+            <Application>
+              <Outlet />
+            </Application>
+          ),
+          children: [
+            { path: 'home', element: <HomePage /> },
+            { path: 'plugin-job-queue', element: <PluginJobQueueSearch /> },
+            { path: 'import-series', element: <ImportSeries /> },
+            { path: 'import-case', element: <ImportCase /> },
+            { path: 'new-case/:seriesUid', element: <CreateNewCase /> },
+            { path: 'new-job/:seriesUid', element: <CreateNewJob /> },
+            {
+              path: 'admin',
+              children: [
+                { path: 'general', element: <GeneralAdmin /> },
+                { path: 'group', element: <GroupAdmin /> },
+                { path: 'user', element: <UserAdmin /> },
+                { path: 'project', element: <ProjectAdmin /> },
+                {
+                  path: 'plugin-job-manager',
+                  element: <PluginJobManagerAdmin />
+                },
+                { path: 'plugins', element: <PluginAdmin /> },
+                { path: 'plugin-job-queue', element: <PluginJobQueueAdmin /> },
+                { index: true, element: <AdminIndex /> }
+              ]
+            },
+            {
+              path: 'browse',
+              children: [
+                {
+                  path: 'series',
+                  children: [
+                    { path: 'mylist/:myListId?', element: <MySeriesList /> },
+                    { path: 'preset/:presetName', element: <SeriesSearch /> },
+                    { path: ':uid', element: <SeriesDetail /> },
+                    { index: true, element: <SeriesSearch /> }
+                  ]
+                },
+                {
+                  path: 'case',
+                  children: [
+                    { path: 'mylist/:myListId?', element: <MyCaseList /> },
+                    { path: 'preset/:presetName', element: <CaseSearch /> },
+                    { path: ':caseId', element: <CaseDetail /> },
+                    { index: true, element: <CaseSearch /> }
+                  ]
+                },
+                {
+                  path: 'plugin-jobs',
+                  children: [
+                    { path: 'mylist/:myListId?', element: <MyPluginJobList /> },
+                    {
+                      path: 'preset/:presetName',
+                      element: <PluginJobSearch />
+                    },
+                    { path: ':jobId', element: <PluginJobDetail /> },
+                    { index: true, element: <PluginJobSearch /> }
+                  ]
+                }
+              ]
+            },
+            { path: 'task-list', element: <TaskList /> },
+            { path: 'preference', element: <Preferences /> },
+            { path: 'tokens', element: <TokenManagement /> }
+          ]
+        }
+      ]
+    }
+  ]);
+
+  return <RouterProvider router={router} />;
 };
 
 ReactDOM.render(

@@ -27,8 +27,7 @@ import React, {
   useState
 } from 'react';
 import { useDispatch } from 'react-redux';
-import { useBlocker } from 'utils/useBlocker';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useBlocker, useParams } from 'react-router-dom';
 import { showMessage } from 'store/messages';
 import { newSearch } from 'store/searches';
 import styled from 'styled-components';
@@ -72,14 +71,13 @@ const CaseDetail: React.FC<{}> = () => {
   const accessibleProjects = useMemo(() => user.accessibleProjects, [user]);
   const isUpdated = caseStore.currentHistoryIndex > 0;
 
-  useBlocker(
-    isUpdated,
-    (tx) => {
-      if (window.confirm(pageTransitionMessage)) {
-        tx.retry(); 
-      }
+  useBlocker(({ currentLocation, nextLocation, historyAction }) => {
+    if (isUpdated) {
+      const ok = window.confirm(pageTransitionMessage);
+      return ok;
     }
-  );
+    return true;
+  });
 
   // warn before reloading or closing page with unsaved changes
   useEffect(() => {

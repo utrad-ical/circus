@@ -63,7 +63,7 @@ const LoginScreen: React.FC<{}> = props => {
     if (loginSucceeded) {
       navigate('/home');
     }
-  }, [loginSucceeded]);
+  }, [loginSucceeded, navigate]);
 
   // Force logout when user shows this page
   useEffect(() => {

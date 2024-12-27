@@ -53,7 +53,7 @@ const OneTimeLogin: FC = () => {
       await loginManager.refreshUserInfo(true);
       navigate(redirect || '/home');
     })();
-  }, [loginManager, pwd, redirect]);
+  }, [loginManager, pwd, redirect, navigate]);
 
   return (
     <div className="container">

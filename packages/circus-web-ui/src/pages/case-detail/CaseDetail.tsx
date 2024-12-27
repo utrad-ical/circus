@@ -176,15 +176,6 @@ const CaseDetail: React.FC<{}> = () => {
     );
   }, [api, dispatch, caseStore.patientInfo, activeRelevantCases]);
 
-  if (!caseId) {
-    return null;
-  }
-
-  const handleRevisionSelect = async (index: number) => {
-    if (isUpdated && !(await confirm(pageTransitionMessage))) return;
-    caseDispatch(c.startLoadRevision({ revisionIndex: index }));
-  };
-
   const updateEditingData = useCallback<EditingDataUpdater>(
     (updater, tag) => {
       const newData = produce(editingData, updater);
@@ -200,6 +191,15 @@ const CaseDetail: React.FC<{}> = () => {
     },
     [editingData]
   );
+
+  if (!caseId) {
+    return null;
+  }
+
+  const handleRevisionSelect = async (index: number) => {
+    if (isUpdated && !(await confirm(pageTransitionMessage))) return;
+    caseDispatch(c.startLoadRevision({ revisionIndex: index }));
+  };
 
   const handleTagChange = async (value: string[]) => {
     try {

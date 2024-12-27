@@ -151,7 +151,7 @@ const RelevantJobs: React.FC<{
 
 const PluginJobDetail: React.FC<{}> = props => {
   const api = useApi();
-  const jobId: string = useParams<any>().jobId;
+  const jobId = useParams<any>().jobId;
   const initialMode = useQuery().get('initialmode') ?? '';
 
   const user = useLoginUser();
@@ -331,6 +331,10 @@ const PluginJobDetail: React.FC<{}> = props => {
 
   if (jobData instanceof Error) {
     return <div className="alert alert-danger">{jobData.message}</div>;
+  }
+
+  if (!jobId) {
+    return <div className="alert alert-danger">No job ID specified.</div>;
   }
 
   const { job, seriesData, pluginData } = jobData;

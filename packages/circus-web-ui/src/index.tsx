@@ -211,7 +211,6 @@ const TheApp: React.FC<{}> = () => {
                   children: [
                     { path: 'mylist/:myListId?', element: <MySeriesList /> },
                     { path: 'preset/:presetName', element: <SeriesSearch /> },
-                    { path: ':uid', element: <SeriesDetail /> },
                     { index: true, element: <SeriesSearch /> }
                   ]
                 },
@@ -220,7 +219,6 @@ const TheApp: React.FC<{}> = () => {
                   children: [
                     { path: 'mylist/:myListId?', element: <MyCaseList /> },
                     { path: 'preset/:presetName', element: <CaseSearch /> },
-                    { path: ':caseId', element: <CaseDetail /> },
                     { index: true, element: <CaseSearch /> }
                   ]
                 },
@@ -232,12 +230,14 @@ const TheApp: React.FC<{}> = () => {
                       path: 'preset/:presetName',
                       element: <PluginJobSearch />
                     },
-                    { path: ':jobId', element: <PluginJobDetail /> },
                     { index: true, element: <PluginJobSearch /> }
                   ]
                 }
               ]
             },
+            { path: 'series/:uid', element: <SeriesDetail /> },
+            { path: 'case/:caseId', element: <CaseDetail /> },
+            { path: 'plugin-job/:jobId', element: <PluginJobDetail /> },
             { path: 'task-list', element: <TaskList /> },
             { path: 'preference', element: <Preferences /> },
             { path: 'tokens', element: <TokenManagement /> }

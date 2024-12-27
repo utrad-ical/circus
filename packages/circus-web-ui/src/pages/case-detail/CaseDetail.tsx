@@ -74,9 +74,9 @@ const CaseDetail: React.FC<{}> = () => {
   useBlocker(({ currentLocation, nextLocation, historyAction }) => {
     if (isUpdated) {
       const ok = window.confirm(pageTransitionMessage);
-      return ok;
+      return !ok;
     }
-    return true;
+    return false;
   });
 
   // warn before reloading or closing page with unsaved changes

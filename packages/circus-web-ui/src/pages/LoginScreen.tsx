@@ -59,6 +59,12 @@ const LoginScreen: React.FC<{}> = props => {
     })();
   }, [loginManager]);
 
+  useEffect(() => {
+    if (loginSucceeded) {
+      navigate('/home');
+    }
+  }, [loginSucceeded]);
+
   // Force logout when user shows this page
   useEffect(() => {
     if (user && !loginSucceeded) {
@@ -78,7 +84,6 @@ const LoginScreen: React.FC<{}> = props => {
       await loginManager.tryAuthenticate(input.id, input.password);
       setLoginSucceeded(true);
       await loginManager.refreshUserInfo(true);
-      navigate('/home');
     } catch (err: any) {
       if (err.response && err.response.status === 400) {
         setError('Invalid user ID or password.');

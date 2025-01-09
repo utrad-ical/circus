@@ -67,6 +67,7 @@ const UserAdmin: React.FC<any> = props => {
   const api = useApi();
 
   useEffect(() => {
+    let isMounted = true;
     const load = async () => {
       const groups = (await api('admin/groups?unlimited=1')).items as {
         groupId: string;
@@ -75,6 +76,7 @@ const UserAdmin: React.FC<any> = props => {
       }[];
       const groupIdMap: any = {};
       groups.forEach(g => (groupIdMap[g.groupId] = g.groupName));
+      if (!isMounted) return;
       setEditorProperties([
         { caption: 'User Email', key: 'userEmail', editor: et.text() },
         { caption: 'Login Name', key: 'loginId', editor: et.text() },
@@ -124,6 +126,9 @@ const UserAdmin: React.FC<any> = props => {
       ]);
     };
     load();
+    return () => {
+      isMounted = false;
+    };
   }, [api]);
 
   if (!editorProperties || !listColumns) return <LoadingIndicator />;

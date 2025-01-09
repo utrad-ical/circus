@@ -93,11 +93,13 @@ const CaseDetail: React.FC<{}> = () => {
   }, [isUpdated]);
 
   useEffect(() => {
+    let isMounted = true;
     if (!caseId) {
       throw new Error('caseId is missing.');
     }
     const loadCase = async () => {
       const caseData = await api('cases/' + caseId);
+      if (!isMounted) return;
       setTags(caseData.tags ?? []);
       const project = accessibleProjects.find(
         (p: { projectId: string }) => p.projectId === caseData.projectId
@@ -139,6 +141,9 @@ const CaseDetail: React.FC<{}> = () => {
       );
     };
     loadCase();
+    return () => {
+      isMounted = false;
+    };
   }, [accessibleProjects, api, caseId]); // should not re-render after mount
 
   const [f, forceLoadRevision] = useReducer(x => x + 1, 0);

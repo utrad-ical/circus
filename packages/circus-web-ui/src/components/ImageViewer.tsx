@@ -118,7 +118,8 @@ const ImageViewer: React.FC<{
   const containerRef = useRef<HTMLDivElement>(null);
   const initialStateSet = useRef<boolean>(false);
 
-  const savedInitialStateSetter = useEffectEvent(initialStateSetter);
+  const savedInitialStateSetter = useEffectEvent(initialStateSetter || noop);
+  const hasInitialStateSetter = !initialStateSetter;
 
   // Handle creation of viewer
   useEffect(() => {
@@ -126,7 +127,7 @@ const ImageViewer: React.FC<{
     onCreateViewer(viewer, id);
     setViewer(viewer);
     viewer.on('imageReady', () => {
-      if (typeof savedInitialStateSetter === 'function') {
+      if (!hasInitialStateSetter) {
         const baseState = composition!.imageSource.initialState(viewer);
         const viewState = savedInitialStateSetter(viewer, baseState, id);
         viewer.setState(viewState);
@@ -143,7 +144,8 @@ const ImageViewer: React.FC<{
     onCreateViewer,
     onDestroyViewer,
     composition,
-    savedInitialStateSetter
+    savedInitialStateSetter,
+    hasInitialStateSetter
   ]);
 
   // Handle view state change

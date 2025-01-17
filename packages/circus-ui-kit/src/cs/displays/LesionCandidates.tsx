@@ -184,14 +184,18 @@ const Candidate: React.FC<{
   }, [composition, imageSource]);
 
   const centerState = useCallback<StateChangerFunc<MprViewState>>(
-    state =>
-      applyDisplayOptions(
+    state => {
+      if (!composition.viewers || composition.viewers.length === 0)
+        return state;
+
+      return applyDisplayOptions(
         state,
-        (composition!.imageSource as any).metadata.voxelSize,
+        (composition.imageSource as any).metadata.voxelSize,
         item.location[2],
         displayOptions,
         composition.viewers[0].getResolution()
-      ),
+      );
+    },
     [composition, item.location]
   );
 

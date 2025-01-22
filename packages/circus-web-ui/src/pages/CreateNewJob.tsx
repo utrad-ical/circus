@@ -5,8 +5,7 @@ import CsVolumeDownloadModal from 'components/CsVolumeDownloadModal';
 import IconButton from 'components/IconButton';
 import PluginDisplay from 'components/PluginDisplay';
 import SeriesSelector, { SeriesEntry } from 'components/SeriesSelector';
-import React, { useEffect, useState, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useApi } from 'utils/api';
 import useLocalPreference from 'utils/useLocalPreference';
@@ -37,6 +36,7 @@ const CreateNewJob: React.FC<{}> = props => {
   const seriesUid = useParams<any>().seriesUid;
 
   useEffect(() => {
+    if (!seriesUid) return;
     const load = async () => {
       setBusy(true);
       setSelectedSeries([{ seriesUid, partialVolumeDescriptor: 'auto' }]);

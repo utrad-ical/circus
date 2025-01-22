@@ -70,6 +70,7 @@ const GroupAdmin: React.FC<any> = props => {
   const api = useApi();
 
   useEffect(() => {
+    let isMounted = true;
     const didMount = async () => {
       const domains = await api('admin/server-params/domains');
       const privList = await api('admin/global-privileges');
@@ -97,7 +98,7 @@ const GroupAdmin: React.FC<any> = props => {
       const pluginSelect: React.FC<any> = props => (
         <PluginSelectorMultiple plugins={pluginOptions} {...props} />
       );
-
+      if (!isMounted) return;
       setEditorProperties([
         [
           { key: 'groupName', caption: 'Group Name', editor: et.text() }, // 0
@@ -179,6 +180,10 @@ const GroupAdmin: React.FC<any> = props => {
       ]);
     };
     didMount();
+
+    return () => {
+      isMounted = false;
+    };
   }, [api]);
 
   if (!editorProperties) return <LoadingIndicator />;

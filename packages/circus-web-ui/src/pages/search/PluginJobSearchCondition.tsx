@@ -106,10 +106,18 @@ const ConditionEditor: React.FC<{
   const [plugins, setPlugins] = useState<any[]>([]);
 
   useEffect(() => {
+    let isMounted = true;
+
     const load = async () => {
-      setPlugins(await api('/plugins'));
+      const data = await api('/plugins');
+      if (!isMounted) return;
+      setPlugins(data);
     };
     load();
+
+    return () => {
+      isMounted = false;
+    };
   }, [api]);
 
   const basicConditionProperties = useMemo<

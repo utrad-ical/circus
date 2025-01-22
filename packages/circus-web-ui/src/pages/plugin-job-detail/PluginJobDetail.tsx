@@ -22,6 +22,7 @@ import { Link, useParams } from 'react-router-dom';
 import { newSearch } from 'store/searches';
 import styled from 'styled-components';
 import { useApi } from 'utils/api';
+import { CancelToken } from 'utils/cancelToken';
 import useLoadData from 'utils/useLoadData';
 import useLoginUser from 'utils/useLoginUser';
 import useQuery from 'utils/useQuery';
@@ -151,7 +152,7 @@ const RelevantJobs: React.FC<{
 
 const PluginJobDetail: React.FC<{}> = props => {
   const api = useApi();
-  const jobId: string = useParams<any>().jobId;
+  const jobId = useParams<any>().jobId;
   const initialMode = useQuery().get('initialmode') ?? '';
 
   const user = useLoginUser();
@@ -169,65 +170,72 @@ const PluginJobDetail: React.FC<{}> = props => {
   );
   const dispatchForJobSearch = useDispatch();
 
-  const loadJob = useCallback(async () => {
-    setBusy(true);
-    try {
-      const job = (await api(`plugin-jobs/${jobId}`)) as Job;
-      const pluginData = (await api(`plugins/${job.pluginId}`)) as Plugin;
-      const seriesData: { [seriesUid: string]: any } = {};
-      const viewPersonalInfoFlag = memoizedAccessiblePlugins
-        .filter(p => p.roles.includes('viewPersonalInfo'))
-        .some(p => p.pluginId === job.pluginId);
-      for (const s of job.series) {
-        const seriesUid = s.seriesUid;
-        if (seriesUid in seriesData) continue;
-        seriesData[seriesUid] = await api(`series/${seriesUid}`);
-        if (!viewPersonalInfoFlag) {
-          delete seriesData[seriesUid].patientInfo;
+  const loadJob = useCallback(
+    async (token: CancelToken) => {
+      setBusy(true);
+      try {
+        const job = (await api(`plugin-jobs/${jobId}`, {}, token)) as Job;
+        const pluginData = (await api(
+          `plugins/${job.pluginId}`,
+          {},
+          token
+        )) as Plugin;
+        const seriesData: { [seriesUid: string]: any } = {};
+        const viewPersonalInfoFlag = memoizedAccessiblePlugins
+          .filter(p => p.roles.includes('viewPersonalInfo'))
+          .some(p => p.pluginId === job.pluginId);
+        for (const s of job.series) {
+          const seriesUid = s.seriesUid;
+          if (seriesUid in seriesData) continue;
+          seriesData[seriesUid] = await api(`series/${seriesUid}`, {}, token);
+          if (!viewPersonalInfoFlag) {
+            delete seriesData[seriesUid].patientInfo;
+          }
         }
-      }
-      dispatch(
-        actions.reset({
-          feedbacks: job.feedbacks,
-          myUserEmail: user.userEmail,
-          preferMode: ['consensual', 'personal'].includes(initialMode)
-            ? (initialMode as 'personal' | 'consensual')
-            : null
-        })
-      );
-
-      if (
-        job.series[0].seriesUid &&
-        seriesData[job.series[0].seriesUid].patientInfo
-      ) {
-        const filter = {
-          'patientInfo.patientId':
-            seriesData[job.series[0].seriesUid].patientInfo.patientId
-        };
-
-        dispatchForJobSearch(
-          newSearch(api, 'relevantJobs', {
-            resource: { endPoint: 'plugin-jobs', primaryKey: 'jobId' },
-            filter,
-            condition: {},
-            sort: '{"createdAt":-1}'
+        dispatch(
+          actions.reset({
+            feedbacks: job.feedbacks,
+            myUserEmail: user.userEmail,
+            preferMode: ['consensual', 'personal'].includes(initialMode)
+              ? (initialMode as 'personal' | 'consensual')
+              : null
           })
         );
-      }
 
-      return { job, pluginData, seriesData };
-    } finally {
-      setBusy(false);
-    }
-  }, [
-    api,
-    initialMode,
-    dispatch,
-    jobId,
-    user.userEmail,
-    memoizedAccessiblePlugins,
-    dispatchForJobSearch
-  ]);
+        if (
+          job.series[0].seriesUid &&
+          seriesData[job.series[0].seriesUid].patientInfo
+        ) {
+          const filter = {
+            'patientInfo.patientId':
+              seriesData[job.series[0].seriesUid].patientInfo.patientId
+          };
+
+          dispatchForJobSearch(
+            newSearch(api, 'relevantJobs', {
+              resource: { endPoint: 'plugin-jobs', primaryKey: 'jobId' },
+              filter,
+              condition: {},
+              sort: '{"createdAt":-1}'
+            })
+          );
+        }
+
+        return { job, pluginData, seriesData };
+      } finally {
+        if (!token.cancelled) setBusy(false);
+      }
+    },
+    [
+      api,
+      initialMode,
+      dispatch,
+      jobId,
+      user.userEmail,
+      memoizedAccessiblePlugins,
+      dispatchForJobSearch
+    ]
+  );
 
   const [jobData, , reloadJob] = useLoadData(loadJob);
 
@@ -331,6 +339,10 @@ const PluginJobDetail: React.FC<{}> = props => {
 
   if (jobData instanceof Error) {
     return <div className="alert alert-danger">{jobData.message}</div>;
+  }
+
+  if (!jobId) {
+    return <div className="alert alert-danger">No job ID specified.</div>;
   }
 
   const { job, seriesData, pluginData } = jobData;

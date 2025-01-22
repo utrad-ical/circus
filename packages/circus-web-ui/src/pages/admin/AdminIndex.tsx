@@ -10,7 +10,7 @@ const Btn: React.FC<{
   link: string;
   glyph: string;
 }> = ({ to, link, glyph }) => (
-  <Link to={`admin/${to}`}>
+  <Link to={`${to}`}>
     <Button block bsStyle="primary" bsSize="lg">
       <Icon icon={glyph} />
       &ensp;{link}

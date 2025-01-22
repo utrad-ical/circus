@@ -232,19 +232,27 @@ const Preferences: React.FC<{}> = props => {
   const showMessage = useShowMessage();
   const [preferences, updatePreferences] = useUserPreferences();
   const [settings, setSettings] = useState<UserPreferences | null>(preferences);
-  const loadSettings = useCallback(async () => {
-    const settings = await api('preferences');
-    setSettings(settings);
-  }, [api]);
+  const loadSettings = useCallback(
+    async (isMounted: boolean) => {
+      const settings = await api('preferences');
+      if (!isMounted) return;
+      setSettings(settings);
+    },
+    [api]
+  );
 
   useEffect(() => {
-    loadSettings();
+    let isMounted = true;
+    loadSettings(isMounted);
+    return () => {
+      isMounted = false;
+    };
   }, [loadSettings]);
 
   const saveClick = async () => {
     await updatePreferences(settings!);
     showMessage('Your preference was saved.', 'success', { short: true });
-    loadSettings();
+    loadSettings(true);
   };
 
   if (settings === null) return <div />;
@@ -294,7 +302,7 @@ const Preferences: React.FC<{}> = props => {
         <Button bsStyle="primary" onClick={saveClick}>
           Save
         </Button>
-        <Button bsStyle="link" onClick={loadSettings}>
+        <Button bsStyle="link" onClick={() => loadSettings(true)}>
           Reset
         </Button>
       </p>

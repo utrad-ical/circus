@@ -10,15 +10,23 @@ const PluginJobManagerAdmin: React.FC<{}> = props => {
   const [status, setStatus] = useState<any>(null);
   const api = useApi();
 
-  const refresh = useCallback(async () => {
-    setBusy(true);
-    const result = await api('admin/plugin-job-manager');
-    setBusy(false);
-    setStatus(result.status);
-  }, [api]);
+  const refresh = useCallback(
+    async (isMounted: boolean) => {
+      setBusy(true);
+      const result = await api('admin/plugin-job-manager');
+      if (!isMounted) return;
+      setBusy(false);
+      setStatus(result.status);
+    },
+    [api]
+  );
 
   useEffect(() => {
-    refresh();
+    let isMounted = true;
+    refresh(isMounted);
+    return () => {
+      isMounted = false;
+    };
   }, [refresh]);
 
   const postSwitch = async (mode: string) => {
@@ -28,7 +36,7 @@ const PluginJobManagerAdmin: React.FC<{}> = props => {
         method: 'put',
         data: { status: mode }
       });
-      await refresh();
+      await refresh(true);
     } catch (e) {
       setBusy(false);
     }
@@ -66,7 +74,7 @@ const PluginJobManagerAdmin: React.FC<{}> = props => {
             icon="refresh"
             bsSize="large"
             bsStyle="link"
-            onClick={refresh}
+            onClick={() => refresh(true)}
           >
             Refresh Status
           </IconButton>

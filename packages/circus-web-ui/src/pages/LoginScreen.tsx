@@ -9,10 +9,10 @@ import {
   Panel
 } from 'components/react-bootstrap';
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLoginManager } from 'utils/loginManager';
 import useLoginUser from 'utils/useLoginUser';
-import browserHistory from '../browserHistory';
 
 const StyledDiv = styled.div`
   width: 100%;
@@ -49,6 +49,7 @@ const LoginScreen: React.FC<{}> = props => {
   const [criticalError, setCriticalError] = useState(false);
   const loginManager = useLoginManager();
   const user = useLoginUser();
+  const navigate = useNavigate();
 
   useEffect(() => {
     (async () => {
@@ -57,6 +58,12 @@ const LoginScreen: React.FC<{}> = props => {
       if (!alive) setCriticalError(true);
     })();
   }, [loginManager]);
+
+  useEffect(() => {
+    if (loginSucceeded) {
+      navigate('/home');
+    }
+  }, [loginSucceeded, navigate]);
 
   // Force logout when user shows this page
   useEffect(() => {
@@ -77,7 +84,6 @@ const LoginScreen: React.FC<{}> = props => {
       await loginManager.tryAuthenticate(input.id, input.password);
       setLoginSucceeded(true);
       await loginManager.refreshUserInfo(true);
-      browserHistory.push('/home');
     } catch (err: any) {
       if (err.response && err.response.status === 400) {
         setError('Invalid user ID or password.');

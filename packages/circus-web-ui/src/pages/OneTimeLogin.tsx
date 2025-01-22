@@ -1,10 +1,9 @@
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import React, { FC, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLoginManager } from 'utils/loginManager';
 import useLoginUser from 'utils/useLoginUser';
 import useQuery from 'utils/useQuery';
-import browserHistory from '../browserHistory';
 
 /**
  * A temporary screen that tries to authenticate a onetime password.
@@ -18,6 +17,7 @@ const OneTimeLogin: FC = () => {
   const [error, setError] = useState<string>();
   const [loginSucceeded, setLoginSucceeded] = useState(false);
   const user = useLoginUser();
+  const navigate = useNavigate();
 
   // Force logout when user shows this page
   useEffect(() => {
@@ -51,9 +51,9 @@ const OneTimeLogin: FC = () => {
         }
       }
       await loginManager.refreshUserInfo(true);
-      browserHistory.push(redirect || '/home');
+      navigate(redirect || '/home');
     })();
-  }, [loginManager, pwd, redirect]);
+  }, [loginManager, pwd, redirect, navigate]);
 
   return (
     <div className="container">

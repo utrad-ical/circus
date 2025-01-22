@@ -9,7 +9,7 @@ const useEffectEvent = <P extends unknown[], R>(
 
   useLayoutEffect(() => {
     handlerRef.current = handler;
-  });
+  }, [handler]);
 
   return useCallback((...args: P): R => {
     return handlerRef.current!(...args);

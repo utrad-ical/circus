@@ -27,8 +27,7 @@ import React, {
   useState
 } from 'react';
 import { useDispatch } from 'react-redux';
-import { Prompt } from 'react-router';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useBlocker, useParams } from 'react-router-dom';
 import { showMessage } from 'store/messages';
 import { newSearch } from 'store/searches';
 import styled from 'styled-components';
@@ -52,7 +51,7 @@ import {
 const pageTransitionMessage = `Are you sure you want to leave?\nIf you leave before saving, your changes will be lost.`;
 
 const CaseDetail: React.FC<{}> = () => {
-  const caseId = useParams<any>().caseId;
+  const caseId = useParams<{ caseId: string }>().caseId;
   const [caseStore, caseDispatch] = useReducer(
     caseStoreReducer,
     caseStoreReducer(undefined as any, { type: 'dummy' }) // gets initial state
@@ -72,6 +71,14 @@ const CaseDetail: React.FC<{}> = () => {
   const accessibleProjects = useMemo(() => user.accessibleProjects, [user]);
   const isUpdated = caseStore.currentHistoryIndex > 0;
 
+  useBlocker(({ currentLocation, nextLocation, historyAction }) => {
+    if (isUpdated) {
+      const ok = window.confirm(pageTransitionMessage);
+      return !ok;
+    }
+    return false;
+  });
+
   // warn before reloading or closing page with unsaved changes
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
@@ -86,8 +93,13 @@ const CaseDetail: React.FC<{}> = () => {
   }, [isUpdated]);
 
   useEffect(() => {
+    let isMounted = true;
+    if (!caseId) {
+      throw new Error('caseId is missing.');
+    }
     const loadCase = async () => {
       const caseData = await api('cases/' + caseId);
+      if (!isMounted) return;
       setTags(caseData.tags ?? []);
       const project = accessibleProjects.find(
         (p: { projectId: string }) => p.projectId === caseData.projectId
@@ -129,6 +141,9 @@ const CaseDetail: React.FC<{}> = () => {
       );
     };
     loadCase();
+    return () => {
+      isMounted = false;
+    };
   }, [accessibleProjects, api, caseId]); // should not re-render after mount
 
   const [f, forceLoadRevision] = useReducer(x => x + 1, 0);
@@ -166,11 +181,6 @@ const CaseDetail: React.FC<{}> = () => {
     );
   }, [api, dispatch, caseStore.patientInfo, activeRelevantCases]);
 
-  const handleRevisionSelect = async (index: number) => {
-    if (isUpdated && !(await confirm(pageTransitionMessage))) return;
-    caseDispatch(c.startLoadRevision({ revisionIndex: index }));
-  };
-
   const updateEditingData = useCallback<EditingDataUpdater>(
     (updater, tag) => {
       const newData = produce(editingData, updater);
@@ -186,6 +196,15 @@ const CaseDetail: React.FC<{}> = () => {
     },
     [editingData]
   );
+
+  if (!caseId) {
+    return null;
+  }
+
+  const handleRevisionSelect = async (index: number) => {
+    if (isUpdated && !(await confirm(pageTransitionMessage))) return;
+    caseDispatch(c.startLoadRevision({ revisionIndex: index }));
+  };
 
   const handleTagChange = async (value: string[]) => {
     try {
@@ -256,7 +275,6 @@ const CaseDetail: React.FC<{}> = () => {
 
   return (
     <FullSpanContainer>
-      <Prompt when={isUpdated} message={pageTransitionMessage} />
       <CaseInfoCollapser title="Case Info">
         {activeRelevantCases ? (
           <DropdownButton

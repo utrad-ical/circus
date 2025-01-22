@@ -13,12 +13,11 @@ import SearchResultsView, {
 import { DropdownButton, MenuItem } from 'components/react-bootstrap';
 import React, { Fragment } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import * as searches from 'store/searches';
 import styled from 'styled-components';
 import { useApi } from 'utils/api';
 import useShowMessage from 'utils/useShowMessage';
-import browserHistory from '../../browserHistory';
 import {
   Executer,
   FeedbackRenderer,
@@ -40,12 +39,13 @@ const Operation: DataGridRenderer<any> = props => {
       ? 'myPluginJobList'
       : 'pluginJob';
   const search = useSelector(state => state.searches.searches[searchName]);
+  const navigate = useNavigate();
 
   const handleViewClick = () => {
     if (job.status !== 'finished') return;
     dispatch(searches.setNextPreviousList(search?.results?.indexes ?? []));
     const url = `/plugin-job/${job.jobId}`;
-    browserHistory.push(url);
+    navigate(url);
   };
 
   const handleMenuClick = async (selection: any) => {

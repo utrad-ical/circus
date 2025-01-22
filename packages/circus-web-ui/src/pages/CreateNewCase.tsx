@@ -1,11 +1,9 @@
-import browserHistory from '../browserHistory';
 import IconButton from 'components/IconButton';
 import MultiTagSelect from 'components/MultiTagSelect';
 import ProjectSelector from 'components/ProjectSelector';
 import SeriesSelector, { SeriesEntry } from 'components/SeriesSelector';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useApi } from 'utils/api';
 import useLoginUser from 'utils/useLoginUser';
 
@@ -24,8 +22,8 @@ const CreateNewCase: React.FC<{}> = props => {
   const [selectedSeries, setSelectedSeries] = useState<SeriesEntry[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const api = useApi();
-  const appState = useSelector(state => state);
   const seriesUid = useParams<any>().seriesUid as string;
+  const navigate = useNavigate();
 
   useEffect(() => {
     const load = async () => {
@@ -53,7 +51,7 @@ const CreateNewCase: React.FC<{}> = props => {
       }
     });
     if (res.caseId) {
-      browserHistory.push(`/case/${res.caseId}`);
+      navigate(`/case/${res.caseId}`);
     }
   };
 

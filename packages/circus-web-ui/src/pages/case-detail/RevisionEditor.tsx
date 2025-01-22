@@ -91,6 +91,8 @@ const useCompositions = (
     series.forEach(async ({}, volId) => {
       const volumeLoader = volumeLoaders[volId];
 
+      if (!volumeLoader) return;
+
       const metadata = await volumeLoader.loadMeta();
       if (abortController.signal.aborted) return;
 

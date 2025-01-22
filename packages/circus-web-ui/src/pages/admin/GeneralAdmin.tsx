@@ -28,14 +28,23 @@ const GeneralAdmin: React.FC<{}> = props => {
   const api = useApi();
   const showMessage = useShowMessage();
 
-  const loadSettings = useCallback(async () => {
-    const data = (await api('admin/server-params')) as Settings;
-    setSettings(data);
-    setComplaints({});
-  }, [api]);
+  const loadSettings = useCallback(
+    async (isMounted: boolean) => {
+      const data = (await api('admin/server-params')) as Settings;
+      if (!isMounted) return;
+      setSettings(data);
+      setComplaints({});
+    },
+    [api]
+  );
 
   useEffect(() => {
-    loadSettings();
+    let isMounted = true;
+    loadSettings(isMounted);
+
+    return () => {
+      isMounted = false;
+    };
   }, [loadSettings]);
 
   const handlePropertyChange = (value: Settings) => {
@@ -66,7 +75,7 @@ const GeneralAdmin: React.FC<{}> = props => {
         tag: 'general-admin',
         short: true
       });
-      loadSettings();
+      loadSettings(true);
     } catch (err: any) {
       setComplaints(err.data.errors);
     }
@@ -105,7 +114,7 @@ const GeneralAdmin: React.FC<{}> = props => {
         <Button bsStyle="primary" onClick={handleSaveClick}>
           Save
         </Button>
-        <Button bsStyle="link" onClick={loadSettings}>
+        <Button bsStyle="link" onClick={() => loadSettings(true)}>
           Cancel
         </Button>
       </p>

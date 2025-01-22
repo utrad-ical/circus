@@ -37,7 +37,10 @@ export const fillPartialVolumeDescriptors = async (
 ): Promise<SeriesEntry[]> => {
   const draft = createDraft(entries);
   await asyncMap(draft, async entry => {
-    if (!entry.partialVolumeDescriptor) {
+    if (
+      !entry.partialVolumeDescriptor ||
+      entry.partialVolumeDescriptor === 'auto'
+    ) {
       entry.partialVolumeDescriptor = await defaultPvdFromSeries(
         entry.seriesUid,
         api,

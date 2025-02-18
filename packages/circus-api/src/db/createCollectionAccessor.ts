@@ -65,7 +65,13 @@ const createCollectionAccessor = <T = any>(
   const sessionOpts = session ? { session } : {};
   const collection = db.collection<WithDates<T>>(collectionName);
 
-  const dbEntrySchema = schema + '|dbEntry';
+  const dbEntrySchema =
+    typeof schema === 'string'
+      ? schema
+          .split('/')
+          .map(s => `${s}|dbEntry`)
+          .join('/')
+      : schema;
 
   /**
    * Inserts a single document after validation succeeds.

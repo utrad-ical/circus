@@ -15,26 +15,34 @@ export const makeModels = (
   session?: ClientSession
 ) => {
   const modelDefinitions: {
-    [key in keyof ModelEntries]: { col: string; pk: string };
+    [key in keyof ModelEntries]: { schema: string; col: string; pk: string };
   } = {
-    user: { col: 'users', pk: 'userEmail' },
-    group: { col: 'groups', pk: 'groupId' },
-    project: { col: 'projects', pk: 'projectId' },
-    series: { col: 'series', pk: 'seriesUid' },
-    clinicalCase: { col: 'clinicalCases', pk: 'caseId' },
-    serverParam: { col: 'serverParams', pk: 'key' },
-    token: { col: 'tokens', pk: 'accessToken' },
-    task: { col: 'tasks', pk: 'taskId' },
-    plugin: { col: 'pluginDefinitions', pk: 'pluginId' },
-    pluginJob: { col: 'pluginJobs', pk: 'jobId' },
-    myList: { col: 'myLists', pk: 'myListId' },
-    onetimeUrl: { col: 'onetimeUrls', pk: 'onetimeUrlId' }
+    user: { schema: 'user', col: 'users', pk: 'userEmail' },
+    group: { schema: 'group', col: 'groups', pk: 'groupId' },
+    project: { schema: 'project', col: 'projects', pk: 'projectId' },
+    series: { schema: 'series', col: 'series', pk: 'seriesUid' },
+    clinicalCase: {
+      schema: 'clinicalCase',
+      col: 'clinicalCases',
+      pk: 'caseId'
+    },
+    serverParam: { schema: 'serverParam', col: 'serverParams', pk: 'key' },
+    token: { schema: 'token', col: 'tokens', pk: 'accessToken' },
+    task: { schema: 'task', col: 'tasks', pk: 'taskId' },
+    plugin: {
+      schema: 'plugin/remotePlugin',
+      col: 'pluginDefinitions',
+      pk: 'pluginId'
+    },
+    pluginJob: { schema: 'pluginJob', col: 'pluginJobs', pk: 'jobId' },
+    myList: { schema: 'myList', col: 'myLists', pk: 'myListId' },
+    onetimeUrl: { schema: 'onetimeUrl', col: 'onetimeUrls', pk: 'onetimeUrlId' }
   };
   const models: any = {};
   (Object.keys(modelDefinitions) as (keyof ModelEntries)[]).forEach(k => {
     const def = modelDefinitions[k];
     models[k] = createCollectionAccessor(database.db, validator, {
-      schema: k,
+      schema: def.schema,
       collectionName: def.col,
       primaryKey: def.pk,
       session

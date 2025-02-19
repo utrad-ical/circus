@@ -59,7 +59,9 @@ const listColumns: Record<PluginType, DataGridColumnDefinition[]> = {
     {
       key: 'adapter',
       caption: 'Adapter',
-      renderer: ({ value: plugin }) => <Fragment>{plugin.adapter}</Fragment>
+      renderer: ({ value: plugin }) => (
+        <Fragment>{plugin.runConfiguration.adapter}</Fragment>
+      )
     },
     {
       key: 'pluginName',

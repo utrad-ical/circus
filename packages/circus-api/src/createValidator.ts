@@ -294,7 +294,7 @@ const createValidator: NoDepFunctionService<
   // We return an object that wraps the two Ajv instances.
   return {
     validate: async (schema: any, data: any, mode = 'default') => {
-      const isOr = schema.includes('/');
+      const isOr = typeof schema === 'string' ? schema.includes('/') : false;
       const schemasToValidate = filterSchema(schema);
       const validators: { [mode: string]: Ajv.Ajv } = {
         default: validator,
@@ -332,8 +332,8 @@ const createValidator: NoDepFunctionService<
 
       for (const schemaToValidate of schemasToValidate) {
         try {
-          data = await validatorToUse.validate(schemaToValidate, data);
-          return data;
+          const clonedData = _.cloneDeep(data);
+          return await validatorToUse.validate(schemaToValidate, clonedData);
         } catch (err) {
           validationError = err;
         }

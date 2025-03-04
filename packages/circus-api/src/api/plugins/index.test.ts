@@ -32,7 +32,6 @@ it('should return plugin definition for CAD+remote type specified by pluginId', 
   const res = await axios.get(
     'api/plugins/rmt-d135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2'
   );
-  console.log(res.data);
   expect(res.status).toBe(200);
   expect(res.data.pluginName).toBe('MOCK-EMPTY-REMOTE');
 });

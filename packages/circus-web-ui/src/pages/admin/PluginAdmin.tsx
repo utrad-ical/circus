@@ -84,6 +84,13 @@ interface RunConfiguration {
   timeout: number;
 }
 
+interface Parameters {
+  endpoint: string;
+  authentication: string;
+  maxConcurrency: number;
+  env: Record<string, string>;
+}
+
 interface RemoteRunConfiguration {
   adapter: string;
   parameters: Parameters;
@@ -93,24 +100,6 @@ const runConfigurationProperties: PropertyEditorProperties<RunConfiguration> = [
   { key: 'gpus', caption: 'GPUs', editor: et.text() },
   { key: 'timeout', caption: 'Timeout (sec)', editor: et.number({ min: 0 }) }
 ];
-
-const RunConfigurationEditor: et.Editor<RunConfiguration> = props => {
-  const { value, onChange } = props;
-  return (
-    <PropertyEditor
-      properties={runConfigurationProperties}
-      value={value}
-      onChange={onChange}
-    />
-  );
-};
-
-interface Parameters {
-  endpoint: string;
-  authentication: string;
-  maxConcurrency: number;
-  env: Record<string, string>;
-}
 
 const parametersProperties: PropertyEditorProperties<Parameters> = [
   { key: 'endpoint', caption: 'Endpoint', editor: et.text() },
@@ -130,20 +119,34 @@ const ParametersEditor: et.Editor<Parameters> = props => {
   );
 };
 
+const remoteRunConfigurationProperties: PropertyEditorProperties<RemoteRunConfiguration> =
+  [
+    { key: 'adapter', caption: 'Adapter', editor: et.text() },
+    {
+      key: 'parameters',
+      caption: 'Parameters',
+      editor: ParametersEditor
+    }
+  ];
+
+const RunConfigurationEditor: et.Editor<RunConfiguration> = props => {
+  const { value, onChange } = props;
+  return (
+    <PropertyEditor
+      properties={runConfigurationProperties}
+      value={value}
+      onChange={onChange}
+    />
+  );
+};
+
 const RemoteRunConfigurationEditor: et.Editor<
   RemoteRunConfiguration
 > = props => {
   const { value, onChange } = props;
   return (
     <PropertyEditor
-      properties={[
-        { key: 'adapter', caption: 'Adapter', editor: et.text() },
-        {
-          key: 'parameters',
-          caption: 'Parameters',
-          editor: ParametersEditor
-        }
-      ]}
+      properties={remoteRunConfigurationProperties}
       value={value}
       onChange={onChange}
     />

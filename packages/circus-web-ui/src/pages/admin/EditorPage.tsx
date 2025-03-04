@@ -82,7 +82,14 @@ const EditorPage: React.FC<{
         }
       })
     );
-  }, [api, dispatch, resource.endPoint, resource.primaryKey, searchName]);
+  }, [
+    api,
+    dispatch,
+    resource.endPoint,
+    resource.primaryKey,
+    searchName,
+    filter
+  ]);
 
   const handleEditStart = useCallback(
     (index, item) => {

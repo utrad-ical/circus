@@ -13,7 +13,7 @@ export const sseStreamWriter = <E extends SseEvent = SseEvent>() => {
   const writer = stream.writable.getWriter();
   const writeEvent = (event: E) => {
     writer.write(`event: ${event.type}\n`);
-    if (event.data) writer.write(`data: ${JSON.stringify(event.data)}\n`);
+    if ('data' in event) writer.write(`data: ${JSON.stringify(event.data)}\n`);
     writer.write('\n');
   };
   const writeComment = (comment: string) => writer.write(`: ${comment}\n`);
@@ -32,7 +32,7 @@ export const sseStreamReader = async function* <E extends SseEvent = SseEvent>(
   const buildEvent = (): SseEvent | null => {
     const event: SseEvent = { type: '', data: undefined };
     for (const line of lines) {
-      const [key, value] = line.split(': ', 2);
+      const [key, value] = line.split(/:\s(.+)/);
       if (key === 'event') {
         event.type = value;
       } else if (key === 'data') {

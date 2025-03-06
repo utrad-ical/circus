@@ -107,7 +107,7 @@ describe('pluginJobRunner00', () => {
         version: '1.0',
         type: 'CAD+remote',
         runConfiguration: {
-          adapter: 'gcp',
+          adapter: 'defaultHttpAdapter',
           parameters: {
             endpoint: 'http://localhost:7743',
             authentication: 'dummy-secret-token',

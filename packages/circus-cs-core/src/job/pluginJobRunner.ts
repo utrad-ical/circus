@@ -175,7 +175,11 @@ const pluginJobRunner: FunctionService<
         if (!runConfiguration)
           throw new Error('No runConfiguration in the plugin');
         const remoteAdapter = runConfiguration.adapter
-          ? adapters[runConfiguration.adapter]
+          ? adapters[
+              runConfiguration.adapter === 'default'
+                ? 'defaultHttpAdapter'
+                : runConfiguration.adapter
+            ]
           : undefined;
         if (!remoteAdapter)
           throw new Error(`No such adapter: ${runConfiguration.adapter}`);

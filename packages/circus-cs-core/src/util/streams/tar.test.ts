@@ -1,17 +1,30 @@
-import asset from 'node:assert';
+import assert from 'node:assert';
 import * as fs from 'node:fs/promises';
-import test from 'node:test';
-import { extractTarToDir, packDirToTar } from './tar.js';
+import { extractTarToDir, packDirToTar } from './tar';
 
 test('tar', async () => {
-  await fs.mkdir('test/extracted', { recursive: true });
+  const sampleDir = 'test/sample-input';
+  const extractedDir = 'test/extracted';
+
+  // make sample files
+  await fs.mkdir(sampleDir, { recursive: true });
+  await fs.writeFile(`${sampleDir}/0.txt`, 'sample text');
+  await fs.writeFile(`${sampleDir}/japan.jpg`, Buffer.from([0xff, 0xd8, 0xff])); // dummy JPEG data
+
+  await fs.mkdir(extractedDir, { recursive: true });
+
   try {
-    const tarStream = await packDirToTar('test/sample-input');
-    await extractTarToDir(tarStream, 'test/extracted');
-    const files = await fs.readdir('test/extracted');
-    asset(files.includes('0.txt'));
-    asset(files.includes('japan.jpg'));
+    // pack -> extract
+    const tarStream = await packDirToTar(sampleDir);
+    await extractTarToDir(tarStream, extractedDir);
+
+    // check extracted files
+    const files = await fs.readdir(extractedDir);
+    assert(files.includes('0.txt'));
+    assert(files.includes('japan.jpg'));
   } finally {
-    await fs.rm('test/extracted', { recursive: true });
+    // cleanup
+    await fs.rm(sampleDir, { recursive: true, force: true });
+    await fs.rm(extractedDir, { recursive: true, force: true });
   }
 });

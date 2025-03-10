@@ -5,6 +5,8 @@ import stream, { PassThrough } from 'stream';
 import tarfs from 'tar-fs';
 import * as circus from '../interface';
 import DockerRunner from '../util/DockerRunner';
+import { extractTarToDir, readLine } from '../util/streams';
+import adapters from './adapters/index';
 import buildDicomVolumes from './buildDicomVolumes';
 import pluginResultsValidator from './pluginResultsValidator';
 
@@ -14,12 +16,31 @@ export interface PluginJobRunner {
 
 type WorkDirType = 'in' | 'out' | 'dicom';
 
+const waitForFile = async (
+  filePath: string,
+  timeoutMs = 10000,
+  intervalMs = 500
+) => {
+  const startTime = Date.now();
+  while (Date.now() - startTime < timeoutMs) {
+    try {
+      await fs.access(filePath);
+      return true;
+    } catch {
+      await new Promise(res => setTimeout(res, intervalMs));
+    }
+  }
+  throw new Error(
+    `Timeout: File ${filePath} did not appear within ${timeoutMs}ms`
+  );
+};
+
 const pluginJobRunner: FunctionService<
   PluginJobRunner,
   {
     jobReporter: circus.PluginJobReporter;
     pluginDefinitionAccessor: circus.PluginDefinitionAccessor;
-    dockerRunner: DockerRunner;
+    dockerRunner?: DockerRunner;
     dicomVoxelDumper: circus.DicomVoxelDumper;
   }
 > = async (
@@ -78,6 +99,20 @@ const pluginJobRunner: FunctionService<
 
   const postProcess = async (jobId: string, logStream: stream.Writable) => {
     const outDir = workDir(jobId, 'out');
+    const timeoutMs = 2000;
+
+    const resultsPath = path.join(outDir, 'results.json');
+    logStream.write(
+      `  Waiting for results.json (timeout: ${timeoutMs}ms)...\n`
+    );
+
+    //Prevent the next step until results.json is created
+    try {
+      await waitForFile(resultsPath, timeoutMs, 500);
+    } catch (err: any) {
+      logStream.write(`[ERROR] ${err.message}\n`);
+      throw err;
+    }
 
     // Perform validation
     logStream.write('  Validating the results...\n');
@@ -112,25 +147,55 @@ const pluginJobRunner: FunctionService<
 
       await jobReporter.report(jobId, 'processing');
       await jobReporter.logStream(jobId, logStream);
-
       writeLog(`Runinng job ID: ${jobId}\n`);
       writeLog('Starting pre-process...\n');
       await preProcess(jobId, series, logStream);
 
       // mainProcess
-      writeLog('Executing the plug-in...\n\n');
-      const { stream, promise } = await executePlugin(
-        dockerRunner,
-        plugin,
-        workDir(jobId, 'in', true), // Plugin input dir containing volume data
-        workDir(jobId, 'out', true) // Plugin output dir that will have CAD results
-      );
-      stream.pipe(
-        logStream,
-        { end: false } // Keeps the logStream open
-      );
-      await promise;
+      if (plugin.type === 'CAD') {
+        if (!dockerRunner) {
+          writeLog('DockerRunner is not available\n');
+          throw new Error('DockerRunner is not available');
+        }
+        writeLog('Executing the plug-in (Docker)...\n\n');
+        const { stream, promise } = await executePlugin(
+          dockerRunner,
+          plugin,
+          workDir(jobId, 'in', true), // Plugin input dir containing volume data
+          workDir(jobId, 'out', true) // Plugin output dir that will have CAD results
+        );
+        stream.pipe(
+          logStream,
+          { end: false } // Keeps the logStream open
+        );
+        await promise;
+      } else {
+        writeLog('Executing the plug-in (Remote CAD)...\n\n');
+        const runConfiguration = plugin.runConfiguration;
+        if (!runConfiguration)
+          throw new Error('No runConfiguration in the plugin');
+        const remoteAdapter = runConfiguration.adapter
+          ? adapters[
+              runConfiguration.adapter === 'default'
+                ? 'defaultHttpAdapter'
+                : runConfiguration.adapter
+            ]
+          : undefined;
+        if (!remoteAdapter)
+          throw new Error(`No such adapter: ${runConfiguration.adapter}`);
+        const { logStream: remoteLogStream, result } = await remoteAdapter(
+          runConfiguration.parameters,
+          workDir(jobId, 'in')
+        );
+        for await (const line of readLine(remoteLogStream)) {
+          writeLog('[Remote CAD] ' + line);
+        }
+        const res = await result;
+        if (res.status !== 'finished')
+          throw new Error(`Remote CAD failed: ${res.errorMessage}`);
 
+        await extractTarToDir(res.resultStream, workDir(jobId, 'out'));
+      }
       writeLog('\n\nPlug-in execution done. Starting post-process...\n');
       await postProcess(jobId, logStream);
       await jobReporter.report(jobId, 'finished');

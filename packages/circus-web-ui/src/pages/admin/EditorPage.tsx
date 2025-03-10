@@ -40,6 +40,8 @@ const EditorPage: React.FC<{
   icon: string;
   makeEmptyItem: () => any;
   editorProperties: PropertyEditorProperties<any>;
+  filter?: object;
+  enableNewItem?: boolean;
 }> = props => {
   const [target, setTarget] = useState<any | null>(null);
   const [editing, setEditing] = useState<any>(null);
@@ -63,13 +65,15 @@ const EditorPage: React.FC<{
     targetName,
     icon,
     makeEmptyItem,
-    editorProperties
+    editorProperties,
+    filter = {},
+    enableNewItem = true
   } = props;
 
   const loadItems = useCallback(async () => {
     dispatch(
       newSearch(api, searchName, {
-        filter: {},
+        filter,
         condition: {},
         sort: '{}',
         resource: {
@@ -78,7 +82,14 @@ const EditorPage: React.FC<{
         }
       })
     );
-  }, [api, dispatch, resource.endPoint, resource.primaryKey, searchName]);
+  }, [
+    api,
+    dispatch,
+    resource.endPoint,
+    resource.primaryKey,
+    searchName,
+    filter
+  ]);
 
   const handleEditStart = useCallback(
     (index, item) => {
@@ -157,16 +168,18 @@ const EditorPage: React.FC<{
   return (
     <AdminContainer title={title} icon={icon} className="admin-editor">
       <SearchResultsView name={searchName} dataView={grid} active={editing} />
-      <p className="text-right">
-        <IconButton
-          icon="plus"
-          bsStyle="primary"
-          bsSize="small"
-          onClick={handleCreateItemClick}
-        >
-          Create new
-        </IconButton>
-      </p>
+      {enableNewItem && (
+        <p className="text-right">
+          <IconButton
+            icon="plus"
+            bsStyle="primary"
+            bsSize="small"
+            onClick={handleCreateItemClick}
+          >
+            Create new
+          </IconButton>
+        </p>
+      )}
       {editing && (
         <Editor
           key={target}

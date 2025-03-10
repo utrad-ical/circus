@@ -5,7 +5,7 @@ routes:
   - verb: get
     path: /plugins/:pluginId
     description: Gets the specified plug-in definition.
-    responseSchema: plugin|dbEntry
+    responseSchema: plugin|dbEntry/remotePlugin|dbEntry
   - verb: get
     path: /plugins
     handler: handleList
@@ -13,4 +13,6 @@ routes:
     responseSchema:
       type: array
       item:
-        $ref: plugin
+        oneOf:
+          - $ref: plugin
+          - $ref: remotePlugin

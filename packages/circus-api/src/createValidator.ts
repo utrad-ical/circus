@@ -6,6 +6,7 @@ import semver from 'semver';
 import * as path from 'path';
 import { isDicomUid, NoDepFunctionService } from '@utrad-ical/circus-lib';
 import { Validator } from './interface';
+import _ from 'lodash';
 
 interface Schema {
   $async?: boolean;
@@ -72,6 +73,7 @@ const customFormats: {
     }
   },
   dockerId: s => /^[a-z0-9]{64}$/.test(s),
+  remoteCadId: s => /^rmt-[a-z0-9]{64}$/.test(s),
   semver: s => semver.valid(s) !== null
 };
 
@@ -94,29 +96,36 @@ const createValidator: NoDepFunctionService<
   if (!Object.keys(schemas).length) console.warn('Schema directory is empty');
 
   const filterSchema = (schemaDef: string | object) => {
-    if (typeof schemaDef === 'object') return schemaDef;
+    if (typeof schemaDef === 'object') return [schemaDef];
     if (typeof schemaDef !== 'string') throw new TypeError('Invalid schema');
 
-    const [name, ...filterDefs] = schemaDef.split(/\s*\|\s*/);
-    let schema = schemas[name];
-    if (!schema) throw new TypeError('Unregistered schema name.');
+    const schemaParts = schemaDef.split('/').map(part => part.trim());
+    const schemaList = schemaParts.map(part => {
+      const [name, ...filterDefs] = part.split(/\s*\|\s*/);
+      let schema = schemas[name];
+      if (!schema) throw new TypeError(`Unregistered schema name: ${name}`);
 
-    for (const filterDef of filterDefs) {
-      const [filterName, ...args] = filterDef.trim().split(/\s+/);
-      const filter = (
-        {
-          allRequired: allRequiredSchema,
-          allRequiredExcept: allRequiredSchema,
-          only: onlySchema,
-          exclude: excludeSchema,
-          addProperty: addPropertySchema,
-          searchResult: searchResultSchema,
-          dbEntry: dbEntrySchema
-        } as { [name: string]: SchemaConverter }
-      )[filterName];
-      schema = filter.call(null, schema, ...args);
-    }
-    return schema;
+      for (const filterDef of filterDefs) {
+        const [filterName, ...args] = filterDef.trim().split(/\s+/);
+        const filter = (
+          {
+            allRequired: allRequiredSchema,
+            allRequiredExcept: allRequiredSchema,
+            only: onlySchema,
+            exclude: excludeSchema,
+            addProperty: addPropertySchema,
+            searchResult: searchResultSchema,
+            dbEntry: dbEntrySchema
+          } as { [name: string]: SchemaConverter }
+        )[filterName];
+        if (!filter) throw new TypeError(`Unknown filter: ${filterName}`);
+        schema = filter.call(null, schema, ...args);
+      }
+
+      return schema;
+    });
+
+    return schemaList;
   };
 
   /**
@@ -285,7 +294,8 @@ const createValidator: NoDepFunctionService<
   // We return an object that wraps the two Ajv instances.
   return {
     validate: async (schema: any, data: any, mode = 'default') => {
-      const theSchema = filterSchema(schema);
+      const isOr = typeof schema === 'string' ? schema.includes('/') : false;
+      const schemasToValidate = filterSchema(schema);
       const validators: { [mode: string]: Ajv.Ajv } = {
         default: validator,
         toDate: toDateValidator,
@@ -293,7 +303,42 @@ const createValidator: NoDepFunctionService<
         fillDefaults: fillDefaultsValidator
       };
       const validatorToUse = validators[mode];
-      data = await validatorToUse.validate(theSchema, data);
+
+      let validationError: any = null;
+
+      if (data.items && isOr) {
+        for (let index = 0; index < data.items.length; index++) {
+          const item = data.items[index];
+
+          for (const schemaToValidate of schemasToValidate) {
+            try {
+              const clonedData = _.cloneDeep({ ...data, items: [item] });
+              const validatedData = await validatorToUse.validate(
+                schemaToValidate,
+                clonedData
+              );
+              data.items[index] = validatedData.items[0];
+              validationError = null;
+              break;
+            } catch (err) {
+              validationError = err;
+            }
+          }
+
+          if (validationError) throw validationError;
+        }
+        return data;
+      }
+
+      for (const schemaToValidate of schemasToValidate) {
+        try {
+          const clonedData = _.cloneDeep(data);
+          return await validatorToUse.validate(schemaToValidate, clonedData);
+        } catch (err) {
+          validationError = err;
+        }
+      }
+      if (validationError) throw validationError;
       return data;
     },
     getSchema: (key: string) => {

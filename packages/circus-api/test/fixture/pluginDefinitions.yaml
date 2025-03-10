@@ -31,3 +31,14 @@
   type: CAD
   runConfiguration: {}
   displayStrategy: []
+- pluginId: rmt-d135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2
+  version: '1.0.0'
+  pluginName: MOCK-EMPTY-REMOTE
+  description: MOCK-EMPTY-REMOTE
+  icon:
+    glyph: brain
+    color: '#ffffff'
+    backgroundColor: '#666666'
+  type: 'CAD+remote'
+  runConfiguration: {}
+  displayStrategy: []

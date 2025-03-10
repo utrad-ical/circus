@@ -1,0 +1,91 @@
+$schema: 'http://json-schema.org/schema#'
+$async: true
+title: RemotePluginDefinition
+type: object
+description: >
+  Represents a CIRCUS CS plug-in (app).
+properties:
+  pluginId:
+    type: string
+    description: >
+      :key: The unique ID of this plug-in.
+  pluginName:
+    type: string
+    minLength: 1
+    maxLength: 128
+    description: >
+      Displayed plug-in name.
+  version:
+    type: string
+    format: semver
+    description: >
+      Semver-compatible plug-in version.
+  type:
+    enum: ['CAD+remote']
+    description: >
+      Plug-in type. The only supported value is 'CAD+remote'.
+  description:
+    type: string
+    maxLength: 128
+    description: >
+      Short text that describes what this plug-in does.
+  runConfiguration:
+    type: object
+    description: >
+      Installation-specific configurations.
+    properties:
+      adapter:
+        type: string
+        description: >
+          Adapter name.
+      parameters:
+        type: object
+        description: >
+          Parameters for the adapter.
+        properties:
+          endpoint:
+            type: string
+            description: >
+              Endpoint URL.
+          authentification:
+            type: string
+            description: >
+              Authentification method.
+          maxConcurrency:
+            type: integer
+            description: >
+              Maximum number of concurrent requests.
+          env:
+            type: array
+            items:
+              type: object
+              properties:
+                type:
+                  type: string
+                feedbackKey:
+                  type: string
+                caption:
+                  type: string
+                options:
+                  type: object
+            description: >
+              Environment variables.
+    additionalProperties: false
+  icon:
+    $ref: icon
+  displayStrategy:
+    type: array
+    items:
+      type: object
+      properties:
+        type:
+          type: string
+        feedbackKey:
+          type: string
+        caption:
+          type: string
+        options:
+          type: object
+    description: >
+      Determines how plug-in results are displayed and how feedback is collected.
+additionalProperties: false

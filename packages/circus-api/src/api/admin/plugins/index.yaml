@@ -4,10 +4,16 @@ description: >
 routes:
   - verb: get
     path: /admin/plugins
+    handler: handleSearch
     description: Gets the list of available plug-ins.
-    responseSchema: plugin|searchResult
+    responseSchema: plugin|searchResult/remotePlugin|searchResult
   - verb: patch
     path: /admin/plugins/:pluginId
-    requestSchema: plugin
+    requestSchema: plugin/remotePlugin
     requiredGlobalPrivilege: manageServer
     description: Updates plugin definition.
+  - verb: post
+    path: /admin/plugins
+    requestSchema: plugin/remotePlugin
+    requiredGlobalPrivilege: manageServer
+    description: Creates a new plug-in.

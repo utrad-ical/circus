@@ -5,6 +5,7 @@ import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import { Archiver } from 'archiver';
 import { EventEmitter } from 'events';
 import { Readable } from 'stream';
+import { RemoteCadDefinition } from 'util/remote-job';
 
 export type QueueState = 'wait' | 'processing';
 
@@ -94,7 +95,7 @@ export interface PluginDefinition {
   /**
    * Plug-in type. Currently the only accepted value is 'CAD'.
    */
-  type: 'CAD';
+  type: 'CAD' | 'CAD+remote';
 
   /**
    * Runtime to use for this plug-in container.
@@ -113,6 +114,11 @@ export interface PluginDefinition {
    * Max execution time for this plug-in.
    */
   maxExecutionSeconds?: number;
+
+  runConfiguration?: {
+    adapter: string;
+    parameters: RemoteCadDefinition;
+  };
 }
 
 export interface PluginDefinitionAccessor {

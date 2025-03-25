@@ -185,7 +185,7 @@ const TaskList: React.FC<{}> = props => {
   return (
     <div>
       <h1>
-        <Icon icon="tasks" /> Tasks
+        <Icon icon="material-checklist" /> Tasks
       </h1>
       <label>
         <input

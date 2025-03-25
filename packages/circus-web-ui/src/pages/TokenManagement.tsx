@@ -82,7 +82,7 @@ const TokenManagement: React.FC<{}> = props => {
   return (
     <div>
       <h1>
-        <Icon icon="bookmark" /> Permanent API Access Tokens
+        <Icon icon="material-bookmarks" /> Permanent API Access Tokens
       </h1>
       <p>
         API tokens can be used to access CIRCUS Rest API programmatically.
@@ -103,7 +103,7 @@ const TokenManagement: React.FC<{}> = props => {
               >
                 <div>
                   <div className="description">
-                    <Icon icon="bookmark" />
+                    <Icon icon="material-bookmark" />
                     &ensp;
                     {token.description}
                   </div>

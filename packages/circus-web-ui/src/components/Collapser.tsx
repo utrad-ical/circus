@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import classnames from 'classnames';
-import { Glyphicon } from 'components/react-bootstrap';
 import styled from 'styled-components';
+import Icon from 'components/Icon';
 
 const StyledDiv = styled.div`
   .collapser-header {
@@ -58,15 +58,8 @@ export const ControlledCollapser: React.FC<
     open?: boolean;
   }
 > = props => {
-  const {
-    open,
-    onToggleClick,
-    title,
-    children,
-    className,
-    framed,
-    noPadding
-  } = props;
+  const { open, onToggleClick, title, children, className, framed, noPadding } =
+    props;
   return (
     <StyledDiv
       className={classnames(
@@ -78,7 +71,7 @@ export const ControlledCollapser: React.FC<
       <a className="collapser-header" onClick={onToggleClick}>
         {title}
         &ensp;
-        <Glyphicon className="triangle" glyph="triangle-right" />
+        <Icon className="triangle" icon="material-arrow_right" />
       </a>
       {open && <div className="collapser-body">{children}</div>}
     </StyledDiv>

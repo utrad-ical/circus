@@ -84,7 +84,7 @@ const MyListHome: React.FC<{
   return (
     <div>
       <h1>
-        <Icon icon="glyphicon-folder-open" /> {title}
+        <Icon icon="material-folder_open" /> {title}
       </h1>
       <MyListArray
         value={lists}

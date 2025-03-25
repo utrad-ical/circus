@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Panel,
-  Glyphicon,
   Row,
   Col,
   ListGroup,
@@ -92,7 +91,7 @@ const MyProjects: React.FC<{}> = props => {
   return (
     <Panel bsStyle="primary">
       <Panel.Heading>
-        <Glyphicon glyph="education" /> My Projects
+        <Icon icon="material-school" /> My Projects
       </Panel.Heading>
       <ListGroup>
         {user.accessibleProjects.map(p => (
@@ -118,7 +117,7 @@ const MyProfile: React.FC<{}> = props => {
   return (
     <Panel bsStyle="primary" className="home-profile">
       <Panel.Heading>
-        <Glyphicon glyph="user" /> Profile
+        <Icon icon="material-person" /> Profile
       </Panel.Heading>
       <ListGroup>
         <ListGroupItem>
@@ -126,7 +125,7 @@ const MyProfile: React.FC<{}> = props => {
         </ListGroupItem>
         {user.globalPrivileges.indexOf('manageServer') > -1 ? (
           <ListGroupItem bsStyle="danger">
-            <Icon icon="warning-sign" />
+            <Icon icon="material-warning" />
             <strong>You have administrative privilege on CIRCUS DB!</strong>
             &ensp; Use this account only when you do administrative tasks.
           </ListGroupItem>

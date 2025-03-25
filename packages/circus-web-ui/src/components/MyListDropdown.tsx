@@ -62,7 +62,7 @@ const MyListDropdown: React.FC<{
     <DropdownButton
       id="series-mylist-dropdown"
       bsSize="sm"
-      title={<Icon icon="glyphicon-folder-open" />}
+      title={<Icon icon="material-folder_open" />}
     >
       {myLists.length > 0 &&
         myLists.map(list => (

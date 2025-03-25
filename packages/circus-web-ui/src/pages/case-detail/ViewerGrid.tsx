@@ -169,7 +169,7 @@ const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
         {viewerMode === '3d' && (
           <DropdownButton
             bsSize="xs"
-            title={<Icon icon="glyphicon-option-horizontal" />}
+            title={<Icon icon="material-more_horiz" />}
             id={`viewergrid-header-dropdown-${key}`}
             pullRight
             noCaret

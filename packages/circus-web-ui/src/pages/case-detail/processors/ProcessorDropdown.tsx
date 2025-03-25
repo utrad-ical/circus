@@ -13,7 +13,7 @@ const ProcessorDropdown: React.FC<{
     <DropdownButton
       onSelect={type => onSelect(type)}
       bsSize="xs"
-      title={<Icon icon="glyphicon-option-horizontal" />}
+      title={<Icon icon="material-more_horiz" />}
       id={`labelmenu-header-dropdown`}
       pullRight
       noCaret

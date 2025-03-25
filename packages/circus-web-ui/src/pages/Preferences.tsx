@@ -264,7 +264,7 @@ const Preferences: React.FC<{}> = props => {
       </h1>
       <Panel>
         <Panel.Heading>
-          <Icon icon="glyphicon-adjust" /> Appearance
+          <Icon icon="material-contrast" /> Appearance
         </Panel.Heading>
         <Panel.Body>
           <PropertyEditor
@@ -276,7 +276,7 @@ const Preferences: React.FC<{}> = props => {
       </Panel>
       <Panel>
         <Panel.Heading>
-          <Icon icon="search" /> Search
+          <Icon icon="material-search" /> Search
         </Panel.Heading>
         <Panel.Body>
           <PropertyEditor

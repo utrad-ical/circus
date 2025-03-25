@@ -159,7 +159,7 @@ const CaseSearchResultsView: React.FC<{
           <DropdownButton
             id="case-tags-dropdown"
             bsSize="sm"
-            title={<Icon icon="glyphicon-tag" />}
+            title={<Icon icon="material-sell" />}
           >
             {availableTags.map(tag => {
               const count = selected.filter(
@@ -199,7 +199,7 @@ const CaseSearchResultsView: React.FC<{
           <DropdownButton
             id="case-export-dropdown"
             bsSize="sm"
-            title={<Icon icon="glyphicon-option-horizontal" />}
+            title={<Icon icon="material-more_horiz" />}
           >
             <MenuItem
               eventKey="mhd"

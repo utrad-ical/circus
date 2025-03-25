@@ -73,13 +73,13 @@ const DeleteFeedbackModal: React.FC<{}> = () => {
   return (
     <>
       <Modal.Header>
-        <Icon icon="glyphicon-remove-sign" /> Delete Feedback
+        <Icon icon="material-delete" /> Delete Feedback
       </Modal.Header>
       <Modal.Body>
         {feedbacks.length > 0 ? (
           <>
             <div className="text-danger">
-              <Icon icon="glyphicon-warning-sign" />
+              <Icon icon="material-warning" />
               You cannot restore feedback once deleted.
             </div>
             <hr />

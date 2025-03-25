@@ -25,7 +25,7 @@ const PersonalConsensualSwitch: React.FC<{
         Personal Mode
       </IconButton>
       &thinsp;
-      <Icon icon="chevron-right" />
+      <Icon icon="material-chevron_right" />
       &thinsp;
       <IconButton
         icon={consensualEntered ? 'check' : 'tower'}

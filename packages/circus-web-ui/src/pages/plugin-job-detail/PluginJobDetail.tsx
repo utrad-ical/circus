@@ -82,17 +82,17 @@ const Menu: React.FC<{
     <DropdownButton
       id="submenu"
       bsStyle="link"
-      title={<Icon icon="menu-hamburger" />}
+      title={<Icon icon="material-menu" />}
       onSelect={onMenuSelect}
       pullRight
       noCaret
     >
       <MenuItem eventKey="deleteFeedback">
-        <Icon icon="remove" />
+        <Icon icon="material-delete" />
         &ensp;Delete feedback
       </MenuItem>
       <MenuItem eventKey="investigate">
-        <Icon icon="search" />
+        <Icon icon="material-search" />
         &ensp;Investigate
       </MenuItem>
     </DropdownButton>

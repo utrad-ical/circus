@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 import classNames from 'classnames';
-import { Glyphicon } from 'components/react-bootstrap';
+import Icon from 'components/Icon';
 
 const StyledSideBar = styled.div`
   overflow: hidden;
@@ -52,7 +52,7 @@ const SideContainer: React.FC<{}> = React.memo(props => {
   return (
     <StyledSideBar className={classNames({ open })}>
       <div className="bar" onClick={handleToggle}>
-        <Glyphicon className="triangle" glyph="triangle-right" />
+        <Icon className="triangle" icon="material-arrow_right" />
       </div>
       {open && <div className="scrollable">{props.children}</div>}
     </StyledSideBar>

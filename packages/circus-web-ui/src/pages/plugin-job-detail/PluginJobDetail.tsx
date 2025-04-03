@@ -88,7 +88,7 @@ const Menu: React.FC<{
       noCaret
     >
       <MenuItem eventKey="deleteFeedback">
-        <Icon icon="material-delete" />
+        <Icon icon="material-close" />
         &ensp;Delete feedback
       </MenuItem>
       <MenuItem eventKey="investigate">
@@ -443,7 +443,9 @@ const PluginJobDetail: React.FC<{}> = props => {
             </Fragment>
           )}
           <IconButton
-            icon={feedbackState.isConsensual ? 'tower' : 'user'}
+            icon={
+              feedbackState.isConsensual ? 'material-crown' : 'material-person'
+            }
             disabled={!feedbackState.valid || busy}
             onClick={handleRegisterClick}
           >

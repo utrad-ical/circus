@@ -36,7 +36,7 @@ const PresetDeleteEditor: et.Editor<SearchPreset[] | undefined> = props => {
             <IconButton
               bsSize="xs"
               bsStyle="primary"
-              icon="remove"
+              icon="material-close"
               onClick={() => handleDeleteClick(preset.name)}
             >
               Delete
@@ -105,7 +105,7 @@ const TemplateEditor: et.Editor<string[] | undefined> = props => {
                 <IconButton
                   bsSize="xs"
                   bsStyle="primary"
-                  icon="remove"
+                  icon="material-close"
                   onClick={() => handleDeleteClick(message)}
                 >
                   Delete

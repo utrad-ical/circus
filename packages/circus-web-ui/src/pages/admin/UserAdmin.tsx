@@ -135,7 +135,7 @@ const UserAdmin: React.FC<any> = props => {
   return (
     <EditorPage
       title="Users"
-      icon="user"
+      icon="material-person"
       searchName="admin-user"
       resource={{ endPoint: 'admin/users', primaryKey: 'userEmail' }}
       editorProperties={editorProperties}

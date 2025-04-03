@@ -11,7 +11,7 @@ const CopyToClipboardButton: React.FC<{
   return (
     <IconButton
       title="Copy to clipboard"
-      icon="glyphicon-copy"
+      icon="material-content_copy"
       bsSize={bsSize}
       bsStyle="link"
       onClick={() => navigator.clipboard.writeText(string)}

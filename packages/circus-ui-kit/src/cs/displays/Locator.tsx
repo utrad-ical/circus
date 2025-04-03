@@ -362,7 +362,7 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
                     {editable && (
                       <Button
                         size="xs"
-                        icon="glyphicon-remove"
+                        icon="material-close"
                         onClick={() => handleRemovePoint(i)}
                       />
                     )}

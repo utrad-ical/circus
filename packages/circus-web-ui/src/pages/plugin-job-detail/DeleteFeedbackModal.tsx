@@ -73,7 +73,7 @@ const DeleteFeedbackModal: React.FC<{}> = () => {
   return (
     <>
       <Modal.Header>
-        <Icon icon="material-delete" /> Delete Feedback
+        <Icon icon="material-close" /> Delete Feedback
       </Modal.Header>
       <Modal.Body>
         {feedbacks.length > 0 ? (

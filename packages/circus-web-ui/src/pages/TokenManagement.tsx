@@ -116,7 +116,7 @@ const TokenManagement: React.FC<{}> = props => {
                 </div>
                 <IconButton
                   bsStyle="warning"
-                  icon="remove"
+                  icon="material-close"
                   onClick={() => handleRemove(token.tokenId)}
                 >
                   Remove
@@ -146,7 +146,7 @@ const TokenManagement: React.FC<{}> = props => {
             bsStyle="primary"
             disabled={description.length <= 0}
             onClick={handleCreate}
-            icon="plus"
+            icon="material-add"
           >
             Create
           </IconButton>

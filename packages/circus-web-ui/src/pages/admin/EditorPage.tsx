@@ -1,4 +1,4 @@
-import IconButton from '@smikitky/rb-components/lib/IconButton';
+import IconButton from 'components/IconButton';
 import PropertyEditor, {
   PropertyEditorProperties
 } from '@smikitky/rb-components/lib/PropertyEditor';
@@ -171,7 +171,7 @@ const EditorPage: React.FC<{
       {enableNewItem && (
         <p className="text-right">
           <IconButton
-            icon="plus"
+            icon="material-add"
             bsStyle="primary"
             bsSize="small"
             onClick={handleCreateItemClick}

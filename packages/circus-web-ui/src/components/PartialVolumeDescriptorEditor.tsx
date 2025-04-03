@@ -77,7 +77,7 @@ const PartialVolumeDescriptorEditor: React.FC<{
             <b>Preview:</b> {describePartialVolumeDescriptor(descriptor)}
           </span>
           <IconButton
-            icon="glyphicon-transfer"
+            icon="material-swap_horiz"
             disabled={!isValid}
             onClick={handleFlip}
           >

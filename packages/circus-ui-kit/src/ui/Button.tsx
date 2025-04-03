@@ -6,6 +6,7 @@ type Size = 'sm' | 'lg' | 'xs';
 
 const iconPrefixMap: { [prefix: string]: string } = {
   'glyphicon-': 'glyphicon glyphicon-',
+  'material-': '',
   'circus-': 'circus-icon circus-icon-',
   'rs-': 'rs-icon-',
   default: 'glyphicon glyphicon-'
@@ -42,7 +43,7 @@ export const Button: React.FC<{
   const iconClass = icon
     ? iconPrefixMap[matchedPrefix] + icon.replace(matchedPrefix, '')
     : undefined;
-
+  const name = icon && icon.substring(matchedPrefix.length);
   return (
     <StyledButton
       ref={ref}
@@ -53,7 +54,11 @@ export const Button: React.FC<{
       style={style}
       className={classNames(className, { selected })}
     >
-      {icon && <span className={iconClass} />}
+      {icon && matchedPrefix === 'material-' ? (
+        <StyledSpan>{name}</StyledSpan>
+      ) : (
+        <span className={iconClass} />
+      )}
       {children}
     </StyledButton>
   );
@@ -77,6 +82,7 @@ const StyledButton = styled.button`
   background-color: ${(props: any) => props.theme.background ?? 'transparent'};
   color: ${(props: any) => props.color ?? props.theme.textColor};
   font-size: ${(props: any) => fontSizes[props.size] ?? fontSizes.default};
+  vertical-align: middle;
   &.selected {
     background-color: ${(props: any) =>
       props.color ?? props.theme.brandPrimary};
@@ -89,4 +95,11 @@ const StyledButton = styled.button`
     filter: none;
     opacity: 0.5;
   }
+`;
+
+const StyledSpan = styled.span`
+  font-family: 'Material Symbols Outlined';
+  display: inline-block;
+  line-height: 1;
+  vertical-align: middle;
 `;

@@ -1,4 +1,4 @@
-import IconButton from '@smikitky/rb-components/lib/IconButton';
+import IconButton from 'components/IconButton';
 import { confirm, prompt } from '@smikitky/rb-components/lib/modal';
 import Icon from 'components/Icon';
 import MyListArray from './MyListArray';
@@ -99,7 +99,7 @@ const MyListHome: React.FC<{
       )}
       <IconButton
         bsStyle="primary"
-        icon="glyphicon-plus"
+        icon="material-add"
         onClick={handleCreateNew}
       >
         Create new my list

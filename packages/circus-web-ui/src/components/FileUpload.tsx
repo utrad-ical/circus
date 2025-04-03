@@ -223,7 +223,7 @@ const SummaryTable: React.FC<{
               <td className="text-right">{withCommas(f.size)}</td>
               <td>
                 <IconButton
-                  icon="remove"
+                  icon="material-close"
                   bsSize="xs"
                   onClick={() => handleDelete(i)}
                 />

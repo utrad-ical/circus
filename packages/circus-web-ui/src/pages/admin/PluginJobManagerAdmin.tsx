@@ -47,13 +47,13 @@ const PluginJobManagerAdmin: React.FC<{}> = props => {
   const handleStopClick = () => postSwitch('stopped');
 
   return (
-    <AdminContainer title="Plugin Job Manager" icon="th-large">
+    <AdminContainer title="Plugin Job Manager" icon="material-grid_view">
       <Panel bsStyle="primary">
         <Panel.Heading>Status</Panel.Heading>
         <Panel.Body>{busy ? <LoadingIndicator /> : status}</Panel.Body>
         <Panel.Footer>
           <IconButton
-            icon="play"
+            icon="material-play_arrow"
             bsSize="large"
             bsStyle="primary"
             onClick={handleStartClick}
@@ -62,7 +62,7 @@ const PluginJobManagerAdmin: React.FC<{}> = props => {
           </IconButton>
           &ensp;
           <IconButton
-            icon="stop"
+            icon="material-stop"
             bsSize="large"
             bsStyle="danger"
             onClick={handleStopClick}
@@ -71,7 +71,7 @@ const PluginJobManagerAdmin: React.FC<{}> = props => {
           </IconButton>
           &ensp;
           <IconButton
-            icon="refresh"
+            icon="material-autorenew"
             bsSize="large"
             bsStyle="link"
             onClick={() => refresh(true)}

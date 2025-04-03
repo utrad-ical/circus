@@ -170,7 +170,7 @@ const CaseSearchResultsView: React.FC<{
                   <IconButton
                     bsSize="xs"
                     bsStyle="default"
-                    icon="glyphicon-plus"
+                    icon="material-add"
                     onClick={() => handleSetTags('add', tag.name)}
                     disabled={count === selected.length}
                   />
@@ -178,7 +178,7 @@ const CaseSearchResultsView: React.FC<{
                   <IconButton
                     bsSize="xs"
                     bsStyle="default"
-                    icon="glyphicon-remove"
+                    icon="material-close"
                     onClick={() => handleSetTags('remove', tag.name)}
                     disabled={count === 0}
                   />

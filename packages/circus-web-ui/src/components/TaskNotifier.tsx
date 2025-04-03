@@ -127,7 +127,7 @@ const TaskDisplay: React.FC<{
           <IconButton
             bsSize="sm"
             bsStyle="success"
-            icon="glyphicon-download"
+            icon="material-arrow_circle_down"
             onClick={handleDownloadClick}
           />
         )}
@@ -136,7 +136,7 @@ const TaskDisplay: React.FC<{
           onClick={onDismissClick}
           bsSize="sm"
           bsStyle="primary"
-          icon="glyphicon-check"
+          icon="material-select_check_box"
         />
       </div>
       <TaskProgressBar

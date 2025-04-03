@@ -191,7 +191,7 @@ const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
         )}
         <IconButton
           bsSize="xs"
-          icon="glyphicon-remove"
+          icon="material-close"
           onClick={handleRemoveClick}
           disabled={Object.keys(editingData.layout.positions).length <= 1}
         />

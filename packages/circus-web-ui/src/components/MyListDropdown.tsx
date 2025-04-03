@@ -70,14 +70,14 @@ const MyListDropdown: React.FC<{
             <IconButton
               bsSize="xs"
               bsStyle="default"
-              icon="glyphicon-plus"
+              icon="material-add"
               onClick={() => handleAddRemove('add', list.myListId)}
             />
             &thinsp;
             <IconButton
               bsSize="xs"
               bsStyle="default"
-              icon="glyphicon-remove"
+              icon="material-close"
               onClick={() => handleAddRemove('remove', list.myListId)}
             />
             &nbsp;

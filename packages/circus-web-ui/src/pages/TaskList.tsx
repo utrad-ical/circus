@@ -77,7 +77,7 @@ const columns: DataGridColumnDefinition<Task>[] = [
         <IconButton
           bsStyle="success"
           bsSize="sm"
-          icon="glyphicon-download"
+          icon="material-arrow_circle_down"
           onClick={handleClick}
         />
       ) : (
@@ -96,7 +96,7 @@ const columns: DataGridColumnDefinition<Task>[] = [
           bsSize="sm"
           bsStyle="primary"
           onClick={() => dismissTask(value.taskId)}
-          icon="glyphicon-check"
+          icon="material-select_check_box"
         >
           Done
         </IconButton>
@@ -159,7 +159,7 @@ const DebugTaskLauncher: React.FC = props => {
 
   return (
     <div>
-      <IconButton icon="glyphicon-plus" onClick={handleClick}>
+      <IconButton icon="material-add" onClick={handleClick}>
         Run debug task
       </IconButton>
     </div>

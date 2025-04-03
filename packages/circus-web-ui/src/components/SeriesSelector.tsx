@@ -31,7 +31,7 @@ const PartialVolumeRenderer: React.FC<{
 
   return (
     <IconButton
-      icon="edit"
+      icon="material-edit_square"
       bsSize="xs"
       onClick={onClick}
       bsStyle={applied ? 'success' : 'default'}
@@ -64,7 +64,7 @@ const RelevantSeries: React.FC<{
           caption: '',
           renderer: ({ value }) => (
             <IconButton
-              icon="chevron-up"
+              icon="material-keyboard_arrow_up"
               bsSize="xs"
               bsStyle="primary"
               onClick={() => onSeriesRegister(value.seriesUid, value.studyUid)}
@@ -299,7 +299,7 @@ const SeriesSelector: React.FC<{
       renderer: ({ value, index }) => (
         <IconButton
           bsSize="xs"
-          icon="remove"
+          icon="material-close"
           onClick={() => handleSeriesRemove(index)}
         />
       )
@@ -314,7 +314,11 @@ const SeriesSelector: React.FC<{
         <SelectAdditionalSeriesDiv>
           {!alwaysShowRelevantSeries && (
             <IconButton
-              icon={showRelevantSeries ? 'chevron-up' : 'plus'}
+              icon={
+                showRelevantSeries
+                  ? 'material-keyboard_arrow_up'
+                  : 'material-add'
+              }
               bsSize="sm"
               onClick={handleAddSeriesClick}
             >

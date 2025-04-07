@@ -4,7 +4,7 @@ mongod --config /etc/mongod.conf
 /usr/sbin/nginx -c /etc/nginx/nginx.conf
 
 cd /var/circus/packages/circus-api
-pm2 start server.js --node-args="server.js"
+IP=0.0.0.0 pm2 start server.js --node-args="server.js"
 
 if [ $AUTO_BOOT_JOB_MANAGER = 1 ]; then
     cd /var/circus/packages/circus-cs-core

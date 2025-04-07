@@ -23,7 +23,7 @@ RUN apt-get install -y\
 RUN curl -SL https://www.mongodb.org/static/pgp/server-5.0.asc | apt-key add - &&\
     echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/5.0 multiverse"\
      | tee /etc/apt/sources.list.d/mongodb-org-5.0.list
-RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - &&\
+RUN curl -sL https://deb.nodesource.com/setup_22.x | bash - &&\
     touch /etc/apt/sources.list.d/nginx.list &&\
     echo "deb http://nginx.org/packages/ubuntu/ precise nginx" >> /etc/apt/sources.list.d/nginx.list &&\
     echo "deb-src http://nginx.org/packages/ubuntu/ precise nginx" >> /etc/apt/sources.list.d/nginx.list &&\

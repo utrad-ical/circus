@@ -39,7 +39,10 @@ const remoteCadImpl: RemoteAdapter = async (
 
       // Add timeout to prevent hanging connections
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minutes timeout
+      const timeoutId = setTimeout(
+        () => controller.abort(),
+        (cadDefinition.timeout ?? 300) * 1000
+      ); // 5 minutes timeout
 
       const req = new Request(`${cadDefinition.endpoint}/run`, {
         method: 'POST',

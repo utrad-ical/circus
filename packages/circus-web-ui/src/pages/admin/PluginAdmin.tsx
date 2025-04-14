@@ -88,6 +88,7 @@ interface Parameters {
   endpoint: string;
   authentication: string;
   maxConcurrency: number;
+  timeout: number;
   env: Record<string, string>;
 }
 
@@ -105,6 +106,7 @@ const parametersProperties: PropertyEditorProperties<Parameters> = [
   { key: 'endpoint', caption: 'Endpoint', editor: et.text() },
   { key: 'authentication', caption: 'Authentication', editor: et.text() },
   { key: 'maxConcurrency', caption: 'Max Concurrency', editor: et.number() },
+  { key: 'timeout', caption: 'Timeout (sec)', editor: et.number({ min: 0 }) },
   { key: 'env', caption: 'Environment Variables', editor: JsonEditor }
 ];
 

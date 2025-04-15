@@ -26,6 +26,7 @@ const makeEmptyItem = (type: PluginType) => ({
             endpoint: '',
             authentication: '',
             maxConcurrency: 1,
+            timeout: 300,
             env: []
           }
         },

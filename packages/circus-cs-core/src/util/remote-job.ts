@@ -3,7 +3,7 @@ export interface RemoteCadDefinition {
   authentication: string;
   maxConcurrency: number;
   env: Record<string, string>;
-  timeout?: number;
+  timeout: number;
 }
 
 export type JobStatus = 'finished' | 'failed';

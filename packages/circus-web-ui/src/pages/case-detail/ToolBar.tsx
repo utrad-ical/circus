@@ -654,7 +654,7 @@ export default ToolBar;
 
 const CheckMark: React.FC<{ checked: boolean }> = props => (
   <span className="checkmark">
-    {props.checked && <Icon icon="glyphicon-ok" />}
+    {props.checked && <Icon icon="material-check" />}
   </span>
 );
 
@@ -707,19 +707,20 @@ const ToolButton: React.FC<{
   }
 };
 
-const MenuItemWithShortcut: React.FC<{ shortcut?: string } & MenuItemProps> =
-  props => {
-    const { shortcut, children, ...rest } = props;
-    useKeyboardShortcut(shortcut, props.onClick || (() => {}));
-    return (
-      <MenuItem {...rest}>
-        <ShortcutBox>
-          <span>{children}</span>
-          {shortcut && <kbd>{shortcut}</kbd>}
-        </ShortcutBox>
-      </MenuItem>
-    );
-  };
+const MenuItemWithShortcut: React.FC<
+  { shortcut?: string } & MenuItemProps
+> = props => {
+  const { shortcut, children, ...rest } = props;
+  useKeyboardShortcut(shortcut, props.onClick || (() => {}));
+  return (
+    <MenuItem {...rest}>
+      <ShortcutBox>
+        <span>{children}</span>
+        {shortcut && <kbd>{shortcut}</kbd>}
+      </ShortcutBox>
+    </MenuItem>
+  );
+};
 
 const ShortcutBox = styled.div`
   display: flex;

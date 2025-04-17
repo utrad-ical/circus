@@ -62,7 +62,7 @@ const MyListDropdown: React.FC<{
     <DropdownButton
       id="series-mylist-dropdown"
       bsSize="sm"
-      title={<Icon icon="glyphicon-folder-open" />}
+      title={<Icon icon="material-folder_open" />}
     >
       {myLists.length > 0 &&
         myLists.map(list => (
@@ -70,14 +70,14 @@ const MyListDropdown: React.FC<{
             <IconButton
               bsSize="xs"
               bsStyle="default"
-              icon="glyphicon-plus"
+              icon="material-add"
               onClick={() => handleAddRemove('add', list.myListId)}
             />
             &thinsp;
             <IconButton
               bsSize="xs"
               bsStyle="default"
-              icon="glyphicon-remove"
+              icon="material-close"
               onClick={() => handleAddRemove('remove', list.myListId)}
             />
             &nbsp;

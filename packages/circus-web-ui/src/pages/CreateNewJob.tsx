@@ -135,7 +135,7 @@ const CreateNewJob: React.FC<{}> = props => {
           <>
             <IconButton
               disabled={!canCreate}
-              icon="download"
+              icon="material-arrow_circle_down"
               bsStyle="default"
               onClick={handleVolumeDownload}
             >

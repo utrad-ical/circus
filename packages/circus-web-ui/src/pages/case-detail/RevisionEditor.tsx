@@ -991,7 +991,7 @@ const RevisionEditor: React.FC<{
           <div className="add-series-pane">
             <IconButton
               bsSize="xs"
-              icon="plus"
+              icon="material-add"
               onClick={handleModifySeries}
               disabled={busy}
             >

@@ -17,7 +17,9 @@ const PersonalConsensualSwitch: React.FC<{
   return (
     <div>
       <IconButton
-        icon={myPersonalEntered ? 'check' : 'user'}
+        icon={
+          myPersonalEntered ? 'material-select_check_box' : 'material-person'
+        }
         bsStyle={isConsensual ? 'default' : 'primary'}
         active={!isConsensual}
         onClick={() => onChange(false)}
@@ -25,10 +27,12 @@ const PersonalConsensualSwitch: React.FC<{
         Personal Mode
       </IconButton>
       &thinsp;
-      <Icon icon="chevron-right" />
+      <Icon icon="material-chevron_right" />
       &thinsp;
       <IconButton
-        icon={consensualEntered ? 'check' : 'tower'}
+        icon={
+          consensualEntered ? 'material-select_check_box' : 'material-crown'
+        }
         bsStyle={isConsensual ? 'primary' : 'default'}
         active={isConsensual}
         disabled={!consensualEntered && !myPersonalEntered}

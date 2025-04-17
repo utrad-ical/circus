@@ -159,7 +159,7 @@ const CaseSearchResultsView: React.FC<{
           <DropdownButton
             id="case-tags-dropdown"
             bsSize="sm"
-            title={<Icon icon="glyphicon-tag" />}
+            title={<Icon icon="material-sell" />}
           >
             {availableTags.map(tag => {
               const count = selected.filter(
@@ -170,7 +170,7 @@ const CaseSearchResultsView: React.FC<{
                   <IconButton
                     bsSize="xs"
                     bsStyle="default"
-                    icon="glyphicon-plus"
+                    icon="material-add"
                     onClick={() => handleSetTags('add', tag.name)}
                     disabled={count === selected.length}
                   />
@@ -178,7 +178,7 @@ const CaseSearchResultsView: React.FC<{
                   <IconButton
                     bsSize="xs"
                     bsStyle="default"
-                    icon="glyphicon-remove"
+                    icon="material-close"
                     onClick={() => handleSetTags('remove', tag.name)}
                     disabled={count === 0}
                   />
@@ -199,7 +199,7 @@ const CaseSearchResultsView: React.FC<{
           <DropdownButton
             id="case-export-dropdown"
             bsSize="sm"
-            title={<Icon icon="glyphicon-option-horizontal" />}
+            title={<Icon icon="material-more_horiz" />}
           >
             <MenuItem
               eventKey="mhd"

@@ -203,7 +203,7 @@ const SearchResultsView: React.FC<{
           {sortOptions && (
             <Fragment>
               &emsp;
-              <Icon icon="sort" />
+              <Icon icon="material-swap_vert" />
               &ensp;
               <ShrinkSelect
                 bsSize="sm"

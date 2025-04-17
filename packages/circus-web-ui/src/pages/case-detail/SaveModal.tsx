@@ -67,7 +67,7 @@ const SaveModal: React.FC<{
         {templates.length > 0 && (
           <Dropdown id="revision-templates-dropdown">
             <DropdownToggle>
-              <Icon icon="glyphicon-repeat" />
+              <Icon icon="material-replay" />
             </DropdownToggle>
             <Dropdown.Menu>
               {templates.map((template, index) => (

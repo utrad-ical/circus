@@ -1,4 +1,4 @@
-import Icon from '@smikitky/rb-components/lib/Icon';
+import Icon from 'components/Icon';
 import { confirm } from '@smikitky/rb-components/lib/modal';
 import DataGrid, {
   DataGridColumnDefinition,
@@ -74,7 +74,7 @@ const Operation: DataGridRenderer<any> = props => {
       &thinsp;
       <DropdownButton
         bsSize="sm"
-        title={<Icon icon="glyphicon-option-horizontal" />}
+        title={<Icon icon="material-more_horiz" />}
         id={`dropdown-`}
         pullRight
         noCaret

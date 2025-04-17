@@ -29,7 +29,7 @@ const AutoReloadSwitch: React.FC<{
   return (
     <Fragment>
       <a onClick={onRefresh}>
-        <Icon bsStyle="link" icon="refresh" />
+        <Icon className="text-link" icon="material-autorenew" />
       </a>
       &ensp;
       <ShrinkSelect

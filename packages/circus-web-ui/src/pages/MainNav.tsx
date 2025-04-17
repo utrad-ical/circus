@@ -80,7 +80,7 @@ const NextPreviousButtons: React.FC<{
         to={prevLink}
         className={classnames('link-prev', { disabled: prevLinkDisabled })}
       >
-        <Icon icon="arrow-left" />
+        <Icon icon="material-arrow_left_alt" />
         &ensp; Prev
       </Link>
       <Link
@@ -88,7 +88,7 @@ const NextPreviousButtons: React.FC<{
         className={classnames('link-next', { disabled: nextLinkDisabled })}
       >
         Next &ensp;
-        <Icon icon="arrow-right" />
+        <Icon icon="material-arrow_right_alt" />
       </Link>
     </li>
   );
@@ -236,7 +236,7 @@ const MyListMenuItems: React.FC<{
   return (
     <React.Fragment>
       <SubMenu
-        icon="glyphicon-folder-open"
+        icon="material-folder_open"
         name="My List"
         link={`/browse/${endPoint}/mylist`}
       />
@@ -246,7 +246,7 @@ const MyListMenuItems: React.FC<{
           <SubMenu
             key={l.myListId}
             sub
-            icon="chevron-right"
+            icon="material-chevron_right"
             name={l.name}
             link={`/browse/${endPoint}/mylist/${l.myListId}`}
           />
@@ -297,12 +297,16 @@ const MainNav: React.FC<{}> = props => {
             </Link>
           </li>
           <Menu name="Series" link="/browse/series">
-            <SubMenu icon="search" name="Series Search" link="/browse/series" />
+            <SubMenu
+              icon="material-search"
+              name="Series Search"
+              link="/browse/series"
+            />
             {seriesSearchPresets.map(preset => (
               <SubMenu
                 key={preset.name}
                 sub
-                icon="chevron-right"
+                icon="material-chevron_right"
                 name={preset.name}
                 link={`/browse/series/preset/${encodeURIComponent(
                   preset.name
@@ -328,12 +332,16 @@ const MainNav: React.FC<{}> = props => {
                 prefix="/case"
               />
             )}
-            <SubMenu icon="search" name="Case Search" link="/browse/case" />
+            <SubMenu
+              icon="material-search"
+              name="Case Search"
+              link="/browse/case"
+            />
             {caseSearchPresets.map(preset => (
               <SubMenu
                 key={preset.name}
                 sub
-                icon="chevron-right"
+                icon="material-chevron_right"
                 name={preset.name}
                 link={`/browse/case/preset/${encodeURIComponent(preset.name)}`}
               />
@@ -343,7 +351,7 @@ const MainNav: React.FC<{}> = props => {
               resourceType="clinicalCases"
               endPoint="case"
             />
-            {/* <SubMenu icon="open" name="Case Import" link="/import-case" /> */}
+            {/* <SubMenu icon="material-upload_2" name="Case Import" link="/import-case" /> */}
           </Menu>
           <Menu name="CAD" icon="circus-icon-job" link="/browse/plugin-jobs">
             {showNextPreviousPluginJobButton && (
@@ -354,7 +362,7 @@ const MainNav: React.FC<{}> = props => {
               />
             )}
             <SubMenu
-              icon="search"
+              icon="material-search"
               name="Plugin Job Search"
               link="/browse/plugin-jobs"
             />
@@ -362,7 +370,7 @@ const MainNav: React.FC<{}> = props => {
               <SubMenu
                 key={preset.name}
                 sub
-                icon="chevron-right"
+                icon="material-chevron_right"
                 name={preset.name}
                 link={`/browse/plugin-jobs/preset/${encodeURIComponent(
                   preset.name
@@ -375,7 +383,7 @@ const MainNav: React.FC<{}> = props => {
               endPoint="plugin-jobs"
             />
             <SubMenu
-              icon="tasks"
+              icon="material-checklist"
               name="Show Job Queue"
               link="/plugin-job-queue"
             />
@@ -387,32 +395,44 @@ const MainNav: React.FC<{}> = props => {
                 target="_blank"
                 rel="noreferrer"
               >
-                <Icon icon="search" />
+                <Icon icon="material-search" />
                 &ensp;Documentation
               </a>
             </li>
-            <SubMenu icon="tasks" name="Task List" link="/task-list" />
+            <SubMenu icon="material-lists" name="Task List" link="/task-list" />
             <SubMenu
               icon="circus-preference"
               name="Preference"
               link="/preference"
             />
-            <SubMenu icon="bookmark" name="Access Tokens" link="/tokens" />
+            <SubMenu
+              icon="material-bookmarks"
+              name="Access Tokens"
+              link="/tokens"
+            />
           </Menu>
           {isAdmin && (
             <Menu name="Administration" link="/admin">
               <SubMenu
-                icon="th-large"
+                icon="material-grid_view"
                 name="Server Configuration"
                 link="/admin/general"
               />
-              <SubMenu icon="record" name="Groups" link="/admin/group" />
-              <SubMenu icon="user" name="Users" link="/admin/user" />
+              <SubMenu
+                icon="material-radio_button_checked"
+                name="Groups"
+                link="/admin/group"
+              />
+              <SubMenu icon="material-person" name="Users" link="/admin/user" />
               <MenuHeader>CIRCUS DB</MenuHeader>
-              <SubMenu icon="education" name="Projects" link="/admin/project" />
+              <SubMenu
+                icon="material-school"
+                name="Projects"
+                link="/admin/project"
+              />
               <MenuHeader>CIRCUS CS</MenuHeader>
               <SubMenu
-                icon="list-alt"
+                icon="material-list_alt"
                 name="Job Manager"
                 link="/admin/plugin-job-manager"
               />
@@ -422,7 +442,7 @@ const MainNav: React.FC<{}> = props => {
                 link="/admin/plugins"
               />
               <SubMenu
-                icon="list"
+                icon="material-lists"
                 name="Job Queue"
                 link="/admin/plugin-job-queue"
               />

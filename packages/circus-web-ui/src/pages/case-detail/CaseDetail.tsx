@@ -14,7 +14,6 @@ import TimeDisplay from 'components/TimeDisplay';
 import {
   Button,
   DropdownButton,
-  Glyphicon,
   MenuItem,
   Modal
 } from 'components/react-bootstrap';
@@ -452,19 +451,19 @@ const MenuBar: React.FC<{
             caseStore.labelsWithInvalidAttributes.length > 0
           }
         >
-          <Glyphicon glyph="save" />
+          <Icon icon="material-download_2" />
           Save
         </Button>
         <DropdownButton
           id="submenu"
           bsStyle="link"
-          title={<Icon icon="menu-hamburger" />}
+          title={<Icon icon="material-menu" />}
           pullRight
           noCaret
           disabled={busy}
         >
           <MenuItem eventKey="1" onSelect={() => onCommand('revert')}>
-            <Icon icon="remove" />
+            <Icon icon="material-close" />
             &ensp;Revert
           </MenuItem>
           <MenuItem divider />
@@ -473,7 +472,7 @@ const MenuBar: React.FC<{
             disabled={!user.globalPrivileges.includes('downloadVolume')}
             onSelect={() => onCommand('exportMhd')}
           >
-            <Icon icon="export" />
+            <Icon icon="material-file_export" />
             Export as MHD
           </MenuItem>
         </DropdownButton>

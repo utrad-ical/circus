@@ -1,10 +1,5 @@
 import React, { useState, useRef } from 'react';
-import {
-  Button,
-  ButtonToolbar,
-  Glyphicon,
-  ProgressBar
-} from './react-bootstrap';
+import { Button, ButtonToolbar, ProgressBar } from './react-bootstrap';
 import { FileDroppable } from './FileDroppable';
 import useShowMessage from 'utils/useShowMessage';
 import * as modal from '@smikitky/rb-components/lib/modal';
@@ -12,6 +7,7 @@ import styled from 'styled-components';
 import { useApi } from 'utils/api';
 import { withCommas } from 'utils/util';
 import IconButton from './IconButton';
+import Icon from './Icon';
 
 const StyledDiv = styled.div`
   input[type='file'] {
@@ -145,7 +141,7 @@ const FileUpload: React.FC<{
                   disabled={!canUpload}
                   onClick={handleUploadClick}
                 >
-                  <Glyphicon glyph="upload" />
+                  <Icon icon="material-arrow_circle_up" />
                   &ensp;Upload
                 </Button>
                 <Button
@@ -173,7 +169,7 @@ const FileUpload: React.FC<{
           )}
           <SummaryTable files={files} onChange={setFiles} />
           <Button bsStyle="default" onClick={() => fileInput.current!.click()}>
-            <Glyphicon glyph="plus" />
+            <Icon icon="material-add" />
             &ensp;{files.length > 0 ? 'Add More file' : 'Select File'}
           </Button>
         </div>
@@ -227,7 +223,7 @@ const SummaryTable: React.FC<{
               <td className="text-right">{withCommas(f.size)}</td>
               <td>
                 <IconButton
-                  icon="remove"
+                  icon="material-close"
                   bsSize="xs"
                   onClick={() => handleDelete(i)}
                 />

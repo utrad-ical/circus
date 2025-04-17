@@ -122,7 +122,7 @@ const DownloadModal = <T extends any>(props: {
         )}
         {taskProgress?.status === 'finished' && (
           <Button bsStyle="success" onClick={handleDownloadClick}>
-            <Icon icon="glyphicon-download" />
+            <Icon icon="material-arrow_circle_down" />
             Download
           </Button>
         )}

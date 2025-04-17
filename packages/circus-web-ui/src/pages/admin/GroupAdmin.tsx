@@ -190,7 +190,7 @@ const GroupAdmin: React.FC<any> = props => {
   return (
     <EditorPage
       title="User Groups"
-      icon="record"
+      icon="material-radio_button_checked"
       searchName="admin-group"
       resource={{ endPoint: 'admin/groups', primaryKey: 'groupId' }}
       editorProperties={editorProperties}
@@ -198,7 +198,7 @@ const GroupAdmin: React.FC<any> = props => {
       makeEmptyItem={makeEmptyItem}
       targetName={item => item.groupName}
       subtitles={[
-        { icon: 'record', title: 'General' },
+        { icon: 'material-radio_button_checked', title: 'General' },
         { icon: 'circus-case', title: 'CIRCUS DB (Project based preferences)' },
         { icon: 'circus-job', title: 'CIRCUS CS (Plug-in based preferences)' }
       ]}

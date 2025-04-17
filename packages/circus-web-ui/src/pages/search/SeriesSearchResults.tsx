@@ -80,7 +80,7 @@ const Operation: DataGridRenderer<any> = props => {
         bsStyle="primary"
         title={
           <Fragment>
-            <Icon icon="plus" /> New
+            <Icon icon="material-add" /> New
           </Fragment>
         }
       >
@@ -94,7 +94,7 @@ const Operation: DataGridRenderer<any> = props => {
       &thinsp;
       <DropdownButton
         bsSize="sm"
-        title={<Icon icon="glyphicon-option-horizontal" />}
+        title={<Icon icon="material-more_horiz" />}
         id={`dropdown-`}
         pullRight
         noCaret

@@ -42,9 +42,9 @@ const LabelDisplay: React.FC<{
         style={{ backgroundColor: label.data.color, color: iconColor }}
       >
         {visibility === 'allHidden' ? (
-          <Icon icon="glyphicon-remove-circle" />
+          <Icon icon="material-cancel" />
         ) : visibility === 'hidden' ? (
-          <Icon icon="eye-close" />
+          <Icon icon="material-visibility_off" />
         ) : null}
       </div>
       <div className="caption">

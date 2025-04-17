@@ -293,7 +293,7 @@ const SeriesInfo: React.FC<{
     <div>
       <IconButton
         bsStyle="link"
-        icon="glyphicon-info-sign"
+        icon="material-info"
         onClick={() => setShowModal(true)}
       />
       <Modal show={showModal} onHide={() => setShowModal(false)} bsSize="lg">

@@ -37,23 +37,31 @@ const AdminIndex: React.FC = () => {
       className="admin-index"
     >
       <Row>
-        <Btn to="general" link="Server Configuration" glyph="th-large" />
+        <Btn
+          to="general"
+          link="Server Configuration"
+          glyph="material-grid_view"
+        />
       </Row>
       <Row>
-        <Btn to="group" link="Groups" glyph="record" />
-        <Btn to="user" link="Users" glyph="user" />
+        <Btn to="group" link="Groups" glyph="material-radio_button_checked" />
+        <Btn to="user" link="Users" glyph="material-person" />
       </Row>
       <h3>CIRCUS DB</h3>
       <Row>
-        <Btn to="project" link="Projects" glyph="education" />
+        <Btn to="project" link="Projects" glyph="material-school" />
       </Row>
       <h3>CIRCUS CS</h3>
       <Row>
-        <Btn to="plugin-job-manager" link="Job Manager" glyph="list-alt" />
+        <Btn
+          to="plugin-job-manager"
+          link="Job Manager"
+          glyph="material-list_alt"
+        />
         <Btn to="plugins" link="CAD Plug-ins" glyph="circus-app" />
       </Row>
       <Row>
-        <Btn to="plugin-job-queue" link="Job Queue" glyph="list" />
+        <Btn to="plugin-job-queue" link="Job Queue" glyph="material-lists" />
       </Row>
     </AdminContainer>
   );

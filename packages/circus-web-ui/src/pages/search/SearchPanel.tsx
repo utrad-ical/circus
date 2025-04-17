@@ -114,7 +114,11 @@ const SearchPanel: <T extends {}>(props: {
     <StateSavingCollapser title="Search Condition" framed>
       <ConditionEditor value={condition} onChange={setCondition} />
       <ButtonBar>
-        <IconButton bsStyle="link" icon="save" onClick={handleSavePresetClick}>
+        <IconButton
+          bsStyle="link"
+          icon="material-download_2"
+          onClick={handleSavePresetClick}
+        >
           Save
         </IconButton>
         &ensp;
@@ -122,7 +126,11 @@ const SearchPanel: <T extends {}>(props: {
           Reset
         </Button>
         &ensp;
-        <IconButton bsStyle="primary" icon="search" onClick={handleSearchClick}>
+        <IconButton
+          bsStyle="primary"
+          icon="material-search"
+          onClick={handleSearchClick}
+        >
           Search
         </IconButton>
       </ButtonBar>

@@ -5,7 +5,6 @@ import {
   Button,
   FormControl,
   FormGroup,
-  Glyphicon,
   Panel
 } from 'components/react-bootstrap';
 import React, { useEffect, useState } from 'react';
@@ -102,7 +101,7 @@ const LoginScreen: React.FC<{}> = props => {
     <StyledDiv className={classnames({ 'has-error': error || criticalError })}>
       {criticalError && (
         <div className="critical">
-          <Icon icon="glyphicon-ban-circle" />
+          <Icon icon="material-block" />
           &nbsp; The CIRCUS API server does not seem to be responding. Please
           consult the administrator.
         </div>
@@ -142,7 +141,7 @@ const LoginScreen: React.FC<{}> = props => {
             bsSize="lg"
             onClick={handleLoginClick}
           >
-            <Glyphicon glyph="ok-sign" />
+            <Icon icon="material-check_circle" />
             &ensp;Login
           </Button>
         </Panel.Footer>

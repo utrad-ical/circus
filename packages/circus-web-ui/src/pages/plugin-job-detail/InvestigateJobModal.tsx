@@ -29,7 +29,7 @@ const InvestigateJobModal: React.FC<{}> = React.memo(props => {
   return (
     <>
       <Modal.Header>
-        <Icon icon="search" /> Investigate Job
+        <Icon icon="material-search" /> Investigate Job
       </Modal.Header>
       <Modal.Body>
         <Tabs id="investigate-job-tabs" defaultActiveKey={1}>

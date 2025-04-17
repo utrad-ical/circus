@@ -112,6 +112,7 @@ describe('pluginJobRunner00', () => {
             endpoint: 'http://localhost:7743',
             authentication: 'dummy-secret-token',
             maxConcurrency: 1,
+            timeout: 300,
             env: []
           }
         }

@@ -79,6 +79,7 @@ describe('admin/plugins', () => {
             'https://abcdefg123.execute-api.ap-northeast-1.amazonaws.com/prod/users',
           authentification: 'aaaaabbbbcccccdddddeeeee',
           maxConcurrent: 5,
+          timeout: 300,
           env: [
             {
               encryptSecret: 'rsa:111122223333'

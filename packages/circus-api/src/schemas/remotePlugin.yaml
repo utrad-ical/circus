@@ -55,6 +55,10 @@ properties:
             type: integer
             description: >
               Maximum number of concurrent requests.
+          timeout:
+            type: integer
+            description: >
+              Timeout in seconds.
           env:
             type: array
             items:

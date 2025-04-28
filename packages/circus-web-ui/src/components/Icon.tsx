@@ -11,11 +11,19 @@ const sizeMap = {
   xxl: '6em'
 };
 
+const spanSizeMap = {
+  xs: '0.75em',
+  sm: '1em',
+  md: '1.25em',
+  lg: '1.5em',
+  xl: '2em',
+  xxl: '6em'
+};
+
 type IconSize = keyof typeof sizeMap;
 
 const baseStyle = css`
   display: inline-block;
-  vertical-align: middle;
   line-height: 1;
   font-size: 1.2em;
   &.text-link {
@@ -47,7 +55,9 @@ const StyledSpan = styled.span<{ size?: IconSize }>`
   ${baseStyle}
   font-family: 'Material Symbols Outlined';
   user-select: none;
-  font-size: ${(props: { size?: IconSize }) => sizeMap[props.size ?? 'md']};
+  font-size: ${(props: { size?: IconSize }) => spanSizeMap[props.size ?? 'md']};
+  vertical-align: ${(props: { size?: IconSize }) =>
+    `${-0.2 * Number(spanSizeMap[props.size ?? 'md'].slice(0, -2))}em`};
   &.spin {
     animation: ${spin} 2s infinite linear;
   }

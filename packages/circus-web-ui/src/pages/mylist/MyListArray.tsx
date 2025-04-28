@@ -18,7 +18,7 @@ const MyListArray: React.FC<{
       {value.map(list => (
         <li key={list.myListId}>
           <Link to={toUrl(list.myListId)}>
-            <Icon bsSize="xl" icon="glyphicon-folder-open" />
+            <Icon size="xxl" icon="material-folder_open" />
             <span className="name">{list.name}</span>
             <div className="menu">
               <Button
@@ -71,9 +71,6 @@ const StyledUl = styled.ul`
       &:hover {
         text-decoration: none;
         color: ${(props: any) => props.theme.highlightColor};
-      }
-      .glyphicon {
-        font-size: 80px;
       }
       .name {
         margin-top: 5px;

@@ -103,7 +103,10 @@ const GeneralAdmin: React.FC<{}> = props => {
   if (settings === null) return null;
 
   return (
-    <AdminContainer title="General Server Configuration" icon="th-large">
+    <AdminContainer
+      title="General Server Configuration"
+      icon="material-grid_view"
+    >
       <PropertyEditor
         value={settings}
         complaints={complaints}

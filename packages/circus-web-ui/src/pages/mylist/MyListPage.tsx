@@ -54,7 +54,7 @@ const MyListPage: React.FC<{
   return (
     <div>
       <h1>
-        <Icon icon="glyphicon-folder-open" /> {title}: {list.name}
+        <Icon icon="material-folder_open" /> {title}: {list.name}
       </h1>
       <ResultsView searchName={searchName} refreshable={false} />
     </div>

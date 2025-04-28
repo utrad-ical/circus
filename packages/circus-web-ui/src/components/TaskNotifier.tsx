@@ -68,7 +68,7 @@ const TaskNotifier: React.FC<{}> = props => {
     <StyledLi className="icon-menu">
       <Link to="/task-list">
         <span className={classNames({ 'in-progress': inProgress })}>
-          <Icon icon="glyphicon-bell" />
+          <Icon icon="material-notifications" size="lg" />
         </span>
       </Link>
       <ul className="dropdown pull-left">
@@ -96,10 +96,6 @@ const StyledLi = styled.li`
   .in-progress {
     color: yellow;
   }
-  .glyphicon-bell {
-    font-size: 25px;
-    vertical-align: middle;
-  }
 `;
 
 const TaskDisplay: React.FC<{
@@ -117,8 +113,8 @@ const TaskDisplay: React.FC<{
     (task.status === 'finished'
       ? `Finished (${moment(task.endedAt).fromNow()})`
       : task.status === 'processing'
-      ? 'In progress'
-      : `Error (${moment(task.endedAt).fromNow()})`);
+        ? 'In progress'
+        : `Error (${moment(task.endedAt).fromNow()})`);
 
   return (
     <StyledTaskDisplay className={status}>
@@ -131,7 +127,7 @@ const TaskDisplay: React.FC<{
           <IconButton
             bsSize="sm"
             bsStyle="success"
-            icon="glyphicon-download"
+            icon="material-arrow_circle_down"
             onClick={handleDownloadClick}
           />
         )}
@@ -140,7 +136,7 @@ const TaskDisplay: React.FC<{
           onClick={onDismissClick}
           bsSize="sm"
           bsStyle="primary"
-          icon="glyphicon-check"
+          icon="material-select_check_box"
         />
       </div>
       <TaskProgressBar

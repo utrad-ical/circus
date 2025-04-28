@@ -1,4 +1,4 @@
-import IconButton from '@smikitky/rb-components/lib/IconButton';
+import IconButton from 'components/IconButton';
 import { confirm, prompt } from '@smikitky/rb-components/lib/modal';
 import Icon from 'components/Icon';
 import MyListArray from './MyListArray';
@@ -84,7 +84,7 @@ const MyListHome: React.FC<{
   return (
     <div>
       <h1>
-        <Icon icon="glyphicon-folder-open" /> {title}
+        <Icon icon="material-folder_open" /> {title}
       </h1>
       <MyListArray
         value={lists}
@@ -99,7 +99,7 @@ const MyListHome: React.FC<{
       )}
       <IconButton
         bsStyle="primary"
-        icon="glyphicon-plus"
+        icon="material-add"
         onClick={handleCreateNew}
       >
         Create new my list

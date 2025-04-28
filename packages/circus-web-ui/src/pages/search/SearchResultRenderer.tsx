@@ -1,4 +1,4 @@
-import Icon from '@smikitky/rb-components/lib/Icon';
+import Icon from 'components/Icon';
 import { DataGridRenderer } from 'components/DataGrid';
 import IdDisplay from 'components/IdDisplay';
 import PatientInfoBox from 'components/PatientInfoBox';
@@ -99,11 +99,11 @@ export const FeedbackRenderer: DataGridRenderer<any> = props => {
     <span title={title}>
       {personals > 0 && (
         <span>
-          <Icon icon="user" />
+          <Icon icon="material-person" />
           {personals > 0 && personals}
         </span>
       )}
-      {consensual > 0 && <Icon icon="tower" />}
+      {consensual > 0 && <Icon icon="material-crown" />}
       {!personals && !consensual && <span className="feedback-none">none</span>}
     </span>
   );

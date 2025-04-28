@@ -86,7 +86,7 @@ const ProjectAdmin: React.FC<{}> = props => {
   return (
     <EditorPage
       title="Projects"
-      icon="education"
+      icon="material-school"
       searchName="admin-project"
       resource={{ endPoint: 'admin/projects', primaryKey: 'projectId' }}
       editorProperties={editorProperties}

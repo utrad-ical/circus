@@ -325,7 +325,11 @@ const LabelMenu: React.FC<{
         labelColors={labelColors}
       />
       <IconButton
-        icon={editingData.allLabelsHidden ? 'eye-open' : 'eye-close'}
+        icon={
+          editingData.allLabelsHidden
+            ? 'material-visibility'
+            : 'material-visibility_off'
+        }
         bsStyle="link"
         bsSize="xs"
         onClick={() => handleCommand('toggleHideAllLabels')}
@@ -345,7 +349,7 @@ const LabelMenu: React.FC<{
       <IconButton
         bsSize="xs"
         title="Rename"
-        icon="font"
+        icon="material-title"
         disabled={!activeLabel || disabled}
         onClick={() => handleCommand('rename')}
       />
@@ -364,7 +368,7 @@ const LabelMenu: React.FC<{
       <IconButton
         bsSize="xs"
         title="Remove"
-        icon="trash"
+        icon="material-delete"
         disabled={!activeLabel || disabled}
         onClick={() => handleCommand('remove')}
       />
@@ -495,7 +499,7 @@ const AppearancePopover: React.FC<{
       />
       <div className="alpha-pane">
         <IconButton
-          icon={hidden ? 'eye-close' : 'eye-open'}
+          icon={hidden ? 'material-visibility_off' : 'material-visibility'}
           bsStyle="link"
           bsSize="sm"
           onClick={() => onChange(appearance, !hidden)}

@@ -29,7 +29,7 @@ const PatientInfoBox: React.FC<{
       <StyledDiv>
         <div className="masked">
           <span className="patient-name">
-            <Icon icon="lock" />
+            <Icon icon="material-lock" />
             &ensp;(masked)
           </span>
         </div>

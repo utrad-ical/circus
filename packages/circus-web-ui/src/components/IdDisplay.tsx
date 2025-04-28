@@ -29,7 +29,7 @@ const IdDisplay: React.FC<{
 
   return (
     <OverlayTrigger trigger="click" rootClose placement="top" overlay={overlay}>
-      <IconButton icon="glyphicon-zoom-in" bsStyle="link" bsSize="xs" />
+      <IconButton icon="material-zoom_in" bsStyle="link" bsSize="xs" />
     </OverlayTrigger>
   );
 });

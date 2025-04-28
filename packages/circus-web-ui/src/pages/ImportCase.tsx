@@ -7,7 +7,7 @@ const ImportCase: React.FC<{}> = props => {
   return (
     <div>
       <h1>
-        <Icon icon="open" /> Case Import
+        <Icon icon="material-upload_2" /> Case Import
       </h1>
       <Alert bsStyle="danger">This function is not implemented.</Alert>
       <FileUpload multiple={false} url={''}>

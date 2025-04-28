@@ -16,8 +16,6 @@ export { default as FormControl } from 'react-bootstrap/lib/FormControl';
 export { default as Checkbox } from 'react-bootstrap/lib/Checkbox';
 export { default as ControlLabel } from 'react-bootstrap/lib/ControlLabel';
 
-export { default as Glyphicon } from 'react-bootstrap/lib/Glyphicon';
-
 export { default as DropdownButton } from 'react-bootstrap/lib/DropdownButton';
 export { default as MenuItem } from 'react-bootstrap/lib/MenuItem';
 

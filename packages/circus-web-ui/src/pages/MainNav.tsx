@@ -1,7 +1,13 @@
+import {
+  autoUpdate,
+  useFloating,
+  useHover,
+  useInteractions
+} from '@floating-ui/react';
 import classnames from 'classnames';
 import Icon from 'components/Icon';
 import TaskNotifier from 'components/TaskNotifier';
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { MyList } from 'store/loginUser';
@@ -24,8 +30,24 @@ const Menu: React.FC<{
       {name}
     </span>
   ];
+
+  const [open, setOpen] = useState(false);
+  const { refs, floatingStyles, context } = useFloating({
+    placement: 'bottom-start',
+    open,
+    onOpenChange: setOpen,
+    whileElementsMounted: autoUpdate
+  });
+
+  const hover = useHover(context);
+  const { getReferenceProps, getFloatingProps } = useInteractions([hover]);
   return (
-    <li className="icon-menu" key={name}>
+    <li
+      className="icon-menu"
+      key={name}
+      ref={refs.setReference}
+      {...getReferenceProps()}
+    >
       {link ? (
         <Link to={link}>{caption}</Link>
       ) : onClick ? (
@@ -35,7 +57,15 @@ const Menu: React.FC<{
       ) : (
         caption
       )}
-      <ul>{children}</ul>
+      {open && children && (
+        <ul
+          ref={refs.setFloating}
+          style={floatingStyles}
+          {...getFloatingProps()}
+        >
+          {children}
+        </ul>
+      )}
     </li>
   );
 };
@@ -159,18 +189,11 @@ const StyledNav = styled.nav`
       }
       > ul {
         /* dropdown sub menu */
-        display: none; /* initially hidden */
         position: absolute;
-        top: 39px;
-        left: 0;
         line-height: 35px;
         background-color: rgba(240, 240, 240, 0.9);
         padding: 0;
         border: 1px solid #bbb;
-        &.pull-left {
-          right: 0;
-          left: auto;
-        }
         > li {
           display: block;
           min-width: 200px;

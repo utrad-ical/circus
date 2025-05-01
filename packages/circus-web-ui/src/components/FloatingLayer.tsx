@@ -57,14 +57,17 @@ const FloatingLayer = ({
   });
 
   const interactions = [];
-  if (trigger === 'click') interactions.push(useClick(context));
-  if (trigger === 'hover') {
-    const hoverOptions = useSafePolygon
-      ? { handleClose: safePolygon() }
-      : undefined;
-    interactions.push(useHover(context, hoverOptions));
-  }
-  if (trigger === 'focus') interactions.push(useFocus(context));
+  const click = useClick(context);
+  const hover = useHover(
+    context,
+    useSafePolygon ? { handleClose: safePolygon() } : undefined
+  );
+  const focus = useFocus(context);
+
+  if (trigger === 'click') interactions.push(click);
+  if (trigger === 'hover') interactions.push(hover);
+  if (trigger === 'focus') interactions.push(focus);
+
   interactions.push(useDismiss(context));
 
   const { getReferenceProps, getFloatingProps } = useInteractions(interactions);

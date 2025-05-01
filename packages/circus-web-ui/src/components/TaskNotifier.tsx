@@ -1,12 +1,6 @@
-import {
-  autoUpdate,
-  safePolygon,
-  size,
-  useFloating,
-  useHover,
-  useInteractions
-} from '@floating-ui/react';
+import { size } from '@floating-ui/react';
 import classNames from 'classnames';
+import FloatingLayer from 'components/FloatingLayer';
 import IconButton from 'components/IconButton';
 import moment from 'moment';
 import React, { useEffect } from 'react';
@@ -25,28 +19,6 @@ const TaskNotifier: React.FC<{}> = props => {
   const api = useApi();
   const dismissTask = useTaskDismisser();
   const dispatch = useDispatch();
-  const [open, setOpen] = React.useState(false);
-  const { refs, floatingStyles, context } = useFloating({
-    placement: 'bottom-end',
-    open,
-    onOpenChange: setOpen,
-    middleware: [
-      size({
-        apply({ elements, availableHeight }) {
-          Object.assign(elements.floating.style, {
-            maxHeight: `${Math.min(availableHeight, 500)}px`,
-            overflowY: 'auto'
-          });
-        }
-      })
-    ],
-    whileElementsMounted: autoUpdate
-  });
-
-  const hover = useHover(context, {
-    handleClose: safePolygon()
-  });
-  const { getReferenceProps, getFloatingProps } = useInteractions([hover]);
 
   // This contains task progress sent from the SSE endpoint
   const taskProgress = useSelector(state => state.taskProgress);
@@ -95,36 +67,56 @@ const TaskNotifier: React.FC<{}> = props => {
   };
 
   return (
-    <StyledLi
-      className="icon-menu"
-      ref={refs.setReference}
-      {...getReferenceProps()}
+    <FloatingLayer
+      placement="bottom-end"
+      useSafePolygon
+      middleware={[
+        size({
+          apply({ elements, availableHeight }) {
+            Object.assign(elements.floating.style, {
+              maxHeight: `${Math.min(availableHeight, 500)}px`,
+              overflowY: 'auto'
+            });
+          }
+        })
+      ]}
     >
-      <Link to="/task-list">
-        <span className={classNames({ 'in-progress': inProgress })}>
-          <Icon icon="material-notifications" size="lg" />
-        </span>
-      </Link>
-      {open && (
-        <ul
-          ref={refs.setFloating}
-          style={floatingStyles}
-          {...getFloatingProps()}
+      {({
+        open,
+        refs,
+        floatingStyles,
+        getReferenceProps,
+        getFloatingProps
+      }) => (
+        <StyledLi
+          className="icon-menu"
+          ref={refs.setReference}
+          {...getReferenceProps()}
         >
-          {tasks.map(task => {
-            const progress = taskProgress[task.taskId];
-            return (
-              <TaskDisplay
-                key={task.taskId}
-                task={task}
-                onDismissClick={() => handleDismissClick(task.taskId)}
-                progress={progress}
-              />
-            );
-          })}
-        </ul>
+          <Link to="/task-list">
+            <span className={classNames({ 'in-progress': inProgress })}>
+              <Icon icon="material-notifications" size="lg" />
+            </span>
+          </Link>
+          {open && (
+            <ul
+              ref={refs.setFloating}
+              style={floatingStyles}
+              {...getFloatingProps()}
+            >
+              {tasks.map(task => (
+                <TaskDisplay
+                  key={task.taskId}
+                  task={task}
+                  onDismissClick={() => handleDismissClick(task.taskId)}
+                  progress={taskProgress[task.taskId]}
+                />
+              ))}
+            </ul>
+          )}
+        </StyledLi>
       )}
-    </StyledLi>
+    </FloatingLayer>
   );
 };
 

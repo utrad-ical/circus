@@ -1,13 +1,8 @@
-import {
-  autoUpdate,
-  useFloating,
-  useHover,
-  useInteractions
-} from '@floating-ui/react';
 import classnames from 'classnames';
+import FloatingLayer from 'components/FloatingLayer';
 import Icon from 'components/Icon';
 import TaskNotifier from 'components/TaskNotifier';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { MyList } from 'store/loginUser';
@@ -31,42 +26,42 @@ const Menu: React.FC<{
     </span>
   ];
 
-  const [open, setOpen] = useState(false);
-  const { refs, floatingStyles, context } = useFloating({
-    placement: 'bottom-start',
-    open,
-    onOpenChange: setOpen,
-    whileElementsMounted: autoUpdate
-  });
-
-  const hover = useHover(context);
-  const { getReferenceProps, getFloatingProps } = useInteractions([hover]);
   return (
-    <li
-      className="icon-menu"
-      key={name}
-      ref={refs.setReference}
-      {...getReferenceProps()}
-    >
-      {link ? (
-        <Link to={link}>{caption}</Link>
-      ) : onClick ? (
-        <a onClick={onClick} href="#">
-          {caption}
-        </a>
-      ) : (
-        caption
-      )}
-      {open && children && (
-        <ul
-          ref={refs.setFloating}
-          style={floatingStyles}
-          {...getFloatingProps()}
+    <FloatingLayer>
+      {({
+        open,
+        refs,
+        floatingStyles,
+        getReferenceProps,
+        getFloatingProps
+      }) => (
+        <li
+          className={classnames('icon-menu', { open })}
+          key={name}
+          ref={refs.setReference}
+          {...getReferenceProps()}
         >
-          {children}
-        </ul>
+          {link ? (
+            <Link to={link}>{caption}</Link>
+          ) : onClick ? (
+            <a onClick={onClick} href="#">
+              {caption}
+            </a>
+          ) : (
+            caption
+          )}
+          {open && children && (
+            <ul
+              ref={refs.setFloating}
+              style={floatingStyles}
+              {...getFloatingProps()}
+            >
+              {children}
+            </ul>
+          )}
+        </li>
       )}
-    </li>
+    </FloatingLayer>
   );
 };
 

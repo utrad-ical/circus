@@ -1,6 +1,6 @@
 import classnames from 'classnames';
-import FloatingLayer from 'components/FloatingLayer';
 import Icon from 'components/Icon';
+import NavMenu from 'components/NavMenu';
 import TaskNotifier from 'components/TaskNotifier';
 import React, { Fragment } from 'react';
 import { useSelector } from 'react-redux';
@@ -10,60 +10,6 @@ import styled from 'styled-components';
 import useLoginUser from 'utils/useLoginUser';
 
 const MainMenu: React.FC<{}> = props => <ul>{props.children}</ul>;
-
-const Menu: React.FC<{
-  name: string;
-  icon?: string;
-  link?: string;
-  onClick?: (ev: React.MouseEvent) => void;
-}> = props => {
-  const { name, icon, link, onClick, children } = props;
-  const className = icon ? icon : `circus-icon-${name.toLowerCase()}`;
-  const caption = [
-    <span className={className} key="icon" />,
-    <span className="hidden-xs" key="caption">
-      {name}
-    </span>
-  ];
-
-  return (
-    <FloatingLayer>
-      {({
-        open,
-        refs,
-        floatingStyles,
-        getReferenceProps,
-        getFloatingProps
-      }) => (
-        <li
-          className={classnames('icon-menu', { open })}
-          key={name}
-          ref={refs.setReference}
-          {...getReferenceProps()}
-        >
-          {link ? (
-            <Link to={link}>{caption}</Link>
-          ) : onClick ? (
-            <a onClick={onClick} href="#">
-              {caption}
-            </a>
-          ) : (
-            caption
-          )}
-          {open && children && (
-            <ul
-              ref={refs.setFloating}
-              style={floatingStyles}
-              {...getFloatingProps()}
-            >
-              {children}
-            </ul>
-          )}
-        </li>
-      )}
-    </FloatingLayer>
-  );
-};
 
 const SubMenu: React.FC<{
   link: string;
@@ -158,7 +104,7 @@ const StyledNav = styled.nav`
       padding: 0 5px;
       display: inline-block;
       position: relative;
-      &.icon-menu span[class^='circus-icon'] {
+      &.icon-menu [class*='navmenu'] {
         font-size: 25px;
         vertical-align: middle;
         margin-right: 3px;
@@ -314,7 +260,7 @@ const MainNav: React.FC<{}> = props => {
               <span className="circus-icon-logo" />
             </Link>
           </li>
-          <Menu name="Series" link="/browse/series">
+          <NavMenu name="Series" link="/browse/series">
             <SubMenu
               icon="material-search"
               name="Series Search"
@@ -341,8 +287,8 @@ const MainNav: React.FC<{}> = props => {
               name="Series Import"
               link="/import-series"
             />
-          </Menu>
-          <Menu name="Case" link="/browse/case">
+          </NavMenu>
+          <NavMenu name="Case" link="/browse/case">
             {showNextPreviousCaseButton && (
               <NextPreviousButtons
                 list={nextPreviousList}
@@ -370,8 +316,8 @@ const MainNav: React.FC<{}> = props => {
               endPoint="case"
             />
             {/* <SubMenu icon="material-upload_2" name="Case Import" link="/import-case" /> */}
-          </Menu>
-          <Menu name="CAD" icon="circus-icon-job" link="/browse/plugin-jobs">
+          </NavMenu>
+          <NavMenu name="CAD" icon="circus-job" link="/browse/plugin-jobs">
             {showNextPreviousPluginJobButton && (
               <NextPreviousButtons
                 list={nextPreviousList}
@@ -405,8 +351,8 @@ const MainNav: React.FC<{}> = props => {
               name="Show Job Queue"
               link="/plugin-job-queue"
             />
-          </Menu>
-          <Menu name="Tool">
+          </NavMenu>
+          <NavMenu name="Tool">
             <li>
               <a
                 href="https://circus-project.net/"
@@ -428,9 +374,9 @@ const MainNav: React.FC<{}> = props => {
               name="Access Tokens"
               link="/tokens"
             />
-          </Menu>
+          </NavMenu>
           {isAdmin && (
-            <Menu name="Administration" link="/admin">
+            <NavMenu name="Administration" link="/admin">
               <SubMenu
                 icon="material-grid_view"
                 name="Server Configuration"
@@ -464,7 +410,7 @@ const MainNav: React.FC<{}> = props => {
                 name="Job Queue"
                 link="/admin/plugin-job-queue"
               />
-            </Menu>
+            </NavMenu>
           )}
         </MainMenu>
       </StyledNav>
@@ -472,7 +418,7 @@ const MainNav: React.FC<{}> = props => {
         <MainMenu>
           <TaskNotifier />
           <li className="user-info hidden-xs">{loginUserName}</li>
-          <Menu name="Logout" onClick={onLogout} />
+          <NavMenu name="Logout" onClick={onLogout} />
         </MainMenu>
       </StyledNav>
     </StyledHeader>

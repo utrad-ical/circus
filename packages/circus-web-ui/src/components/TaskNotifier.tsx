@@ -1,11 +1,9 @@
 import { size } from '@floating-ui/react';
 import classNames from 'classnames';
-import FloatingLayer from 'components/FloatingLayer';
 import IconButton from 'components/IconButton';
 import moment from 'moment';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
 import { newSearch, updateSearch } from 'store/searches';
 import styled, { keyframes } from 'styled-components';
 import Task from 'types/Task';
@@ -13,7 +11,7 @@ import { useApi } from 'utils/api';
 import useTaskDismisser from 'utils/useTaskDismisser';
 import useTaskDownloadHandler from 'utils/useTaskDownloadHandler';
 import { TaskProgress } from '../store/taskProgress';
-import Icon from './Icon';
+import NavMenu from './NavMenu';
 
 const TaskNotifier: React.FC<{}> = props => {
   const api = useApi();
@@ -67,9 +65,12 @@ const TaskNotifier: React.FC<{}> = props => {
   };
 
   return (
-    <FloatingLayer
+    <StyledNavMenu
+      name=""
+      icon="material-notifications"
+      link="/task-list"
       placement="bottom-end"
-      useSafePolygon
+      useSafePolygon={true}
       middleware={[
         size({
           apply({ elements, availableHeight }) {
@@ -80,48 +81,25 @@ const TaskNotifier: React.FC<{}> = props => {
           }
         })
       ]}
+      className={classNames({ 'in-progress': inProgress })}
     >
-      {({
-        open,
-        refs,
-        floatingStyles,
-        getReferenceProps,
-        getFloatingProps
-      }) => (
-        <StyledLi
-          className="icon-menu"
-          ref={refs.setReference}
-          {...getReferenceProps()}
-        >
-          <Link to="/task-list">
-            <span className={classNames({ 'in-progress': inProgress })}>
-              <Icon icon="material-notifications" size="lg" />
-            </span>
-          </Link>
-          {open && (
-            <ul
-              ref={refs.setFloating}
-              style={floatingStyles}
-              {...getFloatingProps()}
-            >
-              {tasks.map(task => (
-                <TaskDisplay
-                  key={task.taskId}
-                  task={task}
-                  onDismissClick={() => handleDismissClick(task.taskId)}
-                  progress={taskProgress[task.taskId]}
-                />
-              ))}
-            </ul>
-          )}
-        </StyledLi>
-      )}
-    </FloatingLayer>
+      {tasks.map(task => {
+        const progress = taskProgress[task.taskId];
+        return (
+          <TaskDisplay
+            key={task.taskId}
+            task={task}
+            onDismissClick={() => handleDismissClick(task.taskId)}
+            progress={progress}
+          />
+        );
+      })}
+    </StyledNavMenu>
   );
 };
 
-const StyledLi = styled.li`
-  .in-progress {
+const StyledNavMenu = styled(NavMenu)`
+  &.in-progress .navmenu {
     color: yellow;
   }
 `;

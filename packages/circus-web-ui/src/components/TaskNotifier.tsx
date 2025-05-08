@@ -1,4 +1,3 @@
-import { size } from '@floating-ui/react';
 import classNames from 'classnames';
 import IconButton from 'components/IconButton';
 import moment from 'moment';
@@ -70,17 +69,6 @@ const TaskNotifier: React.FC<{}> = props => {
       icon="material-notifications"
       link="/task-list"
       placement="bottom-end"
-      useSafePolygon={true}
-      middleware={[
-        size({
-          apply({ elements, availableHeight }) {
-            Object.assign(elements.floating.style, {
-              maxHeight: `${Math.min(availableHeight, 500)}px`,
-              overflowY: 'auto'
-            });
-          }
-        })
-      ]}
       className={classNames({ 'in-progress': inProgress })}
     >
       {tasks.map(task => {
@@ -99,6 +87,10 @@ const TaskNotifier: React.FC<{}> = props => {
 };
 
 const StyledNavMenu = styled(NavMenu)`
+  .dropdown {
+    max-height: 500px;
+    overflow-y: auto;
+  }
   &.in-progress .navmenu {
     color: yellow;
   }

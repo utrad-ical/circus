@@ -1,7 +1,5 @@
-// components/Menu.tsx
 import {
   autoUpdate,
-  Middleware,
   Placement,
   safePolygon,
   useFloating,
@@ -20,8 +18,6 @@ const NavMenu: React.FC<{
   onClick?: (ev: React.MouseEvent) => void;
   children?: React.ReactNode;
   placement?: Placement;
-  useSafePolygon?: boolean;
-  middleware?: Middleware[];
   className?: string;
 }> = ({
   name,
@@ -30,8 +26,6 @@ const NavMenu: React.FC<{
   onClick,
   children,
   placement = 'bottom-start',
-  useSafePolygon = false,
-  middleware = [],
   className
 }) => {
   icon = icon ?? `circus-${name.toLowerCase()}`;
@@ -48,14 +42,14 @@ const NavMenu: React.FC<{
     open,
     onOpenChange: setOpen,
     placement: placement,
-    middleware,
     whileElementsMounted: autoUpdate
   });
 
-  const hover = useHover(
-    context,
-    useSafePolygon ? { handleClose: safePolygon() } : undefined
-  );
+  const hover = useHover(context, {
+    handleClose: safePolygon({
+      blockPointerEvents: true
+    })
+  });
   const { getReferenceProps, getFloatingProps } = useInteractions([hover]);
 
   return (
@@ -78,6 +72,7 @@ const NavMenu: React.FC<{
           ref={refs.setFloating}
           style={floatingStyles}
           {...getFloatingProps()}
+          className="dropdown"
         >
           {children}
         </ul>

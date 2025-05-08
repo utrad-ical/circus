@@ -48,6 +48,7 @@
     "worker-loader": "^3.0.8"
   },
   "dependencies": {
+    "@floating-ui/react": "^0.26.0",
     "@reduxjs/toolkit": "^1.4.0",
     "@smikitky/rb-components": "^7.0.0",
     "@utrad-ical/circus-icons": "^0.2.0",

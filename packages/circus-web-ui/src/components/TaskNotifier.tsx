@@ -3,7 +3,6 @@ import IconButton from 'components/IconButton';
 import moment from 'moment';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
 import { newSearch, updateSearch } from 'store/searches';
 import styled, { keyframes } from 'styled-components';
 import Task from 'types/Task';
@@ -11,7 +10,7 @@ import { useApi } from 'utils/api';
 import useTaskDismisser from 'utils/useTaskDismisser';
 import useTaskDownloadHandler from 'utils/useTaskDownloadHandler';
 import { TaskProgress } from '../store/taskProgress';
-import Icon from './Icon';
+import NavMenu from './NavMenu';
 
 const TaskNotifier: React.FC<{}> = props => {
   const api = useApi();
@@ -65,35 +64,34 @@ const TaskNotifier: React.FC<{}> = props => {
   };
 
   return (
-    <StyledLi className="icon-menu">
-      <Link to="/task-list">
-        <span className={classNames({ 'in-progress': inProgress })}>
-          <Icon icon="material-notifications" size="lg" />
-        </span>
-      </Link>
-      <ul className="dropdown pull-left">
-        {tasks.map(task => {
-          const progress = taskProgress[task.taskId];
-          return (
-            <TaskDisplay
-              key={task.taskId}
-              task={task}
-              onDismissClick={() => handleDismissClick(task.taskId)}
-              progress={progress}
-            />
-          );
-        })}
-      </ul>
-    </StyledLi>
+    <StyledNavMenu
+      name=""
+      icon="material-notifications"
+      link="/task-list"
+      placement="bottom-end"
+      className={classNames({ 'in-progress': inProgress })}
+    >
+      {tasks.map(task => {
+        const progress = taskProgress[task.taskId];
+        return (
+          <TaskDisplay
+            key={task.taskId}
+            task={task}
+            onDismissClick={() => handleDismissClick(task.taskId)}
+            progress={progress}
+          />
+        );
+      })}
+    </StyledNavMenu>
   );
 };
 
-const StyledLi = styled.li`
+const StyledNavMenu = styled(NavMenu)`
   .dropdown {
     max-height: 500px;
     overflow-y: auto;
   }
-  .in-progress {
+  &.in-progress .navmenu {
     color: yellow;
   }
 `;

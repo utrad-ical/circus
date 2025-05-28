@@ -26,18 +26,24 @@ const sizeMap: Record<Size, string> = {
   xl: '2em'
 };
 
+const paddingMap: Record<Size, string> = {
+  xs: '0.1145rem 0.5rem',
+  sm: '0.375rem 0.75rem;',
+  md: '0.375rem 1rem;',
+  lg: '0.5rem 0.6em',
+  xl: '3rem 1.3em'
+};
+
 const variantStyles: Record<Variant, any> = {
   default: css`
     background-color: white;
     color: #111111;
     border: 1px solid silver;
-    padding: 0.1145rem 0.5rem;
   `,
   primary: css`
     background-color: ${(props: any) => props.theme.brandPrimary};
     color: white;
     border: 1px solid transparent;
-    padding: 0.375rem 0.75rem;
   `,
   link: css`
     background: none;
@@ -48,7 +54,6 @@ const variantStyles: Record<Variant, any> = {
   danger: css`
     background-color: #d9534f;
     border: 1px solid transparent;
-    padding: 0.5rem 1.25rem;
     color: white;
   `
 };
@@ -65,6 +70,7 @@ const TriggerButton = styled.button<{
   display: inline-block;
   align-items: center;
   font-size: ${(props: { $size: Size }) => sizeMap[props.$size]};
+  padding: ${(props: { $size: Size }) => paddingMap[props.$size]};
   ${(props: { $variant: Variant }) => variantStyles[props.$variant]};
   ${(props: { $noCaret: boolean }) => !props.$noCaret && 'padding-right: 0;'}
   opacity: ${(props: { $disabled: boolean }) => (props.$disabled ? 0.5 : 1)};

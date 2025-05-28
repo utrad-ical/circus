@@ -14,6 +14,7 @@ type MenuItemProps = {
 
 const Item = styled.li`
   list-style: none;
+  text-align: left;
 `;
 
 const baseStyle = css`
@@ -28,13 +29,18 @@ const baseStyle = css`
   cursor: ${(props: { $disabled: boolean }) =>
     props.$disabled ? 'not-allowed' : 'pointer'};
   opacity: ${(props: { $disabled: boolean }) => (props.$disabled ? 0.5 : 1)};
+  [data-icon] {
+    margin-inline: 0 0.5em;
+  }
+  button > [data-icon] {
+    margin-inline: 0;
+  }
 `;
 
 const ItemButton = styled.button<{ $disabled?: boolean }>`
   ${baseStyle}
   display: flex;
   align-items: center;
-  gap: 0.5em;
   background: none;
   border: none;
   text-align: left;
@@ -63,6 +69,7 @@ const Header = styled.li`
   font-size: 0.85em;
   padding: 0.25em 1.5em;
   list-style: none;
+  text-align: left;
 `;
 
 const MenuItem: React.FC<MenuItemProps> = ({

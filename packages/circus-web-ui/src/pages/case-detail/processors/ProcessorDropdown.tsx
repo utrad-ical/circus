@@ -1,8 +1,9 @@
+import DropdownButton from 'components/DropdownButton';
 import Icon from 'components/Icon';
-import { DropdownButton, MenuItem } from 'components/react-bootstrap';
+import MenuItem from 'components/MenuItem';
 import React from 'react';
 import { LabelType } from '../labelData';
-import { processors, processorTypes, ProcessorType } from './processor-types';
+import { processors, ProcessorType, processorTypes } from './processor-types';
 
 const ProcessorDropdown: React.FC<{
   activeLabelType: LabelType | undefined;
@@ -11,11 +12,10 @@ const ProcessorDropdown: React.FC<{
   const { activeLabelType, onSelect } = props;
   return (
     <DropdownButton
-      onSelect={type => onSelect(type)}
-      bsSize="xs"
+      onSelect={type => onSelect(type as ProcessorType)}
+      size="xs"
       title={<Icon icon="material-more_horiz" />}
-      id={`labelmenu-header-dropdown`}
-      pullRight
+      placement="bottom-end"
       noCaret
     >
       {processorTypes.map(type => {

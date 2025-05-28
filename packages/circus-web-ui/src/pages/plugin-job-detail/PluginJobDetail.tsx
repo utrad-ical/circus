@@ -7,15 +7,17 @@ import {
   Plugin
 } from '@utrad-ical/circus-ui-kit';
 import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
+import DropdownButton from 'components/DropdownButton';
 import FullSpanContainer from 'components/FullSpanContainer';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
+import MenuItem from 'components/MenuItem';
 import PatientInfoBox from 'components/PatientInfoBox';
 import PieProgress from 'components/PieProgress';
 import PluginDisplay from 'components/PluginDisplay';
 import SearchResultsView from 'components/SearchResultsView';
 import UserDisplay from 'components/UserDisplay';
-import { DropdownButton, MenuItem, Modal } from 'components/react-bootstrap';
+import { Modal } from 'components/react-bootstrap';
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
@@ -81,19 +83,19 @@ const Menu: React.FC<{
   return (
     <DropdownButton
       id="submenu"
-      bsStyle="link"
+      variant="link"
       title={<Icon icon="material-menu" />}
       onSelect={onMenuSelect}
-      pullRight
+      placement="bottom-end"
       noCaret
     >
       <MenuItem eventKey="deleteFeedback">
         <Icon icon="material-close" />
-        &ensp;Delete feedback
+        Delete feedback
       </MenuItem>
       <MenuItem eventKey="investigate">
         <Icon icon="material-search" />
-        &ensp;Investigate
+        Investigate
       </MenuItem>
     </DropdownButton>
   );

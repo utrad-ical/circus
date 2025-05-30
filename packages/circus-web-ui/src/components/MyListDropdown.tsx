@@ -1,13 +1,14 @@
 import React from 'react';
-import useLoginUser from 'utils/useLoginUser';
-import { DropdownButton, MenuItem } from './react-bootstrap';
-import Icon from './Icon';
-import IconButton from './IconButton';
 import { useDispatch } from 'react-redux';
-import { useApi } from 'utils/api';
 import { showMessage } from 'store/messages';
 import { updateSearch } from 'store/searches';
+import { useApi } from 'utils/api';
+import useLoginUser from 'utils/useLoginUser';
 import { SearchResult, selectionStatusChanged } from '../store/searches';
+import DropdownButton from './DropdownButton';
+import Icon from './Icon';
+import IconButton from './IconButton';
+import MenuItem from './MenuItem';
 
 const MyListDropdown: React.FC<{
   resourceType: string;
@@ -61,7 +62,7 @@ const MyListDropdown: React.FC<{
   return (
     <DropdownButton
       id="series-mylist-dropdown"
-      bsSize="sm"
+      size="sm"
       title={<Icon icon="material-folder_open" />}
     >
       {myLists.length > 0 &&

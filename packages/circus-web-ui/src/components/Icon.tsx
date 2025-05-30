@@ -76,6 +76,7 @@ export const createIconComponent = (prefixes: { [key: string]: string }) => {
         if (k === 'material-') {
           return (
             <StyledSpan
+              data-icon
               className={classnames(className, { spin })}
               aria-hidden="true"
               size={size}
@@ -86,6 +87,7 @@ export const createIconComponent = (prefixes: { [key: string]: string }) => {
         }
         return (
           <StyledI
+            data-icon
             className={classnames(className, { spin }, prefixes[k] + name)}
             size={size}
           />

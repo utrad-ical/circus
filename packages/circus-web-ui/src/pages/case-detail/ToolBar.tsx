@@ -8,12 +8,12 @@ import Icon from 'components/Icon';
 import {
   Button,
   Dropdown,
-  MenuItem,
   Modal,
   OverlayTrigger,
   SplitButton,
   Tooltip
 } from 'components/react-bootstrap';
+import MenuItem from 'components/MenuItem';
 import { ToolOptions, ToolOptionSetter } from 'pages/case-detail/useToolbar';
 import React, { useState } from 'react';
 import { MenuItemProps } from 'react-bootstrap';
@@ -371,7 +371,9 @@ const ToolBar: React.FC<{
               <MenuItem
                 key={lineWidth}
                 eventKey={lineWidth}
-                onSelect={lineWidth => setToolOption('lineWidth', lineWidth)}
+                onSelect={lineWidth =>
+                  setToolOption('lineWidth', Number(lineWidth))
+                }
               >
                 {lineWidth}
               </MenuItem>

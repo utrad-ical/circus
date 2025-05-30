@@ -3,20 +3,17 @@ import { alert, confirm } from '@smikitky/rb-components/lib/modal';
 import CaseExportModal from 'components/CaseExportModal';
 import Collapser from 'components/Collapser';
 import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
+import DropdownButton from 'components/DropdownButton';
 import FullSpanContainer from 'components/FullSpanContainer';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
+import MenuItem from 'components/MenuItem';
 import PatientInfoBox from 'components/PatientInfoBox';
 import ProjectDisplay from 'components/ProjectDisplay';
 import SearchResultsView from 'components/SearchResultsView';
 import Tag from 'components/Tag';
 import TimeDisplay from 'components/TimeDisplay';
-import {
-  Button,
-  DropdownButton,
-  MenuItem,
-  Modal
-} from 'components/react-bootstrap';
+import { Button, Modal } from 'components/react-bootstrap';
 import { produce } from 'immer';
 import React, {
   useCallback,
@@ -456,15 +453,15 @@ const MenuBar: React.FC<{
         </Button>
         <DropdownButton
           id="submenu"
-          bsStyle="link"
+          variant="link"
           title={<Icon icon="material-menu" />}
-          pullRight
+          placement="bottom-end"
           noCaret
           disabled={busy}
         >
           <MenuItem eventKey="1" onSelect={() => onCommand('revert')}>
             <Icon icon="material-close" />
-            &ensp;Revert
+            Revert
           </MenuItem>
           <MenuItem divider />
           <MenuItem header>Export</MenuItem>

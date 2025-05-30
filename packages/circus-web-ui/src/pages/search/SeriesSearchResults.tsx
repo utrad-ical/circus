@@ -3,13 +3,14 @@ import DataGrid, {
   DataGridColumnDefinition,
   DataGridRenderer
 } from 'components/DataGrid';
+import DropdownButton from 'components/DropdownButton';
 import Icon from 'components/Icon';
+import MenuItem from 'components/MenuItem';
 import MyListDropdown from 'components/MyListDropdown';
 import SearchResultsView, {
   makeSortOptions,
   patientInfoSearchOptions
 } from 'components/SearchResultsView';
-import { DropdownButton, MenuItem } from 'components/react-bootstrap';
 import { multirange } from 'multi-integer-range';
 import React, { Fragment } from 'react';
 import { useSelector } from 'react-redux';
@@ -76,8 +77,8 @@ const Operation: DataGridRenderer<any> = props => {
     <Fragment>
       <DropdownButton
         id="dropdown-new-item"
-        bsSize="sm"
-        bsStyle="primary"
+        size="sm"
+        variant="primary"
         title={
           <Fragment>
             <Icon icon="material-add" /> New
@@ -93,10 +94,9 @@ const Operation: DataGridRenderer<any> = props => {
       </DropdownButton>
       &thinsp;
       <DropdownButton
-        bsSize="sm"
+        size="sm"
         title={<Icon icon="material-more_horiz" />}
-        id={`dropdown-`}
-        pullRight
+        placement="bottom-end"
         noCaret
       >
         <MenuItem eventKey="1" href={`/series/${series.seriesUid}`}>

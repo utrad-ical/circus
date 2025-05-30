@@ -3,9 +3,9 @@ import {
   Button,
   Dropdown,
   FormControl,
-  MenuItem,
   Modal
 } from 'components/react-bootstrap';
+import MenuItem from 'components/MenuItem';
 import keycode from 'keycode';
 import { ExternalLabel } from 'pages/case-detail/labelData';
 import { Revision } from 'pages/case-detail/revisionData';

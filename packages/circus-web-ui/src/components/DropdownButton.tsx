@@ -39,22 +39,38 @@ const variantStyles: Record<Variant, any> = {
     background-color: white;
     color: #111111;
     border: 1px solid silver;
+    &:hover {
+      ${(props: { $disabled: boolean }) =>
+        !props.$disabled && 'background-color:  #e6e6e6'}
+    }
   `,
   primary: css`
     background-color: ${(props: any) => props.theme.brandPrimary};
     color: white;
     border: 1px solid transparent;
+    &:hover {
+      ${(props: any) =>
+        !props.$disabled && `background-color:  ${props.theme.brandDark}`}
+    }
   `,
   link: css`
     background: none;
     border: none;
     color: ${(props: any) => props.theme.brandPrimary};
     text-decoration: underline;
+      ${(props: { $disabled: boolean }) =>
+        !props.$disabled &&
+        'text-decoration: underline; background-color: transparent;'}
+    }
   `,
   danger: css`
     background-color: #d9534f;
     border: 1px solid transparent;
     color: white;
+    &:hover {
+      ${(props: { $disabled: boolean }) =>
+        !props.$disabled && 'background-color: #c9302c;'}
+    }
   `
 };
 
@@ -74,11 +90,6 @@ const TriggerButton = styled.button<{
   ${(props: { $variant: Variant }) => variantStyles[props.$variant]};
   ${(props: { $noCaret: boolean }) => !props.$noCaret && 'padding-right: 0;'}
   opacity: ${(props: { $disabled: boolean }) => (props.$disabled ? 0.5 : 1)};
-  &:hover {
-    opacity: ${(props: { $disabled: boolean }) => (props.$disabled ? 0.5 : 1)};
-    filter: ${(props: { $disabled: boolean }) =>
-      props.$disabled ? 'none' : 'brightness(0.8)'};
-  }
 `;
 
 const Menu = styled.div`

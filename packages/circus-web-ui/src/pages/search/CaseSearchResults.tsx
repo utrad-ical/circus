@@ -1,15 +1,16 @@
 import { confirm } from '@smikitky/rb-components/lib/modal';
 import CaseExportModal from 'components/CaseExportModal';
 import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
+import DropdownButton from 'components/DropdownButton';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
+import MenuItem from 'components/MenuItem';
 import MyListDropdown from 'components/MyListDropdown';
 import SearchResultsView, {
   makeSortOptions,
   patientInfoSearchOptions
 } from 'components/SearchResultsView';
 import { PhysicalTag } from 'components/Tag';
-import { DropdownButton, MenuItem } from 'components/react-bootstrap';
 import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation } from 'react-router-dom';
@@ -158,7 +159,7 @@ const CaseSearchResultsView: React.FC<{
         <>
           <DropdownButton
             id="case-tags-dropdown"
-            bsSize="sm"
+            size="sm"
             title={<Icon icon="material-sell" />}
           >
             {availableTags.map(tag => {
@@ -198,7 +199,7 @@ const CaseSearchResultsView: React.FC<{
           />
           <DropdownButton
             id="case-export-dropdown"
-            bsSize="sm"
+            size="sm"
             title={<Icon icon="material-more_horiz" />}
           >
             <MenuItem

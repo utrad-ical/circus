@@ -29,7 +29,6 @@ const NavMenu: React.FC<{
   className
 }) => {
   icon = icon ?? `circus-${name.toLowerCase()}`;
-  console.log('icon', icon);
   const caption = (
     <>
       <Icon icon={icon} size="lg" className="navmenu" />

@@ -1,16 +1,17 @@
-import Icon from 'components/Icon';
 import { confirm } from '@smikitky/rb-components/lib/modal';
 import DataGrid, {
   DataGridColumnDefinition,
   DataGridRenderer
 } from 'components/DataGrid';
+import DropdownButton from 'components/DropdownButton';
+import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
+import MenuItem from 'components/MenuItem';
 import MyListDropdown from 'components/MyListDropdown';
 import SearchResultsView, {
   makeSortOptions,
   patientInfoSearchOptions
 } from 'components/SearchResultsView';
-import { DropdownButton, MenuItem } from 'components/react-bootstrap';
 import React, { Fragment } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -73,10 +74,9 @@ const Operation: DataGridRenderer<any> = props => {
       </IconButton>
       &thinsp;
       <DropdownButton
-        bsSize="sm"
+        size="sm"
         title={<Icon icon="material-more_horiz" />}
-        id={`dropdown-`}
-        pullRight
+        placement="bottom-end"
         noCaret
         onSelect={handleMenuClick}
       >

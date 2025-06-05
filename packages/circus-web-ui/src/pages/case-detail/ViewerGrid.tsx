@@ -12,6 +12,7 @@ import {
 import { toolFactory } from '@utrad-ical/circus-rs/src/browser/tool/tool-initializer';
 import { Section } from '@utrad-ical/circus-rs/src/common/geometry';
 import classnames from 'classnames';
+import DropdownButton from 'components/DropdownButton';
 import GridContainer, {
   LayoutInfo,
   layoutReducer
@@ -25,7 +26,8 @@ import ImageViewer, {
   setOrthogonalOrientation,
   StateChanger
 } from 'components/ImageViewer';
-import { Button, DropdownButton, MenuItem } from 'components/react-bootstrap';
+import MenuItem from 'components/MenuItem';
+import { Button } from 'components/react-bootstrap';
 import React, {
   useCallback,
   useContext,
@@ -168,10 +170,9 @@ const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
         )}
         {viewerMode === '3d' && (
           <DropdownButton
-            bsSize="xs"
+            size="xs"
             title={<Icon icon="material-more_horiz" />}
-            id={`viewergrid-header-dropdown-${key}`}
-            pullRight
+            placement="bottom-end"
             noCaret
             onSelect={handleSelectLayoutKind as any}
           >

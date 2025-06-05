@@ -7,9 +7,9 @@ import { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-sou
 import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
+import MenuItem from 'components/MenuItem';
 import {
   Button,
-  MenuItem,
   OverlayTrigger,
   Popover,
   SplitButton
@@ -21,6 +21,7 @@ import tinyColor from 'tinycolor2';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
 import useLocalPreference from 'utils/useLocalPreference';
 import useLoginUser from 'utils/useLoginUser';
+import { defaultLabelColors } from '../../labelColors';
 import * as c from './caseStore';
 import createCurrentLabelsUpdator from './createCurrentLabelsUpdator';
 import {
@@ -39,7 +40,6 @@ import {
 import ProcessorDropdown from './processors/ProcessorDropdown';
 import ProcessorModal from './processors/ProcessorModal';
 import { EditingData, EditingDataUpdater } from './revisionData';
-import { defaultLabelColors } from '../../labelColors';
 
 type LabelCommand =
   | 'rename'

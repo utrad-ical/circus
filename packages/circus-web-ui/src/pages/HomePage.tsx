@@ -32,15 +32,15 @@ const HomeMenu = styled.ul`
     > a {
       display: block;
       border-radius: 10px;
-      background-color: ${(props: any) => props.theme.background};
+      background-color: var(--circus-background);
       text-decoration: none;
       font-size: 24px;
       font-weight: bolder;
       padding: 16px 0;
-      color: ${(props: any) => props.theme.brandPrimary};
+      color: var(--circus-brand-primary);
       &:hover {
-        color: ${(props: any) => props.theme.highlightColor};
-        background-color: ${(props: any) => props.theme.secondaryBackground};
+        color: var(--circus-highlight-color);
+        background-color: var(--circus-secondary-background);
       }
     }
   }

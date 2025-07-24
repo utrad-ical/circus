@@ -10,11 +10,11 @@ const StyledDiv = styled.div`
     user-select: none;
     color: white;
     padding: 2px 5px;
-    background-color: ${(props: any) => props.theme.brandPrimary};
+    background-color: var(--circus-brand-primary);
     font-weight: bold;
     cursor: pointer;
     &:hover {
-      background-color: ${(props: any) => props.theme.brandDark};
+      background-color: var(--circus-brand-primary-dark);
     }
     .triangle {
       transition: transform 0.1s linear;
@@ -35,7 +35,7 @@ const StyledDiv = styled.div`
   }
 
   &.framed {
-    border: 1px solid ${(props: any) => props.theme.brandDark};
+    border: 1px solid var(--circus-brand-primary-dark);
   }
 
   &.no-padding {

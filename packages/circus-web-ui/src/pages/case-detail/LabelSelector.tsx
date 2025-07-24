@@ -64,13 +64,13 @@ const LabelSelector: React.FC<{
 
 const StyledSeriesUl = styled.ul`
   padding: 0;
-  border-top: 1px solid ${(props: any) => props.theme.border};
+  border-top: 1px solid var(--circus-border);
 
   ul.case-label-list {
     margin: 0;
     padding-left: 10px;
     &.active {
-      background-color: ${(props: any) => props.theme.activeBackground};
+      background-color: var(--circus-active-background);
     }
   }
 
@@ -530,17 +530,17 @@ export const Label: React.FC<{
 
 const StyledLabelLi = styled.li`
   list-style-type: none;
-  border-bottom: 1px solid ${(props: any) => props.theme.border};
+  border-bottom: 1px solid var(--circus-border);
   height: 30px;
   > .circus-label {
     width: 100%;
     overflow: hidden;
   }
   &:hover {
-    background-color: ${(props: any) => props.theme.secondaryBackground};
+    background-color: var(--circus-secondary-background);
   }
   &.active {
-    background-color: ${(props: any) => props.theme.activeBackground};
+    background-color: var(--circus-active-background);
     font-weight: bold;
     .hint {
       color: white;

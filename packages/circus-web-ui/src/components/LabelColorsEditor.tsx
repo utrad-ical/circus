@@ -128,6 +128,6 @@ const StyledDiv = styled.div`
   gap: 5px;
   align-items: center;
   .color-picker-palette > .color-picker-palette-color.selected {
-    outline: solid 2px ${(props: any) => props.theme.highlightColor};
+    outline: solid 2px var(--circus-highlight-color);
   }
 `;

@@ -13,9 +13,9 @@ const StyledSideBar = styled.div`
     text-align: center;
     cursor: pointer;
     flex: 1 0 auto;
-    background: ${(props: any) => props.theme.brandDark};
+    background: var(--circus-brand-primary-dark);
     &:hover {
-      background: ${(props: any) => props.theme.brandPrimary};
+      background: var(--circus-brand-primary);
     }
     color: white;
   }
@@ -24,8 +24,8 @@ const StyledSideBar = styled.div`
     > .bar {
       text-align: right;
       flex: 0 0 auto;
-      color: ${(props: any) => props.theme.brandPrimary};
-      background: ${(props: any) => props.theme.background};
+      color: var(--circus-brand-primary);
+      background: var(--circus-background);
       .triangle {
         transform: rotate(180deg);
       }

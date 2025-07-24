@@ -43,12 +43,15 @@ const NavMenu: React.FC<{
     placement: placement,
     whileElementsMounted: autoUpdate
   });
+  const isDropdown = children != null && !(onClick || link);
 
-  const hover = useHover(context, {
-    handleClose: safePolygon({
-      blockPointerEvents: true
-    })
-  });
+  const hover = isDropdown
+    ? useHover(context, {
+        handleClose: safePolygon({
+          blockPointerEvents: true
+        })
+      })
+    : undefined;
   const { getReferenceProps, getFloatingProps } = useInteractions([hover]);
 
   return (

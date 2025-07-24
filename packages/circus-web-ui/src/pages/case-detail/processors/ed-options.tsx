@@ -20,9 +20,9 @@ const StyledDiv = styled.div`
     width: 5em;
   }
   .square {
-    background: ${(props: any) => props.theme.background};
-    color: ${(props: any) => props.theme.primaryText};
-    border: 1px solid ${(props: any) => props.theme.border};
+    background: var(--circus-background);
+    color: var(--circus-background-text);
+    border: 1px solid var(--circus-border);
     height: 30px;
     width: 30px;
     font-size: 20px;
@@ -33,16 +33,16 @@ const StyledDiv = styled.div`
     text-align: center;
     &:focus {
       outline: none;
-      background: ${(props: any) => props.theme.secondaryBackground};
+      background: var(--circus-secondary-background);
     }
     &.active {
-      background: ${(props: any) => props.theme.brandPrimary};
+      background: var(--circus-brand-primary);
       &:focus {
-        background: ${(props: any) => props.theme.brandDark};
+        background: var(--circus-brand-primary-dark);
       }
     }
     &.center {
-      background: ${(props: any) => props.theme.highlightColor};
+      background: var(--circus-highlight-color);
     }
   }
   .structure-caption {

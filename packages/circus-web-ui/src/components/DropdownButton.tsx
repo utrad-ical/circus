@@ -45,18 +45,19 @@ const variantStyles: Record<Variant, any> = {
     }
   `,
   primary: css`
-    background-color: ${(props: any) => props.theme.brandPrimary};
+    background-color: var(--circus-brand-primary);
     color: white;
     border: 1px solid transparent;
     &:hover {
       ${(props: any) =>
-        !props.$disabled && `background-color:  ${props.theme.brandDark}`}
+        !props.$disabled &&
+        `background-color: var(--circus-brand-primary-dark)`}
     }
   `,
   link: css`
     background: none;
     border: none;
-    color: ${(props: any) => props.theme.brandPrimary};
+    color: var(--circus-brand-primary);
     text-decoration: underline;
       ${(props: { $disabled: boolean }) =>
         !props.$disabled &&

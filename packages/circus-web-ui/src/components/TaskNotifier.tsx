@@ -181,7 +181,7 @@ const StyledTaskDisplay = styled.div`
   line-height: 1;
   &:hover {
     color: white;
-    background: ${(props: any) => props.theme.brandPrimary};
+    background: var(--circus-brand-primary);
   }
   &.error {
     .task-message {

@@ -59,7 +59,7 @@ const StyledUl = styled.ul`
   > li {
     list-style-type: none;
     border: 1px solid silver;
-    background: ${(props: any) => props.theme.secondaryBackground};
+    background: var(--circus-secondary-background);
     min-height: 200px;
     > a {
       display: flex;
@@ -70,7 +70,7 @@ const StyledUl = styled.ul`
       height: 100%;
       &:hover {
         text-decoration: none;
-        color: ${(props: any) => props.theme.highlightColor};
+        color: var(--circus-highlight-color);
       }
       .name {
         margin-top: 5px;

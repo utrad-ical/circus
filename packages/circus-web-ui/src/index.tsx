@@ -104,16 +104,8 @@ const AppInner: React.FC<{ manager: ReturnType<typeof loginManager> }> = ({
   manager
 }) => {
   const user = useLoginUser();
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  useEffect(() => {
-    const userTheme =
-      user && user.preferences.theme === 'mode_black' ? 'dark' : 'light';
-    if (userTheme && themes[userTheme]) {
-      setTheme(userTheme);
-    } else {
-      setTheme('light'); // Default to light theme
-    }
-  }, [user]);
+  const theme =
+    user && user.preferences.theme === 'mode_black' ? 'dark' : 'light';
 
   return (
     <>

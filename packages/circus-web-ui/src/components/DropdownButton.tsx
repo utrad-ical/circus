@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled, { css } from 'styled-components';
+import classnames from 'classnames';
 
 import {
   autoUpdate,
@@ -168,7 +169,7 @@ const DropdownButton: React.FC<DropdownProps> = ({
         ref={refs.setReference}
         id={id}
         $disabled={disabled}
-        className={className}
+        className={classnames('btn', variant && `btn-${variant}`, className)}
         style={style}
         aria-haspopup="menu"
         aria-expanded={open}

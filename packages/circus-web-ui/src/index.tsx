@@ -40,7 +40,6 @@ import { Provider as ReduxStoreProvider, useSelector } from 'react-redux';
 import { dismissMessageOnPageChange } from 'store/messages';
 import PluginJobQueueSearch from './pages/search/PluginJobQueueSearch';
 import { store } from './store';
-import GlobalStyle, { themes } from './theme';
 
 import {
   createVolumeLoaderManager,
@@ -104,15 +103,14 @@ const AppInner: React.FC<{ manager: ReturnType<typeof loginManager> }> = ({
   manager
 }) => {
   const user = useLoginUser();
-  const theme =
-    user && user.preferences.theme === 'mode_black' ? 'dark' : 'light';
+  const isDarkMode = user && user.preferences.theme === 'mode_black';
 
-  return (
-    <>
-      <GlobalStyle theme={themes[theme]} />
-      <RootApp manager={manager} />
-    </>
-  );
+  useEffect(() => {
+    document.body.classList.toggle('dark', isDarkMode);
+    document.documentElement.style.colorScheme = isDarkMode ? 'dark' : 'light';
+  }, [isDarkMode]);
+
+  return <RootApp manager={manager} />;
 };
 
 const TheApp: React.FC<{}> = () => {

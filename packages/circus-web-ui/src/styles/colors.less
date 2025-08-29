@@ -1,0 +1,265 @@
+// Common variables
+@background-light: #ffffff;
+@background-dark: #000000;
+
+:root {
+  // shared across light/dark (do NOT override in body.dark)
+  --circus-brand-primary: @brand-primary;
+  --circus-brand-primary-dark: darken(@brand-primary, 10%);
+  --circus-brand-primary-darker: darken(@brand-primary, 20%);
+  --circus-brand-primary-text: #ffffff;
+
+  --circus-state-info: #d9edf7;
+
+  // light (default)
+  --circus-background: @background-light;
+  --circus-background-dark: darken(@background-light, 10%);
+  --circus-background-darker: darken(@background-light, 20%);
+  --circus-secondary-background: #eeeeee;
+  --circus-active-background: #dddddd;
+  --circus-invalid-background: pink;
+
+  --circus-background-text: #111111;
+  --circus-primary-text: black;
+  --circus-border: silver;
+
+  --circus-highlight-color: #fd3164;
+}
+
+// dark
+body.dark {
+  --circus-background: @background-dark;
+  --circus-background-dark: lighten(@background-dark, 10%);
+  --circus-background-darker: lighten(@background-dark, 20%);
+
+  --circus-secondary-background: #222222;
+  --circus-active-background: #444444;
+  --circus-invalid-background: #660000;
+
+  --circus-background-text: #ffffff;
+  --circus-primary-text: white;
+  --circus-border: darkgray;
+
+  --circus-state-info: #0a3a52;
+}
+
+// Global styles
+// BODY
+body {
+  background-color: var(--circus-background);
+  color: var(--circus-primary-text);
+}
+
+// BUTTONS
+.btn.btn-primary {
+  background-color: var(--circus-brand-primary);
+  border-color: var(--circus-brand-primary-dark);
+  color: var(--circus-brand-primary-text);
+  &:hover {
+    background-color: var(--circus-brand-primary-dark);
+  }
+  &:active {
+    background-color: var(--circus-brand-primary-darker);
+  }
+  &:disabled {
+    background-color: var(--circus-brand-primary);
+  }
+}
+.open > .dropdown-toggle.btn-primary {
+  background-color: var(--circus-brand-primary);
+  color: var(--circus-brand-primary-text);
+  &:focus {
+    background-color: var(--circus-brand-primary-dark);
+    color: var(--circus-brand-primary-text);
+  }
+  &:hover {
+    background-color: var(--circus-brand-primary-darker);
+    color: var(--circus-brand-primary-text);
+  }
+}
+
+.btn.btn-default {
+  background-color: var(--circus-background);
+  border-color: var(--circus-border);
+  color: var(--circus-background-text);
+  &:hover {
+    background-color: var(--circus-background-dark);
+  }
+  &:active {
+    background-color: var(--circus-background-darker);
+  }
+  &:disabled {
+    background-color: var(--circus-background);
+  }
+}
+.open > .dropdown-toggle.btn-default {
+  background-color: var(--circus-background);
+  color: var(--circus-background-text);
+  &:focus {
+    background-color: var(--circus-background-dark);
+    color: var(--circus-background-text);
+  }
+  &:hover {
+    background-color: var(--circus-background-darker);
+    color: var(--circus-background-text);
+  }
+}
+
+.btn.btn-link {
+  color: var(--circus-brand-primary);
+}
+
+// PANELS
+.panel-primary {
+  border-color: var(--circus-brand-primary);
+  .panel-heading {
+    background-color: var(--circus-brand-primary);
+    border-color: var(--circus-brand-primary);
+  }
+  .panel-footer {
+    background-color: var(--circus-secondary-background);
+    border-top-color: transparent;
+  }
+}
+
+// DROPDOWNS
+.dropdown-menu {
+  background-color: var(--circus-background);
+  border-color: var(--circus-border);
+  > li > a {
+    color: var(--circus-primary-text);
+    &:hover,
+    &:focus {
+      background-color: var(--circus-secondary-background);
+      color: var(--circus-primary-text);
+    }
+  }
+}
+
+// TABLES
+.table {
+  > thead,
+  > tbody,
+  > tfoot {
+    > tr {
+      > th,
+      > td {
+        border-color: var(--circus-border);
+      }
+      &.info > td,
+      &.info:hover > td {
+        background-color: var(--circus-state-info);
+      }
+    }
+    > thead > tr > th {
+      border-color: var(--circus-border);
+    }
+  }
+}
+.table-hover > tbody > tr:hover {
+  background-color: var(--circus-secondary-background);
+}
+.table-striped > tbody > tr:nth-of-type(odd) {
+  background-color: var(--circus-secondary-background);
+}
+
+// TABS
+.nav-tabs > li.active {
+  a,
+  a:hover,
+  a:focus {
+    background-color: var(--circus-background);
+    color: var(--circus-primary-text);
+  }
+}
+
+// FORM CONTROLS
+.form-control {
+  background-color: var(--circus-background);
+  color: var(--circus-primary-text);
+  border-color: var(--circus-border);
+}
+textarea {
+  background-color: var(--circus-background);
+  color: var(--circus-primary-text);
+}
+
+// WELL
+.well {
+  background-color: var(--circus-secondary-background);
+}
+
+// POPOVER
+.popover {
+  background-color: var(--circus-background);
+  border-color: var(--circus-border);
+  &.top > .arrow {
+    border-top-color: var(--circus-border);
+    &:after {
+      border-top-color: var(--circus-background);
+    }
+  }
+  &.right > .arrow {
+    border-right-color: var(--circus-border);
+    &:after {
+      border-right-color: var(--circus-background);
+    }
+  }
+  &.bottom > .arrow {
+    border-bottom-color: var(--circus-border);
+    &:after {
+      border-bottom-color: var(--circus-background);
+    }
+  }
+  &.left > .arrow {
+    border-left-color: var(--circus-border);
+    &:after {
+      border-left-color: var(--circus-background);
+    }
+  }
+}
+
+// A
+a {
+  color: var(--circus-brand-primary);
+}
+
+// MODAL
+.modal-content {
+  background-color: var(--circus-background);
+  border-color: var(--circus-border);
+}
+.close {
+  color: var(--circus-primary-text);
+  opacity: 0.5;
+}
+
+// PAGINATION
+.pagination {
+  > li {
+    > a,
+    > span {
+      background-color: var(--circus-background);
+      color: var(--circus-primary-text);
+      border-color: var(--circus-border);
+      &:hover,
+      &:focus {
+        color: var(--circus-primary-text);
+        background-color: var(--circus-secondary-background);
+        border-color: var(--circus-border);
+      }
+    }
+  }
+  > .disabled {
+    > span,
+    > span:hover,
+    > span:focus,
+    > a,
+    > a:hover,
+    > a:focus {
+      color: var(--circus-border);
+      background-color: var(--circus-background);
+      border-color: var(--circus-border);
+    }
+  }
+}

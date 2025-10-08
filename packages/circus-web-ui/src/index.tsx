@@ -7,7 +7,7 @@ import {
   RouterProvider,
   useLocation
 } from 'react-router-dom';
-
+import useLoginUser from 'utils/useLoginUser';
 import AdminIndex from 'pages/admin/AdminIndex';
 import GeneralAdmin from 'pages/admin/GeneralAdmin';
 import GroupAdmin from 'pages/admin/GroupAdmin';
@@ -40,7 +40,6 @@ import { Provider as ReduxStoreProvider, useSelector } from 'react-redux';
 import { dismissMessageOnPageChange } from 'store/messages';
 import PluginJobQueueSearch from './pages/search/PluginJobQueueSearch';
 import { store } from './store';
-import GlobalStyle, { CircusThemeProvider } from './theme';
 
 import {
   createVolumeLoaderManager,
@@ -98,6 +97,20 @@ const RootApp: React.FC<{ manager: ReturnType<typeof loginManager> }> = ({
   }, [manager, location.pathname]);
 
   return <Outlet />;
+};
+
+const AppInner: React.FC<{ manager: ReturnType<typeof loginManager> }> = ({
+  manager
+}) => {
+  const user = useLoginUser();
+  const isDarkMode = user && user.preferences.theme === 'mode_black';
+
+  useEffect(() => {
+    document.body.classList.toggle('dark', isDarkMode);
+    document.documentElement.style.colorScheme = isDarkMode ? 'dark' : 'light';
+  }, [isDarkMode]);
+
+  return <RootApp manager={manager} />;
 };
 
 const TheApp: React.FC<{}> = () => {
@@ -161,10 +174,7 @@ const TheApp: React.FC<{}> = () => {
           <ApiContext.Provider value={api}>
             <ReduxStoreProvider store={store}>
               <VolumeLoaderFactoryProvider>
-                <CircusThemeProvider>
-                  <GlobalStyle />
-                  <RootApp manager={manager} />
-                </CircusThemeProvider>
+                <AppInner manager={manager} />
               </VolumeLoaderFactoryProvider>
             </ReduxStoreProvider>
           </ApiContext.Provider>

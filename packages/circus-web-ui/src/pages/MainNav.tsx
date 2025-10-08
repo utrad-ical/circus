@@ -78,8 +78,8 @@ const StyledHeader = styled.header`
   width: 100%;
   flex: none;
   position: relative;
-  background-color: ${(props: any) => props.theme.brandDark};
-  border-bottom: 1px solid ${(props: any) => props.theme.brandDarker};
+  background-color: var(--circus-brand-primary-dark);
+  border-bottom: 1px solid var(--circus-brand-primary-darker);
   line-height: 39px;
   z-index: 2000;
   color: white;
@@ -116,8 +116,8 @@ const StyledNav = styled.nav`
       &.logo,
       &.icon-menu {
         &:hover {
-          color: ${(props: any) => props.theme.highlightColor};
-          background-color: ${(props: any) => props.theme.brandPrimary};
+          color: var(--circus-highlight-color);
+          background-color: var(--circus-brand-primary);
           > a {
             color: inherit;
             text-decoration: none;
@@ -145,7 +145,7 @@ const StyledNav = styled.nav`
             padding: 0 8px;
             color: inherit;
             &:hover {
-              background-color: ${(props: any) => props.theme.brandPrimary};
+              background-color: var(--circus-brand-primary);
               color: white;
             }
           }

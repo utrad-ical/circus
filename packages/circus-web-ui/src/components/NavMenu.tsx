@@ -4,7 +4,8 @@ import {
   safePolygon,
   useFloating,
   useHover,
-  useInteractions
+  useInteractions,
+  FloatingContext
 } from '@floating-ui/react';
 import classNames from 'classnames';
 import React, { useState } from 'react';
@@ -37,19 +38,23 @@ const NavMenu: React.FC<{
   );
 
   const [open, setOpen] = useState(false);
+  const isDropdown = children != null && !(onClick || link);
+
   const { refs, floatingStyles, context } = useFloating({
-    open,
+    open: isDropdown ? open : false,
     onOpenChange: setOpen,
     placement: placement,
     whileElementsMounted: autoUpdate
   });
 
-  const hover = useHover(context, {
+  const hover = useHover(context as FloatingContext<Element>, {
     handleClose: safePolygon({
       blockPointerEvents: true
     })
   });
-  const { getReferenceProps, getFloatingProps } = useInteractions([hover]);
+  const { getReferenceProps, getFloatingProps } = useInteractions(
+    isDropdown ? [hover] : []
+  );
 
   return (
     <li

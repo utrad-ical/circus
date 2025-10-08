@@ -5,10 +5,10 @@ import styled from 'styled-components';
 const StyledDiv = styled.div`
   input,
   select {
-    color: ${(props: any) => props.theme.textColor};
-    background: ${(props: any) => props.theme.background};
+    color: var(--circus-background-text);
+    background: var(--circus-background);
     &.invalid {
-      background: ${(props: any) => props.theme.invalidBackground};
+      background: var(--circus-invalid-background)};
     }
   }
 `;

@@ -73,7 +73,7 @@ const StyledLabelDiv = styled.div`
     display: block;
     height: 20px;
     text-align: center;
-    border: 1px solid ${(props: any) => props.theme.border};
+    border: 1px solid var(--circus-border);
   }
   > .caption {
     white-space: nowrap;

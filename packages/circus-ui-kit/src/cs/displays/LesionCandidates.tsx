@@ -428,7 +428,7 @@ const StyledDiv = styled.div`
     margin-bottom: 5px;
     .tool {
       &.active {
-        background-color: ${(props: any) => props.theme.brandPrimary};
+        background-color: var(--circus-brand-primary);
       }
     }
   }

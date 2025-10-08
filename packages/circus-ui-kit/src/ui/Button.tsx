@@ -79,14 +79,14 @@ const fontSizes: { [size: string]: string } = {
 const StyledButton = styled.button`
   padding: ${(props: any) => paddings[props.size] ?? paddings.default};
   border: 1px solid gray;
-  background-color: ${(props: any) => props.theme.background ?? 'transparent'};
-  color: ${(props: any) => props.color ?? props.theme.textColor};
+  background-color: var(--circus-background, 'transparent');
+  color: ${(props: any) => props.color ?? 'var(--circus-background-text)'};
   font-size: ${(props: any) => fontSizes[props.size] ?? fontSizes.default};
   vertical-align: middle;
   &.selected {
     background-color: ${(props: any) =>
-      props.color ?? props.theme.brandPrimary};
-    color: ${(props: any) => props.theme.background ?? 'white'};
+      props.color ?? 'var(--circus-brand-primary)'};
+    color: var(--circus-background, 'white');
   }
   &:hover {
     filter: brightness(80%);

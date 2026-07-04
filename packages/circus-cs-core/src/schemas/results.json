@@ -47,7 +47,7 @@
       }
     },
     "metadata": {
-      "description": "Holds the metadata of the app. Most of the data are optinal",
+      "description": "Holds the metadata of the app. Most of the data are optional",
       "type": "object",
       "properties": {
         "displayOptions": {

@@ -30,7 +30,7 @@ properties:
     type: string
     maxLength: 1024
     description: >
-      Optinal arbitrary text to explain this project.
+      Optional arbitrary text to explain this project.
   tags:
     type: array
     items:

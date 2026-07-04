@@ -42,7 +42,7 @@ properties:
   description:
     type: string
     description: >
-      Optinal arbitrary text to identify this user.
+      Optional arbitrary text to identify this user.
   groups:
     type: array
     items:

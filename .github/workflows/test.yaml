@@ -3,6 +3,47 @@ name: Test
 on: [push]
 
 jobs:
+  check-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 22.x
+      - name: Log GITHUB_REF
+        run: echo "GITHUB_REF $GITHUB_REF"
+      - name: Check each package for changes and version updates
+        run: |
+          git fetch --tags
+          TAGS=($(git tag --sort=-creatordate | head -n 2))
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            LAST_TAG=${TAGS[1]}
+          else
+            LAST_TAG=${TAGS[0]}
+          fi
+          echo "LAST_TAG determined: $LAST_TAG"
+          if [[ -z "$LAST_TAG" ]]; then
+            echo "No valid tag found for this push. Exiting..."
+          else 
+            git fetch --depth=1 origin $LAST_TAG
+            CHANGED=false
+            for PACKAGE in circus-api circus-cs-core circus-icons circus-lib circus-rs circus-ui-kit circus-web-ui create-circus-cad-plugin; do
+              echo "Checking $PACKAGE..."
+              if ! git diff --quiet $LAST_TAG HEAD -- packages/$PACKAGE; then
+                echo "$PACKAGE has changes since $LAST_TAG."
+                CURRENT_VERSION=$(node -p "require('./packages/$PACKAGE/package.json').version")
+                PREVIOUS_VERSION=$(git show $LAST_TAG:./packages/$PACKAGE/package.json | node -e "let data=''; process.stdin.on('data', chunk => data += chunk); process.stdin.on('end', () => console.log(JSON.parse(data).version));")
+                if [ "$CURRENT_VERSION" == "$PREVIOUS_VERSION" ]; then
+                  echo "::error title=Package Version Not Updated::${PACKAGE} has changes but the version in package.json has not been updated."
+                  CHANGED=true
+                fi
+              fi
+            done
+            if [ "$CHANGED" = true ]; then
+              exit 1
+            fi
+          fi
+
   prettier-check:
     runs-on: ubuntu-latest
     env:

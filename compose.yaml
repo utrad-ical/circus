@@ -1,0 +1,80 @@
+# Sample / development compose file for CIRCUS.
+#
+# Services are grouped by profiles, so you can start any combination:
+#
+#   COMPOSE_PROFILES=mongo,api,web docker compose up -d   # everything
+#   COMPOSE_PROFILES=mongo docker compose up -d           # MongoDB only
+#
+# You can also put COMPOSE_PROFILES in `.env`.
+# Initialize/upgrade the database: docker compose run --rm api node circus.js migrate
+
+name: circus
+
+services:
+  mongo:
+    profiles: [mongo]
+    image: mongo:5.0.6
+    command: --replSet rs0 --bind_ip_all
+    volumes:
+      - ${CIRCUS_DATA_DIR:-/var/circus/data}/mongodb:/data/db
+    ports:
+      - ${CIRCUS_MONGO_PORT:-127.0.0.1:27017}:27017
+    healthcheck:
+      # Initializes the replica set on the first run, and reports healthy
+      # only when this node is the writable primary. An existing replica set
+      # config with a different member name is NOT fixed automatically.
+      test:
+        - CMD
+        - mongo
+        - --quiet
+        - --eval
+        - |
+          if (db.adminCommand({ replSetGetStatus: 1 }).code === 94)
+            rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'mongo:27017' }] });
+          quit(db.adminCommand({ hello: 1 }).isWritablePrimary ? 0 : 1);
+      interval: 5s
+      start_period: 30s
+    restart: unless-stopped
+
+  api:
+    profiles: [api]
+    image: ghcr.io/utrad-ical/circus-api:${CIRCUS_TAG:-dev}
+    build:
+      context: .
+      target: api
+    init: true
+    volumes:
+      - ${CIRCUS_DATA_DIR:-/var/circus/data}:/var/circus/data
+      - /var/run/docker.sock:/var/run/docker.sock
+      # To use your own configuration file:
+      # - ./circus.config.js:/var/circus/circus.config.js:ro
+    environment:
+      # Host path of the data directory (for plug-in containers via DooD)
+      DOOD_HOST_WORKING_PATH: ${CIRCUS_DATA_DIR:-/var/circus/data}
+      AUTO_BOOT_JOB_MANAGER: ${AUTO_BOOT_JOB_MANAGER:-0}
+    ports:
+      - ${CIRCUS_API_PORT:-127.0.0.1:8080}:8080
+    depends_on:
+      mongo:
+        condition: service_healthy
+        required: false
+    restart: unless-stopped
+
+  web:
+    profiles: [web]
+    image: ghcr.io/utrad-ical/circus-web:${CIRCUS_TAG:-dev}
+    build:
+      context: .
+      target: web
+    environment:
+      # Set to e.g. host.docker.internal:8080 to use an API server on the host
+      CIRCUS_API_UPSTREAM: ${CIRCUS_API_UPSTREAM:-api:8080}
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    ports:
+      - ${CIRCUS_HTTP_PORT:-80}:80
+    depends_on:
+      api:
+        condition: service_started
+        required: false
+    restart: unless-stopped

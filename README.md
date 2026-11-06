@@ -12,7 +12,34 @@ This is a monorepo that contains all CIRCUS projects.
 
 ## Install
 
-The easiest way to get CIRCUS working is to use our official Docker image, which includes a database server and an httpd. For more information, visit the official CIRCUS website.
+The easiest way to get CIRCUS working is to use Docker Compose.
+CIRCUS consists of the following containers:
+
+| Service | Image                           | Description                                              |
+| ------- | ------------------------------- | -------------------------------------------------------- |
+| `mongo` | `mongo:5.0.6`                   | MongoDB (replica set `rs0`)                              |
+| `api`   | `ghcr.io/utrad-ical/circus-api` | API server, CIRCUS RS, and CS job manager                |
+| `web`   | `ghcr.io/utrad-ical/circus-web` | Web UI served by Caddy, proxying `/api`, `/login`, `/rs` |
+
+Each service belongs to a profile of the same name, so you can start any combination of them
+(e.g., run only `mongo` in Docker while developing the API server locally).
+See [`compose.yaml`](./compose.yaml) for the available environment variables.
+
+```bash
+# Build the images locally and start everything
+COMPOSE_PROFILES=mongo,api,web docker compose up -d --build
+
+# Initialize (or upgrade) the database
+docker compose run --rm api node circus.js migrate
+
+# Register a CAD plug-in (Docker image ID without the "sha256:" prefix)
+docker compose run --rm api node circus.js register-cad-plugin <PLUGIN_ID>
+```
+
+The default user is `circus` (password: `circus`).
+
+To use your own configuration, mount your `circus.config.js` at `/var/circus/circus.config.js` in the `api` container
+(the default one is [`docker/api/circus.config.js`](./docker/api/circus.config.js)).
 
 **Follow the instruction below only when you want to install CIRCUS manually or develop CIRCUS itself.**
 
@@ -68,6 +95,9 @@ Sees `packages/*/src/config/default.ts` for the available options and defaults.
 Use this to build optimized production builds (slow). This is not necessary while you are developing CIRCUS.
 
 ```bash
-# On monorepo root
-npm run build
+# On monorepo root (the same steps as CI and the Dockerfile)
+npm run prebuild-ts
+npm run build-ts
+npm run postbuild-ts
+npm run build -w @utrad-ical/circus-web-ui
 ```

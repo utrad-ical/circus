@@ -1,0 +1,34 @@
+# Keep the build context small and free of local state.
+# Everything here is regenerated inside the build stage.
+
+.git
+.github
+.env
+**/.env
+node_modules
+**/node_modules
+coverage
+attic
+**/*.tsbuildinfo
+**/*.tgz
+
+# Build outputs (rebuilt by `npm run build`)
+packages/*/lib
+packages/circus-rs/dist
+packages/circus-web-ui/public/*.js
+packages/circus-web-ui/public/*.js.map
+packages/circus-web-ui/public/*LICENSE.txt
+packages/circus-rs/src/browser/image-source/gl/glsl/*ShaderSource.ts
+
+# Local runtime data and test leftovers
+packages/circus-api/store
+packages/circus-cs-core/logs
+packages/circus-cs-core/tmp
+packages/circus-cs-core/test/working
+packages/circus-cs-core/test/docker/tmp
+packages/circus-rs/logs
+
+# Docker-related files that are not needed inside the image
+compose.yaml
+compose.*.yaml
+Dockerfile

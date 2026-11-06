@@ -1,0 +1,23 @@
+# Caddy configuration for the circus-web image.
+#
+# Serves the web UI (SPA) and proxies API / RS requests to the api service.
+# HTTP only; terminate TLS in front of this container if needed.
+# WebSocket (/rs/ws) and server-sent events are proxied by default.
+
+{
+	admin off
+}
+
+:80 {
+	root * /srv
+
+	@backend path /api /api/* /login /login/* /rs /rs/*
+	handle @backend {
+		reverse_proxy {$CIRCUS_API_UPSTREAM:api:8080}
+	}
+
+	handle {
+		try_files {path} /index.html
+		file_server
+	}
+}

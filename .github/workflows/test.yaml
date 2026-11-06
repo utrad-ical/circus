@@ -75,7 +75,7 @@ jobs:
             exit 1
           fi
       - name: Run test
-        run: npm test -- --max-workers 1
+        run: npm test
         env:
           CI: true
           CIRCUS_MONGO_TEST_URL: 'mongodb://localhost:27017/circus-api-test'

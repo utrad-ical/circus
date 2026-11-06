@@ -62,6 +62,7 @@
       "dotenv/config"
     ],
     "testEnvironment": "node",
-    "testTimeout": 10000
+    "testTimeout": 10000,
+    "maxWorkers": 1
   }
 }

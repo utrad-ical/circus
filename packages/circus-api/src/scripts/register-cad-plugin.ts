@@ -87,7 +87,7 @@ export const command: Command<{
     };
 
     const existing = await models.plugin.findAll({
-      pluingName: manifest.pluginName,
+      pluginName: manifest.pluginName,
       version: manifest.version
     });
     if (existing.length) {

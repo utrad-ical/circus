@@ -1,4 +1,4 @@
-import exec, { pExec } from './exec';
+import exec, { pExec } from './exec.ts';
 
 test('exec', async () => {
   const result = await exec('echo', ['Vega', 'Sirius']);

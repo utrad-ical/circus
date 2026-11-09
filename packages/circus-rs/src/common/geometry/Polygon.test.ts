@@ -1,4 +1,4 @@
-import * as polygon from './Polygon';
+import * as polygon from './Polygon.ts';
 import { Vector2 } from 'three';
 
 describe('intersectsPolygon', () => {

@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { OverlayTrigger, Popover } from 'components/react-bootstrap';
 import IconButton from 'components/IconButton';
 import { PhysicalTag } from 'components/Tag';
-import Project from 'types/Project';
+import type Project from 'types/Project';
 import styled from 'styled-components';
 
 const TagEditor: React.FC<{

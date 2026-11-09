@@ -2,7 +2,8 @@ import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import { alert, confirm } from '@smikitky/rb-components/lib/modal';
 import CaseExportModal from 'components/CaseExportModal';
 import Collapser from 'components/Collapser';
-import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
+import type { DataGridColumnDefinition } from 'components/DataGrid';
+import DataGrid from 'components/DataGrid';
 import DropdownButton from 'components/DropdownButton';
 import FullSpanContainer from 'components/FullSpanContainer';
 import Icon from 'components/Icon';
@@ -27,22 +28,21 @@ import { Link, useBlocker, useParams } from 'react-router-dom';
 import { showMessage } from 'store/messages';
 import { newSearch } from 'store/searches';
 import styled from 'styled-components';
-import Series from 'types/Series';
+import type Series from 'types/Series';
 import { useApi } from 'utils/api';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
 import useLoginUser from 'utils/useLoginUser';
-import { Project, Tags, Times } from '../search/SearchResultRenderer';
-import RevisionEditor from './RevisionEditor';
-import RevisionSelector from './RevisionSelector';
-import SaveModal from './SaveModal';
-import TagEditor from './TagEditor';
-import caseStoreReducer, * as c from './caseStore';
-import {
+import { Project, Tags, Times } from '../search/SearchResultRenderer.tsx';
+import RevisionEditor from './RevisionEditor.tsx';
+import RevisionSelector from './RevisionSelector.tsx';
+import SaveModal from './SaveModal.tsx';
+import TagEditor from './TagEditor.tsx';
+import caseStoreReducer, * as c from './caseStore.ts';
+import type {
   EditingDataLayoutInitializer,
-  EditingDataUpdater,
-  externalRevisionToInternal,
-  saveRevision
-} from './revisionData';
+  EditingDataUpdater
+} from './revisionData.ts';
+import { externalRevisionToInternal, saveRevision } from './revisionData.ts';
 
 const pageTransitionMessage = `Are you sure you want to leave?\nIf you leave before saving, your changes will be lost.`;
 

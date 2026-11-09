@@ -1,5 +1,5 @@
-import { FunctionService } from '../ServiceLoader';
-import Logger from './Logger';
+import type { FunctionService } from '../ServiceLoader.ts';
+import type Logger from './Logger.ts';
 
 const createNullLogger: FunctionService<Logger> = async (
   options: {},

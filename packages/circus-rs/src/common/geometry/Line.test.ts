@@ -1,4 +1,5 @@
-import { intersectsDirectedSegment, DirectedSegment } from './Line';
+import type { DirectedSegment } from './Line.ts';
+import { intersectsDirectedSegment } from './Line.ts';
 import { Vector2 } from 'three';
 
 describe('intersectsDirectedSegment', () => {

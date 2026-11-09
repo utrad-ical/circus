@@ -1,6 +1,9 @@
-import Project, { ProjectRoles } from '../types/Project';
-import Plugin, { PluginRoles } from '../types/Plugin';
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import type { ProjectRoles } from '../types/Project.ts';
+import type Project from '../types/Project.ts';
+import type { PluginRoles } from '../types/Plugin.ts';
+import type Plugin from '../types/Plugin.ts';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 
 export type GlobalPrivilege =
   | 'createProject'

@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { modalities } from '../../modalities';
-import ConditionFrame, { Condition } from './ConditionFrame';
+import { modalities } from '../../modalities.ts';
+import type { Condition } from './ConditionFrame.tsx';
+import ConditionFrame from './ConditionFrame.tsx';
 import { escapeRegExp } from 'utils/util';
 import * as et from '@smikitky/rb-components/lib/editor-types';
+import type { DateRange } from '@smikitky/rb-components/lib/DateRangePicker';
 import DateRangePicker, {
-  DateRange,
   dateRangeToMongoQuery
 } from '@smikitky/rb-components/lib/DateRangePicker';
 import AgeMinMax from 'components/AgeMinMax';
@@ -12,7 +13,7 @@ import { conditionToMongoQuery } from '@smikitky/rb-components/lib/ConditionEdit
 import SearchPanel from 'pages/search/SearchPanel';
 import { useApi } from 'utils/api';
 import PluginDisplay from 'components/PluginDisplay';
-import { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
+import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
 
 const sexOptions: { [key: string]: string } = {
   all: 'All',

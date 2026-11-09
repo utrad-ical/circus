@@ -1,8 +1,8 @@
-import { Editor } from './processor-types';
+import type { Editor } from './processor-types.ts';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import { FormControl } from 'components/react-bootstrap';
 import React from 'react';
-import { HoleFillingOptions } from './hf-processor';
+import type { HoleFillingOptions } from './hf-processor.ts';
 
 const neighborsOptions2D = {
   4: '4-neigobors',
@@ -60,13 +60,13 @@ export const OptionsEditor: Editor<HoleFillingOptions> = props => {
                   ? value.neighbors in neighborsOptions2D
                     ? value.neighbors
                     : value.neighbors === 6
-                    ? 4
-                    : 8
+                      ? 4
+                      : 8
                   : value.neighbors in neighborsOptions3D
-                  ? value.neighbors
-                  : value.neighbors === 4
-                  ? 6
-                  : 26
+                    ? value.neighbors
+                    : value.neighbors === 4
+                      ? 6
+                      : 26
             })
           }
           numericalValue

@@ -1,5 +1,5 @@
 const ctx: DedicatedWorkerGlobalScope = self as any;
-import { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
+import type { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
 import CCL26 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D26';
 import CCL6 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D6';
 

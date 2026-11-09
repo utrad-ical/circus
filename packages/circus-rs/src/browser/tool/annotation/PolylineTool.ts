@@ -1,19 +1,18 @@
-import { Vector2D } from '../../../common/geometry';
-import Annotation from '../../annotation/Annotation';
-import Polyline from '../../annotation/Polyline';
-import Composition from '../../Composition';
+import type { Vector2D } from '../../../common/geometry/index.ts';
+import type Annotation from '../../annotation/Annotation.ts';
+import Polyline from '../../annotation/Polyline.ts';
+import type Composition from '../../Composition.ts';
 import {
   detectOrthogonalSection,
   sectionFrom2dViewState
-} from '../../section-util';
-import Viewer from '../../viewer/Viewer';
-import ViewerEvent from '../../viewer/ViewerEvent';
-import ViewState, {
-  MprViewState,
-  TwoDimensionalViewState
-} from '../../ViewState';
-import ToolBaseClass, { ToolOptions } from '../Tool';
-import { convertViewerPointToVolumePoint } from '../tool-util';
+} from '../../section-util.ts';
+import type Viewer from '../../viewer/Viewer.ts';
+import type ViewerEvent from '../../viewer/ViewerEvent.ts';
+import type { MprViewState, TwoDimensionalViewState } from '../../ViewState.ts';
+import type ViewState from '../../ViewState.ts';
+import type { ToolOptions } from '../Tool.ts';
+import ToolBaseClass from '../Tool.ts';
+import { convertViewerPointToVolumePoint } from '../tool-util.ts';
 
 /**
  * PolylineTool

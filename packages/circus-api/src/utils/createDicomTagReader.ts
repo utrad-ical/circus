@@ -1,7 +1,8 @@
-import { NoDepFunctionService } from '@utrad-ical/circus-lib';
+import type { NoDepFunctionService } from '@utrad-ical/circus-lib';
 import parser from 'dicom-parser';
-import { createEncConverter, EncConverter } from './encConverter';
-import { DicomTagReader } from '../interface';
+import type { EncConverter } from './encConverter.ts';
+import { createEncConverter } from './encConverter.ts';
+import type { DicomTagReader } from '../interface.ts';
 import { standardDataElements } from 'dicom-data-dictionary';
 
 const stripUndefined: <T extends object>(input: T) => Partial<T> = input => {

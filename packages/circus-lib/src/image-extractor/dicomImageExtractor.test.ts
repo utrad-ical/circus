@@ -1,8 +1,8 @@
-import dicomImageExtractor from './dicomImageExtractor';
+import dicomImageExtractor from './dicomImageExtractor.ts';
 import fs from 'fs';
 import zlib from 'zlib';
 import path from 'path';
-import * as px from '../PixelFormat';
+import * as px from '../PixelFormat.ts';
 import { PNG } from 'pngjs';
 
 const testdir = path.join(__dirname, '../../testdata/test-dicom/');

@@ -1,7 +1,7 @@
-import koa from 'koa';
-import { RsServices } from '../configureServiceLoader';
-import { AsyncCachedLoader } from '../../common/asyncMemoize';
-import { VolumeAccessor } from '../helper/createVolumeProvider';
+import type koa from 'koa';
+import type { RsServices } from '../configureServiceLoader.ts';
+import type { AsyncCachedLoader } from '../../common/asyncMemoize.ts';
+import type { VolumeAccessor } from '../helper/createVolumeProvider.ts';
 
 type MiddlewareOptions = {
   config: any;

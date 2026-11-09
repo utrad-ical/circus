@@ -1,15 +1,20 @@
-import { Line3, Vector2, Vector3 } from 'three';
+import type { Vector2 } from 'three';
+import { Line3, Vector3 } from 'three';
+import type { Ellipsoid } from '../../../common/geometry/Ellipsoid.ts';
 import {
-  Ellipsoid,
   getIntersectedEllipseOrigin,
   intersectionOfEllipsoidAndLine
-} from '../../../common/geometry/Ellipsoid';
-import { Section, sectionToPlane } from '../../../common/geometry/Section';
-import { getEigenvectorsOf2x2, getInverse } from '../../../common/math/Matrix';
+} from '../../../common/geometry/Ellipsoid.ts';
+import type { Section } from '../../../common/geometry/Section.ts';
+import { sectionToPlane } from '../../../common/geometry/Section.ts';
+import {
+  getEigenvectorsOf2x2,
+  getInverse
+} from '../../../common/math/Matrix.ts';
 import {
   convertScreenCoordinateToVolumeCoordinate,
   convertVolumeCoordinateToScreenCoordinate
-} from '../../section-util';
+} from '../../section-util.ts';
 
 export default function intersectEllipsoidAndSection(
   ellipsoid: Ellipsoid,

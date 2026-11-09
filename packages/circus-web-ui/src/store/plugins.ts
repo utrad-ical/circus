@@ -1,7 +1,8 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ApiCaller } from 'utils/api';
-import { AppThunk } from './index';
-import Plugin from '../types/Plugin';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
+import type { ApiCaller } from 'utils/api';
+import type { AppThunk } from './index.ts';
+import type Plugin from '../types/Plugin.ts';
 
 export interface Plugins {
   [pluginId: string]: 'loading' | Plugin;

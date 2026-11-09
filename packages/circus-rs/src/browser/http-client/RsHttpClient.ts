@@ -1,4 +1,5 @@
-import axios, { AxiosRequestConfig, ResponseType } from 'axios';
+import type { AxiosRequestConfig, ResponseType } from 'axios';
+import axios from 'axios';
 
 /**
  * Simple HTTP wrapper that connects to the CIRCUS RS server and returns the response

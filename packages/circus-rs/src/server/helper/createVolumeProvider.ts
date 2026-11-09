@@ -1,17 +1,15 @@
-import {
+import type {
   DicomFileRepository,
   DicomMetadata,
   FunctionService
 } from '@utrad-ical/circus-lib';
-import {
-  Initializer as MultiRangeInitializer,
-  MultiRange
-} from 'multi-integer-range';
-import asyncMemoize from '../../common/asyncMemoize';
-import DicomVolume from '../../common/DicomVolume';
-import PriorityIntegerCaller from '../../common/PriorityIntegerCaller';
-import RawData from '../../common/RawData';
-import { DicomExtractorWorker } from './extractor-worker/createDicomExtractorWorker';
+import type { Initializer as MultiRangeInitializer } from 'multi-integer-range';
+import { MultiRange } from 'multi-integer-range';
+import asyncMemoize from '../../common/asyncMemoize.ts';
+import DicomVolume from '../../common/DicomVolume.ts';
+import PriorityIntegerCaller from '../../common/PriorityIntegerCaller.ts';
+import type RawData from '../../common/RawData.ts';
+import type { DicomExtractorWorker } from './extractor-worker/createDicomExtractorWorker.ts';
 
 export type VolumeProvider = (seriesUid: string) => Promise<VolumeAccessor>;
 

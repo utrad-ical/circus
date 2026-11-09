@@ -3,11 +3,11 @@
 import chalk from 'chalk';
 import dashdash from 'dashdash';
 import merge from 'merge';
-import * as mongo from 'mongodb';
+import type * as mongo from 'mongodb';
 import util from 'util';
-import config from './config';
-import createServiceLoader from './createServiceLoader';
-import scanMigrationFiles from './utils/scanMigrationFiles';
+import config from './config/index.ts';
+import createServiceLoader from './createServiceLoader.ts';
+import scanMigrationFiles from './utils/scanMigrationFiles.ts';
 
 const options = [
   {

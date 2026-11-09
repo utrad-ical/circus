@@ -1,7 +1,7 @@
 import StaticDicomFileRepository from '@utrad-ical/circus-lib/src/dicom-file-repository/StaticDicomFileRepository';
 import { multirange } from 'multi-integer-range';
-import * as circus from '../../interface';
-import { DicomFileRepository } from '@utrad-ical/circus-lib';
+import type * as circus from '../../interface.ts';
+import type { DicomFileRepository } from '@utrad-ical/circus-lib';
 
 /**
  * Creates a temporary DicomFileRepository in 'run with directory' mode.

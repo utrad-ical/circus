@@ -1,12 +1,13 @@
-import { Vector3D } from '@utrad-ical/circus-lib/src/generateMhdHeader';
+import type { Vector3D } from '@utrad-ical/circus-lib/src/generateMhdHeader';
 import { getSectionFromPoints } from '@utrad-ical/circus-rs/src/browser/section-util';
-import { Section } from '@utrad-ical/circus-rs/src/common/geometry';
-import { LayoutInfo, layoutReducer } from 'components/GridContainer';
-import * as c from '../caseStore';
-import { InternalLabelOf } from '../labelData';
-import { EditingData } from '../revisionData';
-import { ViewerDef } from '../ViewerGrid';
-import { Processor } from './processor-types';
+import type { Section } from '@utrad-ical/circus-rs/src/common/geometry';
+import type { LayoutInfo } from 'components/GridContainer';
+import { layoutReducer } from 'components/GridContainer';
+import * as c from '../caseStore.ts';
+import type { InternalLabelOf } from '../labelData.ts';
+import type { EditingData } from '../revisionData.ts';
+import type { ViewerDef } from '../ViewerGrid.tsx';
+import type { Processor } from './processor-types.ts';
 
 const createSectionFromPoints = (
   points: InternalLabelOf<'point'>[],

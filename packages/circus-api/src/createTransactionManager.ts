@@ -1,6 +1,11 @@
-import { FunctionService } from '@utrad-ical/circus-lib';
-import { TransactionManager, Models, Database, Validator } from './interface';
-import { makeModels } from './db/createModels';
+import type { FunctionService } from '@utrad-ical/circus-lib';
+import type {
+  TransactionManager,
+  Models,
+  Database,
+  Validator
+} from './interface.ts';
+import { makeModels } from './db/createModels.ts';
 
 interface Options {
   maxCommitTimeMS?: number;

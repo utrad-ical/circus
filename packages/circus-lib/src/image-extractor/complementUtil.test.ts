@@ -1,4 +1,4 @@
-import { convertComplement } from './complementUtil';
+import { convertComplement } from './complementUtil.ts';
 
 describe('convertComplement', () => {
   // S: sign bit = high bit

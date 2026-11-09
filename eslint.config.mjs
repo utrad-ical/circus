@@ -82,6 +82,30 @@ export default [
     }
   },
   {
+    // Relative imports must have an explicit extension (e.g., './foo.ts')
+    // so that the sources can be run directly by Node (type stripping).
+    files: ['packages/*/src/**/*.{ts,tsx}'],
+
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'TSEnumDeclaration',
+          message: "Don't declare enums"
+        },
+        ...[
+          'ImportDeclaration',
+          'ExportNamedDeclaration',
+          'ExportAllDeclaration',
+          'ImportExpression'
+        ].map(node => ({
+          selector: `${node}[source.value=/^\\.(?!.*\\.(tsx?|jsx?|json|less|css)$)/]`,
+          message: 'Relative imports must have an explicit extension (.ts)'
+        }))
+      ]
+    }
+  },
+  {
     files: ['**/*.ts', '**/*.tsx'],
 
     rules: {

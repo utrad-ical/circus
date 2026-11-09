@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import styled, { css } from 'styled-components';
 import classnames from 'classnames';
 
+import type { Placement } from '@floating-ui/react';
 import {
   autoUpdate,
   flip,
   offset,
-  Placement,
   shift,
   useClick,
   useDismiss,
@@ -14,7 +14,7 @@ import {
   useInteractions,
   useRole
 } from '@floating-ui/react';
-import Icon from './Icon';
+import Icon from './Icon.tsx';
 
 type Variant = 'default' | 'primary' | 'link' | 'danger';
 type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl';

@@ -1,5 +1,5 @@
-import { Validator } from '../interface';
-import koa from 'koa';
+import type { Validator } from '../interface.ts';
+import type koa from 'koa';
 
 interface Options {
   requestSchema?: object | string;

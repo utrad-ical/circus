@@ -1,6 +1,6 @@
-import ViewerEvent from '../../viewer/ViewerEvent';
-import { ToolOptions } from '../Tool';
-import VoxelCloudToolBase from './VoxelCloudToolBase';
+import type ViewerEvent from '../../viewer/ViewerEvent.ts';
+import type { ToolOptions } from '../Tool.ts';
+import VoxelCloudToolBase from './VoxelCloudToolBase.ts';
 
 export interface BrushToolOptions extends ToolOptions {
   width: number;

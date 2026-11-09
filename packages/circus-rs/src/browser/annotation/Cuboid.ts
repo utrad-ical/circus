@@ -1,5 +1,6 @@
-import { drawSimpleFigure } from './helper/drawObject';
-import SolidFigure, { FigureType } from './SolidFigure';
+import { drawSimpleFigure } from './helper/drawObject.ts';
+import type { FigureType } from './SolidFigure.ts';
+import SolidFigure from './SolidFigure.ts';
 
 /**
  * Cuboid annotation

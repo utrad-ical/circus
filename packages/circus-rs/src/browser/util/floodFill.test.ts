@@ -1,4 +1,4 @@
-import floodFill, { BinaryArray2D } from './floodFill';
+import floodFill, { BinaryArray2D } from './floodFill.ts';
 import { Vector2 } from 'three';
 
 const t = (

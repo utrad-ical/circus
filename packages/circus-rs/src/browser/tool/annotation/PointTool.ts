@@ -1,12 +1,10 @@
-import Annotation from '../../annotation/Annotation';
-import Point from '../../annotation/Point';
-import ViewerEvent from '../../viewer/ViewerEvent';
-import ViewState, {
-  MprViewState,
-  TwoDimensionalViewState
-} from '../../ViewState';
-import { convertViewerPointToVolumePoint } from '../tool-util';
-import AnnotationToolBase from './AnnotationToolBase';
+import type Annotation from '../../annotation/Annotation.ts';
+import Point from '../../annotation/Point.ts';
+import type ViewerEvent from '../../viewer/ViewerEvent.ts';
+import type { MprViewState, TwoDimensionalViewState } from '../../ViewState.ts';
+import type ViewState from '../../ViewState.ts';
+import { convertViewerPointToVolumePoint } from '../tool-util.ts';
+import AnnotationToolBase from './AnnotationToolBase.ts';
 
 /**
  * PointTool makes a Point annotation on a mouse click.

@@ -1,8 +1,9 @@
 import { confirm } from '@smikitky/rb-components/lib/modal';
-import DataGrid, {
+import type {
   DataGridColumnDefinition,
   DataGridRenderer
 } from 'components/DataGrid';
+import DataGrid from 'components/DataGrid';
 import DropdownButton from 'components/DropdownButton';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
@@ -27,7 +28,7 @@ import {
   PluginRenderer,
   Status,
   Times
-} from './SearchResultRenderer';
+} from './SearchResultRenderer.tsx';
 
 const Operation: DataGridRenderer<any> = props => {
   const { value: job } = props;

@@ -1,15 +1,15 @@
 import * as et from '@smikitky/rb-components/lib/editor-types';
-import PropertyEditor, {
-  PropertyEditorProperties
-} from '@smikitky/rb-components/lib/PropertyEditor';
-import PartialVolumeDescriptor, {
+import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
+import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
+import type PartialVolumeDescriptor from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
+import {
   describePartialVolumeDescriptor,
   rangeHasPartialVolume
 } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
 import { Button, Modal } from 'components/react-bootstrap';
 import MultiRange from 'multi-integer-range';
 import React, { useMemo, useState } from 'react';
-import IconButton from './IconButton';
+import IconButton from './IconButton.ts';
 import styled from 'styled-components';
 
 const PartialVolumeDescriptorEditor: React.FC<{

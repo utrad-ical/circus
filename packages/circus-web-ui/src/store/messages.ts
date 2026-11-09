@@ -1,6 +1,7 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { AppThunk } from './index';
-import { ReactChild } from 'react';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
+import type { AppThunk } from './index.ts';
+import type { ReactChild } from 'react';
 
 export interface MessageBox {
   id: string;

@@ -2,16 +2,16 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import DateRangePicker, {
   dateRangeToMongoQuery
 } from '@smikitky/rb-components/lib/DateRangePicker';
-import { modalities } from '../../modalities';
+import { modalities } from '../../modalities.ts';
 import * as et from '@smikitky/rb-components/lib/editor-types';
-import ConditionFrame from './ConditionFrame';
+import ConditionFrame from './ConditionFrame.tsx';
 import { escapeRegExp } from 'utils/util';
 import { ControlLabel } from 'components/react-bootstrap';
 import ProjectSelectorMultiple from 'components/ProjectSelectorMultiple';
 import { conditionToMongoQuery } from '@smikitky/rb-components/lib/ConditionEditor';
 import SearchPanel from 'pages/search/SearchPanel';
 import useLoginUser from 'utils/useLoginUser';
-import { Condition as BaseCondition } from './ConditionFrame';
+import type { Condition as BaseCondition } from './ConditionFrame.tsx';
 
 const modalityOptions: { [key: string]: string } = { all: 'All' };
 modalities.forEach(m => (modalityOptions[m] = m));
@@ -46,8 +46,8 @@ const basicConditionToMongoQuery = (condition: Condition['basic']) => {
   return members.length > 1
     ? { $and: members }
     : members.length === 1
-    ? members[0]
-    : {};
+      ? members[0]
+      : {};
 };
 
 const conditionToFilter = (condition: Condition) => {

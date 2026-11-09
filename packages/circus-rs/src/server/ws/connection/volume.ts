@@ -1,15 +1,17 @@
-import WebSocketConnectionHandler from './WebSocketConnectionHandler';
+import type WebSocketConnectionHandler from './WebSocketConnectionHandler.ts';
+import type {
+  ImageTransferMessageData,
+  TransferImageMessage
+} from '../../../common/ws/message.ts';
 import {
   createMessageBuffer,
-  ImageTransferMessageData,
   isImageTransferData,
-  parseMessageBuffer,
-  TransferImageMessage
-} from '../../../common/ws/message';
-import { IncomingMessage } from 'http';
+  parseMessageBuffer
+} from '../../../common/ws/message.ts';
+import type { IncomingMessage } from 'http';
 
-import createImageTransferAgent from '../image-transfer-agent';
-import { VolumeProvider } from '../../helper/createVolumeProvider';
+import createImageTransferAgent from '../image-transfer-agent.ts';
+import type { VolumeProvider } from '../../helper/createVolumeProvider.ts';
 
 let lastWsConnectionId = 0;
 

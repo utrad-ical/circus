@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 import Icon from 'components/Icon';
 import styled from 'styled-components';
-import PatientInfo from 'types/PatientInfo';
+import type PatientInfo from 'types/PatientInfo';
 
 const StyledDiv = styled.div`
   .masked {

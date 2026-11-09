@@ -1,4 +1,4 @@
-import createDockerFileExtractor from './dockerFileExtractor';
+import createDockerFileExtractor from './dockerFileExtractor.ts';
 import tar from 'tar-stream';
 import rawBody from 'raw-body';
 import path from 'path';

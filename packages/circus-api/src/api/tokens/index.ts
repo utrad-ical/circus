@@ -1,6 +1,6 @@
-import generatePermanentToken from '../../utils/generatePermanentToken';
+import generatePermanentToken from '../../utils/generatePermanentToken.ts';
 import httpStatus from 'http-status';
-import { RouteMiddleware } from '../../typings/middlewares';
+import type { RouteMiddleware } from '../../typings/middlewares.ts';
 import status from 'http-status';
 
 export const handleGet: RouteMiddleware = ({ models }) => {

@@ -1,6 +1,6 @@
 import { Vector3, Box3 } from 'three';
-import { AnisotropicRawData, RawData } from '..';
-import floodFill3d from './floodFill3d';
+import type { AnisotropicRawData, RawData } from '../index.ts';
+import floodFill3d from './floodFill3d.ts';
 
 type FuzzySelectTarget = '3d' | 'axial' | 'sagittal' | 'coronal';
 export default function fuzzySelect(

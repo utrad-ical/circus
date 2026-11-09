@@ -1,5 +1,6 @@
 import RawData from '@utrad-ical/circus-rs/src/common/RawData';
-import { createNewLabelData, InternalLabelOf } from '../labelData';
+import type { InternalLabelOf } from '../labelData.ts';
+import { createNewLabelData } from '../labelData.ts';
 
 const ctx: DedicatedWorkerGlobalScope = self as any;
 

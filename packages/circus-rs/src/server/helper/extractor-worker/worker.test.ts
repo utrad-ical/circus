@@ -1,4 +1,4 @@
-import createDicomExtractorWorker from './createDicomExtractorWorker';
+import createDicomExtractorWorker from './createDicomExtractorWorker.ts';
 import fs from 'fs-extra';
 import path from 'path';
 import zlib from 'zlib';

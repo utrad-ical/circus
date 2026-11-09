@@ -1,5 +1,5 @@
-import Viewer from '../viewer/Viewer';
-import ViewState from '../ViewState';
+import type Viewer from '../viewer/Viewer.ts';
+import type ViewState from '../ViewState.ts';
 
 export interface DrawHints {
   hover?: boolean;

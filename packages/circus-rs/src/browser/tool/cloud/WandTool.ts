@@ -1,11 +1,11 @@
-import MprImageSource from '../../image-source/MprImageSource';
-import { isMprImageSourceWithDicomVolume } from '../../image-source/MprImageSourceWithDicomVolume';
-import { detectOrthogonalSection } from '../../section-util';
-import fuzzySelect from '../../util/fuzzySelect';
-import ViewerEvent from '../../viewer/ViewerEvent';
-import { ToolOptions } from '../Tool';
-import { convertViewerPointToVolumeIndex } from '../tool-util';
-import VoxelCloudToolBase from './VoxelCloudToolBase';
+import MprImageSource from '../../image-source/MprImageSource.ts';
+import { isMprImageSourceWithDicomVolume } from '../../image-source/MprImageSourceWithDicomVolume.ts';
+import { detectOrthogonalSection } from '../../section-util.ts';
+import fuzzySelect from '../../util/fuzzySelect.ts';
+import type ViewerEvent from '../../viewer/ViewerEvent.ts';
+import type { ToolOptions } from '../Tool.ts';
+import { convertViewerPointToVolumeIndex } from '../tool-util.ts';
+import VoxelCloudToolBase from './VoxelCloudToolBase.ts';
 
 export type WandToolMode = '2d' | '3d';
 export type ReferenceValueOption = 'clickPoint' | number;

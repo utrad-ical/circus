@@ -1,4 +1,4 @@
-import directoryIterator from './directoryIterator';
+import directoryIterator from './directoryIterator.ts';
 import path from 'path';
 
 const testDir = path.join(__dirname, '../../test/dicom');

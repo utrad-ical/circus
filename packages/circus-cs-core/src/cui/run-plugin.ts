@@ -1,16 +1,16 @@
-import { FunctionService } from '@utrad-ical/circus-lib';
-import Command from './Command';
+import type { FunctionService } from '@utrad-ical/circus-lib';
+import type Command from './Command.ts';
 import os from 'os';
-import pluginJobRunner from '../job/pluginJobRunner';
+import pluginJobRunner from '../job/pluginJobRunner.ts';
 import chalk from 'chalk';
-import DockerRunner from '../util/DockerRunner';
+import type DockerRunner from '../util/DockerRunner.ts';
 import tarfs from 'tar-fs';
-import { DicomFileRepository } from '@utrad-ical/circus-lib';
-import * as circus from '../interface';
-import createDicomVoxelDumper from '../job/createDicomVoxelDumper';
+import type { DicomFileRepository } from '@utrad-ical/circus-lib';
+import type * as circus from '../interface.ts';
+import createDicomVoxelDumper from '../job/createDicomVoxelDumper.ts';
 import createTmpDicomFileRepository, {
   createJobSeries
-} from './util/tmpDicomFileRepository';
+} from './util/tmpDicomFileRepository.ts';
 
 /**
  * Directly runs the specified plug-in without using a queue system.

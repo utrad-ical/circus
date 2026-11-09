@@ -1,11 +1,11 @@
-import { setUpMongoFixture, usingSessionModels } from './test/util-mongo';
-import { Models } from './interface';
+import { setUpMongoFixture, usingSessionModels } from './test/util-mongo.ts';
+import type { Models } from './interface.ts';
+import type { UserPrivilegeInfo } from './privilegeUtils.ts';
 import {
   determineUserAccessInfo,
-  fetchAndLockAccessibleSeries,
-  UserPrivilegeInfo
-} from './privilegeUtils';
-import { SeriesEntry } from './typings/circus';
+  fetchAndLockAccessibleSeries
+} from './privilegeUtils.ts';
+import type { SeriesEntry } from './typings/circus.ts';
 
 let models: Models;
 

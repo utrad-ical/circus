@@ -2,8 +2,9 @@ import DropdownButton from 'components/DropdownButton';
 import Icon from 'components/Icon';
 import MenuItem from 'components/MenuItem';
 import React from 'react';
-import { LabelType } from '../labelData';
-import { processors, ProcessorType, processorTypes } from './processor-types';
+import type { LabelType } from '../labelData.ts';
+import type { ProcessorType } from './processor-types.ts';
+import { processors, processorTypes } from './processor-types.ts';
 
 const ProcessorDropdown: React.FC<{
   activeLabelType: LabelType | undefined;

@@ -1,4 +1,4 @@
-import { NoDepFunctionService } from '@utrad-ical/circus-lib';
+import type { NoDepFunctionService } from '@utrad-ical/circus-lib';
 
 /**
  * Simple counter that holds how many requests happened during the server is up.

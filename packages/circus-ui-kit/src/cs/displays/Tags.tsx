@@ -5,11 +5,11 @@ import FormControl from 'react-bootstrap/lib/FormControl';
 import FormGroup from 'react-bootstrap/lib/FormGroup';
 import MenuItem from 'react-bootstrap/lib/MenuItem';
 import styled from 'styled-components';
-import { Button } from '../../ui/Button';
-import Tooltip from '../../ui/Tooltip';
-import { useCsResults } from '../CsResultsContext';
-import { Display } from '../Display';
-import { useErrorMessage } from './utils/useErrorMessage';
+import { Button } from '../../ui/Button.tsx';
+import Tooltip from '../../ui/Tooltip.tsx';
+import { useCsResults } from '../CsResultsContext.ts';
+import type { Display } from '../Display.tsx';
+import { useErrorMessage } from './utils/useErrorMessage.tsx';
 
 interface TagsOptions {
   label?: string;

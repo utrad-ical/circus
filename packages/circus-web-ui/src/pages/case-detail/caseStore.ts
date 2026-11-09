@@ -1,14 +1,16 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
-import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
-import { Section } from '@utrad-ical/circus-rs/src/common/geometry';
-import { LayoutInfo, layoutReducer } from 'components/GridContainer';
-import Project from 'types/Project';
-import Series from 'types/Series';
-import PatientInfo from '../../types/PatientInfo';
-import { ExternalLabel } from './labelData';
-import { EditingData, Revision } from './revisionData';
-import { ViewerDef, ViewerMode } from './ViewerGrid';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import type { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
+import type { Section } from '@utrad-ical/circus-rs/src/common/geometry';
+import type { LayoutInfo } from 'components/GridContainer';
+import { layoutReducer } from 'components/GridContainer';
+import type Project from 'types/Project';
+import type Series from 'types/Series';
+import type PatientInfo from '../../types/PatientInfo.ts';
+import type { ExternalLabel } from './labelData.ts';
+import type { EditingData, Revision } from './revisionData.ts';
+import type { ViewerDef, ViewerMode } from './ViewerGrid.tsx';
 interface CaseData {
   caseId: string;
   revisions: Revision<ExternalLabel>[];

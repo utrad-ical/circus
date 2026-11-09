@@ -1,5 +1,6 @@
 import React from 'react';
-import BodyPartIcon, { CircusIconDefinition } from './BodyPartIcon';
+import type { CircusIconDefinition } from './BodyPartIcon.tsx';
+import BodyPartIcon from './BodyPartIcon.tsx';
 import styled from 'styled-components';
 import { OverlayTrigger, Tooltip } from 'components/react-bootstrap';
 

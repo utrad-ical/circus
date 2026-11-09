@@ -1,16 +1,15 @@
+import type { Placement, FloatingContext } from '@floating-ui/react';
 import {
   autoUpdate,
-  Placement,
   safePolygon,
   useFloating,
   useHover,
-  useInteractions,
-  FloatingContext
+  useInteractions
 } from '@floating-ui/react';
 import classNames from 'classnames';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Icon from './Icon';
+import Icon from './Icon.tsx';
 
 const NavMenu: React.FC<{
   name: string;

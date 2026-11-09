@@ -1,6 +1,6 @@
 import path from 'path';
 import os from 'os';
-import * as circus from '../interface';
+import type * as circus from '../interface.ts';
 
 // We use cosmiconfig to manage settings.
 // DO NOT DIRECTLY EDIT THIS FILE!!!

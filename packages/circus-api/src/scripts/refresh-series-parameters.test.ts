@@ -1,8 +1,8 @@
-import { command } from './refresh-series-parameters';
-import { setUpMongoFixture, usingModels } from '../test/util-mongo';
-import { Models, DicomTagReader } from '../interface';
-import { CommandFunc } from './Command';
-import { DicomFileRepository } from '@utrad-ical/circus-lib';
+import { command } from './refresh-series-parameters.ts';
+import { setUpMongoFixture, usingModels } from '../test/util-mongo.ts';
+import type { Models, DicomTagReader } from '../interface.ts';
+import type { CommandFunc } from './Command.ts';
+import type { DicomFileRepository } from '@utrad-ical/circus-lib';
 
 const modelsPromise = usingModels();
 let commandFunc: CommandFunc,

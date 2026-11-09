@@ -1,6 +1,6 @@
-import { setUpMongoFixture, usingModels } from '../test/util-mongo';
-import { command } from './clear-token';
-import { CommandFunc } from './Command';
+import { setUpMongoFixture, usingModels } from '../test/util-mongo.ts';
+import { command } from './clear-token.ts';
+import type { CommandFunc } from './Command.ts';
 
 const modelsPromise = usingModels();
 let commandFunc: CommandFunc;

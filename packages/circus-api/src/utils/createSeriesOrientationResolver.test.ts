@@ -1,14 +1,11 @@
-import createDicomTagReader from './createDicomTagReader';
-import {
-  MemoryDicomFileRepository,
-  DicomFileRepository
-} from '@utrad-ical/circus-lib';
-import createSeriesOrientationResolver, {
-  SeriesOrientationResolver
-} from './createSeriesOrientationResolver';
+import createDicomTagReader from './createDicomTagReader.ts';
+import type { DicomFileRepository } from '@utrad-ical/circus-lib';
+import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib';
+import type { SeriesOrientationResolver } from './createSeriesOrientationResolver.ts';
+import createSeriesOrientationResolver from './createSeriesOrientationResolver.ts';
 import fs from 'fs-extra';
 import path from 'path';
-import { DicomTagReader } from '../interface';
+import type { DicomTagReader } from '../interface.ts';
 
 let dicomFileRepository: DicomFileRepository;
 let dicomTagReader: DicomTagReader;

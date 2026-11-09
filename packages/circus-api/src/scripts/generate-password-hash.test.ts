@@ -1,4 +1,4 @@
-import { command } from './generate-password-hash';
+import { command } from './generate-password-hash.ts';
 
 jest.mock('inquirer', () => {
   return {

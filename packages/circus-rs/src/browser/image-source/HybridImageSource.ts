@@ -1,14 +1,12 @@
-import DynamicMprImageSource, {
-  DynamicMprImageSourceOptions
-} from './DynamicMprImageSource';
-import RawVolumeMprImageSource, {
-  RawVolumeMprImageSourceOptions
-} from './RawVolumeMprImageSource';
-import ViewState from '../ViewState';
-import Viewer from '../viewer/Viewer';
-import MprImageSource from './MprImageSource';
-import MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume';
-import { DrawResult } from './ImageSource';
+import type { DynamicMprImageSourceOptions } from './DynamicMprImageSource.ts';
+import DynamicMprImageSource from './DynamicMprImageSource.ts';
+import type { RawVolumeMprImageSourceOptions } from './RawVolumeMprImageSource.ts';
+import RawVolumeMprImageSource from './RawVolumeMprImageSource.ts';
+import type ViewState from '../ViewState.ts';
+import type Viewer from '../viewer/Viewer.ts';
+import MprImageSource from './MprImageSource.ts';
+import type MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume.ts';
+import type { DrawResult } from './ImageSource.ts';
 
 interface HybridImageSourceOptions
   extends RawVolumeMprImageSourceOptions,

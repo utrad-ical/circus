@@ -1,13 +1,11 @@
-import { CsCore } from '@utrad-ical/circus-cs-core';
+import type { CsCore } from '@utrad-ical/circus-cs-core';
 import status from 'http-status';
-import { SeriesEntry } from '../typings/circus';
-import duplicateJobExists from '../api/duplicateJobExists';
-import { Models } from '../interface';
-import {
-  fetchAndLockAccessibleSeries,
-  UserPrivilegeInfo
-} from '../privilegeUtils';
-import generateUniqueId from '../utils/generateUniqueId';
+import type { SeriesEntry } from '../typings/circus.ts';
+import duplicateJobExists from '../api/duplicateJobExists.ts';
+import type { Models } from '../interface.ts';
+import type { UserPrivilegeInfo } from '../privilegeUtils.ts';
+import { fetchAndLockAccessibleSeries } from '../privilegeUtils.ts';
+import generateUniqueId from '../utils/generateUniqueId.ts';
 
 export interface PluginJobRequest {
   pluginId: string;

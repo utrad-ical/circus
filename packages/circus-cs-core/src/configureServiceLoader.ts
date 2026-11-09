@@ -1,15 +1,15 @@
-import {
+import type {
   DicomFileRepository,
   Logger,
   ServiceLoader
 } from '@utrad-ical/circus-lib';
 import path from 'path';
-import createDaemonController from './daemon/createDaemonController';
-import { PluginJobRegisterer } from './job/registerer/createPluginJobRegisterer';
-import { PluginJobRunner } from './job/pluginJobRunner';
-import { MongoClientPool } from './mongoClientPool';
-import DockerRunner from './util/DockerRunner';
-import * as circus from './interface';
+import createDaemonController from './daemon/createDaemonController.ts';
+import type { PluginJobRegisterer } from './job/registerer/createPluginJobRegisterer.ts';
+import type { PluginJobRunner } from './job/pluginJobRunner.ts';
+import type { MongoClientPool } from './mongoClientPool.ts';
+import type DockerRunner from './util/DockerRunner.ts';
+import type * as circus from './interface.ts';
 
 /**
  * The list of all dependencies that can be created via ServiceLoader.

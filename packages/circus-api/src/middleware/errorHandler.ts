@@ -1,6 +1,6 @@
 import Ajv from 'ajv';
 import status from 'http-status';
-import koa from 'koa';
+import type koa from 'koa';
 
 interface Options {
   includeErrorDetails: boolean;

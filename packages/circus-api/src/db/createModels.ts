@@ -1,7 +1,12 @@
-import createCollectionAccessor from './createCollectionAccessor';
-import { Database, Validator, Models, ModelEntries } from '../interface';
-import { FunctionService } from '@utrad-ical/circus-lib';
-import { ClientSession } from 'mongodb';
+import createCollectionAccessor from './createCollectionAccessor.ts';
+import type {
+  Database,
+  Validator,
+  Models,
+  ModelEntries
+} from '../interface.ts';
+import type { FunctionService } from '@utrad-ical/circus-lib';
+import type { ClientSession } from 'mongodb';
 
 /**
  * @param database The Database object containing connection to a Mongo server

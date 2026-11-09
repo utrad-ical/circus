@@ -4,11 +4,12 @@ import { showMessage } from 'store/messages';
 import { updateSearch } from 'store/searches';
 import { useApi } from 'utils/api';
 import useLoginUser from 'utils/useLoginUser';
-import { SearchResult, selectionStatusChanged } from '../store/searches';
-import DropdownButton from './DropdownButton';
-import Icon from './Icon';
-import IconButton from './IconButton';
-import MenuItem from './MenuItem';
+import type { SearchResult } from '../store/searches.ts';
+import { selectionStatusChanged } from '../store/searches.ts';
+import DropdownButton from './DropdownButton.tsx';
+import Icon from './Icon.tsx';
+import IconButton from './IconButton.ts';
+import MenuItem from './MenuItem.tsx';
 
 const MyListDropdown: React.FC<{
   resourceType: string;

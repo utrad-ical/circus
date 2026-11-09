@@ -1,20 +1,20 @@
-import { Viewer } from '@utrad-ical/circus-rs/src/browser';
-import { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
-import { InternalLabel, LabelType } from '../labelData';
-import { EditingData, EditingDataUpdater } from '../revisionData';
-import addNewSctionFromPoints from './addNewSctionFromPoints';
-import * as bo from './bo-options';
-import booleanOperationsProcessor from './booleanOperationsProcessor';
-import * as ccl from './ccl-options';
-import cclProcessor from './ccl-processor';
-import * as duplicate from './duplicate-options';
-import duplicateProcessor from './duplicateProcessor';
-import * as ed from './ed-options';
-import { dilatationProcessor, erosionProcessor } from './ed-processor';
-import * as hf from './hf-options';
-import hfProcessor from './hf-processor';
-import * as ii from './ii-options';
-import iiProcessor from './ii-processor';
+import type { Viewer } from '@utrad-ical/circus-rs/src/browser';
+import type { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
+import type { InternalLabel, LabelType } from '../labelData.ts';
+import type { EditingData, EditingDataUpdater } from '../revisionData.ts';
+import addNewSctionFromPoints from './addNewSctionFromPoints.ts';
+import * as bo from './bo-options.tsx';
+import booleanOperationsProcessor from './booleanOperationsProcessor.ts';
+import * as ccl from './ccl-options.tsx';
+import cclProcessor from './ccl-processor.ts';
+import * as duplicate from './duplicate-options.tsx';
+import duplicateProcessor from './duplicateProcessor.ts';
+import * as ed from './ed-options.tsx';
+import { dilatationProcessor, erosionProcessor } from './ed-processor.ts';
+import * as hf from './hf-options.tsx';
+import hfProcessor from './hf-processor.ts';
+import * as ii from './ii-options.tsx';
+import iiProcessor from './ii-processor.ts';
 
 export type Editor<T> = React.FC<{
   value: T;

@@ -1,17 +1,17 @@
 import { Vector2, Vector3 } from 'three';
+import type { Section } from '../../../common/geometry/index.ts';
 import {
-  Section,
   sectionEquals,
   translateSection
-} from '../../../common/geometry';
-import MprImageSource from '../../image-source/MprImageSource';
-import TwoDimensionalImageSource from '../../image-source/TwoDimensionalImageSource';
+} from '../../../common/geometry/index.ts';
+import MprImageSource from '../../image-source/MprImageSource.ts';
+import TwoDimensionalImageSource from '../../image-source/TwoDimensionalImageSource.ts';
 import {
   sectionFrom2dViewState,
   sectionTo2dViewState,
   sectionOverlapsVolume
-} from '../../section-util';
-import Viewer from '../../viewer/Viewer';
+} from '../../section-util.ts';
+import type Viewer from '../../viewer/Viewer.ts';
 
 export default function handleMoveBy(
   viewer: Viewer,

@@ -1,20 +1,21 @@
-import koa from 'koa';
+import type koa from 'koa';
 import compose from 'koa-compose';
 import {
   isTuple,
   parseTuple,
   parseBoolean
-} from '../../../common/ValidatorRules';
-import { Section, vectorizeSection } from '../../../common/geometry/Section';
+} from '../../../common/ValidatorRules.ts';
+import type { Section } from '../../../common/geometry/Section.ts';
+import { vectorizeSection } from '../../../common/geometry/Section.ts';
 import httpStatus from 'http-status';
 import compress from 'koa-compress';
-import validate from '../middleware/validate';
-import { ValidatorRules } from '../../../common/Validator';
-import ImageEncoder from '../../helper/image-encoder/ImageEncoder';
-import { SeriesMiddlewareState } from './createSeriesRoutes';
-import RawData from '../../../common/RawData';
+import validate from '../middleware/validate.ts';
+import type { ValidatorRules } from '../../../common/Validator.ts';
+import type ImageEncoder from '../../helper/image-encoder/ImageEncoder.ts';
+import type { SeriesMiddlewareState } from './createSeriesRoutes.ts';
+import type RawData from '../../../common/RawData.ts';
 import { multirange } from 'multi-integer-range';
-import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import type { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 
 interface ScanOptions {
   imageEncoder: ImageEncoder;

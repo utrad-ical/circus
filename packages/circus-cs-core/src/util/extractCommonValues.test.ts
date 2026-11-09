@@ -1,4 +1,4 @@
-import extractCommonValues from './extractCommonValues';
+import extractCommonValues from './extractCommonValues.ts';
 
 describe('extractCommonValues', () => {
   test('simple scalar', () => {

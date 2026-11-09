@@ -2,10 +2,9 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useApi } from 'utils/api';
 import useShowMessage from 'utils/useShowMessage';
 import { Button } from 'components/react-bootstrap';
-import AdminContainer from './AdminContainer';
-import PropertyEditor, {
-  PropertyEditorProperties
-} from '@smikitky/rb-components/lib/PropertyEditor';
+import AdminContainer from './AdminContainer.tsx';
+import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
+import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 

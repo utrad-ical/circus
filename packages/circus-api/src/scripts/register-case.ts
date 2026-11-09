@@ -1,8 +1,8 @@
-import Command from './Command';
-import { TransactionManager } from '../interface';
-import makeNewCase from '../case/makeNewCase';
-import { determineUserAccessInfo } from '../privilegeUtils';
-import { toEntry } from './toEntry';
+import type Command from './Command.ts';
+import type { TransactionManager } from '../interface.ts';
+import makeNewCase from '../case/makeNewCase.ts';
+import { determineUserAccessInfo } from '../privilegeUtils.ts';
+import { toEntry } from './toEntry.ts';
 
 export const options = () => {
   return [

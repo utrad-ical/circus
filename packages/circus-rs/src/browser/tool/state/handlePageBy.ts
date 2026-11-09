@@ -1,12 +1,12 @@
 import { Vector2, Vector3 } from 'three';
-import MprImageSource from '../../image-source/MprImageSource';
-import TwoDimensionalImageSource from '../../image-source/TwoDimensionalImageSource';
+import MprImageSource from '../../image-source/MprImageSource.ts';
+import TwoDimensionalImageSource from '../../image-source/TwoDimensionalImageSource.ts';
 import {
   orientationAwareTranslation,
   sectionOverlapsVolume
-} from '../../section-util';
-import Viewer from '../../viewer/Viewer';
-import ViewState from '../../ViewState';
+} from '../../section-util.ts';
+import type Viewer from '../../viewer/Viewer.ts';
+import type ViewState from '../../ViewState.ts';
 
 export default function handlePageBy(viewer: Viewer, step: number): void {
   const prevState = viewer.getState();

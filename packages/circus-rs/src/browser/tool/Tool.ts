@@ -1,10 +1,10 @@
 import { EventEmitter } from 'events';
-import ViewerEvent from '../../browser/viewer/ViewerEvent';
-import ViewerEventTarget from '../interface/ViewerEventTarget';
-import { sign } from './tool-util';
-import Viewer from '../viewer/Viewer';
-import handlePageBy from './state/handlePageBy';
-import handleZoomBy from './state/handleZoomBy';
+import type ViewerEvent from '../../browser/viewer/ViewerEvent.ts';
+import type ViewerEventTarget from '../interface/ViewerEventTarget.ts';
+import { sign } from './tool-util.ts';
+import type Viewer from '../viewer/Viewer.ts';
+import handlePageBy from './state/handlePageBy.ts';
+import handleZoomBy from './state/handleZoomBy.ts';
 
 export interface ToolOptions {}
 export interface Tool extends ViewerEventTarget {

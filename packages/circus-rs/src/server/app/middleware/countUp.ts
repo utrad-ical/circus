@@ -1,5 +1,5 @@
-import koa from 'koa';
-import { Counter } from '../../helper/createCounter';
+import type koa from 'koa';
+import type { Counter } from '../../helper/createCounter.ts';
 
 type MiddlewareOptions = {
   counter: Counter;

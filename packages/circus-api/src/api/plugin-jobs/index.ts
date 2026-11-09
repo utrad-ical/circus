@@ -3,19 +3,21 @@ import glob from 'glob-promise';
 import status from 'http-status';
 import mime from 'mime';
 import path from 'path';
-import makeNewPluginJob from '../../plugin-job/makeNewPluginJob';
-import { CircusContext, RouteMiddleware } from '../../typings/middlewares';
-import checkFilter from '../../utils/checkFilter';
-import generateUniqueId from '../../utils/generateUniqueId';
-import resolveAutoPvdOfSeries, {
-  AutoPvdSeriesEntry
-} from '../../utils/resolveAutoPvdOfSeries';
+import makeNewPluginJob from '../../plugin-job/makeNewPluginJob.ts';
+import type {
+  CircusContext,
+  RouteMiddleware
+} from '../../typings/middlewares.ts';
+import checkFilter from '../../utils/checkFilter.ts';
+import generateUniqueId from '../../utils/generateUniqueId.ts';
+import type { AutoPvdSeriesEntry } from '../../utils/resolveAutoPvdOfSeries.ts';
+import resolveAutoPvdOfSeries from '../../utils/resolveAutoPvdOfSeries.ts';
 import {
   extractFilter,
   isPatientInfoInFilter,
   performAggregationSearch
-} from '../performSearch';
-import { Filter } from 'mongodb';
+} from '../performSearch.ts';
+import type { Filter } from 'mongodb';
 
 const maskPatientInfo = (ctx: CircusContext) => {
   return (pluginJobData: any) => {

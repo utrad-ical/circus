@@ -98,7 +98,7 @@ const DataGrid: <T extends {}>(
   const handleSelectAllChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
     const checked = ev.target.checked;
     value
-      .map(item => (item[itemPrimaryKey!] as any) as string)
+      .map(item => item[itemPrimaryKey!] as any as string)
       .forEach(id => onSelectionChange?.(id, checked));
   };
 
@@ -107,7 +107,7 @@ const DataGrid: <T extends {}>(
       ? undefined
       : (() => {
           const allIds = value.map(
-            item => (item[itemPrimaryKey!] as any) as string
+            item => item[itemPrimaryKey!] as any as string
           );
           const selected = allIds.filter(id => selectedItems.indexOf(id) >= 0);
           if (selected.length === 0) return false;
@@ -146,7 +146,7 @@ const DataGrid: <T extends {}>(
       <tbody>
         {value.map((item, i) => {
           const key = itemPrimaryKey
-            ? ((item[itemPrimaryKey] as any) as string)
+            ? (item[itemPrimaryKey] as any as string)
             : String(i);
           return (
             <tr

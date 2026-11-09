@@ -6,7 +6,7 @@
 import _pm2 from 'pm2';
 import pify from 'pify';
 import escape from 'shell-escape';
-import * as circus from '../interface';
+import type * as circus from '../interface.ts';
 
 const pm2: any = pify(_pm2);
 

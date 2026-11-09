@@ -1,5 +1,5 @@
-import dilation from './dilation';
-import { Structure } from './morphology-types';
+import dilation from './dilation.ts';
+import type { Structure } from './morphology-types.ts';
 
 function sampleImg(dimension: 2 | 3): {
   input: Uint8Array;

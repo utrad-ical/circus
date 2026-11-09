@@ -1,6 +1,6 @@
 import path from 'path';
-import createStaticPluginDefinitionAccessor from './StaticPluginDefinitionAccessor';
-import * as circus from '../interface';
+import createStaticPluginDefinitionAccessor from './StaticPluginDefinitionAccessor.ts';
+import type * as circus from '../interface.ts';
 
 describe('StaticPluginDefinitionAccessor', () => {
   const pluginDir = path.join(__dirname, '../../test/plugins/');

@@ -1,4 +1,4 @@
-import holeFilling2D, { holeFilling3D } from './holeFilling';
+import holeFilling2D, { holeFilling3D } from './holeFilling.ts';
 
 const mosaic = (
   width: number,

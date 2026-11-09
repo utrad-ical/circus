@@ -1,25 +1,27 @@
 import { Box2, Line3, Vector2, Vector3 } from 'three';
-import {
-  distanceFromPointToSection,
+import type {
   Section,
   Vector2D,
   Vector3D
-} from '../../common/geometry';
-import ViewerEventTarget from '../interface/ViewerEventTarget';
+} from '../../common/geometry/index.ts';
+import { distanceFromPointToSection } from '../../common/geometry/index.ts';
+import type ViewerEventTarget from '../interface/ViewerEventTarget.ts';
 import {
   getOrthogonalProjectedPoint,
   sectionFrom2dViewState
-} from '../section-util';
+} from '../section-util.ts';
 import {
   convertViewerPointToVolumePoint,
   convertVolumePointToViewerPoint
-} from '../tool/tool-util';
-import Viewer from '../viewer/Viewer';
-import ViewerEvent from '../viewer/ViewerEvent';
-import ViewState, { MprViewState, TwoDimensionalViewState } from '../ViewState';
-import Annotation, { DrawHints } from './Annotation';
-import { drawFillText, drawLine, drawPoint } from './helper/drawObject';
-import { hitLineSegment, hitRectangle } from './helper/hit-test';
+} from '../tool/tool-util.ts';
+import type Viewer from '../viewer/Viewer.ts';
+import type ViewerEvent from '../viewer/ViewerEvent.ts';
+import type { MprViewState, TwoDimensionalViewState } from '../ViewState.ts';
+import type ViewState from '../ViewState.ts';
+import type { DrawHints } from './Annotation.ts';
+import type Annotation from './Annotation.ts';
+import { drawFillText, drawLine, drawPoint } from './helper/drawObject.ts';
+import { hitLineSegment, hitRectangle } from './helper/hit-test.ts';
 
 type RulerHitType = 'start-reset' | 'end-reset' | 'line-move' | 'label-move';
 

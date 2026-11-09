@@ -1,10 +1,12 @@
 import archiver from 'archiver';
-import { DicomFileRepository } from '@utrad-ical/circus-lib';
+import type { DicomFileRepository } from '@utrad-ical/circus-lib';
 import fs from 'fs-extra';
 import path from 'path';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import tar from 'tar-stream';
-import createDicomVoxelDumper, { stringifyUN } from './createDicomVoxelDumper';
+import createDicomVoxelDumper, {
+  stringifyUN
+} from './createDicomVoxelDumper.ts';
 
 const mockDicomFileRepository: DicomFileRepository = {
   getSeries: async (seriesUid: string) => {

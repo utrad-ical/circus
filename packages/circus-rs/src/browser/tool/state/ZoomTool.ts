@@ -1,8 +1,8 @@
-import Viewer from '../../viewer/Viewer';
-import ViewerEvent from '../../viewer/ViewerEvent';
-import DraggableTool from '../DraggableTool';
-import { Tool } from '../Tool';
-import handleZoomBy from './handleZoomBy';
+import type Viewer from '../../viewer/Viewer.ts';
+import type ViewerEvent from '../../viewer/ViewerEvent.ts';
+import DraggableTool from '../DraggableTool.ts';
+import type { Tool } from '../Tool.ts';
+import handleZoomBy from './handleZoomBy.ts';
 
 /**
  * ZoomTool

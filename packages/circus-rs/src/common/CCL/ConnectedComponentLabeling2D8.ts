@@ -1,5 +1,5 @@
-import { TypedArray } from 'three';
-import { CCL2D } from './ccl-types';
+import type { TypedArray } from 'three';
+import type { CCL2D } from './ccl-types.ts';
 
 /**
  * @param array input binary image

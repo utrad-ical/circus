@@ -1,5 +1,5 @@
+import type { Display } from '@utrad-ical/circus-ui-kit';
 import {
-  Display,
   Choice,
   Dump,
   Locator,

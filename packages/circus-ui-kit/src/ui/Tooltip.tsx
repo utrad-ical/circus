@@ -38,8 +38,8 @@ const StyledTooltip = styled.div<StyledTooltipProps>`
       props.options.aligned === 'left'
         ? `${arrowSize + 1}px`
         : props.options.aligned === 'center'
-        ? `${props.childCenter.x - props.upperLeft.x}px`
-        : `${props.tooltipSize.width - (arrowSize + 1)}px`};
+          ? `${props.childCenter.x - props.upperLeft.x}px`
+          : `${props.tooltipSize.width - (arrowSize + 1)}px`};
     margin-left: ${() => `${-arrowSize}px`};
     border-width: ${() => `${arrowSize}px`};
     border-style: solid;

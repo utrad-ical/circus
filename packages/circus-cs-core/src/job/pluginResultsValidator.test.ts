@@ -1,5 +1,5 @@
 import path from 'path';
-import pluginResultsValidator from './pluginResultsValidator';
+import pluginResultsValidator from './pluginResultsValidator.ts';
 
 describe('Validate lesion candidate plug-in results', () => {
   const testResultsDir = path.resolve(__dirname, '../../test/results');

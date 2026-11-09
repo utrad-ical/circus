@@ -1,9 +1,9 @@
 import chalk from 'chalk';
 import * as path from 'path';
-import { DicomImporter } from '../interface';
-import Command from './Command';
-import directoryIterator from '../utils/directoryIterator';
-import isLikeDicom from '../utils/isLikeDicom';
+import type { DicomImporter } from '../interface.ts';
+import type Command from './Command.ts';
+import directoryIterator from '../utils/directoryIterator.ts';
+import isLikeDicom from '../utils/isLikeDicom.ts';
 
 export const help = () => {
   return (

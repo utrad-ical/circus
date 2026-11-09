@@ -1,5 +1,6 @@
 import path from 'path';
-import ServiceLoader, { FunctionService, ClassService } from './ServiceLoader';
+import type { FunctionService, ClassService } from './ServiceLoader.ts';
+import ServiceLoader from './ServiceLoader.ts';
 
 const dir = path.join(__dirname, '../testdata/autoload-modules');
 

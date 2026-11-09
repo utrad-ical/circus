@@ -1,7 +1,8 @@
-import { Box3, Vector2, Vector3 } from 'three';
-import { Section } from '../../../common/geometry/Section';
-import { convertVolumeCoordinateToScreenCoordinate } from '../../section-util';
-import { LineDrawStyle } from '../SolidFigure';
+import type { Box3, Vector2 } from 'three';
+import { Vector3 } from 'three';
+import type { Section } from '../../../common/geometry/Section.ts';
+import { convertVolumeCoordinateToScreenCoordinate } from '../../section-util.ts';
+import type { LineDrawStyle } from '../SolidFigure.ts';
 
 export default function drawBoundingBoxOutline(
   ctx: CanvasRenderingContext2D,

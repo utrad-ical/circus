@@ -1,6 +1,10 @@
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
-import { Section, Vector2D, Vector3D } from '@utrad-ical/circus-rs/src/browser';
+import type {
+  Section,
+  Vector2D,
+  Vector3D
+} from '@utrad-ical/circus-rs/src/browser';
 import {
   detectOrthogonalSection,
   sectionTo2dViewState
@@ -8,7 +12,7 @@ import {
 import focusBy from '@utrad-ical/circus-rs/src/browser/tool/state/focusBy';
 import { gzipSync } from 'fflate';
 import { produce, createDraft, finishDraft } from 'immer';
-import { ApiCaller } from 'utils/api';
+import type { ApiCaller } from 'utils/api';
 import { sha1 } from 'utils/util';
 
 type InternalLabelDataMap = {

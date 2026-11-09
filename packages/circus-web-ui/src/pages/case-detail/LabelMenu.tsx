@@ -2,9 +2,9 @@ import { ColorPalette } from '@smikitky/rb-components/lib/ColorPicker';
 import { alert, prompt } from '@smikitky/rb-components/lib/modal';
 import Slider from '@smikitky/rb-components/lib/Slider';
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
-import { Viewer } from '@utrad-ical/circus-rs/src/browser';
-import { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
-import { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
+import type { Viewer } from '@utrad-ical/circus-rs/src/browser';
+import type { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
+import type { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import MenuItem from 'components/MenuItem';
@@ -15,31 +15,30 @@ import {
   SplitButton
 } from 'components/react-bootstrap';
 import React, { useState } from 'react';
-import { ButtonProps } from 'react-bootstrap';
+import type { ButtonProps } from 'react-bootstrap';
 import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
 import useLocalPreference from 'utils/useLocalPreference';
 import useLoginUser from 'utils/useLoginUser';
-import { defaultLabelColors } from '../../labelColors';
-import * as c from './caseStore';
-import createCurrentLabelsUpdator from './createCurrentLabelsUpdator';
-import {
-  createNewLabelData,
+import { defaultLabelColors } from '../../labelColors.ts';
+import * as c from './caseStore.ts';
+import createCurrentLabelsUpdator from './createCurrentLabelsUpdator.ts';
+import type {
   InternalLabel,
   InternalLabelData,
   LabelAppearance,
-  LabelType,
-  labelTypes
-} from './labelData';
-import {
+  LabelType
+} from './labelData.ts';
+import { createNewLabelData, labelTypes } from './labelData.ts';
+import type {
   ProcessorProgress,
-  processors,
   ProcessorType
-} from './processors/processor-types';
-import ProcessorDropdown from './processors/ProcessorDropdown';
-import ProcessorModal from './processors/ProcessorModal';
-import { EditingData, EditingDataUpdater } from './revisionData';
+} from './processors/processor-types.ts';
+import { processors } from './processors/processor-types.ts';
+import ProcessorDropdown from './processors/ProcessorDropdown.tsx';
+import ProcessorModal from './processors/ProcessorModal.tsx';
+import type { EditingData, EditingDataUpdater } from './revisionData.ts';
 
 type LabelCommand =
   | 'rename'

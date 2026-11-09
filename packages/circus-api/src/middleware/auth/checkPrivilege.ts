@@ -1,6 +1,6 @@
 import status from 'http-status';
-import { Models } from '../../interface';
-import { CircusMiddeware } from '../../typings/middlewares';
+import type { Models } from '../../interface.ts';
+import type { CircusMiddeware } from '../../typings/middlewares.ts';
 
 const wrap = (data: any) => {
   if (!data) return undefined;

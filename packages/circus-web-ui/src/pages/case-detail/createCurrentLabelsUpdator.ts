@@ -1,5 +1,5 @@
-import { EditingData, EditingDataUpdater } from './revisionData';
-import { InternalLabel } from './labelData';
+import type { EditingData, EditingDataUpdater } from './revisionData.ts';
+import type { InternalLabel } from './labelData.ts';
 import { produce } from 'immer';
 // Small wrapper around updateEditingData
 const createCurrentLabelsUpdator = (

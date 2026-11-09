@@ -1,7 +1,7 @@
 import Icon from 'components/Icon';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MyList } from 'store/loginUser';
+import type { MyList } from 'store/loginUser';
 import styled from 'styled-components';
 import { Button } from 'components/react-bootstrap';
 

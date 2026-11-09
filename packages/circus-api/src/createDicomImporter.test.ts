@@ -1,12 +1,12 @@
 import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib';
 import * as path from 'path';
-import { setUpMongoFixture, usingModels } from './test/util-mongo';
-import createDicomImporter from './createDicomImporter';
-import { DicomImporter, Models } from './interface';
-import createTestLogger from './test/util-logger';
-import createDicomTagReader from './utils/createDicomTagReader';
+import { setUpMongoFixture, usingModels } from './test/util-mongo.ts';
+import createDicomImporter from './createDicomImporter.ts';
+import type { DicomImporter, Models } from './interface.ts';
+import createTestLogger from './test/util-logger.ts';
+import createDicomTagReader from './utils/createDicomTagReader.ts';
 import fs from 'fs-extra';
-import createTransactionManager from './createTransactionManager';
+import createTransactionManager from './createTransactionManager.ts';
 
 const modelsPromise = usingModels();
 

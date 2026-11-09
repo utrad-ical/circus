@@ -1,5 +1,5 @@
 import koa from 'koa';
-import { UserPrivilegeInfo } from '../privilegeUtils';
+import type { UserPrivilegeInfo } from '../privilegeUtils.ts';
 
 declare module 'koa' {
   export interface Request {

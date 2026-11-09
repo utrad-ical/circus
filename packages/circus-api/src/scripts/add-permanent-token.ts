@@ -1,6 +1,6 @@
-import { Models } from '../interface';
-import generatePermanentToken from '../utils/generatePermanentToken';
-import Command from './Command';
+import type { Models } from '../interface.ts';
+import generatePermanentToken from '../utils/generatePermanentToken.ts';
+import type Command from './Command.ts';
 
 export const help = () => {
   return (

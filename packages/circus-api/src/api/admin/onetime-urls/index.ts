@@ -1,5 +1,5 @@
-import { RouteMiddleware } from '../../../typings/middlewares';
-import generateUniqueId from '../../../utils/generateUniqueId';
+import type { RouteMiddleware } from '../../../typings/middlewares.ts';
+import generateUniqueId from '../../../utils/generateUniqueId.ts';
 import status from 'http-status';
 
 const randomStr = (length: number = 32) => {

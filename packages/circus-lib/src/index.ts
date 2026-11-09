@@ -1,22 +1,22 @@
-export { default as sleep } from './sleep';
-export { default as generateUniqueId } from './generateUniqueId';
-export * from './validation';
+export { default as sleep } from './sleep.ts';
+export { default as generateUniqueId } from './generateUniqueId.ts';
+export * from './validation.ts';
 
-export * from './image-extractor/dicomImageExtractor';
-export { default as dicomImageExtractor } from './image-extractor/dicomImageExtractor';
+export * from './image-extractor/dicomImageExtractor.ts';
+export { default as dicomImageExtractor } from './image-extractor/dicomImageExtractor.ts';
 
-export type { default as PartialVolumeDescriptor } from './PartialVolumeDescriptor';
-export * from './PartialVolumeDescriptor';
+export type { default as PartialVolumeDescriptor } from './PartialVolumeDescriptor.ts';
+export * from './PartialVolumeDescriptor.ts';
 
-export { default as ServiceLoader } from './ServiceLoader';
-export * from './ServiceLoader';
+export { default as ServiceLoader } from './ServiceLoader.ts';
+export * from './ServiceLoader.ts';
 
-export { default as generateMhdHeader } from './generateMhdHeader';
+export { default as generateMhdHeader } from './generateMhdHeader.ts';
 
-export type { default as Logger } from './logger/Logger';
+export type { default as Logger } from './logger/Logger.ts';
 
-export * from './dicom-file-repository';
+export * from './dicom-file-repository/index.ts';
 
-export * from './PixelFormat';
+export * from './PixelFormat.ts';
 
 // Do not include 'loadConfig' here because it contains side effects

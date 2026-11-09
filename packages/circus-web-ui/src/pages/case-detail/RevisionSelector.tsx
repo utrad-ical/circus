@@ -3,8 +3,8 @@ import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import TimeDisplay from 'components/TimeDisplay';
 import UserDisplay from 'components/UserDisplay';
 import styled from 'styled-components';
-import { Revision } from './revisionData';
-import { ExternalLabel } from './labelData';
+import type { Revision } from './revisionData.ts';
+import type { ExternalLabel } from './labelData.ts';
 
 const Item: React.FC<{ value: Revision<ExternalLabel> }> = React.memo(props => {
   const revision = props.value;

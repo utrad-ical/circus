@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import * as fs from 'node:fs/promises';
-import { extractTarToDir, packDirToTar } from './tar';
+import { extractTarToDir, packDirToTar } from './tar.ts';
 
 test('tar', async () => {
   const sampleDir = 'test/sample-input';

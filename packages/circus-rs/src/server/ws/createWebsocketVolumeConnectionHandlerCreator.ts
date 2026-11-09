@@ -1,7 +1,8 @@
-import { FunctionService } from '@utrad-ical/circus-lib';
-import WebSocketConnectionHandler from './connection/WebSocketConnectionHandler';
-import volume, { AuthFunctionProvider } from './connection/volume';
-import { VolumeProvider } from '../helper/createVolumeProvider';
+import type { FunctionService } from '@utrad-ical/circus-lib';
+import type WebSocketConnectionHandler from './connection/WebSocketConnectionHandler.ts';
+import type { AuthFunctionProvider } from './connection/volume.ts';
+import volume from './connection/volume.ts';
+import type { VolumeProvider } from '../helper/createVolumeProvider.ts';
 
 export type RsWebsocketVolumeConnectionHandlerCreator = (option: {
   authFunctionProvider: AuthFunctionProvider;

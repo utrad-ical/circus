@@ -1,4 +1,4 @@
-import { invertPixelValue } from './invertPixelValue';
+import { invertPixelValue } from './invertPixelValue.ts';
 
 describe('invertPixelValue', () => {
   test('bitStored = 8, pixelRepresentation = 0', () => {

@@ -1,8 +1,8 @@
-import { Editor } from './processor-types';
+import type { Editor } from './processor-types.ts';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import { FormControl } from 'components/react-bootstrap';
 import React from 'react';
-import { CclOptions } from './ccl-processor';
+import type { CclOptions } from './ccl-processor.ts';
 
 const maximumCCNumOptions = {
   1: '1 CC',

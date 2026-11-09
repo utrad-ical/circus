@@ -1,11 +1,11 @@
-import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
-import { SeriesEntry } from 'components/SeriesSelector';
+import type { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import type { SeriesEntry } from 'components/SeriesSelector';
 import { createDraft, finishDraft } from 'immer';
 import { multirange } from 'multi-integer-range';
-import Series from 'types/Series';
-import { RootState } from '../store';
-import { ApiCaller } from './api';
-import asyncMap from './asyncMap';
+import type Series from 'types/Series';
+import type { RootState } from '../store/index.ts';
+import type { ApiCaller } from './api.ts';
+import asyncMap from './asyncMap.ts';
 
 export const defaultPvd = (images: string): PartialVolumeDescriptor => {
   const mr = multirange(images);

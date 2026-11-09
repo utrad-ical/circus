@@ -1,6 +1,6 @@
-import RawData from '../../../../common/RawData';
-import { detectTextureLayout } from './functions';
-import { transferFunctionOrigin } from './transfer-function-constants';
+import type RawData from '../../../../common/RawData.ts';
+import { detectTextureLayout } from './functions.ts';
+import { transferFunctionOrigin } from './transfer-function-constants.ts';
 
 export default function volumeTextureTransferer(
   gl: WebGLRenderingContext,

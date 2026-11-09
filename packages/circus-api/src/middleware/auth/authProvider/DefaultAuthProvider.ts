@@ -1,6 +1,6 @@
-import { AuthProvider, Models } from '../../../interface';
+import type { AuthProvider, Models } from '../../../interface.ts';
 import nodepass from 'node-php-password';
-import { FunctionService } from '@utrad-ical/circus-lib';
+import type { FunctionService } from '@utrad-ical/circus-lib';
 
 const createDefaultAuthProvider: FunctionService<
   AuthProvider,

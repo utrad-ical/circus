@@ -1,15 +1,17 @@
-import axios, { AxiosInstance } from 'axios';
+import type { AxiosInstance } from 'axios';
+import axios from 'axios';
 import bodyparser from 'koa-bodyparser';
 import Router from 'koa-router';
 import * as qs from 'querystring';
-import { setUpKoaTest, TestServer } from '../../test/util-koa';
-import { setUpMongoFixture, usingModels } from '../../test/util-mongo';
-import errorHandler from '../errorHandler';
-import createOauthServer from './createOauthServer';
+import type { TestServer } from '../../test/util-koa.ts';
+import { setUpKoaTest } from '../../test/util-koa.ts';
+import { setUpMongoFixture, usingModels } from '../../test/util-mongo.ts';
+import errorHandler from '../errorHandler.ts';
+import createOauthServer from './createOauthServer.ts';
 import createNullLogger from '@utrad-ical/circus-lib/src/logger/NullLogger';
-import DefaultAuthProvider from '../auth/authProvider/DefaultAuthProvider';
-import { Models } from '../../interface';
-import { Db } from 'mongodb';
+import DefaultAuthProvider from '../auth/authProvider/DefaultAuthProvider.ts';
+import type { Models } from '../../interface.ts';
+import type { Db } from 'mongodb';
 
 let testServer: TestServer, ax: AxiosInstance, db: Db, models: Models;
 

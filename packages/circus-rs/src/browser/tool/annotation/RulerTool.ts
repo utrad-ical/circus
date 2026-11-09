@@ -1,13 +1,11 @@
-import Annotation from '../../annotation/Annotation';
-import Ruler from '../../annotation/Ruler';
-import { sectionFrom2dViewState } from '../../section-util';
-import ViewerEvent from '../../viewer/ViewerEvent';
-import ViewState, {
-  MprViewState,
-  TwoDimensionalViewState
-} from '../../ViewState';
-import { convertViewerPointToVolumePoint } from '../tool-util';
-import AnnotationToolBase from './AnnotationToolBase';
+import type Annotation from '../../annotation/Annotation.ts';
+import Ruler from '../../annotation/Ruler.ts';
+import { sectionFrom2dViewState } from '../../section-util.ts';
+import type ViewerEvent from '../../viewer/ViewerEvent.ts';
+import type { MprViewState, TwoDimensionalViewState } from '../../ViewState.ts';
+import type ViewState from '../../ViewState.ts';
+import { convertViewerPointToVolumePoint } from '../tool-util.ts';
+import AnnotationToolBase from './AnnotationToolBase.ts';
 
 /**
  * RulerTool creates and edits Ruler.

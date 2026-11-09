@@ -23,9 +23,10 @@ const ImportSeries: React.FC<{}> = props => {
       (domains.length ? domains[0] : null)
   );
 
-  const maxBytes = useMemo(() => bytes(loginUser.uploadFileSizeMaxBytes), [
-    loginUser.uploadFileSizeMaxBytes
-  ]);
+  const maxBytes = useMemo(
+    () => bytes(loginUser.uploadFileSizeMaxBytes),
+    [loginUser.uploadFileSizeMaxBytes]
+  );
 
   if (!Array.isArray(domains) || domains.length === 0) {
     return (

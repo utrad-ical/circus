@@ -1,4 +1,4 @@
-import ps from './parseSeries';
+import ps from './parseSeries.ts';
 
 describe('parseSeries', () => {
   test('simple UID check', () => {

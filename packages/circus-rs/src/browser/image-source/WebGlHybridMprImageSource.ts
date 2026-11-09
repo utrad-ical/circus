@@ -1,14 +1,12 @@
-import DynamicMprImageSource, {
-  DynamicMprImageSourceOptions
-} from './DynamicMprImageSource';
-import WebGlRawVolumeMprImageSource, {
-  WebGlRawVolumeMprImageSourceOptions
-} from './WebGlRawVolumeMprImageSource';
-import ViewState from '../ViewState';
-import Viewer from '../viewer/Viewer';
-import MprImageSource from './MprImageSource';
-import MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume';
-import { DrawResult } from './ImageSource';
+import type { DynamicMprImageSourceOptions } from './DynamicMprImageSource.ts';
+import DynamicMprImageSource from './DynamicMprImageSource.ts';
+import type { WebGlRawVolumeMprImageSourceOptions } from './WebGlRawVolumeMprImageSource.ts';
+import WebGlRawVolumeMprImageSource from './WebGlRawVolumeMprImageSource.ts';
+import type ViewState from '../ViewState.ts';
+import type Viewer from '../viewer/Viewer.ts';
+import MprImageSource from './MprImageSource.ts';
+import type MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume.ts';
+import type { DrawResult } from './ImageSource.ts';
 
 interface WebGlHybridImageSourceOptions
   extends WebGlRawVolumeMprImageSourceOptions,

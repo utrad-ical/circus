@@ -1,12 +1,12 @@
-import EditorPage from './EditorPage';
+import EditorPage from './EditorPage.tsx';
 import React from 'react';
 import * as et from '@smikitky/rb-components/lib/editor-types';
-import WindowPresetEditor from './WindowPresetEditor';
-import TagEditor, { newTagItem } from './TagEditor';
-import AttributeSchemaEditor from './AttributeSchemaEditor';
+import WindowPresetEditor from './WindowPresetEditor.tsx';
+import TagEditor, { newTagItem } from './TagEditor.tsx';
+import AttributeSchemaEditor from './AttributeSchemaEditor.tsx';
 import BodyPartIcon from 'components/BodyPartIcon';
-import IconEditor from './IconEditor';
-import { DataGridColumnDefinition } from 'components/DataGrid';
+import IconEditor from './IconEditor.tsx';
+import type { DataGridColumnDefinition } from 'components/DataGrid';
 
 const windowPriorityOptions = [
   'dicom,preset,auto',

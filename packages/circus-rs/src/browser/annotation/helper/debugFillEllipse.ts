@@ -1,9 +1,10 @@
-import { Box2, Vector2, Vector3 } from 'three';
-import { Ellipsoid } from '../../../common/geometry/Ellipsoid';
-import { box2GrowSubpixel } from '../../../common/geometry/Rectangle';
-import { Section } from '../../../common/geometry/Section';
-import { convertScreenCoordinateToVolumeCoordinate } from '../../section-util';
-import getShadowCanvas from './getShadowCanvas';
+import type { Box2, Vector3 } from 'three';
+import { Vector2 } from 'three';
+import type { Ellipsoid } from '../../../common/geometry/Ellipsoid.ts';
+import { box2GrowSubpixel } from '../../../common/geometry/Rectangle.ts';
+import type { Section } from '../../../common/geometry/Section.ts';
+import { convertScreenCoordinateToVolumeCoordinate } from '../../section-util.ts';
+import getShadowCanvas from './getShadowCanvas.ts';
 
 export default function debugFillEllipse(
   ctx: CanvasRenderingContext2D,

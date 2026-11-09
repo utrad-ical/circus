@@ -1,11 +1,12 @@
 import {
   getInscribedEllipse,
   getInscribedEllipsoid
-} from '../../common/geometry/Ellipsoid';
-import debugFillEllipse from './helper/debugFillEllipse';
-import { drawEllipse, drawSimpleFigure } from './helper/drawObject';
-import intersectEllipsoidAndSection from './helper/getEllipseUsing5Points';
-import SolidFigure, { FigureType, LineDrawStyle } from './SolidFigure';
+} from '../../common/geometry/Ellipsoid.ts';
+import debugFillEllipse from './helper/debugFillEllipse.ts';
+import { drawEllipse, drawSimpleFigure } from './helper/drawObject.ts';
+import intersectEllipsoidAndSection from './helper/getEllipseUsing5Points.ts';
+import type { FigureType, LineDrawStyle } from './SolidFigure.ts';
+import SolidFigure from './SolidFigure.ts';
 
 /**
  * Ellipsoid annotation

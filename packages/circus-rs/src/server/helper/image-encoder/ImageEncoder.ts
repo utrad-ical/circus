@@ -1,4 +1,4 @@
-import stream from 'stream';
+import type stream from 'stream';
 
 /**
  * Base image encoder class. An ImageEncoder receives a 8-bit grayscale

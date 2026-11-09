@@ -1,4 +1,4 @@
-import { targzIterator } from './archiveIterator';
+import { targzIterator } from './archiveIterator.ts';
 import path from 'path';
 import fs from 'fs-extra';
 

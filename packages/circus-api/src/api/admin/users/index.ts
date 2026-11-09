@@ -1,8 +1,8 @@
 import status from 'http-status';
-import performSearch from '../../performSearch';
+import performSearch from '../../performSearch.ts';
 import nodepass from 'node-php-password';
-import { RouteMiddleware } from '../../../typings/middlewares';
-import { defaultPreferences } from '../../../utils/preferenceUtils';
+import type { RouteMiddleware } from '../../../typings/middlewares.ts';
+import { defaultPreferences } from '../../../utils/preferenceUtils.ts';
 
 const removePassword = (input: any) => {
   const output = { ...input };

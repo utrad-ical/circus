@@ -1,5 +1,5 @@
-import React from 'react';
-import { FeedbackEntry } from './CsResultsContext';
+import type React from 'react';
+import type { FeedbackEntry } from './CsResultsContext.ts';
 
 export interface DisplayDefinition {
   type: string;

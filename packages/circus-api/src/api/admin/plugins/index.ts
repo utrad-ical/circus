@@ -1,7 +1,7 @@
-import performSearch from '../../performSearch';
-import { RouteMiddleware } from '../../../typings/middlewares';
-import { extractFilter } from '../../performSearch';
-import checkFilter from '../../../utils/checkFilter';
+import performSearch from '../../performSearch.ts';
+import type { RouteMiddleware } from '../../../typings/middlewares.ts';
+import { extractFilter } from '../../performSearch.ts';
+import checkFilter from '../../../utils/checkFilter.ts';
 import crypto from 'crypto';
 import httpStatus from 'http-status';
 

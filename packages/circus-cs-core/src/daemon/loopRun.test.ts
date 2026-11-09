@@ -1,8 +1,9 @@
-import loopRun, { LoopRunOptions } from './loopRun';
-import sleep from '../util/sleep';
+import type { LoopRunOptions } from './loopRun.ts';
+import loopRun from './loopRun.ts';
+import sleep from '../util/sleep.ts';
 import { EventEmitter } from 'events';
-import * as circus from '../interface';
-import { Logger } from '@utrad-ical/circus-lib';
+import type * as circus from '../interface.ts';
+import type { Logger } from '@utrad-ical/circus-lib';
 
 const createMockLogger = (fn: jest.Mock) => {
   return {

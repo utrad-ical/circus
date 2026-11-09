@@ -1,14 +1,13 @@
 import { alert } from '@smikitky/rb-components/lib/modal';
 import dilation from '@utrad-ical/circus-rs/src/common/morphology/dilation';
 import erosion from '@utrad-ical/circus-rs/src/common/morphology/erosion';
-import {
+import type {
   MorphologicalImageProcessingResults,
   Structure
 } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
 import edWorker from 'worker-loader!./ed-worker';
-import performLabelCreatingVoxelProcessing, {
-  VoxelLabelProcessor
-} from './performLabelCreatingVoxelProcessing';
+import type { VoxelLabelProcessor } from './performLabelCreatingVoxelProcessing.ts';
+import performLabelCreatingVoxelProcessing from './performLabelCreatingVoxelProcessing.ts';
 
 export type ErosionDilationOptions = Structure;
 

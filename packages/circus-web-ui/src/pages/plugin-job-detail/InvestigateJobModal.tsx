@@ -4,7 +4,7 @@ import { useCsResults } from '@utrad-ical/circus-ui-kit';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import { Modal, Tab, Tabs } from 'components/react-bootstrap';
-import { SeriesEntry } from 'components/SeriesSelector';
+import type { SeriesEntry } from 'components/SeriesSelector';
 import TimeDisplay from 'components/TimeDisplay';
 import UserDisplay from 'components/UserDisplay';
 import React, { useEffect, useState } from 'react';

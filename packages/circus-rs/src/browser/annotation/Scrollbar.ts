@@ -1,22 +1,26 @@
 import { Vector2 } from 'three';
-import ViewerEventTarget from '../interface/ViewerEventTarget';
-import { handlePageByScrollbar } from '../tool/state/handlePageBy';
-import Viewer from '../viewer/Viewer';
-import ViewerEvent from '../viewer/ViewerEvent';
-import ViewState, { MprViewState, TwoDimensionalViewState } from '../ViewState';
-import Annotation, { DrawHints } from './Annotation';
-import {
-  createScrollbar,
-  determineThumbStepFromPosition,
-  determineThumbStepFromStep,
-  drawScrollbar,
-  drawVisibilityThreshold,
+import type ViewerEventTarget from '../interface/ViewerEventTarget.ts';
+import { handlePageByScrollbar } from '../tool/state/handlePageBy.ts';
+import Viewer from '../viewer/Viewer.ts';
+import type ViewerEvent from '../viewer/ViewerEvent.ts';
+import type { MprViewState, TwoDimensionalViewState } from '../ViewState.ts';
+import type ViewState from '../ViewState.ts';
+import type { DrawHints } from './Annotation.ts';
+import type Annotation from './Annotation.ts';
+import type {
   HandleType,
   Position,
   ScrollbarContainer,
   Settings,
   Visibility
-} from './helper/scrollbar';
+} from './helper/scrollbar.ts';
+import {
+  createScrollbar,
+  determineThumbStepFromPosition,
+  determineThumbStepFromStep,
+  drawScrollbar,
+  drawVisibilityThreshold
+} from './helper/scrollbar.ts';
 
 interface Options {
   color?: string;

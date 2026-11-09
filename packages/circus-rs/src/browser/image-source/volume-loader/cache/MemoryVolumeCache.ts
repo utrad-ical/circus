@@ -1,5 +1,5 @@
-import VolumeCache from './VolumeCache';
-import { DicomVolumeMetadata } from '../DicomVolumeLoader';
+import type VolumeCache from './VolumeCache.ts';
+import type { DicomVolumeMetadata } from '../DicomVolumeLoader.ts';
 
 /**
  * Provides a simple in-memory volume cache which is available only while the

@@ -4,12 +4,13 @@
  * @module
  */
 import argv from 'argv';
-import config from '../config';
-import configureServiceLoader from '../configureServiceLoader';
-import loopRun, { LoopRunOptions } from './loopRun';
-import createCancellableTimer from './createCancellableTimer';
+import config from '../config/index.ts';
+import configureServiceLoader from '../configureServiceLoader.ts';
+import type { LoopRunOptions } from './loopRun.ts';
+import loopRun from './loopRun.ts';
+import createCancellableTimer from './createCancellableTimer.ts';
 import { ServiceLoader } from '@utrad-ical/circus-lib';
-import * as circus from '../interface';
+import type * as circus from '../interface.ts';
 
 argv.option([
   {

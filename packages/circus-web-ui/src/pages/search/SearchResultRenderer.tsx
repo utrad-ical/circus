@@ -1,5 +1,5 @@
 import Icon from 'components/Icon';
-import { DataGridRenderer } from 'components/DataGrid';
+import type { DataGridRenderer } from 'components/DataGrid';
 import IdDisplay from 'components/IdDisplay';
 import PatientInfoBox from 'components/PatientInfoBox';
 import PluginDisplay from 'components/PluginDisplay';

@@ -1,8 +1,7 @@
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
-import PartialVolumeDescriptor, {
-  describePartialVolumeDescriptor
-} from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
-import { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
+import type PartialVolumeDescriptor from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
+import { describePartialVolumeDescriptor } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
+import type { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
 import classNames from 'classnames';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
@@ -10,12 +9,13 @@ import { Button, Modal } from 'components/react-bootstrap';
 import { multirange } from 'multi-integer-range';
 import React, { useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
-import Series from 'types/Series';
-import { newViewerCellItem, performLayout } from './caseStore';
-import { InternalLabel } from './labelData';
-import LabelDisplay from './LabelDisplay';
-import { EditingData, EditingDataUpdater, seriesColors } from './revisionData';
-import { ViewerMode } from './ViewerGrid';
+import type Series from 'types/Series';
+import { newViewerCellItem, performLayout } from './caseStore.ts';
+import type { InternalLabel } from './labelData.ts';
+import LabelDisplay from './LabelDisplay.tsx';
+import type { EditingData, EditingDataUpdater } from './revisionData.ts';
+import { seriesColors } from './revisionData.ts';
+import type { ViewerMode } from './ViewerGrid.tsx';
 
 const LabelSelector: React.FC<{
   editingData: EditingData;

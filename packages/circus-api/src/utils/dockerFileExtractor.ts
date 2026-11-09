@@ -1,7 +1,8 @@
 import cp from 'child_process';
-import { pipeline, Readable } from 'stream';
+import type { Readable } from 'stream';
+import { pipeline } from 'stream';
 import tarfs from 'tar-fs';
-import exec from './exec';
+import exec from './exec.ts';
 
 /**
  * Utility to extract files from the specified docker image.

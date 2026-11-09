@@ -1,5 +1,5 @@
-import { FigureType } from '../../annotation/PlaneFigure';
-import PlaneFigureTool from './PlaneFigureTool';
+import type { FigureType } from '../../annotation/PlaneFigure.ts';
+import PlaneFigureTool from './PlaneFigureTool.ts';
 
 /**
  * CircleTool

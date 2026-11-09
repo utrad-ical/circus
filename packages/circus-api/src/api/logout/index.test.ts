@@ -1,5 +1,6 @@
-import { setUpAppForRoutesTest, ApiTest } from '../../test/util-routes';
-import { AxiosInstance } from 'axios';
+import type { ApiTest } from '../../test/util-routes.ts';
+import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
+import type { AxiosInstance } from 'axios';
 import httpStatus from 'http-status';
 
 let apiTest: ApiTest, axios: AxiosInstance;

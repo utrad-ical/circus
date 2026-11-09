@@ -1,10 +1,11 @@
-import koa from 'koa';
+import type koa from 'koa';
 import compose from 'koa-compose';
-import { isDicomUid, Logger } from '@utrad-ical/circus-lib';
+import type { Logger } from '@utrad-ical/circus-lib';
+import { isDicomUid } from '@utrad-ical/circus-lib';
 import httpStatus from 'http-status';
-import validate from '../middleware/validate';
-import ipBasedAccessControl from '../middleware/ipBasedAccessControl';
-import { Authorizer } from '../../helper/createAuthorizer';
+import validate from '../middleware/validate.ts';
+import ipBasedAccessControl from '../middleware/ipBasedAccessControl.ts';
+import type { Authorizer } from '../../helper/createAuthorizer.ts';
 
 type MiddlewareOptions = {
   rsLogger: Logger;

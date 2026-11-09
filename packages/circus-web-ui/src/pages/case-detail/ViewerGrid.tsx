@@ -1,30 +1,28 @@
-import {
+import type {
   Composition,
   MprViewState,
   Tool,
   TwoDimensionalViewState,
   Viewer
 } from '@utrad-ical/circus-rs/src/browser';
-import {
-  OrientationString,
-  sectionTo2dViewState
-} from '@utrad-ical/circus-rs/src/browser/section-util';
+import type { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
+import { sectionTo2dViewState } from '@utrad-ical/circus-rs/src/browser/section-util';
 import { toolFactory } from '@utrad-ical/circus-rs/src/browser/tool/tool-initializer';
-import { Section } from '@utrad-ical/circus-rs/src/common/geometry';
+import type { Section } from '@utrad-ical/circus-rs/src/common/geometry';
 import classnames from 'classnames';
 import DropdownButton from 'components/DropdownButton';
-import GridContainer, {
-  LayoutInfo,
-  layoutReducer
-} from 'components/GridContainer';
+import type { LayoutInfo } from 'components/GridContainer';
+import GridContainer, { layoutReducer } from 'components/GridContainer';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
+import type {
+  InitialStateSetterFunc,
+  StateChanger
+} from 'components/ImageViewer';
 import ImageViewer, {
   createStateChanger,
   getInitial2dViewState,
-  InitialStateSetterFunc,
-  setOrthogonalOrientation,
-  StateChanger
+  setOrthogonalOrientation
 } from 'components/ImageViewer';
 import MenuItem from 'components/MenuItem';
 import { Button } from 'components/react-bootstrap';
@@ -36,7 +34,8 @@ import React, {
   useRef
 } from 'react';
 import styled from 'styled-components';
-import { EditingData, EditingDataUpdater, seriesColors } from './revisionData';
+import type { EditingData, EditingDataUpdater } from './revisionData.ts';
+import { seriesColors } from './revisionData.ts';
 
 export type ViewerMode = '2d' | '3d';
 export interface ViewerDef {

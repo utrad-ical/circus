@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useApi } from './api';
+import { useApi } from './api.ts';
 import streamSaver from 'streamsaver';
 
 /**

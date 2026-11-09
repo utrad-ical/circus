@@ -1,15 +1,14 @@
-import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
-import { LayoutInfo } from 'components/GridContainer';
+import type { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import type { LayoutInfo } from 'components/GridContainer';
 import { createDraft, finishDraft } from 'immer';
-import { ApiCaller } from 'utils/api';
-import asyncMap from '../../utils/asyncMap';
+import type { ApiCaller } from 'utils/api';
+import asyncMap from '../../utils/asyncMap.ts';
+import type { ExternalLabel, InternalLabel } from './labelData.ts';
 import {
-  ExternalLabel,
   externalLabelToInternal,
-  InternalLabel,
   internalLabelToExternal
-} from './labelData';
-import { ViewerDef } from './ViewerGrid';
+} from './labelData.ts';
+import type { ViewerDef } from './ViewerGrid.tsx';
 
 /**
  * EditingData represents one revision data with some meta data,

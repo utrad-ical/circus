@@ -38,15 +38,16 @@ import TokenManagement from 'pages/TokenManagement';
 
 import { Provider as ReduxStoreProvider, useSelector } from 'react-redux';
 import { dismissMessageOnPageChange } from 'store/messages';
-import PluginJobQueueSearch from './pages/search/PluginJobQueueSearch';
-import { store } from './store';
+import PluginJobQueueSearch from './pages/search/PluginJobQueueSearch.tsx';
+import { store } from './store/index.ts';
 
+import type { VolumeLoaderManager } from '@utrad-ical/circus-ui-kit';
 import {
   createVolumeLoaderManager,
-  VolumeLoaderFactoryContext,
-  VolumeLoaderManager
+  VolumeLoaderFactoryContext
 } from '@utrad-ical/circus-ui-kit';
-import { ApiCaller, ApiContext, useApi } from 'utils/api';
+import type { ApiCaller } from 'utils/api';
+import { ApiContext, useApi } from 'utils/api';
 import loginManager, { LoginManagerContext } from 'utils/loginManager';
 
 require('./styles/main.less');

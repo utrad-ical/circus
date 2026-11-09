@@ -1,7 +1,7 @@
 import status from 'http-status';
-import { globalPrivileges } from '../../../privilegeUtils';
-import { RouteMiddleware } from '../../../typings/middlewares';
-import performSearch from '../../performSearch';
+import { globalPrivileges } from '../../../privilegeUtils.ts';
+import type { RouteMiddleware } from '../../../typings/middlewares.ts';
+import performSearch from '../../performSearch.ts';
 
 export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {

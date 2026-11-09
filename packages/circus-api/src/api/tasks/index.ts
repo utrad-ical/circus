@@ -1,7 +1,7 @@
-import performSearch from '../performSearch';
+import performSearch from '../performSearch.ts';
 import httpStatus from 'http-status';
-import { RouteMiddleware } from '../../typings/middlewares';
-import checkFilter from '../../utils/checkFilter';
+import type { RouteMiddleware } from '../../typings/middlewares.ts';
+import checkFilter from '../../utils/checkFilter.ts';
 import { EJSON } from 'bson';
 
 export const handleSearch: RouteMiddleware = ({

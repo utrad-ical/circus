@@ -1,7 +1,7 @@
-import Storage from './Storage';
+import type Storage from './Storage.ts';
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import createLocalStorage from './LocalStorage';
+import createLocalStorage from './LocalStorage.ts';
 
 let store: Storage;
 

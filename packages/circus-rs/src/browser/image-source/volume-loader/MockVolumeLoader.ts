@@ -1,7 +1,7 @@
-import DicomVolumeLoader from './DicomVolumeLoader';
-import { PixelFormat } from '../..';
-import DicomVolume from '../../../common/DicomVolume';
-import { DicomVolumeMetadata } from './DicomVolumeLoader';
+import type DicomVolumeLoader from './DicomVolumeLoader.ts';
+import type { PixelFormat } from '../../index.ts';
+import DicomVolume from '../../../common/DicomVolume.ts';
+import type { DicomVolumeMetadata } from './DicomVolumeLoader.ts';
 
 interface MockVolumeLoaderOptions {
   meta?: DicomVolumeMetadata;

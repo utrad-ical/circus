@@ -1,6 +1,7 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ApiCaller } from 'utils/api';
-import { AppThunk } from './index';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
+import type { ApiCaller } from 'utils/api';
+import type { AppThunk } from './index.ts';
 
 export interface Users {
   [userEmail: string]: 'loading' | { userEmail: string; description: string };

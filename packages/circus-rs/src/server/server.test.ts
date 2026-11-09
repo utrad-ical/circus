@@ -1,11 +1,12 @@
-import configureServiceLoader, { RsServices } from './configureServiceLoader';
+import type { RsServices } from './configureServiceLoader.ts';
+import configureServiceLoader from './configureServiceLoader.ts';
 import fs from 'fs';
 import zlib from 'zlib';
 import _axios from 'axios';
-import { Server } from 'http';
+import type { Server } from 'http';
 import { ServiceLoader } from '@utrad-ical/circus-lib';
 import status from 'http-status';
-import { Configuration } from './Configuration';
+import type { Configuration } from './Configuration.ts';
 import path from 'path';
 
 const port = 1024;

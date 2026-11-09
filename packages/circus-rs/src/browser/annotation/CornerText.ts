@@ -1,6 +1,7 @@
-import Viewer from '../viewer/Viewer';
-import ViewState from '../ViewState';
-import Annotation, { DrawHints } from './Annotation';
+import type Viewer from '../viewer/Viewer.ts';
+import type ViewState from '../ViewState.ts';
+import type { DrawHints } from './Annotation.ts';
+import type Annotation from './Annotation.ts';
 
 const PADDING = 10;
 

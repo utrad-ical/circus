@@ -1,9 +1,13 @@
-import ImageSource, { ViewStateResizeTransformer } from './ImageSource';
-import ViewState from '../ViewState';
-import Viewer from '../viewer/Viewer';
-import { createOrthogonalMprSection, adjustOnResized } from '../section-util';
-import { Vector3D, Vector2D } from '../../common/geometry';
-import { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader';
+import type { ViewStateResizeTransformer } from './ImageSource.ts';
+import ImageSource from './ImageSource.ts';
+import type ViewState from '../ViewState.ts';
+import type Viewer from '../viewer/Viewer.ts';
+import {
+  createOrthogonalMprSection,
+  adjustOnResized
+} from '../section-util.ts';
+import type { Vector3D, Vector2D } from '../../common/geometry/index.ts';
+import type { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader.ts';
 
 /**
  * MprImageSource is a common base class for all

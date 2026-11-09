@@ -1,6 +1,6 @@
 import React from 'react';
-import { modalities } from '../../modalities';
-import ConditionFrame from './ConditionFrame';
+import { modalities } from '../../modalities.ts';
+import ConditionFrame from './ConditionFrame.tsx';
 import { escapeRegExp } from 'utils/util';
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import DateRangePicker, {
@@ -8,8 +8,8 @@ import DateRangePicker, {
 } from '@smikitky/rb-components/lib/DateRangePicker';
 import AgeMinMax from 'components/AgeMinMax';
 import { conditionToMongoQuery } from '@smikitky/rb-components/lib/ConditionEditor';
-import SearchPanel from './SearchPanel';
-import { Condition } from './ConditionFrame';
+import SearchPanel from './SearchPanel.tsx';
+import type { Condition } from './ConditionFrame.tsx';
 
 const sexOptions = { all: 'All', M: 'male', F: 'female', O: 'other' };
 const modalityOptions: { [key: string]: string } = { all: 'All' };
@@ -63,8 +63,8 @@ const basicConditionToMongoQuery = (condition: Condition['basic']) => {
   return members.length > 1
     ? { $and: members }
     : members.length === 1
-    ? members[0]
-    : {};
+      ? members[0]
+      : {};
 };
 
 const advancedConditionKeys: any = {

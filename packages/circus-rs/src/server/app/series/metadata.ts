@@ -1,12 +1,12 @@
-import koa from 'koa';
+import type koa from 'koa';
 import compose from 'koa-compose';
-import { ValidatorRules } from '../../../common/Validator';
-import validate from '../middleware/validate';
-import { ViewWindow } from '../../../common/ViewWindow';
-import { PixelFormat } from '@utrad-ical/circus-lib/src/PixelFormat';
-import { SeriesMiddlewareState } from './createSeriesRoutes';
+import type { ValidatorRules } from '../../../common/Validator.ts';
+import validate from '../middleware/validate.ts';
+import type { ViewWindow } from '../../../common/ViewWindow.ts';
+import type { PixelFormat } from '@utrad-ical/circus-lib/src/PixelFormat';
+import type { SeriesMiddlewareState } from './createSeriesRoutes.ts';
 import MultiRange from 'multi-integer-range';
-import { VolumeAccessor } from '../../helper/createVolumeProvider';
+import type { VolumeAccessor } from '../../helper/createVolumeProvider.ts';
 import { partialVolumeDescriptorToArray } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
 
 interface MetadataQuery {

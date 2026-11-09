@@ -1,5 +1,5 @@
 import status from 'http-status';
-import { Middleware } from 'koa';
+import type { Middleware } from 'koa';
 
 const typeCheck: (expectedType?: string) => Middleware = (
   expectedType = 'application/json'

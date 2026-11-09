@@ -1,8 +1,10 @@
-import errorHandler from './errorHandler';
-import axios, { AxiosInstance } from 'axios';
+import errorHandler from './errorHandler.ts';
+import type { AxiosInstance } from 'axios';
+import axios from 'axios';
 import Router from 'koa-router';
 import Ajv from 'ajv';
-import { setUpKoaTest, TestServer } from '../test/util-koa';
+import type { TestServer } from '../test/util-koa.ts';
+import { setUpKoaTest } from '../test/util-koa.ts';
 import createNullLogger from '@utrad-ical/circus-lib/src/logger/NullLogger';
 
 let testServer: TestServer, ax: AxiosInstance;

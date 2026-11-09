@@ -1,9 +1,10 @@
-import PartialVolumeDescriptor, {
+import type PartialVolumeDescriptor from './PartialVolumeDescriptor.ts';
+import {
   describePartialVolumeDescriptor,
   isValidPartialVolumeDescriptor,
   rangeHasPartialVolume,
   partialVolumeDescriptorToArray
-} from './PartialVolumeDescriptor';
+} from './PartialVolumeDescriptor.ts';
 import { multirange } from 'multi-integer-range';
 
 describe('describePartialVolumeDescriptor', () => {

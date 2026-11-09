@@ -1,4 +1,4 @@
-import { PixelFormat } from './PixelFormat';
+import type { PixelFormat } from './PixelFormat.ts';
 export type LineEndingType = 'lf' | 'crlf';
 export type Vector3D = [number, number, number];
 

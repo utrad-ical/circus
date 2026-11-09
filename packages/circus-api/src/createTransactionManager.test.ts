@@ -1,15 +1,15 @@
-import createTransactionManager from './createTransactionManager';
-import * as mongo from 'mongodb';
-import { ClientSession } from 'mongodb';
-import { setUpMongoFixture, usingMongo } from './test/util-mongo';
-import createValidator from './createValidator';
-import createCollectionAccessor from '../src/db/createCollectionAccessor';
-import { Database, Validator, TransactionManager } from './interface';
+import createTransactionManager from './createTransactionManager.ts';
+import type * as mongo from 'mongodb';
+import type { ClientSession } from 'mongodb';
+import { setUpMongoFixture, usingMongo } from './test/util-mongo.ts';
+import createValidator from './createValidator.ts';
+import createCollectionAccessor from '../src/db/createCollectionAccessor.ts';
+import type { Database, Validator, TransactionManager } from './interface.ts';
 
 const mock_createCollectionAccessor = createCollectionAccessor;
 
 // Use Jest's manual mock to replace makeModels
-jest.mock('./db/createModels', () => ({
+jest.mock('./db/createModels.ts', () => ({
   makeModels: (
     database: Database,
     validator: Validator,

@@ -1,4 +1,4 @@
-import { NoDepFunctionService } from '@utrad-ical/circus-lib';
+import type { NoDepFunctionService } from '@utrad-ical/circus-lib';
 import * as ws from 'ws';
 
 const createWSServer: NoDepFunctionService<

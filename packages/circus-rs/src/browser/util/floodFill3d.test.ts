@@ -1,7 +1,7 @@
 import { Vector3, Box3 } from 'three';
-import createMarkedStateDumper from './createMarkedStateDumper';
-import floodFill3d from './floodFill3d';
-import voxelMarker from './voxelMarker';
+import createMarkedStateDumper from './createMarkedStateDumper.ts';
+import floodFill3d from './floodFill3d.ts';
+import voxelMarker from './voxelMarker.ts';
 
 describe('floodFill3d with binarizer that always returns ture', () => {
   const runFrom = (x: number, y: number, z: number, expectedFilled = true) => {

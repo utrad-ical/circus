@@ -14,7 +14,7 @@ import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { useApi } from 'utils/api';
 import useLoadData from 'utils/useLoadData';
-import { CancelToken } from '../utils/cancelToken';
+import type { CancelToken } from '../utils/cancelToken.ts';
 import CopyToClipboardButton from 'components/CopyToClipboardButton';
 
 interface Token {

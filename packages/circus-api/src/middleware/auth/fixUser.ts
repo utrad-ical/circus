@@ -1,6 +1,6 @@
-import { determineUserAccessInfo } from '../../privilegeUtils';
-import { Middleware } from 'koa';
-import { Models } from '../../interface';
+import { determineUserAccessInfo } from '../../privilegeUtils.ts';
+import type { Middleware } from 'koa';
+import type { Models } from '../../interface.ts';
 
 /**
  * This middleware is used in place of createOauthServer when "fix-user" mode

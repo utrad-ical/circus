@@ -1,8 +1,8 @@
-import DraggableTool from '../DraggableTool';
-import ViewerEvent from '../../viewer/ViewerEvent';
-import Viewer from '../../viewer/Viewer';
-import { Tool } from '../Tool';
-import handleRotationBy from './handleRotationBy';
+import DraggableTool from '../DraggableTool.ts';
+import type ViewerEvent from '../../viewer/ViewerEvent.ts';
+import type Viewer from '../../viewer/Viewer.ts';
+import type { Tool } from '../Tool.ts';
+import handleRotationBy from './handleRotationBy.ts';
 
 /**
  * CelestialRotateTool handles mouse drags and wheel moves on the Viewer and

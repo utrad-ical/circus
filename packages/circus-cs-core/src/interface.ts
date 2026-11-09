@@ -1,11 +1,11 @@
 // This *.d.ts file is recognized by the typescript compiler.
 // You can use them like `circus.PluginJobRequest` without `import`-ing.
 
-import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
-import { Archiver } from 'archiver';
-import { EventEmitter } from 'events';
-import { Readable } from 'stream';
-import { RemoteCadDefinition } from './util/remote-job';
+import type { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import type { Archiver } from 'archiver';
+import type { EventEmitter } from 'events';
+import type { Readable } from 'stream';
+import type { RemoteCadDefinition } from './util/remote-job.ts';
 
 export type QueueState = 'wait' | 'processing';
 

@@ -1,6 +1,6 @@
-import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import type { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import React, { useContext } from 'react';
-import { Display } from './Display';
+import type { Display } from './Display.tsx';
 
 export interface FeedbackEntry<T> {
   feedbackId: string;

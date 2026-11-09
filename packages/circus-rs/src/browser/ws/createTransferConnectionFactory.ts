@@ -1,4 +1,4 @@
-import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import type { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import {
   beginTransferMessageData,
   createMessageBuffer,
@@ -8,8 +8,8 @@ import {
   isImageTransferData,
   pauseTransferMessageData,
   resumeTransferMessageData
-} from '../../common/ws/message';
-import WebSocketClient from './WebSocketClient';
+} from '../../common/ws/message.ts';
+import type WebSocketClient from './WebSocketClient.ts';
 
 interface VolumeSpecifier {
   seriesUid: string;

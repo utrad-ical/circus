@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import * as s from 'store/searches';
 import { useApi } from 'utils/api';
 import useLoginUser from 'utils/useLoginUser';
-import MyListHome from './MyListHome';
+import MyListHome from './MyListHome.tsx';
 
 const MyListPage: React.FC<{
   myListId: string | undefined;

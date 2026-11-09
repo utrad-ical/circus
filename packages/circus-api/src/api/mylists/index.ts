@@ -1,6 +1,9 @@
-import { Models } from '../../interface';
-import { CircusContext, RouteMiddleware } from '../../typings/middlewares';
-import generateUniqueId from '../../utils/generateUniqueId';
+import type { Models } from '../../interface.ts';
+import type {
+  CircusContext,
+  RouteMiddleware
+} from '../../typings/middlewares.ts';
+import generateUniqueId from '../../utils/generateUniqueId.ts';
 import status from 'http-status';
 
 export interface MyListItem {

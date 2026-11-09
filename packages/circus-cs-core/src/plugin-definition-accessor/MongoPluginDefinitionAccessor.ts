@@ -1,6 +1,9 @@
-import { FunctionService } from '@utrad-ical/circus-lib';
-import { MongoClientPool } from '../mongoClientPool';
-import { PluginDefinition, PluginDefinitionAccessor } from '../interface';
+import type { FunctionService } from '@utrad-ical/circus-lib';
+import type { MongoClientPool } from '../mongoClientPool.ts';
+import type {
+  PluginDefinition,
+  PluginDefinitionAccessor
+} from '../interface.ts';
 
 const createMongoPluginDefinitionAccessor: FunctionService<
   PluginDefinitionAccessor,

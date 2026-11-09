@@ -1,6 +1,6 @@
-import { usingModels, setUpMongoFixture } from '../test/util-mongo';
-import { Models } from '../interface';
-import duplicateJobExists from './duplicateJobExists';
+import { usingModels, setUpMongoFixture } from '../test/util-mongo.ts';
+import type { Models } from '../interface.ts';
+import duplicateJobExists from './duplicateJobExists.ts';
 
 let models: Models;
 const modelsPromise = usingModels();

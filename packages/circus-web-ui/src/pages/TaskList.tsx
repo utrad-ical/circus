@@ -1,4 +1,5 @@
-import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
+import type { DataGridColumnDefinition } from 'components/DataGrid';
+import DataGrid from 'components/DataGrid';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import SearchResultsView, {
@@ -9,8 +10,8 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { useApi } from 'utils/api';
-import { newSearch } from '../store/searches';
-import Task from 'types/Task';
+import { newSearch } from '../store/searches.ts';
+import type Task from 'types/Task';
 import useTaskDismisser from 'utils/useTaskDismisser';
 import { capitalize } from 'utils/util';
 import useTaskDownloadHandler from 'utils/useTaskDownloadHandler';

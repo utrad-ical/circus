@@ -9,14 +9,14 @@
 // ただし具体的にどんなリクエストが何回走るのかは実装の詳細なので
 // この関数内に隠蔽されている。
 
-import { formatError } from '../../util/error';
-import { appendDirectoryToFormData } from '../../util/form';
+import { formatError } from '../../util/error.ts';
+import { appendDirectoryToFormData } from '../../util/form.ts';
 import type {
   JobResponse,
   JobResult,
   RemoteAdapter
-} from '../../util/remote-job';
-import { sseStreamReader } from '../../util/streams';
+} from '../../util/remote-job.ts';
+import { sseStreamReader } from '../../util/streams.ts';
 
 const remoteCadImpl: RemoteAdapter = async (
   cadDefinition,

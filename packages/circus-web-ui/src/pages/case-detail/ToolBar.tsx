@@ -1,9 +1,9 @@
-import { Editor } from '@smikitky/rb-components/lib/editor-types';
+import type { Editor } from '@smikitky/rb-components/lib/editor-types';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
-import ModifierKeyBehaviors from '@utrad-ical/circus-rs/src/browser/annotation/ModifierKeyBehaviors';
-import PlaneFigureOption from '@utrad-ical/circus-rs/src/browser/annotation/PlaneFigureOption';
-import { ReferenceValueOption } from '@utrad-ical/circus-rs/src/browser/tool/cloud/WandTool';
-import { InterpolationMode } from '@utrad-ical/circus-rs/src/browser/ViewState';
+import type ModifierKeyBehaviors from '@utrad-ical/circus-rs/src/browser/annotation/ModifierKeyBehaviors';
+import type PlaneFigureOption from '@utrad-ical/circus-rs/src/browser/annotation/PlaneFigureOption';
+import type { ReferenceValueOption } from '@utrad-ical/circus-rs/src/browser/tool/cloud/WandTool';
+import type { InterpolationMode } from '@utrad-ical/circus-rs/src/browser/ViewState';
 import Icon from 'components/Icon';
 import {
   Button,
@@ -14,18 +14,22 @@ import {
   Tooltip
 } from 'components/react-bootstrap';
 import MenuItem from 'components/MenuItem';
-import { ToolOptions, ToolOptionSetter } from 'pages/case-detail/useToolbar';
+import type {
+  ToolOptions,
+  ToolOptionSetter
+} from 'pages/case-detail/useToolbar';
 import React, { useState } from 'react';
-import { MenuItemProps } from 'react-bootstrap';
+import type { MenuItemProps } from 'react-bootstrap';
 import styled from 'styled-components';
-import { WindowPreset } from 'types/Project';
+import type { WindowPreset } from 'types/Project';
 import useKeyboardShortcut from 'utils/useKeyboardShortcut';
-import {
+import type {
   ScrollBarsSettings,
   WindowPropagationScope
-} from '../../store/loginUser';
-import { LayoutKind } from './caseStore';
-import ViewWindowEditor, { ViewWindow } from './ViewWindowEditor';
+} from '../../store/loginUser.ts';
+import type { LayoutKind } from './caseStore.ts';
+import type { ViewWindow } from './ViewWindowEditor.tsx';
+import ViewWindowEditor from './ViewWindowEditor.tsx';
 
 export interface ViewOptions {
   showReferenceLine?: boolean;

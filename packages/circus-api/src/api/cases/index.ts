@@ -1,19 +1,22 @@
 import status from 'http-status';
-import {
+import type {
   CaseExportTarget,
   CompressionFormat,
   LabelPackType,
   LineEndingType
-} from '../../case/createMhdPacker';
-import makeNewCase from '../../case/makeNewCase';
-import { CircusContext, RouteMiddleware } from '../../typings/middlewares';
-import checkFilter from '../../utils/checkFilter';
-import resolveAutoPvdOfSeries from '../../utils/resolveAutoPvdOfSeries';
+} from '../../case/createMhdPacker.ts';
+import makeNewCase from '../../case/makeNewCase.ts';
+import type {
+  CircusContext,
+  RouteMiddleware
+} from '../../typings/middlewares.ts';
+import checkFilter from '../../utils/checkFilter.ts';
+import resolveAutoPvdOfSeries from '../../utils/resolveAutoPvdOfSeries.ts';
 import {
   extractFilter,
   isPatientInfoInFilter,
   performAggregationSearch
-} from '../performSearch';
+} from '../performSearch.ts';
 
 const maxTagLength = 32;
 

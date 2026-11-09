@@ -1,4 +1,4 @@
-import DockerRunner, { DockerTimeoutError } from './DockerRunner';
+import DockerRunner, { DockerTimeoutError } from './DockerRunner.ts';
 import Dockerode from 'dockerode';
 
 if (process.env.SKIP_DOCKER_TESTS) {

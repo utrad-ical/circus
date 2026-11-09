@@ -1,20 +1,18 @@
 import { Box3, Vector2, Vector3 } from 'three';
+import type { Section, Vector2D, Vector3D } from '../common/geometry/index.ts';
 import {
   fitRectangle,
   intersectionOfBoxAndPlane,
   normalVector,
   projectPointOntoSection,
-  Section,
   translateSection,
-  Vector2D,
-  Vector3D,
   vectorizeSection
-} from '../common/geometry';
+} from '../common/geometry/index.ts';
 import {
   intersectsPolygon,
   sortVerticesOfSimplePolygon
-} from '../common/geometry/Polygon';
-import { TwoDimensionalViewState } from './ViewState';
+} from '../common/geometry/Polygon.ts';
+import type { TwoDimensionalViewState } from './ViewState.ts';
 
 export type OrientationString = 'axial' | 'sagittal' | 'coronal' | 'oblique';
 

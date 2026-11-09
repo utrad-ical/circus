@@ -1,4 +1,5 @@
-import { setUpAppForRoutesTest, ApiTest } from '../../test/util-routes';
+import type { ApiTest } from '../../test/util-routes.ts';
+import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import path from 'path';
 import fs from 'fs-extra';
 
@@ -10,7 +11,7 @@ const mockPluginDir = path.join(cachePath, pluginId);
 
 const mockPath = path,
   mockFs = fs;
-jest.mock('../../utils/dockerFileExtractor', () => {
+jest.mock('../../utils/dockerFileExtractor.ts', () => {
   return () => ({
     extractToPath: async () => {
       const displayDir = mockPath.join(mockPluginDir, 'displays');

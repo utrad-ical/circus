@@ -1,4 +1,4 @@
-import { FunctionService } from '@utrad-ical/circus-lib';
+import type { FunctionService } from '@utrad-ical/circus-lib';
 import * as mongo from 'mongodb';
 
 export type MongoClientPool = {

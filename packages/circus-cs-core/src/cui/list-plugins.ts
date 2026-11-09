@@ -1,7 +1,7 @@
-import { FunctionService } from '@utrad-ical/circus-lib';
-import Command from './Command';
+import type { FunctionService } from '@utrad-ical/circus-lib';
+import type Command from './Command.ts';
 import { table } from 'table';
-import * as circus from '../interface';
+import type * as circus from '../interface.ts';
 
 const listPlugins: FunctionService<
   Command,

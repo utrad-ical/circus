@@ -1,10 +1,10 @@
-import { Editor } from './processor-types';
-import { Structure } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
+import type { Editor } from './processor-types.ts';
+import type { Structure } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
 import classnames from 'classnames';
 import { FormControl } from 'components/react-bootstrap';
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { ErosionDilationOptions } from './ed-processor';
+import type { ErosionDilationOptions } from './ed-processor.ts';
 
 const StyledDiv = styled.div`
   line-height: 1;

@@ -1,29 +1,30 @@
 import { Vector3, Matrix4 } from 'three';
-import { TransferFunction, InterpolationMode } from '../../ViewState';
-import ShaderProgram, {
+import type { TransferFunction, InterpolationMode } from '../../ViewState.ts';
+import type {
   AttribBufferer,
   SetUniform,
   VertexElementBufferer
-} from './ShaderProgram';
-import { LabelData } from '../volume-loader/interface';
-import loadLabelIntoTexture from './texture/loadLabelIntoTexture';
-import RawData from '../../../common/RawData';
-import loadVolumeIntoTexture from './texture/loadVolumeIntoTexture';
-import loadTransferFunctionIntoTexture from './texture/loadTransferFunctionIntoTexture';
-import { TextureLayout } from './texture/interface';
-import DicomVolume from '../../../common/DicomVolume';
+} from './ShaderProgram.ts';
+import ShaderProgram from './ShaderProgram.ts';
+import type { LabelData } from '../volume-loader/interface.ts';
+import loadLabelIntoTexture from './texture/loadLabelIntoTexture.ts';
+import type RawData from '../../../common/RawData.ts';
+import loadVolumeIntoTexture from './texture/loadVolumeIntoTexture.ts';
+import loadTransferFunctionIntoTexture from './texture/loadTransferFunctionIntoTexture.ts';
+import type { TextureLayout } from './texture/interface.ts';
+import type DicomVolume from '../../../common/DicomVolume.ts';
+import type { Camera } from './webgl-util.ts';
 import {
-  Camera,
   createCamera,
   createModelViewMatrix,
   createPojectionMatrix
-} from './webgl-util';
+} from './webgl-util.ts';
 
 // WebGL shader source (GLSL)
 import {
   vertexShaderSource,
   fragmentShaderSource
-} from './glsl/vrShaderSource';
+} from './glsl/vrShaderSource.ts';
 
 // [TextureIndex]
 // 0: Volume

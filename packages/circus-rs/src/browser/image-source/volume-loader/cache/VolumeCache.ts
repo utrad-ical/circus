@@ -1,4 +1,4 @@
-import { DicomVolumeMetadata } from '../DicomVolumeLoader';
+import type { DicomVolumeMetadata } from '../DicomVolumeLoader.ts';
 
 export default interface VolumeCache {
   getMetadata(key: string): Promise<DicomVolumeMetadata | undefined>;

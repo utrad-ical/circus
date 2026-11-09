@@ -1,20 +1,19 @@
-import koa from 'koa';
+import type koa from 'koa';
 import httpStatus from 'http-status';
+import type { Logger, PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import {
   isDicomUid,
-  isValidPartialVolumeDescriptor,
-  Logger,
-  PartialVolumeDescriptor
+  isValidPartialVolumeDescriptor
 } from '@utrad-ical/circus-lib';
 
-import {
+import type {
   VolumeProvider,
   VolumeAccessor
-} from '../../helper/createVolumeProvider';
+} from '../../helper/createVolumeProvider.ts';
 import compose from 'koa-compose';
-import validate from '../middleware/validate';
-import { ValidatorRules } from '../../../common/Validator';
-import { SeriesMiddlewareState } from './createSeriesRoutes';
+import validate from '../middleware/validate.ts';
+import type { ValidatorRules } from '../../../common/Validator.ts';
+import type { SeriesMiddlewareState } from './createSeriesRoutes.ts';
 import { MultiRange } from 'multi-integer-range';
 
 interface LoadStoreOptions {

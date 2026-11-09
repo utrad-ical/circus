@@ -1,20 +1,24 @@
-import {
+import type {
   Annotation,
-  Composition,
   MprViewState,
-  RawData,
   Tool,
+  Vector3D
+} from '@utrad-ical/circus-rs/src/browser';
+import {
+  Composition,
+  RawData,
   toolFactory,
-  Vector3D,
   VoxelCloud,
   WebGlRawVolumeMprImageSource
 } from '@utrad-ical/circus-rs/src/browser';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { ImageViewer, StateChangerFunc } from '../ui/ImageViewer';
-import { CsResultsContext } from './CsResultsContext';
-import { ColorDefinition, normalizeColor } from './displays/utils/color';
-import { useVolumeLoaders } from './useVolumeLoader';
+import type { StateChangerFunc } from '../ui/ImageViewer.tsx';
+import { ImageViewer } from '../ui/ImageViewer.tsx';
+import { CsResultsContext } from './CsResultsContext.ts';
+import type { ColorDefinition } from './displays/utils/color.ts';
+import { normalizeColor } from './displays/utils/color.ts';
+import { useVolumeLoaders } from './useVolumeLoader.tsx';
 
 type ToolName = 'pager' | 'zoom' | 'pan';
 

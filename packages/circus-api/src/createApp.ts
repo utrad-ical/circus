@@ -1,46 +1,47 @@
 import multer from '@koa/multer';
-import { CsCore, DicomVoxelDumper } from '@utrad-ical/circus-cs-core';
-import {
+import type { CsCore, DicomVoxelDumper } from '@utrad-ical/circus-cs-core';
+import type {
   DicomFileRepository,
   FunctionService,
   Logger
 } from '@utrad-ical/circus-lib';
-import { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
-import { RsWebsocketVolumeConnectionHandlerCreator } from '@utrad-ical/circus-rs/src/server/ws/createWebsocketVolumeConnectionHandlerCreator';
+import type { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
+import type { RsWebsocketVolumeConnectionHandlerCreator } from '@utrad-ical/circus-rs/src/server/ws/createWebsocketVolumeConnectionHandlerCreator';
 import withWebSocketConnectionHandlers from '@utrad-ical/circus-rs/src/server/ws/withWebSocketConnectionHandlers';
-import { ErrorObject } from 'ajv';
+import type { ErrorObject } from 'ajv';
 import * as fs from 'fs-extra';
 import glob from 'glob-promise';
 import { safeLoad as yaml } from 'js-yaml';
-import Koa, { Middleware } from 'koa';
+import type { Middleware } from 'koa';
+import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import compose from 'koa-compose';
 import mount from 'koa-mount';
 import Router from 'koa-router';
-import { fetchUserFromToken } from './middleware/auth/createOauthServer';
+import { fetchUserFromToken } from './middleware/auth/createOauthServer.ts';
 import * as path from 'path';
 import querystring from 'querystring';
-import * as ws from 'ws';
-import { MhdPacker } from './case/createMhdPacker';
-import { TaskManager } from './createTaskManager';
-import {
+import type * as ws from 'ws';
+import type { MhdPacker } from './case/createMhdPacker.ts';
+import type { TaskManager } from './createTaskManager.ts';
+import type {
   Database,
   DicomImporter,
   DicomTagReader,
   Models,
   TransactionManager,
   Validator
-} from './interface';
-import checkPrivilege from './middleware/auth/checkPrivilege';
-import fixUserMiddleware from './middleware/auth/fixUser';
-import KoaOAuth2Server from './middleware/auth/KoaOAuth2Server';
-import cors from './middleware/cors';
-import errorHandler from './middleware/errorHandler';
-import typeCheck from './middleware/typeCheck';
-import validateInOut from './middleware/validateInOut';
-import Storage from './storage/Storage';
-import { Deps } from './typings/middlewares';
-import { SeriesOrientationResolver } from './utils/createSeriesOrientationResolver';
+} from './interface.ts';
+import checkPrivilege from './middleware/auth/checkPrivilege.ts';
+import fixUserMiddleware from './middleware/auth/fixUser.ts';
+import type KoaOAuth2Server from './middleware/auth/KoaOAuth2Server.ts';
+import cors from './middleware/cors.ts';
+import errorHandler from './middleware/errorHandler.ts';
+import typeCheck from './middleware/typeCheck.ts';
+import validateInOut from './middleware/validateInOut.ts';
+import type Storage from './storage/Storage.ts';
+import type { Deps } from './typings/middlewares.ts';
+import type { SeriesOrientationResolver } from './utils/createSeriesOrientationResolver.ts';
 
 function handlerName(route: Route) {
   if (route.handler) return route.handler;

@@ -1,4 +1,4 @@
-import { Editor } from '@smikitky/rb-components/lib/editor-types';
+import type { Editor } from '@smikitky/rb-components/lib/editor-types';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import classnames from 'classnames';
 import React, { useEffect, useRef, useState } from 'react';
@@ -6,8 +6,8 @@ import { createPortal } from 'react-dom';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import useTaskDownloadHandler from 'utils/useTaskDownloadHandler';
-import Icon from './Icon';
-import { Button, Modal, ProgressBar } from './react-bootstrap';
+import Icon from './Icon.tsx';
+import { Button, Modal, ProgressBar } from './react-bootstrap.ts';
 
 export type CompressionFormat = 'tgz' | 'zip';
 

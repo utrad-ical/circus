@@ -1,13 +1,13 @@
-import EditorPage from './EditorPage';
+import EditorPage from './EditorPage.tsx';
 import React, { Fragment } from 'react';
-import BodyPartIcon, { CircusIconDefinition } from 'components/BodyPartIcon';
-import IconEditor from './IconEditor';
-import JsonEditor from './JsonEditor';
+import type { CircusIconDefinition } from 'components/BodyPartIcon';
+import BodyPartIcon from 'components/BodyPartIcon';
+import IconEditor from './IconEditor.tsx';
+import JsonEditor from './JsonEditor.tsx';
 import * as et from '@smikitky/rb-components/lib/editor-types';
-import PropertyEditor, {
-  PropertyEditorProperties
-} from '@smikitky/rb-components/lib/PropertyEditor';
-import { DataGridColumnDefinition } from 'components/DataGrid';
+import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
+import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
+import type { DataGridColumnDefinition } from 'components/DataGrid';
 
 type PluginType = 'CAD' | 'CAD+remote';
 

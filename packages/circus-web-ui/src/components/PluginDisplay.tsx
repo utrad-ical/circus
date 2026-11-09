@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import IconDisplay from './IconDisplay';
+import IconDisplay from './IconDisplay.tsx';
 import { loadPluginInfo } from 'store/plugins';
 import { useSelector, useDispatch } from 'react-redux';
 import { useApi } from 'utils/api';

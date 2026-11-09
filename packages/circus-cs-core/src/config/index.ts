@@ -1,4 +1,4 @@
-import * as circus from '../interface';
+import type * as circus from '../interface.ts';
 import path from 'path';
 import loadConfig from '@utrad-ical/circus-lib/src/config/loadConfig';
 

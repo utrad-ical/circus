@@ -1,6 +1,8 @@
-import { Box3, Line3, Vector3 } from 'three';
-import { Section, sectionToPlane } from './Section';
-import { Vector3D } from './Vector';
+import type { Box3 } from 'three';
+import { Line3, Vector3 } from 'three';
+import type { Section } from './Section.ts';
+import { sectionToPlane } from './Section.ts';
+import type { Vector3D } from './Vector.ts';
 
 /**
  * Represents a bounding box.

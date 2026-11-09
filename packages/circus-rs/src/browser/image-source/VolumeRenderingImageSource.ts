@@ -1,18 +1,19 @@
-import Viewer from '../viewer/Viewer';
-import ViewState, { VrViewState, TransferFunction } from '../ViewState';
-import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
-import VRGLProgram from './gl/VRGLProgram';
-import RawData from '../../common/RawData';
-import { LabelLoader } from './volume-loader/interface';
-import { windowToTransferFunction } from './gl/transfer-function-util';
-import MprImageSource from './MprImageSource';
-import { createOrthogonalMprSection } from '../section-util';
+import type Viewer from '../viewer/Viewer.ts';
+import type { VrViewState, TransferFunction } from '../ViewState.ts';
+import type ViewState from '../ViewState.ts';
+import type DicomVolumeLoader from './volume-loader/DicomVolumeLoader.ts';
+import VRGLProgram from './gl/VRGLProgram.ts';
+import type RawData from '../../common/RawData.ts';
+import type { LabelLoader } from './volume-loader/interface.ts';
+import { windowToTransferFunction } from './gl/transfer-function-util.ts';
+import MprImageSource from './MprImageSource.ts';
+import { createOrthogonalMprSection } from '../section-util.ts';
 import {
   createCameraToLookSection,
   getWebGLContext,
   resolveImageData
-} from './gl/webgl-util';
-import DicomVolume from '../../common/DicomVolume';
+} from './gl/webgl-util.ts';
+import type DicomVolume from '../../common/DicomVolume.ts';
 
 interface VolumeRenderingImageSourceOptions {
   volumeLoader: DicomVolumeLoader;

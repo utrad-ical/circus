@@ -1,14 +1,14 @@
-import Composition from '../../Composition';
-import VoxelCloud from '../../annotation/VoxelCloud';
-import DraggableTool from '../DraggableTool';
-import Viewer from '../../viewer/Viewer';
-import MprImageSource from '../../image-source/MprImageSource';
-import { processVoxelsOnLine } from '../../volume-util';
-import ViewerEvent from '../../viewer/ViewerEvent';
+import type Composition from '../../Composition.ts';
+import VoxelCloud from '../../annotation/VoxelCloud.ts';
+import DraggableTool from '../DraggableTool.ts';
+import type Viewer from '../../viewer/Viewer.ts';
+import type MprImageSource from '../../image-source/MprImageSource.ts';
+import { processVoxelsOnLine } from '../../volume-util.ts';
+import type ViewerEvent from '../../viewer/ViewerEvent.ts';
 import { Box3, Vector3 } from 'three';
-import { ToolOptions } from '../Tool';
-import { convertViewerPointToVolumeIndex } from '../tool-util';
-import { Vector2D } from '../../../common/geometry';
+import type { ToolOptions } from '../Tool.ts';
+import { convertViewerPointToVolumeIndex } from '../tool-util.ts';
+import type { Vector2D } from '../../../common/geometry/index.ts';
 
 /**
  * VoxelCloudToolBase is a base tool that affects VoxelCloud annotations.

@@ -1,6 +1,6 @@
 import NodeOAuthServer, { Request, Response } from 'oauth2-server';
 import status from 'http-status';
-import koa from 'koa';
+import type koa from 'koa';
 
 /**
  * Simple wrapper for node-oauth2-server.

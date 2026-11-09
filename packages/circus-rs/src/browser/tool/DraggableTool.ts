@@ -1,5 +1,6 @@
-import ToolBaseClass, { ToolOptions } from '../../browser/tool/Tool';
-import ViewerEvent from '../../browser/viewer/ViewerEvent';
+import type { ToolOptions } from '../../browser/tool/Tool.ts';
+import ToolBaseClass from '../../browser/tool/Tool.ts';
+import type ViewerEvent from '../../browser/viewer/ViewerEvent.ts';
 
 /**
  * DragInfo holds convenient data while dragging.

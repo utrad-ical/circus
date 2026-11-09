@@ -1,6 +1,6 @@
-import { Logger } from '@utrad-ical/circus-lib';
-import { CancellableTimer } from './createCancellableTimer';
-import * as circus from '../interface';
+import type { Logger } from '@utrad-ical/circus-lib';
+import type { CancellableTimer } from './createCancellableTimer.ts';
+import type * as circus from '../interface.ts';
 
 export interface LoopRunOptions<T> {
   logger: Logger;

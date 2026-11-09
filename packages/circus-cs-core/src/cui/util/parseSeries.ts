@@ -1,5 +1,5 @@
 import { isDicomUid } from '@utrad-ical/circus-lib';
-import * as circus from '../../interface';
+import type * as circus from '../../interface.ts';
 
 const parseSeries: (str: string) => circus.JobSeries = str => {
   const [seriesUid, start, end, delta = '1'] = str.split(':');

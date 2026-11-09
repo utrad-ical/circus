@@ -1,11 +1,11 @@
-import PartialVolumeDescriptor from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
-import {
+import type PartialVolumeDescriptor from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
+import type {
   PixelFormat,
-  PixelFormatInfo,
-  pixelFormatInfo
+  PixelFormatInfo
 } from '@utrad-ical/circus-lib/src/PixelFormat';
-import { Box, Section, Vector2D, Vector3D } from './geometry';
-import { applyWindow } from './pixel';
+import { pixelFormatInfo } from '@utrad-ical/circus-lib/src/PixelFormat';
+import type { Box, Section, Vector2D, Vector3D } from './geometry/index.ts';
+import { applyWindow } from './pixel.ts';
 
 // Make sure you don't add properties
 // that heavily depends on DICOM spec!

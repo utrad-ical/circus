@@ -1,6 +1,6 @@
-import VolumeCache from './VolumeCache';
-import IndexedDbCache from '../../../util/IndexedDbCache';
-import { DicomVolumeMetadata } from '../DicomVolumeLoader';
+import type VolumeCache from './VolumeCache.ts';
+import IndexedDbCache from '../../../util/IndexedDbCache.ts';
+import type { DicomVolumeMetadata } from '../DicomVolumeLoader.ts';
 
 /**
  * Volume Cache backed by IndexedDB, which means the cache data will be

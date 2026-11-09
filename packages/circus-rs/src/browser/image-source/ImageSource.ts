@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
-import ViewState from '../ViewState';
-import Viewer from '../viewer/Viewer';
-import { Vector2D } from '../../common/geometry';
+import type ViewState from '../ViewState.ts';
+import type Viewer from '../viewer/Viewer.ts';
+import type { Vector2D } from '../../common/geometry/index.ts';
 
 export type ViewStateResizeTransformer = (
   viewState: ViewState,

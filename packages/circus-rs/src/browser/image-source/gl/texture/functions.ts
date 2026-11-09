@@ -1,4 +1,4 @@
-import { TextureLayout } from './interface';
+import type { TextureLayout } from './interface.ts';
 
 export function detectTextureLayout(
   size: [number, number, number]

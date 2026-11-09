@@ -1,29 +1,31 @@
 import { Box2, Box3, Vector2, Vector3 } from 'three';
-import { Section, Vector3D } from '../../common/geometry';
-import ViewerEventTarget from '../interface/ViewerEventTarget';
+import type { Section, Vector3D } from '../../common/geometry/index.ts';
+import type ViewerEventTarget from '../interface/ViewerEventTarget.ts';
+import type { OrientationString } from '../section-util.ts';
 import {
   detectOrthogonalSection,
-  OrientationString,
   polygonVerticesOfBoxAndSection,
   sectionOverlapsPolygon
-} from '../section-util';
+} from '../section-util.ts';
 import {
   convertViewerPointToVolumePoint,
   convertVolumePointToViewerPoint
-} from '../tool/tool-util';
-import Viewer from '../viewer/Viewer';
-import ViewerEvent from '../viewer/ViewerEvent';
-import ViewState, { MprViewState } from '../ViewState';
-import Annotation, { DrawHints } from './Annotation';
-import drawBoundingBoxCrossHair from './helper/drawBoundingBoxCrossHair';
-import drawBoundingBoxOutline from './helper/drawBoundingBoxOutline';
-import drawHandleFrame, { defaultHandleSize } from './helper/drawHandleFrame';
-import {
-  BoundingRectWithHandleHitType,
-  hitBoundingRectWithHandles
-} from './helper/hit-test';
-import resize from './helper/resize';
-import ModifierKeyBehaviors from './ModifierKeyBehaviors';
+} from '../tool/tool-util.ts';
+import type Viewer from '../viewer/Viewer.ts';
+import type ViewerEvent from '../viewer/ViewerEvent.ts';
+import type { MprViewState } from '../ViewState.ts';
+import type ViewState from '../ViewState.ts';
+import type { DrawHints } from './Annotation.ts';
+import type Annotation from './Annotation.ts';
+import drawBoundingBoxCrossHair from './helper/drawBoundingBoxCrossHair.ts';
+import drawBoundingBoxOutline from './helper/drawBoundingBoxOutline.ts';
+import drawHandleFrame, {
+  defaultHandleSize
+} from './helper/drawHandleFrame.ts';
+import type { BoundingRectWithHandleHitType } from './helper/hit-test.ts';
+import { hitBoundingRectWithHandles } from './helper/hit-test.ts';
+import resize from './helper/resize.ts';
+import type ModifierKeyBehaviors from './ModifierKeyBehaviors.ts';
 
 export type FigureType = 'cuboid' | 'ellipsoid';
 

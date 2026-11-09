@@ -1,26 +1,29 @@
 import { Box2, Vector2, Vector3 } from 'three';
-import { Vector2D, verticesOfBox } from '../../common/geometry';
-import ViewerEventTarget from '../interface/ViewerEventTarget';
+import type { Vector2D } from '../../common/geometry/index.ts';
+import { verticesOfBox } from '../../common/geometry/index.ts';
+import type ViewerEventTarget from '../interface/ViewerEventTarget.ts';
 import {
   convertVolumeCoordinateToScreenCoordinate,
   detectOrthogonalSection,
   sectionFrom2dViewState
-} from '../section-util';
+} from '../section-util.ts';
 import {
   convertViewerPointToVolumePoint,
   convertVolumePointToViewerPoint
-} from '../tool/tool-util';
-import Viewer from '../viewer/Viewer';
-import ViewerEvent from '../viewer/ViewerEvent';
-import ViewState, { MprViewState, TwoDimensionalViewState } from '../ViewState';
-import Annotation, { DrawHints } from './Annotation';
-import drawHandleFrame, { defaultHandleSize } from './helper/drawHandleFrame';
-import {
-  BoundingRectWithHandleHitType,
-  hitBoundingRectWithHandles
-} from './helper/hit-test';
-import resize from './helper/resize';
-import ModifierKeyBehaviors from './ModifierKeyBehaviors';
+} from '../tool/tool-util.ts';
+import type Viewer from '../viewer/Viewer.ts';
+import type ViewerEvent from '../viewer/ViewerEvent.ts';
+import type { MprViewState, TwoDimensionalViewState } from '../ViewState.ts';
+import type ViewState from '../ViewState.ts';
+import type { DrawHints } from './Annotation.ts';
+import type Annotation from './Annotation.ts';
+import drawHandleFrame, {
+  defaultHandleSize
+} from './helper/drawHandleFrame.ts';
+import type { BoundingRectWithHandleHitType } from './helper/hit-test.ts';
+import { hitBoundingRectWithHandles } from './helper/hit-test.ts';
+import resize from './helper/resize.ts';
+import type ModifierKeyBehaviors from './ModifierKeyBehaviors.ts';
 
 export type FigureType = 'rectangle' | 'circle';
 

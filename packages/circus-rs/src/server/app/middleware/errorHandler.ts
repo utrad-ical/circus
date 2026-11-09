@@ -1,5 +1,5 @@
-import koa from 'koa';
-import { Logger } from '@utrad-ical/circus-lib';
+import type koa from 'koa';
+import type { Logger } from '@utrad-ical/circus-lib';
 
 type MiddlewareOptions = {
   rsLogger: Logger;

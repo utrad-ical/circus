@@ -1,17 +1,16 @@
-import { Vector2D } from '../../../common/geometry';
-import Annotation from '../../annotation/Annotation';
-import PlaneFigure, { FigureType } from '../../annotation/PlaneFigure';
+import type { Vector2D } from '../../../common/geometry/index.ts';
+import type Annotation from '../../annotation/Annotation.ts';
+import type { FigureType } from '../../annotation/PlaneFigure.ts';
+import PlaneFigure from '../../annotation/PlaneFigure.ts';
 import {
   detectOrthogonalSection,
   sectionFrom2dViewState
-} from '../../section-util';
-import ViewerEvent from '../../viewer/ViewerEvent';
-import ViewState, {
-  MprViewState,
-  TwoDimensionalViewState
-} from '../../ViewState';
-import { convertViewerPointToVolumePoint } from '../tool-util';
-import AnnotationToolBase from './AnnotationToolBase';
+} from '../../section-util.ts';
+import type ViewerEvent from '../../viewer/ViewerEvent.ts';
+import type { MprViewState, TwoDimensionalViewState } from '../../ViewState.ts';
+import type ViewState from '../../ViewState.ts';
+import { convertViewerPointToVolumePoint } from '../tool-util.ts';
+import AnnotationToolBase from './AnnotationToolBase.ts';
 
 /**
  * PlaneFigureTool creates and edits PlaneFigure.

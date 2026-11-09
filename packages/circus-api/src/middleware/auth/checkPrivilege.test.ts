@@ -1,9 +1,11 @@
-import axios, { AxiosInstance } from 'axios';
+import type { AxiosInstance } from 'axios';
+import axios from 'axios';
 import Router from 'koa-router';
-import { setUpKoaTest, TestServer } from '../../test/util-koa';
-import { setUpMongoFixture, usingModels } from '../../test/util-mongo';
-import { determineUserAccessInfo } from '../../privilegeUtils';
-import checkPrivilege from './checkPrivilege';
+import type { TestServer } from '../../test/util-koa.ts';
+import { setUpKoaTest } from '../../test/util-koa.ts';
+import { setUpMongoFixture, usingModels } from '../../test/util-mongo.ts';
+import { determineUserAccessInfo } from '../../privilegeUtils.ts';
+import checkPrivilege from './checkPrivilege.ts';
 
 let testServer: TestServer, userEmail: string, ax: AxiosInstance;
 

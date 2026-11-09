@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { SearchResource } from 'store/searches';
-import PluginJobSearchResults from '../search/PluginJobSearchResults';
-import MyListPage from './MyListPage';
+import type { SearchResource } from 'store/searches';
+import PluginJobSearchResults from '../search/PluginJobSearchResults.tsx';
+import MyListPage from './MyListPage.tsx';
 
 const MyPluginJobList: React.FC<{}> = props => {
   const { myListId } = useParams<{ myListId?: string }>();

@@ -1,5 +1,6 @@
-import axios, { AxiosResponse } from 'axios';
-import { CancelToken } from './cancelToken';
+import type { AxiosResponse } from 'axios';
+import axios from 'axios';
+import type { CancelToken } from './cancelToken.ts';
 import { dispatch } from 'store';
 import { showMessage } from 'store/messages';
 import * as qs from 'querystring';

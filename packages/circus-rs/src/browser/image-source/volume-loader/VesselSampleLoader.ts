@@ -1,8 +1,9 @@
-import RsHttpClient from '../../http-client/RsHttpClient';
-import DicomVolumeLoader from './DicomVolumeLoader';
-import DicomVolume from '../../../common/DicomVolume';
-import { DicomVolumeMetadata } from './DicomVolumeLoader';
-import VolumeCache, { nullVolumeCache } from './cache/VolumeCache';
+import RsHttpClient from '../../http-client/RsHttpClient.ts';
+import type DicomVolumeLoader from './DicomVolumeLoader.ts';
+import DicomVolume from '../../../common/DicomVolume.ts';
+import type { DicomVolumeMetadata } from './DicomVolumeLoader.ts';
+import type VolumeCache from './cache/VolumeCache.ts';
+import { nullVolumeCache } from './cache/VolumeCache.ts';
 
 export default class VesselSampleLoader implements DicomVolumeLoader {
   // [Note]

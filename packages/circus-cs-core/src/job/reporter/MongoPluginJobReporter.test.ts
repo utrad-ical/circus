@@ -1,11 +1,11 @@
-import * as mongo from 'mongodb';
-import createMongoPluginJobReporter from './MongoPluginJobReporter';
-import { testClientPool } from '../../testHelper';
-import { MongoClientPool } from '../../mongoClientPool';
+import type * as mongo from 'mongodb';
+import createMongoPluginJobReporter from './MongoPluginJobReporter.ts';
+import { testClientPool } from '../../testHelper.ts';
+import type { MongoClientPool } from '../../mongoClientPool.ts';
 import tar from 'tar-stream';
 import fs from 'fs-extra';
 import path from 'path';
-import * as circus from '../../interface';
+import type * as circus from '../../interface.ts';
 import { PassThrough } from 'stream';
 
 describe('pluginJobReporter', () => {

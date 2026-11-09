@@ -1,8 +1,9 @@
 import { Vector2, Vector3 } from 'three';
-import { intersectionOfTwoSections, Section } from '../../../common/geometry';
-import { convertVolumeCoordinateToScreenCoordinate } from '../../section-util';
-import Viewer from '../../viewer/Viewer';
-import { MprViewState } from '../../ViewState';
+import type { Section } from '../../../common/geometry/index.ts';
+import { intersectionOfTwoSections } from '../../../common/geometry/index.ts';
+import { convertVolumeCoordinateToScreenCoordinate } from '../../section-util.ts';
+import type Viewer from '../../viewer/Viewer.ts';
+import type { MprViewState } from '../../ViewState.ts';
 export interface Line2 {
   start: Vector2;
   end: Vector2;

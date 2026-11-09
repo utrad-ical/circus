@@ -1,6 +1,6 @@
 import React from 'react';
 import IconButton from 'components/IconButton';
-import { Sizes } from 'react-bootstrap';
+import type { Sizes } from 'react-bootstrap';
 
 const CopyToClipboardButton: React.FC<{
   string: string;

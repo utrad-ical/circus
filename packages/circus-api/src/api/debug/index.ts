@@ -1,6 +1,6 @@
 import { PassThrough } from 'stream';
-import delay from '../../utils/delay';
-import { RouteMiddleware } from '../../typings/middlewares';
+import delay from '../../utils/delay.ts';
+import type { RouteMiddleware } from '../../typings/middlewares.ts';
 
 const version = require('../../../package.json').version;
 const upSince = new Date().toISOString();

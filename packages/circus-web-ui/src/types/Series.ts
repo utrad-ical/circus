@@ -1,4 +1,4 @@
-import PatientInfo from './PatientInfo';
+import type PatientInfo from './PatientInfo.ts';
 
 export default interface Series {
   seriesUid: string;

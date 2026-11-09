@@ -1,5 +1,5 @@
-import generateUniqueId from '../utils/generateUniqueId';
-import Command from './Command';
+import generateUniqueId from '../utils/generateUniqueId.ts';
+import type Command from './Command.ts';
 
 export const help = () => {
   return 'Generates and prints a new ID.';

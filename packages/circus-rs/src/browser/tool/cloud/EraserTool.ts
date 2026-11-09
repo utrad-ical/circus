@@ -1,4 +1,4 @@
-import BrushTool from './BrushTool';
+import BrushTool from './BrushTool.ts';
 
 /**
  * EraserTool is a tool with which one can paint on an active voxel cloud.

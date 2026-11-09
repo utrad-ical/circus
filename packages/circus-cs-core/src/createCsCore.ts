@@ -1,6 +1,6 @@
-import { FunctionService } from '@utrad-ical/circus-lib';
-import { PluginJobRegisterer } from './job/registerer/createPluginJobRegisterer';
-import * as circus from './interface';
+import type { FunctionService } from '@utrad-ical/circus-lib';
+import type { PluginJobRegisterer } from './job/registerer/createPluginJobRegisterer.ts';
+import type * as circus from './interface.ts';
 
 const createCsCore: FunctionService<
   circus.CsCore,

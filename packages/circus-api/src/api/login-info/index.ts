@@ -1,4 +1,4 @@
-import { RouteMiddleware } from '../../typings/middlewares';
+import type { RouteMiddleware } from '../../typings/middlewares.ts';
 
 // import status from 'http-status';
 

@@ -1,4 +1,4 @@
-import { compileShader, createProgram } from './webgl-util';
+import { compileShader, createProgram } from './webgl-util.ts';
 
 export type SetUniform = {
   uniform1f(x: number): void;

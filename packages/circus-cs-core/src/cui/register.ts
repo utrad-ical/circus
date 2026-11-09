@@ -1,7 +1,8 @@
-import { FunctionService, generateUniqueId } from '@utrad-ical/circus-lib';
-import Command from './Command';
-import { PluginJobRegisterer } from '../job/registerer/createPluginJobRegisterer';
-import parseSeries from './util/parseSeries';
+import type { FunctionService } from '@utrad-ical/circus-lib';
+import { generateUniqueId } from '@utrad-ical/circus-lib';
+import type Command from './Command.ts';
+import type { PluginJobRegisterer } from '../job/registerer/createPluginJobRegisterer.ts';
+import parseSeries from './util/parseSeries.ts';
 
 const register: FunctionService<
   Command,

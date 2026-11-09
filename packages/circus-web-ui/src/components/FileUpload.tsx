@@ -1,13 +1,13 @@
 import React, { useState, useRef } from 'react';
-import { Button, ButtonToolbar, ProgressBar } from './react-bootstrap';
-import { FileDroppable } from './FileDroppable';
+import { Button, ButtonToolbar, ProgressBar } from './react-bootstrap.ts';
+import { FileDroppable } from './FileDroppable.tsx';
 import useShowMessage from 'utils/useShowMessage';
 import * as modal from '@smikitky/rb-components/lib/modal';
 import styled from 'styled-components';
 import { useApi } from 'utils/api';
 import { withCommas } from 'utils/util';
-import IconButton from './IconButton';
-import Icon from './Icon';
+import IconButton from './IconButton.ts';
+import Icon from './Icon.tsx';
 
 const StyledDiv = styled.div`
   input[type='file'] {

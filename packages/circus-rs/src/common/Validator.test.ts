@@ -1,4 +1,4 @@
-import { Validator } from './Validator';
+import { Validator } from './Validator.ts';
 
 describe('Validator', () => {
   test('must process string rule', () => {

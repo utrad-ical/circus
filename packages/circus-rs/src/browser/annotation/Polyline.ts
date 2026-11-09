@@ -1,29 +1,29 @@
 import { Box2, Box3, Vector2, Vector3 } from 'three';
-import { Vector2D, Vector3D, verticesOfBox } from '../../common/geometry';
-import ViewerEventTarget from '../interface/ViewerEventTarget';
+import type { Vector2D, Vector3D } from '../../common/geometry/index.ts';
+import { verticesOfBox } from '../../common/geometry/index.ts';
+import type ViewerEventTarget from '../interface/ViewerEventTarget.ts';
 import {
   convertVolumeCoordinateToScreenCoordinate,
   detectOrthogonalSection,
   sectionFrom2dViewState
-} from '../section-util';
+} from '../section-util.ts';
 import {
   convertViewerPointToVolumePoint,
   convertVolumePointToViewerPoint
-} from '../tool/tool-util';
-import Viewer from '../viewer/Viewer';
-import ViewerEvent from '../viewer/ViewerEvent';
-import ViewState, { MprViewState, TwoDimensionalViewState } from '../ViewState';
-import Annotation, { DrawHints } from './Annotation';
-import drawBoundingBoxOutline from './helper/drawBoundingBoxOutline';
-import drawHandleFrame from './helper/drawHandleFrame';
-import { drawPath, drawPoint } from './helper/drawObject';
-import handleBoundingBoxOperation from './helper/handleBoundingBoxOperation';
-import {
-  BoundingRectWithHandleHitType,
-  hitBoundingRectWithHandles,
-  hitRectangle
-} from './helper/hit-test';
-import ModifierKeyBehaviors from './ModifierKeyBehaviors';
+} from '../tool/tool-util.ts';
+import type Viewer from '../viewer/Viewer.ts';
+import type ViewerEvent from '../viewer/ViewerEvent.ts';
+import type { MprViewState, TwoDimensionalViewState } from '../ViewState.ts';
+import type ViewState from '../ViewState.ts';
+import type { DrawHints } from './Annotation.ts';
+import type Annotation from './Annotation.ts';
+import drawBoundingBoxOutline from './helper/drawBoundingBoxOutline.ts';
+import drawHandleFrame from './helper/drawHandleFrame.ts';
+import { drawPath, drawPoint } from './helper/drawObject.ts';
+import handleBoundingBoxOperation from './helper/handleBoundingBoxOperation.ts';
+import type { BoundingRectWithHandleHitType } from './helper/hit-test.ts';
+import { hitBoundingRectWithHandles, hitRectangle } from './helper/hit-test.ts';
+import type ModifierKeyBehaviors from './ModifierKeyBehaviors.ts';
 
 const handleSize = 5;
 

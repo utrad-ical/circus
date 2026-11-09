@@ -1,9 +1,9 @@
-import createPluginJobRegisterer from './createPluginJobRegisterer';
-import {
+import createPluginJobRegisterer from './createPluginJobRegisterer.ts';
+import type {
   DicomFileRepository,
   PartialVolumeDescriptor
 } from '@utrad-ical/circus-lib';
-import * as circus from '../../interface';
+import type * as circus from '../../interface.ts';
 
 describe('createPluginJobRegisterer', () => {
   const defaultPayload: circus.PluginJobRequest = {

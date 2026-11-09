@@ -1,5 +1,5 @@
-import AuthorizationCache from './auth/AuthorizationCache';
-import { generateAccessToken } from './auth/generateAccessToken';
+import AuthorizationCache from './auth/AuthorizationCache.ts';
+import { generateAccessToken } from './auth/generateAccessToken.ts';
 
 export interface Authorizer {
   issueToken: (target: string) => Promise<string | void>;

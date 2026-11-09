@@ -1,13 +1,11 @@
-import { Editor } from '@smikitky/rb-components/lib/editor-types';
+import type { Editor } from '@smikitky/rb-components/lib/editor-types';
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { useApi } from 'utils/api';
 import fillPartialVolumeDescriptors from 'utils/partialVolumeDescriptor';
-import DownloadModal, {
-  CompressionFormat,
-  compressionFormatOptions
-} from './DownloadModal';
-import { SeriesEntry } from './SeriesSelector';
+import type { CompressionFormat } from './DownloadModal.tsx';
+import DownloadModal, { compressionFormatOptions } from './DownloadModal.tsx';
+import type { SeriesEntry } from './SeriesSelector.tsx';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 
 interface CsVolumeDownloadOptions {
@@ -15,7 +13,9 @@ interface CsVolumeDownloadOptions {
   compressionFormat: CompressionFormat;
 }
 
-const CsVolumeDoanloadOptionsEditor: Editor<CsVolumeDownloadOptions> = props => {
+const CsVolumeDoanloadOptionsEditor: Editor<
+  CsVolumeDownloadOptions
+> = props => {
   const { value, onChange } = props;
   return (
     <div>

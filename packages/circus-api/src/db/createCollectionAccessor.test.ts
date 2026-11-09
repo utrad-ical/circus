@@ -1,10 +1,9 @@
 import { ValidationError } from 'ajv';
-import * as mongo from 'mongodb';
-import { setUpMongoFixture, usingMongo } from '../test/util-mongo';
-import createValidator from '../createValidator';
-import createCollectionAccessor, {
-  CollectionAccessor
-} from './createCollectionAccessor';
+import type * as mongo from 'mongodb';
+import { setUpMongoFixture, usingMongo } from '../test/util-mongo.ts';
+import createValidator from '../createValidator.ts';
+import type { CollectionAccessor } from './createCollectionAccessor.ts';
+import createCollectionAccessor from './createCollectionAccessor.ts';
 
 interface MonthData {
   month: number;

@@ -1,7 +1,7 @@
-import RawData from '../../../../common/RawData';
-import { TextureLayout } from './interface';
-import { detectTextureLayout, transferDataToTexture } from './functions';
-import { transferFunctionOrigin } from './transfer-function-constants';
+import type RawData from '../../../../common/RawData.ts';
+import type { TextureLayout } from './interface.ts';
+import { detectTextureLayout, transferDataToTexture } from './functions.ts';
+import { transferFunctionOrigin } from './transfer-function-constants.ts';
 
 export default function loadVolumeIntoTexture(
   gl: WebGLRenderingContext,

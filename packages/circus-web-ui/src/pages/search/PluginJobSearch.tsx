@@ -1,6 +1,6 @@
 import React from 'react';
-import PluginJobSearchResults from './PluginJobSearchResults';
-import PluginJobSearchCondition from './PluginJobSearchCondition';
+import PluginJobSearchResults from './PluginJobSearchResults.tsx';
+import PluginJobSearchCondition from './PluginJobSearchCondition.tsx';
 import Icon from 'components/Icon';
 
 const PluginSearch: React.FC<{}> = props => {

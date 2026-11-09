@@ -1,23 +1,23 @@
-import DicomVolume from '../../common/DicomVolume';
-import { Vector2D, Vector3D } from '../../common/geometry';
+import type DicomVolume from '../../common/DicomVolume.ts';
+import type { Vector2D, Vector3D } from '../../common/geometry/index.ts';
 import {
   adjustOnResized,
   sectionTo2dViewState,
   sectionFrom2dViewState,
   createOrthogonalMprSection
-} from '../section-util';
-import setImmediate from '../util/setImmediate';
-import Viewer from '../viewer/Viewer';
-import ViewState, { TwoDimensionalViewState } from '../ViewState';
-import drawToImageData from './drawToImageData';
-import ImageSource, {
-  DrawResult,
-  ViewStateResizeTransformer
-} from './ImageSource';
-import DicomVolumeLoader, {
+} from '../section-util.ts';
+import setImmediate from '../util/setImmediate.ts';
+import type Viewer from '../viewer/Viewer.ts';
+import type { TwoDimensionalViewState } from '../ViewState.ts';
+import type ViewState from '../ViewState.ts';
+import drawToImageData from './drawToImageData.ts';
+import type { DrawResult, ViewStateResizeTransformer } from './ImageSource.ts';
+import ImageSource from './ImageSource.ts';
+import type {
   DicomVolumeMetadata,
   VolumeLoadController
-} from './volume-loader/DicomVolumeLoader';
+} from './volume-loader/DicomVolumeLoader.ts';
+import type DicomVolumeLoader from './volume-loader/DicomVolumeLoader.ts';
 
 interface TwoDimensionalImageSourceOptions {
   volumeLoader: DicomVolumeLoader;

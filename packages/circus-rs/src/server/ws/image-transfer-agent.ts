@@ -1,17 +1,14 @@
-import {
-  PartialVolumeDescriptor,
-  partialVolumeDescriptorToArray
-} from '@utrad-ical/circus-lib';
-import PriorityIntegerQueue from '../../common/PriorityIntegerQueue';
-import {
-  MultiRange,
-  Initializer as MultiRangeInitializer
-} from 'multi-integer-range';
-import {
-  TransferImageMessage,
-  transferImageMessageData
-} from '../../common/ws/message';
-import { VolumeAccessor, VolumeProvider } from '../helper/createVolumeProvider';
+import type { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import { partialVolumeDescriptorToArray } from '@utrad-ical/circus-lib';
+import PriorityIntegerQueue from '../../common/PriorityIntegerQueue.ts';
+import type { Initializer as MultiRangeInitializer } from 'multi-integer-range';
+import { MultiRange } from 'multi-integer-range';
+import type { TransferImageMessage } from '../../common/ws/message.ts';
+import { transferImageMessageData } from '../../common/ws/message.ts';
+import type {
+  VolumeAccessor,
+  VolumeProvider
+} from '../helper/createVolumeProvider.ts';
 
 const PARTIAL_VOLUME_PRIORITY = 1;
 

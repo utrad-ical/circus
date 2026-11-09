@@ -1,7 +1,8 @@
-import { AxiosInstance } from 'axios';
-import { Readable } from 'form-data';
-import { ApiTest, setUpAppForRoutesTest } from '../../test/util-routes';
-import { readFromStream } from '../../test/util-stream';
+import type { AxiosInstance } from 'axios';
+import type { Readable } from 'form-data';
+import type { ApiTest } from '../../test/util-routes.ts';
+import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
+import { readFromStream } from '../../test/util-stream.ts';
 
 let apiTest: ApiTest, axios: AxiosInstance;
 beforeAll(async () => {

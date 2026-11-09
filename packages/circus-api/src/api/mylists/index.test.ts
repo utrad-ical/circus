@@ -1,6 +1,6 @@
 import { setUpMongoFixture } from '../../test/util-mongo';
 import { setUpAppForRoutesTest, ApiTest } from '../../test/util-routes';
-import mongo from 'mongodb';
+import * as mongo from 'mongodb';
 
 let apiTest: ApiTest, ax: typeof apiTest.axiosInstances, db: mongo.Db;
 beforeAll(async () => {
@@ -69,7 +69,7 @@ describe('patch list', () => {
     const userData = await apiTest.database.db
       .collection('users')
       .findOne({ userEmail });
-    const changedList = userData.myLists.filter(
+    const changedList = userData!.myLists.filter(
       (myList: any) => myList.myListId === myListId
     )[0];
     return changedList;
@@ -162,7 +162,7 @@ describe('patch list', () => {
       const userData = await apiTest.database.db
         .collection('users')
         .findOne({ userEmail });
-      const newList = userData.myLists.filter(
+      const newList = userData!.myLists.filter(
         (myList: any) => myList.myListId === myListId
       )[0];
       expect(newList.editors).toHaveLength(2);
@@ -208,7 +208,7 @@ describe('delete list', () => {
     const userData = await apiTest.database.db
       .collection('users')
       .findOne({ userEmail });
-    const result = userData.myLists.find(
+    const result = userData!.myLists.find(
       (list: any) => list.myListId === myListId
     );
     expect(result).toStrictEqual(undefined);
@@ -354,7 +354,7 @@ describe('transaction test', () => {
     const user = await db
       .collection('users')
       .findOne({ userEmail: 'bob@example.com' });
-    expect(user.myLists.length).toBe(34); // including ones already in fixture
+    expect(user!.myLists.length).toBe(34); // including ones already in fixture
     // myListsの中に30個データがある
   });
 });

@@ -1,7 +1,7 @@
 import { usingMongo } from '../test/util-mongo';
 import delay from '../utils/delay';
 import createLocker from './createLocker';
-import mongo from 'mongodb';
+import * as mongo from 'mongodb';
 
 let db: mongo.Db, locker: ReturnType<typeof createLocker>;
 let disposeMongo: () => Promise<void>;

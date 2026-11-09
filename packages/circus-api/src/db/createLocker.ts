@@ -1,5 +1,5 @@
 import randomstring from 'randomstring';
-import mongo from 'mongodb';
+import * as mongo from 'mongodb';
 
 /**
  * Provides dummy DB locking functionality.
@@ -22,12 +22,17 @@ const createLocker = (
   collectionName = 'locks',
   timeout = 300000
 ) => {
-  db.collection(collectionName).createIndex({ target: 1 }, { unique: true });
+  // The unique index is what makes locking work, so wait for it in lock()
+  const indexReady = db
+    .collection(collectionName)
+    .createIndex({ target: 1 }, { unique: true });
+  indexReady.catch(() => {}); // reported by lock(); avoid unhandled rejection
 
   const lock = async (target: string) => {
     if (typeof target !== 'string' || !target.length) {
       throw new TypeError('Lock target must be string');
     }
+    await indexReady;
     const now = new Date();
     const minTime = new Date(now.getTime() - timeout);
 

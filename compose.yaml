@@ -13,8 +13,11 @@ name: circus
 services:
   mongo:
     profiles: [mongo]
-    image: mongo:5.0.6
+    image: mongo:9.0
     command: --replSet rs0 --bind_ip_all
+    environment:
+      # Required on Linux kernel 6.19+ (SERVER-121912); harmless on older kernels
+      GLIBC_TUNABLES: glibc.pthread.rseq=1
     volumes:
       - ${CIRCUS_DATA_DIR:-/var/circus/data}/mongodb:/data/db
     ports:
@@ -25,13 +28,17 @@ services:
       # config with a different member name is NOT fixed automatically.
       test:
         - CMD
-        - mongo
+        - mongosh
         - --quiet
         - --eval
         - |
-          if (db.adminCommand({ replSetGetStatus: 1 }).code === 94)
+          try {
+            rs.status();
+          } catch (e) {
+            if (e.code !== 94) throw e; // 94: NotYetInitialized
             rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'mongo:27017' }] });
-          quit(db.adminCommand({ hello: 1 }).isWritablePrimary ? 0 : 1);
+          }
+          quit(db.hello().isWritablePrimary ? 0 : 1);
       interval: 5s
       start_period: 30s
     restart: unless-stopped

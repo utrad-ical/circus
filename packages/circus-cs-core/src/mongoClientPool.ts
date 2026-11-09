@@ -1,5 +1,5 @@
 import { FunctionService } from '@utrad-ical/circus-lib';
-import mongo from 'mongodb';
+import * as mongo from 'mongodb';
 
 export type MongoClientPool = {
   connect: (url: string) => Promise<mongo.MongoClient>;
@@ -11,9 +11,7 @@ const createMongoClientPool: FunctionService<MongoClientPool> = async () => {
   return {
     connect: async (url: string) => {
       if (pool.has(url)) return pool.get(url)!;
-      const client = await mongo.MongoClient.connect(url, {
-        useUnifiedTopology: true
-      });
+      const client = await mongo.MongoClient.connect(url);
       pool.set(url, client);
       return client;
     },

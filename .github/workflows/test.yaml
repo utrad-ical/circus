@@ -49,9 +49,12 @@ jobs:
       - name: Start mongod
         shell: bash
         run: |
-          docker run --name mongo -p 27017:27017 -d mongo:4.2.2-bionic --replSet replset
-          sleep 5s
-          docker exec mongo /bin/bash -c "echo \"rs.initiate();\" | mongo"
+          docker run --name mongo -p 27017:27017 -d \
+            -e GLIBC_TUNABLES=glibc.pthread.rseq=1 mongo:9.0 --replSet rs0
+          until docker exec mongo mongosh --quiet --eval 'db.hello().ok' >/dev/null 2>&1; do sleep 1; done
+          docker exec mongo mongosh --quiet --eval \
+            "rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'localhost:27017' }] })"
+          until [ "$(docker exec mongo mongosh --quiet --eval 'db.hello().isWritablePrimary')" = true ]; do sleep 1; done
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v7
         with:

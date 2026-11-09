@@ -72,7 +72,7 @@ export default function floodFill(
   let filled = 0;
 
   while (stack.length > 0) {
-    const cur = <Vector2>stack.pop();
+    const cur = stack.pop() as Vector2;
     minx = cur.x < minx ? cur.x : minx;
     maxx = cur.x > maxx ? cur.x : maxx;
 

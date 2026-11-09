@@ -25,8 +25,10 @@ const pad8 = (num: number) => ('00000000' + num).slice(-8);
 
 export default class StaticDicomFileRepository implements DicomFileRepository {
   private concurrencyGate: ConcurrencyGate;
+  private options: Options;
 
-  constructor(private options: Options) {
+  constructor(options: Options) {
+    this.options = options;
     this.concurrencyGate = concurrencyGate(options.maxConcurrency ?? 30);
   }
 

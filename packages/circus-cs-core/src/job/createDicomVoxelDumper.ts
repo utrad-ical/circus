@@ -66,7 +66,7 @@ const returnNumberOrNumberList = (
   if (!numElements) return [];
   const numbers: number[] = [];
   for (let i = 0; i < numElements; i++) {
-    numbers.push((<any>dataset)[accessor](tag, i) as number);
+    numbers.push((dataset as any)[accessor](tag, i) as number);
   }
   return numbers.length === 1 ? numbers[0] : numbers;
 };

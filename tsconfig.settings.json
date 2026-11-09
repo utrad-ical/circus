@@ -7,6 +7,7 @@
     "composite": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
+    "erasableSyntaxOnly": true,
     "types": ["node", "jest"],
 
     // The following settings will map '@utrad-ical/foo'

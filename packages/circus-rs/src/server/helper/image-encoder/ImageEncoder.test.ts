@@ -1,5 +1,5 @@
 const encoders = ['PngJsImageEncoder' /*'NodePngImageEncoder'*/];
-import ImageEncoder from './ImageEncoder';
+import type ImageEncoder from './ImageEncoder.ts';
 
 describe('ImageEncoder', () => {
   let originalImage: Buffer;

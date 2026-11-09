@@ -1,4 +1,4 @@
-import { CircusIconDefinition } from 'components/BodyPartIcon';
+import type { CircusIconDefinition } from 'components/BodyPartIcon';
 
 export type PluginRoles =
   | 'readPlugin'

@@ -1,11 +1,11 @@
-import { FunctionService } from '@utrad-ical/circus-lib';
-import Command from './Command';
-import { DicomFileRepository } from '@utrad-ical/circus-lib';
-import createDicomVoxelDumper from '../job/createDicomVoxelDumper';
-import buildDicomVolumes from '../job/buildDicomVolumes';
+import type { FunctionService } from '@utrad-ical/circus-lib';
+import type Command from './Command.ts';
+import type { DicomFileRepository } from '@utrad-ical/circus-lib';
+import createDicomVoxelDumper from '../job/createDicomVoxelDumper.ts';
+import buildDicomVolumes from '../job/buildDicomVolumes.ts';
 import createTmpDicomFileRepository, {
   createJobSeries
-} from './util/tmpDicomFileRepository';
+} from './util/tmpDicomFileRepository.ts';
 
 /**
  * Exports series data as CIRCUS CS input volume format.

@@ -1,14 +1,16 @@
 import * as rs from '@utrad-ical/circus-rs/src/browser';
-import {
-  Composition,
+import type {
   MprImageSource,
   MprViewState,
+  Tool
+} from '@utrad-ical/circus-rs/src/browser';
+import {
+  Composition,
   PlaneFigure,
-  Tool,
   WebGlRawVolumeMprImageSource
 } from '@utrad-ical/circus-rs/src/browser';
 import classnames from 'classnames';
-import { useVolumeLoaders } from '../useVolumeLoader';
+import { useVolumeLoaders } from '../useVolumeLoader.tsx';
 import get from 'lodash.get';
 import React, {
   useCallback,
@@ -18,14 +20,15 @@ import React, {
   useState
 } from 'react';
 import styled from 'styled-components';
-import { Button } from '../../ui/Button';
-import {
-  createStateChanger,
-  ImageViewer,
-  StateChangerFunc
-} from '../../ui/ImageViewer';
-import { useCsResults } from '../CsResultsContext';
-import { Display, DisplayDefinition, FeedbackReport } from '../Display';
+import { Button } from '../../ui/Button.tsx';
+import type { StateChangerFunc } from '../../ui/ImageViewer.tsx';
+import { createStateChanger, ImageViewer } from '../../ui/ImageViewer.tsx';
+import { useCsResults } from '../CsResultsContext.ts';
+import type {
+  Display,
+  DisplayDefinition,
+  FeedbackReport
+} from '../Display.tsx';
 
 interface LesionCandidate {
   id?: number;

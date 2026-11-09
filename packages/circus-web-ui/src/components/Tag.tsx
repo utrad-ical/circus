@@ -54,7 +54,7 @@ const Tag: React.FC<{
   const { projectId, tag } = props;
   const project = user.accessibleProjects.find(p => p.projectId === projectId);
   const color = project
-    ? project.project.tags.find(t => t.name === tag)?.color ?? defaultTagColor
+    ? (project.project.tags.find(t => t.name === tag)?.color ?? defaultTagColor)
     : defaultTagColor;
   return <PhysicalTag color={color} name={tag} />;
 });
@@ -77,8 +77,8 @@ export const TagList: React.FC<{
     <StyledTagListSpan>
       {tags.map(tag => {
         const color = project
-          ? project.project.tags.find(t => t.name === tag)?.color ??
-            defaultTagColor
+          ? (project.project.tags.find(t => t.name === tag)?.color ??
+            defaultTagColor)
           : defaultTagColor;
         return <PhysicalTag key={tag} name={tag} color={color} />;
       })}

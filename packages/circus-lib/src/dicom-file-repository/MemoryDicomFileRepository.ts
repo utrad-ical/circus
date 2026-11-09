@@ -1,4 +1,5 @@
-import DicomFileRepository, { SeriesAccessor } from './DicomFileRepository';
+import type { SeriesAccessor } from './DicomFileRepository.ts';
+import type DicomFileRepository from './DicomFileRepository.ts';
 import { multirange } from 'multi-integer-range';
 
 type SeriesDataMap = Map<number, ArrayBuffer>;

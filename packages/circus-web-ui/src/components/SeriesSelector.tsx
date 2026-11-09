@@ -1,10 +1,10 @@
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import { confirm, modal } from '@smikitky/rb-components/lib/modal';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
-import PartialVolumeDescriptor, {
-  describePartialVolumeDescriptor
-} from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
-import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
+import type PartialVolumeDescriptor from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
+import { describePartialVolumeDescriptor } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
+import type { DataGridColumnDefinition } from 'components/DataGrid';
+import DataGrid from 'components/DataGrid';
 import IconButton from 'components/IconButton';
 import { Panel } from 'components/react-bootstrap';
 import SearchResultsView from 'components/SearchResultsView';
@@ -14,11 +14,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { newSearch } from 'store/searches';
 import styled from 'styled-components';
-import Series from 'types/Series';
+import type Series from 'types/Series';
 import { useApi } from 'utils/api';
-import { UidDisplay } from '../pages/search/SearchResultRenderer';
-import PartialVolumeDescriptorEditor from './PartialVolumeDescriptorEditor';
-import TimeDisplay from './TimeDisplay';
+import { UidDisplay } from '../pages/search/SearchResultRenderer.tsx';
+import PartialVolumeDescriptorEditor from './PartialVolumeDescriptorEditor.tsx';
+import TimeDisplay from './TimeDisplay.tsx';
 
 const PartialVolumeRenderer: React.FC<{
   index: number;

@@ -1,11 +1,12 @@
 import { gunzipSync } from 'fflate';
 import get from 'lodash.get';
 import React, { useEffect, useState } from 'react';
-import { AnnotationDef, AnnotationViewer } from '../AnnotationViewer';
-import { useCsResults } from '../CsResultsContext';
-import { Display } from '../Display';
-import { ColorDefinition } from './utils/color';
-import { useErrorMessage } from './utils/useErrorMessage';
+import type { AnnotationDef } from '../AnnotationViewer.tsx';
+import { AnnotationViewer } from '../AnnotationViewer.tsx';
+import { useCsResults } from '../CsResultsContext.ts';
+import type { Display } from '../Display.tsx';
+import type { ColorDefinition } from './utils/color.ts';
+import { useErrorMessage } from './utils/useErrorMessage.tsx';
 
 export interface VolumeOverlayOptions {
   volumeId?: number;
@@ -75,13 +76,13 @@ export const VolumeOverlay: Display<VolumeOverlayOptions, void> = props => {
           if (res.status !== 200) {
             throw new Error(
               `Failed to load volume file ` +
-              `(name: ${v.name}, status: ${res.status}, file: ${name})`
+                `(name: ${v.name}, status: ${res.status}, file: ${name})`
             );
           }
 
           return /\.gz$/.test(name)
             ? (gunzipSync(new Uint8Array(await res.arrayBuffer()))
-              .buffer as ArrayBuffer)
+                .buffer as ArrayBuffer)
             : await res.arrayBuffer();
         })
       );

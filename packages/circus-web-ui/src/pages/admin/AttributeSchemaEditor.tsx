@@ -1,7 +1,7 @@
 import React from 'react';
 import BlockSelect from '@smikitky/rb-components/lib/BlockSelect';
 import * as et from '@smikitky/rb-components/lib/editor-types';
-import {
+import type {
   Schema,
   PropSchema
 } from '@smikitky/rb-components/lib/JsonSchemaEditor';

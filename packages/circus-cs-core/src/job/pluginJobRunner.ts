@@ -1,14 +1,15 @@
-import { FunctionService } from '@utrad-ical/circus-lib';
+import type { FunctionService } from '@utrad-ical/circus-lib';
 import fs from 'fs-extra';
 import path from 'path';
-import stream, { PassThrough } from 'stream';
+import type stream from 'stream';
+import { PassThrough } from 'stream';
 import tarfs from 'tar-fs';
-import * as circus from '../interface';
-import DockerRunner from '../util/DockerRunner';
-import { extractTarToDir, readLine } from '../util/streams';
-import adapters from './adapters/index';
-import buildDicomVolumes from './buildDicomVolumes';
-import pluginResultsValidator from './pluginResultsValidator';
+import type * as circus from '../interface.ts';
+import type DockerRunner from '../util/DockerRunner.ts';
+import { extractTarToDir, readLine } from '../util/streams.ts';
+import adapters from './adapters/index.ts';
+import buildDicomVolumes from './buildDicomVolumes.ts';
+import pluginResultsValidator from './pluginResultsValidator.ts';
 
 export interface PluginJobRunner {
   run: (jobId: string, job: circus.PluginJobRequest) => Promise<boolean>;

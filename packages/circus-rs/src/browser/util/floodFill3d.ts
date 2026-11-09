@@ -1,5 +1,5 @@
-import { Vector3, Box3 } from 'three';
-import voxelMarker from './voxelMarker';
+import type { Vector3, Box3 } from 'three';
+import voxelMarker from './voxelMarker.ts';
 
 /**
  * Calls the specified function(fillLine) for each chunked line detected

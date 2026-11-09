@@ -3,26 +3,26 @@ import httpStatus from 'http-status';
 import Router from 'koa-router';
 import koaJson from 'koa-json';
 
-import { RsServerOptions } from './Configuration';
-import { RsServices } from './configureServiceLoader';
+import type { RsServerOptions } from './Configuration.ts';
+import type { RsServices } from './configureServiceLoader.ts';
 
 // middleware
-import cors from './app/middleware/cors';
-import ipBasedAccessControl from './app/middleware/ipBasedAccessControl';
-import errorHandler from './app/middleware/errorHandler';
-import countUp from './app/middleware/countUp';
+import cors from './app/middleware/cors.ts';
+import ipBasedAccessControl from './app/middleware/ipBasedAccessControl.ts';
+import errorHandler from './app/middleware/errorHandler.ts';
+import countUp from './app/middleware/countUp.ts';
 
 // basic routes
-import serverStatus from './app/serverStatus';
+import serverStatus from './app/serverStatus.ts';
 
 // authentication
-import issueSeriesAccessToken from './app/auth/issueSeriesAccessToken';
-import checkSeriesAccessToken from './app/auth/checkSeriesAccessToken';
+import issueSeriesAccessToken from './app/auth/issueSeriesAccessToken.ts';
+import checkSeriesAccessToken from './app/auth/checkSeriesAccessToken.ts';
 
 // application
-import { FunctionService } from '@utrad-ical/circus-lib';
-import createAuthorizer from './helper/createAuthorizer';
-import withWebSocketConnectionHandlers from './ws/withWebSocketConnectionHandlers';
+import type { FunctionService } from '@utrad-ical/circus-lib';
+import createAuthorizer from './helper/createAuthorizer.ts';
+import withWebSocketConnectionHandlers from './ws/withWebSocketConnectionHandlers.ts';
 
 /**
  * Create Koa App.

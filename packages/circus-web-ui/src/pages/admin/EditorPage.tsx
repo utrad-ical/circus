@@ -1,18 +1,19 @@
 import IconButton from 'components/IconButton';
-import PropertyEditor, {
-  PropertyEditorProperties
-} from '@smikitky/rb-components/lib/PropertyEditor';
-import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
+import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
+import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
+import type { DataGridColumnDefinition } from 'components/DataGrid';
+import DataGrid from 'components/DataGrid';
 import Icon from 'components/Icon';
 import SearchResultsView from 'components/SearchResultsView';
 import { Button, Panel } from 'components/react-bootstrap';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { SearchResource, newSearch } from 'store/searches';
+import type { SearchResource } from 'store/searches';
+import { newSearch } from 'store/searches';
 import styled from 'styled-components';
 import { useApi } from 'utils/api';
 import { useLoginManager } from 'utils/loginManager';
-import AdminContainer from './AdminContainer';
+import AdminContainer from './AdminContainer.tsx';
 
 const StyledDataGrid = styled(DataGrid)`
   .label {

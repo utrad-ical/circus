@@ -1,6 +1,7 @@
 import { Vector3, Box3 } from 'three';
-import createMarkedStateDumper from './createMarkedStateDumper';
-import voxelMarker, { VoxelMarker } from './voxelMarker';
+import createMarkedStateDumper from './createMarkedStateDumper.ts';
+import type { VoxelMarker } from './voxelMarker.ts';
+import voxelMarker from './voxelMarker.ts';
 
 test('voxelMarker must work exactly', () => {
   for (let i = 0; i < 10; i++) {

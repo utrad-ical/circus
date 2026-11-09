@@ -1,7 +1,7 @@
 import IconButton from 'components/IconButton';
 import { confirm, prompt } from '@smikitky/rb-components/lib/modal';
 import Icon from 'components/Icon';
-import MyListArray from './MyListArray';
+import MyListArray from './MyListArray.tsx';
 import React from 'react';
 import { dispatch } from 'store';
 import { showMessage } from 'store/messages';

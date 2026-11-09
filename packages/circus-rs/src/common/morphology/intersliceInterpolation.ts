@@ -1,4 +1,4 @@
-import distanceTransform from './distanceTransform';
+import distanceTransform from './distanceTransform.ts';
 
 /**
  * @param array input binary image

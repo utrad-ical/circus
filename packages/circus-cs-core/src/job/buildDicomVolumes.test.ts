@@ -1,8 +1,8 @@
 import path from 'path';
 import fs from 'fs-extra';
-import buildDicomVolumes from './buildDicomVolumes';
-import { DicomFileRepository } from '@utrad-ical/circus-lib';
-import createDicomVoxelDumper from './createDicomVoxelDumper';
+import buildDicomVolumes from './buildDicomVolumes.ts';
+import type { DicomFileRepository } from '@utrad-ical/circus-lib';
+import createDicomVoxelDumper from './createDicomVoxelDumper.ts';
 import { PassThrough } from 'stream';
 
 const mockDicomFileRepository: DicomFileRepository = {

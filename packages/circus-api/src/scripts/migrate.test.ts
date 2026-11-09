@@ -1,5 +1,5 @@
-import { deleteAllCollections, usingModels } from '../test/util-mongo';
-import { command } from './migrate';
+import { deleteAllCollections, usingModels } from '../test/util-mongo.ts';
+import { command } from './migrate.ts';
 
 const modelsPromise = usingModels();
 

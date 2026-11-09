@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
-import { Models } from '../interface';
-import { OAuthClientId } from '../middleware/auth/createOauthServer';
+import type { Models } from '../interface.ts';
+import { OAuthClientId } from '../middleware/auth/createOauthServer.ts';
 
 const generateRandomToken = () => {
   // The same format node-oauth2-server gives

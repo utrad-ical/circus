@@ -1,5 +1,6 @@
-import { AxiosInstance } from 'axios';
-import { ApiTest, setUpAppForRoutesTest } from '../../test/util-routes';
+import type { AxiosInstance } from 'axios';
+import type { ApiTest } from '../../test/util-routes.ts';
+import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 
 let apiTest: ApiTest, dave: AxiosInstance;
 beforeAll(async () => {

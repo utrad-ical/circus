@@ -1,5 +1,6 @@
-import { Vector3, Box3 } from 'three';
-import { VoxelMarker } from './voxelMarker';
+import type { Box3 } from 'three';
+import { Vector3 } from 'three';
+import type { VoxelMarker } from './voxelMarker.ts';
 
 export default function createMarkedStateDumper(marked: VoxelMarker['marked']) {
   return (boundary: Box3): string => {

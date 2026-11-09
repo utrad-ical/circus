@@ -1,6 +1,7 @@
-import koa from 'koa';
+import type koa from 'koa';
 import httpStatus from 'http-status';
-import { Validator, ValidatorRules } from '../../../common/Validator';
+import type { ValidatorRules } from '../../../common/Validator.ts';
+import { Validator } from '../../../common/Validator.ts';
 
 export default function validate(rules: ValidatorRules): koa.Middleware {
   return async function (

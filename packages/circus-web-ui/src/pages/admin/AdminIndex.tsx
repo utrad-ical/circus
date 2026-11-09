@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from 'components/react-bootstrap';
-import AdminContainer from './AdminContainer';
+import AdminContainer from './AdminContainer.tsx';
 import Icon from 'components/Icon';
 import styled from 'styled-components';
 

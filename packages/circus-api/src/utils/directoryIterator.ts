@@ -5,7 +5,7 @@ import {
   isLikeZip,
   zipIterator,
   targzIterator
-} from './archiveIterator';
+} from './archiveIterator.ts';
 
 type Entry =
   | {

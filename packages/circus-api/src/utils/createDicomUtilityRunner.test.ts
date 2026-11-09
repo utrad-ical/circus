@@ -1,4 +1,4 @@
-import createDicomUtilityRunner from './createDicomUtilityRunner';
+import createDicomUtilityRunner from './createDicomUtilityRunner.ts';
 import fs from 'fs-extra';
 import path from 'path';
 import parser from 'dicom-parser';

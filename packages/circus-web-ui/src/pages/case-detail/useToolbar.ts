@@ -1,8 +1,8 @@
 import * as rs from '@utrad-ical/circus-rs/src/browser';
-import { BrushToolOptions } from '@utrad-ical/circus-rs/src/browser/tool/cloud/BrushTool';
-import { WandToolOptions } from '@utrad-ical/circus-rs/src/browser/tool/cloud/WandTool';
-import ToolBaseClass from '@utrad-ical/circus-rs/src/browser/tool/Tool';
-import { ToolCollection } from '@utrad-ical/circus-rs/src/browser/tool/tool-initializer';
+import type { BrushToolOptions } from '@utrad-ical/circus-rs/src/browser/tool/cloud/BrushTool';
+import type { WandToolOptions } from '@utrad-ical/circus-rs/src/browser/tool/cloud/WandTool';
+import type ToolBaseClass from '@utrad-ical/circus-rs/src/browser/tool/Tool';
+import type { ToolCollection } from '@utrad-ical/circus-rs/src/browser/tool/tool-initializer';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export type ToolName = keyof ToolCollection;

@@ -1,6 +1,6 @@
 export type {
   default as DicomFileRepository,
   SeriesAccessor
-} from './DicomFileRepository';
-export { default as StaticDicomFileRepository } from './StaticDicomFileRepository';
-export { default as MemoryDicomFileRepository } from './MemoryDicomFileRepository';
+} from './DicomFileRepository.ts';
+export { default as StaticDicomFileRepository } from './StaticDicomFileRepository.ts';
+export { default as MemoryDicomFileRepository } from './MemoryDicomFileRepository.ts';

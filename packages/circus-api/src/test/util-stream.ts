@@ -1,5 +1,5 @@
-import delay from '../utils/delay';
-import { Readable } from 'stream';
+import delay from '../utils/delay.ts';
+import type { Readable } from 'stream';
 
 export const readFromStream = (stream: Readable): (() => Promise<string>) => {
   let data = '';

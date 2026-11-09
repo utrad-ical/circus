@@ -1,12 +1,11 @@
-import configureCsCoreServiceLoader, {
-  Services as CsCoreServices
-} from '@utrad-ical/circus-cs-core/src/configureServiceLoader';
-import configureRsServiceLoader, {
-  RsServices
-} from '@utrad-ical/circus-rs/src/server/configureServiceLoader';
-import { ServiceLoader, Logger } from '@utrad-ical/circus-lib';
+import type { Services as CsCoreServices } from '@utrad-ical/circus-cs-core/src/configureServiceLoader';
+import configureCsCoreServiceLoader from '@utrad-ical/circus-cs-core/src/configureServiceLoader';
+import type { RsServices } from '@utrad-ical/circus-rs/src/server/configureServiceLoader';
+import configureRsServiceLoader from '@utrad-ical/circus-rs/src/server/configureServiceLoader';
+import type { Logger } from '@utrad-ical/circus-lib';
+import { ServiceLoader } from '@utrad-ical/circus-lib';
 import path from 'path';
-import {
+import type {
   Database,
   Validator,
   DicomImporter,
@@ -14,16 +13,15 @@ import {
   Models,
   AuthProvider,
   TransactionManager
-} from './interface';
-import Storage from './storage/Storage';
-import Koa from 'koa';
-import createDicomUtilityRunner, {
-  DicomUtilityRunner
-} from './utils/createDicomUtilityRunner';
-import { TaskManager } from './createTaskManager';
-import { MhdPacker } from './case/createMhdPacker';
-import KoaOAuth2Server from './middleware/auth/KoaOAuth2Server';
-import { SeriesOrientationResolver } from './utils/createSeriesOrientationResolver';
+} from './interface.ts';
+import type Storage from './storage/Storage.ts';
+import type Koa from 'koa';
+import type { DicomUtilityRunner } from './utils/createDicomUtilityRunner.ts';
+import createDicomUtilityRunner from './utils/createDicomUtilityRunner.ts';
+import type { TaskManager } from './createTaskManager.ts';
+import type { MhdPacker } from './case/createMhdPacker.ts';
+import type KoaOAuth2Server from './middleware/auth/KoaOAuth2Server.ts';
+import type { SeriesOrientationResolver } from './utils/createSeriesOrientationResolver.ts';
 
 export type Services = CsCoreServices &
   RsServices & {

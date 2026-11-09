@@ -1,7 +1,11 @@
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
-import createCurrentLabelsUpdator from '../createCurrentLabelsUpdator';
-import { InternalLabelOf, LabelType, InternalLabel } from '../labelData';
-import { Processor, ProcessorProgress } from './processor-types';
+import createCurrentLabelsUpdator from '../createCurrentLabelsUpdator.ts';
+import type {
+  InternalLabelOf,
+  LabelType,
+  InternalLabel
+} from '../labelData.ts';
+import type { Processor, ProcessorProgress } from './processor-types.ts';
 
 export interface DuplicateOptions {
   newName: string;

@@ -1,11 +1,12 @@
-import validateInOut from './validateInOut';
-import createValidator from '../createValidator';
+import validateInOut from './validateInOut.ts';
+import createValidator from '../createValidator.ts';
 import bodyParser from 'koa-bodyparser';
-import errorHandler from './errorHandler';
+import errorHandler from './errorHandler.ts';
 import axios from 'axios';
 import Router from 'koa-router';
 import * as path from 'path';
-import { setUpKoaTest, TestServer } from '../test/util-koa';
+import type { TestServer } from '../test/util-koa.ts';
+import { setUpKoaTest } from '../test/util-koa.ts';
 import createNullLogger from '@utrad-ical/circus-lib/src/logger/NullLogger';
 
 let testServer: TestServer;

@@ -1,5 +1,5 @@
-import { Models } from '../interface';
-import { SeriesEntry } from '../typings/circus';
+import type { Models } from '../interface.ts';
+import type { SeriesEntry } from '../typings/circus.ts';
 
 interface PluginJobRequest {
   pluginId: string;

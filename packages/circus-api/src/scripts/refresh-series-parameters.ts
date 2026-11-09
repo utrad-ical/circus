@@ -1,7 +1,7 @@
-import Command from './Command';
-import { Models, DicomTagReader } from '../interface';
+import type Command from './Command.ts';
+import type { Models, DicomTagReader } from '../interface.ts';
 import { multirange } from 'multi-integer-range';
-import { DicomFileRepository } from '@utrad-ical/circus-lib';
+import type { DicomFileRepository } from '@utrad-ical/circus-lib';
 
 export const options = () => {
   return [

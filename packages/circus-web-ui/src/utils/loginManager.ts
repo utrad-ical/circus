@@ -1,7 +1,8 @@
 import axios from 'axios';
 import React, { useContext } from 'react';
-import createApiCaller, { ApiCaller, formatCredentials } from './api';
-import { Dispatch } from 'redux';
+import type { ApiCaller } from './api.ts';
+import createApiCaller, { formatCredentials } from './api.ts';
+import type { Dispatch } from 'redux';
 import * as actions from 'store/loginUser';
 import * as searchActions from 'store/searches';
 import * as qs from 'querystring';

@@ -1,8 +1,8 @@
-import { setUpMongoFixture, usingSessionModels } from '../test/util-mongo';
-import { CommandFunc } from './Command';
-import { Database, TransactionManager, Validator } from '../interface';
-import { command } from './register-plugin-job';
-import createTransactionManager from '../createTransactionManager';
+import { setUpMongoFixture, usingSessionModels } from '../test/util-mongo.ts';
+import type { CommandFunc } from './Command.ts';
+import type { Database, TransactionManager, Validator } from '../interface.ts';
+import { command } from './register-plugin-job.ts';
+import createTransactionManager from '../createTransactionManager.ts';
 
 const modelsPromise = usingSessionModels();
 let commandFunc: CommandFunc;

@@ -1,12 +1,16 @@
-import {
+import type {
   DicomFileRepository,
   FunctionService,
-  isDicomUid,
   Logger
 } from '@utrad-ical/circus-lib';
+import { isDicomUid } from '@utrad-ical/circus-lib';
 import { multirange } from 'multi-integer-range';
-import { DicomImporter, DicomTagReader, TransactionManager } from './interface';
-import { DicomUtilityRunner } from './utils/createDicomUtilityRunner';
+import type {
+  DicomImporter,
+  DicomTagReader,
+  TransactionManager
+} from './interface.ts';
+import type { DicomUtilityRunner } from './utils/createDicomUtilityRunner.ts';
 
 interface Options {
   /**

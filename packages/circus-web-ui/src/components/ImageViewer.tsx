@@ -1,10 +1,10 @@
 import * as rs from '@utrad-ical/circus-rs/src/browser';
+import type { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
 import {
   createOrthogonalMprSection,
-  OrientationString,
   sectionTo2dViewState
 } from '@utrad-ical/circus-rs/src/browser/section-util';
-import ToolBaseClass from '@utrad-ical/circus-rs/src/browser/tool/Tool';
+import type ToolBaseClass from '@utrad-ical/circus-rs/src/browser/tool/Tool';
 import { toolFactory } from '@utrad-ical/circus-rs/src/browser/tool/tool-initializer';
 import setImmediate from '@utrad-ical/circus-rs/src/browser/util/setImmediate';
 import classnames from 'classnames';

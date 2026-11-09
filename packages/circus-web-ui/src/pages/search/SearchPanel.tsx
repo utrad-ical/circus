@@ -7,7 +7,7 @@ import { useApi } from 'utils/api';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLoginManager } from 'utils/loginManager';
 import useLoginUser from 'utils/useLoginUser';
-import { SearchPreset } from 'store/loginUser';
+import type { SearchPreset } from 'store/loginUser';
 import * as searches from 'store/searches';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';

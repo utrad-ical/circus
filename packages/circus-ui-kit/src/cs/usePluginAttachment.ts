@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import CsResultsContext from './CsResultsContext';
+import CsResultsContext from './CsResultsContext.ts';
 
 interface AttachmentTypeMap {
   json: any;

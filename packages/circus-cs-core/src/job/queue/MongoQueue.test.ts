@@ -1,8 +1,8 @@
-import * as mongo from 'mongodb';
-import { testClientPool } from '../../testHelper';
-import { MongoClientPool } from '../../mongoClientPool';
-import createMongoQueue from './MongoQueue';
-import * as circus from '../../interface';
+import type * as mongo from 'mongodb';
+import { testClientPool } from '../../testHelper.ts';
+import type { MongoClientPool } from '../../mongoClientPool.ts';
+import createMongoQueue from './MongoQueue.ts';
+import type * as circus from '../../interface.ts';
 
 describe('Queue system: Mongo', () => {
   let mongoClientPool: MongoClientPool;

@@ -1,4 +1,7 @@
-import { Structure, BasicMorphologicalOperation } from './morphology-types';
+import type {
+  Structure,
+  BasicMorphologicalOperation
+} from './morphology-types.ts';
 
 const defaultStructure: Structure = {
   array: new Uint8Array([0, 1, 0, 1, 1, 1, 0, 1, 0]),

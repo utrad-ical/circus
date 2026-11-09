@@ -1,20 +1,22 @@
 import { Box2, Vector2, Vector3 } from 'three';
+import type { Vector3D } from '../../common/geometry/index.ts';
 import {
   distanceFromPointToSection,
-  Section,
-  Vector3D
-} from '../../common/geometry';
-import ViewerEventTarget from '../interface/ViewerEventTarget';
+  Section
+} from '../../common/geometry/index.ts';
+import type ViewerEventTarget from '../interface/ViewerEventTarget.ts';
 import {
   convertViewerPointToVolumePoint,
   convertVolumePointToViewerPoint
-} from '../tool/tool-util';
-import Viewer from '../viewer/Viewer';
-import ViewerEvent from '../viewer/ViewerEvent';
-import ViewState, { MprViewState, TwoDimensionalViewState } from '../ViewState';
-import Annotation, { DrawHints } from './Annotation';
-import { drawPoint } from './helper/drawObject';
-import { hitRectangle } from './helper/hit-test';
+} from '../tool/tool-util.ts';
+import type Viewer from '../viewer/Viewer.ts';
+import type ViewerEvent from '../viewer/ViewerEvent.ts';
+import type { MprViewState, TwoDimensionalViewState } from '../ViewState.ts';
+import type ViewState from '../ViewState.ts';
+import type { DrawHints } from './Annotation.ts';
+import type Annotation from './Annotation.ts';
+import { drawPoint } from './helper/drawObject.ts';
+import { hitRectangle } from './helper/hit-test.ts';
 
 type PointHitType = 'point-move';
 

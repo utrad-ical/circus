@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { createEncConverter } from './encConverter';
+import { createEncConverter } from './encConverter.ts';
 
 // Performs encoding checks using DICOM spec sppendix H to K
 // http://dicom.nema.org/dicom/2013/output/chtml/part05/PS3.5.html

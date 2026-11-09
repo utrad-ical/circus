@@ -1,10 +1,10 @@
-import * as rs from '@utrad-ical/circus-rs/src/browser';
+import type * as rs from '@utrad-ical/circus-rs/src/browser';
 import React, { useContext, useEffect, useState } from 'react';
-import {
-  serializeUtilizeOptions,
+import type {
   SeriesEntryWithHints,
   VolumeLoaderManager
-} from './createVolumeLoaderManager';
+} from './createVolumeLoaderManager.tsx';
+import { serializeUtilizeOptions } from './createVolumeLoaderManager.tsx';
 
 export const VolumeLoaderFactoryContext =
   React.createContext<VolumeLoaderManager>(null as any);

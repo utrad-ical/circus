@@ -1,4 +1,4 @@
-import sleep from './sleep';
+import sleep from './sleep.ts';
 
 test('sleep', async () => {
   const start = Date.now();

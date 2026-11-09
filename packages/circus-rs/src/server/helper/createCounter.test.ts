@@ -1,4 +1,4 @@
-import createCounter from './createCounter';
+import createCounter from './createCounter.ts';
 
 test('count up', async () => {
   const counter = await createCounter({});

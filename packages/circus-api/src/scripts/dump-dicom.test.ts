@@ -1,6 +1,6 @@
-import { command } from './dump-dicom';
+import { command } from './dump-dicom.ts';
 import path from 'path';
-import createDicomTagReader from '../utils/createDicomTagReader';
+import createDicomTagReader from '../utils/createDicomTagReader.ts';
 
 test('dump-dicom', async () => {
   const dicomTagReader = await createDicomTagReader({});

@@ -1,8 +1,8 @@
-import ViewerEvent from '../../viewer/ViewerEvent';
-import DraggableTool from '../DraggableTool';
-import Viewer from '../../viewer/Viewer';
-import { Tool } from '../Tool';
-import handleMoveBy from './handleMoveBy';
+import type ViewerEvent from '../../viewer/ViewerEvent.ts';
+import DraggableTool from '../DraggableTool.ts';
+import type Viewer from '../../viewer/Viewer.ts';
+import type { Tool } from '../Tool.ts';
+import handleMoveBy from './handleMoveBy.ts';
 
 /**
  * HandTool is a tool which responds to a mouse drag and moves the

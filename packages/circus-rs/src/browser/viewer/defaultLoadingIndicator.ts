@@ -1,4 +1,4 @@
-import LoadingIndicator from '../interface/LoadingIndicator';
+import type LoadingIndicator from '../interface/LoadingIndicator.ts';
 
 const defaultLoadingIndicator: LoadingIndicator = (ctx, time) => {
   const size = 48;

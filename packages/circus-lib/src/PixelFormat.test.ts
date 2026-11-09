@@ -1,4 +1,4 @@
-import { PixelFormat, pixelFormatInfo } from './PixelFormat';
+import { PixelFormat, pixelFormatInfo } from './PixelFormat.ts';
 
 test('pixelFormatInfo', () => {
   const result = pixelFormatInfo('int16');

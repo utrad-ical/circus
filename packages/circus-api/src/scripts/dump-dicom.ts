@@ -1,6 +1,6 @@
-import Command from './Command';
+import type Command from './Command.ts';
 import fs from 'fs-extra';
-import { DicomTagReader } from '../interface';
+import type { DicomTagReader } from '../interface.ts';
 
 export const help = () => {
   return (

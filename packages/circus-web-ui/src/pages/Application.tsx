@@ -1,13 +1,13 @@
 import React, { Fragment, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import MessageBox from './MessageBox';
+import MessageBox from './MessageBox.tsx';
 import { Button } from 'components/react-bootstrap';
 import ErrorBoundary from 'components/ErrorBoundary';
-import MainNav from './MainNav';
+import MainNav from './MainNav.tsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { useApi } from 'utils/api';
 import fetchEventSource from 'utils/fetchEventSource';
-import { taskUpdate, taskFinish, taskError } from '../store/taskProgress';
+import { taskUpdate, taskFinish, taskError } from '../store/taskProgress.ts';
 
 const useTaskProgress = () => {
   const api = useApi();

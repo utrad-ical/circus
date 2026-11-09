@@ -1,9 +1,10 @@
 import IconButton from '@smikitky/rb-components/lib/IconButton';
-import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import type { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
-import { Composition, Viewer } from '@utrad-ical/circus-rs/src/browser';
-import ModifierKeyBehaviors from '@utrad-ical/circus-rs/src/browser/annotation/ModifierKeyBehaviors';
-import {
+import type { Viewer } from '@utrad-ical/circus-rs/src/browser';
+import { Composition } from '@utrad-ical/circus-rs/src/browser';
+import type ModifierKeyBehaviors from '@utrad-ical/circus-rs/src/browser/annotation/ModifierKeyBehaviors';
+import type {
   DicomVolumeMetadata,
   ProgressEventListener
 } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
@@ -11,7 +12,7 @@ import {
   sectionFrom2dViewState,
   sectionTo2dViewState
 } from '@utrad-ical/circus-rs/src/browser/section-util';
-import { InterpolationMode } from '@utrad-ical/circus-rs/src/browser/ViewState';
+import type { InterpolationMode } from '@utrad-ical/circus-rs/src/browser/ViewState';
 import { useVolumeLoaders } from '@utrad-ical/circus-ui-kit';
 import classNames from 'classnames';
 import Collapser from 'components/Collapser';
@@ -29,38 +30,38 @@ import React, {
   useState
 } from 'react';
 import styled from 'styled-components';
-import Project from 'types/Project';
-import Series from 'types/Series';
+import type Project from 'types/Project';
+import type Series from 'types/Series';
 import { useApi } from 'utils/api';
 import isTouchDevice from 'utils/isTouchDevice';
 import useEffectEvent from 'utils/useEffectEvent';
 import { useUserPreferences } from 'utils/useLoginUser';
-import { Modal } from '../../components/react-bootstrap';
-import {
+import { Modal } from '../../components/react-bootstrap.ts';
+import type {
   ScrollBarsSettings,
   WindowPropagationScope
-} from '../../store/loginUser';
-import * as c from './caseStore';
+} from '../../store/loginUser.ts';
+import * as c from './caseStore.ts';
+import type { InternalLabel, InternalLabelDataOf } from './labelData.ts';
 import {
   buildAnnotation,
-  InternalLabel,
-  InternalLabelDataOf,
   labelTypes,
   setRecommendedDisplay
-} from './labelData';
-import LabelMenu from './LabelMenu';
-import LabelSelector from './LabelSelector';
-import {
+} from './labelData.ts';
+import LabelMenu from './LabelMenu.tsx';
+import LabelSelector from './LabelSelector.tsx';
+import type {
   EditingData,
   EditingDataLayoutInitializer,
   EditingDataUpdater,
   SeriesEntryWithLabels
-} from './revisionData';
-import SeriesSelectorDialog from './SeriesSelectorDialog';
-import SideContainer from './SideContainer';
-import ToolBar, { ViewOptions, zDimmedThresholdOptions } from './ToolBar';
-import ViewerGrid from './ViewerGrid';
-import { ViewWindow } from './ViewWindowEditor';
+} from './revisionData.ts';
+import SeriesSelectorDialog from './SeriesSelectorDialog.tsx';
+import SideContainer from './SideContainer.tsx';
+import type { ViewOptions } from './ToolBar.tsx';
+import ToolBar, { zDimmedThresholdOptions } from './ToolBar.tsx';
+import ViewerGrid from './ViewerGrid.tsx';
+import type { ViewWindow } from './ViewWindowEditor.tsx';
 
 const useCompositions = (
   series: {

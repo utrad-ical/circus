@@ -1,11 +1,11 @@
 import { ColorPalette } from '@smikitky/rb-components/lib/ColorPicker';
-import * as et from '@smikitky/rb-components/lib/editor-types';
+import type * as et from '@smikitky/rb-components/lib/editor-types';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import { Button } from 'components/react-bootstrap';
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { defaultLabelColors } from '../labelColors';
-import { LabelColorsSettings } from '../store/loginUser';
+import { defaultLabelColors } from '../labelColors.ts';
+import type { LabelColorsSettings } from '../store/loginUser.ts';
 
 const LabelColorsEditor: et.Editor<LabelColorsSettings | undefined> = props => {
   const { value, onChange } = props;

@@ -1,14 +1,9 @@
-import React, {
-  RefObject,
-  useEffect,
-  useRef,
-  createRef,
-  useState
-} from 'react';
+import type { RefObject } from 'react';
+import React, { useEffect, useRef, createRef, useState } from 'react';
 import get from 'lodash.get';
-import { useCsResults } from '../CsResultsContext';
-import { Display } from '../Display';
-import { useErrorMessage } from './utils/useErrorMessage';
+import { useCsResults } from '../CsResultsContext.ts';
+import type { Display } from '../Display.tsx';
+import { useErrorMessage } from './utils/useErrorMessage.tsx';
 import classnames from 'classnames';
 import styled from 'styled-components';
 

@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
 import FormControl from 'react-bootstrap/lib/FormControl';
 import FormGroup from 'react-bootstrap/lib/FormGroup';
-import { useCsResults } from '../CsResultsContext';
-import { Display } from '../Display';
-import { useErrorMessage } from './utils/useErrorMessage';
+import { useCsResults } from '../CsResultsContext.ts';
+import type { Display } from '../Display.tsx';
+import { useErrorMessage } from './utils/useErrorMessage.tsx';
 
 interface TextOptions {
   /**

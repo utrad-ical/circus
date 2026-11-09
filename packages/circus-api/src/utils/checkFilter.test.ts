@@ -1,4 +1,4 @@
-import checkFilter from './checkFilter';
+import checkFilter from './checkFilter.ts';
 import { EJSON } from 'bson';
 
 const fields = ['age', 'name', 'dept', 'valid', 'birthday'];

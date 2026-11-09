@@ -1,7 +1,7 @@
-import Koa from 'koa';
+import type Koa from 'koa';
 
-import * as ws from 'ws';
-import WebSocketConnectionHandler from './connection/WebSocketConnectionHandler';
+import type * as ws from 'ws';
+import type WebSocketConnectionHandler from './connection/WebSocketConnectionHandler.ts';
 
 const withWebSocketConnectionHandlers =
   (wss: ws.Server, routes: Record<string, WebSocketConnectionHandler>) =>

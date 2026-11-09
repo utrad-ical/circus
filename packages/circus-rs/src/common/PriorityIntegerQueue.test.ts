@@ -1,4 +1,4 @@
-import PriorityIntegerQueue from './PriorityIntegerQueue';
+import PriorityIntegerQueue from './PriorityIntegerQueue.ts';
 
 const extract = (queue: PriorityIntegerQueue) => {
   const result: number[] = [];

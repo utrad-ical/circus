@@ -1,11 +1,11 @@
 import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
-import DockerRunner from '../util/DockerRunner';
-import isDirectory from '../util/isDirectory';
-import { FunctionService } from '@utrad-ical/circus-lib';
-import Command from './Command';
-import * as circus from '../interface';
+import type DockerRunner from '../util/DockerRunner.ts';
+import isDirectory from '../util/isDirectory.ts';
+import type { FunctionService } from '@utrad-ical/circus-lib';
+import type Command from './Command.ts';
+import type * as circus from '../interface.ts';
 
 const checkEnv: FunctionService<
   Command,

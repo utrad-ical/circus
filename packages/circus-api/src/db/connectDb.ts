@@ -1,6 +1,6 @@
 import * as mongo from 'mongodb';
-import { FunctionService } from '@utrad-ical/circus-lib';
-import { Database } from '../interface';
+import type { FunctionService } from '@utrad-ical/circus-lib';
+import type { Database } from '../interface.ts';
 
 /**
  * @deprecated

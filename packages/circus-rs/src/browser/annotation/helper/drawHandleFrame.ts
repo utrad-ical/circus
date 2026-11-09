@@ -1,10 +1,8 @@
-import { Vector2 } from 'three';
-import {
-  centerDirectedSegment,
-  DirectedSegment
-} from '../../../common/geometry/Line';
-import { toPolygon } from '../../../common/geometry/Polygon';
-import { drawLine, drawPolygon, drawSquareAroundPoint } from './drawObject';
+import type { Vector2 } from 'three';
+import type { DirectedSegment } from '../../../common/geometry/Line.ts';
+import { centerDirectedSegment } from '../../../common/geometry/Line.ts';
+import { toPolygon } from '../../../common/geometry/Polygon.ts';
+import { drawLine, drawPolygon, drawSquareAroundPoint } from './drawObject.ts';
 
 export const defaultHandleSize = 5;
 const defaultLineWidth = 1;

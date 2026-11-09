@@ -1,15 +1,15 @@
-import DicomVolume from '../../common/DicomVolume';
-import DicomVolumeLoader from './volume-loader/DicomVolumeLoader';
-import ViewState from '../ViewState';
-import { convertSectionToIndex } from '../section-util';
-import { Section } from '../../common/geometry';
-import setImmediate from '../util/setImmediate';
-import Viewer from '../viewer/Viewer';
-import drawToImageData from './drawToImageData';
-import MprImageSource from './MprImageSource';
+import type DicomVolume from '../../common/DicomVolume.ts';
+import type DicomVolumeLoader from './volume-loader/DicomVolumeLoader.ts';
+import type ViewState from '../ViewState.ts';
+import { convertSectionToIndex } from '../section-util.ts';
+import type { Section } from '../../common/geometry/index.ts';
+import setImmediate from '../util/setImmediate.ts';
+import type Viewer from '../viewer/Viewer.ts';
+import drawToImageData from './drawToImageData.ts';
+import MprImageSource from './MprImageSource.ts';
 import { Vector3 } from 'three';
-import MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume';
-import { DrawResult } from './ImageSource';
+import type MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume.ts';
+import type { DrawResult } from './ImageSource.ts';
 
 export interface RawVolumeMprImageSourceOptions {
   volumeLoader: DicomVolumeLoader;

@@ -1,5 +1,5 @@
 import { useDispatch } from 'react-redux';
-import { useApi } from './api';
+import { useApi } from './api.ts';
 import { dismissTask } from 'store/searches';
 
 const useTaskDismisser = () => {

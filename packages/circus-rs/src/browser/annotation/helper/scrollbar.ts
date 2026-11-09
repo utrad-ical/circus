@@ -1,20 +1,20 @@
 import { Box2, Box3, Vector2, Vector3 } from 'three';
+import type { Section, Vector2D } from '../../../common/geometry/index.ts';
 import {
   dotFromPointToSection,
-  normalVector,
-  Section,
-  Vector2D
-} from '../../../common/geometry';
-import Composition from '../../Composition';
-import MprImageSource from '../../image-source/MprImageSource';
-import TwoDimensionalImageSource from '../../image-source/TwoDimensionalImageSource';
+  normalVector
+} from '../../../common/geometry/index.ts';
+import type Composition from '../../Composition.ts';
+import type MprImageSource from '../../image-source/MprImageSource.ts';
+import type TwoDimensionalImageSource from '../../image-source/TwoDimensionalImageSource.ts';
 import {
   convertPointToMm,
   convertSectionToIndex,
   detectOrthogonalSection
-} from '../../section-util';
-import Viewer from '../../viewer/Viewer';
-import ViewState, { TwoDimensionalViewState } from '../../ViewState';
+} from '../../section-util.ts';
+import type Viewer from '../../viewer/Viewer.ts';
+import type { TwoDimensionalViewState } from '../../ViewState.ts';
+import type ViewState from '../../ViewState.ts';
 
 export type Position = 'right' | 'left' | 'top' | 'bottom';
 export type Visibility = 'always' | 'hover';

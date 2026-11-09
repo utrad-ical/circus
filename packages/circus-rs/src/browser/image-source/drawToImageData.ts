@@ -1,6 +1,6 @@
-import { TypedArray } from 'three';
-import { ViewWindow } from '../../common/ViewWindow';
-import Viewer from '../viewer/Viewer';
+import type { TypedArray } from 'three';
+import type { ViewWindow } from '../../common/ViewWindow.ts';
+import Viewer from '../viewer/Viewer.ts';
 
 /**
  * Builds RGBA canvas ImageData from a grayscale bitmap data.

@@ -1,5 +1,6 @@
-import * as et from '@smikitky/rb-components/lib/editor-types';
-import Slider, { SliderProps } from '@smikitky/rb-components/lib/Slider';
+import type * as et from '@smikitky/rb-components/lib/editor-types';
+import type { SliderProps } from '@smikitky/rb-components/lib/Slider';
+import Slider from '@smikitky/rb-components/lib/Slider';
 import React from 'react';
 import styled from 'styled-components';
 

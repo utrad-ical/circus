@@ -1,10 +1,10 @@
-import { LabelData } from '../../volume-loader/interface';
-import { TextureLayout } from './interface';
+import type { LabelData } from '../../volume-loader/interface.ts';
+import type { TextureLayout } from './interface.ts';
 import {
   detectTextureLayout,
   transferDataToTexture,
   dumpTexture
-} from './functions';
+} from './functions.ts';
 
 export default function loadLabelIntoTexture(
   gl: WebGLRenderingContext,

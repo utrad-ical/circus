@@ -1,12 +1,9 @@
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import RawData from '@utrad-ical/circus-rs/src/common/RawData';
-import createCurrentLabelsUpdator from '../createCurrentLabelsUpdator';
-import {
-  createNewLabelData,
-  InternalLabel,
-  InternalLabelOf
-} from '../labelData';
-import { Processor, ProcessorProgress } from './processor-types';
+import createCurrentLabelsUpdator from '../createCurrentLabelsUpdator.ts';
+import type { InternalLabel, InternalLabelOf } from '../labelData.ts';
+import { createNewLabelData } from '../labelData.ts';
+import type { Processor, ProcessorProgress } from './processor-types.ts';
 import boWorker from 'worker-loader!./bo-worker';
 
 export const booleanOperationTypes = ['add', 'subtract', 'intersect'] as const;

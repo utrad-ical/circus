@@ -1,9 +1,9 @@
-import DicomVolume from '../../../common/DicomVolume';
-import { ViewWindow } from '../../../common/ViewWindow';
-import { PixelFormat } from '@utrad-ical/circus-lib/src/PixelFormat';
-import { Initializer as MultiRangeInitializer } from 'multi-integer-range';
-import { EventEmitter } from 'events';
-import StrictEventEmitter from 'strict-event-emitter-types';
+import type DicomVolume from '../../../common/DicomVolume.ts';
+import type { ViewWindow } from '../../../common/ViewWindow.ts';
+import type { PixelFormat } from '@utrad-ical/circus-lib/src/PixelFormat';
+import type { Initializer as MultiRangeInitializer } from 'multi-integer-range';
+import type { EventEmitter } from 'events';
+import type StrictEventEmitter from 'strict-event-emitter-types';
 
 export interface DicomVolumeMetadata {
   dicomWindow?: ViewWindow;

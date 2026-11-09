@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import useEffectEvent from './useEffectEvent';
+import useEffectEvent from './useEffectEvent.ts';
 
 /**
  * Custom hook to invoke the given callback with the specified interval.

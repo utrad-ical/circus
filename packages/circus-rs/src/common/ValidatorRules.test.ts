@@ -1,4 +1,4 @@
-import * as vr from './ValidatorRules';
+import * as vr from './ValidatorRules.ts';
 
 it('isTuple', () => {
   const t3 = vr.isTuple(3);

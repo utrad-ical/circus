@@ -1,4 +1,4 @@
-import { readLine } from './readLine';
+import { readLine } from './readLine.ts';
 
 export interface SseEvent<T = unknown> {
   type: string;

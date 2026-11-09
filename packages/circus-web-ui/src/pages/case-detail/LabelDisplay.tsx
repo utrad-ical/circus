@@ -1,8 +1,10 @@
 import Icon from 'components/Icon';
-import React, { DragEventHandler, MouseEventHandler, useMemo } from 'react';
+import type { DragEventHandler, MouseEventHandler } from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { mostReadable } from 'tinycolor2';
-import { InternalLabel, labelTypes } from './labelData';
+import type { InternalLabel } from './labelData.ts';
+import { labelTypes } from './labelData.ts';
 
 const LabelDisplay: React.FC<{
   label: InternalLabel;

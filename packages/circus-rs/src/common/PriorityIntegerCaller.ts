@@ -1,8 +1,6 @@
-import {
-  MultiRange,
-  Initializer as MultiRangeInitializer
-} from 'multi-integer-range';
-import PriorityIntegerQueue from './PriorityIntegerQueue';
+import type { Initializer as MultiRangeInitializer } from 'multi-integer-range';
+import { MultiRange } from 'multi-integer-range';
+import PriorityIntegerQueue from './PriorityIntegerQueue.ts';
 
 type InvokedFunction = (integer: number) => Promise<any>;
 type Callback = {

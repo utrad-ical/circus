@@ -1,4 +1,4 @@
-import isLikeDicom from './isLikeDicom';
+import isLikeDicom from './isLikeDicom.ts';
 import path from 'path';
 import fs from 'fs-extra';
 

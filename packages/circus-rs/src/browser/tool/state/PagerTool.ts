@@ -1,8 +1,8 @@
-import ViewerEvent from '../../viewer/ViewerEvent';
-import DraggableTool from '../DraggableTool';
-import Viewer from '../../viewer/Viewer';
-import { Tool } from '../Tool';
-import handlePageBy from './handlePageBy';
+import type ViewerEvent from '../../viewer/ViewerEvent.ts';
+import DraggableTool from '../DraggableTool.ts';
+import type Viewer from '../../viewer/Viewer.ts';
+import type { Tool } from '../Tool.ts';
+import handlePageBy from './handlePageBy.ts';
 
 /**
  * PagerTool handles mouse drag and performs the paging of the stacked images.

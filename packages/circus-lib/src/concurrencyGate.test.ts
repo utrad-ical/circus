@@ -1,4 +1,4 @@
-import concurrencyGate from './concurrencyGate';
+import concurrencyGate from './concurrencyGate.ts';
 
 test('manual start/finish', async () => {
   const gate = concurrencyGate(3);

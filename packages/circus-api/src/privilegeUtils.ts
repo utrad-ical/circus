@@ -1,6 +1,6 @@
 import MultiRange from 'multi-integer-range';
-import { Models } from './interface';
-import { SeriesEntry } from './typings/circus';
+import type { Models } from './interface.ts';
+import type { SeriesEntry } from './typings/circus.ts';
 import {
   isValidPartialVolumeDescriptor,
   partialVolumeDescriptorToArray

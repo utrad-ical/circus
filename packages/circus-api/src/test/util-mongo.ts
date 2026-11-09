@@ -1,12 +1,12 @@
 import { EJSON } from 'bson';
 import * as fs from 'fs-extra';
 import { safeLoad as yaml } from 'js-yaml';
-import * as mongo from 'mongodb';
+import type * as mongo from 'mongodb';
 import * as path from 'path';
-import createValidator from '../createValidator';
-import { Database, Validator, Models } from '../interface';
-import connectDb from '../db/connectDb';
-import createModels, { makeModels } from '../db/createModels';
+import createValidator from '../createValidator.ts';
+import type { Database, Validator, Models } from '../interface.ts';
+import connectDb from '../db/connectDb.ts';
+import createModels, { makeModels } from '../db/createModels.ts';
 
 /**
  * Connects to a test MongoDB instance.

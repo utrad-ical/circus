@@ -1,13 +1,15 @@
-import { Vector3D } from '../../../common/geometry';
-import Annotation from '../../annotation/Annotation';
-import Cuboid from '../../annotation/Cuboid';
-import Ellipsoid from '../../annotation/Ellipsoid';
-import SolidFigure, { FigureType } from '../../annotation/SolidFigure';
-import { detectOrthogonalSection } from '../../section-util';
-import ViewerEvent from '../../viewer/ViewerEvent';
-import ViewState, { MprViewState } from '../../ViewState';
-import { convertViewerPointToVolumePoint } from '../tool-util';
-import AnnotationToolBase from './AnnotationToolBase';
+import type { Vector3D } from '../../../common/geometry/index.ts';
+import type Annotation from '../../annotation/Annotation.ts';
+import Cuboid from '../../annotation/Cuboid.ts';
+import Ellipsoid from '../../annotation/Ellipsoid.ts';
+import type { FigureType } from '../../annotation/SolidFigure.ts';
+import SolidFigure from '../../annotation/SolidFigure.ts';
+import { detectOrthogonalSection } from '../../section-util.ts';
+import type ViewerEvent from '../../viewer/ViewerEvent.ts';
+import type { MprViewState } from '../../ViewState.ts';
+import type ViewState from '../../ViewState.ts';
+import { convertViewerPointToVolumePoint } from '../tool-util.ts';
+import AnnotationToolBase from './AnnotationToolBase.ts';
 
 /**
  * SolidFigureTool creates and edits SolidFigure.

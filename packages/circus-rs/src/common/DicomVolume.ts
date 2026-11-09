@@ -1,6 +1,6 @@
-import AnisotropicRawData from './AnisotropicRawData';
+import AnisotropicRawData from './AnisotropicRawData.ts';
 import { MultiRange } from 'multi-integer-range';
-import { ViewWindow } from './ViewWindow';
+import type { ViewWindow } from './ViewWindow.ts';
 
 export default class DicomVolume extends AnisotropicRawData {
   /**

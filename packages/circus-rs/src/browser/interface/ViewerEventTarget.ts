@@ -1,4 +1,4 @@
-import ViewerEvent from '../../browser/viewer/ViewerEvent';
+import type ViewerEvent from '../../browser/viewer/ViewerEvent.ts';
 
 export default interface ViewerEventTarget {
   mouseUpHandler?: (viewerEvent: ViewerEvent) => any;

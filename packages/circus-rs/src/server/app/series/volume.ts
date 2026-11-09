@@ -1,9 +1,9 @@
-import koa from 'koa';
+import type koa from 'koa';
 import compose from 'koa-compose';
 import compress from 'koa-compress';
-import { SeriesMiddlewareState } from './createSeriesRoutes';
-import DicomVolume from '../../../common/DicomVolume';
-import createPartialVolume from './createPartialVolume';
+import type { SeriesMiddlewareState } from './createSeriesRoutes.ts';
+import type DicomVolume from '../../../common/DicomVolume.ts';
+import createPartialVolume from './createPartialVolume.ts';
 
 const PARTIAL_VOLUME_PRIORITY = 1;
 

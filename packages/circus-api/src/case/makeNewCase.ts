@@ -1,10 +1,8 @@
-import generateUniqueId from '../utils/generateUniqueId';
-import {
-  fetchAndLockAccessibleSeries,
-  UserPrivilegeInfo
-} from '../privilegeUtils';
-import { Models } from '../interface';
-import { SeriesEntry } from '../typings/circus';
+import generateUniqueId from '../utils/generateUniqueId.ts';
+import type { UserPrivilegeInfo } from '../privilegeUtils.ts';
+import { fetchAndLockAccessibleSeries } from '../privilegeUtils.ts';
+import type { Models } from '../interface.ts';
+import type { SeriesEntry } from '../typings/circus.ts';
 import { isValidPartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 
 const makeNewCase = async (

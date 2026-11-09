@@ -1,6 +1,6 @@
 import React from 'react';
-import SeriesSearchCondition from './SeriesSearchCondition';
-import SeriesSearchResults from './SeriesSearchResults';
+import SeriesSearchCondition from './SeriesSearchCondition.tsx';
+import SeriesSearchResults from './SeriesSearchResults.tsx';
 import Icon from 'components/Icon';
 
 const SeriesSearch: React.FC<{}> = props => {

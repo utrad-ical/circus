@@ -1,4 +1,4 @@
-import koa from 'koa';
+import type koa from 'koa';
 
 /**
  * Simple middleware to append CORS response header.

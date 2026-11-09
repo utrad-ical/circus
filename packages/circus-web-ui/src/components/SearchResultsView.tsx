@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import { Pagination } from 'components/react-bootstrap';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
-import AutoReloadSwitch from './AutoReloadSwitch';
+import AutoReloadSwitch from './AutoReloadSwitch.tsx';
 import Icon from 'components/Icon';
 import classnames from 'classnames';
 import styled from 'styled-components';

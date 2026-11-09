@@ -1,5 +1,5 @@
-import { Section } from '../common/geometry';
-import { ViewWindow } from '../common/ViewWindow';
+import type { Section } from '../common/geometry/index.ts';
+import type { ViewWindow } from '../common/ViewWindow.ts';
 
 interface SectionDrawingViewState {
   readonly section: Section;

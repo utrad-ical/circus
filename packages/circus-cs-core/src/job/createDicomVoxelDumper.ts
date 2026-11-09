@@ -1,22 +1,25 @@
-import {
+import type {
   DicomFileRepository,
   DicomImageData,
+  FunctionService
+} from '@utrad-ical/circus-lib';
+import {
   dicomImageExtractor,
-  FunctionService,
   generateMhdHeader,
   partialVolumeDescriptorToArray,
   pixelFormatInfo
 } from '@utrad-ical/circus-lib';
 import parser from 'dicom-parser';
-import extractCommonValues from '../util/extractCommonValues';
-import { createEncConverter, EncConverter } from './encConverter';
-import {
+import extractCommonValues from '../util/extractCommonValues.ts';
+import type { EncConverter } from './encConverter.ts';
+import { createEncConverter } from './encConverter.ts';
+import type {
   DicomVoxelDumper,
   SeriesEntry,
   DicomVoxelDumperOptions
-} from '../interface';
+} from '../interface.ts';
 import { EventEmitter } from 'events';
-import { Archiver } from 'archiver';
+import type { Archiver } from 'archiver';
 
 type KeyValues = { [key: string]: any };
 

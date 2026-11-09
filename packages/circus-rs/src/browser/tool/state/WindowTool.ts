@@ -1,8 +1,8 @@
-import { ViewWindow } from '../../../common/ViewWindow';
-import Viewer from '../../viewer/Viewer';
-import ViewerEvent from '../../viewer/ViewerEvent';
-import DraggableTool from '../DraggableTool';
-import { Tool } from '../Tool';
+import type { ViewWindow } from '../../../common/ViewWindow.ts';
+import type Viewer from '../../viewer/Viewer.ts';
+import type ViewerEvent from '../../viewer/ViewerEvent.ts';
+import DraggableTool from '../DraggableTool.ts';
+import type { Tool } from '../Tool.ts';
 
 /**
  * WindowTool handles mouse drag and modifies the window level/width accordingly.

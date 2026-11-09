@@ -1,13 +1,13 @@
 import { Vector2 } from 'three';
-import { Vector3D } from '../../../common/geometry';
-import MprImageSource from '../../image-source/MprImageSource';
-import TwoDimensionalImageSource from '../../image-source/TwoDimensionalImageSource';
+import type { Vector3D } from '../../../common/geometry/index.ts';
+import MprImageSource from '../../image-source/MprImageSource.ts';
+import TwoDimensionalImageSource from '../../image-source/TwoDimensionalImageSource.ts';
 import {
   sectionFrom2dViewState,
   sectionTo2dViewState,
   translateOriginToCenter
-} from '../../section-util';
-import Viewer from '../../viewer/Viewer';
+} from '../../section-util.ts';
+import type Viewer from '../../viewer/Viewer.ts';
 
 export default function focusBy(
   viewer: Viewer,

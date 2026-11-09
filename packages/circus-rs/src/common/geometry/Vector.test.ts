@@ -1,4 +1,4 @@
-import * as vector from './Vector';
+import * as vector from './Vector.ts';
 import { Vector2, Box2 } from 'three';
 
 it('vector2ToPerpendicularClockwise', () => {

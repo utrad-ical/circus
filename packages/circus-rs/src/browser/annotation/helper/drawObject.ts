@@ -1,5 +1,5 @@
 import { Box2, Vector2 } from 'three';
-import { DirectedSegment } from '../../../common/geometry/Line';
+import type { DirectedSegment } from '../../../common/geometry/Line.ts';
 
 /**
  * Draw a point.

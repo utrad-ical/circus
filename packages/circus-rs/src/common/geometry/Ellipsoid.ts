@@ -1,4 +1,5 @@
-import { Box3, Vector2, Vector3, Line3, Plane, Box2 } from 'three';
+import type { Box3, Line3, Plane, Box2 } from 'three';
+import { Vector2, Vector3 } from 'three';
 
 export interface Ellipsoid {
   origin: Vector3;

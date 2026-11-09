@@ -1,5 +1,5 @@
-import RsHttpClient from '../../http-client/RsHttpClient';
-import { LabelData, LabelLoader } from './interface';
+import type RsHttpClient from '../../http-client/RsHttpClient.ts';
+import type { LabelData, LabelLoader } from './interface.ts';
 
 interface CsLabelCandidate {
   rank: number;

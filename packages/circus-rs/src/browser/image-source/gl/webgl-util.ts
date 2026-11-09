@@ -1,6 +1,7 @@
 import { Vector2, Vector3, Matrix4 } from 'three';
 import { mat4 } from 'gl-matrix';
-import { Section, vectorizeSection } from '../../../common/geometry/Section';
+import type { Section } from '../../../common/geometry/Section.ts';
+import { vectorizeSection } from '../../../common/geometry/Section.ts';
 
 export function resolveImageData(gl: WebGLRenderingContext) {
   const pixels = new Uint8Array(

@@ -1,10 +1,10 @@
-import { FunctionService } from '@utrad-ical/circus-lib';
-import { MongoClientPool } from '../../mongoClientPool';
+import type { FunctionService } from '@utrad-ical/circus-lib';
+import type { MongoClientPool } from '../../mongoClientPool.ts';
 import tarfs from 'tar-fs';
 import fs from 'fs-extra';
 import path from 'path';
-import * as circus from '../../interface';
-import { Readable } from 'stream';
+import type * as circus from '../../interface.ts';
+import type { Readable } from 'stream';
 
 /**
  * An implementation of PluginJobReporter that writes plugin status on

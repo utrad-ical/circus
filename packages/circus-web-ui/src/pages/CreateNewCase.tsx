@@ -1,7 +1,8 @@
 import IconButton from 'components/IconButton';
 import MultiTagSelect from 'components/MultiTagSelect';
 import ProjectSelector from 'components/ProjectSelector';
-import SeriesSelector, { SeriesEntry } from 'components/SeriesSelector';
+import type { SeriesEntry } from 'components/SeriesSelector';
+import SeriesSelector from 'components/SeriesSelector';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useApi } from 'utils/api';

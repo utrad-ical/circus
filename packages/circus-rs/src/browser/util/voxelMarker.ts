@@ -1,4 +1,5 @@
-import { Vector3, Box3 } from 'three';
+import type { Box3 } from 'three';
+import { Vector3 } from 'three';
 
 export interface VoxelMarker {
   marked(p: Vector3): boolean;

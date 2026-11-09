@@ -1,4 +1,4 @@
-import MemoryDicomFileRepository from './MemoryDicomFileRepository';
+import MemoryDicomFileRepository from './MemoryDicomFileRepository.ts';
 
 describe('MemoryDicomFileRepository', () => {
   test('save/load/delete image', async () => {

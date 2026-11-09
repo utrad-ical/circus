@@ -1,7 +1,8 @@
-import { Box } from '../common/geometry';
-import RawData from '../common/RawData';
-import floodFill, { BinaryArrayView2D } from './util/floodFill';
-import { OrientationString } from './section-util';
+import type { Box } from '../common/geometry/index.ts';
+import type RawData from '../common/RawData.ts';
+import type { BinaryArrayView2D } from './util/floodFill.ts';
+import floodFill from './util/floodFill.ts';
+import type { OrientationString } from './section-util.ts';
 import { Vector3, Vector2 } from 'three';
 
 /**

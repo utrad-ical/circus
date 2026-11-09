@@ -1,4 +1,4 @@
-import loadConfig from './loadConfig';
+import loadConfig from './loadConfig.ts';
 import path from 'path';
 
 test('with defaults', () => {

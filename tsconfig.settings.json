@@ -9,6 +9,7 @@
     "skipLibCheck": true,
     "erasableSyntaxOnly": true,
     "isolatedModules": true,
+    "rewriteRelativeImportExtensions": true,
     "types": ["node", "jest"],
 
     // The following settings will map '@utrad-ical/foo'

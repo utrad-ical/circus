@@ -1,4 +1,4 @@
-import Viewer from './Viewer';
+import type Viewer from './Viewer.ts';
 
 export default class ViewerEvent {
   public type: string;

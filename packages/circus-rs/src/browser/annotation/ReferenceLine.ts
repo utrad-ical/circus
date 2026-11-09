@@ -1,18 +1,19 @@
 import { Vector2, Vector3 } from 'three';
-import ViewerEventTarget from '../interface/ViewerEventTarget';
-import { convertViewerPointToVolumePoint } from '../tool/tool-util';
-import Viewer from '../viewer/Viewer';
-import ViewerEvent from '../viewer/ViewerEvent';
-import ViewState, { MprViewState } from '../ViewState';
-import Annotation, { DrawHints } from './Annotation';
+import type ViewerEventTarget from '../interface/ViewerEventTarget.ts';
+import { convertViewerPointToVolumePoint } from '../tool/tool-util.ts';
+import Viewer from '../viewer/Viewer.ts';
+import type ViewerEvent from '../viewer/ViewerEvent.ts';
+import type { MprViewState } from '../ViewState.ts';
+import type ViewState from '../ViewState.ts';
+import type { DrawHints } from './Annotation.ts';
+import type Annotation from './Annotation.ts';
+import type { HandleType, Line2 } from './helper/referenceLine.ts';
 import {
   drawReferenceLine,
   getReferenceLineOnScreen,
   handlePageByReferenceLine,
-  HandleType,
-  determineHandleType,
-  Line2
-} from './helper/referenceLine';
+  determineHandleType
+} from './helper/referenceLine.ts';
 
 interface Options {
   color?: string;

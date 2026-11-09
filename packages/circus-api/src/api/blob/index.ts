@@ -1,7 +1,7 @@
 import status from 'http-status';
 import rawBody from 'raw-body';
 import { createHash } from 'crypto';
-import { RouteMiddleware } from '../../typings/middlewares';
+import type { RouteMiddleware } from '../../typings/middlewares.ts';
 import { createGunzip } from 'zlib';
 
 const sha1 = (buf: Buffer) => {

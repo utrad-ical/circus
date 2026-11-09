@@ -1,6 +1,9 @@
-import { DicomFileRepository, FunctionService } from '@utrad-ical/circus-lib';
-import PartialVolumeDescriptor from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
-import { DicomTagReader } from '../interface';
+import type {
+  DicomFileRepository,
+  FunctionService
+} from '@utrad-ical/circus-lib';
+import type PartialVolumeDescriptor from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
+import type { DicomTagReader } from '../interface.ts';
 
 export type SeriesOrientationResolver = (
   seriesUid: string,

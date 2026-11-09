@@ -1,14 +1,14 @@
-import { setUpKoaTest, TestServer } from '../test/util-koa';
-import { setUpMongoFixture, usingMongo } from '../test/util-mongo';
+import type { TestServer } from '../test/util-koa.ts';
+import { setUpKoaTest } from '../test/util-koa.ts';
+import { setUpMongoFixture, usingMongo } from '../test/util-mongo.ts';
 
 import performSearch, {
   runAggregation,
   isPatientInfoInFilter
-} from './performSearch';
-import createCollectionAccessor, {
-  CollectionAccessor
-} from '../db/createCollectionAccessor';
-import createValidator from '../createValidator';
+} from './performSearch.ts';
+import type { CollectionAccessor } from '../db/createCollectionAccessor.ts';
+import createCollectionAccessor from '../db/createCollectionAccessor.ts';
+import createValidator from '../createValidator.ts';
 import path from 'path';
 import axios from 'axios';
 

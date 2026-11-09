@@ -1,12 +1,13 @@
-import RsHttpClient from '../../http-client/RsHttpClient';
-import DicomVolumeLoader from './DicomVolumeLoader';
-import DicomVolume from '../../../common/DicomVolume';
-import { DicomVolumeMetadata } from './DicomVolumeLoader';
-import PartialVolumeDescriptor, {
-  isValidPartialVolumeDescriptor
-} from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
-import VolumeCache, { nullVolumeCache } from './cache/VolumeCache';
-import { EstimateWindowType, createRequestParams } from './rs-loader-utils';
+import type RsHttpClient from '../../http-client/RsHttpClient.ts';
+import type DicomVolumeLoader from './DicomVolumeLoader.ts';
+import DicomVolume from '../../../common/DicomVolume.ts';
+import type { DicomVolumeMetadata } from './DicomVolumeLoader.ts';
+import type PartialVolumeDescriptor from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
+import { isValidPartialVolumeDescriptor } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
+import type VolumeCache from './cache/VolumeCache.ts';
+import { nullVolumeCache } from './cache/VolumeCache.ts';
+import type { EstimateWindowType } from './rs-loader-utils.ts';
+import { createRequestParams } from './rs-loader-utils.ts';
 
 interface RsVolumeLoaderOptions {
   rsHttpClient: RsHttpClient;

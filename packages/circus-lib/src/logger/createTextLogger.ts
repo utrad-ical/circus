@@ -1,5 +1,5 @@
 import util from 'util';
-import Transport from 'winston-transport';
+import type Transport from 'winston-transport';
 import winston from 'winston';
 import { format } from 'logform';
 

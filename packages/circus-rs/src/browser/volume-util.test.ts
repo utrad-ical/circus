@@ -1,5 +1,5 @@
-import RawData from '../common/RawData';
-import * as vu from './volume-util';
+import RawData from '../common/RawData.ts';
+import * as vu from './volume-util.ts';
 
 describe('scanBoundingBox', () => {
   test('should return null for volume with all zeros', () => {

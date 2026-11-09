@@ -1,4 +1,4 @@
-import * as rect from './Rectangle';
+import * as rect from './Rectangle.ts';
 import { Vector2, Box2 } from 'three';
 
 describe('fitRectangle', () => {

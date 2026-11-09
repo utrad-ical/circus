@@ -1,12 +1,12 @@
 import { Vector3 } from 'three';
-import { Vector3D } from '../../../common/geometry';
-import MprImageSource from '../../image-source/MprImageSource';
-import { isMprImageSourceWithDicomVolume } from '../../image-source/MprImageSourceWithDicomVolume';
-import { detectOrthogonalSection } from '../../section-util';
-import ViewerEvent from '../../viewer/ViewerEvent';
-import { floodFillOnSlice } from '../../volume-util';
-import { convertViewerPointToVolumeIndex } from '../tool-util';
-import VoxelCloudToolBase from './VoxelCloudToolBase';
+import type { Vector3D } from '../../../common/geometry/index.ts';
+import MprImageSource from '../../image-source/MprImageSource.ts';
+import { isMprImageSourceWithDicomVolume } from '../../image-source/MprImageSourceWithDicomVolume.ts';
+import { detectOrthogonalSection } from '../../section-util.ts';
+import type ViewerEvent from '../../viewer/ViewerEvent.ts';
+import { floodFillOnSlice } from '../../volume-util.ts';
+import { convertViewerPointToVolumeIndex } from '../tool-util.ts';
+import VoxelCloudToolBase from './VoxelCloudToolBase.ts';
 
 /**
  * Bucket tool performs the flood-fill operation along an orthogonal MPR plane.

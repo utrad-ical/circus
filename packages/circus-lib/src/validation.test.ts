@@ -1,4 +1,4 @@
-import { isDicomUid } from './validation';
+import { isDicomUid } from './validation.ts';
 
 test('isDicomUid', () => {
   expect(isDicomUid('')).toBe(false);

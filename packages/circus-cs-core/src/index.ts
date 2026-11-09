@@ -1,3 +1,3 @@
-export { default as createCsCore } from './createCsCore';
+export { default as createCsCore } from './createCsCore.ts';
 
-export * from './interface';
+export * from './interface.ts';

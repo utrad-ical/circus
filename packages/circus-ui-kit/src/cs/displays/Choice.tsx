@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { useCsResults } from '../CsResultsContext';
-import { Display } from '../Display';
-import { Button } from '../../ui/Button';
-import Tooltip from '../../ui/Tooltip';
+import { useCsResults } from '../CsResultsContext.ts';
+import type { Display } from '../Display.tsx';
+import { Button } from '../../ui/Button.tsx';
+import Tooltip from '../../ui/Tooltip.tsx';
 
 interface ChoiceItem {
   value: number | string;

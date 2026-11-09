@@ -1,5 +1,7 @@
-import { FeedbackEntry, useCsResults } from '@utrad-ical/circus-ui-kit';
-import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
+import type { FeedbackEntry } from '@utrad-ical/circus-ui-kit';
+import { useCsResults } from '@utrad-ical/circus-ui-kit';
+import type { DataGridColumnDefinition } from 'components/DataGrid';
+import DataGrid from 'components/DataGrid';
 import Icon from 'components/Icon';
 import { Button, Modal } from 'components/react-bootstrap';
 import TimeDisplay from 'components/TimeDisplay';

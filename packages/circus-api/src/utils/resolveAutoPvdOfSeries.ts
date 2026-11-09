@@ -1,8 +1,8 @@
-import { SeriesEntry } from '@utrad-ical/circus-cs-core';
-import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
-import { Models } from '../interface';
+import type { SeriesEntry } from '@utrad-ical/circus-cs-core';
+import type { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import type { Models } from '../interface.ts';
 import MultiRange from 'multi-integer-range';
-import { SeriesOrientationResolver } from './createSeriesOrientationResolver';
+import type { SeriesOrientationResolver } from './createSeriesOrientationResolver.ts';
 
 export interface AutoPvdSeriesEntry {
   seriesUid: string;

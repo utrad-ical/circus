@@ -2,7 +2,7 @@ import createDicomTagReader, {
   extractAge,
   parseDate,
   readDicomTags
-} from './createDicomTagReader';
+} from './createDicomTagReader.ts';
 import fs from 'fs-extra';
 import path from 'path';
 

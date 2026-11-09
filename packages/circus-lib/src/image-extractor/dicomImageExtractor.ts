@@ -1,9 +1,11 @@
-import { PixelFormat, pixelFormatInfo } from '../PixelFormat';
+import type { PixelFormat } from '../PixelFormat.ts';
+import { pixelFormatInfo } from '../PixelFormat.ts';
 
 import lj from 'jpeg-lossless-decoder-js';
-import parser, { DataSet } from 'dicom-parser';
-import { convertComplement } from './complementUtil';
-import { invertPixelValue } from './invertPixelValue';
+import type { DataSet } from 'dicom-parser';
+import parser from 'dicom-parser';
+import { convertComplement } from './complementUtil.ts';
+import { invertPixelValue } from './invertPixelValue.ts';
 
 interface RescaleParams {
   slope: number;

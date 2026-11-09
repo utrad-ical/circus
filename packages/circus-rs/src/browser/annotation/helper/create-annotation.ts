@@ -3,17 +3,17 @@ import {
   convertScreenCoordinateToVolumeCoordinate,
   detectOrthogonalSection,
   sectionFrom2dViewState
-} from '../../section-util';
-import Viewer from '../../viewer/Viewer';
-import Cuboid from '../Cuboid';
-import Ellipsoid from '../Ellipsoid';
-import PlaneFigure, { FigureType as PlaneFigureType } from '../PlaneFigure';
-import Point from '../Point';
-import Ruler from '../Ruler';
-import SolidFigure, {
-  FigureType as SolidFigureType,
-  getSolidFigureBoundingBoxWithResetDepth
-} from '../SolidFigure';
+} from '../../section-util.ts';
+import type Viewer from '../../viewer/Viewer.ts';
+import Cuboid from '../Cuboid.ts';
+import Ellipsoid from '../Ellipsoid.ts';
+import type { FigureType as PlaneFigureType } from '../PlaneFigure.ts';
+import PlaneFigure from '../PlaneFigure.ts';
+import Point from '../Point.ts';
+import Ruler from '../Ruler.ts';
+import type { FigureType as SolidFigureType } from '../SolidFigure.ts';
+import type SolidFigure from '../SolidFigure.ts';
+import { getSolidFigureBoundingBoxWithResetDepth } from '../SolidFigure.ts';
 
 interface CreateDefaultSolidFigureFromViewerOption {
   type?: SolidFigureType;

@@ -1,8 +1,9 @@
-import Annotation from '../../annotation/Annotation';
-import Viewer from '../../viewer/Viewer';
-import ViewerEvent from '../../viewer/ViewerEvent';
-import ViewState from '../../ViewState';
-import ToolBaseClass, { ToolOptions } from '../Tool';
+import type Annotation from '../../annotation/Annotation.ts';
+import type Viewer from '../../viewer/Viewer.ts';
+import type ViewerEvent from '../../viewer/ViewerEvent.ts';
+import type ViewState from '../../ViewState.ts';
+import type { ToolOptions } from '../Tool.ts';
+import ToolBaseClass from '../Tool.ts';
 
 export default abstract class AnnotationToolBase<
   T extends ToolOptions = ToolOptions

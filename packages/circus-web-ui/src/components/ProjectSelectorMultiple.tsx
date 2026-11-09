@@ -1,8 +1,8 @@
 import React from 'react';
 import MultiSelect from '@smikitky/rb-components/lib/MultiSelect';
-import BodyPartIcon from './BodyPartIcon';
+import BodyPartIcon from './BodyPartIcon.tsx';
 import styled from 'styled-components';
-import Project from 'types/Project';
+import type Project from 'types/Project';
 
 const Renderer: React.FC<{
   renderAs: 'select' | 'list';

@@ -1,5 +1,5 @@
-import { Models } from '../interface';
-import Command from './Command';
+import type { Models } from '../interface.ts';
+import type Command from './Command.ts';
 
 export const options = () => {
   return [

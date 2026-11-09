@@ -1,5 +1,5 @@
 import React from 'react';
-import Icon from './Icon';
+import Icon from './Icon.tsx';
 import classnames from 'classnames';
 import styled from 'styled-components';
 

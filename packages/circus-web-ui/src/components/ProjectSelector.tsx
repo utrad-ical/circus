@@ -1,7 +1,7 @@
 import React from 'react';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
-import BodyPartIcon from './BodyPartIcon';
-import Project from 'types/Project';
+import BodyPartIcon from './BodyPartIcon.tsx';
+import type Project from 'types/Project';
 
 const ProjectSelector: React.FC<{
   value: string;

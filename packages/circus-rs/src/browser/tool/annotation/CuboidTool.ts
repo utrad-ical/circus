@@ -1,5 +1,5 @@
-import { FigureType } from '../../annotation/SolidFigure';
-import SolidFigureTool from './SolidFigureTool';
+import type { FigureType } from '../../annotation/SolidFigure.ts';
+import SolidFigureTool from './SolidFigureTool.ts';
 
 /**
  * CuboidTool

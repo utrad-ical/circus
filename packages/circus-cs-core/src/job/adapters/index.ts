@@ -1,5 +1,5 @@
-import defaultHttpAdapter from './defaultHttpAdapter';
-import { RemoteAdapter } from '../../util/remote-job';
+import defaultHttpAdapter from './defaultHttpAdapter.ts';
+import type { RemoteAdapter } from '../../util/remote-job.ts';
 
 const adapters: Record<string, RemoteAdapter> = { defaultHttpAdapter };
 

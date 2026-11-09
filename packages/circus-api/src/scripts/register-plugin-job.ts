@@ -1,9 +1,9 @@
-import Command from './Command';
-import { TransactionManager } from '../interface';
-import { CsCore } from '@utrad-ical/circus-cs-core';
-import { toEntry } from './toEntry';
-import makeNewPluginJob from '../plugin-job/makeNewPluginJob';
-import { determineUserAccessInfo } from '../privilegeUtils';
+import type Command from './Command.ts';
+import type { TransactionManager } from '../interface.ts';
+import type { CsCore } from '@utrad-ical/circus-cs-core';
+import { toEntry } from './toEntry.ts';
+import makeNewPluginJob from '../plugin-job/makeNewPluginJob.ts';
+import { determineUserAccessInfo } from '../privilegeUtils.ts';
 
 export const options = () => {
   return [

@@ -1,8 +1,8 @@
-import KoaOAuth2Server from './KoaOAuth2Server';
-import { determineUserAccessInfo } from '../../privilegeUtils';
-import { Models, AuthProvider } from '../../interface';
-import koa from 'koa';
-import { FunctionService } from '@utrad-ical/circus-lib';
+import KoaOAuth2Server from './KoaOAuth2Server.ts';
+import { determineUserAccessInfo } from '../../privilegeUtils.ts';
+import type { Models, AuthProvider } from '../../interface.ts';
+import type koa from 'koa';
+import type { FunctionService } from '@utrad-ical/circus-lib';
 
 const debug = false;
 

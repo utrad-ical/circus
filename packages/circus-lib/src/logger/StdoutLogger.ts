@@ -1,7 +1,7 @@
-import Logger from './Logger';
+import type Logger from './Logger.ts';
 import * as winston from 'winston';
-import { FunctionService } from '../ServiceLoader';
-import createTextLogger from './createTextLogger';
+import type { FunctionService } from '../ServiceLoader.ts';
+import createTextLogger from './createTextLogger.ts';
 
 interface Options {
   /**

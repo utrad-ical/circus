@@ -1,4 +1,4 @@
-import { Models } from '../interface';
+import type { Models } from '../interface.ts';
 import MultiRange from 'multi-integer-range';
 
 export const toEntry = async (uidStr: string, models: Models) => {

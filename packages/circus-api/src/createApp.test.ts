@@ -1,8 +1,10 @@
-import axios, { AxiosInstance } from 'axios';
-import { setUpKoaTestWith, TestServer } from './test/util-koa';
-import createTestLogger from './test/util-logger';
-import { usingModels } from './test/util-mongo';
-import createApp from './createApp';
+import type { AxiosInstance } from 'axios';
+import axios from 'axios';
+import type { TestServer } from './test/util-koa.ts';
+import { setUpKoaTestWith } from './test/util-koa.ts';
+import createTestLogger from './test/util-logger.ts';
+import { usingModels } from './test/util-mongo.ts';
+import createApp from './createApp.ts';
 import * as ws from 'ws';
 
 let testServer: TestServer, ax: AxiosInstance;

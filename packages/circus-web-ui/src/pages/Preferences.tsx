@@ -1,19 +1,18 @@
 import * as et from '@smikitky/rb-components/lib/editor-types';
-import PropertyEditor, {
-  PropertyEditorProperties
-} from '@smikitky/rb-components/lib/PropertyEditor';
+import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
+import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import LabelColorsEditor from 'components/LabelColorsEditor';
 import { labeledSlider } from 'components/LabeledSlider';
 import { Button, FormControl, Panel } from 'components/react-bootstrap';
 import React, { useCallback, useEffect, useState } from 'react';
-import { SearchPreset, UserPreferences } from 'store/loginUser';
+import type { SearchPreset, UserPreferences } from 'store/loginUser';
 import { useApi } from 'utils/api';
 import { useUserPreferences } from 'utils/useLoginUser';
 import useShowMessage from 'utils/useShowMessage';
-import { WindowPropagationScope } from '../store/loginUser';
-import ScrollbarEditor from './ScrollBarsEditor';
+import type { WindowPropagationScope } from '../store/loginUser.ts';
+import ScrollbarEditor from './ScrollBarsEditor.tsx';
 
 const PresetDeleteEditor: et.Editor<SearchPreset[] | undefined> = props => {
   const { value = [], onChange } = props;

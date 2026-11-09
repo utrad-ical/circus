@@ -1,4 +1,4 @@
-import { command } from './ulid';
+import { command } from './ulid.ts';
 
 test('ulid', async () => {
   const commandFunc = await command(undefined, {});

@@ -1,6 +1,6 @@
-import * as su from '../../browser/section-util';
-import * as sect from './Section';
-import { Vector2D } from './Vector';
+import * as su from '../../browser/section-util.ts';
+import * as sect from './Section.ts';
+import type { Vector2D } from './Vector.ts';
 import { Vector3, Vector2 } from 'three';
 
 test('parallelToX', () => {

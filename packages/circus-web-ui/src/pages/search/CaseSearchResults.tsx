@@ -1,6 +1,7 @@
 import { confirm } from '@smikitky/rb-components/lib/modal';
 import CaseExportModal from 'components/CaseExportModal';
-import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
+import type { DataGridColumnDefinition } from 'components/DataGrid';
+import DataGrid from 'components/DataGrid';
 import DropdownButton from 'components/DropdownButton';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
@@ -24,7 +25,7 @@ import {
   Project,
   Tags,
   Times
-} from './SearchResultRenderer';
+} from './SearchResultRenderer.tsx';
 
 const Operation: React.FC<{
   value: any;

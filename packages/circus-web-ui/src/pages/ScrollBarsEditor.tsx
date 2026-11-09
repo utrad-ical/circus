@@ -1,6 +1,6 @@
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
-import * as et from '@smikitky/rb-components/lib/editor-types';
-import { ScrollBarsSettings } from 'store/loginUser';
+import type * as et from '@smikitky/rb-components/lib/editor-types';
+import type { ScrollBarsSettings } from 'store/loginUser';
 import React from 'react';
 import styled from 'styled-components';
 

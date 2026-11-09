@@ -1,10 +1,9 @@
 import { alert } from '@smikitky/rb-components/lib/modal';
 import intersliceInterpolation from '@utrad-ical/circus-rs/src/common/morphology/intersliceInterpolation';
-import { MorphologicalImageProcessingResults } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
+import type { MorphologicalImageProcessingResults } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
 import iiWorker from 'worker-loader!./ii-worker';
-import performLabelCreatingVoxelProcessing, {
-  VoxelLabelProcessor
-} from './performLabelCreatingVoxelProcessing';
+import type { VoxelLabelProcessor } from './performLabelCreatingVoxelProcessing.ts';
+import performLabelCreatingVoxelProcessing from './performLabelCreatingVoxelProcessing.ts';
 
 export interface IntersliceInterpolationOptions {
   orientation: 'Axial' | 'Coronal' | 'Sagital';

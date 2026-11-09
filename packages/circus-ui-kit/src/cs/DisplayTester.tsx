@@ -1,4 +1,5 @@
-import CsResultsContext, { PluginAttachmentLoader } from './CsResultsContext';
+import type { PluginAttachmentLoader } from './CsResultsContext.ts';
+import CsResultsContext from './CsResultsContext.ts';
 import React, { useState, useMemo } from 'react';
 
 const defaultAttachmentLoader = async () => {

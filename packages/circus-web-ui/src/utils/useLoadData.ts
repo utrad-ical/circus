@@ -1,5 +1,6 @@
 import { useState, useEffect, useReducer } from 'react';
-import cancelToken, { CancelToken } from './cancelToken';
+import type { CancelToken } from './cancelToken.ts';
+import cancelToken from './cancelToken.ts';
 
 /**
  * Asynchronously load data from the given async loader function.

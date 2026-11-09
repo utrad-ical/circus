@@ -1,8 +1,9 @@
 import { Pool } from 'tarn';
-import cp, { ChildProcessWithoutNullStreams } from 'child_process';
+import type { ChildProcessWithoutNullStreams } from 'child_process';
+import cp from 'child_process';
 import split from 'split';
-import { NoDepFunctionService } from '@utrad-ical/circus-lib';
-import { dicomUtilityRunnerDockerImage } from '../config/default';
+import type { NoDepFunctionService } from '@utrad-ical/circus-lib';
+import { dicomUtilityRunnerDockerImage } from '../config/default.ts';
 
 interface Options {
   maxConcurrency?: number;

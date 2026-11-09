@@ -1,4 +1,4 @@
-import { Vector2 } from 'three';
+import type { Vector2 } from 'three';
 
 let shadowCanvas: HTMLCanvasElement | undefined = undefined;
 export default function getShadowCanvas(

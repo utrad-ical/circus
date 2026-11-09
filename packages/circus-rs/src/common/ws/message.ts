@@ -1,4 +1,4 @@
-import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import type { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 
 const endOfJson = 0x0a;
 

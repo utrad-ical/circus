@@ -1,5 +1,5 @@
-import { RouteMiddleware } from '../../../typings/middlewares';
-import { QueueState } from '@utrad-ical/circus-cs-core';
+import type { RouteMiddleware } from '../../../typings/middlewares.ts';
+import type { QueueState } from '@utrad-ical/circus-cs-core';
 
 export const handleGet: RouteMiddleware = ({ cs, models }) => {
   return async (ctx, next) => {

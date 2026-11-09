@@ -1,6 +1,6 @@
 import React from 'react';
 import MultiSelect from '@smikitky/rb-components/lib/MultiSelect';
-import { PhysicalTag } from './Tag';
+import { PhysicalTag } from './Tag.tsx';
 
 const MultiTagSelect: React.FC<{
   tags: { name: string; color: string }[];

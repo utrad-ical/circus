@@ -1,11 +1,10 @@
 import { alert } from '@smikitky/rb-components/lib/modal';
-import { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
+import type { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
 import CCL26 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D26';
 import CCL6 from '@utrad-ical/circus-rs/src/common/CCL/ConnectedComponentLabeling3D6';
 import cclWorker from 'worker-loader!./ccl-worker';
-import performLabelCreatingVoxelProcessing, {
-  VoxelLabelProcessor
-} from './performLabelCreatingVoxelProcessing';
+import type { VoxelLabelProcessor } from './performLabelCreatingVoxelProcessing.ts';
+import performLabelCreatingVoxelProcessing from './performLabelCreatingVoxelProcessing.ts';
 
 export interface CclOptions {
   maxOutputComponents: number;

@@ -1,6 +1,6 @@
 import React from 'react';
-import { useCsResults } from '../CsResultsContext';
-import { Display } from '../Display';
+import { useCsResults } from '../CsResultsContext.ts';
+import type { Display } from '../Display.tsx';
 import styled from 'styled-components';
 
 interface DumpOptions {

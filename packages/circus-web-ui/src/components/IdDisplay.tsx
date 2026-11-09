@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import CopyToClipboardButton from './CopyToClipboardButton';
-import IconButton from './IconButton';
-import { OverlayTrigger, Popover } from './react-bootstrap';
+import CopyToClipboardButton from './CopyToClipboardButton.tsx';
+import IconButton from './IconButton.ts';
+import { OverlayTrigger, Popover } from './react-bootstrap.ts';
 
 const MyPopover = styled(Popover)`
   font-size: 80%;

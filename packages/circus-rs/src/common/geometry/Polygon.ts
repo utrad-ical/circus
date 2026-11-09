@@ -1,6 +1,8 @@
-import { ShapeUtils, Triangle, Vector2, Vector3 } from 'three';
-import { DirectedSegment, intersectsDirectedSegment } from './Line';
-import { vector2ToVector3 } from './Vector';
+import type { Vector3 } from 'three';
+import { ShapeUtils, Triangle, Vector2 } from 'three';
+import type { DirectedSegment } from './Line.ts';
+import { intersectsDirectedSegment } from './Line.ts';
+import { vector2ToVector3 } from './Vector.ts';
 
 export interface Polygon {
   vertices: Vector2[];

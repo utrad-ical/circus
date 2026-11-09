@@ -1,23 +1,26 @@
-import RsHttpClient from '../../http-client/RsHttpClient';
-import DicomVolumeLoader, {
+import type RsHttpClient from '../../http-client/RsHttpClient.ts';
+import type {
   ProgressEventEmitter,
   VolumeLoadController
-} from './DicomVolumeLoader';
-import DicomVolume from '../../../common/DicomVolume';
-import { DicomVolumeMetadata } from './DicomVolumeLoader';
-import PartialVolumeDescriptor, {
+} from './DicomVolumeLoader.ts';
+import type DicomVolumeLoader from './DicomVolumeLoader.ts';
+import DicomVolume from '../../../common/DicomVolume.ts';
+import type { DicomVolumeMetadata } from './DicomVolumeLoader.ts';
+import type PartialVolumeDescriptor from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
+import {
   isValidPartialVolumeDescriptor,
   partialVolumeDescriptorToArray
 } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
-import VolumeCache, { nullVolumeCache } from './cache/VolumeCache';
-import { EstimateWindowType, createRequestParams } from './rs-loader-utils';
-import {
+import type VolumeCache from './cache/VolumeCache.ts';
+import { nullVolumeCache } from './cache/VolumeCache.ts';
+import type { EstimateWindowType } from './rs-loader-utils.ts';
+import { createRequestParams } from './rs-loader-utils.ts';
+import type {
   TransferConnection,
   TransferConnectionFactory
-} from '../../ws/createTransferConnectionFactory';
-import MultiRange, {
-  Initializer as MultiRangeInitializer
-} from 'multi-integer-range';
+} from '../../ws/createTransferConnectionFactory.ts';
+import type { Initializer as MultiRangeInitializer } from 'multi-integer-range';
+import MultiRange from 'multi-integer-range';
 import { EventEmitter } from 'events';
 
 interface RsProgressiveVolumeLoaderOptions {

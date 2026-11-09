@@ -1,7 +1,7 @@
-import { readDicomTags } from './utils/createDicomTagReader';
-import { Disposable } from '@utrad-ical/circus-lib/src/ServiceLoader';
-import { CollectionAccessor } from './db/createCollectionAccessor';
-import * as mongo from 'mongodb';
+import type { readDicomTags } from './utils/createDicomTagReader.ts';
+import type { Disposable } from '@utrad-ical/circus-lib/src/ServiceLoader';
+import type { CollectionAccessor } from './db/createCollectionAccessor.ts';
+import type * as mongo from 'mongodb';
 
 export interface Validator {
   validate: (schema: any, data: any, mode?: string) => Promise<any>;

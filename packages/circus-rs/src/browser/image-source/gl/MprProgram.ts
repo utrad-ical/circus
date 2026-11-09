@@ -1,26 +1,28 @@
 import { Vector3, Matrix4 } from 'three';
-import { TransferFunction, InterpolationMode } from '../../ViewState';
-import ShaderProgram, {
+import type { TransferFunction, InterpolationMode } from '../../ViewState.ts';
+import type {
   AttribBufferer,
   SetUniform,
   VertexElementBufferer
-} from './ShaderProgram';
-import loadTransferFunctionIntoTexture from './texture/loadTransferFunctionIntoTexture';
-import { Section, vectorizeSection } from '../../../common/geometry/Section';
-import { ViewWindow } from '../../../common/ViewWindow';
+} from './ShaderProgram.ts';
+import ShaderProgram from './ShaderProgram.ts';
+import loadTransferFunctionIntoTexture from './texture/loadTransferFunctionIntoTexture.ts';
+import type { Section } from '../../../common/geometry/Section.ts';
+import { vectorizeSection } from '../../../common/geometry/Section.ts';
+import type { ViewWindow } from '../../../common/ViewWindow.ts';
+import type { Camera } from './webgl-util.ts';
 import {
-  Camera,
   createCamera,
   createModelViewMatrix,
   createPojectionMatrix
-} from './webgl-util';
-import DicomVolume from '../../../common/DicomVolume';
-import volumeTextureTransferer from './texture/volumeTextureTransferer';
+} from './webgl-util.ts';
+import type DicomVolume from '../../../common/DicomVolume.ts';
+import volumeTextureTransferer from './texture/volumeTextureTransferer.ts';
 // WebGL shader source (GLSL)
 import {
   vertexShaderSource,
   fragmentShaderSource
-} from './glsl/mprShaderSource';
+} from './glsl/mprShaderSource.ts';
 
 const maxTextures = 8;
 const maxCount = 512 * 512 * 1024;

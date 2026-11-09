@@ -1,16 +1,19 @@
-import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import type { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import archiver from 'archiver';
 import status from 'http-status';
 import { multirange } from 'multi-integer-range';
-import { CircusContext, RouteMiddleware } from '../../typings/middlewares';
-import checkFilter from '../../utils/checkFilter';
-import { fileOrArchiveIterator } from '../../utils/directoryIterator';
-import isLikeDicom from '../../utils/isLikeDicom';
+import type {
+  CircusContext,
+  RouteMiddleware
+} from '../../typings/middlewares.ts';
+import checkFilter from '../../utils/checkFilter.ts';
+import { fileOrArchiveIterator } from '../../utils/directoryIterator.ts';
+import isLikeDicom from '../../utils/isLikeDicom.ts';
 import {
   extractFilter,
   isPatientInfoInFilter,
   performAggregationSearch
-} from '../performSearch';
+} from '../performSearch.ts';
 
 const maskPatientInfo = (ctx: CircusContext) => {
   return (series: any) => {

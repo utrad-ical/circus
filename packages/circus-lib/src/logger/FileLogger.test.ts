@@ -1,7 +1,7 @@
-import createFileLogger from './FileLogger';
+import createFileLogger from './FileLogger.ts';
 import path from 'path';
 import fs from 'fs-extra';
-import sleep from '../sleep';
+import sleep from '../sleep.ts';
 
 const logDir = path.resolve(__dirname, '../../testdata/logger');
 

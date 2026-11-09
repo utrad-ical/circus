@@ -1,15 +1,16 @@
-import { FunctionService, Logger } from '@utrad-ical/circus-lib';
+import type { FunctionService, Logger } from '@utrad-ical/circus-lib';
 import { EventEmitter } from 'events';
 import fs from 'fs-extra';
 import status from 'http-status';
 import _ from 'lodash';
 import mime from 'mime';
-import { PassThrough, Writable } from 'stream';
+import type { Writable } from 'stream';
+import { PassThrough } from 'stream';
 import path from 'path';
-import StrictEventEmitter from 'strict-event-emitter-types';
-import generateUniqueId from '../src/utils/generateUniqueId';
-import { Models } from './interface';
-import { CircusContext } from './typings/middlewares';
+import type StrictEventEmitter from 'strict-event-emitter-types';
+import generateUniqueId from '../src/utils/generateUniqueId.ts';
+import type { Models } from './interface.ts';
+import type { CircusContext } from './typings/middlewares.ts';
 
 export type TaskEventEmitter = StrictEventEmitter<EventEmitter, TaskEvents>;
 

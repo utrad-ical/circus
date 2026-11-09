@@ -1,9 +1,9 @@
-import { TransferFunction } from '../../../ViewState';
-import buildTransferFunctionMap from './buildTransferFunctionMap';
+import type { TransferFunction } from '../../../ViewState.ts';
+import buildTransferFunctionMap from './buildTransferFunctionMap.ts';
 import {
   transferFunctionRange,
   transferFunctionTextureSize
-} from './transfer-function-constants';
+} from './transfer-function-constants.ts';
 
 export default function loadTransferFunctionIntoTexture(
   gl: WebGLRenderingContext,

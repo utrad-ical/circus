@@ -1,5 +1,5 @@
-import RawData from './RawData';
-import { Vector3D } from './geometry';
+import RawData from './RawData.ts';
+import type { Vector3D } from './geometry/index.ts';
 
 /**
  * RawData with voxelSize property that represents the size of one voxel

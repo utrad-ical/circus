@@ -1,12 +1,14 @@
-import { Action, configureStore } from '@reduxjs/toolkit';
-import { AnyAction, combineReducers, Dispatch } from 'redux';
-import { ThunkAction, ThunkDispatch } from 'redux-thunk';
-import loginUser from './loginUser';
-import messages from './messages';
-import plugins from './plugins';
-import searches from './searches';
-import taskProgress from './taskProgress';
-import users from './users';
+import type { Action } from '@reduxjs/toolkit';
+import { configureStore } from '@reduxjs/toolkit';
+import type { AnyAction, Dispatch } from 'redux';
+import { combineReducers } from 'redux';
+import type { ThunkAction, ThunkDispatch } from 'redux-thunk';
+import loginUser from './loginUser.ts';
+import messages from './messages.ts';
+import plugins from './plugins.ts';
+import searches from './searches.ts';
+import taskProgress from './taskProgress.ts';
+import users from './users.ts';
 
 const reducer = combineReducers({
   searches,

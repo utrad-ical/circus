@@ -1,6 +1,6 @@
-import { CircusIconDefinition } from 'components/BodyPartIcon';
-import { Schema } from '@smikitky/rb-components/lib/JsonSchemaEditor';
-import CaseTag from './CaseTag';
+import type { CircusIconDefinition } from 'components/BodyPartIcon';
+import type { Schema } from '@smikitky/rb-components/lib/JsonSchemaEditor';
+import type CaseTag from './CaseTag.ts';
 
 export type ProjectRoles =
   | 'read'

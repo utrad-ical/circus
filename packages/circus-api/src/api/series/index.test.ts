@@ -1,12 +1,13 @@
-import { AxiosInstance } from 'axios';
+import type { AxiosInstance } from 'axios';
 import FormData from 'form-data';
 import fs from 'fs-extra';
 import path from 'path';
 import tarfs from 'tar-fs';
 import zlib from 'zlib';
-import { setUpMongoFixture } from '../../test/util-mongo';
-import { ApiTest, setUpAppForRoutesTest } from '../../test/util-routes';
-import delay from '../../utils/delay';
+import { setUpMongoFixture } from '../../test/util-mongo.ts';
+import type { ApiTest } from '../../test/util-routes.ts';
+import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
+import delay from '../../utils/delay.ts';
 
 let apiTest: ApiTest, ax: typeof apiTest.axiosInstances;
 

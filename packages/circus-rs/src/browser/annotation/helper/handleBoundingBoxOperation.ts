@@ -1,7 +1,7 @@
-import { Vector3D } from '../../../common/geometry';
+import type { Vector3D } from '../../../common/geometry/index.ts';
 import { Vector3 } from 'three';
-import { OrientationString } from '../../section-util';
-import { BoundingRectWithHandleHitType } from './hit-test';
+import type { OrientationString } from '../../section-util.ts';
+import type { BoundingRectWithHandleHitType } from './hit-test.ts';
 
 type BoundingBox = [Vector3, Vector3];
 type Axis = 'x' | 'y' | 'z';

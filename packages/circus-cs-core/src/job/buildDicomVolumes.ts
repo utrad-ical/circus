@@ -1,7 +1,7 @@
 import archiver from 'archiver';
-import { Writable } from 'stream';
+import type { Writable } from 'stream';
 import tarfs from 'tar-fs';
-import { DicomVoxelDumper, SeriesEntry } from '../interface';
+import type { DicomVoxelDumper, SeriesEntry } from '../interface.ts';
 
 /**
  * Builds raw volume data (and associated files) from DICOM series

@@ -1,6 +1,7 @@
 import { ServiceLoader } from '@utrad-ical/circus-lib';
-import config from './config';
-import configureServiceLoader, { RsServices } from './configureServiceLoader';
+import config from './config.ts';
+import type { RsServices } from './configureServiceLoader.ts';
+import configureServiceLoader from './configureServiceLoader.ts';
 
 const main = async () => {
   console.log('CIRCUS RS is starting up...');

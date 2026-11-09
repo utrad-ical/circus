@@ -1,30 +1,30 @@
-import axios, { AxiosInstance } from 'axios';
+import type { AxiosInstance } from 'axios';
+import axios from 'axios';
 import fs from 'fs-extra';
 import { safeLoad as yaml } from 'js-yaml';
 import path from 'path';
-import createApp from '../createApp';
-import { setUpKoaTestWith } from './util-koa';
-import { connectMongo, setUpMongoFixture } from './util-mongo';
-import * as cscore from '@utrad-ical/circus-cs-core';
-import createTestLogger from './util-logger';
-import createValidator from '../createValidator';
-import createModels from '../db/createModels';
-import createMemoryStorage from '../storage/MemoryStorage';
-import createDicomImporter from '../createDicomImporter';
-import {
-  MemoryDicomFileRepository,
-  DicomFileRepository
-} from '@utrad-ical/circus-lib';
-import createDicomTagReader from '../utils/createDicomTagReader';
-import createDicomUtilityRunner from '../utils/createDicomUtilityRunner';
-import createTaskManager, { TaskManager } from '../createTaskManager';
-import { DicomVoxelDumper } from '@utrad-ical/circus-cs-core';
-import { Archiver } from 'archiver';
+import createApp from '../createApp.ts';
+import { setUpKoaTestWith } from './util-koa.ts';
+import { connectMongo, setUpMongoFixture } from './util-mongo.ts';
+import type * as cscore from '@utrad-ical/circus-cs-core';
+import createTestLogger from './util-logger.ts';
+import createValidator from '../createValidator.ts';
+import createModels from '../db/createModels.ts';
+import createMemoryStorage from '../storage/MemoryStorage.ts';
+import createDicomImporter from '../createDicomImporter.ts';
+import type { DicomFileRepository } from '@utrad-ical/circus-lib';
+import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib';
+import createDicomTagReader from '../utils/createDicomTagReader.ts';
+import createDicomUtilityRunner from '../utils/createDicomUtilityRunner.ts';
+import type { TaskManager } from '../createTaskManager.ts';
+import createTaskManager from '../createTaskManager.ts';
+import type { DicomVoxelDumper } from '@utrad-ical/circus-cs-core';
+import type { Archiver } from 'archiver';
 import { EventEmitter } from 'events';
-import createOauthServer from '../middleware/auth/createOauthServer';
-import createDefaultAuthProvider from '../middleware/auth/authProvider/DefaultAuthProvider';
-import { Database } from '../interface';
-import createTransactionManager from '../createTransactionManager';
+import createOauthServer from '../middleware/auth/createOauthServer.ts';
+import createDefaultAuthProvider from '../middleware/auth/authProvider/DefaultAuthProvider.ts';
+import type { Database } from '../interface.ts';
+import createTransactionManager from '../createTransactionManager.ts';
 import * as ws from 'ws';
 
 /**

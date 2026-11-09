@@ -2,11 +2,11 @@ import Archiver from 'archiver';
 import { EventEmitter } from 'events';
 import memory from 'memory-streams';
 import path from 'path';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import tar from 'tar-stream';
-import * as circus from '../interface';
-import DockerRunner from '../util/DockerRunner';
-import pluginJobRunner, { executePlugin } from './pluginJobRunner';
+import type * as circus from '../interface.ts';
+import DockerRunner from '../util/DockerRunner.ts';
+import pluginJobRunner, { executePlugin } from './pluginJobRunner.ts';
 
 const testDir = path.resolve(__dirname, '../../test/');
 const workingDirectory = path.join(testDir, 'working/');

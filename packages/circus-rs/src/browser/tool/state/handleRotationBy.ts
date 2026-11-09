@@ -1,5 +1,5 @@
-import { rotateAroundXAxis, rotateAroundYAxis } from '../../section-util';
-import Viewer from '../../viewer/Viewer';
+import { rotateAroundXAxis, rotateAroundYAxis } from '../../section-util.ts';
+import type Viewer from '../../viewer/Viewer.ts';
 
 export default function handleRotationBy(
   viewer: Viewer,

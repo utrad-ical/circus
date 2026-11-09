@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import {
+import type {
   Display,
-  useCsResults,
   FeedbackEntry,
   FeedbackTarget,
   FeedbackReport
 } from '@utrad-ical/circus-ui-kit';
-import Section from './Section';
+import { useCsResults } from '@utrad-ical/circus-ui-kit';
+import Section from './Section.tsx';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import { produce } from 'immer';
 

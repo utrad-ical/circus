@@ -1,5 +1,5 @@
-import { defaultPreferences } from '../../utils/preferenceUtils';
-import { RouteMiddleware } from '../../typings/middlewares';
+import { defaultPreferences } from '../../utils/preferenceUtils.ts';
+import type { RouteMiddleware } from '../../typings/middlewares.ts';
 
 export const handleGet: RouteMiddleware = () => {
   return async (ctx, next) => {

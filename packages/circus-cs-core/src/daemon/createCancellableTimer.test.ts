@@ -1,4 +1,4 @@
-import createCancellableTimer from './createCancellableTimer';
+import createCancellableTimer from './createCancellableTimer.ts';
 
 describe('createCancellableTimer', () => {
   test('basic function', async () => {

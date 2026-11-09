@@ -1,8 +1,8 @@
 'use strict';
 
-import { DicomVolumeMetadata } from '../image-source/volume-loader/DicomVolumeLoader';
-import { Section } from '../../common/geometry';
-import { zMinMaxOfSection } from '../section-util';
+import type { DicomVolumeMetadata } from '../image-source/volume-loader/DicomVolumeLoader.ts';
+import type { Section } from '../../common/geometry/index.ts';
+import { zMinMaxOfSection } from '../section-util.ts';
 
 export default function imageRangeOfSection(
   section: Section,

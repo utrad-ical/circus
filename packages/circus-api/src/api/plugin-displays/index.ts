@@ -1,8 +1,8 @@
 import fs from 'fs-extra';
 import httpStatus from 'http-status';
 import path from 'path';
-import createDockerFileExtractor from '../../utils/dockerFileExtractor';
-import { RouteMiddleware } from '../../typings/middlewares';
+import createDockerFileExtractor from '../../utils/dockerFileExtractor.ts';
+import type { RouteMiddleware } from '../../typings/middlewares.ts';
 
 export const handleGet: RouteMiddleware = ({
   pluginCachePath,

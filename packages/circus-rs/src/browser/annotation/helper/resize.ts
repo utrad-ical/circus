@@ -1,8 +1,8 @@
-import { Vector3D } from '../../../common/geometry';
-import { Vector3 } from 'three';
-import { OrientationString } from '../../section-util';
-import { BoundingRectWithHandleHitType } from './hit-test';
-import handleBoundingBoxOperation from './handleBoundingBoxOperation';
+import type { Vector3D } from '../../../common/geometry/index.ts';
+import type { Vector3 } from 'three';
+import type { OrientationString } from '../../section-util.ts';
+import type { BoundingRectWithHandleHitType } from './hit-test.ts';
+import handleBoundingBoxOperation from './handleBoundingBoxOperation.ts';
 
 const resize = (
   handleType: BoundingRectWithHandleHitType,

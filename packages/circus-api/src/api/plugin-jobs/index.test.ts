@@ -1,8 +1,9 @@
-import { setUpAppForRoutesTest, ApiTest } from '../../test/util-routes';
-import { AxiosInstance } from 'axios';
-import { setUpMongoFixture } from '../../test/util-mongo';
+import type { ApiTest } from '../../test/util-routes.ts';
+import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
+import type { AxiosInstance } from 'axios';
+import { setUpMongoFixture } from '../../test/util-mongo.ts';
 import status from 'http-status';
-import { extractPatientIdNameFilter } from '.';
+import { extractPatientIdNameFilter } from './index.ts';
 
 let apiTest: ApiTest,
   alice: AxiosInstance,

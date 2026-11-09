@@ -1,10 +1,10 @@
-import { FunctionService } from '@utrad-ical/circus-lib';
+import type { FunctionService } from '@utrad-ical/circus-lib';
 import chalk from 'chalk';
 import moment from 'moment';
 import { table } from 'table';
-import sleep from '../util/sleep';
-import Command from './Command';
-import * as circus from '../interface';
+import sleep from '../util/sleep.ts';
+import type Command from './Command.ts';
+import type * as circus from '../interface.ts';
 
 const dt = (date: Date) => {
   const m = moment(date);

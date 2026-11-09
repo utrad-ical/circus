@@ -5,12 +5,12 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { newSearch, updateSearch } from 'store/searches';
 import styled, { keyframes } from 'styled-components';
-import Task from 'types/Task';
+import type Task from 'types/Task';
 import { useApi } from 'utils/api';
 import useTaskDismisser from 'utils/useTaskDismisser';
 import useTaskDownloadHandler from 'utils/useTaskDownloadHandler';
-import { TaskProgress } from '../store/taskProgress';
-import NavMenu from './NavMenu';
+import type { TaskProgress } from '../store/taskProgress.ts';
+import NavMenu from './NavMenu.tsx';
 
 const TaskNotifier: React.FC<{}> = props => {
   const api = useApi();

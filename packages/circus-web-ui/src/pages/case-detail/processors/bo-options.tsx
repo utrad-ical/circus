@@ -1,13 +1,13 @@
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import LabelDisplay from '../LabelDisplay';
-import {
+import LabelDisplay from '../LabelDisplay.tsx';
+import type {
   BooleanOperationsOptions,
-  BooleanOperationType,
-  booleanOperationTypes
-} from './booleanOperationsProcessor';
-import { Editor } from './processor-types';
+  BooleanOperationType
+} from './booleanOperationsProcessor.ts';
+import { booleanOperationTypes } from './booleanOperationsProcessor.ts';
+import type { Editor } from './processor-types.ts';
 
 const RenderOperationType: React.FC<{
   caption: BooleanOperationType;

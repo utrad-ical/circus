@@ -2,7 +2,7 @@ import { multirange } from 'multi-integer-range';
 import RawData from '@utrad-ical/circus-rs/src/common/RawData';
 import { EventEmitter } from 'events';
 import { PassThrough } from 'stream';
-import createMhdPacker from './createMhdPacker';
+import createMhdPacker from './createMhdPacker.ts';
 import rawBody from 'raw-body';
 import zip from 'jszip';
 

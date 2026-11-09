@@ -1,6 +1,6 @@
-import RawData from './RawData';
-import { PixelFormat } from '@utrad-ical/circus-lib/src/PixelFormat';
-import { Vector3D } from './geometry';
+import RawData from './RawData.ts';
+import type { PixelFormat } from '@utrad-ical/circus-lib/src/PixelFormat';
+import type { Vector3D } from './geometry/index.ts';
 
 test('create binary data', () => {
   const raw = new RawData([8, 8, 8], 'binary');

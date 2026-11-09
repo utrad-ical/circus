@@ -1,8 +1,8 @@
 import { Button, Modal, ProgressBar } from 'components/react-bootstrap';
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { ProcessorProgress, Editor } from './processor-types';
-import { InternalLabel } from '../labelData';
+import type { ProcessorProgress, Editor } from './processor-types.ts';
+import type { InternalLabel } from '../labelData.ts';
 
 const ProcessorModal: React.FC<{
   title: string;

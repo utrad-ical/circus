@@ -1,4 +1,4 @@
-import StaticDicomFileRepository from './StaticDicomFileRepository';
+import StaticDicomFileRepository from './StaticDicomFileRepository.ts';
 import path from 'path';
 import fs from 'fs-extra';
 

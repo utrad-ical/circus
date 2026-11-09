@@ -1,8 +1,8 @@
 import path from 'path';
 import fs from 'fs-extra';
-import { testClientPool } from '../testHelper';
-import createMongoPluginDefinitionAccessor from './MongoPluginDefinitionAccessor';
-import { MongoClientPool } from '../mongoClientPool';
+import { testClientPool } from '../testHelper.ts';
+import createMongoPluginDefinitionAccessor from './MongoPluginDefinitionAccessor.ts';
+import type { MongoClientPool } from '../mongoClientPool.ts';
 
 describe('MongoPluginDefinitionAccesor', () => {
   let mongoClientPool: MongoClientPool;

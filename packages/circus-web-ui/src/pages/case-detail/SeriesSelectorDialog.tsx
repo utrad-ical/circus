@@ -1,11 +1,12 @@
 import { Button, Modal } from 'components/react-bootstrap';
-import SeriesSelector, { SeriesEntry } from 'components/SeriesSelector';
+import type { SeriesEntry } from 'components/SeriesSelector';
+import SeriesSelector from 'components/SeriesSelector';
 import { produce } from 'immer';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useApi } from 'utils/api';
 import fillPartialVolumeDescriptors from 'utils/partialVolumeDescriptor';
-import { SeriesEntryWithLabels } from './revisionData';
+import type { SeriesEntryWithLabels } from './revisionData.ts';
 
 const SeriesSelectorDialog: React.FC<{
   onResolve: (result: SeriesEntryWithLabels[] | null) => void;

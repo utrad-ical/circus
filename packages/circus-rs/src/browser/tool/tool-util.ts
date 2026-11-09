@@ -1,12 +1,12 @@
 import { Vector2, Vector3 } from 'three';
-import MprImageSource from '../image-source/MprImageSource';
+import type MprImageSource from '../image-source/MprImageSource.ts';
 import {
   convertPointToIndex,
   convertScreenCoordinateToVolumeCoordinate,
   convertVolumeCoordinateToScreenCoordinate,
   sectionFrom2dViewState
-} from '../section-util';
-import Viewer from '../viewer/Viewer';
+} from '../section-util.ts';
+import type Viewer from '../viewer/Viewer.ts';
 
 /**
  * Utility method which works in the same way as Math.sign().

@@ -1,4 +1,4 @@
-import isDirectory from './isDirectory';
+import isDirectory from './isDirectory.ts';
 
 test('return true for true directory', async () => {
   expect(await isDirectory(__dirname)).toBe(true);

@@ -1,5 +1,5 @@
-import { NoDepFunctionService } from '@utrad-ical/circus-lib';
-import ImageEncoder from './ImageEncoder';
+import type { NoDepFunctionService } from '@utrad-ical/circus-lib';
+import type ImageEncoder from './ImageEncoder.ts';
 import stream from 'stream';
 import Png from 'png';
 

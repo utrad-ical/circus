@@ -1,4 +1,4 @@
-import DicomVolume from '../../common/DicomVolume';
+import type DicomVolume from '../../common/DicomVolume.ts';
 
 export default interface MprImageSourceWithDicomVolume {
   getLoadedDicomVolume: () => DicomVolume | undefined;

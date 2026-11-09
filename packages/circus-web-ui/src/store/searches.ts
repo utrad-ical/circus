@@ -1,9 +1,10 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 import { confirm, prompt } from '@smikitky/rb-components/lib/modal';
-import { AppDispatch, AppThunk } from 'store';
-import { ApiCaller } from 'utils/api';
-import Series from 'types/Series';
-import Task from 'types/Task';
+import type { AppDispatch, AppThunk } from 'store';
+import type { ApiCaller } from 'utils/api';
+import type Series from 'types/Series';
+import type Task from 'types/Task';
 
 export interface SearchResource {
   endPoint: string;

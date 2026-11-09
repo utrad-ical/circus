@@ -1,6 +1,6 @@
 import status from 'http-status';
-import { CollectionAccessor } from '../db/createCollectionAccessor';
-import { CircusContext } from '../typings/middlewares';
+import type { CollectionAccessor } from '../db/createCollectionAccessor.ts';
+import type { CircusContext } from '../typings/middlewares.ts';
 import { isPlainObject } from 'lodash';
 import { EJSON } from 'bson';
 

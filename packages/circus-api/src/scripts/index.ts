@@ -3,9 +3,10 @@ import fs from 'fs';
 import path from 'path';
 import glob from 'glob-promise';
 import chalk from 'chalk';
-import Command, { CommandFunc } from './Command';
-import createServiceLoader from '../createServiceLoader';
-import config from '../config';
+import type { CommandFunc } from './Command.ts';
+import type Command from './Command.ts';
+import createServiceLoader from '../createServiceLoader.ts';
+import config from '../config/index.ts';
 
 const packageFile = path.join(__dirname, '../../package.json');
 const version = JSON.parse(fs.readFileSync(packageFile, 'utf8')).version;

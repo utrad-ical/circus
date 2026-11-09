@@ -1,7 +1,8 @@
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { UserPreferences, userPreferencesUpdated } from 'store/loginUser';
-import { useApi } from './api';
+import type { UserPreferences } from 'store/loginUser';
+import { userPreferencesUpdated } from 'store/loginUser';
+import { useApi } from './api.ts';
 
 /**
  * A React cutsom hook to fetch login user from redux store.

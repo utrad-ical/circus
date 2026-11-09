@@ -1,12 +1,13 @@
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
-import {
-  CsResultsContext,
+import type {
   CsResultsContextType,
   FeedbackReport,
   Job,
   Plugin
 } from '@utrad-ical/circus-ui-kit';
-import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
+import { CsResultsContext } from '@utrad-ical/circus-ui-kit';
+import type { DataGridColumnDefinition } from 'components/DataGrid';
+import DataGrid from 'components/DataGrid';
 import DropdownButton from 'components/DropdownButton';
 import FullSpanContainer from 'components/FullSpanContainer';
 import Icon from 'components/Icon';
@@ -24,7 +25,7 @@ import { Link, useParams } from 'react-router-dom';
 import { newSearch } from 'store/searches';
 import styled from 'styled-components';
 import { useApi } from 'utils/api';
-import { CancelToken } from 'utils/cancelToken';
+import type { CancelToken } from 'utils/cancelToken';
 import useLoadData from 'utils/useLoadData';
 import useLoginUser from 'utils/useLoginUser';
 import useQuery from 'utils/useQuery';
@@ -33,13 +34,13 @@ import {
   PluginRenderer,
   Status,
   Times
-} from '../search/SearchResultRenderer';
-import DeleteFeedbackModal from './DeleteFeedbackModal';
-import InvestigateJobModal from './InvestigateJobModal';
-import MainDisplay from './MainDisplay';
-import PersonalConsensualSwitch from './PersonalConsensualSwitch';
-import loadDisplay from './loadDisplay';
-import useFeedback, { actions } from './useFeedback';
+} from '../search/SearchResultRenderer.tsx';
+import DeleteFeedbackModal from './DeleteFeedbackModal.tsx';
+import InvestigateJobModal from './InvestigateJobModal.tsx';
+import MainDisplay from './MainDisplay.tsx';
+import PersonalConsensualSwitch from './PersonalConsensualSwitch.tsx';
+import loadDisplay from './loadDisplay.ts';
+import useFeedback, { actions } from './useFeedback.tsx';
 
 const StyledDiv = styled.div`
   display: flex;

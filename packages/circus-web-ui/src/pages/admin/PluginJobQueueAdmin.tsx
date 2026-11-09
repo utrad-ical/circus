@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
-import AdminContainer from './AdminContainer';
+import AdminContainer from './AdminContainer.tsx';
 import SearchResultsView from 'components/SearchResultsView';
 import { newSearch } from 'store/searches';
 import { useDispatch } from 'react-redux';
-import DataGrid, { DataGridColumnDefinition } from 'components/DataGrid';
+import type { DataGridColumnDefinition } from 'components/DataGrid';
+import DataGrid from 'components/DataGrid';
 import { useApi } from 'utils/api';
 
 const columns: DataGridColumnDefinition[] = [

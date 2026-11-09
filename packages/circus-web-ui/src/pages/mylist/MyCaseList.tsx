@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { SearchResource } from 'store/searches';
-import CaseSearchResultsView from '../search/CaseSearchResults';
-import MyListPage from './MyListPage';
+import type { SearchResource } from 'store/searches';
+import CaseSearchResultsView from '../search/CaseSearchResults.tsx';
+import MyListPage from './MyListPage.tsx';
 
 const MyCaseList: React.FC<{}> = props => {
   const { myListId } = useParams<{ myListId?: string }>();

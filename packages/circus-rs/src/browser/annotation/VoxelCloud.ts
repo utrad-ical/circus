@@ -1,21 +1,21 @@
 import { Box2, Box3, Vector2, Vector3 } from 'three';
+import type { Section, Vector3D } from '../../common/geometry/index.ts';
 import {
   box2GrowSubpixel,
-  intersectionOfBoxAndPlane,
-  Section,
-  Vector3D
-} from '../../common/geometry';
-import RawData from '../../common/RawData';
-import MprImageSource from '../image-source/MprImageSource';
+  intersectionOfBoxAndPlane
+} from '../../common/geometry/index.ts';
+import RawData from '../../common/RawData.ts';
+import type MprImageSource from '../image-source/MprImageSource.ts';
 import {
   convertScreenCoordinateToVolumeCoordinate,
   convertSectionToIndex,
   convertVolumeCoordinateToScreenCoordinate
-} from '../section-util';
-import Viewer from '../viewer/Viewer';
-import ViewState from '../ViewState';
-import { scanBoundingBox } from '../volume-util';
-import Annotation, { DrawHints } from './Annotation';
+} from '../section-util.ts';
+import type Viewer from '../viewer/Viewer.ts';
+import type ViewState from '../ViewState.ts';
+import { scanBoundingBox } from '../volume-util.ts';
+import type { DrawHints } from './Annotation.ts';
+import type Annotation from './Annotation.ts';
 
 /**
  * VoxelCloud is a type of Annotation that can be registered to a Composition.

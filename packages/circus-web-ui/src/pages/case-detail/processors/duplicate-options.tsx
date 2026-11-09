@@ -1,7 +1,7 @@
-import { Editor } from './processor-types';
+import type { Editor } from './processor-types.ts';
 import { FormControl } from 'components/react-bootstrap';
 import React from 'react';
-import { DuplicateOptions } from './duplicateProcessor';
+import type { DuplicateOptions } from './duplicateProcessor.ts';
 
 export const initialOptions: DuplicateOptions = {
   newName: 'duplicated label'

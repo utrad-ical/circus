@@ -1,16 +1,16 @@
 import { EventEmitter } from 'events';
-import Annotation from '../annotation/Annotation';
-import Composition from '../Composition';
-import {
+import type Annotation from '../annotation/Annotation.ts';
+import type Composition from '../Composition.ts';
+import type {
   DrawResult,
-  isDraft,
   ViewStateResizeTransformer
-} from '../image-source/ImageSource';
-import LoadingIndicator from '../interface/LoadingIndicator';
-import { Tool } from '../tool/Tool';
-import ViewState from '../ViewState';
-import defaultLoadingIndicator from './defaultLoadingIndicator';
-import ViewerEvent from './ViewerEvent';
+} from '../image-source/ImageSource.ts';
+import { isDraft } from '../image-source/ImageSource.ts';
+import type LoadingIndicator from '../interface/LoadingIndicator.ts';
+import type { Tool } from '../tool/Tool.ts';
+import type ViewState from '../ViewState.ts';
+import defaultLoadingIndicator from './defaultLoadingIndicator.ts';
+import ViewerEvent from './ViewerEvent.ts';
 
 /**
  * Viewer is the main component of CIRCUS RS, and wraps a HTML canvas element

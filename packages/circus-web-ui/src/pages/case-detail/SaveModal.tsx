@@ -7,8 +7,8 @@ import {
 } from 'components/react-bootstrap';
 import MenuItem from 'components/MenuItem';
 import keycode from 'keycode';
-import { ExternalLabel } from 'pages/case-detail/labelData';
-import { Revision } from 'pages/case-detail/revisionData';
+import type { ExternalLabel } from 'pages/case-detail/labelData';
+import type { Revision } from 'pages/case-detail/revisionData';
 import React, { Fragment, useState } from 'react';
 import DropdownToggle from 'react-bootstrap/lib/DropdownToggle';
 import styled from 'styled-components';

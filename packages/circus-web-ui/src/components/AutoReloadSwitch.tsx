@@ -1,6 +1,6 @@
 import React, { Fragment, useState } from 'react';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
-import Icon from './Icon';
+import Icon from './Icon.tsx';
 import useInterval from 'utils/useInterval';
 
 const defaultOptions = {

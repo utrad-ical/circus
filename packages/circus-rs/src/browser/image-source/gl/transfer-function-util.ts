@@ -1,9 +1,9 @@
-import { TransferFunction } from '../../ViewState';
-import { ViewWindow } from '../../../common/ViewWindow';
+import type { TransferFunction } from '../../ViewState.ts';
+import type { ViewWindow } from '../../../common/ViewWindow.ts';
 import {
   transferFunctionOrigin,
   transferFunctionRange
-} from './texture/transfer-function-constants';
+} from './texture/transfer-function-constants.ts';
 
 type TransferFunctionDefinition = [number, string][];
 

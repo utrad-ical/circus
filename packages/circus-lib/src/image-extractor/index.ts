@@ -1,2 +1,2 @@
-import dicomImageExtractor from './dicomImageExtractor';
+import dicomImageExtractor from './dicomImageExtractor.ts';
 export default dicomImageExtractor;

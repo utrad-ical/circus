@@ -5,7 +5,7 @@ import TaskNotifier from 'components/TaskNotifier';
 import React, { Fragment } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { MyList } from 'store/loginUser';
+import type { MyList } from 'store/loginUser';
 import styled from 'styled-components';
 import useLoginUser from 'utils/useLoginUser';
 

@@ -4,8 +4,9 @@ import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import semver from 'semver';
 import * as path from 'path';
-import { isDicomUid, NoDepFunctionService } from '@utrad-ical/circus-lib';
-import { Validator } from './interface';
+import type { NoDepFunctionService } from '@utrad-ical/circus-lib';
+import { isDicomUid } from '@utrad-ical/circus-lib';
+import type { Validator } from './interface.ts';
 import _ from 'lodash';
 
 interface Schema {

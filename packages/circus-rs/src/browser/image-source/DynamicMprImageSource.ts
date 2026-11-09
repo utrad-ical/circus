@@ -1,18 +1,16 @@
-import ViewState from '../ViewState';
-import { convertSectionToIndex } from '../section-util';
-import { Vector2D, Section } from '../../common/geometry';
-import { ViewWindow } from '../../common/ViewWindow';
-import RsHttpClient from '../http-client/RsHttpClient';
-import Viewer from '../viewer/Viewer';
-import drawToImageData from './drawToImageData';
-import MprImageSource from './MprImageSource';
-import { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader';
+import type ViewState from '../ViewState.ts';
+import { convertSectionToIndex } from '../section-util.ts';
+import type { Vector2D, Section } from '../../common/geometry/index.ts';
+import type { ViewWindow } from '../../common/ViewWindow.ts';
+import type RsHttpClient from '../http-client/RsHttpClient.ts';
+import type Viewer from '../viewer/Viewer.ts';
+import drawToImageData from './drawToImageData.ts';
+import MprImageSource from './MprImageSource.ts';
+import type { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader.ts';
 import { Vector3 } from 'three';
-import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
-import {
-  EstimateWindowType,
-  createRequestParams
-} from './volume-loader/rs-loader-utils';
+import type { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import type { EstimateWindowType } from './volume-loader/rs-loader-utils.ts';
+import { createRequestParams } from './volume-loader/rs-loader-utils.ts';
 
 export interface DynamicMprImageSourceOptions {
   rsHttpClient: RsHttpClient;

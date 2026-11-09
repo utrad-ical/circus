@@ -1,5 +1,5 @@
 import * as mongo from 'mongodb';
-import { MongoClientPool } from './mongoClientPool';
+import type { MongoClientPool } from './mongoClientPool.ts';
 
 export const testClientPool = async () => {
   const mongoUrl =

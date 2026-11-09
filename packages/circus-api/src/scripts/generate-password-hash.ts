@@ -1,6 +1,6 @@
 import inquirer from 'inquirer';
 import password from 'node-php-password';
-import Command from './Command';
+import type Command from './Command.ts';
 
 export const help = () => {
   return (

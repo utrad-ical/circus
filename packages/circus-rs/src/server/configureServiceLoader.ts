@@ -1,16 +1,16 @@
-import {
+import type {
   DicomFileRepository,
   Logger,
   ServiceLoader
 } from '@utrad-ical/circus-lib';
-import Koa from 'koa';
+import type Koa from 'koa';
 import path from 'path';
-import * as ws from 'ws';
-import { Counter } from './helper/createCounter';
-import { VolumeProvider } from './helper/createVolumeProvider';
-import ImageEncoder from './helper/image-encoder/ImageEncoder';
-import { DicomExtractorWorker } from './helper/extractor-worker/createDicomExtractorWorker';
-import { RsWebsocketVolumeConnectionHandlerCreator } from './ws/createWebsocketVolumeConnectionHandlerCreator';
+import type * as ws from 'ws';
+import type { Counter } from './helper/createCounter.ts';
+import type { VolumeProvider } from './helper/createVolumeProvider.ts';
+import type ImageEncoder from './helper/image-encoder/ImageEncoder.ts';
+import type { DicomExtractorWorker } from './helper/extractor-worker/createDicomExtractorWorker.ts';
+import type { RsWebsocketVolumeConnectionHandlerCreator } from './ws/createWebsocketVolumeConnectionHandlerCreator.ts';
 
 export interface RsServices {
   rsServer: Koa;

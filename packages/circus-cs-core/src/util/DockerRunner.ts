@@ -1,11 +1,11 @@
 import { EventEmitter } from 'events';
 import Dockerode from 'dockerode';
 import memory from 'memory-streams';
-import sleep from './sleep';
+import sleep from './sleep.ts';
 import tar from 'tar-stream';
 import path from 'path';
 import os from 'os';
-import defaults from '../config/default';
+import defaults from '../config/default.ts';
 
 // Supported events:
 // - container

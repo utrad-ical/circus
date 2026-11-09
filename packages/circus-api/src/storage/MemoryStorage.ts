@@ -1,5 +1,5 @@
-import Storage from './Storage';
-import { NoDepFunctionService } from '@utrad-ical/circus-lib';
+import type Storage from './Storage.ts';
+import type { NoDepFunctionService } from '@utrad-ical/circus-lib';
 
 const createMemoryStorage: NoDepFunctionService<Storage> = async () => {
   const store = new Map<string, Buffer>();

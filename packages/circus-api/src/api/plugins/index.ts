@@ -1,4 +1,4 @@
-import { RouteMiddleware } from '../../typings/middlewares';
+import type { RouteMiddleware } from '../../typings/middlewares.ts';
 
 export const handleGet: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {

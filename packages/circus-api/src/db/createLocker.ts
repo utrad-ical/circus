@@ -1,5 +1,5 @@
 import randomstring from 'randomstring';
-import * as mongo from 'mongodb';
+import type * as mongo from 'mongodb';
 
 /**
  * Provides dummy DB locking functionality.

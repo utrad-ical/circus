@@ -1,5 +1,5 @@
-import erosion from './erosion';
-import { Structure } from './morphology-types';
+import erosion from './erosion.ts';
+import type { Structure } from './morphology-types.ts';
 
 function sampleImg(dimension: 2 | 3): {
   input: Uint8Array;

@@ -1,8 +1,8 @@
 import * as path from 'path';
 import chalk from 'chalk';
-import { Database, Models } from '../interface';
-import scanMigrationFiles from '../utils/scanMigrationFiles';
-import Command from './Command';
+import type { Database, Models } from '../interface.ts';
+import scanMigrationFiles from '../utils/scanMigrationFiles.ts';
+import type Command from './Command.ts';
 
 export const help = () => {
   return 'Performs DB migration.';

@@ -1,6 +1,6 @@
-import Viewer from './viewer/Viewer';
-import { toolFactory } from './tool/tool-initializer';
-import { Tool } from './tool/Tool';
+import type Viewer from './viewer/Viewer.ts';
+import { toolFactory } from './tool/tool-initializer.ts';
+import type { Tool } from './tool/Tool.ts';
 
 interface Toolbar {
   bindViewer: (viewer: Viewer) => void;

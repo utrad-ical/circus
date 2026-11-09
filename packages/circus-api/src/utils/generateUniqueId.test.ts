@@ -1,4 +1,4 @@
-import generateUniqueId from './generateUniqueId';
+import generateUniqueId from './generateUniqueId.ts';
 
 it('generateUniqueId', () => {
   const id = generateUniqueId();

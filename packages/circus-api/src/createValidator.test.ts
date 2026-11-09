@@ -1,5 +1,5 @@
-import createValidator from './createValidator';
-import { Validator } from './interface';
+import createValidator from './createValidator.ts';
+import type { Validator } from './interface.ts';
 import * as path from 'path';
 import { ValidationError } from 'ajv';
 

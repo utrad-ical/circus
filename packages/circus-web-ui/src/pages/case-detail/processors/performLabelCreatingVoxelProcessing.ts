@@ -1,11 +1,12 @@
 import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
-import { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
-import { MorphologicalImageProcessingResults } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
+import type { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
+import type { MorphologicalImageProcessingResults } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
 import RawData from '@utrad-ical/circus-rs/src/common/RawData';
-import createCurrentLabelsUpdator from '../createCurrentLabelsUpdator';
-import { createNewLabelData, InternalLabelOf } from '../labelData';
-import { ProcessorProgress, Processor } from './processor-types';
+import createCurrentLabelsUpdator from '../createCurrentLabelsUpdator.ts';
+import type { InternalLabelOf } from '../labelData.ts';
+import { createNewLabelData } from '../labelData.ts';
+import type { ProcessorProgress, Processor } from './processor-types.ts';
 
 export type PostProcessor<
   T extends LabelingResults3D | MorphologicalImageProcessingResults

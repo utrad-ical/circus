@@ -2,7 +2,8 @@ import * as JSZip from 'jszip';
 import tar from 'tar-stream';
 import zlib from 'zlib';
 import rawBody from 'raw-body';
-import { Readable, pipeline } from 'stream';
+import type { Readable } from 'stream';
+import { pipeline } from 'stream';
 import { EventEmitter } from 'events';
 
 /**

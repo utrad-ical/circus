@@ -1,17 +1,17 @@
-import koa from 'koa';
+import type koa from 'koa';
 import Router from 'koa-router';
 
-import ImageEncoder from '../../helper/image-encoder/ImageEncoder';
-import {
+import type ImageEncoder from '../../helper/image-encoder/ImageEncoder.ts';
+import type {
   VolumeProvider,
   VolumeAccessor
-} from '../../helper/createVolumeProvider';
+} from '../../helper/createVolumeProvider.ts';
 
-import loadFromVolumeProvider from './loadFromVolumeProvider';
-import metadata from './metadata';
-import volume from './volume';
-import scan from './scan';
-import {
+import loadFromVolumeProvider from './loadFromVolumeProvider.ts';
+import metadata from './metadata.ts';
+import volume from './volume.ts';
+import scan from './scan.ts';
+import type {
   PartialVolumeDescriptor,
   FunctionService,
   Logger

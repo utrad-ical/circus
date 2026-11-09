@@ -115,9 +115,7 @@ export class WebSocketClientImpl implements WebSocketClient {
     }
   }
 
-  public async send(
-    data: string | ArrayBufferLike | Blob | ArrayBufferView
-  ): Promise<void> {
+  public async send(data: Parameters<WebSocket['send']>[0]): Promise<void> {
     const ws = this.connected() ? this.ws! : await this.connect();
     ws.send(data);
   }

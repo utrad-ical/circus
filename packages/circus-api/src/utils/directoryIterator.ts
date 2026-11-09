@@ -70,7 +70,7 @@ export default async function* directoryIterator(
   } else if (stat.isFile()) {
     const buffer = await fs.readFile(rootPath);
     try {
-      yield* fileOrArchiveIterator(buffer.buffer, rootPath);
+      yield* fileOrArchiveIterator(buffer.buffer as ArrayBuffer, rootPath);
     } catch (err) {
       yield { type: 'error', message: `File ${rootPath} is invalid.` };
     }

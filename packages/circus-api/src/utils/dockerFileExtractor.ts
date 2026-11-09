@@ -39,7 +39,7 @@ const createDockerFileExtractor = (imageId: string) => {
         `${containerId}:${srcPath}`,
         destPath
       ]);
-      let stderr: string;
+      let stderr = '';
       child.stderr.on('data', data => (stderr += data));
       child.on('close', code => {
         if (code !== 0) reject(new Error('extractToPath error: ' + stderr));

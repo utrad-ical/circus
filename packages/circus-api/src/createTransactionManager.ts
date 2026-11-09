@@ -1,5 +1,5 @@
 import { FunctionService } from '@utrad-ical/circus-lib';
-import { TransactionManager, Models, Database, Validator } from 'interface';
+import { TransactionManager, Models, Database, Validator } from './interface';
 import { makeModels } from './db/createModels';
 
 interface Options {

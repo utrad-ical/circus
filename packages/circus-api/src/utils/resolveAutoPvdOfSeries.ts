@@ -1,6 +1,6 @@
 import { SeriesEntry } from '@utrad-ical/circus-cs-core';
 import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
-import { Models } from 'interface';
+import { Models } from '../interface';
 import MultiRange from 'multi-integer-range';
 import { SeriesOrientationResolver } from './createSeriesOrientationResolver';
 

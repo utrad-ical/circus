@@ -4,11 +4,17 @@
     "lib": ["dom", "webworker", "es2019"],
     "jsx": "react",
     "rootDir": "src",
-    "baseUrl": "src",
     "outDir": "./lib",
+    // Mirrors webpack's `resolve.modules` (bare imports from src/).
+    // Overrides the `paths` in tsconfig.settings.json, so repeat that mapping.
+    "paths": {
+      "*": ["./src/*"],
+      "@utrad-ical/*": ["../*/src"]
+    },
     // This package is top-level and not referenced by others,
     // so we set the following two options
     "composite": false,
+    "declaration": false,
     "noEmit": true
   },
   "include": ["src/**/*"],

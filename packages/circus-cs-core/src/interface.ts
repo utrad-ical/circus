@@ -5,7 +5,7 @@ import { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
 import { Archiver } from 'archiver';
 import { EventEmitter } from 'events';
 import { Readable } from 'stream';
-import { RemoteCadDefinition } from 'util/remote-job';
+import { RemoteCadDefinition } from './util/remote-job';
 
 export type QueueState = 'wait' | 'processing';
 

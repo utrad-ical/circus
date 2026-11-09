@@ -110,7 +110,7 @@ const readNumberList = (
   const numElements = dataSet.elements[key].length / valueBytes;
   const numbers: number[] = [];
   for (let i = 0; i < numElements; i++) {
-    numbers.push((<any>dataSet)[accessor](key, i) as number);
+    numbers.push((dataSet as any)[accessor](key, i) as number);
   }
   return numbers.length > 1 ? numbers : numbers[0];
 };

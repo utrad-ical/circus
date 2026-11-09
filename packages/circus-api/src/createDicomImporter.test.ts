@@ -49,7 +49,7 @@ test('import a DICOM file', async () => {
   const fileContent = await fs.readFile(file);
   const seriesUid =
     '2.16.840.1.113662.2.1.2519.21582.2990505.2105152.2381633.20';
-  await importer.importDicom(fileContent.buffer, 'someDomain');
+  await importer.importDicom(fileContent.buffer as ArrayBuffer, 'someDomain');
 
   const seriesLoader = await dicomFileRepository.getSeries(seriesUid);
   expect((await seriesLoader.load(8)) instanceof ArrayBuffer).toBe(true);

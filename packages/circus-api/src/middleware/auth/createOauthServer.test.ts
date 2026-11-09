@@ -8,7 +8,7 @@ import errorHandler from '../errorHandler';
 import createOauthServer from './createOauthServer';
 import createNullLogger from '@utrad-ical/circus-lib/src/logger/NullLogger';
 import DefaultAuthProvider from '../auth/authProvider/DefaultAuthProvider';
-import { Models } from 'interface';
+import { Models } from '../../interface';
 import { Db } from 'mongodb';
 
 let testServer: TestServer, ax: AxiosInstance, db: Db, models: Models;

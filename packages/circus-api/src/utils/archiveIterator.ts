@@ -86,7 +86,10 @@ export const targzIterator = async function* (
     const b = await rawBody(lastStream!);
     yield {
       name: lastName!,
-      buffer: b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength)
+      buffer: b.buffer.slice(
+        b.byteOffset,
+        b.byteOffset + b.byteLength
+      ) as ArrayBuffer
     };
     lastStream = undefined;
     lastNext!();

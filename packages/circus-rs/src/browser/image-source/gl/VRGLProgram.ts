@@ -11,7 +11,7 @@ import RawData from '../../../common/RawData';
 import loadVolumeIntoTexture from './texture/loadVolumeIntoTexture';
 import loadTransferFunctionIntoTexture from './texture/loadTransferFunctionIntoTexture';
 import { TextureLayout } from './texture/interface';
-import DicomVolume from 'common/DicomVolume';
+import DicomVolume from '../../../common/DicomVolume';
 import {
   Camera,
   createCamera,

@@ -12,7 +12,7 @@ import {
   getWebGLContext,
   resolveImageData
 } from './gl/webgl-util';
-import DicomVolume from 'common/DicomVolume';
+import DicomVolume from '../../common/DicomVolume';
 
 interface VolumeRenderingImageSourceOptions {
   volumeLoader: DicomVolumeLoader;

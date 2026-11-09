@@ -5,8 +5,10 @@ type SeriesDataMap = Map<number, ArrayBuffer>;
 
 export default class MemoryDicomFileRepository implements DicomFileRepository {
   private storage: Map<string, SeriesDataMap>;
+  private options: object;
 
-  constructor(private options: object) {
+  constructor(options: object) {
+    this.options = options;
     this.storage = new Map();
   }
 

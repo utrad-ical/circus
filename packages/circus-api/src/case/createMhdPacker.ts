@@ -96,7 +96,7 @@ const createMhdPacker: FunctionService<
       if (!hash) continue; // empty voxels
       const labelBuffer = await blobStorage.read(hash);
       const labelVol = new RawData(label.data.size, 'binary');
-      labelVol.assign(labelBuffer.buffer);
+      labelVol.assign(labelBuffer.buffer as ArrayBuffer);
       if (options.labelPackType === 'combined') {
         combinedVolume!.copy(
           labelVol,

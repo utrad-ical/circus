@@ -1,6 +1,6 @@
 import { CsCore } from '@utrad-ical/circus-cs-core';
 import status from 'http-status';
-import { SeriesEntry } from 'typings/circus';
+import { SeriesEntry } from '../typings/circus';
 import duplicateJobExists from '../api/duplicateJobExists';
 import { Models } from '../interface';
 import {

@@ -5,7 +5,7 @@ import { Writable } from 'node:stream';
 
 async function openAsBlob(filePath: string): Promise<Blob> {
   const buffer = await readFile(filePath);
-  return new Blob([buffer]);
+  return new Blob([buffer as Uint8Array<ArrayBuffer>]);
 }
 
 export const extractFormFilesToDirectory = async (

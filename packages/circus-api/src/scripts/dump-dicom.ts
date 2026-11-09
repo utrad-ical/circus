@@ -18,7 +18,7 @@ export const command: Command<{
     if (!Array.isArray(options._args) || options._args.length !== 1)
       throw new Error('Specify one DICOM file.');
     const buf = await fs.readFile(options._args[0]);
-    const result = await dicomTagReader(buf.buffer);
+    const result = await dicomTagReader(buf.buffer as ArrayBuffer);
     console.log(result);
   };
 };

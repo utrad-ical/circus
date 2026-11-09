@@ -66,14 +66,14 @@ const returnNumberOrNumberList = (
   if (!numElements) return [];
   const numbers: number[] = [];
   for (let i = 0; i < numElements; i++) {
-    numbers.push((<any>dataset)[accessor](tag, i) as number);
+    numbers.push((dataset as any)[accessor](tag, i) as number);
   }
   return numbers.length === 1 ? numbers[0] : numbers;
 };
 
 interface Options {}
 
-export const stringifyUN = (data: ArrayBuffer, tag: string) => {
+export const stringifyUN = (data: ArrayBuffer | Uint8Array, tag: string) => {
   const arr = new Uint8Array(data);
   if (arr.length > 5 * 1024 * 1024)
     throw new Error(`Data of the private tag ${tag} is too large`);
@@ -85,10 +85,10 @@ export const stringifyUN = (data: ArrayBuffer, tag: string) => {
       break;
     }
   }
-  if (isAscii) return Buffer.from(data).toString('ascii');
+  if (isAscii) return Buffer.from(arr).toString('ascii');
   return (
     'data:application/octet-stream;base64,' +
-    Buffer.from(data).toString('base64')
+    Buffer.from(arr).toString('base64')
   );
 };
 
@@ -142,7 +142,7 @@ const dataSetToObject = (
       case 'UN': {
         // UNKNOWN
         const bin = Buffer.from(
-          dataset.byteArray.buffer,
+          dataset.byteArray.buffer as ArrayBuffer,
           element.dataOffset,
           element.length
         );

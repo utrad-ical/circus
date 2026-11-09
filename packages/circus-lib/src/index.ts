@@ -5,7 +5,7 @@ export * from './validation';
 export * from './image-extractor/dicomImageExtractor';
 export { default as dicomImageExtractor } from './image-extractor/dicomImageExtractor';
 
-export { default as PartialVolumeDescriptor } from './PartialVolumeDescriptor';
+export type { default as PartialVolumeDescriptor } from './PartialVolumeDescriptor';
 export * from './PartialVolumeDescriptor';
 
 export { default as ServiceLoader } from './ServiceLoader';
@@ -13,7 +13,7 @@ export * from './ServiceLoader';
 
 export { default as generateMhdHeader } from './generateMhdHeader';
 
-export { default as Logger } from './logger/Logger';
+export type { default as Logger } from './logger/Logger';
 
 export * from './dicom-file-repository';
 

@@ -23,7 +23,7 @@ import createDicomUtilityRunner, {
 import { TaskManager } from './createTaskManager';
 import { MhdPacker } from './case/createMhdPacker';
 import KoaOAuth2Server from './middleware/auth/KoaOAuth2Server';
-import { SeriesOrientationResolver } from 'utils/createSeriesOrientationResolver';
+import { SeriesOrientationResolver } from './utils/createSeriesOrientationResolver';
 
 export type Services = CsCoreServices &
   RsServices & {

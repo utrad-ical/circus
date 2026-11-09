@@ -312,7 +312,7 @@ class LRU<T> {
     this.data.set(key, value);
     if (this.maxSize < this.data.size) {
       // least-recently used cache eviction strategy
-      const deleteCacheKey = this.data.keys().next().value;
+      const deleteCacheKey = this.data.keys().next().value!;
       this.data.delete(deleteCacheKey);
     }
     return value;

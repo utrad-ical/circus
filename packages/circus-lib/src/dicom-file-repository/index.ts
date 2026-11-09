@@ -1,4 +1,4 @@
-export {
+export type {
   default as DicomFileRepository,
   SeriesAccessor
 } from './DicomFileRepository';

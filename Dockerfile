@@ -3,7 +3,7 @@
 #   target `web` -> circus-web: Caddy + web UI (SPA)
 #   target `api` -> circus-api: API server, CIRCUS RS, CS job manager
 
-ARG NODE_VERSION=22
+ARG NODE_VERSION=26
 
 # ---------------------------------------------------------------------------
 # build (shared; not published)

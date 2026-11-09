@@ -45,7 +45,7 @@ To use your own configuration, mount your `circus.config.js` at `/var/circus/cir
 
 ### Install Requirements
 
-- Node.js (&ge; 12.x) and NPM (**&ge; 7.14**)
+- Node.js (&ge; 22.x) and NPM (**&ge; 10**)
 - Docker
 - MongoDB
 

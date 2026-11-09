@@ -5,7 +5,7 @@
 import 'tslib';
 
 export { default as Viewer } from './viewer/Viewer';
-export {
+export type {
   default as ViewState,
   MprViewState,
   VrViewState,
@@ -13,7 +13,7 @@ export {
   TransferFunction,
   SubVolume
 } from './ViewState';
-export { ViewWindow } from '../common/ViewWindow';
+export type { ViewWindow } from '../common/ViewWindow';
 export { default as Composition } from './Composition';
 
 export { default as Annotation } from './annotation/Annotation';
@@ -41,10 +41,8 @@ export * from '@utrad-ical/circus-lib/src/PixelFormat';
 export * from '../common/geometry';
 
 export { default as RsHttpClient } from './http-client/RsHttpClient';
-export {
-  createTransferConnectionFactory,
-  TransferConnectionFactory
-} from './ws/createTransferConnectionFactory';
+export { createTransferConnectionFactory } from './ws/createTransferConnectionFactory';
+export type { TransferConnectionFactory } from './ws/createTransferConnectionFactory';
 export { WebSocketClientImpl as WebSocketClient } from './ws/WebSocketClient';
 
 export { default as ImageSource } from './image-source/ImageSource';
@@ -57,7 +55,7 @@ export { default as TwoDimensionalImageSource } from './image-source/TwoDimensio
 export { default as WebGlRawVolumeMprImageSource } from './image-source/WebGlRawVolumeMprImageSource';
 export { default as WebGlHybridMprImageSource } from './image-source/WebGlHybridMprImageSource';
 
-export {
+export type {
   default as DicomVolumeLoader,
   VolumeLoadController
 } from './image-source/volume-loader/DicomVolumeLoader';
@@ -87,4 +85,4 @@ export { default as zoomBy } from './tool/state/handleZoomBy';
 export { default as rotateBy } from './tool/state/handleRotationBy';
 export * from './image-source/gl/transfer-function-util';
 export { default as buildTransferFunctionMap } from './image-source/gl/texture/buildTransferFunctionMap';
-export { EstimateWindowType } from './image-source/volume-loader/rs-loader-utils';
+export type { EstimateWindowType } from './image-source/volume-loader/rs-loader-utils';

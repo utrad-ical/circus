@@ -23,7 +23,7 @@ import { Archiver } from 'archiver';
 import { EventEmitter } from 'events';
 import createOauthServer from '../middleware/auth/createOauthServer';
 import createDefaultAuthProvider from '../middleware/auth/authProvider/DefaultAuthProvider';
-import { Database } from 'interface';
+import { Database } from '../interface';
 import createTransactionManager from '../createTransactionManager';
 import * as ws from 'ws';
 

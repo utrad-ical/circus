@@ -7,14 +7,14 @@ import ShaderProgram, {
 } from './ShaderProgram';
 import loadTransferFunctionIntoTexture from './texture/loadTransferFunctionIntoTexture';
 import { Section, vectorizeSection } from '../../../common/geometry/Section';
-import { ViewWindow } from 'common/ViewWindow';
+import { ViewWindow } from '../../../common/ViewWindow';
 import {
   Camera,
   createCamera,
   createModelViewMatrix,
   createPojectionMatrix
 } from './webgl-util';
-import DicomVolume from 'common/DicomVolume';
+import DicomVolume from '../../../common/DicomVolume';
 import volumeTextureTransferer from './texture/volumeTextureTransferer';
 // WebGL shader source (GLSL)
 import {

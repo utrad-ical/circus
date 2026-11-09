@@ -297,7 +297,11 @@ function extractUncompressedPixels(
   }
 
   const readType = pxInfo.bpp === 2 ? Uint16Array : Uint8Array;
-  const buffer = new readType(dataset.byteArray.buffer, offset, rows * columns);
+  const buffer = new readType(
+    dataset.byteArray.buffer as ArrayBuffer,
+    offset,
+    rows * columns
+  );
   const pixelData = new ArrayBuffer(rows * columns * bpp);
   const resultArray = new pxInfo.arrayClass(pixelData);
 

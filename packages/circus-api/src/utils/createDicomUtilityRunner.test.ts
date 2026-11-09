@@ -15,9 +15,9 @@ test('compress DICOM file', async () => {
     dockerImage
   });
   const outBuffers = await Promise.all([
-    runner.compress(inBuffer.buffer),
-    runner.compress(inBuffer.buffer),
-    runner.compress(inBuffer.buffer)
+    runner.compress(inBuffer.buffer as ArrayBuffer),
+    runner.compress(inBuffer.buffer as ArrayBuffer),
+    runner.compress(inBuffer.buffer as ArrayBuffer)
   ]);
   await runner.dispose();
   for (const outBuffer of outBuffers) {
@@ -34,7 +34,7 @@ test('reject if Docker image is invalid', async () => {
     maxConcurrency: 3,
     dockerImage: 'circuscad/this-image-does-not-exist'
   });
-  await expect(runner.compress(inBuffer.buffer)).rejects.toThrow(
+  await expect(runner.compress(inBuffer.buffer as ArrayBuffer)).rejects.toThrow(
     /Unable to find image/
   );
   await runner.dispose();
@@ -46,7 +46,7 @@ test('rejects with broken DICOM file', async () => {
     maxConcurrency: 3,
     dockerImage
   });
-  await expect(runner.compress(inBuffer.buffer)).rejects.toThrow(
+  await expect(runner.compress(inBuffer.buffer as ArrayBuffer)).rejects.toThrow(
     /Did not respond with "OK"|Dcm/
   );
   await runner.dispose();

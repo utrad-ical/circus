@@ -21,7 +21,7 @@
   "devDependencies": {
     "react": "^17.0.2",
     "styled-components": "^5.1.0",
-    "typescript": "^5.5.4"
+    "typescript": "~6.0.3"
   },
   "dependencies": {
     "@smikitky/rb-components": "^7.0.0",
@@ -29,7 +29,7 @@
     "@utrad-ical/circus-lib": "^0.17.0",
     "@utrad-ical/circus-rs": "^0.27.0",
     "classnames": "^2.3.1",
-    "fflate": "^0.6.10",
+    "fflate": "^0.8.3",
     "lodash.get": "^4.4.2",
     "react-bootstrap": "^0.33.1"
   }

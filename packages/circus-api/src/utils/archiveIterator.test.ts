@@ -13,7 +13,9 @@ describe('targzIterator', () => {
 
   test('correct tar.gz file', async () => {
     const buffer = await fs.readFile(path.join(testDir, 'abc.tar.gz'));
-    const result = await toArray(targzIterator(buffer));
+    const result = await toArray(
+      targzIterator(buffer as unknown as ArrayBuffer)
+    );
     expect(result).toHaveLength(3);
     expect(result[0]).toMatchObject({ name: 'a.txt' });
     expect(result[0].buffer instanceof ArrayBuffer).toBe(true);
@@ -23,15 +25,15 @@ describe('targzIterator', () => {
   test('corrupted gz file', async () => {
     // with gz signature (0x1f8b), but invalid data
     const buffer = Buffer.from([0x1f, 0x8b, 0xff, 0x33, 0x32]);
-    await expect(toArray(targzIterator(buffer))).rejects.toThrow(
-      'unknown compression method'
-    );
+    await expect(
+      toArray(targzIterator(buffer as unknown as ArrayBuffer))
+    ).rejects.toThrow('unknown compression method');
   });
 
   test('correct gz, but not tar', async () => {
     const buffer = await fs.readFile(path.join(testDir, 'a.txt.gz'));
-    await expect(toArray(targzIterator(buffer))).rejects.toThrow(
-      'Unexpected end of data'
-    );
+    await expect(
+      toArray(targzIterator(buffer as unknown as ArrayBuffer))
+    ).rejects.toThrow('Unexpected end of data');
   });
 });

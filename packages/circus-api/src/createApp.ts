@@ -40,7 +40,7 @@ import typeCheck from './middleware/typeCheck';
 import validateInOut from './middleware/validateInOut';
 import Storage from './storage/Storage';
 import { Deps } from './typings/middlewares';
-import { SeriesOrientationResolver } from 'utils/createSeriesOrientationResolver';
+import { SeriesOrientationResolver } from './utils/createSeriesOrientationResolver';
 
 function handlerName(route: Route) {
   if (route.handler) return route.handler;

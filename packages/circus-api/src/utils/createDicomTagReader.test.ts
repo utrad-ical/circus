@@ -16,7 +16,7 @@ beforeAll(async () => {
 
 test('default', async () => {
   const reader = await createDicomTagReader({});
-  const result = await reader(content);
+  const result = await reader(content as unknown as ArrayBuffer);
   expect(result.modality).toBe('CT');
   expect(result.seriesDate).toEqual(new Date('1999-05-05T10:52:34.530Z'));
   expect(result.patientInfo.patientName).toBe('Anonymized');
@@ -24,7 +24,7 @@ test('default', async () => {
 
 test('with defaultTzOffset', async () => {
   const reader = await createDicomTagReader({ defaultTzOffset: 540 });
-  const result = await reader(content);
+  const result = await reader(content as unknown as ArrayBuffer);
   expect(result.seriesDate).toEqual(new Date('1999-05-05T01:52:34.530Z'));
 });
 
@@ -51,7 +51,7 @@ test('extractAge', () => {
 });
 
 test('extractParameters', async () => {
-  const dicomTags = await readDicomTags(content);
+  const dicomTags = await readDicomTags(content as unknown as ArrayBuffer);
   expect(dicomTags.parameters.TransferSyntaxUID).toBe('1.2.840.10008.1.2.1'); //UI
   expect(dicomTags.parameters.PhotometricInterpretation).toBe('MONOCHROME2'); //CS
   expect(dicomTags.parameters.InstanceNumber).toBe(8); //IS

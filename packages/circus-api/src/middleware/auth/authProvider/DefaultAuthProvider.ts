@@ -1,4 +1,4 @@
-import { AuthProvider, Models } from 'interface';
+import { AuthProvider, Models } from '../../../interface';
 import nodepass from 'node-php-password';
 import { FunctionService } from '@utrad-ical/circus-lib';
 

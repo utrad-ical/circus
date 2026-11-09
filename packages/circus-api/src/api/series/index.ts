@@ -113,12 +113,15 @@ export const handlePost: RouteMiddleware = ({ dicomImporter, taskManager }) => {
       try {
         for (const file of sentFiles) {
           for await (const entry of fileOrArchiveIterator(
-            file.buffer.buffer,
+            file.buffer.buffer as ArrayBuffer,
             file.filename
           )) {
             if (entry.type === 'error') throw new Error(entry.message);
             if (!isLikeDicom(entry.buffer)) continue;
-            await dicomImporter.importDicom(Buffer.from(entry.buffer), domain);
+            await dicomImporter.importDicom(
+              Buffer.from(entry.buffer) as unknown as ArrayBuffer,
+              domain
+            );
             dicomCount++;
             emitter.emit('progress', `Imported ${dicomCount} entities...`);
           }

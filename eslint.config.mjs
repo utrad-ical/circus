@@ -109,7 +109,10 @@ export default [
     files: ['**/*.ts', '**/*.tsx'],
 
     rules: {
-      'no-undef': 'off'
+      'no-undef': 'off',
+      // Type-only imports must use `import type` (required by Node's type
+      // stripping). Remove this once `verbatimModuleSyntax` is enabled.
+      '@typescript-eslint/consistent-type-imports': 'error'
     }
   },
   {

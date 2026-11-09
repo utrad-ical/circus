@@ -1,4 +1,4 @@
-import mongo from 'mongodb';
+import * as mongo from 'mongodb';
 import { multirange } from 'multi-integer-range';
 
 /**

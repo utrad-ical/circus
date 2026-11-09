@@ -1,5 +1,5 @@
 import status from 'http-status';
-import mongo from 'mongodb';
+import * as mongo from 'mongodb';
 import { Validator } from '../interface';
 
 type CursorOptions = {
@@ -28,8 +28,8 @@ interface FindOptions {
 }
 
 export interface CollectionAccessor<T = any> {
-  deleteMany: (query?: object) => Promise<mongo.DeleteWriteOpResultObject>;
-  deleteOne: (query?: object) => Promise<mongo.DeleteWriteOpResultObject>;
+  deleteMany: (query?: object) => Promise<mongo.DeleteResult>;
+  deleteOne: (query?: object) => Promise<mongo.DeleteResult>;
   findAll: (query?: object, options?: CursorOptions) => Promise<WithDates<T>[]>;
   findAsCursor: (
     query?: object,
@@ -99,8 +99,8 @@ const createCollectionAccessor = <T = any>(
     const upserting = { createdAt: date, updatedAt: date, ...data };
     await validator.validate(dbEntrySchema, { [primaryKey]: id, ...upserting });
     return await collection.updateOne(
-      { [primaryKey]: id } as mongo.FilterQuery<WithDates<T>>,
-      { $set: upserting } as mongo.UpdateQuery<WithDates<T>>,
+      { [primaryKey]: id } as mongo.Filter<WithDates<T>>,
+      { $set: upserting } as mongo.UpdateFilter<WithDates<T>>,
       { upsert: true, ...sessionOpts }
     );
   };
@@ -140,7 +140,7 @@ const createCollectionAccessor = <T = any>(
   const findAsCursor = (query: object = {}, options: CursorOptions = {}) => {
     const { sort, limit, skip } = options;
     let cursor = collection.find(query, { ...sessionOpts }).project({ _id: 0 });
-    if (sort) cursor = cursor.sort(sort);
+    if (sort) cursor = cursor.sort(sort as mongo.Sort);
     if (skip) cursor = cursor.skip(skip);
     if (limit) cursor = cursor.limit(limit);
     return {
@@ -150,7 +150,7 @@ const createCollectionAccessor = <T = any>(
         return next;
       },
       hasNext: () => cursor.hasNext(),
-      count: () => cursor.count()
+      count: () => collection.countDocuments(query, { ...sessionOpts })
     } as CursorLike<WithDates<T>>;
   };
 
@@ -184,21 +184,21 @@ const createCollectionAccessor = <T = any>(
     const key = primaryKey ? primaryKey : '_id';
     if (options?.withLock) {
       if (!session) throw new Error('Cannot lock a document outside a session');
-      await collection.findOneAndUpdate(
-        { [key]: id } as mongo.FilterQuery<WithDates<T>>,
-        {
-          $set: { myLock: { pseudoRandom: new mongo.ObjectId() } }
-        } as mongo.UpdateQuery<any>,
+      // `myLock` is not part of T, so use an untyped collection here
+      const lockCollection = db.collection(collectionName);
+      await lockCollection.findOneAndUpdate(
+        { [key]: id },
+        { $set: { myLock: { pseudoRandom: new mongo.ObjectId() } } },
         { session }
       );
-      await collection.updateOne(
-        { [key]: id } as mongo.FilterQuery<WithDates<T>>,
-        { $unset: { myLock: 1 } } as mongo.UpdateQuery<any>,
+      await lockCollection.updateOne(
+        { [key]: id },
+        { $unset: { myLock: 1 } },
         { session }
       );
     }
     const docs = await collection
-      .find({ [key]: id } as mongo.FilterQuery<WithDates<T>>, {
+      .find({ [key]: id } as mongo.Filter<WithDates<T>>, {
         ...sessionOpts
       })
       .project({ _id: 0 })
@@ -241,20 +241,20 @@ const createCollectionAccessor = <T = any>(
       throw err;
     }
     const original = await collection.findOneAndUpdate(
-      { [key]: id } as mongo.FilterQuery<WithDates<T>>,
-      { $set: { updatedAt: date, ...updates } } as mongo.UpdateQuery<
+      { [key]: id } as mongo.Filter<WithDates<T>>,
+      { $set: { updatedAt: date, ...updates } } as mongo.UpdateFilter<
         WithDates<T>
       >,
       { ...sessionOpts }
     );
-    if (original.value === null) {
+    if (original === null) {
       const err = new Error('The request resource was not found.');
       err.status = status.NOT_FOUND;
       err.expose = true;
       throw err;
     }
     const updated: WithDates<T> & { _id: any; myLock: any } = {
-      ...original.value,
+      ...original,
       ...updates,
       updatedAt: date
     } as any;
@@ -264,8 +264,8 @@ const createCollectionAccessor = <T = any>(
     } catch (err) {
       // validation failed, rollback
       await collection.findOneAndReplace(
-        { [key]: id } as mongo.FilterQuery<WithDates<T>>,
-        original.value!,
+        { [key]: id } as mongo.Filter<WithDates<T>>,
+        original,
         { ...sessionOpts }
       );
       throw err;
@@ -293,8 +293,8 @@ const createCollectionAccessor = <T = any>(
         returnDocument: 'after'
       }
     );
-    if (doc.value !== null) {
-      return doc.value.value as number;
+    if (doc !== null) {
+      return doc.value as number;
     } else {
       await db.collection('sequences').insertOne({
         key: collectionName,

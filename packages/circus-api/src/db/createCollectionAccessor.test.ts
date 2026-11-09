@@ -1,5 +1,5 @@
 import { ValidationError } from 'ajv';
-import mongo from 'mongodb';
+import * as mongo from 'mongodb';
 import { setUpMongoFixture, usingMongo } from '../test/util-mongo';
 import createValidator from '../createValidator';
 import createCollectionAccessor, {

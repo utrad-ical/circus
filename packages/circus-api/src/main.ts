@@ -3,7 +3,7 @@
 import chalk from 'chalk';
 import dashdash from 'dashdash';
 import merge from 'merge';
-import mongo from 'mongodb';
+import * as mongo from 'mongodb';
 import util from 'util';
 import config from './config';
 import createServiceLoader from './createServiceLoader';

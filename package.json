@@ -56,7 +56,7 @@
   },
   "jest": {
     "transformIgnorePatterns": [
-      "<rootDir>/node_modules/(?!@utrad-ical/circus-(rs|cs-core|lib)/src)"
+      "<rootDir>/node_modules/(?!@utrad-ical/circus-(rs|cs-core|lib)/src|mongodb/lib/runtime_adapters)"
     ],
     "setupFiles": [
       "dotenv/config"

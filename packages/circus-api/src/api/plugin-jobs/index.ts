@@ -15,7 +15,7 @@ import {
   isPatientInfoInFilter,
   performAggregationSearch
 } from '../performSearch';
-import { FilterQuery } from 'mongodb';
+import { Filter } from 'mongodb';
 
 const maskPatientInfo = (ctx: CircusContext) => {
   return (pluginJobData: any) => {
@@ -135,7 +135,7 @@ const searchableFields = [
   'finishedAt'
 ];
 
-type CustomFilter<T = any> = FilterQuery<T>;
+type CustomFilter<T = any> = Filter<T>;
 
 /**
  * Identifies and collects filters with fixed value in patientInfo.patientId or

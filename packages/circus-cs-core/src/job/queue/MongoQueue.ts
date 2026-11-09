@@ -7,7 +7,11 @@ const createMongoQueue: FunctionService<
   { mongoClientPool: MongoClientPool }
 > = async (options: any, { mongoClientPool }) => {
   const connection = await mongoClientPool.connect(options.mongoUrl);
-  const collection = await connection.db().collection(options.collectionName);
+  const collection = connection
+    .db()
+    .collection<
+      circus.QueueItem<circus.PluginJobRequest>
+    >(options.collectionName);
   await collection.createIndex({ jobId: 1 }, { unique: true });
 
   const list = async function (state: circus.QueueState | 'all' = 'wait') {
@@ -36,14 +40,11 @@ const createMongoQueue: FunctionService<
   };
 
   const dequeue = async () => {
-    const result = (
-      await collection.findOneAndUpdate(
-        { state: 'wait' },
-        { $set: { state: 'processing', startedAt: new Date() } },
-        { sort: { priority: -1, _id: 1 }, returnDocument: 'after' }
-      )
-    ).value as circus.QueueItem<circus.PluginJobRequest> | null;
-    return result;
+    return await collection.findOneAndUpdate(
+      { state: 'wait' },
+      { $set: { state: 'processing', startedAt: new Date() } },
+      { sort: { priority: -1, _id: 1 }, returnDocument: 'after' }
+    );
   };
 
   const settle = async (jobId: string) => {
@@ -51,7 +52,7 @@ const createMongoQueue: FunctionService<
       jobId,
       state: 'processing'
     });
-    if (!result.value)
+    if (!result)
       throw new Error('Tried to mark a job as done before it gets started.');
   };
 
@@ -60,7 +61,7 @@ const createMongoQueue: FunctionService<
       jobId,
       state: 'wait'
     });
-    return !!result.value;
+    return !!result;
   };
 
   return { list, enqueue, dequeue, settle, removeFromQueue };

@@ -1,4 +1,4 @@
-import mongo from 'mongodb';
+import * as mongo from 'mongodb';
 import createMongoPluginJobReporter from './MongoPluginJobReporter';
 import { testClientPool } from '../../testHelper';
 import { MongoClientPool } from '../../mongoClientPool';

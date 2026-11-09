@@ -20,7 +20,7 @@ export const command: Command<{ models: Models }> = async (opt, { models }) => {
     const { all } = options;
     const where = all ? {} : { permanentTokenId: null };
     const res = await models.token.deleteMany(where);
-    console.log(`Deleted ${res.result.n} access token(s).`);
+    console.log(`Deleted ${res.deletedCount} access token(s).`);
     if (!all) {
       console.log('Use --all flag to also delete permanent tokens.');
     }

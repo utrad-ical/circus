@@ -1,4 +1,4 @@
-import mongo from 'mongodb';
+import * as mongo from 'mongodb';
 import { testClientPool } from '../../testHelper';
 import { MongoClientPool } from '../../mongoClientPool';
 import createMongoQueue from './MongoQueue';

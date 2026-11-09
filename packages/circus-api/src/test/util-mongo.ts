@@ -1,7 +1,7 @@
 import { EJSON } from 'bson';
 import * as fs from 'fs-extra';
 import { safeLoad as yaml } from 'js-yaml';
-import mongo from 'mongodb';
+import * as mongo from 'mongodb';
 import * as path from 'path';
 import createValidator from '../createValidator';
 import { Database, Validator, Models } from '../interface';

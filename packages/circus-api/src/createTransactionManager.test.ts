@@ -1,5 +1,6 @@
 import createTransactionManager from './createTransactionManager';
-import mongo, { ClientSession } from 'mongodb';
+import * as mongo from 'mongodb';
+import { ClientSession } from 'mongodb';
 import { setUpMongoFixture, usingMongo } from './test/util-mongo';
 import createValidator from './createValidator';
 import createCollectionAccessor from '../src/db/createCollectionAccessor';
@@ -71,7 +72,7 @@ describe('createTransactionManager', () => {
     }
     await Promise.all(array);
     const result = await db.collection('bankAccounts').findOne({ userId });
-    expect(result.balance).toBe(10010);
+    expect(result!.balance).toBe(10010);
   });
 
   // test('not use transacton processing', async () => {

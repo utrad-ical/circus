@@ -1,6 +1,6 @@
 import { FunctionService } from '@utrad-ical/circus-lib';
 import { MongoClientPool } from '../mongoClientPool';
-import { PluginDefinitionAccessor } from '../interface';
+import { PluginDefinition, PluginDefinitionAccessor } from '../interface';
 
 const createMongoPluginDefinitionAccessor: FunctionService<
   PluginDefinitionAccessor,
@@ -8,7 +8,7 @@ const createMongoPluginDefinitionAccessor: FunctionService<
 > = async (options: any, { mongoClientPool }) => {
   const { mongoUrl, collectionName } = options;
   const client = await mongoClientPool.connect(mongoUrl);
-  const collection = client.db().collection(collectionName);
+  const collection = client.db().collection<PluginDefinition>(collectionName);
 
   const get = async (pluginId: string) => {
     if (!pluginId) throw new Error('Plug-in ID undefined');

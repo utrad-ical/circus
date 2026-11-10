@@ -27,7 +27,9 @@ beforeEach(async () => {
     'clinicalCases',
     'users',
     'groups',
-    'projects'
+    'projects',
+    'series',
+    'pluginDefinitions'
   ]);
 });
 

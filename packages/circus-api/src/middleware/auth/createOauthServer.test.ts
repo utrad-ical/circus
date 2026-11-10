@@ -50,7 +50,13 @@ before(async () => {
 });
 
 beforeEach(async () => {
-  await setUpMongoFixture(db, ['users', 'onetimeUrls']);
+  await setUpMongoFixture(db, [
+    'users',
+    'groups',
+    'projects',
+    'pluginDefinitions',
+    'onetimeUrls'
+  ]);
 });
 
 after(async () => {

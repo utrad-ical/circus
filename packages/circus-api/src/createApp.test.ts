@@ -5,7 +5,7 @@ import axios from 'axios';
 import type { TestServer } from './test/util-koa.ts';
 import { setUpKoaTestWith } from './test/util-koa.ts';
 import createTestLogger from './test/util-logger.ts';
-import { usingModels } from './test/util-mongo.ts';
+import { setUpMongoFixture, usingModels } from './test/util-mongo.ts';
 import createApp from './createApp.ts';
 import * as ws from 'ws';
 
@@ -15,6 +15,13 @@ const modelsPromise = usingModels();
 
 before(async () => {
   const { database, validator, models } = await modelsPromise;
+  // `fixUser` below must exist
+  await setUpMongoFixture(database.db, [
+    'users',
+    'groups',
+    'projects',
+    'pluginDefinitions'
+  ]);
   const apiLogger = await createTestLogger();
   const koaApp = await createApp(
     {

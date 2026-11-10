@@ -16,7 +16,13 @@ const modelsPromise = usingSessionModels();
 before(async () => {
   const { database, models: m } = await modelsPromise;
   const db = database.db;
-  await setUpMongoFixture(db, ['groups', 'users', 'series']);
+  await setUpMongoFixture(db, [
+    'groups',
+    'users',
+    'series',
+    'projects',
+    'pluginDefinitions'
+  ]);
   models = m;
 });
 

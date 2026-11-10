@@ -26,8 +26,17 @@ beforeEach(async () => {
   const { db } = (await modelsPromise).database;
   const registerFn = mock.fn();
   cs = { job: { register: registerFn } };
-  commandFunc = await command(null, { transactionManager, cs });
-  await setUpMongoFixture(db, ['pluginJobs', 'users']);
+  // Pass the dependencies by the names declared in `command.dependencies`,
+  // as ServiceLoader does
+  const available: { [name: string]: unknown } = {
+    transactionManager,
+    core: cs
+  };
+  const deps = Object.fromEntries(
+    command.dependencies!.map(name => [name, available[name]])
+  );
+  commandFunc = await command(null, deps as any);
+  await setUpMongoFixture(db, ['pluginDefinitions', 'pluginJobs', 'users']);
 });
 
 test('create new plugin-job', async () => {

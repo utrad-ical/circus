@@ -4,7 +4,6 @@
   "description": "Medical lesion database for CAD research",
   "main": "index.js",
   "scripts": {
-    "start": "webpack serve --mode=development",
     "fontgen": "node assets/icons/fontgen.js",
     "build": "cross-env NODE_ENV=production webpack --mode=production",
     "typecheck": "tsc --noEmit",

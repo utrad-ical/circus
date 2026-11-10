@@ -1,7 +1,5 @@
 const ctx: DedicatedWorkerGlobalScope = self as any;
-import holeFilling2D, {
-  holeFilling3D
-} from '@utrad-ical/circus-rs/src/common/CCL/holeFilling';
+import { holeFilling2D, holeFilling3D } from '@utrad-ical/circus-rs';
 
 ctx.addEventListener('message', event => {
   const {

@@ -8,7 +8,7 @@ import type {
   TransactionManager
 } from '../interface.ts';
 import type { Models } from '../interface.ts';
-import type { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
+import type { VolumeProvider } from '@utrad-ical/circus-rs/server';
 import type Storage from '../storage/Storage.ts';
 import type { UserPrivilegeInfo } from '../privilegeUtils.ts';
 import type { CsCore, DicomVoxelDumper } from '@utrad-ical/circus-cs-core';

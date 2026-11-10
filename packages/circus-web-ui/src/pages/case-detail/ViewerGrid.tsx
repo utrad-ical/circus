@@ -3,12 +3,11 @@ import type {
   MprViewState,
   Tool,
   TwoDimensionalViewState,
-  Viewer
-} from '@utrad-ical/circus-rs/src/browser';
-import type { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
-import { sectionTo2dViewState } from '@utrad-ical/circus-rs/src/browser/section-util';
-import { toolFactory } from '@utrad-ical/circus-rs/src/browser/tool/tool-initializer';
-import type { Section } from '@utrad-ical/circus-rs/src/common/geometry';
+  Viewer,
+  OrientationString,
+  Section
+} from '@utrad-ical/circus-rs';
+import { sectionTo2dViewState, toolFactory } from '@utrad-ical/circus-rs';
 import classnames from 'classnames';
 import DropdownButton from 'components/DropdownButton';
 import type { LayoutInfo } from 'components/GridContainer';

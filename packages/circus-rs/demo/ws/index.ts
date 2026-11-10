@@ -7,7 +7,7 @@ import {
 import DebugLogger from './DebugLogger';
 import { WebSocketClientImpl as WebSocketClient } from '../../src/browser/ws/WebSocketClient';
 import drawToImageData from '../../src/browser/image-source/drawToImageData';
-import { pixelFormatInfo } from '@utrad-ical/circus-rs/src/volume/PixelFormat.ts';
+import { pixelFormatInfo } from '@utrad-ical/circus-rs';
 import setting, { toPartialVolumeDescriptor } from './setting';
 import { createRequestParams } from '../../src/browser/image-source/volume-loader/rs-loader-utils';
 

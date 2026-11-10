@@ -5,9 +5,9 @@ import type {
   FunctionService,
   Logger
 } from '@utrad-ical/circus-lib';
-import type { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
-import type { RsWebsocketVolumeConnectionHandlerCreator } from '@utrad-ical/circus-rs/src/server/ws/createWebsocketVolumeConnectionHandlerCreator';
-import withWebSocketConnectionHandlers from '@utrad-ical/circus-rs/src/server/ws/withWebSocketConnectionHandlers';
+import type { VolumeProvider } from '@utrad-ical/circus-rs/server';
+import type { RsWebsocketVolumeConnectionHandlerCreator } from '@utrad-ical/circus-rs/server';
+import { withWebSocketConnectionHandlers } from '@utrad-ical/circus-rs/server';
 import type { ErrorObject } from 'ajv';
 import * as fs from 'fs-extra';
 import glob from 'glob-promise';

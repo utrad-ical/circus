@@ -1,8 +1,10 @@
-import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
-import * as rs from '@utrad-ical/circus-rs/src/browser';
-import type { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
-import type { MorphologicalImageProcessingResults } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
-import RawData from '@utrad-ical/circus-rs/src/common/RawData';
+import generateUniqueId from 'utils/generateUniqueId';
+import * as rs from '@utrad-ical/circus-rs';
+import type {
+  LabelingResults3D,
+  MorphologicalImageProcessingResults
+} from '@utrad-ical/circus-rs';
+import { RawData } from '@utrad-ical/circus-rs';
 import createCurrentLabelsUpdator from '../createCurrentLabelsUpdator.ts';
 import type { InternalLabelOf } from '../labelData.ts';
 import { createNewLabelData } from '../labelData.ts';

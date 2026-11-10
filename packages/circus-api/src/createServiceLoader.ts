@@ -1,7 +1,7 @@
-import type { Services as CsCoreServices } from '@utrad-ical/circus-cs-core/src/configureServiceLoader';
-import configureCsCoreServiceLoader from '@utrad-ical/circus-cs-core/src/configureServiceLoader';
-import type { RsServices } from '@utrad-ical/circus-rs/src/server/configureServiceLoader';
-import configureRsServiceLoader from '@utrad-ical/circus-rs/src/server/configureServiceLoader';
+import type { CsCoreServices } from '@utrad-ical/circus-cs-core';
+import { configureCsCoreServiceLoader } from '@utrad-ical/circus-cs-core';
+import type { RsServices } from '@utrad-ical/circus-rs/server';
+import { configureRsServiceLoader } from '@utrad-ical/circus-rs/server';
 import type { Logger } from '@utrad-ical/circus-lib';
 import { ServiceLoader } from '@utrad-ical/circus-lib';
 import path from 'path';

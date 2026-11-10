@@ -1,5 +1,5 @@
 import type { Editor } from './processor-types.ts';
-import type { Structure } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
+import type { Structure } from '@utrad-ical/circus-rs';
 import classnames from 'classnames';
 import { FormControl } from 'components/react-bootstrap';
 import React, { useState } from 'react';

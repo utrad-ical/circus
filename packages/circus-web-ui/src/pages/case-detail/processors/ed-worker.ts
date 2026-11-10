@@ -1,6 +1,5 @@
 const ctx: DedicatedWorkerGlobalScope = self as any;
-import dilation from '@utrad-ical/circus-rs/src/common/morphology/dilation';
-import erosion from '@utrad-ical/circus-rs/src/common/morphology/erosion';
+import { dilation, erosion } from '@utrad-ical/circus-rs';
 
 ctx.addEventListener('message', event => {
   const { input, width, height, nSlices, structure, isErosion } = event.data;

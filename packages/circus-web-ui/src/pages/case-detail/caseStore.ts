@@ -1,8 +1,10 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
-import type PartialVolumeDescriptor from '@utrad-ical/circus-rs/src/volume/PartialVolumeDescriptor.ts';
-import type { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
-import type { Section } from '@utrad-ical/circus-rs/src/common/geometry';
+import type {
+  PartialVolumeDescriptor,
+  OrientationString,
+  Section
+} from '@utrad-ical/circus-rs';
 import type { LayoutInfo } from 'components/GridContainer';
 import { layoutReducer } from 'components/GridContainer';
 import type Project from 'types/Project';

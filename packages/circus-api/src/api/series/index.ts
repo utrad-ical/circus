@@ -1,4 +1,4 @@
-import type PartialVolumeDescriptor from '@utrad-ical/circus-rs/src/volume/PartialVolumeDescriptor.ts';
+import type { PartialVolumeDescriptor } from '@utrad-ical/circus-rs/server';
 import archiver from 'archiver';
 import status from 'http-status';
 import { multirange } from 'multi-integer-range';

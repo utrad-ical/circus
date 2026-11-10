@@ -1,6 +1,6 @@
 import createPluginJobRegisterer from './createPluginJobRegisterer.ts';
 import type { DicomFileRepository } from '@utrad-ical/circus-lib';
-import type PartialVolumeDescriptor from '@utrad-ical/circus-rs/src/volume/PartialVolumeDescriptor.ts';
+import type { PartialVolumeDescriptor } from '@utrad-ical/circus-rs/server';
 import type * as circus from '../../interface.ts';
 
 describe('createPluginJobRegisterer', () => {

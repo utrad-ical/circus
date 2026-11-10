@@ -5,7 +5,7 @@ export * from './validation.ts';
 export { default as ServiceLoader } from './ServiceLoader.ts';
 export * from './ServiceLoader.ts';
 
-export type { default as Logger } from './logger/Logger.ts';
+export * from './logger/index.ts';
 
 export * from './dicom-file-repository/index.ts';
 

@@ -1,14 +1,10 @@
-import * as rs from '@utrad-ical/circus-rs/src/browser';
-import type {
-  MprImageSource,
-  MprViewState,
-  Tool
-} from '@utrad-ical/circus-rs/src/browser';
+import * as rs from '@utrad-ical/circus-rs';
+import type { MprImageSource, MprViewState, Tool } from '@utrad-ical/circus-rs';
 import {
   Composition,
   PlaneFigure,
   WebGlRawVolumeMprImageSource
-} from '@utrad-ical/circus-rs/src/browser';
+} from '@utrad-ical/circus-rs';
 import classnames from 'classnames';
 import { useVolumeLoaders } from '../useVolumeLoader.tsx';
 import get from 'lodash.get';

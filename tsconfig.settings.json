@@ -10,12 +10,6 @@
     "erasableSyntaxOnly": true,
     "isolatedModules": true,
     "rewriteRelativeImportExtensions": true,
-    "types": ["node", "jest"],
-
-    // The following settings will map '@utrad-ical/foo'
-    // to './packages/foo/src'.
-    "paths": {
-      "@utrad-ical/*": ["./packages/*/src"]
-    }
+    "types": ["node", "jest"]
   }
 }

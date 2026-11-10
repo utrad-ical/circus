@@ -1,11 +1,11 @@
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
 import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
-import type PartialVolumeDescriptor from '@utrad-ical/circus-rs/src/volume/PartialVolumeDescriptor.ts';
+import type { PartialVolumeDescriptor } from '@utrad-ical/circus-rs';
 import {
   describePartialVolumeDescriptor,
   rangeHasPartialVolume
-} from '@utrad-ical/circus-rs/src/volume/PartialVolumeDescriptor.ts';
+} from '@utrad-ical/circus-rs';
 import { Button, Modal } from 'components/react-bootstrap';
 import MultiRange from 'multi-integer-range';
 import React, { useMemo, useState } from 'react';

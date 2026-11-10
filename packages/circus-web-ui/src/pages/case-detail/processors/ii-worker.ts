@@ -1,5 +1,5 @@
 const ctx: DedicatedWorkerGlobalScope = self as any;
-import intersliceInterpolation from '@utrad-ical/circus-rs/src/common/morphology/intersliceInterpolation';
+import { intersliceInterpolation } from '@utrad-ical/circus-rs';
 
 ctx.addEventListener('message', event => {
   const { input, width, height, nSlices, mode } = event.data;

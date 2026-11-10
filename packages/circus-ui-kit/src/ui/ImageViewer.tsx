@@ -1,9 +1,5 @@
-import type {
-  Composition,
-  Tool,
-  ViewState
-} from '@utrad-ical/circus-rs/src/browser';
-import { Viewer } from '@utrad-ical/circus-rs/src/browser';
+import type { Composition, Tool, ViewState } from '@utrad-ical/circus-rs';
+import { Viewer } from '@utrad-ical/circus-rs';
 import React, { useEffect, useRef, useState } from 'react';
 import classnames from 'classnames';
 

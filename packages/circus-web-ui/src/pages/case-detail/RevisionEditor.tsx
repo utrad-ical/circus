@@ -1,18 +1,18 @@
 import IconButton from '@smikitky/rb-components/lib/IconButton';
-import type PartialVolumeDescriptor from '@utrad-ical/circus-rs/src/volume/PartialVolumeDescriptor.ts';
-import * as rs from '@utrad-ical/circus-rs/src/browser';
-import type { Viewer } from '@utrad-ical/circus-rs/src/browser';
-import { Composition } from '@utrad-ical/circus-rs/src/browser';
-import type ModifierKeyBehaviors from '@utrad-ical/circus-rs/src/browser/annotation/ModifierKeyBehaviors';
 import type {
+  PartialVolumeDescriptor,
+  Viewer,
+  ModifierKeyBehaviors,
   DicomVolumeMetadata,
-  ProgressEventListener
-} from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
+  ProgressEventListener,
+  InterpolationMode
+} from '@utrad-ical/circus-rs';
+import * as rs from '@utrad-ical/circus-rs';
 import {
+  Composition,
   sectionFrom2dViewState,
   sectionTo2dViewState
-} from '@utrad-ical/circus-rs/src/browser/section-util';
-import type { InterpolationMode } from '@utrad-ical/circus-rs/src/browser/ViewState';
+} from '@utrad-ical/circus-rs';
 import { useVolumeLoaders } from '@utrad-ical/circus-ui-kit';
 import classNames from 'classnames';
 import Collapser from 'components/Collapser';

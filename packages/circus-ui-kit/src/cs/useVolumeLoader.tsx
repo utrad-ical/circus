@@ -1,4 +1,4 @@
-import type * as rs from '@utrad-ical/circus-rs/src/browser';
+import type * as rs from '@utrad-ical/circus-rs';
 import React, { useContext, useEffect, useState } from 'react';
 import type {
   SeriesEntryWithHints,

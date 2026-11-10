@@ -8,7 +8,7 @@ import { setUpKoaTest } from '../../test/util-koa.ts';
 import { setUpMongoFixture, usingModels } from '../../test/util-mongo.ts';
 import errorHandler from '../errorHandler.ts';
 import createOauthServer from './createOauthServer.ts';
-import createNullLogger from '@utrad-ical/circus-lib/src/logger/NullLogger';
+import { createNullLogger } from '@utrad-ical/circus-lib';
 import DefaultAuthProvider from '../auth/authProvider/DefaultAuthProvider.ts';
 import type { Models } from '../../interface.ts';
 import type { Db } from 'mongodb';

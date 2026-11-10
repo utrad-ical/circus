@@ -1,9 +1,7 @@
-import loadConfig from '@utrad-ical/circus-lib/src/config/loadConfig';
+import loadConfig from '@utrad-ical/circus-lib/config';
 import path from 'path';
 
-const csDefault = require.resolve(
-  '@utrad-ical/circus-cs-core/src/config/default'
-);
+const csDefault = require.resolve('@utrad-ical/circus-cs-core/default-config');
 
 const config = loadConfig([
   csDefault, // CS Core Defaults

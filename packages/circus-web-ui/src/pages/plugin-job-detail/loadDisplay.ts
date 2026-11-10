@@ -1,4 +1,5 @@
 import type { Display } from '@utrad-ical/circus-ui-kit';
+import * as uiKit from '@utrad-ical/circus-ui-kit';
 import {
   Choice,
   Dump,
@@ -10,8 +11,8 @@ import {
   Gallery,
   Tags
 } from '@utrad-ical/circus-ui-kit';
-
-// https://github.com/module-federation/module-federation-examples/tree/master/advanced-api/dynamic-remotes
+import React from 'react';
+import ReactDOM from 'react-dom';
 
 const builtInDisplays: { [name: string]: Display<any, any> } = {
   Choice,
@@ -25,39 +26,90 @@ const builtInDisplays: { [name: string]: Display<any, any> } = {
   Tags
 };
 
-const loaded = new Map<string, true>();
+/**
+ * Custom displays of plug-ins are webpack Module Federation remotes
+ * (`remoteEntry.js`, which registers itself as `window.CircusCsModule`).
+ * Instead of relying on the Module Federation runtime of the host bundler,
+ * we pass a hand-made share scope to the container, which tells the remote
+ * to use these module instances of the host.
+ * If a module is missing here, the remote silently falls back to its own
+ * bundled copy, which breaks hooks and contexts (e.g., `useCsResults()`).
+ */
+const sharedModules: { [name: string]: { version: string; module: unknown } } =
+  {
+    react: { version: React.version, module: React },
+    'react-dom': { version: ReactDOM.version, module: ReactDOM },
+    // The ui-kit API version that existing plug-ins were built against
+    '@utrad-ical/circus-ui-kit': { version: '0.3.0', module: uiKit }
+  };
 
-const loadDynamicScript = async (
-  name: string,
-  pluginId: string
-): Promise<void> => {
-  if (loaded.has(name)) return;
-  const url = `/api/plugin-displays/${pluginId}/displays/remoteEntry.js`;
-  const script = await (await fetch(url)).text();
-  const element = document.createElement('script');
-  element.text = script.replace(
-    /http:\/\/localhost:\d{1,5}\//g,
-    `/api/plugin-displays/${pluginId}/displays/`
+interface Container {
+  init: (shareScope: object) => Promise<void> | void;
+  get: (module: string) => Promise<() => any>;
+}
+
+/**
+ * Creates a new share scope for each container
+ * so that plug-ins cannot affect each other.
+ */
+const createShareScope = (pluginId: string) =>
+  Object.fromEntries(
+    Object.entries(sharedModules).map(([name, { version, module }]) => [
+      name,
+      {
+        [version]: {
+          get: () => {
+            console.debug(
+              `Plug-in ${pluginId.slice(0, 12)} uses ${name}@${version} of CIRCUS`
+            );
+            return Promise.resolve(() => module);
+          },
+          from: 'circus-web-ui',
+          eager: true,
+          loaded: 1
+        }
+      }
+    ])
   );
+
+const loadContainer = async (pluginId: string): Promise<Container> => {
+  const baseUrl = `/api/plugin-displays/${pluginId}/displays/`;
+  const res = await fetch(baseUrl + 'remoteEntry.js');
+  if (!res.ok) throw new Error(`Failed to load displays of ${pluginId}`);
+  const script = await res.text();
+  const element = document.createElement('script');
+  // remoteEntry.js has a hard-coded public path (http://localhost:<port>/)
+  element.text = script.replace(/http:\/\/localhost:\d{1,5}\//g, baseUrl);
   element.type = 'text/javascript';
+  // Every plug-in registers itself with the same global name,
+  // so take it right after the script runs
+  const w = window as any;
+  delete w.CircusCsModule;
   document.head.appendChild(element);
-  loaded.set(name, true);
+  const container = w.CircusCsModule as Container | undefined;
+  if (!container) throw new Error(`Invalid displays of ${pluginId}`);
+  await container.init(createShareScope(pluginId));
+  return container;
 };
 
-declare const __webpack_init_sharing__: any;
-declare const __webpack_share_scopes__: any;
+const containers = new Map<string, Promise<Container>>();
+
+const getContainer = (pluginId: string): Promise<Container> => {
+  if (!containers.has(pluginId)) {
+    const promise = loadContainer(pluginId);
+    promise.catch(() => containers.delete(pluginId));
+    containers.set(pluginId, promise);
+  }
+  return containers.get(pluginId)!;
+};
 
 const loadExternalDisplay = async <O extends object, F>(
   name: string,
   pluginId: string
 ): Promise<Display<O, F>> => {
-  await loadDynamicScript(name, pluginId);
-  await __webpack_init_sharing__('default');
-  const container = (window as any)['CircusCsModule'] as any;
-  await container.init(__webpack_share_scopes__.default);
+  const container = await getContainer(pluginId);
   const factory = await container.get('./' + name);
-  const Display = factory().default;
-  return Display;
+  return factory().default;
 };
 
 const loadDisplay = (pluginId: string) => {

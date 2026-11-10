@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test, before, after } from 'node:test';
-import { expect } from 'expect';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import path from 'path';
@@ -36,7 +36,7 @@ test('returns the module container', async () => {
   const res = await ax.alice.get(
     `api/plugin-displays/${pluginId}/remoteEntry.js`
   );
-  expect(res.status).toBe(200);
-  expect(res.headers['content-type']).toContain('text/javascript');
-  expect(res.data).toBe('Hello');
+  assert.equal(res.status, 200);
+  assert.ok(res.headers['content-type'].includes('text/javascript'));
+  assert.equal(res.data, 'Hello');
 });

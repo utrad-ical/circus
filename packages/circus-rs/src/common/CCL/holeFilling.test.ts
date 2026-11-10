@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { expect } from 'expect';
 import holeFilling2D, { holeFilling3D } from './holeFilling.ts';
 
 const mosaic = (
@@ -83,7 +83,7 @@ function HolleFillingTest(
         }
       }
     }
-    expect(flag).toBe(false);
+    assert.equal(flag, false);
   };
 }
 

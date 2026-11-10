@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test, mock } from 'node:test';
-import { expect } from 'expect';
 import Archiver from 'archiver';
 import { EventEmitter } from 'events';
 import memory from 'memory-streams';
@@ -79,11 +79,11 @@ const generatePluginJobRunnerTest = async (
 
   await runner.run(jobId, jobRequest);
   const statuses = jobReporter.report.mock.calls.map(call => call.arguments[1]);
-  expect(statuses).toEqual(['processing', 'results', 'finished']);
+  assert.deepEqual(statuses, ['processing', 'results', 'finished']);
 
-  expect(resultsPacked).toBe(true);
+  assert.equal(resultsPacked, true);
   const log = logStream.toString();
-  expect(log).toContain('Plug-in execution done.');
+  assert.ok(log.includes('Plug-in execution done.'));
 };
 
 describe('pluginJobRunner00', () => {
@@ -140,7 +140,7 @@ describe('executePlugin', () => {
       type: 'CAD'
     };
     const result = await t(plugin);
-    expect(result).toContain('Hello from Docker!');
+    assert.ok(result.includes('Hello from Docker!'));
   });
 
   // Skipping this test because it's slow, but should work
@@ -152,6 +152,6 @@ describe('executePlugin', () => {
       type: 'CAD'
     };
     const result = await t(plugin);
-    expect(result).toContain('EAI_AGAIN'); // Network unavailable
+    assert.ok(result.includes('EAI_AGAIN')); // Network unavailable
   });
 });

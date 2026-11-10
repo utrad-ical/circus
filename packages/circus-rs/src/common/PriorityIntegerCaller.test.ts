@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { expect } from 'expect';
 import PriorityIntegerCaller from './PriorityIntegerCaller.ts';
 import { multirange } from 'multi-integer-range';
 
@@ -16,9 +16,9 @@ test('must support priority according to PriorityIntegerQueue algorithm', async 
   loader.append('2', 20);
   loader.append('3', 30);
   await loader.waitFor('3');
-  expect(result).toEqual([1, 3]);
+  assert.deepEqual(result, [1, 3]);
   await loader.waitFor('1-3');
-  expect(result).toEqual([1, 3, 2]);
+  assert.deepEqual(result, [1, 3, 2]);
 
   loader.append('4', 40);
   loader.append('5', 50);
@@ -29,7 +29,7 @@ test('must support priority according to PriorityIntegerQueue algorithm', async 
   loader.append('7', 7); // update priority to lower (rejected)
 
   await loader.waitFor('1-7');
-  expect(result).toEqual([1, 3, 2].concat([4, 5, 7, 6]));
+  assert.deepEqual(result, [1, 3, 2].concat([4, 5, 7, 6]));
 });
 
 test('must invoke the callback only once for each integer', async () => {
@@ -45,7 +45,7 @@ test('must invoke the callback only once for each integer', async () => {
   loader.append('1');
   loader.append('2');
   await loader.waitFor('1,2');
-  expect(result).toEqual([1, 2]);
+  assert.deepEqual(result, [1, 2]);
 });
 
 test('must handle rejection', async () => {
@@ -58,9 +58,9 @@ test('must handle rejection', async () => {
   const loader = new PriorityIntegerCaller(callback);
   loader.append('1-10');
   await loader.waitFor('1-6');
-  expect(multirange(result).has('1-6')).toBe(true);
+  assert.equal(multirange(result).has('1-6'), true);
   await loader.waitFor('8'); // must not throw
-  await expect(loader.waitFor(7)).rejects.toThrow('Rejected with 7');
+  await assert.rejects(loader.waitFor(7), { message: /Rejected with 7/ });
   await loader.waitFor('9-10'); // must not throw
 });
 
@@ -77,8 +77,8 @@ test('must accept initial resolved range', async () => {
 
   loader.append('1-10');
   await loader.waitFor('1-10'); // must not throw
-  expect(multirange(result).has('5-8')).toBe(false);
-  expect(multirange(result).has('1-4, 9-10')).toBe(true);
+  assert.equal(multirange(result).has('5-8'), false);
+  assert.equal(multirange(result).has('1-4, 9-10'), true);
 });
 
 test('can call waitFor before appending', (_t, done) => {
@@ -96,5 +96,5 @@ test('must accept maxConcurrency', async () => {
   loader.append('1-100'); // All callbacks wil be called concurrently
   const start = new Date().getTime();
   await loader.waitFor('1-100');
-  expect(new Date().getTime() - start).toBeLessThan(300);
+  assert.ok(new Date().getTime() - start < 300);
 });

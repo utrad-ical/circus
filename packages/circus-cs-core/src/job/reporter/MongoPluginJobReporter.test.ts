@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test, before, after, beforeEach } from 'node:test';
-import { expect } from 'expect';
 import type * as mongo from 'mongodb';
 import createMongoPluginJobReporter from './MongoPluginJobReporter.ts';
 import { testClientPool } from '../../testHelper.ts';
@@ -47,28 +47,28 @@ describe('pluginJobReporter', () => {
   test('report processing', async () => {
     await reporter.report(jobId, 'processing');
     const check = await collection.findOne({ jobId });
-    expect(check).toMatchObject({ status: 'processing' });
-    expect(check.startedAt).not.toBeFalsy();
+    assert.partialDeepStrictEqual(check, { status: 'processing' });
+    assert.ok(check.startedAt);
   });
 
   test('report finished', async () => {
     await reporter.report(jobId, 'finished');
     const check = await collection.findOne({ jobId });
-    expect(check).toMatchObject({ status: 'finished' });
-    expect(check.finishedAt).not.toBeFalsy();
+    assert.partialDeepStrictEqual(check, { status: 'finished' });
+    assert.ok(check.finishedAt);
   });
 
   test('report error', async () => {
     await reporter.report(jobId, 'failed');
     const check = await collection.findOne({ jobId });
-    expect(check).toMatchObject({ status: 'failed' });
-    expect(check.finishedAt).toBeFalsy();
+    assert.partialDeepStrictEqual(check, { status: 'failed' });
+    assert.ok(!check.finishedAt);
   });
 
   test('store results', async () => {
     await reporter.report(jobId, 'results', ['a', 'b', 'c']);
     const check = await collection.findOne({ jobId });
-    expect(check.results).toEqual(['a', 'b', 'c']);
+    assert.deepEqual(check.results, ['a', 'b', 'c']);
   });
 
   test('logStream', (_t, done) => {
@@ -77,7 +77,7 @@ describe('pluginJobReporter', () => {
     reporter.logStream(jobId, stream, async () => {
       const file = path.join(resultsDirectory, jobId, 'plugin-log.txt');
       const result = await fs.readFile(file, 'utf8');
-      expect(result).toBe('hello');
+      assert.equal(result, 'hello');
       done();
     });
   });
@@ -90,6 +90,6 @@ describe('pluginJobReporter', () => {
     stream.finalize();
     await reporter.packDir(jobId, stream);
     const result = await fs.readFile(file, 'utf8');
-    expect(result).toBe(txt);
+    assert.equal(result, txt);
   });
 });

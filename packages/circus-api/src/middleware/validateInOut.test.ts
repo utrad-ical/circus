@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test, beforeEach, afterEach } from 'node:test';
-import { expect } from 'expect';
 import validateInOut from './validateInOut.ts';
 import createValidator from '../createValidator.ts';
 import bodyParser from 'koa-bodyparser';
@@ -59,7 +59,7 @@ test('should pass input validation', async function () {
     method: 'post',
     data: { intVal: 5, dateVal: '2015-05-05T00:11:22.000Z' }
   });
-  expect(res.data.foo).toBe('2015-05-05T00:11:22.000Z');
+  assert.equal(res.data.foo, '2015-05-05T00:11:22.000Z');
 });
 
 test('should fail input validation', async function () {
@@ -69,7 +69,7 @@ test('should fail input validation', async function () {
     data: { intVal: 30, dateVal: 'invalid date' },
     validateStatus: () => true
   });
-  expect(res.status).toBe(400);
+  assert.equal(res.status, 400);
 });
 
 test('should pass output validation', async function () {
@@ -87,6 +87,6 @@ test('should fail output validation', async function () {
     data: { intVal: 'foo' },
     validateStatus: () => true
   });
-  expect(res.status).toBe(500);
-  expect(res.data.error).toMatch(/Response schema validation error/i);
+  assert.equal(res.status, 500);
+  assert.match(res.data.error, /Response schema validation error/i);
 });

@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test, before, beforeEach, mock } from 'node:test';
-import { expect } from 'expect';
 import { command } from './refresh-series-parameters.ts';
 import { setUpMongoFixture, usingModels } from '../test/util-mongo.ts';
 import type { Models, DicomTagReader } from '../interface.ts';
@@ -50,13 +50,13 @@ beforeEach(async () => {
 test('refresh series parameters', async () => {
   await commandFunc({});
   const seriesData = await models.series.findById(seriesUid);
-  expect(seriesData.parameters.PhotometricInterpretation).toBe('MONOCHROME2');
+  assert.equal(seriesData.parameters.PhotometricInterpretation, 'MONOCHROME2');
 });
 
 test('refresh series parameters with maxDate', async () => {
   await commandFunc({ maxDate: '2020-08-30T00:00:00Z' });
   const seriesData = await models.series.findById(seriesUid);
-  expect(seriesData.parameters.PhotometricInterpretation).toBe('MONOCHROME2');
+  assert.equal(seriesData.parameters.PhotometricInterpretation, 'MONOCHROME2');
   const seriesData2 = await models.series.findById(overMaxDateSeriesUid);
-  expect(seriesData2.parameters.PhotometricInterpretation).toBe(undefined);
+  assert.equal(seriesData2.parameters.PhotometricInterpretation, undefined);
 });

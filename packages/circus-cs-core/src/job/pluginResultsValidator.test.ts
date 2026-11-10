@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { expect } from 'expect';
 import path from 'path';
 import pluginResultsValidator from './pluginResultsValidator.ts';
 
@@ -11,9 +11,9 @@ describe('Validate lesion candidate plug-in results', () => {
     if (shouldBeValid) {
       await pluginResultsValidator(dir);
     } else {
-      await expect(pluginResultsValidator(dir)).rejects.toThrow(
-        /validation failed/
-      );
+      await assert.rejects(pluginResultsValidator(dir), {
+        message: /validation failed/
+      });
     }
   };
 

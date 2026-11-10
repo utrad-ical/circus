@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { it, before, after } from 'node:test';
-import { expect } from 'expect';
 import type { ApiTest } from '../../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../../test/util-routes.ts';
 import type { AxiosInstance } from 'axios';
@@ -17,8 +17,8 @@ const url = 'api/admin/plugin-job-manager';
 it('should return the current state of a server', async () => {
   const res = await axios.get(url);
   const status = await apiTest.csCore.daemon.status();
-  expect(res.status).toBe(200);
-  expect(res.data.status).toBe(status);
+  assert.equal(res.status, 200);
+  assert.equal(res.data.status, status);
 });
 
 it('should set the state of a server', async () => {
@@ -27,14 +27,14 @@ it('should set the state of a server', async () => {
     url: url + '/switch',
     data: { status: 'running' }
   });
-  expect(res.status).toBe(200);
-  expect(res.data).toEqual({ status: 'running' });
+  assert.equal(res.status, 200);
+  assert.deepEqual(res.data, { status: 'running' });
   const res2 = await axios.request({
     method: 'put',
     url: url + '/switch',
     data: { status: 'stopped' }
   });
-  expect(res2.data).toEqual({ status: 'stopped' });
+  assert.deepEqual(res2.data, { status: 'stopped' });
 });
 
 it('should throw for invalid status change request', async () => {
@@ -43,5 +43,5 @@ it('should throw for invalid status change request', async () => {
     url: url + '/switch',
     data: { status: 'going' } // invalid status
   });
-  expect(res.status).toBe(400);
+  assert.equal(res.status, 400);
 });

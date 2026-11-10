@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { it, before, after, beforeEach } from 'node:test';
-import { expect } from 'expect';
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import bodyparser from 'koa-bodyparser';
@@ -74,7 +74,7 @@ it('should authenticate a request with valid token', async () => {
   const result = await ax.get('data', {
     headers: { Authorization: `Bearer ${token}` }
   });
-  expect(result.data).toMatchObject({ a: 100 });
+  assert.partialDeepStrictEqual(result.data, { a: 100 });
 });
 
 it('should reject token request with wrong credential', async () => {
@@ -88,7 +88,7 @@ it('should reject token request with wrong credential', async () => {
       password: 'thisPasswordIsWrong'
     })
   });
-  expect(res1.status).toBe(400);
+  assert.equal(res1.status, 400);
 
   // nonexistent user
   const res2 = await ax.post('token', {
@@ -100,20 +100,20 @@ it('should reject token request with wrong credential', async () => {
       password: 'charlieDoesNotExist'
     })
   });
-  expect(res2.status).toBe(400);
+  assert.equal(res2.status, 400);
 });
 
 it('should return empty data with a request with invalid token', async () => {
   // no token
   const res1 = await ax.get('data');
-  expect(res1.status).toBe(401);
+  assert.equal(res1.status, 401);
 
   // wrong token
   const wrongToken = 'PeterPiperPickedAPepper';
   const res2 = await ax.get('data', {
     headers: { Authorization: `Bearer ${wrongToken}` }
   });
-  expect(res2.status).toBe(401);
+  assert.equal(res2.status, 401);
 });
 
 it('onetime URL', async () => {
@@ -128,5 +128,5 @@ it('onetime URL', async () => {
       password: 'bgticgmjqprbgdundfklfdmbnr'
     })
   });
-  expect(res.status).toBe(200);
+  assert.equal(res.status, 200);
 });

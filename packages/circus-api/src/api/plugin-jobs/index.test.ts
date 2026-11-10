@@ -1,3 +1,4 @@
+import assert from 'node:assert/strict';
 import {
   describe,
   test,
@@ -6,7 +7,6 @@ import {
   beforeEach,
   afterEach
 } from 'node:test';
-import { expect } from 'expect';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import type { AxiosInstance } from 'axios';
@@ -43,8 +43,8 @@ after(async () => await apiTest.tearDown());
 describe('plugin-job search', () => {
   test('List plug-in jobs', async () => {
     const res = await dave.get('api/plugin-jobs');
-    expect(res.status).toBe(200);
-    expect(Array.isArray(res.data.items)).toBe(true);
+    assert.equal(res.status, 200);
+    assert.equal(Array.isArray(res.data.items), true);
   });
 
   test('Filter by patientInfo', async () => {
@@ -53,9 +53,9 @@ describe('plugin-job search', () => {
         filter: JSON.stringify({ 'patientInfo.patientName': 'Sakura' })
       }
     });
-    expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(1);
-    expect(res.data.items[0].patientInfo.age).toBe(20);
+    assert.equal(res.status, 200);
+    assert.equal(res.data.items.length, 1);
+    assert.equal(res.data.items[0].patientInfo.age, 20);
   });
 
   test('Filter by series info', async () => {
@@ -67,20 +67,20 @@ describe('plugin-job search', () => {
         })
       }
     });
-    expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(2);
+    assert.equal(res.status, 200);
+    assert.equal(res.data.items.length, 2);
   });
 
   test('Filter by power user domain', async () => {
     const res = await bob.get('api/plugin-jobs');
-    expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(2);
+    assert.equal(res.status, 200);
+    assert.equal(res.data.items.length, 2);
   });
 
   test('Filter by guest domain', async () => {
     const res = await guest.get('api/plugin-jobs');
-    expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(0);
+    assert.equal(res.status, 200);
+    assert.equal(res.data.items.length, 0);
   });
 
   test('throw 400 if search using patient information for unprivileged user', async () => {
@@ -90,7 +90,7 @@ describe('plugin-job search', () => {
         filter: JSON.stringify({ 'patientInfo.patientName': 'Sakura' })
       }
     });
-    expect(res.status).toBe(400);
+    assert.equal(res.status, 400);
   });
 
   test('should not be able to filter by patientInfo if user has no viewPersonalInfo', async () => {
@@ -100,8 +100,8 @@ describe('plugin-job search', () => {
         filter: JSON.stringify({ 'patientInfo.patientName': 'Sakura' })
       }
     });
-    expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(0);
+    assert.equal(res.status, 200);
+    assert.equal(res.data.items.length, 0);
   });
 
   test('should be searchable if patient information is not used', async () => {
@@ -113,8 +113,8 @@ describe('plugin-job search', () => {
         }
       }
     });
-    expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(4);
+    assert.equal(res.status, 200);
+    assert.equal(res.data.items.length, 4);
   });
 });
 
@@ -126,23 +126,23 @@ describe('search by mylist', () => {
 
   test('search succeeds', async () => {
     const res = await dave.get(`api/plugin-jobs/list/${myListId}`);
-    expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(1);
-    expect(res.data.items[0].patientInfo.patientName).toBe('Koume');
+    assert.equal(res.status, 200);
+    assert.equal(res.data.items.length, 1);
+    assert.equal(res.data.items[0].patientInfo.patientName, 'Koume');
   });
 
   test('throw 404 if use nonexistent myListId in my list', async () => {
     const nonexistentMyListId = '11111111111111111111111111';
     const res = await dave.get(`api/plugin-jobs/list/${nonexistentMyListId}`);
-    expect(res.status).toBe(404);
-    expect(res.data.error).toBe('This my list does not exist');
+    assert.equal(res.status, 404);
+    assert.equal(res.data.error, 'This my list does not exist');
   });
 
   test('should throw 400 for non-plugin-job mylist type', async () => {
     const caseMyListId = '01ezab6xqfac7hvm5s09yw1g1j';
     const res = await dave.get(`api/plugin-jobs/list/${caseMyListId}`);
-    expect(res.status).toBe(400);
-    expect(res.data.error).toBe('This my list is not for plugin jobs');
+    assert.equal(res.status, 400);
+    assert.equal(res.data.error, 'This my list is not for plugin jobs');
   });
 
   test('should not return results if domain check fails', async () => {
@@ -150,8 +150,8 @@ describe('search by mylist', () => {
       .collection('users')
       .updateOne({ userEmail: 'dave@example.com' }, { $set: { groups: [] } });
     const res = await dave.get(`api/plugin-jobs/list/${myListId}`);
-    expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(0);
+    assert.equal(res.status, 200);
+    assert.equal(res.data.items.length, 0);
   });
 
   test('should not return patient info when personalInfoView = false', async () => {
@@ -162,9 +162,9 @@ describe('search by mylist', () => {
         { $set: { 'preferences.personalInfoView': false } }
       );
     const res = await dave.get(`api/plugin-jobs/list/${myListId}`);
-    expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(1);
-    expect(res.data.items[0].patientInfo).toBe(undefined);
+    assert.equal(res.status, 200);
+    assert.equal(res.data.items.length, 1);
+    assert.equal(res.data.items[0].patientInfo, undefined);
   });
 
   test('should not return patient info when there is no privileges', async () => {
@@ -175,9 +175,9 @@ describe('search by mylist', () => {
         { $set: { privileges: [] } }
       );
     const res = await dave.get(`api/plugin-jobs/list/${myListId}`);
-    expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(1);
-    expect(res.data.items[0].patientInfo).toBe(undefined);
+    assert.equal(res.status, 200);
+    assert.equal(res.data.items.length, 1);
+    assert.equal(res.data.items[0].patientInfo, undefined);
   });
 });
 
@@ -197,7 +197,7 @@ describe('plugin-job registration', () => {
         ]
       }
     });
-    expect(res.status).toBe(201);
+    assert.equal(res.status, 201);
   });
 
   test('should not register a new plug-in job if a user has no executePlugin', async () => {
@@ -215,7 +215,7 @@ describe('plugin-job registration', () => {
         ]
       }
     });
-    expect(res.status).toBe(400);
+    assert.equal(res.status, 400);
   });
 
   test('should reject if series image out of range', async () => {
@@ -235,7 +235,7 @@ describe('plugin-job registration', () => {
         priority: 123
       }
     });
-    expect(res.status).toBe(400);
+    assert.equal(res.status, 400);
   });
 
   test('should reject if series lacks PVD', async () => {
@@ -250,7 +250,7 @@ describe('plugin-job registration', () => {
         priority: 123
       }
     });
-    expect(res.status).toBe(400);
+    assert.equal(res.status, 400);
   });
 
   test('should register a job with automatic PVD', async () => {
@@ -268,7 +268,7 @@ describe('plugin-job registration', () => {
         ]
       }
     });
-    expect(res.status).toBe(201);
+    assert.equal(res.status, 201);
   });
 
   test('should reject for unmatched series domain', async () => {
@@ -290,9 +290,9 @@ describe('plugin-job registration', () => {
         ]
       }
     });
-    expect(res.status).toBe(400);
-    expect(res.data.error).toMatch(
-      'All series must belong to the same domain.'
+    assert.equal(res.status, 400);
+    assert.ok(
+      res.data.error.includes('All series must belong to the same domain.')
     );
   });
 
@@ -309,13 +309,13 @@ describe('plugin-job registration', () => {
     };
     test('should reject for duplicated job', async () => {
       const res = await bob.post('api/plugin-jobs', job);
-      expect(res.status).toBe(400);
-      expect(res.data.error).toMatch('duplicate');
+      assert.equal(res.status, 400);
+      assert.ok(res.data.error.includes('duplicate'));
     });
 
     test('should not reject when "force" flag is set', async () => {
       const res = await bob.post('api/plugin-jobs', { ...job, force: true });
-      expect(res.status).toBe(201);
+      assert.equal(res.status, 201);
     });
   });
 });
@@ -327,7 +327,7 @@ describe('job cancellation', () => {
       url: 'api/plugin-jobs/01gr80z2v58f9jytq60snybgfa',
       data: { status: 'cancelled' }
     });
-    expect(res.status).toBe(status.NO_CONTENT);
+    assert.equal(res.status, status.NO_CONTENT);
   });
 
   test('cancellation fails if status is not in_queue', async () => {
@@ -336,7 +336,7 @@ describe('job cancellation', () => {
       url: 'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa',
       data: { status: 'cancelled' }
     });
-    expect(res.status).toBe(status.UNPROCESSABLE_ENTITY);
+    assert.equal(res.status, status.UNPROCESSABLE_ENTITY);
   });
 });
 
@@ -347,7 +347,7 @@ describe('job invalidation', () => {
       url: 'api/plugin-jobs/01f5dt3qn9877g072t9y7h7pjp',
       data: { status: 'invalidated' }
     });
-    expect(res.status).toBe(status.NO_CONTENT);
+    assert.equal(res.status, status.NO_CONTENT);
   });
 
   test('invalidation fails if status is not in_queue', async () => {
@@ -356,7 +356,7 @@ describe('job invalidation', () => {
       url: 'api/plugin-jobs/01dxgwvhwhyjt8hd4srsf9z4te',
       data: { status: 'invalidated' }
     });
-    expect(res.status).toBe(status.UNPROCESSABLE_ENTITY);
+    assert.equal(res.status, status.UNPROCESSABLE_ENTITY);
   });
 
   test('invalidation fails if a user has no manageJobs', async () => {
@@ -365,7 +365,7 @@ describe('job invalidation', () => {
       url: 'api/plugin-jobs/01f5dt3qn9877g072t9y7h7pjp',
       data: { status: 'invalidated' }
     });
-    expect(res.status).toBe(status.UNAUTHORIZED);
+    assert.equal(res.status, status.UNAUTHORIZED);
   });
 });
 
@@ -373,9 +373,9 @@ test('should return a finished plug-in job', async () => {
   const res = await dave.request({
     url: 'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa'
   });
-  expect(res.status).toBe(200);
-  expect(res.data.jobId).toBe('01dxgwv3k0medrvhdag4mpw9wa');
-  expect(res.data.status).toBe('finished');
+  assert.equal(res.status, 200);
+  assert.equal(res.data.jobId, '01dxgwv3k0medrvhdag4mpw9wa');
+  assert.equal(res.data.status, 'finished');
 });
 
 describe('register feedback', () => {
@@ -385,7 +385,7 @@ describe('register feedback', () => {
       method: 'post',
       data: { data: { lesionCandidates: [] }, actionLog: [] }
     });
-    expect(res.status).toBe(status.OK);
+    assert.equal(res.status, status.OK);
   });
 
   test('should return a list of feedback entries', async () => {
@@ -393,8 +393,8 @@ describe('register feedback', () => {
       url: 'api/plugin-jobs/01dxgwvhwhyjt8hd4srsf9z4te/feedback',
       method: 'get'
     });
-    expect(res.status).toBe(status.OK);
-    expect(res.data).toHaveLength(1);
+    assert.equal(res.status, status.OK);
+    assert.equal(res.data.length, 1);
   });
 });
 
@@ -414,35 +414,35 @@ describe('delete feedback', () => {
     const res = await alice.delete(
       `api/plugin-jobs/${jobId}/feedback/01grtppnyxbdherkv2krd2n72a`
     );
-    expect(res.status).toBe(status.NO_CONTENT);
-    expect(await getCount()).toBe(2);
+    assert.equal(res.status, status.NO_CONTENT);
+    assert.equal(await getCount(), 2);
   });
 
   test('should not delete one feedback if a user has no manageFeedback', async () => {
     const res = await frank.delete(
       `api/plugin-jobs/${jobId}/feedback/01grtppnyxbdherkv2krd2n72a`
     );
-    expect(res.status).toBe(status.UNAUTHORIZED);
+    assert.equal(res.status, status.UNAUTHORIZED);
   });
 
   test('return 404 for non-existing feedback', async () => {
     const res = await alice.delete(
       `api/plugin-jobs/${jobId}/feedback/thisfeedbackdoesnotexist`
     );
-    expect(res.status).toBe(status.NOT_FOUND);
+    assert.equal(res.status, status.NOT_FOUND);
   });
 
   test('delete all feedback', async () => {
     const res = await alice.delete(`api/plugin-jobs/${jobId}/feedback/all`);
-    expect(res.status).toBe(status.NO_CONTENT);
-    expect(await getCount()).toBe(0);
+    assert.equal(res.status, status.NO_CONTENT);
+    assert.equal(await getCount(), 0);
   });
 
   test('refuse to delete personal feedback when consensual feedback exists', async () => {
     const res = await alice.delete(
       `api/plugin-jobs/${jobId}/feedback/01grtppgk4kvgx8q5htj5530rp`
     );
-    expect(res.status).toBe(status.BAD_REQUEST);
+    assert.equal(res.status, status.BAD_REQUEST);
   });
 });
 
@@ -451,17 +451,17 @@ describe('get plugin job attachment list', () => {
     const res = await alice.get(
       'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/attachment'
     );
-    expect(res.status).toBe(200);
-    expect(Array.isArray(res.data)).toBe(true);
-    expect(res.data).toContain('test.txt');
-    expect(res.data).toContain('sub/test2.txt');
+    assert.equal(res.status, 200);
+    assert.equal(Array.isArray(res.data), true);
+    assert.ok(res.data.includes('test.txt'));
+    assert.ok(res.data.includes('sub/test2.txt'));
   });
 
   test('reject unauthorized user', async () => {
     const res = await guest.get(
       'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/attachment'
     );
-    expect(res.status).toBe(401);
+    assert.equal(res.status, 401);
   });
 });
 
@@ -470,35 +470,35 @@ describe('download plugin job attachment files', () => {
     const res = await alice.get(
       'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/attachment/test.txt'
     );
-    expect(res.status).toBe(200);
-    expect(res.headers['content-type']).toMatch('text/plain');
-    expect(res.data).toBe('This is a test file');
+    assert.equal(res.status, 200);
+    assert.ok(res.headers['content-type'].includes('text/plain'));
+    assert.equal(res.data, 'This is a test file');
   });
 
   test('return 404 for nonexistent file', async () => {
     const res = await alice.get(
       'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/attachment/dummy.txt'
     );
-    expect(res.status).toBe(404);
+    assert.equal(res.status, 404);
   });
 
   test('reject unauthorized user', async () => {
     const res = await guest.get(
       'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/attachment/test.txt'
     );
-    expect(res.status).toBe(401);
+    assert.equal(res.status, 401);
   });
 });
 
 describe('extractPatientIdNameFilter', () => {
   test('return filter when customFilter contains a fixed value in patientInfo.patientId without $and', () => {
     const customFilter = { 'patientInfo.patientId': '015' };
-    expect(extractPatientIdNameFilter(customFilter)).toEqual(customFilter);
+    assert.deepEqual(extractPatientIdNameFilter(customFilter), customFilter);
   });
 
   test('return null when customFilter contains a fixed value in status without $and', () => {
     const customFilter = { status: 'failed' };
-    expect(extractPatientIdNameFilter(customFilter)).toBe(null);
+    assert.equal(extractPatientIdNameFilter(customFilter), null);
   });
 
   test('return null when $and exists but targetFilter does not contain a fixed value', () => {
@@ -509,16 +509,16 @@ describe('extractPatientIdNameFilter', () => {
         { createdAt: { $lt: { $date: '2017-10-10T00:00:00Z' } } }
       ]
     };
-    expect(extractPatientIdNameFilter(customFilter)).toBe(null);
+    assert.equal(extractPatientIdNameFilter(customFilter), null);
   });
 
   test('return filter when $and exists and targetFilter contains a fixed value', () => {
     const customFilter = { $and: [{ 'patientInfo.patientName': 'sakura' }] };
-    expect(extractPatientIdNameFilter(customFilter)).toEqual(customFilter);
+    assert.deepEqual(extractPatientIdNameFilter(customFilter), customFilter);
   });
 
   test('return null when customFilter is an empty object', () => {
-    expect(extractPatientIdNameFilter({})).toBe(null);
+    assert.equal(extractPatientIdNameFilter({}), null);
   });
 
   test('return null when customFilter contains $or condition', () => {
@@ -528,7 +528,7 @@ describe('extractPatientIdNameFilter', () => {
         { 'patientInfo.patientName': 'umeko' }
       ]
     };
-    expect(extractPatientIdNameFilter(customFilter)).toBe(null);
+    assert.equal(extractPatientIdNameFilter(customFilter), null);
   });
 
   test('return filters when multiple conditions are present in $and', () => {
@@ -546,7 +546,7 @@ describe('extractPatientIdNameFilter', () => {
         { 'patientInfo.age': { $lt: 50 } }
       ]
     };
-    expect(extractPatientIdNameFilter(customFilter)).toEqual(expected);
+    assert.deepEqual(extractPatientIdNameFilter(customFilter), expected);
   });
 
   test('return filters when $and contains nested $and', () => {
@@ -574,6 +574,6 @@ describe('extractPatientIdNameFilter', () => {
         { 'patientInfo.Id': { $regex: '^0' } }
       ]
     };
-    expect(extractPatientIdNameFilter(customFilter)).toEqual(expected);
+    assert.deepEqual(extractPatientIdNameFilter(customFilter), expected);
   });
 });

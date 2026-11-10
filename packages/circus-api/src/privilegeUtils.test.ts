@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test, before } from 'node:test';
-import { expect } from 'expect';
 import { setUpMongoFixture, usingSessionModels } from './test/util-mongo.ts';
 import type { Models } from './interface.ts';
 import type { UserPrivilegeInfo } from './privilegeUtils.ts';
@@ -21,8 +21,8 @@ before(async () => {
 });
 
 const sameMembers = (test: string[], members: string[]) => {
-  expect(test.length).toBe(members.length);
-  members.forEach(item => expect(test.indexOf(item) >= 0).toBe(true));
+  assert.equal(test.length, members.length);
+  members.forEach(item => assert.equal(test.indexOf(item) >= 0, true));
 };
 
 test('determineUserAccessInfo', async () => {
@@ -34,7 +34,7 @@ test('determineUserAccessInfo', async () => {
     'issueOnetime'
   ]);
   sameMembers(privA.domains, ['sirius.org']);
-  expect(privA.accessibleProjects).toEqual([]);
+  assert.deepEqual(privA.accessibleProjects, []);
   sameMembers(privA.accessiblePlugins[0].roles, [
     'readPlugin',
     'manageFeedback'
@@ -44,9 +44,9 @@ test('determineUserAccessInfo', async () => {
   const privB = await determineUserAccessInfo(models, bob);
   sameMembers(privB.globalPrivileges, ['personalInfoView', 'downloadVolume']);
   sameMembers(privB.domains, ['vega.org', 'altair.org']);
-  expect(privB.accessibleProjects).toHaveLength(1);
+  assert.equal(privB.accessibleProjects.length, 1);
   sameMembers(privB.accessibleProjects[0].roles, ['read', 'write', 'moderate']);
-  expect(privB.accessiblePlugins).toHaveLength(1);
+  assert.equal(privB.accessiblePlugins.length, 1);
   sameMembers(privB.accessiblePlugins[0].roles, [
     'readPlugin',
     'executePlugin',
@@ -57,8 +57,8 @@ test('determineUserAccessInfo', async () => {
   const privG = await determineUserAccessInfo(models, guest);
   sameMembers(privG.globalPrivileges, []);
   sameMembers(privG.domains, []);
-  expect(privG.accessibleProjects).toEqual([]);
-  expect(privG.accessiblePlugins).toEqual([]);
+  assert.deepEqual(privG.accessibleProjects, []);
+  assert.deepEqual(privG.accessiblePlugins, []);
 });
 
 test('fetchAndLockAccessibleSeries', async () => {
@@ -86,10 +86,10 @@ test('fetchAndLockAccessibleSeries', async () => {
     );
   const checkOk = async (priv: UserPrivilegeInfo, seriesEntries: string[]) => {
     const series = await fetch(priv, seriesEntries);
-    expect(seriesEntries.length).toBe(series.length);
+    assert.equal(seriesEntries.length, series.length);
   };
   const checkNg = async (priv: UserPrivilegeInfo, seriesEntries: string[]) => {
-    await expect(fetch(priv, seriesEntries)).rejects.toThrow();
+    await assert.rejects(fetch(priv, seriesEntries));
   };
   // 111.222.333.444.444: (  1) [sirius.org] A
   // 111.222.333.444.555: (150) [sirius.org] A

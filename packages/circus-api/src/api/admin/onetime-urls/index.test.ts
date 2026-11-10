@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test, before, after, beforeEach } from 'node:test';
-import { expect } from 'expect';
 import type { ApiTest } from '../../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../../test/util-routes.ts';
 import { setUpMongoFixture } from '../../../test/util-mongo.ts';
@@ -24,7 +24,7 @@ test('create a one time URL', async () => {
     url: `api/admin/onetime-urls`,
     data: { user: userEmail }
   });
-  expect(res.status).toBe(201);
+  assert.equal(res.status, 201);
 });
 
 test('throw 401 error for unauthorized user', async () => {
@@ -35,7 +35,7 @@ test('throw 401 error for unauthorized user', async () => {
     url: `api/admin/onetime-urls`,
     data: { user: userEmail }
   });
-  expect(res.status).toBe(401);
+  assert.equal(res.status, 401);
 });
 
 test('throw 404 error for nonexistent user', async () => {
@@ -45,7 +45,7 @@ test('throw 404 error for nonexistent user', async () => {
     url: `api/admin/onetime-urls`,
     data: { user: userEmail }
   });
-  expect(res.status).toBe(404);
+  assert.equal(res.status, 404);
 });
 
 test('throw 400 error for login disabled user', async () => {
@@ -55,5 +55,5 @@ test('throw 400 error for login disabled user', async () => {
     url: `api/admin/onetime-urls`,
     data: { user: userEmail }
   });
-  expect(res.status).toBe(400);
+  assert.equal(res.status, 400);
 });

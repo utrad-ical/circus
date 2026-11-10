@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test, it, before, after } from 'node:test';
-import { expect } from 'expect';
 import type { TestServer } from '../test/util-koa.ts';
 import { setUpKoaTest } from '../test/util-koa.ts';
 import { setUpMongoFixture, usingMongo } from '../test/util-mongo.ts';
@@ -54,12 +54,12 @@ after(async () => {
 
 test('isPatientInfoInFilter', () => {
   const i = isPatientInfoInFilter;
-  expect(i({ 'patientInfo.age': 7 })).toBe(true);
-  expect(i({ 'patientInfo.age': 7, status: false })).toBe(true);
-  expect(i({ status: false })).toBe(false);
-  expect(i({ $and: [{ 'patientInfo.age': 7, status: false }] })).toBe(true);
-  expect(i({ $and: [{ status: false }] })).toBe(false);
-  expect(i({ $or: [{ 'patientInfo.age': 7 }] })).toBe(true);
+  assert.equal(i({ 'patientInfo.age': 7 }), true);
+  assert.equal(i({ 'patientInfo.age': 7, status: false }), true);
+  assert.equal(i({ status: false }), false);
+  assert.equal(i({ $and: [{ 'patientInfo.age': 7, status: false }] }), true);
+  assert.equal(i({ $and: [{ status: false }] }), false);
+  assert.equal(i({ $or: [{ 'patientInfo.age': 7 }] }), true);
 });
 
 describe('performSearch', () => {
@@ -82,44 +82,51 @@ describe('performSearch', () => {
 
   it('should perform search', async () => {
     const res = await search({ limit: 100 });
-    expect(res.items).toHaveLength(30);
+    assert.equal(res.items.length, 30);
   });
 
   it('should take filter', async () => {
     const res1 = await search({ query: { price: { $gt: 800 } } });
-    expect(res1.items.length).toBe(6);
-    expect(res1.totalItems).toBe(6);
-    expect(res1.page).toBe(1);
+    assert.equal(res1.items.length, 6);
+    assert.equal(res1.totalItems, 6);
+    assert.equal(res1.page, 1);
     const res2 = await search({ query: { color: 'blue' } });
-    expect(res2.items.length).toBe(3);
-    expect(res2.totalItems).toBe(3);
+    assert.equal(res2.items.length, 3);
+    assert.equal(res2.totalItems, 3);
   });
 
   it('should take sort', async () => {
     const res1 = await search({ sort: { price: -1 } });
-    expect(res1.items[0].name).toBe('digital firewall');
+    assert.equal(res1.items[0].name, 'digital firewall');
     const res2 = await search({ sort: { price: 1 } });
-    expect(res2.items[0].name).toBe('bluetooth pixel');
+    assert.equal(res2.items[0].name, 'bluetooth pixel');
     const res3 = await search({ sort: { stock: 1, name: 1 } });
-    expect(res3.items.map((i: any) => i.itemId).slice(0, 3)).toEqual([
-      28, 13, 1
-    ]);
+    assert.deepEqual(
+      res3.items.map((i: any) => i.itemId).slice(0, 3),
+      [28, 13, 1]
+    );
   });
 
   it('should take paging', async () => {
     const res1 = await search({ page: 1, limit: 2, sort: { price: -1 } });
-    expect(res1.items.map((i: any) => i.itemId)).toEqual([12, 23]);
-    expect(res1.totalItems).toBe(30);
-    expect(res1.page).toBe(1);
+    assert.deepEqual(
+      res1.items.map((i: any) => i.itemId),
+      [12, 23]
+    );
+    assert.equal(res1.totalItems, 30);
+    assert.equal(res1.page, 1);
 
     const res2 = await search({ page: 2, limit: 2, sort: { price: -1 } });
-    expect(res2.items.map((i: any) => i.itemId)).toEqual([28, 15]);
-    expect(res2.totalItems).toBe(30);
-    expect(res2.page).toBe(2);
+    assert.deepEqual(
+      res2.items.map((i: any) => i.itemId),
+      [28, 15]
+    );
+    assert.equal(res2.totalItems, 30);
+    assert.equal(res2.page, 2);
 
     const res3 = await search({ page: 20, limit: 2, sort: { price: -1 } });
-    expect(res3.items).toEqual([]);
-    expect(res3.totalItems).toBe(30);
+    assert.deepEqual(res3.items, []);
+    assert.equal(res3.totalItems, 30);
   });
 });
 
@@ -130,15 +137,15 @@ describe('runAggregation', () => {
       skip: 1,
       sort: { price: -1 }
     });
-    expect(result.items).toHaveLength(3);
-    expect(result.items[0]).toMatchObject({ itemId: 23 });
+    assert.equal(result.items.length, 3);
+    assert.partialDeepStrictEqual(result.items[0], { itemId: 23 });
   });
 
   test('filter', async () => {
     const result = await runAggregation(items, {
       filter: { price: { $gte: 900 } }
     });
-    expect(result.items).toHaveLength(3);
+    assert.equal(result.items.length, 3);
   });
 
   test('group', async () => {
@@ -147,6 +154,6 @@ describe('runAggregation', () => {
       transform: a => ({ ...a, message: 'hello' })
     });
     const blueCount = result.items.find(r => r._id === 'blue');
-    expect(blueCount).toEqual({ _id: 'blue', count: 3, message: 'hello' });
+    assert.deepEqual(blueCount, { _id: 'blue', count: 3, message: 'hello' });
   });
 });

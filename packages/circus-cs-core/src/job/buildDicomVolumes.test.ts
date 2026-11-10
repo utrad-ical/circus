@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { expect } from 'expect';
 import path from 'path';
 import fs from 'fs-extra';
 import buildDicomVolumes from './buildDicomVolumes.ts';
@@ -44,9 +44,9 @@ describe('buildDicomVolume', () => {
         logStream
       );
       const files = await fs.readdir(tmpDestDir);
-      expect(files).toContain('0.mhd');
-      expect(files).toContain('0.raw');
-      expect(files).toContain('0.json');
+      assert.ok(files.includes('0.mhd'));
+      assert.ok(files.includes('0.raw'));
+      assert.ok(files.includes('0.json'));
     } finally {
       await fs.remove(tmpDestDir);
     }

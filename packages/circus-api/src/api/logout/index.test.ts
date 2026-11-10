@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test, before, after } from 'node:test';
-import { expect } from 'expect';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import type { AxiosInstance } from 'axios';
@@ -14,18 +14,18 @@ after(async () => await apiTest.tearDown());
 
 test('logout', async () => {
   const res1 = await axios.get('api/logout');
-  expect(res1.status).toBe(httpStatus.NO_CONTENT);
+  assert.equal(res1.status, httpStatus.NO_CONTENT);
   const res2 = await axios.get('api/login-info');
-  expect(res2.status).toBe(httpStatus.UNAUTHORIZED);
+  assert.equal(res2.status, httpStatus.UNAUTHORIZED);
 });
 
 test('preserve permanent token', async () => {
   const res = await apiTest.axiosInstances.guest.get('api/logout');
-  expect(res.status).toBe(httpStatus.NO_CONTENT);
+  assert.equal(res.status, httpStatus.NO_CONTENT);
   const rows = await apiTest.database.db
     .collection('tokens')
     .find({ userId: 'guest@example.com' })
     .toArray();
-  expect(rows).toHaveLength(1);
-  expect(rows[0]?.permanentTokenId).toMatch(/.{10,}/);
+  assert.equal(rows.length, 1);
+  assert.match(rows[0]?.permanentTokenId, /.{10,}/);
 });

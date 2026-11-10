@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { expect } from 'expect';
 import archiver from 'archiver';
 import type { DicomFileRepository } from '@utrad-ical/circus-lib';
 import fs from 'fs-extra';
@@ -58,12 +58,12 @@ test('dump json', async () => {
   let count = 0;
   extract.on('entry', async (headers, stream, next) => {
     count++;
-    expect(headers.name).toMatch(/0\.(json|mhd|raw)/);
+    assert.match(headers.name, /0\.(json|mhd|raw)/);
     const content = await readFromStreamTillEnd(stream);
     if (headers.name === '0.json') {
-      expect(JSON.parse(content).common).toHaveProperty('0008,0008'); // ImageType
-      expect(JSON.parse(content).common['0010,0010']).toBeUndefined(); // PatientName
-      expect(JSON.parse(content).common['01f1,1001']).toBe(undefined); // Acquisition Type (private tag)
+      assert.ok('0008,0008' in JSON.parse(content).common); // ImageType
+      assert.equal(JSON.parse(content).common['0010,0010'], undefined); // PatientName
+      assert.equal(JSON.parse(content).common['01f1,1001'], undefined); // Acquisition Type (private tag)
     }
     next();
   });
@@ -71,7 +71,7 @@ test('dump json', async () => {
   await new Promise((resolve, reject) => {
     extract.on('finish', resolve);
   });
-  expect(count).toBe(3);
+  assert.equal(count, 3);
 });
 
 test('dump json including private tags', async () => {
@@ -94,12 +94,12 @@ test('dump json including private tags', async () => {
   stream.pipe(extract);
 
   extract.on('entry', async (headers, stream, next) => {
-    expect(headers.name).toMatch(/0\.(json|mhd|raw)/);
+    assert.match(headers.name, /0\.(json|mhd|raw)/);
     const content = await readFromStreamTillEnd(stream);
     if (headers.name === '0.json') {
-      expect(JSON.parse(content).common).toHaveProperty('0008,0008'); // ImageType
-      expect(JSON.parse(content).common['0010,0010']).toBeUndefined(); // PatientName
-      expect(JSON.parse(content).common['01f1,1001']).toBe('SPIRAL'); // Acquisition Type (private tag)
+      assert.ok('0008,0008' in JSON.parse(content).common); // ImageType
+      assert.equal(JSON.parse(content).common['0010,0010'], undefined); // PatientName
+      assert.equal(JSON.parse(content).common['01f1,1001'], 'SPIRAL'); // Acquisition Type (private tag)
     }
     next();
   });
@@ -113,19 +113,19 @@ describe('stringifyUN', () => {
   test('ASCII', () => {
     const buf = new Uint8Array([97, 98, 99]).buffer; // 'abc'
     const result = stringifyUN(buf, 'x00000000');
-    expect(result).toBe('abc');
+    assert.equal(result, 'abc');
   });
 
   test('Base64', () => {
     const buf = new Uint8Array([0, 1, 2, 3]).buffer;
     const result = stringifyUN(buf, 'x00000000');
-    expect(result).toMatch('data:application/octet-stream;base64,AAECAw==');
+    assert.ok(result.includes('data:application/octet-stream;base64,AAECAw=='));
   });
 
   test('Rejects large binary', () => {
     const buf = new Uint8Array(10000000).buffer;
-    expect(() => stringifyUN(buf, 'x00000000')).toThrow(
-      `Data of the private tag x00000000 is too large`
-    );
+    assert.throws(() => stringifyUN(buf, 'x00000000'), {
+      message: /Data of the private tag x00000000 is too large/
+    });
   });
 });

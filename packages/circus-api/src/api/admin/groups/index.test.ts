@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, it, before, after, beforeEach } from 'node:test';
-import { expect } from 'expect';
 import type { ApiTest } from '../../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../../test/util-routes.ts';
 import { setUpMongoFixture } from '../../../test/util-mongo.ts';
@@ -18,20 +18,20 @@ beforeEach(async () => {
 
 it('should return list of groups', async () => {
   const res = await axios.get('api/admin/groups');
-  expect(res.data.items).toBeInstanceOf(Array);
-  expect(res.data.items[0].groupName).toBe('admin');
+  assert.ok(res.data.items instanceof Array);
+  assert.equal(res.data.items[0].groupName, 'admin');
 });
 
 it('should return a group', async () => {
   const res = await axios.get('api/admin/groups/1');
-  expect(res.data.groupName).toBe('admin');
+  assert.equal(res.data.groupName, 'admin');
 });
 
 it('should return error for nonexistent group', async () => {
   const res1 = await axios.get('api/admin/groups/7');
-  expect(res1.status).toBe(404);
+  assert.equal(res1.status, 404);
   const res2 = await axios.get('api/admin/groups/bad');
-  expect(res2.status).toBe(404);
+  assert.equal(res2.status, 404);
 });
 
 it('should update a group', async () => {
@@ -40,9 +40,9 @@ it('should update a group', async () => {
     url: 'api/admin/groups/1',
     data: { groupName: 'root' }
   });
-  expect(res1.status).toBe(204);
+  assert.equal(res1.status, 204);
   const res2 = await axios.get('api/admin/groups/1');
-  expect(res2.data.groupName).toBe('root');
+  assert.equal(res2.data.groupName, 'root');
 });
 
 const basicGroupData = {
@@ -69,7 +69,7 @@ it('should add a new group', async () => {
     url: 'api/admin/groups',
     data: basicGroupData
   });
-  expect(res.status).toBe(201);
+  assert.equal(res.status, 201);
 });
 
 it('should return error for invalid group update', async () => {
@@ -78,23 +78,23 @@ it('should return error for invalid group update', async () => {
     url: 'api/admin/groups/1',
     data: { groupName: 72 }
   });
-  expect(res1.status).toBe(400);
+  assert.equal(res1.status, 400);
 
   const res2 = await axios.request({
     method: 'patch',
     url: 'api/admin/groups/1',
     data: { groupId: 45 }
   });
-  expect(res2.status).toBe(400);
-  expect(res2.data.error).toMatch(/primary key/);
+  assert.equal(res2.status, 400);
+  assert.match(res2.data.error, /primary key/);
 
   const res3 = await axios.request({
     method: 'post',
     url: 'api/admin/groups',
     data: { ...basicGroupData, groupId: 77 }
   });
-  expect(res3.status).toBe(400);
-  expect(res3.data.error).toMatch(/Group ID cannot be specified/);
+  assert.equal(res3.status, 400);
+  assert.match(res3.data.error, /Group ID cannot be specified/);
 });
 
 const permissionsDependencies = {
@@ -119,7 +119,7 @@ const updateGroupData = async (
     url: 'api/admin/groups/1',
     data
   });
-  expect(res.status).toBe(expectedStatus);
+  assert.equal(res.status, expectedStatus);
 };
 
 describe('group permission updates', () => {
@@ -158,8 +158,11 @@ describe('group permission updates', () => {
 
 it('should return global-privileges', async () => {
   const res = await axios('api/admin/global-privileges');
-  expect(res.data.length).toBeGreaterThan(1);
-  expect(res.data.every((p: any) => p.privilege && p.caption)).toBe(true);
+  assert.ok(res.data.length > 1);
+  assert.equal(
+    res.data.every((p: any) => p.privilege && p.caption),
+    true
+  );
 });
 
 // it.skip('should reject unknown field', () => {});

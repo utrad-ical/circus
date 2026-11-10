@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { expect } from 'expect';
 import loadConfig from './loadConfig.ts';
 import path from 'path';
 
@@ -8,7 +8,7 @@ test('with defaults', () => {
     [path.join(__dirname, '../../testdata/config/default')],
     'dummy'
   );
-  expect(result).toEqual({ a: 10, c: 'cat' });
+  assert.deepEqual(result, { a: 10, c: 'cat' });
 });
 
 test('with defaults and custom config', () => {
@@ -17,10 +17,10 @@ test('with defaults and custom config', () => {
     'custom',
     { searchFrom: path.join(__dirname, '../../testdata/config') }
   );
-  expect(result).toEqual({ a: 50, b: 'banana', c: 'cat' });
+  assert.deepEqual(result, { a: 50, b: 'banana', c: 'cat' });
 });
 
 test('empty', () => {
   const result = loadConfig([], 'dummy');
-  expect(result).toEqual({});
+  assert.deepEqual(result, {});
 });

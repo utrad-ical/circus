@@ -58,7 +58,7 @@
     "@types/fs-extra": "^8.1.0",
     "@types/js-yaml": "^3.12.3",
     "@types/minimist": "^1.2.0",
-    "@types/node": "^18.19.64",
+    "@types/node": "^24.19.2",
     "@types/pify": "^3.0.2",
     "@types/shell-escape": "^0.2.0",
     "@types/table": "^4.0.5",

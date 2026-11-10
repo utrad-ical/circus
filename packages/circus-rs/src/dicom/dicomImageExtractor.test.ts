@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { expect } from 'expect';
 import dicomImageExtractor from './dicomImageExtractor.ts';
 import fs from 'fs';
 import zlib from 'zlib';
@@ -21,10 +21,11 @@ describe('dicomImageExtractor', () => {
     if (!metadata || !pixelData) throw new Error();
 
     for (const key in checks) {
-      expect(checks[key]).toEqual((metadata as any)[key]);
+      assert.deepEqual(checks[key], (metadata as any)[key]);
     }
     const pxInfo = px.pixelFormatInfo(metadata.pixelFormat);
-    expect(metadata.columns * metadata.rows * pxInfo.bpp).toEqual(
+    assert.deepEqual(
+      metadata.columns * metadata.rows * pxInfo.bpp,
       pixelData.byteLength
     );
 

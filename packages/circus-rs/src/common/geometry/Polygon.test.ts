@@ -1,12 +1,12 @@
+import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { expect } from 'expect';
 import * as polygon from './Polygon.ts';
 import { Vector2 } from 'three';
 
 describe('intersectsPolygon', () => {
   const t = (polygon1: Vector2[], polygon2: Vector2[], expected: boolean) => {
-    expect(polygon.intersectsPolygon(polygon1, polygon2)).toBe(expected);
-    expect(polygon.intersectsPolygon(polygon2, polygon1)).toBe(expected);
+    assert.equal(polygon.intersectsPolygon(polygon1, polygon2), expected);
+    assert.equal(polygon.intersectsPolygon(polygon2, polygon1), expected);
   };
   const v2 = (x: number, y: number) => new Vector2(x, y);
 

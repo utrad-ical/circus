@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test, before, after } from 'node:test';
-import { expect } from 'expect';
 import path from 'path';
 import fs from 'fs-extra';
 import { testClientPool } from '../testHelper.ts';
@@ -37,6 +37,6 @@ describe('MongoPluginDefinitionAccesor', () => {
     const def = await accessor.get(
       'e3f245078d839ea804e100ada6183edf864624a2859b2a8341a0721378f13f97'
     );
-    expect(def.pluginName).toBe('MRA-CAD');
+    assert.equal(def.pluginName, 'MRA-CAD');
   });
 });

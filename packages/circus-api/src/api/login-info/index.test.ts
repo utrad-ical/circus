@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test, before, after } from 'node:test';
-import { expect } from 'expect';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import type { AxiosInstance } from 'axios';
@@ -13,7 +13,7 @@ after(async () => await apiTest.tearDown());
 
 test('short', async () => {
   const res = await axios.get('api/login-info');
-  expect(res.data).toEqual({
+  assert.deepEqual(res.data, {
     userEmail: 'bob@example.com',
     loginId: 'bob'
   });
@@ -21,10 +21,10 @@ test('short', async () => {
 
 test('full', async () => {
   const res = await axios.get('api/login-info/full');
-  expect(res.data).toMatchObject({
+  assert.partialDeepStrictEqual(res.data, {
     userEmail: 'bob@example.com',
     loginId: 'bob',
     description: 'Bob'
   });
-  expect(res.data.sharedMyLists).toHaveLength(1);
+  assert.equal(res.data.sharedMyLists.length, 1);
 });

@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { expect } from 'expect';
 import { targzIterator } from './archiveIterator.ts';
 import path from 'path';
 import fs from 'fs-extra';
@@ -18,24 +18,26 @@ describe('targzIterator', () => {
     const result = await toArray(
       targzIterator(buffer as unknown as ArrayBuffer)
     );
-    expect(result).toHaveLength(3);
-    expect(result[0]).toMatchObject({ name: 'a.txt' });
-    expect(result[0].buffer instanceof ArrayBuffer).toBe(true);
-    expect(result[0].buffer.byteLength).toBe(3);
+    assert.equal(result.length, 3);
+    assert.partialDeepStrictEqual(result[0], { name: 'a.txt' });
+    assert.equal(result[0].buffer instanceof ArrayBuffer, true);
+    assert.equal(result[0].buffer.byteLength, 3);
   });
 
   test('corrupted gz file', async () => {
     // with gz signature (0x1f8b), but invalid data
     const buffer = Buffer.from([0x1f, 0x8b, 0xff, 0x33, 0x32]);
-    await expect(
-      toArray(targzIterator(buffer as unknown as ArrayBuffer))
-    ).rejects.toThrow('unknown compression method');
+    await assert.rejects(
+      toArray(targzIterator(buffer as unknown as ArrayBuffer)),
+      { message: /unknown compression method/ }
+    );
   });
 
   test('correct gz, but not tar', async () => {
     const buffer = await fs.readFile(path.join(testDir, 'a.txt.gz'));
-    await expect(
-      toArray(targzIterator(buffer as unknown as ArrayBuffer))
-    ).rejects.toThrow('Unexpected end of data');
+    await assert.rejects(
+      toArray(targzIterator(buffer as unknown as ArrayBuffer)),
+      { message: /Unexpected end of data/ }
+    );
   });
 });

@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { expect } from 'expect';
 import createDicomExtractorWorker from './createDicomExtractorWorker.ts';
 import fs from 'fs-extra';
 import path from 'path';
@@ -25,9 +25,9 @@ const dicomImage = (file = 'CT-MONO2-16-brain') => {
 test('dicomExtractorWorker', async () => {
   const extract = await createDicomExtractorWorker({ maxConcurrency: 1 });
   const data = await extract((await dicomImage()).buffer);
-  expect(data).toHaveProperty('metadata');
-  expect(data).toHaveProperty('pixelData');
+  assert.ok('metadata' in data);
+  assert.ok('pixelData' in data);
   const dummy = new Uint8Array(512).fill(5).buffer;
-  expect(extract(dummy)).rejects.toThrow(/DICM prefix not found/);
+  assert.rejects(extract(dummy), { message: /DICM prefix not found/ });
   await extract.dispose();
 });

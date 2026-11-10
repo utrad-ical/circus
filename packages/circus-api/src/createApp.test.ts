@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { it, before, after } from 'node:test';
-import { expect } from 'expect';
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import type { TestServer } from './test/util-koa.ts';
@@ -68,7 +68,7 @@ after(async () => {
 
 it('should return 404 for root path', async () => {
   const res = await ax.get('');
-  expect(res.status).toBe(404);
+  assert.equal(res.status, 404);
 });
 
 it('should return 400 for malformed JSON input', async () => {
@@ -79,7 +79,7 @@ it('should return 400 for malformed JSON input', async () => {
     headers: { 'Content-Type': 'application/json' },
     transformRequest: [() => '{I+am+not.a.valid-JSON}}']
   });
-  expect(res.status).toBe(400);
+  assert.equal(res.status, 400);
 });
 
 it('should return 415 if content type is not set to JSON', async () => {
@@ -89,17 +89,17 @@ it('should return 415 if content type is not set to JSON', async () => {
     headers: { 'Content-Type': 'text/plain', 'X-poe': 'poepoe' },
     data: 'testdata'
   });
-  expect(res.status).toBe(415); // Unsupported media type
+  assert.equal(res.status, 415); // Unsupported media type
 });
 
 it('should return 400 for huge JSON > 1mb', async () => {
   const bigData = { foo: 'A'.repeat(1024 * 1024) };
   const res = await ax.post('api/echo', { data: bigData });
-  expect(res.status).toBe(400);
+  assert.equal(res.status, 400);
 });
 
 it('should return input data as-is', async () => {
   const data = { a: 10, b: 'test', c: { d: 999, e: 'TEST' } };
   const res = await axios.post(testServer.url + 'api/echo', data);
-  expect(res.data).toEqual(data);
+  assert.deepEqual(res.data, data);
 });

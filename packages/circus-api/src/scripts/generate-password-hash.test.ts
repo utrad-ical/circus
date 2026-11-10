@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test, mock } from 'node:test';
-import { expect } from 'expect';
 import inquirer from 'inquirer';
 import { command } from './generate-password-hash.ts';
 
@@ -13,11 +13,11 @@ test('generate hash', async () => {
   const commandFunc = await command(null, {});
   const spy = mock.method(console, 'log', () => {});
   await commandFunc({});
-  expect(spy.mock.calls[0].arguments[0]).toMatch(/\$2y\$/);
+  assert.match(spy.mock.calls[0].arguments[0], /\$2y\$/);
 });
 
 test('error on password mismatch', async () => {
   const commandFunc = await command(null, {});
   mock.method(console, 'log', () => {});
-  await expect(commandFunc({})).rejects.toThrow(/Password mismatch/);
+  await assert.rejects(commandFunc({}), { message: /Password mismatch/ });
 });

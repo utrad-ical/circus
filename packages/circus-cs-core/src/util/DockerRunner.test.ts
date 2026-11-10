@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test, beforeEach } from 'node:test';
-import { expect } from 'expect';
 import DockerRunner, { DockerTimeoutError } from './DockerRunner.ts';
 import Dockerode from 'dockerode';
 
@@ -13,13 +13,14 @@ if (process.env.SKIP_DOCKER_TESTS) {
   // If this test fails, check if 'hello-world' image is present
   test('run hello-world docker image', async () => {
     const result = await runner.run({ Image: 'hello-world' });
-    expect(result).toMatch('Hello from Docker!');
+    assert.ok(result.includes('Hello from Docker!'));
   });
 
   test('timeout', async () => {
-    await expect(
-      runner.run({ Image: 'circus-mock-timeout' }, 300)
-    ).rejects.toThrow(DockerTimeoutError);
+    await assert.rejects(
+      runner.run({ Image: 'circus-mock-timeout' }, 300),
+      DockerTimeoutError
+    );
   });
 
   test('exit code', async () => {
@@ -27,7 +28,7 @@ if (process.env.SKIP_DOCKER_TESTS) {
       Image: 'circus-mock-error' // exits with status code 5
     });
     const code = await promise;
-    expect(code).toBe(5);
+    assert.equal(code, 5);
   });
 
   test('load text file from an image', async () => {
@@ -35,12 +36,12 @@ if (process.env.SKIP_DOCKER_TESTS) {
       'circus-mock-succeed',
       '/plugin.json'
     );
-    expect(result).toMatch(/pluginName/);
+    assert.match(result, /pluginName/);
   });
 
   test('connect to Docker public API', async () => {
     const rode = new Dockerode();
     const results = await rode.listImages();
-    expect(results.length).toBeGreaterThanOrEqual(1);
+    assert.ok(results.length >= 1);
   });
 }

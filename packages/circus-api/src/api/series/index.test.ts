@@ -1,3 +1,4 @@
+import assert from 'node:assert/strict';
 import {
   describe,
   test,
@@ -7,7 +8,6 @@ import {
   beforeEach,
   afterEach
 } from 'node:test';
-import { expect } from 'expect';
 import type { AxiosInstance } from 'axios';
 import FormData from 'form-data';
 import fs from 'fs-extra';
@@ -33,8 +33,8 @@ it('should perform search', async () => {
     url: 'api/series',
     method: 'get'
   });
-  expect(res.status).toBe(200);
-  expect(res.data.items).toHaveLength(9);
+  assert.equal(res.status, 200);
+  assert.equal(res.data.items.length, 9);
 });
 
 it('should return single series information', async () => {
@@ -42,8 +42,8 @@ it('should return single series information', async () => {
     url: 'api/series/111.222.333.444.666',
     method: 'get'
   });
-  expect(res.status).toBe(200);
-  expect(res.data.manufacturer).toBe('Hatsushiba');
+  assert.equal(res.status, 200);
+  assert.equal(res.data.manufacturer, 'Hatsushiba');
 });
 
 it('should reject 403 for unauthorized series', async () => {
@@ -51,7 +51,7 @@ it('should reject 403 for unauthorized series', async () => {
     url: 'api/series/111.222.333.444.777',
     method: 'get'
   });
-  expect(res.status).toBe(403);
+  assert.equal(res.status, 403);
 });
 
 test('throw 400 if search using patient information for unprivileged user', async () => {
@@ -60,7 +60,7 @@ test('throw 400 if search using patient information for unprivileged user', asyn
     method: 'get',
     params: { filter: JSON.stringify({ 'patientInfo.patientName': 'Koume' }) }
   });
-  expect(res.status).toBe(400);
+  assert.equal(res.status, 400);
 });
 
 test('should be searchable if patient information is not used', async () => {
@@ -69,8 +69,8 @@ test('should be searchable if patient information is not used', async () => {
     method: 'get',
     params: { filter: JSON.stringify({ seriesUid: '222.333.444.555.666' }) }
   });
-  expect(res.status).toBe(200);
-  expect(res.data.items).toHaveLength(1);
+  assert.equal(res.status, 200);
+  assert.equal(res.data.items.length, 1);
 });
 
 describe('getOrientation', () => {
@@ -80,8 +80,8 @@ describe('getOrientation', () => {
       method: 'get',
       params: { start: 1, end: 10 }
     });
-    expect(res.status).toBe(200);
-    expect(res.data).toEqual({ orientation: 'head-first' });
+    assert.equal(res.status, 200);
+    assert.deepEqual(res.data, { orientation: 'head-first' });
   });
 
   test('unspecified start/end', async () => {
@@ -89,8 +89,8 @@ describe('getOrientation', () => {
       url: 'api/series/333.444.555.666.777/orientation',
       method: 'get'
     });
-    expect(res.status).toBe(200);
-    expect(res.data).toEqual({ orientation: 'head-first' });
+    assert.equal(res.status, 200);
+    assert.deepEqual(res.data, { orientation: 'head-first' });
   });
 
   test('throw 400 for image out of bounds', async () => {
@@ -99,8 +99,11 @@ describe('getOrientation', () => {
       method: 'get',
       params: { start: 1, end: 100 }
     });
-    expect(res.status).toBe(400);
-    expect(res.data.error).toBe('The given start/end number is out of bounds.');
+    assert.equal(res.status, 400);
+    assert.equal(
+      res.data.error,
+      'The given start/end number is out of bounds.'
+    );
   });
 
   test('throw 403 for unprivileged user', async () => {
@@ -109,8 +112,9 @@ describe('getOrientation', () => {
       method: 'get',
       params: { start: 1, end: 10 }
     });
-    expect(res.status).toBe(403);
-    expect(res.data.error).toBe(
+    assert.equal(res.status, 403);
+    assert.equal(
+      res.data.error,
       'You do not have privilege to access this series.'
     );
   });
@@ -121,8 +125,8 @@ describe('getOrientation', () => {
       method: 'get',
       params: { filter: JSON.stringify({ start: 1, end: 10 }) }
     });
-    expect(res.status).toBe(500);
-    expect(res.data.error).toBe('no image');
+    assert.equal(res.status, 500);
+    assert.equal(res.data.error, 'no image');
   });
 });
 
@@ -164,8 +168,8 @@ describe('Upload', () => {
     test('upload signle DICOM file', async () => {
       const res = await uploadTest(file);
       if (res.status === 503) return;
-      expect(res.status).toBe(201);
-      expect(res.data?.taskId).toHaveLength(26);
+      assert.equal(res.status, 201);
+      assert.equal(res.data?.taskId.length, 26);
       const taskId = res.data.taskId;
       while (apiTest.taskManager.isTaskInProgress(taskId)) {
         await delay(10);
@@ -173,22 +177,22 @@ describe('Upload', () => {
       const doc = await apiTest.database.db.collection('series').findOne({
         seriesUid
       });
-      expect(doc?.images).toBe('8');
+      assert.equal(doc?.images, '8');
     });
 
     test('upload zipped DICOM files', async () => {
       const file = path.join(__dirname, '../../../test/dicom/test.zip');
       const res = await uploadTest(file);
       if (res.status === 503) return;
-      expect(res.status).toBe(201);
-      expect(res.data?.taskId).toHaveLength(26);
+      assert.equal(res.status, 201);
+      assert.equal(res.data?.taskId.length, 26);
     });
 
     test('reject series upload into innaccessible domain', async () => {
       const res = await uploadTest(file, apiTest.axiosInstances.bob);
       if (res.status === 503) return;
-      expect(res.status).toBe(403);
-      expect(res.data.error).toMatch(/You cannot upload to this domain/);
+      assert.equal(res.status, 403);
+      assert.match(res.data.error, /You cannot upload to this domain/);
     });
   });
 
@@ -203,11 +207,11 @@ describe('Upload', () => {
         headers: formData.getHeaders(),
         data: formData
       });
-      expect(res.status).toBe(201);
+      assert.equal(res.status, 201);
       const doc = await apiTest.database.db.collection('series').findOne({
         seriesUid
       });
-      expect(doc?.images).toBe('8');
+      assert.equal(doc?.images, '8');
     });
   });
 });
@@ -218,11 +222,11 @@ describe('Delete', () => {
       url: 'api/series/222.333.444.555.666',
       method: 'delete'
     });
-    expect(res.status).toBe(204);
+    assert.equal(res.status, 204);
     const series = await apiTest.database.db
       .collection('series')
       .findOne({ seriesUid: '222.333.444.555.666' });
-    expect(series).toStrictEqual(null);
+    assert.deepEqual(series, null);
   });
 
   it('should fail with 404 for nonexistent series', async () => {
@@ -230,7 +234,7 @@ describe('Delete', () => {
       url: 'api/series/222.222.222.222.222',
       method: 'delete'
     });
-    expect(res.status).toBe(404);
+    assert.equal(res.status, 404);
   });
 
   it('should fail with 400 if series is used in a plugin-job', async () => {
@@ -238,7 +242,7 @@ describe('Delete', () => {
       url: 'api/series/111.222.333.444.555',
       method: 'delete'
     });
-    expect(res.status).toBe(400);
+    assert.equal(res.status, 400);
   });
 
   it('should fail with 400 if series is used in a clinical-case', async () => {
@@ -246,7 +250,7 @@ describe('Delete', () => {
       url: 'api/series/111.222.333.444.888',
       method: 'delete'
     });
-    expect(res.status).toBe(400);
+    assert.equal(res.status, 400);
   });
 });
 
@@ -264,9 +268,9 @@ describe('Delete file', () => {
       url: 'api/series/222.333.444.555.666',
       method: 'delete'
     });
-    expect(res.status).toBe(204);
+    assert.equal(res.status, 204);
     const series2 = await dicomFileRepository.getSeries('222.333.444.555.666');
-    expect(series2.images).toBe('');
+    assert.equal(series2.images, '');
   });
 
   it('should throw 404 for deletion of nonexistent series', async () => {
@@ -274,7 +278,7 @@ describe('Delete file', () => {
       url: 'api/series/nonexistentSeries',
       method: 'delete'
     });
-    expect(res.status).toBe(404);
+    assert.equal(res.status, 404);
   });
 });
 
@@ -290,9 +294,9 @@ describe('search by my list', () => {
       url: `api/series/list/${myListId}`,
       method: 'get'
     });
-    expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(1);
-    expect(res.data.items[0].patientInfo.patientName).toBe('Koume');
+    assert.equal(res.status, 200);
+    assert.equal(res.data.items.length, 1);
+    assert.equal(res.data.items[0].patientInfo.patientName, 'Koume');
   });
 
   test('should not return patient info when personalInfoView = false', async () => {
@@ -306,9 +310,9 @@ describe('search by my list', () => {
       url: `api/series/list/${myListId}`,
       method: 'get'
     });
-    expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(1);
-    expect(res.data.items[0].patientInfo).toBe(undefined);
+    assert.equal(res.status, 200);
+    assert.equal(res.data.items.length, 1);
+    assert.equal(res.data.items[0].patientInfo, undefined);
   });
 
   test('can not search when use nonexistent myListId in myList', async () => {
@@ -317,7 +321,7 @@ describe('search by my list', () => {
       url: `api/series/list/${nonexistentId}`,
       method: 'get'
     });
-    expect(res.status).toBe(404);
+    assert.equal(res.status, 404);
   });
 
   test('should not return results if domain check fails', async () => {
@@ -328,8 +332,8 @@ describe('search by my list', () => {
       url: `api/series/list/${myListId}`,
       method: 'get'
     });
-    expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(0);
+    assert.equal(res.status, 200);
+    assert.equal(res.data.items.length, 0);
   });
 
   test('should throw 400 for non-series mylist type', async () => {
@@ -338,8 +342,8 @@ describe('search by my list', () => {
       url: `api/series/list/${caseMyListId}`,
       method: 'get'
     });
-    expect(res.status).toBe(400);
-    expect(res.data.error).toBe('This my list is not for series');
+    assert.equal(res.status, 400);
+    assert.equal(res.data.error, 'This my list is not for series');
   });
 });
 
@@ -362,7 +366,7 @@ describe('Export CS volume', () => {
       ],
       compressionFormat: 'tgz'
     });
-    expect(res.status).toBe(201);
+    assert.equal(res.status, 201);
     const taskId = res.data.taskId;
 
     while (apiTest.taskManager.isTaskInProgress(taskId)) {
@@ -381,6 +385,6 @@ describe('Export CS volume', () => {
       path.join(apiTest.downloadFileDirectory, 'dummy.txt'),
       'utf8'
     );
-    expect(textContent).toBe('abc');
+    assert.equal(textContent, 'abc');
   });
 });

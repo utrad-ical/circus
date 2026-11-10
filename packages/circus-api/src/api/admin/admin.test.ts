@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test, before, after } from 'node:test';
-import { expect } from 'expect';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import type { AxiosInstance } from 'axios';
@@ -31,8 +31,8 @@ test('return unauthorized error for unauthorized user', async () => {
         method: method as any,
         data
       });
-      expect(res.status).toBe(401);
-      expect(res.data.error).toMatch(/privilege/);
+      assert.equal(res.status, 401);
+      assert.match(res.data.error, /privilege/);
     };
 
     // Check with these users without admin privilege

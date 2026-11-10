@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { expect } from 'expect';
 import floodFill, { BinaryArray2D } from './floodFill.ts';
 import { Vector2 } from 'three';
 
@@ -22,8 +22,8 @@ const t = (
     }
   }
   const filled = floodFill(arr, new Vector2().fromArray(start), erase);
-  expect(arr.toString()).toBe(expectedPattern);
-  expect(filled).toBe(expectedFillCount);
+  assert.equal(arr.toString(), expectedPattern);
+  assert.equal(filled, expectedFillCount);
 };
 
 test('must flood-fill a closed area correctly', () => {
@@ -129,9 +129,9 @@ const t_err = (
       if (rows[y][x] === '*') arr.set(true, new Vector2(x, y));
     }
   }
-  expect(() => floodFill(arr, new Vector2().fromArray(start), erase)).toThrow(
-    expectedErrorMessage
-  );
+  assert.throws(() => floodFill(arr, new Vector2().fromArray(start), erase), {
+    message: expectedErrorMessage
+  });
 };
 
 test('must throw error message if center value is invalid', () => {

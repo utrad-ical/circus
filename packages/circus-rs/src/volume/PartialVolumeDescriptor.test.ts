@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { expect } from 'expect';
 import type PartialVolumeDescriptor from './PartialVolumeDescriptor.ts';
 import {
   describePartialVolumeDescriptor,
@@ -23,7 +23,7 @@ describe('describePartialVolumeDescriptor', () => {
   ];
   for (const [pvd, count, expected] of cases) {
     test(`${JSON.stringify(pvd)}, ${count} -> ${expected}`, () => {
-      expect(describePartialVolumeDescriptor(pvd, count)).toBe(expected);
+      assert.equal(describePartialVolumeDescriptor(pvd, count), expected);
     });
   }
 });
@@ -44,7 +44,8 @@ describe('isValidPartialVolumeDescriptor', () => {
   ];
   for (const [start, end, delta, expected] of cases) {
     test(`(${start}, ${end}, ${delta}) should be ${expected}`, () => {
-      expect(isValidPartialVolumeDescriptor({ start, end, delta })).toBe(
+      assert.equal(
+        isValidPartialVolumeDescriptor({ start, end, delta }),
         expected
       );
     });
@@ -68,18 +69,20 @@ describe('rangeHasPartialVolume', () => {
   for (const [range, start, end, delta, expected] of cases) {
     test(`'${range}' in (${start}, ${end}, ${delta}) should be ${expected}`, () => {
       const mr = multirange(range);
-      expect(rangeHasPartialVolume(mr, { start, end, delta })).toBe(expected);
+      assert.equal(rangeHasPartialVolume(mr, { start, end, delta }), expected);
     });
   }
 
   test('invalid PVD throws', () => {
-    expect(() =>
-      rangeHasPartialVolume(multirange('1-100'), {
-        start: 1,
-        end: 10,
-        delta: 2
-      })
-    ).toThrow('Invalid');
+    assert.throws(
+      () =>
+        rangeHasPartialVolume(multirange('1-100'), {
+          start: 1,
+          end: 10,
+          delta: 2
+        }),
+      { message: /Invalid/ }
+    );
   });
 });
 
@@ -91,7 +94,7 @@ describe('partialVolumeDescriptorToArray', () => {
   for (const [start, end, delta, expected] of cases) {
     test(`partialVolumeDescriptorToArray (${start}, ${end}, ${delta})`, () => {
       const pvd = { start, end, delta };
-      expect(partialVolumeDescriptorToArray(pvd)).toEqual(expected);
+      assert.deepEqual(partialVolumeDescriptorToArray(pvd), expected);
     });
   }
 });

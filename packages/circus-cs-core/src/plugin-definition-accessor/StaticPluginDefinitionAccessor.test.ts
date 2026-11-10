@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test, before } from 'node:test';
-import { expect } from 'expect';
 import path from 'path';
 import createStaticPluginDefinitionAccessor from './StaticPluginDefinitionAccessor.ts';
 import type * as circus from '../interface.ts';
@@ -17,13 +17,13 @@ describe('StaticPluginDefinitionAccessor', () => {
 
   test('get the list of plugin definitions', async () => {
     const defs = await pluginDefs.list();
-    expect(defs).toHaveLength(7);
+    assert.equal(defs.length, 7);
   });
 
   test('get one plugin definition', async () => {
     const def = await pluginDefs.get(
       'e3f245078d839ea804e100ada6183edf864624a2859b2a8341a0721378f13f97'
     );
-    expect(def.pluginName).toEqual('MRA-CAD');
+    assert.deepEqual(def.pluginName, 'MRA-CAD');
   });
 });

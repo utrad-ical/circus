@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test, before, after, beforeEach } from 'node:test';
-import { expect } from 'expect';
 import { setUpMongoFixture } from '../../test/util-mongo.ts';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
@@ -15,33 +15,33 @@ after(async () => await apiTest.tearDown());
 
 test('list all my lists', async () => {
   const res = await ax.bob.get('api/mylists');
-  expect(res.status).toBe(200);
-  expect(res.data instanceof Array).toBe(true);
+  assert.equal(res.status, 200);
+  assert.equal(res.data instanceof Array, true);
 });
 
 describe('get one my list', () => {
   test("get user's own list", async () => {
     const res = await ax.bob.get('api/mylists/01ewetw0chv8v5vxdtjdf6x9rk');
-    expect(res.status).toBe(200);
-    expect(res.data).toHaveProperty('name');
-    expect(res.data).toHaveProperty('resourceIds');
+    assert.equal(res.status, 200);
+    assert.ok('name' in res.data);
+    assert.ok('resourceIds' in res.data);
   });
 
   test("get other user's list if granted as editor", async () => {
     const res = await ax.bob.get('api/mylists/01ezab6xqfac7hvm5s09yw1g1j');
-    expect(res.status).toBe(200);
-    expect(res.data.name).toBe("Dave's case list");
+    assert.equal(res.status, 200);
+    assert.equal(res.data.name, "Dave's case list");
   });
 
   test('throw 404 if nonextent my list id', async () => {
     const res = await ax.bob.get('api/mylists/dummy');
-    expect(res.status).toBe(404);
-    expect(res.data.error).toBe('This my list does not exist');
+    assert.equal(res.status, 404);
+    assert.equal(res.data.error, 'This my list does not exist');
   });
 
   test('throw 401 if not granted as editor', async () => {
     const res = await ax.bob.get('api/mylists/01ez9knaakz9tgd2hpyceagj11');
-    expect(res.status).toBe(401);
+    assert.equal(res.status, 401);
   });
 });
 
@@ -52,8 +52,8 @@ describe('create new list', () => {
       method: 'post',
       data: { name: 'test', resourceType: 'clinicalCases', public: false }
     });
-    expect(res.status).toBe(201);
-    expect(res.data.myListId).toHaveLength(26);
+    assert.equal(res.status, 201);
+    assert.equal(res.data.myListId.length, 26);
   });
 
   test('throw 400 when the list name is invalid', async () => {
@@ -62,7 +62,7 @@ describe('create new list', () => {
       method: 'post',
       data: { name: '' }
     });
-    expect(res.status).toBe(400);
+    assert.equal(res.status, 400);
   });
 });
 
@@ -85,10 +85,10 @@ describe('patch list', () => {
       method: 'patch',
       data: { name: 'new name' }
     });
-    expect(res.status).toBe(204);
+    assert.equal(res.status, 204);
 
     const changedList = await returnChangedList(myListId);
-    expect(changedList.name).toBe('new name');
+    assert.equal(changedList.name, 'new name');
   });
 
   test('change public status from false to true', async () => {
@@ -98,10 +98,10 @@ describe('patch list', () => {
       method: 'patch',
       data: { public: true }
     });
-    expect(res.status).toBe(204);
+    assert.equal(res.status, 204);
 
     const changedList = await returnChangedList(myListId);
-    expect(changedList.public).toBe(true);
+    assert.equal(changedList.public, true);
   });
 
   test('throw 401 for my list the user does not own', async () => {
@@ -111,7 +111,7 @@ describe('patch list', () => {
       method: 'patch',
       data: { name: 'new name' }
     });
-    expect(res.status).toBe(401);
+    assert.equal(res.status, 401);
   });
 
   test('throw 400 when the new list name is empty text', async () => {
@@ -121,7 +121,7 @@ describe('patch list', () => {
       method: 'patch',
       data: { name: '' }
     });
-    expect(res.status).toBe(400);
+    assert.equal(res.status, 400);
   });
 
   test('throw 400 when the new list name is too long', async () => {
@@ -132,7 +132,7 @@ describe('patch list', () => {
       method: 'patch',
       data: { name }
     });
-    expect(res.status).toBe(400);
+    assert.equal(res.status, 400);
   });
 
   test('throw 404 for nonexistent my list id', async () => {
@@ -142,7 +142,7 @@ describe('patch list', () => {
       method: 'patch',
       data: { name: 'new name' }
     });
-    expect(res.status).toBe(404);
+    assert.equal(res.status, 404);
   });
 
   describe('patch list editors', () => {
@@ -159,7 +159,7 @@ describe('patch list', () => {
           ]
         }
       });
-      expect(res.status).toBe(204);
+      assert.equal(res.status, 204);
 
       const userEmail = 'bob@example.com';
       const userData = await apiTest.database.db
@@ -168,7 +168,7 @@ describe('patch list', () => {
       const newList = userData!.myLists.filter(
         (myList: any) => myList.myListId === myListId
       )[0];
-      expect(newList.editors).toHaveLength(2);
+      assert.equal(newList.editors.length, 2);
     });
 
     test('throw 400 if invalid E-mail address is included', async () => {
@@ -177,8 +177,8 @@ describe('patch list', () => {
         method: 'patch',
         data: { editors: [{ type: 'user', userEmail: 'invalid@example.com' }] }
       });
-      expect(res.status).toBe(400);
-      expect(res.data.error).toBe('Invalid email address is included');
+      assert.equal(res.status, 400);
+      assert.equal(res.data.error, 'Invalid email address is included');
     });
 
     test('throw 400 if invalid group ID is included', async () => {
@@ -187,8 +187,8 @@ describe('patch list', () => {
         method: 'patch',
         data: { editors: [{ type: 'group', groupId: 999 }] }
       });
-      expect(res.status).toBe(400);
-      expect(res.data.error).toBe('Invalid group ID is included');
+      assert.equal(res.status, 400);
+      assert.equal(res.data.error, 'Invalid group ID is included');
     });
   });
 });
@@ -201,12 +201,12 @@ describe('delete list', () => {
       url: `api/mylists/${myListId}`,
       method: 'delete'
     });
-    expect(res.status).toBe(204);
+    assert.equal(res.status, 204);
 
     const myList = await apiTest.database.db
       .collection('myLists')
       .findOne({ myListId });
-    expect(myList).toStrictEqual(null);
+    assert.deepEqual(myList, null);
 
     const userData = await apiTest.database.db
       .collection('users')
@@ -214,7 +214,7 @@ describe('delete list', () => {
     const result = userData!.myLists.find(
       (list: any) => list.myListId === myListId
     );
-    expect(result).toStrictEqual(undefined);
+    assert.deepEqual(result, undefined);
   });
 
   test('throw 401 for my list the user does not own', async () => {
@@ -223,7 +223,7 @@ describe('delete list', () => {
       url: `api/mylists/${myListId}`,
       method: 'delete'
     });
-    expect(res.status).toBe(401);
+    assert.equal(res.status, 401);
   });
 
   test('throw 404 for nonexistent my list id', async () => {
@@ -232,7 +232,7 @@ describe('delete list', () => {
       url: `api/mylists/${myListId}`,
       method: 'delete'
     });
-    expect(res.status).toBe(404);
+    assert.equal(res.status, 404);
   });
 });
 
@@ -251,8 +251,8 @@ describe('patch list item', () => {
         'bfaeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715'
       ]
     });
-    expect(res.status).toBe(200);
-    expect(res.data.changedCount).toBe(1);
+    assert.equal(res.status, 200);
+    assert.equal(res.data.changedCount, 1);
   });
 
   test('inserting an nonexistent item should cause 404 error', async () => {
@@ -260,7 +260,7 @@ describe('patch list item', () => {
       operation: 'add',
       resourceIds: ['this-id-does-not-exist']
     });
-    expect(res.status).toBe(404);
+    assert.equal(res.status, 404);
   });
 
   test('inserting a duplicate item must be ignored', async () => {
@@ -271,8 +271,8 @@ describe('patch list item', () => {
         'gfdrjivu4w8p57nv95p7n485n3p891ygy6543wedfuyt67oiulkjhtrw312wergr'
       ]
     });
-    expect(res.status).toBe(200);
-    expect(res.data.changedCount).toBe(0);
+    assert.equal(res.status, 200);
+    assert.equal(res.data.changedCount, 0);
   });
 
   test('remove item from a mylist', async () => {
@@ -282,8 +282,8 @@ describe('patch list item', () => {
         'gfdrjivu4w8p57nv95p7n485n3p891ygy6543wedfuyt67oiulkjhtrw312wergr'
       ]
     });
-    expect(res.status).toBe(200);
-    expect(res.data.changedCount).toBe(1);
+    assert.equal(res.status, 200);
+    assert.equal(res.data.changedCount, 1);
   });
 
   test('removeing a nonexistent item should cause no effect', async () => {
@@ -294,8 +294,8 @@ describe('patch list item', () => {
         'bfaeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715'
       ]
     });
-    expect(res.status).toBe(200);
-    expect(res.data.changedCount).toBe(0);
+    assert.equal(res.status, 200);
+    assert.equal(res.data.changedCount, 0);
   });
 
   test('throw 404 for nonexistent my list id', async () => {
@@ -305,7 +305,7 @@ describe('patch list item', () => {
         'bfaeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715'
       ]
     });
-    expect(res.status).toBe(404);
+    assert.equal(res.status, 404);
   });
 
   describe("patch other user's list", () => {
@@ -319,8 +319,8 @@ describe('patch list item', () => {
           ]
         }
       );
-      expect(res.status).toBe(200);
-      expect(res.data.changedCount).toBe(1);
+      assert.equal(res.status, 200);
+      assert.equal(res.data.changedCount, 1);
     });
 
     test('throw 401 if not granted as editor', async () => {
@@ -333,7 +333,7 @@ describe('patch list item', () => {
           ]
         }
       );
-      expect(res.status).toBe(401);
+      assert.equal(res.status, 401);
     });
   });
 });
@@ -353,11 +353,14 @@ describe('transaction test', () => {
       })
     );
     const responses = await Promise.all(promises);
-    expect(responses.every(res => res.status === 201)).toBe(true);
+    assert.equal(
+      responses.every(res => res.status === 201),
+      true
+    );
     const user = await db
       .collection('users')
       .findOne({ userEmail: 'bob@example.com' });
-    expect(user!.myLists.length).toBe(34); // including ones already in fixture
+    assert.equal(user!.myLists.length, 34); // including ones already in fixture
     // myListsの中に30個データがある
   });
 });

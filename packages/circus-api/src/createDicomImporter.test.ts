@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test, before, beforeEach } from 'node:test';
-import { expect } from 'expect';
 import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib';
 import * as path from 'path';
 import { setUpMongoFixture, usingModels } from './test/util-mongo.ts';
@@ -54,16 +54,16 @@ test('import a DICOM file', async () => {
   await importer.importDicom(fileContent.buffer as ArrayBuffer, 'someDomain');
 
   const seriesLoader = await dicomFileRepository.getSeries(seriesUid);
-  expect((await seriesLoader.load(8)) instanceof ArrayBuffer).toBe(true);
+  assert.equal((await seriesLoader.load(8)) instanceof ArrayBuffer, true);
   const series = await models.series.findByIdOrFail(seriesUid);
-  expect(series.seriesUid).toBe(seriesUid);
-  expect(series.domain).toBe('someDomain');
-  expect(series.images).toBe('8');
+  assert.equal(series.seriesUid, seriesUid);
+  assert.equal(series.domain, 'someDomain');
+  assert.equal(series.images, '8');
 });
 
 test('rejects a broken file', async () => {
   const fileContent = new ArrayBuffer(512);
-  await expect(importer.importDicom(fileContent, 'domain')).rejects.toThrow(
-    /not a valid DICOM P10 file/
-  );
+  await assert.rejects(importer.importDicom(fileContent, 'domain'), {
+    message: /not a valid DICOM P10 file/
+  });
 });

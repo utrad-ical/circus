@@ -1,14 +1,14 @@
+import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { expect } from 'expect';
 import createCounter from './createCounter.ts';
 
 test('count up', async () => {
   const counter = await createCounter({});
-  expect(counter.getCount('foo')).toBe(0);
-  expect(counter.getCount('bar')).toBe(0);
+  assert.equal(counter.getCount('foo'), 0);
+  assert.equal(counter.getCount('bar'), 0);
   counter.countUp('foo');
-  expect(counter.getCount('foo')).toBe(1);
-  expect(counter.getCount('bar')).toBe(0);
+  assert.equal(counter.getCount('foo'), 1);
+  assert.equal(counter.getCount('bar'), 0);
 });
 
 test('return set of counters', async () => {
@@ -16,5 +16,5 @@ test('return set of counters', async () => {
   counter.countUp('foo');
   counter.countUp('bar');
   counter.countUp('bar');
-  expect(counter.getCounts()).toEqual({ foo: 1, bar: 2 });
+  assert.deepEqual(counter.getCounts(), { foo: 1, bar: 2 });
 });

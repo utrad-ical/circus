@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, it, before } from 'node:test';
-import { expect } from 'expect';
 import createValidator from './createValidator.ts';
 import type { Validator } from './interface.ts';
 import * as path from 'path';
@@ -20,9 +20,7 @@ it('should validate correct partial data', async () => {
 
 it('should throw with invalid data', async () => {
   const testData = { intVal: 10, strVal: 500 };
-  await expect(validator.validate('sample', testData)).rejects.toThrow(
-    ValidationError
-  );
+  await assert.rejects(validator.validate('sample', testData), ValidationError);
 });
 
 describe('special formats', () => {
@@ -35,9 +33,10 @@ describe('special formats', () => {
       await validator.validate({ type: 'string', format, $async: true }, s);
     }
     for (const s of invalids) {
-      await expect(
-        validator.validate({ type: 'string', format, $async: true }, s)
-      ).rejects.toThrow(ValidationError);
+      await assert.rejects(
+        validator.validate({ type: 'string', format, $async: true }, s),
+        ValidationError
+      );
     }
   };
 
@@ -108,15 +107,15 @@ describe('special formats', () => {
 it('should work with toDate mode', async () => {
   const testData = { intVal: 3, dateVal: '2112-09-03T00:00:00.000Z' };
   const result = await validator.validate('date', testData, 'toDate');
-  expect(result.dateVal).toBeInstanceOf(Date);
-  expect(result.dateVal.toISOString()).toBe('2112-09-03T00:00:00.000Z');
+  assert.ok(result.dateVal instanceof Date);
+  assert.equal(result.dateVal.toISOString(), '2112-09-03T00:00:00.000Z');
 });
 
 it('should work with fromDate mode', async () => {
   const iso = '2011-11-28T00:11:22.000Z';
   const testData = { intVal: 3, dateVal: new Date(iso) };
   const result = await validator.validate('date', testData, 'fromDate');
-  expect(result.dateVal).toBe(iso);
+  assert.equal(result.dateVal, iso);
 });
 
 it('should handle allRequired option', async () => {
@@ -128,7 +127,8 @@ it('should handle allRequired option', async () => {
   };
   await validator.validate('sample|allRequired', testData);
   delete testData.intVal;
-  expect(validator.validate('sample|allRequired', testData)).rejects.toThrow(
+  assert.rejects(
+    validator.validate('sample|allRequired', testData),
     ValidationError
   );
 });
@@ -137,9 +137,10 @@ it('should handle allRequiredExcept option', async () => {
   const testData: any = { intVal: 0, strVal: 'bar', multiRange: '1' };
   await validator.validate('sample|allRequiredExcept dicomUid', testData);
   delete testData.intVal;
-  await expect(
-    validator.validate('sample|allRequiredExcept dicomUid', testData)
-  ).rejects.toThrow(ValidationError);
+  await assert.rejects(
+    validator.validate('sample|allRequiredExcept dicomUid', testData),
+    ValidationError
+  );
   await validator.validate(
     'sample|allRequiredExcept dicomUid,intVal',
     testData
@@ -149,12 +150,14 @@ it('should handle allRequiredExcept option', async () => {
 it('should handle only option', async () => {
   const testData = { dicomUid: '1.2.3' };
   await validator.validate('sample|only dicomUid', testData);
-  await expect(
-    validator.validate('sample|only dicomUid', { dicomUid: false })
-  ).rejects.toThrow(ValidationError);
-  await expect(
-    validator.validate('sample|only intVal', testData)
-  ).rejects.toThrow(ValidationError);
+  await assert.rejects(
+    validator.validate('sample|only dicomUid', { dicomUid: false }),
+    ValidationError
+  );
+  await assert.rejects(
+    validator.validate('sample|only intVal', testData),
+    ValidationError
+  );
 });
 
 it('should handle dbEntry option', async () => {
@@ -169,12 +172,14 @@ it('should handle dbEntry option', async () => {
   await validator.validate('sample|dbEntry', goodData);
 
   const badData1 = { ...goodData, intVal: 'string' };
-  await expect(validator.validate('sample|dbEntry', badData1)).rejects.toThrow(
+  await assert.rejects(
+    validator.validate('sample|dbEntry', badData1),
     ValidationError
   );
 
   const badData2 = { ...goodData, createdAt: '2010-01-01' };
-  await expect(validator.validate('sample|dbEntry', badData2)).rejects.toThrow(
+  await assert.rejects(
+    validator.validate('sample|dbEntry', badData2),
     ValidationError
   );
 });
@@ -190,24 +195,26 @@ it('should handle searchResult option', async () => {
   await validator.validate('sample|searchResult', goodData);
 
   const badData1 = { items: [goodItem, goodItem], totalItems: 2 };
-  await expect(
-    validator.validate('sample|searchResult', badData1)
-  ).rejects.toThrow(ValidationError);
+  await assert.rejects(
+    validator.validate('sample|searchResult', badData1),
+    ValidationError
+  );
 
   const badData2 = { items: [goodItem, 'foo'], totalItems: 2, page: 1 };
-  await expect(
-    validator.validate('sample|searchResult', badData2)
-  ).rejects.toThrow(ValidationError);
+  await assert.rejects(
+    validator.validate('sample|searchResult', badData2),
+    ValidationError
+  );
 });
 
 it('should fill defaults', async () => {
   const testData = {};
   const modified = await validator.validate('sample', testData, 'fillDefaults');
-  expect(modified).toEqual({ intVal: 5, strVal: 'biscuit' });
+  assert.deepEqual(modified, { intVal: 5, strVal: 'biscuit' });
 });
 
 it('should retrieve schema by key', async () => {
   const schema = await validator.getSchema('sample');
-  expect(typeof schema).toBe('function');
-  expect(typeof schema.schema).toBe('object');
+  assert.equal(typeof schema, 'function');
+  assert.equal(typeof schema.schema, 'object');
 });

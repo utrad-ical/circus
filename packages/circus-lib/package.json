@@ -49,7 +49,7 @@
   "devDependencies": {
     "@types/cosmiconfig": "^5.0.3",
     "@types/fs-extra": "^8.1.0",
-    "@types/node": "^18.19.64",
+    "@types/node": "^24.19.2",
     "@types/tar-stream": "^1.6.2",
     "rimraf": "^5.0.10",
     "tslib": "^1.11.2",

@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { expect } from 'expect';
 import concurrencyGate from './concurrencyGate.ts';
 
 test('manual start/finish', async () => {
@@ -16,7 +16,7 @@ test('manual start/finish', async () => {
       }
     })
   );
-  expect(res).toEqual([0, 2, 4, 6, 8, 10, 12, 14, 16, 18]);
+  assert.deepEqual(res, [0, 2, 4, 6, 8, 10, 12, 14, 16, 18]);
 });
 
 test('use', async () => {
@@ -29,11 +29,11 @@ test('use', async () => {
       })
     )
   );
-  expect(res).toEqual([0, 2, 4, 6, 8, 10, 12, 14, 16, 18]);
+  assert.deepEqual(res, [0, 2, 4, 6, 8, 10, 12, 14, 16, 18]);
 });
 
 test('error', async () => {
   // @ts-expect-error
-  expect(() => concurrencyGate()).toThrow(TypeError);
-  expect(() => concurrencyGate(0)).toThrow(RangeError);
+  assert.throws(() => concurrencyGate(), TypeError);
+  assert.throws(() => concurrencyGate(0), RangeError);
 });

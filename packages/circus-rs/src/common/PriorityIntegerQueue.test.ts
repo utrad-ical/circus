@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { expect } from 'expect';
 import PriorityIntegerQueue from './PriorityIntegerQueue.ts';
 
 const extract = (queue: PriorityIntegerQueue) => {
@@ -16,7 +16,7 @@ test('equal priority', () => {
   queue.append('5-7');
   queue.append('1-3');
   queue.append('10');
-  expect(extract(queue)).toEqual([5, 6, 7, 1, 2, 3, 10]);
+  assert.deepEqual(extract(queue), [5, 6, 7, 1, 2, 3, 10]);
 });
 
 test('equal priority, LIFO', () => {
@@ -24,7 +24,7 @@ test('equal priority, LIFO', () => {
   queue.append('5-7');
   queue.append('1-3');
   queue.append('2,6,10');
-  expect(extract(queue)).toEqual([2, 6, 10, 1, 3, 5, 7]);
+  assert.deepEqual(extract(queue), [2, 6, 10, 1, 3, 5, 7]);
 });
 
 test('high-priority items precede', () => {
@@ -33,7 +33,7 @@ test('high-priority items precede', () => {
   queue.append('1-3', 1);
   queue.append('10');
   queue.append('9', 1);
-  expect(extract(queue)).toEqual([1, 2, 3, 9, 10, 5, 6, 7]);
+  assert.deepEqual(extract(queue), [1, 2, 3, 9, 10, 5, 6, 7]);
 });
 
 test('high-priority items precede, LIFO', () => {
@@ -45,14 +45,14 @@ test('high-priority items precede, LIFO', () => {
   queue.append('9', 5);
   queue.append('2-3', 8);
   queue.append('50', 8);
-  expect(extract(queue)).toEqual([50, 2, 3, 9, 7, 6, 8, 1, 4, 5, 10]);
+  assert.deepEqual(extract(queue), [50, 2, 3, 9, 7, 6, 8, 1, 4, 5, 10]);
 });
 
 test('overwrite low-priority queue items', () => {
   const queue = new PriorityIntegerQueue();
   queue.append('1-6', 1);
   queue.append('2-4', 3);
-  expect(extract(queue)).toEqual([2, 3, 4, 1, 5, 6]);
+  assert.deepEqual(extract(queue), [2, 3, 4, 1, 5, 6]);
 });
 
 test('do not overwrite high-priority queue items', () => {
@@ -60,7 +60,7 @@ test('do not overwrite high-priority queue items', () => {
   queue.append('3-5', 3);
   queue.append('1-6', 1);
   queue.append('4', 0);
-  expect(extract(queue)).toEqual([3, 4, 5, 1, 2, 6]);
+  assert.deepEqual(extract(queue), [3, 4, 5, 1, 2, 6]);
 });
 
 test('clear', () => {
@@ -68,5 +68,5 @@ test('clear', () => {
   queue.append('1-10');
   queue.clear();
   queue.append('30');
-  expect(extract(queue)).toEqual([30]);
+  assert.deepEqual(extract(queue), [30]);
 });

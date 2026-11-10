@@ -1,5 +1,6 @@
+import assert from 'node:assert/strict';
+import { isDeepStrictEqual } from 'node:util';
 import { test, beforeEach, mock } from 'node:test';
-import { expect } from 'expect';
 import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib';
 import path from 'path';
 import createTestLogger from '../test/util-logger.ts';
@@ -47,34 +48,38 @@ test('import from a DICOM file', async () => {
   const spy = mock.method(console, 'log', () => {});
   const file = path.join(__dirname, '../../test/dicom/CT-MONO2-16-brain.dcm');
   await commandFunc({ domain, _args: [file] });
-  expect(spy.mock.calls.map(c => c.arguments)).toContainEqual([
-    'Imported 1 file.'
-  ]);
+  assert.ok(
+    spy.mock.calls
+      .map(c => c.arguments)
+      .some((item: unknown) => isDeepStrictEqual(item, ['Imported 1 file.']))
+  );
   const seriesAccessor = await dicomFileRepository.getSeries(seriesUid);
-  expect(seriesAccessor.images).toBe('8');
-  expect((await seriesAccessor.load(8)) instanceof ArrayBuffer).toBe(true);
+  assert.equal(seriesAccessor.images, '8');
+  assert.equal((await seriesAccessor.load(8)) instanceof ArrayBuffer, true);
   const seriesData = await models.series.findById(seriesUid);
-  expect(seriesData.domain).toBe('default');
+  assert.equal(seriesData.domain, 'default');
 });
 
 test('import from a zip file', async () => {
   const spy = mock.method(console, 'log', () => {});
   const file = path.join(__dirname, '../../test/dicom/test.zip');
   await commandFunc({ domain, _args: [file] });
-  expect(spy.mock.calls.map(c => c.arguments)).toContainEqual([
-    'Imported 1 file.'
-  ]);
+  assert.ok(
+    spy.mock.calls
+      .map(c => c.arguments)
+      .some((item: unknown) => isDeepStrictEqual(item, ['Imported 1 file.']))
+  );
   const seriesAccessor = await dicomFileRepository.getSeries(seriesUid);
-  expect(seriesAccessor.images).toBe('8');
-  expect((await seriesAccessor.load(8)) instanceof ArrayBuffer).toBe(true);
+  assert.equal(seriesAccessor.images, '8');
+  assert.equal((await seriesAccessor.load(8)) instanceof ArrayBuffer, true);
   const seriesData = await models.series.findById(seriesUid);
-  expect(seriesData.domain).toBe('default');
+  assert.equal(seriesData.domain, 'default');
 });
 
 test('throws when domain is unspecified', async () => {
-  await expect(commandFunc({ _args: ['dummy'] })).rejects.toThrow(
-    /Domain must be specified/
-  );
+  await assert.rejects(commandFunc({ _args: ['dummy'] }), {
+    message: /Domain must be specified/
+  });
 });
 
 // TODO: check error on broken DICOM file

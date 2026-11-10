@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test, before, after, beforeEach } from 'node:test';
-import { expect } from 'expect';
 import { setUpMongoFixture } from '../../test/util-mongo.ts';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
@@ -19,9 +19,12 @@ describe('search', () => {
       url: 'api/cases',
       method: 'get'
     });
-    expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(4);
-    expect(res.data.items.some((item: any) => item.revisions)).toBe(false);
+    assert.equal(res.status, 200);
+    assert.equal(res.data.items.length, 4);
+    assert.equal(
+      res.data.items.some((item: any) => item.revisions),
+      false
+    );
   });
 
   test('search with patient name', async () => {
@@ -30,9 +33,9 @@ describe('search', () => {
         filter: JSON.stringify({ 'patientInfo.patientName': 'Anzu' })
       }
     });
-    expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(1);
-    expect(res.data.items[0].patientInfo.patientName).toBe('Anzu');
+    assert.equal(res.status, 200);
+    assert.equal(res.data.items.length, 1);
+    assert.equal(res.data.items[0].patientInfo.patientName, 'Anzu');
   });
 
   test('search with patient name in regex', async () => {
@@ -41,9 +44,9 @@ describe('search', () => {
         filter: JSON.stringify({ 'patientInfo.patientName': { $regex: '^An' } })
       }
     });
-    expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(1);
-    expect(res.data.items[0].patientInfo.patientName).toBe('Anzu');
+    assert.equal(res.status, 200);
+    assert.equal(res.data.items.length, 1);
+    assert.equal(res.data.items[0].patientInfo.patientName, 'Anzu');
   });
 
   test('throw 400 if search using patient information for unprivileged user', async () => {
@@ -51,15 +54,15 @@ describe('search', () => {
     const res = await ax.frank.get('api/cases', {
       params: { filter: JSON.stringify({ 'patientInfo.patientName': 'Anzu' }) }
     });
-    expect(res.status).toBe(400);
+    assert.equal(res.status, 400);
   });
 
   test('should be searchable if patient information is not used', async () => {
     const res = await ax.frank.get('api/cases', {
       params: { filter: JSON.stringify({ caseId: cid }) }
     });
-    expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(1);
+    assert.equal(res.status, 200);
+    assert.equal(res.data.items.length, 1);
   });
 
   test('search from user with no viewPersonalInfo privilege', async () => {
@@ -78,28 +81,28 @@ describe('search', () => {
         })
       }
     });
-    expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(0);
+    assert.equal(res.status, 200);
+    assert.equal(res.data.items.length, 0);
   });
 
   test('throw 400 for wrong request', async () => {
     const res1 = await ax.alice.get('api/cases', {
       params: { filter: 'invalid-json' }
     });
-    expect(res1.status).toBe(400);
-    expect(res1.data.error).toMatch(/Invalid JSON was passed/);
+    assert.equal(res1.status, 400);
+    assert.match(res1.data.error, /Invalid JSON was passed/);
 
     const res2 = await ax.alice.get('api/cases', {
       params: { sort: 'invalid-json' }
     });
-    expect(res2.status).toBe(400);
-    expect(res2.data.error).toMatch(/invalid json/i);
+    assert.equal(res2.status, 400);
+    assert.match(res2.data.error, /invalid json/i);
 
     const res3 = await ax.alice.get('api/cases', {
       params: { sort: '{"field":11}' }
     });
-    expect(res3.status).toBe(400);
-    expect(res3.data.error).toMatch(/key\/value pair/);
+    assert.equal(res3.status, 400);
+    assert.match(res3.data.error, /key\/value pair/);
   });
 });
 
@@ -123,8 +126,8 @@ describe('create', () => {
         tags: []
       }
     });
-    expect(res.status).toBe(201);
-    expect(res.data.caseId).toHaveLength(26);
+    assert.equal(res.status, 201);
+    assert.equal(res.data.caseId.length, 26);
   });
 
   test('throw error for different domains in one series', async () => {
@@ -154,9 +157,9 @@ describe('create', () => {
         tags: []
       }
     });
-    expect(res.status).toBe(400);
-    expect(res.data.error).toMatch(
-      'All series must belong to the same domain.'
+    assert.equal(res.status, 400);
+    assert.ok(
+      res.data.error.includes('All series must belong to the same domain.')
     );
   });
 
@@ -176,8 +179,8 @@ describe('create', () => {
         tags: []
       }
     });
-    expect(res.status).toBe(400);
-    expect(res.data.error).toMatch(/specified range is invalid/i);
+    assert.equal(res.status, 400);
+    assert.match(res.data.error, /specified range is invalid/i);
   });
 
   // TODO: more checks regarding security
@@ -189,21 +192,21 @@ describe('get one case', () => {
       url: `api/cases/${cid}`,
       method: 'get'
     });
-    expect(res.data.projectId).toBe('8883fdef6f5144f50eb2a83cd34baa44');
-    expect(res.data).toHaveProperty('revisions');
+    assert.equal(res.data.projectId, '8883fdef6f5144f50eb2a83cd34baa44');
+    assert.ok('revisions' in res.data);
   });
 
   test('return 404 for nonexistent case', async () => {
     const res = await ax.bob.request({
       url: 'api/cases/thiscaseisinvalid'
     });
-    expect(res.status).toBe(404);
+    assert.equal(res.status, 404);
   });
 
   test('reject revision read access from unauthorized user', async () => {
     const res = await ax.guest.get(`api/cases/${cid}`);
-    expect(res.status).toBe(401);
-    expect(res.data.error).toMatch(/read/);
+    assert.equal(res.status, 401);
+    assert.match(res.data.error, /read/);
   });
 });
 
@@ -219,9 +222,9 @@ describe('add revision', () => {
         series: []
       }
     });
-    expect(res.status).toBe(201);
+    assert.equal(res.status, 201);
     const res2 = await ax.bob.get(`api/cases/${cid}`);
-    expect(res2.data.revisions[1].creator).toBe('bob@example.com');
+    assert.equal(res2.data.revisions[1].creator, 'bob@example.com');
   });
 
   test('add a revision with labels', async () => {
@@ -318,7 +321,7 @@ describe('add revision', () => {
       }
     });
 
-    expect(res.status).toBe(201);
+    assert.equal(res.status, 201);
   });
 
   test('reject revision addition with invalid labels', async () => {
@@ -348,7 +351,7 @@ describe('add revision', () => {
         ]
       }
     });
-    expect(res.status).toBe(400);
+    assert.equal(res.status, 400);
   });
 
   test('reject revision addition with nonexistent voxel', async () => {
@@ -379,8 +382,8 @@ describe('add revision', () => {
         ]
       }
     });
-    expect(res.status).toBe(400);
-    expect(res.data.error).toContain('Some voxel data are missing');
+    assert.equal(res.status, 400);
+    assert.ok(res.data.error.includes('Some voxel data are missing'));
   });
 
   test('reject revision addition from unauthorized user', async () => {
@@ -389,8 +392,8 @@ describe('add revision', () => {
       method: 'post',
       data: { anything: 'can be used' }
     });
-    expect(res.status).toBe(401);
-    expect(res.data.error).toMatch(/write/);
+    assert.equal(res.status, 401);
+    assert.match(res.data.error, /write/);
   });
 });
 
@@ -401,22 +404,22 @@ describe('put tags', () => {
       'YYY',
       'ZZZ'
     ]);
-    expect(res.status).toBe(204);
+    assert.equal(res.status, 204);
     const { data } = await ax.bob.get(`api/cases/${cid}`);
-    expect(data.tags).toEqual(['XXX', 'YYY', 'ZZZ']);
+    assert.deepEqual(data.tags, ['XXX', 'YYY', 'ZZZ']);
   });
 
   test('reject invalid tags', async () => {
     const res = await ax.bob.put(`api/cases/${cid}/tags`, [123, 444]);
-    expect(res.status).toBe(400);
+    assert.equal(res.status, 400);
     const res2 = await ax.bob.put(`api/cases/${cid}/tags`, { some: 'data' });
-    expect(res2.status).toBe(400);
+    assert.equal(res2.status, 400);
   });
 
   test('reject tag writes from unauthorized user', async () => {
     const res = await ax.guest.put(`api/cases/${cid}/tags`, []);
-    expect(res.status).toBe(401);
-    expect(res.data.error).toMatch(/write/);
+    assert.equal(res.status, 401);
+    assert.match(res.data.error, /write/);
   });
 });
 
@@ -424,30 +427,34 @@ describe('search by mylist', () => {
   const myListId = '01ewes10a08z21bjnysd4p1m3f';
   test('search', async () => {
     const res = await ax.bob.get(`api/cases/list/${myListId}`);
-    expect(res.status).toBe(200);
-    expect(
+    assert.equal(res.status, 200);
+    assert.equal(
       res.data.items.some(
         (item: any) =>
           item.caseId ===
           'ankutrdbn53780cmm3489yxj01cmrm0cregtjcmveuhbi987gdhbtrdc780yn3er'
-      )
-    ).toBe(true);
-    expect(res.data.items.some((item: any) => item.revisions)).toBe(false);
+      ),
+      true
+    );
+    assert.equal(
+      res.data.items.some((item: any) => item.revisions),
+      false
+    );
   });
 
   test('return 404 for nonexistent list id', async () => {
     const res = await ax.bob.get('api/cases/list/dummy');
-    expect(res.status).toBe(404);
+    assert.equal(res.status, 404);
   });
 
   test('returns 404 for my list of another user', async () => {
     const res = await ax.bob.get('api/cases/list/01ex36f2n99kjaqvpfrerrsryp');
-    expect(res.status).toBe(404);
+    assert.equal(res.status, 404);
   });
 
   test('return 400 for my list for different resource type', async () => {
     const res = await ax.bob.get('api/cases/list/01ex36wt9c94s93j0rmk98nsj0');
-    expect(res.status).toBe(400);
+    assert.equal(res.status, 400);
   });
 });
 
@@ -462,9 +469,9 @@ describe('patch tags', () => {
       caseIds: [cid],
       tags: ['ufo', 'party']
     });
-    expect(res.status).toBe(204);
+    assert.equal(res.status, 204);
     const res2 = await ax.bob.get(`api/cases/${cid}`);
-    expect(res2.data.tags).toEqual(['happy', 'ufo', 'party']);
+    assert.deepEqual(res2.data.tags, ['happy', 'ufo', 'party']);
   });
 
   test('remove tags', async () => {
@@ -473,9 +480,9 @@ describe('patch tags', () => {
       caseIds: [cid],
       tags: ['happy']
     });
-    expect(res.status).toBe(204);
+    assert.equal(res.status, 204);
     const res2 = await ax.bob.get(`api/cases/${cid}`);
-    expect(res2.data.tags).toEqual([]);
+    assert.deepEqual(res2.data.tags, []);
   });
 
   test('set tags', async () => {
@@ -484,9 +491,9 @@ describe('patch tags', () => {
       caseIds: [cid],
       tags: ['check']
     });
-    expect(res.status).toBe(204);
+    assert.equal(res.status, 204);
     const res2 = await ax.bob.get(`api/cases/${cid}`);
-    expect(res2.data.tags).toEqual(['check']);
+    assert.deepEqual(res2.data.tags, ['check']);
   });
 
   test('throw for bad operation', async () => {
@@ -494,7 +501,7 @@ describe('patch tags', () => {
       caseIds: [cid],
       tags: ['check']
     });
-    expect(res.status).toBe(400);
+    assert.equal(res.status, 400);
   });
 
   test('throw 404 for nonexistent case', async () => {
@@ -503,7 +510,7 @@ describe('patch tags', () => {
       caseIds: ['thisCaseDoesNotExist'],
       tags: ['check']
     });
-    expect(res.status).toBe(404);
+    assert.equal(res.status, 404);
   });
 
   test('reject add-tags from unauthoried user', async () => {
@@ -512,7 +519,7 @@ describe('patch tags', () => {
       caseIds: [cid],
       tags: ['check']
     });
-    expect(res.status).toBe(401);
+    assert.equal(res.status, 401);
   });
 });
 
@@ -529,17 +536,15 @@ describe('delete', () => {
       url: `api/cases/${caseId}?force=1`,
       method: 'delete'
     });
-    expect(res.status).toBe(204);
+    assert.equal(res.status, 204);
     const myList = await apiTest.database.db
       .collection('myLists')
       .findOne({ myListId: '01ewes10a08z21bjnysd4p1m3f' });
-    expect(myList!.items).not.toContainEqual(
-      expect.objectContaining({ resourceId: caseId })
-    );
+    assert.ok(!myList!.items.some((item: any) => item.resourceId === caseId));
     const aCase = await apiTest.database.db
       .collection('clinicalCases')
       .findOne({ caseId });
-    expect(aCase).toStrictEqual(null);
+    assert.deepEqual(aCase, null);
   });
 
   test('throw 401 for unauthorized user', async () => {
@@ -547,8 +552,9 @@ describe('delete', () => {
       url: `api/cases/${caseId}`,
       method: 'delete'
     });
-    expect(res.status).toBe(401);
-    expect(res.data.error).toBe(
+    assert.equal(res.status, 401);
+    assert.equal(
+      res.data.error,
       'You do not have "moderate" privilege of this project.'
     );
   });
@@ -558,8 +564,8 @@ describe('delete', () => {
       url: `api/cases/${caseId}`,
       method: 'delete'
     });
-    expect(res.status).toBe(403);
-    expect(res.data.error).toBe("This case is in someone's my list.");
+    assert.equal(res.status, 403);
+    assert.equal(res.data.error, "This case is in someone's my list.");
   });
 
   test('throw 404 for nonexistent caseId', async () => {
@@ -567,7 +573,7 @@ describe('delete', () => {
       url: 'api/cases/nonexistentCaseId',
       method: 'delete'
     });
-    expect(res.status).toBe(404);
+    assert.equal(res.status, 404);
   });
 
   test('transaction tests', async () => {

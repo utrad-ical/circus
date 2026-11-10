@@ -1,4 +1,5 @@
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
 interface ModuleConfig {
   [key: string]: { type?: string; options?: any };
@@ -197,7 +198,7 @@ export default class ServiceLoader<T extends object = any> {
   }
 
   private async createFromModule<K extends keyof T>(name: K, path: string) {
-    path = path.replace('<circus-lib>', __dirname);
+    path = resolveModulePath(path.replace('<circus-lib>', __dirname));
     const module = (await import(path)).default as Service<T[K]>;
     return await this.instanciateService(name, module);
   }
@@ -222,3 +223,24 @@ export default class ServiceLoader<T extends object = any> {
     }
   }
 }
+
+const moduleExtensions = ['.ts', '.js', '.mjs', '.cjs'];
+
+/**
+ * Module paths in configurations may omit the file extension
+ * (e.g., `/path/to/createAuthProvider`), which ESM `import()` does not allow.
+ * Finds the actual file by trying the common extensions and index files.
+ */
+export const resolveModulePath = (modulePath: string): string => {
+  if (!path.isAbsolute(modulePath)) return modulePath; // package name
+  if (fs.existsSync(modulePath) && fs.statSync(modulePath).isFile()) {
+    return modulePath;
+  }
+  for (const candidate of [
+    ...moduleExtensions.map(ext => modulePath + ext),
+    ...moduleExtensions.map(ext => path.join(modulePath, 'index' + ext))
+  ]) {
+    if (fs.existsSync(candidate)) return candidate;
+  }
+  return modulePath;
+};

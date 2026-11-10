@@ -1,4 +1,3 @@
 #!/usr/bin/env node
 
-require('./register');
-require('./src/cui');
+import './src/cui/index.ts';

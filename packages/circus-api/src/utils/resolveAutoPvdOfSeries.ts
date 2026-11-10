@@ -1,7 +1,7 @@
 import type { SeriesEntry } from '@utrad-ical/circus-cs-core';
 import type { PartialVolumeDescriptor } from '@utrad-ical/circus-rs/server';
 import type { Models } from '../interface.ts';
-import MultiRange from 'multi-integer-range';
+import { MultiRange } from 'multi-integer-range';
 import type { SeriesOrientationResolver } from './createSeriesOrientationResolver.ts';
 
 export interface AutoPvdSeriesEntry {

@@ -9,7 +9,7 @@
 const path = require('path');
 const os = require('os');
 
-module.exports.default = {
+export default {
   // DICOM file repository is a loader that fetches the content of a DICOM file
   // specified by a series instance UID and an image number.
   dicomFileRepository: {

@@ -28,7 +28,7 @@ export const command: Command<{ database: Database; models: Models }> = async (
 
     for (let i = currentRevision + 1; i in migrations; i++) {
       const file = migrations[i];
-      const module = require(file);
+      const module = await import(file);
       const name = path.basename(file);
       console.log(chalk.green('Forwarding...'), name);
       try {

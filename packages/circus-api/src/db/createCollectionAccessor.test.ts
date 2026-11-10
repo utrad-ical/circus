@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { describe, test, it, before, after, beforeEach } from 'node:test';
-import { ValidationError } from 'ajv';
+import Ajv from 'ajv';
+
+const { ValidationError } = Ajv;
 import type * as mongo from 'mongodb';
 import { setUpMongoFixture, usingMongo } from '../test/util-mongo.ts';
 import createValidator from '../createValidator.ts';
@@ -20,7 +22,7 @@ before(async () => {
   db = (await dbPromise).database.db;
   disposeMongo = (await dbPromise).dispose;
   const validator = await createValidator({
-    schemaRoot: __dirname + '/../../test/test-schemas'
+    schemaRoot: import.meta.dirname + '/../../test/test-schemas'
   });
   testCollection = await createCollectionAccessor<MonthData>(db, validator, {
     schema: 'months',
@@ -176,7 +178,7 @@ describe('#findById', () => {
 
     before(async () => {
       const validator = await createValidator({
-        schemaRoot: __dirname + '/../../test/test-schemas'
+        schemaRoot: import.meta.dirname + '/../../test/test-schemas'
       });
       session = (await dbPromise).database.connection.startSession();
       sessionCollection = createCollectionAccessor<MonthData>(db, validator, {

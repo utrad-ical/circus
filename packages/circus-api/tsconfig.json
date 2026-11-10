@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.settings.json",
   "compilerOptions": {
-    "lib": ["dom", "es2019"],
+    "lib": ["dom", "es2022"],
     "rootDir": "src",
     "outDir": "./lib",
     // This package is top-level and not referenced by others,

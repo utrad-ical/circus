@@ -1,7 +1,7 @@
 import status from 'http-status';
 import type { CollectionAccessor } from '../db/createCollectionAccessor.ts';
 import type { CircusContext } from '../typings/middlewares.ts';
-import { isPlainObject } from 'lodash';
+import _ from 'lodash';
 import { EJSON } from 'bson';
 
 interface SearchQuery {
@@ -57,7 +57,7 @@ const extractSearchOptions = (
     } catch (err) {
       ctx.throw(status.BAD_REQUEST, 'Bad sort parameter. Invalid JSON.');
     }
-    if (!isPlainObject(sort)) {
+    if (!_.isPlainObject(sort)) {
       ctx.throw(status.BAD_REQUEST, 'Bad sort parameter. Non-object passed.');
     }
     if (Object.keys(sort).length > 5) {

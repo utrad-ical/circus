@@ -5,7 +5,7 @@ import validate from '../middleware/validate.ts';
 import type { ViewWindow } from '../../../common/ViewWindow.ts';
 import type { PixelFormat } from '../../../volume/PixelFormat.ts';
 import type { SeriesMiddlewareState } from './createSeriesRoutes.ts';
-import MultiRange from 'multi-integer-range';
+import { MultiRange } from 'multi-integer-range';
 import type { VolumeAccessor } from '../../helper/createVolumeProvider.ts';
 import { partialVolumeDescriptorToArray } from '../../../volume/PartialVolumeDescriptor.ts';
 

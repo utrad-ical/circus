@@ -1,7 +1,7 @@
 import { before, after } from 'node:test';
 import { EJSON } from 'bson';
-import * as fs from 'fs-extra';
-import { safeLoad as yaml } from 'js-yaml';
+import fs from 'fs-extra';
+import yaml from 'js-yaml';
 import type * as mongo from 'mongodb';
 import * as path from 'path';
 import createValidator from '../createValidator.ts';
@@ -30,9 +30,9 @@ export const setUpMongoFixture = async (
   for (const colName of collections) {
     const col = db.collection(colName);
     await col.deleteMany({});
-    const content = yaml(
+    const content = yaml.safeLoad(
       await fs.readFile(
-        path.join(__dirname, '../../test/fixture', colName + '.yaml'),
+        path.join(import.meta.dirname, '../../test/fixture', colName + '.yaml'),
         'utf8'
       )
     );

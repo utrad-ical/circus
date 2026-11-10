@@ -1,5 +1,5 @@
 import type { Models } from '../interface.ts';
-import MultiRange from 'multi-integer-range';
+import { MultiRange } from 'multi-integer-range';
 
 export const toEntry = async (uidStr: string, models: Models) => {
   const [seriesUid, ...pvdStrs] = uidStr.split(':');

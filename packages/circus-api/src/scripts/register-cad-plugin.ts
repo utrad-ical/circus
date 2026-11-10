@@ -1,4 +1,6 @@
-import { ValidationError } from 'ajv';
+import Ajv from 'ajv';
+
+const { ValidationError } = Ajv;
 import inquirer from 'inquirer';
 import type { Database, Models } from '../interface.ts';
 import type Command from './Command.ts';

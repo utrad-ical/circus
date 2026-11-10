@@ -1,4 +1,3 @@
 #!/usr/bin/env node
 
-require('./register');
-require('./src/daemon');
+import './src/daemon/index.ts';

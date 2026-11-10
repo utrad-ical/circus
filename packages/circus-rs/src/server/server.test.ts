@@ -29,7 +29,7 @@ const axios = _axios.create({
   validateStatus: () => true
 });
 
-const testdir = path.join(__dirname, '../../test-data/dicom/');
+const testdir = path.join(import.meta.dirname, '../../test-data/dicom/');
 
 const dicomImage = (file = 'CT-MONO2-16-brain') => {
   return new Promise<Buffer>(resolve => {

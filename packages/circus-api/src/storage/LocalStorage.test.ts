@@ -2,12 +2,12 @@ import assert from 'node:assert/strict';
 import { it, before, after, beforeEach } from 'node:test';
 import type Storage from './Storage.ts';
 import * as path from 'path';
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 import createLocalStorage from './LocalStorage.ts';
 
 let store: Storage;
 
-const tmpDir = path.join(__dirname, 'tmp-dir');
+const tmpDir = path.join(import.meta.dirname, 'tmp-dir');
 
 before(async function () {
   await fs.emptyDir(tmpDir);

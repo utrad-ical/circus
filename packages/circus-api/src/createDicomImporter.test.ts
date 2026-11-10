@@ -15,7 +15,10 @@ const modelsPromise = usingModels();
 let dicomFileRepository: MemoryDicomFileRepository,
   importer: DicomImporter,
   models: Models;
-const file = path.join(__dirname, '../test/dicom/CT-MONO2-16-brain.dcm');
+const file = path.join(
+  import.meta.dirname,
+  '../test/dicom/CT-MONO2-16-brain.dcm'
+);
 
 before(async () => {
   models = (await modelsPromise).models;

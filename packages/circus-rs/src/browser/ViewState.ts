@@ -112,4 +112,4 @@ export interface SubVolume {
 type ViewState = MprViewState | VrViewState | TwoDimensionalViewState;
 
 // eslint-disable-next-line no-undef
-export default ViewState;
+export type { ViewState as default };

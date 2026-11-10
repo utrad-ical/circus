@@ -51,55 +51,70 @@ const createServiceLoader = async (config: any) => {
   configureCsCoreServiceLoader(loader as any);
   configureRsServiceLoader(loader);
   // Register our modules
-  loader.registerModule('apiServer', path.join(__dirname, 'createApp'));
-  loader.registerModule('database', path.join(__dirname, 'db/connectDb'));
+  loader.registerModule(
+    'apiServer',
+    path.join(import.meta.dirname, 'createApp')
+  );
+  loader.registerModule(
+    'database',
+    path.join(import.meta.dirname, 'db/connectDb')
+  );
   loader.registerDirectory('apiLogger', '<circus-lib>/logger', 'NullLogger');
-  loader.registerModule('validator', path.join(__dirname, 'createValidator'));
-  loader.registerModule('models', path.join(__dirname, 'db/createModels'));
+  loader.registerModule(
+    'validator',
+    path.join(import.meta.dirname, 'createValidator')
+  );
+  loader.registerModule(
+    'models',
+    path.join(import.meta.dirname, 'db/createModels')
+  );
   loader.registerModule(
     'dicomImporter',
-    path.join(__dirname, 'createDicomImporter')
+    path.join(import.meta.dirname, 'createDicomImporter')
   );
-  loader.registerModule('rs', path.join(__dirname, 'createCircusRs'));
+  loader.registerModule('rs', path.join(import.meta.dirname, 'createCircusRs'));
   loader.registerModule(
     'dicomTagReader',
-    path.join(__dirname, 'utils/createDicomTagReader')
+    path.join(import.meta.dirname, 'utils/createDicomTagReader')
   );
   loader.register('dicomUtilityRunner', createDicomUtilityRunner);
 
   loader.registerDirectory(
     'blobStorage',
-    path.join(__dirname, 'storage'),
+    path.join(import.meta.dirname, 'storage'),
     'MemoryStorage'
   );
   loader.registerModule(
     'taskManager',
-    path.join(__dirname, 'createTaskManager')
+    path.join(import.meta.dirname, 'createTaskManager')
   );
   loader.registerModule(
     'mhdPacker',
-    path.join(__dirname, 'case/createMhdPacker')
+    path.join(import.meta.dirname, 'case/createMhdPacker')
   );
   loader.registerModule(
     'oauthServer',
-    path.join(__dirname, 'middleware/auth/createOauthServer')
+    path.join(import.meta.dirname, 'middleware/auth/createOauthServer')
   );
   loader.registerDirectory(
     'authProvider',
-    path.join(__dirname, 'middleware/auth/authProvider'),
+    path.join(import.meta.dirname, 'middleware/auth/authProvider'),
     'DefaultAuthProvider'
   );
   loader.registerModule(
     'defaultAuthProvider',
-    path.join(__dirname, 'middleware/auth/authProvider/DefaultAuthProvider')
+    path.join(
+      import.meta.dirname,
+      'middleware/auth/authProvider/DefaultAuthProvider'
+    )
   );
   loader.registerModule(
     'transactionManager',
-    path.join(__dirname, 'createTransactionManager')
+    path.join(import.meta.dirname, 'createTransactionManager')
   );
   loader.registerModule(
     'seriesOrientationResolver',
-    path.join(__dirname, 'utils/createSeriesOrientationResolver')
+    path.join(import.meta.dirname, 'utils/createSeriesOrientationResolver')
   );
   return loader as ApiServiceLoader;
 };

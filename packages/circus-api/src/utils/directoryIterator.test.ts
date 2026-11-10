@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import directoryIterator from './directoryIterator.ts';
 import path from 'path';
 
-const testDir = path.join(__dirname, '../../test/dicom');
+const testDir = path.join(import.meta.dirname, '../../test/dicom');
 const dicomName = 'CT-MONO2-16-brain.dcm';
 
 const toArray = async <T>(generator: AsyncGenerator<T>) => {

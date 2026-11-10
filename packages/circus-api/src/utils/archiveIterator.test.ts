@@ -11,7 +11,7 @@ const toArray = async <T>(generator: AsyncGenerator<T>) => {
 };
 
 describe('targzIterator', () => {
-  const testDir = path.join(__dirname, '../../test/etc/');
+  const testDir = path.join(import.meta.dirname, '../../test/etc/');
 
   test('correct tar.gz file', async () => {
     const buffer = await fs.readFile(path.join(testDir, 'abc.tar.gz'));

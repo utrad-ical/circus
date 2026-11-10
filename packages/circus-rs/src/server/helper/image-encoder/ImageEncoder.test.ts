@@ -1,7 +1,18 @@
 import assert from 'node:assert/strict';
 import { describe, test, it, beforeEach } from 'node:test';
-const encoders = ['PngJsImageEncoder' /*'NodePngImageEncoder'*/];
 import type ImageEncoder from './ImageEncoder.ts';
+
+const encoders = ['PngJsImageEncoder' /*'NodePngImageEncoder'*/];
+
+// Encoders whose dependencies are not installed are skipped
+const encModules = new Map<string, any>();
+for (const enc of encoders) {
+  try {
+    encModules.set(enc, (await import(`./${enc}.ts`)).default);
+  } catch {
+    // not available
+  }
+}
 
 describe('ImageEncoder', () => {
   let originalImage: Buffer;
@@ -15,14 +26,12 @@ describe('ImageEncoder', () => {
     }
   });
 
-  encoders.forEach(enc => {
+  for (const enc of encoders) {
     const testName = 'must encode image to PNG using ' + enc;
-    let encModule: any;
-    try {
-      encModule = require('./' + enc).default;
-    } catch (e) {
+    const encModule = encModules.get(enc);
+    if (!encModule) {
       it.skip(testName);
-      return;
+      continue;
     }
     test(testName, (_t, done) => {
       encModule().then((encoder: ImageEncoder) =>
@@ -36,5 +45,5 @@ describe('ImageEncoder', () => {
         })
       );
     });
-  });
+  }
 });

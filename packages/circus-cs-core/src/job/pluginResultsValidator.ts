@@ -2,7 +2,8 @@ import Ajv from 'ajv';
 import path from 'path';
 import fs from 'fs-extra';
 
-const resultsSchema = require('../schemas/results.json');
+import resultsSchema from '../schemas/results.json' with { type: 'json' };
+
 const lesionCandAjv = new Ajv({ allErrors: true }).compile(resultsSchema);
 
 /**

@@ -29,7 +29,7 @@ test('head-first', async () => {
   for (let f = 1; f <= 10; f++) {
     const num = ('000' + f.toString()).slice(-3);
     const file = await fs.readFile(
-      path.join(__dirname, `../../test/dicom/head-first${num}.dcm`)
+      path.join(import.meta.dirname, `../../test/dicom/head-first${num}.dcm`)
     );
     await series.save(f, file.buffer as ArrayBuffer);
   }
@@ -48,7 +48,7 @@ test('foot-first', async () => {
   for (let f = 1; f <= 10; f++) {
     const num = ('000' + f.toString()).slice(-3);
     const file = await fs.readFile(
-      path.join(__dirname, `../../test/dicom/foot-first${num}.dcm`)
+      path.join(import.meta.dirname, `../../test/dicom/foot-first${num}.dcm`)
     );
     await series.save(f, file.buffer as ArrayBuffer);
   }
@@ -66,7 +66,7 @@ test('should return head-first if single image series', async () => {
     '2.16.840.1.113662.2.1.2519.21582.2990505.2105152.2381633.20'
   );
   const file = await fs.readFile(
-    path.join(__dirname, '../../test/dicom/CT-MONO2-16-brain.dcm')
+    path.join(import.meta.dirname, '../../test/dicom/CT-MONO2-16-brain.dcm')
   );
   await series.save(1, file.buffer as ArrayBuffer);
   const result = await resolveSeriesOrientation(

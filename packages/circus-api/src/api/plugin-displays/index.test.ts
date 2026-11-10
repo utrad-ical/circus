@@ -5,7 +5,7 @@ import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import path from 'path';
 import fs from 'fs-extra';
 
-const cachePath = path.join(__dirname, '../../../test/plugin-cache');
+const cachePath = path.join(import.meta.dirname, '../../../test/plugin-cache');
 
 const pluginId =
   'd135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2';

@@ -21,7 +21,7 @@ export interface RsServices {
   imageEncoder: ImageEncoder;
   rsSeriesRoutes: Koa.Middleware;
   volumeProvider: VolumeProvider;
-  rsWSServer: ws.Server;
+  rsWSServer: ws.WebSocketServer;
   rsWebsocketVolumeConnectionHandlerCreator: RsWebsocketVolumeConnectionHandlerCreator;
 }
 
@@ -34,34 +34,43 @@ const configureServiceLoader = (loader: ServiceLoader<any>): void => {
   );
   loader.registerDirectory(
     'imageEncoder',
-    path.join(__dirname, 'helper/image-encoder'),
+    path.join(import.meta.dirname, 'helper/image-encoder'),
     'PngJsImageEncoder'
   );
   loader.registerModule(
     'counter',
-    path.join(__dirname, 'helper/createCounter')
+    path.join(import.meta.dirname, 'helper/createCounter')
   );
   loader.registerModule(
     'dicomExtractorWorker',
-    path.join(__dirname, 'helper/extractor-worker/createDicomExtractorWorker')
+    path.join(
+      import.meta.dirname,
+      'helper/extractor-worker/createDicomExtractorWorker'
+    )
   );
   loader.registerModule(
     'rsSeriesRoutes',
-    path.join(__dirname, 'app/series/createSeriesRoutes.ts')
+    path.join(import.meta.dirname, 'app/series/createSeriesRoutes.ts')
   );
   loader.registerModule(
     'volumeProvider',
-    path.join(__dirname, 'helper/createVolumeProvider')
+    path.join(import.meta.dirname, 'helper/createVolumeProvider')
   );
   loader.registerModule(
     'rsWSServer',
-    path.join(__dirname, 'ws/createWSServer')
+    path.join(import.meta.dirname, 'ws/createWSServer')
   );
   loader.registerModule(
     'rsWebsocketVolumeConnectionHandlerCreator',
-    path.join(__dirname, 'ws/createWebsocketVolumeConnectionHandlerCreator')
+    path.join(
+      import.meta.dirname,
+      'ws/createWebsocketVolumeConnectionHandlerCreator'
+    )
   );
-  loader.registerModule('rsServer', path.join(__dirname, './createServer'));
+  loader.registerModule(
+    'rsServer',
+    path.join(import.meta.dirname, './createServer')
+  );
 };
 
 export default configureServiceLoader;

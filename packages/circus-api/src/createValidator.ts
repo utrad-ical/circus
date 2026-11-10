@@ -78,7 +78,7 @@ const customFormats: {
   semver: s => semver.valid(s) !== null
 };
 
-const defaultSchemaRoot = path.join(__dirname, 'schemas');
+const defaultSchemaRoot = path.join(import.meta.dirname, 'schemas');
 
 type SchemaConverter = (schema: any, ...params: string[]) => any;
 

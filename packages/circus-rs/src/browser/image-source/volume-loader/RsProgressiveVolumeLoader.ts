@@ -20,7 +20,7 @@ import type {
   TransferConnectionFactory
 } from '../../ws/createTransferConnectionFactory.ts';
 import type { Initializer as MultiRangeInitializer } from 'multi-integer-range';
-import MultiRange from 'multi-integer-range';
+import { MultiRange } from 'multi-integer-range';
 import { EventEmitter } from 'events';
 
 interface RsProgressiveVolumeLoaderOptions {

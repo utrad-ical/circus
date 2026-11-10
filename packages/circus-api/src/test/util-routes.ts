@@ -3,7 +3,7 @@ import { after } from 'node:test';
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import fs from 'fs-extra';
-import { safeLoad as yaml } from 'js-yaml';
+import yaml from 'js-yaml';
 import path from 'path';
 import createApp from '../createApp.ts';
 import { setUpKoaTestWith } from './util-koa.ts';
@@ -135,7 +135,7 @@ export const setUpAppForRoutesTest = async (
   );
 
   const downloadFileDirectory = path.join(
-    __dirname,
+    import.meta.dirname,
     '../../test/download-test'
   );
   const taskManager = await createTaskManager(
@@ -169,8 +169,14 @@ export const setUpAppForRoutesTest = async (
   const app = await createApp(
     {
       debug: true,
-      pluginResultsPath: path.join(__dirname, '../../test/plugin-results'),
-      pluginCachePath: path.join(__dirname, '../../test/plugin-cache'),
+      pluginResultsPath: path.join(
+        import.meta.dirname,
+        '../../test/plugin-results'
+      ),
+      pluginCachePath: path.join(
+        import.meta.dirname,
+        '../../test/plugin-cache'
+      ),
       uploadFileSizeMaxBytes: 200 * 1024 * 1024,
       dicomImageServerUrl: '' // dummy
     },
@@ -195,7 +201,7 @@ export const setUpAppForRoutesTest = async (
       ),
       transactionManager,
       ...overrides,
-      rsWSServer: new ws.Server({
+      rsWSServer: new ws.WebSocketServer({
         noServer: true,
         skipUTF8Validation: true
       }),
@@ -252,9 +258,12 @@ export const setUpAppForRoutesTest = async (
 
 const createMockCsCore = () => {
   let status: 'running' | 'stopped' = 'stopped';
-  const pluginDefinitions = yaml(
+  const pluginDefinitions = yaml.safeLoad(
     fs.readFileSync(
-      path.join(__dirname, '../../test/fixture/pluginDefinitions.yaml'),
+      path.join(
+        import.meta.dirname,
+        '../../test/fixture/pluginDefinitions.yaml'
+      ),
       'utf8'
     )
   ) as cscore.PluginDefinition[];

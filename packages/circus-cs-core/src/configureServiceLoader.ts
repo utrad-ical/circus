@@ -52,24 +52,24 @@ export default function configureServiceLoader(
   // The following three services interact with database
   serviceLoader.registerDirectory(
     'pluginDefinitionAccessor',
-    path.join(__dirname, 'plugin-definition-accessor'),
+    path.join(import.meta.dirname, 'plugin-definition-accessor'),
     'StaticPluginDefinitionAccessor'
   );
   serviceLoader.registerDirectory(
     'jobReporter',
-    path.join(__dirname, 'job', 'reporter'),
+    path.join(import.meta.dirname, 'job', 'reporter'),
     'MongoPluginJobReporter'
   );
   serviceLoader.registerDirectory(
     'queue',
-    path.join(__dirname, 'job', 'queue'),
+    path.join(import.meta.dirname, 'job', 'queue'),
     'MongoQueue'
   );
 
   // Used by mongodb-related services
   serviceLoader.registerModule(
     'mongoClientPool',
-    path.join(__dirname, 'mongoClientPool')
+    path.join(import.meta.dirname, 'mongoClientPool')
   );
 
   // DICOM file repository
@@ -82,24 +82,32 @@ export default function configureServiceLoader(
   // Misc 'singleton' modules
   serviceLoader.registerModule(
     'pluginJobRegisterer',
-    path.join(__dirname, 'job', 'registerer', 'createPluginJobRegisterer')
+    path.join(
+      import.meta.dirname,
+      'job',
+      'registerer',
+      'createPluginJobRegisterer'
+    )
   );
   serviceLoader.registerModule(
     'jobRunner',
-    path.join(__dirname, 'job', 'pluginJobRunner')
+    path.join(import.meta.dirname, 'job', 'pluginJobRunner')
   );
   serviceLoader.registerModule(
     'dockerRunner',
-    path.join(__dirname, 'util', 'DockerRunner')
+    path.join(import.meta.dirname, 'util', 'DockerRunner')
   );
   serviceLoader.registerFactory('configuration', async config => config);
 
   // "the facade"
-  serviceLoader.registerModule('core', path.join(__dirname, 'createCsCore'));
+  serviceLoader.registerModule(
+    'core',
+    path.join(import.meta.dirname, 'createCsCore')
+  );
 
   serviceLoader.registerModule(
     'dicomVoxelDumper',
-    path.join(__dirname, 'job', 'createDicomVoxelDumper')
+    path.join(import.meta.dirname, 'job', 'createDicomVoxelDumper')
   );
 
   return serviceLoader;

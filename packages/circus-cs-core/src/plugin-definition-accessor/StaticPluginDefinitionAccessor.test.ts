@@ -5,7 +5,7 @@ import createStaticPluginDefinitionAccessor from './StaticPluginDefinitionAccess
 import type * as circus from '../interface.ts';
 
 describe('StaticPluginDefinitionAccessor', () => {
-  const pluginDir = path.join(__dirname, '../../test/plugins/');
+  const pluginDir = path.join(import.meta.dirname, '../../test/plugins/');
   let pluginDefs: circus.PluginDefinitionAccessor;
 
   before(async () => {

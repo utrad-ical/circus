@@ -12,7 +12,7 @@ import {
 } from './gl/webgl-util.ts';
 import type MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume.ts';
 import type { Initializer as MultiRangeInitializer } from 'multi-integer-range';
-import MultiRange from 'multi-integer-range';
+import { MultiRange } from 'multi-integer-range';
 import type { DrawResult } from './ImageSource.ts';
 import setImmediate from '../util/setImmediate.ts';
 import imageRangeOfSection from '../util/imageRangeOfSection.ts';

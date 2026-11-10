@@ -13,7 +13,7 @@ const modelsPromise = usingModels();
 let models: Models;
 let manager: TaskManager;
 const userEmail = 'alice@example.com';
-const downloadTestDir = path.join(__dirname, '../test/download-test');
+const downloadTestDir = path.join(import.meta.dirname, '../test/download-test');
 
 before(async () => {
   await fs.mkdir(downloadTestDir);

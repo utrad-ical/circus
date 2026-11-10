@@ -1,5 +1,9 @@
 import { cosmiconfigSync } from 'cosmiconfig';
 import merge from 'merge';
+import { createRequire } from 'node:module';
+import { resolveModulePath } from '../ServiceLoader.ts';
+
+const require = createRequire(import.meta.url);
 
 /**
  * Loads a JavaScript config module.
@@ -8,7 +12,7 @@ import merge from 'merge';
  * ES modules that do not use top-level await.
  */
 const loadModule = (filePath: string) => {
-  const mod = require(filePath);
+  const mod = require(resolveModulePath(filePath));
   return mod && typeof mod === 'object' && 'default' in mod ? mod.default : mod;
 };
 

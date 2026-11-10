@@ -1,5 +1,4 @@
 /**
  * CIRCUS RS
  */
-require('./register');
-require('./src/server/main');
+import './src/server/main.ts';

@@ -132,7 +132,7 @@ describe('getOrientation', () => {
 
 describe('Upload', () => {
   const file = path.join(
-    __dirname,
+    import.meta.dirname,
     '../../../test/dicom/CT-MONO2-16-brain.dcm'
   );
   const seriesUid =
@@ -181,7 +181,10 @@ describe('Upload', () => {
     });
 
     test('upload zipped DICOM files', async () => {
-      const file = path.join(__dirname, '../../../test/dicom/test.zip');
+      const file = path.join(
+        import.meta.dirname,
+        '../../../test/dicom/test.zip'
+      );
       const res = await uploadTest(file);
       if (res.status === 503) return;
       assert.equal(res.status, 201);

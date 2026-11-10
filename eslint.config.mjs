@@ -75,7 +75,7 @@ export default [
   {
     // Relative imports must have an explicit extension (e.g., './foo.ts')
     // so that the sources can be run directly by Node (type stripping).
-    files: ['packages/*/src/**/*.{ts,tsx}'],
+    files: ['packages/*/src/**/*.{js,ts,tsx}'],
 
     rules: {
       'no-restricted-syntax': [
@@ -100,10 +100,7 @@ export default [
     files: ['**/*.ts', '**/*.tsx'],
 
     rules: {
-      'no-undef': 'off',
-      // Type-only imports must use `import type` (required by Node's type
-      // stripping). Remove this once `verbatimModuleSyntax` is enabled.
-      '@typescript-eslint/consistent-type-imports': 'error'
+      'no-undef': 'off'
     }
   },
   {

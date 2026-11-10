@@ -1,4 +1,4 @@
-import * as JSZip from 'jszip';
+import JSZip from 'jszip';
 import tar from 'tar-stream';
 import zlib from 'zlib';
 import rawBody from 'raw-body';

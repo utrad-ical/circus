@@ -1,4 +1,4 @@
-import type MultiRange from 'multi-integer-range';
+import type { MultiRange } from 'multi-integer-range';
 
 /**
  * Defines a set of integers to construct a partial volume

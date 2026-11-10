@@ -3,7 +3,7 @@ import type DicomFileRepository from './DicomFileRepository.ts';
 import path from 'path';
 import fs from 'fs-extra';
 import crypto from 'crypto';
-import type MultiRange from 'multi-integer-range';
+import type { MultiRange } from 'multi-integer-range';
 import { multirange } from 'multi-integer-range';
 import type { ConcurrencyGate } from '../concurrencyGate.ts';
 import concurrencyGate from '../concurrencyGate.ts';

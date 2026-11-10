@@ -16,7 +16,7 @@ describe('MongoPluginDefinitionAccesor', () => {
       .collection('pluginDefinitions');
     const defs = JSON.parse(
       await fs.readFile(
-        path.join(__dirname, '../../test/plugins/plugins.json'),
+        path.join(import.meta.dirname, '../../test/plugins/plugins.json'),
         'utf8'
       )
     );

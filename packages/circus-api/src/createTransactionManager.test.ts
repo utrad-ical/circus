@@ -31,7 +31,7 @@ before(async () => {
   database = (await dbPromise).database;
   db = database.db;
   validator = await createValidator({
-    schemaRoot: __dirname + '/../test/test-schemas'
+    schemaRoot: import.meta.dirname + '/../test/test-schemas'
   });
   await setUpMongoFixture(db, ['bankAccounts']);
 });

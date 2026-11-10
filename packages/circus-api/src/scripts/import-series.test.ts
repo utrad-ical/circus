@@ -46,7 +46,10 @@ const seriesUid = '2.16.840.1.113662.2.1.2519.21582.2990505.2105152.2381633.20';
 
 test('import from a DICOM file', async () => {
   const spy = mock.method(console, 'log', () => {});
-  const file = path.join(__dirname, '../../test/dicom/CT-MONO2-16-brain.dcm');
+  const file = path.join(
+    import.meta.dirname,
+    '../../test/dicom/CT-MONO2-16-brain.dcm'
+  );
   await commandFunc({ domain, _args: [file] });
   assert.ok(
     spy.mock.calls
@@ -62,7 +65,7 @@ test('import from a DICOM file', async () => {
 
 test('import from a zip file', async () => {
   const spy = mock.method(console, 'log', () => {});
-  const file = path.join(__dirname, '../../test/dicom/test.zip');
+  const file = path.join(import.meta.dirname, '../../test/dicom/test.zip');
   await commandFunc({ domain, _args: [file] });
   assert.ok(
     spy.mock.calls

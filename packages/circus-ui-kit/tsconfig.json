@@ -1,7 +1,10 @@
 {
   "extends": "../../tsconfig.settings.json",
   "compilerOptions": {
-    "lib": ["dom", "es2019"],
+    // Bundled by webpack
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["dom", "es2022"],
     "jsx": "react",
     "rootDir": "src",
     "outDir": "./lib"

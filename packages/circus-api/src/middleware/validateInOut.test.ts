@@ -7,7 +7,7 @@ import Router from 'koa-router';
 import * as path from 'path';
 import type { TestServer } from '../test/util-koa.ts';
 import { setUpKoaTest } from '../test/util-koa.ts';
-import createNullLogger from '@utrad-ical/circus-lib/src/logger/NullLogger';
+import { createNullLogger } from '@utrad-ical/circus-lib';
 
 let testServer: TestServer;
 

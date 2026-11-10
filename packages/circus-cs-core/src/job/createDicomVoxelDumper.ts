@@ -2,11 +2,13 @@ import type {
   DicomFileRepository,
   FunctionService
 } from '@utrad-ical/circus-lib';
-import type { DicomImageData } from '@utrad-ical/circus-rs/src/dicom/dicomImageExtractor.ts';
-import dicomImageExtractor from '@utrad-ical/circus-rs/src/dicom/dicomImageExtractor.ts';
-import generateMhdHeader from '@utrad-ical/circus-rs/src/volume/generateMhdHeader.ts';
-import { partialVolumeDescriptorToArray } from '@utrad-ical/circus-rs/src/volume/PartialVolumeDescriptor.ts';
-import { pixelFormatInfo } from '@utrad-ical/circus-rs/src/volume/PixelFormat.ts';
+import type { DicomImageData } from '@utrad-ical/circus-rs/server';
+import {
+  dicomImageExtractor,
+  generateMhdHeader,
+  partialVolumeDescriptorToArray,
+  pixelFormatInfo
+} from '@utrad-ical/circus-rs/server';
 import parser from 'dicom-parser';
 import extractCommonValues from '../util/extractCommonValues.ts';
 import type { EncConverter } from './encConverter.ts';

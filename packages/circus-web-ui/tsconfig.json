@@ -5,11 +5,9 @@
     "jsx": "react",
     "rootDir": "src",
     "outDir": "./lib",
-    // Mirrors webpack's `resolve.modules` (bare imports from src/).
-    // Overrides the `paths` in tsconfig.settings.json, so repeat that mapping.
+    // Mirrors webpack's `resolve.modules` (bare imports from src/)
     "paths": {
-      "*": ["./src/*"],
-      "@utrad-ical/*": ["../*/src"]
+      "*": ["./src/*"]
     },
     // This package is top-level and not referenced by others,
     // so we set the following two options

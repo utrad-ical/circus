@@ -1,10 +1,12 @@
-import type { DicomFileRepository } from '@utrad-ical/circus-lib';
+import type {
+  DicomFileRepository,
+  FunctionService
+} from '@utrad-ical/circus-lib';
 import {
   isValidPartialVolumeDescriptor,
   rangeHasPartialVolume
-} from '@utrad-ical/circus-rs/src/volume/PartialVolumeDescriptor.ts';
+} from '@utrad-ical/circus-rs/server';
 import MultiRange from 'multi-integer-range';
-import type { FunctionService } from '@utrad-ical/circus-lib';
 import type * as circus from '../../interface.ts';
 
 export interface PluginJobRegisterer {

@@ -1,5 +1,5 @@
 import { multirange } from 'multi-integer-range';
-import RawData from '@utrad-ical/circus-rs/src/common/RawData';
+import { RawData } from '@utrad-ical/circus-rs/server';
 import { EventEmitter } from 'events';
 import { PassThrough } from 'stream';
 import createMhdPacker from './createMhdPacker.ts';

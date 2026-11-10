@@ -4,7 +4,7 @@ import type { SeriesEntry } from './typings/circus.ts';
 import {
   isValidPartialVolumeDescriptor,
   partialVolumeDescriptorToArray
-} from '@utrad-ical/circus-rs/src/volume/PartialVolumeDescriptor.ts';
+} from '@utrad-ical/circus-rs/server';
 
 export const dbRoleNames = [
   'read',

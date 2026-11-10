@@ -1,10 +1,10 @@
 import { ColorPalette } from '@smikitky/rb-components/lib/ColorPicker';
 import { alert, prompt } from '@smikitky/rb-components/lib/modal';
 import Slider from '@smikitky/rb-components/lib/Slider';
-import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
-import type { Viewer } from '@utrad-ical/circus-rs/src/browser';
-import type { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
-import type { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
+import generateUniqueId from 'utils/generateUniqueId';
+import type { Viewer } from '@utrad-ical/circus-rs';
+import type { DicomVolumeMetadata } from '@utrad-ical/circus-rs';
+import type { OrientationString } from '@utrad-ical/circus-rs';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import MenuItem from 'components/MenuItem';

@@ -1,5 +1,5 @@
 import path from 'path';
-import loadConfig from '@utrad-ical/circus-lib/src/config/loadConfig';
+import loadConfig from '@utrad-ical/circus-lib/config';
 
 const config = loadConfig(
   [path.join(__dirname, '../../config/default')],

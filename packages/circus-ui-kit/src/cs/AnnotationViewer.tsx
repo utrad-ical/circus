@@ -3,14 +3,14 @@ import type {
   MprViewState,
   Tool,
   Vector3D
-} from '@utrad-ical/circus-rs/src/browser';
+} from '@utrad-ical/circus-rs';
 import {
   Composition,
   RawData,
   toolFactory,
   VoxelCloud,
   WebGlRawVolumeMprImageSource
-} from '@utrad-ical/circus-rs/src/browser';
+} from '@utrad-ical/circus-rs';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import type { StateChangerFunc } from '../ui/ImageViewer.tsx';

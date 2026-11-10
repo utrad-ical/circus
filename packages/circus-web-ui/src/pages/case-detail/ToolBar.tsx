@@ -1,9 +1,9 @@
 import type { Editor } from '@smikitky/rb-components/lib/editor-types';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
-import type ModifierKeyBehaviors from '@utrad-ical/circus-rs/src/browser/annotation/ModifierKeyBehaviors';
-import type PlaneFigureOption from '@utrad-ical/circus-rs/src/browser/annotation/PlaneFigureOption';
-import type { ReferenceValueOption } from '@utrad-ical/circus-rs/src/browser/tool/cloud/WandTool';
-import type { InterpolationMode } from '@utrad-ical/circus-rs/src/browser/ViewState';
+import type { ModifierKeyBehaviors } from '@utrad-ical/circus-rs';
+import type { PlaneFigureOption } from '@utrad-ical/circus-rs';
+import type { ReferenceValueOption } from '@utrad-ical/circus-rs';
+import type { InterpolationMode } from '@utrad-ical/circus-rs';
 import Icon from 'components/Icon';
 import {
   Button,

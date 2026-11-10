@@ -1,4 +1,4 @@
-import RawData from '@utrad-ical/circus-rs/src/common/RawData';
+import { RawData } from '@utrad-ical/circus-rs';
 import type { InternalLabelOf } from '../labelData.ts';
 import { createNewLabelData } from '../labelData.ts';
 

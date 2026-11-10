@@ -1,6 +1,5 @@
-import type { Vector3D } from '@utrad-ical/circus-rs/src/volume/generateMhdHeader.ts';
-import { getSectionFromPoints } from '@utrad-ical/circus-rs/src/browser/section-util';
-import type { Section } from '@utrad-ical/circus-rs/src/common/geometry';
+import type { Vector3D, Section } from '@utrad-ical/circus-rs';
+import { getSectionFromPoints } from '@utrad-ical/circus-rs';
 import type { LayoutInfo } from 'components/GridContainer';
 import { layoutReducer } from 'components/GridContainer';
 import * as c from '../caseStore.ts';

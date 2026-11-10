@@ -1,12 +1,12 @@
-import * as rs from '@utrad-ical/circus-rs/src/browser';
-import type { OrientationString } from '@utrad-ical/circus-rs/src/browser/section-util';
+import * as rs from '@utrad-ical/circus-rs';
+import type { OrientationString } from '@utrad-ical/circus-rs';
 import {
   createOrthogonalMprSection,
   sectionTo2dViewState
-} from '@utrad-ical/circus-rs/src/browser/section-util';
-import type ToolBaseClass from '@utrad-ical/circus-rs/src/browser/tool/Tool';
-import { toolFactory } from '@utrad-ical/circus-rs/src/browser/tool/tool-initializer';
-import setImmediate from '@utrad-ical/circus-rs/src/browser/util/setImmediate';
+} from '@utrad-ical/circus-rs';
+import type { Tool as ToolBaseClass } from '@utrad-ical/circus-rs';
+import { toolFactory } from '@utrad-ical/circus-rs';
+import { setImmediate } from '@utrad-ical/circus-rs';
 import classnames from 'classnames';
 import { EventEmitter } from 'events';
 import React, { useEffect, useRef, useState } from 'react';

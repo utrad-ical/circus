@@ -1,7 +1,9 @@
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
-import type PartialVolumeDescriptor from '@utrad-ical/circus-rs/src/volume/PartialVolumeDescriptor.ts';
-import { describePartialVolumeDescriptor } from '@utrad-ical/circus-rs/src/volume/PartialVolumeDescriptor.ts';
-import type { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
+import type {
+  PartialVolumeDescriptor,
+  DicomVolumeMetadata
+} from '@utrad-ical/circus-rs';
+import { describePartialVolumeDescriptor } from '@utrad-ical/circus-rs';
 import classNames from 'classnames';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';

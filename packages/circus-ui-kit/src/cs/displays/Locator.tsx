@@ -1,4 +1,4 @@
-import * as rs from '@utrad-ical/circus-rs/src/browser';
+import * as rs from '@utrad-ical/circus-rs';
 import { useVolumeLoaders } from '../useVolumeLoader.tsx';
 import get from 'lodash.get';
 import React, {

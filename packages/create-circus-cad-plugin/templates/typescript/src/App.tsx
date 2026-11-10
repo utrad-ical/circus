@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import styled from "styled-components";
-import { DicomVolumeLoader } from "@utrad-ical/circus-rs/lib/browser";
+import { DicomVolumeLoader } from "@utrad-ical/circus-rs";
 import axios from "axios";
 import sampleJob from "./sampleJob.json";
 import SampleViewer from "./components/SampleViewer";

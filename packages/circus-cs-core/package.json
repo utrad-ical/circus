@@ -2,7 +2,11 @@
   "name": "@utrad-ical/circus-cs-core",
   "version": "0.18.0",
   "description": "CIRCUS CS Core: Plugin manager",
-  "types": "src/interface.d.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./default-config": "./src/config/default.ts",
+    "./package.json": "./package.json"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit"
   },

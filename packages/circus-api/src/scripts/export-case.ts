@@ -6,7 +6,7 @@ import type { Writable } from 'stream';
 import type { Models } from '../interface.ts';
 import type Command from './Command.ts';
 import type Storage from '../storage/Storage.ts';
-import type { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
+import type { VolumeProvider } from '@utrad-ical/circus-rs/server';
 import type { MhdPacker } from '../case/createMhdPacker.ts';
 import { EventEmitter } from 'events';
 import type { TaskEventEmitter } from '../createTaskManager.ts';

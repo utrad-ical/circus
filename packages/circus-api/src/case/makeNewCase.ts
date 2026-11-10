@@ -3,7 +3,7 @@ import type { UserPrivilegeInfo } from '../privilegeUtils.ts';
 import { fetchAndLockAccessibleSeries } from '../privilegeUtils.ts';
 import type { Models } from '../interface.ts';
 import type { SeriesEntry } from '../typings/circus.ts';
-import { isValidPartialVolumeDescriptor } from '@utrad-ical/circus-rs/src/volume/PartialVolumeDescriptor.ts';
+import { isValidPartialVolumeDescriptor } from '@utrad-ical/circus-rs/server';
 
 const makeNewCase = async (
   models: Models,

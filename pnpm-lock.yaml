@@ -951,9 +951,6 @@ importers:
       '@utrad-ical/circus-icons':
         specifier: workspace:*
         version: link:../circus-icons
-      '@utrad-ical/circus-lib':
-        specifier: workspace:*
-        version: link:../circus-lib
       '@utrad-ical/circus-rs':
         specifier: workspace:*
         version: link:../circus-rs
@@ -1038,6 +1035,9 @@ importers:
       tslib:
         specifier: ^1.11.2
         version: 1.11.2
+      ulid:
+        specifier: ^2.3.0
+        version: 2.3.0
     devDependencies:
       '@babel/core':
         specifier: ^7.18.9

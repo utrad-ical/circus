@@ -1,8 +1,6 @@
 import { alert } from '@smikitky/rb-components/lib/modal';
-import type { LabelingResults3D } from '@utrad-ical/circus-rs/src/common/CCL/ccl-types';
-import holeFilling2D, {
-  holeFilling3D
-} from '@utrad-ical/circus-rs/src/common/CCL/holeFilling';
+import type { LabelingResults3D } from '@utrad-ical/circus-rs';
+import { holeFilling2D, holeFilling3D } from '@utrad-ical/circus-rs';
 import hfWorker from 'worker-loader!./hf-worker';
 import type { VoxelLabelProcessor } from './performLabelCreatingVoxelProcessing.ts';
 import performLabelCreatingVoxelProcessing from './performLabelCreatingVoxelProcessing.ts';

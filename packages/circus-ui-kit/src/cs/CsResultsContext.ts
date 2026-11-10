@@ -1,4 +1,4 @@
-import type PartialVolumeDescriptor from '@utrad-ical/circus-rs/src/volume/PartialVolumeDescriptor.ts';
+import type { PartialVolumeDescriptor } from '@utrad-ical/circus-rs';
 import React, { useContext } from 'react';
 import type { Display } from './Display.tsx';
 

@@ -1,5 +1,5 @@
-import type { Viewer } from '@utrad-ical/circus-rs/src/browser';
-import type { DicomVolumeMetadata } from '@utrad-ical/circus-rs/src/browser/image-source/volume-loader/DicomVolumeLoader';
+import type { Viewer } from '@utrad-ical/circus-rs';
+import type { DicomVolumeMetadata } from '@utrad-ical/circus-rs';
 import type { InternalLabel, LabelType } from '../labelData.ts';
 import type { EditingData, EditingDataUpdater } from '../revisionData.ts';
 import addNewSctionFromPoints from './addNewSctionFromPoints.ts';

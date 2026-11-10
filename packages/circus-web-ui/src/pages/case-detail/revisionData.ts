@@ -1,4 +1,4 @@
-import type PartialVolumeDescriptor from '@utrad-ical/circus-rs/src/volume/PartialVolumeDescriptor.ts';
+import type { PartialVolumeDescriptor } from '@utrad-ical/circus-rs';
 import type { LayoutInfo } from 'components/GridContainer';
 import { createDraft, finishDraft } from 'immer';
 import type { ApiCaller } from 'utils/api';

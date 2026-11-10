@@ -1,7 +1,7 @@
 // This *.d.ts file is recognized by the typescript compiler.
 // You can use them like `circus.PluginJobRequest` without `import`-ing.
 
-import type PartialVolumeDescriptor from '@utrad-ical/circus-rs/src/volume/PartialVolumeDescriptor.ts';
+import type { PartialVolumeDescriptor } from '@utrad-ical/circus-rs/server';
 import type { Archiver } from 'archiver';
 import type { EventEmitter } from 'events';
 import type { Readable } from 'stream';

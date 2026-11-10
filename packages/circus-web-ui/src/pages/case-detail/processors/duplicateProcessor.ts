@@ -1,4 +1,4 @@
-import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
+import generateUniqueId from 'utils/generateUniqueId';
 import createCurrentLabelsUpdator from '../createCurrentLabelsUpdator.ts';
 import type {
   InternalLabelOf,

@@ -1,11 +1,9 @@
 import zeroPad from '../utils/zeroPad.ts';
-import RawData from '@utrad-ical/circus-rs/src/common/RawData';
-import type { Vector3D } from '@utrad-ical/circus-rs/src/common/geometry';
+import { RawData, generateMhdHeader } from '@utrad-ical/circus-rs/server';
+import type { Vector3D, VolumeProvider } from '@utrad-ical/circus-rs/server';
 import type { TaskEventEmitter } from '../createTaskManager.ts';
 import type { Writable } from 'stream';
 import type { FunctionService, Logger } from '@utrad-ical/circus-lib';
-import generateMhdHeader from '@utrad-ical/circus-rs/src/volume/generateMhdHeader.ts';
-import type { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
 import type { Models } from '../interface.ts';
 import type Storage from '../storage/Storage.ts';
 import path from 'path';

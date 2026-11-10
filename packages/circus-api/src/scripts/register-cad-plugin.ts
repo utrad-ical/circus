@@ -3,7 +3,7 @@ import inquirer from 'inquirer';
 import type { Database, Models } from '../interface.ts';
 import type Command from './Command.ts';
 import type { Validator } from '../interface.ts';
-import type DockerRunner from '@utrad-ical/circus-cs-core/src/util/DockerRunner';
+import type { DockerRunner } from '@utrad-ical/circus-cs-core';
 
 export const help = () => {
   return (

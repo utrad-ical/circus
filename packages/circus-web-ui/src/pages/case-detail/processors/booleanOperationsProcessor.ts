@@ -1,5 +1,5 @@
-import generateUniqueId from '@utrad-ical/circus-lib/src/generateUniqueId';
-import RawData from '@utrad-ical/circus-rs/src/common/RawData';
+import generateUniqueId from 'utils/generateUniqueId';
+import { RawData } from '@utrad-ical/circus-rs';
 import createCurrentLabelsUpdator from '../createCurrentLabelsUpdator.ts';
 import type { InternalLabel, InternalLabelOf } from '../labelData.ts';
 import { createNewLabelData } from '../labelData.ts';

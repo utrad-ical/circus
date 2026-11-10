@@ -21,6 +21,26 @@
   },
   "license": "MIT",
   "main": "lib/browser/index.js",
+  "exports": {
+    ".": "./src/browser/index.ts",
+    "./server": "./src/server/index.ts",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./lib/browser/index.d.ts",
+        "default": "./lib/browser/index.js"
+      },
+      "./server": {
+        "types": "./lib/server/index.d.ts",
+        "default": "./lib/server/index.js"
+      },
+      "./package.json": "./package.json",
+      "./circus-rs.css": "./lib/browser/circus-rs.css"
+    }
+  },
+  "sideEffects": false,
   "dependencies": {
     "@babel/core": "^7.18.9",
     "@babel/preset-env": "^7.18.9",

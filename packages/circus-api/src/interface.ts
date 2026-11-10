@@ -1,5 +1,5 @@
 import type { readDicomTags } from './utils/createDicomTagReader.ts';
-import type { Disposable } from '@utrad-ical/circus-lib/src/ServiceLoader';
+import type { Disposable } from '@utrad-ical/circus-lib';
 import type { CollectionAccessor } from './db/createCollectionAccessor.ts';
 import type * as mongo from 'mongodb';
 

@@ -5,7 +5,7 @@ import { setUpMongoFixture, usingModels } from './test/util-mongo.ts';
 import { readFromStream, readFromStreamTillEnd } from './test/util-stream.ts';
 import path from 'path';
 import fs from 'fs-extra';
-import createNullLogger from '@utrad-ical/circus-lib/src/logger/NullLogger';
+import { createNullLogger } from '@utrad-ical/circus-lib';
 
 const modelsPromise = usingModels();
 let models: Models;

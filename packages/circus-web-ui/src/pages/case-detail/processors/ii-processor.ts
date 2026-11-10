@@ -1,6 +1,6 @@
 import { alert } from '@smikitky/rb-components/lib/modal';
-import intersliceInterpolation from '@utrad-ical/circus-rs/src/common/morphology/intersliceInterpolation';
-import type { MorphologicalImageProcessingResults } from '@utrad-ical/circus-rs/src/common/morphology/morphology-types';
+import { intersliceInterpolation } from '@utrad-ical/circus-rs';
+import type { MorphologicalImageProcessingResults } from '@utrad-ical/circus-rs';
 import iiWorker from 'worker-loader!./ii-worker';
 import type { VoxelLabelProcessor } from './performLabelCreatingVoxelProcessing.ts';
 import performLabelCreatingVoxelProcessing from './performLabelCreatingVoxelProcessing.ts';

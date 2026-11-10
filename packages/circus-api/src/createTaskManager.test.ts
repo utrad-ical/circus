@@ -32,6 +32,15 @@ afterAll(async () => {
   await fs.remove(downloadTestDir);
 });
 
+const waitForTaskStatus = async (taskId: string, status: string) => {
+  for (let i = 0; i < 100; i++) {
+    const task = await models.task.findById(taskId);
+    if (task.status === status) return;
+    await new Promise(resolve => setTimeout(resolve, 20));
+  }
+  throw new Error(`Task ${taskId} did not become ${status}`);
+};
+
 const newDummyCtx = () =>
   ({
     body: null,
@@ -173,6 +182,10 @@ test('isTaskInProgress', async () => {
 
   emitter.emit('finish');
   expect(manager.isTaskInProgress(taskId)).toBe(false);
+
+  // Wait for the DB update triggered by 'finish' so that it does not
+  // outlive the DB connection closed in afterAll
+  await waitForTaskStatus(taskId, 'finished');
 });
 
 test('download', async () => {

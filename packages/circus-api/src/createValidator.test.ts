@@ -32,9 +32,7 @@ describe('special formats', () => {
     invalids: string[]
   ) => {
     for (const s of valids) {
-      await expect(
-        validator.validate({ type: 'string', format, $async: true }, s)
-      ).resolves;
+      await validator.validate({ type: 'string', format, $async: true }, s);
     }
     for (const s of invalids) {
       await expect(

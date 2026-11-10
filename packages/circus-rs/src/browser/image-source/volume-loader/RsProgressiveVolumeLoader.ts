@@ -19,8 +19,8 @@ import type {
   TransferConnection,
   TransferConnectionFactory
 } from '../../ws/createTransferConnectionFactory.ts';
-import type { Initializer as MultiRangeInitializer } from 'multi-integer-range';
-import { MultiRange } from 'multi-integer-range';
+import * as mr from 'multi-integer-range';
+import { type RangeInput, toRange } from '../../../common/rangeInput.ts';
 import { EventEmitter } from 'events';
 
 interface RsProgressiveVolumeLoaderOptions {
@@ -85,16 +85,14 @@ export default class RsProgressiveVolumeLoader implements DicomVolumeLoader {
   private createLoadController() {
     const emitter: ProgressEventEmitter = new EventEmitter();
 
-    const setPriority = (
-      imageIndices: MultiRangeInitializer,
-      priority: number
-    ) => {
+    const setPriority = (imageIndices: RangeInput, priority: number) => {
       this.connected.then(() => {
-        const targets = new MultiRange(imageIndices).subtract(
-          Array.from(this.loadedIndices)
+        const targets = mr.subtract(
+          toRange(imageIndices),
+          mr.normalize(this.loadedIndices)
         );
-        if (0 < targets.segmentLength()) {
-          this.transferConnection!.setPriority(targets.toArray(), priority);
+        if (0 < targets.length) {
+          this.transferConnection!.setPriority(mr.flatten(targets), priority);
         }
       });
     };

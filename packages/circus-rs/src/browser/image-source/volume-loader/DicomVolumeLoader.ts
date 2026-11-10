@@ -1,7 +1,7 @@
 import type DicomVolume from '../../../common/DicomVolume.ts';
 import type { ViewWindow } from '../../../common/ViewWindow.ts';
 import type { PixelFormat } from '../../../volume/PixelFormat.ts';
-import type { Initializer as MultiRangeInitializer } from 'multi-integer-range';
+import type { RangeInput } from '../../../common/rangeInput.ts';
 import type { EventEmitter } from 'events';
 import type { StrictEventEmitter } from 'strict-event-emitter-types';
 
@@ -45,7 +45,7 @@ export type ProgressEventEmitter = StrictEventEmitter<
 
 export interface VolumeLoadController extends ProgressEventEmitter {
   getVolume(): DicomVolume | null;
-  setPriority(imageIndices: MultiRangeInitializer, priority: number): void;
+  setPriority(imageIndices: RangeInput, priority: number): void;
   loadedImages(): number[];
   abort(): void;
   pause(): void;

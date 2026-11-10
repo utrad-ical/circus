@@ -9,7 +9,7 @@ import IconButton from 'components/IconButton';
 import { Panel } from 'components/react-bootstrap';
 import SearchResultsView from 'components/SearchResultsView';
 import { produce } from 'immer';
-import { multirange } from 'multi-integer-range';
+import * as mr from 'multi-integer-range';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { newSearch } from 'store/searches';
@@ -183,16 +183,16 @@ const SeriesSelector: React.FC<{
   const handlePvdButtonClick = async (index: number) => {
     if (onPvdEditing && !(await onPvdEditing(index))) return;
     const seriesUid = value[index].seriesUid;
-    const mr = multirange(seriesData[seriesUid]?.images);
+    const images = mr.initialize(seriesData[seriesUid]?.images);
     const result = (await modal(
       (props: any) => (
         <PartialVolumeDescriptorEditor
           initialValue={
             typeof value[index].partialVolumeDescriptor === 'object'
               ? value[index].partialVolumeDescriptor
-              : { start: mr.min(), end: mr.max(), delta: 1 }
+              : { start: mr.min(images), end: mr.max(images), delta: 1 }
           }
-          images={mr}
+          images={images}
           {...props}
         />
       ),

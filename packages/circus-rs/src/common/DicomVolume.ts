@@ -1,5 +1,5 @@
 import AnisotropicRawData from './AnisotropicRawData.ts';
-import { MultiRange } from 'multi-integer-range';
+import * as mr from 'multi-integer-range';
 import type { ViewWindow } from './ViewWindow.ts';
 
 export default class DicomVolume extends AnisotropicRawData {
@@ -15,9 +15,9 @@ export default class DicomVolume extends AnisotropicRawData {
 
   /**
    * Holds which images are already loaded in this volume.
-   * When complete, this.loadedSlices.length() will be the same as this.size[2].
+   * When complete, mr.length(this.loadedSlices) will be the same as this.size[2].
    */
-  protected loadedSlices: MultiRange = new MultiRange();
+  protected loadedSlices: mr.MIR = [];
 
   /**
    * Holds misc DICOM header data.
@@ -35,7 +35,7 @@ export default class DicomVolume extends AnisotropicRawData {
   }
 
   /**
-   * Append z to loadedSlices:MultiRange.
+   * Append z to loadedSlices.
    * @param z z-coordinate
    * @deprecated use series accessor
    */
@@ -43,7 +43,7 @@ export default class DicomVolume extends AnisotropicRawData {
     if (z < 0 || z >= this.size[2]) {
       throw new RangeError('z-index out of bounds');
     }
-    this.loadedSlices.append(z);
+    this.loadedSlices = mr.append(this.loadedSlices, mr.normalize(z));
   }
 
   /**
@@ -55,6 +55,6 @@ export default class DicomVolume extends AnisotropicRawData {
    */
   public insertSingleImage(z: number, imageData: ArrayBuffer): void {
     super.insertSingleImage(z, imageData);
-    this.loadedSlices.append(z);
+    this.loadedSlices = mr.append(this.loadedSlices, mr.normalize(z));
   }
 }

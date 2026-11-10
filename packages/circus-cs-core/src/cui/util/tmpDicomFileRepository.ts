@@ -1,5 +1,5 @@
+import * as mr from 'multi-integer-range';
 import { StaticDicomFileRepository } from '@utrad-ical/circus-lib';
-import { multirange } from 'multi-integer-range';
 import type * as circus from '../../interface.ts';
 import type { DicomFileRepository } from '@utrad-ical/circus-lib';
 
@@ -28,8 +28,7 @@ export const createJobSeries = async (
     // Use index as UID when directory mode
     const seriesUid = directoryMode ? String(i) : item;
     const seriesAccessor = await dicomFileRepository.getSeries(seriesUid);
-    const images = multirange(seriesAccessor.images);
-    const [start, end] = images.getRanges()[0];
+    const [start, end] = mr.parse(seriesAccessor.images)[0];
     series.push({
       seriesUid,
       partialVolumeDescriptor: { start, end, delta: 1 }

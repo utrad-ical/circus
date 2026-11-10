@@ -8,7 +8,7 @@ import classNames from 'classnames';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';
 import { Button, Modal } from 'components/react-bootstrap';
-import { multirange } from 'multi-integer-range';
+import * as mr from 'multi-integer-range';
 import React, { useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import type Series from 'types/Series';
@@ -264,9 +264,12 @@ const SeriesInfo: React.FC<{
   const { series, pvd } = props;
   const [showModal, setShowModal] = useState(false);
 
-  const mr = multirange(series.images);
+  const images = mr.initialize(series.images);
   const noPvd =
-    !pvd || (mr.min() === pvd.start && mr.max() === pvd.end && pvd.delta === 1);
+    !pvd ||
+    (mr.min(images) === pvd.start &&
+      mr.max(images) === pvd.end &&
+      pvd.delta === 1);
 
   const data: { [key: string]: React.ReactChild } = {
     Modality: series.modality,

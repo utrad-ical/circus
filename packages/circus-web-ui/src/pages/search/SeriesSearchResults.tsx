@@ -12,7 +12,7 @@ import SearchResultsView, {
   makeSortOptions,
   patientInfoSearchOptions
 } from 'components/SearchResultsView';
-import { multirange } from 'multi-integer-range';
+import * as mr from 'multi-integer-range';
 import React, { Fragment } from 'react';
 import { useSelector } from 'react-redux';
 import { dispatch } from 'store';
@@ -126,14 +126,16 @@ const columns: DataGridColumnDefinition<any>[] = [
     key: 'images',
     renderer: props => {
       const { images } = props.value;
-      const mr = multirange(images);
-      const count = mr.length();
-      if (mr.min() === 1 && mr.max() === count) {
+      const range = mr.initialize(images);
+      const count = mr.length(range);
+      const min = mr.min(range);
+      const max = mr.max(range);
+      if (min === 1 && max === count) {
         return <>{count}</>;
       } else {
         return (
           <>
-            {count} ({mr.min()}-{mr.max()})
+            {count} ({min}-{max})
           </>
         );
       }

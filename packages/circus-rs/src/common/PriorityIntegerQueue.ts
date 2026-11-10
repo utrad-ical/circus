@@ -1,10 +1,10 @@
-import type { Initializer as MultiRangeInitializer } from 'multi-integer-range';
-import { MultiRange } from 'multi-integer-range';
+import * as mr from 'multi-integer-range';
+import { type RangeInput, toRange } from './rangeInput.ts';
 
 interface Entry {
   priority: number;
   // We keep track of MultiRanges to hold the append order in the same priority
-  fragments: MultiRange[];
+  fragments: mr.MIR[];
 }
 
 export interface PriorityIntegerQueueOptions {
@@ -28,12 +28,12 @@ export default class PriorityIntegerQueue {
 
   private cleanup(): void {
     this.entries.forEach(
-      e => (e.fragments = e.fragments.filter(f => f.segmentLength() > 0))
+      e => (e.fragments = e.fragments.filter(f => f.length > 0))
     );
     this.entries = this.entries.filter(e => e.fragments.length > 0);
   }
 
-  public append(value: MultiRangeInitializer, priority: number = 0): void {
+  public append(value: RangeInput, priority: number = 0): void {
     const [index, entry] = ((): [number, Entry] => {
       const i = this.entries.findIndex(e => e.priority >= priority);
       if (this.entries[i]?.priority === priority) return [i, this.entries[i]];
@@ -43,28 +43,30 @@ export default class PriorityIntegerQueue {
       return [newIndex, newEntry];
     })();
 
-    const newRange = new MultiRange(value);
+    let newRange = toRange(value);
 
     // Remove values that are already in queue with higher priority
     for (let i = index + 1; i < this.entries.length; i++) {
-      this.entries[i].fragments.forEach(f => newRange.subtract(f));
+      for (const f of this.entries[i].fragments)
+        newRange = mr.subtract(newRange, f);
     }
-    if (!newRange.segmentLength()) {
+    if (!newRange.length) {
       this.cleanup();
       return;
     }
 
     // Remove values from entries with lower priority
     for (let i = 0; i < index; i++) {
-      this.entries[i].fragments.forEach(f => f.subtract(newRange));
+      const e = this.entries[i];
+      e.fragments = e.fragments.map(f => mr.subtract(f, newRange));
     }
 
     // In fragments in the same priority...
     if (this.lifoForSamePriority) {
-      entry.fragments.forEach(f => f.subtract(newRange));
+      entry.fragments = entry.fragments.map(f => mr.subtract(f, newRange));
       entry.fragments.push(newRange);
     } else {
-      entry.fragments.forEach(f => newRange.subtract(f));
+      for (const f of entry.fragments) newRange = mr.subtract(newRange, f);
       entry.fragments.unshift(newRange);
     }
 
@@ -75,9 +77,12 @@ export default class PriorityIntegerQueue {
     if (!this.entries.length) return { value: undefined, priority: undefined };
     const top = this.entries[this.entries.length - 1];
     const priority = top.priority;
-    const topFragment = top.fragments[top.fragments.length - 1];
-    const result = topFragment.shift();
-    if (topFragment.segmentLength() === 0) top.fragments.pop();
+    const topIndex = top.fragments.length - 1;
+    const topFragment = top.fragments[topIndex];
+    const result = mr.min(topFragment);
+    const rest = mr.tail(topFragment);
+    if (rest.length === 0) top.fragments.pop();
+    else top.fragments[topIndex] = rest;
     if (top.fragments.length === 0) {
       this.entries.pop();
     }
@@ -92,7 +97,7 @@ export default class PriorityIntegerQueue {
     return this.entries.reduce<number[]>(
       (collection, { fragments }) => [
         ...collection,
-        ...fragments.map(f => f.toArray()).flat()
+        ...fragments.map(f => mr.flatten(f)).flat()
       ],
       []
     );
@@ -101,7 +106,8 @@ export default class PriorityIntegerQueue {
   public toString(): string {
     return this.entries
       .map(
-        e => `p=${e.priority}: ` + e.fragments.map(f => f.toString()).join('|')
+        e =>
+          `p=${e.priority}: ` + e.fragments.map(f => mr.stringify(f)).join('|')
       )
       .join(' / ');
   }

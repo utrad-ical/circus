@@ -14,7 +14,7 @@ import type { ValidatorRules } from '../../../common/Validator.ts';
 import type ImageEncoder from '../../helper/image-encoder/ImageEncoder.ts';
 import type { SeriesMiddlewareState } from './createSeriesRoutes.ts';
 import type RawData from '../../../common/RawData.ts';
-import { multirange } from 'multi-integer-range';
+import * as mr from 'multi-integer-range';
 import type PartialVolumeDescriptor from '../../../volume/PartialVolumeDescriptor.ts';
 
 interface ScanOptions {
@@ -73,7 +73,7 @@ export default function scan({ imageEncoder }: ScanOptions): koa.Middleware {
     const z2i = zIndexToImageNo(state.partialVolumeDescriptor);
     const waitForImages = zAxisRange
       .map(z => z2i(z))
-      .filter(i => images.has(i));
+      .filter(i => mr.has(images, mr.normalize(i)));
 
     await load(waitForImages, SCAN_PRIORITY);
 
@@ -131,5 +131,5 @@ function getZRange(section: Section, interpolation: boolean): number[] {
   ];
   const zMin = Math.floor(Math.min(...zIndices)) - (interpolation ? 1 : 0);
   const zMax = Math.ceil(Math.max(...zIndices));
-  return multirange([[zMin, zMax]]).toArray();
+  return mr.flatten(mr.normalize([[zMin, zMax]]));
 }

@@ -73,6 +73,7 @@ export type {
   ProgressEventListener,
   VolumeLoadController
 } from './image-source/volume-loader/DicomVolumeLoader.ts';
+export type { RangeInput } from '../common/rangeInput.ts';
 export { default as MockVolumeLoader } from './image-source/volume-loader/MockVolumeLoader.ts';
 export { default as MixVolumeLoader } from './image-source/volume-loader/MixVolumeLoader.ts';
 export { default as RsVolumeLoader } from './image-source/volume-loader/RsVolumeLoader.ts';

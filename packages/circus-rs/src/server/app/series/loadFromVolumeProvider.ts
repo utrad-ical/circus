@@ -13,7 +13,7 @@ import compose from 'koa-compose';
 import validate from '../middleware/validate.ts';
 import type { ValidatorRules } from '../../../common/Validator.ts';
 import type { SeriesMiddlewareState } from './createSeriesRoutes.ts';
-import { MultiRange } from 'multi-integer-range';
+import * as mr from 'multi-integer-range';
 
 interface LoadStoreOptions {
   logger: Logger;
@@ -56,11 +56,10 @@ export default function loadVolumeProvider({
     const { images } = volumeAccessor!;
     const { start, end, delta } = ctx.state.query;
     if (start !== undefined || end !== undefined || delta !== undefined) {
-      const imageRange = new MultiRange(images);
       if (
         !isValidPartialVolumeDescriptor({ start, end, delta }) ||
-        !imageRange.has(start) ||
-        !imageRange.has(end)
+        !mr.has(images, mr.normalize(start)) ||
+        !mr.has(images, mr.normalize(end))
       ) {
         ctx.throw(httpStatus.BAD_REQUEST, 'Volume descriptor is invalid');
       }

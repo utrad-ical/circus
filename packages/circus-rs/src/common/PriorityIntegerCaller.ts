@@ -1,15 +1,15 @@
-import type { Initializer as MultiRangeInitializer } from 'multi-integer-range';
-import { MultiRange } from 'multi-integer-range';
+import * as mr from 'multi-integer-range';
 import PriorityIntegerQueue from './PriorityIntegerQueue.ts';
+import { type RangeInput, toRange } from './rangeInput.ts';
 
 type InvokedFunction = (integer: number) => Promise<any>;
 type Callback = {
-  range: MultiRange;
+  range: mr.MIR;
   resolve: Function;
   reject: Function;
 };
 type Options = {
-  initialResolved?: MultiRangeInitializer;
+  initialResolved?: RangeInput;
   maxConcurrency?: number;
 };
 
@@ -29,31 +29,43 @@ export default class PriorityIntegerCaller {
   private inOperation: boolean;
   private processing: number[];
   private maxConcurrency: number;
-  public readonly resolvedRange: MultiRange;
-  public readonly rejectedRange: MultiRange;
+  private resolved: mr.MIR = [];
+  private rejected: mr.MIR = [];
 
   private callbacks: Callback[];
 
   constructor(fn: InvokedFunction, options: Options = {}) {
     const { initialResolved, maxConcurrency = 1 } = options;
     this.fn = fn;
-    this.resolvedRange = new MultiRange();
-    this.rejectedRange = new MultiRange();
     this.queue = new PriorityIntegerQueue();
     this.inOperation = false;
     this.processing = [];
     this.callbacks = [];
     this.maxConcurrency = maxConcurrency;
-    if (initialResolved) this.resolvedRange.append(initialResolved);
+    if (initialResolved) this.resolved = toRange(initialResolved);
   }
 
-  public append(target: MultiRangeInitializer, priority: number = 0): void {
-    const range = new MultiRange(target)
-      .subtract(this.resolvedRange)
-      .subtract(this.rejectedRange)
-      .subtract(this.processing);
+  /**
+   * Integers for which the function has been successfully called.
+   */
+  public get resolvedRange(): mr.MIR {
+    return this.resolved;
+  }
 
-    if (0 < range.segmentLength()) {
+  /**
+   * Integers for which the function has thrown an error.
+   */
+  public get rejectedRange(): mr.MIR {
+    return this.rejected;
+  }
+
+  public append(target: RangeInput, priority: number = 0): void {
+    let range = toRange(target);
+    range = mr.subtract(range, this.resolved);
+    range = mr.subtract(range, this.rejected);
+    range = mr.subtract(range, mr.normalize(this.processing));
+
+    if (0 < range.length) {
       this.queue.append(range, priority);
       if (!this.inOperation) {
         this.inOperation = true;
@@ -62,10 +74,10 @@ export default class PriorityIntegerCaller {
     }
   }
 
-  public waitFor(target: MultiRangeInitializer): Promise<void> {
+  public waitFor(target: RangeInput): Promise<void> {
     return new Promise((resolve, reject) => {
       this.callbacks.push({
-        range: new MultiRange(target),
+        range: toRange(target),
         resolve,
         reject
       });
@@ -73,25 +85,25 @@ export default class PriorityIntegerCaller {
     });
   }
 
-  private markAsResolved(range: MultiRangeInitializer): void {
-    this.resolvedRange.append(range);
+  private markAsResolved(integer: number): void {
+    this.resolved = mr.append(this.resolved, mr.normalize(integer));
     this.processCallbacks();
   }
 
   private markAsRejected(integer: number, err: Error): void {
-    this.rejectedRange.append(integer);
+    this.rejected = mr.append(this.rejected, mr.normalize(integer));
     this.processCallbacks();
   }
 
   private processCallbacks(): void {
     const remainings: Callback[] = [];
-    const settledRange = this.resolvedRange.clone().append(this.rejectedRange);
+    const settledRange = mr.append(this.resolved, this.rejected);
     this.callbacks.forEach(waiting => {
-      if (this.resolvedRange.has(waiting.range)) {
+      if (mr.has(this.resolved, waiting.range)) {
         waiting.resolve();
-      } else if (settledRange.has(waiting.range)) {
-        const errorRange = waiting.range.clone().intersect(this.rejectedRange);
-        const message = `Rejected with ${errorRange.toString()}`;
+      } else if (mr.has(settledRange, waiting.range)) {
+        const errorRange = mr.intersect(waiting.range, this.rejected);
+        const message = `Rejected with ${mr.stringify(errorRange)}`;
         waiting.reject(new Error(message));
       } else {
         remainings.push(waiting);

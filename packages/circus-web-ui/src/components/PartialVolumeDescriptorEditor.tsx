@@ -7,7 +7,7 @@ import {
   rangeHasPartialVolume
 } from '@utrad-ical/circus-rs';
 import { Button, Modal } from 'components/react-bootstrap';
-import { MultiRange } from 'multi-integer-range';
+import * as mr from 'multi-integer-range';
 import React, { useMemo, useState } from 'react';
 import IconButton from './IconButton.ts';
 import styled from 'styled-components';
@@ -17,12 +17,16 @@ const PartialVolumeDescriptorEditor: React.FC<{
     result: null | { descriptor: PartialVolumeDescriptor | null }
   ) => void;
   initialValue: PartialVolumeDescriptor;
-  images: MultiRange;
+  images: mr.MIR;
 }> = props => {
   const { onResolve, images, initialValue } = props;
   const [descriptor, setDescriptor] = useState<PartialVolumeDescriptor>(() => {
     return (
-      initialValue ?? { start: images.min()!, end: images.max()!, delta: 1 }
+      initialValue ?? {
+        start: mr.min(images)!,
+        end: mr.max(images)!,
+        delta: 1
+      }
     );
   });
 
@@ -35,17 +39,17 @@ const PartialVolumeDescriptorEditor: React.FC<{
   }, [descriptor, images]);
 
   const properties = useMemo(() => {
-    const mr = new MultiRange(images);
+    const maxImage = mr.max(images);
     return [
       {
         key: 'start',
         caption: 'Start',
-        editor: et.number({ min: 1, max: mr.max() })
+        editor: et.number({ min: 1, max: maxImage })
       },
       {
         key: 'end',
         caption: 'End',
-        editor: et.number({ min: 1, max: mr.max() })
+        editor: et.number({ min: 1, max: maxImage })
       },
       {
         key: 'delta',
@@ -64,7 +68,7 @@ const PartialVolumeDescriptorEditor: React.FC<{
     <>
       <Modal.Body>
         <p>
-          <b>Uploaded images:</b> {images.toString()}
+          <b>Uploaded images:</b> {mr.stringify(images)}
         </p>
         <PropertyEditor
           properties={properties}

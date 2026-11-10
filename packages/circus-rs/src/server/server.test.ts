@@ -184,6 +184,17 @@ describe('without auth', () => {
         assert.equal(res.headers['content-type'], 'application/octet-stream');
         assert.equal(res.headers['content-length'], String(512 * 512 * 6 * 2));
       });
+
+      test('rejects partial volume out of the image range', async () => {
+        const res1 = await axios.get(
+          '/series/1.2.3.4.5/volume?start=5&end=21&delta=1'
+        );
+        assert.equal(res1.status, status.BAD_REQUEST);
+        const res2 = await axios.get(
+          '/series/1.2.3.4.5/volume?start=25&end=15&delta=-1'
+        );
+        assert.equal(res2.status, status.BAD_REQUEST);
+      });
     });
 
     describe('scan', () => {

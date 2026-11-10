@@ -1,10 +1,10 @@
+import * as mr from 'multi-integer-range';
 import type {
   DicomFileRepository,
   FunctionService,
   Logger
 } from '@utrad-ical/circus-lib';
 import { isDicomUid } from '@utrad-ical/circus-lib';
-import { multirange } from 'multi-integer-range';
 import type {
   DicomImporter,
   DicomTagReader,
@@ -67,9 +67,13 @@ const createDicomImporter: FunctionService<
         apiLogger.trace(`Importing: ${seriesUid} #${instanceNumber}`);
         if (series) {
           // Add image number
-          const mr = multirange(series.images);
-          mr.append(instanceNumber);
-          await models.series.modifyOne(seriesUid, { images: mr.toString() });
+          const images = mr.append(
+            mr.initialize(series.images),
+            mr.normalize(instanceNumber)
+          );
+          await models.series.modifyOne(seriesUid, {
+            images: mr.stringify(images)
+          });
         } else {
           // Insert as a new series
           const doc = {

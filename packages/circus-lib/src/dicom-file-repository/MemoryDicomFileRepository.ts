@@ -1,6 +1,6 @@
 import type { SeriesAccessor } from './DicomFileRepository.ts';
 import type DicomFileRepository from './DicomFileRepository.ts';
-import { multirange } from 'multi-integer-range';
+import * as mr from 'multi-integer-range';
 
 type SeriesDataMap = Map<number, ArrayBuffer>;
 
@@ -18,8 +18,7 @@ export default class MemoryDicomFileRepository implements DicomFileRepository {
       ? this.storage.get(seriesUid)!
       : new Map();
 
-    const count = multirange();
-    seriesData.forEach((v, key) => count.append(key));
+    let count = mr.normalize(seriesData.keys());
 
     this.storage.set(seriesUid, seriesData);
 
@@ -31,14 +30,14 @@ export default class MemoryDicomFileRepository implements DicomFileRepository {
 
     const save = async (image: number, buffer: ArrayBuffer) => {
       seriesData.set(image, buffer);
-      count.append(image);
+      count = mr.append(count, mr.normalize(image));
     };
 
     return {
       load,
       save,
       get images() {
-        return count.toString();
+        return mr.stringify(count);
       }
     };
   }

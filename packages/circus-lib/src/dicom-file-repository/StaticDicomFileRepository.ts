@@ -3,8 +3,7 @@ import type DicomFileRepository from './DicomFileRepository.ts';
 import path from 'path';
 import fs from 'fs-extra';
 import crypto from 'crypto';
-import type { MultiRange } from 'multi-integer-range';
-import { multirange } from 'multi-integer-range';
+import * as mr from 'multi-integer-range';
 import type { ConcurrencyGate } from '../concurrencyGate.ts';
 import concurrencyGate from '../concurrencyGate.ts';
 
@@ -38,19 +37,14 @@ export default class StaticDicomFileRepository implements DicomFileRepository {
   /**
    * Read the file list of the directory and count the DICOM files.
    */
-  protected async scanDicomImages(dirPath: string): Promise<MultiRange> {
-    const result = multirange();
+  protected async scanDicomImages(dirPath: string): Promise<mr.MIR> {
     try {
       const files = await fs.readdir(dirPath);
-      for (const file of files) {
-        const num = parseInt(path.basename(file), 10);
-        result.append(num);
-      }
-      return result;
+      return mr.normalize(files.map(file => parseInt(path.basename(file), 10)));
     } catch (e: any) {
       if (e.code === 'ENOENT') {
         // Directory does not exist
-        return result;
+        return [];
       }
       throw e;
     }
@@ -96,7 +90,7 @@ export default class StaticDicomFileRepository implements DicomFileRepository {
       load,
       save,
       get images() {
-        return count.toString();
+        return mr.stringify(count);
       }
     };
   }

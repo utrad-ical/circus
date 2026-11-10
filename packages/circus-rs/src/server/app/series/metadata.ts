@@ -5,7 +5,7 @@ import validate from '../middleware/validate.ts';
 import type { ViewWindow } from '../../../common/ViewWindow.ts';
 import type { PixelFormat } from '../../../volume/PixelFormat.ts';
 import type { SeriesMiddlewareState } from './createSeriesRoutes.ts';
-import { MultiRange } from 'multi-integer-range';
+import * as mr from 'multi-integer-range';
 import type { VolumeAccessor } from '../../helper/createVolumeProvider.ts';
 import { partialVolumeDescriptorToArray } from '../../../volume/PartialVolumeDescriptor.ts';
 
@@ -44,11 +44,11 @@ export default function metadata(): koa.Middleware {
     // Modify full volume accessor to partial volume accessor
     const loadImages = state.partialVolumeDescriptor
       ? partialVolumeDescriptorToArray(state.partialVolumeDescriptor)
-      : images.toArray();
+      : mr.flatten(images);
 
     const volumeAccessor: VolumeAccessor = {
       ...state.volumeAccessor,
-      images: new MultiRange(loadImages)
+      images: mr.normalize(loadImages)
     };
 
     const { voxelCount, voxelSize, dicomWindow, pixelFormat, mode } =
@@ -87,11 +87,10 @@ async function extractVolumeMetadata(
 ): Promise<VolumeMetadata> {
   const { imageMetadata, load, images, determinePitch, isLike3d } =
     volumeAccessor;
-  if (images.segmentLength() === 0)
-    throw new TypeError('Invalid volume accessor.');
+  if (images.length === 0) throw new TypeError('Invalid volume accessor.');
 
-  const count = images.length();
-  const primaryImageNo = images.min()!;
+  const count = mr.length(images);
+  const primaryImageNo = mr.min(images)!;
   await load(primaryImageNo);
   const primaryMetadata = imageMetadata.get(primaryImageNo)!;
 
@@ -116,20 +115,19 @@ async function extractEstimatedWindow(
   algo: 'full' | 'first' | 'center'
 ): Promise<ViewWindow> {
   const { imageMetadata, load, images } = volumeAccessor;
-  if (images.segmentLength() === 0)
-    throw new TypeError('Invalid volume accessor.');
+  if (images.length === 0) throw new TypeError('Invalid volume accessor.');
 
   let slices: number[];
   switch (algo) {
     case 'full':
-      slices = images.toArray();
+      slices = mr.flatten(images);
       break;
     case 'first':
-      slices = [images.clone().shift()!];
+      slices = [mr.min(images)!];
       break;
     case 'center': {
-      const centerIdx = Math.floor(images.length() / 2);
-      slices = [images.toArray()[centerIdx]];
+      const centerIdx = Math.floor(mr.length(images) / 2);
+      slices = [mr.at(images, centerIdx)!];
       break;
     }
     default:

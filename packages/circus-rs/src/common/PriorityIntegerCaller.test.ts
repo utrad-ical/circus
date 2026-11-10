@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import PriorityIntegerCaller from './PriorityIntegerCaller.ts';
-import { multirange } from 'multi-integer-range';
+import * as mr from 'multi-integer-range';
 
 const sleep = () => new Promise(resolve => setTimeout(resolve, 10));
 
@@ -58,7 +58,7 @@ test('must handle rejection', async () => {
   const loader = new PriorityIntegerCaller(callback);
   loader.append('1-10');
   await loader.waitFor('1-6');
-  assert.equal(multirange(result).has('1-6'), true);
+  assert.equal(mr.has(mr.normalize(result), mr.parse('1-6')), true);
   await loader.waitFor('8'); // must not throw
   await assert.rejects(loader.waitFor(7), { message: /Rejected with 7/ });
   await loader.waitFor('9-10'); // must not throw
@@ -77,8 +77,25 @@ test('must accept initial resolved range', async () => {
 
   loader.append('1-10');
   await loader.waitFor('1-10'); // must not throw
-  assert.equal(multirange(result).has('5-8'), false);
-  assert.equal(multirange(result).has('1-4, 9-10'), true);
+  assert.equal(mr.has(mr.normalize(result), mr.parse('5-8')), false);
+  assert.equal(mr.has(mr.normalize(result), mr.parse('1-4, 9-10')), true);
+});
+
+test('must not call the function for initially resolved integers', async () => {
+  const called: number[] = [];
+  const loader = new PriorityIntegerCaller(
+    async (index: number) => {
+      called.push(index);
+    },
+    { initialResolved: '5-8' }
+  );
+  loader.append('1-10');
+  await loader.waitFor('1-10');
+  assert.deepEqual(
+    called.sort((a, b) => a - b),
+    [1, 2, 3, 4, 9, 10]
+  );
+  assert.deepEqual(loader.resolvedRange, [[1, 10]]);
 });
 
 test('can call waitFor before appending', (_t, done) => {

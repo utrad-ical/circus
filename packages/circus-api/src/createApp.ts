@@ -10,7 +10,7 @@ import type { RsWebsocketVolumeConnectionHandlerCreator } from '@utrad-ical/circ
 import { withWebSocketConnectionHandlers } from '@utrad-ical/circus-rs/server';
 import type { ErrorObject } from 'ajv';
 import fs from 'fs-extra';
-import glob from 'glob-promise';
+import glob from './utils/glob.ts';
 import yaml from 'js-yaml';
 import type { Middleware } from 'koa';
 import Koa from 'koa';

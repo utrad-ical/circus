@@ -1,6 +1,6 @@
 // main server bootstrapping
 
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import dashdash from 'dashdash';
 import merge from 'merge';
 import type * as mongo from 'mongodb';
@@ -98,7 +98,8 @@ const main = async () => {
   const latestDbSchemaRevision = await getLatestDbSchemaRevision();
   if (currentDbSchemaRevision !== latestDbSchemaRevision) {
     console.warn(
-      chalk.red(
+      styleText(
+        'red',
         'Warning: DB Schema revision mismatch detected!\n' +
           `Current revision: ${currentDbSchemaRevision}\n` +
           `Required revision: ${latestDbSchemaRevision}\n` +
@@ -111,9 +112,10 @@ const main = async () => {
   const appOptions = patchedConfig.apiServer.options;
 
   if (appOptions.fixUser) {
-    console.warn(chalk.red('WARNING: NO AUTHENTICATION MODE!'));
+    console.warn(styleText('red', 'WARNING: NO AUTHENTICATION MODE!'));
     console.warn(
-      chalk.red(
+      styleText(
+        'red',
         `CIRCUS API will start using ${appOptions.fixUser} as the fixed user!`
       )
     );
@@ -137,11 +139,14 @@ const main = async () => {
       Object.keys(setupInfo).forEach(k => logger.info(`${k}: ${setupInfo[k]}`));
       Object.keys(setupInfo).forEach(k => console.log(`${k}: ${setupInfo[k]}`));
       console.log(
-        chalk.green(`Server running on ${appOptions.host}:${appOptions.port}`)
+        styleText(
+          'green',
+          `Server running on ${appOptions.host}:${appOptions.port}`
+        )
       );
     });
   } catch (err) {
-    console.error(chalk.red('Error during the server startup.'));
+    console.error(styleText('red', 'Error during the server startup.'));
     console.error(err);
   }
 

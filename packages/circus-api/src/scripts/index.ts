@@ -1,8 +1,8 @@
 import dashdash from 'dashdash';
 import fs from 'fs';
 import path from 'path';
-import glob from 'glob-promise';
-import chalk from 'chalk';
+import glob from '../utils/glob.ts';
+import { styleText } from 'node:util';
 import type { CommandFunc } from './Command.ts';
 import type Command from './Command.ts';
 import createServiceLoader from '../createServiceLoader.ts';
@@ -37,7 +37,7 @@ const main = async () => {
     console.log('  help [command]');
   };
 
-  console.log(chalk.yellow(`CIRCUS-API CLI version ${version}\n`));
+  console.log(styleText('yellow', `CIRCUS-API CLI version ${version}\n`));
   if (commands.indexOf(commandName) >= 0) {
     const module = await importCommand(commandName);
     try {
@@ -55,7 +55,7 @@ const main = async () => {
         await loader.dispose();
       }
     } catch (err: any) {
-      console.error(chalk.red('ERROR:'));
+      console.error(styleText('red', 'ERROR:'));
       console.error(err.message);
       err.errors && console.error(err.errors);
       err.stack && console.error(err.stack);

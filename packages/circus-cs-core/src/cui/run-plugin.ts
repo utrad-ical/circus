@@ -2,7 +2,7 @@ import type { FunctionService } from '@utrad-ical/circus-lib';
 import type Command from './Command.ts';
 import os from 'os';
 import pluginJobRunner from '../job/pluginJobRunner.ts';
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import type DockerRunner from '../util/DockerRunner.ts';
 import tarfs from 'tar-fs';
 import type { DicomFileRepository } from '@utrad-ical/circus-lib';
@@ -55,7 +55,7 @@ const runPlugin: FunctionService<
 
     const jobReporter: circus.PluginJobReporter = {
       report: async (jobId, type, payload) => {
-        console.log(chalk.cyan('Job status changed:', type));
+        console.log(styleText('cyan', `Job status changed: ${type}`));
       },
       logStream: async (jobId, stream) => {
         stream.pipe(process.stdout);

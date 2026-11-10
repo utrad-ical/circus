@@ -1,5 +1,5 @@
 import minimist from 'minimist';
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import config from '../config/index.ts';
 import path from 'path';
 import configureServiceLoader from '../configureServiceLoader.ts';
@@ -60,7 +60,7 @@ async function boot(commandName: string | undefined, args: any) {
   if (!commandName || commandName === 'help') {
     console.log('Available commands:');
     Object.keys(commands).forEach(key =>
-      console.log(`  ${chalk.cyan(key)}: ${commands[key].help}`)
+      console.log(`  ${styleText('cyan', key)}: ${commands[key].help}`)
     );
     return;
   }
@@ -78,7 +78,7 @@ async function boot(commandName: string | undefined, args: any) {
     await callFunc(commandName, args);
     await loader.dispose();
   } catch (e) {
-    console.log(chalk.red('Error:'));
+    console.log(styleText('red', 'Error:'));
     console.error(e);
     process.exit(1);
   }

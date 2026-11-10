@@ -307,9 +307,6 @@ importers:
       bytes:
         specifier: ^3.1.0
         version: 3.1.2
-      chalk:
-        specifier: ^3.0.0
-        version: 3.0.0
       dashdash:
         specifier: ^1.14.1
         version: 1.14.1
@@ -331,12 +328,6 @@ importers:
       generic-pool:
         specifier: ^3.7.1
         version: 3.8.2
-      glob:
-        specifier: ^7.1.6
-        version: 7.1.6
-      glob-promise:
-        specifier: ^3.4.0
-        version: 3.4.0(glob@7.1.6)
       http-status:
         specifier: ^1.4.2
         version: 1.5.0
@@ -518,9 +509,6 @@ importers:
       argv:
         specifier: 0.0.2
         version: 0.0.2
-      chalk:
-        specifier: ^3.0.0
-        version: 3.0.0
       dicom-parser:
         specifier: ^1.8.7
         version: 1.8.7
@@ -845,9 +833,6 @@ importers:
       fs-extra:
         specifier: ^11.2.0
         version: 11.2.0
-      glob-promise:
-        specifier: ^3.4.0
-        version: 3.4.0(glob@10.4.5)
       less:
         specifier: ^3.11.1
         version: 3.13.1
@@ -1084,12 +1069,6 @@ importers:
       css-loader:
         specifier: ^7.1.2
         version: 7.1.2(webpack@5.95.0)
-      glob:
-        specifier: ^7.1.6
-        version: 7.1.6
-      glob-promise:
-        specifier: ^3.4.0
-        version: 3.4.0(glob@7.1.6)
       less:
         specifier: ^3.11.1
         version: 3.13.1
@@ -3838,12 +3817,6 @@ packages:
   glob-parent@6.0.2:
     resolution: {integrity: sha512-XxwI8EOhVQgWp6iDL+3b0r86f4d6AX6zSU55HfB4ydCEuXLXc5FcYeOu+nnGftS4TEju/11rt4KJPTMgbfmv4A==}
     engines: {node: '>=10.13.0'}
-
-  glob-promise@3.4.0:
-    resolution: {integrity: sha512-q08RJ6O+eJn+dVanerAndJwIcumgbDdYiUT7zFQl3Wm1xD6fBKtah7H8ZJChj4wP+8C+QfeVy8xautR7rdmKEw==}
-    engines: {node: '>=4'}
-    peerDependencies:
-      glob: '*'
 
   glob-promise@4.2.0:
     resolution: {integrity: sha512-XQlQamNoMi++Sd5c8Y3l/FE2aqia+Lo1ghXEJZiqXdOvWOosA/zVetMahrdfRwwPjCXcFjg3fUogryAMa7IRQQ==}
@@ -9549,16 +9522,6 @@ snapshots:
   glob-parent@6.0.2:
     dependencies:
       is-glob: 4.0.3
-
-  glob-promise@3.4.0(glob@10.4.5):
-    dependencies:
-      '@types/glob': 7.1.4
-      glob: 10.4.5
-
-  glob-promise@3.4.0(glob@7.1.6):
-    dependencies:
-      '@types/glob': 7.1.4
-      glob: 7.1.6
 
   glob-promise@4.2.0(glob@7.1.6):
     dependencies:

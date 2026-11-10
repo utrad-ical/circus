@@ -28,7 +28,6 @@
     "ajv": "^6.11.0",
     "archiver": "^5.3.0",
     "argv": "0.0.2",
-    "chalk": "^3.0.0",
     "dicom-parser": "^1.8.7",
     "dockerode": "^2.5.8",
     "fs-extra": "^9.0.0",

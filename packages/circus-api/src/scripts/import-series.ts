@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import * as path from 'path';
 import type { DicomImporter } from '../interface.ts';
 import type Command from './Command.ts';
@@ -33,7 +33,7 @@ export const command: Command<{
     if (!files.length) throw new Error('Import target must be specified.');
     const paths = files.map((p: string) => path.resolve(process.cwd(), p));
     if (!paths.length) {
-      console.log(chalk.red('No file or directory specified.'));
+      console.log(styleText('red', 'No file or directory specified.'));
       return;
     }
 
@@ -42,7 +42,7 @@ export const command: Command<{
       try {
         for await (const entry of directoryIterator(pathArg)) {
           if (entry.type === 'error') {
-            console.error(chalk.red(entry.message));
+            console.error(styleText('red', entry.message));
             continue;
           }
           if (!isLikeDicom(entry.buffer)) {
@@ -62,11 +62,11 @@ export const command: Command<{
           err.code === 'ENOENT'
             ? `${pathArg} is not a file nor a directory.`
             : `Error while trying to access ${pathArg}.`;
-        console.error(chalk.red(message));
+        console.error(styleText('red', message));
         continue;
       }
 
-      console.log(chalk.green('Import finished.'));
+      console.log(styleText('green', 'Import finished.'));
       const fStr = count === 1 ? 'file' : 'files';
       console.log(`Imported ${count} ${fStr}.`);
     }

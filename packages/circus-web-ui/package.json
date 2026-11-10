@@ -36,8 +36,6 @@
     "babel-loader": "^9.2.1",
     "cross-env": "^5.2.0",
     "css-loader": "^7.1.2",
-    "glob": "^7.1.6",
-    "glob-promise": "^3.4.0",
     "less": "^3.11.1",
     "less-loader": "^10.0.1",
     "style-loader": "^4.0.0",

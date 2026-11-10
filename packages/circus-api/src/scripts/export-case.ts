@@ -1,5 +1,5 @@
 import type { DicomFileRepository } from '@utrad-ical/circus-lib';
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import fs from 'fs-extra';
 import path from 'path';
 import type { Writable } from 'stream';
@@ -91,7 +91,7 @@ export const command: Command<{
     await fs.ensureDir(outDir);
     for (const caseId of caseIds) {
       try {
-        console.log(chalk.cyan('Exporting'), caseId);
+        console.log(styleText('cyan', 'Exporting'), caseId);
         const stream = fs.createWriteStream(
           path.join(outDir, `${caseId}.${zip ? 'zip' : 'tar.gz'}`)
         );
@@ -104,7 +104,7 @@ export const command: Command<{
           mhdLineEnding: 'lf'
         });
         await waitForStream(stream);
-        console.log(chalk.green('Exported '), caseId);
+        console.log(styleText('green', 'Exported '), caseId);
       } catch (err: any) {
         if (continueOnError) {
           console.error(err.message);

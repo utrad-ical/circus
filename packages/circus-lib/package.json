@@ -40,7 +40,6 @@
     "logform": "^2.2.0",
     "merge": "^1.2.1",
     "multi-integer-range": "^6.1.0",
-    "recursive-readdir": "^2.2.2",
     "tar-stream": "^2.1.0",
     "ulid": "^2.3.0",
     "winston": "^3.2.1",
@@ -51,7 +50,6 @@
     "@types/fs-extra": "^8.1.0",
     "@types/node": "^24.19.2",
     "@types/tar-stream": "^1.6.2",
-    "rimraf": "^5.0.10",
     "tsdown": "0.23.7",
     "tslib": "^1.11.2",
     "typescript": "~6.0.3"

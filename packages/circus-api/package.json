@@ -5,7 +5,8 @@
   "description": "CIRCUS JSON API Server",
   "main": "server.js",
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "dev": "node --watch server.js"
   },
   "repository": {
     "type": "git",

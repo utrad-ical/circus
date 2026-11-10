@@ -1,6 +1,6 @@
+import * as mr from 'multi-integer-range';
 import assert from 'node:assert/strict';
 import { test, mock } from 'node:test';
-import { multirange } from 'multi-integer-range';
 import { RawData } from '@utrad-ical/circus-rs/server';
 import { EventEmitter } from 'events';
 import { PassThrough } from 'stream';
@@ -35,7 +35,7 @@ test('pack', async () => {
     },
     volumeProvider: mock.fn(() => {
       return {
-        images: multirange('1-10'),
+        images: mr.parse('1-10'),
         load: () => Promise.resolve(),
         volume: new RawData([16, 16, 10], 'uint8'),
         determinePitch: () => Promise.resolve(2.5),

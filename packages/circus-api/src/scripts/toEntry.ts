@@ -1,5 +1,5 @@
+import * as mr from 'multi-integer-range';
 import type { Models } from '../interface.ts';
-import { MultiRange } from 'multi-integer-range';
 
 export const toEntry = async (uidStr: string, models: Models) => {
   const [seriesUid, ...pvdStrs] = uidStr.split(':');
@@ -12,7 +12,7 @@ export const toEntry = async (uidStr: string, models: Models) => {
         }
       : await (async () => {
           const seriesData = await models.series.findByIdOrFail(seriesUid);
-          const firstSegment = new MultiRange(seriesData.images).getRanges()[0];
+          const firstSegment = mr.initialize(seriesData.images)[0];
           return {
             start: firstSegment[0],
             end: firstSegment[1],

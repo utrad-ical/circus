@@ -1,6 +1,6 @@
+import * as mr from 'multi-integer-range';
 import type Command from './Command.ts';
 import type { Models, DicomTagReader } from '../interface.ts';
-import { multirange } from 'multi-integer-range';
 import type { DicomFileRepository } from '@utrad-ical/circus-lib';
 
 export const options = () => {
@@ -33,7 +33,7 @@ export const command: Command<{
       console.log(`Updating ${series.seriesUid}`);
       const repoSeries = await dicomFileRepository.getSeries(series.seriesUid);
       const firstImage = await repoSeries.load(
-        multirange(series.images).min()!
+        mr.min(mr.initialize(series.images))!
       );
       const tags = await dicomTagReader(firstImage);
       await models.series.modifyOne(series.seriesUid, {

@@ -1,3 +1,4 @@
+import * as mr from 'multi-integer-range';
 import zeroPad from '../utils/zeroPad.ts';
 import { RawData, generateMhdHeader } from '@utrad-ical/circus-rs/server';
 import type { Vector3D, VolumeProvider } from '@utrad-ical/circus-rs/server';
@@ -157,7 +158,7 @@ const createMhdPacker: FunctionService<
       const volumeAccessor = await volumeProvider(series.seriesUid);
       await volumeAccessor.load(volumeAccessor.images);
       const volume = volumeAccessor.volume;
-      const primaryImageNo = volumeAccessor.images.min();
+      const primaryImageNo = mr.min(volumeAccessor.images);
       const primaryMetadata = volumeAccessor.imageMetadata.get(
         primaryImageNo!
       )!;

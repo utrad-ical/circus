@@ -1,7 +1,7 @@
+import * as mr from 'multi-integer-range';
 import type { PartialVolumeDescriptor } from '@utrad-ical/circus-rs/server';
 import archiver from 'archiver';
 import status from 'http-status';
-import { multirange } from 'multi-integer-range';
 import type {
   CircusContext,
   RouteMiddleware
@@ -48,7 +48,7 @@ export const handleGetOrientation: RouteMiddleware = ({
   return async (ctx, next) => {
     const uid = ctx.params.seriesUid;
     const series = await models.series.findByIdOrFail(uid);
-    const images = multirange(series.images);
+    const images = mr.initialize(series.images);
 
     const getInt = (param: any): number | undefined => {
       if (param === undefined) return undefined;
@@ -56,10 +56,13 @@ export const handleGetOrientation: RouteMiddleware = ({
         throw ctx.throw(status.BAD_REQUEST, 'Invalid string');
       return Number(param);
     };
-    const start = getInt(ctx.request.query.start) ?? images.min()!;
-    const end = getInt(ctx.request.query.end) ?? images.max()!;
+    const start = getInt(ctx.request.query.start) ?? mr.min(images)!;
+    const end = getInt(ctx.request.query.end) ?? mr.max(images)!;
 
-    if (!images.has(start) || !images.has(end)) {
+    if (
+      !mr.has(images, mr.normalize(start)) ||
+      !mr.has(images, mr.normalize(end))
+    ) {
       ctx.throw(
         status.BAD_REQUEST,
         'The given start/end number is out of bounds.'

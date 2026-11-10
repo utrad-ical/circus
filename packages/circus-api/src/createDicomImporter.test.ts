@@ -64,6 +64,17 @@ test('import a DICOM file', async () => {
   assert.equal(series.images, '8');
 });
 
+test('adds the image number to an existing series', async () => {
+  const fileContent = await fs.readFile(file);
+  const seriesUid =
+    '2.16.840.1.113662.2.1.2519.21582.2990505.2105152.2381633.20';
+  await importer.importDicom(fileContent.buffer as ArrayBuffer, 'someDomain');
+  await models.series.modifyOne(seriesUid, { images: '1-3,10' });
+  await importer.importDicom(fileContent.buffer as ArrayBuffer, 'someDomain');
+  const series = await models.series.findByIdOrFail(seriesUid);
+  assert.equal(series.images, '1-3,8,10');
+});
+
 test('rejects a broken file', async () => {
   const fileContent = new ArrayBuffer(512);
   await assert.rejects(importer.importDicom(fileContent, 'domain'), {

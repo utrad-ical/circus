@@ -1,3 +1,4 @@
+import * as mr from 'multi-integer-range';
 import type {
   DicomFileRepository,
   FunctionService
@@ -6,7 +7,6 @@ import {
   isValidPartialVolumeDescriptor,
   rangeHasPartialVolume
 } from '@utrad-ical/circus-rs/server';
-import { MultiRange } from 'multi-integer-range';
 import type * as circus from '../../interface.ts';
 
 export interface PluginJobRegisterer {
@@ -51,9 +51,9 @@ const createPluginJobRegisterer: FunctionService<
     }
     for (const series of seriesList) {
       const loader = await dicomFileRepository.getSeries(series.seriesUid);
-      const imagesInSeries = new MultiRange(loader.images);
+      const imagesInSeries = mr.parse(loader.images);
       // Check the series exists
-      if (!imagesInSeries.length()) {
+      if (!imagesInSeries.length) {
         throw new Error(`Series ${series.seriesUid} not found.`);
       }
       if (!isValidPartialVolumeDescriptor(series.partialVolumeDescriptor)) {
@@ -67,7 +67,7 @@ const createPluginJobRegisterer: FunctionService<
         throw new RangeError(
           `Series ${series.seriesUid} does not contain enough images ` +
             'specified by the partialVolumeDescriptor.\n' +
-            `Images in the series: ${imagesInSeries.toString()}`
+            `Images in the series: ${mr.stringify(imagesInSeries)}`
         );
       }
     }

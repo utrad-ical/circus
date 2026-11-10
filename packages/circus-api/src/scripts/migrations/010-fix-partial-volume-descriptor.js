@@ -1,5 +1,5 @@
 import * as mongo from 'mongodb';
-import { multirange } from 'multi-integer-range';
+import * as mr from 'multi-integer-range';
 
 /**
  * @param {mongo.Db} db
@@ -23,9 +23,9 @@ export async function up(db) {
           throw new Error(
             `Series ${seriesUid} defined in job ${jobId} (volId #${volId}) was not found.`
           );
-        const images = multirange(seriesDoc.images);
-        const start = images.min();
-        const end = images.max();
+        const images = mr.initialize(seriesDoc.images);
+        const start = mr.min(images);
+        const end = mr.max(images);
         partialVolumeDescriptor = { start, end, delta: 1 };
       }
       const series = { seriesUid, partialVolumeDescriptor };

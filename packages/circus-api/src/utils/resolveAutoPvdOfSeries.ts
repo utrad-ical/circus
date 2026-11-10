@@ -1,7 +1,7 @@
+import * as mr from 'multi-integer-range';
 import type { SeriesEntry } from '@utrad-ical/circus-cs-core';
 import type { PartialVolumeDescriptor } from '@utrad-ical/circus-rs/server';
 import type { Models } from '../interface.ts';
-import { MultiRange } from 'multi-integer-range';
 import type { SeriesOrientationResolver } from './createSeriesOrientationResolver.ts';
 
 export interface AutoPvdSeriesEntry {
@@ -19,9 +19,9 @@ const resolveAutoPvdOfSeries = async (
   ): Promise<SeriesEntry> => {
     if (series.partialVolumeDescriptor !== 'auto') return series as SeriesEntry;
     const seriesData = await models.series.findByIdOrFail(series.seriesUid);
-    const images = new MultiRange(seriesData.images);
-    if (images.length() === 0) throw new Error('Empty series');
-    const firstSegment = images.getRanges()[0];
+    const images = mr.initialize(seriesData.images);
+    if (images.length === 0) throw new Error('Empty series');
+    const firstSegment = images[0];
     const partialVolumeDescriptor = await seriesOrientationResolver(
       series.seriesUid,
       firstSegment[0],

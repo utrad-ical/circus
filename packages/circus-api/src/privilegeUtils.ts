@@ -1,4 +1,4 @@
-import { MultiRange } from 'multi-integer-range';
+import * as mr from 'multi-integer-range';
 import type { Models } from './interface.ts';
 import type { SeriesEntry } from './typings/circus.ts';
 import {
@@ -144,7 +144,7 @@ export const fetchAndLockAccessibleSeries = async (
     );
     if (
       partialImages.length === 0 ||
-      !new MultiRange(item.images).has(partialImages)
+      !mr.has(mr.initialize(item.images), mr.normalize(partialImages))
     ) {
       throwError(400, 'Specified range is invalid.');
     }

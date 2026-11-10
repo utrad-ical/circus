@@ -1,3 +1,5 @@
+import { test } from 'node:test';
+import { expect } from 'expect';
 import floodFill, { BinaryArray2D } from './floodFill.ts';
 import { Vector2 } from 'three';
 

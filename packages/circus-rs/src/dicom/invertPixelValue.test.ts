@@ -1,3 +1,5 @@
+import { describe, test } from 'node:test';
+import { expect } from 'expect';
 import { invertPixelValue } from './invertPixelValue.ts';
 
 describe('invertPixelValue', () => {

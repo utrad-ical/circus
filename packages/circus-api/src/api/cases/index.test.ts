@@ -1,13 +1,15 @@
+import { describe, test, before, after, beforeEach } from 'node:test';
+import { expect } from 'expect';
 import { setUpMongoFixture } from '../../test/util-mongo.ts';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 
 let apiTest: ApiTest, ax: typeof apiTest.axiosInstances;
-beforeAll(async () => {
+before(async () => {
   apiTest = await setUpAppForRoutesTest();
   ax = apiTest.axiosInstances;
 });
-afterAll(async () => await apiTest.tearDown());
+after(async () => await apiTest.tearDown());
 
 const cid = 'faeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715b';
 
@@ -531,8 +533,8 @@ describe('delete', () => {
     const myList = await apiTest.database.db
       .collection('myLists')
       .findOne({ myListId: '01ewes10a08z21bjnysd4p1m3f' });
-    expect(myList!.items).toEqual(
-      expect.not.objectContaining({ resourceId: caseId })
+    expect(myList!.items).not.toContainEqual(
+      expect.objectContaining({ resourceId: caseId })
     );
     const aCase = await apiTest.database.db
       .collection('clinicalCases')

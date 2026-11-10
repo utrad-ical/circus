@@ -1,3 +1,4 @@
+import { before, after } from 'node:test';
 import { EJSON } from 'bson';
 import * as fs from 'fs-extra';
 import { safeLoad as yaml } from 'js-yaml';
@@ -11,7 +12,7 @@ import createModels, { makeModels } from '../db/createModels.ts';
 /**
  * Connects to a test MongoDB instance.
  * Consider using `usingMongo()` instead, which takes care of closing the
- * connection by implicitly calling `afterAll()`.
+ * connection by implicitly calling `after()`.
  */
 export const connectMongo = async () => {
   const url = process.env.CIRCUS_MONGO_TEST_URL;
@@ -70,14 +71,14 @@ export const deleteAllCollections = async (db: mongo.Db) => {
 /**
  * Initializes a test Mongo database.
  * The return value must be `await`-ed inside `test`, `beforeEach`, etc.
- * You must manually call `dispose()` inside `afterAll()` to properly close
+ * You must manually call `dispose()` inside `after()` to properly close
  * the Mongo connection after the tests have finished.
  */
 export const usingMongo = () => {
   return new Promise<{ database: Database; dispose: () => Promise<void> }>(
     resolve => {
       let database: Database;
-      beforeAll(async () => {
+      before(async () => {
         database = await connectMongo();
         resolve({
           database: database,
@@ -100,7 +101,7 @@ export const usingModels = () => {
     models: Models;
   }>(resolve => {
     let database: Database;
-    beforeAll(async () => {
+    before(async () => {
       database = await connectMongo();
       const validator = await createValidator(undefined);
       const models = await createModels(undefined, {
@@ -109,7 +110,7 @@ export const usingModels = () => {
       });
       resolve({ database, validator, models });
     });
-    afterAll(async () => {
+    after(async () => {
       await database.dispose();
     });
   });
@@ -122,14 +123,14 @@ export const usingSessionModels = () => {
     models: Models;
   }>(resolve => {
     let database: Database;
-    beforeAll(async () => {
+    before(async () => {
       database = await connectMongo();
       const session = database.connection.startSession();
       const validator = await createValidator(undefined);
       const models = makeModels(database, validator, session);
       resolve({ database, validator, models });
     });
-    afterAll(async () => {
+    after(async () => {
       await database.dispose();
     });
   });

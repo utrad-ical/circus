@@ -1,3 +1,5 @@
+import { describe, test, it } from 'node:test';
+import { expect } from 'expect';
 import { Vector3, Box3 } from 'three';
 import * as box from './Box.ts';
 

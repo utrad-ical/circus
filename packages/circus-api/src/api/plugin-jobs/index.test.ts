@@ -1,3 +1,12 @@
+import {
+  describe,
+  test,
+  before,
+  after,
+  beforeEach,
+  afterEach
+} from 'node:test';
+import { expect } from 'expect';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import type { AxiosInstance } from 'axios';
@@ -12,12 +21,12 @@ let apiTest: ApiTest,
   dave: AxiosInstance,
   frank: AxiosInstance;
 
-beforeAll(async () => {
+before(async () => {
   apiTest = await setUpAppForRoutesTest();
   ({ alice, bob, guest, dave, frank } = apiTest.axiosInstances);
 });
 
-afterAll(async () => await apiTest.tearDown());
+after(async () => await apiTest.tearDown());
 
 // (alice belongs to sirius.org domain, and has readPlugin and manageFeedback permissions)
 // (bob belongs to vega.org domain, and has readPlugin, executePlugin and inputPersonalFeedback permissions)

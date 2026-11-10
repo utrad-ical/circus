@@ -1,14 +1,16 @@
+import { describe, it, before, after, beforeEach } from 'node:test';
+import { expect } from 'expect';
 import type { ApiTest } from '../../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../../test/util-routes.ts';
 import { setUpMongoFixture } from '../../../test/util-mongo.ts';
 import type { AxiosInstance } from 'axios';
 
 let apiTest: ApiTest, axios: AxiosInstance;
-beforeAll(async () => {
+before(async () => {
   apiTest = await setUpAppForRoutesTest();
   axios = apiTest.axiosInstances.alice;
 });
-afterAll(async () => await apiTest.tearDown());
+after(async () => await apiTest.tearDown());
 
 beforeEach(async () => {
   await setUpMongoFixture(apiTest.database.db, ['groups']);
@@ -122,9 +124,10 @@ const updateGroupData = async (
 
 describe('group permission updates', () => {
   describe('success cases', () => {
-    it.each(Object.entries(permissionsDependencies))(
-      '%s: should update successfully when dependencies are met',
-      async (permission, dependencies) => {
+    for (const [permission, dependencies] of Object.entries(
+      permissionsDependencies
+    )) {
+      it(`${permission}: should update successfully when dependencies are met`, async () => {
         const data = {
           ...basicGroupData,
           [permission]: ['sampleId'],
@@ -135,22 +138,21 @@ describe('group permission updates', () => {
         };
 
         await updateGroupData(data, 204);
-      }
-    );
+      });
+    }
   });
 
   describe('failure cases', () => {
-    it.each(Object.entries(permissionsDependencies))(
-      '%s: should fail to update when dependencies are not met',
-      async permission => {
+    for (const permission of Object.keys(permissionsDependencies)) {
+      it(`${permission}: should fail to update when dependencies are not met`, async () => {
         const data = {
           ...basicGroupData,
           [permission]: ['sampleId']
         };
 
         await updateGroupData(data, 400);
-      }
-    );
+      });
+    }
   });
 });
 

@@ -1,3 +1,5 @@
+import { test, before, after } from 'node:test';
+import { expect } from 'expect';
 import createFileLogger from './FileLogger.ts';
 import path from 'path';
 import fs from 'fs-extra';
@@ -5,11 +7,11 @@ import sleep from '../sleep.ts';
 
 const logDir = path.resolve(__dirname, '../../testdata/logger');
 
-beforeAll(async () => {
+before(async () => {
   await fs.emptyDir(logDir);
 });
 
-afterAll(async () => {
+after(async () => {
   await fs.emptyDir(logDir);
 });
 

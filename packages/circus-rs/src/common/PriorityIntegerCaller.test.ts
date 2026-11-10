@@ -1,3 +1,5 @@
+import { test } from 'node:test';
+import { expect } from 'expect';
 import PriorityIntegerCaller from './PriorityIntegerCaller.ts';
 import { multirange } from 'multi-integer-range';
 
@@ -79,9 +81,9 @@ test('must accept initial resolved range', async () => {
   expect(multirange(result).has('1-4, 9-10')).toBe(true);
 });
 
-test('can call waitFor before appending', done => {
+test('can call waitFor before appending', (_t, done) => {
   const loader = new PriorityIntegerCaller(async () => {});
-  loader.waitFor('1-10').then(done);
+  loader.waitFor('1-10').then(() => done());
   loader.append('1-10');
 });
 

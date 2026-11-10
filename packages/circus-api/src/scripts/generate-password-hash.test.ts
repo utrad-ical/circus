@@ -1,23 +1,23 @@
+import { test, mock } from 'node:test';
+import { expect } from 'expect';
+import inquirer from 'inquirer';
 import { command } from './generate-password-hash.ts';
 
-jest.mock('inquirer', () => {
-  return {
-    prompt: jest
-      .fn()
-      .mockReturnValueOnce({ pwd1: 'mypassword', pwd2: 'mypassword' })
-      .mockReturnValueOnce({ pwd1: 'mypassword', pwd2: 'unmatched' })
-  };
-});
+const answers = [
+  { pwd1: 'mypassword', pwd2: 'mypassword' },
+  { pwd1: 'mypassword', pwd2: 'unmatched' }
+];
+mock.method(inquirer, 'prompt', async () => answers.shift());
 
 test('generate hash', async () => {
   const commandFunc = await command(null, {});
-  const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
+  const spy = mock.method(console, 'log', () => {});
   await commandFunc({});
-  expect(spy.mock.calls[0][0]).toMatch(/\$2y\$/);
+  expect(spy.mock.calls[0].arguments[0]).toMatch(/\$2y\$/);
 });
 
 test('error on password mismatch', async () => {
   const commandFunc = await command(null, {});
-  jest.spyOn(console, 'log').mockImplementation(() => {});
+  mock.method(console, 'log', () => {});
   await expect(commandFunc({})).rejects.toThrow(/Password mismatch/);
 });

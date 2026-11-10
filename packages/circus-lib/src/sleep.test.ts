@@ -1,3 +1,5 @@
+import { test } from 'node:test';
+import { expect } from 'expect';
 import sleep from './sleep.ts';
 
 test('sleep', async () => {

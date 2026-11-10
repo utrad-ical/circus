@@ -1,3 +1,5 @@
+import { describe, test, before, after } from 'node:test';
+import { expect } from 'expect';
 import path from 'path';
 import fs from 'fs-extra';
 import { testClientPool } from '../testHelper.ts';
@@ -7,7 +9,7 @@ import type { MongoClientPool } from '../mongoClientPool.ts';
 describe('MongoPluginDefinitionAccesor', () => {
   let mongoClientPool: MongoClientPool;
 
-  beforeAll(async () => {
+  before(async () => {
     mongoClientPool = await testClientPool();
     const collection = (await mongoClientPool.connect('dummy'))
       .db()
@@ -22,7 +24,7 @@ describe('MongoPluginDefinitionAccesor', () => {
     await collection.insertMany(defs);
   });
 
-  afterAll(async () => {
+  after(async () => {
     await mongoClientPool.dispose();
   });
 

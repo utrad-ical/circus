@@ -1,3 +1,5 @@
+import { test } from 'node:test';
+import { expect } from 'expect';
 import { Vector3, Box3 } from 'three';
 import createMarkedStateDumper from './createMarkedStateDumper.ts';
 import type { VoxelMarker } from './voxelMarker.ts';

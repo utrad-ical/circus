@@ -1,3 +1,5 @@
+import { test } from 'node:test';
+import { expect } from 'expect';
 import loadConfig from './loadConfig.ts';
 import path from 'path';
 

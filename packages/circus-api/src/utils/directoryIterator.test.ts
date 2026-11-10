@@ -1,3 +1,5 @@
+import { test } from 'node:test';
+import { expect } from 'expect';
 import directoryIterator from './directoryIterator.ts';
 import path from 'path';
 

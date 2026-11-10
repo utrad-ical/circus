@@ -1,3 +1,5 @@
+import { test } from 'node:test';
+import { expect } from 'expect';
 import { PixelFormat, pixelFormatInfo } from './PixelFormat.ts';
 
 test('pixelFormatInfo', () => {

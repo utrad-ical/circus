@@ -1,3 +1,5 @@
+import { describe, test } from 'node:test';
+import { expect } from 'expect';
 import path from 'path';
 import pluginResultsValidator from './pluginResultsValidator.ts';
 

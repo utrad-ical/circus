@@ -1,3 +1,5 @@
+import { describe, test, before, after, beforeEach, mock } from 'node:test';
+import { expect } from 'expect';
 import type { TaskEventEmitter, TaskManager } from './createTaskManager.ts';
 import createTaskManager from './createTaskManager.ts';
 import type { Models } from './interface.ts';
@@ -13,7 +15,7 @@ let manager: TaskManager;
 const userEmail = 'alice@example.com';
 const downloadTestDir = path.join(__dirname, '../test/download-test');
 
-beforeAll(async () => {
+before(async () => {
   await fs.mkdir(downloadTestDir);
   const { database, models: m } = await modelsPromise;
   const { db } = database;
@@ -28,7 +30,7 @@ beforeEach(async () => {
   );
 });
 
-afterAll(async () => {
+after(async () => {
   await fs.remove(downloadTestDir);
 });
 
@@ -44,7 +46,7 @@ const waitForTaskStatus = async (taskId: string, status: string) => {
 const newDummyCtx = () =>
   ({
     body: null,
-    set: jest.fn(),
+    set: mock.fn(),
     throw: (status: number, message?: string) => {
       const error = new Error(message ?? `status ${status}`);
       error.status = status;
@@ -194,7 +196,7 @@ test('download', async () => {
   await fs.writeFile(path.join(downloadTestDir, taskId), 'test');
   await manager.download(ctx, taskId);
   expect(ctx.type).toBe('application/zip');
-  expect(ctx.set).toHaveBeenCalled();
+  expect(ctx.set.mock.callCount()).toBeGreaterThan(0);
   const string = await readFromStreamTillEnd(ctx.body);
   expect(string).toBe('test');
 });

@@ -1,3 +1,5 @@
+import { describe, test } from 'node:test';
+import { expect } from 'expect';
 import type { DirectedSegment } from './Line.ts';
 import { intersectsDirectedSegment } from './Line.ts';
 import { Vector2 } from 'three';

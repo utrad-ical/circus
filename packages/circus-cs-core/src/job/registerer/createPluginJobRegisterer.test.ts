@@ -1,3 +1,5 @@
+import { describe, test, beforeEach, mock } from 'node:test';
+import { expect } from 'expect';
 import createPluginJobRegisterer from './createPluginJobRegisterer.ts';
 import type { DicomFileRepository } from '@utrad-ical/circus-lib';
 import type { PartialVolumeDescriptor } from '@utrad-ical/circus-rs/server';
@@ -18,11 +20,11 @@ describe('createPluginJobRegisterer', () => {
 
   beforeEach(() => {
     const queue = {
-      enqueue: jest.fn()
+      enqueue: mock.fn()
     } as unknown as circus.PluginJobRequestQueue;
 
     const dicomFileRepository = {
-      getSeries: jest.fn(seriesUid =>
+      getSeries: mock.fn(seriesUid =>
         Promise.resolve({ images: seriesUid === '1.2.3' ? '1-50' : '' })
       )
     } as unknown as DicomFileRepository;
@@ -55,8 +57,10 @@ describe('createPluginJobRegisterer', () => {
   test('Register', async () => {
     const registerer = await createPluginJobRegisterer(undefined, deps);
     await registerer.register('aaa', defaultPayload, undefined);
-    expect(deps.dicomFileRepository.getSeries).toHaveBeenCalledWith('1.2.3');
-    expect(deps.queue.enqueue).toHaveBeenCalled();
+    expect(
+      deps.dicomFileRepository.getSeries.mock.calls.map(c => c.arguments)
+    ).toContainEqual(['1.2.3']);
+    expect(deps.queue.enqueue.mock.callCount()).toBeGreaterThan(0);
   });
 
   test('Invalid Job ID throws', async () => {

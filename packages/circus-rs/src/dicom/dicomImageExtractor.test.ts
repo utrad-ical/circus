@@ -1,3 +1,5 @@
+import { describe, test } from 'node:test';
+import { expect } from 'expect';
 import dicomImageExtractor from './dicomImageExtractor.ts';
 import fs from 'fs';
 import zlib from 'zlib';

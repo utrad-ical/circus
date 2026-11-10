@@ -1,3 +1,5 @@
+import { describe, test, it, before, after } from 'node:test';
+import { expect } from 'expect';
 import type { RsServices } from './configureServiceLoader.ts';
 import configureServiceLoader from './configureServiceLoader.ts';
 import fs from 'fs';
@@ -75,8 +77,8 @@ const startTestServer = async (config: any) => {
 
 describe('without auth', () => {
   let stopServer: Function;
-  beforeAll(async () => (stopServer = await startTestServer(testConfig())));
-  afterAll(() => stopServer());
+  before(async () => (stopServer = await startTestServer(testConfig())));
+  after(() => stopServer());
 
   test('status', async () => {
     const res = await axios.get('/status');
@@ -235,7 +237,7 @@ describe('without auth', () => {
 
 describe('with authentication', () => {
   let stopServer: Function;
-  beforeAll(async () => {
+  before(async () => {
     const config = testConfig();
     config.rsServer!.options!.authorization = {
       enabled: true,
@@ -244,7 +246,7 @@ describe('with authentication', () => {
     };
     stopServer = await startTestServer(config);
   });
-  afterAll(() => stopServer());
+  after(() => stopServer());
 
   let tokenHeader: { Authorization: string };
 

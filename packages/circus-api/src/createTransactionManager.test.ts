@@ -1,4 +1,6 @@
-import createTransactionManager from './createTransactionManager.ts';
+import { describe, test, before, after } from 'node:test';
+import { expect } from 'expect';
+import { createTransactionManagerFactory } from './createTransactionManager.ts';
 import type * as mongo from 'mongodb';
 import type { ClientSession } from 'mongodb';
 import { setUpMongoFixture, usingMongo } from './test/util-mongo.ts';
@@ -6,30 +8,26 @@ import createValidator from './createValidator.ts';
 import createCollectionAccessor from '../src/db/createCollectionAccessor.ts';
 import type { Database, Validator, TransactionManager } from './interface.ts';
 
-const mock_createCollectionAccessor = createCollectionAccessor;
-
-// Use Jest's manual mock to replace makeModels
-jest.mock('./db/createModels.ts', () => ({
-  makeModels: (
-    database: Database,
-    validator: Validator,
-    session: ClientSession
-  ) => {
-    return {
-      bankAccounts: mock_createCollectionAccessor(database.db, validator, {
-        schema: 'bankAccounts',
-        collectionName: 'bankAccounts',
-        primaryKey: 'userId',
-        session
-      })
-    };
-  }
-}));
+// Replace makeModels to use a test-only collection
+const createTransactionManager = createTransactionManagerFactory(((
+  database: Database,
+  validator: Validator,
+  session: ClientSession
+) => {
+  return {
+    bankAccounts: createCollectionAccessor(database.db, validator, {
+      schema: 'bankAccounts',
+      collectionName: 'bankAccounts',
+      primaryKey: 'userId',
+      session
+    })
+  };
+}) as any);
 
 let database: Database, validator: Validator, db: mongo.Db;
 const dbPromise = usingMongo();
 
-beforeAll(async () => {
+before(async () => {
   database = (await dbPromise).database;
   db = database.db;
   validator = await createValidator({
@@ -38,7 +36,7 @@ beforeAll(async () => {
   await setUpMongoFixture(db, ['bankAccounts']);
 });
 
-afterAll(async () => {
+after(async () => {
   if (database.dispose) {
     await database.dispose();
   }
@@ -46,7 +44,7 @@ afterAll(async () => {
 
 describe('createTransactionManager', () => {
   let transactionManager: TransactionManager;
-  beforeAll(async () => {
+  before(async () => {
     transactionManager = await createTransactionManager(
       { maxCommitTimeMS: 10000 },
       { database, validator }

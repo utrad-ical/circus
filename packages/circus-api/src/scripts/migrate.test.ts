@@ -1,3 +1,5 @@
+import { test, mock } from 'node:test';
+import { expect } from 'expect';
 import { deleteAllCollections, usingModels } from '../test/util-mongo.ts';
 import { command } from './migrate.ts';
 
@@ -8,13 +10,19 @@ test('perform migration from scratch', async () => {
   const { db } = database;
   await deleteAllCollections(db);
   const commandFunc = await command(null, { database, models });
-  const spy1 = jest.spyOn(console, 'log').mockImplementation(() => {});
+  const spy1 = mock.method(console, 'log', () => {});
   await commandFunc({});
-  expect(spy1).toHaveBeenCalledWith('Current Revision: 0');
-  expect(spy1).toHaveBeenCalledWith('The database is now up to date.');
+  expect(spy1.mock.calls.map(c => c.arguments)).toContainEqual([
+    'Current Revision: 0'
+  ]);
+  expect(spy1.mock.calls.map(c => c.arguments)).toContainEqual([
+    'The database is now up to date.'
+  ]);
 
   // Shows 'up to date' message on second run
-  const spy2 = jest.spyOn(console, 'log').mockImplementation(() => {});
+  const spy2 = mock.method(console, 'log', () => {});
   await commandFunc({});
-  expect(spy2).toBeCalledWith('Already up to date.');
+  expect(spy2.mock.calls.map(c => c.arguments)).toContainEqual([
+    'Already up to date.'
+  ]);
 });

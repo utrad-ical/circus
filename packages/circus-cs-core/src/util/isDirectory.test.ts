@@ -1,3 +1,5 @@
+import { test } from 'node:test';
+import { expect } from 'expect';
 import isDirectory from './isDirectory.ts';
 
 test('return true for true directory', async () => {

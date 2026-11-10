@@ -1,3 +1,4 @@
+import type createDockerFileExtractor from '../utils/dockerFileExtractor.ts';
 import type { ParameterizedContext } from 'koa';
 import type koa from 'koa';
 import type {
@@ -37,6 +38,8 @@ export interface Deps {
   dicomVoxelDumper: DicomVoxelDumper;
   transactionManager: TransactionManager;
   seriesOrientationResolver: SeriesOrientationResolver;
+  /** Replaceable in tests; defaults to the real Docker-based extractor */
+  createDockerFileExtractor?: typeof createDockerFileExtractor;
 }
 
 interface CustomCtxMembers {

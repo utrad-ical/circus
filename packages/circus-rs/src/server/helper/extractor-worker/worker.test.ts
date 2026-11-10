@@ -1,3 +1,5 @@
+import { test } from 'node:test';
+import { expect } from 'expect';
 import createDicomExtractorWorker from './createDicomExtractorWorker.ts';
 import fs from 'fs-extra';
 import path from 'path';

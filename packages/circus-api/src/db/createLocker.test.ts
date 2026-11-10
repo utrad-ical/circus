@@ -1,3 +1,5 @@
+import { it, before, after } from 'node:test';
+import { expect } from 'expect';
 import { usingMongo } from '../test/util-mongo.ts';
 import delay from '../utils/delay.ts';
 import createLocker from './createLocker.ts';
@@ -7,14 +9,14 @@ let db: mongo.Db, locker: ReturnType<typeof createLocker>;
 let disposeMongo: () => Promise<void>;
 const dbPromise = usingMongo();
 
-beforeAll(async () => {
+before(async () => {
   db = (await dbPromise).database.db;
   disposeMongo = (await dbPromise).dispose;
   await db.collection('locks').deleteMany({});
   locker = await createLocker(db);
 });
 
-afterAll(async () => {
+after(async () => {
   await disposeMongo();
 });
 

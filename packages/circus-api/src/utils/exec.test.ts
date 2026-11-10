@@ -1,3 +1,5 @@
+import { test } from 'node:test';
+import { expect } from 'expect';
 import exec, { pExec } from './exec.ts';
 
 test('exec', async () => {

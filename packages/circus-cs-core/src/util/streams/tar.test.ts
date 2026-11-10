@@ -1,3 +1,4 @@
+import { test } from 'node:test';
 import assert from 'node:assert';
 import * as fs from 'node:fs/promises';
 import { extractTarToDir, packDirToTar } from './tar.ts';

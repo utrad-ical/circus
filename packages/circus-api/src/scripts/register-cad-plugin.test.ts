@@ -1,20 +1,19 @@
+import { test, before, beforeEach, mock } from 'node:test';
+import { expect } from 'expect';
 import { setUpMongoFixture, usingModels } from '../test/util-mongo.ts';
 import type { CommandFunc } from './Command.ts';
+import inquirer from 'inquirer';
 import { command } from './register-cad-plugin.ts';
 
 const modelsPromise = usingModels();
 let commandFunc: CommandFunc;
 
-jest.mock('inquirer', () => {
-  return {
-    // always say yes to the 'is this okay' prompt
-    prompt: jest.fn().mockReturnValue({ ok: true })
-  };
-});
+// always say yes to the 'is this okay' prompt
+mock.method(inquirer, 'prompt', async () => ({ ok: true }));
 
 let pluginDefFileContent: object;
 
-beforeAll(async () => {
+before(async () => {
   const { database, validator, models } = await modelsPromise;
   const dockerRunner = {
     // mocked DockerRunner
@@ -43,9 +42,11 @@ test('registers a CAD plug-in', async () => {
     version: '1.5.0',
     description: 'detects everything'
   };
-  const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
+  const spy = mock.method(console, 'log', () => {});
   await commandFunc({ _args: [pluginId] });
-  expect(spy).toHaveBeenCalledWith('Registered my awesome cad v1.5.0');
+  expect(spy.mock.calls.map(c => c.arguments)).toContainEqual([
+    'Registered my awesome cad v1.5.0'
+  ]);
 
   const { models } = await modelsPromise;
   const data = await models.plugin.findById(pluginId);

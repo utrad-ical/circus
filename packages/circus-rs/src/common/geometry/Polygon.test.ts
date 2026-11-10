@@ -1,3 +1,5 @@
+import { describe, test } from 'node:test';
+import { expect } from 'expect';
 import * as polygon from './Polygon.ts';
 import { Vector2 } from 'three';
 

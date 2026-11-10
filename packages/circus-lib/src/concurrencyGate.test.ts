@@ -1,3 +1,5 @@
+import { test } from 'node:test';
+import { expect } from 'expect';
 import concurrencyGate from './concurrencyGate.ts';
 
 test('manual start/finish', async () => {
@@ -32,6 +34,6 @@ test('use', async () => {
 
 test('error', async () => {
   // @ts-expect-error
-  expect(() => concurrencyGate()).toThrowError(TypeError);
-  expect(() => concurrencyGate(0)).toThrowError(RangeError);
+  expect(() => concurrencyGate()).toThrow(TypeError);
+  expect(() => concurrencyGate(0)).toThrow(RangeError);
 });

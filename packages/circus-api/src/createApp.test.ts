@@ -1,3 +1,5 @@
+import { it, before, after } from 'node:test';
+import { expect } from 'expect';
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import type { TestServer } from './test/util-koa.ts';
@@ -11,7 +13,7 @@ let testServer: TestServer, ax: AxiosInstance;
 
 const modelsPromise = usingModels();
 
-beforeAll(async () => {
+before(async () => {
   const { database, validator, models } = await modelsPromise;
   const apiLogger = await createTestLogger();
   const koaApp = await createApp(
@@ -60,7 +62,7 @@ beforeAll(async () => {
   ax = axios.create({ baseURL: testServer.url, validateStatus: () => true });
 });
 
-afterAll(async () => {
+after(async () => {
   await testServer.tearDown();
 });
 

@@ -1,3 +1,5 @@
+import { test, before } from 'node:test';
+import { expect } from 'expect';
 import { setUpMongoFixture, usingSessionModels } from './test/util-mongo.ts';
 import type { Models } from './interface.ts';
 import type { UserPrivilegeInfo } from './privilegeUtils.ts';
@@ -11,7 +13,7 @@ let models: Models;
 
 const modelsPromise = usingSessionModels();
 
-beforeAll(async () => {
+before(async () => {
   const { database, models: m } = await modelsPromise;
   const db = database.db;
   await setUpMongoFixture(db, ['groups', 'users', 'series']);

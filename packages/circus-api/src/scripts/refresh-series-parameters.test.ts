@@ -1,3 +1,5 @@
+import { test, before, beforeEach, mock } from 'node:test';
+import { expect } from 'expect';
 import { command } from './refresh-series-parameters.ts';
 import { setUpMongoFixture, usingModels } from '../test/util-mongo.ts';
 import type { Models, DicomTagReader } from '../interface.ts';
@@ -13,8 +15,8 @@ let commandFunc: CommandFunc,
 const seriesUid = '111.222.333.444.555';
 const overMaxDateSeriesUid = '111.222.333.444.444';
 
-beforeAll(async () => {
-  const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
+before(async () => {
+  const spy = mock.method(console, 'log', () => {});
   const ab = new Uint8Array(10);
 
   dicomFileRepository = {

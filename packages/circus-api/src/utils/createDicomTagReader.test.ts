@@ -1,3 +1,5 @@
+import { test, before } from 'node:test';
+import { expect } from 'expect';
 import createDicomTagReader, {
   extractAge,
   parseDate,
@@ -8,7 +10,7 @@ import path from 'path';
 
 let content: Buffer;
 
-beforeAll(async () => {
+before(async () => {
   content = await fs.readFile(
     path.join(__dirname, '../../test/dicom/CT-MONO2-16-brain.dcm')
   );

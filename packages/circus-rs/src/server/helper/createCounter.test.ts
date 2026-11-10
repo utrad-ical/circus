@@ -1,3 +1,5 @@
+import { test } from 'node:test';
+import { expect } from 'expect';
 import createCounter from './createCounter.ts';
 
 test('count up', async () => {

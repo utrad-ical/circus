@@ -1,3 +1,5 @@
+import { describe, test, before, after, beforeEach } from 'node:test';
+import { expect } from 'expect';
 import type * as mongo from 'mongodb';
 import { testClientPool } from '../../testHelper.ts';
 import type { MongoClientPool } from '../../mongoClientPool.ts';
@@ -10,7 +12,7 @@ describe('Queue system: Mongo', () => {
   let queue: circus.Queue<any>;
   const collectionName = 'pluginJobQueue';
 
-  beforeAll(async () => {
+  before(async () => {
     mongoClientPool = await testClientPool();
   });
 
@@ -22,7 +24,7 @@ describe('Queue system: Mongo', () => {
     queue = await createMongoQueue({ collectionName }, { mongoClientPool });
   });
 
-  afterAll(async () => {
+  after(async () => {
     await mongoClientPool.dispose();
   });
 

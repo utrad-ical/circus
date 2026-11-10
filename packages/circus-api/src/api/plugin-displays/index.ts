@@ -7,7 +7,8 @@ import type { RouteMiddleware } from '../../typings/middlewares.ts';
 export const handleGet: RouteMiddleware = ({
   pluginCachePath,
   models,
-  logger
+  logger,
+  createDockerFileExtractor: createExtractor = createDockerFileExtractor
 }) => {
   const reading = new Map<string, Promise<void>>();
 
@@ -37,7 +38,7 @@ export const handleGet: RouteMiddleware = ({
             await reading.get(pluginId);
           } else {
             const promise = (async () => {
-              const extractor = createDockerFileExtractor(pluginId);
+              const extractor = createExtractor(pluginId);
               try {
                 await fs.ensureDir(displaysDir);
                 await extractor.extractToPath('/displays', displaysDir);

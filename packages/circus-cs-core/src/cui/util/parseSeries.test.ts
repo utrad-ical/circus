@@ -1,3 +1,5 @@
+import { describe, test } from 'node:test';
+import { expect } from 'expect';
 import ps from './parseSeries.ts';
 
 describe('parseSeries', () => {

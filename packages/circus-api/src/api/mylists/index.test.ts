@@ -1,15 +1,17 @@
+import { describe, test, before, after, beforeEach } from 'node:test';
+import { expect } from 'expect';
 import { setUpMongoFixture } from '../../test/util-mongo.ts';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import type * as mongo from 'mongodb';
 
 let apiTest: ApiTest, ax: typeof apiTest.axiosInstances, db: mongo.Db;
-beforeAll(async () => {
+before(async () => {
   apiTest = await setUpAppForRoutesTest();
   ax = apiTest.axiosInstances;
   db = apiTest.database.db;
 });
-afterAll(async () => await apiTest.tearDown());
+after(async () => await apiTest.tearDown());
 
 test('list all my lists', async () => {
   const res = await ax.bob.get('api/mylists');

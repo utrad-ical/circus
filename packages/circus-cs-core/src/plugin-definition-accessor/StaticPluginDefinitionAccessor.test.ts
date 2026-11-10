@@ -1,3 +1,5 @@
+import { describe, test, before } from 'node:test';
+import { expect } from 'expect';
 import path from 'path';
 import createStaticPluginDefinitionAccessor from './StaticPluginDefinitionAccessor.ts';
 import type * as circus from '../interface.ts';
@@ -6,7 +8,7 @@ describe('StaticPluginDefinitionAccessor', () => {
   const pluginDir = path.join(__dirname, '../../test/plugins/');
   let pluginDefs: circus.PluginDefinitionAccessor;
 
-  beforeAll(async () => {
+  before(async () => {
     pluginDefs = await createStaticPluginDefinitionAccessor(
       { dir: pluginDir },
       {}

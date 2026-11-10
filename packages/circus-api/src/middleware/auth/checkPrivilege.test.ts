@@ -1,3 +1,5 @@
+import { describe, it, before, after } from 'node:test';
+import { expect } from 'expect';
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import Router from 'koa-router';
@@ -11,7 +13,7 @@ let testServer: TestServer, userEmail: string, ax: AxiosInstance;
 
 const modelsPromise = usingModels();
 
-beforeAll(async () => {
+before(async () => {
   const { database, models } = await modelsPromise;
   await setUpMongoFixture(database.db, [
     'groups',
@@ -61,7 +63,7 @@ beforeAll(async () => {
   ax = axios.create({ baseURL: testServer.url, validateStatus: () => true });
 });
 
-afterAll(async () => {
+after(async () => {
   await testServer.tearDown();
 });
 

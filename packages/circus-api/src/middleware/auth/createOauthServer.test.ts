@@ -1,3 +1,5 @@
+import { it, before, after, beforeEach } from 'node:test';
+import { expect } from 'expect';
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import bodyparser from 'koa-bodyparser';
@@ -17,7 +19,7 @@ let testServer: TestServer, ax: AxiosInstance, db: Db, models: Models;
 
 const modelsPromise = usingModels();
 
-beforeAll(async () => {
+before(async () => {
   const { database, models } = await modelsPromise;
   db = database.db;
   const authProvider = await DefaultAuthProvider({}, { models });
@@ -51,7 +53,7 @@ beforeEach(async () => {
   await setUpMongoFixture(db, ['users', 'onetimeUrls']);
 });
 
-afterAll(async () => {
+after(async () => {
   testServer.tearDown();
 });
 

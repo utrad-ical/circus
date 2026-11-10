@@ -1,3 +1,13 @@
+import {
+  describe,
+  test,
+  it,
+  before,
+  after,
+  beforeEach,
+  afterEach
+} from 'node:test';
+import { expect } from 'expect';
 import type { AxiosInstance } from 'axios';
 import FormData from 'form-data';
 import fs from 'fs-extra';
@@ -11,12 +21,12 @@ import delay from '../../utils/delay.ts';
 
 let apiTest: ApiTest, ax: typeof apiTest.axiosInstances;
 
-beforeAll(async () => {
+before(async () => {
   apiTest = await setUpAppForRoutesTest();
   ax = apiTest.axiosInstances;
 });
 
-afterAll(async () => await apiTest.tearDown());
+after(async () => await apiTest.tearDown());
 
 it('should perform search', async () => {
   const res = await ax.dave.request({

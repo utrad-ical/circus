@@ -1,3 +1,5 @@
+import { test } from 'node:test';
+import { expect } from 'expect';
 import isLikeDicom from './isLikeDicom.ts';
 import path from 'path';
 import fs from 'fs-extra';

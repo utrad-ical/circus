@@ -1,3 +1,5 @@
+import { describe, test } from 'node:test';
+import { expect } from 'expect';
 import createCancellableTimer from './createCancellableTimer.ts';
 
 describe('createCancellableTimer', () => {
@@ -8,7 +10,7 @@ describe('createCancellableTimer', () => {
     expect(new Date().getTime()).toBeGreaterThanOrEqual(start + 200);
   });
 
-  test('cancel', done => {
+  test('cancel', (_t, done) => {
     const timer = createCancellableTimer(300, { timerResolution: 50 });
     const start = new Date().getTime();
     timer.waitForNext().then(() => {

@@ -1,3 +1,5 @@
+import { test, beforeEach, mock } from 'node:test';
+import { expect } from 'expect';
 import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib';
 import path from 'path';
 import createTestLogger from '../test/util-logger.ts';
@@ -42,10 +44,12 @@ beforeEach(async () => {
 const seriesUid = '2.16.840.1.113662.2.1.2519.21582.2990505.2105152.2381633.20';
 
 test('import from a DICOM file', async () => {
-  const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
+  const spy = mock.method(console, 'log', () => {});
   const file = path.join(__dirname, '../../test/dicom/CT-MONO2-16-brain.dcm');
   await commandFunc({ domain, _args: [file] });
-  expect(spy).toHaveBeenCalledWith('Imported 1 file.');
+  expect(spy.mock.calls.map(c => c.arguments)).toContainEqual([
+    'Imported 1 file.'
+  ]);
   const seriesAccessor = await dicomFileRepository.getSeries(seriesUid);
   expect(seriesAccessor.images).toBe('8');
   expect((await seriesAccessor.load(8)) instanceof ArrayBuffer).toBe(true);
@@ -54,10 +58,12 @@ test('import from a DICOM file', async () => {
 });
 
 test('import from a zip file', async () => {
-  const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
+  const spy = mock.method(console, 'log', () => {});
   const file = path.join(__dirname, '../../test/dicom/test.zip');
   await commandFunc({ domain, _args: [file] });
-  expect(spy).toHaveBeenCalledWith('Imported 1 file.');
+  expect(spy.mock.calls.map(c => c.arguments)).toContainEqual([
+    'Imported 1 file.'
+  ]);
   const seriesAccessor = await dicomFileRepository.getSeries(seriesUid);
   expect(seriesAccessor.images).toBe('8');
   expect((await seriesAccessor.load(8)) instanceof ArrayBuffer).toBe(true);

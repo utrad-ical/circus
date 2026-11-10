@@ -1,3 +1,5 @@
+import { describe, test, it, before, after } from 'node:test';
+import { expect } from 'expect';
 import type { TestServer } from '../test/util-koa.ts';
 import { setUpKoaTest } from '../test/util-koa.ts';
 import { setUpMongoFixture, usingMongo } from '../test/util-mongo.ts';
@@ -17,7 +19,7 @@ let disposeMongo: () => Promise<void>;
 
 const dbPromise = usingMongo();
 
-beforeAll(async () => {
+before(async () => {
   const db = (await dbPromise).database.db;
   disposeMongo = (await dbPromise).dispose;
   await setUpMongoFixture(db, ['items']);
@@ -45,7 +47,7 @@ beforeAll(async () => {
   });
 });
 
-afterAll(async () => {
+after(async () => {
   await disposeMongo();
   await testServer.tearDown();
 });

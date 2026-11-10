@@ -1,3 +1,5 @@
+import { describe, test, it, before, after, beforeEach } from 'node:test';
+import { expect } from 'expect';
 import { ValidationError } from 'ajv';
 import type * as mongo from 'mongodb';
 import { setUpMongoFixture, usingMongo } from '../test/util-mongo.ts';
@@ -14,7 +16,7 @@ let testCollection: CollectionAccessor<MonthData>, db: mongo.Db;
 let disposeMongo: () => Promise<void>;
 const dbPromise = usingMongo();
 
-beforeAll(async () => {
+before(async () => {
   db = (await dbPromise).database.db;
   disposeMongo = (await dbPromise).dispose;
   const validator = await createValidator({
@@ -31,7 +33,7 @@ beforeEach(async () => {
   await setUpMongoFixture(db, ['months', 'sequences']);
 });
 
-afterAll(async () => {
+after(async () => {
   const col = db.collection('months');
   await col.deleteMany({});
   if (disposeMongo) {
@@ -172,7 +174,7 @@ describe('#findById', () => {
     let session: mongo.ClientSession;
     let sessionCollection: CollectionAccessor<MonthData>;
 
-    beforeAll(async () => {
+    before(async () => {
       const validator = await createValidator({
         schemaRoot: __dirname + '/../../test/test-schemas'
       });
@@ -195,7 +197,7 @@ describe('#findById', () => {
 
     test('throw error for session is not used', async () => {
       const promise = testCollection.findById(3, { withLock: true });
-      await expect(promise).rejects.toThrowError(
+      await expect(promise).rejects.toThrow(
         'Cannot lock a document outside a session'
       );
     });

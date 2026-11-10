@@ -1,3 +1,5 @@
+import { test, beforeEach } from 'node:test';
+import { expect } from 'expect';
 import createDicomTagReader from './createDicomTagReader.ts';
 import type { DicomFileRepository } from '@utrad-ical/circus-lib';
 import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib';

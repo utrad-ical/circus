@@ -1,3 +1,5 @@
+import { test, before, after } from 'node:test';
+import { expect } from 'expect';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import path from 'path';
@@ -9,29 +11,23 @@ const pluginId =
   'd135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2';
 const mockPluginDir = path.join(cachePath, pluginId);
 
-const mockPath = path,
-  mockFs = fs;
-jest.mock('../../utils/dockerFileExtractor.ts', () => {
-  return () => ({
-    extractToPath: async () => {
-      const displayDir = mockPath.join(mockPluginDir, 'displays');
-      await mockFs.ensureDir(displayDir);
-      await mockFs.writeFile(
-        mockPath.join(displayDir, 'remoteEntry.js'),
-        'Hello'
-      );
-    },
-    dispose: () => Promise.resolve()
-  });
+// Replaces the Docker-based extractor
+const createDockerFileExtractor = () => ({
+  extractToPath: async () => {
+    const displayDir = path.join(mockPluginDir, 'displays');
+    await fs.ensureDir(displayDir);
+    await fs.writeFile(path.join(displayDir, 'remoteEntry.js'), 'Hello');
+  },
+  dispose: () => Promise.resolve()
 });
 
 let apiTest: ApiTest, ax: typeof apiTest.axiosInstances;
-beforeAll(async () => {
+before(async () => {
   await fs.remove(mockPluginDir);
-  apiTest = await setUpAppForRoutesTest();
+  apiTest = await setUpAppForRoutesTest({ createDockerFileExtractor } as any);
   ax = apiTest.axiosInstances;
 });
-afterAll(async () => {
+after(async () => {
   await apiTest.tearDown();
   await fs.remove(mockPluginDir);
 });

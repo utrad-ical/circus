@@ -6,7 +6,7 @@ jobs:
   prettier-check:
     runs-on: ubuntu-latest
     env:
-      NODE_VERSION: 22.x
+      NODE_VERSION: 24.x
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -37,7 +37,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [22.x, 24.x, 26.x]
+        node-version: [24.x, 26.x]
       fail-fast: false
 
     # services:

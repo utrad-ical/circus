@@ -4,14 +4,14 @@
     "module": "nodenext",
     "verbatimModuleSyntax": true,
     "resolveJsonModule": true,
-    "declaration": true,
     "strict": true,
-    "composite": true,
+    // Type checking only; publishable builds are made by tsdown
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "erasableSyntaxOnly": true,
     "isolatedModules": true,
-    "rewriteRelativeImportExtensions": true,
     "types": ["node"]
   }
 }

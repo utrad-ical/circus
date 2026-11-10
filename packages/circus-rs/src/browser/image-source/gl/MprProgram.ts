@@ -19,10 +19,19 @@ import {
 import type DicomVolume from '../../../common/DicomVolume.ts';
 import volumeTextureTransferer from './texture/volumeTextureTransferer.ts';
 // WebGL shader source (GLSL)
-import {
-  vertexShaderSource,
-  fragmentShaderSource
-} from './glsl/mprShaderSource.ts';
+import mprSectionVert from './glsl/mpr-section.vert?raw';
+import mprHeaderFrag from './glsl/mpr-header.frag?raw';
+import pixelValueFrag from './glsl/pixel-value.frag?raw';
+import pixelColorFrag from './glsl/pixel-color.frag?raw';
+import mprMainFrag from './glsl/mpr-main.frag?raw';
+
+const vertexShaderSource = mprSectionVert;
+const fragmentShaderSource = [
+  mprHeaderFrag,
+  pixelValueFrag,
+  pixelColorFrag,
+  mprMainFrag
+].join('\n');
 
 const maxTextures = 8;
 const maxCount = 512 * 512 * 1024;

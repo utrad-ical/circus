@@ -18,7 +18,11 @@ interface Options {
   maxConcurrency?: number;
 }
 
-const workerMain = path.join(import.meta.dirname, 'worker.ts');
+// `worker.ts` in the source tree, `worker.js` in the published package
+const workerMain = path.join(
+  import.meta.dirname,
+  'worker' + path.extname(import.meta.filename)
+);
 
 const createDicomExtractorWorker: NoDepFunctionService<
   DicomExtractorWorker,

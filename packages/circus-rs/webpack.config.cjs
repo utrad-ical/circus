@@ -6,7 +6,7 @@ module.exports = (env, argv) => ({
     'circus-rs-client': './src/browser/index.ts'
   },
   output: {
-    path: path.join(__dirname, 'dist'),
+    path: path.join(__dirname, 'dist-demo'),
     library: 'circusrs',
     libraryTarget: 'umd',
     filename: '[name].js'
@@ -17,6 +17,8 @@ module.exports = (env, argv) => ({
   },
   module: {
     rules: [
+      // `import text from './file?raw'` (GLSL shaders)
+      { resourceQuery: /raw/, type: 'asset/source' },
       {
         test: /\.ts$/,
         loader: 'babel-loader',
@@ -24,8 +26,7 @@ module.exports = (env, argv) => ({
       },
       { test: /\.less$/, use: ['style-loader', 'css-loader', 'less-loader'] },
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
-      { test: /\.woff$/, type: 'asset/inline' },
-      { test: /\.frag|\.vert$/, use: ['webpack-glsl-loader'] }
+      { test: /\.woff$/, type: 'asset/inline' }
     ]
   },
   plugins: [

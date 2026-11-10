@@ -72,8 +72,8 @@ jobs:
           docker pull circuscad/dicom_voxel_dump:1.0.0
           cd packages/circus-cs-core/test/docker
           node build.cjs
-      - name: Build modules
-        run: pnpm run build-ts
+      - name: Build packages (tsdown) and web UI (webpack)
+        run: pnpm run build
       - name: Run TypeScript Check
         run: |
           pnpm run typecheck

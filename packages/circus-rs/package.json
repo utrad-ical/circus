@@ -6,12 +6,10 @@
     "start": "node ./server.js",
     "debug": "nodemon --inspect ./server.js",
     "devserver": "webpack serve --mode=development --config webpack.config.cjs",
-    "prebuild": "bash prebuild.sh",
-    "build": "tsc",
-    "postbuild": "bash postbuild.sh",
+    "build": "rimraf dist && tsdown && lessc src/browser/circus-rs.less dist/browser/circus-rs.css && cp src/browser/circus-rs.less dist/browser/",
     "watch": "webpack --watch --config webpack.config.cjs",
-    "clean": "rimraf dist",
-    "docs": "jekyll build --source=./docs --dest=./docs/_site && cp -r ./dist ./docs/_site",
+    "clean": "rimraf dist dist-demo",
+    "docs": "jekyll build --source=./docs --dest=./docs/_site && cp -r ./dist-demo ./docs/_site",
     "docserver": "jekyll serve --source=./docs --dest=./docs/_site",
     "typecheck": "tsc --noEmit"
   },
@@ -21,7 +19,7 @@
     "directory": "packages/circus-rs"
   },
   "license": "MIT",
-  "main": "lib/browser/index.js",
+  "main": "dist/browser/index.js",
   "exports": {
     ".": "./src/browser/index.ts",
     "./server": "./src/server/index.ts",
@@ -30,15 +28,15 @@
   "publishConfig": {
     "exports": {
       ".": {
-        "types": "./lib/browser/index.d.ts",
-        "default": "./lib/browser/index.js"
+        "types": "./dist/browser/index.d.ts",
+        "default": "./dist/browser/index.js"
       },
       "./server": {
-        "types": "./lib/server/index.d.ts",
-        "default": "./lib/server/index.js"
+        "types": "./dist/server/index.d.ts",
+        "default": "./dist/server/index.js"
       },
       "./package.json": "./package.json",
-      "./circus-rs.css": "./lib/browser/circus-rs.css"
+      "./circus-rs.css": "./dist/browser/circus-rs.css"
     }
   },
   "sideEffects": [
@@ -55,6 +53,7 @@
     "events": "^3.3.0",
     "extend": "^3.0.2",
     "gl-matrix": "^2.4.0",
+    "http-status": "^1.5.0",
     "jpeg-lossless-decoder-js": "^2.0.4",
     "json5": "^0.5.1",
     "koa": "^2.11.0",
@@ -100,22 +99,25 @@
     "file-loader": "^6.2.0",
     "fs-extra": "^11.2.0",
     "glob-promise": "^3.4.0",
-    "http-status": "^1.4.2",
     "less": "^3.11.1",
     "less-loader": "^10.0.1",
     "merge": "^1.2.1",
     "rimraf": "^5.0.10",
     "style-loader": "^4.0.0",
     "svgicons2svgfont": "^5.0.2",
+    "tsdown": "0.23.7",
     "ttf2woff": "^2.0.1",
     "typescript": "~6.0.3",
     "url-loader": "^4.1.1",
     "webpack": "^5.95.0",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.1.0",
-    "webpack-glsl-loader": "^1.0.1"
+    "webpack-dev-server": "^5.1.0"
   },
   "nodemonConfig": {
     "ext": "ts,js,json"
-  }
+  },
+  "files": [
+    "dist",
+    "config/default.js"
+  ]
 }

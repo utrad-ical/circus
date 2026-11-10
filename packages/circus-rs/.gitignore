@@ -1,6 +1,6 @@
 node_modules
 /logs
-/lib
 /dist
+/dist-demo
 *.tgz
 .*

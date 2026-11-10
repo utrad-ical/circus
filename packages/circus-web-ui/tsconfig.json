@@ -8,22 +8,15 @@
     "verbatimModuleSyntax": false,
     "lib": ["dom", "webworker", "es2022"],
     "jsx": "react",
-    "rootDir": "src",
-    "outDir": "./lib",
     // Mirrors webpack's `resolve.modules` (bare imports from src/)
     "paths": {
       "*": ["./src/*"]
-    },
-    // This package is top-level and not referenced by others,
-    // so we set the following two options
-    "composite": false,
-    "declaration": false,
-    "noEmit": true
+    }
   },
-  "include": ["src/**/*"],
-  "references": [
-    { "path": "../circus-lib" },
-    { "path": "../circus-rs" },
-    { "path": "../circus-ui-kit" }
+  "include": [
+    "src/**/*",
+    // Ambient declarations used by the circus-rs sources (e.g., `*?raw`)
+    "../circus-rs/src/typings/ambient.d.ts",
+    "../circus-rs/src/typings/gl-matrix/*.d.ts"
   ]
 }

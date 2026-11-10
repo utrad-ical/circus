@@ -12,7 +12,7 @@ attic
 **/*.tsbuildinfo
 **/*.tgz
 
-# Build outputs (rebuilt by `npm run build`)
+# Build outputs (rebuilt inside the build stage)
 packages/*/lib
 packages/circus-rs/dist
 packages/circus-web-ui/public/*.js

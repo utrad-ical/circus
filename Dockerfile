@@ -12,12 +12,15 @@ FROM node:${NODE_VERSION}-bookworm AS build
 
 WORKDIR /var/circus
 COPY . .
+# Install the pnpm version pinned by `packageManager` in package.json
+# (corepack is no longer bundled with Node 25+)
+RUN npm install -g "$(node -p 'require("./package.json").packageManager')"
 # Same build steps as CI (tsc -b follows project references in order)
-RUN npm ci && \
-    npm run prebuild-ts && \
-    npm run build-ts && \
-    npm run postbuild-ts && \
-    npm run build -w @utrad-ical/circus-web-ui
+RUN pnpm install --frozen-lockfile && \
+    pnpm run prebuild-ts && \
+    pnpm run build-ts && \
+    pnpm run postbuild-ts && \
+    pnpm -F @utrad-ical/circus-web-ui run build
 
 # ---------------------------------------------------------------------------
 # web -> circus-web

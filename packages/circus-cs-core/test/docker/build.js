@@ -30,7 +30,10 @@ const build = async target => {
     path.join(tmpDir, 'results'),
     { recursive: true }
   );
-  await fs.copy(path.join(import.meta.dirname, 'main.js'), path.join(tmpDir, 'main.js'));
+  await fs.copy(
+    path.join(import.meta.dirname, 'main.js'),
+    path.join(tmpDir, 'main.js')
+  );
 
   const image = `circus-mock-${target}`;
   await passthru('docker', ['image', 'rm', image]);

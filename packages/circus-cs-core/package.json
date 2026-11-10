@@ -53,7 +53,6 @@
   "devDependencies": {
     "@types/archiver": "^5.1.1",
     "@types/argv": "0.0.4",
-    "@types/cosmiconfig": "^5.0.3",
     "@types/dockerode": "^2.5.28",
     "@types/fs-extra": "^8.1.0",
     "@types/js-yaml": "^3.12.3",
@@ -61,7 +60,6 @@
     "@types/node": "^24.19.2",
     "@types/pify": "^3.0.2",
     "@types/shell-escape": "^0.2.0",
-    "@types/table": "^4.0.5",
     "@types/tar-fs": "^1.16.3",
     "@types/tar-stream": "^1.6.2",
     "typescript": "~6.0.3"

@@ -20,7 +20,9 @@ before(async () => {
     'users',
     'projects',
     'clinicalCases',
-    'pluginJobs'
+    'pluginJobs',
+    'pluginDefinitions',
+    'series'
   ]);
   testServer = await setUpKoaTest(async app => {
     app.use(async (ctx, next) => {
@@ -114,7 +116,7 @@ describe('project privilege checker', () => {
 });
 
 describe('plugin-job privilege checker', () => {
-  it('should pass for user without a privilege', async () => {
+  it('should pass for user with privileges', async () => {
     const resource = 'plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa';
     userEmail = 'alice@example.com';
     const res = await ax.get(resource);
@@ -127,5 +129,7 @@ describe('plugin-job privilege checker', () => {
     userEmail = 'bob@example.com';
     const res = await ax.get(resource);
     assert.equal(res.status, 401);
+    // bob has readPlugin of this plug-in, but not the domain of the series
+    assert.match(res.data, /privilege to access this plugin-job/);
   });
 });

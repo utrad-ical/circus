@@ -1,4 +1,4 @@
-const chalk = require('chalk');
+const { styleText } = require('node:util');
 const fs = require('fs-extra');
 const cp = require('child_process');
 const path = require('path');
@@ -6,7 +6,7 @@ const path = require('path');
 // Builds mock docker images into the local machine.
 
 const build = async target => {
-  console.log('\n' + chalk.yellow(`Building circus-mock-${target}`));
+  console.log('\n' + styleText('yellow', `Building circus-mock-${target}`));
 
   const tmpDir = path.resolve(__dirname, 'tmp');
   await fs.ensureDir(tmpDir);
@@ -37,9 +37,9 @@ const build = async target => {
   try {
     const code = await passthru('docker', ['build', './tmp', '-t', image]);
     if (code === 0) {
-      console.log(chalk.green(`Build succeeded for ${image}`));
+      console.log(styleText('green', `Build succeeded for ${image}`));
     } else {
-      console.error(chalk.red(`Build failed for ${image}`));
+      console.error(styleText('red', `Build failed for ${image}`));
     }
   } finally {
     await fs.remove(tmpDir);

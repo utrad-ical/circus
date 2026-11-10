@@ -38,8 +38,8 @@ interface Args {
 
 export const command: Command<{
   transactionManager: TransactionManager;
-  cs: CsCore;
-}> = async (_, { transactionManager, cs }) => {
+  core: CsCore;
+}> = async (_, { transactionManager, core }) => {
   return async (options: Args) => {
     await transactionManager.withTransaction(async models => {
       if (options._args.length < 2)
@@ -80,7 +80,7 @@ export const command: Command<{
         request,
         userPrivileges,
         user.userEmail,
-        cs,
+        core,
         priority
       );
 

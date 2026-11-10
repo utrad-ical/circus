@@ -176,6 +176,17 @@ const createTaskManager: FunctionService<
 
     const throttledHandleProgress = _.throttle(handleProgress, 150);
 
+    // The handlers below are called from an EventEmitter, so nobody awaits
+    // them; catch DB errors here to avoid unhandled rejections.
+    const updateTask = async (updates: object) => {
+      try {
+        await models.task.modifyOne(taskId, updates);
+      } catch (err: any) {
+        apiLogger.error(`Failed to update task status (taskId: ${taskId})`);
+        apiLogger.error(err?.message ?? String(err));
+      }
+    };
+
     const handleError = async (message: string) => {
       removeHandlers();
       task.message = message;
@@ -183,7 +194,7 @@ const createTaskManager: FunctionService<
       task.total = undefined;
       aggregatedEmitter.emit('taskEvent', taskId, 'error', task);
       tasks.delete(taskId);
-      await models.task.modifyOne(taskId, {
+      await updateTask({
         status: 'error',
         endedAt: new Date(),
         errorMessage: message
@@ -205,7 +216,7 @@ const createTaskManager: FunctionService<
       task.total = undefined;
       aggregatedEmitter.emit('taskEvent', taskId, 'finish', task);
       tasks.delete(taskId);
-      await models.task.modifyOne(taskId, {
+      await updateTask({
         status: 'finished',
         endedAt: new Date(),
         finishedMessage: task.message

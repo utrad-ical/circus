@@ -1,5 +1,5 @@
 import type Logger from './Logger.ts';
-import * as winston from 'winston';
+import winston from 'winston';
 import type { FunctionService } from '../ServiceLoader.ts';
 import createTextLogger from './createTextLogger.ts';
 

@@ -8,7 +8,7 @@ import type Command from './Command.ts';
 import createServiceLoader from '../createServiceLoader.ts';
 import config from '../config/index.ts';
 
-const packageFile = path.join(__dirname, '../../package.json');
+const packageFile = path.join(import.meta.dirname, '../../package.json');
 const version = JSON.parse(fs.readFileSync(packageFile, 'utf8')).version;
 
 const [, , commandName, ...argv] = process.argv;
@@ -20,14 +20,14 @@ interface CommandModule {
 }
 
 const importCommand = async (moduleName: string) => {
-  const modulePath = path.join(__dirname, `${moduleName}.ts`);
-  return require(modulePath) as CommandModule;
+  const modulePath = path.join(import.meta.dirname, `${moduleName}.ts`);
+  return (await import(modulePath)) as CommandModule;
 };
 
 const main = async () => {
-  const commandFiles = (await glob(path.join(__dirname, '*.ts'))).filter(
-    name => !/(index|Command|test)\.ts$/.test(name)
-  );
+  const commandFiles = (
+    await glob(path.join(import.meta.dirname, '*.ts'))
+  ).filter(name => !/(index|Command|test)\.ts$/.test(name));
   const commands = commandFiles.map(p => path.basename(p, '.ts'));
 
   const printUsage = () => {

@@ -3,5 +3,5 @@
 This directory contains scripts to create mock Docker images.
 
 ```bash
-$ node build.js
+$ node build.cjs
 ```

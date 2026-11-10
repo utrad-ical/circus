@@ -1,1 +1,1 @@
-module.exports.default = { a: 10, c: 'cat' };
+export default { a: 10, c: 'cat' };

@@ -20,7 +20,7 @@ type Decoder = (input: Buffer) => string;
  */
 const iconvLite: (encoding: string) => () => Promise<Decoder> = encoding => {
   return async () => {
-    const iconv = await import('iconv-lite');
+    const iconv = (await import('iconv-lite')).default;
     return buffer => iconv.decode(buffer, encoding);
   };
 };
@@ -33,7 +33,7 @@ const encMap: { [key: string]: () => Promise<Decoder> } = {
   'IR 13': iconvLite('sjis'), // Japanese half-width kana (sjis is compatible)
   'IR 87': async () => {
     // Japanese JIS kanji
-    const jconv = await import('jconv');
+    const jconv = (await import('jconv')).default;
     return b => {
       // HACK: Replace the escape sequence 'ESC ( J' to 'ESC ( B'.
       // Both roughly mean "switch to ASCII",

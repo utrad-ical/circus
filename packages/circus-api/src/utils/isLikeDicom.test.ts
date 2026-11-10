@@ -4,7 +4,7 @@ import isLikeDicom from './isLikeDicom.ts';
 import path from 'path';
 import fs from 'fs-extra';
 
-const testDir = path.join(__dirname, '../../test/dicom');
+const testDir = path.join(import.meta.dirname, '../../test/dicom');
 
 test('is dicom', async () => {
   const file = await fs.readFile(path.join(testDir, 'CT-MONO2-16-brain.dcm'));

@@ -12,7 +12,7 @@ let content: Buffer;
 
 before(async () => {
   content = await fs.readFile(
-    path.join(__dirname, '../../test/dicom/CT-MONO2-16-brain.dcm')
+    path.join(import.meta.dirname, '../../test/dicom/CT-MONO2-16-brain.dcm')
   );
 });
 

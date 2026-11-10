@@ -9,7 +9,10 @@ import { PassThrough } from 'stream';
 
 const mockDicomFileRepository: DicomFileRepository = {
   getSeries: async (seriesUid: string) => {
-    const testDir = path.join(__dirname, '../../test/repository/dicom');
+    const testDir = path.join(
+      import.meta.dirname,
+      '../../test/repository/dicom'
+    );
     return {
       load: async (image: number) => {
         const buffer = await fs.readFile(path.join(testDir, `00000001.dcm`));
@@ -29,7 +32,10 @@ describe('buildDicomVolume', () => {
       { dicomFileRepository: mockDicomFileRepository }
     );
     const logStream = new PassThrough();
-    const tmpDestDir = path.resolve(__dirname, '../../test/build-dicom-test');
+    const tmpDestDir = path.resolve(
+      import.meta.dirname,
+      '../../test/build-dicom-test'
+    );
     await fs.emptyDir(tmpDestDir);
     try {
       await buildDicomVolumes(

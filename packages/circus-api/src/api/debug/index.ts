@@ -2,7 +2,9 @@ import { PassThrough } from 'stream';
 import delay from '../../utils/delay.ts';
 import type { RouteMiddleware } from '../../typings/middlewares.ts';
 
-const version = require('../../../package.json').version;
+import packageJson from '../../../package.json' with { type: 'json' };
+
+const version = packageJson.version;
 const upSince = new Date().toISOString();
 
 export const handleGet: RouteMiddleware = () => {

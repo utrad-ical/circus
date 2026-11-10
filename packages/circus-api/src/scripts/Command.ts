@@ -4,4 +4,4 @@ export type CommandFunc = (options: any) => Promise<void>;
 type Command<D> = FunctionService<CommandFunc, D>;
 
 // eslint-disable-next-line
-export default Command;
+export type { Command as default };

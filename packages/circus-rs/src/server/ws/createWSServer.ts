@@ -2,7 +2,7 @@ import type { NoDepFunctionService } from '@utrad-ical/circus-lib';
 import * as ws from 'ws';
 
 const createWSServer: NoDepFunctionService<
-  ws.Server,
+  ws.WebSocketServer,
   | {
       perMessageDeflate?: ws.ServerOptions['perMessageDeflate'];
     }
@@ -32,7 +32,7 @@ const createWSServer: NoDepFunctionService<
     //   // should not be compressed if context takeover is disabled.
     // }
   };
-  return new ws.Server(options);
+  return new ws.WebSocketServer(options);
 };
 
 export default createWSServer;

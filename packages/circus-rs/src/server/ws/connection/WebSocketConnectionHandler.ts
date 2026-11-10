@@ -8,4 +8,4 @@ type WebSocketConnectionHandler = (
   ws: WebSocket,
   request: IncomingMessage
 ) => void;
-export default WebSocketConnectionHandler;
+export type { WebSocketConnectionHandler as default };

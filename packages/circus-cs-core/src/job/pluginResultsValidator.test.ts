@@ -4,7 +4,10 @@ import path from 'path';
 import pluginResultsValidator from './pluginResultsValidator.ts';
 
 describe('Validate lesion candidate plug-in results', () => {
-  const testResultsDir = path.resolve(__dirname, '../../test/results');
+  const testResultsDir = path.resolve(
+    import.meta.dirname,
+    '../../test/results'
+  );
 
   const checkOne = async (target: string, shouldBeValid: boolean = true) => {
     const dir = path.join(testResultsDir, target);

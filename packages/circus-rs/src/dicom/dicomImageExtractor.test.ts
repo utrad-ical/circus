@@ -7,7 +7,7 @@ import path from 'path';
 import * as px from '../volume/PixelFormat.ts';
 import { PNG } from 'pngjs';
 
-const testdir = path.join(__dirname, '../../test-data/test-dicom/');
+const testdir = path.join(import.meta.dirname, '../../test-data/test-dicom/');
 
 interface CheckObject {
   [key: string]: any;

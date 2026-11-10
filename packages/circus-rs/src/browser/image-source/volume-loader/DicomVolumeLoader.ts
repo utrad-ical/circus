@@ -3,7 +3,7 @@ import type { ViewWindow } from '../../../common/ViewWindow.ts';
 import type { PixelFormat } from '../../../volume/PixelFormat.ts';
 import type { Initializer as MultiRangeInitializer } from 'multi-integer-range';
 import type { EventEmitter } from 'events';
-import type StrictEventEmitter from 'strict-event-emitter-types';
+import type { StrictEventEmitter } from 'strict-event-emitter-types';
 
 export interface DicomVolumeMetadata {
   dicomWindow?: ViewWindow;

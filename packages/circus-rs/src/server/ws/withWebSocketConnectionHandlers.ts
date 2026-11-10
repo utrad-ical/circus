@@ -4,7 +4,10 @@ import type * as ws from 'ws';
 import type WebSocketConnectionHandler from './connection/WebSocketConnectionHandler.ts';
 
 const withWebSocketConnectionHandlers =
-  (wss: ws.Server, routes: Record<string, WebSocketConnectionHandler>) =>
+  (
+    wss: ws.WebSocketServer,
+    routes: Record<string, WebSocketConnectionHandler>
+  ) =>
   (app: Koa<Koa.DefaultState, Koa.DefaultContext>) => {
     const listen = app.listen;
     app.listen = ((...args: Parameters<typeof listen>) => {

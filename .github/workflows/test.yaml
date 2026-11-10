@@ -71,7 +71,7 @@ jobs:
           docker pull circuscad/dicom_utility:2.0.0-beta3
           docker pull circuscad/dicom_voxel_dump:1.0.0
           cd packages/circus-cs-core/test/docker
-          node build.js
+          node build.cjs
       - name: Build modules
         run: pnpm run build-ts
       - name: Run TypeScript Check

@@ -1,5 +1,8 @@
 export default class Biscuit {
-  constructor(private times: number = 2, deps: {}) {}
+  private times: number;
+  constructor(times: number = 2, deps: {}) {
+    this.times = times;
+  }
   public eat() {
     return `biscuit eaten ${this.times} times`;
   }

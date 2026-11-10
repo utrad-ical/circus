@@ -1,1 +1,1 @@
-module.exports = { a: 50, b: 'banana' };
+export default { a: 50, b: 'banana' };

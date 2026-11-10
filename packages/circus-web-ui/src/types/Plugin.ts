@@ -23,4 +23,4 @@ interface Plugin {
   displayStrategy: any[];
 }
 
-export default Plugin;
+export type { Plugin as default };

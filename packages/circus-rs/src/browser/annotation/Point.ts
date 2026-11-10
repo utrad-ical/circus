@@ -2,7 +2,7 @@ import { Box2, Vector2, Vector3 } from 'three';
 import type { Vector3D } from '../../common/geometry/index.ts';
 import {
   distanceFromPointToSection,
-  Section
+  type Section
 } from '../../common/geometry/index.ts';
 import type ViewerEventTarget from '../interface/ViewerEventTarget.ts';
 import {

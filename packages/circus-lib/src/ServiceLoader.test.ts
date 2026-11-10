@@ -4,7 +4,7 @@ import path from 'path';
 import type { FunctionService, ClassService } from './ServiceLoader.ts';
 import ServiceLoader from './ServiceLoader.ts';
 
-const dir = path.join(__dirname, '../testdata/autoload-modules');
+const dir = path.join(import.meta.dirname, '../testdata/autoload-modules');
 
 test('simple creation from class', async () => {
   class Fighter {}

@@ -1,4 +1,6 @@
-import { ValidationError } from 'ajv';
+import Ajv from 'ajv';
+
+const { ValidationError } = Ajv;
 import type { CollectionAccessor } from '../db/createCollectionAccessor.ts';
 import type { Models } from '../interface.ts';
 import type Command from './Command.ts';

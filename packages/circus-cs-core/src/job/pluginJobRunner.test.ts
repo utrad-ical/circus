@@ -10,7 +10,7 @@ import type * as circus from '../interface.ts';
 import DockerRunner from '../util/DockerRunner.ts';
 import pluginJobRunner, { executePlugin } from './pluginJobRunner.ts';
 
-const testDir = path.resolve(__dirname, '../../test/');
+const testDir = path.resolve(import.meta.dirname, '../../test/');
 const workingDirectory = path.join(testDir, 'working/');
 
 const seriesUid = 'dicom';
@@ -123,8 +123,8 @@ describe('executePlugin', () => {
     const { stream, promise } = await executePlugin(
       runner,
       plugin,
-      __dirname,
-      __dirname
+      import.meta.dirname,
+      import.meta.dirname
     );
     const memStream = new memory.WritableStream();
     stream.pipe(memStream);

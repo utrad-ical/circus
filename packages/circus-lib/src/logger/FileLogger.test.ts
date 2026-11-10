@@ -5,7 +5,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import sleep from '../sleep.ts';
 
-const logDir = path.resolve(__dirname, '../../testdata/logger');
+const logDir = path.resolve(import.meta.dirname, '../../testdata/logger');
 
 before(async () => {
   await fs.emptyDir(logDir);

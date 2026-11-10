@@ -6,7 +6,7 @@ import {
   isValidPartialVolumeDescriptor,
   rangeHasPartialVolume
 } from '@utrad-ical/circus-rs/server';
-import MultiRange from 'multi-integer-range';
+import { MultiRange } from 'multi-integer-range';
 import type * as circus from '../../interface.ts';
 
 export interface PluginJobRegisterer {

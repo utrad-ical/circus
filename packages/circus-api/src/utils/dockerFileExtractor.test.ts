@@ -29,7 +29,7 @@ test('extract file from hello-world', async () => {
   }
 });
 
-const testDir = path.resolve(__dirname, '../../test');
+const testDir = path.resolve(import.meta.dirname, '../../test');
 
 describe('extractToPath', () => {
   test('succeed', async () => {

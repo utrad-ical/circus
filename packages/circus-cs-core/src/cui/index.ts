@@ -71,7 +71,7 @@ async function boot(commandName: string | undefined, args: any) {
 
   const loader = configureServiceLoader(new ServiceLoader(config));
   const module: string = commands[commandName].module || commandName;
-  loader.registerModule('command', path.join(__dirname, module));
+  loader.registerModule('command', path.join(import.meta.dirname, module));
 
   try {
     const callFunc = (await loader.get('command')) as Command;

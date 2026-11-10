@@ -48,7 +48,7 @@ before(async () => {
         token: () => () => {}
       } as any,
       transactionManager: null as any, // dummy
-      rsWSServer: new ws.Server({
+      rsWSServer: new ws.WebSocketServer({
         noServer: true,
         skipUTF8Validation: true
       }),

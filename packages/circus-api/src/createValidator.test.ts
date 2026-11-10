@@ -3,13 +3,15 @@ import { describe, it, before } from 'node:test';
 import createValidator from './createValidator.ts';
 import type { Validator } from './interface.ts';
 import * as path from 'path';
-import { ValidationError } from 'ajv';
+import Ajv from 'ajv';
+
+const { ValidationError } = Ajv;
 
 let validator: Validator;
 
 before(async () => {
   validator = await createValidator({
-    schemaRoot: path.join(__dirname, '../test/test-schemas')
+    schemaRoot: path.join(import.meta.dirname, '../test/test-schemas')
   });
 });
 

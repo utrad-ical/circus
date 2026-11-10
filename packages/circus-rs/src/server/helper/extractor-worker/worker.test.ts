@@ -5,7 +5,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import zlib from 'zlib';
 
-const testdir = path.join(__dirname, '../../../../test-data/dicom/');
+const testdir = path.join(import.meta.dirname, '../../../../test-data/dicom/');
 
 const dicomImage = (file = 'CT-MONO2-16-brain') => {
   return new Promise<Buffer>(resolve => {

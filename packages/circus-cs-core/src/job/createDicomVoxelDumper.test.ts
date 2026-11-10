@@ -12,7 +12,10 @@ import createDicomVoxelDumper, {
 
 const mockDicomFileRepository: DicomFileRepository = {
   getSeries: async (seriesUid: string) => {
-    const testDir = path.join(__dirname, '../../test/repository/dicom');
+    const testDir = path.join(
+      import.meta.dirname,
+      '../../test/repository/dicom'
+    );
     return {
       load: async (image: number) => {
         const buffer = await fs.readFile(

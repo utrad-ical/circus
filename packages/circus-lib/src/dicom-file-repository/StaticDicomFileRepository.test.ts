@@ -5,7 +5,10 @@ import path from 'path';
 import fs from 'fs-extra';
 
 describe('StaticDicomFileRepository', () => {
-  const dataDir = path.resolve(__dirname, '../../testdata/sample-dicom');
+  const dataDir = path.resolve(
+    import.meta.dirname,
+    '../../testdata/sample-dicom'
+  );
 
   test('load image', async () => {
     const dr = new StaticDicomFileRepository({ dataDir });

@@ -43,8 +43,8 @@ FROM node:${NODE_VERSION}-bookworm-slim AS api
 # (Docker-outside-of-Docker via the mounted /var/run/docker.sock)
 COPY --from=docker:27-cli /usr/local/bin/docker /usr/local/bin/docker
 
-# devDependencies are kept because the server transpiles TypeScript
-# at runtime using @babel/register
+# The server runs the TypeScript sources directly (Node.js type stripping).
+# devDependencies are still included; pruning them is left for later.
 COPY --from=build /var/circus /var/circus
 RUN rm -rf /var/circus/packages/circus-web-ui/public
 

@@ -7,7 +7,7 @@ import {
   rangeHasPartialVolume
 } from '@utrad-ical/circus-rs';
 import { Button, Modal } from 'components/react-bootstrap';
-import MultiRange from 'multi-integer-range';
+import { MultiRange } from 'multi-integer-range';
 import React, { useMemo, useState } from 'react';
 import IconButton from './IconButton.ts';
 import styled from 'styled-components';

@@ -1,4 +1,4 @@
-import MultiRange from 'multi-integer-range';
+import { MultiRange } from 'multi-integer-range';
 import type { Models } from './interface.ts';
 import type { SeriesEntry } from './typings/circus.ts';
 import {

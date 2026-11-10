@@ -17,7 +17,7 @@ describe('pluginJobReporter', () => {
 
   const jobId = 'aabbcc';
   const collectionName = 'pluginJobs';
-  const resultsDirectory = path.resolve(__dirname, '../../../test');
+  const resultsDirectory = path.resolve(import.meta.dirname, '../../../test');
 
   before(async () => {
     mongoClientPool = await testClientPool();

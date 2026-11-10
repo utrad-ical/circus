@@ -7,7 +7,7 @@ import mime from 'mime';
 import type { Writable } from 'stream';
 import { PassThrough } from 'stream';
 import path from 'path';
-import type StrictEventEmitter from 'strict-event-emitter-types';
+import type { StrictEventEmitter } from 'strict-event-emitter-types';
 import generateUniqueId from '../src/utils/generateUniqueId.ts';
 import type { Models } from './interface.ts';
 import type { CircusContext } from './typings/middlewares.ts';

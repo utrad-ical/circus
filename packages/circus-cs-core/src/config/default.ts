@@ -60,7 +60,7 @@ const defaults: circus.Configuration = {
     options: {
       startOptions: {
         name: 'circus-cs-job-manager',
-        cwd: path.join(__dirname, '..', '..'),
+        cwd: path.join(import.meta.dirname, '..', '..'),
         output: '/var/circus/data/logs/daemon-pm2-output.log',
         error: '/var/circus/data/logs/daemon-pm2-error.log'
       },

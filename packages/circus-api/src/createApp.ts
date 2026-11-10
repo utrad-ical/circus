@@ -9,9 +9,9 @@ import type { VolumeProvider } from '@utrad-ical/circus-rs/server';
 import type { RsWebsocketVolumeConnectionHandlerCreator } from '@utrad-ical/circus-rs/server';
 import { withWebSocketConnectionHandlers } from '@utrad-ical/circus-rs/server';
 import type { ErrorObject } from 'ajv';
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 import glob from 'glob-promise';
-import { safeLoad as yaml } from 'js-yaml';
+import yaml from 'js-yaml';
 import type { Middleware } from 'koa';
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
@@ -78,7 +78,9 @@ async function prepareApiRouter(
 
   const manifestFiles = await glob(apiDir);
   for (const manifestFile of manifestFiles) {
-    const data = yaml(await fs.readFile(manifestFile, 'utf8')) as ManifestFile;
+    const data = yaml.safeLoad(
+      await fs.readFile(manifestFile, 'utf8')
+    ) as ManifestFile;
     try {
       await validator.validate('api', data);
     } catch (err: any) {
@@ -90,7 +92,7 @@ async function prepareApiRouter(
     const dir = path.dirname(manifestFile);
     for (const route of data.routes) {
       if (route.forDebug && !debug) continue;
-      const module = require(dir);
+      const module = await import(path.join(dir, 'index.ts'));
       const mainHandler = module[handlerName(route)];
       if (typeof mainHandler !== 'function') {
         throw new Error(
@@ -139,7 +141,7 @@ export const createApp: FunctionService<
     blobStorage: Storage;
     core: CsCore;
     rsSeriesRoutes: Koa.Middleware;
-    rsWSServer: ws.Server;
+    rsWSServer: ws.WebSocketServer;
     rsWebsocketVolumeConnectionHandlerCreator: RsWebsocketVolumeConnectionHandlerCreator;
     volumeProvider: VolumeProvider;
     dicomFileRepository: DicomFileRepository;
@@ -215,7 +217,7 @@ export const createApp: FunctionService<
     createDockerFileExtractor
   };
 
-  const apiDir = path.resolve(__dirname, 'api/**/*.yaml');
+  const apiDir = path.resolve(import.meta.dirname, 'api/**/*.yaml');
 
   const authMiddleware = fixUser
     ? fixUserMiddleware(deps, fixUser)

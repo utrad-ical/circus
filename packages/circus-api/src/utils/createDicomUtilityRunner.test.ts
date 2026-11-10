@@ -5,7 +5,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import parser from 'dicom-parser';
 
-const testDir = path.join(__dirname, '../../test/dicom');
+const testDir = path.join(import.meta.dirname, '../../test/dicom');
 const dockerImage = 'circuscad/dicom_utility:2.0.0-beta3';
 
 test('compress DICOM file', async () => {

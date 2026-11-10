@@ -1,7 +1,12 @@
 {
   "extends": "../../tsconfig.settings.json",
   "compilerOptions": {
-    "lib": ["dom", "webworker", "es2019"],
+    // Bundled by webpack
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    // rb-components ships .tsx sources that do not follow this rule
+    "verbatimModuleSyntax": false,
+    "lib": ["dom", "webworker", "es2022"],
     "jsx": "react",
     "rootDir": "src",
     "outDir": "./lib",

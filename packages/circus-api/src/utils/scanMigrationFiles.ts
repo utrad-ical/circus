@@ -4,7 +4,7 @@ import * as path from 'path';
 const scanMigrationFiles = async () => {
   const results: string[] = [];
   const files = await glob(
-    path.resolve(__dirname, '../scripts/migrations', '*')
+    path.resolve(import.meta.dirname, '../scripts/migrations', '*')
   );
   files.forEach(file => {
     try {

@@ -1,7 +1,5 @@
-require('./register');
-
 // Load .env file
-require('dotenv').config();
+import 'dotenv/config';
 
 // Run the main script
-require('./src/main');
+import './src/main.ts';

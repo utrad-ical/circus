@@ -1,4 +1,4 @@
-import type { Vector3D } from '@utrad-ical/circus-lib/src/generateMhdHeader';
+import type { Vector3D } from '@utrad-ical/circus-rs/src/volume/generateMhdHeader.ts';
 import { getSectionFromPoints } from '@utrad-ical/circus-rs/src/browser/section-util';
 import type { Section } from '@utrad-ical/circus-rs/src/common/geometry';
 import type { LayoutInfo } from 'components/GridContainer';

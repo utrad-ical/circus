@@ -37,7 +37,10 @@ export {
 
 export { default as RawData } from '../common/RawData.ts';
 export { default as AnisotropicRawData } from '../common/AnisotropicRawData.ts';
-export * from '@utrad-ical/circus-lib/src/PixelFormat';
+export { default as DicomVolume } from '../common/DicomVolume.ts';
+export * from '../volume/PixelFormat.ts';
+export type { default as PartialVolumeDescriptor } from '../volume/PartialVolumeDescriptor.ts';
+export * from '../volume/PartialVolumeDescriptor.ts';
 export * from '../common/geometry/index.ts';
 
 export { default as RsHttpClient } from './http-client/RsHttpClient.ts';
@@ -57,6 +60,7 @@ export { default as WebGlHybridMprImageSource } from './image-source/WebGlHybrid
 
 export type {
   default as DicomVolumeLoader,
+  DicomVolumeMetadata,
   VolumeLoadController
 } from './image-source/volume-loader/DicomVolumeLoader.ts';
 export { default as MockVolumeLoader } from './image-source/volume-loader/MockVolumeLoader.ts';

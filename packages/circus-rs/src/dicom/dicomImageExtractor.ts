@@ -1,5 +1,5 @@
-import type { PixelFormat } from '../PixelFormat.ts';
-import { pixelFormatInfo } from '../PixelFormat.ts';
+import type { PixelFormat } from '../volume/PixelFormat.ts';
+import { pixelFormatInfo } from '../volume/PixelFormat.ts';
 
 import lj from 'jpeg-lossless-decoder-js';
 import type { DataSet } from 'dicom-parser';

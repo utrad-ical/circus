@@ -1,10 +1,9 @@
 import type koa from 'koa';
 import httpStatus from 'http-status';
-import type { Logger, PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
-import {
-  isDicomUid,
-  isValidPartialVolumeDescriptor
-} from '@utrad-ical/circus-lib';
+import type { Logger } from '@utrad-ical/circus-lib';
+import type PartialVolumeDescriptor from '../../../volume/PartialVolumeDescriptor.ts';
+import { isDicomUid } from '@utrad-ical/circus-lib';
+import { isValidPartialVolumeDescriptor } from '../../../volume/PartialVolumeDescriptor.ts';
 
 import type {
   VolumeProvider,

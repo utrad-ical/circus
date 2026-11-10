@@ -1,4 +1,4 @@
-import type { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import type PartialVolumeDescriptor from '../../../volume/PartialVolumeDescriptor.ts';
 
 export type EstimateWindowType = 'full' | 'first' | 'center' | 'none';
 

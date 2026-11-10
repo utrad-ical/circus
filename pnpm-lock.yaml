@@ -488,6 +488,9 @@ importers:
       '@utrad-ical/circus-lib':
         specifier: workspace:*
         version: link:../circus-lib
+      '@utrad-ical/circus-rs':
+        specifier: workspace:*
+        version: link:../circus-rs
       ajv:
         specifier: ^6.11.0
         version: 6.12.6
@@ -627,15 +630,9 @@ importers:
       cosmiconfig:
         specifier: ^6.0.0
         version: 6.0.0
-      dicom-parser:
-        specifier: ^1.8.4
-        version: 1.8.7
       fs-extra:
         specifier: ^9.0.0
         version: 9.1.0
-      jpeg-lossless-decoder-js:
-        specifier: ^2.0.4
-        version: 2.0.4
       logform:
         specifier: ^2.2.0
         version: 2.2.0
@@ -673,15 +670,9 @@ importers:
       '@types/node':
         specifier: ^18.19.64
         version: 18.19.64
-      '@types/pngjs':
-        specifier: ^3.4.2
-        version: 3.4.2
       '@types/tar-stream':
         specifier: ^1.6.2
         version: 1.6.3
-      pngjs:
-        specifier: ^3.4.0
-        version: 3.4.0
       rimraf:
         specifier: ^5.0.10
         version: 5.0.10
@@ -908,9 +899,6 @@ importers:
       '@utrad-ical/circus-icons':
         specifier: workspace:*
         version: link:../circus-icons
-      '@utrad-ical/circus-lib':
-        specifier: workspace:*
-        version: link:../circus-lib
       '@utrad-ical/circus-rs':
         specifier: workspace:*
         version: link:../circus-rs

@@ -1,8 +1,8 @@
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import { confirm, modal } from '@smikitky/rb-components/lib/modal';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
-import type PartialVolumeDescriptor from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
-import { describePartialVolumeDescriptor } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
+import type PartialVolumeDescriptor from '@utrad-ical/circus-rs/src/volume/PartialVolumeDescriptor.ts';
+import { describePartialVolumeDescriptor } from '@utrad-ical/circus-rs/src/volume/PartialVolumeDescriptor.ts';
 import type { DataGridColumnDefinition } from 'components/DataGrid';
 import DataGrid from 'components/DataGrid';
 import IconButton from 'components/IconButton';

@@ -1,4 +1,4 @@
-import type { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import type PartialVolumeDescriptor from '@utrad-ical/circus-rs/src/volume/PartialVolumeDescriptor.ts';
 import type { SeriesEntry } from 'components/SeriesSelector';
 import { createDraft, finishDraft } from 'immer';
 import { multirange } from 'multi-integer-range';

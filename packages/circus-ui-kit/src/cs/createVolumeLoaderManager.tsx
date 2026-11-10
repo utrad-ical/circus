@@ -1,5 +1,5 @@
-import type PartialVolumeDescriptor from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
-import { isValidPartialVolumeDescriptor } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
+import type PartialVolumeDescriptor from '@utrad-ical/circus-rs/src/volume/PartialVolumeDescriptor.ts';
+import { isValidPartialVolumeDescriptor } from '@utrad-ical/circus-rs/src/volume/PartialVolumeDescriptor.ts';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 
 export interface SeriesEntryWithHints {

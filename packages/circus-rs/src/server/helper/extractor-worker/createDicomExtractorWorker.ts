@@ -1,7 +1,5 @@
-import type {
-  DicomImageData,
-  NoDepFunctionService
-} from '@utrad-ical/circus-lib';
+import type { NoDepFunctionService } from '@utrad-ical/circus-lib';
+import type { DicomImageData } from '../../../dicom/dicomImageExtractor.ts';
 import { Worker } from 'worker_threads';
 import { Pool } from 'tarn';
 import path from 'path';

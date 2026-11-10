@@ -31,7 +31,6 @@
   "dependencies": {
     "@smikitky/rb-components": "^7.0.0",
     "@utrad-ical/circus-icons": "workspace:*",
-    "@utrad-ical/circus-lib": "workspace:*",
     "@utrad-ical/circus-rs": "workspace:*",
     "classnames": "^2.3.1",
     "fflate": "^0.8.3",

@@ -2,10 +2,10 @@ import dicomImageExtractor from './dicomImageExtractor.ts';
 import fs from 'fs';
 import zlib from 'zlib';
 import path from 'path';
-import * as px from '../PixelFormat.ts';
+import * as px from '../volume/PixelFormat.ts';
 import { PNG } from 'pngjs';
 
-const testdir = path.join(__dirname, '../../testdata/test-dicom/');
+const testdir = path.join(__dirname, '../../test-data/test-dicom/');
 
 interface CheckObject {
   [key: string]: any;

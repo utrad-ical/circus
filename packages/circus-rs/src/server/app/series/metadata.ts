@@ -3,11 +3,11 @@ import compose from 'koa-compose';
 import type { ValidatorRules } from '../../../common/Validator.ts';
 import validate from '../middleware/validate.ts';
 import type { ViewWindow } from '../../../common/ViewWindow.ts';
-import type { PixelFormat } from '@utrad-ical/circus-lib/src/PixelFormat';
+import type { PixelFormat } from '../../../volume/PixelFormat.ts';
 import type { SeriesMiddlewareState } from './createSeriesRoutes.ts';
 import MultiRange from 'multi-integer-range';
 import type { VolumeAccessor } from '../../helper/createVolumeProvider.ts';
-import { partialVolumeDescriptorToArray } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
+import { partialVolumeDescriptorToArray } from '../../../volume/PartialVolumeDescriptor.ts';
 
 interface MetadataQuery {
   estimateWindow?: 'full' | 'first' | 'center' | 'none';

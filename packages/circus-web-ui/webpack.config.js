@@ -27,6 +27,11 @@ module.exports = {
   module: {
     rules: [
       {
+        // `import text from './file?raw'` (e.g., GLSL shaders in circus-rs)
+        resourceQuery: /raw/,
+        type: 'asset/source'
+      },
+      {
         test: t =>
           /\.(jsx?|tsx?)/.test(t) &&
           (/(circus-rs|rb-components)/.test(t) || !/node_modules/.test(t)),
@@ -43,10 +48,6 @@ module.exports = {
       {
         test: /\.css/,
         use: ['style-laoder', 'css-loader']
-      },
-      {
-        test: /\.(frag|vert)$/,
-        use: ['webpack-glsl-loader']
       },
       {
         test: /\.m?js/,

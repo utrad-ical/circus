@@ -108,9 +108,13 @@ Sees `packages/*/src/config/default.ts` for the available options and defaults.
 Use this to build optimized production builds (slow). This is not necessary while you are developing CIRCUS.
 
 ```bash
-# On monorepo root (the same steps as CI and the Dockerfile)
-pnpm run prebuild-ts
-pnpm run build-ts
-pnpm run postbuild-ts
+# On monorepo root: builds the npm packages (circus-lib, circus-rs and
+# circus-ui-kit, with tsdown into `dist/`) and the web UI (webpack)
+pnpm run build
+
+# The Docker image only needs the web UI;
+# the server runs the TypeScript sources directly
 pnpm -F @utrad-ical/circus-web-ui run build
 ```
+
+TypeScript (`tsc`) is used only for type checking (`pnpm run typecheck`).

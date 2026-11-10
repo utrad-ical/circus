@@ -1,18 +1,11 @@
 {
   "extends": "../../tsconfig.settings.json",
   "compilerOptions": {
-    "lib": ["dom", "es2022"],
-    "rootDir": "src",
-    "outDir": "./lib",
-    // This package is top-level and not referenced by others,
-    // so we set the following two options
-    "composite": false,
-    "noEmit": true
+    "lib": ["dom", "es2022"]
   },
-  "include": ["src/**/*"],
-  "references": [
-    { "path": "../circus-lib" },
-    { "path": "../circus-rs" },
-    { "path": "../circus-cs-core" }
+  "include": [
+    "src/**/*",
+    // Ambient module declarations used by the circus-rs sources
+    "../circus-rs/src/typings/ambient.d.ts"
   ]
 }

@@ -5,11 +5,13 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "lib": ["dom", "es2022"],
-    "jsx": "react",
-    "rootDir": "src",
-    "outDir": "./lib"
+    "jsx": "react"
   },
-  "include": ["src/**/*"],
-  "exclude": ["src/**/*.test.ts"],
-  "references": [{ "path": "../circus-lib" }, { "path": "../circus-rs" }]
+  "include": [
+    "src/**/*",
+    // Ambient declarations used by the circus-rs sources (e.g., `*?raw`)
+    "../circus-rs/src/typings/ambient.d.ts",
+    "../circus-rs/src/typings/gl-matrix/*.d.ts"
+  ],
+  "exclude": ["src/**/*.test.ts"]
 }

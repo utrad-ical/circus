@@ -1,10 +1,6 @@
 {
   "extends": "../../tsconfig.settings.json",
-  "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "./lib"
-  },
+  "compilerOptions": {},
   "include": ["src/**/*", "src/**/*.json"],
-  "exclude": ["src/**/*.test.ts"],
-  "references": [{ "path": "../circus-lib" }, { "path": "../circus-rs" }]
+  "exclude": ["src/**/*.test.ts"]
 }

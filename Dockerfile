@@ -15,11 +15,8 @@ COPY . .
 # Install the pnpm version pinned by `packageManager` in package.json
 # (corepack is no longer bundled with Node 25+)
 RUN npm install -g "$(node -p 'require("./package.json").packageManager')"
-# Same build steps as CI (tsc -b follows project references in order)
+# Only the web UI needs a build; the server runs the TypeScript sources directly
 RUN pnpm install --frozen-lockfile && \
-    pnpm run prebuild-ts && \
-    pnpm run build-ts && \
-    pnpm run postbuild-ts && \
     pnpm -F @utrad-ical/circus-web-ui run build
 
 # ---------------------------------------------------------------------------

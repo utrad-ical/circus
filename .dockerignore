@@ -9,16 +9,16 @@ node_modules
 **/node_modules
 coverage
 attic
-**/*.tsbuildinfo
 **/*.tgz
 
 # Build outputs (rebuilt inside the build stage)
-packages/*/lib
+packages/circus-lib/dist
 packages/circus-rs/dist
+packages/circus-ui-kit/dist
+packages/circus-rs/dist-demo
 packages/circus-web-ui/public/*.js
 packages/circus-web-ui/public/*.js.map
 packages/circus-web-ui/public/*LICENSE.txt
-packages/circus-rs/src/browser/image-source/gl/glsl/*ShaderSource.ts
 
 # Local runtime data and test leftovers
 packages/circus-api/store

@@ -16,9 +16,6 @@
     "lint-fix": "eslint --fix \"packages/*/{src,test}/**/*.{js,ts,tsx}\"",
     "lint-prettier": "prettier --check \"packages/*/{src,test}/**/*.{js,ts,less,json,yaml,yml}\"",
     "prettier": "prettier --write \"packages/*/{src,test}/**/*.{js,ts,less,json,yaml,yml}\"",
-    "prebuild-ts": "pnpm -F @utrad-ical/circus-rs run prebuild",
-    "build-ts": "tsc -b",
-    "postbuild-ts": "pnpm -F @utrad-ical/circus-rs run postbuild",
     "typecheck": "pnpm -r --if-present run typecheck"
   },
   "devDependencies": {

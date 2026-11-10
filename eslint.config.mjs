@@ -90,7 +90,8 @@ export default [
           'ExportAllDeclaration',
           'ImportExpression'
         ].map(node => ({
-          selector: `${node}[source.value=/^\\.(?!.*\\.(tsx?|jsx?|json|less|css)$)/]`,
+          // `?raw` imports (text files such as GLSL shaders) are allowed
+          selector: `${node}[source.value=/^\\.(?!.*\\.(tsx?|jsx?|json|less|css)$)(?!.*\\?raw$)/]`,
           message: 'Relative imports must have an explicit extension (.ts)'
         }))
       ]

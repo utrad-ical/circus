@@ -52,10 +52,12 @@ const createUncachedVolumeProvider: FunctionService<
     const imageRange = new MultiRange(images);
 
     if (imageRange.segmentLength() === 0) {
-      const err = new Error(`Series '${seriesUid}' could not be loaded.`);
-      err.status = 404;
-      err.expose = true;
-      throw err;
+      // Does not rely on the global `Error` augmentation in src/typings,
+      // which is not visible when other packages type-check this file
+      throw Object.assign(
+        new Error(`Series '${seriesUid}' could not be loaded.`),
+        { status: 404, expose: true }
+      );
     }
 
     // Create map of image-no to data-index (as z index on the volume).

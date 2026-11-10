@@ -7,7 +7,8 @@
     "start": "webpack serve --mode=development",
     "fontgen": "node assets/icons/fontgen.js",
     "build": "cross-env NODE_ENV=production webpack --mode=production",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "dev": "webpack serve --mode=development"
   },
   "repository": {
     "type": "git",

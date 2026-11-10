@@ -75,12 +75,21 @@ pnpm run typecheck
 ### Development Server
 
 ```bash
-# API server (port 8080)
-cd packages/circus-api && node server.js
-
-# Web UI with webpack dev server (port 8081, proxies /api, /login and /rs to the API server)
-pnpm -F @utrad-ical/circus-web-ui start
+pnpm dev
 ```
+
+This starts the following two in parallel. Each output line is prefixed with the package name, and Ctrl+C stops both.
+
+- API server (`packages/circus-api`, port 8080). It runs with `node --watch`, so it restarts when an imported source file (including those in other packages such as circus-lib and circus-rs) changes.
+- Web UI dev server (`packages/circus-web-ui`, port 8081). It proxies `/api`, `/login` and `/rs` (including the WebSocket `/rs/ws`) to the API server.
+
+The ports and the proxy target can be changed with environment variables:
+
+```bash
+PORT=18080 CIRCUS_PORT=18081 DEV_PROXY=http://localhost:18080 pnpm dev
+```
+
+You can also start only one of them with `pnpm -F @utrad-ical/circus-api dev` or `pnpm -F @utrad-ical/circus-web-ui dev`.
 
 ### Configuration
 

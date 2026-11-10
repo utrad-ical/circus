@@ -50,7 +50,7 @@ const configureServiceLoader = (loader: ServiceLoader<any>): void => {
   );
   loader.registerModule(
     'rsSeriesRoutes',
-    path.join(import.meta.dirname, 'app/series/createSeriesRoutes.ts')
+    path.join(import.meta.dirname, 'app/series/createSeriesRoutes')
   );
   loader.registerModule(
     'volumeProvider',

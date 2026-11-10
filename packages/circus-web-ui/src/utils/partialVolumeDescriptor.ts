@@ -1,17 +1,17 @@
 import type { PartialVolumeDescriptor } from '@utrad-ical/circus-rs';
 import type { SeriesEntry } from 'components/SeriesSelector';
 import { createDraft, finishDraft } from 'immer';
-import { multirange } from 'multi-integer-range';
+import * as mr from 'multi-integer-range';
 import type Series from 'types/Series';
 import type { RootState } from '../store/index.ts';
 import type { ApiCaller } from './api.ts';
 import asyncMap from './asyncMap.ts';
 
 export const defaultPvd = (images: string): PartialVolumeDescriptor => {
-  const mr = multirange(images);
-  if (mr.segmentLength() === 0 || mr.isUnbounded())
+  const range = mr.parse(images);
+  if (range.length === 0 || mr.isUnbounded(range))
     throw new Error('Invalid images string');
-  const firstSegment = mr.getRanges()[0];
+  const firstSegment = range[0];
   return { start: firstSegment[0], end: firstSegment[1], delta: 1 };
 };
 

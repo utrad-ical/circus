@@ -40,7 +40,9 @@
       "./circus-rs.css": "./lib/browser/circus-rs.css"
     }
   },
-  "sideEffects": false,
+  "sideEffects": [
+    "*.css"
+  ],
   "dependencies": {
     "@babel/core": "^7.18.9",
     "@babel/preset-env": "^7.18.9",

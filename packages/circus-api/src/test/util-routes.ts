@@ -1,3 +1,4 @@
+import type { Deps } from '../typings/middlewares.ts';
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import fs from 'fs-extra';
@@ -86,7 +87,9 @@ export interface ApiTest {
   downloadFileDirectory: string;
 }
 
-export const setUpAppForRoutesTest = async () => {
+export const setUpAppForRoutesTest = async (
+  overrides: Pick<Deps, 'createDockerFileExtractor'> = {}
+) => {
   const database = await connectMongo();
   const db = database.db;
 
@@ -190,6 +193,7 @@ export const setUpAppForRoutesTest = async () => {
         { defaultAuthProvider: authProvider, models, authProvider }
       ),
       transactionManager,
+      ...overrides,
       rsWSServer: new ws.Server({
         noServer: true,
         skipUTF8Validation: true

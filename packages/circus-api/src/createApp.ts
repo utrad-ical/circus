@@ -151,6 +151,8 @@ export const createApp: FunctionService<
     oauthServer: KoaOAuth2Server;
     transactionManager: TransactionManager;
     seriesOrientationResolver: SeriesOrientationResolver;
+    /** Only used by tests */
+    createDockerFileExtractor?: Deps['createDockerFileExtractor'];
   },
   CreateAppOptions
 > = async (
@@ -174,7 +176,8 @@ export const createApp: FunctionService<
     dicomVoxelDumper,
     oauthServer,
     transactionManager,
-    seriesOrientationResolver
+    seriesOrientationResolver,
+    createDockerFileExtractor
   }
 ) => {
   const {
@@ -208,7 +211,8 @@ export const createApp: FunctionService<
     mhdPacker,
     dicomVoxelDumper,
     transactionManager,
-    seriesOrientationResolver
+    seriesOrientationResolver,
+    createDockerFileExtractor
   };
 
   const apiDir = path.resolve(__dirname, 'api/**/*.yaml');

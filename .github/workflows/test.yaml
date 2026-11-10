@@ -1,6 +1,11 @@
 name: Test
 
-on: [push]
+# Runs once for each PR (including those from forks, whose pushes do not
+# run here) and for each push to master
+on:
+  push:
+    branches: [master]
+  pull_request:
 
 jobs:
   prettier-check:

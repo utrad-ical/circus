@@ -87,39 +87,33 @@ const generatePluginJobRunnerTest = async (
 };
 
 describe('pluginJobRunner00', () => {
-  test(
-    'Normal run',
-    async () =>
-      generatePluginJobRunnerTest('12345', {
-        pluginId: 'circus-mock-succeed',
-        pluginName: 'Empty',
-        version: '1.0',
-        type: 'CAD'
-      }),
-    20000
+  test('Normal run', { timeout: 20000 }, async () =>
+    generatePluginJobRunnerTest('12345', {
+      pluginId: 'circus-mock-succeed',
+      pluginName: 'Empty',
+      version: '1.0',
+      type: 'CAD'
+    })
   );
 
   // Skipping this test because it needs a remote server to be up
-  test.skip(
-    'Remote CAD run',
-    async () =>
-      generatePluginJobRunnerTest('54321', {
-        pluginId: 'circus-remote-mock',
-        pluginName: 'RemoteTest',
-        version: '1.0',
-        type: 'CAD+remote',
-        runConfiguration: {
-          adapter: 'defaultHttpAdapter',
-          parameters: {
-            endpoint: 'http://localhost:7743',
-            authentication: 'dummy-secret-token',
-            maxConcurrency: 1,
-            timeout: 300,
-            env: []
-          }
+  test.skip('Remote CAD run', { timeout: 20000 }, async () =>
+    generatePluginJobRunnerTest('54321', {
+      pluginId: 'circus-remote-mock',
+      pluginName: 'RemoteTest',
+      version: '1.0',
+      type: 'CAD+remote',
+      runConfiguration: {
+        adapter: 'defaultHttpAdapter',
+        parameters: {
+          endpoint: 'http://localhost:7743',
+          authentication: 'dummy-secret-token',
+          maxConcurrency: 1,
+          timeout: 300,
+          env: []
         }
-      }),
-    20000
+      }
+    })
   );
 });
 

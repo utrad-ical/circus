@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, it, before, after } from 'node:test';
-import { expect } from 'expect';
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import Router from 'koa-router';
@@ -71,13 +71,13 @@ describe('global privilege checker', () => {
   it('should pass for user with good global privilege', async () => {
     userEmail = 'alice@example.com';
     const res = await ax.get('global');
-    expect(res.data).toBe('Protected Area');
+    assert.equal(res.data, 'Protected Area');
   });
 
   it('should fail for user with bad global privilege', async () => {
     userEmail = 'bob@example.com';
     const res = await ax.get('global');
-    expect(res.status).toBe(401);
+    assert.equal(res.status, 401);
   });
 });
 
@@ -87,7 +87,7 @@ describe('project privilege checker', () => {
       'case/faeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715b';
     userEmail = 'bob@example.com';
     const res = await ax.get(resource);
-    expect(res.data).toBe('Protected Area');
+    assert.equal(res.data, 'Protected Area');
   });
 
   it('should fail for user without a privilege', async () => {
@@ -95,21 +95,21 @@ describe('project privilege checker', () => {
       'case/faeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715b';
     userEmail = 'alice@example.com';
     const res = await ax.get(resource);
-    expect(res.status).toBe(401);
+    assert.equal(res.status, 401);
   });
 
   it('should pass for user with good project privilege', async () => {
     const resource = 'project/8883fdef6f5144f50eb2a83cd34baa44';
     userEmail = 'bob@example.com';
     const res = await ax.get(resource);
-    expect(res.data).toBe('Protected Area');
+    assert.equal(res.data, 'Protected Area');
   });
 
   it('should fail for user without a projectprivilege', async () => {
     const resource = 'project/8883fdef6f5144f50eb2a83cd34baa44';
     userEmail = 'alice@example.com';
     const res = await ax.get(resource);
-    expect(res.status).toBe(401);
+    assert.equal(res.status, 401);
   });
 });
 
@@ -119,13 +119,13 @@ describe('plugin-job privilege checker', () => {
     userEmail = 'alice@example.com';
     const res = await ax.get(resource);
     // console.log(res.data);
-    expect(res.data).toBe('Protected Area');
+    assert.equal(res.data, 'Protected Area');
   });
 
   it('should fail for user without a privilege', async () => {
     const resource = 'plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa';
     userEmail = 'bob@example.com';
     const res = await ax.get(resource);
-    expect(res.status).toBe(401);
+    assert.equal(res.status, 401);
   });
 });

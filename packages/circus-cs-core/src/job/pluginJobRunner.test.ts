@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test, mock } from 'node:test';
-import { expect } from 'expect';
 import Archiver from 'archiver';
 import { EventEmitter } from 'events';
 import memory from 'memory-streams';
@@ -79,47 +79,41 @@ const generatePluginJobRunnerTest = async (
 
   await runner.run(jobId, jobRequest);
   const statuses = jobReporter.report.mock.calls.map(call => call.arguments[1]);
-  expect(statuses).toEqual(['processing', 'results', 'finished']);
+  assert.deepEqual(statuses, ['processing', 'results', 'finished']);
 
-  expect(resultsPacked).toBe(true);
+  assert.equal(resultsPacked, true);
   const log = logStream.toString();
-  expect(log).toContain('Plug-in execution done.');
+  assert.ok(log.includes('Plug-in execution done.'));
 };
 
 describe('pluginJobRunner00', () => {
-  test(
-    'Normal run',
-    async () =>
-      generatePluginJobRunnerTest('12345', {
-        pluginId: 'circus-mock-succeed',
-        pluginName: 'Empty',
-        version: '1.0',
-        type: 'CAD'
-      }),
-    20000
+  test('Normal run', { timeout: 20000 }, async () =>
+    generatePluginJobRunnerTest('12345', {
+      pluginId: 'circus-mock-succeed',
+      pluginName: 'Empty',
+      version: '1.0',
+      type: 'CAD'
+    })
   );
 
   // Skipping this test because it needs a remote server to be up
-  test.skip(
-    'Remote CAD run',
-    async () =>
-      generatePluginJobRunnerTest('54321', {
-        pluginId: 'circus-remote-mock',
-        pluginName: 'RemoteTest',
-        version: '1.0',
-        type: 'CAD+remote',
-        runConfiguration: {
-          adapter: 'defaultHttpAdapter',
-          parameters: {
-            endpoint: 'http://localhost:7743',
-            authentication: 'dummy-secret-token',
-            maxConcurrency: 1,
-            timeout: 300,
-            env: []
-          }
+  test.skip('Remote CAD run', { timeout: 20000 }, async () =>
+    generatePluginJobRunnerTest('54321', {
+      pluginId: 'circus-remote-mock',
+      pluginName: 'RemoteTest',
+      version: '1.0',
+      type: 'CAD+remote',
+      runConfiguration: {
+        adapter: 'defaultHttpAdapter',
+        parameters: {
+          endpoint: 'http://localhost:7743',
+          authentication: 'dummy-secret-token',
+          maxConcurrency: 1,
+          timeout: 300,
+          env: []
         }
-      }),
-    20000
+      }
+    })
   );
 });
 
@@ -146,7 +140,7 @@ describe('executePlugin', () => {
       type: 'CAD'
     };
     const result = await t(plugin);
-    expect(result).toContain('Hello from Docker!');
+    assert.ok(result.includes('Hello from Docker!'));
   });
 
   // Skipping this test because it's slow, but should work
@@ -158,6 +152,6 @@ describe('executePlugin', () => {
       type: 'CAD'
     };
     const result = await t(plugin);
-    expect(result).toContain('EAI_AGAIN'); // Network unavailable
+    assert.ok(result.includes('EAI_AGAIN')); // Network unavailable
   });
 });

@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test, beforeEach } from 'node:test';
-import { expect } from 'expect';
 import createDicomTagReader from './createDicomTagReader.ts';
 import type { DicomFileRepository } from '@utrad-ical/circus-lib';
 import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib';
@@ -38,7 +38,7 @@ test('head-first', async () => {
     1,
     10
   );
-  expect(result).toEqual({ start: 1, end: 10, delta: 1 });
+  assert.deepEqual(result, { start: 1, end: 10, delta: 1 });
 });
 
 test('foot-first', async () => {
@@ -57,7 +57,7 @@ test('foot-first', async () => {
     1,
     10
   );
-  expect(result).toEqual({ start: 10, end: 1, delta: -1 });
+  assert.deepEqual(result, { start: 10, end: 1, delta: -1 });
 });
 
 test('should return head-first if single image series', async () => {
@@ -74,5 +74,5 @@ test('should return head-first if single image series', async () => {
     1,
     1
   );
-  expect(result).toEqual({ start: 1, end: 1, delta: 1 });
+  assert.deepEqual(result, { start: 1, end: 1, delta: 1 });
 });

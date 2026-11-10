@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test, before, after } from 'node:test';
-import { expect } from 'expect';
 import type { AxiosInstance } from 'axios';
 import type { Readable } from 'form-data';
 import type { ApiTest } from '../../test/util-routes.ts';
@@ -16,33 +16,33 @@ after(async () => await apiTest.tearDown());
 describe('search', () => {
   test('should return the list of tasks of the user', async () => {
     const res = await axios.get('api/tasks');
-    expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(4);
+    assert.equal(res.status, 200);
+    assert.equal(res.data.items.length, 4);
   });
 
   test('search with taskId', async () => {
     const res = await axios.get('api/tasks', {
       params: { filter: JSON.stringify({ taskId: 'aaaabbbbcccc1111' }) }
     });
-    expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(1);
-    expect(res.data.items[0].name).toBe('Importing DICOM files');
+    assert.equal(res.status, 200);
+    assert.equal(res.data.items.length, 1);
+    assert.equal(res.data.items[0].name, 'Importing DICOM files');
   });
 
   test('should not show tasks of other user in search results', async () => {
     const res = await axios.get('api/tasks', {
       params: { filter: JSON.stringify({ taskId: 'bbbbccccdddd1111' }) } // Bob's task
     });
-    expect(res.status).toBe(200);
-    expect(res.data.items).toHaveLength(0);
+    assert.equal(res.status, 200);
+    assert.equal(res.data.items.length, 0);
   });
 
   test('should throw 400 for invalid request', async () => {
     const res = await axios.get('api/tasks', {
       params: { filter: JSON.stringify({ invalid: 'invalid' }) }
     });
-    expect(res.status).toBe(400);
-    expect(res.data.error).toBe('Bad filter.');
+    assert.equal(res.status, 400);
+    assert.equal(res.data.error, 'Bad filter.');
   });
 });
 
@@ -55,42 +55,42 @@ test('report', async () => {
 
   const res = await axios.get('api/tasks/report', { responseType: 'stream' });
   const stream = res.data as Readable;
-  expect(res.status).toBe(200);
-  expect(res.headers['content-type']).toMatch('text/event-stream');
+  assert.equal(res.status, 200);
+  assert.ok(res.headers['content-type'].includes('text/event-stream'));
 
   const streamFinish = readFromStream(stream);
   const data = await streamFinish();
-  expect(data).toMatch(taskId);
-  expect(data).toMatch('Starting the task');
+  assert.ok(data.includes(taskId));
+  assert.ok(data.includes('Starting the task'));
   emitter.emit('finish');
 });
 
 describe('get', () => {
   test('Returns task info', async () => {
     const res = await axios.get('api/tasks/aaaabbbbcccc1111');
-    expect(res.status).toBe(200);
+    assert.equal(res.status, 200);
   });
   test('Returns 401 for unauthorized task', async () => {
     const res = await axios.get('api/tasks/bbbbccccdddd1111'); // Bob's
-    expect(res.status).toBe(401);
+    assert.equal(res.status, 401);
   });
 });
 
 describe('download', () => {
   test('Returns 401 for unauthorized task', async () => {
     const res = await axios.get('api/tasks/bbbbccccdddd1111/download'); // Bob's
-    expect(res.status).toBe(401);
+    assert.equal(res.status, 401);
   });
   test('Returns 400 when task has no downloadable file', async () => {
     const res = await axios.get('api/tasks/aaaabbbbcccc1111/download');
-    expect(res.status).toBe(400);
+    assert.equal(res.status, 400);
   });
   test('Returns 409 when a task is still in progress', async () => {
     const res = await axios.get('api/tasks/aaaabbbbcccc3333/download');
-    expect(res.status).toBe(409);
+    assert.equal(res.status, 409);
   });
   test('Return 404 when download file is not existence', async () => {
     const res = await axios.get('api/tasks/aaaabbbbcccc4444/download');
-    expect(res.status).toBe(404);
+    assert.equal(res.status, 404);
   });
 });

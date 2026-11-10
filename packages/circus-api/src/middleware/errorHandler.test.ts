@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test, before, after } from 'node:test';
-import { expect } from 'expect';
 import errorHandler from './errorHandler.ts';
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
@@ -66,34 +66,34 @@ after(async () => {
 
 test('should return 200 for normal request', async () => {
   const res = await ax.get('found');
-  expect(res.status).toBe(200);
+  assert.equal(res.status, 200);
 });
 
 test('should return 404 for nonexistent path', async () => {
   const res = await ax.get('not-found');
-  expect(res.status).toBe(404);
+  assert.equal(res.status, 404);
 });
 
 test('should return 400 for request validation error', async () => {
   const res = await ax.get('invalid-on-request');
-  expect(res.status).toBe(400);
-  expect(res.data.error).toMatch(/request data is not correct/i);
+  assert.equal(res.status, 400);
+  assert.match(res.data.error, /request data is not correct/i);
 });
 
 test('should return 500 for server-side validation error', async () => {
   const res = await ax('invalid-on-response');
-  expect(res.status).toBe(500);
-  expect(res.data.error).toMatch(/response schema validation error/i);
+  assert.equal(res.status, 500);
+  assert.match(res.data.error, /response schema validation error/i);
 });
 
 test('should return 500 for server-side run-time error', async () => {
   const res = await ax('server-side-error');
-  expect(res.status).toBe(500);
-  expect(res.data).toHaveProperty('stack');
+  assert.equal(res.status, 500);
+  assert.ok('stack' in res.data);
 });
 
 test('should return 403 for server-side access error', async () => {
   const res = await ax.get('error-403');
-  expect(res.status).toBe(403);
-  expect(res.data.error).toMatch(/no!/);
+  assert.equal(res.status, 403);
+  assert.match(res.data.error, /no!/);
 });

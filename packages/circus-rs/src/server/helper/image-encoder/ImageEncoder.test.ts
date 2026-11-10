@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test, it, beforeEach } from 'node:test';
-import { expect } from 'expect';
 const encoders = ['PngJsImageEncoder' /*'NodePngImageEncoder'*/];
 import type ImageEncoder from './ImageEncoder.ts';
 
@@ -30,7 +30,7 @@ describe('ImageEncoder', () => {
           out.on('finish', () => {
             const hdr = out.read(8).toString('hex');
             // The fixed 10-byte PNG header
-            expect(hdr).toBe('89504e470d0a1a0a');
+            assert.equal(hdr, '89504e470d0a1a0a');
             done();
           });
         })

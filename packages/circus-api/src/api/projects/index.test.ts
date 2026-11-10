@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test, before, after } from 'node:test';
-import { expect } from 'expect';
 import type { AxiosInstance } from 'axios';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
@@ -13,5 +13,5 @@ after(async () => await apiTest.tearDown());
 
 test('get project', async () => {
   const res = await dave.get('api/projects/8883fdef6f5144f50eb2a83cd34baa44');
-  expect(res.status).toBe(200);
+  assert.equal(res.status, 200);
 });

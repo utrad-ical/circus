@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test, before, after } from 'node:test';
-import { expect } from 'expect';
 import { createTransactionManagerFactory } from './createTransactionManager.ts';
 import type * as mongo from 'mongodb';
 import type { ClientSession } from 'mongodb';
@@ -70,7 +70,7 @@ describe('createTransactionManager', () => {
     }
     await Promise.all(array);
     const result = await db.collection('bankAccounts').findOne({ userId });
-    expect(result!.balance).toBe(10010);
+    assert.equal(result!.balance, 10010);
   });
 
   // test('not use transacton processing', async () => {

@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { expect } from 'expect';
 import { Vector3, Box3 } from 'three';
 import createMarkedStateDumper from './createMarkedStateDumper.ts';
 import type { VoxelMarker } from './voxelMarker.ts';
@@ -21,7 +21,7 @@ test('voxelMarker must work exactly', () => {
     // console.log([o, s, markArguments]);
     // console.log(result1);
 
-    expect(result2).toBe(result1);
+    assert.equal(result2, result1);
   }
 });
 

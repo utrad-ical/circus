@@ -1,8 +1,8 @@
+import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { expect } from 'expect';
 import { PixelFormat, pixelFormatInfo } from './PixelFormat.ts';
 
 test('pixelFormatInfo', () => {
   const result = pixelFormatInfo('int16');
-  expect(result.bpp).toBe(2);
+  assert.equal(result.bpp, 2);
 });

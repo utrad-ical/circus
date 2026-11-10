@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { expect } from 'expect';
 import cors from './cors.ts';
 import axios from 'axios';
 import { setUpKoaTest } from '../test/util-koa.ts';
@@ -17,8 +17,8 @@ test('cors', async () => {
       method: 'get',
       url: testServer.url
     });
-    expect(res.headers['access-control-allow-origin']).toBe('*');
-    expect(res.data).toBe('hi');
+    assert.equal(res.headers['access-control-allow-origin'], '*');
+    assert.equal(res.data, 'hi');
   } finally {
     await testServer.tearDown();
   }

@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { expect } from 'expect';
 import StaticDicomFileRepository from './StaticDicomFileRepository.ts';
 import path from 'path';
 import fs from 'fs-extra';
@@ -10,9 +10,9 @@ describe('StaticDicomFileRepository', () => {
   test('load image', async () => {
     const dr = new StaticDicomFileRepository({ dataDir });
     const series = await dr.getSeries('1.2.3.4.5');
-    expect(series.images).toBe('1-2,4');
+    assert.equal(series.images, '1-2,4');
     const image = await series.load(2);
-    expect(image).toHaveProperty('byteLength', 6);
+    assert.deepEqual(image['byteLength'], 6);
   });
 
   test('save/delete image', async () => {
@@ -22,17 +22,17 @@ describe('StaticDicomFileRepository', () => {
     const a = new Uint8Array('abcde'.split('').map(c => c.charCodeAt(0)));
     await series.save(1, a.buffer as ArrayBuffer);
     const result = await fs.readFile(path.join(newDir, '00000001.dcm'), 'utf8');
-    expect(result).toBe('abcde');
+    assert.equal(result, 'abcde');
 
     await dr.deleteSeries('new');
-    expect(await fs.pathExists(newDir)).toBe(false);
+    assert.equal(await fs.pathExists(newDir), false);
     const series2 = await dr.getSeries('new');
-    expect(series2.images).toBe('');
+    assert.equal(series2.images, '');
   });
 
   test('return count=0 for nonexistent series', async () => {
     const dr = new StaticDicomFileRepository({ dataDir });
     const series = await dr.getSeries('2.4.6.8.10');
-    expect(series.images).toBe('');
+    assert.equal(series.images, '');
   });
 });

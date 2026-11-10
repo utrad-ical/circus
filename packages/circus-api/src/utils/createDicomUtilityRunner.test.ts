@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { expect } from 'expect';
 import createDicomUtilityRunner from './createDicomUtilityRunner.ts';
 import fs from 'fs-extra';
 import path from 'path';
@@ -24,7 +24,7 @@ test('compress DICOM file', async () => {
   await runner.dispose();
   for (const outBuffer of outBuffers) {
     const dataSet = parser.parseDicom(new Uint8Array(outBuffer));
-    expect(dataSet.string('x00020010')).toBe('1.2.840.10008.1.2.4.70');
+    assert.equal(dataSet.string('x00020010'), '1.2.840.10008.1.2.4.70');
   }
 });
 
@@ -36,9 +36,9 @@ test('reject if Docker image is invalid', async () => {
     maxConcurrency: 3,
     dockerImage: 'circuscad/this-image-does-not-exist'
   });
-  await expect(runner.compress(inBuffer.buffer as ArrayBuffer)).rejects.toThrow(
-    /Unable to find image/
-  );
+  await assert.rejects(runner.compress(inBuffer.buffer as ArrayBuffer), {
+    message: /Unable to find image/
+  });
   await runner.dispose();
 });
 
@@ -48,8 +48,8 @@ test('rejects with broken DICOM file', async () => {
     maxConcurrency: 3,
     dockerImage
   });
-  await expect(runner.compress(inBuffer.buffer as ArrayBuffer)).rejects.toThrow(
-    /Did not respond with "OK"|Dcm/
-  );
+  await assert.rejects(runner.compress(inBuffer.buffer as ArrayBuffer), {
+    message: /Did not respond with "OK"|Dcm/
+  });
   await runner.dispose();
 });

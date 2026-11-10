@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test, mock } from 'node:test';
-import { expect } from 'expect';
 import { multirange } from 'multi-integer-range';
 import { RawData } from '@utrad-ical/circus-rs/server';
 import { EventEmitter } from 'events';
@@ -58,14 +58,14 @@ test('pack', async () => {
     mhdLineEnding: 'lf'
   });
   const zipFile = await rawBody(downloadFileStream);
-  expect(zipFile).not.toBe(undefined);
+  assert.notEqual(zipFile, undefined);
   // Validate ZIP file
   const archive = await zip.loadAsync(zipFile);
   // data.json
   const json = JSON.parse(
     await archive.file('my-case-id/data.json')!.async('text')
   );
-  expect(json).toEqual({
+  assert.deepEqual(json, {
     caseId: 'my-case-id',
     projectId: 'my-project-id',
     createdAt: '2015-01-01T00:00:00.000Z',
@@ -82,7 +82,7 @@ test('pack', async () => {
   });
   // vol000.raw
   const raw = await archive.file('my-case-id/vol000.raw')!.async('arraybuffer');
-  expect(raw.byteLength).toBe(16 * 16 * 10);
+  assert.equal(raw.byteLength, 16 * 16 * 10);
   // vol000.mhd
   const mhd = await archive.file('my-case-id/vol000.mhd')!.async('text');
   const lines = [
@@ -94,5 +94,5 @@ test('pack', async () => {
     'ElementByteOrderMSB = False',
     'ElementDataFile = vol000.raw'
   ];
-  lines.forEach(line => expect(mhd).toContain(line));
+  lines.forEach(line => assert.ok(mhd.includes(line)));
 });

@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test, it, before, after, beforeEach } from 'node:test';
-import { expect } from 'expect';
 import type { ApiTest } from '../../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../../test/util-routes.ts';
 import { setUpMongoFixture } from '../../../test/util-mongo.ts';
@@ -18,20 +18,26 @@ beforeEach(async () => {
 
 it('should return list of users', async () => {
   const res = await axios.get('api/admin/users');
-  expect(res.data.items).toBeInstanceOf(Array);
-  expect(res.data.items.some((u: any) => u.loginId === 'bob')).toBe(true);
-  expect(res.data.items.some((u: any) => u.password)).toBe(false);
+  assert.ok(res.data.items instanceof Array);
+  assert.equal(
+    res.data.items.some((u: any) => u.loginId === 'bob'),
+    true
+  );
+  assert.equal(
+    res.data.items.some((u: any) => u.password),
+    false
+  );
 });
 
 it('should return a user', async () => {
   const res = await axios.get('api/admin/users/alice@example.com');
-  expect(res.data.loginId).toBe('alice');
-  expect(res.data).not.toHaveProperty('password');
+  assert.equal(res.data.loginId, 'alice');
+  assert.ok(!('password' in res.data));
 });
 
 it('should return error for nonexistent user', async () => {
   const res = await axios.get('api/admin/user/john@due.com');
-  expect(res.status).toBe(404);
+  assert.equal(res.status, 404);
 });
 
 it('should update a user', async () => {
@@ -41,7 +47,7 @@ it('should update a user', async () => {
     data: { loginId: 'anastasia' }
   });
   const res2 = await axios.get('api/admin/users/alice@example.com');
-  expect(res2.data.loginId).toBe('anastasia');
+  assert.equal(res2.data.loginId, 'anastasia');
 });
 
 it('should return error for invalid user update', async () => {
@@ -50,15 +56,15 @@ it('should return error for invalid user update', async () => {
     url: 'api/admin/users/alice@example.com',
     data: { groups: ['this-must-not-be', 'strings'] }
   });
-  expect(res1.status).toBe(400);
+  assert.equal(res1.status, 400);
 
   const res2 = await axios.request({
     method: 'patch',
     url: 'api/admin/users/alice@example.com',
     data: { userEmail: 'alice.new.mail@example.com' }
   });
-  expect(res2.status).toBe(400);
-  expect(res2.data.error).toMatch(/primary key/);
+  assert.equal(res2.status, 400);
+  assert.match(res2.data.error, /primary key/);
 });
 
 test('should create a user', async () => {
@@ -81,10 +87,10 @@ test('should create a user', async () => {
       groups: [1]
     }
   });
-  expect(res.status).toBe(201);
-  expect(res.data).toMatchObject({ userEmail: 'test@example.com' });
+  assert.equal(res.status, 201);
+  assert.partialDeepStrictEqual(res.data, { userEmail: 'test@example.com' });
   const res2 = await axios.get('api/admin/users/test@example.com');
-  expect(res2.data.loginId).toBe('test');
+  assert.equal(res2.data.loginId, 'test');
 });
 
 //  it.skip('should reject unknown field');

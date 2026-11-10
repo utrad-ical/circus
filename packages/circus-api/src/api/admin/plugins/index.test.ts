@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test, before, after, beforeEach } from 'node:test';
-import { expect } from 'expect';
 import type { ApiTest } from '../../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../../test/util-routes.ts';
 import { setUpMongoFixture } from '../../../test/util-mongo.ts';
@@ -20,13 +20,14 @@ describe('admin/plugins', () => {
 
   test('should return list of plugins', async () => {
     const res = await axios.get('api/admin/plugins');
-    expect(res.status).toBe(200);
-    expect(res.data.items).toBeInstanceOf(Array);
-    expect(
+    assert.equal(res.status, 200);
+    assert.ok(res.data.items instanceof Array);
+    assert.equal(
       res.data.items.some(
         (p: any) => p.pluginName === 'MOCK-VALIDATION-FAILURE'
-      )
-    ).toBe(true);
+      ),
+      true
+    );
   });
 
   test('should update plugin', async () => {
@@ -35,9 +36,10 @@ describe('admin/plugins', () => {
     const res2 = await axios.patch(`api/admin/plugins/${pluginId}`, {
       pluginName: 'NEW-NAME'
     });
-    expect(res2.status).toBe(204);
+    assert.equal(res2.status, 204);
     const res3 = await axios.get('api/admin/plugins');
-    expect(res3.data.items.some((p: any) => p.pluginName === 'NEW-NAME')).toBe(
+    assert.equal(
+      res3.data.items.some((p: any) => p.pluginName === 'NEW-NAME'),
       true
     );
   });
@@ -46,8 +48,8 @@ describe('admin/plugins', () => {
     const res = await axios.get('api/admin/plugins', {
       params: { filter: JSON.stringify({ type: 'CAD' }) }
     });
-    expect(res.status).toBe(200);
-    expect(res.data.items.length).toBe(3);
+    assert.equal(res.status, 200);
+    assert.equal(res.data.items.length, 3);
   });
 
   test('should create plugin', async () => {
@@ -62,11 +64,12 @@ describe('admin/plugins', () => {
       icon: { glyph: 'calc', color: '#ffffff', backgroundColor: '#555555' },
       displayStrategy: []
     });
-    expect(res.status).toBe(httpStatus.CREATED);
+    assert.equal(res.status, httpStatus.CREATED);
     const res2 = await axios.get('api/admin/plugins');
-    expect(
-      res2.data.items.some((p: any) => p.pluginName === 'NEW-PLUGIN')
-    ).toBe(true);
+    assert.equal(
+      res2.data.items.some((p: any) => p.pluginName === 'NEW-PLUGIN'),
+      true
+    );
   });
 
   test('should create remote plugin', async () => {
@@ -93,10 +96,11 @@ describe('admin/plugins', () => {
       icon: { glyph: 'calc', color: '#ffffff', backgroundColor: '#555555' },
       displayStrategy: []
     });
-    expect(res.status).toBe(201);
+    assert.equal(res.status, 201);
     const res2 = await axios.get('api/admin/plugins');
-    expect(
-      res2.data.items.some((p: any) => p.pluginName === 'NEW-REMOTE-PLUGIN')
-    ).toBe(true);
+    assert.equal(
+      res2.data.items.some((p: any) => p.pluginName === 'NEW-REMOTE-PLUGIN'),
+      true
+    );
   });
 });

@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { it, before } from 'node:test';
-import { expect } from 'expect';
 import { usingModels, setUpMongoFixture } from '../test/util-mongo.ts';
 import type { Models } from '../interface.ts';
 import duplicateJobExists from './duplicateJobExists.ts';
@@ -37,28 +37,28 @@ const makeBaseRequest = () => ({
 
 it('should return true for duplicate plugin job', async () => {
   const result = await duplicateJobExists(models, makeBaseRequest());
-  expect(result).toBe(true);
+  assert.equal(result, true);
 });
 
 it('should return false on different plugin ID', async () => {
   const request = makeBaseRequest();
   request.pluginId = 'mnopqrstuvwx';
   const result = await duplicateJobExists(models, request);
-  expect(result).toBe(false);
+  assert.equal(result, false);
 });
 
 it('should return false on different series length', async () => {
   const request = makeBaseRequest();
   request.series.pop();
   const result = await duplicateJobExists(models, request);
-  expect(result).toBe(false);
+  assert.equal(result, false);
 });
 
 it('should return false on different series UID', async () => {
   const request = makeBaseRequest();
   request.series[0].seriesUid = '0.0.0.0.0';
   const result = await duplicateJobExists(models, request);
-  expect(result).toBe(false);
+  assert.equal(result, false);
 });
 
 it('should return true when different only in the order of the elements in partial volume descriptor', async () => {
@@ -69,7 +69,7 @@ it('should return true when different only in the order of the elements in parti
     delta: 1
   };
   const result = await duplicateJobExists(models, request);
-  expect(result).toBe(true);
+  assert.equal(result, true);
 });
 
 it('should return false when status is "invalidated"', async () => {
@@ -87,7 +87,7 @@ it('should return false when status is "invalidated"', async () => {
     ]
   };
   const result = await duplicateJobExists(models, request);
-  expect(result).toBe(false);
+  assert.equal(result, false);
 });
 
 it('should return false when status is "failed"', async () => {
@@ -105,5 +105,5 @@ it('should return false when status is "failed"', async () => {
     ]
   };
   const result = await duplicateJobExists(models, request);
-  expect(result).toBe(false);
+  assert.equal(result, false);
 });

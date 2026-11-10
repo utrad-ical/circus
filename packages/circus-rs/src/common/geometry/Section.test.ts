@@ -1,69 +1,73 @@
+import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { expect } from 'expect';
 import * as su from '../../browser/section-util.ts';
 import * as sect from './Section.ts';
 import type { Vector2D } from './Vector.ts';
 import { Vector3, Vector2 } from 'three';
 
 test('parallelToX', () => {
-  expect(su.parallelToX(new Vector3(1, 0, 0))).toBe(true);
-  expect(su.parallelToX(new Vector3(-1, 0, 0))).toBe(true);
-  expect(su.parallelToX(new Vector3(0, 1, 0))).toBe(false);
-  expect(su.parallelToX(new Vector3(0, -1, 0))).toBe(false);
-  expect(su.parallelToX(new Vector3(0, 0, 1))).toBe(false);
-  expect(su.parallelToX(new Vector3(0, 0, -1))).toBe(false);
-  expect(su.parallelToX(new Vector3(0.5, 0.5, 0.5))).toBe(false);
+  assert.equal(su.parallelToX(new Vector3(1, 0, 0)), true);
+  assert.equal(su.parallelToX(new Vector3(-1, 0, 0)), true);
+  assert.equal(su.parallelToX(new Vector3(0, 1, 0)), false);
+  assert.equal(su.parallelToX(new Vector3(0, -1, 0)), false);
+  assert.equal(su.parallelToX(new Vector3(0, 0, 1)), false);
+  assert.equal(su.parallelToX(new Vector3(0, 0, -1)), false);
+  assert.equal(su.parallelToX(new Vector3(0.5, 0.5, 0.5)), false);
 });
 
 test('parallelToY', () => {
-  expect(su.parallelToY(new Vector3(1, 0, 0))).toBe(false);
-  expect(su.parallelToY(new Vector3(-1, 0, 0))).toBe(false);
-  expect(su.parallelToY(new Vector3(0, 1, 0))).toBe(true);
-  expect(su.parallelToY(new Vector3(0, -1, 0))).toBe(true);
-  expect(su.parallelToY(new Vector3(0, 0, 1))).toBe(false);
-  expect(su.parallelToY(new Vector3(0, 0, -1))).toBe(false);
-  expect(su.parallelToY(new Vector3(0.5, 0.5, 0.5))).toBe(false);
+  assert.equal(su.parallelToY(new Vector3(1, 0, 0)), false);
+  assert.equal(su.parallelToY(new Vector3(-1, 0, 0)), false);
+  assert.equal(su.parallelToY(new Vector3(0, 1, 0)), true);
+  assert.equal(su.parallelToY(new Vector3(0, -1, 0)), true);
+  assert.equal(su.parallelToY(new Vector3(0, 0, 1)), false);
+  assert.equal(su.parallelToY(new Vector3(0, 0, -1)), false);
+  assert.equal(su.parallelToY(new Vector3(0.5, 0.5, 0.5)), false);
 });
 
 test('parallelToZ', () => {
-  expect(su.parallelToZ(new Vector3(1, 0, 0))).toBe(false);
-  expect(su.parallelToZ(new Vector3(-1, 0, 0))).toBe(false);
-  expect(su.parallelToZ(new Vector3(0, 1, 0))).toBe(false);
-  expect(su.parallelToZ(new Vector3(0, -1, 0))).toBe(false);
-  expect(su.parallelToZ(new Vector3(0, 0, 1))).toBe(true);
-  expect(su.parallelToZ(new Vector3(0, 0, -1))).toBe(true);
-  expect(su.parallelToZ(new Vector3(0.5, 0.5, 0.5))).toBe(false);
+  assert.equal(su.parallelToZ(new Vector3(1, 0, 0)), false);
+  assert.equal(su.parallelToZ(new Vector3(-1, 0, 0)), false);
+  assert.equal(su.parallelToZ(new Vector3(0, 1, 0)), false);
+  assert.equal(su.parallelToZ(new Vector3(0, -1, 0)), false);
+  assert.equal(su.parallelToZ(new Vector3(0, 0, 1)), true);
+  assert.equal(su.parallelToZ(new Vector3(0, 0, -1)), true);
+  assert.equal(su.parallelToZ(new Vector3(0.5, 0.5, 0.5)), false);
 });
 
 test('detectOrthogonalSection', () => {
-  expect(
+  assert.equal(
     su.detectOrthogonalSection({
       origin: [0, 0, 0],
       xAxis: [1, 0, 0],
       yAxis: [0, 1, 0]
-    })
-  ).toBe('axial');
-  expect(
+    }),
+    'axial'
+  );
+  assert.equal(
     su.detectOrthogonalSection({
       origin: [0, 0, 0],
       xAxis: [0, 1, 0],
       yAxis: [0, 0, 1]
-    })
-  ).toBe('sagittal');
-  expect(
+    }),
+    'sagittal'
+  );
+  assert.equal(
     su.detectOrthogonalSection({
       origin: [0, 0, 0],
       xAxis: [1, 0, 0],
       yAxis: [0, 0, 1]
-    })
-  ).toBe('coronal');
-  expect(
+    }),
+    'coronal'
+  );
+  assert.equal(
     su.detectOrthogonalSection({
       origin: [0, 0, 0],
       xAxis: [1, 2, 0],
       yAxis: [0, 1, 0]
-    })
-  ).toBe('oblique');
+    }),
+    'oblique'
+  );
 });
 
 test('transform', () => {
@@ -73,7 +77,7 @@ test('transform', () => {
     yAxis: [8, 8, 10]
   };
   const t = sect.translateSection(section, new Vector3(10, 11, 12));
-  expect(t.origin).toEqual([11, 14, 17]);
+  assert.deepEqual(t.origin, [11, 14, 17]);
 });
 
 describe('adjustOnResized', () => {
@@ -91,7 +95,7 @@ describe('adjustOnResized', () => {
       beforeResolution,
       afterResolution
     );
-    expect(newSection).toEqual({
+    assert.deepEqual(newSection, {
       origin: [-3, -3, 0],
       xAxis: [12, 0, 0],
       yAxis: [0, 12, 0]
@@ -114,7 +118,7 @@ describe('adjustOnResized', () => {
       beforeResolution,
       afterResolution
     );
-    expect(newSection).toEqual({
+    assert.deepEqual(newSection, {
       origin: [3, 5, 7], // origin + (origin to center) / 2
       xAxis: [0, 8, 6], // half of before
       yAxis: [0, -6, 8] // half of before
@@ -130,7 +134,7 @@ test('distanceFromPointToSection', () => {
   };
   const p = new Vector3(2, 3, -5);
   const d = sect.distanceFromPointToSection(a, p);
-  expect(d).toBe(5);
+  assert.equal(d, 5);
 });
 
 test('dotFromPointToSection', () => {
@@ -141,7 +145,7 @@ test('dotFromPointToSection', () => {
   };
   const p = new Vector3(2, 3, -5);
   const d = sect.dotFromPointToSection(a, p);
-  expect(d).toBe(-5);
+  assert.equal(d, -5);
 });
 
 test('sectionEquals', () => {
@@ -150,8 +154,8 @@ test('sectionEquals', () => {
     xAxis: [1, 1, 1],
     yAxis: [2, 2, 2]
   };
-  expect(sect.sectionEquals(a, a)).toBe(true);
-  expect(sect.sectionEquals(a, { ...a, origin: [0, 1, 1] })).toBe(false);
+  assert.equal(sect.sectionEquals(a, a), true);
+  assert.equal(sect.sectionEquals(a, { ...a, origin: [0, 1, 1] }), false);
 });
 
 test('sectionOverlapsVolume', () => {
@@ -160,14 +164,14 @@ test('sectionOverlapsVolume', () => {
     const voxelSize = new Vector3(1, 1, 1);
     const voxelCount = new Vector3(10, 10, 10);
     const vSection = sect.vectorizeSection(mmSection);
-    expect(vSection.xAxis.dot(vSection.yAxis)).toBe(0);
+    assert.equal(vSection.xAxis.dot(vSection.yAxis), 0);
     const actual = su.sectionOverlapsVolume(
       mmSection,
       resolution,
       voxelSize,
       voxelCount
     );
-    expect(actual).toBe(expected);
+    assert.equal(actual, expected);
   };
   t(
     {
@@ -220,5 +224,5 @@ test('sectionCenter', () => {
     // origin to center is [0, 2, 14]
   };
   const center = sect.sectionCenter(section);
-  expect(center).toEqual(new Vector3(3, 6, 14));
+  assert.deepEqual(center, new Vector3(3, 6, 14));
 });

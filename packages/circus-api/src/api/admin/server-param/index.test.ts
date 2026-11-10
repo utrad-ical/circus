@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { it, before, after, beforeEach } from 'node:test';
-import { expect } from 'expect';
 import type { ApiTest } from '../../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../../test/util-routes.ts';
 import { setUpMongoFixture } from '../../../test/util-mongo.ts';
@@ -18,7 +18,7 @@ beforeEach(async () => {
 
 it('should return parameters', async () => {
   const res = await axios.get('api/admin/server-params');
-  expect(res.data).toEqual({
+  assert.deepEqual(res.data, {
     foo: 'bar',
     color: ['green', 'black', 'blue'],
     defaultDomain: 'default'
@@ -27,7 +27,7 @@ it('should return parameters', async () => {
 
 it('should return one parameter', async () => {
   const res = await axios.get('api/admin/server-params/color');
-  expect(res.data).toEqual(['green', 'black', 'blue']);
+  assert.deepEqual(res.data, ['green', 'black', 'blue']);
 });
 
 it('should update one parameter', async () => {
@@ -36,9 +36,9 @@ it('should update one parameter', async () => {
     method: 'put',
     data: ['orange']
   });
-  expect(res.status).toBe(204);
+  assert.equal(res.status, 204);
   const res2 = await axios.get('api/admin/server-params');
-  expect(res2.data.color).toEqual(['orange']);
+  assert.deepEqual(res2.data.color, ['orange']);
 });
 
 it('should bulk-update parametes', async () => {
@@ -47,9 +47,9 @@ it('should bulk-update parametes', async () => {
     method: 'put',
     data: { foo: 'buz', price: 1980 }
   });
-  expect(res.status).toBe(204);
+  assert.equal(res.status, 204);
   const res2 = await axios.get('api/admin/server-params');
-  expect(res2.data).toEqual({
+  assert.deepEqual(res2.data, {
     foo: 'buz',
     color: ['green', 'black', 'blue'],
     defaultDomain: 'default',

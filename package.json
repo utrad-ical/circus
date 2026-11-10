@@ -6,7 +6,7 @@
     "url": "https://github.com/utrad-ical/circus.git"
   },
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=24.0.0"
   },
   "packageManager": "pnpm@12.18.0",
   "scripts": {
@@ -29,7 +29,7 @@
     "@eslint/compat": "^1.1.1",
     "@eslint/eslintrc": "^3.1.0",
     "@eslint/js": "^9.10.0",
-    "@types/node": "^18.19.64",
+    "@types/node": "^24.19.2",
     "@typescript-eslint/eslint-plugin": "^8.4.0",
     "@typescript-eslint/parser": "^8.4.0",
     "babel-plugin-react-compiler": "^19.0.0-beta-a7bf2bd-20241110",
@@ -38,7 +38,6 @@
     "eslint-plugin-react": "^7.35.0",
     "eslint-plugin-react-compiler": "^19.0.0-beta-a7bf2bd-20241110",
     "eslint-plugin-react-hooks": "^4.6.2",
-    "expect": "^30.5.2",
     "globals": "^15.9.0",
     "prettier": "^3.3.3",
     "react-compiler-runtime": "^19.0.0-beta-a7bf2bd-20241110",

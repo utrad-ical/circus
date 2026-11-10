@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { expect } from 'expect';
 import RawData from './RawData.ts';
 import type { PixelFormat } from '../volume/PixelFormat.ts';
 import type { Vector3D } from './geometry/index.ts';
@@ -9,10 +9,10 @@ test('create binary data', () => {
   const array = new Uint8Array(8); // 64 bits in a slice
   array[0] = 0xaa; // 0b10101010
   raw.insertSingleImage(0, array.buffer);
-  expect(raw.getPixelAt(0, 0, 0)).toBe(1);
-  expect(raw.getPixelAt(1, 0, 0)).toBe(0);
-  expect(raw.getPixelAt(2, 0, 0)).toBe(1);
-  expect(raw.getPixelAt(3, 0, 0)).toBe(0);
+  assert.equal(raw.getPixelAt(0, 0, 0), 1);
+  assert.equal(raw.getPixelAt(1, 0, 0), 0);
+  assert.equal(raw.getPixelAt(2, 0, 0), 1);
+  assert.equal(raw.getPixelAt(3, 0, 0), 0);
 });
 
 describe('create binary data (various sizes)', () => {
@@ -36,9 +36,9 @@ describe('create binary data (various sizes)', () => {
       for (let y = 0; y < ry; y++) {
         for (let x = 0; x < rx; x++) {
           if (typeof value === 'number') {
-            expect(raw.getPixelAt(x, y, z)).toBe(value);
+            assert.equal(raw.getPixelAt(x, y, z), value);
           } else {
-            expect(raw.getPixelAt(x, y, z)).toBe(value(x, y, z));
+            assert.equal(raw.getPixelAt(x, y, z), value(x, y, z));
           }
         }
       }
@@ -55,9 +55,9 @@ describe('create binary data (various sizes)', () => {
     for (let y = 0; y < ry; y++) {
       for (let x = 0; x < rx; x++) {
         if (typeof value === 'number') {
-          expect(raw.getPixelAt(x, y, z)).toBe(value);
+          assert.equal(raw.getPixelAt(x, y, z), value);
         } else {
-          expect(raw.getPixelAt(x, y, z)).toBe(value(x, y, z));
+          assert.equal(raw.getPixelAt(x, y, z), value(x, y, z));
         }
       }
     }
@@ -70,7 +70,7 @@ describe('create binary data (various sizes)', () => {
     const actualSrc = new Uint8Array(actualData);
     const expectSrc = new Uint8Array(expectData);
     actualSrc.forEach((value, idx) => {
-      expect(value).toEqual(expectSrc[idx]);
+      assert.deepEqual(value, expectSrc[idx]);
     });
   };
 
@@ -266,7 +266,7 @@ const readWriteTest = (
         }
       }
     }
-    expect(flag).toBe(false);
+    assert.equal(flag, false);
   };
 };
 
@@ -284,8 +284,8 @@ test('#convert', () => {
   raw.convert('int8', function (v) {
     return v + 5;
   });
-  expect(raw.getPixelFormat()).toBe('int8');
-  expect(raw.getPixelAt(2, 2, 2)).toBe(5);
+  assert.equal(raw.getPixelFormat(), 'int8');
+  assert.equal(raw.getPixelAt(2, 2, 2), 5);
 });
 
 test('#copy', () => {
@@ -293,29 +293,29 @@ test('#copy', () => {
   src.fillAll((x, y, z) => x + y + z);
   const dest = new RawData([16, 16, 16], 'int8');
   dest.copy(src);
-  expect(dest.getPixelAt(3, 10, 7)).toBe(20);
+  assert.equal(dest.getPixelAt(3, 10, 7), 20);
 
   dest.fillAll(0);
   dest.copy(src, undefined, [3, 3, 3]);
-  expect(dest.getPixelAt(6, 13, 10)).toBe(20);
-  expect(dest.getPixelAt(15, 15, 15)).toBe(36);
+  assert.equal(dest.getPixelAt(6, 13, 10), 20);
+  assert.equal(dest.getPixelAt(15, 15, 15), 36);
 
   dest.fillAll(0);
   dest.copy(src, undefined, [-3, -3, -3]);
-  expect(dest.getPixelAt(0, 7, 4)).toBe(20);
-  expect(dest.getPixelAt(0, 0, 0)).toBe(9);
+  assert.equal(dest.getPixelAt(0, 7, 4), 20);
+  assert.equal(dest.getPixelAt(0, 0, 0), 9);
 
   dest.fillAll(0);
   dest.copy(src, { origin: [5, 5, 5], size: [5, 5, 5] });
-  expect(dest.getPixelAt(0, 0, 0)).toBe(15);
-  expect(dest.getPixelAt(4, 4, 4)).toBe(27);
-  expect(dest.getPixelAt(5, 4, 4)).toBe(0);
+  assert.equal(dest.getPixelAt(0, 0, 0), 15);
+  assert.equal(dest.getPixelAt(4, 4, 4), 27);
+  assert.equal(dest.getPixelAt(5, 4, 4), 0);
 
   dest.fillAll(10);
   dest.copy(src, undefined, undefined, (s, d) => s + d);
-  expect(dest.getPixelAt(3, 10, 7)).toBe(30);
+  assert.equal(dest.getPixelAt(3, 10, 7), 30);
 
-  expect(() => dest.copy(dest)).toThrow(TypeError);
+  assert.throws(() => dest.copy(dest), TypeError);
 });
 
 test('#transformBoundingBox', () => {
@@ -329,27 +329,27 @@ test('#transformBoundingBox', () => {
   {
     const vol = newVol();
     vol.transformBoundingBox({ origin: [0, 0, 0], size: [8, 8, 8] });
-    expect(vol.getDimension()).toEqual([8, 8, 8]);
-    expect(vol.getPixelAt(5, 7, 3)).toBe(15);
+    assert.deepEqual(vol.getDimension(), [8, 8, 8]);
+    assert.equal(vol.getPixelAt(5, 7, 3), 15);
   }
 
   // shrink to bottom-right
   {
     const vol = newVol();
     vol.transformBoundingBox({ origin: [8, 8, 8], size: [8, 8, 8] });
-    expect(vol.getDimension()).toEqual([8, 8, 8]);
-    expect(vol.getPixelAt(0, 0, 0)).toBe(24);
-    expect(vol.getPixelAt(7, 7, 7)).toBe(45);
+    assert.deepEqual(vol.getDimension(), [8, 8, 8]);
+    assert.equal(vol.getPixelAt(0, 0, 0), 24);
+    assert.equal(vol.getPixelAt(7, 7, 7), 45);
   }
 
   // expand from origin
   {
     const vol = newVol();
     vol.transformBoundingBox({ origin: [0, 0, 0], size: [24, 24, 24] });
-    expect(vol.getDimension()).toEqual([24, 24, 24]);
-    expect(vol.getPixelAt(5, 7, 3)).toBe(15);
-    expect(vol.getPixelAt(15, 15, 15)).toBe(45);
-    expect(vol.getPixelAt(20, 20, 20)).toBe(0);
+    assert.deepEqual(vol.getDimension(), [24, 24, 24]);
+    assert.equal(vol.getPixelAt(5, 7, 3), 15);
+    assert.equal(vol.getPixelAt(15, 15, 15), 45);
+    assert.equal(vol.getPixelAt(20, 20, 20), 0);
   }
 
   // expand to top-left
@@ -359,9 +359,9 @@ test('#transformBoundingBox', () => {
       { origin: [0, 0, 0], size: [32, 32, 32] },
       [16, 16, 16]
     );
-    expect(vol.getDimension()).toEqual([32, 32, 32]);
-    expect(vol.getPixelAt(15, 15, 15)).toBe(0);
-    expect(vol.getPixelAt(16 + 1, 16 + 3, 16 + 5)).toBe(9);
+    assert.deepEqual(vol.getDimension(), [32, 32, 32]);
+    assert.equal(vol.getPixelAt(15, 15, 15), 0);
+    assert.equal(vol.getPixelAt(16 + 1, 16 + 3, 16 + 5), 9);
   }
 });
 
@@ -369,7 +369,7 @@ test('#setPartialVolumeDescriptor', () => {
   const vol = new RawData([16, 16, 16], 'int8');
   vol.fillAll((x, y, z) => x + y + z);
   vol.setPartialVolumeDescriptor({ start: 2, end: 8, delta: 2 });
-  expect(vol.getPixelAt(1, 1, 2)).toBe(8);
+  assert.equal(vol.getPixelAt(1, 1, 2), 8);
   vol.setPartialVolumeDescriptor(undefined);
-  expect(vol.getPixelAt(1, 1, 1)).toBe(3);
+  assert.equal(vol.getPixelAt(1, 1, 1), 3);
 });

@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { it, before, after } from 'node:test';
-import { expect } from 'expect';
 import { usingMongo } from '../test/util-mongo.ts';
 import delay from '../utils/delay.ts';
 import createLocker from './createLocker.ts';
@@ -28,12 +28,13 @@ it('should perform locking of one resource', async () => {
 });
 
 it('should fail on the second lock trial', async () => {
-  await expect(
+  await assert.rejects(
     (async () => {
       await locker.lock('sapphire');
       await locker.lock('sapphire');
-    })()
-  ).rejects.toThrow('Resource busy');
+    })(),
+    { message: /Resource busy/ }
+  );
 });
 
 it('should not fail with a zombie lock', async () => {

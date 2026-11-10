@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test, before, after } from 'node:test';
-import { expect } from 'expect';
 import createFileLogger from './FileLogger.ts';
 import path from 'path';
 import fs from 'fs-extra';
@@ -33,13 +33,13 @@ test('file logger', async () => {
   await sleep(50);
 
   const files = await fs.readdir(logDir);
-  expect(files).toHaveLength(2);
+  assert.equal(files.length, 2);
   for (const file of files) {
     const log = await fs.readFile(path.join(logDir, file), 'utf8');
-    expect(log).toMatch(/Something trivial happened/);
-    expect(log).toMatch(/price: 150/);
-    expect(log).toMatch(/stock: true/);
-    expect(log).toMatch(/This is bad/);
-    expect(log).toMatch(/true false true/);
+    assert.match(log, /Something trivial happened/);
+    assert.match(log, /price: 150/);
+    assert.match(log, /stock: true/);
+    assert.match(log, /This is bad/);
+    assert.match(log, /true false true/);
   }
 });

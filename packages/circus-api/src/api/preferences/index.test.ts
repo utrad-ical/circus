@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test, before, after } from 'node:test';
-import { expect } from 'expect';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import type { AxiosInstance } from 'axios';
@@ -13,7 +13,7 @@ after(async () => await apiTest.tearDown());
 
 test('return the preference of the current user', async () => {
   const res = await axios.get('api/preferences');
-  expect(res.data.theme).toBe('mode_white');
+  assert.equal(res.data.theme, 'mode_white');
 });
 
 describe('PATCH', () => {
@@ -23,9 +23,9 @@ describe('PATCH', () => {
       method: 'patch',
       data: { theme: 'mode_black' }
     });
-    expect(res1.status).toBe(204);
+    assert.equal(res1.status, 204);
     const res2 = await axios.get('api/preferences');
-    expect(res2.data.theme).toBe('mode_black');
+    assert.equal(res2.data.theme, 'mode_black');
   });
 
   test('reject invalid preference update', async () => {
@@ -34,7 +34,7 @@ describe('PATCH', () => {
       method: 'patch',
       data: { theme: 'mode_pink', personalInfoView: false }
     });
-    expect(res.status).toBe(400);
+    assert.equal(res.status, 400);
   });
 
   test('reject nonexistent preference key', async () => {
@@ -43,7 +43,7 @@ describe('PATCH', () => {
       method: 'patch',
       data: { pineapple: true }
     });
-    expect(res.status).toBe(400);
+    assert.equal(res.status, 400);
   });
 
   test('reject empty object', async () => {
@@ -52,6 +52,6 @@ describe('PATCH', () => {
       method: 'patch',
       data: {}
     });
-    expect(res.status).toBe(400);
+    assert.equal(res.status, 400);
   });
 });

@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { it, before, after } from 'node:test';
-import { expect } from 'expect';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import type { AxiosInstance } from 'axios';
@@ -21,12 +21,12 @@ it('should accept uploading and downloading a blob', async () => {
     headers: { 'Content-Type': 'application/octet-stream' },
     data: 'star'
   });
-  expect(res.status).toBe(201);
+  assert.equal(res.status, 201);
   const res2 = await axios.request({
     method: 'get',
     url: 'api/blob/' + sha1
   });
-  expect(res2.data).toBe('star');
+  assert.equal(res2.data, 'star');
 });
 
 it('should accept gzipped data', async () => {
@@ -39,12 +39,12 @@ it('should accept gzipped data', async () => {
     },
     data: createGzip().end('star')
   });
-  expect(res.status).toBe(201);
+  assert.equal(res.status, 201);
   const res2 = await axios.request({
     method: 'get',
     url: 'api/blob/' + sha1
   });
-  expect(res2.data).toBe('star');
+  assert.equal(res2.data, 'star');
 });
 
 it('should return 400 on hash mismatch', async () => {
@@ -54,10 +54,10 @@ it('should return 400 on hash mismatch', async () => {
     headers: { 'Content-Type': 'application/octet-stream' },
     data: 'star'
   });
-  expect(res.status).toBe(400);
+  assert.equal(res.status, 400);
 });
 
 it('should return 404 for nonexistent hash', async () => {
   const res = await axios.get('api/blob/aaabbbcccdddeeefff111222333');
-  expect(res.status).toBe(404);
+  assert.equal(res.status, 404);
 });

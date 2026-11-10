@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test, mock } from 'node:test';
-import { expect } from 'expect';
 import path from 'path';
 import type { FunctionService, ClassService } from './ServiceLoader.ts';
 import ServiceLoader from './ServiceLoader.ts';
@@ -15,7 +15,7 @@ test('simple creation from class', async () => {
   const loader = new ServiceLoader<Services>({});
   loader.register('fighter', Fighter);
   const result = await loader.get('fighter');
-  expect(result).toBeInstanceOf(Fighter);
+  assert.ok(result instanceof Fighter);
 });
 
 test('simple creation from function', async () => {
@@ -24,13 +24,13 @@ test('simple creation from function', async () => {
     gun: Gun;
   }
   const createGun: FunctionService<Gun, {}> = async (options, deps) => {
-    expect(deps).toEqual({});
+    assert.deepEqual(deps, {});
     return { shot: () => 'bang' };
   };
   const loader = new ServiceLoader<Services>();
   loader.register('gun', createGun);
   const result = await loader.get('gun');
-  expect(result.shot()).toBe('bang');
+  assert.equal(result.shot(), 'bang');
 });
 
 test('create from module path', async () => {
@@ -40,7 +40,7 @@ test('create from module path', async () => {
   const loader = new ServiceLoader<Services>({ food: { options: 5 } });
   loader.registerModule('food', path.join(dir, 'Pudding'));
   const pudding = await loader.get('food');
-  expect(pudding.eat()).toBe('pudding eaten 5 times');
+  assert.equal(pudding.eat(), 'pudding eaten 5 times');
 });
 
 describe('create with dependency', () => {
@@ -54,7 +54,7 @@ describe('create with dependency', () => {
   test('using classes', async () => {
     const Ninja: ClassService<Fighter> = class implements Fighter {
       constructor(options: any, deps: { weapon: Weapon }) {
-        expect(deps.weapon instanceof Shuriken).toBe(true);
+        assert.equal(deps.weapon instanceof Shuriken, true);
       }
       attack() {
         return 'use weapon';
@@ -76,8 +76,8 @@ describe('create with dependency', () => {
     loader.register('fighter', Ninja);
     loader.register('weapon', Shuriken);
     const result = await loader.get('fighter');
-    expect(result).toBeInstanceOf(Ninja);
-    expect(fn.mock.callCount()).toBe(1);
+    assert.ok(result instanceof Ninja);
+    assert.equal(fn.mock.callCount(), 1);
   });
 
   test('using functions', async () => {
@@ -97,7 +97,7 @@ describe('create with dependency', () => {
     loader.register('fighter', createNinja);
     loader.register('weapon', createShuriken);
     const result = await loader.get('fighter');
-    expect(result.attack()).toBe('attacking with my shuriken');
+    assert.equal(result.attack(), 'attacking with my shuriken');
   });
 });
 
@@ -116,7 +116,7 @@ test('create with options', async () => {
   const loader = new ServiceLoader<Services>(config);
   loader.register('fighter', Fighter);
   const result = await loader.get('fighter');
-  expect(result.number).toBe(50);
+  assert.equal(result.number, 50);
 });
 
 test('create with factory', async () => {
@@ -126,7 +126,7 @@ test('create with factory', async () => {
   const loader = new ServiceLoader<Services>();
   loader.registerFactory('fighter', async () => 'abc');
   const result = await loader.get('fighter');
-  expect(result).toBe('abc');
+  assert.equal(result, 'abc');
 });
 
 describe('dispose', () => {
@@ -146,7 +146,7 @@ describe('dispose', () => {
     }));
     await loader.get('gun');
     await loader.dispose();
-    expect(fn.mock.callCount()).toBe(1);
+    assert.equal(fn.mock.callCount(), 1);
   });
 
   test('non-await and dispose', async () => {
@@ -158,7 +158,7 @@ describe('dispose', () => {
     }));
     loader.get('gun'); // Do not await
     await loader.dispose();
-    expect(fn.mock.callCount()).toBe(1);
+    assert.equal(fn.mock.callCount(), 1);
   });
 
   test('no dispose', async () => {
@@ -178,7 +178,7 @@ describe('autoloading with registerDirectory', () => {
     const loader1 = new ServiceLoader<Services>();
     loader1.registerDirectory('food', dir, 'Biscuit');
     const biscuit = await loader1.get('food');
-    expect(biscuit.eat()).toBe('biscuit eaten 2 times');
+    assert.equal(biscuit.eat(), 'biscuit eaten 2 times');
   });
 
   test('load custom type with config', async () => {
@@ -186,7 +186,7 @@ describe('autoloading with registerDirectory', () => {
     const loader = new ServiceLoader<Services>(options);
     loader.registerDirectory('food', dir, 'Biscuit');
     const pudding = await loader.get('food');
-    expect(pudding.eat()).toBe('pudding eaten 5 times');
+    assert.equal(pudding.eat(), 'pudding eaten 5 times');
   });
 
   test('load from module using absolute path', async () => {
@@ -195,7 +195,7 @@ describe('autoloading with registerDirectory', () => {
     const loader = new ServiceLoader<Services>(options);
     loader.registerDirectory('food', dir, 'Biscuit');
     const pudding = await loader.get('food');
-    expect(pudding.eat()).toBe('pudding eaten 3 times');
+    assert.equal(pudding.eat(), 'pudding eaten 3 times');
   });
 });
 
@@ -205,7 +205,7 @@ test('dependencies must not be created more than once', async () => {
   class Gunlancer {
     constructor(options: any, { gunlance }: { gunlance: Gunlance }) {
       fn();
-      expect(gunlance).toBeInstanceOf(Gunlance);
+      assert.ok(gunlance instanceof Gunlance);
     }
     static dependencies = ['gunlance'];
   }
@@ -213,7 +213,7 @@ test('dependencies must not be created more than once', async () => {
   class Gunner {
     constructor(options: any, { gun }: { gun: Gun }) {
       fn();
-      expect(gun).toBeInstanceOf(Gun);
+      assert.ok(gun instanceof Gun);
     }
     static dependencies = ['gun'];
   }
@@ -221,7 +221,7 @@ test('dependencies must not be created more than once', async () => {
   class Gunlance {
     constructor(options: any, { gun }: { gun: Gun }) {
       fn();
-      expect(gun).toBeInstanceOf(Gun);
+      assert.ok(gun instanceof Gun);
     }
     static dependencies = ['gun'];
   }
@@ -251,13 +251,13 @@ test('dependencies must not be created more than once', async () => {
     loader.get('gunner'),
     loader.get('gunner')
   ]);
-  expect(gunlancer).toBeInstanceOf(Gunlancer);
-  expect(gunner1).toBeInstanceOf(Gunner);
-  expect(gunner1).toBe(gunner2);
-  expect(fn.mock.callCount()).toBe(4);
+  assert.ok(gunlancer instanceof Gunlancer);
+  assert.ok(gunner1 instanceof Gunner);
+  assert.equal(gunner1, gunner2);
+  assert.equal(fn.mock.callCount(), 4);
 });
 
 test('throws for unregistered service', async () => {
   const loader = new ServiceLoader<any>();
-  await expect(loader.get('weapon')).rejects.toThrow(/not registered/);
+  await assert.rejects(loader.get('weapon'), { message: /not registered/ });
 });

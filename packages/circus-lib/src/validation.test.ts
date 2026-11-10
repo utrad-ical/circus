@@ -1,13 +1,13 @@
+import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { expect } from 'expect';
 import { isDicomUid } from './validation.ts';
 
 test('isDicomUid', () => {
-  expect(isDicomUid('')).toBe(false);
-  expect(isDicomUid('1111.222..8')).toBe(false);
-  expect(isDicomUid('11118')).toBe(false);
-  expect(isDicomUid('1.3333.'.repeat(10) + '555')).toBe(false);
-  expect(isDicomUid('1.3333.55555')).toBe(true);
-  expect(isDicomUid('1.3333.00.55555')).toBe(true);
-  expect(isDicomUid('1.3333.00.55555', true)).toBe(false);
+  assert.equal(isDicomUid(''), false);
+  assert.equal(isDicomUid('1111.222..8'), false);
+  assert.equal(isDicomUid('11118'), false);
+  assert.equal(isDicomUid('1.3333.'.repeat(10) + '555'), false);
+  assert.equal(isDicomUid('1.3333.55555'), true);
+  assert.equal(isDicomUid('1.3333.00.55555'), true);
+  assert.equal(isDicomUid('1.3333.00.55555', true), false);
 });

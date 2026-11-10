@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test, before, after, beforeEach } from 'node:test';
-import { expect } from 'expect';
 import type * as mongo from 'mongodb';
 import { testClientPool } from '../../testHelper.ts';
 import type { MongoClientPool } from '../../mongoClientPool.ts';
@@ -31,7 +31,7 @@ describe('Queue system: Mongo', () => {
   test('insert a job and list it', async () => {
     await queue.enqueue('abcde', { a: 5 }, 0);
     const item = await queue.dequeue();
-    expect(item).toMatchObject({ payload: { a: 5 } });
+    assert.partialDeepStrictEqual(item, { payload: { a: 5 } });
   });
 
   test('insert multiple jobs with priority', async () => {
@@ -42,10 +42,10 @@ describe('Queue system: Mongo', () => {
     const item2 = await queue.dequeue();
     const item3 = await queue.dequeue();
     const item4 = await queue.dequeue();
-    expect(item1).toMatchObject({ payload: { a: 8 } });
-    expect(item2).toMatchObject({ payload: { a: 5 } });
-    expect(item3).toMatchObject({ payload: { a: 7 } });
-    expect(item4).toBeNull();
+    assert.partialDeepStrictEqual(item1, { payload: { a: 8 } });
+    assert.partialDeepStrictEqual(item2, { payload: { a: 5 } });
+    assert.partialDeepStrictEqual(item3, { payload: { a: 7 } });
+    assert.equal(item4, null);
   });
 
   test('mark job as finished', async () => {
@@ -53,13 +53,13 @@ describe('Queue system: Mongo', () => {
     await queue.dequeue();
     await queue.settle('first');
     const rows = await collection.find({}).toArray();
-    expect(rows).toHaveLength(0);
+    assert.equal(rows.length, 0);
   });
 
   test('throws if tried to settle a job before dequeue', async () => {
     await queue.enqueue('first', { a: 5 }, 0);
-    await expect(queue.settle('first')).rejects.toThrow(
-      'before it gets started'
-    );
+    await assert.rejects(queue.settle('first'), {
+      message: /before it gets started/
+    });
   });
 });

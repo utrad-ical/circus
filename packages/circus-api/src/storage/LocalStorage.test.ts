@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { it, before, after, beforeEach } from 'node:test';
-import { expect } from 'expect';
 import type Storage from './Storage.ts';
 import * as path from 'path';
 import * as fs from 'fs-extra';
@@ -29,34 +29,39 @@ after(async function () {
 });
 
 it('should throw error for nonexistent root', async function () {
-  await expect(
+  await assert.rejects(
     createLocalStorage({ root: 'somewhere/over/the/rainbow' })
-  ).rejects.toThrow();
+  );
 });
 
 it('should execute write()', async function () {
   await store.write('xxyyzz', Buffer.from('biscuit'));
   const out = path.join(tmpDir, 'xx', 'xxyyzz.txt');
-  expect(await fs.pathExists(out)).toBe(true);
-  expect(await fs.readFile(out, 'utf8')).toBe('biscuit');
+  assert.equal(await fs.pathExists(out), true);
+  assert.equal(await fs.readFile(out, 'utf8'), 'biscuit');
 });
 
 it('should execute read()', async function () {
-  expect(Buffer.from(await store.read('aabbcc')).toString('utf8')).toBe(
+  assert.equal(
+    Buffer.from(await store.read('aabbcc')).toString('utf8'),
     'coconut'
   );
-  await expect(store.read('notafile')).rejects.toThrow();
+  await assert.rejects(store.read('notafile'));
 });
 
 it('should execute exists()', async function () {
-  expect(await store.exists('aabbcc')).toBe(true);
-  expect(await store.exists('xxyyzz')).toBe(false);
+  assert.equal(await store.exists('aabbcc'), true);
+  assert.equal(await store.exists('xxyyzz'), false);
 });
 
 it('should execute remove()', async function () {
-  expect(await fs.pathExists(path.join(tmpDir, 'aa', 'aabbcc.txt'))).toBe(true);
+  assert.equal(
+    await fs.pathExists(path.join(tmpDir, 'aa', 'aabbcc.txt')),
+    true
+  );
   await store.remove('aabbcc');
-  expect(await fs.pathExists(path.join(tmpDir, 'aa', 'aabbcc.txt'))).toBe(
+  assert.equal(
+    await fs.pathExists(path.join(tmpDir, 'aa', 'aabbcc.txt')),
     false
   );
 });

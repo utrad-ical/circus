@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { expect } from 'expect';
 import checkFilter from './checkFilter.ts';
 import { EJSON } from 'bson';
 
@@ -7,32 +7,38 @@ const fields = ['age', 'name', 'dept', 'valid', 'birthday'];
 
 describe('checkFilter', () => {
   test('normal scalar types', () => {
-    expect(checkFilter({ age: 5, name: 'Alice' }, fields)).toBe(true);
-    expect(checkFilter({ age: { $gt: 5 } }, fields)).toBe(true);
-    expect(checkFilter({ age: { $gt: 5, $lt: 7 } }, fields)).toBe(true);
-    expect(checkFilter({ age: 12, $and: [{ name: 'Alice' }] }, fields)).toBe(
+    assert.equal(checkFilter({ age: 5, name: 'Alice' }, fields), true);
+    assert.equal(checkFilter({ age: { $gt: 5 } }, fields), true);
+    assert.equal(checkFilter({ age: { $gt: 5, $lt: 7 } }, fields), true);
+    assert.equal(
+      checkFilter({ age: 12, $and: [{ name: 'Alice' }] }, fields),
       true
     );
-    expect(checkFilter({ valid: true }, fields)).toBe(true);
-    expect(checkFilter({ name: { $in: ['Alice', 'Bob'] } }, fields)).toBe(true);
-    expect(checkFilter({ name: { $all: ['Ann', 'Bob'] } }, fields)).toBe(true);
-    expect(checkFilter({ sex: 'F' }, fields)).toBe(false);
-    expect(checkFilter({ age: { $gg: 5 } }, fields)).toBe(false);
-    expect(checkFilter({ name: /Bob/ }, fields)).toBe(false);
+    assert.equal(checkFilter({ valid: true }, fields), true);
+    assert.equal(
+      checkFilter({ name: { $in: ['Alice', 'Bob'] } }, fields),
+      true
+    );
+    assert.equal(checkFilter({ name: { $all: ['Ann', 'Bob'] } }, fields), true);
+    assert.equal(checkFilter({ sex: 'F' }, fields), false);
+    assert.equal(checkFilter({ age: { $gg: 5 } }, fields), false);
+    assert.equal(checkFilter({ name: /Bob/ }, fields), false);
   });
 
   test('dates and regexp', () => {
-    expect(checkFilter({ birthday: new Date() }, fields)).toBe(true);
-    expect(
+    assert.equal(checkFilter({ birthday: new Date() }, fields), true);
+    assert.equal(
       checkFilter(
         EJSON.parse(
           '{"birthday":{"$lt":{"$date":"2015-11-11T00:22:33Z"}}}'
         ) as object,
         fields
-      )
-    ).toBe(true);
-    expect(
-      checkFilter(EJSON.parse('{"name":{"$regex":"^An"}}') as object, fields)
-    ).toBe(true);
+      ),
+      true
+    );
+    assert.equal(
+      checkFilter(EJSON.parse('{"name":{"$regex":"^An"}}') as object, fields),
+      true
+    );
   });
 });

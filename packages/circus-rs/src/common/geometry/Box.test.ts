@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test, it } from 'node:test';
-import { expect } from 'expect';
 import { Vector3, Box3 } from 'three';
 import * as box from './Box.ts';
 
@@ -14,13 +14,14 @@ describe('intersectionOfBoxAndPlane', () => {
         yAxis: [0, 2, 0]
       });
 
-      expect((intersections || []).length).toBe(points.length);
+      assert.equal((intersections || []).length, points.length);
       points.forEach(p => {
-        expect(
+        assert.equal(
           intersections!.findIndex(ip => {
             return p[0] == ip.x && p[1] == ip.y && p[2] == ip.z;
-          }) >= 0
-        ).toBe(true);
+          }) >= 0,
+          true
+        );
       });
     };
 

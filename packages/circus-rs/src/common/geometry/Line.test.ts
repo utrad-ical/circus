@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { expect } from 'expect';
 import type { DirectedSegment } from './Line.ts';
 import { intersectsDirectedSegment } from './Line.ts';
 import { Vector2 } from 'three';
@@ -10,8 +10,8 @@ describe('intersectsDirectedSegment', () => {
     segment2: DirectedSegment,
     expected: boolean
   ) => {
-    expect(intersectsDirectedSegment(segment1, segment2)).toBe(expected);
-    expect(intersectsDirectedSegment(segment2, segment1)).toBe(expected);
+    assert.equal(intersectsDirectedSegment(segment1, segment2), expected);
+    assert.equal(intersectsDirectedSegment(segment2, segment1), expected);
   };
   const vec = (x: number, y: number) => new Vector2(x, y);
   const ds = (p1: Vector2, p2: Vector2) => ({ from: p1, to: p2 });

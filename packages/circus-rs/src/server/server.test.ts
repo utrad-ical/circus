@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test, it, before, after } from 'node:test';
-import { expect } from 'expect';
 import type { RsServices } from './configureServiceLoader.ts';
 import configureServiceLoader from './configureServiceLoader.ts';
 import fs from 'fs';
@@ -82,21 +82,21 @@ describe('without auth', () => {
 
   test('status', async () => {
     const res = await axios.get('/status');
-    expect(res.status).toBe(status.OK);
-    expect(res.headers['content-type']).toMatch('application/json');
-    expect(res.data).toMatchObject({ status: 'Running' });
+    assert.equal(res.status, status.OK);
+    assert.ok(res.headers['content-type'].includes('application/json'));
+    assert.partialDeepStrictEqual(res.data, { status: 'Running' });
   });
 
   test('globalIpFilter', async () => {
     const res = await axios.get('/status', {
       headers: { 'X-Forwarded-For': '127.0.0.11 ' }
     });
-    expect(res.status).toBe(status.UNAUTHORIZED);
+    assert.equal(res.status, status.UNAUTHORIZED);
   });
 
   test('must return 404 for nonexistent route', async () => {
     const res = await axios.get('/foobar');
-    expect(res.status).toBe(status.NOT_FOUND);
+    assert.equal(res.status, status.NOT_FOUND);
   });
 
   describe('series middleware', () => {
@@ -105,7 +105,7 @@ describe('without auth', () => {
         method: 'options',
         url: '/series/1.2.3.4.5/metadata'
       });
-      expect(res.headers['access-control-allow-methods']).toBe('GET');
+      assert.equal(res.headers['access-control-allow-methods'], 'GET');
     });
 
     // it.skip('must return 404 for nonexistent series');
@@ -113,24 +113,24 @@ describe('without auth', () => {
     describe('metadata', () => {
       test('returns no window by default', async () => {
         const res = await axios.get('/series/1.2.3.4.5/metadata');
-        expect(res.status).toBe(status.OK);
-        expect(res.data.estimatedWindow).toBeUndefined();
+        assert.equal(res.status, status.OK);
+        assert.equal(res.data.estimatedWindow, undefined);
       });
 
       test('returns no window if window=none', async () => {
         const res = await axios.get(
           '/series/1.2.3.4.5/metadata?estimateWindow=none'
         );
-        expect(res.status).toBe(status.OK);
-        expect(res.data.estimatedWindow).toBeUndefined();
+        assert.equal(res.status, status.OK);
+        assert.equal(res.data.estimatedWindow, undefined);
       });
 
       test('returns estimated window with window=first', async () => {
         const res = await axios.get(
           '/series/1.2.3.4.5/metadata?estimateWindow=first'
         );
-        expect(res.status).toBe(status.OK);
-        expect(res.data.estimatedWindow).toMatchObject({
+        assert.equal(res.status, status.OK);
+        assert.partialDeepStrictEqual(res.data.estimatedWindow, {
           level: 192,
           width: 2498
         });
@@ -140,8 +140,8 @@ describe('without auth', () => {
         const res = await axios.get(
           '/series/1.2.3.4.5/metadata?estimateWindow=center'
         );
-        expect(res.status).toBe(status.OK);
-        expect(res.data.estimatedWindow).toMatchObject({
+        assert.equal(res.status, status.OK);
+        assert.partialDeepStrictEqual(res.data.estimatedWindow, {
           level: 192,
           width: 2498
         });
@@ -151,8 +151,8 @@ describe('without auth', () => {
         const res = await axios.get(
           '/series/1.2.3.4.5/metadata?estimateWindow=full'
         );
-        expect(res.status).toBe(status.OK);
-        expect(res.data.estimatedWindow).toMatchObject({
+        assert.equal(res.status, status.OK);
+        assert.partialDeepStrictEqual(res.data.estimatedWindow, {
           level: 192,
           width: 2498
         });
@@ -162,27 +162,27 @@ describe('without auth', () => {
         const res = await axios.get(
           '/series/1.2.3.4.5/metadata?start=5&end=15&delta=2'
         );
-        expect(res.status).toBe(status.OK);
+        assert.equal(res.status, status.OK);
         // 6 slices (5, 7, 9, 11, 13, 15)
-        expect(res.data.voxelCount).toEqual([512, 512, 6]);
+        assert.deepEqual(res.data.voxelCount, [512, 512, 6]);
       });
     });
 
     describe('volume', () => {
       test('returns raw volume', async () => {
         const res = await axios.get('/series/1.2.3.4.5/volume');
-        expect(res.status).toBe(status.OK);
-        expect(res.headers['content-type']).toBe('application/octet-stream');
-        expect(res.headers['content-length']).toBe(String(512 * 512 * 20 * 2));
+        assert.equal(res.status, status.OK);
+        assert.equal(res.headers['content-type'], 'application/octet-stream');
+        assert.equal(res.headers['content-length'], String(512 * 512 * 20 * 2));
       });
 
       test('returns partial volume', async () => {
         const res = await axios.get(
           '/series/1.2.3.4.5/volume?start=5&end=15&delta=2'
         );
-        expect(res.status).toBe(status.OK);
-        expect(res.headers['content-type']).toBe('application/octet-stream');
-        expect(res.headers['content-length']).toBe(String(512 * 512 * 6 * 2));
+        assert.equal(res.status, status.OK);
+        assert.equal(res.headers['content-type'], 'application/octet-stream');
+        assert.equal(res.headers['content-length'], String(512 * 512 * 6 * 2));
       });
     });
 
@@ -196,8 +196,8 @@ describe('without auth', () => {
             size: '50,50'
           }
         });
-        expect(res.status).toBe(status.OK);
-        expect(res.headers['content-type']).toBe('application/octet-stream');
+        assert.equal(res.status, status.OK);
+        assert.equal(res.headers['content-type'], 'application/octet-stream');
       });
 
       test('return oblique image from partial volume', async () => {
@@ -212,8 +212,8 @@ describe('without auth', () => {
             size: '50,50'
           }
         });
-        expect(res.status).toBe(status.OK);
-        expect(res.headers['content-type']).toBe('application/octet-stream');
+        assert.equal(res.status, status.OK);
+        assert.equal(res.headers['content-type'], 'application/octet-stream');
       });
 
       it('return oblique image in PNG', async () => {
@@ -228,8 +228,8 @@ describe('without auth', () => {
             wl: 50
           }
         });
-        expect(res.status).toBe(status.OK);
-        expect(res.headers['content-type']).toBe('image/png');
+        assert.equal(res.status, status.OK);
+        assert.equal(res.headers['content-type'], 'image/png');
       });
     });
   });
@@ -254,34 +254,34 @@ describe('with authentication', () => {
     const res = await axios.get('/token', {
       headers: { 'X-Forwarded-For': '127.0.0.2' }
     });
-    expect(res.status).toBe(status.UNAUTHORIZED);
+    assert.equal(res.status, status.UNAUTHORIZED);
   });
 
   test('issue valid token', async () => {
     const res = await axios.get('/token', {
       params: { series: '1.2.3.4.5' }
     });
-    expect(res.status).toBe(status.OK);
-    expect(res.data).toMatchObject({ result: 'OK' });
+    assert.equal(res.status, status.OK);
+    assert.partialDeepStrictEqual(res.data, { result: 'OK' });
     tokenHeader = { Authorization: `Bearer ${res.data.token}` };
   });
 
   test('return error if token not passed', async () => {
     const res = await axios.get('/series/1.2.3.4.5/metadata');
-    expect(res.status).toBe(status.UNAUTHORIZED);
+    assert.equal(res.status, status.UNAUTHORIZED);
   });
 
   test('return error for unmatched token', async () => {
     const res = await axios.get('/series/8.8.8.8.8/metadata', {
       headers: tokenHeader
     });
-    expect(res.status).toBe(status.UNAUTHORIZED);
+    assert.equal(res.status, status.UNAUTHORIZED);
   });
 
   test('return content for valid token', async () => {
     const res = await axios.get('/series/1.2.3.4.5/metadata', {
       headers: tokenHeader
     });
-    expect(res.status).toBe(status.OK);
+    assert.equal(res.status, status.OK);
   });
 });

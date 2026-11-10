@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test, before } from 'node:test';
-import { expect } from 'expect';
 import createDicomTagReader, {
   extractAge,
   parseDate,
@@ -19,47 +19,53 @@ before(async () => {
 test('default', async () => {
   const reader = await createDicomTagReader({});
   const result = await reader(content as unknown as ArrayBuffer);
-  expect(result.modality).toBe('CT');
-  expect(result.seriesDate).toEqual(new Date('1999-05-05T10:52:34.530Z'));
-  expect(result.patientInfo.patientName).toBe('Anonymized');
+  assert.equal(result.modality, 'CT');
+  assert.deepEqual(result.seriesDate, new Date('1999-05-05T10:52:34.530Z'));
+  assert.equal(result.patientInfo.patientName, 'Anonymized');
 });
 
 test('with defaultTzOffset', async () => {
   const reader = await createDicomTagReader({ defaultTzOffset: 540 });
   const result = await reader(content as unknown as ArrayBuffer);
-  expect(result.seriesDate).toEqual(new Date('1999-05-05T01:52:34.530Z'));
+  assert.deepEqual(result.seriesDate, new Date('1999-05-05T01:52:34.530Z'));
 });
 
 test('parseDate', () => {
-  expect(parseDate('20181224', '201830')).toEqual(
+  assert.deepEqual(
+    parseDate('20181224', '201830'),
     new Date('2018-12-24T20:18:30Z')
   );
-  expect(parseDate('20200308', '154219.123456')).toEqual(
+  assert.deepEqual(
+    parseDate('20200308', '154219.123456'),
     new Date('2020-03-08T15:42:19.123Z')
   );
-  expect(parseDate('19870430', '235959.999')).toEqual(
+  assert.deepEqual(
+    parseDate('19870430', '235959.999'),
     new Date('1987-04-30T23:59:59.999Z')
   );
 });
 
 test('extractAge', () => {
-  expect(extractAge('020Y', '19700505', new Date('1980-08-30T00:00:00Z'))).toBe(
+  assert.equal(
+    extractAge('020Y', '19700505', new Date('1980-08-30T00:00:00Z')),
     20
   );
-  expect(
-    extractAge(undefined, '19700505', new Date('1980-08-30T00:00:00Z'))
-  ).toBe(10);
-  expect(extractAge(undefined, '19700505', undefined)).toBe(undefined);
+  assert.equal(
+    extractAge(undefined, '19700505', new Date('1980-08-30T00:00:00Z')),
+    10
+  );
+  assert.equal(extractAge(undefined, '19700505', undefined), undefined);
 });
 
 test('extractParameters', async () => {
   const dicomTags = await readDicomTags(content as unknown as ArrayBuffer);
-  expect(dicomTags.parameters.TransferSyntaxUID).toBe('1.2.840.10008.1.2.1'); //UI
-  expect(dicomTags.parameters.PhotometricInterpretation).toBe('MONOCHROME2'); //CS
-  expect(dicomTags.parameters.InstanceNumber).toBe(8); //IS
-  expect(dicomTags.parameters.ImagePositionPatient).toEqual([
-    -119.7656, -399.7656, -280
-  ]); //DS
-  expect(dicomTags.parameters.SliceLocation).toBe(280); //DS
-  expect(dicomTags.parameters.BitsAllocated).toBe(16); //US
+  assert.equal(dicomTags.parameters.TransferSyntaxUID, '1.2.840.10008.1.2.1'); //UI
+  assert.equal(dicomTags.parameters.PhotometricInterpretation, 'MONOCHROME2'); //CS
+  assert.equal(dicomTags.parameters.InstanceNumber, 8); //IS
+  assert.deepEqual(
+    dicomTags.parameters.ImagePositionPatient,
+    [-119.7656, -399.7656, -280]
+  ); //DS
+  assert.equal(dicomTags.parameters.SliceLocation, 280); //DS
+  assert.equal(dicomTags.parameters.BitsAllocated, 16); //US
 });

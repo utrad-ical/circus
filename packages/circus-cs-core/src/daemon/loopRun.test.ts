@@ -1,6 +1,6 @@
+import assert from 'node:assert/strict';
 import { describe, test, mock } from 'node:test';
 import type { Mock } from 'node:test';
-import { expect } from 'expect';
 import type { LoopRunOptions } from './loopRun.ts';
 import loopRun from './loopRun.ts';
 import sleep from '../util/sleep.ts';
@@ -100,21 +100,24 @@ describe('loopRun', () => {
     mockContext.emit('SIGINT');
     await loop;
 
-    expect(fn.mock.calls.map(c => c.arguments)).toEqual([
-      ['CIRCUS CS Job Manager started. pid: 0'],
-      ['Job 1 started.'],
-      ['Job 1 finished.'],
-      ['Job 1 settled.'],
-      ['Job 2 started.'],
-      ['Job 2 failed.'],
-      ['Job 2 settled.'],
-      ['Job 3 started.'],
-      ['Job 3 finished.'],
-      ['Job 3 settled.'],
-      ['Currently the queue is empty.'],
-      ['Signal SIGINT'],
-      ['CIRCUS CS Job Manager will be stopped on next loop.'],
-      ['CIRCUS CS Job Manager stopped.']
-    ]);
+    assert.deepEqual(
+      fn.mock.calls.map(c => c.arguments),
+      [
+        ['CIRCUS CS Job Manager started. pid: 0'],
+        ['Job 1 started.'],
+        ['Job 1 finished.'],
+        ['Job 1 settled.'],
+        ['Job 2 started.'],
+        ['Job 2 failed.'],
+        ['Job 2 settled.'],
+        ['Job 3 started.'],
+        ['Job 3 finished.'],
+        ['Job 3 settled.'],
+        ['Currently the queue is empty.'],
+        ['Signal SIGINT'],
+        ['CIRCUS CS Job Manager will be stopped on next loop.'],
+        ['CIRCUS CS Job Manager stopped.']
+      ]
+    );
   });
 });

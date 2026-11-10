@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { expect } from 'expect';
 import CCL from './ConnectedComponentLabeling3D26.ts';
 import { mosaic, white, black, sampleImg } from './ccl-test-utils.ts';
 
@@ -43,7 +43,7 @@ function CCLTest(
         }
       }
     }
-    expect(flag).toBe(false);
+    assert.equal(flag, false);
   };
 }
 
@@ -57,9 +57,9 @@ test('<Exception handling> number of tentative labels > 8 bit', () => {
     width,
     neighbor
   );
-  expect(() => CCL(img, width, width, width, bufferSize)).toThrow(
-    `Number of tentative labels exceeded the limit ${bufferSize}.`
-  );
+  assert.throws(() => CCL(img, width, width, width, bufferSize), {
+    message: `Number of tentative labels exceeded the limit ${bufferSize}.`
+  });
 });
 
 describe('labeling: Mosaic', () => {

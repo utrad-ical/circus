@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { test, before, after, beforeEach } from 'node:test';
-import { expect } from 'expect';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import { setUpMongoFixture } from '../../test/util-mongo.ts';
@@ -18,8 +18,8 @@ beforeEach(async () => {
 
 test('return user info by userEmail', async () => {
   const res = await axios.get('api/users/alice@example.com');
-  expect(res.status).toBe(200);
-  expect(res.data).toMatchObject({
+  assert.equal(res.status, 200);
+  assert.partialDeepStrictEqual(res.data, {
     userEmail: 'alice@example.com',
     loginId: 'alice',
     description: 'Alice'

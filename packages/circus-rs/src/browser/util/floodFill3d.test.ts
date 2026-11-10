@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { expect } from 'expect';
 import { Vector3, Box3 } from 'three';
 import createMarkedStateDumper from './createMarkedStateDumper.ts';
 import floodFill3d from './floodFill3d.ts';
@@ -24,14 +24,15 @@ describe('floodFill3d with binarizer that always returns ture', () => {
     // console.log(report);
     // console.log(result);
     if (expectedFilled) {
-      expect(result.replace(/\s+/g, '')).toBe(
+      assert.equal(
+        result.replace(/\s+/g, ''),
         expectedResult.replace(/\s+/g, '')
       );
-      expect(report.targetVoxels).toBe(64);
-      expect(report.matchedVoxels).toBe(64);
+      assert.equal(report.targetVoxels, 64);
+      assert.equal(report.matchedVoxels, 64);
     } else {
-      expect(report.targetVoxels).toBe(64);
-      expect(report.matchedVoxels).toBe(0);
+      assert.equal(report.targetVoxels, 64);
+      assert.equal(report.matchedVoxels, 0);
     }
   };
   const expectedResult = `
@@ -96,7 +97,10 @@ describe('floodFill3d with gourd-shaped binarizer', () => {
     const result = dump();
     // console.log(report);
     // console.log(result);
-    expect(result.replace(/\s+/g, '')).toBe(expectedResult.replace(/\s+/g, ''));
+    assert.equal(
+      result.replace(/\s+/g, ''),
+      expectedResult.replace(/\s+/g, '')
+    );
   });
   test('must not fill anywhere if the start point does not satisfy the condition', () => {
     const gourdShapedBinarizer = createDualBallShapedBinarizer(
@@ -114,7 +118,7 @@ describe('floodFill3d with gourd-shaped binarizer', () => {
       gourdShapedBinarizer,
       fillLine
     );
-    expect(report.matchedVoxels).toBe(0);
+    assert.equal(report.matchedVoxels, 0);
   });
 });
 
@@ -199,10 +203,12 @@ describe('floodFill3d with separated 2 balls binarizer', () => {
     const closestZoom1 = dumper(new Box3().setFromArray([0, 7, 9, 15, 12, 11]));
     // console.log(result1);
     // console.log(closestZoom1);
-    expect(result1.replace(/\s+/g, '')).toBe(
+    assert.equal(
+      result1.replace(/\s+/g, ''),
       expectedResult1.replace(/\s+/g, '')
     );
-    expect(closestZoom1.replace(/\s+/g, '')).toBe(
+    assert.equal(
+      closestZoom1.replace(/\s+/g, ''),
       expectedClosestZoom1.replace(/\s+/g, '')
     );
 
@@ -216,10 +222,12 @@ describe('floodFill3d with separated 2 balls binarizer', () => {
     const closestZoom2 = dumper(new Box3().setFromArray([0, 7, 9, 15, 12, 11]));
     // console.log(result2);
     // console.log(closestZoom2);
-    expect(result2.replace(/\s+/g, '')).toBe(
+    assert.equal(
+      result2.replace(/\s+/g, ''),
       expectedResult2.replace(/\s+/g, '')
     );
-    expect(closestZoom2.replace(/\s+/g, '')).toBe(
+    assert.equal(
+      closestZoom2.replace(/\s+/g, ''),
       expectedClosestZoom2.replace(/\s+/g, '')
     );
   });

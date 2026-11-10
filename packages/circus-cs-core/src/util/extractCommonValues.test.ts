@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { expect } from 'expect';
 import extractCommonValues from './extractCommonValues.ts';
 
 describe('extractCommonValues', () => {
@@ -13,7 +13,7 @@ describe('extractCommonValues', () => {
       common: { a: 1, c: 8 },
       unique: [{ b: 5 }, { b: 7 }, { b: 8 }]
     };
-    expect(extractCommonValues(input)).toEqual(output);
+    assert.deepEqual(extractCommonValues(input), output);
   });
 
   test('all common values', () => {
@@ -26,7 +26,7 @@ describe('extractCommonValues', () => {
       common: { a: 1, b: 5, c: 8 },
       unique: [{}, {}, {}]
     };
-    expect(extractCommonValues(input)).toEqual(output);
+    assert.deepEqual(extractCommonValues(input), output);
   });
 
   test('preserve input', () => {
@@ -39,8 +39,8 @@ describe('extractCommonValues', () => {
       common: { b: 5, c: 8 },
       unique: [{ a: 1 }, { a: 2 }, { a: 3 }]
     };
-    expect(extractCommonValues(input)).toEqual(output);
-    expect(input).toEqual([
+    assert.deepEqual(extractCommonValues(input), output);
+    assert.deepEqual(input, [
       { a: 1, b: 5, c: 8 },
       { a: 2, b: 5, c: 8 },
       { a: 3, b: 5, c: 8 }
@@ -61,13 +61,13 @@ describe('extractCommonValues', () => {
         { a: 2, b: 1, c: 8 }
       ]
     };
-    expect(extractCommonValues(input)).toEqual(output);
+    assert.deepEqual(extractCommonValues(input), output);
   });
 
   test('no input', () => {
     const input: object[] = [];
     const output = { common: {}, unique: [{}] };
-    expect(extractCommonValues(input)).toEqual(output);
+    assert.deepEqual(extractCommonValues(input), output);
   });
 
   test('has nested values', () => {
@@ -82,6 +82,6 @@ describe('extractCommonValues', () => {
         { b: 7, e: { w: '' } }
       ]
     };
-    expect(extractCommonValues(input)).toEqual(output);
+    assert.deepEqual(extractCommonValues(input), output);
   });
 });

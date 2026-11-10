@@ -1,5 +1,6 @@
+import assert from 'node:assert/strict';
+import { isDeepStrictEqual } from 'node:util';
 import { describe, test, beforeEach, mock } from 'node:test';
-import { expect } from 'expect';
 import createPluginJobRegisterer from './createPluginJobRegisterer.ts';
 import type { DicomFileRepository } from '@utrad-ical/circus-lib';
 import type { PartialVolumeDescriptor } from '@utrad-ical/circus-rs/server';
@@ -57,19 +58,21 @@ describe('createPluginJobRegisterer', () => {
   test('Register', async () => {
     const registerer = await createPluginJobRegisterer(undefined, deps);
     await registerer.register('aaa', defaultPayload, undefined);
-    expect(
-      deps.dicomFileRepository.getSeries.mock.calls.map(c => c.arguments)
-    ).toContainEqual(['1.2.3']);
-    expect(deps.queue.enqueue.mock.callCount()).toBeGreaterThan(0);
+    assert.ok(
+      deps.dicomFileRepository.getSeries.mock.calls
+        .map(c => c.arguments)
+        .some((item: unknown) => isDeepStrictEqual(item, ['1.2.3']))
+    );
+    assert.ok(deps.queue.enqueue.mock.callCount() > 0);
   });
 
   test('Invalid Job ID throws', async () => {
     // Note that we do not check a duplicate of job IDs
     // because it's not possible to block that here in the first place
     const registerer = await createPluginJobRegisterer(undefined, deps);
-    await expect(registerer.register('../', defaultPayload, 0)).rejects.toThrow(
-      'Invalid Job ID'
-    );
+    await assert.rejects(registerer.register('../', defaultPayload, 0), {
+      message: /Invalid Job ID/
+    });
   });
 
   test('Invalid plug-in ID throws', async () => {
@@ -78,9 +81,9 @@ describe('createPluginJobRegisterer', () => {
       pluginId: 'imaginary'
     };
     const registerer = await createPluginJobRegisterer(undefined, deps);
-    await expect(registerer.register('abc', wrongPayload, 0)).rejects.toThrow(
-      'No such plug-in installed.'
-    );
+    await assert.rejects(registerer.register('abc', wrongPayload, 0), {
+      message: /No such plug-in installed\./
+    });
   });
 
   test('Specifying no series throws', async () => {
@@ -89,9 +92,9 @@ describe('createPluginJobRegisterer', () => {
       series: []
     };
     const registerer = await createPluginJobRegisterer(undefined, deps);
-    await expect(registerer.register('abc', wrongPayload, 0)).rejects.toThrow(
-      'No series specified'
-    );
+    await assert.rejects(registerer.register('abc', wrongPayload, 0), {
+      message: /No series specified/
+    });
   });
 
   test('Nonexistent series throws', async () => {
@@ -105,9 +108,9 @@ describe('createPluginJobRegisterer', () => {
       ]
     };
     const registerer = await createPluginJobRegisterer(undefined, deps);
-    await expect(registerer.register('abc', wrongPayload, 0)).rejects.toThrow(
-      'Series 9.9.9 not found'
-    );
+    await assert.rejects(registerer.register('abc', wrongPayload, 0), {
+      message: /Series 9\.9\.9 not found/
+    });
   });
 
   test('Series with wrong PVD throws', async () => {
@@ -120,8 +123,9 @@ describe('createPluginJobRegisterer', () => {
         series: [{ seriesUid: '1.2.3', partialVolumeDescriptor }]
       };
       const registerer = await createPluginJobRegisterer(undefined, deps);
-      await expect(registerer.register('abc', wrongPayload, 0)).rejects.toThrow(
-        expectedMessage
+      await assert.rejects(
+        registerer.register('abc', wrongPayload, 0),
+        (err: Error) => err.message.includes(expectedMessage)
       );
     };
     await check({ start: 1, end: 999, delta: 1 });

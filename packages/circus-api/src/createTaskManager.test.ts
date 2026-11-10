@@ -1,5 +1,5 @@
+import assert from 'node:assert/strict';
 import { describe, test, before, after, beforeEach, mock } from 'node:test';
-import { expect } from 'expect';
 import type { TaskEventEmitter, TaskManager } from './createTaskManager.ts';
 import createTaskManager from './createTaskManager.ts';
 import type { Models } from './interface.ts';
@@ -62,13 +62,13 @@ describe('register', () => {
       name: 'Importing DICOM files',
       userEmail
     });
-    expect(ctx.body).toEqual({ taskId });
+    assert.deepEqual(ctx.body, { taskId });
 
     const task = await models.task.findById(taskId);
-    expect(task.name).toBe('Importing DICOM files');
-    expect(task.status).toBe('processing');
-    expect(task.userEmail).toBe('alice@example.com');
-    expect(emitter.eventNames()).toEqual(['progress', 'error', 'finish']);
+    assert.equal(task.name, 'Importing DICOM files');
+    assert.equal(task.status, 'processing');
+    assert.equal(task.userEmail, 'alice@example.com');
+    assert.deepEqual(emitter.eventNames(), ['progress', 'error', 'finish']);
   });
 
   test('with download file', async () => {
@@ -84,12 +84,13 @@ describe('register', () => {
     const fileContent = Math.random().toString();
 
     downloadFileStream!.end(fileContent);
-    expect(ctx.body).toEqual({ taskId });
+    assert.deepEqual(ctx.body, { taskId });
     emitter.emit('finish', 'Export finished.');
 
     const task = await models.task.findById(taskId);
-    expect(task.downloadFileType).toMatch(/application\/zip/);
-    expect(await fs.readFile(path.join(downloadTestDir, taskId), 'utf8')).toBe(
+    assert.match(task.downloadFileType, /application\/zip/);
+    assert.equal(
+      await fs.readFile(path.join(downloadTestDir, taskId), 'utf8'),
       fileContent
     );
   });
@@ -117,12 +118,12 @@ describe('report', () => {
     emitter.emit('finish', 'Imported.');
 
     const sentData = await streamFinish();
-    expect(sentData).toMatch(/progress/);
-    expect(sentData).toMatch(/finish/);
-    expect(sentData).toMatch(/taskId/);
+    assert.match(sentData, /progress/);
+    assert.match(sentData, /finish/);
+    assert.match(sentData, /taskId/);
 
     const finishedTask = await models.task.findById(taskId);
-    expect(finishedTask.status).toBe('finished');
+    assert.equal(finishedTask.status, 'finished');
   });
 
   test("report only the given user's progress", async () => {
@@ -148,8 +149,8 @@ describe('report', () => {
     emitterBob.emit('finish');
 
     const sentData = await streamFinish();
-    expect(sentData).not.toMatch(taskId); // no Alice's task
-    expect(sentData).toMatch(new RegExp(`finish\n.+${taskIdBob}`));
+    assert.ok(!sentData.includes(taskId)); // no Alice's task
+    assert.match(sentData, new RegExp(`finish\n.+${taskIdBob}`));
   });
 
   test('report error of one task', async () => {
@@ -161,15 +162,15 @@ describe('report', () => {
     emitter.emit('error', 'Some error happened.');
 
     const sentData = await streamFinish();
-    expect(sentData).toMatch(/error/);
+    assert.match(sentData, /error/);
 
     const task = await models.task.findById(taskId);
-    expect(task.status).toBe('error');
+    assert.equal(task.status, 'error');
   });
 });
 
 test('isTaskInProgress', async () => {
-  expect(manager.isTaskInProgress('dummy')).toBe(false);
+  assert.equal(manager.isTaskInProgress('dummy'), false);
 
   const ctx = newDummyCtx();
   const { taskId, emitter } = await manager.register(ctx, {
@@ -177,13 +178,13 @@ test('isTaskInProgress', async () => {
     userEmail
   });
 
-  expect(manager.isTaskInProgress(taskId)).toBe(true);
+  assert.equal(manager.isTaskInProgress(taskId), true);
 
   emitter.emit('progress', 'Importing 10 files...', 1, 10);
-  expect(manager.isTaskInProgress(taskId)).toBe(true);
+  assert.equal(manager.isTaskInProgress(taskId), true);
 
   emitter.emit('finish');
-  expect(manager.isTaskInProgress(taskId)).toBe(false);
+  assert.equal(manager.isTaskInProgress(taskId), false);
 
   // Wait for the DB update triggered by 'finish' so that it does not
   // outlive the DB connection closed in afterAll
@@ -195,10 +196,10 @@ test('download', async () => {
   const taskId = 'aaaabbbbcccc2222';
   await fs.writeFile(path.join(downloadTestDir, taskId), 'test');
   await manager.download(ctx, taskId);
-  expect(ctx.type).toBe('application/zip');
-  expect(ctx.set.mock.callCount()).toBeGreaterThan(0);
+  assert.equal(ctx.type, 'application/zip');
+  assert.ok(ctx.set.mock.callCount() > 0);
   const string = await readFromStreamTillEnd(ctx.body);
-  expect(string).toBe('test');
+  assert.equal(string, 'test');
 });
 
 test('fail download when the download file is gone', async () => {
@@ -207,6 +208,6 @@ test('fail download when the download file is gone', async () => {
   try {
     await manager.download(ctx, taskId);
   } catch (err: any) {
-    expect(err.status).toBe(404);
+    assert.equal(err.status, 404);
   }
 });

@@ -1,4 +1,4 @@
-import randomstring from 'randomstring';
+import { randomBytes } from 'node:crypto';
 import type * as mongo from 'mongodb';
 
 /**
@@ -36,7 +36,7 @@ const createLocker = (
     const now = new Date();
     const minTime = new Date(now.getTime() - timeout);
 
-    const myId = randomstring.generate({ length: 12, charset: 'hex' });
+    const myId = randomBytes(6).toString('hex'); // 12 hex chars
     try {
       await db
         .collection(collectionName)

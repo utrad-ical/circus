@@ -1,5 +1,5 @@
 import Ajv from 'ajv';
-import glob from 'glob-promise';
+import glob from './utils/glob.ts';
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import semver from 'semver';
@@ -7,7 +7,6 @@ import * as path from 'path';
 import type { NoDepFunctionService } from '@utrad-ical/circus-lib';
 import { isDicomUid } from '@utrad-ical/circus-lib';
 import type { Validator } from './interface.ts';
-import _ from 'lodash';
 
 interface Schema {
   $async?: boolean;
@@ -313,7 +312,7 @@ const createValidator: NoDepFunctionService<
 
           for (const schemaToValidate of schemasToValidate) {
             try {
-              const clonedData = _.cloneDeep({ ...data, items: [item] });
+              const clonedData = structuredClone({ ...data, items: [item] });
               const validatedData = await validatorToUse.validate(
                 schemaToValidate,
                 clonedData
@@ -333,7 +332,7 @@ const createValidator: NoDepFunctionService<
 
       for (const schemaToValidate of schemasToValidate) {
         try {
-          const clonedData = _.cloneDeep(data);
+          const clonedData = structuredClone(data);
           return await validatorToUse.validate(schemaToValidate, clonedData);
         } catch (err) {
           validationError = err;

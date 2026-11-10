@@ -1,4 +1,4 @@
-import glob from 'glob-promise';
+import glob from './glob.ts';
 import * as path from 'path';
 
 const scanMigrationFiles = async () => {

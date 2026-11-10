@@ -1,5 +1,5 @@
 import fs from 'fs';
-import glob from 'glob-promise';
+import glob from '../../utils/glob.ts';
 import status from 'http-status';
 import mime from 'mime';
 import path from 'path';

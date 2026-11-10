@@ -1,5 +1,5 @@
 import type { FunctionService } from '@utrad-ical/circus-lib';
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import moment from 'moment';
 import { table } from 'table';
 import sleep from '../util/sleep.ts';
@@ -29,7 +29,9 @@ const monitor: FunctionService<
 
         const status = await daemonController.status();
         const statusText =
-          status === 'running' ? chalk.green(status) : chalk.red(status);
+          status === 'running'
+            ? styleText('green', status)
+            : styleText('red', status);
 
         const rows = jobs.map(job => {
           const text =

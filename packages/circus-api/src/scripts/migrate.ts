@@ -1,5 +1,5 @@
 import * as path from 'path';
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import type { Database, Models } from '../interface.ts';
 import scanMigrationFiles from '../utils/scanMigrationFiles.ts';
 import type Command from './Command.ts';
@@ -30,7 +30,7 @@ export const command: Command<{ database: Database; models: Models }> = async (
       const file = migrations[i];
       const module = await import(file);
       const name = path.basename(file);
-      console.log(chalk.green('Forwarding...'), name);
+      console.log(styleText('green', 'Forwarding...'), name);
       try {
         await module.up(database.db, models);
         await migrationCollection.updateOne(
@@ -39,7 +39,7 @@ export const command: Command<{ database: Database; models: Models }> = async (
           { upsert: true }
         );
       } catch (err: any) {
-        console.error(chalk.red('Error: ', name));
+        console.error(styleText('red', `Error: ${name}`));
         console.error(err.message);
         if (err.errors) console.error(err.errors);
         break;

@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import chalk from 'chalk';
+import { styleText } from 'node:util';
 import type DockerRunner from '../util/DockerRunner.ts';
 import isDirectory from '../util/isDirectory.ts';
 import type { FunctionService } from '@utrad-ical/circus-lib';
@@ -88,18 +88,18 @@ const checkEnv: FunctionService<
           (entry.title + ' '.repeat(35)).substring(0, 35) + ': '
         );
         const message = await entry.fn();
-        process.stdout.write(chalk.cyanBright('[OK]\n'));
-        if (message) console.log('  ' + chalk.gray(message));
+        process.stdout.write(styleText('cyanBright', '[OK]\n'));
+        if (message) console.log('  ' + styleText('gray', message));
         passedCount++;
       } catch (e: any) {
-        process.stdout.write(chalk.redBright('[NG]\n'));
+        process.stdout.write(styleText('redBright', '[NG]\n'));
         console.error('  ' + e.message);
       }
     }
     if (passedCount === checkEntries.length) {
-      console.log(chalk.cyanBright('All checks passed.'));
+      console.log(styleText('cyanBright', 'All checks passed.'));
     } else {
-      console.log(chalk.red('Check the installation guide.'));
+      console.log(styleText('red', 'Check the installation guide.'));
     }
   };
 };

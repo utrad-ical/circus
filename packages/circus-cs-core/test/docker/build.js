@@ -1,14 +1,14 @@
-const chalk = require('chalk');
-const fs = require('fs-extra');
-const cp = require('child_process');
-const path = require('path');
+import cp from 'node:child_process';
+import path from 'node:path';
+import { styleText } from 'node:util';
+import fs from 'fs-extra';
 
 // Builds mock docker images into the local machine.
 
 const build = async target => {
-  console.log('\n' + chalk.yellow(`Building circus-mock-${target}`));
+  console.log('\n' + styleText('yellow', `Building circus-mock-${target}`));
 
-  const tmpDir = path.resolve(__dirname, 'tmp');
+  const tmpDir = path.resolve(import.meta.dirname, 'tmp');
   await fs.ensureDir(tmpDir);
 
   const dockerFile = unindent(`
@@ -26,20 +26,24 @@ const build = async target => {
   });
   await fs.writeFile(path.join(tmpDir, 'plugin.json'), pluginDefinitionFile);
   await fs.copy(
-    path.join(__dirname, '..', 'results'),
+    path.join(import.meta.dirname, '..', 'results'),
     path.join(tmpDir, 'results'),
     { recursive: true }
   );
-  await fs.copy(path.join(__dirname, 'main.js'), path.join(tmpDir, 'main.js'));
+  await fs.copy(
+    path.join(import.meta.dirname, 'main.js'),
+    path.join(tmpDir, 'main.js')
+  );
 
   const image = `circus-mock-${target}`;
   await passthru('docker', ['image', 'rm', image]);
   try {
-    const code = await passthru('docker', ['build', './tmp', '-t', image]);
+    const code = await passthru('docker', ['build', tmpDir, '-t', image]);
     if (code === 0) {
-      console.log(chalk.green(`Build succeeded for ${image}`));
+      console.log(styleText('green', `Build succeeded for ${image}`));
     } else {
-      console.error(chalk.red(`Build failed for ${image}`));
+      console.error(styleText('red', `Build failed for ${image}`));
+      process.exitCode = 1;
     }
   } finally {
     await fs.remove(tmpDir);
@@ -71,6 +75,7 @@ const main = async () => {
       await build(target);
     } catch (err) {
       console.error(err.message);
+      process.exitCode = 1;
     }
   }
   console.log(

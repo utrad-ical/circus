@@ -60,19 +60,6 @@ module.exports = {
   plugins: [
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(nodeEnv)
-    }),
-    new webpack.container.ModuleFederationPlugin({
-      shared: [
-        { react: { singleton: true, eager: true, requiredVersion: '^17.0.2' } },
-        {
-          'react-dom': {
-            singleton: true,
-            eager: true,
-            requiredVersion: '^17.0.2'
-          }
-        },
-        { '@utrad-ical/circus-ui-kit': { singleton: true, eager: true } }
-      ]
     })
   ],
   devServer: {

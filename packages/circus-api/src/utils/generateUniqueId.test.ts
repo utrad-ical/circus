@@ -1,3 +1,5 @@
+import { it } from 'node:test';
+import { expect } from 'expect';
 import generateUniqueId from './generateUniqueId.ts';
 
 it('generateUniqueId', () => {

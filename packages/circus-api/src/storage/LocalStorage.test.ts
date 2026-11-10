@@ -1,3 +1,5 @@
+import { it, before, after, beforeEach } from 'node:test';
+import { expect } from 'expect';
 import type Storage from './Storage.ts';
 import * as path from 'path';
 import * as fs from 'fs-extra';
@@ -7,7 +9,7 @@ let store: Storage;
 
 const tmpDir = path.join(__dirname, 'tmp-dir');
 
-beforeAll(async function () {
+before(async function () {
   await fs.emptyDir(tmpDir);
   store = await createLocalStorage({
     dataDir: tmpDir,
@@ -20,7 +22,7 @@ beforeEach(async function () {
   await fs.outputFile(path.join(tmpDir, 'aa', 'aabbcc.txt'), 'coconut');
 });
 
-afterAll(async function () {
+after(async function () {
   if (tmpDir) {
     await fs.remove(tmpDir);
   }

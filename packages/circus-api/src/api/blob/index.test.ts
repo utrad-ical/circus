@@ -1,14 +1,16 @@
+import { it, before, after } from 'node:test';
+import { expect } from 'expect';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import type { AxiosInstance } from 'axios';
 import { createGzip } from 'zlib';
 
 let apiTest: ApiTest, axios: AxiosInstance;
-beforeAll(async () => {
+before(async () => {
   apiTest = await setUpAppForRoutesTest();
   axios = apiTest.axiosInstances.alice;
 });
-afterAll(async () => await apiTest.tearDown());
+after(async () => await apiTest.tearDown());
 
 const sha1 = '4e3e01b9af84f54d95f94d24eeb0583332a85268';
 

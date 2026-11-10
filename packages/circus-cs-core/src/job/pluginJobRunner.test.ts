@@ -1,3 +1,5 @@
+import { describe, test, mock } from 'node:test';
+import { expect } from 'expect';
 import Archiver from 'archiver';
 import { EventEmitter } from 'events';
 import memory from 'memory-streams';
@@ -23,7 +25,7 @@ const generatePluginJobRunnerTest = async (
   // Mock Job Reporter
   let resultsPacked = false;
   const jobReporter = {
-    report: jest.fn(),
+    report: mock.fn(),
     logStream: async (jobId: string, stream: Readable) => {
       stream.pipe(logStream);
     },
@@ -76,7 +78,7 @@ const generatePluginJobRunnerTest = async (
   };
 
   await runner.run(jobId, jobRequest);
-  const statuses = jobReporter.report.mock.calls.map(call => call[1]);
+  const statuses = jobReporter.report.mock.calls.map(call => call.arguments[1]);
   expect(statuses).toEqual(['processing', 'results', 'finished']);
 
   expect(resultsPacked).toBe(true);
@@ -148,7 +150,7 @@ describe('executePlugin', () => {
   });
 
   // Skipping this test because it's slow, but should work
-  test.skip('network blocked', async () => {
+  test.skip('network blocked', { timeout: 99999 }, async () => {
     const plugin: circus.PluginDefinition = {
       pluginId: 'circus-mock-check-network',
       pluginName: 'Test',
@@ -157,5 +159,5 @@ describe('executePlugin', () => {
     };
     const result = await t(plugin);
     expect(result).toContain('EAI_AGAIN'); // Network unavailable
-  }, 99999);
+  });
 });

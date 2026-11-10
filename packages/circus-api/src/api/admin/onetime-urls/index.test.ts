@@ -1,14 +1,16 @@
+import { test, before, after, beforeEach } from 'node:test';
+import { expect } from 'expect';
 import type { ApiTest } from '../../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../../test/util-routes.ts';
 import { setUpMongoFixture } from '../../../test/util-mongo.ts';
 import type { AxiosInstance } from 'axios';
 
 let apiTest: ApiTest, axios: AxiosInstance;
-beforeAll(async () => {
+before(async () => {
   apiTest = await setUpAppForRoutesTest();
 });
 
-afterAll(async () => await apiTest.tearDown());
+after(async () => await apiTest.tearDown());
 
 beforeEach(async () => {
   axios = apiTest.axiosInstances.alice;

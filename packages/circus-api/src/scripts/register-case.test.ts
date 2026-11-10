@@ -1,3 +1,5 @@
+import { describe, test, before, beforeEach, mock } from 'node:test';
+import { expect } from 'expect';
 import { setUpMongoFixture, usingSessionModels } from '../test/util-mongo.ts';
 import type { Database, TransactionManager, Validator } from '../interface.ts';
 import type { CommandFunc } from './Command.ts';
@@ -10,7 +12,7 @@ let transactionManager: TransactionManager;
 let database: Database;
 let validator: Validator;
 
-beforeAll(async () => {
+before(async () => {
   database = (await modelsPromise).database;
   validator = (await modelsPromise).validator;
   transactionManager = await createTransactionManager(
@@ -30,7 +32,7 @@ beforeEach(async () => {
 });
 
 test('create new case', async () => {
-  const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
+  const spy = mock.method(console, 'log', () => {});
   await commandFunc({
     _args: [
       '8883fdef6f5144f50eb2a83cd34baa44',
@@ -40,12 +42,12 @@ test('create new case', async () => {
     user: 'bob',
     tags: 'tag1,tag2'
   });
-  const caseId = spy.mock.calls[0][0];
+  const caseId = spy.mock.calls[0].arguments[0];
   await transactionManager.withTransaction(async models => {
     const data = await models.clinicalCase.findById(caseId);
     expect(data.projectId).toBe('8883fdef6f5144f50eb2a83cd34baa44');
   });
-  spy.mockReset();
+  spy.mock.resetCalls();
 });
 
 describe('throw error when necessary arguments do not exist', () => {
@@ -54,7 +56,7 @@ describe('throw error when necessary arguments do not exist', () => {
       _args: ['111.222.333.444.777'],
       user: 'bob'
     });
-    await expect(command).rejects.toThrowError(
+    await expect(command).rejects.toThrow(
       new Error(
         'Required arguments must be specified.\n' +
           'argument 1: project ID or project name\n' +
@@ -77,7 +79,7 @@ describe('throw error when necessary arguments do not exist', () => {
     const command = commandFunc({
       _args: ['8883fdef6f5144f50eb2a83cd34baa44', '111.222.333.444.777']
     });
-    await expect(command).rejects.toThrowError(
+    await expect(command).rejects.toThrow(
       new Error('User ID or e-mail must be specified.')
     );
   });

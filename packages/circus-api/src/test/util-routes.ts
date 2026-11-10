@@ -1,4 +1,5 @@
 import type { Deps } from '../typings/middlewares.ts';
+import { after } from 'node:test';
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import fs from 'fs-extra';
@@ -30,7 +31,7 @@ import * as ws from 'ws';
 
 /**
  * Holds data used for API route testing.
- * Make sure to call `tearDown()` in the `afterAll()` function.
+ * Make sure to call `tearDown()` in the `after()` function.
  */
 export interface ApiTest {
   database: Database;
@@ -75,7 +76,7 @@ export interface ApiTest {
   dicomFileRepository: DicomFileRepository;
   /**
    * Shuts down the test Koa server and the DB connection.
-   * Make sure to call this on `afterAll()`.
+   * Make sure to call this on `after()`.
    */
   tearDown: () => Promise<void>;
   /**

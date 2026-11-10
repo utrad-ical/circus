@@ -1,3 +1,5 @@
+import { describe, test } from 'node:test';
+import { expect } from 'expect';
 import dilation from './dilation.ts';
 import type { Structure } from './morphology-types.ts';
 

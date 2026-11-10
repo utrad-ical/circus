@@ -1,3 +1,5 @@
+import { test } from 'node:test';
+import { expect } from 'expect';
 import { isDicomUid } from './validation.ts';
 
 test('isDicomUid', () => {

@@ -1,14 +1,16 @@
+import { test, before, after } from 'node:test';
+import { expect } from 'expect';
 import type { AxiosInstance } from 'axios';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import httpStatus from 'http-status';
 
 let apiTest: ApiTest, axios: AxiosInstance;
-beforeAll(async () => {
+before(async () => {
   apiTest = await setUpAppForRoutesTest();
   axios = apiTest.axiosInstances.alice;
 });
-afterAll(async () => await apiTest.tearDown());
+after(async () => await apiTest.tearDown());
 
 test('Create / search / delete token', async () => {
   const res1 = await axios.post('/api/tokens', { description: 'stella' });

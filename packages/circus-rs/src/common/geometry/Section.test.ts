@@ -1,3 +1,5 @@
+import { describe, test } from 'node:test';
+import { expect } from 'expect';
 import * as su from '../../browser/section-util.ts';
 import * as sect from './Section.ts';
 import type { Vector2D } from './Vector.ts';

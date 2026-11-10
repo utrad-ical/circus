@@ -1,3 +1,4 @@
+import { describe, test } from 'node:test';
 import * as assert from 'assert';
 import { createEncConverter } from './encConverter.ts';
 

@@ -2,7 +2,6 @@ import { FlatCompat } from '@eslint/eslintrc';
 import js from '@eslint/js';
 import typescriptEslint from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
-import jest from 'eslint-plugin-jest';
 import react from 'eslint-plugin-react';
 import reactCompiler from 'eslint-plugin-react-compiler';
 import reactHooks from 'eslint-plugin-react-hooks';
@@ -30,8 +29,7 @@ export default [
     languageOptions: {
       globals: {
         ...globals.browser,
-        ...globals.node,
-        ...globals.jest
+        ...globals.node
       },
 
       parser: tsParser,
@@ -72,13 +70,6 @@ export default [
       'react/prop-types': 'off',
       'react/display-name': 'off',
       'react-compiler/react-compiler': 'error'
-    }
-  },
-  {
-    files: ['**/*.test.ts'],
-
-    plugins: {
-      jest
     }
   },
   {

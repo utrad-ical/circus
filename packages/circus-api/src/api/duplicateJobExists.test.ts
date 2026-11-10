@@ -1,3 +1,5 @@
+import { it, before } from 'node:test';
+import { expect } from 'expect';
 import { usingModels, setUpMongoFixture } from '../test/util-mongo.ts';
 import type { Models } from '../interface.ts';
 import duplicateJobExists from './duplicateJobExists.ts';
@@ -5,7 +7,7 @@ import duplicateJobExists from './duplicateJobExists.ts';
 let models: Models;
 const modelsPromise = usingModels();
 
-beforeAll(async () => {
+before(async () => {
   const { database, models: m } = await modelsPromise;
   await setUpMongoFixture(database.db, ['pluginJobs']);
   models = m;

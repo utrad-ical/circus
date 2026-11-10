@@ -1,14 +1,16 @@
+import { test, before, after } from 'node:test';
+import { expect } from 'expect';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import type { AxiosInstance } from 'axios';
 import httpStatus from 'http-status';
 
 let apiTest: ApiTest, axios: AxiosInstance;
-beforeAll(async () => {
+before(async () => {
   apiTest = await setUpAppForRoutesTest();
   axios = apiTest.axiosInstances.alice;
 });
-afterAll(async () => await apiTest.tearDown());
+after(async () => await apiTest.tearDown());
 
 test('logout', async () => {
   const res1 = await axios.get('api/logout');

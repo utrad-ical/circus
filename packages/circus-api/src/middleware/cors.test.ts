@@ -1,3 +1,5 @@
+import { test } from 'node:test';
+import { expect } from 'expect';
 import cors from './cors.ts';
 import axios from 'axios';
 import { setUpKoaTest } from '../test/util-koa.ts';

@@ -1,3 +1,5 @@
+import { describe, test, mock } from 'node:test';
+import { expect } from 'expect';
 import path from 'path';
 import type { FunctionService, ClassService } from './ServiceLoader.ts';
 import ServiceLoader from './ServiceLoader.ts';
@@ -60,7 +62,7 @@ describe('create with dependency', () => {
       static dependencies = ['weapon'];
     };
 
-    const fn = jest.fn();
+    const fn = mock.fn();
     class Shuriken implements Weapon {
       constructor() {
         fn();
@@ -75,8 +77,7 @@ describe('create with dependency', () => {
     loader.register('weapon', Shuriken);
     const result = await loader.get('fighter');
     expect(result).toBeInstanceOf(Ninja);
-    expect(fn).toBeCalledTimes(1);
-    expect.assertions(3);
+    expect(fn.mock.callCount()).toBe(1);
   });
 
   test('using functions', async () => {
@@ -137,7 +138,7 @@ describe('dispose', () => {
   }
 
   test('await and dispose', async () => {
-    const fn = jest.fn();
+    const fn = mock.fn();
     const loader = new ServiceLoader<Services>();
     loader.register('gun', async () => ({
       shot: () => 'bang',
@@ -145,11 +146,11 @@ describe('dispose', () => {
     }));
     await loader.get('gun');
     await loader.dispose();
-    expect(fn).toHaveBeenCalledTimes(1);
+    expect(fn.mock.callCount()).toBe(1);
   });
 
   test('non-await and dispose', async () => {
-    const fn = jest.fn();
+    const fn = mock.fn();
     const loader = new ServiceLoader<Services>();
     loader.register('gun', async () => ({
       shot: () => 'bang',
@@ -157,7 +158,7 @@ describe('dispose', () => {
     }));
     loader.get('gun'); // Do not await
     await loader.dispose();
-    expect(fn).toHaveBeenCalledTimes(1);
+    expect(fn.mock.callCount()).toBe(1);
   });
 
   test('no dispose', async () => {
@@ -199,7 +200,7 @@ describe('autoloading with registerDirectory', () => {
 });
 
 test('dependencies must not be created more than once', async () => {
-  const fn = jest.fn();
+  const fn = mock.fn();
 
   class Gunlancer {
     constructor(options: any, { gunlance }: { gunlance: Gunlance }) {
@@ -253,7 +254,7 @@ test('dependencies must not be created more than once', async () => {
   expect(gunlancer).toBeInstanceOf(Gunlancer);
   expect(gunner1).toBeInstanceOf(Gunner);
   expect(gunner1).toBe(gunner2);
-  expect(fn).toBeCalledTimes(4);
+  expect(fn.mock.callCount()).toBe(4);
 });
 
 test('throws for unregistered service', async () => {

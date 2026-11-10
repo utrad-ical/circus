@@ -1,3 +1,5 @@
+import { describe, test } from 'node:test';
+import { expect } from 'expect';
 import CCL from './ConnectedComponentLabeling3D26.ts';
 import { mosaic, white, black, sampleImg } from './ccl-test-utils.ts';
 

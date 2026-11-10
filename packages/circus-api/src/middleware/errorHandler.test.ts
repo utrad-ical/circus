@@ -1,3 +1,5 @@
+import { test, before, after } from 'node:test';
+import { expect } from 'expect';
 import errorHandler from './errorHandler.ts';
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
@@ -9,7 +11,7 @@ import { createNullLogger } from '@utrad-ical/circus-lib';
 
 let testServer: TestServer, ax: AxiosInstance;
 
-beforeAll(async () => {
+before(async () => {
   testServer = await setUpKoaTest(async app => {
     const router = new Router();
 
@@ -58,7 +60,7 @@ beforeAll(async () => {
   ax = axios.create({ baseURL: testServer.url, validateStatus: () => true });
 });
 
-afterAll(async () => {
+after(async () => {
   await testServer.tearDown();
 });
 

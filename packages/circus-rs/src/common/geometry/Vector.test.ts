@@ -1,3 +1,5 @@
+import { it } from 'node:test';
+import { expect } from 'expect';
 import * as vector from './Vector.ts';
 import { Vector2, Box2 } from 'three';
 

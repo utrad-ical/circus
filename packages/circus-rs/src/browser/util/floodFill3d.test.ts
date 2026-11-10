@@ -1,3 +1,5 @@
+import { describe, test } from 'node:test';
+import { expect } from 'expect';
 import { Vector3, Box3 } from 'three';
 import createMarkedStateDumper from './createMarkedStateDumper.ts';
 import floodFill3d from './floodFill3d.ts';

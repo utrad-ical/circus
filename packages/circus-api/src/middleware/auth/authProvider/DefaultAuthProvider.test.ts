@@ -1,3 +1,5 @@
+import { describe, test, before } from 'node:test';
+import { expect } from 'expect';
 import createDefaultAuthProvider from './DefaultAuthProvider.ts';
 import { usingModels, setUpMongoFixture } from '../../../test/util-mongo.ts';
 import type { Models } from '../../../interface.ts';
@@ -5,7 +7,7 @@ import type { Models } from '../../../interface.ts';
 const modelsPromise = usingModels();
 let models: Models;
 
-beforeAll(async () => {
+before(async () => {
   const { db } = (await modelsPromise).database;
   models = (await modelsPromise).models;
   await setUpMongoFixture(db, ['users']);

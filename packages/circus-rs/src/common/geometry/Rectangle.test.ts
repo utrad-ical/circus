@@ -1,3 +1,5 @@
+import { describe, it } from 'node:test';
+import { expect } from 'expect';
 import * as rect from './Rectangle.ts';
 import { Vector2, Box2 } from 'three';
 

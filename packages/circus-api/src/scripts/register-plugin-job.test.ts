@@ -1,3 +1,5 @@
+import { describe, test, before, beforeEach, mock } from 'node:test';
+import { expect } from 'expect';
 import { setUpMongoFixture, usingSessionModels } from '../test/util-mongo.ts';
 import type { CommandFunc } from './Command.ts';
 import type { Database, TransactionManager, Validator } from '../interface.ts';
@@ -11,7 +13,7 @@ let database: Database;
 let validator: Validator;
 let cs: any;
 
-beforeAll(async () => {
+before(async () => {
   database = (await modelsPromise).database;
   validator = (await modelsPromise).validator;
   transactionManager = await createTransactionManager(
@@ -22,14 +24,14 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   const { db } = (await modelsPromise).database;
-  const registerFn = jest.fn();
+  const registerFn = mock.fn();
   cs = { job: { register: registerFn } };
   commandFunc = await command(null, { transactionManager, cs });
   await setUpMongoFixture(db, ['pluginJobs', 'users']);
 });
 
 test('create new plugin-job', async () => {
-  const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
+  const spy = mock.method(console, 'log', () => {});
   await commandFunc({
     _args: [
       'e2cf1a5f82d62f7b3bd02db78e51008f4f11f8b31aedc96bfd50f3d7c80ba6e6',
@@ -39,19 +41,19 @@ test('create new plugin-job', async () => {
     priority: -1,
     tags: 'tag1,tag2'
   });
-  expect(cs.job.register).toHaveBeenCalledTimes(1);
-  expect(cs.job.register.mock.calls[0][0]).toHaveLength(26);
-  expect(cs.job.register.mock.calls[0][1].pluginId).toEqual(
+  expect(cs.job.register.mock.callCount()).toBe(1);
+  expect(cs.job.register.mock.calls[0].arguments[0]).toHaveLength(26);
+  expect(cs.job.register.mock.calls[0].arguments[1].pluginId).toEqual(
     'e2cf1a5f82d62f7b3bd02db78e51008f4f11f8b31aedc96bfd50f3d7c80ba6e6'
   );
-  const jobId = spy.mock.calls[0][0];
+  const jobId = spy.mock.calls[0].arguments[0];
   await transactionManager.withTransaction(async models => {
     const data = await models.pluginJob.findById(jobId);
     expect(data.pluginId).toBe(
       'e2cf1a5f82d62f7b3bd02db78e51008f4f11f8b31aedc96bfd50f3d7c80ba6e6'
     );
   });
-  spy.mockReset();
+  spy.mock.resetCalls();
 });
 
 describe('throw error when necessary arguments do not exist', () => {
@@ -60,7 +62,7 @@ describe('throw error when necessary arguments do not exist', () => {
       _args: ['111.222.333.444.777'],
       user: 'bob'
     });
-    await expect(command).rejects.toThrowError(
+    await expect(command).rejects.toThrow(
       new Error(
         'Required arguments must be specified.\n' +
           'argument 1: plugin ID or plugin name\n' +
@@ -86,7 +88,7 @@ describe('throw error when necessary arguments do not exist', () => {
         '111.222.333.444.777'
       ]
     });
-    await expect(command).rejects.toThrowError(
+    await expect(command).rejects.toThrow(
       new Error('User ID or e-mail must be specified.')
     );
   });

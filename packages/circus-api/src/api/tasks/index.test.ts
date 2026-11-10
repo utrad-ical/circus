@@ -1,3 +1,5 @@
+import { describe, test, before, after } from 'node:test';
+import { expect } from 'expect';
 import type { AxiosInstance } from 'axios';
 import type { Readable } from 'form-data';
 import type { ApiTest } from '../../test/util-routes.ts';
@@ -5,11 +7,11 @@ import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import { readFromStream } from '../../test/util-stream.ts';
 
 let apiTest: ApiTest, axios: AxiosInstance;
-beforeAll(async () => {
+before(async () => {
   apiTest = await setUpAppForRoutesTest();
   axios = apiTest.axiosInstances.alice;
 });
-afterAll(async () => await apiTest.tearDown());
+after(async () => await apiTest.tearDown());
 
 describe('search', () => {
   test('should return the list of tasks of the user', async () => {

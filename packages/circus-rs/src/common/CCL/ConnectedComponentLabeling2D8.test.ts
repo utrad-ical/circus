@@ -1,3 +1,5 @@
+import { describe, test } from 'node:test';
+import { expect } from 'expect';
 import CCL from './ConnectedComponentLabeling2D8.ts';
 import { mosaic, white, black, sampleImg } from './ccl-test-utils.ts';
 

@@ -1,3 +1,6 @@
+import { describe, test, mock } from 'node:test';
+import type { Mock } from 'node:test';
+import { expect } from 'expect';
 import type { LoopRunOptions } from './loopRun.ts';
 import loopRun from './loopRun.ts';
 import sleep from '../util/sleep.ts';
@@ -5,7 +8,7 @@ import { EventEmitter } from 'events';
 import type * as circus from '../interface.ts';
 import type { Logger } from '@utrad-ical/circus-lib';
 
-const createMockLogger = (fn: jest.Mock) => {
+const createMockLogger = (fn: Mock<(...args: any[]) => any>) => {
   return {
     trace: fn,
     debug: fn,
@@ -17,7 +20,10 @@ const createMockLogger = (fn: jest.Mock) => {
   } as Logger;
 };
 
-const createMockQueueSystem = <T>(len: number = 10, fn: jest.Mock) => {
+const createMockQueueSystem = <T>(
+  len: number = 10,
+  fn: Mock<(...args: any[]) => any>
+) => {
   const q: circus.QueueItem<T>[] = [];
   let qId: number = 0;
 
@@ -73,7 +79,7 @@ class MockContext extends EventEmitter {
 describe('loopRun', () => {
   let _active: boolean = true;
   test('insert a job and list it', async () => {
-    const fn = jest.fn();
+    const fn = mock.fn();
     const queue = createMockQueueSystem<null>(3, fn);
     const options: LoopRunOptions<null> = {
       logger: createMockLogger(fn),
@@ -94,7 +100,7 @@ describe('loopRun', () => {
     mockContext.emit('SIGINT');
     await loop;
 
-    expect(fn.mock.calls).toEqual([
+    expect(fn.mock.calls.map(c => c.arguments)).toEqual([
       ['CIRCUS CS Job Manager started. pid: 0'],
       ['Job 1 started.'],
       ['Job 1 finished.'],

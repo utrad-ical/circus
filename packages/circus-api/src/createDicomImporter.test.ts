@@ -1,3 +1,5 @@
+import { test, before, beforeEach } from 'node:test';
+import { expect } from 'expect';
 import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib';
 import * as path from 'path';
 import { setUpMongoFixture, usingModels } from './test/util-mongo.ts';
@@ -15,7 +17,7 @@ let dicomFileRepository: MemoryDicomFileRepository,
   models: Models;
 const file = path.join(__dirname, '../test/dicom/CT-MONO2-16-brain.dcm');
 
-beforeAll(async () => {
+before(async () => {
   models = (await modelsPromise).models;
 });
 

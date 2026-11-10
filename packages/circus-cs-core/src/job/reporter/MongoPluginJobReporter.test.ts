@@ -1,3 +1,5 @@
+import { describe, test, before, after, beforeEach } from 'node:test';
+import { expect } from 'expect';
 import type * as mongo from 'mongodb';
 import createMongoPluginJobReporter from './MongoPluginJobReporter.ts';
 import { testClientPool } from '../../testHelper.ts';
@@ -17,7 +19,7 @@ describe('pluginJobReporter', () => {
   const collectionName = 'pluginJobs';
   const resultsDirectory = path.resolve(__dirname, '../../../test');
 
-  beforeAll(async () => {
+  before(async () => {
     mongoClientPool = await testClientPool();
     collection = (await mongoClientPool.connect('dummy'))
       .db()
@@ -37,7 +39,7 @@ describe('pluginJobReporter', () => {
     });
   });
 
-  afterAll(async () => {
+  after(async () => {
     await mongoClientPool.dispose();
     await fs.remove(path.join(resultsDirectory, jobId));
   });
@@ -69,7 +71,7 @@ describe('pluginJobReporter', () => {
     expect(check.results).toEqual(['a', 'b', 'c']);
   });
 
-  test('logStream', done => {
+  test('logStream', (_t, done) => {
     const stream = new PassThrough();
     stream.end('hello');
     reporter.logStream(jobId, stream, async () => {

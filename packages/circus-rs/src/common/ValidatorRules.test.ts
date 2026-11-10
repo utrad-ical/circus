@@ -1,3 +1,5 @@
+import { it } from 'node:test';
+import { expect } from 'expect';
 import * as vr from './ValidatorRules.ts';
 
 it('isTuple', () => {

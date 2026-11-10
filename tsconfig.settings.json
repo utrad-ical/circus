@@ -10,6 +10,6 @@
     "erasableSyntaxOnly": true,
     "isolatedModules": true,
     "rewriteRelativeImportExtensions": true,
-    "types": ["node", "jest"]
+    "types": ["node"]
   }
 }

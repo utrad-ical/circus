@@ -1,3 +1,5 @@
+import { test } from 'node:test';
+import { expect } from 'expect';
 import PriorityIntegerQueue from './PriorityIntegerQueue.ts';
 
 const extract = (queue: PriorityIntegerQueue) => {

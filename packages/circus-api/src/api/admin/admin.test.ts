@@ -1,10 +1,12 @@
+import { test, before, after } from 'node:test';
+import { expect } from 'expect';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import type { AxiosInstance } from 'axios';
 
 let apiTest: ApiTest;
-beforeAll(async () => (apiTest = await setUpAppForRoutesTest()));
-afterAll(async () => await apiTest.tearDown());
+before(async () => (apiTest = await setUpAppForRoutesTest()));
+after(async () => await apiTest.tearDown());
 
 test('return unauthorized error for unauthorized user', async () => {
   const targets = [

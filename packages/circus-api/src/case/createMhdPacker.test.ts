@@ -1,3 +1,5 @@
+import { test, mock } from 'node:test';
+import { expect } from 'expect';
 import { multirange } from 'multi-integer-range';
 import { RawData } from '@utrad-ical/circus-rs/server';
 import { EventEmitter } from 'events';
@@ -19,7 +21,7 @@ test('pack', async () => {
   const deps = {
     models: {
       clinicalCase: {
-        findByIdOrFail: jest.fn().mockImplementation(() => {
+        findByIdOrFail: mock.fn(() => {
           return Promise.resolve({
             caseId: 'my-case-id',
             latestRevision: rev,
@@ -31,7 +33,7 @@ test('pack', async () => {
         })
       }
     },
-    volumeProvider: jest.fn().mockImplementation(() => {
+    volumeProvider: mock.fn(() => {
       return {
         images: multirange('1-10'),
         load: () => Promise.resolve(),
@@ -44,7 +46,7 @@ test('pack', async () => {
         }
       };
     }),
-    blobStorage: jest.fn()
+    blobStorage: mock.fn()
   } as any;
   const packer = await createMhdPacker({}, deps);
   const caseIds = ['my-case-id'];

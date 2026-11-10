@@ -1,3 +1,5 @@
+import { describe, test, it, beforeEach } from 'node:test';
+import { expect } from 'expect';
 const encoders = ['PngJsImageEncoder' /*'NodePngImageEncoder'*/];
 import type ImageEncoder from './ImageEncoder.ts';
 
@@ -22,7 +24,7 @@ describe('ImageEncoder', () => {
       it.skip(testName);
       return;
     }
-    test(testName, done => {
+    test(testName, (_t, done) => {
       encModule().then((encoder: ImageEncoder) =>
         encoder.write(originalImage, 16, 16).then(out => {
           out.on('finish', () => {

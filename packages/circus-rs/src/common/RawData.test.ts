@@ -1,3 +1,5 @@
+import { describe, test } from 'node:test';
+import { expect } from 'expect';
 import RawData from './RawData.ts';
 import type { PixelFormat } from '../volume/PixelFormat.ts';
 import type { Vector3D } from './geometry/index.ts';

@@ -1,3 +1,5 @@
+import { describe, it, before } from 'node:test';
+import { expect } from 'expect';
 import createValidator from './createValidator.ts';
 import type { Validator } from './interface.ts';
 import * as path from 'path';
@@ -5,7 +7,7 @@ import { ValidationError } from 'ajv';
 
 let validator: Validator;
 
-beforeAll(async () => {
+before(async () => {
   validator = await createValidator({
     schemaRoot: path.join(__dirname, '../test/test-schemas')
   });

@@ -1,3 +1,5 @@
+import { describe, test } from 'node:test';
+import { expect } from 'expect';
 import { Validator } from './Validator.ts';
 
 describe('Validator', () => {

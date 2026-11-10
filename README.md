@@ -17,7 +17,7 @@ CIRCUS consists of the following containers:
 
 | Service | Image                           | Description                                              |
 | ------- | ------------------------------- | -------------------------------------------------------- |
-| `mongo` | `mongo:5.0.6`                   | MongoDB (replica set `rs0`)                              |
+| `mongo` | `mongo:9.0`                     | MongoDB (replica set `rs0`)                              |
 | `api`   | `ghcr.io/utrad-ical/circus-api` | API server, CIRCUS RS, and CS job manager                |
 | `web`   | `ghcr.io/utrad-ical/circus-web` | Web UI served by Caddy, proxying `/api`, `/login`, `/rs` |
 
@@ -45,28 +45,41 @@ To use your own configuration, mount your `circus.config.js` at `/var/circus/cir
 
 ### Install Requirements
 
-- Node.js (&ge; 22.x) and NPM (**&ge; 10**)
+- Node.js (&ge; 22.x)
+- [pnpm](https://pnpm.io/) (the version is pinned by `packageManager` in `package.json`; with [Corepack](https://github.com/nodejs/corepack) it is selected automatically)
 - Docker
 - MongoDB
 
 ### Install JavaScript Dependencies
 
-We use [NPM's workspaces feature](https://docs.npmjs.com/cli/v7/using-npm/workspaces) to manage the monorepo. The installation of the dependencies for each package is simple:
+We use [pnpm workspaces](https://pnpm.io/workspaces) to manage the monorepo:
 
 ```
 git clone git@github.com:utrad-ical/circus
 cd circus
-npm ci
+pnpm install
 ```
 
-(Unlike Lerna, common dependencies are hoisted by default.)
+Packages in this repository depend on each other via `workspace:*`.
+Unlike npm, pnpm does not hoist dependencies, so each package must declare every package it imports in its own `package.json`.
 
 ### Automated Test, Lint & Code Formatting:
 
 ```bash
-npm test
-npm run prettier
-npm run lint
+pnpm test
+pnpm run lint-prettier # or `pnpm run prettier` to fix
+pnpm run lint
+pnpm run typecheck
+```
+
+### Development Server
+
+```bash
+# API server (port 8080)
+cd packages/circus-api && node server.js
+
+# Web UI with webpack dev server (port 8081, proxies /api, /login and /rs to the API server)
+pnpm -F @utrad-ical/circus-web-ui start
 ```
 
 ### Configuration
@@ -96,8 +109,8 @@ Use this to build optimized production builds (slow). This is not necessary whil
 
 ```bash
 # On monorepo root (the same steps as CI and the Dockerfile)
-npm run prebuild-ts
-npm run build-ts
-npm run postbuild-ts
-npm run build -w @utrad-ical/circus-web-ui
+pnpm run prebuild-ts
+pnpm run build-ts
+pnpm run postbuild-ts
+pnpm -F @utrad-ical/circus-web-ui run build
 ```

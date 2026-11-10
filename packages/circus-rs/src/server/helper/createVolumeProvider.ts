@@ -1,8 +1,8 @@
 import type {
   DicomFileRepository,
-  DicomMetadata,
   FunctionService
 } from '@utrad-ical/circus-lib';
+import type { DicomMetadata } from '../../dicom/dicomImageExtractor.ts';
 import type { Initializer as MultiRangeInitializer } from 'multi-integer-range';
 import { MultiRange } from 'multi-integer-range';
 import asyncMemoize from '../../common/asyncMemoize.ts';

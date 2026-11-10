@@ -17,9 +17,7 @@
   "license": "MIT",
   "dependencies": {
     "cosmiconfig": "^6.0.0",
-    "dicom-parser": "^1.8.4",
     "fs-extra": "^9.0.0",
-    "jpeg-lossless-decoder-js": "^2.0.4",
     "logform": "^2.2.0",
     "merge": "^1.2.1",
     "multi-integer-range": "^4.0.8",
@@ -34,9 +32,7 @@
     "@types/cosmiconfig": "^5.0.3",
     "@types/fs-extra": "^8.1.0",
     "@types/node": "^18.19.64",
-    "@types/pngjs": "^3.4.2",
     "@types/tar-stream": "^1.6.2",
-    "pngjs": "^3.4.0",
     "rimraf": "^5.0.10",
     "tslib": "^1.11.2",
     "typescript": "~6.0.3"

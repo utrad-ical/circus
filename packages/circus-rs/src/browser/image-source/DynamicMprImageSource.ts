@@ -8,7 +8,7 @@ import drawToImageData from './drawToImageData.ts';
 import MprImageSource from './MprImageSource.ts';
 import type { DicomVolumeMetadata } from './volume-loader/DicomVolumeLoader.ts';
 import { Vector3 } from 'three';
-import type { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import type PartialVolumeDescriptor from '../../volume/PartialVolumeDescriptor.ts';
 import type { EstimateWindowType } from './volume-loader/rs-loader-utils.ts';
 import { createRequestParams } from './volume-loader/rs-loader-utils.ts';
 

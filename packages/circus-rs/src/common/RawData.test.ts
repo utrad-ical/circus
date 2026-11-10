@@ -1,5 +1,5 @@
 import RawData from './RawData.ts';
-import type { PixelFormat } from '@utrad-ical/circus-lib/src/PixelFormat';
+import type { PixelFormat } from '../volume/PixelFormat.ts';
 import type { Vector3D } from './geometry/index.ts';
 
 test('create binary data', () => {

@@ -6,11 +6,11 @@ import type {
 import type DicomVolumeLoader from './DicomVolumeLoader.ts';
 import DicomVolume from '../../../common/DicomVolume.ts';
 import type { DicomVolumeMetadata } from './DicomVolumeLoader.ts';
-import type PartialVolumeDescriptor from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
+import type PartialVolumeDescriptor from '../../../volume/PartialVolumeDescriptor.ts';
 import {
   isValidPartialVolumeDescriptor,
   partialVolumeDescriptorToArray
-} from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
+} from '../../../volume/PartialVolumeDescriptor.ts';
 import type VolumeCache from './cache/VolumeCache.ts';
 import { nullVolumeCache } from './cache/VolumeCache.ts';
 import type { EstimateWindowType } from './rs-loader-utils.ts';

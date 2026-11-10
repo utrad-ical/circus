@@ -2,7 +2,7 @@ import type { DicomFileRepository } from '@utrad-ical/circus-lib';
 import {
   isValidPartialVolumeDescriptor,
   rangeHasPartialVolume
-} from '@utrad-ical/circus-lib';
+} from '@utrad-ical/circus-rs/src/volume/PartialVolumeDescriptor.ts';
 import MultiRange from 'multi-integer-range';
 import type { FunctionService } from '@utrad-ical/circus-lib';
 import type * as circus from '../../interface.ts';

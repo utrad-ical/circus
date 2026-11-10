@@ -1,9 +1,6 @@
-import type PartialVolumeDescriptor from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
-import type {
-  PixelFormat,
-  PixelFormatInfo
-} from '@utrad-ical/circus-lib/src/PixelFormat';
-import { pixelFormatInfo } from '@utrad-ical/circus-lib/src/PixelFormat';
+import type PartialVolumeDescriptor from '../volume/PartialVolumeDescriptor.ts';
+import type { PixelFormat, PixelFormatInfo } from '../volume/PixelFormat.ts';
+import { pixelFormatInfo } from '../volume/PixelFormat.ts';
 import type { Box, Section, Vector2D, Vector3D } from './geometry/index.ts';
 import { applyWindow } from './pixel.ts';
 

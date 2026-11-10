@@ -1,5 +1,5 @@
-import type { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
-import { partialVolumeDescriptorToArray } from '@utrad-ical/circus-lib';
+import type PartialVolumeDescriptor from '../../volume/PartialVolumeDescriptor.ts';
+import { partialVolumeDescriptorToArray } from '../../volume/PartialVolumeDescriptor.ts';
 import PriorityIntegerQueue from '../../common/PriorityIntegerQueue.ts';
 import type { Initializer as MultiRangeInitializer } from 'multi-integer-range';
 import { MultiRange } from 'multi-integer-range';

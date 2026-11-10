@@ -11,11 +11,8 @@ import loadFromVolumeProvider from './loadFromVolumeProvider.ts';
 import metadata from './metadata.ts';
 import volume from './volume.ts';
 import scan from './scan.ts';
-import type {
-  PartialVolumeDescriptor,
-  FunctionService,
-  Logger
-} from '@utrad-ical/circus-lib';
+import type { FunctionService, Logger } from '@utrad-ical/circus-lib';
+import type PartialVolumeDescriptor from '../../../volume/PartialVolumeDescriptor.ts';
 
 export interface SeriesMiddlewareState {
   volumeAccessor: VolumeAccessor;

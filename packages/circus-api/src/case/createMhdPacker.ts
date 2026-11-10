@@ -4,7 +4,7 @@ import type { Vector3D } from '@utrad-ical/circus-rs/src/common/geometry';
 import type { TaskEventEmitter } from '../createTaskManager.ts';
 import type { Writable } from 'stream';
 import type { FunctionService, Logger } from '@utrad-ical/circus-lib';
-import { generateMhdHeader } from '@utrad-ical/circus-lib';
+import generateMhdHeader from '@utrad-ical/circus-rs/src/volume/generateMhdHeader.ts';
 import type { VolumeProvider } from '@utrad-ical/circus-rs/src/server/helper/createVolumeProvider';
 import type { Models } from '../interface.ts';
 import type Storage from '../storage/Storage.ts';

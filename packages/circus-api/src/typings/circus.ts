@@ -1,4 +1,4 @@
-import type { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import type PartialVolumeDescriptor from '@utrad-ical/circus-rs/src/volume/PartialVolumeDescriptor.ts';
 
 export interface SeriesEntry {
   seriesUid: string;

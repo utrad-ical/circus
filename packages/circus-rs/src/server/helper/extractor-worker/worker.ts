@@ -1,4 +1,4 @@
-import { dicomImageExtractor } from '@utrad-ical/circus-lib';
+import dicomImageExtractor from '../../../dicom/dicomImageExtractor.ts';
 import { parentPort } from 'worker_threads';
 
 if (!parentPort) throw new Error('Worker invoked incorrectly');

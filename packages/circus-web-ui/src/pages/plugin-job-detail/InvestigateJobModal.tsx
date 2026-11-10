@@ -1,5 +1,5 @@
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
-import { describePartialVolumeDescriptor } from '@utrad-ical/circus-lib/src/PartialVolumeDescriptor';
+import { describePartialVolumeDescriptor } from '@utrad-ical/circus-rs/src/volume/PartialVolumeDescriptor.ts';
 import { useCsResults } from '@utrad-ical/circus-ui-kit';
 import Icon from 'components/Icon';
 import IconButton from 'components/IconButton';

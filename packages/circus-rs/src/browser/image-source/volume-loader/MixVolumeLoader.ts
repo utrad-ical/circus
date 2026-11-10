@@ -1,6 +1,6 @@
 import type DicomVolumeLoader from './DicomVolumeLoader.ts';
 import DicomVolume from '../../../common/DicomVolume.ts';
-import type { PixelFormat } from '@utrad-ical/circus-lib/src/PixelFormat';
+import type { PixelFormat } from '../../../volume/PixelFormat.ts';
 import type { DicomVolumeMetadata } from './DicomVolumeLoader.ts';
 
 interface MixVolumeLoaderOptions {

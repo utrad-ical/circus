@@ -15,7 +15,7 @@ import type ImageEncoder from '../../helper/image-encoder/ImageEncoder.ts';
 import type { SeriesMiddlewareState } from './createSeriesRoutes.ts';
 import type RawData from '../../../common/RawData.ts';
 import { multirange } from 'multi-integer-range';
-import type { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import type PartialVolumeDescriptor from '../../../volume/PartialVolumeDescriptor.ts';
 
 interface ScanOptions {
   imageEncoder: ImageEncoder;

@@ -1,5 +1,5 @@
 import IconButton from '@smikitky/rb-components/lib/IconButton';
-import type { PartialVolumeDescriptor } from '@utrad-ical/circus-lib';
+import type PartialVolumeDescriptor from '@utrad-ical/circus-rs/src/volume/PartialVolumeDescriptor.ts';
 import * as rs from '@utrad-ical/circus-rs/src/browser';
 import type { Viewer } from '@utrad-ical/circus-rs/src/browser';
 import { Composition } from '@utrad-ical/circus-rs/src/browser';

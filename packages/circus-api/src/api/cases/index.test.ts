@@ -531,8 +531,8 @@ describe('delete', () => {
     const myList = await apiTest.database.db
       .collection('myLists')
       .findOne({ myListId: '01ewes10a08z21bjnysd4p1m3f' });
-    expect(myList!.items).toEqual(
-      expect.not.objectContaining({ resourceId: caseId })
+    expect(myList!.items).not.toContainEqual(
+      expect.objectContaining({ resourceId: caseId })
     );
     const aCase = await apiTest.database.db
       .collection('clinicalCases')

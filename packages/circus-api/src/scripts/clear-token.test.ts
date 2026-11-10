@@ -21,5 +21,5 @@ test('delete only non-permanent tokens', async () => {
 test('delete all tokens including permanent ones', async () => {
   const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
   await commandFunc({ all: true });
-  expect(spy).toBeCalledWith('Deleted 7 access token(s).');
+  expect(spy).toBeCalledWith('Deleted 8 access token(s).');
 });

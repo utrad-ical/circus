@@ -1,4 +1,4 @@
-const createBaseOptions = require('../webpack.config');
+const createBaseOptions = require('../webpack.config.cjs');
 
 module.exports = (env, argv) => {
   const config = createBaseOptions(env, argv);

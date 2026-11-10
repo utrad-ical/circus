@@ -5,9 +5,8 @@
  * Instead, use place `circus.config.js` to someone above this directory.
  */
 
-'use strict';
-const path = require('path');
-const os = require('os');
+import path from 'node:path';
+import os from 'node:os';
 
 export default {
   // DICOM file repository is a loader that fetches the content of a DICOM file

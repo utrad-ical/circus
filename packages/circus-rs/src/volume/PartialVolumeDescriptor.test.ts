@@ -7,7 +7,7 @@ import {
   rangeHasPartialVolume,
   partialVolumeDescriptorToArray
 } from './PartialVolumeDescriptor.ts';
-import { multirange } from 'multi-integer-range';
+import * as mr from 'multi-integer-range';
 
 describe('describePartialVolumeDescriptor', () => {
   const a: PartialVolumeDescriptor = { start: 1, end: 11, delta: 2 };
@@ -68,15 +68,18 @@ describe('rangeHasPartialVolume', () => {
   ];
   for (const [range, start, end, delta, expected] of cases) {
     test(`'${range}' in (${start}, ${end}, ${delta}) should be ${expected}`, () => {
-      const mr = multirange(range);
-      assert.equal(rangeHasPartialVolume(mr, { start, end, delta }), expected);
+      const images = mr.parse(range);
+      assert.equal(
+        rangeHasPartialVolume(images, { start, end, delta }),
+        expected
+      );
     });
   }
 
   test('invalid PVD throws', () => {
     assert.throws(
       () =>
-        rangeHasPartialVolume(multirange('1-100'), {
+        rangeHasPartialVolume(mr.parse('1-100'), {
           start: 1,
           end: 10,
           delta: 2

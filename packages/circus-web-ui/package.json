@@ -68,7 +68,7 @@
     "lodash": "^4.17.15",
     "merge": "^1.2.1",
     "moment": "^2.24.0",
-    "multi-integer-range": "^4.0.8",
+    "multi-integer-range": "^6.1.0",
     "querystring-es3": "^0.2.1",
     "react": "^17.0.2",
     "react-bootstrap": "^0.33.1",

@@ -1,4 +1,4 @@
-import type { MultiRange } from 'multi-integer-range';
+import * as mr from 'multi-integer-range';
 
 /**
  * Defines a set of integers to construct a partial volume
@@ -68,15 +68,17 @@ export const isValidPartialVolumeDescriptor = (
  * @param desciptor The
  */
 export const rangeHasPartialVolume = (
-  range: MultiRange,
+  range: mr.MIR,
   descriptor: PartialVolumeDescriptor
 ) => {
   if (!isValidPartialVolumeDescriptor(descriptor))
     throw new Error('Invalid partial volume descriptor');
   const { start, end, delta } = descriptor;
-  if (range.has([[Math.min(start, end), Math.max(start, end)]])) return true;
+  if (mr.has(range, [[Math.min(start, end), Math.max(start, end)]]))
+    return true;
   if (delta !== 1 && delta !== -1) {
-    for (let i = start; i !== end; i += delta) if (!range.has(i)) return false;
+    for (let i = start; i !== end; i += delta)
+      if (!mr.has(range, [[i, i]])) return false;
     return true;
   }
   return false;

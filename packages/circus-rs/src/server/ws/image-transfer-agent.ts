@@ -1,8 +1,8 @@
 import type PartialVolumeDescriptor from '../../volume/PartialVolumeDescriptor.ts';
 import { partialVolumeDescriptorToArray } from '../../volume/PartialVolumeDescriptor.ts';
 import PriorityIntegerQueue from '../../common/PriorityIntegerQueue.ts';
-import type { Initializer as MultiRangeInitializer } from 'multi-integer-range';
-import { MultiRange } from 'multi-integer-range';
+import * as mr from 'multi-integer-range';
+import { type RangeInput, toRange } from '../../common/rangeInput.ts';
 import type { TransferImageMessage } from '../../common/ws/message.ts';
 import { transferImageMessageData } from '../../common/ws/message.ts';
 import type {
@@ -26,7 +26,7 @@ type TransferConnection = {
   id: () => string;
   time: () => number;
   transferNextImage: () => Promise<void>;
-  setPriority: (target: MultiRangeInitializer, priority: number) => void;
+  setPriority: (target: RangeInput, priority: number) => void;
   abort: () => void;
   pause: () => void;
   resume: () => void;
@@ -127,13 +127,13 @@ const createImageTransferAgent = ({
       partialVolumeDescriptor
     );
 
-    const setPriority = async (
-      target: MultiRangeInitializer,
-      priority: number
-    ) => {
-      const targetRange = new MultiRange(target).intersect(queue.toArray());
-      if (0 < targetRange.segmentLength()) {
-        // console.log(`Set priority ${priority} / ${targetRange.toString()}`);
+    const setPriority = async (target: RangeInput, priority: number) => {
+      const targetRange = mr.intersect(
+        toRange(target),
+        mr.normalize(queue.toArray())
+      );
+      if (0 < targetRange.length) {
+        // console.log(`Set priority ${priority} / ${mr.stringify(targetRange)}`);
         queue.append(targetRange, priority);
       }
     };
@@ -213,8 +213,7 @@ const prepare = (
   // Maps a zero-based volume z-index to the corresponding image number,
   // The number is the number to be specified when call load() function.
   const zIndices = new Map<number, number>();
-  const imageNoToZ = (imageNo: number) =>
-    new MultiRange(images).toArray().indexOf(imageNo);
+  const imageNoToZ = (imageNo: number) => mr.flatten(images).indexOf(imageNo);
   if (partialVolumeDescriptor) {
     // Set zIndices for the partial volume.
     const partialImages = partialVolumeDescriptorToArray(
@@ -227,7 +226,7 @@ const prepare = (
   } else {
     // Set zIndices for the entire volume.
     // It has already started loading by volumeProvider.
-    images.toArray().forEach((v, i) => zIndices.set(i, v));
+    mr.flatten(images).forEach((v, i) => zIndices.set(i, v));
   }
 
   const imageIndices = Array.from(zIndices.keys());

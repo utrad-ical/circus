@@ -64,7 +64,7 @@
     "koa-router": "^7.4.0",
     "lru-cache": "^11.0.0",
     "minimist": "^1.2.0",
-    "multi-integer-range": "^4.0.8",
+    "multi-integer-range": "^6.1.0",
     "pngjs": "^3.4.0",
     "strict-event-emitter-types": "^2.0.0",
     "tarn": "^3.0.1",

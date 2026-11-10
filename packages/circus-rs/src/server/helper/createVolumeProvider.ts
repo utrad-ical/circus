@@ -3,12 +3,12 @@ import type {
   FunctionService
 } from '@utrad-ical/circus-lib';
 import type { DicomMetadata } from '../../dicom/dicomImageExtractor.ts';
-import type { Initializer as MultiRangeInitializer } from 'multi-integer-range';
-import { MultiRange } from 'multi-integer-range';
+import * as mr from 'multi-integer-range';
 import asyncMemoize from '../../common/asyncMemoize.ts';
 import DicomVolume from '../../common/DicomVolume.ts';
 import PriorityIntegerCaller from '../../common/PriorityIntegerCaller.ts';
 import type RawData from '../../common/RawData.ts';
+import { type RangeInput, toRange } from '../../common/rangeInput.ts';
 import type { DicomExtractorWorker } from './extractor-worker/createDicomExtractorWorker.ts';
 
 export type VolumeProvider = (seriesUid: string) => Promise<VolumeAccessor>;
@@ -20,13 +20,13 @@ export type VolumeProvider = (seriesUid: string) => Promise<VolumeAccessor>;
 export interface VolumeAccessor {
   imageMetadata: Map<number, DicomMetadata>;
   volume: RawData;
-  load: (range: MultiRangeInitializer, priority?: number) => Promise<void>;
+  load: (range: RangeInput, priority?: number) => Promise<void>;
   /**
    * Maps an image number to the corresponding zero-based volume z-index
    */
   zIndices: Map<number, number>;
   determinePitch: () => Promise<number>;
-  images: MultiRange;
+  images: mr.MIR;
   isLike3d: () => Promise<boolean>;
 }
 
@@ -49,9 +49,9 @@ const createUncachedVolumeProvider: FunctionService<
   const { maxConcurrency = 32 } = opts;
   return async (seriesUid): Promise<VolumeAccessor> => {
     const { load, images } = await dicomFileRepository.getSeries(seriesUid);
-    const imageRange = new MultiRange(images);
+    const imageRange = mr.parse(images);
 
-    if (imageRange.segmentLength() === 0) {
+    if (imageRange.length === 0) {
       // Does not rely on the global `Error` augmentation in src/typings,
       // which is not visible when other packages type-check this file
       throw Object.assign(
@@ -62,7 +62,7 @@ const createUncachedVolumeProvider: FunctionService<
 
     // Create map of image-no to data-index (as z index on the volume).
     const zIndices: Map<number, number> = new Map();
-    imageRange.toArray().forEach((no, idx) => zIndices.set(no, idx));
+    mr.flatten(imageRange).forEach((no, idx) => zIndices.set(no, idx));
 
     // Collect each image metadata on fetched.
     const imageMetadata: Map<number, DicomMetadata> = new Map();
@@ -75,13 +75,13 @@ const createUncachedVolumeProvider: FunctionService<
     };
 
     // Fetch first data to get columns and rows.
-    const topImageNo = imageRange.min()!;
+    const topImageNo = mr.min(imageRange)!;
     const topImagePixelData = await fetch(topImageNo);
     const { columns, rows, pixelFormat } = imageMetadata.get(topImageNo)!;
 
     // Create volume
     const volume = new DicomVolume(
-      [columns, rows, imageRange.length()],
+      [columns, rows, mr.length(imageRange)],
       pixelFormat
     );
     volume.insertSingleImage(zIndices.get(topImageNo)!, topImagePixelData);
@@ -100,19 +100,20 @@ const createUncachedVolumeProvider: FunctionService<
     });
 
     // start loading immediately
-    priorityLoader.append(images);
+    priorityLoader.append(imageRange);
 
-    const loadSeries = (range: MultiRangeInitializer, priority: number = 0) => {
-      if (!imageRange.has(range)) throw new RangeError('Invalid image range');
+    const loadSeries = (input: RangeInput, priority: number = 0) => {
+      const range = toRange(input);
+      if (!mr.has(imageRange, range))
+        throw new RangeError('Invalid image range');
       priorityLoader.append(range, priority);
       return priorityLoader.waitFor(range);
     };
 
     const determinePitch = async () => {
-      const images = imageRange.clone();
-      const count = images.length();
+      const count = mr.length(imageRange);
 
-      const primaryImageNo = images.shift()!;
+      const primaryImageNo = mr.at(imageRange, 0)!;
       await load(primaryImageNo);
       const primaryMetadata = imageMetadata.get(primaryImageNo)!;
 
@@ -120,7 +121,7 @@ const createUncachedVolumeProvider: FunctionService<
         // The pitch value can be negative (represents the direction of stacking)
         return Math.abs(primaryMetadata.pitch);
       } else if (count > 1) {
-        const secondaryImageNo = images.shift()!;
+        const secondaryImageNo = mr.at(imageRange, 1)!;
         await load(secondaryImageNo);
         const secondaryMetadata = imageMetadata.get(secondaryImageNo)!;
         return Math.abs(
@@ -142,11 +143,10 @@ const createUncachedVolumeProvider: FunctionService<
      * @returns True for "3D-like images"
      */
     const isLike3d = async () => {
-      const images = imageRange.clone();
-      const count = images.length();
+      const count = mr.length(imageRange);
 
       // primary image
-      const primaryImageNo = images.shift()!;
+      const primaryImageNo = mr.at(imageRange, 0)!;
       await load(primaryImageNo);
       const primaryMetadata = imageMetadata.get(primaryImageNo)!;
       const checkPrimaryImage = determineIf3dImageFromMetadata(primaryMetadata);
@@ -155,7 +155,7 @@ const createUncachedVolumeProvider: FunctionService<
       }
 
       // secondary image
-      const secondaryImageNo = images.shift()!;
+      const secondaryImageNo = mr.at(imageRange, 1)!;
       await load(secondaryImageNo);
       const secondaryMetadata = imageMetadata.get(secondaryImageNo)!;
       const checkSecondaryImage =
@@ -192,8 +192,7 @@ const createUncachedVolumeProvider: FunctionService<
 
     const verifyMetadata = async (metadata: DicomMetadata) => {
       // primary image
-      const images = imageRange.clone();
-      const primaryImageNo = images.shift()!;
+      const primaryImageNo = mr.at(imageRange, 0)!;
       await load(primaryImageNo);
       const primaryMetadata = imageMetadata.get(primaryImageNo)!;
 

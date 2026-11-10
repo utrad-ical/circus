@@ -11,8 +11,8 @@ import {
   resolveImageData
 } from './gl/webgl-util.ts';
 import type MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume.ts';
-import type { Initializer as MultiRangeInitializer } from 'multi-integer-range';
-import { MultiRange } from 'multi-integer-range';
+import * as mr from 'multi-integer-range';
+import type { RangeInput } from '../../common/rangeInput.ts';
 import type { DrawResult } from './ImageSource.ts';
 import setImmediate from '../util/setImmediate.ts';
 import imageRangeOfSection from '../util/imageRangeOfSection.ts';
@@ -47,10 +47,7 @@ export default class WebGlRawVolumeMprImageSource
 
   private background: RGBA = [0.0, 0.0, 0.0, 1.0];
 
-  private setPriority: (
-    imageIndices: MultiRangeInitializer,
-    priority: number
-  ) => void;
+  private setPriority: (imageIndices: RangeInput, priority: number) => void;
   private disposeCallbacks: (() => void)[] = [];
 
   // For debugging
@@ -172,15 +169,16 @@ export default class WebGlRawVolumeMprImageSource
     if (viewState.type !== 'mpr') throw new TypeError('Unsupported state');
 
     const [min, max] = imageRangeOfSection(viewState.section, this.metadata!);
-    const images = new MultiRange([[min, max]]);
+    const images = mr.normalize([[min, max]]);
 
-    const priority = this.metadata!.voxelCount[2] / images.length();
+    const priority = this.metadata!.voxelCount[2] / mr.length(images);
     this.setPriority(images, priority);
 
     const margin = 5;
-    const adjacentImages = new MultiRange([
-      [min - margin, max + margin]
-    ]).subtract(images);
+    const adjacentImages = mr.subtract(
+      mr.normalize([[min - margin, max + margin]]),
+      images
+    );
     const adjacentPriority = Math.max(0, priority - 1);
     this.setPriority(adjacentImages, adjacentPriority);
 

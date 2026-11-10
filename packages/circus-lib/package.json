@@ -39,7 +39,7 @@
     "fs-extra": "^9.0.0",
     "logform": "^2.2.0",
     "merge": "^1.2.1",
-    "multi-integer-range": "^4.0.8",
+    "multi-integer-range": "^6.1.0",
     "recursive-readdir": "^2.2.2",
     "tar-stream": "^2.1.0",
     "ulid": "^2.3.0",

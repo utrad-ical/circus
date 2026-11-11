@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { DicomVolumeLoader } from '@utrad-ical/circus-rs';
-import axios from 'axios';
 import sampleJob from './sampleJob.json';
 import SampleViewer from './components/SampleViewer';
 
@@ -17,14 +16,13 @@ const App = () => {
   const resultsContext = useMemo<any | undefined>(() => {
     if (!sampleJob) return undefined;
 
+    // Files under `data/` are served by the dev server (see webpack.config.js)
     const loadAttachment = (path: string, signal?: AbortSignal) => {
-      const url = `http://localhost:3000/${path}`;
-      return fetch(url);
+      return fetch(`/data/${path}`, { signal });
     };
     loadAttachment.list = async () => {
-      const url = `http://localhost:3000/`;
-      const res = await axios.get(url);
-      return res.data;
+      const res = await fetch('/data-list');
+      return res.json();
     };
     return {
       job: sampleJob,

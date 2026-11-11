@@ -1,16 +1,21 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ModuleFederationPlugin =
   require('webpack').container.ModuleFederationPlugin;
+const fs = require('fs');
 const path = require('path');
 const deps = require('./package.json').dependencies;
+
+const dataDir = path.join(__dirname, 'data');
 
 module.exports = {
   entry: './src/index',
   mode: 'production',
   devServer: {
-    static: {
-      directory: path.join(__dirname, 'dist')
-    },
+    static: [
+      { directory: path.join(__dirname, 'dist') },
+      // Plug-in output files for the local preview (see `src/App.tsx`)
+      { directory: dataDir, publicPath: '/data' }
+    ],
     port: 3002,
     headers: {
       'Access-Control-Allow-Origin': '*',
@@ -18,6 +23,18 @@ module.exports = {
         'Origin, X-Requested-With, Content-Type, Accept',
       'Access-Control-Allow-Credentials': 'true',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS'
+    },
+    // Returns the file list of a directory under `data/` as JSON,
+    // which emulates `loadAttachment.list()`
+    setupMiddlewares: (middlewares, devServer) => {
+      devServer.app.get('/data-list{/*dir}', (req, res) => {
+        const dir = path.join(dataDir, ...(req.params.dir ?? []));
+        if (!dir.startsWith(dataDir)) return res.status(400).end();
+        fs.readdir(dir, (err, files) =>
+          err ? res.status(404).end() : res.json(files)
+        );
+      });
+      return middlewares;
     }
   },
 
@@ -41,15 +58,15 @@ module.exports = {
     new ModuleFederationPlugin({
       name: 'CircusCsModule',
       library: {
-        name: 'CircusCsModule', //library name must be "CircusCsModule"
+        name: 'CircusCsModule', // library name must be "CircusCsModule"
         type: 'window'
       },
       filename: 'remoteEntry.js',
       exposes: {
         './SampleViewer': './src/components/SampleViewer'
       },
+      // Only the modules provided by CIRCUS are shared
       shared: {
-        ...deps,
         react: { singleton: true, eager: true, requiredVersion: deps['react'] },
         'react-dom': {
           singleton: true,

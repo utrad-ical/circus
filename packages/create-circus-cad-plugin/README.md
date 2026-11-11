@@ -26,7 +26,6 @@ current directory
 ├── package.json
 ├── package-lock.json
 ├── postbuild.sh
-├── server.js
 ├── tsconfig.json
 ├── webpack.config.js
 ├── data
@@ -48,6 +47,16 @@ current directory
     └── components
         └── SampleViewer.tsx
 ```
+
+## Preview the Viewer Locally
+
+Node.js 22.15 or later is required.
+
+```sh
+npm start
+```
+
+Open http://localhost:3002/. The viewer receives `src/sampleJob.json` as the job, and the files in `data/` as the output files of the CAD.
 
 ## Register the Default Template in CIRCUS
 

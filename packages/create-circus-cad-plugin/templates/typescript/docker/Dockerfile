@@ -1,4 +1,4 @@
-FROM node:16.14.0
+FROM node:24-slim
 
 # Add plugin manifest file.
 COPY plugin.json /

@@ -49,12 +49,7 @@ import {
 import type { ApiCaller } from 'utils/api';
 import { ApiContext, useApi } from 'utils/api';
 import loginManager, { LoginManagerContext } from 'utils/loginManager';
-
-require('./styles/main.less');
-
-require('bootstrap/fonts/glyphicons-halflings-regular.woff');
-require('bootstrap/fonts/glyphicons-halflings-regular.woff2');
-require('bootstrap/fonts/glyphicons-halflings-regular.ttf');
+import './styles/main.less';
 
 const VolumeLoaderFactoryProvider: React.FC<{}> = ({ children }) => {
   const server = useSelector(state => state.loginUser.data?.dicomImageServer);

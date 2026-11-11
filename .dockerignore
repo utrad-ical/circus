@@ -15,7 +15,6 @@ attic
 packages/circus-lib/dist
 packages/circus-rs/dist
 packages/circus-ui-kit/dist
-packages/circus-rs/dist-demo
 packages/circus-web-ui/dist
 
 # Local runtime data and test leftovers

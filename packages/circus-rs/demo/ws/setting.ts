@@ -1,40 +1,40 @@
-import { PartialVolumeDescriptor } from "@utrad-ical/circus-lib";
+import type PartialVolumeDescriptor from '../../src/volume/PartialVolumeDescriptor.ts';
 
 export type VolumeSetting = {
-    server: string;
-    seriesUid: string;
-    partialVolumeDescriptor: string;
+  server: string;
+  seriesUid: string;
+  partialVolumeDescriptor: string;
 };
 
 let config: VolumeSetting[] = [];
 
 const restore = () => {
-    config = JSON.parse(localStorage.getItem('rs-ws-config') || '[]');
-    // const cfg = JSON.parse(localStorage.getItem('rs-demo-save') || 'null');
-    // if (config.length === 0 && cfg) {
-    //     const { server, seriesUid, partialVolumeDescriptor } = cfg;
-    //     add(server, seriesUid, partialVolumeDescriptor)
-    // }
-    console.log(config);
-}
+  config = JSON.parse(localStorage.getItem('rs-ws-config') || '[]');
+  // const cfg = JSON.parse(localStorage.getItem('rs-demo-save') || 'null');
+  // if (config.length === 0 && cfg) {
+  //     const { server, seriesUid, partialVolumeDescriptor } = cfg;
+  //     add(server, seriesUid, partialVolumeDescriptor)
+  // }
+  console.log(config);
+};
 
 const save = () => {
-    localStorage.setItem('rs-ws-config', JSON.stringify(config));
-}
+  localStorage.setItem('rs-ws-config', JSON.stringify(config));
+};
 
 const add = (
-    server: string,
-    seriesUid: string,
-    partialVolumeDescriptor: string
+  server: string,
+  seriesUid: string,
+  partialVolumeDescriptor: string
 ) => {
-    config.push({ server, seriesUid, partialVolumeDescriptor });
-    save();
-}
+  config.push({ server, seriesUid, partialVolumeDescriptor });
+  save();
+};
 
 const remove = (idx: number) => {
-    config.splice(idx, 1);
-    save();
-}
+  config.splice(idx, 1);
+  save();
+};
 
 const get = (idx: number) => config[idx];
 
@@ -42,23 +42,25 @@ const count = () => config.length;
 
 restore();
 
-export function toPartialVolumeDescriptor(str?: string): PartialVolumeDescriptor | undefined {
-    if (!str) return undefined;
-    const [start, end, delta] = str.split(':').map(value => {
-        const num = parseInt(value, 10);
-        return isNaN(num) ? undefined : num;
-    });
+export function toPartialVolumeDescriptor(
+  str?: string
+): PartialVolumeDescriptor | undefined {
+  if (!str) return undefined;
+  const [start, end, delta] = str.split(':').map(value => {
+    const num = parseInt(value, 10);
+    return isNaN(num) ? undefined : num;
+  });
 
-    if (start === undefined && end === undefined && delta === undefined) {
-        return undefined;
-    } else if (start !== undefined && end !== undefined) {
-        return { start, end, delta: delta || 1 };
-    } else {
-        throw new Error(
-            'Invalid partial volume descriptor specified. ' +
-            'partial volume descriptor must be in the form of `startImgNum:endImgNum(:imageDelta)`'
-        );
-    }
+  if (start === undefined && end === undefined && delta === undefined) {
+    return undefined;
+  } else if (start !== undefined && end !== undefined) {
+    return { start, end, delta: delta || 1 };
+  } else {
+    throw new Error(
+      'Invalid partial volume descriptor specified. ' +
+        'partial volume descriptor must be in the form of `startImgNum:endImgNum(:imageDelta)`'
+    );
+  }
 }
 
 export default { add, remove, get, count };

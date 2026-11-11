@@ -1,15 +1,15 @@
-import { RsHttpClient } from '../../src/browser';
+import { RsHttpClient } from '../../src/browser/index.ts';
 import {
   createTransferConnectionFactory,
-  TransferConnection,
-  TransferConnectionFactory
-} from '../../src/browser/ws/createTransferConnectionFactory';
-import DebugLogger from './DebugLogger';
-import { WebSocketClientImpl as WebSocketClient } from '../../src/browser/ws/WebSocketClient';
-import drawToImageData from '../../src/browser/image-source/drawToImageData';
+  type TransferConnection,
+  type TransferConnectionFactory
+} from '../../src/browser/ws/createTransferConnectionFactory.ts';
+import DebugLogger from './DebugLogger.ts';
+import { WebSocketClientImpl as WebSocketClient } from '../../src/browser/ws/WebSocketClient.ts';
+import drawToImageData from '../../src/browser/image-source/drawToImageData.ts';
 import { pixelFormatInfo } from '@utrad-ical/circus-rs';
-import setting, { toPartialVolumeDescriptor } from './setting';
-import { createRequestParams } from '../../src/browser/image-source/volume-loader/rs-loader-utils';
+import setting, { toPartialVolumeDescriptor } from './setting.ts';
+import { createRequestParams } from '../../src/browser/image-source/volume-loader/rs-loader-utils.ts';
 
 document.addEventListener('DOMContentLoaded', function (e) {
   setup();
@@ -42,7 +42,7 @@ function setup() {
   ) as HTMLDivElement;
   const btn = (label: string, parent: HTMLElement = btnContainer) => {
     const button = document.createElement('button');
-    button.classList.add('btn', 'btn-outline-secondary', 'mr-1');
+    button.classList.add('btn');
     button.innerText = label;
     parent.append(button);
     return button;
@@ -181,7 +181,7 @@ function setup() {
     );
 
     btn('Disconnect', subBtnContainer).addEventListener('click', function (e) {
-      wsClient.dispose();
+      wsClient.disconnect();
     });
 
     btn('Clear', subBtnContainer).addEventListener('click', function (e) {
@@ -248,7 +248,7 @@ async function prepareLoadingProcess(
 
     const indicator = loaderElement.querySelector(
       'canvas[data-role=load-indicator]'
-    ) as HTMLCanvasElement | undefined;
+    ) as HTMLCanvasElement | null;
     if (indicator) {
       const ctx = indicator.getContext('2d')!;
 
@@ -280,13 +280,11 @@ async function prepareLoadingProcess(
 
   // Layout
   const container = document.createElement('div');
-  container.classList.add('row', 'no-gutturs');
+  container.classList.add('loader-row');
   loaderElement.append(container);
   const previewContainer = document.createElement('div');
-  previewContainer.classList.add('col-2', 'pr-1');
   container.append(previewContainer);
   const rightSide = document.createElement('div');
-  rightSide.classList.add('col-10');
   container.append(rightSide);
   const row1 = document.createElement('div');
   rightSide.append(row1);
@@ -298,7 +296,7 @@ async function prepareLoadingProcess(
   const imageCount = metadata.voxelCount[2];
 
   // Display metadata
-  row1.classList.add('d-flex', 'justify-content-between');
+  row1.classList.add('space-between');
   const seriesUidContainer = document.createElement('div');
   row1.append(seriesUidContainer);
   seriesUidContainer.innerText =
@@ -319,7 +317,7 @@ async function prepareLoadingProcess(
       ` ${mbps.toFixed(2)} Mbps`;
   };
 
-  row3.classList.add('d-flex', 'justify-content-between');
+  row3.classList.add('space-between');
   divAt(row3).innerText =
     'Higher priority images: ' + higherPriorityImages.join(',');
 
@@ -377,7 +375,7 @@ async function prepareLoadingProcess(
   // Start
   const startButton = document.createElement('button');
   startButton.setAttribute('data-role', 'start-button');
-  startButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'mr-2');
+  startButton.classList.add('btn', 'btn-sm');
   startButton.innerText = 'Start';
   startButton.addEventListener('click', () => {
     if (transferConnection) return;
@@ -400,7 +398,7 @@ async function prepareLoadingProcess(
 
   // ChangePriority
   // const changePriorityButton = document.createElement('button');
-  // changePriorityButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'mr-2');
+  // changePriorityButton.classList.add('btn', 'btn-sm');
   // changePriorityButton.innerText = 'Change Priority ' + higherPriorityImages.toString();
   // changePriorityButton.addEventListener('click', () => {
   //     logger.info(`#${transferConnection.id()} setPriority`);
@@ -410,7 +408,7 @@ async function prepareLoadingProcess(
 
   // Pause
   const pauseButton = document.createElement('button');
-  pauseButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'mr-2');
+  pauseButton.classList.add('btn', 'btn-sm');
   pauseButton.innerText = 'Pause';
   pauseButton.addEventListener('click', () => {
     if (!transferConnection) return;
@@ -421,7 +419,7 @@ async function prepareLoadingProcess(
 
   // Resume
   const resumeButton = document.createElement('button');
-  resumeButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'mr-2');
+  resumeButton.classList.add('btn', 'btn-sm');
   resumeButton.innerText = 'Resume';
   resumeButton.addEventListener('click', () => {
     if (!transferConnection) return;
@@ -432,7 +430,7 @@ async function prepareLoadingProcess(
 
   // Abort
   const abortButton = document.createElement('button');
-  abortButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'mr-2');
+  abortButton.classList.add('btn', 'btn-sm');
   abortButton.innerText = 'Abort';
   abortButton.addEventListener('click', () => {
     if (!transferConnection) return;
@@ -445,7 +443,7 @@ async function prepareLoadingProcess(
   // Dispose
   const disposeButton = document.createElement('button');
   disposeButton.setAttribute('data-role', 'dispose-button');
-  disposeButton.classList.add('btn', 'btn-sm', 'btn-secondary', 'mr-2');
+  disposeButton.classList.add('btn', 'btn-sm');
   disposeButton.innerText = 'Dispose';
   disposeButton.addEventListener('click', () => {
     if (transferConnection) {

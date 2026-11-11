@@ -1,17 +1,11 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compataible" content="IE=edge" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>CIRCUS RS Demo</title>
 
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
-      integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
-      crossorigin="anonymous"
-    />
+    <link rel="stylesheet" href="./demo.css" />
     <style>
       #viewer1,
       #viewer2,
@@ -43,33 +37,20 @@
   <body>
     <div class="container">
       <h1>Solid Figure Annotation</h1>
-      <hr />
 
       <!-- This is where our toolbar is created -->
-      <div id="toolbar" class="m-1"></div>
+      <div id="toolbar"></div>
 
       <!-- This is where our viewers are initialized -->
-      <div style="display: flex;">
+      <div style="display: flex">
         <div id="wrap1"><div id="viewer1"></div></div>
         <div id="wrap2"><div id="viewer2"></div></div>
       </div>
-      <div style="display: flex;">
+      <div style="display: flex">
         <div id="wrap3"><div id="viewer3"></div></div>
         <div id="wrap4"><div id="viewer4"></div></div>
       </div>
     </div>
-
-    <!-- cdn scripts -->
-    <script
-      src="https://code.jquery.com/jquery-3.3.1.min.js"
-      integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-      crossorigin="anonymous"
-    ></script>
-
-    <!-- circusrs script -->
-    <script src="/circus-rs-client.js"></script>
-
-    <!-- demo script -->
-    <script src="./solid-figure-annotation.js"></script>
+    <script type="module" src="./solid-figure-annotation.js"></script>
   </body>
 </html>

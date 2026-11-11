@@ -1,6 +1,6 @@
-'use strict';
-
-const rs = circusrs;
+import * as rs from '../src/browser/index.ts';
+import '../src/browser/circus-rs.less';
+import { toPartialVolumeDescriptor } from './utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const config = JSON.parse(localStorage.getItem('rs-demo-save'));
@@ -15,31 +15,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize composition
   const rsHttpClient = new rs.RsHttpClient(config.server);
 
-  function toPartialVolumeDescriptor(str) {
-    const [start, end, delta] = $.map(str.split(':'), function(value) {
-      const num = parseInt(value, 10);
-      return isNaN(num) ? undefined : num;
-    });
-
-    if (start === undefined && end === undefined && delta === undefined) {
-      return undefined;
-    } else if (start !== undefined && end !== undefined) {
-      return { start: start, end: end, delta: delta };
-    } else {
-      throw new Error(
-        'Invalid partial volume descriptor specified. ' +
-          'partial volume descriptor must be in the form of `startImgNum:endImgNum(:imageDelta)`'
-      );
-    }
-  }
   const partialVolumeDescriptor = toPartialVolumeDescriptor(
     config.partialVolumeDescriptor
   );
 
-  const volumeLoader = new rs.RsVolumeLoader({
+  const wsClient = new rs.WebSocketClient(
+    config.server.replace(/^http/, 'ws') + '/ws/volume'
+  );
+  const volumeLoader = new rs.RsProgressiveVolumeLoader({
     seriesUid: config.seriesUid,
     partialVolumeDescriptor: partialVolumeDescriptor,
-    rsHttpClient
+    rsHttpClient,
+    transferConnectionFactory: rs.createTransferConnectionFactory(wsClient)
   });
   const imageSource = new config.sourceClass({
     volumeLoader,
@@ -80,9 +67,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const setOrientation = async (v, orientation) => {
     const imageSource = comp.imageSource;
     await imageSource.ready();
-
+    const viewState = v.getState() || v.getRequestingState();
+    if (!viewState) throw new Error('View state not initialized');
     v.setState({
-      ...v.getState(),
+      ...viewState,
       section: rs.createOrthogonalMprSection(
         v.getResolution(),
         imageSource.mmDim(),

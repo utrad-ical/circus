@@ -1,43 +1,37 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-
-<head>
-  <meta charset="utf-8" />
-  <meta http-equiv="X-UA-Compataible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>WebSocket | CIRCUS RS Demo</title>
-
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-</head>
-
-<body>
-  <div id="test-container" class="container my-3">
-    <div class="form-row">
-      <div class="col-4">
-        <div id="button-container"></div>
-        <hr>
-        <div class="card">
-          <div class="card-header p-1 d-flex justify-content-between">
-            <div>Logs</div>
-            <a href="javascript:void(0);" id="clear-logs" class="close text-danger">&times;</a>
-          </div>
-          <div class="card-body p-0">
-            <pre data-role="log-console" class="m-0 p-1" style="min-height: 4rem;"></pre>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>WebSocket | CIRCUS RS Demo</title>
+    <link rel="stylesheet" href="../demo.css" />
+  </head>
+  <body>
+    <div id="test-container" class="container">
+      <h1>WebSocket</h1>
+      <div class="sidebar-layout">
+        <div>
+          <div id="button-container"></div>
+          <hr />
+          <div class="card">
+            <div class="card-header">
+              <div>Logs</div>
+              <button type="button" id="clear-logs" class="close text-danger">
+                &times;
+              </button>
+            </div>
+            <div class="card-body">
+              <pre data-role="log-console"></pre>
+            </div>
           </div>
         </div>
-
-      </div>
-      <div class="col-8">
-        <div id="sub-button-container"></div>
-        <hr>
-        <div data-role="loader-container" class="list-group"></div>
+        <div>
+          <div id="sub-button-container"></div>
+          <hr />
+          <div data-role="loader-container" class="list-group"></div>
+        </div>
       </div>
     </div>
-
-  </div>
-
-  <script src="/ws/index.js"></script>
-</body>
-
+    <script type="module" src="./index.ts"></script>
+  </body>
 </html>

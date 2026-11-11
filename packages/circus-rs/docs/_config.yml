@@ -1,8 +1,0 @@
-keep_files: ['dist']
-exclude: ['live-demo.md']
-defaults:
-    -
-        scope:
-            path: "" # empty string for all files
-        values:
-            layout: default

@@ -1,0 +1,179 @@
+/* Minimal styles for the demo pages (no CSS framework) */
+
+:root {
+  --border: #ccc;
+  --muted-bg: #f5f5f5;
+  --primary: #337ab7;
+  --danger: #c9302c;
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+}
+
+body {
+  margin: 0;
+  color: #333;
+  background: #fff;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 16px 32px;
+}
+
+h1 {
+  margin: 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+  font-weight: 500;
+}
+
+.panel {
+  margin: 16px 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--muted-bg);
+}
+
+.inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stack-form {
+  display: grid;
+  gap: 8px;
+}
+
+.stack-form label {
+  display: grid;
+  gap: 2px;
+}
+
+input,
+select,
+textarea {
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font: inherit;
+  background: #fff;
+}
+
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
+}
+
+.two-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(512px, 1fr));
+  gap: 16px;
+}
+
+.sidebar-layout {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 16px;
+}
+
+.btn {
+  display: inline-block;
+  margin: 0 4px 4px 0;
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font: inherit;
+  color: inherit;
+  background: #fff;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #e6e6e6;
+}
+
+.btn-primary {
+  border-color: var(--primary);
+  color: #fff;
+  background: var(--primary);
+}
+
+.btn-primary:hover {
+  background: #286090;
+}
+
+.btn-sm {
+  padding: 2px 8px;
+  font-size: 12px;
+}
+
+.btn-block {
+  display: block;
+  width: 100%;
+  text-align: left;
+}
+
+.list-group {
+  display: grid;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.list-group-item {
+  padding: 8px 12px;
+}
+
+.list-group-item + .list-group-item {
+  border-top: 1px solid var(--border);
+}
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px;
+  border-bottom: 1px solid var(--border);
+  background: var(--muted-bg);
+}
+
+.card-body pre {
+  margin: 0;
+  padding: 4px;
+  min-height: 4rem;
+}
+
+.close {
+  border: none;
+  background: none;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.text-danger {
+  color: var(--danger);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.loader-row {
+  display: grid;
+  grid-template-columns: 1fr 5fr;
+  gap: 8px;
+}
+
+.space-between {
+  display: flex;
+  justify-content: space-between;
+}

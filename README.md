@@ -91,6 +91,12 @@ PORT=18080 CIRCUS_PORT=18081 DEV_PROXY=http://localhost:18080 pnpm dev
 
 You can also start only one of them with `pnpm -F @utrad-ical/circus-api dev` or `pnpm -F @utrad-ical/circus-web-ui dev`.
 
+To develop the viewer of CIRCUS RS without CIRCUS itself, use the RS demo (see [`packages/circus-rs/README.md`](./packages/circus-rs/README.md)):
+
+```bash
+pnpm -F @utrad-ical/circus-rs demo
+```
+
 ### Configuration
 
 We use [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) to configure options across all CIRCUS packages.

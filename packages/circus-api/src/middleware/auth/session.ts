@@ -48,8 +48,11 @@ const cookieOptions = (ctx: Ctx) => ({
 /**
  * Throws if a request that may change data lacks the CSRF header.
  */
-export const checkCsrfHeader = (ctx: Ctx) => {
-  if (!isSafeMethod(ctx.method) && !ctx.get(csrfHeaderName)) {
+export const checkCsrfHeader = (ctx: Ctx, alsoForSafeMethods = false) => {
+  if (
+    (alsoForSafeMethods || !isSafeMethod(ctx.method)) &&
+    !ctx.get(csrfHeaderName)
+  ) {
     ctx.throw(403, `The ${csrfHeaderName} header is required.`);
   }
 };
@@ -108,6 +111,7 @@ export const withSessionCookie = (
     if (byCookie) {
       checkCsrfHeader(ctx);
       ctx.request.headers.authorization = `Bearer ${cookie}`;
+      ctx.state.authenticatedBySessionCookie = true;
     }
     await authenticate(ctx, async () => {
       if (byCookie) {

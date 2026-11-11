@@ -229,3 +229,21 @@ describe('RS', () => {
     assert.equal(res2.status, httpStatus.OK);
   });
 });
+
+// Runs last: a successful GET /api/logout deletes all tokens of alice,
+// including the Bearer token used by the other tests
+describe('GET /api/logout', () => {
+  test('GET /api/logout with the cookie requires the CSRF header', async () => {
+    const cookie = await loginAsAlice();
+    const res1 = await ax.get('api/logout', { headers: { Cookie: cookie } });
+    assert.equal(res1.status, httpStatus.FORBIDDEN);
+    const res2 = await ax.get('api/login-info', {
+      headers: { Cookie: cookie }
+    });
+    assert.equal(res2.status, httpStatus.OK);
+    const res3 = await ax.get('api/logout', {
+      headers: { Cookie: cookie, ...csrf }
+    });
+    assert.equal(res3.status, httpStatus.NO_CONTENT);
+  });
+});

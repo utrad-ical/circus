@@ -25,7 +25,9 @@ const defaults: Configuration = {
       port: 8080,
       pluginResultsPath: '/var/circus/data/plugin-results',
       pluginCachePath: '/var/circus/data/plugin-cache',
-      dicomImageServerUrl: 'http://localhost:8080/rs',
+      // URL of CIRCUS RS as seen from the browser. A path on the same origin
+      // as the web UI is recommended, so that the session cookie is sent
+      dicomImageServerUrl: '/rs',
       debug: false,
       uploadFileSizeMaxBytes: 200 * 1024 * 1024
     }

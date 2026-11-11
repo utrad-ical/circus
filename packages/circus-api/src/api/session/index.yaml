@@ -1,0 +1,31 @@
+name: Session
+description: >
+  Manages the browser session of the web UI, kept in an HttpOnly cookie.
+  API clients use access tokens (OAuth or permanent tokens) instead.
+routes:
+  - verb: post
+    path: /session
+    noAuthentication: true
+    description: >
+      Logs in with a user name and a password, or with a onetime password
+      issued via the onetime URL, and sets the session cookie.
+    requestSchema:
+      oneOf:
+        - type: object
+          properties:
+            username:
+              type: string
+            password:
+              type: string
+          required: [username, password]
+          additionalProperties: false
+        - type: object
+          properties:
+            onetime:
+              type: string
+          required: [onetime]
+          additionalProperties: false
+  - verb: delete
+    path: /session
+    noAuthentication: true
+    description: Logs out by deleting the current session.

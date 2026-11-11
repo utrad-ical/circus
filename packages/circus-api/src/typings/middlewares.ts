@@ -38,6 +38,8 @@ export interface Deps {
   dicomVoxelDumper: DicomVoxelDumper;
   transactionManager: TransactionManager;
   seriesOrientationResolver: SeriesOrientationResolver;
+  /** Verifies a user name and a password (or a onetime password) */
+  verifyUser: (username: string, password: string) => Promise<any | null>;
   /** Replaceable in tests; defaults to the real Docker-based extractor */
   createDockerFileExtractor?: typeof createDockerFileExtractor;
 }

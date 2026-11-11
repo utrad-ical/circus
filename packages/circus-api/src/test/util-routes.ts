@@ -2,6 +2,7 @@ import type { Deps } from '../typings/middlewares.ts';
 import { after } from 'node:test';
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
+import Router from 'koa-router';
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import path from 'path';
@@ -191,7 +192,15 @@ export const setUpAppForRoutesTest = async (
       dicomImporter,
       core: csCore,
       mhdPacker: null as any, // dummy
-      rsSeriesRoutes: async () => {}, // dummy
+      // Dummy RS routes; a real router is needed because koa-router runs
+      // the middleware registered with `use()` only for matched routes
+      rsSeriesRoutes: (() => {
+        const router = new Router();
+        router.get('/metadata', ctx => {
+          ctx.body = { dummy: true };
+        });
+        return router.routes() as any;
+      })(),
       volumeProvider: null as any, // dummy
       taskManager,
       dicomVoxelDumper,

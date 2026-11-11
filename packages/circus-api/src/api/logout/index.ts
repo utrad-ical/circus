@@ -1,5 +1,6 @@
 import status from 'http-status';
 import type { RouteMiddleware } from '../../typings/middlewares.ts';
+import { endSession } from '../../middleware/auth/session.ts';
 
 export const handleGet: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
@@ -11,6 +12,7 @@ export const handleGet: RouteMiddleware = ({ models }) => {
       userId: userEmail,
       permanentTokenId: null // non-permanent tokens
     });
+    await endSession(ctx, models);
     ctx.body = null; // No content
   };
 };

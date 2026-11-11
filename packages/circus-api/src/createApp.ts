@@ -19,6 +19,10 @@ import compose from 'koa-compose';
 import mount from 'koa-mount';
 import Router from 'koa-router';
 import { fetchUserFromToken } from './middleware/auth/createOauthServer.ts';
+import {
+  sessionFromRawRequest,
+  withSessionCookie
+} from './middleware/auth/session.ts';
 import * as path from 'path';
 import querystring from 'querystring';
 import type * as ws from 'ws';
@@ -214,14 +218,17 @@ export const createApp: FunctionService<
     dicomVoxelDumper,
     transactionManager,
     seriesOrientationResolver,
-    createDockerFileExtractor
+    createDockerFileExtractor,
+    verifyUser: (username, password) =>
+      oauthServer.verifyUser(username, password)
   };
 
   const apiDir = path.resolve(import.meta.dirname, 'api/**/*.yaml');
 
+  // Accepts either a Bearer token (API clients) or the session cookie (web UI)
   const authMiddleware = fixUser
     ? fixUserMiddleware(deps, fixUser)
-    : oauthServer.authenticate();
+    : withSessionCookie(models, oauthServer.authenticate());
 
   const apiRouter = await prepareApiRouter(apiDir, deps, debug, authMiddleware);
 
@@ -259,15 +266,34 @@ export const createApp: FunctionService<
   koa.use(mount('/login', compose([bodyParser(), oauthServer.token()])));
 
   const rs = new Router();
-  rs.use('/series/:sid', rsSeriesRoutes as any);
+  rs.use(
+    '/series/:sid',
+    authMiddleware as any,
+    // The user must be able to access the domain of the series
+    (async (ctx: any, next: Koa.Next) => {
+      const series = await models.series.findById(ctx.params.sid);
+      if (!series) ctx.throw(404, 'Series not found.');
+      if (!ctx.userPrivileges.domains.includes(series.domain)) {
+        ctx.throw(403, 'You do not have privilege to access this series.');
+      }
+      await next();
+    }) as any,
+    rsSeriesRoutes as any
+  );
   koa.use(mount('/rs', rs.routes() as any));
   withWebSocketConnectionHandlers(rsWSServer, {
     '/rs/ws/volume': rsWebsocketVolumeConnectionHandlerCreator({
       authFunctionProvider: req => {
         // Returns a function that checks if the user has the
         // privilege to access the volume.
-        const { token } = querystring.decode(req.url?.split('?')[1] ?? '');
-        if (typeof token !== 'string') return async () => false;
+        // The session cookie (web UI), or a token in the query string
+        const { token: queryToken } = querystring.decode(
+          req.url?.split('?')[1] ?? ''
+        );
+        const token =
+          sessionFromRawRequest(req.headers.cookie) ??
+          (typeof queryToken === 'string' ? queryToken : undefined);
+        if (!token) return async () => false;
         const accessibleDomains = (async () => {
           const data = await fetchUserFromToken(token, models);
           if (

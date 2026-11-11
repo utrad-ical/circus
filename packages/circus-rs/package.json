@@ -5,13 +5,10 @@
   "scripts": {
     "start": "node ./server.js",
     "debug": "nodemon --inspect ./server.js",
-    "devserver": "webpack serve --mode=development --config webpack.config.cjs",
+    "demo": "vite --config demo/vite.config.ts",
     "build": "node -e \"for (const d of process.argv.slice(1)) fs.rmSync(d, { recursive: true, force: true })\" dist && tsdown && lessc src/browser/circus-rs.less dist/browser/circus-rs.css && cp src/browser/circus-rs.less dist/browser/",
-    "watch": "webpack --watch --config webpack.config.cjs",
-    "clean": "node -e \"for (const d of process.argv.slice(1)) fs.rmSync(d, { recursive: true, force: true })\" dist dist-demo",
-    "docs": "jekyll build --source=./docs --dest=./docs/_site && cp -r ./dist-demo ./docs/_site",
-    "docserver": "jekyll serve --source=./docs --dest=./docs/_site",
-    "typecheck": "tsc --noEmit"
+    "clean": "node -e \"for (const d of process.argv.slice(1)) fs.rmSync(d, { recursive: true, force: true })\" dist",
+    "typecheck": "tsc --noEmit && tsc -p demo/tsconfig.json"
   },
   "repository": {
     "type": "git",
@@ -43,9 +40,6 @@
     "*.css"
   ],
   "dependencies": {
-    "@babel/core": "^7.18.9",
-    "@babel/preset-env": "^7.18.9",
-    "@babel/preset-typescript": "^7.18.6",
     "@utrad-ical/circus-icons": "workspace:*",
     "@utrad-ical/circus-lib": "workspace:*",
     "axios": "^1.7.7",
@@ -91,23 +85,15 @@
     "@types/tinycolor2": "^1.4.0",
     "@types/validator": "^6.3.0",
     "@types/ws": "^8.5.3",
-    "babel-loader": "^9.2.1",
     "benchmark": "^2.1.4",
-    "css-loader": "^7.1.2",
-    "file-loader": "^6.2.0",
     "fs-extra": "^11.2.0",
-    "less": "^3.11.1",
-    "less-loader": "^10.0.1",
+    "less": "^4.9.1",
     "merge": "^1.2.1",
-    "style-loader": "^4.0.0",
     "svgicons2svgfont": "^5.0.2",
     "tsdown": "0.23.7",
     "ttf2woff": "^2.0.1",
     "typescript": "~6.0.3",
-    "url-loader": "^4.1.1",
-    "webpack": "^5.95.0",
-    "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.1.0"
+    "vite": "8.3.7"
   },
   "nodemonConfig": {
     "ext": "ts,js,json"

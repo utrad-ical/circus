@@ -447,7 +447,7 @@ div2.style.display = 'none';
 const vrControl =
   document.querySelector('#vr-controls') || document.createElement('div');
 vrControl.setAttribute('id', 'vr-controls');
-$(vrControl).children().remove();
+vrControl.replaceChildren();
 div2.parentNode.appendChild(vrControl);
 
 // Setup volume loader
@@ -505,7 +505,8 @@ vrImageSource.ready().then(() => {
   const toggleTransferFunction = () =>
     viewer.setState({
       ...viewer.getState(),
-      transferFunction: (enableBloodVesselsExtraction = !enableBloodVesselsExtraction)
+      transferFunction: (enableBloodVesselsExtraction =
+        !enableBloodVesselsExtraction)
         ? vesselTransferFunction
         : defaultTransferFunction
     });
@@ -520,13 +521,11 @@ vrImageSource.ready().then(() => {
     });
 
   const appendVrControlButton = (title, fn) => {
-    $(vrControl).append(
-      $(document.createElement('button'))
-        .addClass('btn btn-sm btn-block btn-default')
-        .css({ textAlign: 'left' })
-        .on('click', fn)
-        .append(title)
-    );
+    const button = document.createElement('button');
+    button.className = 'btn btn-sm btn-block';
+    button.addEventListener('click', fn);
+    button.append(title);
+    vrControl.append(button);
   };
 
   appendVrControlButton(
@@ -616,13 +615,11 @@ vrImageSource.ready().then(() => {
     });
 
   const appendVrControlButton = (title, fn) => {
-    $(vrControl).append(
-      $(document.createElement('button'))
-        .addClass('btn btn-sm btn-block btn-default')
-        .css({ textAlign: 'left' })
-        .on('click', fn)
-        .append(title)
-    );
+    const button = document.createElement('button');
+    button.className = 'btn btn-sm btn-block';
+    button.addEventListener('click', fn);
+    button.append(title);
+    vrControl.append(button);
   };
 
   appendVrControlButton(

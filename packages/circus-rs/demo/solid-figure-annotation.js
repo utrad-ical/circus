@@ -1,6 +1,5 @@
-'use strict';
-
-const rs = circusrs;
+import * as rs from '../src/browser/index.ts';
+import '../src/browser/circus-rs.less';
 
 document.addEventListener('DOMContentLoaded', () => {
   const config = JSON.parse(localStorage.getItem('rs-demo-save'));
@@ -16,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const rsHttpClient = new rs.RsHttpClient(config.server);
 
   function toPartialVolumeDescriptor(str) {
-    const [start, end, delta] = $.map(str.split(':'), function(value) {
+    const [start, end, delta] = $.map(str.split(':'), function (value) {
       const num = parseInt(value, 10);
       return isNaN(num) ? undefined : num;
     });

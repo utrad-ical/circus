@@ -28,6 +28,21 @@ test('dicomExtractorWorker', async () => {
   assert.ok('metadata' in data);
   assert.ok('pixelData' in data);
   const dummy = new Uint8Array(512).fill(5).buffer;
-  assert.rejects(extract(dummy), { message: /DICM prefix not found/ });
+  await assert.rejects(extract(dummy), { message: /DICM prefix not found/ });
   await extract.dispose();
+});
+
+test('dicomExtractorWorker under node --watch', async () => {
+  // With `node --watch`, Node sets this variable and the worker reports
+  // every module it loads to the parent port
+  process.env.WATCH_REPORT_DEPENDENCIES = '1';
+  try {
+    const extract = await createDicomExtractorWorker({ maxConcurrency: 1 });
+    const data = await extract((await dicomImage()).buffer);
+    assert.ok('metadata' in data);
+    assert.ok('pixelData' in data);
+    await extract.dispose();
+  } finally {
+    delete process.env.WATCH_REPORT_DEPENDENCIES;
+  }
 });

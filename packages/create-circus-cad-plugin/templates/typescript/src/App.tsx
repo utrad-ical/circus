@@ -1,17 +1,17 @@
-import React, { useMemo } from "react";
-import styled from "styled-components";
-import { DicomVolumeLoader } from "@utrad-ical/circus-rs";
-import axios from "axios";
-import sampleJob from "./sampleJob.json";
-import SampleViewer from "./components/SampleViewer";
+import React, { useMemo } from 'react';
+import styled from 'styled-components';
+import { DicomVolumeLoader } from '@utrad-ical/circus-rs';
+import axios from 'axios';
+import sampleJob from './sampleJob.json';
+import SampleViewer from './components/SampleViewer';
 
 import {
   Job,
   Plugin,
   CsResultsContext,
   SeriesDefinition,
-  FeedbackEntry,
-} from "@utrad-ical/circus-ui-kit";
+  FeedbackEntry
+} from '@utrad-ical/circus-ui-kit';
 
 const App = () => {
   const resultsContext = useMemo<any | undefined>(() => {
@@ -40,7 +40,7 @@ const App = () => {
       },
       loadDisplay: (name: string) => {
         return {} as Promise<any>;
-      },
+      }
     };
   }, []);
   const personalOpinionsForKey = (key: string): FeedbackEntry<never>[] => {
@@ -55,8 +55,8 @@ const App = () => {
         <CsResultsContext.Provider value={resultsContext}>
           <SampleViewer
             initialFeedbackValue={undefined}
-            onFeedbackChange={(status) => {}}
-            personalOpinions={personalOpinionsForKey("test")}
+            onFeedbackChange={status => {}}
+            personalOpinions={personalOpinionsForKey('test')}
             options={{}}
           />
         </CsResultsContext.Provider>
@@ -68,8 +68,9 @@ const App = () => {
 export default App;
 
 const StyledDiv = styled.div`
-  font-family: "Helvetica Neue", "Helvetica", "ヒラギノ角ゴ ProN W3",
-    "Hiragino Kaku Gothic ProN", "メイリオ", Meiryo, sans-serif;
+  font-family:
+    'Helvetica Neue', 'Helvetica', 'ヒラギノ角ゴ ProN W3',
+    'Hiragino Kaku Gothic ProN', 'メイリオ', Meiryo, sans-serif;
   font-size: 16px;
   line-height: 1.42857143;
   background-color: white;

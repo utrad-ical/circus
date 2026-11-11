@@ -9,6 +9,7 @@
     "package.json",
     "package-lock.json",
     "node_modules",
-    "*glyphs.less"
+    "*glyphs.less",
+    "*glyphs.css"
   ]
 }

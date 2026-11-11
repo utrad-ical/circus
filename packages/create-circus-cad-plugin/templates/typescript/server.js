@@ -1,20 +1,20 @@
-const jsonServer = require("json-server");
-const opts = require("opts");
-const fs = require("fs");
+const jsonServer = require('json-server');
+const opts = require('opts');
+const fs = require('fs');
 
 opts.parse([
   {
-    short: "p",
-    long: "port",
-    description: "HTTP port",
+    short: 'p',
+    long: 'port',
+    description: 'HTTP port',
     value: true,
-    required: false,
-  },
+    required: false
+  }
 ]);
 
 const server = jsonServer.create();
 const middlewares = jsonServer.defaults({ static: `${__dirname}/data` });
-const port = opts.get("port") || 3000;
+const port = opts.get('port') || 3000;
 
 server.use(middlewares);
 server.use((req, res, next) => {

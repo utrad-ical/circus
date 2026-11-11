@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef, RefObject } from "react";
-import styled from "styled-components";
-import { useCsResults, Display } from "@utrad-ical/circus-ui-kit";
+import React, { useState, useEffect, useRef, RefObject } from 'react';
+import styled from 'styled-components';
+import { useCsResults, Display } from '@utrad-ical/circus-ui-kit';
 
 interface Feedback {
   comment: string;
@@ -35,7 +35,7 @@ const StyledDiv = styled.div`
   }
 `;
 
-const SampleViewer: Display<any, Feedback> = (props) => {
+const SampleViewer: Display<any, Feedback> = props => {
   const { initialFeedbackValue, onFeedbackChange, personalOpinions } = props;
   const resultImgRef = useRef<HTMLImageElement>(null);
   const { job, loadAttachment } = useCsResults();
@@ -46,7 +46,7 @@ const SampleViewer: Display<any, Feedback> = (props) => {
       return initialFeedbackValue;
     }
     return {
-      comment: "",
+      comment: ''
     };
   });
 
@@ -61,7 +61,7 @@ const SampleViewer: Display<any, Feedback> = (props) => {
       if (res.status === 200) {
         const img = await res.arrayBuffer();
         const view = new Uint8Array(img);
-        const blob = new Blob([view], { type: "image/png" });
+        const blob = new Blob([view], { type: 'image/png' });
         const url = URL.createObjectURL(blob);
         element.current!.src = url;
       }
@@ -70,7 +70,7 @@ const SampleViewer: Display<any, Feedback> = (props) => {
   }, [job, loadAttachment]);
 
   useEffect(() => {
-    if (currentFeedback["comment"] !== "") {
+    if (currentFeedback['comment'] !== '') {
       onFeedbackChange({ valid: true, value: currentFeedback });
     } else {
       onFeedbackChange({ valid: false });
@@ -99,13 +99,13 @@ const SampleViewer: Display<any, Feedback> = (props) => {
         <p>Summary</p>
         <table className="summary table table-hover">
           <tbody>
-            {row("item01", results.item01)}
-            {row("item02", results.item02)}
-            {row("item03", results.item03)}
-            {row("item04", results.item04)}
-            {row("test", results.test)}
+            {row('item01', results.item01)}
+            {row('item02', results.item02)}
+            {row('item03', results.item03)}
+            {row('item04', results.item04)}
+            {row('test', results.test)}
             {row(
-              "location",
+              'location',
               `[${results.location[0]}, ${results.location[1]}, ${results.location[2]}]`
             )}
           </tbody>
@@ -119,7 +119,7 @@ const SampleViewer: Display<any, Feedback> = (props) => {
         <p>feedback</p>
         <div>Do you have any comments?</div>
         <textarea
-          value={currentFeedback["comment"]}
+          value={currentFeedback['comment']}
           onChange={handleChangeComment}
           cols={50}
           rows={3}

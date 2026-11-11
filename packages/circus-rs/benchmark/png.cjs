@@ -20,15 +20,15 @@ var suite = new Benchmark.Suite();
 suite
   .add('pngjs (pure JS)', {
     defer: true,
-    fn: function(deferred) {
+    fn: function (deferred) {
       var out = new streamBuffers.WritableStreamBuffer();
       enc.write(out, imageData, width, height);
-      out.on('finish', function() {
+      out.on('finish', function () {
         deferred.resolve();
       });
     }
   })
-  .on('cycle', function(event) {
+  .on('cycle', function (event) {
     console.log(event.target.toString());
   });
 suite.run({ async: true });

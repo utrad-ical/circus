@@ -111,7 +111,8 @@
           }
         ]
       }
-    ]
+    ],
+    "no-undef": "error"
   },
   "overrides": [
     {
@@ -125,6 +126,12 @@
       "files": ["**/*.d.ts"],
       "rules": {
         "no-redeclare": "off"
+      }
+    },
+    {
+      "files": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
+      "rules": {
+        "no-undef": "off"
       }
     }
   ]

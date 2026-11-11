@@ -978,9 +978,6 @@ importers:
       multi-integer-range:
         specifier: ^6.1.0
         version: 6.1.0
-      querystring-es3:
-        specifier: ^0.2.1
-        version: 0.2.1
       react:
         specifier: ^17.0.2
         version: 17.0.2
@@ -1096,9 +1093,6 @@ importers:
       webpack-dev-server:
         specifier: ^5.1.0
         version: 5.1.0(debug@4.3.5(supports-color@8.1.1))(supports-color@8.1.1)(webpack-cli@5.1.4)(webpack@5.95.0)
-      worker-loader:
-        specifier: ^3.0.8
-        version: 3.0.8(webpack@5.95.0)
 
   packages/create-circus-cad-plugin:
     dependencies:
@@ -5156,10 +5150,6 @@ packages:
   quansync@1.0.0:
     resolution: {integrity: sha512-5xZacEEufv3HSTPQuchrvV6soaiACMFnq1H8wkVioctoH3TRha9Sz66lOxRwPK/qZj7HPiSveih9yAyh98gvqA==}
 
-  querystring-es3@0.2.1:
-    resolution: {integrity: sha512-773xhDQnZBMFobEiztv8LIl70ch5MSF/jUQVlhwFyBILqq96anmoctVIYz+ZRp0qbCKATTn6ev02M3r7Ga5vqA==}
-    engines: {node: '>=0.4.x'}
-
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
@@ -6257,12 +6247,6 @@ packages:
   word-wrap@1.2.5:
     resolution: {integrity: sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==}
     engines: {node: '>=0.10.0'}
-
-  worker-loader@3.0.8:
-    resolution: {integrity: sha512-XQyQkIFeRVC7f7uRhFdNMe/iJOdO6zxAaR3EWbDp45v3mDhrTi+++oswKNxShUNjPC/1xUp5DB29YKLhFo129g==}
-    engines: {node: '>= 10.13.0'}
-    peerDependencies:
-      webpack: ^4.0.0 || ^5.0.0
 
   wrap-ansi@3.0.1:
     resolution: {integrity: sha512-iXR3tDXpbnTpzjKSylUJRkLuOrEC7hwEB221cgn6wtF8wpmz28puFXAEfPT5zrjM3wahygB//VuWEr1vTkDcNQ==}
@@ -10861,8 +10845,6 @@ snapshots:
 
   quansync@1.0.0: {}
 
-  querystring-es3@0.2.1: {}
-
   queue-microtask@1.2.3: {}
 
   randombytes@2.1.0:
@@ -12141,12 +12123,6 @@ snapshots:
       winston-transport: 4.4.0
 
   word-wrap@1.2.5: {}
-
-  worker-loader@3.0.8(webpack@5.95.0):
-    dependencies:
-      loader-utils: 2.0.0
-      schema-utils: 3.3.0
-      webpack: 5.95.0(webpack-cli@5.1.4)
 
   wrap-ansi@3.0.1:
     dependencies:

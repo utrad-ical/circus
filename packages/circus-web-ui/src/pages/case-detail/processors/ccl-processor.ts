@@ -1,7 +1,6 @@
 import { alert } from '@smikitky/rb-components/lib/modal';
 import type { LabelingResults3D } from '@utrad-ical/circus-rs';
 import { CCL3D26 as CCL26, CCL3D6 as CCL6 } from '@utrad-ical/circus-rs';
-import cclWorker from 'worker-loader!./ccl-worker';
 import type { VoxelLabelProcessor } from './performLabelCreatingVoxelProcessing.ts';
 import performLabelCreatingVoxelProcessing from './performLabelCreatingVoxelProcessing.ts';
 
@@ -122,7 +121,7 @@ const cclVoxelProcessor: VoxelLabelProcessor<
     labels: new Array(0)
   };
   if (window.Worker) {
-    const myWorker = new cclWorker();
+    const myWorker = new Worker(new URL('./ccl-worker.ts', import.meta.url));
     myWorker.postMessage({
       input,
       width,

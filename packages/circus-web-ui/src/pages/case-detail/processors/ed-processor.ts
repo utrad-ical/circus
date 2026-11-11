@@ -4,7 +4,6 @@ import type {
   MorphologicalImageProcessingResults,
   Structure
 } from '@utrad-ical/circus-rs';
-import edWorker from 'worker-loader!./ed-worker';
 import type { VoxelLabelProcessor } from './performLabelCreatingVoxelProcessing.ts';
 import performLabelCreatingVoxelProcessing from './performLabelCreatingVoxelProcessing.ts';
 
@@ -55,7 +54,7 @@ const createEdProcessor: (
     }
 
     if (window.Worker) {
-      const myWorker = new edWorker();
+      const myWorker = new Worker(new URL('./ed-worker.ts', import.meta.url));
       myWorker.postMessage({
         input: initializedInput,
         width: width + 2 * padding[0],

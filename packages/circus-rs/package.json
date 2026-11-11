@@ -5,7 +5,9 @@
   "scripts": {
     "start": "node ./server.js",
     "debug": "nodemon --inspect ./server.js",
-    "demo": "vite --config demo/vite.config.ts",
+    "demo": "pnpm run \"/^demo:/\"",
+    "demo:server": "node --watch server.js",
+    "demo:vite": "vite --config demo/vite.config.ts",
     "build": "node -e \"for (const d of process.argv.slice(1)) fs.rmSync(d, { recursive: true, force: true })\" dist && tsdown && lessc src/browser/circus-rs.less dist/browser/circus-rs.css && cp src/browser/circus-rs.less dist/browser/",
     "clean": "node -e \"for (const d of process.argv.slice(1)) fs.rmSync(d, { recursive: true, force: true })\" dist",
     "typecheck": "tsc --noEmit && tsc -p demo/tsconfig.json"

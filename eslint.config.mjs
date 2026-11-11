@@ -3,7 +3,6 @@ import js from '@eslint/js';
 import typescriptEslint from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import react from 'eslint-plugin-react';
-import reactCompiler from 'eslint-plugin-react-compiler';
 import reactHooks from 'eslint-plugin-react-hooks';
 import globals from 'globals';
 import path from 'node:path';
@@ -22,8 +21,7 @@ export default [
   {
     plugins: {
       react,
-      '@typescript-eslint': typescriptEslint,
-      'react-compiler': reactCompiler
+      '@typescript-eslint': typescriptEslint
     },
 
     languageOptions: {
@@ -68,8 +66,7 @@ export default [
       ],
 
       'react/prop-types': 'off',
-      'react/display-name': 'off',
-      'react-compiler/react-compiler': 'error'
+      'react/display-name': 'off'
     }
   },
   {

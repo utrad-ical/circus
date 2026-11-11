@@ -1,6 +1,6 @@
 import { useDispatch } from 'react-redux';
 import type React from 'react';
-import { showMessage } from 'store/messages';
+import { showMessage } from '#store/messages.ts';
 
 interface Options {
   /**

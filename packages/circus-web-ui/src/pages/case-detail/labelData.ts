@@ -1,4 +1,4 @@
-import generateUniqueId from 'utils/generateUniqueId';
+import generateUniqueId from '#utils/generateUniqueId.ts';
 import * as rs from '@utrad-ical/circus-rs';
 import type { Section, Vector2D, Vector3D } from '@utrad-ical/circus-rs';
 import {
@@ -8,8 +8,8 @@ import {
 import { focusBy } from '@utrad-ical/circus-rs';
 import { gzipSync } from 'fflate';
 import { produce, createDraft, finishDraft } from 'immer';
-import type { ApiCaller } from 'utils/api';
-import { sha1 } from 'utils/util';
+import type { ApiCaller } from '#utils/api.ts';
+import { sha1 } from '#utils/util.ts';
 
 type InternalLabelDataMap = {
   voxel: InternalVoxelLabelData;

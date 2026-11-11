@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import classnames from 'classnames';
 import styled from 'styled-components';
-import Icon from 'components/Icon';
+import Icon from '#components/Icon.tsx';
 
 const StyledDiv = styled.div`
   .collapser-header {

@@ -1,12 +1,12 @@
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import { describePartialVolumeDescriptor } from '@utrad-ical/circus-rs';
 import { useCsResults } from '@utrad-ical/circus-ui-kit';
-import Icon from 'components/Icon';
-import IconButton from 'components/IconButton';
-import { Modal, Tab, Tabs } from 'components/react-bootstrap';
-import type { SeriesEntry } from 'components/SeriesSelector';
-import TimeDisplay from 'components/TimeDisplay';
-import UserDisplay from 'components/UserDisplay';
+import Icon from '#components/Icon.tsx';
+import IconButton from '#components/IconButton.ts';
+import { Modal, Tab, Tabs } from '#components/react-bootstrap.ts';
+import type { SeriesEntry } from '#components/SeriesSelector.tsx';
+import TimeDisplay from '#components/TimeDisplay.tsx';
+import UserDisplay from '#components/UserDisplay.tsx';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 

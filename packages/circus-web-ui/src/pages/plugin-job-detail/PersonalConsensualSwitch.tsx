@@ -1,6 +1,6 @@
 import React from 'react';
-import Icon from 'components/Icon';
-import IconButton from 'components/IconButton';
+import Icon from '#components/Icon.tsx';
+import IconButton from '#components/IconButton.ts';
 
 const PersonalConsensualSwitch: React.FC<{
   feedbackState: { isConsensual: boolean };

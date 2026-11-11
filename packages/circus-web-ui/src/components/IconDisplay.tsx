@@ -2,7 +2,7 @@ import React from 'react';
 import type { CircusIconDefinition } from './BodyPartIcon.tsx';
 import BodyPartIcon from './BodyPartIcon.tsx';
 import styled from 'styled-components';
-import { OverlayTrigger, Tooltip } from 'components/react-bootstrap';
+import { OverlayTrigger, Tooltip } from '#components/react-bootstrap.ts';
 
 const StyledSpan = styled.span`
   display: inline-block;

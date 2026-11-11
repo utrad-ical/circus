@@ -1,5 +1,5 @@
 import React from 'react';
-import IconButton from 'components/IconButton';
+import IconButton from '#components/IconButton.ts';
 import type { Sizes } from 'react-bootstrap';
 
 const CopyToClipboardButton: React.FC<{

@@ -1,11 +1,11 @@
 import type { Editor } from '@smikitky/rb-components/lib/editor-types';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import { produce } from 'immer';
-import type { ExternalLabel } from 'pages/case-detail/labelData';
-import type { Revision } from 'pages/case-detail/revisionData';
-import RevisionSelector from 'pages/case-detail/RevisionSelector';
+import type { ExternalLabel } from '#pages/case-detail/labelData.ts';
+import type { Revision } from '#pages/case-detail/revisionData.ts';
+import RevisionSelector from '#pages/case-detail/RevisionSelector.tsx';
 import React, { useCallback, useMemo } from 'react';
-import { useApi } from 'utils/api';
+import { useApi } from '#utils/api.ts';
 import type { CompressionFormat, LineEnding } from './DownloadModal.tsx';
 import DownloadModal, {
   compressionFormatOptions,

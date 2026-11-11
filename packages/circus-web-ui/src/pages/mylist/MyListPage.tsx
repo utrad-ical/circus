@@ -1,9 +1,9 @@
-import Icon from 'components/Icon';
+import Icon from '#components/Icon.tsx';
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import * as s from 'store/searches';
-import { useApi } from 'utils/api';
-import useLoginUser from 'utils/useLoginUser';
+import * as s from '#store/searches.ts';
+import { useApi } from '#utils/api.ts';
+import useLoginUser from '#utils/useLoginUser.ts';
 import MyListHome from './MyListHome.tsx';
 
 const MyListPage: React.FC<{

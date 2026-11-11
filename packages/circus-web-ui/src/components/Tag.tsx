@@ -1,7 +1,7 @@
 import React from 'react';
 import tinycolor from 'tinycolor2';
 import styled from 'styled-components';
-import useLoginUser from 'utils/useLoginUser';
+import useLoginUser from '#utils/useLoginUser.ts';
 
 const StyledSpan = styled.span`
   display: inline-block;

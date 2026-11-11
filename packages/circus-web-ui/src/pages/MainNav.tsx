@@ -1,13 +1,13 @@
 import classnames from 'classnames';
-import Icon from 'components/Icon';
-import NavMenu from 'components/NavMenu';
-import TaskNotifier from 'components/TaskNotifier';
+import Icon from '#components/Icon.tsx';
+import NavMenu from '#components/NavMenu.tsx';
+import TaskNotifier from '#components/TaskNotifier.tsx';
 import React, { Fragment } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import type { MyList } from 'store/loginUser';
+import type { MyList } from '#store/loginUser.ts';
 import styled from 'styled-components';
-import useLoginUser from 'utils/useLoginUser';
+import useLoginUser from '#utils/useLoginUser.ts';
 
 const MainMenu: React.FC<{}> = props => <ul>{props.children}</ul>;
 

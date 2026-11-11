@@ -1,13 +1,13 @@
-import Icon from 'components/Icon';
-import type { DataGridRenderer } from 'components/DataGrid';
-import IdDisplay from 'components/IdDisplay';
-import PatientInfoBox from 'components/PatientInfoBox';
-import PluginDisplay from 'components/PluginDisplay';
-import ProjectDisplay from 'components/ProjectDisplay';
-import { TagList } from 'components/Tag';
-import TimeDisplay from 'components/TimeDisplay';
-import UserDisplay from 'components/UserDisplay';
-import { ProgressBar } from 'components/react-bootstrap';
+import Icon from '#components/Icon.tsx';
+import type { DataGridRenderer } from '#components/DataGrid.tsx';
+import IdDisplay from '#components/IdDisplay.tsx';
+import PatientInfoBox from '#components/PatientInfoBox.tsx';
+import PluginDisplay from '#components/PluginDisplay.tsx';
+import ProjectDisplay from '#components/ProjectDisplay.tsx';
+import { TagList } from '#components/Tag.tsx';
+import TimeDisplay from '#components/TimeDisplay.tsx';
+import UserDisplay from '#components/UserDisplay.tsx';
+import { ProgressBar } from '#components/react-bootstrap.ts';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 

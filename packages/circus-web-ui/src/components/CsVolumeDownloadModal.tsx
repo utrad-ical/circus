@@ -1,8 +1,8 @@
 import type { Editor } from '@smikitky/rb-components/lib/editor-types';
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import { useApi } from 'utils/api';
-import fillPartialVolumeDescriptors from 'utils/partialVolumeDescriptor';
+import { useApi } from '#utils/api.ts';
+import fillPartialVolumeDescriptors from '#utils/partialVolumeDescriptor.ts';
 import type { CompressionFormat } from './DownloadModal.tsx';
 import DownloadModal, { compressionFormatOptions } from './DownloadModal.tsx';
 import type { SeriesEntry } from './SeriesSelector.tsx';

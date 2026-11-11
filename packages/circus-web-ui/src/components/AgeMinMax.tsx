@@ -1,5 +1,5 @@
 import React from 'react';
-import { FormControl } from 'components/react-bootstrap';
+import { FormControl } from '#components/react-bootstrap.ts';
 
 const AgeMinMax: React.FC<{
   value: { min: number; max: number };

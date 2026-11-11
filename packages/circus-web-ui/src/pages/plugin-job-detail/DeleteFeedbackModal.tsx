@@ -1,13 +1,13 @@
 import type { FeedbackEntry } from '@utrad-ical/circus-ui-kit';
 import { useCsResults } from '@utrad-ical/circus-ui-kit';
-import type { DataGridColumnDefinition } from 'components/DataGrid';
-import DataGrid from 'components/DataGrid';
-import Icon from 'components/Icon';
-import { Button, Modal } from 'components/react-bootstrap';
-import TimeDisplay from 'components/TimeDisplay';
-import UserDisplay from 'components/UserDisplay';
+import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
+import DataGrid from '#components/DataGrid.tsx';
+import Icon from '#components/Icon.tsx';
+import { Button, Modal } from '#components/react-bootstrap.ts';
+import TimeDisplay from '#components/TimeDisplay.tsx';
+import UserDisplay from '#components/UserDisplay.tsx';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useApi } from 'utils/api';
+import { useApi } from '#utils/api.ts';
 import * as modal from '@smikitky/rb-components/lib/modal';
 
 const DeleteFeedbackModal: React.FC<{}> = () => {

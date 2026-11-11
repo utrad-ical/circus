@@ -1,6 +1,6 @@
 import React from 'react';
-import IconDisplay from 'components/IconDisplay';
-import useLoginUser from 'utils/useLoginUser';
+import IconDisplay from '#components/IconDisplay.tsx';
+import useLoginUser from '#utils/useLoginUser.ts';
 
 const ProjectDisplay: React.FC<{
   projectId: string;

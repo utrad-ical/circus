@@ -1,6 +1,6 @@
 import React from 'react';
-import { dismissMessage } from 'store/messages';
-import { Alert } from 'components/react-bootstrap';
+import { dismissMessage } from '#store/messages.ts';
+import { Alert } from '#components/react-bootstrap.ts';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 

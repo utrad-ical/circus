@@ -1,14 +1,14 @@
 import classNames from 'classnames';
-import IconButton from 'components/IconButton';
+import IconButton from '#components/IconButton.ts';
 import moment from 'moment';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { newSearch, updateSearch } from 'store/searches';
+import { newSearch, updateSearch } from '#store/searches.ts';
 import styled, { keyframes } from 'styled-components';
-import type Task from 'types/Task';
-import { useApi } from 'utils/api';
-import useTaskDismisser from 'utils/useTaskDismisser';
-import useTaskDownloadHandler from 'utils/useTaskDownloadHandler';
+import type Task from '#types/Task.ts';
+import { useApi } from '#utils/api.ts';
+import useTaskDismisser from '#utils/useTaskDismisser.ts';
+import useTaskDownloadHandler from '#utils/useTaskDownloadHandler.ts';
 import type { TaskProgress } from '../store/taskProgress.ts';
 import NavMenu from './NavMenu.tsx';
 

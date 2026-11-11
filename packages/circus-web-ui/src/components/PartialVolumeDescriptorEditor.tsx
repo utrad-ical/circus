@@ -6,7 +6,7 @@ import {
   describePartialVolumeDescriptor,
   rangeHasPartialVolume
 } from '@utrad-ical/circus-rs';
-import { Button, Modal } from 'components/react-bootstrap';
+import { Button, Modal } from '#components/react-bootstrap.ts';
 import * as mr from 'multi-integer-range';
 import React, { useMemo, useState } from 'react';
 import IconButton from './IconButton.ts';

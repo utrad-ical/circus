@@ -2,23 +2,23 @@ import { confirm } from '@smikitky/rb-components/lib/modal';
 import type {
   DataGridColumnDefinition,
   DataGridRenderer
-} from 'components/DataGrid';
-import DataGrid from 'components/DataGrid';
-import DropdownButton from 'components/DropdownButton';
-import Icon from 'components/Icon';
-import MenuItem from 'components/MenuItem';
-import MyListDropdown from 'components/MyListDropdown';
+} from '#components/DataGrid.tsx';
+import DataGrid from '#components/DataGrid.tsx';
+import DropdownButton from '#components/DropdownButton.tsx';
+import Icon from '#components/Icon.tsx';
+import MenuItem from '#components/MenuItem.tsx';
+import MyListDropdown from '#components/MyListDropdown.tsx';
 import SearchResultsView, {
   makeSortOptions,
   patientInfoSearchOptions
-} from 'components/SearchResultsView';
+} from '#components/SearchResultsView.tsx';
 import * as mr from 'multi-integer-range';
 import React, { Fragment } from 'react';
 import { useSelector } from 'react-redux';
-import { dispatch } from 'store';
-import { showMessage } from 'store/messages';
-import { useApi } from 'utils/api';
-import { useLoginManager } from 'utils/loginManager';
+import { dispatch } from '#store/index.ts';
+import { showMessage } from '#store/messages.ts';
+import { useApi } from '#utils/api.ts';
+import { useLoginManager } from '#utils/loginManager.ts';
 import {
   Modality,
   PatientInfo,

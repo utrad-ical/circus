@@ -1,4 +1,4 @@
-import generateUniqueId from 'utils/generateUniqueId';
+import generateUniqueId from '#utils/generateUniqueId.ts';
 import { RawData } from '@utrad-ical/circus-rs';
 import createCurrentLabelsUpdator from '../createCurrentLabelsUpdator.ts';
 import type { InternalLabel, InternalLabelOf } from '../labelData.ts';

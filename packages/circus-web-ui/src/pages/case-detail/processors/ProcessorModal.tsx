@@ -1,4 +1,4 @@
-import { Button, Modal, ProgressBar } from 'components/react-bootstrap';
+import { Button, Modal, ProgressBar } from '#components/react-bootstrap.ts';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import type { ProcessorProgress, Editor } from './processor-types.ts';

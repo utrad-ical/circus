@@ -1,6 +1,6 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
-import type { ApiCaller } from 'utils/api';
+import type { ApiCaller } from '#utils/api.ts';
 import type { AppThunk } from './index.ts';
 
 export interface Users {

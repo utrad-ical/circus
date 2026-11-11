@@ -2,17 +2,17 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { modalities } from '../../modalities.ts';
 import type { Condition } from './ConditionFrame.tsx';
 import ConditionFrame from './ConditionFrame.tsx';
-import { escapeRegExp } from 'utils/util';
+import { escapeRegExp } from '#utils/util.ts';
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import type { DateRange } from '@smikitky/rb-components/lib/DateRangePicker';
 import DateRangePicker, {
   dateRangeToMongoQuery
 } from '@smikitky/rb-components/lib/DateRangePicker';
-import AgeMinMax from 'components/AgeMinMax';
+import AgeMinMax from '#components/AgeMinMax.tsx';
 import { conditionToMongoQuery } from '@smikitky/rb-components/lib/ConditionEditor';
-import SearchPanel from 'pages/search/SearchPanel';
-import { useApi } from 'utils/api';
-import PluginDisplay from 'components/PluginDisplay';
+import SearchPanel from '#pages/search/SearchPanel.tsx';
+import { useApi } from '#utils/api.ts';
+import PluginDisplay from '#components/PluginDisplay.tsx';
 import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
 
 const sexOptions: { [key: string]: string } = {

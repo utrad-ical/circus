@@ -1,6 +1,6 @@
 import type { Editor } from './processor-types.ts';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
-import { FormControl } from 'components/react-bootstrap';
+import { FormControl } from '#components/react-bootstrap.ts';
 import React from 'react';
 import type { CclOptions } from './ccl-processor.ts';
 

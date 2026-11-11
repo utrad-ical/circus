@@ -4,7 +4,7 @@ import type { ModifierKeyBehaviors } from '@utrad-ical/circus-rs';
 import type { PlaneFigureOption } from '@utrad-ical/circus-rs';
 import type { ReferenceValueOption } from '@utrad-ical/circus-rs';
 import type { InterpolationMode } from '@utrad-ical/circus-rs';
-import Icon from 'components/Icon';
+import Icon from '#components/Icon.tsx';
 import {
   Button,
   Dropdown,
@@ -12,17 +12,17 @@ import {
   OverlayTrigger,
   SplitButton,
   Tooltip
-} from 'components/react-bootstrap';
-import MenuItem from 'components/MenuItem';
+} from '#components/react-bootstrap.ts';
+import MenuItem from '#components/MenuItem.tsx';
 import type {
   ToolOptions,
   ToolOptionSetter
-} from 'pages/case-detail/useToolbar';
+} from '#pages/case-detail/useToolbar.ts';
 import React, { useState } from 'react';
 import type { MenuItemProps } from 'react-bootstrap';
 import styled from 'styled-components';
-import type { WindowPreset } from 'types/Project';
-import useKeyboardShortcut from 'utils/useKeyboardShortcut';
+import type { WindowPreset } from '#types/Project.ts';
+import useKeyboardShortcut from '#utils/useKeyboardShortcut.ts';
 import type {
   ScrollBarsSettings,
   WindowPropagationScope

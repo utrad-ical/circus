@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useApi } from 'utils/api';
-import useShowMessage from 'utils/useShowMessage';
-import { Button } from 'components/react-bootstrap';
+import { useApi } from '#utils/api.ts';
+import useShowMessage from '#utils/useShowMessage.ts';
+import { Button } from '#components/react-bootstrap.ts';
 import AdminContainer from './AdminContainer.tsx';
 import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
 import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';

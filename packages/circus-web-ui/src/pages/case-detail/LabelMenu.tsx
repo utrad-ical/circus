@@ -1,26 +1,26 @@
 import { ColorPalette } from '@smikitky/rb-components/lib/ColorPicker';
 import { alert, prompt } from '@smikitky/rb-components/lib/modal';
 import Slider from '@smikitky/rb-components/lib/Slider';
-import generateUniqueId from 'utils/generateUniqueId';
+import generateUniqueId from '#utils/generateUniqueId.ts';
 import type { Viewer } from '@utrad-ical/circus-rs';
 import type { DicomVolumeMetadata } from '@utrad-ical/circus-rs';
 import type { OrientationString } from '@utrad-ical/circus-rs';
-import Icon from 'components/Icon';
-import IconButton from 'components/IconButton';
-import MenuItem from 'components/MenuItem';
+import Icon from '#components/Icon.tsx';
+import IconButton from '#components/IconButton.ts';
+import MenuItem from '#components/MenuItem.tsx';
 import {
   Button,
   OverlayTrigger,
   Popover,
   SplitButton
-} from 'components/react-bootstrap';
+} from '#components/react-bootstrap.ts';
 import React, { useState } from 'react';
 import type { ButtonProps } from 'react-bootstrap';
 import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
-import useKeyboardShortcut from 'utils/useKeyboardShortcut';
-import useLocalPreference from 'utils/useLocalPreference';
-import useLoginUser from 'utils/useLoginUser';
+import useKeyboardShortcut from '#utils/useKeyboardShortcut.ts';
+import useLocalPreference from '#utils/useLocalPreference.ts';
+import useLoginUser from '#utils/useLoginUser.ts';
 import { defaultLabelColors } from '../../labelColors.ts';
 import * as c from './caseStore.ts';
 import createCurrentLabelsUpdator from './createCurrentLabelsUpdator.ts';

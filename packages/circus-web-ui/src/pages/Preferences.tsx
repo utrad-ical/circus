@@ -1,16 +1,16 @@
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
 import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
-import Icon from 'components/Icon';
-import IconButton from 'components/IconButton';
-import LabelColorsEditor from 'components/LabelColorsEditor';
-import { labeledSlider } from 'components/LabeledSlider';
-import { Button, FormControl, Panel } from 'components/react-bootstrap';
+import Icon from '#components/Icon.tsx';
+import IconButton from '#components/IconButton.ts';
+import LabelColorsEditor from '#components/LabelColorsEditor.tsx';
+import { labeledSlider } from '#components/LabeledSlider.tsx';
+import { Button, FormControl, Panel } from '#components/react-bootstrap.ts';
 import React, { useCallback, useEffect, useState } from 'react';
-import type { SearchPreset, UserPreferences } from 'store/loginUser';
-import { useApi } from 'utils/api';
-import { useUserPreferences } from 'utils/useLoginUser';
-import useShowMessage from 'utils/useShowMessage';
+import type { SearchPreset, UserPreferences } from '#store/loginUser.ts';
+import { useApi } from '#utils/api.ts';
+import { useUserPreferences } from '#utils/useLoginUser.ts';
+import useShowMessage from '#utils/useShowMessage.ts';
 import type { WindowPropagationScope } from '../store/loginUser.ts';
 import ScrollbarEditor from './ScrollBarsEditor.tsx';
 

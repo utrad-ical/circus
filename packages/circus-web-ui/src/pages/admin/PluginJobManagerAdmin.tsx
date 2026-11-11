@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useApi } from 'utils/api';
+import { useApi } from '#utils/api.ts';
 import AdminContainer from './AdminContainer.tsx';
-import IconButton from 'components/IconButton';
-import { Panel } from 'components/react-bootstrap';
+import IconButton from '#components/IconButton.ts';
+import { Panel } from '#components/react-bootstrap.ts';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 
 const PluginJobManagerAdmin: React.FC<{}> = props => {

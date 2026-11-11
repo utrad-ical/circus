@@ -10,7 +10,7 @@ import { setImmediate } from '@utrad-ical/circus-rs';
 import classnames from 'classnames';
 import { EventEmitter } from 'events';
 import React, { useEffect, useRef, useState } from 'react';
-import useEffectEvent from 'utils/useEffectEvent';
+import useEffectEvent from '#utils/useEffectEvent.ts';
 
 export const setOrthogonalOrientation = (orientation: OrientationString) => {
   return (viewer: rs.Viewer, initialViewState: rs.MprViewState) => {

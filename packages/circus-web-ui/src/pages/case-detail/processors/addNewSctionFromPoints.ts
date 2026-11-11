@@ -1,7 +1,7 @@
 import type { Vector3D, Section } from '@utrad-ical/circus-rs';
 import { getSectionFromPoints } from '@utrad-ical/circus-rs';
-import type { LayoutInfo } from 'components/GridContainer';
-import { layoutReducer } from 'components/GridContainer';
+import type { LayoutInfo } from '#components/GridContainer.tsx';
+import { layoutReducer } from '#components/GridContainer.tsx';
 import * as c from '../caseStore.ts';
 import type { InternalLabelOf } from '../labelData.ts';
 import type { EditingData } from '../revisionData.ts';

@@ -1,20 +1,20 @@
-import type { DataGridColumnDefinition } from 'components/DataGrid';
-import DataGrid from 'components/DataGrid';
-import Icon from 'components/Icon';
-import IconButton from 'components/IconButton';
+import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
+import DataGrid from '#components/DataGrid.tsx';
+import Icon from '#components/Icon.tsx';
+import IconButton from '#components/IconButton.ts';
 import SearchResultsView, {
   makeSortOptions
-} from 'components/SearchResultsView';
-import TimeDisplay from 'components/TimeDisplay';
+} from '#components/SearchResultsView.tsx';
+import TimeDisplay from '#components/TimeDisplay.tsx';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { useApi } from 'utils/api';
+import { useApi } from '#utils/api.ts';
 import { newSearch } from '../store/searches.ts';
-import type Task from 'types/Task';
-import useTaskDismisser from 'utils/useTaskDismisser';
-import { capitalize } from 'utils/util';
-import useTaskDownloadHandler from 'utils/useTaskDownloadHandler';
+import type Task from '#types/Task.ts';
+import useTaskDismisser from '#utils/useTaskDismisser.ts';
+import { capitalize } from '#utils/util.ts';
+import useTaskDownloadHandler from '#utils/useTaskDownloadHandler.ts';
 
 const sortOptions = makeSortOptions({
   createdAt: 'task create time',

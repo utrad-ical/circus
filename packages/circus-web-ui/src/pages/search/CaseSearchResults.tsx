@@ -1,24 +1,24 @@
 import { confirm } from '@smikitky/rb-components/lib/modal';
-import CaseExportModal from 'components/CaseExportModal';
-import type { DataGridColumnDefinition } from 'components/DataGrid';
-import DataGrid from 'components/DataGrid';
-import DropdownButton from 'components/DropdownButton';
-import Icon from 'components/Icon';
-import IconButton from 'components/IconButton';
-import MenuItem from 'components/MenuItem';
-import MyListDropdown from 'components/MyListDropdown';
+import CaseExportModal from '#components/CaseExportModal.tsx';
+import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
+import DataGrid from '#components/DataGrid.tsx';
+import DropdownButton from '#components/DropdownButton.tsx';
+import Icon from '#components/Icon.tsx';
+import IconButton from '#components/IconButton.ts';
+import MenuItem from '#components/MenuItem.tsx';
+import MyListDropdown from '#components/MyListDropdown.tsx';
 import SearchResultsView, {
   makeSortOptions,
   patientInfoSearchOptions
-} from 'components/SearchResultsView';
-import { PhysicalTag } from 'components/Tag';
+} from '#components/SearchResultsView.tsx';
+import { PhysicalTag } from '#components/Tag.tsx';
 import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation } from 'react-router-dom';
-import * as searches from 'store/searches';
-import { updateSearch } from 'store/searches';
-import { useApi } from 'utils/api';
-import useLoginUser from 'utils/useLoginUser';
+import * as searches from '#store/searches.ts';
+import { updateSearch } from '#store/searches.ts';
+import { useApi } from '#utils/api.ts';
+import useLoginUser from '#utils/useLoginUser.ts';
 import {
   CaseId,
   PatientInfo,

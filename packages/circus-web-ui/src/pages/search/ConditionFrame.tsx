@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tabs, Tab } from 'components/react-bootstrap';
+import { Tabs, Tab } from '#components/react-bootstrap.ts';
 import ConditionEditor from '@smikitky/rb-components/lib/ConditionEditor';
 import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
 import styled from 'styled-components';

@@ -1,9 +1,9 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { showMessage } from 'store/messages';
-import { updateSearch } from 'store/searches';
-import { useApi } from 'utils/api';
-import useLoginUser from 'utils/useLoginUser';
+import { showMessage } from '#store/messages.ts';
+import { updateSearch } from '#store/searches.ts';
+import { useApi } from '#utils/api.ts';
+import useLoginUser from '#utils/useLoginUser.ts';
 import type { SearchResult } from '../store/searches.ts';
 import { selectionStatusChanged } from '../store/searches.ts';
 import DropdownButton from './DropdownButton.tsx';

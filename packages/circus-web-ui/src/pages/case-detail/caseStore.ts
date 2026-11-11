@@ -5,10 +5,10 @@ import type {
   OrientationString,
   Section
 } from '@utrad-ical/circus-rs';
-import type { LayoutInfo } from 'components/GridContainer';
-import { layoutReducer } from 'components/GridContainer';
-import type Project from 'types/Project';
-import type Series from 'types/Series';
+import type { LayoutInfo } from '#components/GridContainer.tsx';
+import { layoutReducer } from '#components/GridContainer.tsx';
+import type Project from '#types/Project.ts';
+import type Series from '#types/Series.ts';
 import type PatientInfo from '../../types/PatientInfo.ts';
 import type { ExternalLabel } from './labelData.ts';
 import type { EditingData, Revision } from './revisionData.ts';

@@ -1,10 +1,10 @@
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
-import useShowMessage from 'utils/useShowMessage';
-import FileUpload from 'components/FileUpload';
-import { Alert } from 'components/react-bootstrap';
+import useShowMessage from '#utils/useShowMessage.ts';
+import FileUpload from '#components/FileUpload.tsx';
+import { Alert } from '#components/react-bootstrap.ts';
 import React, { useState, useMemo } from 'react';
-import useLocalPreference from 'utils/useLocalPreference';
-import useLoginUser from 'utils/useLoginUser';
+import useLocalPreference from '#utils/useLocalPreference.ts';
+import useLoginUser from '#utils/useLoginUser.ts';
 import bytes from 'bytes';
 
 const ImportSeries: React.FC<{}> = props => {

@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { OverlayTrigger, Popover } from 'components/react-bootstrap';
-import IconButton from 'components/IconButton';
-import { PhysicalTag } from 'components/Tag';
-import type Project from 'types/Project';
+import { OverlayTrigger, Popover } from '#components/react-bootstrap.ts';
+import IconButton from '#components/IconButton.ts';
+import { PhysicalTag } from '#components/Tag.tsx';
+import type Project from '#types/Project.ts';
 import styled from 'styled-components';
 
 const TagEditor: React.FC<{

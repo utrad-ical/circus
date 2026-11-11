@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Button, Modal } from 'components/react-bootstrap';
+import { Button, Modal } from '#components/react-bootstrap.ts';
 import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
 import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
 import * as et from '@smikitky/rb-components/lib/editor-types';

@@ -3,6 +3,13 @@
   "version": "1.1.0",
   "description": "Medical lesion database for CAD research",
   "main": "index.js",
+  "imports": {
+    "#components/*": "./src/components/*",
+    "#pages/*": "./src/pages/*",
+    "#store/*": "./src/store/*",
+    "#types/*": "./src/types/*",
+    "#utils/*": "./src/utils/*"
+  },
   "scripts": {
     "fontgen": "node assets/icons/fontgen.js",
     "build": "cross-env NODE_ENV=production webpack --mode=production",

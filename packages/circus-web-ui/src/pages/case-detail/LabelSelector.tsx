@@ -5,13 +5,13 @@ import type {
 } from '@utrad-ical/circus-rs';
 import { describePartialVolumeDescriptor } from '@utrad-ical/circus-rs';
 import classNames from 'classnames';
-import Icon from 'components/Icon';
-import IconButton from 'components/IconButton';
-import { Button, Modal } from 'components/react-bootstrap';
+import Icon from '#components/Icon.tsx';
+import IconButton from '#components/IconButton.ts';
+import { Button, Modal } from '#components/react-bootstrap.ts';
 import * as mr from 'multi-integer-range';
 import React, { useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
-import type Series from 'types/Series';
+import type Series from '#types/Series.ts';
 import { newViewerCellItem, performLayout } from './caseStore.ts';
 import type { InternalLabel } from './labelData.ts';
 import LabelDisplay from './LabelDisplay.tsx';

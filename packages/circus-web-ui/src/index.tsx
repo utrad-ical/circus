@@ -1,4 +1,4 @@
-import Application from 'pages/Application';
+import Application from '#pages/Application.tsx';
 import React, { StrictMode, useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import {
@@ -7,37 +7,37 @@ import {
   RouterProvider,
   useLocation
 } from 'react-router-dom';
-import useLoginUser from 'utils/useLoginUser';
-import AdminIndex from 'pages/admin/AdminIndex';
-import GeneralAdmin from 'pages/admin/GeneralAdmin';
-import GroupAdmin from 'pages/admin/GroupAdmin';
-import PluginAdmin from 'pages/admin/PluginAdmin';
-import PluginJobManagerAdmin from 'pages/admin/PluginJobManagerAdmin';
-import PluginJobQueueAdmin from 'pages/admin/PluginJobQueueAdmin';
-import ProjectAdmin from 'pages/admin/ProjectAdmin';
-import UserAdmin from 'pages/admin/UserAdmin';
-import CaseDetail from 'pages/case-detail/CaseDetail';
-import CreateNewCase from 'pages/CreateNewCase';
-import CreateNewJob from 'pages/CreateNewJob';
-import HomePage from 'pages/HomePage';
-import ImportCase from 'pages/ImportCase';
-import ImportSeries from 'pages/ImportSeries';
-import LoginScreen from 'pages/LoginScreen';
-import MyCaseList from 'pages/mylist/MyCaseList';
-import MyPluginJobList from 'pages/mylist/MyPluginJobList';
-import MySeriesList from 'pages/mylist/MySeriesList';
-import OneTimeLogin from 'pages/OneTimeLogin';
-import PluginJobDetail from 'pages/plugin-job-detail/PluginJobDetail';
-import Preferences from 'pages/Preferences';
-import CaseSearch from 'pages/search/CaseSearch';
-import PluginJobSearch from 'pages/search/PluginJobSearch';
-import SeriesSearch from 'pages/search/SeriesSearch';
-import SeriesDetail from 'pages/SeriesDetail';
-import TaskList from 'pages/TaskList';
-import TokenManagement from 'pages/TokenManagement';
+import useLoginUser from '#utils/useLoginUser.ts';
+import AdminIndex from '#pages/admin/AdminIndex.tsx';
+import GeneralAdmin from '#pages/admin/GeneralAdmin.tsx';
+import GroupAdmin from '#pages/admin/GroupAdmin.tsx';
+import PluginAdmin from '#pages/admin/PluginAdmin.tsx';
+import PluginJobManagerAdmin from '#pages/admin/PluginJobManagerAdmin.tsx';
+import PluginJobQueueAdmin from '#pages/admin/PluginJobQueueAdmin.tsx';
+import ProjectAdmin from '#pages/admin/ProjectAdmin.tsx';
+import UserAdmin from '#pages/admin/UserAdmin.tsx';
+import CaseDetail from '#pages/case-detail/CaseDetail.tsx';
+import CreateNewCase from '#pages/CreateNewCase.tsx';
+import CreateNewJob from '#pages/CreateNewJob.tsx';
+import HomePage from '#pages/HomePage.tsx';
+import ImportCase from '#pages/ImportCase.tsx';
+import ImportSeries from '#pages/ImportSeries.tsx';
+import LoginScreen from '#pages/LoginScreen.tsx';
+import MyCaseList from '#pages/mylist/MyCaseList.tsx';
+import MyPluginJobList from '#pages/mylist/MyPluginJobList.tsx';
+import MySeriesList from '#pages/mylist/MySeriesList.tsx';
+import OneTimeLogin from '#pages/OneTimeLogin.tsx';
+import PluginJobDetail from '#pages/plugin-job-detail/PluginJobDetail.tsx';
+import Preferences from '#pages/Preferences.tsx';
+import CaseSearch from '#pages/search/CaseSearch.tsx';
+import PluginJobSearch from '#pages/search/PluginJobSearch.tsx';
+import SeriesSearch from '#pages/search/SeriesSearch.tsx';
+import SeriesDetail from '#pages/SeriesDetail.tsx';
+import TaskList from '#pages/TaskList.tsx';
+import TokenManagement from '#pages/TokenManagement.tsx';
 
 import { Provider as ReduxStoreProvider, useSelector } from 'react-redux';
-import { dismissMessageOnPageChange } from 'store/messages';
+import { dismissMessageOnPageChange } from '#store/messages.ts';
 import PluginJobQueueSearch from './pages/search/PluginJobQueueSearch.tsx';
 import { store } from './store/index.ts';
 
@@ -46,9 +46,9 @@ import {
   createVolumeLoaderManager,
   VolumeLoaderFactoryContext
 } from '@utrad-ical/circus-ui-kit';
-import type { ApiCaller } from 'utils/api';
-import { ApiContext, useApi } from 'utils/api';
-import loginManager, { LoginManagerContext } from 'utils/loginManager';
+import type { ApiCaller } from '#utils/api.ts';
+import { ApiContext, useApi } from '#utils/api.ts';
+import loginManager, { LoginManagerContext } from '#utils/loginManager.ts';
 import './styles/main.less';
 
 const VolumeLoaderFactoryProvider: React.FC<{}> = ({ children }) => {

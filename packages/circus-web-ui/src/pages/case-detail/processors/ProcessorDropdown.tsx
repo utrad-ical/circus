@@ -1,6 +1,6 @@
-import DropdownButton from 'components/DropdownButton';
-import Icon from 'components/Icon';
-import MenuItem from 'components/MenuItem';
+import DropdownButton from '#components/DropdownButton.tsx';
+import Icon from '#components/Icon.tsx';
+import MenuItem from '#components/MenuItem.tsx';
 import React from 'react';
 import type { LabelType } from '../labelData.ts';
 import type { ProcessorType } from './processor-types.ts';

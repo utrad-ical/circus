@@ -1,8 +1,8 @@
 import type { AxiosResponse } from 'axios';
 import axios from 'axios';
 import type { CancelToken } from './cancelToken.ts';
-import { dispatch } from 'store';
-import { showMessage } from 'store/messages';
+import { dispatch } from '#store/index.ts';
+import { showMessage } from '#store/messages.ts';
 import { useContext, createContext } from 'react';
 
 export interface ApiCaller {

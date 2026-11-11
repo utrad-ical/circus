@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useApi } from 'utils/api';
-import { loadUserInfo } from 'store/users';
+import { useApi } from '#utils/api.ts';
+import { loadUserInfo } from '#store/users.ts';
 
 const useUserInfo = (userEmail: string) => {
   const user = useSelector(state => state.users[userEmail]);

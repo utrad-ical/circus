@@ -15,13 +15,13 @@ import {
 } from '@utrad-ical/circus-rs';
 import { useVolumeLoaders } from '@utrad-ical/circus-ui-kit';
 import classNames from 'classnames';
-import Collapser from 'components/Collapser';
-import Icon from 'components/Icon';
-import { createStateChanger } from 'components/ImageViewer';
-import StyledJsonSchemaEditor from 'components/StyledJsonSchemaEditor';
+import Collapser from '#components/Collapser.tsx';
+import Icon from '#components/Icon.tsx';
+import { createStateChanger } from '#components/ImageViewer.tsx';
+import StyledJsonSchemaEditor from '#components/StyledJsonSchemaEditor.tsx';
 import { produce } from 'immer';
 import { debounce } from 'lodash';
-import useToolbar from 'pages/case-detail/useToolbar';
+import useToolbar from '#pages/case-detail/useToolbar.ts';
 import React, {
   useCallback,
   useEffect,
@@ -30,12 +30,12 @@ import React, {
   useState
 } from 'react';
 import styled from 'styled-components';
-import type Project from 'types/Project';
-import type Series from 'types/Series';
-import { useApi } from 'utils/api';
-import isTouchDevice from 'utils/isTouchDevice';
-import useEffectEvent from 'utils/useEffectEvent';
-import { useUserPreferences } from 'utils/useLoginUser';
+import type Project from '#types/Project.ts';
+import type Series from '#types/Series.ts';
+import { useApi } from '#utils/api.ts';
+import isTouchDevice from '#utils/isTouchDevice.ts';
+import useEffectEvent from '#utils/useEffectEvent.ts';
+import { useUserPreferences } from '#utils/useLoginUser.ts';
 import { Modal } from '../../components/react-bootstrap.ts';
 import type {
   ScrollBarsSettings,

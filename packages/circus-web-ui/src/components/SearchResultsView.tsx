@@ -1,14 +1,14 @@
 import React, { Fragment } from 'react';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
-import { Pagination } from 'components/react-bootstrap';
+import { Pagination } from '#components/react-bootstrap.ts';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import AutoReloadSwitch from './AutoReloadSwitch.tsx';
-import Icon from 'components/Icon';
+import Icon from '#components/Icon.tsx';
 import classnames from 'classnames';
 import styled from 'styled-components';
-import { useApi } from 'utils/api';
+import { useApi } from '#utils/api.ts';
 import { useSelector, useDispatch } from 'react-redux';
-import * as searches from 'store/searches';
+import * as searches from '#store/searches.ts';
 
 export const patientInfoSearchOptions: { readonly [key: string]: string } = {
   'patientInfo.patientName': 'patient name',

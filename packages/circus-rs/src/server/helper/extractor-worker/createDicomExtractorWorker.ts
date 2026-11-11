@@ -1,6 +1,6 @@
 import type { NoDepFunctionService } from '@utrad-ical/circus-lib';
 import type { DicomImageData } from '../../../dicom/dicomImageExtractor.ts';
-import { Worker } from 'worker_threads';
+import { MessageChannel, Worker } from 'worker_threads';
 import { Pool } from 'tarn';
 import path from 'path';
 import os from 'os';
@@ -43,8 +43,12 @@ const createDicomExtractorWorker: NoDepFunctionService<
     if (destroyed) return Promise.reject('Worker pool has been destroyed');
     return new Promise<DicomImageData>((resolve, reject) => {
       pool.acquire().promise.then(worker => {
-        const cb = (result: DicomImageData | string) => {
-          worker.off('message', cb);
+        // Each request has its own channel, because the parent port also
+        // carries messages from Node itself (e.g., `{ 'watch:import': [...] }`
+        // reported to the parent when running with `node --watch`)
+        const { port1, port2 } = new MessageChannel();
+        port1.once('message', (result: DicomImageData | string) => {
+          port1.close();
           pool.release(worker);
           if (typeof result === 'string') {
             // string result means an error
@@ -52,9 +56,8 @@ const createDicomExtractorWorker: NoDepFunctionService<
           } else {
             resolve(result);
           }
-        };
-        worker.on('message', cb);
-        worker.postMessage(input);
+        });
+        worker.postMessage({ input, port: port2 }, [port2]);
       });
     });
   };

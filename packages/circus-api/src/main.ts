@@ -47,7 +47,7 @@ const parsedArgs = (() => {
     const parser = dashdash.createParser({ options });
     const opts = parser.parse(process.argv);
     if (opts.help) {
-      console.log('Usage: node server.js [OPTIONS]');
+      console.log('Usage: node server.ts [OPTIONS]');
       console.log('Options:\n' + parser.help({ includeEnv: true }));
       process.exit(0);
     }

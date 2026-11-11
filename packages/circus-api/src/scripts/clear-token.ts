@@ -12,7 +12,7 @@ export const options = () => {
 };
 
 export const help = () => {
-  return 'Removes all access tokens.\n' + 'Usage: node circus.js clear-token';
+  return 'Removes all access tokens.\n' + 'Usage: circus clear-token';
 };
 
 export const command: Command<{ models: Models }> = async (opt, { models }) => {

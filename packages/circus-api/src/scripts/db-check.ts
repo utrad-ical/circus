@@ -16,7 +16,7 @@ export const options = () => {
 };
 
 export const help = () => {
-  return 'Performs DB integrity check.\n' + 'Usage: node circus.js db-check';
+  return 'Performs DB integrity check.\n' + 'Usage: circus db-check';
 };
 
 export const command: Command<{ models: Models }> = async (

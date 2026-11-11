@@ -1,6 +1,6 @@
 {
   "extends": "../../tsconfig.settings.json",
   "compilerOptions": {},
-  "include": ["src/**/*", "src/**/*.json"],
+  "include": ["src/**/*", "cui.ts", "daemon.ts", "src/**/*.json"],
   "exclude": ["src/**/*.test.ts"]
 }

@@ -42,7 +42,7 @@ const runPlugin: FunctionService<
     };
     if (!pluginId) {
       console.log(
-        'Usage: node cui.js run-plugin <plugin-id> <series-or-directories>...'
+        'Usage: node cui.ts run-plugin <plugin-id> <series-or-directories>...'
       );
       throw new Error('Plug-in ID is not specified.');
     }

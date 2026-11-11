@@ -17,7 +17,7 @@
     "directory": "packages/circus-cs-core"
   },
   "bin": {
-    "cs-core": "./cui.js"
+    "cs-core": "./cui.ts"
   },
   "dependencies": {
     "@utrad-ical/circus-lib": "workspace:*",

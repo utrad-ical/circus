@@ -6,7 +6,7 @@
 #   COMPOSE_PROFILES=mongo docker compose up -d           # MongoDB only
 #
 # You can also put COMPOSE_PROFILES in `.env`.
-# Initialize/upgrade the database: docker compose run --rm api node circus.js migrate
+# Initialize/upgrade the database: docker compose exec api circus migrate
 
 name: circus
 

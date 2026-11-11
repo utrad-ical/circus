@@ -3,10 +3,10 @@
   "version": "0.4.0",
   "type": "module",
   "description": "CIRCUS JSON API Server",
-  "main": "server.js",
+  "main": "server.ts",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.ts"
   },
   "repository": {
     "type": "git",

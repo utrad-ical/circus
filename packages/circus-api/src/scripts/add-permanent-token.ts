@@ -5,7 +5,7 @@ import type Command from './Command.ts';
 export const help = () => {
   return (
     'Grants permanent access token for the given user.\n' +
-    'Usage: node circus.js add-permanent-token [userEmailOrName]'
+    'Usage: circus add-permanent-token [userEmailOrName]'
   );
 };
 

@@ -15,8 +15,8 @@
     "build": "pnpm -r --if-present run build",
     "lint": "eslint \"packages/*/{src,test}/**/*.{js,ts,tsx}\"",
     "lint-fix": "eslint --fix \"packages/*/{src,test}/**/*.{js,ts,tsx}\"",
-    "lint-prettier": "prettier --check \"packages/*/{src,test}/**/*.{js,ts,less,json,yaml,yml}\"",
-    "prettier": "prettier --write \"packages/*/{src,test}/**/*.{js,ts,less,json,yaml,yml}\"",
+    "lint-format": "oxfmt --check",
+    "format": "oxfmt",
     "typecheck": "pnpm -r --if-present run typecheck"
   },
   "devDependencies": {
@@ -31,13 +31,8 @@
     "eslint-plugin-react": "^7.35.0",
     "eslint-plugin-react-hooks": "^4.6.2",
     "globals": "^15.9.0",
-    "prettier": "^3.3.3",
+    "oxfmt": "0.78.0",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.4.0"
-  },
-  "prettier": {
-    "singleQuote": true,
-    "trailingComma": "none",
-    "arrowParens": "avoid"
   }
 }

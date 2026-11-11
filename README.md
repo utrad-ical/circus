@@ -67,7 +67,7 @@ Unlike npm, pnpm does not hoist dependencies, so each package must declare every
 
 ```bash
 pnpm test
-pnpm run lint-prettier # or `pnpm run prettier` to fix
+pnpm run lint-format # or `pnpm run format` to fix (oxfmt)
 pnpm run lint
 pnpm run typecheck
 ```

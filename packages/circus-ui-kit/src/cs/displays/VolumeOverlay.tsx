@@ -86,15 +86,13 @@ export const VolumeOverlay: Display<VolumeOverlayOptions, void> = props => {
             : await res.arrayBuffer();
         })
       );
-      const annotationDefs = volumes.map(
-        (v, i): AnnotationDef => ({
-          type: 'voxels',
-          color: colorMap[v.name] ?? defaultColor,
-          origin: v.origin,
-          size: v.size,
-          volume: buffers[i]
-        })
-      );
+      const annotationDefs = volumes.map((v, i): AnnotationDef => ({
+        type: 'voxels',
+        color: colorMap[v.name] ?? defaultColor,
+        origin: v.origin,
+        size: v.size,
+        volume: buffers[i]
+      }));
       setAnnotationDefs(annotationDefs);
     };
     load().catch(err => setError(err.message));

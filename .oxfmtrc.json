@@ -1,0 +1,13 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "singleQuote": true,
+  "trailingComma": "none",
+  "arrowParens": "avoid",
+  "printWidth": 80,
+  "ignorePatterns": [
+    "package.json",
+    "package-lock.json",
+    "*glyphs.less",
+    "*glyphs.css"
+  ]
+}

@@ -9,9 +9,9 @@ const createMongoQueue: FunctionService<
   const connection = await mongoClientPool.connect(options.mongoUrl);
   const collection = connection
     .db()
-    .collection<
-      circus.QueueItem<circus.PluginJobRequest>
-    >(options.collectionName);
+    .collection<circus.QueueItem<circus.PluginJobRequest>>(
+      options.collectionName
+    );
   await collection.createIndex({ jobId: 1 }, { unique: true });
 
   const list = async function (state: circus.QueueState | 'all' = 'wait') {

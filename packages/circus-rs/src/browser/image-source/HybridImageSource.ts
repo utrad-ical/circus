@@ -9,8 +9,7 @@ import type MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume.
 import type { DrawResult } from './ImageSource.ts';
 
 interface HybridImageSourceOptions
-  extends RawVolumeMprImageSourceOptions,
-    DynamicMprImageSourceOptions {}
+  extends RawVolumeMprImageSourceOptions, DynamicMprImageSourceOptions {}
 
 /**
  * HybridImageSource combines DynamicMprImageSource and RawVolumeMprImageSource.

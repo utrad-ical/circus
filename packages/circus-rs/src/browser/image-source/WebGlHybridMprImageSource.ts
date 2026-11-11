@@ -9,8 +9,7 @@ import type MprImageSourceWithDicomVolume from './MprImageSourceWithDicomVolume.
 import type { DrawResult } from './ImageSource.ts';
 
 interface WebGlHybridImageSourceOptions
-  extends WebGlRawVolumeMprImageSourceOptions,
-    DynamicMprImageSourceOptions {}
+  extends WebGlRawVolumeMprImageSourceOptions, DynamicMprImageSourceOptions {}
 
 /**
  * WebGlHybridMprImageSource combines DynamicMprImageSource and WebGlRawVolumeMprImageSource.

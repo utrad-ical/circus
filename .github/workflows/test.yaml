@@ -8,7 +8,7 @@ on:
   pull_request:
 
 jobs:
-  prettier-check:
+  format-check:
     runs-on: ubuntu-latest
     env:
       NODE_VERSION: 24.x
@@ -22,11 +22,11 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Run Prettier Check
+      - name: Run Format Check (oxfmt)
         run: |
-          pnpm run lint-prettier
+          pnpm run lint-format
           if [ $? -ne 0 ]; then
-            echo "Prettier check failed."
+            echo "Format check failed."
             exit 1
           fi
       - name: Run ESlint

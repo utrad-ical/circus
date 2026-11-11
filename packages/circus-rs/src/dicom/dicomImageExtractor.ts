@@ -268,7 +268,7 @@ function extractUncompressedRGBPixels(
   // Convert RGB to RGBA8
   const srcArray = new Uint8Array(dataset.byteArray.buffer, offset, len);
   const destArray = new Uint8Array(rows * columns * bppOfRGBA);
-  for (let i = 0, j = 0; i < len; ) {
+  for (let i = 0, j = 0; i < len;) {
     destArray[j++] = srcArray[i++]; // red
     destArray[j++] = srcArray[i++]; // green
     destArray[j++] = srcArray[i++]; // blue

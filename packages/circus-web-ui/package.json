@@ -12,7 +12,6 @@
     "#utils/*": "./src/utils/*"
   },
   "scripts": {
-    "fontgen": "node assets/icons/fontgen.js",
     "build": "vite build",
     "typecheck": "tsc --noEmit",
     "dev": "vite",
@@ -40,8 +39,6 @@
     "@types/tinycolor2": "^1.4.3",
     "@vitejs/plugin-react": "6.3.0",
     "less": "^4.9.1",
-    "svgicons2svgfont": "^5.0.2",
-    "ttf2woff": "^2.0.1",
     "typescript": "~7.0.2",
     "vite": "8.3.7"
   },
@@ -62,7 +59,6 @@
     "immer": "^10.1.1",
     "keycode": "^2.2.0",
     "lodash": "^4.17.15",
-    "merge": "^1.2.1",
     "moment": "^2.24.0",
     "multi-integer-range": "^6.1.0",
     "react": "^17.0.2",

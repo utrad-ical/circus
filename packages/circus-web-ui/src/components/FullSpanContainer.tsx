@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import useBodyClass from 'utils/useBodyClass';
+import useBodyClass from '#utils/useBodyClass.ts';
 
 /**
  * This adds "full-span-container" body class from within a component.

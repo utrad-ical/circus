@@ -1,7 +1,7 @@
 import React, { Fragment, useState } from 'react';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import Icon from './Icon.tsx';
-import useInterval from 'utils/useInterval';
+import useInterval from '#utils/useInterval.ts';
 
 const defaultOptions = {
   0: 'none',

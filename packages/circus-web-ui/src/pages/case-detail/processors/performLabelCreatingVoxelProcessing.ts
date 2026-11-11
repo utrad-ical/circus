@@ -1,4 +1,4 @@
-import generateUniqueId from 'utils/generateUniqueId';
+import generateUniqueId from '#utils/generateUniqueId.ts';
 import * as rs from '@utrad-ical/circus-rs';
 import type {
   LabelingResults3D,

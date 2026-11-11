@@ -1,17 +1,17 @@
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import classnames from 'classnames';
-import Icon from 'components/Icon';
+import Icon from '#components/Icon.tsx';
 import {
   Button,
   FormControl,
   FormGroup,
   Panel
-} from 'components/react-bootstrap';
+} from '#components/react-bootstrap.ts';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { useLoginManager } from 'utils/loginManager';
-import useLoginUser from 'utils/useLoginUser';
+import { useLoginManager } from '#utils/loginManager.ts';
+import useLoginUser from '#utils/useLoginUser.ts';
 
 const StyledDiv = styled.div`
   width: 100%;

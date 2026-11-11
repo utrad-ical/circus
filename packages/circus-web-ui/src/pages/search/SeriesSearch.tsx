@@ -1,7 +1,7 @@
 import React from 'react';
 import SeriesSearchCondition from './SeriesSearchCondition.tsx';
 import SeriesSearchResults from './SeriesSearchResults.tsx';
-import Icon from 'components/Icon';
+import Icon from '#components/Icon.tsx';
 
 const SeriesSearch: React.FC<{}> = props => {
   return (

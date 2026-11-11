@@ -1,18 +1,18 @@
-import Icon from 'components/Icon';
+import Icon from '#components/Icon.tsx';
 import {
   Button,
   Dropdown,
   FormControl,
   Modal
-} from 'components/react-bootstrap';
-import MenuItem from 'components/MenuItem';
+} from '#components/react-bootstrap.ts';
+import MenuItem from '#components/MenuItem.tsx';
 import keycode from 'keycode';
-import type { ExternalLabel } from 'pages/case-detail/labelData';
-import type { Revision } from 'pages/case-detail/revisionData';
+import type { ExternalLabel } from '#pages/case-detail/labelData.ts';
+import type { Revision } from '#pages/case-detail/revisionData.ts';
 import React, { Fragment, useState } from 'react';
 import DropdownToggle from 'react-bootstrap/lib/DropdownToggle';
 import styled from 'styled-components';
-import useLoginUser from 'utils/useLoginUser';
+import useLoginUser from '#utils/useLoginUser.ts';
 
 interface Template {
   title: string;

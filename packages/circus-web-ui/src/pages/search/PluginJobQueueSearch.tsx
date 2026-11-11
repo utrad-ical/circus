@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
-import Icon from 'components/Icon';
-import { newSearch } from 'store/searches';
-import { useApi } from 'utils/api';
+import Icon from '#components/Icon.tsx';
+import { newSearch } from '#store/searches.ts';
+import { useApi } from '#utils/api.ts';
 import { useDispatch } from 'react-redux';
 import SearchResultsView, {
   makeSortOptions
-} from 'components/SearchResultsView';
+} from '#components/SearchResultsView.tsx';
 
 const sortOptions = makeSortOptions({
   jobId: 'job id'

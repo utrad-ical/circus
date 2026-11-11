@@ -1,7 +1,7 @@
 import React from 'react';
 import PluginJobSearchResults from './PluginJobSearchResults.tsx';
 import PluginJobSearchCondition from './PluginJobSearchCondition.tsx';
-import Icon from 'components/Icon';
+import Icon from '#components/Icon.tsx';
 
 const PluginSearch: React.FC<{}> = props => {
   return (

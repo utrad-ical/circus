@@ -3,7 +3,7 @@ import type { FeedbackEntry } from '@utrad-ical/circus-ui-kit';
 import moment from 'moment';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
-import UserDisplay from 'components/UserDisplay';
+import UserDisplay from '#components/UserDisplay.tsx';
 
 const registeredMessage = (feedback: FeedbackEntry<any>) => {
   const m = moment(feedback.createdAt);

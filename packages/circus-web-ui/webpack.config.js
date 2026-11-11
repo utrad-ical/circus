@@ -18,7 +18,6 @@ module.exports = {
     filename: '[name].js'
   },
   resolve: {
-    modules: [path.join(__dirname, 'src'), 'node_modules'],
     extensions: ['.js', '.jsx', '.ts', '.tsx']
   },
   module: {

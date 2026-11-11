@@ -1,7 +1,7 @@
 import type { PartialVolumeDescriptor } from '@utrad-ical/circus-rs';
-import type { LayoutInfo } from 'components/GridContainer';
+import type { LayoutInfo } from '#components/GridContainer.tsx';
 import { createDraft, finishDraft } from 'immer';
-import type { ApiCaller } from 'utils/api';
+import type { ApiCaller } from '#utils/api.ts';
 import asyncMap from '../../utils/asyncMap.ts';
 import type { ExternalLabel, InternalLabel } from './labelData.ts';
 import {

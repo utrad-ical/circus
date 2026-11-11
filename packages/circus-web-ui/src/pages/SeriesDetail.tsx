@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Row, Col, Panel } from 'components/react-bootstrap';
-import { useApi } from 'utils/api';
+import { Row, Col, Panel } from '#components/react-bootstrap.ts';
+import { useApi } from '#utils/api.ts';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
-import ImageViewer from 'components/ImageViewer';
+import ImageViewer from '#components/ImageViewer.tsx';
 import * as rs from '@utrad-ical/circus-rs';
 import { toolFactory } from '@utrad-ical/circus-rs';
-import useLoadData from 'utils/useLoadData';
+import useLoadData from '#utils/useLoadData.ts';
 import styled from 'styled-components';
 import { Link, useParams } from 'react-router-dom';
-import IconButton from 'components/IconButton';
+import IconButton from '#components/IconButton.ts';
 import type { SeriesEntryWithHints } from '@utrad-ical/circus-ui-kit';
 import { useVolumeLoaders } from '@utrad-ical/circus-ui-kit';
 

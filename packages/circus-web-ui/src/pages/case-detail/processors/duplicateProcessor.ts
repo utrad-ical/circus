@@ -1,4 +1,4 @@
-import generateUniqueId from 'utils/generateUniqueId';
+import generateUniqueId from '#utils/generateUniqueId.ts';
 import createCurrentLabelsUpdator from '../createCurrentLabelsUpdator.ts';
 import type {
   InternalLabelOf,

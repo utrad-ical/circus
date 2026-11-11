@@ -1,17 +1,17 @@
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import { confirm } from '@smikitky/rb-components/lib/modal';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
-import CsVolumeDownloadModal from 'components/CsVolumeDownloadModal';
-import IconButton from 'components/IconButton';
-import PluginDisplay from 'components/PluginDisplay';
-import type { SeriesEntry } from 'components/SeriesSelector';
-import SeriesSelector from 'components/SeriesSelector';
+import CsVolumeDownloadModal from '#components/CsVolumeDownloadModal.tsx';
+import IconButton from '#components/IconButton.ts';
+import PluginDisplay from '#components/PluginDisplay.tsx';
+import type { SeriesEntry } from '#components/SeriesSelector.tsx';
+import SeriesSelector from '#components/SeriesSelector.tsx';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useApi } from 'utils/api';
-import useLocalPreference from 'utils/useLocalPreference';
-import useLoginUser from 'utils/useLoginUser';
-import useShowMessage from 'utils/useShowMessage';
+import { useApi } from '#utils/api.ts';
+import useLocalPreference from '#utils/useLocalPreference.ts';
+import useLoginUser from '#utils/useLoginUser.ts';
+import useShowMessage from '#utils/useShowMessage.ts';
 
 const CreateNewJob: React.FC<{}> = props => {
   const [selectedPlugin, setSelectedPlugin] = useState<string | null>(null);

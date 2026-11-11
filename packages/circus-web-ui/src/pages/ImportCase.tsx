@@ -1,7 +1,7 @@
 import React from 'react';
-import FileUpload from 'components/FileUpload';
-import Icon from 'components/Icon';
-import { Alert } from 'components/react-bootstrap';
+import FileUpload from '#components/FileUpload.tsx';
+import Icon from '#components/Icon.tsx';
+import { Alert } from '#components/react-bootstrap.ts';
 
 const ImportCase: React.FC<{}> = props => {
   return (

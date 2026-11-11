@@ -4,9 +4,9 @@ import * as et from '@smikitky/rb-components/lib/editor-types';
 import WindowPresetEditor from './WindowPresetEditor.tsx';
 import TagEditor, { newTagItem } from './TagEditor.tsx';
 import AttributeSchemaEditor from './AttributeSchemaEditor.tsx';
-import BodyPartIcon from 'components/BodyPartIcon';
+import BodyPartIcon from '#components/BodyPartIcon.tsx';
 import IconEditor from './IconEditor.tsx';
-import type { DataGridColumnDefinition } from 'components/DataGrid';
+import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
 
 const windowPriorityOptions = [
   'dicom,preset,auto',

@@ -1,6 +1,6 @@
 import React from 'react';
-import Icon from 'components/Icon';
-import useLoginUser from 'utils/useLoginUser';
+import Icon from '#components/Icon.tsx';
+import useLoginUser from '#utils/useLoginUser.ts';
 
 const AdminContainer: React.FC<{
   title: string;

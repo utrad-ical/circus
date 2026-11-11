@@ -1,4 +1,4 @@
-import type { RootState } from 'store';
+import type { RootState } from '#store/index.ts';
 
 declare module 'react-redux' {
   // This defines the shape of our global state.

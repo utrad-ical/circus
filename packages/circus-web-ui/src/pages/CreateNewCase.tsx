@@ -1,12 +1,12 @@
-import IconButton from 'components/IconButton';
-import MultiTagSelect from 'components/MultiTagSelect';
-import ProjectSelector from 'components/ProjectSelector';
-import type { SeriesEntry } from 'components/SeriesSelector';
-import SeriesSelector from 'components/SeriesSelector';
+import IconButton from '#components/IconButton.ts';
+import MultiTagSelect from '#components/MultiTagSelect.tsx';
+import ProjectSelector from '#components/ProjectSelector.tsx';
+import type { SeriesEntry } from '#components/SeriesSelector.tsx';
+import SeriesSelector from '#components/SeriesSelector.tsx';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useApi } from 'utils/api';
-import useLoginUser from 'utils/useLoginUser';
+import { useApi } from '#utils/api.ts';
+import useLoginUser from '#utils/useLoginUser.ts';
 
 const CreateNewCase: React.FC<{}> = props => {
   const user = useLoginUser()!;

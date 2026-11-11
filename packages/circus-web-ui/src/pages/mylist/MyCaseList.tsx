@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import type { SearchResource } from 'store/searches';
+import type { SearchResource } from '#store/searches.ts';
 import CaseSearchResultsView from '../search/CaseSearchResults.tsx';
 import MyListPage from './MyListPage.tsx';
 

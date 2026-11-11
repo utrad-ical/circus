@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 import classNames from 'classnames';
-import Icon from 'components/Icon';
+import Icon from '#components/Icon.tsx';
 
 const StyledSideBar = styled.div`
   overflow: hidden;

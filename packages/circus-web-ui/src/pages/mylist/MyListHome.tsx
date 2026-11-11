@@ -1,13 +1,13 @@
-import IconButton from 'components/IconButton';
+import IconButton from '#components/IconButton.ts';
 import { confirm, prompt } from '@smikitky/rb-components/lib/modal';
-import Icon from 'components/Icon';
+import Icon from '#components/Icon.tsx';
 import MyListArray from './MyListArray.tsx';
 import React from 'react';
-import { dispatch } from 'store';
-import { showMessage } from 'store/messages';
-import { useApi } from 'utils/api';
-import { useLoginManager } from 'utils/loginManager';
-import useLoginUser from 'utils/useLoginUser';
+import { dispatch } from '#store/index.ts';
+import { showMessage } from '#store/messages.ts';
+import { useApi } from '#utils/api.ts';
+import { useLoginManager } from '#utils/loginManager.ts';
+import useLoginUser from '#utils/useLoginUser.ts';
 
 const MyListHome: React.FC<{
   title: string;

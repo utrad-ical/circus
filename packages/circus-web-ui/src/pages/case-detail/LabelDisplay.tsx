@@ -1,4 +1,4 @@
-import Icon from 'components/Icon';
+import Icon from '#components/Icon.tsx';
 import type { DragEventHandler, MouseEventHandler } from 'react';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';

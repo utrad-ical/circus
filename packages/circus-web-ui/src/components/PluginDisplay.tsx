@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import IconDisplay from './IconDisplay.tsx';
-import { loadPluginInfo } from 'store/plugins';
+import { loadPluginInfo } from '#store/plugins.ts';
 import { useSelector, useDispatch } from 'react-redux';
-import { useApi } from 'utils/api';
+import { useApi } from '#utils/api.ts';
 
 const PluginDisplay: React.FC<{
   pluginId: string;

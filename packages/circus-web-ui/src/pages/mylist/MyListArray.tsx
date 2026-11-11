@@ -1,9 +1,9 @@
-import Icon from 'components/Icon';
+import Icon from '#components/Icon.tsx';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import type { MyList } from 'store/loginUser';
+import type { MyList } from '#store/loginUser.ts';
 import styled from 'styled-components';
-import { Button } from 'components/react-bootstrap';
+import { Button } from '#components/react-bootstrap.ts';
 
 const MyListArray: React.FC<{
   value: MyList[];

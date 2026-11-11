@@ -1,7 +1,7 @@
 import React from 'react';
-import CaseSearchResults from 'pages/search/CaseSearchResults';
-import CaseSearchCondition from 'pages/search/CaseSearchCondition';
-import Icon from 'components/Icon';
+import CaseSearchResults from '#pages/search/CaseSearchResults.tsx';
+import CaseSearchCondition from '#pages/search/CaseSearchCondition.tsx';
+import Icon from '#components/Icon.tsx';
 
 const CaseSearch: React.FC<{}> = props => {
   return (

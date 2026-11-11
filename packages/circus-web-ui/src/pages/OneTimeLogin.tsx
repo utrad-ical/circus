@@ -2,9 +2,9 @@ import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useLoginManager } from 'utils/loginManager';
-import useLoginUser from 'utils/useLoginUser';
-import useQuery from 'utils/useQuery';
+import { useLoginManager } from '#utils/loginManager.ts';
+import useLoginUser from '#utils/useLoginUser.ts';
+import useQuery from '#utils/useQuery.ts';
 
 /**
  * A temporary screen that tries to authenticate a onetime password.

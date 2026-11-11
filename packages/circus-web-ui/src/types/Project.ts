@@ -1,4 +1,4 @@
-import type { CircusIconDefinition } from 'components/BodyPartIcon';
+import type { CircusIconDefinition } from '#components/BodyPartIcon.tsx';
 import type { Schema } from '@smikitky/rb-components/lib/JsonSchemaEditor';
 import type CaseTag from './CaseTag.ts';
 

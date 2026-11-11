@@ -1,14 +1,14 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Button } from 'components/react-bootstrap';
-import IconButton from 'components/IconButton';
-import { ControlledCollapser } from 'components/Collapser';
-import useLocalPreference from 'utils/useLocalPreference';
-import { useApi } from 'utils/api';
+import { Button } from '#components/react-bootstrap.ts';
+import IconButton from '#components/IconButton.ts';
+import { ControlledCollapser } from '#components/Collapser.tsx';
+import useLocalPreference from '#utils/useLocalPreference.ts';
+import { useApi } from '#utils/api.ts';
 import { useDispatch, useSelector } from 'react-redux';
-import { useLoginManager } from 'utils/loginManager';
-import useLoginUser from 'utils/useLoginUser';
-import type { SearchPreset } from 'store/loginUser';
-import * as searches from 'store/searches';
+import { useLoginManager } from '#utils/loginManager.ts';
+import useLoginUser from '#utils/useLoginUser.ts';
+import type { SearchPreset } from '#store/loginUser.ts';
+import * as searches from '#store/searches.ts';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 

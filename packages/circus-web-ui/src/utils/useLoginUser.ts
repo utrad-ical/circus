@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import type { UserPreferences } from 'store/loginUser';
-import { userPreferencesUpdated } from 'store/loginUser';
+import type { UserPreferences } from '#store/loginUser.ts';
+import { userPreferencesUpdated } from '#store/loginUser.ts';
 import { useApi } from './api.ts';
 
 /**

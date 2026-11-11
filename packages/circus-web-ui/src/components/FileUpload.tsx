@@ -1,11 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { Button, ButtonToolbar, ProgressBar } from './react-bootstrap.ts';
 import { FileDroppable } from './FileDroppable.tsx';
-import useShowMessage from 'utils/useShowMessage';
+import useShowMessage from '#utils/useShowMessage.ts';
 import * as modal from '@smikitky/rb-components/lib/modal';
 import styled from 'styled-components';
-import { useApi } from 'utils/api';
-import { withCommas } from 'utils/util';
+import { useApi } from '#utils/api.ts';
+import { withCommas } from '#utils/util.ts';
 import IconButton from './IconButton.ts';
 import Icon from './Icon.tsx';
 

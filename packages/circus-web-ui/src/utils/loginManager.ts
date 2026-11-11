@@ -3,8 +3,8 @@ import React, { useContext } from 'react';
 import type { ApiCaller } from './api.ts';
 import createApiCaller, { formatCredentials } from './api.ts';
 import type { Dispatch } from 'redux';
-import * as actions from 'store/loginUser';
-import * as searchActions from 'store/searches';
+import * as actions from '#store/loginUser.ts';
+import * as searchActions from '#store/searches.ts';
 
 /**
  * Creates a loginManager.

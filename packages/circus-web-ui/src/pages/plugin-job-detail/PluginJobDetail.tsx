@@ -6,29 +6,29 @@ import type {
   Plugin
 } from '@utrad-ical/circus-ui-kit';
 import { CsResultsContext } from '@utrad-ical/circus-ui-kit';
-import type { DataGridColumnDefinition } from 'components/DataGrid';
-import DataGrid from 'components/DataGrid';
-import DropdownButton from 'components/DropdownButton';
-import FullSpanContainer from 'components/FullSpanContainer';
-import Icon from 'components/Icon';
-import IconButton from 'components/IconButton';
-import MenuItem from 'components/MenuItem';
-import PatientInfoBox from 'components/PatientInfoBox';
-import PieProgress from 'components/PieProgress';
-import PluginDisplay from 'components/PluginDisplay';
-import SearchResultsView from 'components/SearchResultsView';
-import UserDisplay from 'components/UserDisplay';
-import { Modal } from 'components/react-bootstrap';
+import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
+import DataGrid from '#components/DataGrid.tsx';
+import DropdownButton from '#components/DropdownButton.tsx';
+import FullSpanContainer from '#components/FullSpanContainer.tsx';
+import Icon from '#components/Icon.tsx';
+import IconButton from '#components/IconButton.ts';
+import MenuItem from '#components/MenuItem.tsx';
+import PatientInfoBox from '#components/PatientInfoBox.tsx';
+import PieProgress from '#components/PieProgress.tsx';
+import PluginDisplay from '#components/PluginDisplay.tsx';
+import SearchResultsView from '#components/SearchResultsView.tsx';
+import UserDisplay from '#components/UserDisplay.tsx';
+import { Modal } from '#components/react-bootstrap.ts';
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
-import { newSearch } from 'store/searches';
+import { newSearch } from '#store/searches.ts';
 import styled from 'styled-components';
-import { useApi } from 'utils/api';
-import type { CancelToken } from 'utils/cancelToken';
-import useLoadData from 'utils/useLoadData';
-import useLoginUser from 'utils/useLoginUser';
-import useQuery from 'utils/useQuery';
+import { useApi } from '#utils/api.ts';
+import type { CancelToken } from '#utils/cancelToken.ts';
+import useLoadData from '#utils/useLoadData.ts';
+import useLoginUser from '#utils/useLoginUser.ts';
+import useQuery from '#utils/useQuery.ts';
 import {
   FeedbackRenderer,
   PluginRenderer,

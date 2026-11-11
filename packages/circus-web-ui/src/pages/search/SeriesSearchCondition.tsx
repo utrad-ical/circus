@@ -1,12 +1,12 @@
 import React from 'react';
 import { modalities } from '../../modalities.ts';
 import ConditionFrame from './ConditionFrame.tsx';
-import { escapeRegExp } from 'utils/util';
+import { escapeRegExp } from '#utils/util.ts';
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import DateRangePicker, {
   dateRangeToMongoQuery
 } from '@smikitky/rb-components/lib/DateRangePicker';
-import AgeMinMax from 'components/AgeMinMax';
+import AgeMinMax from '#components/AgeMinMax.tsx';
 import { conditionToMongoQuery } from '@smikitky/rb-components/lib/ConditionEditor';
 import SearchPanel from './SearchPanel.tsx';
 import type { Condition } from './ConditionFrame.tsx';

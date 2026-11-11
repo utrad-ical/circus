@@ -6,12 +6,12 @@ import {
   Col,
   ListGroup,
   ListGroupItem
-} from 'components/react-bootstrap';
-import ProjectDisplay from 'components/ProjectDisplay';
-import Icon from 'components/Icon';
-import TimeDisplay from 'components/TimeDisplay';
+} from '#components/react-bootstrap.ts';
+import ProjectDisplay from '#components/ProjectDisplay.tsx';
+import Icon from '#components/Icon.tsx';
+import TimeDisplay from '#components/TimeDisplay.tsx';
 import styled from 'styled-components';
-import useLoginUser from 'utils/useLoginUser';
+import useLoginUser from '#utils/useLoginUser.ts';
 
 const HomeMenu = styled.ul`
   margin: 20px 0;

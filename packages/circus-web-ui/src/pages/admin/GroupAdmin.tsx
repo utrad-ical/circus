@@ -1,10 +1,10 @@
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import * as et from '@smikitky/rb-components/lib/editor-types';
-import type { DataGridColumnDefinition } from 'components/DataGrid';
-import PluginSelectorMultiple from 'components/PluginSelectorMultiple';
-import ProjectSelectorMultiple from 'components/ProjectSelectorMultiple';
+import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
+import PluginSelectorMultiple from '#components/PluginSelectorMultiple.tsx';
+import ProjectSelectorMultiple from '#components/ProjectSelectorMultiple.tsx';
 import React, { useEffect, useState } from 'react';
-import { useApi } from 'utils/api';
+import { useApi } from '#utils/api.ts';
 import EditorPage from './EditorPage.tsx';
 
 const makeEmptyItem = () => {

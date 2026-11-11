@@ -2,24 +2,24 @@ import { confirm } from '@smikitky/rb-components/lib/modal';
 import type {
   DataGridColumnDefinition,
   DataGridRenderer
-} from 'components/DataGrid';
-import DataGrid from 'components/DataGrid';
-import DropdownButton from 'components/DropdownButton';
-import Icon from 'components/Icon';
-import IconButton from 'components/IconButton';
-import MenuItem from 'components/MenuItem';
-import MyListDropdown from 'components/MyListDropdown';
+} from '#components/DataGrid.tsx';
+import DataGrid from '#components/DataGrid.tsx';
+import DropdownButton from '#components/DropdownButton.tsx';
+import Icon from '#components/Icon.tsx';
+import IconButton from '#components/IconButton.ts';
+import MenuItem from '#components/MenuItem.tsx';
+import MyListDropdown from '#components/MyListDropdown.tsx';
 import SearchResultsView, {
   makeSortOptions,
   patientInfoSearchOptions
-} from 'components/SearchResultsView';
+} from '#components/SearchResultsView.tsx';
 import React, { Fragment } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
-import * as searches from 'store/searches';
+import * as searches from '#store/searches.ts';
 import styled from 'styled-components';
-import { useApi } from 'utils/api';
-import useShowMessage from 'utils/useShowMessage';
+import { useApi } from '#utils/api.ts';
+import useShowMessage from '#utils/useShowMessage.ts';
 import {
   Executer,
   FeedbackRenderer,

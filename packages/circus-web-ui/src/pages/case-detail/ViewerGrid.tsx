@@ -9,22 +9,22 @@ import type {
 } from '@utrad-ical/circus-rs';
 import { sectionTo2dViewState, toolFactory } from '@utrad-ical/circus-rs';
 import classnames from 'classnames';
-import DropdownButton from 'components/DropdownButton';
-import type { LayoutInfo } from 'components/GridContainer';
-import GridContainer, { layoutReducer } from 'components/GridContainer';
-import Icon from 'components/Icon';
-import IconButton from 'components/IconButton';
+import DropdownButton from '#components/DropdownButton.tsx';
+import type { LayoutInfo } from '#components/GridContainer.tsx';
+import GridContainer, { layoutReducer } from '#components/GridContainer.tsx';
+import Icon from '#components/Icon.tsx';
+import IconButton from '#components/IconButton.ts';
 import type {
   InitialStateSetterFunc,
   StateChanger
-} from 'components/ImageViewer';
+} from '#components/ImageViewer.tsx';
 import ImageViewer, {
   createStateChanger,
   getInitial2dViewState,
   setOrthogonalOrientation
-} from 'components/ImageViewer';
-import MenuItem from 'components/MenuItem';
-import { Button } from 'components/react-bootstrap';
+} from '#components/ImageViewer.tsx';
+import MenuItem from '#components/MenuItem.tsx';
+import { Button } from '#components/react-bootstrap.ts';
 import React, {
   useCallback,
   useContext,

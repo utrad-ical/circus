@@ -1,21 +1,21 @@
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import { confirm } from '@smikitky/rb-components/lib/modal';
-import Icon from 'components/Icon';
-import IconButton from 'components/IconButton';
+import Icon from '#components/Icon.tsx';
+import IconButton from '#components/IconButton.ts';
 import {
   ListGroup,
   InputGroup,
   ListGroupItem,
   Panel,
   FormControl
-} from 'components/react-bootstrap';
-import TimeDisplay from 'components/TimeDisplay';
+} from '#components/react-bootstrap.ts';
+import TimeDisplay from '#components/TimeDisplay.tsx';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
-import { useApi } from 'utils/api';
-import useLoadData from 'utils/useLoadData';
+import { useApi } from '#utils/api.ts';
+import useLoadData from '#utils/useLoadData.ts';
 import type { CancelToken } from '../utils/cancelToken.ts';
-import CopyToClipboardButton from 'components/CopyToClipboardButton';
+import CopyToClipboardButton from '#components/CopyToClipboardButton.tsx';
 
 interface Token {
   tokenId: string;

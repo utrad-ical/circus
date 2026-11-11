@@ -5,12 +5,12 @@ import DateRangePicker, {
 import { modalities } from '../../modalities.ts';
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import ConditionFrame from './ConditionFrame.tsx';
-import { escapeRegExp } from 'utils/util';
-import { ControlLabel } from 'components/react-bootstrap';
-import ProjectSelectorMultiple from 'components/ProjectSelectorMultiple';
+import { escapeRegExp } from '#utils/util.ts';
+import { ControlLabel } from '#components/react-bootstrap.ts';
+import ProjectSelectorMultiple from '#components/ProjectSelectorMultiple.tsx';
 import { conditionToMongoQuery } from '@smikitky/rb-components/lib/ConditionEditor';
-import SearchPanel from 'pages/search/SearchPanel';
-import useLoginUser from 'utils/useLoginUser';
+import SearchPanel from '#pages/search/SearchPanel.tsx';
+import useLoginUser from '#utils/useLoginUser.ts';
 import type { Condition as BaseCondition } from './ConditionFrame.tsx';
 
 const modalityOptions: { [key: string]: string } = { all: 'All' };

@@ -1,18 +1,18 @@
-import IconButton from 'components/IconButton';
+import IconButton from '#components/IconButton.ts';
 import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
 import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
-import type { DataGridColumnDefinition } from 'components/DataGrid';
-import DataGrid from 'components/DataGrid';
-import Icon from 'components/Icon';
-import SearchResultsView from 'components/SearchResultsView';
-import { Button, Panel } from 'components/react-bootstrap';
+import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
+import DataGrid from '#components/DataGrid.tsx';
+import Icon from '#components/Icon.tsx';
+import SearchResultsView from '#components/SearchResultsView.tsx';
+import { Button, Panel } from '#components/react-bootstrap.ts';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import type { SearchResource } from 'store/searches';
-import { newSearch } from 'store/searches';
+import type { SearchResource } from '#store/searches.ts';
+import { newSearch } from '#store/searches.ts';
 import styled from 'styled-components';
-import { useApi } from 'utils/api';
-import { useLoginManager } from 'utils/loginManager';
+import { useApi } from '#utils/api.ts';
+import { useLoginManager } from '#utils/loginManager.ts';
 import AdminContainer from './AdminContainer.tsx';
 
 const StyledDataGrid = styled(DataGrid)`

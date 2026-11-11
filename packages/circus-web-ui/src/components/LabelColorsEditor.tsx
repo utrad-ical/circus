@@ -1,7 +1,7 @@
 import { ColorPalette } from '@smikitky/rb-components/lib/ColorPicker';
 import type * as et from '@smikitky/rb-components/lib/editor-types';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
-import { Button } from 'components/react-bootstrap';
+import { Button } from '#components/react-bootstrap.ts';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { defaultLabelColors } from '../labelColors.ts';

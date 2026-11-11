@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Button } from 'components/react-bootstrap';
+import { Button } from '#components/react-bootstrap.ts';
 import AdminContainer from './AdminContainer.tsx';
-import Icon from 'components/Icon';
+import Icon from '#components/Icon.tsx';
 import styled from 'styled-components';
 
 const Btn: React.FC<{

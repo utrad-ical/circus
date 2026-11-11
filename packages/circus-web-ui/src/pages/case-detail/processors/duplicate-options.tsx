@@ -1,5 +1,5 @@
 import type { Editor } from './processor-types.ts';
-import { FormControl } from 'components/react-bootstrap';
+import { FormControl } from '#components/react-bootstrap.ts';
 import React from 'react';
 import type { DuplicateOptions } from './duplicateProcessor.ts';
 

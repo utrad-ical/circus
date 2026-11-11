@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import BodyPartIcon from 'components/BodyPartIcon';
+import BodyPartIcon from '#components/BodyPartIcon.tsx';
 import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import ColorPicker from '@smikitky/rb-components/lib/ColorPicker';

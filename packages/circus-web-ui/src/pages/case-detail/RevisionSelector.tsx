@@ -1,7 +1,7 @@
 import React from 'react';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
-import TimeDisplay from 'components/TimeDisplay';
-import UserDisplay from 'components/UserDisplay';
+import TimeDisplay from '#components/TimeDisplay.tsx';
+import UserDisplay from '#components/UserDisplay.tsx';
 import styled from 'styled-components';
 import type { Revision } from './revisionData.ts';
 import type { ExternalLabel } from './labelData.ts';

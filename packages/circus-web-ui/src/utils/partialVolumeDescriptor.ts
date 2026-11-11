@@ -1,8 +1,8 @@
 import type { PartialVolumeDescriptor } from '@utrad-ical/circus-rs';
-import type { SeriesEntry } from 'components/SeriesSelector';
+import type { SeriesEntry } from '#components/SeriesSelector.tsx';
 import { createDraft, finishDraft } from 'immer';
 import * as mr from 'multi-integer-range';
-import type Series from 'types/Series';
+import type Series from '#types/Series.ts';
 import type { RootState } from '../store/index.ts';
 import type { ApiCaller } from './api.ts';
 import asyncMap from './asyncMap.ts';

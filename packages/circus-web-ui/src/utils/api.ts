@@ -3,7 +3,6 @@ import axios from 'axios';
 import type { CancelToken } from './cancelToken.ts';
 import { dispatch } from 'store';
 import { showMessage } from 'store/messages';
-import * as qs from 'querystring';
 import { useContext, createContext } from 'react';
 
 export interface ApiCaller {
@@ -37,7 +36,7 @@ const createApiCaller = (initialCredentials: any, apiServer: string) => {
     const res = await axios.request({
       method: 'post',
       url: apiServer + 'login',
-      data: qs.stringify({
+      data: new URLSearchParams({
         client_id: 'circus-front',
         client_secret: 'not-a-secret',
         grant_type: 'refresh_token',

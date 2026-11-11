@@ -19,10 +19,7 @@ module.exports = {
   },
   resolve: {
     modules: [path.join(__dirname, 'src'), 'node_modules'],
-    extensions: ['.js', '.jsx', '.ts', '.tsx'],
-    fallback: {
-      querystring: require.resolve('querystring-es3')
-    }
+    extensions: ['.js', '.jsx', '.ts', '.tsx']
   },
   module: {
     rules: [

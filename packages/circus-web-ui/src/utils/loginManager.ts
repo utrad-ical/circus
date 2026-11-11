@@ -5,7 +5,6 @@ import createApiCaller, { formatCredentials } from './api.ts';
 import type { Dispatch } from 'redux';
 import * as actions from 'store/loginUser';
 import * as searchActions from 'store/searches';
-import * as qs from 'querystring';
 
 /**
  * Creates a loginManager.
@@ -46,7 +45,7 @@ const loginManager = (
     const res = await axios.request({
       method: 'post',
       url: apiServer + 'login',
-      data: qs.stringify({
+      data: new URLSearchParams({
         client_id: 'circus-front',
         client_secret: 'not-a-secret',
         grant_type: 'password',

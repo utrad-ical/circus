@@ -202,7 +202,7 @@ const TaskList: React.FC<{}> = props => {
         refreshable
         name="task"
       />
-      {process.env.NODE_ENV === 'development' && <DebugTaskLauncher />}
+      {import.meta.env.DEV && <DebugTaskLauncher />}
     </div>
   );
 };

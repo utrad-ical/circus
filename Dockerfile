@@ -25,7 +25,7 @@ RUN pnpm install --frozen-lockfile && \
 # ---------------------------------------------------------------------------
 FROM caddy:2 AS web
 
-COPY --from=build /var/circus/packages/circus-web-ui/public /srv
+COPY --from=build /var/circus/packages/circus-web-ui/dist /srv
 COPY docker/caddy/Caddyfile /etc/caddy/Caddyfile
 
 EXPOSE 80
@@ -43,7 +43,7 @@ COPY --from=docker:27-cli /usr/local/bin/docker /usr/local/bin/docker
 # The server runs the TypeScript sources directly (Node.js type stripping).
 # devDependencies are still included; pruning them is left for later.
 COPY --from=build /var/circus /var/circus
-RUN rm -rf /var/circus/packages/circus-web-ui/public
+RUN rm -rf /var/circus/packages/circus-web-ui/dist
 
 COPY docker/api/circus.config.js /var/circus/circus.config.js
 COPY docker/api/entrypoint.sh /usr/local/bin/circus-entrypoint

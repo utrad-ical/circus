@@ -118,7 +118,7 @@ Use this to build optimized production builds (slow). This is not necessary whil
 
 ```bash
 # On monorepo root: builds the npm packages (circus-lib, circus-rs and
-# circus-ui-kit, with tsdown into `dist/`) and the web UI (webpack)
+# circus-ui-kit, with tsdown into `dist/`) and the web UI (Vite, into `packages/circus-web-ui/dist/`)
 pnpm run build
 
 # The Docker image only needs the web UI;

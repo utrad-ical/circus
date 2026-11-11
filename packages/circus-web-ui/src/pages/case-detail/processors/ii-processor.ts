@@ -77,7 +77,9 @@ const iiVoxelProcessor: VoxelLabelProcessor<
         : width;
 
   if (window.Worker) {
-    const myWorker = new Worker(new URL('./ii-worker.ts', import.meta.url));
+    const myWorker = new Worker(new URL('./ii-worker.ts', import.meta.url), {
+      type: 'module'
+    });
     myWorker.postMessage({
       input: initializedInput,
       width: transposedWidth,

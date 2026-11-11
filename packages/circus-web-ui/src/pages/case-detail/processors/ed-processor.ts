@@ -54,7 +54,9 @@ const createEdProcessor: (
     }
 
     if (window.Worker) {
-      const myWorker = new Worker(new URL('./ed-worker.ts', import.meta.url));
+      const myWorker = new Worker(new URL('./ed-worker.ts', import.meta.url), {
+        type: 'module'
+      });
       myWorker.postMessage({
         input: initializedInput,
         width: width + 2 * padding[0],

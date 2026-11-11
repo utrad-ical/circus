@@ -1,13 +1,14 @@
 {
   "extends": "../../tsconfig.settings.json",
   "compilerOptions": {
-    // Bundled by webpack
+    // Bundled by Vite
     "module": "esnext",
     "moduleResolution": "bundler",
     // rb-components ships .tsx sources that do not follow this rule
     "verbatimModuleSyntax": false,
     "lib": ["dom", "webworker", "es2022"],
-    "jsx": "react"
+    "jsx": "react",
+    "types": ["node", "vite/client"]
   },
   "include": [
     "src/**/*",

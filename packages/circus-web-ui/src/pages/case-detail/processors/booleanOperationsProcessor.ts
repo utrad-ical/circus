@@ -61,7 +61,9 @@ const booleanOperationsProcessor: Processor<BooleanOperationsOptions> = (
     ];
 
   if (window.Worker) {
-    const myWorker = new Worker(new URL('./bo-worker.ts', import.meta.url));
+    const myWorker = new Worker(new URL('./bo-worker.ts', import.meta.url), {
+      type: 'module'
+    });
     myWorker.postMessage({
       label,
       targetLabel,

@@ -1093,9 +1093,6 @@ importers:
       webpack-dev-server:
         specifier: ^5.1.0
         version: 5.1.0(debug@4.3.5(supports-color@8.1.1))(supports-color@8.1.1)(webpack-cli@5.1.4)(webpack@5.95.0)
-      worker-loader:
-        specifier: ^3.0.8
-        version: 3.0.8(webpack@5.95.0)
 
   packages/create-circus-cad-plugin:
     dependencies:
@@ -6250,12 +6247,6 @@ packages:
   word-wrap@1.2.5:
     resolution: {integrity: sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==}
     engines: {node: '>=0.10.0'}
-
-  worker-loader@3.0.8:
-    resolution: {integrity: sha512-XQyQkIFeRVC7f7uRhFdNMe/iJOdO6zxAaR3EWbDp45v3mDhrTi+++oswKNxShUNjPC/1xUp5DB29YKLhFo129g==}
-    engines: {node: '>= 10.13.0'}
-    peerDependencies:
-      webpack: ^4.0.0 || ^5.0.0
 
   wrap-ansi@3.0.1:
     resolution: {integrity: sha512-iXR3tDXpbnTpzjKSylUJRkLuOrEC7hwEB221cgn6wtF8wpmz28puFXAEfPT5zrjM3wahygB//VuWEr1vTkDcNQ==}
@@ -12132,12 +12123,6 @@ snapshots:
       winston-transport: 4.4.0
 
   word-wrap@1.2.5: {}
-
-  worker-loader@3.0.8(webpack@5.95.0):
-    dependencies:
-      loader-utils: 2.0.0
-      schema-utils: 3.3.0
-      webpack: 5.95.0(webpack-cli@5.1.4)
 
   wrap-ansi@3.0.1:
     dependencies:

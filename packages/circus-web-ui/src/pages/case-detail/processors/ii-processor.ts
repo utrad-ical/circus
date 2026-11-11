@@ -1,7 +1,6 @@
 import { alert } from '@smikitky/rb-components/lib/modal';
 import { intersliceInterpolation } from '@utrad-ical/circus-rs';
 import type { MorphologicalImageProcessingResults } from '@utrad-ical/circus-rs';
-import iiWorker from 'worker-loader!./ii-worker';
 import type { VoxelLabelProcessor } from './performLabelCreatingVoxelProcessing.ts';
 import performLabelCreatingVoxelProcessing from './performLabelCreatingVoxelProcessing.ts';
 
@@ -78,7 +77,7 @@ const iiVoxelProcessor: VoxelLabelProcessor<
         : width;
 
   if (window.Worker) {
-    const myWorker = new iiWorker();
+    const myWorker = new Worker(new URL('./ii-worker.ts', import.meta.url));
     myWorker.postMessage({
       input: initializedInput,
       width: transposedWidth,

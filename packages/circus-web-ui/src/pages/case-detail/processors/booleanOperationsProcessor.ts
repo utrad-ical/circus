@@ -4,7 +4,6 @@ import createCurrentLabelsUpdator from '../createCurrentLabelsUpdator.ts';
 import type { InternalLabel, InternalLabelOf } from '../labelData.ts';
 import { createNewLabelData } from '../labelData.ts';
 import type { Processor, ProcessorProgress } from './processor-types.ts';
-import boWorker from 'worker-loader!./bo-worker';
 
 export const booleanOperationTypes = ['add', 'subtract', 'intersect'] as const;
 export type BooleanOperationType = (typeof booleanOperationTypes)[number];
@@ -62,7 +61,7 @@ const booleanOperationsProcessor: Processor<BooleanOperationsOptions> = (
     ];
 
   if (window.Worker) {
-    const myWorker = new boWorker();
+    const myWorker = new Worker(new URL('./bo-worker.ts', import.meta.url));
     myWorker.postMessage({
       label,
       targetLabel,

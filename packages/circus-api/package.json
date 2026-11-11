@@ -82,7 +82,7 @@
     "@types/ws": "^8.5.12",
     "form-data": "^3.0.0",
     "tar-fs": "^2.1.1",
-    "typescript": "~6.0.3",
+    "typescript": "~7.0.2",
     "ws": "^8.18.0"
   },
   "nodemonConfig": {

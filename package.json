@@ -13,26 +13,17 @@
     "dev": "pnpm --parallel --filter @utrad-ical/circus-api --filter @utrad-ical/circus-web-ui run dev",
     "test": "node --env-file-if-exists=.env --test --test-force-exit --test-concurrency=1 --test-timeout=10000 \"packages/*/src/**/*.test.ts\"",
     "build": "pnpm -r --if-present run build",
-    "lint": "eslint \"packages/*/{src,test}/**/*.{js,ts,tsx}\"",
-    "lint-fix": "eslint --fix \"packages/*/{src,test}/**/*.{js,ts,tsx}\"",
+    "lint": "oxlint",
+    "lint-fix": "oxlint --fix",
     "lint-format": "oxfmt --check",
     "format": "oxfmt",
     "typecheck": "pnpm -r --if-present run typecheck"
   },
   "devDependencies": {
-    "@eslint/compat": "^1.1.1",
-    "@eslint/eslintrc": "^3.1.0",
-    "@eslint/js": "^9.10.0",
     "@types/node": "^24.19.2",
-    "@typescript-eslint/eslint-plugin": "^8.4.0",
-    "@typescript-eslint/parser": "^8.4.0",
     "dotenv": "^16.0.3",
-    "eslint": "^8.57.0",
-    "eslint-plugin-react": "^7.35.0",
-    "eslint-plugin-react-hooks": "^4.6.2",
-    "globals": "^15.9.0",
     "oxfmt": "0.78.0",
-    "typescript": "~6.0.3",
-    "typescript-eslint": "^8.4.0"
+    "oxlint": "1.93.0",
+    "typescript": "~7.0.2"
   }
 }

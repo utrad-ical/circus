@@ -10,7 +10,7 @@ export interface EncConverter {
 
 type Decoder = (input: Buffer) => string;
 
-/* eslint no-control-regex: 0 */
+/* oxlint-disable no-control-regex -- JIS escape sequences */
 
 /**
  * A higher-order function that returns a new function,

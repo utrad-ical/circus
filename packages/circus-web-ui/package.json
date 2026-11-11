@@ -42,7 +42,7 @@
     "less": "^4.9.1",
     "svgicons2svgfont": "^5.0.2",
     "ttf2woff": "^2.0.1",
-    "typescript": "~6.0.3",
+    "typescript": "~7.0.2",
     "vite": "8.3.7"
   },
   "dependencies": {

@@ -7,7 +7,7 @@ import {
   FormGroup,
   Panel
 } from '#components/react-bootstrap.ts';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLoginManager } from '#utils/loginManager.ts';
@@ -64,9 +64,12 @@ const LoginScreen: React.FC<{}> = props => {
     }
   }, [loginSucceeded, navigate]);
 
+  // Set while logging in on this page, during which the user is loaded
+  const loggingIn = useRef(false);
+
   // Force logout when user shows this page
   useEffect(() => {
-    if (user && !loginSucceeded) {
+    if (user && !loginSucceeded && !loggingIn.current) {
       const logout = async () => {
         await loginManager.logout();
       };
@@ -80,10 +83,11 @@ const LoginScreen: React.FC<{}> = props => {
 
   const handleLoginClick = async () => {
     try {
+      loggingIn.current = true;
       await loginManager.tryAuthenticate(input.id, input.password);
       setLoginSucceeded(true);
-      await loginManager.refreshUserInfo(true);
     } catch (err: any) {
+      loggingIn.current = false;
       if (err.response && err.response.status === 401) {
         setError('Invalid user ID or password.');
       } else {

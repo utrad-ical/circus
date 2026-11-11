@@ -40,7 +40,6 @@ const OneTimeLogin: FC = () => {
         }
         return;
       }
-      await loginManager.refreshUserInfo(true);
       navigate(redirect || '/home');
     })();
   }, [loginManager, pwd, redirect, navigate]);

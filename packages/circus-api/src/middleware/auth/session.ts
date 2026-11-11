@@ -110,10 +110,31 @@ export const withSessionCookie = (
       ctx.request.headers.authorization = `Bearer ${cookie}`;
     }
     await authenticate(ctx, async () => {
-      if (byCookie) await extendSession(ctx, models);
+      if (byCookie) {
+        checkExpectedUser(ctx);
+        await extendSession(ctx, models);
+      }
       await next();
     });
   };
+};
+
+/**
+ * The header with which the web UI tells the user it believes it is
+ * logged in as. The session cookie is shared by all tabs, so another tab may
+ * have logged in as a different user in the meantime.
+ */
+export const expectedUserHeaderName = 'X-Circus-User';
+
+export const sessionUserChangedHeaderName = 'X-Circus-Session-User-Changed';
+
+const checkExpectedUser = (ctx: Ctx) => {
+  const expected = ctx.get(expectedUserHeaderName);
+  if (expected && expected !== ctx.user?.userEmail) {
+    // Lets the web UI tell this from other conflicts
+    ctx.set(sessionUserChangedHeaderName, '1');
+    ctx.throw(409, 'The user of this session has changed.');
+  }
 };
 
 /**

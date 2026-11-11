@@ -2,6 +2,10 @@ import axios from 'axios';
 import React, { useContext } from 'react';
 import type { ApiCaller } from './api.ts';
 import createApiCaller, { csrfHeaders } from './api.ts';
+import {
+  broadcastSessionChange,
+  isSessionUserChangedError
+} from './sessionUserCheck.ts';
 import type { Dispatch } from 'redux';
 import * as actions from '#store/loginUser.ts';
 import * as searchActions from '#store/searches.ts';
@@ -42,6 +46,9 @@ const loginManager = (
       headers: csrfHeaders,
       withCredentials: true
     });
+    // Learn who we are now, and tell other tabs
+    const userEmail = await refreshUserInfo(true);
+    if (userEmail) broadcastSessionChange(userEmail);
   };
 
   /**
@@ -62,11 +69,13 @@ const loginManager = (
   /**
    * Loads the user information.
    */
-  const refreshUserInfo = async (full = false) => {
+  const refreshUserInfo = async (full = false): Promise<string | undefined> => {
     dispatch(actions.loginInfoRequest());
     try {
       const result = await api('login-info' + (full ? '/full' : ''), {
-        handleErrors: [401]
+        handleErrors: [401],
+        // Loading the full info (re)establishes the user of this tab
+        checkUser: !full
       });
       if (typeof result.userEmail !== 'string') {
         throw Error('Server did not respond with valid user data');
@@ -76,7 +85,10 @@ const loginManager = (
       } else {
         dispatch(actions.loginInfoConfirmed());
       }
+      return result.userEmail;
     } catch (err) {
+      // Keep the state of this tab; the user is asked to reload the page
+      if (isSessionUserChangedError(err)) return;
       dispatch(actions.loggedOut());
       dispatch(searchActions.reset());
     }
@@ -89,6 +101,7 @@ const loginManager = (
     });
     dispatch(actions.loggedOut());
     dispatch(searchActions.reset());
+    broadcastSessionChange(null);
   };
 
   return {

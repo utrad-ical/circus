@@ -155,6 +155,20 @@ describe('requests with the session cookie', () => {
     );
   });
 
+  test('are rejected if the web UI expects another user', async () => {
+    const cookie = await loginAsAlice();
+    const res1 = await ax.get('api/login-info', {
+      headers: { Cookie: cookie, 'X-Circus-User': 'alice@example.com' }
+    });
+    assert.equal(res1.status, httpStatus.OK);
+    // Another tab has logged in as bob
+    const res2 = await ax.get('api/login-info', {
+      headers: { Cookie: cookie, 'X-Circus-User': 'bob@example.com' }
+    });
+    assert.equal(res2.status, httpStatus.CONFLICT);
+    assert.equal(res2.headers['x-circus-session-user-changed'], '1');
+  });
+
   test('are rejected after the session expires', async () => {
     const cookie = await loginAsAlice();
     await apiTest.database.db

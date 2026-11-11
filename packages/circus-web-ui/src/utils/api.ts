@@ -4,6 +4,12 @@ import type { CancelToken } from './cancelToken.ts';
 import { dispatch } from '#store/index.ts';
 import { showMessage } from '#store/messages.ts';
 import { useContext, createContext } from 'react';
+import {
+  currentUserEmail,
+  expectedUserHeaderName,
+  isSessionUserChangedError,
+  showSessionUserChangedMessage
+} from './sessionUserCheck.ts';
 
 export interface ApiCaller {
   (command: string, options?: any, cancelToken?: CancelToken): Promise<any>;
@@ -34,8 +40,18 @@ const createApiCaller = (apiServer: string) => {
       if (params.method === 'get') params.method = 'post';
     }
 
+    // Unless told not to (i.e., when loading the user just after a login),
+    // the server rejects the request if the session user has changed
+    const { checkUser = true } = options;
+    delete params.checkUser;
+    const userEmail = checkUser ? currentUserEmail() : undefined;
+
     try {
-      const headers = { ...csrfHeaders, ...(params.headers || {}) };
+      const headers = {
+        ...csrfHeaders,
+        ...(userEmail ? { [expectedUserHeaderName]: userEmail } : {}),
+        ...(params.headers || {})
+      };
 
       let axiosCancelToken = undefined;
       if (cancelToken) {
@@ -54,6 +70,10 @@ const createApiCaller = (apiServer: string) => {
       });
       return res.data;
     } catch (err: any) {
+      if (isSessionUserChangedError(err)) {
+        showSessionUserChangedMessage();
+        throw err;
+      }
       // By default, all errors are displayed with a minimal message.
       // Set 'handleErrors' option to supress error message for specific error types.
       let handle = options.handleErrors === true;

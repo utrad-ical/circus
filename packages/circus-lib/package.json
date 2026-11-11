@@ -52,7 +52,7 @@
     "@types/tar-stream": "^1.6.2",
     "tsdown": "0.23.7",
     "tslib": "^1.11.2",
-    "typescript": "~6.0.3"
+    "typescript": "~7.0.2"
   },
   "files": [
     "dist"

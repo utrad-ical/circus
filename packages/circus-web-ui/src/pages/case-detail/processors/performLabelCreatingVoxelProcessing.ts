@@ -71,9 +71,10 @@ const performLabelCreatingVoxelProcessing = <
       const newLabel: InternalLabelOf<'voxel'>[] = [];
 
       if ('labelNum' in processingResults) {
-        for (let num = 0; num < processingResults.labelNum; num++) {
-          const [ULx, ULy, ULz] = processingResults.labels[num].min;
-          const [LRx, LRy, LRz] = processingResults.labels[num].max;
+        const { labelNum, labels, labelMap } = processingResults;
+        for (let num = 0; num < labelNum; num++) {
+          const [ULx, ULy, ULz] = labels[num].min;
+          const [LRx, LRy, LRz] = labels[num].max;
           const color =
             labelColors[
               (labelColors.indexOf(label.data.color) + num + 1) %
@@ -93,7 +94,7 @@ const performLabelCreatingVoxelProcessing = <
             for (let j = ULy; j <= LRy; j++) {
               for (let i = ULx; i <= LRx; i++) {
                 const pos = i + j * width + k * width * height;
-                if (processingResults.labelMap[pos] === num + 1) {
+                if (labelMap[pos] === num + 1) {
                   volume.writePixelAt(1, i - ULx, j - ULy, k - ULz);
                 }
               }

@@ -4,4 +4,3 @@ node_modules
 /test/working
 /test/docker/tmp
 /test/build-dicom-test
-/lib

@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.settings.json",
   "compilerOptions": {
-    // Bundled by webpack
+    // Bundled by Vite (web-ui) and tsdown
     "module": "esnext",
     "moduleResolution": "bundler",
     "lib": ["dom", "es2022"],

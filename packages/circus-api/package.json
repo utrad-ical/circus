@@ -85,9 +85,5 @@
     "tar-fs": "^2.1.1",
     "typescript": "~7.0.2",
     "ws": "^8.18.0"
-  },
-  "nodemonConfig": {
-    "ext": "js,mjs,ts,json,yaml",
-    "signal": "SIGTERM"
   }
 }

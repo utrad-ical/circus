@@ -70,6 +70,8 @@ const createApiCaller = (apiServer: string) => {
       });
       return res.data;
     } catch (err: any) {
+      // Cancelled on purpose (e.g., by `useLoadData` on re-render)
+      if (axios.isCancel(err)) throw err;
       if (isSessionUserChangedError(err)) {
         showSessionUserChangedMessage();
         throw err;

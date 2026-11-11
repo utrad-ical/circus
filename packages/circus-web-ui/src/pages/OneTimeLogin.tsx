@@ -3,7 +3,6 @@ import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLoginManager } from '#utils/loginManager.ts';
-import useLoginUser from '#utils/useLoginUser.ts';
 import useQuery from '#utils/useQuery.ts';
 
 /**
@@ -16,20 +15,10 @@ const OneTimeLogin: FC = () => {
 
   const loginManager = useLoginManager();
   const [error, setError] = useState<string>();
-  const [loginSucceeded, setLoginSucceeded] = useState(false);
-  const user = useLoginUser();
   const navigate = useNavigate();
 
-  // Force logout when user shows this page
-  useEffect(() => {
-    if (user && !loginSucceeded) {
-      const logout = async () => {
-        await loginManager.logout();
-      };
-      logout();
-    }
-  }, [loginManager, loginSucceeded, user]);
-
+  // Logging in with the onetime password replaces the session
+  // of the current user (if any) on the server side
   useEffect(() => {
     (async () => {
       if (!pwd) {
@@ -39,10 +28,9 @@ const OneTimeLogin: FC = () => {
         return;
       }
       try {
-        await loginManager.tryAuthenticate(pwd, pwd);
-        setLoginSucceeded(true);
+        await loginManager.tryOnetimeLogin(pwd);
       } catch (err: any) {
-        if (err.response && err.response.status === 400) {
+        if (err.response && err.response.status === 401) {
           setError('This onetime URL is invalid or has been expired.');
         } else {
           setError(
@@ -50,6 +38,7 @@ const OneTimeLogin: FC = () => {
               'Please consult the administrator.'
           );
         }
+        return;
       }
       await loginManager.refreshUserInfo(true);
       navigate(redirect || '/home');

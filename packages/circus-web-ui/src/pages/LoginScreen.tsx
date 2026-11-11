@@ -84,7 +84,7 @@ const LoginScreen: React.FC<{}> = props => {
       setLoginSucceeded(true);
       await loginManager.refreshUserInfo(true);
     } catch (err: any) {
-      if (err.response && err.response.status === 400) {
+      if (err.response && err.response.status === 401) {
         setError('Invalid user ID or password.');
       } else {
         setCriticalError(true);

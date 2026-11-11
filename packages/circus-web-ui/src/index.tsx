@@ -47,21 +47,16 @@ import {
   VolumeLoaderFactoryContext
 } from '@utrad-ical/circus-ui-kit';
 import type { ApiCaller } from '#utils/api.ts';
-import { ApiContext, useApi } from '#utils/api.ts';
+import { ApiContext } from '#utils/api.ts';
 import loginManager, { LoginManagerContext } from '#utils/loginManager.ts';
 import './styles/main.less';
 
 const VolumeLoaderFactoryProvider: React.FC<{}> = ({ children }) => {
   const server = useSelector(state => state.loginUser.data?.dicomImageServer);
-  const api = useApi();
-  const token = api?.getToken();
-
+  // The session cookie authenticates both HTTP and WebSocket requests to RS
   const provider = useMemo<VolumeLoaderManager>(
-    () =>
-      server && token
-        ? createVolumeLoaderManager({ server, queryString: `token=${token}` })
-        : (null as any),
-    [server, token]
+    () => (server ? createVolumeLoaderManager({ server }) : (null as any)),
+    [server]
   );
 
   const currentProvider = useRef<VolumeLoaderManager>();
@@ -113,51 +108,14 @@ const TheApp: React.FC<{}> = () => {
   const [manager, setManager] = useState<ReturnType<typeof loginManager>>();
   const [api, setApi] = useState<ApiCaller>();
 
-  const handleStorageEvent = (event: StorageEvent) => {
-    console.log('storage', event.key);
-    switch (event.key) {
-      case 'getSessionStorage': {
-        // Send the current credentials to other tabs via localStorage
-        localStorage.setItem(
-          'transferCredentials',
-          sessionStorage.getItem('tokenCredentials') ?? ''
-        );
-        localStorage.removeItem('transferCredentials');
-        break;
-      }
-      case 'transferCredentials': {
-        // Another tab sent credentials
-        if (!event.newValue) return;
-        if (location.pathname === '/') return;
-        // Save the sent credentials to sessionStorage and recreate loginManger
-        sessionStorage.setItem('tokenCredentials', event.newValue);
-        const manager = loginManager('/', store.dispatch, api =>
-          setApi(() => api!)
-        );
-        setManager(manager);
-        if (manager.restoreApiCaller()) {
-          manager.refreshUserInfo(true);
-        }
-        break;
-      }
-    }
-  };
-
   useEffect(() => {
-    window.addEventListener('storage', handleStorageEvent);
-    if (!sessionStorage.length) {
-      localStorage.setItem('getSessionStorage', 'a new tab has been created');
-      localStorage.removeItem('getSessionStorage');
-    }
-
-    // First-time login management
+    // The login state is kept in the session cookie;
+    // check it by loading the user information
     const manager = loginManager('/', store.dispatch, api =>
       setApi(() => api!)
     );
     setManager(manager);
-    if (manager.restoreApiCaller()) {
-      manager.refreshUserInfo(true);
-    }
+    manager.refreshUserInfo(true);
   }, []);
 
   if (!manager) return null;

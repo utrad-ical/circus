@@ -7,46 +7,21 @@ import { useContext, createContext } from 'react';
 
 export interface ApiCaller {
   (command: string, options?: any, cancelToken?: CancelToken): Promise<any>;
-  getToken: () => string;
   getBaseUrl: () => string;
 }
 
 /**
- * Forms a credential data from an Axios OAuth response.
- * @param res Axios response
+ * The header required by the API server for requests that may change data
+ * (CSRF protection for the session cookie).
  */
-export const formatCredentials = (responseData: any) => ({
-  accessToken: responseData.access_token,
-  refreshToken: responseData.refresh_token,
-  expiresIn: responseData.expires_in,
-  expiresAt: Date.now() + responseData.expires_in * 1000
-});
+export const csrfHeaders = { 'X-Requested-With': 'XMLHttpRequest' };
 
 /**
  * Creates CIRCUS API accessor.
+ * Requests are authenticated with the HttpOnly session cookie,
+ * which the browser sends automatically.
  */
-const createApiCaller = (initialCredentials: any, apiServer: string) => {
-  let credentials = initialCredentials;
-
-  const saveCredentialData = (credentials: any) => {
-    sessionStorage.setItem('tokenCredentials', JSON.stringify(credentials));
-  };
-
-  const tryRefreshToken = async (refreshToken: string) => {
-    const res = await axios.request({
-      method: 'post',
-      url: apiServer + 'login',
-      data: new URLSearchParams({
-        client_id: 'circus-front',
-        client_secret: 'not-a-secret',
-        grant_type: 'refresh_token',
-        refresh_token: refreshToken
-      })
-    });
-    saveCredentialData(formatCredentials(res.data));
-    return formatCredentials(res.data);
-  };
-
+const createApiCaller = (apiServer: string) => {
   const baseURL = apiServer + 'api/';
 
   const api: ApiCaller = async (
@@ -59,15 +34,8 @@ const createApiCaller = (initialCredentials: any, apiServer: string) => {
       if (params.method === 'get') params.method = 'post';
     }
 
-    if (Date.now() > credentials.expiresAt - 60000) {
-      credentials = await tryRefreshToken(credentials.refreshToken);
-    }
-
     try {
-      const headers = {
-        Authorization: `Bearer ${credentials.accessToken}`,
-        ...(params.headers || {})
-      };
+      const headers = { ...csrfHeaders, ...(params.headers || {}) };
 
       let axiosCancelToken = undefined;
       if (cancelToken) {
@@ -102,9 +70,7 @@ const createApiCaller = (initialCredentials: any, apiServer: string) => {
       throw err;
     }
   };
-  api.getToken = () => credentials.accessToken;
   api.getBaseUrl = () => baseURL;
-  saveCredentialData(credentials);
   return api;
 };
 

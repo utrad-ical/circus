@@ -1,13 +1,15 @@
 import axios from 'axios';
 import React, { useContext } from 'react';
 import type { ApiCaller } from './api.ts';
-import createApiCaller, { formatCredentials } from './api.ts';
+import createApiCaller, { csrfHeaders } from './api.ts';
 import type { Dispatch } from 'redux';
 import * as actions from '#store/loginUser.ts';
 import * as searchActions from '#store/searches.ts';
 
 /**
  * Creates a loginManager.
+ * The login state is kept in an HttpOnly session cookie set by the API server,
+ * so it is shared by all tabs and is not visible from JavaScript.
  * @param apiServer API server root string
  * @param dispatch The redux store's dispatch object
  * @param onApiChange Notification callback
@@ -17,16 +19,8 @@ const loginManager = (
   dispatch: Dispatch,
   onApiChange: (api: ApiCaller | null) => void
 ) => {
-  let api: ApiCaller | null = null;
-
-  const restoreApiCaller = () => {
-    const credentials = sessionStorage.getItem('tokenCredentials');
-    if (credentials) {
-      api = createApiCaller(JSON.parse(credentials), apiServer);
-      onApiChange(api);
-      return true;
-    }
-  };
+  const api = createApiCaller(apiServer);
+  onApiChange(api);
 
   const checkServerIsLive = async () => {
     try {
@@ -41,28 +35,34 @@ const loginManager = (
     }
   };
 
-  const tryAuthenticate = async (id: string, password: string) => {
-    const res = await axios.request({
-      method: 'post',
-      url: apiServer + 'login',
-      data: new URLSearchParams({
-        client_id: 'circus-front',
-        client_secret: 'not-a-secret',
-        grant_type: 'password',
-        username: id,
-        password
-      })
+  const startSession = async (
+    data: { username: string; password: string } | { onetime: string }
+  ) => {
+    await axios.post(apiServer + 'api/session', data, {
+      headers: csrfHeaders,
+      withCredentials: true
     });
-    const credentials = formatCredentials(res.data);
-    api = createApiCaller(credentials, apiServer);
-    onApiChange(api);
+  };
+
+  /**
+   * Logs in with a user name and a password.
+   */
+  const tryAuthenticate = async (id: string, password: string) => {
+    await startSession({ username: id, password });
+  };
+
+  /**
+   * Logs in with a onetime password (onetime URL).
+   * This replaces the session of the current user, if any.
+   */
+  const tryOnetimeLogin = async (onetime: string) => {
+    await startSession({ onetime });
   };
 
   /**
    * Loads the user information.
    */
   const refreshUserInfo = async (full = false) => {
-    if (!api) throw new Error('Not logged in');
     dispatch(actions.loginInfoRequest());
     try {
       const result = await api('login-info' + (full ? '/full' : ''), {
@@ -83,19 +83,18 @@ const loginManager = (
   };
 
   const logout = async () => {
-    if (!api) throw new Error('Not logged in');
-    await api('logout');
+    await axios.delete(apiServer + 'api/session', {
+      headers: csrfHeaders,
+      withCredentials: true
+    });
     dispatch(actions.loggedOut());
     dispatch(searchActions.reset());
-    sessionStorage.removeItem('tokenCredentials');
-    api = null;
-    onApiChange(null);
   };
 
   return {
-    restoreApiCaller,
     checkServerIsLive,
     tryAuthenticate,
+    tryOnetimeLogin,
     refreshUserInfo,
     logout
   };

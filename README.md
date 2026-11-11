@@ -29,12 +29,16 @@ See [`compose.yaml`](./compose.yaml) for the available environment variables.
 # Build the images locally and start everything
 COMPOSE_PROFILES=mongo,api,web docker compose up -d --build
 
-# Initialize (or upgrade) the database
-docker compose run --rm api node circus.js migrate
+# Initialize (or upgrade) the database. The API server exits until the
+# database is migrated, so this runs in a one-off container
+docker compose run --rm api circus migrate
 
 # Register a CAD plug-in (Docker image ID without the "sha256:" prefix)
-docker compose run --rm api node circus.js register-cad-plugin <PLUGIN_ID>
+docker compose exec api circus register-cad-plugin <PLUGIN_ID>
 ```
+
+`circus` is the administration command of the `api` container; run `docker compose exec api circus` to see all the available commands.
+When developing CIRCUS locally, use `pnpm circus` instead (e.g., `pnpm circus migrate`).
 
 The default user is `circus` (password: `circus`).
 

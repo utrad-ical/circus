@@ -10,7 +10,7 @@ import type * as circus from '../interface.ts';
 
 const pm2: any = pify(_pm2);
 
-const startScript = 'daemon.js';
+const startScript = 'daemon.ts';
 
 export default function createDaemonController(
   config: circus.Configuration
@@ -33,7 +33,13 @@ export default function createDaemonController(
     return execute(async () => {
       const processList = await pm2.describe(startOptions.name);
       if (processList.length > 0) return;
-      await pm2.start(startScript, { ...startOptions, args });
+      await pm2.start(startScript, {
+        // pm2 runs `.ts` files with bun by default; Node.js runs them
+        // directly (type stripping)
+        interpreter: 'node',
+        ...startOptions,
+        args
+      });
     });
   };
 

@@ -1,7 +1,7 @@
 #!/bin/sh
 # Entrypoint for the circus-api image.
 # Runs under tini (compose `init: true`), then execs the given command
-# (`node server.js` by default).
+# (`node server.ts` by default).
 set -eu
 
 # The host machine's IP address, used by some configuration files
@@ -20,9 +20,9 @@ done
 # Start the CS job manager in the background (managed by the pm2 library,
 # the same way as the "start" button in the admin screen).
 # Only when starting the server, not for one-off commands such as migrate.
-if [ "${AUTO_BOOT_JOB_MANAGER:-0}" = "1" ] && [ "$*" = "node server.js" ]; then
+if [ "${AUTO_BOOT_JOB_MANAGER:-0}" = "1" ] && [ "$*" = "node server.ts" ]; then
   echo "Starting CS job manager..."
-  node /var/circus/packages/circus-cs-core/cui.js start ||
+  node /var/circus/packages/circus-cs-core/cui.ts start ||
     echo "Warning: failed to start CS job manager" >&2
 fi
 

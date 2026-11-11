@@ -25,7 +25,7 @@ export const options = () => {
 export const help = () => {
   return (
     'Create a new plugin-job.\n' +
-    'Usage: node circus register-plugin-job PluginIdOrName ' +
+    'Usage: circus register-plugin-job PluginIdOrName ' +
     '--user=UesrNameOrEmail --priority=Priority SeriesUid1 [SeriesUid2 ...]'
   );
 };

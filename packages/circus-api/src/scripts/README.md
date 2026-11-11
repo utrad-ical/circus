@@ -3,7 +3,7 @@
 This directory contains utility scripts called in command line like:
 
 ```
-$ node circus ulid
+$ pnpm circus ulid
 ```
 
 Each script file should export the following functions:

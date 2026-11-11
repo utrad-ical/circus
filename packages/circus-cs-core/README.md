@@ -6,16 +6,16 @@ This code contains plug-in job manager for the CIRCUS CS project.
 
 ## CUI
 
-The `cui.js` is a utility command-line interface to access various functions of CIRCUS CS Core. The syntax is:
+The `cui.ts` is a utility command-line interface to access various functions of CIRCUS CS Core. The syntax is:
 
 ```
-node cui [subcommand]
+node cui.ts [subcommand]
 ```
 
-Just do `node cui` to see all the available subcommands.
+Just do `node cui.ts` to see all the available subcommands.
 
 ```bash
-$ node cui check-env
+$ node cui.ts check-env
 Plugin working directory      : [OK]
 Docker connection             : [OK]
 MongoDB connection            : [OK]

@@ -47,6 +47,8 @@ RUN rm -rf /var/circus/packages/circus-web-ui/dist
 
 COPY docker/api/circus.config.js /var/circus/circus.config.js
 COPY docker/api/entrypoint.sh /usr/local/bin/circus-entrypoint
+# Administration commands (e.g., `docker compose exec api circus migrate`)
+COPY docker/api/circus /usr/local/bin/circus
 
 ENV TZ=UTC \
     IP=0.0.0.0 \
@@ -59,4 +61,4 @@ WORKDIR /var/circus/packages/circus-api
 EXPOSE 8080
 
 ENTRYPOINT ["circus-entrypoint"]
-CMD ["node", "server.js"]
+CMD ["node", "server.ts"]

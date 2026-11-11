@@ -7,7 +7,7 @@ export const help = () => {
     'Dumps the content of the specified DICOM file.\n' +
     'You can use this to check if a DICOM file is valid\n' +
     'and loadable to the CIRCUS system.\n\n' +
-    'Usage: node circus.js dump-dicom [file]'
+    'Usage: circus dump-dicom [file]'
   );
 };
 

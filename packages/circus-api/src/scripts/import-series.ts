@@ -8,7 +8,7 @@ import isLikeDicom from '../utils/isLikeDicom.ts';
 export const help = () => {
   return (
     'Imports DICOM series from file/directory.\n' +
-    'Usage: node circus.js import-series --domain=DOMAIN [target...]'
+    'Usage: circus import-series --domain=DOMAIN [target...]'
   );
 };
 

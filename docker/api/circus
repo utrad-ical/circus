@@ -1,0 +1,4 @@
+#!/bin/sh
+# Runs a CIRCUS administration command, e.g.:
+#   docker compose exec api circus migrate
+exec node /var/circus/packages/circus-api/circus.ts "$@"

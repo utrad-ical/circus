@@ -12,7 +12,7 @@ export const help = () => {
     'Registers a new CAD plug-in.\n' +
     'The plug-in must be already loaded as a Docker image,\n' +
     'and the image must contain a plugin manifest file.\n\n' +
-    'Usage: node circus.js register-cad-plugin DOCKER_IMAGE_ID'
+    'Usage: circus register-cad-plugin DOCKER_IMAGE_ID'
   );
 };
 

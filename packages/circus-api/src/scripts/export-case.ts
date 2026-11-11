@@ -14,7 +14,7 @@ import type { TaskEventEmitter } from '../createTaskManager.ts';
 export const help = () => {
   return (
     'Export a specified DB case data in the specified format.\n' +
-    'Usage: node circus.js export-case CASEID [CASEID ...]'
+    'Usage: circus export-case CASEID [CASEID ...]'
   );
 };
 

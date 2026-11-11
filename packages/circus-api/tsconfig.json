@@ -5,6 +5,8 @@
   },
   "include": [
     "src/**/*",
+    "server.ts",
+    "circus.ts",
     // Ambient module declarations used by the circus-rs sources
     "../circus-rs/src/typings/ambient.d.ts"
   ]

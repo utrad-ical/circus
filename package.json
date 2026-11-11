@@ -11,6 +11,7 @@
   "packageManager": "pnpm@12.18.0",
   "scripts": {
     "dev": "pnpm --parallel --filter @utrad-ical/circus-api --filter @utrad-ical/circus-web-ui run dev",
+    "circus": "node packages/circus-api/circus.ts",
     "test": "node --env-file-if-exists=.env --test --test-force-exit --test-concurrency=1 --test-timeout=10000 \"packages/*/src/**/*.test.ts\"",
     "build": "pnpm -r --if-present run build",
     "lint": "oxlint",

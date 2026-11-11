@@ -16,7 +16,7 @@ const useInterval = (callback: () => void, intervalMs: number | null) => {
       const id = setInterval(tick, intervalMs);
       return () => clearInterval(id);
     }
-  }, [intervalMs, savedCallback]);
+  }, [intervalMs]);
 };
 
 export default useInterval;

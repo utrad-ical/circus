@@ -14,8 +14,8 @@ export const useErrorMessage = (): [
     setMessage(message);
   }, []);
 
-  return [
-    message ? <pre className="alert alert-danger">{message}</pre> : undefined,
-    setError
-  ];
+  const element = message ? (
+    <pre className="alert alert-danger">{message}</pre>
+  ) : undefined;
+  return [element, setError];
 };

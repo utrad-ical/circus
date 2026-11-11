@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
     };
   };
 
-  let priorityCounter = 0;
+  const priorityCounter = 0;
   const setRotations: (() => void)[] = [];
   const dumpStates: (() => void)[] = [];
   const sampleStates: (() => void)[] = [];

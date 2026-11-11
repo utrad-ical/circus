@@ -29,7 +29,12 @@ module.exports = {
     setupMiddlewares: (middlewares, devServer) => {
       devServer.app.get('/data-list{/*dir}', (req, res) => {
         const dir = path.join(dataDir, ...(req.params.dir ?? []));
-        if (!dir.startsWith(dataDir)) return res.status(400).end();
+        // Reject paths outside `data/` (a string prefix check is not enough,
+        // e.g., a sibling directory named `database`)
+        const relative = path.relative(dataDir, dir);
+        if (relative.startsWith('..') || path.isAbsolute(relative)) {
+          return res.status(400).end();
+        }
         fs.readdir(dir, (err, files) =>
           err ? res.status(404).end() : res.json(files)
         );

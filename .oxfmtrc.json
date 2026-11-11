@@ -4,11 +4,9 @@
   "trailingComma": "none",
   "arrowParens": "avoid",
   "printWidth": 80,
-  "sortPackageJson": false,
   "ignorePatterns": [
     "package.json",
     "package-lock.json",
-    "node_modules",
     "*glyphs.less",
     "*glyphs.css"
   ]

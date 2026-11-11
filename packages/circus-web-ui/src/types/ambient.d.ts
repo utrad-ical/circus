@@ -4,3 +4,6 @@ declare module 'styled-components';
 declare module 'lodash.get';
 declare module 'gl-matrix';
 declare module 'jpeg-lossless-decoder-js';
+
+// Stylesheets imported for their side effects (bundled by webpack)
+declare module '*.less';

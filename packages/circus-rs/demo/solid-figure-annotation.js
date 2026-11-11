@@ -35,10 +35,14 @@ document.addEventListener('DOMContentLoaded', () => {
     config.partialVolumeDescriptor
   );
 
-  const volumeLoader = new rs.RsVolumeLoader({
+  const wsClient = new rs.WebSocketClient(
+    config.server.replace(/^http/, 'ws') + '/ws/volume'
+  );
+  const volumeLoader = new rs.RsProgressiveVolumeLoader({
     seriesUid: config.seriesUid,
     partialVolumeDescriptor: partialVolumeDescriptor,
-    rsHttpClient
+    rsHttpClient,
+    transferConnectionFactory: rs.createTransferConnectionFactory(wsClient)
   });
   const imageSource = new config.sourceClass({
     volumeLoader,

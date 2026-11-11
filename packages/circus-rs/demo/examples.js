@@ -24,10 +24,15 @@ const partialVolumeDescriptor = toPartialVolumeDescriptor(
   config.partialVolumeDescriptor
 );
 
-const volumeLoader = new rs.RsVolumeLoader({
+// Voxel data are transferred via WebSocket
+const wsClient = new rs.WebSocketClient(
+  config.server.replace(/^http/, 'ws') + '/ws/volume'
+);
+const volumeLoader = new rs.RsProgressiveVolumeLoader({
   seriesUid: config.seriesUid,
   partialVolumeDescriptor: partialVolumeDescriptor,
-  rsHttpClient
+  rsHttpClient,
+  transferConnectionFactory: rs.createTransferConnectionFactory(wsClient)
 });
 const imageSource = new config.sourceClass({
   volumeLoader,
@@ -378,60 +383,6 @@ comp.addAnnotation(fig);
 comp.annotationUpdated();
 
 /*--
-@title Benchmark of ImageSource
-This example directly invokes various types of ImageSource and sees their performance.
---*/
-
-const cfg = { seriesUid, client: new rs.RsHttpClient(config.server) };
-
-const dynSrc = new rs.DynamicImageSource(cfg);
-const volSrc = new rs.RawVolumeImageSource(cfg);
-
-console.log('Waiting for ready state...');
-Promise.all([dynSrc.ready(), volSrc.ready()])
-  .then(() => {
-    return benchmark(dynSrc);
-  })
-  .then(() => {
-    return benchmark(volSrc);
-  });
-
-function benchmark(src) {
-  const iteration = 100;
-  let count = 0;
-
-  const vs = {
-    window: { width: 100, level: 0 },
-    section: {
-      origin: [0, 0, 100],
-      xAxis: [512, 0, 0],
-      yAxis: [0, 512, 0]
-    }
-  };
-
-  console.log(`Measuring ${src.constructor.name}...`);
-  const start = performance.now();
-
-  function loop() {
-    return src.draw(viewer, vs).then(() => {
-      count++;
-      if (count < iteration) return loop();
-      else {
-        return (time = performance.now() - start);
-      }
-    });
-  }
-
-  return loop().then(time => {
-    const fps = (1000 / time) * iteration;
-    console.log(
-      `${src.constructor.name} took ${time} ms for ${iteration} iterations (${fps} fps)`
-    );
-    return time;
-  });
-}
-
-/*--
 @title VR common
 @hidden
 --*/
@@ -453,13 +404,17 @@ div2.parentNode.appendChild(vrControl);
 // Setup volume loader
 const rsHttpClient = new rs.RsHttpClient(config.server);
 const cache = new rs.IndexedDbVolumeCache();
-const volumeLoader = new rs.RsVolumeLoader({
+const wsClient = new rs.WebSocketClient(
+  config.server.replace(/^http/, 'ws') + '/ws/volume'
+);
+const volumeLoader = new rs.RsProgressiveVolumeLoader({
   rsHttpClient,
   seriesUid: config.seriesUid,
   partialVolumeDescriptor: toPartialVolumeDescriptor(
     config.partialVolumeDescriptor
   ),
-  cache
+  cache,
+  transferConnectionFactory: rs.createTransferConnectionFactory(wsClient)
 });
 
 // Create transfer function (ex. extracting blood vessels)

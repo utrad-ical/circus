@@ -87,7 +87,7 @@ $('example-run').addEventListener('click', () => {
     const config = {
       seriesUid: $('seriesUid').value,
       partialVolumeDescriptor: $('partialVolumeDescriptor').value,
-      server: $('server').value
+      server: $('server').value || location.origin + '/rs'
     };
     localStorage.setItem('rs-demo-save', JSON.stringify(config));
 

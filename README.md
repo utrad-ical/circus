@@ -37,7 +37,7 @@ docker compose exec api circus register-cad-plugin <PLUGIN_ID>
 ```
 
 `circus` is the administration command of the `api` container; run `docker compose exec api circus` to see all the available commands.
-When developing CIRCUS locally, run `node circus.ts` in `packages/circus-api` instead.
+When developing CIRCUS locally, use `pnpm circus` instead (e.g., `pnpm circus migrate`).
 
 The default user is `circus` (password: `circus`).
 

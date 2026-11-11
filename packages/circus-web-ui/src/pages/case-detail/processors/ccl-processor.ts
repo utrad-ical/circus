@@ -121,7 +121,9 @@ const cclVoxelProcessor: VoxelLabelProcessor<
     labels: new Array(0)
   };
   if (window.Worker) {
-    const myWorker = new Worker(new URL('./ccl-worker.ts', import.meta.url));
+    const myWorker = new Worker(new URL('./ccl-worker.ts', import.meta.url), {
+      type: 'module'
+    });
     myWorker.postMessage({
       input,
       width,

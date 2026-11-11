@@ -27,7 +27,9 @@ const hfVoxelProcessor: VoxelLabelProcessor<
   } = props;
 
   if (window.Worker) {
-    const myWorker = new Worker(new URL('./hf-worker.ts', import.meta.url));
+    const myWorker = new Worker(new URL('./hf-worker.ts', import.meta.url), {
+      type: 'module'
+    });
     myWorker.postMessage({
       input,
       width,

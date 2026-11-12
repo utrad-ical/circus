@@ -1,0 +1,77 @@
+.calendar {
+  display: inline-block;
+  min-width: 250px;
+  &.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25em;
+}
+
+.headerLabel {
+  padding: 0.15em 0.6em;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: bold;
+  cursor: pointer;
+  &:hover:not(:disabled) {
+    background-color: color-mix(in oklch, var(--bg), var(--text) 8%);
+  }
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  color: var(--muted);
+  font-size: 0.85em;
+  text-align: center;
+}
+
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.compact {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.25em;
+  padding: 0.25em 0;
+}
+
+.cell {
+  padding: 0.3em 0;
+  border: 1px solid transparent;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  &:hover {
+    background-color: color-mix(in oklch, var(--bg), var(--text) 8%);
+  }
+  &.wide {
+    padding: 0.5em 0;
+  }
+  &.outside {
+    color: var(--muted);
+  }
+  &.today {
+    border-color: var(--theme);
+  }
+  &.selected {
+    background-color: var(--theme);
+    color: var(--theme-text);
+  }
+}

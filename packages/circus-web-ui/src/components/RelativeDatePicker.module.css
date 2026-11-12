@@ -1,0 +1,20 @@
+.editor {
+  padding: 10px;
+  white-space: nowrap;
+  min-width: 200px;
+}
+
+.modes {
+  display: flex;
+  > button + button {
+    margin-inline-start: -1px;
+  }
+}
+
+.switch {
+  margin-top: 10px;
+}
+
+.relative input {
+  width: 80px;
+}

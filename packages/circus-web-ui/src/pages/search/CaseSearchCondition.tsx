@@ -2,7 +2,7 @@ import { multiSelectEditor } from '#components/MultiSelect.tsx';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import DateRangePicker, {
   dateRangeToMongoQuery
-} from '@smikitky/rb-components/lib/DateRangePicker';
+} from '#components/DateRangePicker.tsx';
 import { modalities } from '../../modalities.ts';
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import ConditionFrame from './ConditionFrame.tsx';

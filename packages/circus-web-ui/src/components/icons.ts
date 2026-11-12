@@ -17,6 +17,7 @@ import materialCheckBox from '@material-symbols/svg-600/outlined/check_box.svg?i
 import materialCheckBoxOutlineBlank from '@material-symbols/svg-600/outlined/check_box_outline_blank.svg?icon';
 import materialCheckCircle from '@material-symbols/svg-600/outlined/check_circle.svg?icon';
 import materialChecklist from '@material-symbols/svg-600/outlined/checklist.svg?icon';
+import materialChevronLeft from '@material-symbols/svg-600/outlined/chevron_left.svg?icon';
 import materialChevronRight from '@material-symbols/svg-600/outlined/chevron_right.svg?icon';
 import materialClose from '@material-symbols/svg-600/outlined/close.svg?icon';
 import materialContentCopy from '@material-symbols/svg-600/outlined/content_copy.svg?icon';
@@ -157,6 +158,7 @@ const icons: { [name: string]: SvgIconData } = {
   'material-check_box_outline_blank': materialCheckBoxOutlineBlank,
   'material-check_circle': materialCheckCircle,
   'material-checklist': materialChecklist,
+  'material-chevron_left': materialChevronLeft,
   'material-chevron_right': materialChevronRight,
   'material-close': materialClose,
   'material-content_copy': materialContentCopy,

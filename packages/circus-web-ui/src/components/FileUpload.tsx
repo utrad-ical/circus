@@ -3,7 +3,7 @@ import React, { useState, useRef } from 'react';
 import { ProgressBar } from './react-bootstrap.ts';
 import { FileDroppable } from './FileDroppable.tsx';
 import useShowMessage from '#utils/useShowMessage.ts';
-import * as modal from '@smikitky/rb-components/lib/modal';
+import * as modal from '#components/dialogs.tsx';
 import styled from 'styled-components';
 import { useApi } from '#utils/api.ts';
 import { withCommas } from '#utils/util.ts';

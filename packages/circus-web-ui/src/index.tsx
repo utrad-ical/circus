@@ -1,4 +1,5 @@
 import Application from '#pages/Application.tsx';
+import { DialogHost } from '#components/dialogs.tsx';
 import React, { StrictMode, useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import {
@@ -142,6 +143,7 @@ const TheApp: React.FC<{}> = () => {
             <ReduxStoreProvider store={store}>
               <VolumeLoaderFactoryProvider>
                 <AppInner manager={manager} />
+                <DialogHost />
               </VolumeLoaderFactoryProvider>
             </ReduxStoreProvider>
           </ApiContext.Provider>

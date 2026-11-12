@@ -1,6 +1,6 @@
 import Button from '#components/Button.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
-import { confirm, modal } from '@smikitky/rb-components/lib/modal';
+import { confirm, modal } from '#components/dialogs.tsx';
 import Select from '#components/Select.tsx';
 import type { PartialVolumeDescriptor } from '@utrad-ical/circus-rs';
 import { describePartialVolumeDescriptor } from '@utrad-ical/circus-rs';

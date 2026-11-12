@@ -1,5 +1,5 @@
 import Button from '#components/Button.tsx';
-import { confirm } from '@smikitky/rb-components/lib/modal';
+import { confirm } from '#components/dialogs.tsx';
 import CaseExportModal from '#components/CaseExportModal.tsx';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
 import DataGrid from '#components/DataGrid.tsx';

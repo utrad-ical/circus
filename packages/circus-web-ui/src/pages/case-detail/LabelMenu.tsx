@@ -1,6 +1,6 @@
 import Button, { type ButtonProps } from '#components/Button.tsx';
 import { ColorPalette } from '#components/ColorPicker.tsx';
-import { alert, prompt } from '@smikitky/rb-components/lib/modal';
+import { alert, prompt } from '#components/dialogs.tsx';
 import Slider from '#components/Slider.tsx';
 import generateUniqueId from '#utils/generateUniqueId.ts';
 import type { Viewer } from '@utrad-ical/circus-rs';

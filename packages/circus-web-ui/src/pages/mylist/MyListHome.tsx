@@ -1,5 +1,5 @@
 import Button from '#components/Button.tsx';
-import { confirm, prompt } from '@smikitky/rb-components/lib/modal';
+import { confirm, prompt } from '#components/dialogs.tsx';
 import Icon from '#components/Icon.tsx';
 import MyListArray from './MyListArray.tsx';
 import React from 'react';

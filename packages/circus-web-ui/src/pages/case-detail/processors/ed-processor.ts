@@ -1,4 +1,4 @@
-import { alert } from '@smikitky/rb-components/lib/modal';
+import { alert } from '#components/dialogs.tsx';
 import { dilation, erosion } from '@utrad-ical/circus-rs';
 import type {
   MorphologicalImageProcessingResults,

@@ -1,6 +1,6 @@
 import Button from '#components/Button.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
-import { confirm } from '@smikitky/rb-components/lib/modal';
+import { confirm } from '#components/dialogs.tsx';
 import Icon from '#components/Icon.tsx';
 import {
   ListGroup,

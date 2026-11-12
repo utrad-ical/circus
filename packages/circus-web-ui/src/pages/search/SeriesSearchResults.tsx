@@ -1,4 +1,4 @@
-import { confirm } from '@smikitky/rb-components/lib/modal';
+import { confirm } from '#components/dialogs.tsx';
 import type {
   DataGridColumnDefinition,
   DataGridRenderer

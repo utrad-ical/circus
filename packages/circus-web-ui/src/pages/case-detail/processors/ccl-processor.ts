@@ -1,4 +1,4 @@
-import { alert } from '@smikitky/rb-components/lib/modal';
+import { alert } from '#components/dialogs.tsx';
 import type { LabelingResults3D } from '@utrad-ical/circus-rs';
 import { CCL3D26 as CCL26, CCL3D6 as CCL6 } from '@utrad-ical/circus-rs';
 import type { VoxelLabelProcessor } from './performLabelCreatingVoxelProcessing.ts';

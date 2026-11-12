@@ -1,4 +1,4 @@
-import { alert } from '@smikitky/rb-components/lib/modal';
+import { alert } from '#components/dialogs.tsx';
 import type { LabelingResults3D } from '@utrad-ical/circus-rs';
 import { holeFilling2D, holeFilling3D } from '@utrad-ical/circus-rs';
 import type { VoxelLabelProcessor } from './performLabelCreatingVoxelProcessing.ts';

@@ -49,15 +49,24 @@
   }
 }
 
-.nextPrevious {
+.menu .nextPrevious {
   display: flex;
   border-bottom: 1px solid gray;
   > a {
     flex: 0 0 50%;
-    text-align: center;
-    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3em;
     color: inherit;
     text-decoration: none;
+    user-select: none;
+    &:hover,
+    &:focus-visible {
+      background-color: var(--theme);
+      color: var(--theme-text);
+      text-decoration: none;
+    }
   }
   .disabled {
     opacity: 0.5;

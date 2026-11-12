@@ -3,6 +3,7 @@ import React, { Fragment } from 'react';
 import type { CircusIconDefinition } from '#components/BodyPartIcon.tsx';
 import BodyPartIcon from '#components/BodyPartIcon.tsx';
 import IconEditor from './IconEditor.tsx';
+import CopyToClipboardButton from '#components/CopyToClipboardButton.tsx';
 import JsonEditor from './JsonEditor.tsx';
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
@@ -39,7 +40,13 @@ const listColumns: Record<PluginType, DataGridColumnDefinition[]> = {
       key: 'pluginId',
       caption: 'Plug-in ID',
       renderer: ({ value: plugin }) => (
-        <Fragment>{plugin.pluginId.substring(0, 12)}</Fragment>
+        <span title={plugin.pluginId}>
+          {plugin.pluginId.substring(0, 12)}
+          {/* Prevents the row click from opening the editor */}
+          <span onClick={ev => ev.stopPropagation()}>
+            <CopyToClipboardButton bsSize="xs" string={plugin.pluginId} />
+          </span>
+        </span>
       )
     },
     {

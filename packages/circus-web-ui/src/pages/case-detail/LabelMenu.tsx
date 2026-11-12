@@ -8,11 +8,8 @@ import type { DicomVolumeMetadata } from '@utrad-ical/circus-rs';
 import type { OrientationString } from '@utrad-ical/circus-rs';
 import Icon from '#components/Icon.tsx';
 import MenuItem from '#components/MenuItem.tsx';
-import {
-  OverlayTrigger,
-  Popover,
-  SplitButton
-} from '#components/react-bootstrap.ts';
+import { OverlayTrigger, Popover } from '#components/react-bootstrap.ts';
+import SplitButton from '#components/SplitButton.tsx';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
@@ -371,16 +368,15 @@ const LabelMenu: React.FC<{
       />
       &thinsp;
       <SplitButton
-        id="add-label"
-        bsSize="xs"
-        bsStyle="primary"
+        size="xsmall"
+        variant="primary"
         title={
           <span>
             Add <Icon icon={labelTypes[newLabelType].icon} />
           </span>
         }
         onClick={() => addLabel(newLabelType)}
-        pullRight
+        align="end"
         disabled={disabled}
       >
         {Object.keys(labelTypes).map((type, i) => {

@@ -4,7 +4,6 @@
 
 export { default as Alert } from 'react-bootstrap/lib/Alert';
 
-export { default as SplitButton } from 'react-bootstrap/lib/SplitButton';
 export { default as ButtonGroup } from 'react-bootstrap/lib/ButtonGroup';
 export { default as ButtonToolbar } from 'react-bootstrap/lib/ButtonToolbar';
 
@@ -26,7 +25,6 @@ export { default as ProgressBar } from 'react-bootstrap/lib/ProgressBar';
 export { default as OverlayTrigger } from 'react-bootstrap/lib/OverlayTrigger';
 export { default as Tooltip } from 'react-bootstrap/lib/Tooltip';
 export { default as Popover } from 'react-bootstrap/lib/Popover';
-export { default as Dropdown } from 'react-bootstrap/lib/Dropdown';
 
 export { default as Tabs } from 'react-bootstrap/lib/Tabs';
 export { default as Tab } from 'react-bootstrap/lib/Tab';

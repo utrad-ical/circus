@@ -63,7 +63,7 @@ const MyListDropdown: React.FC<{
   return (
     <DropdownButton
       id="series-mylist-dropdown"
-      size="sm"
+      size="small"
       title={<Icon icon="material-folder_open" />}
     >
       {myLists.length > 0 &&

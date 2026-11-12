@@ -10,12 +10,8 @@ export default defineConfig({
   publicDir: false,
   build: {
     sourcemap: true,
-    // The oldest browser versions that support every CSS feature we use
-    // (as of 2026-11, `contrast-color()` sets the bar). Raise them when using
-    // a newer feature. Do not lower them: the minifier would then rewrite
-    // `light-dark()` into a polyfill that does not work with `color-scheme`
-    // set from JS
-    cssTarget: ['chrome147', 'edge147', 'firefox146', 'safari26']
+    // Minimum versions to support contrast-color() and anchor positioning
+    cssTarget: ['chrome147', 'edge147', 'firefox147', 'safari26']
   },
   optimizeDeps: {
     // rb-components is published as .tsx sources, which Vite does not

@@ -1,0 +1,27 @@
+.trigger {
+  anchor-name: var(--dropdown-anchor);
+}
+
+.caret {
+  font-size: 0.8em;
+  margin-inline: -0.25em -0.3em;
+}
+
+.menu {
+  position-anchor: var(--dropdown-anchor);
+  position-area: block-end span-inline-end;
+  position-try-fallbacks: flip-block;
+  inset: auto;
+  margin: 2px 0;
+  min-width: 160px;
+  padding: 4px 0;
+  border: 1px solid var(--border);
+  background-color: var(--bg);
+  color: var(--text);
+  box-shadow: 0 4px 8px rgb(0 0 0 / 0.15);
+  list-style: none;
+}
+
+.end {
+  position-area: block-end span-inline-start;
+}

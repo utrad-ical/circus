@@ -75,9 +75,9 @@ const Operation: DataGridRenderer<any> = props => {
       </Button>
       &thinsp;
       <DropdownButton
-        size="sm"
+        size="small"
         title={<Icon icon="material-more_horiz" />}
-        placement="bottom-end"
+        align="end"
         noCaret
         onSelect={handleMenuClick}
       >

@@ -6,20 +6,15 @@ import type { PlaneFigureOption } from '@utrad-ical/circus-rs';
 import type { ReferenceValueOption } from '@utrad-ical/circus-rs';
 import type { InterpolationMode } from '@utrad-ical/circus-rs';
 import Icon from '#components/Icon.tsx';
-import {
-  Dropdown,
-  Modal,
-  OverlayTrigger,
-  SplitButton,
-  Tooltip
-} from '#components/react-bootstrap.ts';
-import MenuItem from '#components/MenuItem.tsx';
+import DropdownButton from '#components/DropdownButton.tsx';
+import MenuItem, { type MenuItemProps } from '#components/MenuItem.tsx';
+import { Modal, OverlayTrigger, Tooltip } from '#components/react-bootstrap.ts';
+import SplitButton from '#components/SplitButton.tsx';
 import type {
   ToolOptions,
   ToolOptionSetter
 } from '#pages/case-detail/useToolbar.ts';
 import React, { useState } from 'react';
-import type { MenuItemProps } from 'react-bootstrap';
 import styled from 'styled-components';
 import type { WindowPreset } from '#types/Project.ts';
 import useKeyboardShortcut from '#utils/useKeyboardShortcut.ts';
@@ -363,33 +358,30 @@ const ToolBar: React.FC<{
         shortcut="E"
         disabled={!brushEnabled || disabled}
       />
-      <Dropdown
+      <DropdownButton
         id="line-width-dropdown"
-        className="line-width-shrinkselect"
         disabled={!brushEnabled || disabled}
+        title={<span className="line-width">{toolOptions.lineWidth}</span>}
       >
-        <Dropdown.Toggle>{toolOptions.lineWidth}</Dropdown.Toggle>
-        <Dropdown.Menu>
-          {widthOptions.map(lineWidth => {
-            return (
-              <MenuItem
-                key={lineWidth}
-                eventKey={lineWidth}
-                onSelect={lineWidth =>
-                  setToolOption('lineWidth', Number(lineWidth))
-                }
-              >
-                {lineWidth}
-              </MenuItem>
-            );
-          })}
-          <MenuItem header>
-            <ShortcutBox>
-              <kbd>Q</kbd>: Wider,&nbsp;<kbd>A</kbd>: Narrower
-            </ShortcutBox>
-          </MenuItem>
-        </Dropdown.Menu>
-      </Dropdown>
+        {widthOptions.map(lineWidth => {
+          return (
+            <MenuItem
+              key={lineWidth}
+              eventKey={lineWidth}
+              onSelect={lineWidth =>
+                setToolOption('lineWidth', Number(lineWidth))
+              }
+            >
+              {lineWidth}
+            </MenuItem>
+          );
+        })}
+        <MenuItem header>
+          <ShortcutBox>
+            <kbd>Q</kbd>: Wider,&nbsp;<kbd>A</kbd>: Narrower
+          </ShortcutBox>
+        </MenuItem>
+      </DropdownButton>
       <ToolButton
         name="bucket"
         icon="circus-bucket"
@@ -423,126 +415,119 @@ const ToolBar: React.FC<{
         disabled={!brushEnabled || !wandEnabled || disabled}
       />
       &thinsp;
-      <Dropdown id="layout-dropdown" disabled={!layoutEnabled || disabled}>
-        <Dropdown.Toggle>
-          <Icon icon="circus-layout-four" />
-        </Dropdown.Toggle>
-        <Dropdown.Menu>
-          {layoutOptions.map(l => {
-            return (
-              <MenuItemWithShortcut
-                key={l.key}
-                eventKey={l.key}
-                shortcut={l.shortcut}
-                onClick={() => onChangeLayoutKind(l.key)}
-              >
-                <Icon icon={l.icon} />
-                {l.caption}
-              </MenuItemWithShortcut>
-            );
-          })}
-        </Dropdown.Menu>
-      </Dropdown>
+      <DropdownButton
+        id="layout-dropdown"
+        disabled={!layoutEnabled || disabled}
+        title={<Icon icon="circus-layout-four" />}
+      >
+        {layoutOptions.map(l => {
+          return (
+            <MenuItemWithShortcut
+              key={l.key}
+              eventKey={l.key}
+              shortcut={l.shortcut}
+              onClick={() => onChangeLayoutKind(l.key)}
+            >
+              <Icon icon={l.icon} />
+              {l.caption}
+            </MenuItemWithShortcut>
+          );
+        })}
+      </DropdownButton>
       &thinsp;
-      <Dropdown id="view-options-dropdown" disabled={disabled}>
-        <Dropdown.Toggle>
-          <Icon icon="circus-tool" />
-        </Dropdown.Toggle>
-        <Dropdown.Menu>
-          <MenuItemWithShortcut
-            shortcut=";"
-            onClick={handleToggleReferenceLine}
-          >
-            <CheckMark checked={!!viewOptions.showReferenceLine} />
-            Show reference line
-          </MenuItemWithShortcut>
-          <MenuItemWithShortcut
-            shortcut="F"
-            onClick={handleToggleInterpolationMode}
-          >
-            <CheckMark
-              checked={viewOptions.interpolationMode === 'trilinear'}
-            />
-            Trilinear filtering
-          </MenuItemWithShortcut>
-          <MenuItem divider />
-          <MenuItem header>Scroll bars visibility</MenuItem>
-          {scrollbarVisibilityOptions.map(l => {
-            return (
-              <MenuItem
-                key={l.key}
-                eventKey={l.key}
-                onSelect={handleToggleScrollbar('visibility')}
-              >
-                <CheckMark
-                  checked={viewOptions.scrollbar?.visibility === l.key}
-                />
-                {l.caption}
-              </MenuItem>
-            );
-          })}
-          {viewOptions.scrollbar?.visibility &&
-            viewOptions.scrollbar.visibility !== 'none' && (
-              <>
-                <MenuItem header>Scroll bars size</MenuItem>
-                {scrollbarSizeOptions.map(l => {
-                  return (
-                    <MenuItem
-                      key={l.key}
-                      eventKey={l.key}
-                      onSelect={handleToggleScrollbar('size')}
-                    >
-                      <CheckMark
-                        checked={viewOptions.scrollbar?.size === l.key}
-                      />
-                      {l.caption}
-                    </MenuItem>
-                  );
-                })}
-                <MenuItem header>Scroll bars position</MenuItem>
-                {scrollbarPositionOptions.map(l => {
-                  return (
-                    <MenuItem
-                      key={l.key}
-                      eventKey={l.key}
-                      onSelect={handleToggleScrollbar('position')}
-                    >
-                      <CheckMark
-                        checked={viewOptions.scrollbar?.position === l.key}
-                      />
-                      {l.caption}
-                    </MenuItem>
-                  );
-                })}
-              </>
-            )}
-          <MenuItem divider />
-          <MenuItem header>Shape resizing behavior</MenuItem>
-          <MenuItem onClick={handleToggleLockMaintainAspectRatio}>
-            <CheckMark checked={modifierKeyBehaviors.lockMaintainAspectRatio} />
-            Lock Shift + Drag to maintain aspect ratio
-          </MenuItem>
-          <MenuItem onClick={handleToggleLockFixCenterOfGravity}>
-            <CheckMark checked={modifierKeyBehaviors.lockFixCenterOfGravity} />
-            Lock Ctrl + Drag to fix center of gravity
-          </MenuItem>
-          <MenuItem header>Number of slices for 2D shape</MenuItem>
-          {zDimmedThresholdOptions.map(l => {
-            return (
-              <MenuItem
-                key={l.key}
-                eventKey={l.key}
-                onSelect={handleChangeZDimmedThreshold}
-              >
-                <CheckMark
-                  checked={planeFigureOption.zDimmedThreshold === l.value}
-                />
-                {l.caption}
-              </MenuItem>
-            );
-          })}
-        </Dropdown.Menu>
-      </Dropdown>
+      <DropdownButton
+        id="view-options-dropdown"
+        disabled={disabled}
+        title={<Icon icon="circus-tool" />}
+      >
+        <MenuItemWithShortcut shortcut=";" onClick={handleToggleReferenceLine}>
+          <CheckMark checked={!!viewOptions.showReferenceLine} />
+          Show reference line
+        </MenuItemWithShortcut>
+        <MenuItemWithShortcut
+          shortcut="F"
+          onClick={handleToggleInterpolationMode}
+        >
+          <CheckMark checked={viewOptions.interpolationMode === 'trilinear'} />
+          Trilinear filtering
+        </MenuItemWithShortcut>
+        <MenuItem divider />
+        <MenuItem header>Scroll bars visibility</MenuItem>
+        {scrollbarVisibilityOptions.map(l => {
+          return (
+            <MenuItem
+              key={l.key}
+              eventKey={l.key}
+              onSelect={handleToggleScrollbar('visibility')}
+            >
+              <CheckMark
+                checked={viewOptions.scrollbar?.visibility === l.key}
+              />
+              {l.caption}
+            </MenuItem>
+          );
+        })}
+        {viewOptions.scrollbar?.visibility &&
+          viewOptions.scrollbar.visibility !== 'none' && (
+            <>
+              <MenuItem header>Scroll bars size</MenuItem>
+              {scrollbarSizeOptions.map(l => {
+                return (
+                  <MenuItem
+                    key={l.key}
+                    eventKey={l.key}
+                    onSelect={handleToggleScrollbar('size')}
+                  >
+                    <CheckMark
+                      checked={viewOptions.scrollbar?.size === l.key}
+                    />
+                    {l.caption}
+                  </MenuItem>
+                );
+              })}
+              <MenuItem header>Scroll bars position</MenuItem>
+              {scrollbarPositionOptions.map(l => {
+                return (
+                  <MenuItem
+                    key={l.key}
+                    eventKey={l.key}
+                    onSelect={handleToggleScrollbar('position')}
+                  >
+                    <CheckMark
+                      checked={viewOptions.scrollbar?.position === l.key}
+                    />
+                    {l.caption}
+                  </MenuItem>
+                );
+              })}
+            </>
+          )}
+        <MenuItem divider />
+        <MenuItem header>Shape resizing behavior</MenuItem>
+        <MenuItem onClick={handleToggleLockMaintainAspectRatio}>
+          <CheckMark checked={modifierKeyBehaviors.lockMaintainAspectRatio} />
+          Lock Shift + Drag to maintain aspect ratio
+        </MenuItem>
+        <MenuItem onClick={handleToggleLockFixCenterOfGravity}>
+          <CheckMark checked={modifierKeyBehaviors.lockFixCenterOfGravity} />
+          Lock Ctrl + Drag to fix center of gravity
+        </MenuItem>
+        <MenuItem header>Number of slices for 2D shape</MenuItem>
+        {zDimmedThresholdOptions.map(l => {
+          return (
+            <MenuItem
+              key={l.key}
+              eventKey={l.key}
+              onSelect={handleChangeZDimmedThreshold}
+            >
+              <CheckMark
+                checked={planeFigureOption.zDimmedThreshold === l.value}
+              />
+              {l.caption}
+            </MenuItem>
+          );
+        })}
+      </DropdownButton>
       {(active === 'wand' || active === 'wandEraser') && (
         <StyledSpanWandOption>
           <label>
@@ -601,16 +586,13 @@ const ToolBar: React.FC<{
 const StyledDiv = styled.div`
   flex: none;
   background-color: #333;
-  button {
+  button:not([role='menuitem']) {
     height: 40px;
     padding: 0 7px;
     font-size: 170%;
   }
-  .line-width-shrinkselect > button {
-    font-size: 100%;
-  }
-  .layout-shrinkselect .dropdown-toggle .caption {
-    display: none;
+  .line-width {
+    font-size: 60%;
   }
   .checkmark {
     display: inline-block;
@@ -692,9 +674,8 @@ const ToolButton: React.FC<{
     return (
       <OverlayTrigger overlay={toolTip} placement="top" delayShow={200}>
         <SplitButton
-          id={`toolbutton-${name}`}
           title={iconSpan}
-          bsStyle={style}
+          variant={style}
           onClick={handleClick}
           disabled={disabled}
         >
@@ -729,6 +710,7 @@ const MenuItemWithShortcut: React.FC<
 };
 
 const ShortcutBox = styled.div`
+  flex: 1;
   display: flex;
   justify-content: space-between;
   kbd {

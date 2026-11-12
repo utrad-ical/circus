@@ -1,214 +1,142 @@
-import React, { useState } from 'react';
-import styled, { css } from 'styled-components';
 import classnames from 'classnames';
-
-import type { Placement } from '@floating-ui/react';
-import {
-  autoUpdate,
-  flip,
-  offset,
-  shift,
-  useClick,
-  useDismiss,
-  useFloating,
-  useInteractions,
-  useRole
-} from '@floating-ui/react';
+import React, {
+  type CSSProperties,
+  type FC,
+  type FocusEvent,
+  type KeyboardEvent,
+  type MouseEvent,
+  type ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
+import moveMenuFocus from '#utils/menuKeyboard.ts';
+import Button, { type ButtonSize, type ButtonVariant } from './Button.tsx';
+import styles from './DropdownButton.module.css';
 import Icon from './Icon.tsx';
+import { MenuContext } from './MenuItem.tsx';
 
-type Variant = 'default' | 'primary' | 'link' | 'danger';
-type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+let counter = 0;
 
-const sizeMap: Record<Size, string> = {
-  xs: '0.9em',
-  sm: '1em',
-  md: '1.25em',
-  lg: '1.5em',
-  xl: '2em'
-};
+const enabledItems = (menu: HTMLElement | null) =>
+  Array.from(
+    menu?.querySelectorAll<HTMLElement>(
+      '[role="menuitem"]:not([aria-disabled="true"])'
+    ) ?? []
+  );
 
-const paddingMap: Record<Size, string> = {
-  xs: '0.1145rem 0.5rem',
-  sm: '0.375rem 0.75rem;',
-  md: '0.375rem 1rem;',
-  lg: '0.5rem 0.6em',
-  xl: '3rem 1.3em'
-};
-
-const variantStyles: Record<Variant, any> = {
-  default: css`
-    background-color: white;
-    color: #111111;
-    border: 1px solid silver;
-    &:hover {
-      ${(props: { $disabled: boolean }) =>
-        !props.$disabled && 'background-color:  #e6e6e6'}
-    }
-  `,
-  primary: css`
-    background-color: var(--circus-brand-primary);
-    color: white;
-    border: 1px solid transparent;
-    &:hover {
-      ${(props: any) =>
-        !props.$disabled &&
-        `background-color: var(--circus-brand-primary-dark)`}
-    }
-  `,
-  link: css`
-    background: none;
-    border: none;
-    color: var(--circus-brand-primary);
-    text-decoration: underline;
-      ${(props: { $disabled: boolean }) =>
-        !props.$disabled &&
-        'text-decoration: underline; background-color: transparent;'}
-    }
-  `,
-  danger: css`
-    background-color: #d9534f;
-    border: 1px solid transparent;
-    color: white;
-    &:hover {
-      ${(props: { $disabled: boolean }) =>
-        !props.$disabled && 'background-color: #c9302c;'}
-    }
-  `
-};
-
-const TriggerButton = styled.button<{
-  $variant: Variant;
-  $size: Size;
-  $noCaret?: boolean;
-  $disabled?: boolean;
-}>`
-  line-height: 1.5;
-  cursor: ${(props: { $disabled: boolean }) =>
-    props.$disabled ? 'not-allowed' : 'pointer'};
-  display: inline-block;
-  align-items: center;
-  font-size: ${(props: { $size: Size }) => sizeMap[props.$size]};
-  padding: ${(props: { $size: Size }) => paddingMap[props.$size]};
-  ${(props: { $variant: Variant }) => variantStyles[props.$variant]};
-  ${(props: { $noCaret: boolean }) => !props.$noCaret && 'padding-right: 0;'}
-  opacity: ${(props: { $disabled: boolean }) => (props.$disabled ? 0.5 : 1)};
-`;
-
-const Menu = styled.div`
-  background: white;
-  border: 1px solid #ddd;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  min-width: 160px;
-  padding: 4px 0;
-  z-index: 1000;
-`;
-
-const caretIconMap: Record<string, string> = {
-  top: 'material-arrow_drop_up',
-  bottom: 'material-arrow_drop_down',
-  left: 'material-arrow_left',
-  right: 'material-arrow_right'
-};
-
-type DropdownProps = {
-  title: React.ReactNode;
-  children: React.ReactNode;
-  placement?: Placement;
-  variant?: Variant;
-  size?: Size;
+/**
+ * A button that opens a menu of `MenuItem`s.
+ * The menu is a popover placed with CSS anchor positioning.
+ */
+const DropdownButton: FC<{
+  title: ReactNode;
+  children: ReactNode;
+  align?: 'start' | 'end';
+  variant?: ButtonVariant;
+  size?: ButtonSize;
   disabled?: boolean;
   id?: string;
   className?: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
   noCaret?: boolean;
-  onSelect?: (value: string) => void;
-};
-
-const DropdownButton: React.FC<DropdownProps> = ({
-  title,
-  children,
-  placement = 'bottom-start',
-  variant = 'default',
-  size = 'md',
-  disabled = false,
-  id,
-  className,
-  style,
-  noCaret = false,
-  onSelect
-}) => {
+  onSelect?: (eventKey: any, event: MouseEvent) => void;
+}> = props => {
+  const {
+    title,
+    children,
+    align = 'start',
+    variant,
+    size,
+    disabled,
+    id,
+    className,
+    style,
+    noCaret,
+    onSelect
+  } = props;
+  const [menuId] = useState(() => `circus-dropdown-${++counter}`);
   const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLUListElement>(null);
 
-  const { refs, floatingStyles, context } = useFloating({
-    open,
-    onOpenChange: setOpen,
-    middleware: [offset(2), flip(), shift()],
-    whileElementsMounted: autoUpdate,
-    placement
-  });
+  useEffect(() => {
+    const menu = menuRef.current!;
+    const handleToggle = (ev: Event) => {
+      const isOpen = (ev as Event & { newState: string }).newState === 'open';
+      setOpen(isOpen);
+      if (isOpen) enabledItems(menu)[0]?.focus();
+    };
+    menu.addEventListener('toggle', handleToggle);
+    return () => menu.removeEventListener('toggle', handleToggle);
+  }, []);
 
-  const click = useClick(context);
-  const dismiss = useDismiss(context);
-  const role = useRole(context);
+  const context = useMemo(
+    () => ({
+      select: (eventKey: string | number | undefined, event: MouseEvent) => {
+        if (eventKey !== undefined) onSelect?.(eventKey, event);
+        menuRef.current?.hidePopover();
+      }
+    }),
+    [onSelect]
+  );
 
-  const { getReferenceProps, getFloatingProps } = useInteractions([
-    click,
-    dismiss,
-    role
-  ]);
+  const handleTriggerKeyDown = (ev: KeyboardEvent) => {
+    if (ev.key === 'ArrowDown' && !disabled) {
+      ev.preventDefault();
+      menuRef.current?.showPopover();
+    }
+  };
 
-  const referenceProps = disabled
-    ? { onClick: (e: React.MouseEvent) => e.preventDefault() }
-    : getReferenceProps();
-  const direction = placement.split('-')[0];
-  const caretIcon = caretIconMap[direction] ?? 'material-arrow_drop_down';
+  const handleMenuKeyDown = (ev: KeyboardEvent) => {
+    if (ev.key === 'Tab') {
+      menuRef.current?.hidePopover();
+    } else if (moveMenuFocus(enabledItems(menuRef.current), ev.key)) {
+      ev.preventDefault();
+    }
+  };
+
+  const handleMenuBlur = (ev: FocusEvent) => {
+    const next = ev.relatedTarget as Node | null;
+    if (next && !menuRef.current?.contains(next) && next !== triggerRef.current)
+      menuRef.current?.hidePopover();
+  };
+
+  const anchor = { '--dropdown-anchor': `--${menuId}` } as CSSProperties;
 
   return (
     <>
-      <TriggerButton
-        ref={refs.setReference}
+      <Button
+        ref={triggerRef}
         id={id}
-        $disabled={disabled}
-        className={classnames('btn', variant && `btn-${variant}`, className)}
-        style={style}
+        variant={variant}
+        size={size}
+        disabled={disabled}
+        className={classnames(styles.trigger, className)}
+        style={{ ...anchor, ...style }}
         aria-haspopup="menu"
         aria-expanded={open}
-        {...referenceProps}
-        $variant={variant}
-        $size={size}
-        $noCaret={noCaret}
+        onKeyDown={handleTriggerKeyDown}
+        {...{ popovertarget: menuId }}
       >
         {title}
-        {!noCaret && <Icon icon={caretIcon} size="md" aria-hidden="true" />}
-      </TriggerButton>
-
-      {open && (
-        <Menu
-          ref={refs.setFloating}
-          style={floatingStyles}
-          role="menu"
-          {...getFloatingProps()}
-        >
-          {React.Children.map(children, child => {
-            if (!React.isValidElement(child)) return child;
-
-            const eventKey =
-              child.props.eventKey ?? child.props['data-event-key'];
-
-            const handleClick = (event: React.MouseEvent) => {
-              child.props.onClick?.(event);
-              if (eventKey != null && onSelect) onSelect(eventKey);
-              setOpen(false);
-            };
-
-            return React.cloneElement(child as React.ReactElement, {
-              role: 'menuitem',
-              tabIndex: -1,
-              onClick: handleClick
-            });
-          })}
-        </Menu>
-      )}
+        {!noCaret && (
+          <Icon icon="material-arrow_drop_down" className={styles.caret} />
+        )}
+      </Button>
+      <ul
+        ref={menuRef}
+        id={menuId}
+        role="menu"
+        className={classnames(styles.menu, align === 'end' && styles.end)}
+        style={anchor}
+        onKeyDown={handleMenuKeyDown}
+        onBlur={handleMenuBlur}
+        {...{ popover: 'auto' }}
+      >
+        <MenuContext.Provider value={context}>{children}</MenuContext.Provider>
+      </ul>
     </>
   );
 };

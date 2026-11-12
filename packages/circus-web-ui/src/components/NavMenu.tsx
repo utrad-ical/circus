@@ -9,6 +9,7 @@ import React, {
   useState
 } from 'react';
 import { Link } from 'react-router-dom';
+import moveMenuFocus from '#utils/menuKeyboard.ts';
 import Icon from './Icon.tsx';
 import styles from './NavMenu.module.css';
 
@@ -46,23 +47,17 @@ const NavMenu: FC<{
 
   const handleKeyDown = (ev: KeyboardEvent) => {
     if (!children) return;
-    const items = menuItems();
-    const index = items.indexOf(document.activeElement as HTMLElement);
-    if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
-      ev.preventDefault();
-      setOpen(true);
-      const next =
-        index < 0
-          ? 0
-          : (index + (ev.key === 'ArrowDown' ? 1 : -1) + items.length) %
-            items.length;
-      // Wait until the menu is shown
-      requestAnimationFrame(() => menuItems()[next]?.focus());
-    } else if (ev.key === 'Escape' && open) {
+    if (ev.key === 'Escape' && open) {
       setOpen(false);
       itemRef.current
         ?.querySelector<HTMLElement>(`.${styles.caption}`)
         ?.focus();
+    } else if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+      ev.preventDefault();
+      const key = ev.key;
+      setOpen(true);
+      // Wait until the menu is shown
+      requestAnimationFrame(() => moveMenuFocus(menuItems(), key));
     }
   };
 

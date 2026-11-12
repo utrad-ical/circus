@@ -1,12 +1,12 @@
 import Button from '#components/Button.tsx';
 import Icon from '#components/Icon.tsx';
-import { Dropdown, FormControl, Modal } from '#components/react-bootstrap.ts';
+import DropdownButton from '#components/DropdownButton.tsx';
+import { FormControl, Modal } from '#components/react-bootstrap.ts';
 import MenuItem from '#components/MenuItem.tsx';
 import keycode from 'keycode';
 import type { ExternalLabel } from '#pages/case-detail/labelData.ts';
 import type { Revision } from '#pages/case-detail/revisionData.ts';
 import React, { Fragment, useState } from 'react';
-import DropdownToggle from 'react-bootstrap/lib/DropdownToggle';
 import styled from 'styled-components';
 import useLoginUser from '#utils/useLoginUser.ts';
 
@@ -61,27 +61,25 @@ const SaveModal: React.FC<{
           onKeyDown={handleKeyDown}
         />
         {templates.length > 0 && (
-          <Dropdown id="revision-templates-dropdown">
-            <DropdownToggle>
-              <Icon icon="material-replay" />
-            </DropdownToggle>
-            <Dropdown.Menu>
-              {templates.map((template, index) => (
-                <Fragment key={index}>
-                  {index !== 0 && <MenuItem divider />}
-                  <MenuItem header>{template.title}</MenuItem>
-                  {template.messages.map((message, i) => (
-                    <MenuItem
-                      key={i}
-                      onClick={() => handleSelectTemplate(message)}
-                    >
-                      {message}
-                    </MenuItem>
-                  ))}
-                </Fragment>
-              ))}
-            </Dropdown.Menu>
-          </Dropdown>
+          <DropdownButton
+            id="revision-templates-dropdown"
+            title={<Icon icon="material-replay" />}
+          >
+            {templates.map((template, index) => (
+              <Fragment key={index}>
+                {index !== 0 && <MenuItem divider />}
+                <MenuItem header>{template.title}</MenuItem>
+                {template.messages.map((message, i) => (
+                  <MenuItem
+                    key={i}
+                    onClick={() => handleSelectTemplate(message)}
+                  >
+                    {message}
+                  </MenuItem>
+                ))}
+              </Fragment>
+            ))}
+          </DropdownButton>
         )}
       </Modal.Body>
       <Modal.Footer>

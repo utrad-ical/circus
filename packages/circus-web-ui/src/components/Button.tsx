@@ -1,12 +1,12 @@
 import classnames from 'classnames';
-import React, { forwardRef } from 'react';
+import React, { type ButtonHTMLAttributes, forwardRef } from 'react';
 import styles from './Button.module.css';
 import Icon from './Icon.tsx';
 
 export type ButtonVariant = 'primary' | 'default' | 'link' | 'danger';
 export type ButtonSize = 'xsmall' | 'small' | 'large';
 
-export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
   size?: ButtonSize;
   icon?: string;

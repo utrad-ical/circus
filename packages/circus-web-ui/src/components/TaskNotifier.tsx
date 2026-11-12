@@ -68,7 +68,7 @@ const TaskNotifier: React.FC<{}> = props => {
       name=""
       icon="material-notifications"
       link="/task-list"
-      placement="bottom-end"
+      align="end"
       className={classNames({ 'in-progress': inProgress })}
     >
       {tasks.map(task => {
@@ -87,11 +87,11 @@ const TaskNotifier: React.FC<{}> = props => {
 };
 
 const StyledNavMenu = styled(NavMenu)`
-  .dropdown {
+  > ul {
     max-height: 500px;
     overflow-y: auto;
   }
-  &.in-progress .navmenu {
+  &.in-progress > a svg {
     color: yellow;
   }
 `;

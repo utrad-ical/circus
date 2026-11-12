@@ -1,38 +1,15 @@
 import classnames from 'classnames';
 import Icon from '#components/Icon.tsx';
-import NavMenu from '#components/NavMenu.tsx';
+import NavMenu, { NavMenuHeader, NavSubMenu } from '#components/NavMenu.tsx';
 import TaskNotifier from '#components/TaskNotifier.tsx';
-import React, { Fragment } from 'react';
+import React, { type FC, type MouseEvent } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { MyList } from '#store/loginUser.ts';
-import styled from 'styled-components';
 import useLoginUser from '#utils/useLoginUser.ts';
+import styles from './MainNav.module.css';
 
-const MainMenu: React.FC<{}> = props => <ul>{props.children}</ul>;
-
-const SubMenu: React.FC<{
-  link: string;
-  icon: string;
-  name: string;
-  sub?: boolean;
-}> = props => {
-  return (
-    <li className={classnames({ sub: props.sub })}>
-      <Link to={props.link}>
-        {props.icon && (
-          <Fragment>
-            <Icon icon={props.icon} />
-            &ensp;
-          </Fragment>
-        )}
-        {props.name}
-      </Link>
-    </li>
-  );
-};
-
-const NextPreviousButtons: React.FC<{
+const NextPreviousButtons: FC<{
   list: string[];
   current: string;
   prefix: string;
@@ -46,17 +23,17 @@ const NextPreviousButtons: React.FC<{
   const prevLinkDisabled = 0 >= currentPosition;
   const nextLinkDisabled = currentPosition >= props.list.length - 1;
   return (
-    <li className="next-previous-buttons">
+    <li className={styles.nextPrevious}>
       <Link
         to={prevLink}
-        className={classnames('link-prev', { disabled: prevLinkDisabled })}
+        className={classnames({ [styles.disabled]: prevLinkDisabled })}
       >
         <Icon icon="material-arrow_left_alt" />
         &ensp; Prev
       </Link>
       <Link
         to={nextLink}
-        className={classnames('link-next', { disabled: nextLinkDisabled })}
+        className={classnames({ [styles.disabled]: nextLinkDisabled })}
       >
         Next &ensp;
         <Icon icon="material-arrow_right_alt" />
@@ -65,144 +42,15 @@ const NextPreviousButtons: React.FC<{
   );
 };
 
-const MenuHeader: React.FC<{}> = props => {
-  return (
-    <li>
-      <div className="menu-header">{props.children}</div>
-    </li>
-  );
-};
-
-const StyledHeader = styled.header`
-  margin: 0 auto;
-  width: 100%;
-  flex: none;
-  position: relative;
-  background-color: var(--circus-brand-primary-dark);
-  border-bottom: 1px solid var(--circus-brand-primary-darker);
-  line-height: 39px;
-  z-index: 2000;
-  color: white;
-  text-align: left;
-
-  display: flex;
-  flex-flow: row;
-  justify-content: space-between;
-`;
-
-const StyledNav = styled.nav`
-  a {
-    display: inline-block;
-  }
-
-  > ul {
-    /* main navigation menu */
-    margin: 0;
-    padding: 0 5px;
-    > li {
-      /* main navigation item */
-      padding: 0 5px;
-      display: inline-block;
-      position: relative;
-      &.icon-menu [class*='navmenu'] {
-        font-size: 25px;
-        vertical-align: middle;
-        margin-right: 3px;
-      }
-      > a {
-        color: white;
-        text-decoration: none;
-      }
-      &.logo,
-      &.icon-menu {
-        &:hover {
-          color: var(--circus-highlight-color);
-          background-color: var(--circus-brand-primary);
-          > a {
-            color: inherit;
-            text-decoration: none;
-          }
-          > ul {
-            /* show dropdown sub menu */
-            display: block;
-          }
-        }
-      }
-      > ul {
-        /* dropdown sub menu */
-        position: absolute;
-        line-height: 35px;
-        background-color: rgba(240, 240, 240, 0.9);
-        padding: 0;
-        border: 1px solid #bbb;
-        > li {
-          display: block;
-          min-width: 200px;
-          color: black;
-          a {
-            text-decoration: none;
-            display: block;
-            padding: 0 8px;
-            color: inherit;
-            &:hover {
-              background-color: var(--circus-brand-primary);
-              color: white;
-            }
-          }
-          .menu-header {
-            border-top: 1px solid #bbbbbb;
-            line-height: 20px;
-            padding: 5px 8px 0 8px;
-            color: gray;
-          }
-          &.sub {
-            /* sub-sub menu indent */
-            a {
-              padding: 2px 0 2px 20px;
-              line-height: 25px;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  .logo {
-    text-shadow: 1px 1px 2px black;
-    svg {
-      filter: drop-shadow(1px 1px 2px black);
-    }
-  }
-
-  .user-info {
-    font-weight: bold;
-    margin-right: 10px;
-  }
-
-  .next-previous-buttons {
-    display: flex;
-    > a {
-      flex: 0 0 50%;
-      text-align: center;
-      user-select: none;
-      &.disabled {
-        opacity: 0.5;
-        pointer-events: none;
-      }
-    }
-    border-bottom: 1px solid gray;
-  }
-`;
-
-const MyListMenuItems: React.FC<{
+const MyListMenuItems: FC<{
   myLists: MyList[];
   resourceType: string;
   endPoint: string;
 }> = props => {
   const { myLists, resourceType, endPoint } = props;
   return (
-    <React.Fragment>
-      <SubMenu
+    <>
+      <NavSubMenu
         icon="material-folder_open"
         name="My List"
         link={`/browse/${endPoint}/mylist`}
@@ -210,19 +58,19 @@ const MyListMenuItems: React.FC<{
       {myLists
         .filter(l => l.resourceType === resourceType)
         .map(l => (
-          <SubMenu
+          <NavSubMenu
             key={l.myListId}
-            sub
+            nested
             icon="material-chevron_right"
             name={l.name}
             link={`/browse/${endPoint}/mylist/${l.myListId}`}
           />
         ))}
-    </React.Fragment>
+    </>
   );
 };
 
-const MainNav: React.FC<{}> = props => {
+const MainNav: FC<{}> = props => {
   const user = useLoginUser();
   const pathname = useLocation().pathname;
   let nextPreviousList = useSelector(state => state.searches.nextPreviousList);
@@ -238,7 +86,7 @@ const MainNav: React.FC<{}> = props => {
   } = user.preferences;
   const myLists = user.myLists ?? [];
 
-  const onLogout = async (ev: React.MouseEvent) => {
+  const onLogout = async (ev: MouseEvent) => {
     ev.preventDefault();
     navigate('/');
   };
@@ -255,24 +103,24 @@ const MainNav: React.FC<{}> = props => {
     pathname.indexOf('/plugin-job') === 0 && nextPreviousList.length > 0;
 
   return (
-    <StyledHeader>
-      <StyledNav>
-        <MainMenu>
-          <li className="logo">
+    <header className={styles.header}>
+      <nav>
+        <ul className={styles.menu}>
+          <li className={styles.logo}>
             <Link to="/home">
               <Icon icon="circus-logo" />
             </Link>
           </li>
           <NavMenu name="Series" link="/browse/series">
-            <SubMenu
+            <NavSubMenu
               icon="material-search"
               name="Series Search"
               link="/browse/series"
             />
             {seriesSearchPresets.map(preset => (
-              <SubMenu
+              <NavSubMenu
                 key={preset.name}
-                sub
+                nested
                 icon="material-chevron_right"
                 name={preset.name}
                 link={`/browse/series/preset/${encodeURIComponent(
@@ -285,7 +133,7 @@ const MainNav: React.FC<{}> = props => {
               resourceType="series"
               endPoint="series"
             />
-            <SubMenu
+            <NavSubMenu
               icon="circus-series-import"
               name="Series Import"
               link="/import-series"
@@ -299,15 +147,15 @@ const MainNav: React.FC<{}> = props => {
                 prefix="/case"
               />
             )}
-            <SubMenu
+            <NavSubMenu
               icon="material-search"
               name="Case Search"
               link="/browse/case"
             />
             {caseSearchPresets.map(preset => (
-              <SubMenu
+              <NavSubMenu
                 key={preset.name}
-                sub
+                nested
                 icon="material-chevron_right"
                 name={preset.name}
                 link={`/browse/case/preset/${encodeURIComponent(preset.name)}`}
@@ -318,7 +166,7 @@ const MainNav: React.FC<{}> = props => {
               resourceType="clinicalCases"
               endPoint="case"
             />
-            {/* <SubMenu icon="material-upload_2" name="Case Import" link="/import-case" /> */}
+            {/* <NavSubMenu icon="material-upload_2" name="Case Import" link="/import-case" /> */}
           </NavMenu>
           <NavMenu name="CAD" icon="circus-job" link="/browse/plugin-jobs">
             {showNextPreviousPluginJobButton && (
@@ -328,15 +176,15 @@ const MainNav: React.FC<{}> = props => {
                 prefix="/plugin-job"
               />
             )}
-            <SubMenu
+            <NavSubMenu
               icon="material-search"
               name="Plugin Job Search"
               link="/browse/plugin-jobs"
             />
             {pluginJobSearchPresets.map(preset => (
-              <SubMenu
+              <NavSubMenu
                 key={preset.name}
-                sub
+                nested
                 icon="material-chevron_right"
                 name={preset.name}
                 link={`/browse/plugin-jobs/preset/${encodeURIComponent(
@@ -349,30 +197,30 @@ const MainNav: React.FC<{}> = props => {
               resourceType="pluginJobs"
               endPoint="plugin-jobs"
             />
-            <SubMenu
+            <NavSubMenu
               icon="material-checklist"
               name="Show Job Queue"
               link="/plugin-job-queue"
             />
           </NavMenu>
           <NavMenu name="Tool">
-            <li>
-              <a
-                href="https://circus-project.net/"
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Icon icon="material-search" />
-                &ensp;Documentation
-              </a>
-            </li>
-            <SubMenu icon="material-lists" name="Task List" link="/task-list" />
-            <SubMenu
+            <NavSubMenu
+              icon="material-search"
+              name="Documentation"
+              link="https://circus-project.net/"
+              external
+            />
+            <NavSubMenu
+              icon="material-lists"
+              name="Task List"
+              link="/task-list"
+            />
+            <NavSubMenu
               icon="circus-preference"
               name="Preference"
               link="/preference"
             />
-            <SubMenu
+            <NavSubMenu
               icon="material-bookmarks"
               name="Access Tokens"
               link="/tokens"
@@ -380,51 +228,55 @@ const MainNav: React.FC<{}> = props => {
           </NavMenu>
           {isAdmin && (
             <NavMenu name="Administration" link="/admin">
-              <SubMenu
+              <NavSubMenu
                 icon="material-grid_view"
                 name="Server Configuration"
                 link="/admin/general"
               />
-              <SubMenu
+              <NavSubMenu
                 icon="material-groups"
                 name="Groups"
                 link="/admin/group"
               />
-              <SubMenu icon="material-person" name="Users" link="/admin/user" />
-              <MenuHeader>CIRCUS DB</MenuHeader>
-              <SubMenu
+              <NavSubMenu
+                icon="material-person"
+                name="Users"
+                link="/admin/user"
+              />
+              <NavMenuHeader>CIRCUS DB</NavMenuHeader>
+              <NavSubMenu
                 icon="material-school"
                 name="Projects"
                 link="/admin/project"
               />
-              <MenuHeader>CIRCUS CS</MenuHeader>
-              <SubMenu
+              <NavMenuHeader>CIRCUS CS</NavMenuHeader>
+              <NavSubMenu
                 icon="material-list_alt"
                 name="Job Manager"
                 link="/admin/plugin-job-manager"
               />
-              <SubMenu
+              <NavSubMenu
                 icon="circus-app"
                 name="CAD Plug-ins"
                 link="/admin/plugins"
               />
-              <SubMenu
+              <NavSubMenu
                 icon="material-pending_actions"
                 name="Job Queue"
                 link="/admin/plugin-job-queue"
               />
             </NavMenu>
           )}
-        </MainMenu>
-      </StyledNav>
-      <StyledNav>
-        <MainMenu>
+        </ul>
+      </nav>
+      <nav>
+        <ul className={styles.menu}>
           <TaskNotifier />
-          <li className="user-info hidden-xs">{loginUserName}</li>
+          <li className={styles.userInfo}>{loginUserName}</li>
           <NavMenu name="Logout" onClick={onLogout} />
-        </MainMenu>
-      </StyledNav>
-    </StyledHeader>
+        </ul>
+      </nav>
+    </header>
   );
 };
 

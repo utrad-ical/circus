@@ -1,0 +1,63 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2000;
+  flex: none;
+  width: 100%;
+  margin: 0 auto;
+  background-color: var(--circus-brand-primary-dark);
+  border-bottom: 1px solid var(--circus-brand-primary-darker);
+  line-height: 39px;
+  color: white;
+}
+
+.menu {
+  margin: 0;
+  padding: 0 5px;
+  list-style: none;
+}
+
+.logo {
+  display: inline-block;
+  padding: 0 5px;
+  text-shadow: 1px 1px 2px black;
+  svg {
+    filter: drop-shadow(1px 1px 2px black);
+  }
+  > a {
+    color: inherit;
+    &:focus:not(:focus-visible) {
+      outline: none;
+    }
+  }
+  &:hover {
+    color: var(--accent);
+    background-color: var(--theme);
+  }
+}
+
+.userInfo {
+  display: inline-block;
+  font-weight: bold;
+  margin-right: 10px;
+  @media (width < 768px) {
+    display: none;
+  }
+}
+
+.nextPrevious {
+  display: flex;
+  border-bottom: 1px solid gray;
+  > a {
+    flex: 0 0 50%;
+    text-align: center;
+    user-select: none;
+    color: inherit;
+    text-decoration: none;
+  }
+  .disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+}

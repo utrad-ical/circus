@@ -1,4 +1,5 @@
-import { Button, Modal } from '#components/react-bootstrap.ts';
+import Button from '#components/Button.tsx';
+import { Modal } from '#components/react-bootstrap.ts';
 import type { SeriesEntry } from '#components/SeriesSelector.tsx';
 import SeriesSelector from '#components/SeriesSelector.tsx';
 import { produce } from 'immer';
@@ -60,10 +61,10 @@ const SeriesSelectorDialog: React.FC<{
         />
       </Modal.Body>
       <Modal.Footer>
-        <Button bsStyle="link" onClick={() => onResolve(null)}>
+        <Button variant="link" onClick={() => onResolve(null)}>
           Cancel
         </Button>
-        <Button onClick={handleResolve} bsStyle="primary">
+        <Button onClick={handleResolve} variant="primary">
           OK
         </Button>
       </Modal.Footer>

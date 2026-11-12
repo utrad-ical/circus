@@ -1,11 +1,11 @@
+import Button from '#components/Button.tsx';
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
 import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
 import Icon from '#components/Icon.tsx';
-import IconButton from '#components/IconButton.ts';
 import LabelColorsEditor from '#components/LabelColorsEditor.tsx';
 import { labeledSlider } from '#components/LabeledSlider.tsx';
-import { Button, FormControl, Panel } from '#components/react-bootstrap.ts';
+import { FormControl, Panel } from '#components/react-bootstrap.ts';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { SearchPreset, UserPreferences } from '#store/loginUser.ts';
 import { useApi } from '#utils/api.ts';
@@ -32,14 +32,14 @@ const PresetDeleteEditor: et.Editor<SearchPreset[] | undefined> = props => {
         return (
           <li key={preset.name} className="form-control-static">
             {preset.name}{' '}
-            <IconButton
-              bsSize="xs"
-              bsStyle="primary"
+            <Button
+              size="xsmall"
+              variant="primary"
               icon="material-close"
               onClick={() => handleDeleteClick(preset.name)}
             >
               Delete
-            </IconButton>
+            </Button>
           </li>
         );
       })}
@@ -86,7 +86,7 @@ const TemplateEditor: et.Editor<string[] | undefined> = props => {
         />
         &nbsp;
         <Button
-          bsStyle="primary"
+          variant="primary"
           disabled={canNotAdd()}
           onClick={() => handleAddClick(newTemplate)}
         >
@@ -101,14 +101,14 @@ const TemplateEditor: et.Editor<string[] | undefined> = props => {
             return (
               <li key={message} className="form-control-static">
                 {message}{' '}
-                <IconButton
-                  bsSize="xs"
-                  bsStyle="primary"
+                <Button
+                  size="xsmall"
+                  variant="primary"
                   icon="material-close"
                   onClick={() => handleDeleteClick(message)}
                 >
                   Delete
-                </IconButton>
+                </Button>
               </li>
             );
           })}
@@ -298,10 +298,10 @@ const Preferences: React.FC<{}> = props => {
         </Panel.Body>
       </Panel>
       <p className="text-center">
-        <Button bsStyle="primary" onClick={saveClick}>
+        <Button variant="primary" onClick={saveClick}>
           Save
         </Button>
-        <Button bsStyle="link" onClick={() => loadSettings(true)}>
+        <Button variant="link" onClick={() => loadSettings(true)}>
           Reset
         </Button>
       </p>

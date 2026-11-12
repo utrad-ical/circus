@@ -1,8 +1,8 @@
+import Button from '#components/Button.tsx';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import { describePartialVolumeDescriptor } from '@utrad-ical/circus-rs';
 import { useCsResults } from '@utrad-ical/circus-ui-kit';
 import Icon from '#components/Icon.tsx';
-import IconButton from '#components/IconButton.ts';
 import { Modal, Tab, Tabs } from '#components/react-bootstrap.ts';
 import type { SeriesEntry } from '#components/SeriesSelector.tsx';
 import TimeDisplay from '#components/TimeDisplay.tsx';
@@ -162,14 +162,14 @@ const FeedbackContent: React.FC<{ value: any }> = props => {
   const [show, setShow] = useState(false);
   if (!show)
     return (
-      <IconButton
-        bsSize="xs"
-        bsStyle="primary"
+      <Button
+        size="xsmall"
+        variant="primary"
         icon="material-chevron_right"
         onClick={() => setShow(true)}
       >
         Show
-      </IconButton>
+      </Button>
     );
   return <>{JSON.stringify(value)}</>;
 };

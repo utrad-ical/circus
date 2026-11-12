@@ -1,7 +1,7 @@
+import Button from '#components/Button.tsx';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useApi } from '#utils/api.ts';
 import useShowMessage from '#utils/useShowMessage.ts';
-import { Button } from '#components/react-bootstrap.ts';
 import AdminContainer from './AdminContainer.tsx';
 import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
 import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
@@ -113,10 +113,10 @@ const GeneralAdmin: React.FC<{}> = props => {
         onChange={handlePropertyChange}
       />
       <p className="text-center">
-        <Button bsStyle="primary" onClick={handleSaveClick}>
+        <Button variant="primary" onClick={handleSaveClick}>
           Save
         </Button>
-        <Button bsStyle="link" onClick={() => loadSettings(true)}>
+        <Button variant="link" onClick={() => loadSettings(true)}>
           Cancel
         </Button>
       </p>

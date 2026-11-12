@@ -44,7 +44,7 @@ const listColumns: Record<PluginType, DataGridColumnDefinition[]> = {
           {plugin.pluginId.substring(0, 12)}
           {/* Prevents the row click from opening the editor */}
           <span onClick={ev => ev.stopPropagation()}>
-            <CopyToClipboardButton bsSize="xs" string={plugin.pluginId} />
+            <CopyToClipboardButton size="xsmall" string={plugin.pluginId} />
           </span>
         </span>
       )

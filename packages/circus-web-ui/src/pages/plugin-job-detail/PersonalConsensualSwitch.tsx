@@ -1,6 +1,6 @@
+import Button from '#components/Button.tsx';
 import React from 'react';
 import Icon from '#components/Icon.tsx';
-import IconButton from '#components/IconButton.ts';
 
 const PersonalConsensualSwitch: React.FC<{
   feedbackState: { isConsensual: boolean };
@@ -16,30 +16,30 @@ const PersonalConsensualSwitch: React.FC<{
   } = props;
   return (
     <div>
-      <IconButton
+      <Button
         icon={
           myPersonalEntered ? 'material-select_check_box' : 'material-person'
         }
-        bsStyle={isConsensual ? 'default' : 'primary'}
-        active={!isConsensual}
+        variant={isConsensual ? 'default' : 'primary'}
+        pressed={!isConsensual}
         onClick={() => onChange(false)}
       >
         Personal Mode
-      </IconButton>
+      </Button>
       &thinsp;
       <Icon icon="material-chevron_right" />
       &thinsp;
-      <IconButton
+      <Button
         icon={
           consensualEntered ? 'material-select_check_box' : 'material-crown'
         }
-        bsStyle={isConsensual ? 'primary' : 'default'}
-        active={isConsensual}
+        variant={isConsensual ? 'primary' : 'default'}
+        pressed={isConsensual}
         disabled={!consensualEntered && !myPersonalEntered}
         onClick={() => onChange(true)}
       >
         Consensual Mode
-      </IconButton>
+      </Button>
     </div>
   );
 };

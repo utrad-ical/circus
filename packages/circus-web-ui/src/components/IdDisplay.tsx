@@ -1,7 +1,7 @@
+import Button from '#components/Button.tsx';
 import React from 'react';
 import styled from 'styled-components';
 import CopyToClipboardButton from './CopyToClipboardButton.tsx';
-import IconButton from './IconButton.ts';
 import { OverlayTrigger, Popover } from './react-bootstrap.ts';
 
 const MyPopover = styled(Popover)`
@@ -20,7 +20,7 @@ const IdDisplay: React.FC<{
         return (
           <div key={key}>
             <b>{key}:</b> {value[key]}
-            <CopyToClipboardButton bsSize="xs" string={value[key]} />
+            <CopyToClipboardButton size="xsmall" string={value[key]} />
           </div>
         );
       })}
@@ -29,7 +29,7 @@ const IdDisplay: React.FC<{
 
   return (
     <OverlayTrigger trigger="click" rootClose placement="top" overlay={overlay}>
-      <IconButton icon="material-zoom_in" bsStyle="link" bsSize="xs" />
+      <Button icon="material-zoom_in" variant="link" size="xsmall" />
     </OverlayTrigger>
   );
 });

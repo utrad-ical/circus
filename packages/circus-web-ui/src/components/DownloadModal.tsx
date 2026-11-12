@@ -1,3 +1,4 @@
+import Button from '#components/Button.tsx';
 import type { Editor } from '@smikitky/rb-components/lib/editor-types';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import classnames from 'classnames';
@@ -6,8 +7,7 @@ import { createPortal } from 'react-dom';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import useTaskDownloadHandler from '#utils/useTaskDownloadHandler.ts';
-import Icon from './Icon.tsx';
-import { Button, Modal, ProgressBar } from './react-bootstrap.ts';
+import { Modal, ProgressBar } from './react-bootstrap.ts';
 
 export type CompressionFormat = 'tgz' | 'zip';
 
@@ -107,22 +107,23 @@ const DownloadModal = <T extends any>(props: {
         </div>
       </StyledModalBody>
       <Modal.Footer>
-        <Button bsStyle="default" onClick={onClose}>
-          {closeTitle}
-        </Button>
+        <Button onClick={onClose}>{closeTitle}</Button>
         {!taskProgress && (
-          <Button bsStyle="primary" onClick={handleStartClick}>
+          <Button variant="primary" onClick={handleStartClick}>
             Start download
           </Button>
         )}
         {taskProgress?.status === 'processing' && (
-          <Button bsStyle="primary" disabled>
+          <Button variant="primary" disabled>
             <LoadingIndicator /> Please wait...
           </Button>
         )}
         {taskProgress?.status === 'finished' && (
-          <Button bsStyle="success" onClick={handleDownloadClick}>
-            <Icon icon="material-arrow_circle_down" />
+          <Button
+            variant="primary"
+            onClick={handleDownloadClick}
+            icon="material-arrow_circle_down"
+          >
             Download
           </Button>
         )}

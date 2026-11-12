@@ -1,3 +1,4 @@
+import Button from '#components/Button.tsx';
 import { confirm } from '@smikitky/rb-components/lib/modal';
 import type {
   DataGridColumnDefinition,
@@ -6,7 +7,6 @@ import type {
 import DataGrid from '#components/DataGrid.tsx';
 import DropdownButton from '#components/DropdownButton.tsx';
 import Icon from '#components/Icon.tsx';
-import IconButton from '#components/IconButton.ts';
 import MenuItem from '#components/MenuItem.tsx';
 import MyListDropdown from '#components/MyListDropdown.tsx';
 import SearchResultsView, {
@@ -64,15 +64,15 @@ const Operation: DataGridRenderer<any> = props => {
 
   return (
     <Fragment>
-      <IconButton
+      <Button
         disabled={job.status !== 'finished'}
         icon="circus-series"
-        bsSize="sm"
-        bsStyle="primary"
+        size="small"
+        variant="primary"
         onClick={handleViewClick}
       >
         View
-      </IconButton>
+      </Button>
       &thinsp;
       <DropdownButton
         size="sm"

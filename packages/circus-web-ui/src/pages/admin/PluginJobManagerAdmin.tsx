@@ -1,7 +1,7 @@
+import Button from '#components/Button.tsx';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useApi } from '#utils/api.ts';
 import AdminContainer from './AdminContainer.tsx';
-import IconButton from '#components/IconButton.ts';
 import { Panel } from '#components/react-bootstrap.ts';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 
@@ -52,32 +52,32 @@ const PluginJobManagerAdmin: React.FC<{}> = props => {
         <Panel.Heading>Status</Panel.Heading>
         <Panel.Body>{busy ? <LoadingIndicator /> : status}</Panel.Body>
         <Panel.Footer>
-          <IconButton
+          <Button
             icon="material-play_arrow"
-            bsSize="large"
-            bsStyle="primary"
+            size="large"
+            variant="primary"
             onClick={handleStartClick}
           >
             Start
-          </IconButton>
+          </Button>
           &ensp;
-          <IconButton
+          <Button
             icon="material-stop"
-            bsSize="large"
-            bsStyle="danger"
+            size="large"
+            variant="danger"
             onClick={handleStopClick}
           >
             Stop
-          </IconButton>
+          </Button>
           &ensp;
-          <IconButton
+          <Button
             icon="material-autorenew"
-            bsSize="large"
-            bsStyle="link"
+            size="large"
+            variant="link"
             onClick={() => refresh(true)}
           >
             Refresh Status
-          </IconButton>
+          </Button>
         </Panel.Footer>
       </Panel>
     </AdminContainer>

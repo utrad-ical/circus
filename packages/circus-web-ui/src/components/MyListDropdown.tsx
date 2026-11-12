@@ -1,3 +1,4 @@
+import Button from '#components/Button.tsx';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { showMessage } from '#store/messages.ts';
@@ -8,7 +9,6 @@ import type { SearchResult } from '../store/searches.ts';
 import { selectionStatusChanged } from '../store/searches.ts';
 import DropdownButton from './DropdownButton.tsx';
 import Icon from './Icon.tsx';
-import IconButton from './IconButton.ts';
 import MenuItem from './MenuItem.tsx';
 
 const MyListDropdown: React.FC<{
@@ -69,16 +69,14 @@ const MyListDropdown: React.FC<{
       {myLists.length > 0 &&
         myLists.map(list => (
           <MenuItem key={list.myListId}>
-            <IconButton
-              bsSize="xs"
-              bsStyle="default"
+            <Button
+              size="xsmall"
               icon="material-add"
               onClick={() => handleAddRemove('add', list.myListId)}
             />
             &thinsp;
-            <IconButton
-              bsSize="xs"
-              bsStyle="default"
+            <Button
+              size="xsmall"
               icon="material-close"
               onClick={() => handleAddRemove('remove', list.myListId)}
             />

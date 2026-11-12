@@ -1,3 +1,4 @@
+import Button from '#components/Button.tsx';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import type {
   CsResultsContextType,
@@ -11,7 +12,6 @@ import DataGrid from '#components/DataGrid.tsx';
 import DropdownButton from '#components/DropdownButton.tsx';
 import FullSpanContainer from '#components/FullSpanContainer.tsx';
 import Icon from '#components/Icon.tsx';
-import IconButton from '#components/IconButton.ts';
 import MenuItem from '#components/MenuItem.tsx';
 import PatientInfoBox from '#components/PatientInfoBox.tsx';
 import PieProgress from '#components/PieProgress.tsx';
@@ -129,14 +129,14 @@ const RelevantJobs: React.FC<{
           currentJobId === value.jobId ? null : (
             <div className="register">
               <Link to={`/plugin-job/${value.jobId}`}>
-                <IconButton
+                <Button
                   disabled={value.status !== 'finished'}
                   icon="circus-series"
-                  bsSize="sm"
-                  bsStyle="primary"
+                  size="small"
+                  variant="primary"
                 >
                   View
-                </IconButton>
+                </Button>
               </Link>
             </div>
           )
@@ -442,7 +442,7 @@ const PluginJobDetail: React.FC<{}> = props => {
               &ensp;
             </Fragment>
           )}
-          <IconButton
+          <Button
             icon={
               feedbackState.isConsensual ? 'material-crown' : 'material-person'
             }
@@ -450,7 +450,7 @@ const PluginJobDetail: React.FC<{}> = props => {
             onClick={handleRegisterClick}
           >
             Register {modeText} feedback
-          </IconButton>
+          </Button>
         </div>
         <CsResultsContext.Provider value={resultsContext!}>
           <Modal

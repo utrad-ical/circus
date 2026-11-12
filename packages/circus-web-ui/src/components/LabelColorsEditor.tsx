@@ -1,7 +1,7 @@
+import Button from '#components/Button.tsx';
 import { ColorPalette } from '@smikitky/rb-components/lib/ColorPicker';
 import type * as et from '@smikitky/rb-components/lib/editor-types';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
-import { Button } from '#components/react-bootstrap.ts';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { defaultLabelColors } from '../labelColors.ts';
@@ -92,24 +92,24 @@ const LabelColorsEditor: et.Editor<LabelColorsSettings | undefined> = props => {
             onChange={ev => setEditingColor(ev.target.value)}
           />
           <Button
-            bsSize="sm"
-            bsStyle="primary"
+            size="small"
+            variant="primary"
             disabled={canNotAdd()}
             onClick={handleAdd}
           >
             Add
           </Button>
           <Button
-            bsSize="sm"
-            bsStyle="primary"
+            size="small"
+            variant="primary"
             disabled={canNotChange()}
             onClick={handleChange}
           >
             Change
           </Button>
           <Button
-            bsSize="sm"
-            bsStyle="primary"
+            size="small"
+            variant="primary"
             disabled={canNotDelete()}
             onClick={handleDelete}
           >

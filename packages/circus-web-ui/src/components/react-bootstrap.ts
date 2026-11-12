@@ -4,7 +4,6 @@
 
 export { default as Alert } from 'react-bootstrap/lib/Alert';
 
-export { default as Button } from 'react-bootstrap/lib/Button';
 export { default as SplitButton } from 'react-bootstrap/lib/SplitButton';
 export { default as ButtonGroup } from 'react-bootstrap/lib/ButtonGroup';
 export { default as ButtonToolbar } from 'react-bootstrap/lib/ButtonToolbar';

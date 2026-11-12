@@ -1,5 +1,5 @@
+import Button from '#components/Button.tsx';
 import classNames from 'classnames';
-import IconButton from '#components/IconButton.ts';
 import moment from 'moment';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -122,18 +122,18 @@ const TaskDisplay: React.FC<{
           <div className="task-message">{message}</div>
         </div>
         {task.downloadFileType && task.status === 'finished' && (
-          <IconButton
-            bsSize="sm"
-            bsStyle="success"
+          <Button
+            size="small"
+            variant="primary"
             icon="material-arrow_circle_down"
             onClick={handleDownloadClick}
           />
         )}
-        <IconButton
+        <Button
           title="Dismiss"
           onClick={onDismissClick}
-          bsSize="sm"
-          bsStyle="primary"
+          size="small"
+          variant="primary"
           icon="material-select_check_box"
         />
       </div>

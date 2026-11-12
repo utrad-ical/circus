@@ -1,5 +1,6 @@
+import Button from '#components/Button.tsx';
 import React, { useState, useMemo } from 'react';
-import { Button, Modal } from '#components/react-bootstrap.ts';
+import { Modal } from '#components/react-bootstrap.ts';
 import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
 import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
 import * as et from '@smikitky/rb-components/lib/editor-types';
@@ -38,10 +39,10 @@ const ViewWindowEditor: React.FC<{
         <hr />
       </Modal.Body>
       <Modal.Footer>
-        <Button bsStyle="link" onClick={onHide}>
+        <Button variant="link" onClick={onHide}>
           Cancel
         </Button>
-        <Button onClick={() => onOkClick(window)} bsStyle="primary">
+        <Button onClick={() => onOkClick(window)} variant="primary">
           OK
         </Button>
       </Modal.Footer>

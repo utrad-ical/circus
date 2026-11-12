@@ -1,13 +1,12 @@
+import Button from '#components/Button.tsx';
 import React, { useState, useRef } from 'react';
-import { Button, ButtonToolbar, ProgressBar } from './react-bootstrap.ts';
+import { ButtonToolbar, ProgressBar } from './react-bootstrap.ts';
 import { FileDroppable } from './FileDroppable.tsx';
 import useShowMessage from '#utils/useShowMessage.ts';
 import * as modal from '@smikitky/rb-components/lib/modal';
 import styled from 'styled-components';
 import { useApi } from '#utils/api.ts';
 import { withCommas } from '#utils/util.ts';
-import IconButton from './IconButton.ts';
-import Icon from './Icon.tsx';
 
 const StyledDiv = styled.div`
   input[type='file'] {
@@ -137,15 +136,15 @@ const FileUpload: React.FC<{
             <>
               <ButtonToolbar>
                 <Button
-                  bsStyle="primary"
+                  variant="primary"
                   disabled={!canUpload}
                   onClick={handleUploadClick}
+                  icon="material-arrow_circle_up"
                 >
-                  <Icon icon="material-arrow_circle_up" />
-                  &ensp;Upload
+                  Upload
                 </Button>
                 <Button
-                  bsStyle="link"
+                  variant="link"
                   disabled={uploading}
                   onClick={() => setFiles([])}
                 >
@@ -168,9 +167,11 @@ const FileUpload: React.FC<{
             </>
           )}
           <SummaryTable files={files} onChange={setFiles} />
-          <Button bsStyle="default" onClick={() => fileInput.current!.click()}>
-            <Icon icon="material-add" />
-            &ensp;{files.length > 0 ? 'Add More file' : 'Select File'}
+          <Button
+            onClick={() => fileInput.current!.click()}
+            icon="material-add"
+          >
+            {files.length > 0 ? 'Add More file' : 'Select File'}
           </Button>
         </div>
         {uploading && (
@@ -222,9 +223,9 @@ const SummaryTable: React.FC<{
               <td>{f.name}</td>
               <td className="text-right">{withCommas(f.size)}</td>
               <td>
-                <IconButton
+                <Button
                   icon="material-close"
-                  bsSize="xs"
+                  size="xsmall"
                   onClick={() => handleDelete(i)}
                 />
               </td>

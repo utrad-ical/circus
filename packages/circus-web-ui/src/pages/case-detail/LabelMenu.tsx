@@ -1,3 +1,4 @@
+import Button, { type ButtonProps } from '#components/Button.tsx';
 import { ColorPalette } from '@smikitky/rb-components/lib/ColorPicker';
 import { alert, prompt } from '@smikitky/rb-components/lib/modal';
 import Slider from '@smikitky/rb-components/lib/Slider';
@@ -6,16 +7,13 @@ import type { Viewer } from '@utrad-ical/circus-rs';
 import type { DicomVolumeMetadata } from '@utrad-ical/circus-rs';
 import type { OrientationString } from '@utrad-ical/circus-rs';
 import Icon from '#components/Icon.tsx';
-import IconButton from '#components/IconButton.ts';
 import MenuItem from '#components/MenuItem.tsx';
 import {
-  Button,
   OverlayTrigger,
   Popover,
   SplitButton
 } from '#components/react-bootstrap.ts';
 import React, { useState } from 'react';
-import type { ButtonProps } from 'react-bootstrap';
 import styled from 'styled-components';
 import tinyColor from 'tinycolor2';
 import useKeyboardShortcut from '#utils/useKeyboardShortcut.ts';
@@ -323,30 +321,30 @@ const LabelMenu: React.FC<{
         onChange={handleAppearanceChange}
         labelColors={labelColors}
       />
-      <IconButton
+      <Button
         icon={
           editingData.allLabelsHidden
             ? 'material-visibility'
             : 'material-visibility_off'
         }
-        bsStyle="link"
-        bsSize="xs"
+        variant="link"
+        size="xsmall"
         onClick={() => handleCommand('toggleHideAllLabels')}
       >
         All
-      </IconButton>
+      </Button>
       <div className="spacer" />
       {activeLabel && labelTypes[activeLabel.type].canConvertTo && (
-        <IconButton
-          bsSize="xs"
+        <Button
+          size="xsmall"
           title={'Convert to ' + labelTypes[activeLabel.type].canConvertTo}
           icon={labelTypes[labelTypes[activeLabel.type].canConvertTo!].icon}
           disabled={!activeLabel || activeLabel.type === 'voxel'}
           onClick={() => handleCommand('convertType')}
         />
       )}
-      <IconButton
-        bsSize="xs"
+      <Button
+        size="xsmall"
         title="Rename"
         icon="material-title"
         disabled={!activeLabel || disabled}
@@ -354,7 +352,7 @@ const LabelMenu: React.FC<{
       />
       <ShortcutIconButton
         shortcut="R"
-        bsSize="xs"
+        size="xsmall"
         title="Reveal in Viewer (R)"
         icon="material-location_on"
         disabled={!activeLabel || disabled}
@@ -364,8 +362,8 @@ const LabelMenu: React.FC<{
         activeLabelType={activeLabel?.type}
         onSelect={handleProcesssorSelect}
       />
-      <IconButton
-        bsSize="xs"
+      <Button
+        size="xsmall"
         title="Remove"
         icon="material-delete"
         disabled={!activeLabel || disabled}
@@ -440,7 +438,7 @@ const AppearanceEditor: React.FC<{
   const { appearance, hidden, disabled, onChange, labelColors } = props;
   if (disabled || !appearance) {
     return (
-      <ColorEditorButton bsSize="xs" style={{ backgroundColor: '#eeeeee' }}>
+      <ColorEditorButton size="xsmall" style={{ backgroundColor: '#eeeeee' }}>
         -
       </ColorEditorButton>
     );
@@ -466,7 +464,7 @@ const AppearanceEditor: React.FC<{
     >
       <ColorEditorButton
         className="color-editor-button"
-        bsSize="xs"
+        size="xsmall"
         style={{
           backgroundColor: appearance.color,
           color: tinyColor
@@ -497,10 +495,10 @@ const AppearancePopover: React.FC<{
         colors={labelColors}
       />
       <div className="alpha-pane">
-        <IconButton
+        <Button
           icon={hidden ? 'material-visibility_off' : 'material-visibility'}
-          bsStyle="link"
-          bsSize="sm"
+          variant="link"
+          size="small"
           onClick={() => onChange(appearance, !hidden)}
         />
         <Slider
@@ -527,9 +525,9 @@ const StyledAppearancePopoverDiv = styled.div`
 `;
 
 const ShortcutIconButton: React.FC<
-  { shortcut: string; icon: string } & ButtonProps
+  { shortcut: string } & ButtonProps
 > = props => {
   const { shortcut, ...rest } = props;
   useKeyboardShortcut(shortcut, props.onClick ?? (() => {}));
-  return <IconButton {...rest} />;
+  return <Button {...rest} />;
 };

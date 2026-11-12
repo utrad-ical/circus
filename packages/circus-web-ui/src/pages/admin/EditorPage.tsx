@@ -1,11 +1,11 @@
-import IconButton from '#components/IconButton.ts';
+import Button from '#components/Button.tsx';
 import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
 import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
 import DataGrid from '#components/DataGrid.tsx';
 import Icon from '#components/Icon.tsx';
 import SearchResultsView from '#components/SearchResultsView.tsx';
-import { Button, Panel } from '#components/react-bootstrap.ts';
+import { Panel } from '#components/react-bootstrap.ts';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import type { SearchResource } from '#store/searches.ts';
@@ -173,14 +173,14 @@ const EditorPage: React.FC<{
       <SearchResultsView name={searchName} dataView={grid} active={editing} />
       {enableNewItem && (
         <p className="text-right">
-          <IconButton
+          <Button
             icon="material-add"
-            bsStyle="primary"
-            bsSize="small"
+            variant="primary"
+            size="small"
             onClick={handleCreateItemClick}
           >
             Create new
-          </IconButton>
+          </Button>
         </p>
       )}
       {editing && (
@@ -324,10 +324,10 @@ const Editor: React.FC<{
         )}
       </Panel.Body>
       <Panel.Footer className="text-center">
-        <Button bsStyle="link" onClick={onCancelClick}>
+        <Button variant="link" onClick={onCancelClick}>
           Cancel
         </Button>
-        <Button bsStyle="primary" onClick={handleSave}>
+        <Button variant="primary" onClick={handleSave}>
           Save
         </Button>
       </Panel.Footer>

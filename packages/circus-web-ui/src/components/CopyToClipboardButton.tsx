@@ -1,8 +1,7 @@
+import Button, { type ButtonSize } from '#components/Button.tsx';
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import IconButton from '#components/IconButton.ts';
 import { showMessage } from '#store/messages.ts';
-import type { Sizes } from 'react-bootstrap';
 
 /**
  * Copies the text using a temporary textarea and `execCommand('copy')`.
@@ -45,9 +44,9 @@ const copyText = async (text: string): Promise<boolean> => {
 
 const CopyToClipboardButton: React.FC<{
   string: string;
-  bsSize?: Sizes;
+  size?: ButtonSize;
 }> = props => {
-  const { string, bsSize } = props;
+  const { string, size } = props;
   const dispatch = useDispatch();
 
   const handleClick = async () => {
@@ -62,11 +61,11 @@ const CopyToClipboardButton: React.FC<{
   };
 
   return (
-    <IconButton
+    <Button
       title="Copy to clipboard"
       icon="material-content_copy"
-      bsSize={bsSize}
-      bsStyle="link"
+      size={size}
+      variant="link"
       onClick={handleClick}
     />
   );

@@ -1,5 +1,5 @@
+import Button from '#components/Button.tsx';
 import Icon from '#components/Icon.tsx';
-import IconButton from '#components/IconButton.ts';
 import MultiTagSelect from '#components/MultiTagSelect.tsx';
 import ProjectSelector from '#components/ProjectSelector.tsx';
 import type { SeriesEntry } from '#components/SeriesSelector.tsx';
@@ -92,14 +92,14 @@ const CreateNewCase: React.FC<{}> = props => {
         />
       </div>
       <div className="text-right">
-        <IconButton
+        <Button
           disabled={!canCreate}
           icon="circus-case"
-          bsStyle="primary"
+          variant="primary"
           onClick={handleCreate}
         >
           Create case for <b>{prj.project.projectName}</b>
-        </IconButton>
+        </Button>
       </div>
     </div>
   );

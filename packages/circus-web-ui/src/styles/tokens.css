@@ -9,13 +9,13 @@
  */
 @layer base {
   :root {
-    --theme: #168477;
     /*
-     * Should be `contrast-color(var(--theme))`, but it picks black for the
-     * current theme color (contrast 4.60 against 4.56 for white)
+     * Dark enough that white text wins clearly with any contrast algorithm
+     * (WCAG 2: 5.03 for white against 4.17 for black)
      */
-    --theme-text: #ffffff;
-    --accent: #fd3164;
+    --theme: #037d70;
+    --theme-text: contrast-color(var(--theme));
+    --accent: #f6348a;
 
     --success: oklch(0.6 0.15 145);
     --warning: oklch(0.75 0.15 70);

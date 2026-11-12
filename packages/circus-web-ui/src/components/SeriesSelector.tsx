@@ -1,7 +1,7 @@
 import Button from '#components/Button.tsx';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import { confirm, modal } from '@smikitky/rb-components/lib/modal';
-import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import Select from '#components/Select.tsx';
 import type { PartialVolumeDescriptor } from '@utrad-ical/circus-rs';
 import { describePartialVolumeDescriptor } from '@utrad-ical/circus-rs';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
@@ -328,7 +328,7 @@ const SeriesSelector: React.FC<{
           {showRelevantSeries && (
             <>
               <span>Showing series from</span>
-              <ShrinkSelect
+              <Select
                 options={{
                   studyUid: 'the same study',
                   patientId: 'the same patient'

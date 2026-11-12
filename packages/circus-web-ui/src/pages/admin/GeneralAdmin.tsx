@@ -6,7 +6,7 @@ import AdminContainer from './AdminContainer.tsx';
 import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
 import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
 import * as et from '@smikitky/rb-components/lib/editor-types';
-import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import Select from '#components/Select.tsx';
 
 interface Settings {
   domains: string[];
@@ -92,7 +92,7 @@ const GeneralAdmin: React.FC<{}> = props => {
           caption: 'Default Domain',
           key: 'defaultDomain',
           editor: (props: any) => (
-            <ShrinkSelect options={settings.domains} {...props} />
+            <Select options={settings.domains} {...props} />
           )
         }
       ] as PropertyEditorProperties<Settings>,

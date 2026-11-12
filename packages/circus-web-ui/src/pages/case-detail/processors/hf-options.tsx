@@ -1,5 +1,5 @@
 import type { Editor } from './processor-types.ts';
-import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import Select from '#components/Select.tsx';
 import { FormControl } from '#components/react-bootstrap.ts';
 import React from 'react';
 import type { HoleFillingOptions } from './hf-processor.ts';
@@ -47,8 +47,8 @@ export const OptionsEditor: Editor<HoleFillingOptions> = props => {
     <>
       <div>
         Dimension&nbsp;
-        <ShrinkSelect
-          bsSize="sm"
+        <Select
+          size="small"
           options={dimensionOptions}
           value={value.dimension}
           onChange={v =>
@@ -74,8 +74,8 @@ export const OptionsEditor: Editor<HoleFillingOptions> = props => {
         {value.dimension === 2 && (
           <>
             &ensp;Orientation&nbsp;
-            <ShrinkSelect
-              bsSize="sm"
+            <Select
+              size="small"
               options={orientationOptions}
               value={value.orientation}
               onChange={v => onChange({ ...value, orientation: v })}
@@ -85,8 +85,8 @@ export const OptionsEditor: Editor<HoleFillingOptions> = props => {
       </div>
       <div>
         Neighbors to decide same CC&nbsp;
-        <ShrinkSelect
-          bsSize="sm"
+        <Select
+          size="small"
           options={
             value.dimension === 2 ? neighborsOptions2D : neighborsOptions3D
           }

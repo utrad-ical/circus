@@ -6,7 +6,7 @@ import fillPartialVolumeDescriptors from '#utils/partialVolumeDescriptor.ts';
 import type { CompressionFormat } from './DownloadModal.tsx';
 import DownloadModal, { compressionFormatOptions } from './DownloadModal.tsx';
 import type { SeriesEntry } from './SeriesSelector.tsx';
-import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import Select from '#components/Select.tsx';
 
 interface CsVolumeDownloadOptions {
   series: SeriesEntry[];
@@ -25,7 +25,7 @@ const CsVolumeDoanloadOptionsEditor: Editor<
         : `one volume`}
       <div className="row">
         Compression format:{' '}
-        <ShrinkSelect
+        <Select
           options={compressionFormatOptions}
           value={value.compressionFormat}
           onChange={v => onChange({ ...value, compressionFormat: v })}

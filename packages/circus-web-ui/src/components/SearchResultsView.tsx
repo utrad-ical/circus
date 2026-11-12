@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import Select from '#components/Select.tsx';
 import { Pagination } from '#components/react-bootstrap.ts';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import AutoReloadSwitch from './AutoReloadSwitch.tsx';
@@ -181,8 +181,8 @@ const SearchResultsView: React.FC<{
         <div>
           {totalItems + ' Result' + (totalItems !== 1 ? 's' : '')}
           &emsp;
-          <ShrinkSelect
-            bsSize="sm"
+          <Select
+            size="small"
             options={limitOptions}
             value={limit}
             onChange={handleLimitChange}
@@ -205,8 +205,8 @@ const SearchResultsView: React.FC<{
               &emsp;
               <Icon icon="material-swap_vert" />
               &ensp;
-              <ShrinkSelect
-                bsSize="sm"
+              <Select
+                size="small"
                 options={sortOptions}
                 value={sort}
                 onChange={handleSortChange}

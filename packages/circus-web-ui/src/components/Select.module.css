@@ -1,0 +1,15 @@
+.select {
+  display: inline-block;
+}
+
+.block {
+  display: block;
+  > button {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+.empty::before {
+  content: '\00a0';
+}

@@ -1,5 +1,5 @@
 import React from 'react';
-import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import Select from '#components/Select.tsx';
 import BodyPartIcon from './BodyPartIcon.tsx';
 import type Project from '#types/Project.ts';
 
@@ -21,7 +21,7 @@ const ProjectSelector: React.FC<{
       )
     };
   });
-  return <ShrinkSelect {...props} options={options} />;
+  return <Select {...props} options={options} />;
 };
 
 export default ProjectSelector;

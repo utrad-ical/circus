@@ -1,5 +1,5 @@
 import React from 'react';
-import BlockSelect from '@smikitky/rb-components/lib/BlockSelect';
+import Select from '#components/Select.tsx';
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import type {
   Schema,
@@ -154,7 +154,8 @@ const SchemaEntryEditor: React.FC<{
         />
       </div>
       <div className="attribute-schema-type">
-        <BlockSelect
+        <Select
+          block
           options={typeOptions}
           value={normalizedType}
           onChange={handleTypeChange}

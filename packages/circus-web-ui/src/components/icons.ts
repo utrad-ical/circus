@@ -13,6 +13,8 @@ import materialBookmark from '@material-symbols/svg-600/outlined/bookmark.svg?ic
 import materialBookmarks from '@material-symbols/svg-600/outlined/bookmarks.svg?icon';
 import materialCancel from '@material-symbols/svg-600/outlined/cancel.svg?icon';
 import materialCheck from '@material-symbols/svg-600/outlined/check.svg?icon';
+import materialCheckBox from '@material-symbols/svg-600/outlined/check_box.svg?icon';
+import materialCheckBoxOutlineBlank from '@material-symbols/svg-600/outlined/check_box_outline_blank.svg?icon';
 import materialCheckCircle from '@material-symbols/svg-600/outlined/check_circle.svg?icon';
 import materialChecklist from '@material-symbols/svg-600/outlined/checklist.svg?icon';
 import materialChevronRight from '@material-symbols/svg-600/outlined/chevron_right.svg?icon';
@@ -151,6 +153,8 @@ const icons: { [name: string]: SvgIconData } = {
   'material-bookmarks': materialBookmarks,
   'material-cancel': materialCancel,
   'material-check': materialCheck,
+  'material-check_box': materialCheckBox,
+  'material-check_box_outline_blank': materialCheckBoxOutlineBlank,
   'material-check_circle': materialCheckCircle,
   'material-checklist': materialChecklist,
   'material-chevron_right': materialChevronRight,

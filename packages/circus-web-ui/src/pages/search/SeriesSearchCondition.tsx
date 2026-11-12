@@ -1,3 +1,4 @@
+import { selectEditor } from '#components/Select.tsx';
 import React from 'react';
 import { modalities } from '../../modalities.ts';
 import ConditionFrame from './ConditionFrame.tsx';
@@ -19,7 +20,7 @@ const basicConditionProperties = [
   {
     key: 'modality',
     caption: 'Modality',
-    editor: et.shrinkSelect(modalityOptions)
+    editor: selectEditor(modalityOptions)
   },
   { key: 'seriesUid', caption: 'Series UID', editor: et.text() },
   {
@@ -30,7 +31,7 @@ const basicConditionProperties = [
   { key: 'patientId', caption: 'Patient ID', editor: et.text() },
   { key: 'patientName', caption: 'Patient Name', editor: et.text() },
   { key: 'age', caption: 'Age', editor: AgeMinMax },
-  { key: 'sex', caption: 'Sex', editor: et.shrinkSelect(sexOptions) },
+  { key: 'sex', caption: 'Sex', editor: selectEditor(sexOptions) },
   { key: 'seriesDate', caption: 'Series Date', editor: DateRangePicker }
 ];
 

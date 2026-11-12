@@ -1,7 +1,7 @@
 import Button from '#components/Button.tsx';
 import { ColorPalette } from '@smikitky/rb-components/lib/ColorPicker';
 import type * as et from '@smikitky/rb-components/lib/editor-types';
-import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import Select from '#components/Select.tsx';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { defaultLabelColors } from '../labelColors.ts';
@@ -73,8 +73,8 @@ const LabelColorsEditor: et.Editor<LabelColorsSettings | undefined> = props => {
   };
   return (
     <StyledDiv>
-      <ShrinkSelect
-        bsSize="sm"
+      <Select
+        size="small"
         options={{ default: 'Default', custom: 'Custom' }}
         value={value.useDefault ? 'default' : 'custom'}
         onChange={handleLabelColorsSelect}

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import BodyPartIcon from '#components/BodyPartIcon.tsx';
 import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
-import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import Select from '#components/Select.tsx';
 import ColorPicker from '@smikitky/rb-components/lib/ColorPicker';
 
 const glyphs = [
@@ -44,7 +44,7 @@ const GlyphPicker: React.FC<any> = props => {
     );
     return o;
   }, []);
-  return <ShrinkSelect options={options} {...props} />;
+  return <Select options={options} {...props} />;
 };
 
 const iconProperties = [

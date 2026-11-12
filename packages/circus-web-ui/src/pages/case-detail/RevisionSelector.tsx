@@ -1,5 +1,5 @@
 import React from 'react';
-import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import Select from '#components/Select.tsx';
 import TimeDisplay from '#components/TimeDisplay.tsx';
 import UserDisplay from '#components/UserDisplay.tsx';
 import styled from 'styled-components';
@@ -55,7 +55,7 @@ const RevisionSelector: React.FC<{
   );
 });
 
-const StyledShrinkSelect = styled(ShrinkSelect)`
+const StyledShrinkSelect = styled(Select)`
   .revision-selector-item > span {
     margin: 0 3px;
   }

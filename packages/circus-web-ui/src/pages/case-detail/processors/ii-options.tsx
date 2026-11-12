@@ -1,5 +1,5 @@
 import type { Editor } from './processor-types.ts';
-import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import Select from '#components/Select.tsx';
 import React from 'react';
 import type { IntersliceInterpolationOptions } from './ii-processor.ts';
 import styled from 'styled-components';
@@ -25,15 +25,15 @@ export const OptionsEditor: Editor<IntersliceInterpolationOptions> = props => {
   return (
     <StyledDiv>
       Orientation
-      <ShrinkSelect
-        bsSize="sm"
+      <Select
+        size="small"
         options={orientationOptions}
         value={value.orientation}
         onChange={v => onChange({ ...value, orientation: v })}
       />
       Mode
-      <ShrinkSelect
-        bsSize="sm"
+      <Select
+        size="small"
         options={originIsCenterOptions}
         value={value.mode}
         onChange={v => onChange({ ...value, mode: v })}

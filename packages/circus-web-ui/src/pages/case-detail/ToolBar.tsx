@@ -1,6 +1,6 @@
 import Button from '#components/Button.tsx';
 import type { Editor } from '@smikitky/rb-components/lib/editor-types';
-import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import Select from '#components/Select.tsx';
 import type { ModifierKeyBehaviors } from '@utrad-ical/circus-rs';
 import type { PlaneFigureOption } from '@utrad-ical/circus-rs';
 import type { ReferenceValueOption } from '@utrad-ical/circus-rs';
@@ -559,7 +559,7 @@ const ToolBar: React.FC<{
           </label>
           <label>
             Mode:
-            <ShrinkSelect
+            <Select
               className="wand-option-shrinkselect"
               options={wandModeOptions}
               value={toolOptions.wandMode}
@@ -635,6 +635,7 @@ const StyledSpanWandOption = styled.span`
   .wand-option-shrinkselect > button {
     font-size: 100%;
     height: 28.4px;
+    min-height: 0;
     padding: 1px 2px;
   }
 `;

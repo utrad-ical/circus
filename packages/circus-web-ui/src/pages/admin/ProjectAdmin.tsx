@@ -1,3 +1,4 @@
+import { selectEditor } from '#components/Select.tsx';
 import EditorPage from './EditorPage.tsx';
 import React from 'react';
 import * as et from '@smikitky/rb-components/lib/editor-types';
@@ -61,7 +62,7 @@ const editorProperties = [
   {
     key: 'windowPriority',
     caption: 'Window Priority',
-    editor: et.shrinkSelect(windowPriorityOptions)
+    editor: selectEditor(windowPriorityOptions)
   },
   {
     key: 'tags',

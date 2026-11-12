@@ -11,12 +11,8 @@ const useTaskDownloadHandler = (taskId: string) => {
   const api = useApi();
 
   const cb = useCallback(async () => {
-    const response = await fetch(
-      api.getBaseUrl() + `tasks/${taskId}/download`,
-      {
-        headers: { Authorization: `Bearer ${api.getToken()}` }
-      }
-    );
+    // Authenticated with the session cookie
+    const response = await fetch(api.getBaseUrl() + `tasks/${taskId}/download`);
     const size = Number(response.headers.get('content-length')) || undefined;
     const cd = response.headers.get('content-deposition');
     const fileName = cd?.match(/filename="(.+)"/)?.[1] ?? 'download';

@@ -5,7 +5,7 @@
 set -eu
 
 # The host machine's IP address, used by some configuration files
-# (e.g., dicomImageServerUrl). If not given explicitly, resolve it from
+# (e.g., an authentication provider). If not given explicitly, resolve it from
 # the `hostmachine` entry (compose `extra_hosts`), if any.
 if [ -z "${LOCAL_HOST_IP:-}" ]; then
   LOCAL_HOST_IP=$(getent hosts hostmachine | awk '{ print $1 }' || true)

@@ -5,22 +5,21 @@ import { Button } from '#components/react-bootstrap.ts';
 import ErrorBoundary from '#components/ErrorBoundary.tsx';
 import MainNav from './MainNav.tsx';
 import { useDispatch, useSelector } from 'react-redux';
-import { useApi } from '#utils/api.ts';
+import useLoginUser from '#utils/useLoginUser.ts';
 import fetchEventSource from '#utils/fetchEventSource.ts';
 import { taskUpdate, taskFinish, taskError } from '../store/taskProgress.ts';
 
 const useTaskProgress = () => {
-  const api = useApi();
   const dispatch = useDispatch();
+  const userEmail = useLoginUser()?.userEmail;
   // Listens to the SSE and updates the redux store
   // during the lifecycle of this component.
-  const token = api?.getToken();
+  // The request is authenticated with the session cookie.
   useEffect(() => {
     const abortController = new AbortController();
     const load = async () => {
-      if (!token) return;
+      if (!userEmail) return;
       const generator = fetchEventSource('/api/tasks/report', {
-        headers: { Authorization: `Bearer ${token}` },
         signal: abortController.signal
       });
       for await (const event of generator) {
@@ -54,7 +53,7 @@ const useTaskProgress = () => {
     return () => {
       abortController.abort();
     };
-  }, [dispatch, token]);
+  }, [dispatch, userEmail]);
 };
 
 /**

@@ -273,12 +273,9 @@ const PluginJobDetail: React.FC<{}> = props => {
     const { job, pluginData } = jobData;
 
     const loadAttachment = (path: string, signal?: AbortSignal) => {
+      // Authenticated with the session cookie
       const url = `/api/plugin-jobs/${job.jobId}/attachment/${path}`;
-      const token = api.getToken();
-      return fetch(url, {
-        signal,
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      return fetch(url, { signal });
     };
     loadAttachment.list = () =>
       api(`plugin-jobs/${job.jobId}/attachment`) as Promise<string[]>;

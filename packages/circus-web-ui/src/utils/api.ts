@@ -4,49 +4,30 @@ import type { CancelToken } from './cancelToken.ts';
 import { dispatch } from '#store/index.ts';
 import { showMessage } from '#store/messages.ts';
 import { useContext, createContext } from 'react';
+import {
+  currentUserEmail,
+  expectedUserHeaderName,
+  isSessionUserChangedError,
+  showSessionUserChangedMessage
+} from './sessionUserCheck.ts';
 
 export interface ApiCaller {
   (command: string, options?: any, cancelToken?: CancelToken): Promise<any>;
-  getToken: () => string;
   getBaseUrl: () => string;
 }
 
 /**
- * Forms a credential data from an Axios OAuth response.
- * @param res Axios response
+ * The header required by the API server for requests that may change data
+ * (CSRF protection for the session cookie).
  */
-export const formatCredentials = (responseData: any) => ({
-  accessToken: responseData.access_token,
-  refreshToken: responseData.refresh_token,
-  expiresIn: responseData.expires_in,
-  expiresAt: Date.now() + responseData.expires_in * 1000
-});
+export const csrfHeaders = { 'X-Requested-With': 'XMLHttpRequest' };
 
 /**
  * Creates CIRCUS API accessor.
+ * Requests are authenticated with the HttpOnly session cookie,
+ * which the browser sends automatically.
  */
-const createApiCaller = (initialCredentials: any, apiServer: string) => {
-  let credentials = initialCredentials;
-
-  const saveCredentialData = (credentials: any) => {
-    sessionStorage.setItem('tokenCredentials', JSON.stringify(credentials));
-  };
-
-  const tryRefreshToken = async (refreshToken: string) => {
-    const res = await axios.request({
-      method: 'post',
-      url: apiServer + 'login',
-      data: new URLSearchParams({
-        client_id: 'circus-front',
-        client_secret: 'not-a-secret',
-        grant_type: 'refresh_token',
-        refresh_token: refreshToken
-      })
-    });
-    saveCredentialData(formatCredentials(res.data));
-    return formatCredentials(res.data);
-  };
-
+const createApiCaller = (apiServer: string) => {
   const baseURL = apiServer + 'api/';
 
   const api: ApiCaller = async (
@@ -59,13 +40,16 @@ const createApiCaller = (initialCredentials: any, apiServer: string) => {
       if (params.method === 'get') params.method = 'post';
     }
 
-    if (Date.now() > credentials.expiresAt - 60000) {
-      credentials = await tryRefreshToken(credentials.refreshToken);
-    }
+    // Unless told not to (i.e., when loading the user just after a login),
+    // the server rejects the request if the session user has changed
+    const { checkUser = true } = options;
+    delete params.checkUser;
+    const userEmail = checkUser ? currentUserEmail() : undefined;
 
     try {
       const headers = {
-        Authorization: `Bearer ${credentials.accessToken}`,
+        ...csrfHeaders,
+        ...(userEmail ? { [expectedUserHeaderName]: userEmail } : {}),
         ...(params.headers || {})
       };
 
@@ -86,6 +70,12 @@ const createApiCaller = (initialCredentials: any, apiServer: string) => {
       });
       return res.data;
     } catch (err: any) {
+      // Cancelled on purpose (e.g., by `useLoadData` on re-render)
+      if (axios.isCancel(err)) throw err;
+      if (isSessionUserChangedError(err)) {
+        showSessionUserChangedMessage();
+        throw err;
+      }
       // By default, all errors are displayed with a minimal message.
       // Set 'handleErrors' option to supress error message for specific error types.
       let handle = options.handleErrors === true;
@@ -102,9 +92,7 @@ const createApiCaller = (initialCredentials: any, apiServer: string) => {
       throw err;
     }
   };
-  api.getToken = () => credentials.accessToken;
   api.getBaseUrl = () => baseURL;
-  saveCredentialData(credentials);
   return api;
 };
 

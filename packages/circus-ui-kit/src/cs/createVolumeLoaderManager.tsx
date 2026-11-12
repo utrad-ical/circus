@@ -39,14 +39,16 @@ export const createVolumeLoaderManager = ({
   queryString?: string;
   cacheTimeout?: number;
 }): VolumeLoaderManager => {
-  const secure = server.match(/^https/);
-  const host = server.replace(/^.*\/\/(.*)$/, '$1');
+  // `server` may be an absolute URL or a path on the current origin (`/rs`).
+  // On the same origin, the browser sends the session cookie of CIRCUS
+  // with both the HTTP and WebSocket requests.
+  const url = new URL(server, window.location.href);
+  const base = (url.origin + url.pathname).replace(/\/$/, '');
+  const wsBase = base.replace(/^http/, 'ws');
 
-  const rsHttpClient = new rs.RsHttpClient(
-    `${secure ? 'https' : 'http'}://${host}`
-  );
+  const rsHttpClient = new rs.RsHttpClient(base);
   const wsClient = new rs.WebSocketClient(
-    `${secure ? 'wss' : 'ws'}://${host}/ws/volume${queryString ? '?' + queryString : ''}`
+    `${wsBase}/ws/volume${queryString ? '?' + queryString : ''}`
   );
   const transferConnectionFactory =
     rs.createTransferConnectionFactory(wsClient);

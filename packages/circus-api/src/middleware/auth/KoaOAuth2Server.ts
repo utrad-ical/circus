@@ -30,6 +30,14 @@ export default class KoaOAuth2Server {
     }
   }
 
+  /**
+   * Verifies the credentials in the same way as the password grant
+   * (including onetime passwords), and returns the user or null.
+   */
+  async verifyUser(username: string, password: string): Promise<any | null> {
+    return await this.options.model.getUser(username, password);
+  }
+
   authenticate(options?: any): koa.Middleware {
     return async (ctx, next) => {
       const request = new Request(ctx.request);

@@ -14,12 +14,9 @@ module.exports = {
   },
   apiServer: {
     options: {
-      // URL of CIRCUS RS as seen from the browser
-      dicomImageServerUrl:
-        process.env.DICOM_IMAGE_SERVER_URL ||
-        (process.env.LOCAL_HOST_IP
-          ? `http://${process.env.LOCAL_HOST_IP}/rs`
-          : 'http://localhost/rs')
+      // URL of CIRCUS RS as seen from the browser. A path on the same origin
+      // as the web UI is recommended, so that the session cookie is sent
+      dicomImageServerUrl: process.env.DICOM_IMAGE_SERVER_URL || '/rs'
     }
   },
   blobStorage: {

@@ -194,7 +194,7 @@ const SearchResultsView: React.FC<{
             <Fragment>
               &emsp;
               <AutoReloadSwitch
-                bsSize="sm"
+                size="small"
                 onRefresh={handleRefresh}
                 disabled={isFetching}
               />

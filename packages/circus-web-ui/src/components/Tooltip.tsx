@@ -20,6 +20,7 @@ const Tooltip: FC<{
 }> = props => {
   const { content, delay = 0, children } = props;
   const [tooltipId] = useState(() => `circus-tooltip-${++counter}`);
+  const targetRef = useRef<HTMLSpanElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -39,13 +40,25 @@ const Tooltip: FC<{
 
   useEffect(() => () => clearTimeout(timer.current), []);
 
+  // ARIA relationships are not inherited, so the description is attached to
+  // the controls that actually get focus (not to those inside a popover)
+  useEffect(() => {
+    const controls = targetRef.current!.querySelectorAll<HTMLElement>(
+      ':is(button, a[href], input, select, textarea, [tabindex]):not([tabindex="-1"])'
+    );
+    for (const control of controls) {
+      if (!control.closest('[popover]'))
+        control.setAttribute('aria-describedby', tooltipId);
+    }
+  });
+
   const anchor = { '--tooltip-anchor': `--${tooltipId}` } as CSSProperties;
 
   return (
     <span
+      ref={targetRef}
       className={styles.target}
       style={anchor}
-      aria-describedby={tooltipId}
       onMouseEnter={show}
       onMouseLeave={hide}
       onFocus={show}

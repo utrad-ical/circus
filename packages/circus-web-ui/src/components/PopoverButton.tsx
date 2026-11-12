@@ -46,6 +46,7 @@ const PopoverButton: FC<
     popupClassName?: string;
     popupRef?: RefObject<HTMLElement | null>;
     onOpen?: (popup: HTMLElement) => void;
+    onClose?: () => void;
     onPopupKeyDown?: (ev: KeyboardEvent) => void;
   }
 > = props => {
@@ -65,6 +66,7 @@ const PopoverButton: FC<
     popupClassName,
     popupRef: givenPopupRef,
     onOpen,
+    onClose,
     onPopupKeyDown
   } = props;
   const [popupId] = useState(() => `circus-popover-${++counter}`);
@@ -75,6 +77,8 @@ const PopoverButton: FC<
 
   const onOpenRef = useRef(onOpen);
   onOpenRef.current = onOpen;
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     const popup = popupRef.current!;
@@ -82,6 +86,7 @@ const PopoverButton: FC<
       const isOpen = (ev as Event & { newState: string }).newState === 'open';
       setOpen(isOpen);
       if (isOpen) onOpenRef.current?.(popup);
+      else onCloseRef.current?.();
     };
     popup.addEventListener('toggle', handleToggle);
     return () => popup.removeEventListener('toggle', handleToggle);

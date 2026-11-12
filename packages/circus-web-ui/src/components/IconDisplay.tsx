@@ -2,7 +2,7 @@ import React from 'react';
 import type { CircusIconDefinition } from './BodyPartIcon.tsx';
 import BodyPartIcon from './BodyPartIcon.tsx';
 import styled from 'styled-components';
-import { OverlayTrigger, Tooltip } from '#components/react-bootstrap.ts';
+import Tooltip from './Tooltip.tsx';
 
 const StyledSpan = styled.span`
   display: inline-block;
@@ -38,20 +38,7 @@ const IconDisplay: React.FC<{
     </StyledSpan>
   );
 
-  if (toolTip) {
-    const tip = (
-      <Tooltip placement="top" id="icon-display-tooltip">
-        {toolTip}
-      </Tooltip>
-    );
-    return (
-      <OverlayTrigger overlay={tip} placement="top">
-        {content}
-      </OverlayTrigger>
-    );
-  } else {
-    return content;
-  }
+  return toolTip ? <Tooltip content={toolTip}>{content}</Tooltip> : content;
 };
 
 export default IconDisplay;

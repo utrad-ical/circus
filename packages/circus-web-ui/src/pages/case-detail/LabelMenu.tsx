@@ -8,11 +8,10 @@ import type { DicomVolumeMetadata } from '@utrad-ical/circus-rs';
 import type { OrientationString } from '@utrad-ical/circus-rs';
 import Icon from '#components/Icon.tsx';
 import MenuItem from '#components/MenuItem.tsx';
-import { OverlayTrigger, Popover } from '#components/react-bootstrap.ts';
+import PopoverButton from '#components/PopoverButton.tsx';
 import SplitButton from '#components/SplitButton.tsx';
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import tinyColor from 'tinycolor2';
 import useKeyboardShortcut from '#utils/useKeyboardShortcut.ts';
 import useLocalPreference from '#utils/useLocalPreference.ts';
 import useLoginUser from '#utils/useLoginUser.ts';
@@ -424,6 +423,10 @@ const ColorEditorButton = styled(Button)`
   min-width: 50px;
 `;
 
+const ColorEditorPopoverButton = styled(PopoverButton)`
+  min-width: 50px;
+`;
+
 const AppearanceEditor: React.FC<{
   appearance: LabelAppearance | undefined;
   hidden: boolean;
@@ -440,37 +443,25 @@ const AppearanceEditor: React.FC<{
     );
   }
 
-  const appearanceEditor = (
-    <Popover id="appearance-editor">
+  return (
+    <ColorEditorPopoverButton
+      title={`${appearance.alpha * 100}%`}
+      size="xsmall"
+      noCaret
+      className="color-editor-button"
+      style={{
+        backgroundColor: appearance.color,
+        color: `contrast-color(${appearance.color})`
+      }}
+      popupRole="dialog"
+    >
       <AppearancePopover
         appearance={appearance}
         hidden={hidden}
         onChange={onChange}
         labelColors={labelColors}
       />
-    </Popover>
-  );
-
-  return (
-    <OverlayTrigger
-      trigger="click"
-      rootClose
-      overlay={appearanceEditor}
-      placement="bottom"
-    >
-      <ColorEditorButton
-        className="color-editor-button"
-        size="xsmall"
-        style={{
-          backgroundColor: appearance.color,
-          color: tinyColor
-            .mostReadable(appearance.color, ['#ffffff', '#000000'])
-            .toHex8String()
-        }}
-      >
-        {appearance.alpha * 100}%
-      </ColorEditorButton>
-    </OverlayTrigger>
+    </ColorEditorPopoverButton>
   );
 };
 

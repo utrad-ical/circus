@@ -8,7 +8,8 @@ import type { InterpolationMode } from '@utrad-ical/circus-rs';
 import Icon from '#components/Icon.tsx';
 import DropdownButton from '#components/DropdownButton.tsx';
 import MenuItem, { type MenuItemProps } from '#components/MenuItem.tsx';
-import { Modal, OverlayTrigger, Tooltip } from '#components/react-bootstrap.ts';
+import { Modal } from '#components/react-bootstrap.ts';
+import Tooltip from '#components/Tooltip.tsx';
 import SplitButton from '#components/SplitButton.tsx';
 import type {
   ToolOptions,
@@ -664,17 +665,12 @@ const ToolButton: React.FC<{
 
   const style = active === name ? 'primary' : 'default';
   const iconSpan = <Icon icon={icon} />;
-  const toolTip = (
-    <Tooltip id="case-detail-toolbar-tooltip">
-      {name[0].toUpperCase() +
-        name.slice(1) +
-        (shortcut ? ' (' + shortcut + ')' : '')}
-    </Tooltip>
-  );
+  const toolTip =
+    name[0].toUpperCase() + name.slice(1) + (shortcut ? ` (${shortcut})` : '');
 
-  if (children) {
-    return (
-      <OverlayTrigger overlay={toolTip} placement="top" delayShow={200}>
+  return (
+    <Tooltip content={toolTip} delay={200}>
+      {children ? (
         <SplitButton
           title={iconSpan}
           variant={style}
@@ -683,17 +679,13 @@ const ToolButton: React.FC<{
         >
           {children}
         </SplitButton>
-      </OverlayTrigger>
-    );
-  } else {
-    return (
-      <OverlayTrigger overlay={toolTip} placement="top" delayShow={200}>
+      ) : (
         <Button variant={style} onClick={handleClick} disabled={disabled}>
           {iconSpan}
         </Button>
-      </OverlayTrigger>
-    );
-  }
+      )}
+    </Tooltip>
+  );
 };
 
 const MenuItemWithShortcut: React.FC<

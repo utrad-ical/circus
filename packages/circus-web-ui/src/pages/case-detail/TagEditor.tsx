@@ -1,6 +1,6 @@
-import Button from '#components/Button.tsx';
+import Icon from '#components/Icon.tsx';
+import PopoverButton from '#components/PopoverButton.tsx';
 import React, { useState, useMemo } from 'react';
-import { OverlayTrigger, Popover } from '#components/react-bootstrap.ts';
 import { PhysicalTag } from '#components/Tag.tsx';
 import type Project from '#types/Project.ts';
 import styled from 'styled-components';
@@ -26,8 +26,17 @@ const TagEditor: React.FC<{
     }
   };
 
-  const overlay = (
-    <Popover id="tag-popover">
+  return (
+    <PopoverButton
+      title={<Icon icon="circus-tool" />}
+      variant="link"
+      size="small"
+      noCaret
+      popupRole="dialog"
+      popupClassName="tag-popover"
+      onOpen={() => setEditingValue(value)}
+      onClose={handleExited}
+    >
       <StyledUl>
         {projectData.tags.map(tag => {
           return (
@@ -46,26 +55,13 @@ const TagEditor: React.FC<{
           );
         })}
       </StyledUl>
-    </Popover>
-  );
-
-  return (
-    <OverlayTrigger
-      trigger="click"
-      rootClose
-      overlay={overlay}
-      placement="bottom"
-      onEnter={() => setEditingValue(value)}
-      onExited={handleExited}
-    >
-      <Button icon="circus-tool" variant="link" size="small" />
-    </OverlayTrigger>
+    </PopoverButton>
   );
 };
 
 const StyledUl = styled.ul`
   list-style: none;
-  padding: 0;
+  padding: 9px 14px;
   margin: 0;
   li {
     padding: 3px 0;

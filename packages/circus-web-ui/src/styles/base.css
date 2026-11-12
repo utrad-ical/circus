@@ -1,0 +1,25 @@
+/*
+ * Base styles of the whole page.
+ * They replace the corresponding parts of Bootstrap's scaffolding,
+ * so removing Bootstrap later will not change the look.
+ */
+@layer base {
+  body {
+    font-family:
+      'Helvetica Neue', 'Helvetica', 'ヒラギノ角ゴ ProN W3',
+      'Hiragino Kaku Gothic ProN', 'メイリオ', Meiryo, sans-serif;
+    font-size: 16px;
+    line-height: 1.428571429;
+    background-color: var(--bg);
+    color: var(--text);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--theme);
+    outline-offset: 1px;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklch, var(--theme) 30%, transparent);
+  }
+}

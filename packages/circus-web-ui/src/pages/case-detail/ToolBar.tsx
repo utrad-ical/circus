@@ -588,6 +588,7 @@ const StyledDiv = styled.div`
   background-color: #333;
   button:not([role='menuitem']) {
     height: 40px;
+    min-height: 0;
     padding: 0 7px;
     font-size: 170%;
   }

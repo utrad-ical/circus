@@ -5,6 +5,7 @@ import {
   createBrowserRouter,
   Outlet,
   RouterProvider,
+  type RouteObject,
   useLocation
 } from 'react-router-dom';
 import useLoginUser from '#utils/useLoginUser.ts';
@@ -105,6 +106,17 @@ const AppInner: React.FC<{ manager: ReturnType<typeof loginManager> }> = ({
   return <RootApp manager={manager} />;
 };
 
+// Opts in to the behavior of v7 to silence the warnings
+const routerOptions = {
+  future: {
+    v7_relativeSplatPath: true,
+    v7_fetcherPersist: true,
+    v7_normalizeFormMethod: true,
+    v7_partialHydration: true,
+    v7_skipActionErrorRevalidation: true
+  }
+};
+
 const TheApp: React.FC<{}> = () => {
   const [manager, setManager] = useState<ReturnType<typeof loginManager>>();
   const [api, setApi] = useState<ApiCaller>();
@@ -121,7 +133,7 @@ const TheApp: React.FC<{}> = () => {
 
   if (!manager) return null;
 
-  const router = createBrowserRouter([
+  const routes: RouteObject[] = [
     {
       path: '/',
       element: (
@@ -210,9 +222,13 @@ const TheApp: React.FC<{}> = () => {
         }
       ]
     }
-  ]);
+  ];
 
-  return <RouterProvider router={router} />;
+  const router = createBrowserRouter(routes, routerOptions);
+
+  return (
+    <RouterProvider router={router} future={{ v7_startTransition: true }} />
+  );
 };
 
 ReactDOM.render(

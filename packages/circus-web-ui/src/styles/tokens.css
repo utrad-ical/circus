@@ -1,0 +1,56 @@
+/*
+ * Design tokens.
+ *
+ * These variables are also available to plug-in displays,
+ * so their names are part of the public API.
+ * Light and dark values are switched by `color-scheme` on the root element.
+ * Shades and tints are not tokens; derive them where they are used,
+ * e.g., `color-mix(in oklch, var(--theme) 15%, var(--bg))`.
+ */
+@layer base {
+  :root {
+    --theme: #168477;
+    /*
+     * Should be `contrast-color(var(--theme))`, but it picks black for the
+     * current theme color (contrast 4.60 against 4.56 for white)
+     */
+    --theme-text: #ffffff;
+    --accent: #fd3164;
+
+    --success: oklch(0.6 0.15 145);
+    --warning: oklch(0.75 0.15 70);
+    --danger: oklch(0.58 0.19 25);
+
+    --bg: light-dark(#ffffff, #000000);
+    --surface: light-dark(#eeeeee, #222222);
+    --text: light-dark(#111111, #ffffff);
+    --muted: light-dark(#777777, #999999);
+    --border: light-dark(silver, darkgray);
+  }
+
+  /*
+   * Old names kept during the migration.
+   * Remove them when nothing refers to them.
+   */
+  :root {
+    --circus-brand-primary: var(--theme);
+    --circus-brand-primary-dark: color-mix(in oklch, var(--theme), black 25%);
+    --circus-brand-primary-darker: color-mix(in oklch, var(--theme), black 50%);
+    --circus-brand-primary-text: var(--theme-text);
+
+    --circus-state-info: color-mix(in oklch, var(--theme) 15%, var(--bg));
+
+    --circus-background: var(--bg);
+    --circus-background-dark: light-dark(#e6e6e6, #1a1a1a);
+    --circus-background-darker: light-dark(#cccccc, #333333);
+    --circus-secondary-background: var(--surface);
+    --circus-active-background: light-dark(#dddddd, #444444);
+    --circus-invalid-background: light-dark(pink, #660000);
+
+    --circus-background-text: var(--text);
+    --circus-primary-text: var(--text);
+    --circus-border: var(--border);
+
+    --circus-highlight-color: var(--accent);
+  }
+}

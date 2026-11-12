@@ -1,5 +1,7 @@
-// Import Bootstrap as our primary CSS framework
-@import 'bootstrap.less';
+// Bootstrap is kept in a weak cascade layer (see foundation.css)
+@layer bootstrap {
+  @import 'bootstrap.less';
+}
 @import 'colors.less';
 
 .pagination {

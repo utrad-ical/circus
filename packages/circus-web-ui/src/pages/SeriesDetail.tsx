@@ -1,3 +1,4 @@
+import Button from '#components/Button.tsx';
 import Icon from '#components/Icon.tsx';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Row, Col, Panel } from '#components/react-bootstrap.ts';
@@ -9,7 +10,6 @@ import { toolFactory } from '@utrad-ical/circus-rs';
 import useLoadData from '#utils/useLoadData.ts';
 import styled from 'styled-components';
 import { Link, useParams } from 'react-router-dom';
-import IconButton from '#components/IconButton.ts';
 import type { SeriesEntryWithHints } from '@utrad-ical/circus-ui-kit';
 import { useVolumeLoaders } from '@utrad-ical/circus-ui-kit';
 
@@ -139,15 +139,15 @@ const SeriesDetail: React.FC<{}> = props => {
         <Col lg={6}>
           <StyledMenu>
             <Link to={`/new-case/${seriesUid}`}>
-              <IconButton icon="circus-case" bsStyle="primary">
+              <Button icon="circus-case" variant="primary">
                 New Case
-              </IconButton>
+              </Button>
             </Link>
             &ensp;
             <Link to={`/new-job/${seriesUid}`}>
-              <IconButton icon="circus-job" bsStyle="primary">
+              <Button icon="circus-job" variant="primary">
                 New Job
-              </IconButton>
+              </Button>
             </Link>
           </StyledMenu>
           {typeof seriesData.patientInfo === 'object' ? (

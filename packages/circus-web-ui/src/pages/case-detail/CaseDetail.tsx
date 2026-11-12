@@ -1,3 +1,4 @@
+import Button from '#components/Button.tsx';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import { alert, confirm } from '@smikitky/rb-components/lib/modal';
 import CaseExportModal from '#components/CaseExportModal.tsx';
@@ -7,14 +8,13 @@ import DataGrid from '#components/DataGrid.tsx';
 import DropdownButton from '#components/DropdownButton.tsx';
 import FullSpanContainer from '#components/FullSpanContainer.tsx';
 import Icon from '#components/Icon.tsx';
-import IconButton from '#components/IconButton.ts';
 import MenuItem from '#components/MenuItem.tsx';
 import PatientInfoBox from '#components/PatientInfoBox.tsx';
 import ProjectDisplay from '#components/ProjectDisplay.tsx';
 import SearchResultsView from '#components/SearchResultsView.tsx';
 import Tag from '#components/Tag.tsx';
 import TimeDisplay from '#components/TimeDisplay.tsx';
-import { Button, Modal } from '#components/react-bootstrap.ts';
+import { Modal } from '#components/react-bootstrap.ts';
 import { produce } from 'immer';
 import React, {
   useCallback,
@@ -426,29 +426,27 @@ const MenuBar: React.FC<{
       </div>
       <div className="right">
         {unsavedAlertMessage}
-        <IconButton
-          bsStyle="default"
+        <Button
           icon="material-skip_previous"
           disabled={!c.canUndo(caseStore) || busy}
           onClick={() => onCommand('undo')}
         />
-        <IconButton
-          bsStyle="default"
+        <Button
           icon="material-skip_next"
           disabled={!c.canRedo(caseStore) || busy}
           onClick={() => onCommand('redo')}
         />
         &ensp;
         <Button
-          bsStyle="success"
+          variant="primary"
           onClick={() => onCommand('save')}
           disabled={
             busy ||
             !caseStore.caseAttributesAreValid ||
             caseStore.labelsWithInvalidAttributes.length > 0
           }
+          icon="material-download_2"
         >
-          <Icon icon="material-download_2" />
           Save
         </Button>
         <DropdownButton
@@ -517,9 +515,9 @@ const RelevantCases: React.FC<{
           currentCaseId === value.caseId ? null : (
             <div className="register">
               <Link to={`/case/${value.caseId}`}>
-                <IconButton icon="circus-case" bsSize="sm" bsStyle="primary">
+                <Button icon="circus-case" size="small" variant="primary">
                   View
-                </IconButton>
+                </Button>
               </Link>
             </div>
           )

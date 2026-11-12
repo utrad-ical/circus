@@ -1,10 +1,9 @@
+import Button from '#components/Button.tsx';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import { confirm } from '@smikitky/rb-components/lib/modal';
 import Icon from '#components/Icon.tsx';
-import IconButton from '#components/IconButton.ts';
 import {
   ListGroup,
-  InputGroup,
   ListGroupItem,
   Panel,
   FormControl
@@ -114,13 +113,13 @@ const TokenManagement: React.FC<{}> = props => {
                     <AccessToken accessToken={accessTokens[token.tokenId]} />
                   )}
                 </div>
-                <IconButton
-                  bsStyle="warning"
+                <Button
+                  variant="danger"
                   icon="material-close"
                   onClick={() => handleRemove(token.tokenId)}
                 >
                   Remove
-                </IconButton>
+                </Button>
               </StyledListGroupItem>
             ))}
           {Array.isArray(data) && data.length === 0 && (
@@ -132,7 +131,7 @@ const TokenManagement: React.FC<{}> = props => {
       </Panel>
       <hr />
       <h1>Add new token</h1>
-      <InputGroup>
+      <NewTokenForm>
         <FormControl
           type="text"
           placeholder="Description of the new token"
@@ -141,20 +140,22 @@ const TokenManagement: React.FC<{}> = props => {
             setDescription(ev.target.value)
           }
         ></FormControl>
-        <InputGroup.Button>
-          <IconButton
-            bsStyle="primary"
-            disabled={description.length <= 0}
-            onClick={handleCreate}
-            icon="material-add"
-          >
-            Create
-          </IconButton>
-        </InputGroup.Button>
-      </InputGroup>
+        <Button
+          variant="primary"
+          disabled={description.length <= 0}
+          onClick={handleCreate}
+          icon="material-add"
+        >
+          Create
+        </Button>
+      </NewTokenForm>
     </div>
   );
 };
+
+const NewTokenForm = styled.div`
+  display: flex;
+`;
 
 const StyledListGroupItem = styled(ListGroupItem)`
   display: flex;

@@ -1,12 +1,8 @@
+import Button from '#components/Button.tsx';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import classnames from 'classnames';
 import Icon from '#components/Icon.tsx';
-import {
-  Button,
-  FormControl,
-  FormGroup,
-  Panel
-} from '#components/react-bootstrap.ts';
+import { FormControl, FormGroup, Panel } from '#components/react-bootstrap.ts';
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -141,12 +137,12 @@ const LoginScreen: React.FC<{}> = props => {
         <Panel.Footer className="text-center">
           <Button
             disabled={disabled}
-            bsStyle="primary"
-            bsSize="lg"
+            variant="primary"
+            size="large"
             onClick={handleLoginClick}
+            icon="material-check_circle"
           >
-            <Icon icon="material-check_circle" />
-            &ensp;Login
+            Login
           </Button>
         </Panel.Footer>
       </Panel>

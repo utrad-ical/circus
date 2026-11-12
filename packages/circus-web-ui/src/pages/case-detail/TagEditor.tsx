@@ -1,6 +1,6 @@
+import Button from '#components/Button.tsx';
 import React, { useState, useMemo } from 'react';
 import { OverlayTrigger, Popover } from '#components/react-bootstrap.ts';
-import IconButton from '#components/IconButton.ts';
 import { PhysicalTag } from '#components/Tag.tsx';
 import type Project from '#types/Project.ts';
 import styled from 'styled-components';
@@ -58,7 +58,7 @@ const TagEditor: React.FC<{
       onEnter={() => setEditingValue(value)}
       onExited={handleExited}
     >
-      <IconButton icon="circus-tool" bsStyle="link" bsSize="sm" />
+      <Button icon="circus-tool" variant="link" size="small" />
     </OverlayTrigger>
   );
 };

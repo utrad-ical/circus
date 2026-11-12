@@ -1,10 +1,10 @@
+import Button from '#components/Button.tsx';
 import { confirm } from '@smikitky/rb-components/lib/modal';
 import CaseExportModal from '#components/CaseExportModal.tsx';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
 import DataGrid from '#components/DataGrid.tsx';
 import DropdownButton from '#components/DropdownButton.tsx';
 import Icon from '#components/Icon.tsx';
-import IconButton from '#components/IconButton.ts';
 import MenuItem from '#components/MenuItem.tsx';
 import MyListDropdown from '#components/MyListDropdown.tsx';
 import SearchResultsView, {
@@ -44,14 +44,14 @@ const Operation: React.FC<{
   return (
     <div className="register">
       <Link to={`/case/${item.caseId}`}>
-        <IconButton
+        <Button
           icon="circus-case"
-          bsSize="sm"
-          bsStyle="primary"
+          size="small"
+          variant="primary"
           onClick={handleClick}
         >
           View
-        </IconButton>
+        </Button>
       </Link>
     </div>
   );
@@ -169,17 +169,15 @@ const CaseSearchResultsView: React.FC<{
               ).length;
               return (
                 <MenuItem key={tag.name}>
-                  <IconButton
-                    bsSize="xs"
-                    bsStyle="default"
+                  <Button
+                    size="xsmall"
                     icon="material-add"
                     onClick={() => handleSetTags('add', tag.name)}
                     disabled={count === selected.length}
                   />
                   &thinsp;
-                  <IconButton
-                    bsSize="xs"
-                    bsStyle="default"
+                  <Button
+                    size="xsmall"
                     icon="material-close"
                     onClick={() => handleSetTags('remove', tag.name)}
                     disabled={count === 0}

@@ -1,3 +1,4 @@
+import Button from '#components/Button.tsx';
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
 import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
@@ -6,10 +7,9 @@ import {
   describePartialVolumeDescriptor,
   rangeHasPartialVolume
 } from '@utrad-ical/circus-rs';
-import { Button, Modal } from '#components/react-bootstrap.ts';
+import { Modal } from '#components/react-bootstrap.ts';
 import * as mr from 'multi-integer-range';
 import React, { useMemo, useState } from 'react';
-import IconButton from './IconButton.ts';
 import styled from 'styled-components';
 
 const PartialVolumeDescriptorEditor: React.FC<{
@@ -80,17 +80,17 @@ const PartialVolumeDescriptorEditor: React.FC<{
           <span>
             <b>Preview:</b> {describePartialVolumeDescriptor(descriptor)}
           </span>
-          <IconButton
+          <Button
             icon="material-swap_horiz"
             disabled={!isValid}
             onClick={handleFlip}
           >
             Flip start/end
-          </IconButton>
+          </Button>
         </PreviewDiv>
       </Modal.Body>
       <Modal.Footer>
-        <Button bsStyle="link" onClick={() => onResolve(null)}>
+        <Button variant="link" onClick={() => onResolve(null)}>
           Cancel
         </Button>
         <Button onClick={() => onResolve({ descriptor: null })}>
@@ -99,7 +99,7 @@ const PartialVolumeDescriptorEditor: React.FC<{
         <Button
           onClick={() => onResolve({ descriptor })}
           disabled={!isValid}
-          bsStyle="primary"
+          variant="primary"
         >
           OK
         </Button>

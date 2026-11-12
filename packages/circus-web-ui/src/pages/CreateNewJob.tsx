@@ -1,9 +1,9 @@
+import Button from '#components/Button.tsx';
 import Icon from '#components/Icon.tsx';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import { confirm } from '@smikitky/rb-components/lib/modal';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import CsVolumeDownloadModal from '#components/CsVolumeDownloadModal.tsx';
-import IconButton from '#components/IconButton.ts';
 import PluginDisplay from '#components/PluginDisplay.tsx';
 import type { SeriesEntry } from '#components/SeriesSelector.tsx';
 import SeriesSelector from '#components/SeriesSelector.tsx';
@@ -135,25 +135,24 @@ const CreateNewJob: React.FC<{}> = props => {
       <div className="text-right">
         {user.globalPrivileges.includes('downloadVolume') && (
           <>
-            <IconButton
+            <Button
               disabled={!canCreate}
               icon="material-arrow_circle_down"
-              bsStyle="default"
               onClick={handleVolumeDownload}
             >
               Download volume
-            </IconButton>
+            </Button>
             &ensp;
           </>
         )}
-        <IconButton
+        <Button
           disabled={!canCreate}
           icon="circus-b-calc"
-          bsStyle="primary"
+          variant="primary"
           onClick={handleCreate}
         >
           Register Job
-        </IconButton>
+        </Button>
       </div>
       {showVolumeDownloadModal && (
         <CsVolumeDownloadModal

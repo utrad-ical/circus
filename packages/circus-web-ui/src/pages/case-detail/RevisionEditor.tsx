@@ -1,4 +1,4 @@
-import IconButton from '@smikitky/rb-components/lib/IconButton';
+import Button from '#components/Button.tsx';
 import type {
   PartialVolumeDescriptor,
   Viewer,
@@ -989,14 +989,14 @@ const RevisionEditor: React.FC<{
             metadata={metadata}
           />
           <div className="add-series-pane">
-            <IconButton
-              bsSize="xs"
+            <Button
+              size="xsmall"
               icon="material-add"
               onClick={handleModifySeries}
               disabled={busy}
             >
               Add series
-            </IconButton>
+            </Button>
           </div>
 
           {activeLabel &&

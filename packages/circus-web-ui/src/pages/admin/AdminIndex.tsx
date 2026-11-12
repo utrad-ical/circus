@@ -1,8 +1,7 @@
+import Button from '#components/Button.tsx';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Button } from '#components/react-bootstrap.ts';
 import AdminContainer from './AdminContainer.tsx';
-import Icon from '#components/Icon.tsx';
 import styled from 'styled-components';
 
 const Btn: React.FC<{
@@ -11,9 +10,8 @@ const Btn: React.FC<{
   glyph: string;
 }> = ({ to, link, glyph }) => (
   <Link to={`${to}`}>
-    <Button block bsStyle="primary" bsSize="lg">
-      <Icon icon={glyph} />
-      &ensp;{link}
+    <Button variant="primary" size="large" icon={glyph}>
+      {link}
     </Button>
   </Link>
 );
@@ -26,6 +24,9 @@ const Row = styled.div`
     margin-bottom: 20px;
     margin-right: 10px;
     flex: 0 0 320px;
+    > button {
+      width: 100%;
+    }
   }
 `;
 

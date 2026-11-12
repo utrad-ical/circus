@@ -1,4 +1,5 @@
-import { Button, Modal, ProgressBar } from '#components/react-bootstrap.ts';
+import Button from '#components/Button.tsx';
+import { Modal, ProgressBar } from '#components/react-bootstrap.ts';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import type { ProcessorProgress, Editor } from './processor-types.ts';
@@ -55,10 +56,10 @@ const ProcessorModal: React.FC<{
         </StyledDiv>
       </Modal.Body>
       <Modal.Footer>
-        <Button bsStyle="link" onClick={onHide}>
+        <Button variant="link" onClick={onHide}>
           Cancel
         </Button>
-        <Button onClick={handleOkClick} bsStyle="primary">
+        <Button onClick={handleOkClick} variant="primary">
           OK
         </Button>
       </Modal.Footer>

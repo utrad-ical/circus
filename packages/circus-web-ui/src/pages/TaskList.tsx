@@ -1,7 +1,7 @@
+import Button from '#components/Button.tsx';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
 import DataGrid from '#components/DataGrid.tsx';
 import Icon from '#components/Icon.tsx';
-import IconButton from '#components/IconButton.ts';
 import SearchResultsView, {
   makeSortOptions
 } from '#components/SearchResultsView.tsx';
@@ -75,9 +75,9 @@ const columns: DataGridColumnDefinition<Task>[] = [
       const { status, taskId, downloadFileType } = value;
       const handleClick = useTaskDownloadHandler(taskId);
       return status === 'finished' && downloadFileType ? (
-        <IconButton
-          bsStyle="success"
-          bsSize="sm"
+        <Button
+          variant="primary"
+          size="small"
           icon="material-arrow_circle_down"
           onClick={handleClick}
         />
@@ -92,15 +92,15 @@ const columns: DataGridColumnDefinition<Task>[] = [
     renderer: (({ value }) => {
       const dismissTask = useTaskDismisser();
       return (
-        <IconButton
+        <Button
           disabled={value.dismissed}
-          bsSize="sm"
-          bsStyle="primary"
+          size="small"
+          variant="primary"
           onClick={() => dismissTask(value.taskId)}
           icon="material-select_check_box"
         >
           Done
-        </IconButton>
+        </Button>
       );
     }) as React.FC<any>
   }
@@ -160,9 +160,9 @@ const DebugTaskLauncher: React.FC = props => {
 
   return (
     <div>
-      <IconButton icon="material-add" onClick={handleClick}>
+      <Button icon="material-add" onClick={handleClick}>
         Run debug task
-      </IconButton>
+      </Button>
     </div>
   );
 };

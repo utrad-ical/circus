@@ -1,3 +1,4 @@
+import Button from '#components/Button.tsx';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import { confirm, modal } from '@smikitky/rb-components/lib/modal';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
@@ -5,7 +6,6 @@ import type { PartialVolumeDescriptor } from '@utrad-ical/circus-rs';
 import { describePartialVolumeDescriptor } from '@utrad-ical/circus-rs';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
 import DataGrid from '#components/DataGrid.tsx';
-import IconButton from '#components/IconButton.ts';
 import { Panel } from '#components/react-bootstrap.ts';
 import SearchResultsView from '#components/SearchResultsView.tsx';
 import { produce } from 'immer';
@@ -30,14 +30,14 @@ const PartialVolumeRenderer: React.FC<{
   const applied = value !== 'auto';
 
   return (
-    <IconButton
+    <Button
       icon="material-edit_square"
-      bsSize="xs"
+      size="xsmall"
       onClick={onClick}
-      bsStyle={applied ? 'success' : 'default'}
+      variant={applied ? 'primary' : 'default'}
     >
       {applied ? describePartialVolumeDescriptor(value!, 3) : 'auto'}
-    </IconButton>
+    </Button>
   );
 };
 
@@ -63,14 +63,14 @@ const RelevantSeries: React.FC<{
           key: 'action',
           caption: '',
           renderer: ({ value }) => (
-            <IconButton
+            <Button
               icon="material-keyboard_arrow_up"
-              bsSize="xs"
-              bsStyle="primary"
+              size="xsmall"
+              variant="primary"
               onClick={() => onSeriesRegister(value.seriesUid, value.studyUid)}
             >
               Add
-            </IconButton>
+            </Button>
           )
         }
       ];
@@ -297,8 +297,8 @@ const SeriesSelector: React.FC<{
     {
       className: 'delete',
       renderer: ({ value, index }) => (
-        <IconButton
-          bsSize="xs"
+        <Button
+          size="xsmall"
           icon="material-close"
           onClick={() => handleSeriesRemove(index)}
         />
@@ -313,17 +313,17 @@ const SeriesSelector: React.FC<{
         <DataGrid columns={columns} value={value} />
         <SelectAdditionalSeriesDiv>
           {!alwaysShowRelevantSeries && (
-            <IconButton
+            <Button
               icon={
                 showRelevantSeries
                   ? 'material-keyboard_arrow_up'
                   : 'material-add'
               }
-              bsSize="sm"
+              size="small"
               onClick={handleAddSeriesClick}
             >
               {showRelevantSeries ? 'Close' : 'Add Series'}
-            </IconButton>
+            </Button>
           )}
           {showRelevantSeries && (
             <>

@@ -1,10 +1,6 @@
+import Button from '#components/Button.tsx';
 import Icon from '#components/Icon.tsx';
-import {
-  Button,
-  Dropdown,
-  FormControl,
-  Modal
-} from '#components/react-bootstrap.ts';
+import { Dropdown, FormControl, Modal } from '#components/react-bootstrap.ts';
 import MenuItem from '#components/MenuItem.tsx';
 import keycode from 'keycode';
 import type { ExternalLabel } from '#pages/case-detail/labelData.ts';
@@ -89,10 +85,10 @@ const SaveModal: React.FC<{
         )}
       </Modal.Body>
       <Modal.Footer>
-        <Button bsStyle="link" onClick={onHide}>
+        <Button variant="link" onClick={onHide}>
           Cancel
         </Button>
-        <Button onClick={() => onOkClick(value)} bsStyle="primary">
+        <Button onClick={() => onOkClick(value)} variant="primary">
           OK
         </Button>
       </Modal.Footer>

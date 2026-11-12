@@ -1,9 +1,9 @@
+import Button from '#components/Button.tsx';
 import Icon from '#components/Icon.tsx';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import type { MyList } from '#store/loginUser.ts';
 import styled from 'styled-components';
-import { Button } from '#components/react-bootstrap.ts';
 
 const MyListArray: React.FC<{
   value: MyList[];
@@ -22,8 +22,8 @@ const MyListArray: React.FC<{
             <span className="name">{list.name}</span>
             <div className="menu">
               <Button
-                bsSize="xs"
-                bsStyle="primary"
+                size="xsmall"
+                variant="primary"
                 onClick={ev => {
                   ev.preventDefault();
                   onRenameClick(list.myListId);
@@ -33,8 +33,8 @@ const MyListArray: React.FC<{
               </Button>
               &ensp;
               <Button
-                bsSize="xs"
-                bsStyle="danger"
+                size="xsmall"
+                variant="danger"
                 onClick={ev => {
                   ev.preventDefault();
                   onDeleteClick(list.myListId);

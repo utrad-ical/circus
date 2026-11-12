@@ -1,7 +1,7 @@
+import Button from '#components/Button.tsx';
 import React, { Fragment, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import MessageBox from './MessageBox.tsx';
-import { Button } from '#components/react-bootstrap.ts';
 import ErrorBoundary from '#components/ErrorBoundary.tsx';
 import MainNav from './MainNav.tsx';
 import { useDispatch, useSelector } from 'react-redux';

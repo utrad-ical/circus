@@ -1,4 +1,4 @@
-import IconButton from '#components/IconButton.ts';
+import Button from '#components/Button.tsx';
 import { confirm, prompt } from '@smikitky/rb-components/lib/modal';
 import Icon from '#components/Icon.tsx';
 import MyListArray from './MyListArray.tsx';
@@ -97,13 +97,9 @@ const MyListHome: React.FC<{
           You have no my list for this resource type.
         </div>
       )}
-      <IconButton
-        bsStyle="primary"
-        icon="material-add"
-        onClick={handleCreateNew}
-      >
+      <Button variant="primary" icon="material-add" onClick={handleCreateNew}>
         Create new my list
-      </IconButton>
+      </Button>
     </div>
   );
 };

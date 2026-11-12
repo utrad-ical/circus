@@ -1,3 +1,4 @@
+import Button from '#components/Button.tsx';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import type {
   PartialVolumeDescriptor,
@@ -6,8 +7,7 @@ import type {
 import { describePartialVolumeDescriptor } from '@utrad-ical/circus-rs';
 import classNames from 'classnames';
 import Icon from '#components/Icon.tsx';
-import IconButton from '#components/IconButton.ts';
-import { Button, Modal } from '#components/react-bootstrap.ts';
+import { Modal } from '#components/react-bootstrap.ts';
 import * as mr from 'multi-integer-range';
 import React, { useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
@@ -296,8 +296,8 @@ const SeriesInfo: React.FC<{
 
   return (
     <div>
-      <IconButton
-        bsStyle="link"
+      <Button
+        variant="link"
         icon="material-info"
         onClick={() => setShowModal(true)}
       />
@@ -314,7 +314,7 @@ const SeriesInfo: React.FC<{
           </tbody>
         </table>
         <Modal.Footer>
-          <Button bsStyle="primary" onClick={() => setShowModal(false)}>
+          <Button variant="primary" onClick={() => setShowModal(false)}>
             OK
           </Button>
         </Modal.Footer>

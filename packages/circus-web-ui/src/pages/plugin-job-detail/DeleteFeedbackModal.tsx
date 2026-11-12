@@ -1,9 +1,10 @@
+import Button from '#components/Button.tsx';
 import type { FeedbackEntry } from '@utrad-ical/circus-ui-kit';
 import { useCsResults } from '@utrad-ical/circus-ui-kit';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
 import DataGrid from '#components/DataGrid.tsx';
 import Icon from '#components/Icon.tsx';
-import { Button, Modal } from '#components/react-bootstrap.ts';
+import { Modal } from '#components/react-bootstrap.ts';
 import TimeDisplay from '#components/TimeDisplay.tsx';
 import UserDisplay from '#components/UserDisplay.tsx';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -60,8 +61,8 @@ const DeleteFeedbackModal: React.FC<{}> = () => {
         renderer: ({ value }) => (
           <Button
             onClick={() => handleDeleteFb(value.feedbackId)}
-            bsStyle="danger"
-            bsSize="small"
+            variant="danger"
+            size="small"
             disabled={!value.isConsensual && hasConsensual}
           >
             Delete
@@ -89,7 +90,7 @@ const DeleteFeedbackModal: React.FC<{}> = () => {
             <DataGrid<FeedbackEntry<any>> columns={columns} value={feedbacks} />
             <hr />
             Delete <b>all</b> feedback for this job:{' '}
-            <Button bsStyle="danger" onClick={() => handleDeleteFb('all')}>
+            <Button variant="danger" onClick={() => handleDeleteFb('all')}>
               Delete
             </Button>
           </>

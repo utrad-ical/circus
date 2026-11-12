@@ -1,3 +1,4 @@
+import Button from '#components/Button.tsx';
 import type {
   Composition,
   MprViewState,
@@ -13,7 +14,6 @@ import DropdownButton from '#components/DropdownButton.tsx';
 import type { LayoutInfo } from '#components/GridContainer.tsx';
 import GridContainer, { layoutReducer } from '#components/GridContainer.tsx';
 import Icon from '#components/Icon.tsx';
-import IconButton from '#components/IconButton.ts';
 import type {
   InitialStateSetterFunc,
   StateChanger
@@ -24,7 +24,6 @@ import ImageViewer, {
   setOrthogonalOrientation
 } from '#components/ImageViewer.tsx';
 import MenuItem from '#components/MenuItem.tsx';
-import { Button } from '#components/react-bootstrap.ts';
 import React, {
   useCallback,
   useContext,
@@ -87,7 +86,7 @@ const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
     }, 'select active editor');
   };
 
-  const handleRotateClick: React.MouseEventHandler<Button> = ev => {
+  const handleRotateClick: React.MouseEventHandler<HTMLButtonElement> = ev => {
     updateEditingData(d => {
       const item = d.layoutItems.find(item => item.key === key)!;
       item.celestialRotateMode = !item.celestialRotateMode;
@@ -104,7 +103,7 @@ const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
     ev.stopPropagation();
   };
 
-  const handleRemoveClick: React.MouseEventHandler<Button> = ev => {
+  const handleRemoveClick: React.MouseEventHandler<HTMLButtonElement> = ev => {
     updateEditingData(d => {
       if (Object.keys(d.layout.positions).length <= 1) return;
       delete d.layout.positions[key];
@@ -159,8 +158,8 @@ const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
       <span>
         {orientation === 'oblique' && (
           <Button
-            bsSize="xs"
-            bsStyle={celestialRotateMode ? 'primary' : 'default'}
+            size="xsmall"
+            variant={celestialRotateMode ? 'primary' : 'default'}
             onClick={handleRotateClick}
           >
             Rotate
@@ -188,8 +187,8 @@ const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
             </MenuItem>
           </DropdownButton>
         )}
-        <IconButton
-          bsSize="xs"
+        <Button
+          size="xsmall"
           icon="material-close"
           onClick={handleRemoveClick}
           disabled={Object.keys(editingData.layout.positions).length <= 1}

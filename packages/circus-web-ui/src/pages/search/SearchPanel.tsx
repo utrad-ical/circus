@@ -1,6 +1,5 @@
+import Button from '#components/Button.tsx';
 import React, { useState, useCallback, useEffect } from 'react';
-import { Button } from '#components/react-bootstrap.ts';
-import IconButton from '#components/IconButton.ts';
 import { ControlledCollapser } from '#components/Collapser.tsx';
 import useLocalPreference from '#utils/useLocalPreference.ts';
 import { useApi } from '#utils/api.ts';
@@ -114,25 +113,25 @@ const SearchPanel: <T extends {}>(props: {
     <StateSavingCollapser title="Search Condition" framed>
       <ConditionEditor value={condition} onChange={setCondition} />
       <ButtonBar>
-        <IconButton
-          bsStyle="link"
+        <Button
+          variant="link"
           icon="material-download_2"
           onClick={handleSavePresetClick}
         >
           Save
-        </IconButton>
+        </Button>
         &ensp;
-        <Button bsStyle="link" onClick={handleResetClick}>
+        <Button variant="link" onClick={handleResetClick}>
           Reset
         </Button>
         &ensp;
-        <IconButton
-          bsStyle="primary"
+        <Button
+          variant="primary"
           icon="material-search"
           onClick={handleSearchClick}
         >
           Search
-        </IconButton>
+        </Button>
       </ButtonBar>
     </StateSavingCollapser>
   );

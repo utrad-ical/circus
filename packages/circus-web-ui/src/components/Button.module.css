@@ -1,0 +1,77 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35em;
+  padding: 0.375em 0.75em;
+  border: 1px solid var(--border);
+  background-color: var(--bg);
+  color: var(--text);
+  font: inherit;
+  line-height: 1.43;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  &:hover {
+    background-color: color-mix(in oklch, var(--bg), var(--text) 8%);
+  }
+  &:active,
+  &[aria-pressed='true'] {
+    background-color: color-mix(in oklch, var(--bg), var(--text) 16%);
+    box-shadow: inset 0 3px 5px rgb(0 0 0 / 0.125);
+  }
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+}
+
+.primary,
+.danger {
+  --button-color: var(--theme);
+  background-color: var(--button-color);
+  border-color: oklch(from var(--button-color) calc(l - 0.06) c h);
+  color: contrast-color(var(--button-color));
+  &:hover {
+    background-color: oklch(from var(--button-color) calc(l - 0.06) c h);
+  }
+  &:active,
+  &[aria-pressed='true'] {
+    background-color: oklch(from var(--button-color) calc(l - 0.12) c h);
+  }
+  &:disabled {
+    background-color: var(--button-color);
+  }
+}
+.danger {
+  --button-color: var(--danger);
+}
+
+.link {
+  border-color: transparent;
+  background-color: transparent;
+  color: var(--theme);
+  &:hover,
+  &:active,
+  &[aria-pressed='true'] {
+    background-color: transparent;
+    box-shadow: none;
+    text-decoration: underline;
+  }
+}
+
+.xsmall {
+  padding: 0.0625em 0.35em;
+  font-size: 0.875em;
+}
+.small {
+  padding: 0.35em 0.7em;
+  font-size: 0.875em;
+}
+.large {
+  padding: 0.5em 0.8em;
+  font-size: 1.25em;
+  line-height: 1.33;
+}

@@ -1,3 +1,4 @@
+import Button from '#components/Button.tsx';
 import type { Editor } from '@smikitky/rb-components/lib/editor-types';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import type { ModifierKeyBehaviors } from '@utrad-ical/circus-rs';
@@ -6,7 +7,6 @@ import type { ReferenceValueOption } from '@utrad-ical/circus-rs';
 import type { InterpolationMode } from '@utrad-ical/circus-rs';
 import Icon from '#components/Icon.tsx';
 import {
-  Button,
   Dropdown,
   Modal,
   OverlayTrigger,
@@ -705,7 +705,7 @@ const ToolButton: React.FC<{
   } else {
     return (
       <OverlayTrigger overlay={toolTip} placement="top" delayShow={200}>
-        <Button bsStyle={style} onClick={handleClick} disabled={disabled}>
+        <Button variant={style} onClick={handleClick} disabled={disabled}>
           {iconSpan}
         </Button>
       </OverlayTrigger>

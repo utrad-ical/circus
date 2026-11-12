@@ -386,7 +386,7 @@ const MainNav: React.FC<{}> = props => {
                 link="/admin/general"
               />
               <SubMenu
-                icon="material-radio_button_checked"
+                icon="material-groups"
                 name="Groups"
                 link="/admin/group"
               />
@@ -409,7 +409,7 @@ const MainNav: React.FC<{}> = props => {
                 link="/admin/plugins"
               />
               <SubMenu
-                icon="material-lists"
+                icon="material-pending_actions"
                 name="Job Queue"
                 link="/admin/plugin-job-queue"
               />

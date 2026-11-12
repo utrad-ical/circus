@@ -190,7 +190,7 @@ const GroupAdmin: React.FC<any> = props => {
   return (
     <EditorPage
       title="User Groups"
-      icon="material-radio_button_checked"
+      icon="material-groups"
       searchName="admin-group"
       resource={{ endPoint: 'admin/groups', primaryKey: 'groupId' }}
       editorProperties={editorProperties}

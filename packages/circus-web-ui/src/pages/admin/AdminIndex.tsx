@@ -44,7 +44,7 @@ const AdminIndex: React.FC = () => {
         />
       </Row>
       <Row>
-        <Btn to="group" link="Groups" glyph="material-radio_button_checked" />
+        <Btn to="group" link="Groups" glyph="material-groups" />
         <Btn to="user" link="Users" glyph="material-person" />
       </Row>
       <h3>CIRCUS DB</h3>
@@ -61,7 +61,11 @@ const AdminIndex: React.FC = () => {
         <Btn to="plugins" link="CAD Plug-ins" glyph="circus-app" />
       </Row>
       <Row>
-        <Btn to="plugin-job-queue" link="Job Queue" glyph="material-lists" />
+        <Btn
+          to="plugin-job-queue"
+          link="Job Queue"
+          glyph="material-pending_actions"
+        />
       </Row>
     </AdminContainer>
   );

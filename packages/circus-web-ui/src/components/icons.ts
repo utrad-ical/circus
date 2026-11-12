@@ -26,6 +26,7 @@ import materialEditSquare from '@material-symbols/svg-600/outlined/edit_square.s
 import materialFileExport from '@material-symbols/svg-600/outlined/file_export.svg?icon';
 import materialFolderOpen from '@material-symbols/svg-600/outlined/folder_open.svg?icon';
 import materialGridView from '@material-symbols/svg-600/outlined/grid_view.svg?icon';
+import materialGroups from '@material-symbols/svg-600/outlined/groups.svg?icon';
 import materialInfo from '@material-symbols/svg-600/outlined/info.svg?icon';
 import materialKeyboardArrowUp from '@material-symbols/svg-600/outlined/keyboard_arrow_up.svg?icon';
 import materialListAlt from '@material-symbols/svg-600/outlined/list_alt.svg?icon';
@@ -35,6 +36,7 @@ import materialLock from '@material-symbols/svg-600/outlined/lock.svg?icon';
 import materialMenu from '@material-symbols/svg-600/outlined/menu.svg?icon';
 import materialMoreHoriz from '@material-symbols/svg-600/outlined/more_horiz.svg?icon';
 import materialNotifications from '@material-symbols/svg-600/outlined/notifications.svg?icon';
+import materialPendingActions from '@material-symbols/svg-600/outlined/pending_actions.svg?icon';
 import materialPerson from '@material-symbols/svg-600/outlined/person.svg?icon';
 import materialPlayArrow from '@material-symbols/svg-600/outlined/play_arrow.svg?icon';
 import materialRadioButtonChecked from '@material-symbols/svg-600/outlined/radio_button_checked.svg?icon';
@@ -162,6 +164,7 @@ const icons: { [name: string]: SvgIconData } = {
   'material-file_export': materialFileExport,
   'material-folder_open': materialFolderOpen,
   'material-grid_view': materialGridView,
+  'material-groups': materialGroups,
   'material-info': materialInfo,
   'material-keyboard_arrow_up': materialKeyboardArrowUp,
   'material-list_alt': materialListAlt,
@@ -171,6 +174,7 @@ const icons: { [name: string]: SvgIconData } = {
   'material-menu': materialMenu,
   'material-more_horiz': materialMoreHoriz,
   'material-notifications': materialNotifications,
+  'material-pending_actions': materialPendingActions,
   'material-person': materialPerson,
   'material-play_arrow': materialPlayArrow,
   'material-radio_button_checked': materialRadioButtonChecked,

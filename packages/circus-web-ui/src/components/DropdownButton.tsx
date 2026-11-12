@@ -89,7 +89,8 @@ const DropdownButton: FC<{
   };
 
   const handleMenuKeyDown = (ev: KeyboardEvent) => {
-    if (ev.key === 'Tab') {
+    // Other content (e.g., a table of links) keeps the normal Tab order
+    if (ev.key === 'Tab' && (ev.target as HTMLElement).role === 'menuitem') {
       menuRef.current?.hidePopover();
     } else if (moveMenuFocus(enabledItems(menuRef.current), ev.key)) {
       ev.preventDefault();

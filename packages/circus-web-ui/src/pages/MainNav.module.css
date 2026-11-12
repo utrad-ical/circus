@@ -30,6 +30,9 @@
     &:focus:not(:focus-visible) {
       outline: none;
     }
+    &:focus-visible {
+      outline-color: white;
+    }
   }
   &:hover {
     color: var(--accent);

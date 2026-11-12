@@ -1,5 +1,5 @@
 import type { Editor } from '@smikitky/rb-components/lib/editor-types';
-import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import Select from '#components/Select.tsx';
 import { produce } from 'immer';
 import type { ExternalLabel } from '#pages/case-detail/labelData.ts';
 import type { Revision } from '#pages/case-detail/revisionData.ts';
@@ -73,7 +73,7 @@ const createCaseExportOptionsEditor: (
       )}
       <div className="row">
         Voxel labels:{' '}
-        <ShrinkSelect
+        <Select
           options={labelPackTypeOptions}
           value={value.labelPackType}
           onChange={v => onChange({ ...value, labelPackType: v })}
@@ -81,7 +81,7 @@ const createCaseExportOptionsEditor: (
       </div>
       <div className="row">
         MHD file line endings:{' '}
-        <ShrinkSelect
+        <Select
           options={lineEndingOptions}
           value={value.mhdLineEnding}
           onChange={v => onChange({ ...value, mhdLineEnding: v })}
@@ -89,7 +89,7 @@ const createCaseExportOptionsEditor: (
       </div>
       <div className="row">
         Compression format:{' '}
-        <ShrinkSelect
+        <Select
           options={compressionFormatOptions}
           value={value.compressionFormat}
           onChange={v => onChange({ ...value, compressionFormat: v })}

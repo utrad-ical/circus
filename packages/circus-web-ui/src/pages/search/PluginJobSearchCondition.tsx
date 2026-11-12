@@ -1,3 +1,4 @@
+import { selectEditor } from '#components/Select.tsx';
 import React, { useState, useEffect, useMemo } from 'react';
 import { modalities } from '../../modalities.ts';
 import type { Condition } from './ConditionFrame.tsx';
@@ -130,13 +131,13 @@ const ConditionEditor: React.FC<{
       {
         key: 'pluginId',
         caption: 'Plugin',
-        editor: et.shrinkSelect(pluginOptions, { renderer: PluginRenderer })
+        editor: selectEditor(pluginOptions, { renderer: PluginRenderer })
       },
       { key: 'jobId', caption: 'Job ID', editor: et.text() },
       { key: 'patientId', caption: 'Patient ID', editor: et.text() },
       { key: 'patientName', caption: 'Pt. Name', editor: et.text() },
       { key: 'age', caption: 'Age', editor: AgeMinMax },
-      { key: 'sex', caption: 'Sex', editor: et.shrinkSelect(sexOptions) },
+      { key: 'sex', caption: 'Sex', editor: selectEditor(sexOptions) },
       {
         key: 'createdAt',
         caption: 'Job Date',
@@ -145,7 +146,7 @@ const ConditionEditor: React.FC<{
       {
         key: 'status',
         caption: 'Status',
-        editor: et.shrinkSelect(statusOptions)
+        editor: selectEditor(statusOptions)
       }
     ];
   }, [plugins]);

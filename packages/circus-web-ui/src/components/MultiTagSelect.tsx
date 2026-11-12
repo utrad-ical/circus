@@ -1,5 +1,5 @@
 import React from 'react';
-import MultiSelect from '@smikitky/rb-components/lib/MultiSelect';
+import MultiSelect from '#components/MultiSelect.tsx';
 import { PhysicalTag } from './Tag.tsx';
 
 const MultiTagSelect: React.FC<{

@@ -1,5 +1,5 @@
 import Icon from '#components/Icon.tsx';
-import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import Select from '#components/Select.tsx';
 import useShowMessage from '#utils/useShowMessage.ts';
 import FileUpload from '#components/FileUpload.tsx';
 import { Alert } from '#components/react-bootstrap.ts';
@@ -63,7 +63,7 @@ const ImportSeries: React.FC<{}> = props => {
       >
         <div>
           Upload Domain:&ensp;
-          <ShrinkSelect
+          <Select
             options={loginUser.domains}
             value={uploadDomain!}
             onChange={setUploadDomain}

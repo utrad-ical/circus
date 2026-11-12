@@ -1,5 +1,5 @@
 import React from 'react';
-import MultiSelect from '@smikitky/rb-components/lib/MultiSelect';
+import MultiSelect from '#components/MultiSelect.tsx';
 import BodyPartIcon from './BodyPartIcon.tsx';
 import styled from 'styled-components';
 import type Project from '#types/Project.ts';

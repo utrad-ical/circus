@@ -1,4 +1,4 @@
-import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import Select from '#components/Select.tsx';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import LabelDisplay from '../LabelDisplay.tsx';
@@ -74,16 +74,16 @@ export const OptionsEditor: Editor<BooleanOperationsOptions> = props => {
       <div>Label1:</div>
       <LabelDisplay label={labels[activeLabelIndex]} />
       <div>Operation:</div>
-      <ShrinkSelect
-        bsSize="sm"
+      <Select
+        size="small"
         options={booleanOperationTypes as unknown as string[]}
         value={value.operation}
         onChange={operation => onChange({ ...value, operation })}
         renderer={RenderOperationType}
       />
       <div>Label2:</div>
-      <ShrinkSelect
-        bsSize="sm"
+      <Select
+        size="small"
         options={options}
         value={labels[value.targetLabelIndex]?.temporaryKey ?? 'unselected'}
         onChange={handleSelectLabel2}

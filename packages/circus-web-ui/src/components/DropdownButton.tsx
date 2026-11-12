@@ -21,7 +21,7 @@ let counter = 0;
 const enabledItems = (menu: HTMLElement | null) =>
   Array.from(
     menu?.querySelectorAll<HTMLElement>(
-      '[role="menuitem"]:not([aria-disabled="true"])'
+      '[role^="menuitem"]:not([aria-disabled="true"])'
     ) ?? []
   );
 
@@ -65,7 +65,11 @@ const DropdownButton: FC<{
     const handleToggle = (ev: Event) => {
       const isOpen = (ev as Event & { newState: string }).newState === 'open';
       setOpen(isOpen);
-      if (isOpen) enabledItems(menu)[0]?.focus();
+      if (isOpen)
+        (
+          menu.querySelector<HTMLElement>('[aria-checked="true"]') ??
+          enabledItems(menu)[0]
+        )?.focus();
     };
     menu.addEventListener('toggle', handleToggle);
     return () => menu.removeEventListener('toggle', handleToggle);
@@ -73,9 +77,13 @@ const DropdownButton: FC<{
 
   const context = useMemo(
     () => ({
-      select: (eventKey: string | number | undefined, event: MouseEvent) => {
+      select: (
+        eventKey: string | number | undefined,
+        event: MouseEvent,
+        keepOpen?: boolean
+      ) => {
         if (eventKey !== undefined) onSelect?.(eventKey, event);
-        menuRef.current?.hidePopover();
+        if (!keepOpen) menuRef.current?.hidePopover();
       }
     }),
     [onSelect]
@@ -90,7 +98,10 @@ const DropdownButton: FC<{
 
   const handleMenuKeyDown = (ev: KeyboardEvent) => {
     // Other content (e.g., a table of links) keeps the normal Tab order
-    if (ev.key === 'Tab' && (ev.target as HTMLElement).role === 'menuitem') {
+    if (
+      ev.key === 'Tab' &&
+      (ev.target as HTMLElement).role?.startsWith('menuitem')
+    ) {
       menuRef.current?.hidePopover();
     } else if (moveMenuFocus(enabledItems(menuRef.current), ev.key)) {
       ev.preventDefault();

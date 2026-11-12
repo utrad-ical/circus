@@ -1,3 +1,4 @@
+import { selectEditor } from '#components/Select.tsx';
 import Button from '#components/Button.tsx';
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
@@ -122,7 +123,7 @@ const appearanceProperties: PropertyEditorProperties<UserPreferences> = [
   {
     key: 'theme',
     caption: 'Color theme',
-    editor: et.shrinkSelect({
+    editor: selectEditor({
       mode_white: 'White',
       mode_black: 'Black'
     }) as et.Editor<string | undefined>
@@ -177,7 +178,7 @@ const circusDBProperties: PropertyEditorProperties<UserPreferences> = [
   {
     key: 'interpolationMode',
     caption: 'Interpolation mode',
-    editor: et.shrinkSelect({
+    editor: selectEditor({
       nearestNeighbor: 'Nearest neighbor',
       trilinearFiltering: 'Trilinear filtering'
     }) as et.Editor<string | undefined>
@@ -185,7 +186,7 @@ const circusDBProperties: PropertyEditorProperties<UserPreferences> = [
   {
     key: 'windowPropagationScope',
     caption: 'Window propagation scope',
-    editor: et.shrinkSelect({
+    editor: selectEditor({
       all: 'All',
       series: 'Per series',
       viewer: 'Per viewer'
@@ -213,7 +214,7 @@ const circusDBProperties: PropertyEditorProperties<UserPreferences> = [
   {
     key: 'dimmedOutlineFor2DLabels',
     caption: '2D shapes visibility',
-    editor: et.shrinkSelect({
+    editor: selectEditor({
       hide: 'No dimmed outline',
       show: '±2 slices',
       infinity: '±∞ slices'

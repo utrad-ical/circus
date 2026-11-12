@@ -1,3 +1,4 @@
+import { multiSelectEditor } from '#components/MultiSelect.tsx';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import DateRangePicker, {
   dateRangeToMongoQuery
@@ -100,7 +101,7 @@ const ConditionEditor: React.FC<{
         caption: 'Update Time',
         editor: DateRangePicker
       },
-      { key: 'tags', caption: 'Tags', editor: et.multiSelect(availableTags) }
+      { key: 'tags', caption: 'Tags', editor: multiSelectEditor(availableTags) }
     ],
     [availableTags]
   );

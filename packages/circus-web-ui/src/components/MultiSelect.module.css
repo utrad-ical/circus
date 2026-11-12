@@ -1,0 +1,16 @@
+.select {
+  display: inline-block;
+}
+
+.checkboxes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  label {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    font-weight: normal;
+    cursor: pointer;
+  }
+}

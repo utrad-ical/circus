@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import EditorPage from './EditorPage.tsx';
 import { useApi } from '#utils/api.ts';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
-import MultiSelect from '@smikitky/rb-components/lib/MultiSelect';
-import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import MultiSelect from '#components/MultiSelect.tsx';
+import Select from '#components/Select.tsx';
 import classnames from 'classnames';
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
@@ -33,7 +33,7 @@ const PreferenceEditor: React.FC<{
     <div>
       <label>
         <span>Theme:</span>
-        <ShrinkSelect
+        <Select
           options={{ mode_white: 'White', mode_black: 'Black' }}
           value={props.value.theme}
           onChange={(v: string | number) =>

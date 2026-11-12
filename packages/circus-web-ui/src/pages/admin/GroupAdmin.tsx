@@ -1,3 +1,4 @@
+import { multiSelectEditor } from '#components/MultiSelect.tsx';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
@@ -105,12 +106,12 @@ const GroupAdmin: React.FC<any> = props => {
           {
             key: 'privileges',
             caption: 'Privileges',
-            editor: et.multiSelect(privileges, { type: 'checkbox' })
+            editor: multiSelectEditor(privileges, { type: 'checkbox' })
           },
           {
             key: 'domains',
             caption: 'Accessible Domains',
-            editor: et.multiSelect(domains, { type: 'checkbox' })
+            editor: multiSelectEditor(domains, { type: 'checkbox' })
           }
         ],
         [

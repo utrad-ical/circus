@@ -1,4 +1,4 @@
-.item[role='menuitem'] {
+.item[role^='menuitem'] {
   display: flex;
   align-items: center;
   gap: 0.5em;
@@ -19,6 +19,9 @@
   }
   &:focus-visible {
     outline: none;
+  }
+  &[role='menuitemradio'][aria-checked='true'] {
+    background-color: color-mix(in oklch, var(--theme) 15%, var(--bg));
   }
   &[aria-disabled='true'] {
     opacity: 0.5;

@@ -1,5 +1,5 @@
 import type { Editor } from './processor-types.ts';
-import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import Select from '#components/Select.tsx';
 import { FormControl } from '#components/react-bootstrap.ts';
 import React from 'react';
 import type { CclOptions } from './ccl-processor.ts';
@@ -41,8 +41,8 @@ export const OptionsEditor: Editor<CclOptions> = props => {
     <>
       <div>
         Maximum number of connected components (CCs)&nbsp;
-        <ShrinkSelect
-          bsSize="sm"
+        <Select
+          size="small"
           options={maximumCCNumOptions}
           value={value.maxOutputComponents}
           onChange={v => onChange({ ...value, maxOutputComponents: v })}
@@ -51,8 +51,8 @@ export const OptionsEditor: Editor<CclOptions> = props => {
       </div>
       <div>
         Neighbors to decide same CC&nbsp;
-        <ShrinkSelect
-          bsSize="sm"
+        <Select
+          size="small"
           options={neighborsOptions}
           value={value.neighbors}
           onChange={v => onChange({ ...value, neighbors: v })}

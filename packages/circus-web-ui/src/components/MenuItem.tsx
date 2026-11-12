@@ -5,11 +5,16 @@ import React, {
   type ReactNode,
   useContext
 } from 'react';
+import Icon from './Icon.tsx';
 import styles from './MenuItem.module.css';
 
 /** Provided by the menu that contains the items */
 export const MenuContext = createContext<{
-  select: (eventKey: string | number | undefined, event: MouseEvent) => void;
+  select: (
+    eventKey: string | number | undefined,
+    event: MouseEvent,
+    keepOpen?: boolean
+  ) => void;
 }>({ select: () => {} });
 
 export type MenuItemProps = {
@@ -20,6 +25,8 @@ export type MenuItemProps = {
   header?: boolean;
   onClick?: (event: MouseEvent) => void;
   href?: string;
+  type?: 'radio' | 'checkbox';
+  checked?: boolean;
   children?: ReactNode;
 };
 
@@ -32,6 +39,8 @@ const MenuItem: FC<MenuItemProps> = props => {
     header,
     onClick,
     href,
+    type,
+    checked,
     children
   } = props;
   const { select } = useContext(MenuContext);
@@ -51,11 +60,12 @@ const MenuItem: FC<MenuItemProps> = props => {
     }
     onClick?.(ev);
     onSelect?.(eventKey ?? '', ev);
-    select(eventKey, ev);
+    select(eventKey, ev, type === 'checkbox');
   };
 
   const itemProps = {
-    role: 'menuitem',
+    role: type ? `menuitem${type}` : 'menuitem',
+    'aria-checked': type ? !!checked : undefined,
     tabIndex: -1,
     className: styles.item,
     'aria-disabled': disabled,
@@ -70,6 +80,15 @@ const MenuItem: FC<MenuItemProps> = props => {
         </a>
       ) : (
         <button type="button" {...itemProps}>
+          {type === 'checkbox' && (
+            <Icon
+              icon={
+                checked
+                  ? 'material-check_box'
+                  : 'material-check_box_outline_blank'
+              }
+            />
+          )}
           {children}
         </button>
       )}

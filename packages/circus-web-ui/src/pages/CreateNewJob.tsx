@@ -2,7 +2,7 @@ import Button from '#components/Button.tsx';
 import Icon from '#components/Icon.tsx';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import { confirm } from '@smikitky/rb-components/lib/modal';
-import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import Select from '#components/Select.tsx';
 import CsVolumeDownloadModal from '#components/CsVolumeDownloadModal.tsx';
 import PluginDisplay from '#components/PluginDisplay.tsx';
 import type { SeriesEntry } from '#components/SeriesSelector.tsx';
@@ -126,7 +126,7 @@ const CreateNewJob: React.FC<{}> = props => {
       <SeriesSelector value={selectedSeries} onChange={setSelectedSeries} />
       <div>
         Plug-in:&ensp;
-        <ShrinkSelect
+        <Select
           options={pluginOptions}
           value={selectedPlugin!}
           onChange={setSelectedPlugin}

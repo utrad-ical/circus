@@ -1,5 +1,5 @@
 import React, { Fragment, useState } from 'react';
-import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
+import Select from '#components/Select.tsx';
 import Icon from './Icon.tsx';
 import useInterval from '#utils/useInterval.ts';
 
@@ -32,7 +32,7 @@ const AutoReloadSwitch: React.FC<{
         <Icon className="text-link" icon="material-autorenew" />
       </a>
       &ensp;
-      <ShrinkSelect
+      <Select
         {...rest}
         options={options}
         numericalValue

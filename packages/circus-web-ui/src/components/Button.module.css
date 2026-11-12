@@ -3,7 +3,10 @@
   align-items: center;
   justify-content: center;
   gap: 0.35em;
-  padding: 0.375em 0.75em;
+  --padding-block: 0.375em;
+  padding: var(--padding-block) 0.75em;
+  /* Icon-only buttons are as tall as buttons with text */
+  min-height: calc(1lh + 2 * var(--padding-block) + 2px);
   border: 1px solid var(--border);
   background-color: var(--bg);
   color: var(--text);
@@ -63,15 +66,23 @@
 }
 
 .xsmall {
-  padding: 0.0625em 0.35em;
+  --padding-block: 0.0625em;
+  padding-inline: 0.35em;
   font-size: 0.875em;
 }
 .small {
-  padding: 0.35em 0.7em;
+  --padding-block: 0.35em;
+  padding-inline: 0.7em;
   font-size: 0.875em;
 }
 .large {
-  padding: 0.5em 0.8em;
+  --padding-block: 0.5em;
+  padding-inline: 0.8em;
   font-size: 1.25em;
   line-height: 1.33;
+}
+
+.button .caret {
+  font-size: 0.8em;
+  margin-inline: -0.25em -0.3em;
 }

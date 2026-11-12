@@ -167,9 +167,9 @@ const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
         )}
         {viewerMode === '3d' && (
           <DropdownButton
-            size="xs"
+            size="xsmall"
             title={<Icon icon="material-more_horiz" />}
-            placement="bottom-end"
+            align="end"
             noCaret
             onSelect={handleSelectLayoutKind as any}
           >

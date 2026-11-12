@@ -160,7 +160,7 @@ const CaseSearchResultsView: React.FC<{
         <>
           <DropdownButton
             id="case-tags-dropdown"
-            size="sm"
+            size="small"
             title={<Icon icon="material-sell" />}
           >
             {availableTags.map(tag => {
@@ -198,7 +198,7 @@ const CaseSearchResultsView: React.FC<{
           />
           <DropdownButton
             id="case-export-dropdown"
-            size="sm"
+            size="small"
             title={<Icon icon="material-more_horiz" />}
           >
             <MenuItem

@@ -87,7 +87,7 @@ const Menu: React.FC<{
       variant="link"
       title={<Icon icon="material-menu" />}
       onSelect={onMenuSelect}
-      placement="bottom-end"
+      align="end"
       noCaret
     >
       <MenuItem eventKey="deleteFeedback">

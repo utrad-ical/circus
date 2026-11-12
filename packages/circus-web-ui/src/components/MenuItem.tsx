@@ -1,116 +1,79 @@
-import React from 'react';
-import styled, { css } from 'styled-components';
+import React, {
+  createContext,
+  type FC,
+  type MouseEvent,
+  type ReactNode,
+  useContext
+} from 'react';
+import styles from './MenuItem.module.css';
 
-type MenuItemProps = {
+/** Provided by the menu that contains the items */
+export const MenuContext = createContext<{
+  select: (eventKey: string | number | undefined, event: MouseEvent) => void;
+}>({ select: () => {} });
+
+export type MenuItemProps = {
   eventKey?: string | number;
   disabled?: boolean;
-  onSelect?: (eventKey: string | number, event: React.MouseEvent) => void;
+  onSelect?: (eventKey: string | number, event: MouseEvent) => void;
   divider?: boolean;
   header?: boolean;
-  onClick?: (e: React.MouseEvent) => void;
+  onClick?: (event: MouseEvent) => void;
   href?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 };
 
-const Item = styled.li`
-  list-style: none;
-  text-align: left;
-`;
+const MenuItem: FC<MenuItemProps> = props => {
+  const {
+    eventKey,
+    disabled,
+    onSelect,
+    divider,
+    header,
+    onClick,
+    href,
+    children
+  } = props;
+  const { select } = useContext(MenuContext);
 
-const baseStyle = css`
-  pointer-events: auto;
-  padding: 0.2em 1em;
-  width: 100%;
-  color: black;
-  &:hover {
-    background-color: ${(props: { $disabled: boolean }) =>
-      props.$disabled ? 'inherit' : '#eee'};
-  }
-  cursor: ${(props: { $disabled: boolean }) =>
-    props.$disabled ? 'not-allowed' : 'pointer'};
-  opacity: ${(props: { $disabled: boolean }) => (props.$disabled ? 0.5 : 1)};
-  [data-icon] {
-    margin-inline: 0 0.5em;
-  }
-  button > [data-icon] {
-    margin-inline: 0;
-  }
-`;
+  if (divider) return <li role="separator" className={styles.divider} />;
+  if (header)
+    return (
+      <li role="presentation" className={styles.header}>
+        {children}
+      </li>
+    );
 
-const ItemButton = styled.button<{ $disabled?: boolean }>`
-  ${baseStyle}
-  display: flex;
-  align-items: center;
-  background: none;
-  border: none;
-  text-align: left;
-  font-size: 1em;
-`;
-
-const ItemLink = styled.a<{ $disabled?: boolean }>`
-  ${baseStyle}
-  display: block;
-  text-decoration: none;
-  &:hover {
-    color: black;
-    text-decoration: none;
-  }
-`;
-
-const Divider = styled.hr`
-  margin: 0.5em 0;
-  border: none;
-  height: 1px;
-  background-color: #e5e5e5;
-`;
-
-const Header = styled.li`
-  color: #777777;
-  font-size: 0.85em;
-  padding: 0.25em 1.5em;
-  list-style: none;
-  text-align: left;
-`;
-
-const MenuItem: React.FC<MenuItemProps> = ({
-  eventKey,
-  disabled,
-  onSelect,
-  divider,
-  header,
-  onClick,
-  href,
-  children
-}) => {
-  if (divider) return <Divider role="separator" />;
-  if (header) return <Header role="presentation">{children}</Header>;
-
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = (ev: MouseEvent) => {
     if (disabled) {
-      e.preventDefault();
+      ev.preventDefault();
       return;
     }
-    onClick?.(e);
-    onSelect?.(eventKey ?? '', e);
+    onClick?.(ev);
+    onSelect?.(eventKey ?? '', ev);
+    select(eventKey, ev);
+  };
+
+  const itemProps = {
+    role: 'menuitem',
+    tabIndex: -1,
+    className: styles.item,
+    'aria-disabled': disabled,
+    onClick: handleClick
   };
 
   return (
-    <Item role="presentation">
+    <li role="none">
       {href ? (
-        <ItemLink href={href} onClick={handleClick} $disabled={disabled}>
+        <a href={href} {...itemProps}>
           {children}
-        </ItemLink>
+        </a>
       ) : (
-        <ItemButton
-          type="button"
-          onClick={handleClick}
-          $disabled={disabled}
-          aria-disabled={disabled}
-        >
+        <button type="button" {...itemProps}>
           {children}
-        </ItemButton>
+        </button>
       )}
-    </Item>
+    </li>
   );
 };
 

@@ -1,0 +1,8 @@
+.split {
+  display: inline-flex;
+  vertical-align: middle;
+  > button + button {
+    margin-inline-start: -1px;
+    padding-inline: 0.2em;
+  }
+}

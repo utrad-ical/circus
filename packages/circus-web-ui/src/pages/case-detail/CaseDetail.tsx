@@ -453,7 +453,7 @@ const MenuBar: React.FC<{
           id="submenu"
           variant="link"
           title={<Icon icon="material-menu" />}
-          placement="bottom-end"
+          align="end"
           noCaret
           disabled={busy}
         >

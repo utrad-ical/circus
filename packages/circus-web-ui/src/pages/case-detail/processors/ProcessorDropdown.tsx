@@ -14,9 +14,9 @@ const ProcessorDropdown: React.FC<{
   return (
     <DropdownButton
       onSelect={type => onSelect(type as ProcessorType)}
-      size="xs"
+      size="xsmall"
       title={<Icon icon="material-more_horiz" />}
-      placement="bottom-end"
+      align="end"
       noCaret
     >
       {processorTypes.map(type => {

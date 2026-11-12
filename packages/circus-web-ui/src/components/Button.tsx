@@ -11,6 +11,7 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   size?: ButtonSize;
   icon?: string;
   pressed?: boolean;
+  caret?: boolean;
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
@@ -19,6 +20,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
     size,
     icon,
     pressed,
+    caret,
     type = 'button',
     className,
     children,
@@ -39,6 +41,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
     >
       {icon && <Icon icon={icon} />}
       {children}
+      {caret && (
+        <Icon icon="material-arrow_drop_down" className={styles.caret} />
+      )}
     </button>
   );
 });

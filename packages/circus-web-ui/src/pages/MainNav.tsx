@@ -29,13 +29,13 @@ const NextPreviousButtons: FC<{
         className={classnames({ [styles.disabled]: prevLinkDisabled })}
       >
         <Icon icon="material-arrow_left_alt" />
-        &ensp; Prev
+        Prev
       </Link>
       <Link
         to={nextLink}
         className={classnames({ [styles.disabled]: nextLinkDisabled })}
       >
-        Next &ensp;
+        Next
         <Icon icon="material-arrow_right_alt" />
       </Link>
     </li>

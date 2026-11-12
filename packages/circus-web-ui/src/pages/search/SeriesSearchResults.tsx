@@ -78,7 +78,7 @@ const Operation: DataGridRenderer<any> = props => {
     <Fragment>
       <DropdownButton
         id="dropdown-new-item"
-        size="sm"
+        size="small"
         variant="primary"
         title={
           <Fragment>
@@ -95,9 +95,9 @@ const Operation: DataGridRenderer<any> = props => {
       </DropdownButton>
       &thinsp;
       <DropdownButton
-        size="sm"
+        size="small"
         title={<Icon icon="material-more_horiz" />}
-        placement="bottom-end"
+        align="end"
         noCaret
       >
         <MenuItem eventKey="1" href={`/series/${series.seriesUid}`}>

@@ -1,0 +1,9 @@
+.popup {
+  --popup-padding: 9px 14px;
+  font-size: 80%;
+  overflow-wrap: anywhere;
+  /* Centered below the button, shifted to stay in the viewport */
+  position-area: block-end span-all;
+  justify-self: anchor-center;
+  margin-inline: 8px;
+}

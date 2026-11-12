@@ -5,7 +5,11 @@
 .popup {
   position-anchor: var(--popover-anchor);
   position-area: block-end span-inline-end;
-  position-try-fallbacks: flip-block;
+  position-try-fallbacks:
+    flip-inline,
+    flip-block,
+    flip-block flip-inline;
+  max-width: calc(100vw - 16px);
   inset: auto;
   margin: 2px 0;
   padding: var(--popup-padding, 0);

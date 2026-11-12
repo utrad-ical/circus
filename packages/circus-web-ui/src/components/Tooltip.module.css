@@ -1,0 +1,23 @@
+.target {
+  display: inline-flex;
+  vertical-align: middle;
+  anchor-name: var(--tooltip-anchor);
+}
+
+.tooltip {
+  position-anchor: var(--tooltip-anchor);
+  position-area: block-start;
+  position-try-fallbacks: flip-block;
+  inset: auto;
+  max-width: 250px;
+  margin: 4px 0;
+  padding: 3px 8px;
+  border: none;
+  border-radius: 4px;
+  background-color: rgb(0 0 0 / 0.85);
+  color: white;
+  font-size: 0.85em;
+  line-height: 1.4;
+  text-align: center;
+  pointer-events: none;
+}

@@ -3,7 +3,7 @@ import Icon from '#components/Icon.tsx';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Row, Col, Panel } from '#components/react-bootstrap.ts';
 import { useApi } from '#utils/api.ts';
-import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
+import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import ImageViewer from '#components/ImageViewer.tsx';
 import * as rs from '@utrad-ical/circus-rs';
 import { toolFactory } from '@utrad-ical/circus-rs';

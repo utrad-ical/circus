@@ -42,6 +42,7 @@ import materialNotifications from '@material-symbols/svg-600/outlined/notificati
 import materialPendingActions from '@material-symbols/svg-600/outlined/pending_actions.svg?icon';
 import materialPerson from '@material-symbols/svg-600/outlined/person.svg?icon';
 import materialPlayArrow from '@material-symbols/svg-600/outlined/play_arrow.svg?icon';
+import materialProgressActivity from '@material-symbols/svg-600/outlined/progress_activity.svg?icon';
 import materialRadioButtonChecked from '@material-symbols/svg-600/outlined/radio_button_checked.svg?icon';
 import materialReplay from '@material-symbols/svg-600/outlined/replay.svg?icon';
 import materialSchool from '@material-symbols/svg-600/outlined/school.svg?icon';
@@ -184,6 +185,7 @@ const icons: { [name: string]: SvgIconData } = {
   'material-person': materialPerson,
   'material-play_arrow': materialPlayArrow,
   'material-radio_button_checked': materialRadioButtonChecked,
+  'material-progress_activity': materialProgressActivity,
   'material-replay': materialReplay,
   'material-school': materialSchool,
   'material-search': materialSearch,

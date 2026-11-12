@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import BodyPartIcon from '#components/BodyPartIcon.tsx';
 import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
 import Select from '#components/Select.tsx';
-import ColorPicker from '@smikitky/rb-components/lib/ColorPicker';
+import ColorPicker from '#components/ColorPicker.tsx';
 
 const glyphs = [
   'stomach',

@@ -1,5 +1,5 @@
 import React from 'react';
-import ColorPicker from '@smikitky/rb-components/lib/ColorPicker';
+import ColorPicker from '#components/ColorPicker.tsx';
 import { PhysicalTag } from '#components/Tag.tsx';
 
 interface Tag {

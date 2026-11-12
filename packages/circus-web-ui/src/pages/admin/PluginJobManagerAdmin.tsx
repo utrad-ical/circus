@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useApi } from '#utils/api.ts';
 import AdminContainer from './AdminContainer.tsx';
 import { Panel } from '#components/react-bootstrap.ts';
-import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
+import LoadingIndicator from '#components/LoadingIndicator.tsx';
 
 const PluginJobManagerAdmin: React.FC<{}> = props => {
   const [busy, setBusy] = useState(true);

@@ -1,5 +1,5 @@
 import Button from '#components/Button.tsx';
-import { ColorPalette } from '@smikitky/rb-components/lib/ColorPicker';
+import { ColorPalette } from '#components/ColorPicker.tsx';
 import type * as et from '@smikitky/rb-components/lib/editor-types';
 import Select from '#components/Select.tsx';
 import React, { useState } from 'react';
@@ -127,7 +127,7 @@ const StyledDiv = styled.div`
   display: flex;
   gap: 5px;
   align-items: center;
-  .color-picker-palette > .color-picker-palette-color.selected {
+  [role='listbox'] > [aria-selected='true'] {
     outline: solid 2px var(--circus-highlight-color);
   }
 `;

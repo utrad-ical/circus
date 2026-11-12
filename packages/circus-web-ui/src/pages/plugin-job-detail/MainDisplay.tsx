@@ -7,7 +7,7 @@ import type {
 } from '@utrad-ical/circus-ui-kit';
 import { useCsResults } from '@utrad-ical/circus-ui-kit';
 import Section from './Section.tsx';
-import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
+import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import { produce } from 'immer';
 
 const MainDisplay: Display<FeedbackTarget[], any> = props => {

@@ -1,3 +1,4 @@
+import Icon from '#components/Icon.tsx';
 import IconButton from '#components/IconButton.ts';
 import MultiTagSelect from '#components/MultiTagSelect.tsx';
 import ProjectSelector from '#components/ProjectSelector.tsx';
@@ -72,7 +73,7 @@ const CreateNewCase: React.FC<{}> = props => {
   return (
     <div>
       <h1>
-        <span className="circus-icon-case" />
+        <Icon icon="circus-case" />
         New Case
       </h1>
       <SeriesSelector value={selectedSeries} onChange={setSelectedSeries} />

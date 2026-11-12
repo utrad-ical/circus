@@ -165,7 +165,7 @@ const FeedbackContent: React.FC<{ value: any }> = props => {
       <IconButton
         bsSize="xs"
         bsStyle="primary"
-        icon="chevron-right"
+        icon="material-chevron_right"
         onClick={() => setShow(true)}
       >
         Show

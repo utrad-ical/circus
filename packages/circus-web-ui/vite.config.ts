@@ -1,10 +1,11 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
+import svgIconPlugin from './vite/svgIconPlugin.ts';
 
 const proxyTarget = process.env.DEV_PROXY || 'http://localhost:8080';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), svgIconPlugin()],
   // Nothing to copy as-is; everything is bundled from `index.html`
   publicDir: false,
   build: {

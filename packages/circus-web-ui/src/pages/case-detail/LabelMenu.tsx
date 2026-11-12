@@ -356,7 +356,7 @@ const LabelMenu: React.FC<{
         shortcut="R"
         bsSize="xs"
         title="Reveal in Viewer (R)"
-        icon="map-marker"
+        icon="material-location_on"
         disabled={!activeLabel || disabled}
         onClick={() => handleCommand('reveal')}
       />

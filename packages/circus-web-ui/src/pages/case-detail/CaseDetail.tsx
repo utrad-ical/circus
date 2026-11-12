@@ -428,13 +428,13 @@ const MenuBar: React.FC<{
         {unsavedAlertMessage}
         <IconButton
           bsStyle="default"
-          icon="step-backward"
+          icon="material-skip_previous"
           disabled={!c.canUndo(caseStore) || busy}
           onClick={() => onCommand('undo')}
         />
         <IconButton
           bsStyle="default"
-          icon="step-forward"
+          icon="material-skip_next"
           disabled={!c.canRedo(caseStore) || busy}
           onClick={() => onCommand('redo')}
         />

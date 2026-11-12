@@ -1,3 +1,4 @@
+import Icon from '#components/Icon.tsx';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Row, Col, Panel } from '#components/react-bootstrap.ts';
 import { useApi } from '#utils/api.ts';
@@ -100,7 +101,7 @@ const SeriesDetail: React.FC<{}> = props => {
     return (
       <div>
         <h1>
-          <span className="circus-icon-series" /> Series Detail
+          <Icon icon="circus-series" /> Series Detail
         </h1>
         <div className="alert alert-danger">{message}</div>
       </div>
@@ -124,7 +125,7 @@ const SeriesDetail: React.FC<{}> = props => {
   return (
     <div>
       <h1>
-        <span className="circus-icon-series" /> Series Detail
+        <Icon icon="circus-series" /> Series Detail
       </h1>
       <Row>
         <Col lg={6}>

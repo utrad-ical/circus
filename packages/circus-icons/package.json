@@ -1,23 +1,15 @@
 {
   "name": "@utrad-ical/circus-icons",
-  "version": "0.2.0",
-  "description": "Icon dataset used throughout the CIRCUS project",
-  "main": "scripts/fontgen.js",
-  "scripts": {
-    "generate": "node scripts/fontgen"
-  },
+  "version": "0.3.0",
+  "description": "SVG icons used throughout the CIRCUS project",
+  "files": [
+    "icons"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/utrad-ical/circus.git",
     "directory": "packages/circus-icons"
   },
   "author": "Soichiro Miki <smiki-tky@umin.ac.jp>",
-  "license": "MIT",
-  "devDependencies": {
-    "glob": "^7.1.6",
-    "glob-promise": "^4.1.0",
-    "svg2ttf": "^6.0.3",
-    "svgicons2svgfont": "^9.1.1",
-    "ttf2woff": "^2.0.2"
-  }
+  "license": "MIT"
 }

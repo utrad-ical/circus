@@ -25,7 +25,7 @@ const HomeMenu = styled.ul`
     display: block;
     text-align: center;
     width: 250px;
-    div.img > span {
+    div.img > svg {
       font-size: 200px;
       vertical-align: bottom;
     }
@@ -179,7 +179,7 @@ const Menu: React.FC<{
     <li>
       <Link to={link}>
         <div className="img">
-          <span className={'circus-icon circus-icon-' + icon} />
+          <Icon icon={`circus-${icon}`} />
         </div>
         <p>{title}</p>
       </Link>

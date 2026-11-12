@@ -169,6 +169,9 @@ const StyledNav = styled.nav`
 
   .logo {
     text-shadow: 1px 1px 2px black;
+    svg {
+      filter: drop-shadow(1px 1px 2px black);
+    }
   }
 
   .user-info {
@@ -257,7 +260,7 @@ const MainNav: React.FC<{}> = props => {
         <MainMenu>
           <li className="logo">
             <Link to="/home">
-              <span className="circus-icon-logo" />
+              <Icon icon="circus-logo" />
             </Link>
           </li>
           <NavMenu name="Series" link="/browse/series">

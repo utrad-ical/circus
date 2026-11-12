@@ -1,6 +1,7 @@
 import type Viewer from './viewer/Viewer.ts';
 import { toolFactory } from './tool/tool-initializer.ts';
 import type { Tool } from './tool/Tool.ts';
+import toolbarIcons from './toolbarIcons.ts';
 
 interface Toolbar {
   bindViewer: (viewer: Viewer) => void;
@@ -50,6 +51,7 @@ class ToolbarComponent {
         'rs-icon-' + toKebabCase(toolName)
       ].join(' ');
       button.setAttribute('type', 'button');
+      button.innerHTML = toolbarIcons[toKebabCase(toolName)] ?? '';
 
       button.addEventListener('click', () => handleToolButtonClick(toolName));
 

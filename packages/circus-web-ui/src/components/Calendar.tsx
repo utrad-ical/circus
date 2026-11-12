@@ -13,7 +13,6 @@ import {
   isValid,
   parse,
   setMonth,
-  setYear,
   startOfMonth,
   startOfWeek
 } from 'date-fns';
@@ -41,6 +40,10 @@ const parseValue = (value: string | undefined) => {
   const date = parse(value, dateFormat, new Date());
   return isValid(date) ? date : null;
 };
+
+// Unlike setYear, keeps Feb 29 in February (Feb 28) for a non-leap year
+const withYear = (date: Date, year: number) =>
+  addYears(date, year - getYear(date));
 
 const yearPageStart = (date: Date) =>
   Math.floor(getYear(date) / yearsPerPage) * yearsPerPage;
@@ -82,6 +85,7 @@ const Calendar: FC<{
   });
 
   const navigate = (direction: number) => {
+    if (disabled) return;
     const next =
       view === 'day'
         ? addMonths(viewDate, direction)
@@ -89,8 +93,8 @@ const Calendar: FC<{
     setViewDate(next);
     setFocusedDate(prev =>
       view === 'day'
-        ? setMonth(setYear(prev, getYear(next)), next.getMonth())
-        : setYear(prev, getYear(next))
+        ? setMonth(withYear(prev, getYear(next)), next.getMonth())
+        : withYear(prev, getYear(next))
     );
   };
 
@@ -111,6 +115,7 @@ const Calendar: FC<{
 
   // Selects a date in the day view, or zooms in one level
   const activate = (date: Date) => {
+    if (disabled) return;
     if (view === 'day') {
       setFocusedDate(date);
       onChange(format(date, dateFormat));
@@ -119,8 +124,8 @@ const Calendar: FC<{
     setViewDate(date);
     setFocusedDate(
       view === 'month'
-        ? setMonth(setYear(focusedDate, getYear(date)), date.getMonth())
-        : setYear(focusedDate, getYear(date))
+        ? setMonth(withYear(focusedDate, getYear(date)), date.getMonth())
+        : withYear(focusedDate, getYear(date))
     );
     setView(view === 'month' ? 'day' : 'month');
     shouldFocusCell.current = true;
@@ -134,6 +139,7 @@ const Calendar: FC<{
         : addYears(focusedDate, units);
 
   const handleKeyDown = (ev: KeyboardEvent) => {
+    if (disabled) return;
     const columns = viewColumns[view];
     let next: Date;
     switch (ev.key) {
@@ -155,7 +161,7 @@ const Calendar: FC<{
             ? startOfWeek(focusedDate)
             : view === 'month'
               ? setMonth(focusedDate, 0)
-              : setYear(focusedDate, yearPageStart(focusedDate));
+              : withYear(focusedDate, yearPageStart(focusedDate));
         break;
       case 'End':
         next =
@@ -163,7 +169,7 @@ const Calendar: FC<{
             ? endOfWeek(focusedDate)
             : view === 'month'
               ? setMonth(focusedDate, 11)
-              : setYear(
+              : withYear(
                   focusedDate,
                   yearPageStart(focusedDate) + yearsPerPage - 1
                 );
@@ -231,7 +237,7 @@ const Calendar: FC<{
             focused: isSameMonth(date, focusedDate)
           }))
         : Array.from({ length: yearsPerPage }, (_, i) =>
-            setYear(startOfMonth(viewDate), yearPageStart(viewDate) + i)
+            withYear(startOfMonth(viewDate), yearPageStart(viewDate) + i)
           ).map(date => ({
             date,
             label: format(date, 'yyyy'),
@@ -259,12 +265,13 @@ const Calendar: FC<{
           size="xsmall"
           icon="material-chevron_left"
           title="Previous"
+          disabled={disabled}
           onClick={() => navigate(-1)}
         />
         <button
           type="button"
           className={styles.headerLabel}
-          disabled={view === 'year'}
+          disabled={disabled || view === 'year'}
           onClick={zoomOut}
         >
           {headerLabel}
@@ -274,6 +281,7 @@ const Calendar: FC<{
           size="xsmall"
           icon="material-chevron_right"
           title="Next"
+          disabled={disabled}
           onClick={() => navigate(1)}
         />
       </div>
@@ -297,6 +305,7 @@ const Calendar: FC<{
               [styles.today]: cell.today
             })}
             tabIndex={cell.focused ? 0 : -1}
+            disabled={disabled}
             aria-pressed={cell.selected}
             onClick={() => activate(cell.date)}
             onKeyDown={handleKeyDown}

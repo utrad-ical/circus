@@ -21,7 +21,6 @@ import setting, {
 // import MultiRange from "multi-integer-range";
 import handleRotationBy from '../../src/browser/tool/state/handleRotationBy.ts';
 import '../../src/browser/circus-rs.less';
-import '@utrad-ical/circus-icons/dist/circus-rs-font-glyphs.less';
 
 document.addEventListener('DOMContentLoaded', function (e) {
   const toolbar = setupToolbar();

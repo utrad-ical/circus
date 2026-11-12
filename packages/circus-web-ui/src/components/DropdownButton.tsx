@@ -14,7 +14,6 @@ import React, {
 import moveMenuFocus from '#utils/menuKeyboard.ts';
 import Button, { type ButtonSize, type ButtonVariant } from './Button.tsx';
 import styles from './DropdownButton.module.css';
-import Icon from './Icon.tsx';
 import { MenuContext } from './MenuItem.tsx';
 
 let counter = 0;
@@ -117,13 +116,11 @@ const DropdownButton: FC<{
         style={{ ...anchor, ...style }}
         aria-haspopup="menu"
         aria-expanded={open}
+        caret={!noCaret}
         onKeyDown={handleTriggerKeyDown}
         {...{ popovertarget: menuId }}
       >
         {title}
-        {!noCaret && (
-          <Icon icon="material-arrow_drop_down" className={styles.caret} />
-        )}
       </Button>
       <ul
         ref={menuRef}

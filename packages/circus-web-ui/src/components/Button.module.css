@@ -81,3 +81,8 @@
   font-size: 1.25em;
   line-height: 1.33;
 }
+
+.button .caret {
+  font-size: 0.8em;
+  margin-inline: -0.25em -0.3em;
+}

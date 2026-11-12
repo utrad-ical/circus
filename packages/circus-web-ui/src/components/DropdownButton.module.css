@@ -2,11 +2,6 @@
   anchor-name: var(--dropdown-anchor);
 }
 
-.caret {
-  font-size: 0.8em;
-  margin-inline: -0.25em -0.3em;
-}
-
 .menu {
   position-anchor: var(--dropdown-anchor);
   position-area: block-end span-inline-end;

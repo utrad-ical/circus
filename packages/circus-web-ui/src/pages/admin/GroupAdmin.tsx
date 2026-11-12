@@ -1,5 +1,5 @@
 import { multiSelectEditor } from '#components/MultiSelect.tsx';
-import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
+import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
 import PluginSelectorMultiple from '#components/PluginSelectorMultiple.tsx';

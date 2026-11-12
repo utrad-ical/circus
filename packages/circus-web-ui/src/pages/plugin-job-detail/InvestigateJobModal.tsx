@@ -1,5 +1,5 @@
 import Button from '#components/Button.tsx';
-import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
+import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import { describePartialVolumeDescriptor } from '@utrad-ical/circus-rs';
 import { useCsResults } from '@utrad-ical/circus-ui-kit';
 import Icon from '#components/Icon.tsx';

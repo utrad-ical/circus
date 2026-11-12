@@ -1,6 +1,6 @@
 import Button from '#components/Button.tsx';
 import type { Editor } from '@smikitky/rb-components/lib/editor-types';
-import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
+import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import classnames from 'classnames';
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';

@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 import Select from '#components/Select.tsx';
 import { Pagination } from '#components/react-bootstrap.ts';
-import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
+import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import AutoReloadSwitch from './AutoReloadSwitch.tsx';
 import Icon from '#components/Icon.tsx';
 import classnames from 'classnames';

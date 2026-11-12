@@ -1,7 +1,7 @@
 import Button, { type ButtonProps } from '#components/Button.tsx';
-import { ColorPalette } from '@smikitky/rb-components/lib/ColorPicker';
+import { ColorPalette } from '#components/ColorPicker.tsx';
 import { alert, prompt } from '@smikitky/rb-components/lib/modal';
-import Slider from '@smikitky/rb-components/lib/Slider';
+import Slider from '#components/Slider.tsx';
 import generateUniqueId from '#utils/generateUniqueId.ts';
 import type { Viewer } from '@utrad-ical/circus-rs';
 import type { DicomVolumeMetadata } from '@utrad-ical/circus-rs';

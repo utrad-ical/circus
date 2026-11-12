@@ -1,0 +1,49 @@
+.palette {
+  display: flex;
+  flex-flow: row wrap;
+  width: calc(14px * 8 + 2px);
+  padding: 1px 0 0 1px;
+  &.disabled .color {
+    cursor: default;
+    &:hover {
+      border-color: white;
+    }
+  }
+}
+
+.color {
+  display: block;
+  width: 15px;
+  height: 15px;
+  margin: -1px 0 0 -1px;
+  padding: 0;
+  border: 1px solid white;
+  cursor: pointer;
+  &:hover {
+    z-index: 1;
+    border-color: gray;
+  }
+  &[aria-selected='true'] {
+    z-index: 2;
+    border-color: black;
+  }
+  &:focus-visible {
+    z-index: 3;
+    outline: 2px solid var(--theme);
+  }
+}
+
+.alpha {
+  width: 110px;
+}
+
+.popup {
+  --popup-padding: 10px;
+}
+
+.preview {
+  display: inline-block;
+  width: 1.5em;
+  height: 1em;
+  border: 1px solid gray;
+}

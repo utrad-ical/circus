@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import EditorPage from './EditorPage.tsx';
 import { useApi } from '#utils/api.ts';
-import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
+import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import MultiSelect from '#components/MultiSelect.tsx';
 import Select from '#components/Select.tsx';
 import classnames from 'classnames';

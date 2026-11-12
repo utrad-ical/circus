@@ -1,6 +1,6 @@
 import type * as et from '@smikitky/rb-components/lib/editor-types';
-import type { SliderProps } from '@smikitky/rb-components/lib/Slider';
-import Slider from '@smikitky/rb-components/lib/Slider';
+import type { SliderProps } from '#components/Slider.tsx';
+import Slider from '#components/Slider.tsx';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -14,7 +14,7 @@ const LabeledSlider: React.FC<
   const { label = value => String(value), ...sliderProps } = props;
   return (
     <StyledDiv>
-      <Slider {...sliderProps} />
+      <Slider {...sliderProps} className="slider" />
       <div>{label(props.value)}</div>
     </StyledDiv>
   );

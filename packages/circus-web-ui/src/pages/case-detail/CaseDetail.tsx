@@ -1,5 +1,5 @@
 import Button from '#components/Button.tsx';
-import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
+import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import { alert, confirm } from '@smikitky/rb-components/lib/modal';
 import CaseExportModal from '#components/CaseExportModal.tsx';
 import Collapser from '#components/Collapser.tsx';

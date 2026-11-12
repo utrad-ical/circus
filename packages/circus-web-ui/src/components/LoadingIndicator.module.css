@@ -1,0 +1,19 @@
+.indicator {
+  visibility: hidden;
+  animation: appear 0s var(--delay, 0s) forwards;
+  svg {
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes appear {
+  to {
+    visibility: visible;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}

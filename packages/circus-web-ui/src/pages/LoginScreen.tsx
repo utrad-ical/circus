@@ -1,5 +1,5 @@
 import Button from '#components/Button.tsx';
-import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
+import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import classnames from 'classnames';
 import Icon from '#components/Icon.tsx';
 import { FormControl, FormGroup, Panel } from '#components/react-bootstrap.ts';

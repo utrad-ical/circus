@@ -1,6 +1,6 @@
 import Button from '#components/Button.tsx';
 import React, { useState, useRef } from 'react';
-import { ButtonToolbar, ProgressBar } from './react-bootstrap.ts';
+import { ProgressBar } from './react-bootstrap.ts';
 import { FileDroppable } from './FileDroppable.tsx';
 import useShowMessage from '#utils/useShowMessage.ts';
 import * as modal from '@smikitky/rb-components/lib/modal';
@@ -9,6 +9,10 @@ import { useApi } from '#utils/api.ts';
 import { withCommas } from '#utils/util.ts';
 
 const StyledDiv = styled.div`
+  .upload-buttons {
+    display: flex;
+    gap: 5px;
+  }
   input[type='file'] {
     display: none;
   }
@@ -134,7 +138,7 @@ const FileUpload: React.FC<{
           />
           {files.length > 0 && (
             <>
-              <ButtonToolbar>
+              <div className="upload-buttons">
                 <Button
                   variant="primary"
                   disabled={!canUpload}
@@ -150,7 +154,7 @@ const FileUpload: React.FC<{
                 >
                   Reset
                 </Button>
-              </ButtonToolbar>
+              </div>
               {files.length > (uploadFileMax ?? Infinity) && (
                 <div className="alert alert-danger">
                   You cannot upload more than {uploadFileMax} files at the same

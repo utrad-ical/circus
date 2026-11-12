@@ -4,7 +4,6 @@ import { confirm } from '@smikitky/rb-components/lib/modal';
 import Icon from '#components/Icon.tsx';
 import {
   ListGroup,
-  InputGroup,
   ListGroupItem,
   Panel,
   FormControl
@@ -132,7 +131,7 @@ const TokenManagement: React.FC<{}> = props => {
       </Panel>
       <hr />
       <h1>Add new token</h1>
-      <InputGroup>
+      <NewTokenForm>
         <FormControl
           type="text"
           placeholder="Description of the new token"
@@ -141,20 +140,22 @@ const TokenManagement: React.FC<{}> = props => {
             setDescription(ev.target.value)
           }
         ></FormControl>
-        <InputGroup.Button>
-          <Button
-            variant="primary"
-            disabled={description.length <= 0}
-            onClick={handleCreate}
-            icon="material-add"
-          >
-            Create
-          </Button>
-        </InputGroup.Button>
-      </InputGroup>
+        <Button
+          variant="primary"
+          disabled={description.length <= 0}
+          onClick={handleCreate}
+          icon="material-add"
+        >
+          Create
+        </Button>
+      </NewTokenForm>
     </div>
   );
 };
+
+const NewTokenForm = styled.div`
+  display: flex;
+`;
 
 const StyledListGroupItem = styled(ListGroupItem)`
   display: flex;

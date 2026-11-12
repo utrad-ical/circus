@@ -1,5 +1,5 @@
 import classnames from 'classnames';
-import React from 'react';
+import React, { createElement, type FC } from 'react';
 import styles from './Icon.module.css';
 import icons from './icons.ts';
 
@@ -9,7 +9,7 @@ type IconSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
  * Renders an SVG icon by name (`material-*` or `circus-*`).
  * Unknown names render nothing.
  */
-const Icon: React.FC<{
+const Icon: FC<{
   icon: string;
   size?: IconSize;
   className?: string;
@@ -31,7 +31,7 @@ const Icon: React.FC<{
       )}
     >
       {data.shapes.map(([tag, attributes], i) =>
-        React.createElement(tag, { key: i, ...attributes })
+        createElement(tag, { key: i, ...attributes })
       )}
     </svg>
   );

@@ -6,7 +6,7 @@ import { escapeRegExp } from '#utils/util.ts';
 import * as et from '@smikitky/rb-components/lib/editor-types';
 import DateRangePicker, {
   dateRangeToMongoQuery
-} from '@smikitky/rb-components/lib/DateRangePicker';
+} from '#components/DateRangePicker.tsx';
 import AgeMinMax from '#components/AgeMinMax.tsx';
 import { conditionToMongoQuery } from '@smikitky/rb-components/lib/ConditionEditor';
 import SearchPanel from './SearchPanel.tsx';

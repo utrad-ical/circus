@@ -5,10 +5,10 @@ import type { Condition } from './ConditionFrame.tsx';
 import ConditionFrame from './ConditionFrame.tsx';
 import { escapeRegExp } from '#utils/util.ts';
 import * as et from '@smikitky/rb-components/lib/editor-types';
-import type { DateRange } from '@smikitky/rb-components/lib/DateRangePicker';
+import type { DateRange } from '#components/DateRangePicker.tsx';
 import DateRangePicker, {
   dateRangeToMongoQuery
-} from '@smikitky/rb-components/lib/DateRangePicker';
+} from '#components/DateRangePicker.tsx';
 import AgeMinMax from '#components/AgeMinMax.tsx';
 import { conditionToMongoQuery } from '@smikitky/rb-components/lib/ConditionEditor';
 import SearchPanel from '#pages/search/SearchPanel.tsx';

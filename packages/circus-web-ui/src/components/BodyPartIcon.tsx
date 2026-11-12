@@ -10,12 +10,17 @@ export interface CircusIconDefinition {
 }
 
 const StyledSpan = styled.span`
+  display: inline-flex;
   border-radius: 5px;
   vertical-align: middle;
   font-size: 90%;
   padding: 3px;
+  > svg {
+    font-size: 1em;
+    vertical-align: 0;
+  }
   &.lg {
-    font-size: 150%;
+    font-size: 175%;
   }
   &.xl {
     font-size: 200%;

@@ -39,7 +39,7 @@ export const Tags: DataGridRenderer<any> = props => {
 };
 
 export const Project: (size?: string) => DataGridRenderer<any> =
-  (size = 'xl') =>
+  (size = 'lg') =>
   props => {
     const item = props.value;
     return <ProjectDisplay projectId={item.projectId} size={size} withName />;
@@ -52,12 +52,12 @@ export const CaseId: DataGridRenderer<any> = props => {
 };
 
 export const PluginRenderer: (size?: string) => DataGridRenderer<any> =
-  (size = 'xl') =>
+  (size = 'lg') =>
   props => {
     const {
       value: { pluginId }
     } = props;
-    return <PluginDisplay size="lg" pluginId={pluginId} />;
+    return <PluginDisplay size={size} pluginId={pluginId} />;
   };
 
 export const JobId: DataGridRenderer<any> = props => {

@@ -50,9 +50,11 @@ export const ColorPalette: FC<{
     className
   } = props;
   const paletteRef = useRef<HTMLDivElement>(null);
-  const rgbValue = withAlpha ? tinycolor(value).toHexString() : value;
+  // Compares colors in the same notation (e.g., lowercase hex)
+  const normalize = (color: string) => tinycolor(color).toHexString();
+  const rgbValue = normalize(value);
   const alphaValue = withAlpha ? tinycolor(value).getAlpha() : 1;
-  const selectedIndex = colors.indexOf(rgbValue);
+  const selectedIndex = colors.findIndex(c => normalize(c) === rgbValue);
 
   const select = (color: string) => {
     if (disabled) return;
@@ -97,7 +99,7 @@ export const ColorPalette: FC<{
             type="button"
             role="option"
             aria-label={color}
-            aria-selected={color === rgbValue}
+            aria-selected={i === selectedIndex}
             // Only the selected (or first) color is in the tab order
             tabIndex={i === Math.max(selectedIndex, 0) ? 0 : -1}
             disabled={disabled}
@@ -185,6 +187,7 @@ const ColorPicker: FC<{
         colors={colors}
         withAlpha={withAlpha}
         onChange={onChange}
+        disabled={disabled}
       />
     </PopoverButton>
   );

@@ -1,4 +1,5 @@
 import React, { Fragment, useState } from 'react';
+import type { ButtonSize } from '#components/Button.tsx';
 import Select from '#components/Select.tsx';
 import Icon from './Icon.tsx';
 import useInterval from '#utils/useInterval.ts';
@@ -13,8 +14,7 @@ const defaultOptions = {
 const AutoReloadSwitch: React.FC<{
   onRefresh: () => void;
   options?: any;
-  bsSize: any;
-  bsStyle?: string;
+  size?: ButtonSize;
   disabled?: boolean;
 }> = props => {
   const { onRefresh, options = defaultOptions, children, ...rest } = props;

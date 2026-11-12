@@ -1,3 +1,4 @@
+import Icon from '#components/Icon.tsx';
 import LoadingIndicator from '@smikitky/rb-components/lib/LoadingIndicator';
 import { confirm } from '@smikitky/rb-components/lib/modal';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
@@ -119,7 +120,7 @@ const CreateNewJob: React.FC<{}> = props => {
   return (
     <div>
       <h1>
-        <span className="circus-icon-b-calc" />
+        <Icon icon="circus-b-calc" />
         New Job
       </h1>
       <SeriesSelector value={selectedSeries} onChange={setSelectedSeries} />

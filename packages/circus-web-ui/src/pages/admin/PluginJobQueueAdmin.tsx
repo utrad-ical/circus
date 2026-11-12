@@ -40,7 +40,7 @@ const PluginJobQueueAdmin: React.FC<{}> = props => {
   }, [api, dispatch]);
 
   return (
-    <AdminContainer title="Plugin Job Queue" icon="material-lists">
+    <AdminContainer title="Plugin Job Queue" icon="material-pending_actions">
       <SearchResultsView name="globalJobQueue" dataView={DataView} />
     </AdminContainer>
   );

@@ -1,3 +1,4 @@
+import Icon from '#components/Icon.tsx';
 import ShrinkSelect from '@smikitky/rb-components/lib/ShrinkSelect';
 import useShowMessage from '#utils/useShowMessage.ts';
 import FileUpload from '#components/FileUpload.tsx';
@@ -46,7 +47,7 @@ const ImportSeries: React.FC<{}> = props => {
   return (
     <div>
       <h1>
-        <span className="circus-icon-series-import" /> Series Import
+        <Icon icon="circus-series-import" /> Series Import
       </h1>
       <p>
         Choose DICOM files to upload. (Maximum size: {maxBytes}, up to{' '}

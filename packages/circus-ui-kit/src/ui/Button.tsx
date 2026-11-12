@@ -1,16 +1,9 @@
 import classNames from 'classnames';
 import React, { forwardRef } from 'react';
 import styled from 'styled-components';
+import buttonIcons from './buttonIcons.ts';
 
 type Size = 'sm' | 'lg' | 'xs';
-
-const iconPrefixMap: { [prefix: string]: string } = {
-  'glyphicon-': 'glyphicon glyphicon-',
-  'material-': '',
-  'circus-': 'circus-icon circus-icon-',
-  'rs-': 'rs-icon-',
-  default: 'glyphicon glyphicon-'
-};
 
 /**
  * This is a styled button that renders according to the CIRCUS theme.
@@ -38,12 +31,7 @@ export const Button: React.FC<{
     children
   } = props;
 
-  const matchedPrefix =
-    Object.keys(iconPrefixMap).find(p => icon?.startsWith(p)) ?? 'default';
-  const iconClass = icon
-    ? iconPrefixMap[matchedPrefix] + icon.replace(matchedPrefix, '')
-    : undefined;
-  const name = icon && icon.substring(matchedPrefix.length);
+  const iconSvg = icon ? buttonIcons[icon] : undefined;
   return (
     <StyledButton
       ref={ref}
@@ -54,11 +42,7 @@ export const Button: React.FC<{
       style={style}
       className={classNames(className, { selected })}
     >
-      {icon && matchedPrefix === 'material-' ? (
-        <StyledSpan>{name}</StyledSpan>
-      ) : (
-        <span className={iconClass} />
-      )}
+      {iconSvg && <IconSpan dangerouslySetInnerHTML={{ __html: iconSvg }} />}
       {children}
     </StyledButton>
   );
@@ -97,9 +81,11 @@ const StyledButton = styled.button`
   }
 `;
 
-const StyledSpan = styled.span`
-  font-family: 'Material Symbols Outlined';
-  display: inline-block;
-  line-height: 1;
-  vertical-align: middle;
+const IconSpan = styled.span`
+  svg {
+    width: 1em;
+    height: 1em;
+    fill: currentColor;
+    vertical-align: -0.125em;
+  }
 `;

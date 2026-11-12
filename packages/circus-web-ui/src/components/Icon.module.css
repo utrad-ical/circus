@@ -1,0 +1,29 @@
+.icon {
+  display: inline-block;
+  width: auto;
+  height: 1em;
+  font-size: 1.25em;
+  fill: currentColor;
+  vertical-align: -0.2em;
+  flex-shrink: 0;
+}
+
+.xs {
+  font-size: 0.75em;
+}
+.sm {
+  font-size: 1em;
+}
+.lg {
+  font-size: 1.5em;
+}
+.xl {
+  font-size: 2em;
+}
+.xxl {
+  font-size: 6em;
+}
+
+.icon:global(.text-link) {
+  cursor: pointer;
+}

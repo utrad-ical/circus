@@ -1,18 +1,19 @@
 import fs from 'node:fs/promises';
-import path from 'node:path';
-import { defineConfig } from 'tsdown';
+import { defineConfig, type Rolldown } from 'tsdown';
 
 /**
  * Inlines `import text from './file?raw'` as a string, like Vite does.
  * This lets the published package work without any bundler setup
  * on the consumer side.
  */
-const rawPlugin = {
+const rawPlugin: Rolldown.Plugin = {
   name: 'raw',
-  resolveId(source: string, importer: string | undefined) {
+  async resolveId(source, importer) {
     if (!source.endsWith('?raw') || !importer) return null;
-    const file = path.resolve(path.dirname(importer), source.slice(0, -4));
-    return file + '?raw';
+    const resolved = await this.resolve(source.slice(0, -4), importer, {
+      skipSelf: true
+    });
+    return resolved ? resolved.id + '?raw' : null;
   },
   async load(id: string) {
     if (!id.endsWith('?raw')) return null;

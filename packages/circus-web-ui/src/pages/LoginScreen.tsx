@@ -113,7 +113,7 @@ const LoginScreen: React.FC<{}> = props => {
       <Panel bsStyle="primary">
         <Panel.Body>
           <h1 className="text-center">
-            <span className="circus-icon-logo" />
+            <Icon icon="circus-logo" />
             <span hidden>CIRCUS DB</span>
           </h1>
           <FormGroup>

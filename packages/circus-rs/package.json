@@ -41,7 +41,6 @@
     "*.css"
   ],
   "dependencies": {
-    "@utrad-ical/circus-icons": "workspace:*",
     "@utrad-ical/circus-lib": "workspace:*",
     "axios": "^1.7.7",
     "dicom-parser": "^1.8.4",
@@ -86,6 +85,7 @@
     "@types/tinycolor2": "^1.4.0",
     "@types/validator": "^6.3.0",
     "@types/ws": "^8.5.3",
+    "@utrad-ical/circus-icons": "workspace:*",
     "fs-extra": "^11.2.0",
     "less": "^4.9.1",
     "tsdown": "0.23.7",

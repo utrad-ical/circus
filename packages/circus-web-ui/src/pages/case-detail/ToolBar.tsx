@@ -266,7 +266,7 @@ const ToolBar: React.FC<{
     <StyledDiv>
       <ToolButton
         name="pager"
-        icon="rs-pager"
+        icon="circus-pager"
         changeTool={onChangeTool}
         active={active}
         shortcut="P"
@@ -274,7 +274,7 @@ const ToolBar: React.FC<{
       />
       <ToolButton
         name="zoom"
-        icon="rs-zoom"
+        icon="circus-zoom"
         changeTool={onChangeTool}
         active={active}
         shortcut="Z"
@@ -292,7 +292,7 @@ const ToolBar: React.FC<{
       </ToolButton>
       <ToolButton
         name="hand"
-        icon="rs-hand"
+        icon="circus-hand"
         changeTool={onChangeTool}
         active={active}
         shortcut="H"
@@ -300,7 +300,7 @@ const ToolBar: React.FC<{
       />
       <ToolButton
         name="window"
-        icon="rs-window"
+        icon="circus-window"
         changeTool={onChangeTool}
         active={active}
         shortcut="W"
@@ -349,7 +349,7 @@ const ToolBar: React.FC<{
       &thinsp;
       <ToolButton
         name="brush"
-        icon="rs-brush"
+        icon="circus-brush"
         changeTool={onChangeTool}
         active={active}
         shortcut="B"
@@ -357,7 +357,7 @@ const ToolBar: React.FC<{
       />
       <ToolButton
         name="eraser"
-        icon="rs-eraser"
+        icon="circus-eraser"
         changeTool={onChangeTool}
         active={active}
         shortcut="E"
@@ -392,7 +392,7 @@ const ToolBar: React.FC<{
       </Dropdown>
       <ToolButton
         name="bucket"
-        icon="rs-bucket"
+        icon="circus-bucket"
         changeTool={onChangeTool}
         active={active}
         shortcut="Shift+B"
@@ -400,7 +400,7 @@ const ToolBar: React.FC<{
       />
       <ToolButton
         name="bucketEraser"
-        icon="rs-bucket-erase"
+        icon="circus-bucket-erase"
         changeTool={onChangeTool}
         active={active}
         shortcut="Shift+E"
@@ -408,7 +408,7 @@ const ToolBar: React.FC<{
       />
       <ToolButton
         name="wand"
-        icon="rs-wand"
+        icon="circus-wand"
         changeTool={onChangeTool}
         active={active}
         shortcut="M"
@@ -416,7 +416,7 @@ const ToolBar: React.FC<{
       />
       <ToolButton
         name="wandEraser"
-        icon="rs-wand-eraser"
+        icon="circus-wand-eraser"
         changeTool={onChangeTool}
         active={active}
         shortcut="Shift+M"

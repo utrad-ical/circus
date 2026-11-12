@@ -1,5 +1,5 @@
 .menu {
   min-width: 160px;
-  padding: 4px 0;
+  --popup-padding: 4px 0;
   list-style: none;
 }

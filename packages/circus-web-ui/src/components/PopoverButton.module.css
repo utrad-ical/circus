@@ -8,7 +8,7 @@
   position-try-fallbacks: flip-block;
   inset: auto;
   margin: 2px 0;
-  padding: 0;
+  padding: var(--popup-padding, 0);
   border: 1px solid var(--border);
   background-color: var(--bg);
   color: var(--text);

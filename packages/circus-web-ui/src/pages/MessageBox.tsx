@@ -1,6 +1,6 @@
 import React from 'react';
 import { dismissMessage } from '#store/messages.ts';
-import { Alert } from '#components/react-bootstrap.ts';
+import Alert, { type AlertVariant } from '#components/Alert.tsx';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
@@ -12,11 +12,10 @@ const MessageBox: React.FC<{}> = React.memo(props => {
   return (
     <StyledDiv>
       {messages.map(m => {
-        const style = m.style ? m.style : 'success';
         return (
           <Alert
             key={m.id}
-            bsStyle={style}
+            variant={(m.style || 'success') as AlertVariant}
             onDismiss={() => dispatch(dismissMessage({ id: m.id }))}
           >
             {m.message}

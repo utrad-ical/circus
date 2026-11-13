@@ -2,7 +2,7 @@ import Icon from '#components/Icon.tsx';
 import Select from '#components/Select.tsx';
 import useShowMessage from '#utils/useShowMessage.ts';
 import FileUpload from '#components/FileUpload.tsx';
-import { Alert } from '#components/react-bootstrap.ts';
+import Alert from '#components/Alert.tsx';
 import React, { useState, useMemo } from 'react';
 import useLocalPreference from '#utils/useLocalPreference.ts';
 import useLoginUser from '#utils/useLoginUser.ts';
@@ -31,7 +31,7 @@ const ImportSeries: React.FC<{}> = props => {
 
   if (!Array.isArray(domains) || domains.length === 0) {
     return (
-      <Alert bsStyle="warning">
+      <Alert variant="warning">
         You do not have any accessible domain. Uploading is not allowed.
       </Alert>
     );

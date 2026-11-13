@@ -1,3 +1,4 @@
+import Panel, { PanelHeader, PanelBody } from '#components/Panel.tsx';
 import Button from '#components/Button.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import { confirm, modal } from '#components/dialogs.tsx';
@@ -6,7 +7,6 @@ import type { PartialVolumeDescriptor } from '@utrad-ical/circus-rs';
 import { describePartialVolumeDescriptor } from '@utrad-ical/circus-rs';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
 import DataGrid from '#components/DataGrid.tsx';
-import { Panel } from '#components/react-bootstrap.ts';
 import SearchResultsView from '#components/SearchResultsView.tsx';
 import { produce } from 'immer';
 import * as mr from 'multi-integer-range';
@@ -308,8 +308,8 @@ const SeriesSelector: React.FC<{
 
   return (
     <Panel>
-      <Panel.Heading>Series</Panel.Heading>
-      <Panel.Body>
+      <PanelHeader>Series</PanelHeader>
+      <PanelBody>
         <DataGrid columns={columns} value={value} />
         <SelectAdditionalSeriesDiv>
           {!alwaysShowRelevantSeries && (
@@ -350,7 +350,7 @@ const SeriesSelector: React.FC<{
               You don&rsquo;t have permission to access personal information.
             </WarninMessageSpan>
           ))}
-      </Panel.Body>
+      </PanelBody>
     </Panel>
   );
 };

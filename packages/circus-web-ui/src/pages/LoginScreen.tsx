@@ -1,8 +1,9 @@
+import Panel, { PanelBody, PanelFooter } from '#components/Panel.tsx';
 import Button from '#components/Button.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import classnames from 'classnames';
 import Icon from '#components/Icon.tsx';
-import { FormControl, FormGroup, Panel } from '#components/react-bootstrap.ts';
+import { FormControl, FormGroup } from '#components/react-bootstrap.ts';
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -13,7 +14,7 @@ const StyledDiv = styled.div`
   width: 100%;
   max-width: 400px;
   margin: 0 auto;
-  .panel {
+  .login-panel {
     box-shadow: 3px 3px 30px silver;
   }
   margin-top: 3em;
@@ -106,8 +107,8 @@ const LoginScreen: React.FC<{}> = props => {
           consult the administrator.
         </div>
       )}
-      <Panel bsStyle="primary">
-        <Panel.Body>
+      <Panel variant="primary" className="login-panel">
+        <PanelBody>
           <h1 className="text-center">
             <Icon icon="circus-logo" />
             <span hidden>CIRCUS DB</span>
@@ -133,8 +134,8 @@ const LoginScreen: React.FC<{}> = props => {
             />
           </FormGroup>
           {error && <p className="text-danger">{error}</p>}
-        </Panel.Body>
-        <Panel.Footer className="text-center">
+        </PanelBody>
+        <PanelFooter className="text-center">
           <Button
             disabled={disabled}
             variant="primary"
@@ -144,7 +145,7 @@ const LoginScreen: React.FC<{}> = props => {
           >
             Login
           </Button>
-        </Panel.Footer>
+        </PanelFooter>
       </Panel>
     </StyledDiv>
   );

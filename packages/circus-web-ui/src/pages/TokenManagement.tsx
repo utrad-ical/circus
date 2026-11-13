@@ -1,13 +1,9 @@
+import Panel, { PanelList, PanelListItem } from '#components/Panel.tsx';
 import Button from '#components/Button.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import { confirm } from '#components/dialogs.tsx';
 import Icon from '#components/Icon.tsx';
-import {
-  ListGroup,
-  ListGroupItem,
-  Panel,
-  FormControl
-} from '#components/react-bootstrap.ts';
+import { FormControl } from '#components/react-bootstrap.ts';
 import TimeDisplay from '#components/TimeDisplay.tsx';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
@@ -92,13 +88,13 @@ const TokenManagement: React.FC<{}> = props => {
         <div className="alert alert-danger">Load error</div>
       )}
 
-      <Panel bsStyle="default">
-        <ListGroup>
+      <Panel>
+        <PanelList>
           {Array.isArray(data) &&
             data.map((token, i) => (
               <StyledListGroupItem
                 key={token.tokenId}
-                bsStyle={accessTokens[token.tokenId] ? 'info' : undefined}
+                variant={accessTokens[token.tokenId] ? 'info' : undefined}
               >
                 <div>
                   <div className="description">
@@ -123,11 +119,11 @@ const TokenManagement: React.FC<{}> = props => {
               </StyledListGroupItem>
             ))}
           {Array.isArray(data) && data.length === 0 && (
-            <ListGroupItem>
+            <PanelListItem>
               You have not created any permanent access tokens.
-            </ListGroupItem>
+            </PanelListItem>
           )}
-        </ListGroup>
+        </PanelList>
       </Panel>
       <hr />
       <h1>Add new token</h1>
@@ -157,7 +153,7 @@ const NewTokenForm = styled.div`
   display: flex;
 `;
 
-const StyledListGroupItem = styled(ListGroupItem)`
+const StyledListGroupItem = styled(PanelListItem)`
   display: flex;
   justify-content: space-between;
   align-items: center;

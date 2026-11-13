@@ -1,3 +1,4 @@
+import Panel, { PanelHeader, PanelBody } from '#components/Panel.tsx';
 import { selectEditor } from '#components/Select.tsx';
 import Button from '#components/Button.tsx';
 import * as et from '@smikitky/rb-components/lib/editor-types';
@@ -6,7 +7,7 @@ import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
 import Icon from '#components/Icon.tsx';
 import LabelColorsEditor from '#components/LabelColorsEditor.tsx';
 import { labeledSlider } from '#components/LabeledSlider.tsx';
-import { FormControl, Panel } from '#components/react-bootstrap.ts';
+import { FormControl } from '#components/react-bootstrap.ts';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { SearchPreset, UserPreferences } from '#store/loginUser.ts';
 import { useApi } from '#utils/api.ts';
@@ -263,40 +264,40 @@ const Preferences: React.FC<{}> = props => {
         <Icon icon="circus-preference" /> Preferences
       </h1>
       <Panel>
-        <Panel.Heading>
+        <PanelHeader>
           <Icon icon="material-contrast" /> Appearance
-        </Panel.Heading>
-        <Panel.Body>
+        </PanelHeader>
+        <PanelBody>
           <PropertyEditor
             value={settings}
             properties={appearanceProperties}
             onChange={setSettings}
           />
-        </Panel.Body>
+        </PanelBody>
       </Panel>
       <Panel>
-        <Panel.Heading>
+        <PanelHeader>
           <Icon icon="material-search" /> Search
-        </Panel.Heading>
-        <Panel.Body>
+        </PanelHeader>
+        <PanelBody>
           <PropertyEditor
             value={settings}
             properties={searchProperties}
             onChange={setSettings}
           />
-        </Panel.Body>
+        </PanelBody>
       </Panel>
       <Panel>
-        <Panel.Heading>
+        <PanelHeader>
           <Icon icon="circus-case" /> CIRCUS DB
-        </Panel.Heading>
-        <Panel.Body>
+        </PanelHeader>
+        <PanelBody>
           <PropertyEditor
             value={settings}
             properties={circusDBProperties}
             onChange={setSettings}
           />
-        </Panel.Body>
+        </PanelBody>
       </Panel>
       <p className="text-center">
         <Button variant="primary" onClick={saveClick}>

@@ -1,7 +1,8 @@
+import Panel, { PanelHeader, PanelBody } from '#components/Panel.tsx';
 import Button from '#components/Button.tsx';
 import Icon from '#components/Icon.tsx';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Row, Col, Panel } from '#components/react-bootstrap.ts';
+import { Row, Col } from '#components/react-bootstrap.ts';
 import { useApi } from '#utils/api.ts';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import ImageViewer from '#components/ImageViewer.tsx';
@@ -151,23 +152,14 @@ const SeriesDetail: React.FC<{}> = props => {
             </Link>
           </StyledMenu>
           {typeof seriesData.patientInfo === 'object' ? (
-            <Table
-              data={seriesData.patientInfo}
-              title="Patient Info"
-              defaultExpanded
-            />
+            <Table data={seriesData.patientInfo} title="Patient Info" />
           ) : (
-            <Panel defaultExpanded>
-              <Panel.Heading>Patient Info</Panel.Heading>
-              <Panel.Body>Personal information is masked.</Panel.Body>
+            <Panel>
+              <PanelHeader>Patient Info</PanelHeader>
+              <PanelBody>Personal information is masked.</PanelBody>
             </Panel>
           )}
-          <Table
-            data={seriesData}
-            keys={keys}
-            title="Series Detail"
-            defaultExpanded
-          />
+          <Table data={seriesData} keys={keys} title="Series Detail" />
           <Table data={seriesData.parameters} title="Parameters" />
         </Col>
       </Row>
@@ -185,29 +177,26 @@ const print = (data: any) => {
 const Table: React.FC<{
   data: { [key: string]: any };
   title: string;
-  defaultExpanded?: boolean;
   keys?: string[];
 }> = props => {
   const keys = Array.isArray(props.keys) ? props.keys : Object.keys(props.data);
   return (
-    <Panel defaultExpanded={props.defaultExpanded}>
-      <Panel.Heading>{props.title}</Panel.Heading>
-      <Panel.Collapse>
-        <table className="table table-condensed">
-          <tbody>
-            {keys.map(k => {
-              return (
-                <tr key={k}>
-                  <th>{k}</th>
-                  <td style={{ wordBreak: 'break-all' }}>
-                    {print(props.data[k])}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </Panel.Collapse>
+    <Panel>
+      <PanelHeader>{props.title}</PanelHeader>
+      <table className="table table-condensed">
+        <tbody>
+          {keys.map(k => {
+            return (
+              <tr key={k}>
+                <th>{k}</th>
+                <td style={{ wordBreak: 'break-all' }}>
+                  {print(props.data[k])}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </Panel>
   );
 };

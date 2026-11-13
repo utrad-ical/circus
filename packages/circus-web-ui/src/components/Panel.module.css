@@ -1,0 +1,46 @@
+.panel {
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background-color: var(--bg);
+  overflow: clip;
+  > * + * {
+    border-top: 1px solid var(--border);
+  }
+  &.primary {
+    border-color: var(--theme);
+    > .header {
+      background-color: var(--theme);
+      color: var(--theme-text);
+    }
+  }
+}
+
+.header,
+.footer {
+  padding: 10px 15px;
+  background-color: var(--surface);
+}
+
+.body {
+  padding: 15px;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  > li {
+    padding: 10px 15px;
+  }
+  > li + li {
+    border-top: 1px solid var(--border);
+  }
+  > .info {
+    background-color: color-mix(in oklch, var(--theme) 15%, var(--bg));
+  }
+  > .danger {
+    background-color: color-mix(in oklch, var(--danger) 15%, var(--bg));
+    color: var(--danger);
+  }
+}

@@ -1,0 +1,8 @@
+.profile {
+  display: grid;
+  align-items: start;
+  gap: 0 30px;
+  @media (min-width: 992px) {
+    grid-template-columns: 7fr 5fr;
+  }
+}

@@ -10,6 +10,7 @@ import ProjectDisplay from '#components/ProjectDisplay.tsx';
 import Icon from '#components/Icon.tsx';
 import TimeDisplay from '#components/TimeDisplay.tsx';
 import styled from 'styled-components';
+import styles from './HomePage.module.css';
 import useLoginUser from '#utils/useLoginUser.ts';
 
 const HomeMenu = styled.ul`
@@ -154,21 +155,12 @@ const MyProfile: React.FC<{}> = props => {
   );
 };
 
-const ProfileGrid = styled.div`
-  display: grid;
-  align-items: start;
-  gap: 0 30px;
-  @media (min-width: 992px) {
-    grid-template-columns: 7fr 5fr;
-  }
-`;
-
 const Profile: React.FC<{}> = props => {
   return (
-    <ProfileGrid>
+    <div className={styles.profile}>
       <MyProjects />
       <MyProfile />
-    </ProfileGrid>
+    </div>
   );
 };
 

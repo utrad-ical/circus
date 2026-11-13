@@ -10,6 +10,7 @@ import * as rs from '@utrad-ical/circus-rs';
 import { toolFactory } from '@utrad-ical/circus-rs';
 import useLoadData from '#utils/useLoadData.ts';
 import styled from 'styled-components';
+import styles from './SeriesDetail.module.css';
 import { Link, useParams } from 'react-router-dom';
 import type { SeriesEntryWithHints } from '@utrad-ical/circus-ui-kit';
 import { useVolumeLoaders } from '@utrad-ical/circus-ui-kit';
@@ -18,17 +19,6 @@ const StyledImageViewer = styled(ImageViewer)`
   background: black;
   width: 512px;
   height: 512px;
-`;
-
-const StyledColumns = styled.div`
-  display: grid;
-  gap: 0 30px;
-  @media (min-width: 1200px) {
-    grid-template-columns: 1fr 1fr;
-  }
-  > * {
-    min-width: 0;
-  }
 `;
 
 const StyledMenu = styled.div`
@@ -139,7 +129,7 @@ const SeriesDetail: React.FC<{}> = props => {
       <h1>
         <Icon icon="circus-series" /> Series Detail
       </h1>
-      <StyledColumns>
+      <div className={styles.columns}>
         <div>
           <StyledImageViewer
             id="series-detail"
@@ -182,7 +172,7 @@ const SeriesDetail: React.FC<{}> = props => {
           />
           <Table data={seriesData.parameters} title="Parameters" />
         </div>
-      </StyledColumns>
+      </div>
     </div>
   );
 };

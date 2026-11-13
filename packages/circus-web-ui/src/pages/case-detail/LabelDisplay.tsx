@@ -9,6 +9,7 @@ import styles from './LabelDisplay.module.css';
 
 const LabelDisplay: React.FC<{
   label: InternalLabel;
+  className?: string;
   visibility?: 'normal' | 'hidden' | 'allHidden';
   hintText?: string;
   onColorClick?: MouseEventHandler;
@@ -19,6 +20,7 @@ const LabelDisplay: React.FC<{
 }> = props => {
   const {
     label,
+    className,
     hintText,
     visibility = 'normal',
     onColorClick,
@@ -34,7 +36,7 @@ const LabelDisplay: React.FC<{
   );
 
   return (
-    <div className={classNames('circus-label', styles.labelDisplay)}>
+    <div className={classNames(styles.labelDisplay, className)}>
       <div
         className={styles.colorPreview}
         onClick={onColorClick}
@@ -54,7 +56,7 @@ const LabelDisplay: React.FC<{
         <Icon icon={labelTypes[label.type].icon} />
         {label.name ?? <span className={styles.noName}>Label</span>}
         {hintText && (
-          <span className={classNames('hint', styles.hint)} title={hintText}>
+          <span className={styles.hint} title={hintText}>
             {hintText}
           </span>
         )}

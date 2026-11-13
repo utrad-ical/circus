@@ -968,12 +968,12 @@ const RevisionEditor: React.FC<{
 
   return (
     <div
-      className={classNames('case-revision-data', styles.revisionEditor, {
+      className={classNames(styles.revisionEditor, {
         [styles.busy]: busy
       })}
     >
       <SideContainer>
-        <Collapser title="Series / Labels" className="labels" noPadding>
+        <Collapser title="Series / Labels" noPadding>
           <LabelMenu
             editingData={editingData}
             onReveal={handleReveal}
@@ -1006,12 +1006,7 @@ const RevisionEditor: React.FC<{
           {activeLabel &&
             Object.keys(projectData.labelAttributesSchema.properties || {})
               .length > 0 && (
-              <div
-                className={classNames(
-                  'label-attributes',
-                  styles.labelAttributes
-                )}
-              >
+              <div className={styles.labelAttributes}>
                 <b>Attributes for</b>:{' '}
                 <Icon icon={labelTypes[activeLabel.type].icon} />{' '}
                 <span className={styles.labelName}>{activeLabel.name}</span>
@@ -1035,7 +1030,7 @@ const RevisionEditor: React.FC<{
         </Collapser>
         {Object.keys(projectData.caseAttributesSchema.properties || {}).length >
           0 && (
-          <Collapser title="Case Attributes" className="case-attributes">
+          <Collapser title="Case Attributes">
             <JsonSchemaEditor
               key={refreshCounter}
               schema={projectData.caseAttributesSchema}
@@ -1049,7 +1044,7 @@ const RevisionEditor: React.FC<{
           </Collapser>
         )}
       </SideContainer>
-      <div className={classNames('case-revision-main', styles.main)}>
+      <div className={styles.main}>
         <ToolBar
           active={activeToolName}
           onChangeTool={setActiveTool}

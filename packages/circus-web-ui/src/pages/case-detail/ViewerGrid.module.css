@@ -11,11 +11,11 @@
   border: 1px solid #888888;
   cursor: pointer;
 
-  &:global(.selected-series) {
+  &.selectedSeries {
     background-color: #666666;
   }
 
-  &:global(.active) {
+  &.active {
     background-color: #555500;
   }
 

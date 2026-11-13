@@ -186,7 +186,7 @@ const SeriesItem: React.FC<{
   return (
     <li
       className={classNames(styles.series, {
-        active: seriesIndex === editingData.activeSeriesIndex
+        [styles.active]: seriesIndex === editingData.activeSeriesIndex
       })}
       onClick={handleSeriesClick}
       onDoubleClick={handleSeriesDoubleClick}
@@ -211,7 +211,7 @@ const SeriesItem: React.FC<{
           <Button variant="link" icon="material-info" onClick={onShowInfo} />
         </div>
       </span>
-      <ul className={classNames('case-label-list', styles.caseLabelList)}>
+      <ul className={styles.caseLabelList}>
         {series.labels.map((label, labelIndex) => (
           <Label
             key={label.temporaryKey}
@@ -474,7 +474,7 @@ export const Label: React.FC<{
     <li
       ref={liRef}
       className={classNames(styles.label, {
-        active: label === activeLabel,
+        [styles.active]: label === activeLabel,
         [styles.draggingTop]: isDraggingOver === 'top',
         [styles.draggingBottom]: isDraggingOver === 'bottom'
       })}
@@ -487,6 +487,7 @@ export const Label: React.FC<{
       onDragLeave={handleDragLeave}
     >
       <LabelDisplay
+        className={styles.labelDisplay}
         label={label}
         onColorClick={handleColorPreviewClick}
         colorDraggable

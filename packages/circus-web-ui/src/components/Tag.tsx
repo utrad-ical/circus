@@ -1,4 +1,3 @@
-import classnames from 'classnames';
 import React from 'react';
 import tinycolor from 'tinycolor2';
 import useLoginUser from '#utils/useLoginUser.ts';
@@ -20,7 +19,7 @@ export const PhysicalTag: React.FC<{
     '--tag-border-color': tinycolor(color).darken().toHexString()
   } as React.CSSProperties;
   return (
-    <span className={classnames('tag', styles.tag)} style={style}>
+    <span className={styles.tag} style={style}>
       {props.name}
     </span>
   );

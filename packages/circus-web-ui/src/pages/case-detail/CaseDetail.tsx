@@ -271,47 +271,49 @@ const CaseDetail: React.FC<{}> = () => {
 
   return (
     <FullSpanContainer>
-      <Collapser title="Case Info" className={styles.caseInfo}>
-        {activeRelevantCases ? (
-          <DropdownButton
-            id="casemenu"
-            title={<PatientInfoBox value={caseStore.patientInfo} />}
-            noCaret
-            disabled={busy}
-            style={{ textAlign: 'left', border: 'none', padding: '0px' }}
-          >
-            <RelevantCases currentCaseId={caseId} />
-          </DropdownButton>
-        ) : (
-          <PatientInfoBox value={caseStore.patientInfo} />
-        )}
-        <ProjectDisplay
-          projectId={projectData.projectId}
-          withName
-          withDescription
-          size="xl"
-        />
-        <div className={styles.spacer} />
-        <div className={styles.tagList}>
-          <b>Tags:</b>
-          {tags.map((t: string | number | undefined) => (
-            <Tag
-              projectId={projectData.projectId}
-              tag={!t ? '' : t.toString()}
-              key={t}
-            />
-          ))}
-          {tags.length === 0 && <span>(none)</span>}
-          <TagEditor
-            projectData={projectData}
-            value={tags}
-            onChange={handleTagChange}
+      <Collapser title="Case Info" noPadding>
+        <div className={styles.caseInfo}>
+          {activeRelevantCases ? (
+            <DropdownButton
+              id="casemenu"
+              title={<PatientInfoBox value={caseStore.patientInfo} />}
+              noCaret
+              disabled={busy}
+              className={styles.patientButton}
+            >
+              <RelevantCases currentCaseId={caseId} />
+            </DropdownButton>
+          ) : (
+            <PatientInfoBox value={caseStore.patientInfo} />
+          )}
+          <ProjectDisplay
+            projectId={projectData.projectId}
+            withName
+            withDescription
+            size="xl"
           />
-        </div>
-        <div>
-          Case: {caseId}
-          <br />
-          (Create: <TimeDisplay value={caseData.createdAt} />)
+          <div className={styles.spacer} />
+          <div className={styles.tagList}>
+            <b>Tags:</b>
+            {tags.map((t: string | number | undefined) => (
+              <Tag
+                projectId={projectData.projectId}
+                tag={!t ? '' : t.toString()}
+                key={t}
+              />
+            ))}
+            {tags.length === 0 && <span>(none)</span>}
+            <TagEditor
+              projectData={projectData}
+              value={tags}
+              onChange={handleTagChange}
+            />
+          </div>
+          <div>
+            Case: {caseId}
+            <br />
+            (Create: <TimeDisplay value={caseData.createdAt} />)
+          </div>
         </div>
       </Collapser>
       <MenuBar
@@ -469,13 +471,11 @@ const RelevantCases: React.FC<{
         caption: '',
         renderer: ({ value }) =>
           currentCaseId === value.caseId ? null : (
-            <div className="register">
-              <Link to={`/case/${value.caseId}`}>
-                <Button icon="circus-case" size="small" variant="primary">
-                  View
-                </Button>
-              </Link>
-            </div>
+            <Link to={`/case/${value.caseId}`}>
+              <Button icon="circus-case" size="small" variant="primary">
+                View
+              </Button>
+            </Link>
           )
       }
     ];
@@ -483,7 +483,7 @@ const RelevantCases: React.FC<{
   });
 
   return (
-    <div style={{ whiteSpace: 'nowrap', margin: '1em' }}>
+    <div className={styles.relevantCases}>
       <div>Showing cases from the same patient</div>
       <SearchResultsView
         name="relevantCases"

@@ -427,11 +427,7 @@ const AppearanceEditor: React.FC<{
   const { appearance, hidden, disabled, onChange, labelColors } = props;
   if (disabled || !appearance) {
     return (
-      <Button
-        className={styles.colorEditorButton}
-        size="xsmall"
-        style={{ backgroundColor: '#eeeeee' }}
-      >
+      <Button className={styles.colorEditorButton} size="xsmall">
         -
       </Button>
     );
@@ -442,7 +438,7 @@ const AppearanceEditor: React.FC<{
       title={`${appearance.alpha * 100}%`}
       size="xsmall"
       noCaret
-      className={`color-editor-button ${styles.colorEditorButton}`}
+      className={styles.colorEditorButton}
       style={{
         backgroundColor: appearance.color,
         color: `contrast-color(${appearance.color})`

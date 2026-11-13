@@ -1,23 +1,27 @@
 .caseInfo {
-  /* Stronger than the padding in Collapser.module.css, whatever the load order */
-  &:global(.collapser) :global(.collapser-body) {
-    padding: 3px;
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: space-between;
-    align-items: center;
-    > * {
-      margin: 0 10px;
-    }
+  padding: 3px 10px;
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  column-gap: 20px;
+  .patientButton {
+    text-align: left;
+    border: none;
+    padding: 0;
   }
   .spacer {
     flex-grow: 1;
   }
   .tagList {
-    > :global(.tag) {
-      margin-left: 3px;
-    }
+    display: flex;
+    align-items: center;
+    gap: 3px;
   }
+}
+
+.relevantCases {
+  white-space: nowrap;
+  margin: 1em;
 }
 
 .menuBar {

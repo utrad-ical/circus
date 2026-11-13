@@ -1,6 +1,6 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
-import { confirm, prompt } from '@smikitky/rb-components/lib/modal';
+import { confirm, prompt } from '#components/dialogs.tsx';
 import type { AppDispatch, AppThunk } from '#store/index.ts';
 import type { ApiCaller } from '#utils/api.ts';
 import type Series from '#types/Series.ts';

@@ -1,4 +1,4 @@
-import { alert } from '@smikitky/rb-components/lib/modal';
+import { alert } from '#components/dialogs.tsx';
 import { intersliceInterpolation } from '@utrad-ical/circus-rs';
 import type { MorphologicalImageProcessingResults } from '@utrad-ical/circus-rs';
 import type { VoxelLabelProcessor } from './performLabelCreatingVoxelProcessing.ts';

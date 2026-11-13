@@ -1,7 +1,7 @@
 import Button from '#components/Button.tsx';
 import Icon from '#components/Icon.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
-import { confirm } from '@smikitky/rb-components/lib/modal';
+import { confirm } from '#components/dialogs.tsx';
 import Select from '#components/Select.tsx';
 import CsVolumeDownloadModal from '#components/CsVolumeDownloadModal.tsx';
 import PluginDisplay from '#components/PluginDisplay.tsx';

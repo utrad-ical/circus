@@ -9,7 +9,7 @@ import TimeDisplay from '#components/TimeDisplay.tsx';
 import UserDisplay from '#components/UserDisplay.tsx';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useApi } from '#utils/api.ts';
-import * as modal from '@smikitky/rb-components/lib/modal';
+import * as modal from '#components/dialogs.tsx';
 
 const DeleteFeedbackModal: React.FC<{}> = () => {
   const { job } = useCsResults();

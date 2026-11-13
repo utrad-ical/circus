@@ -7,7 +7,7 @@ import {
   describePartialVolumeDescriptor,
   rangeHasPartialVolume
 } from '@utrad-ical/circus-rs';
-import { Modal } from '#components/react-bootstrap.ts';
+import { DialogBody, DialogFooter } from '#components/Dialog.tsx';
 import * as mr from 'multi-integer-range';
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -66,7 +66,7 @@ const PartialVolumeDescriptorEditor: React.FC<{
 
   return (
     <>
-      <Modal.Body>
+      <DialogBody>
         <p>
           <b>Uploaded images:</b> {mr.stringify(images)}
         </p>
@@ -88,8 +88,8 @@ const PartialVolumeDescriptorEditor: React.FC<{
             Flip start/end
           </Button>
         </PreviewDiv>
-      </Modal.Body>
-      <Modal.Footer>
+      </DialogBody>
+      <DialogFooter>
         <Button variant="link" onClick={() => onResolve(null)}>
           Cancel
         </Button>
@@ -103,7 +103,7 @@ const PartialVolumeDescriptorEditor: React.FC<{
         >
           OK
         </Button>
-      </Modal.Footer>
+      </DialogFooter>
     </>
   );
 };

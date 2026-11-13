@@ -1,6 +1,6 @@
 import Button from '#components/Button.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
-import { alert, confirm } from '@smikitky/rb-components/lib/modal';
+import { alert, confirm } from '#components/dialogs.tsx';
 import CaseExportModal from '#components/CaseExportModal.tsx';
 import Collapser from '#components/Collapser.tsx';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';

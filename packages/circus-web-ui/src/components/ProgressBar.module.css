@@ -1,0 +1,48 @@
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  white-space: nowrap;
+}
+
+.track {
+  --bar-color: var(--theme);
+  position: relative;
+  flex: 1;
+  height: 0.6em;
+  background-color: color-mix(in oklch, var(--text) 10%, var(--bg));
+  overflow: hidden;
+  &.success {
+    --bar-color: var(--success);
+  }
+  &.danger {
+    --bar-color: var(--danger);
+  }
+}
+
+.fill {
+  height: 100%;
+  background-color: var(--bar-color);
+  transition: width 0.3s ease-out;
+}
+
+/* A segment of 30% of the track moving from left to right */
+.indeterminate .fill {
+  width: 30%;
+  animation: slide 1.5s linear infinite;
+}
+
+@keyframes slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(calc(100% / 0.3));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .indeterminate .fill {
+    animation-duration: 4s;
+  }
+}

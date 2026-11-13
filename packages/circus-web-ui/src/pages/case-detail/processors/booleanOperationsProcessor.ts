@@ -46,7 +46,7 @@ const booleanOperationsProcessor: Processor<BooleanOperationsOptions> = (
   )
     throw new TypeError('Invalid label passed.');
 
-  reportProgress({ value: 100, label: '', finished: false });
+  reportProgress({ finished: false });
   const updateCurrentLabels = createCurrentLabelsUpdator(
     editingData,
     updateEditingData

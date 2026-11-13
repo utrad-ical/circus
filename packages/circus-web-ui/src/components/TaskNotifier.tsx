@@ -4,13 +4,14 @@ import moment from 'moment';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { newSearch, updateSearch } from '#store/searches.ts';
-import styled, { keyframes } from 'styled-components';
+import styled from 'styled-components';
 import type Task from '#types/Task.ts';
 import { useApi } from '#utils/api.ts';
 import useTaskDismisser from '#utils/useTaskDismisser.ts';
 import useTaskDownloadHandler from '#utils/useTaskDownloadHandler.ts';
 import type { TaskProgress } from '../store/taskProgress.ts';
 import NavMenu from './NavMenu.tsx';
+import ProgressBar from './ProgressBar.tsx';
 
 const TaskNotifier: React.FC<{}> = props => {
   const api = useApi();
@@ -105,6 +106,9 @@ const TaskDisplay: React.FC<{
 
   const handleDownloadClick = useTaskDownloadHandler(task.taskId);
   const status = progress?.status ?? task.status;
+  const counted =
+    typeof progress?.finished === 'number' &&
+    typeof progress?.total === 'number';
 
   const message =
     progress?.message ??
@@ -137,42 +141,23 @@ const TaskDisplay: React.FC<{
           icon="material-select_check_box"
         />
       </div>
-      <TaskProgressBar
-        status={status}
-        finished={progress?.finished}
-        total={progress?.total}
+      <ProgressBar
+        className="task-progressbar"
+        variant={
+          status === 'error'
+            ? 'danger'
+            : status === 'finished'
+              ? 'success'
+              : undefined
+        }
+        value={
+          status !== 'processing' ? 1 : counted ? progress!.finished : undefined
+        }
+        max={status === 'processing' && counted ? progress!.total : 1}
       />
     </StyledTaskDisplay>
   );
 };
-
-const TaskProgressBar: React.FC<{
-  status: 'finished' | 'error' | 'processing';
-  finished?: number;
-  total?: number;
-}> = props => {
-  const { status, finished, total } = props;
-
-  const percent =
-    status === 'processing' &&
-    typeof finished === 'number' &&
-    typeof total === 'number'
-      ? (finished / total) * 100
-      : 100;
-  return (
-    <div className="task-progressbar">
-      <div
-        className={classNames('bar', status)}
-        style={percent !== undefined ? { right: `${100 - percent}%` } : {}}
-      />
-    </div>
-  );
-};
-
-const shift = keyframes`
-  from { background-position-x: 0; }
-  to { background-position-x: 20px; }
-`;
 
 const StyledTaskDisplay = styled.div`
   color: black;
@@ -203,29 +188,8 @@ const StyledTaskDisplay = styled.div`
     padding: 2px 7px;
     font-size: 80%;
   }
-  .task-progressbar {
+  .task-progressbar [role='progressbar'] {
     height: 4px;
-    width: 100%;
-    position: relative;
-    background: silver;
-    .bar {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      &.finished {
-        background-color: #779977;
-      }
-      &.error {
-        background-color: #dd0000;
-      }
-      &.processing {
-        background: repeating-linear-gradient(90deg, yellow 0px, orange 20px);
-        background-size: 20px 4px;
-        animation: ${shift} 0.7s linear infinite;
-      }
-    }
   }
 `;
 

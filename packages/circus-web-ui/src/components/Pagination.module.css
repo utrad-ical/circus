@@ -1,0 +1,9 @@
+.pagination {
+  display: inline-flex;
+  > button {
+    min-width: 2.5em;
+  }
+  > button + button {
+    margin-inline-start: -1px;
+  }
+}

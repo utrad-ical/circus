@@ -1,14 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import ControlLabel from 'react-bootstrap/lib/ControlLabel';
-import Dropdown from 'react-bootstrap/lib/Dropdown';
-import FormControl from 'react-bootstrap/lib/FormControl';
-import FormGroup from 'react-bootstrap/lib/FormGroup';
-import MenuItem from 'react-bootstrap/lib/MenuItem';
 import styled from 'styled-components';
 import { Button } from '../../ui/Button.tsx';
 import Tooltip from '../../ui/Tooltip.tsx';
 import { useCsResults } from '../CsResultsContext.ts';
 import type { Display } from '../Display.tsx';
+import {
+  Field,
+  FieldLabel,
+  SelectInput,
+  TextInput
+} from './utils/formField.tsx';
 import { useErrorMessage } from './utils/useErrorMessage.tsx';
 
 interface TagsOptions {
@@ -227,8 +228,8 @@ export const Tags: Display<TagsOptions, string[]> = props => {
   if (error) return error;
 
   return (
-    <StyledFormGroup validationState={invalidMessage ? 'error' : undefined}>
-      {label && <ControlLabel>{label}</ControlLabel>}
+    <StyledField>
+      {label && <FieldLabel as="div">{label}</FieldLabel>}
       <div className="tags">
         <div className="array">
           {tags.map((tag, index) =>
@@ -257,30 +258,33 @@ export const Tags: Display<TagsOptions, string[]> = props => {
         </div>
         <div className="chooseTags">
           {predefinedTags.length > 0 && (
-            <Dropdown
-              id="chooseTagsFromPreset"
+            <SelectInput
               className="fromPreset"
-              onSelect={handleTagSelect as any}
+              aria-label="Add a tag"
+              aria-invalid={!!invalidMessage}
+              value=""
+              onChange={(ev: React.ChangeEvent<HTMLSelectElement>) =>
+                ev.target.value && handleTagSelect(ev.target.value)
+              }
               disabled={!editable}
             >
-              <Dropdown.Toggle></Dropdown.Toggle>
-              <Dropdown.Menu>
-                {predefinedTags.map(tag => (
-                  <MenuItem key={tag} eventKey={tag}>
-                    {tag}
-                  </MenuItem>
-                ))}
-              </Dropdown.Menu>
-            </Dropdown>
+              <option value="">Add...</option>
+              {predefinedTags.map(tag => (
+                <option key={tag} value={tag}>
+                  {tag}
+                </option>
+              ))}
+            </SelectInput>
           )}
           {acceptFreeText && (
             <div className="fromFreeText">
               {freeTextLabel && <label>{freeTextLabel}</label>}
-              <FormControl
+              <TextInput
                 type="text"
+                aria-label={freeTextLabel ?? 'Free text'}
                 disabled={!editable}
                 value={freeText}
-                onChange={handleFreeTextChange as any}
+                onChange={handleFreeTextChange}
               />
               <Button onClick={() => handleAddFreeText()} disabled={!editable}>
                 Add
@@ -290,11 +294,11 @@ export const Tags: Display<TagsOptions, string[]> = props => {
           )}
         </div>
       </div>
-    </StyledFormGroup>
+    </StyledField>
   );
 };
 
-const StyledFormGroup = styled(FormGroup)`
+const StyledField = styled(Field)`
   .tags {
     display: flex;
     gap: 1rem;

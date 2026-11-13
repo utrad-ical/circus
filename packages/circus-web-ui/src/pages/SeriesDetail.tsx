@@ -3,7 +3,6 @@ import Panel, { PanelHeader, PanelBody } from '#components/Panel.tsx';
 import Button from '#components/Button.tsx';
 import Icon from '#components/Icon.tsx';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Row, Col } from '#components/react-bootstrap.ts';
 import { useApi } from '#utils/api.ts';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import ImageViewer from '#components/ImageViewer.tsx';
@@ -19,6 +18,17 @@ const StyledImageViewer = styled(ImageViewer)`
   background: black;
   width: 512px;
   height: 512px;
+`;
+
+const StyledColumns = styled.div`
+  display: grid;
+  gap: 0 30px;
+  @media (min-width: 1200px) {
+    grid-template-columns: 1fr 1fr;
+  }
+  > * {
+    min-width: 0;
+  }
 `;
 
 const StyledMenu = styled.div`
@@ -129,16 +139,16 @@ const SeriesDetail: React.FC<{}> = props => {
       <h1>
         <Icon icon="circus-series" /> Series Detail
       </h1>
-      <Row>
-        <Col lg={6}>
+      <StyledColumns>
+        <div>
           <StyledImageViewer
             id="series-detail"
             composition={composition}
             tool={pagerTool}
             initialTool={pagerTool}
           />
-        </Col>
-        <Col lg={6}>
+        </div>
+        <div>
           <StyledMenu>
             <Link to={`/new-case/${seriesUid}`}>
               <Button icon="circus-case" variant="primary">
@@ -171,8 +181,8 @@ const SeriesDetail: React.FC<{}> = props => {
             defaultExpanded
           />
           <Table data={seriesData.parameters} title="Parameters" />
-        </Col>
-      </Row>
+        </div>
+      </StyledColumns>
     </div>
   );
 };

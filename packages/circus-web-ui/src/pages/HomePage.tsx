@@ -6,7 +6,6 @@ import Panel, {
 } from '#components/Panel.tsx';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Row, Col } from '#components/react-bootstrap.ts';
 import ProjectDisplay from '#components/ProjectDisplay.tsx';
 import Icon from '#components/Icon.tsx';
 import TimeDisplay from '#components/TimeDisplay.tsx';
@@ -155,16 +154,21 @@ const MyProfile: React.FC<{}> = props => {
   );
 };
 
+const ProfileGrid = styled.div`
+  display: grid;
+  align-items: start;
+  gap: 0 30px;
+  @media (min-width: 992px) {
+    grid-template-columns: 7fr 5fr;
+  }
+`;
+
 const Profile: React.FC<{}> = props => {
   return (
-    <Row>
-      <Col md={7}>
-        <MyProjects />
-      </Col>
-      <Col md={5}>
-        <MyProfile />
-      </Col>
-    </Row>
+    <ProfileGrid>
+      <MyProjects />
+      <MyProfile />
+    </ProfileGrid>
   );
 };
 

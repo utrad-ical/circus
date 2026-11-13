@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import { MessageBox } from './MessageBox.tsx';
 
 /**
  * This is an error message box shown when the display strategy is
@@ -15,7 +16,9 @@ export const useErrorMessage = (): [
   }, []);
 
   const element = message ? (
-    <pre className="alert alert-danger">{message}</pre>
+    <MessageBox variant="danger" preformatted>
+      {message}
+    </MessageBox>
   ) : undefined;
   return [element, setError];
 };

@@ -1,3 +1,4 @@
+import u from '#components/utilities.module.css';
 import Input from '#components/Input.tsx';
 import Panel, { PanelHeader, PanelBody } from '#components/Panel.tsx';
 import { selectEditor } from '#components/Select.tsx';
@@ -25,11 +26,11 @@ const PresetDeleteEditor: et.Editor<SearchPreset[] | undefined> = props => {
   };
 
   if (!Array.isArray(value) || !value.length) {
-    return <div className="text-muted">(no presets)</div>;
+    return <div className={u.muted}>(no presets)</div>;
   }
 
   return (
-    <ul className="list-unstyled">
+    <ul className={u.plainList}>
       {value.map(preset => {
         return (
           <li key={preset.name}>
@@ -98,9 +99,9 @@ const TemplateEditor: et.Editor<string[] | undefined> = props => {
         </Button>
       </span>
       {!Array.isArray(value) || !value.length ? (
-        <div className="text-muted">(no templates)</div>
+        <div className={u.muted}>(no templates)</div>
       ) : (
-        <ul className="list-unstyled">
+        <ul className={u.plainList}>
           {value.map(message => {
             return (
               <li key={message}>
@@ -301,7 +302,7 @@ const Preferences: React.FC<{}> = props => {
           />
         </PanelBody>
       </Panel>
-      <p className="text-center">
+      <p className={u.textCenter}>
         <Button variant="primary" onClick={saveClick}>
           Save
         </Button>

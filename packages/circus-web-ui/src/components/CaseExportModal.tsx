@@ -1,3 +1,4 @@
+import styles from './DownloadModal.module.css';
 import type { Editor } from '#components/editorTypes.tsx';
 import Select from '#components/Select.tsx';
 import { produce } from 'immer';
@@ -63,7 +64,7 @@ const createCaseExportOptionsEditor: (
   return (
     <div>
       {revisions && (
-        <div className="row">
+        <div className={styles.option}>
           Target revision:{' '}
           <RevSelector
             value={(value.caseIds[0] as any).revisionIndex}
@@ -71,7 +72,7 @@ const createCaseExportOptionsEditor: (
           />
         </div>
       )}
-      <div className="row">
+      <div className={styles.option}>
         Voxel labels:{' '}
         <Select
           options={labelPackTypeOptions}
@@ -79,7 +80,7 @@ const createCaseExportOptionsEditor: (
           onChange={v => onChange({ ...value, labelPackType: v })}
         />
       </div>
-      <div className="row">
+      <div className={styles.option}>
         MHD file line endings:{' '}
         <Select
           options={lineEndingOptions}
@@ -87,7 +88,7 @@ const createCaseExportOptionsEditor: (
           onChange={v => onChange({ ...value, mhdLineEnding: v })}
         />
       </div>
-      <div className="row">
+      <div className={styles.option}>
         Compression format:{' '}
         <Select
           options={compressionFormatOptions}

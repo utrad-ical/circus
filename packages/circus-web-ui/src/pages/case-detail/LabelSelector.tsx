@@ -1,3 +1,4 @@
+import table from '#components/table.module.css';
 import Button from '#components/Button.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import type {
@@ -318,7 +319,7 @@ const SeriesInfo: React.FC<{
     <>
       <DialogHeader>Series Information</DialogHeader>
       <DialogBody>
-        <table className="table table-striped">
+        <table className={classNames(table.table, table.striped)}>
           <tbody>
             {Object.keys(data).map(k => (
               <tr key={k}>

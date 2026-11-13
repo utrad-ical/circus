@@ -1,3 +1,4 @@
+import Badge from '#components/Badge.tsx';
 import { multiSelectEditor } from '#components/MultiSelect.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import * as et from '#components/editorTypes.tsx';
@@ -42,9 +43,9 @@ const listColumns: DataGridColumnDefinition<{
           {item.privileges.map((priv, i) => {
             const style = priv === 'manageServer' ? 'danger' : 'primary';
             return (
-              <span key={i} className={`label label-${style}`}>
+              <Badge key={i} variant={style}>
                 {priv}
-              </span>
+              </Badge>
             );
           })}
         </>
@@ -57,9 +58,7 @@ const listColumns: DataGridColumnDefinition<{
     renderer: ({ value: item }) => (
       <>
         {item.domains.map((d, i) => (
-          <span key={i} className="label label-default">
-            {d}
-          </span>
+          <Badge key={i}>{d}</Badge>
         ))}
       </>
     )

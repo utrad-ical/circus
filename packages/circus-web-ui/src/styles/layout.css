@@ -1,0 +1,48 @@
+/* The layout of the whole application */
+
+html,
+body {
+  height: 100%;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: scroll;
+}
+
+/* The main column of an ordinary page */
+.page-container {
+  margin-inline: auto;
+  padding-inline: 15px;
+  @media (min-width: 768px) {
+    width: 750px;
+  }
+  @media (min-width: 992px) {
+    width: 970px;
+  }
+  @media (min-width: 1200px) {
+    width: 1170px;
+  }
+  & h1 {
+    margin: 15px 0 20px;
+    font-size: 24px;
+    font-weight: bold;
+  }
+}
+
+/* Pages like case detail fill the whole window (see FullSpanContainer) */
+body.full-span-container {
+  #app {
+    overflow-y: hidden;
+  }
+  .page-container {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+}

@@ -1,3 +1,4 @@
+import u from '#components/utilities.module.css';
 import Icon from '#components/Icon.tsx';
 import type { DataGridRenderer } from '#components/DataGrid.tsx';
 import IdDisplay from '#components/IdDisplay.tsx';
@@ -80,10 +81,10 @@ export const Status: DataGridRenderer<any> = props => {
   if (status === 'processing') {
     return <ProgressBar label="processing" />;
   }
-  const className = { in_queue: 'text-info', finished: 'text-success' }[
+  const className = { in_queue: u.info, finished: u.success }[
     status as 'in_queue' | 'finished'
   ];
-  return <span className={className || 'text-danger'}>{status}</span>;
+  return <span className={className || u.danger}>{status}</span>;
 };
 
 export const FeedbackRenderer: DataGridRenderer<any> = props => {

@@ -1,3 +1,4 @@
+import u from '#components/utilities.module.css';
 import Button from '#components/Button.tsx';
 import type { FeedbackEntry } from '@utrad-ical/circus-ui-kit';
 import { useCsResults } from '@utrad-ical/circus-ui-kit';
@@ -81,7 +82,7 @@ const DeleteFeedbackModal: React.FC<{}> = () => {
       <DialogBody>
         {feedbacks.length > 0 ? (
           <>
-            <div className="text-danger">
+            <div className={u.danger}>
               <Icon icon="material-warning" />
               You cannot restore feedback once deleted.
             </div>
@@ -96,7 +97,7 @@ const DeleteFeedbackModal: React.FC<{}> = () => {
           </>
         ) : (
           <>
-            <div className="text-info">
+            <div className={u.info}>
               There is no feedback data for this job.
             </div>
           </>

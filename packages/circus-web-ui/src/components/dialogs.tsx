@@ -1,3 +1,4 @@
+import u from './utilities.module.css';
 import React, {
   type ComponentType,
   type FC,
@@ -263,7 +264,7 @@ export const prompt = (
             onKeyDown={handleKeyDown}
             onFocus={ev => ev.target.select()}
           />
-          {error !== null && <div className="text-danger">{error}</div>}
+          {error !== null && <div className={u.danger}>{error}</div>}
         </DialogBody>
         <DialogFooter>
           <Button variant="primary" disabled={error !== null} onClick={submit}>

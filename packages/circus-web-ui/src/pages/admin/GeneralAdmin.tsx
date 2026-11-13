@@ -1,3 +1,4 @@
+import u from '#components/utilities.module.css';
 import Button from '#components/Button.tsx';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useApi } from '#utils/api.ts';
@@ -109,7 +110,7 @@ const GeneralAdmin: React.FC<{}> = props => {
         properties={properties}
         onChange={handlePropertyChange}
       />
-      <p className="text-center">
+      <p className={u.textCenter}>
         <Button variant="primary" onClick={handleSaveClick}>
           Save
         </Button>

@@ -1,3 +1,4 @@
+import u from '#components/utilities.module.css';
 import Alert from '#components/Alert.tsx';
 import Button from '#components/Button.tsx';
 import Icon from '#components/Icon.tsx';
@@ -90,7 +91,7 @@ const CreateNewCase: React.FC<{}> = props => {
           onChange={setSelectedTags}
         />
       </div>
-      <div className="text-right">
+      <div className={u.textRight}>
         <Button
           disabled={!canCreate}
           icon="circus-case"

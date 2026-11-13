@@ -800,9 +800,6 @@ importers:
       axios:
         specifier: ^1.7.7
         version: 1.7.7(debug@4.3.5(supports-color@7.2.0))
-      bootstrap:
-        specifier: ^3.4.1
-        version: 3.4.1
       bytes:
         specifier: ^3.1.0
         version: 3.1.2
@@ -897,9 +894,6 @@ importers:
       '@vitejs/plugin-react':
         specifier: 6.3.0
         version: 6.3.0(vite@8.3.7(@types/node@24.19.2)(less@4.9.1(supports-color@7.2.0))(terser@5.34.1))
-      less:
-        specifier: ^4.9.1
-        version: 4.9.1(supports-color@7.2.0)
       typescript:
         specifier: ~7.0.2
         version: 7.0.2
@@ -2182,11 +2176,6 @@ packages:
 
   bodec@0.1.0:
     resolution: {integrity: sha512-Ylo+MAo5BDUq1KA3f3R/MFhh+g8cnHmo8bz3YPGhI1znrMaf77ol1sfvYJzsw3nTE+Y2GryfDxBaR+AqpAkEHQ==}
-
-  bootstrap@3.4.1:
-    resolution: {integrity: sha512-yN5oZVmRCwe5aKwzRj6736nSmKDX7pLYwsXiCj/EYmo16hODaBiT4En5btW/jhBF/seV+XMx3aYwukYC3A49DA==}
-    engines: {node: '>=6'}
-    deprecated: This version of Bootstrap is no longer supported. Please upgrade to the latest version.
 
   brace-expansion@1.1.11:
     resolution: {integrity: sha512-iCuPHDFgrHX7H2vEI/5xpz07zSHB00TpugqhmYtVmMO6518mCuRMoOYFldEBl0g187ufozdaHgWKcYFb61qGiA==}
@@ -5544,8 +5533,6 @@ snapshots:
   bluebird@3.7.2: {}
 
   bodec@0.1.0: {}
-
-  bootstrap@3.4.1: {}
 
   brace-expansion@1.1.11:
     dependencies:

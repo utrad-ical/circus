@@ -1,10 +1,10 @@
+import styles from './DownloadModal.module.css';
 import Button from '#components/Button.tsx';
 import type { Editor } from '#components/editorTypes.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import classnames from 'classnames';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import styled from 'styled-components';
 import useTaskDownloadHandler from '#utils/useTaskDownloadHandler.ts';
 import { DialogBody, DialogFooter, DialogHeader } from './Dialog.tsx';
 import ProgressBar from './ProgressBar.tsx';
@@ -67,37 +67,35 @@ const DownloadModal = <T extends any>(props: {
     <>
       <DialogHeader>{caption}</DialogHeader>
       <DialogBody>
-        <StyledDiv>
-          <OptionsEditor value={options} onChange={handleOptionsChange} />
-          <div className="row">
-            <ProgressBar
-              variant={
-                taskProgress?.status === 'error'
-                  ? 'danger'
-                  : taskProgress?.status === 'finished'
-                    ? 'success'
-                    : undefined
-              }
-              value={
-                taskProgress
-                  ? taskProgress.status === 'processing'
-                    ? taskProgress.finished
-                    : (taskProgress.total ?? 100)
-                  : 0
-              }
-              max={taskProgress?.total ?? 100}
-            />
-          </div>
-          <div
-            className={classnames('message', 'row', {
-              'text-mute': !taskProgress,
-              'text-danger': taskProgress?.status === 'error',
-              'text-success': taskProgress?.status === 'finished'
-            })}
-          >
-            {taskProgress?.message ?? 'Not started'}
-          </div>
-        </StyledDiv>
+        <OptionsEditor value={options} onChange={handleOptionsChange} />
+        <div className={styles.option}>
+          <ProgressBar
+            variant={
+              taskProgress?.status === 'error'
+                ? 'danger'
+                : taskProgress?.status === 'finished'
+                  ? 'success'
+                  : undefined
+            }
+            value={
+              taskProgress
+                ? taskProgress.status === 'processing'
+                  ? taskProgress.finished
+                  : (taskProgress.total ?? 100)
+                : 0
+            }
+            max={taskProgress?.total ?? 100}
+          />
+        </div>
+        <div
+          className={classnames(styles.message, {
+            [styles.muted]: !taskProgress,
+            [styles.danger]: taskProgress?.status === 'error',
+            [styles.success]: taskProgress?.status === 'finished'
+          })}
+        >
+          {taskProgress?.message ?? 'Not started'}
+        </div>
       </DialogBody>
       <DialogFooter>
         <Button onClick={onClose}>{closeTitle}</Button>
@@ -124,11 +122,5 @@ const DownloadModal = <T extends any>(props: {
     </>
   );
 };
-
-const StyledDiv = styled.div`
-  .row {
-    margin: 8px 0;
-  }
-`;
 
 export default DownloadModal;

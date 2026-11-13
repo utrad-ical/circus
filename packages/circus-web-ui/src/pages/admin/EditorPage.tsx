@@ -1,3 +1,4 @@
+import u from '#components/utilities.module.css';
 import Alert from '#components/Alert.tsx';
 import Panel, {
   PanelHeader,
@@ -19,13 +20,6 @@ import styled from 'styled-components';
 import { useApi } from '#utils/api.ts';
 import { useLoginManager } from '#utils/loginManager.ts';
 import AdminContainer from './AdminContainer.tsx';
-
-const StyledDataGrid = styled(DataGrid)`
-  .label {
-    margin-left: 1px;
-    margin-right: 1px;
-  }
-`;
 
 const StyledSubTitle = styled.div`
   font-weight: bold;
@@ -113,7 +107,7 @@ const EditorPage: React.FC<{
 
   const grid = useMemo(() => {
     return (props => (
-      <StyledDataGrid
+      <DataGrid
         value={props.value}
         columns={listColumns}
         itemPrimaryKey={resource.primaryKey}
@@ -177,7 +171,7 @@ const EditorPage: React.FC<{
     <AdminContainer title={title} icon={icon} className="admin-editor">
       <SearchResultsView name={searchName} dataView={grid} active={editing} />
       {enableNewItem && (
-        <p className="text-right">
+        <p className={u.textRight}>
           <Button
             icon="material-add"
             variant="primary"
@@ -328,7 +322,7 @@ const Editor: React.FC<{
           </>
         )}
       </PanelBody>
-      <PanelFooter className="text-center">
+      <PanelFooter className={u.textCenter}>
         <Button variant="link" onClick={onCancelClick}>
           Cancel
         </Button>

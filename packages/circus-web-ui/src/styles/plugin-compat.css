@@ -1,0 +1,66 @@
+/*
+ * Bootstrap 3 classes still used by v1 plug-in displays (fat-volumetry-viewer).
+ * Web UI itself must not use them. Remove this together with v1 displays.
+ */
+@layer plugin-compat {
+  .row {
+    margin-right: -15px;
+    margin-left: -15px;
+    &::before,
+    &::after {
+      display: table;
+      content: ' ';
+    }
+    &::after {
+      clear: both;
+    }
+  }
+
+  .table {
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 22px;
+    > :is(thead, tbody, tfoot) > tr > :is(th, td) {
+      padding: 8px;
+      line-height: 1.428571429;
+      vertical-align: top;
+      border-top: 1px solid var(--border);
+    }
+    > thead > tr > th {
+      vertical-align: bottom;
+      border-bottom: 2px solid var(--border);
+    }
+    > :is(caption + thead, colgroup + thead, thead:first-child)
+      > tr:first-child
+      > :is(th, td) {
+      border-top: 0;
+    }
+    > tbody + tbody {
+      border-top: 2px solid var(--border);
+    }
+  }
+  .table-hover > tbody > tr:hover {
+    background-color: var(--surface);
+  }
+
+  .checkbox {
+    position: relative;
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    & label {
+      min-height: 22px;
+      margin-bottom: 0;
+      padding-left: 20px;
+      font-weight: normal;
+      cursor: pointer;
+    }
+    & input[type='checkbox'] {
+      position: absolute;
+      margin-left: -20px;
+    }
+    & + .checkbox {
+      margin-top: -5px;
+    }
+  }
+}

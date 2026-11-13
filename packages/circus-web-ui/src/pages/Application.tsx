@@ -91,7 +91,9 @@ const Application: React.FC<{}> = props => {
             </Alert>
           )}
         </div>
-        <div className="container">{pageContentVisible && props.children}</div>
+        <div className="page-container">
+          {pageContentVisible && props.children}
+        </div>
       </ErrorBoundary>
     </Fragment>
   );

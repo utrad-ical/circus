@@ -1,3 +1,5 @@
+import classnames from 'classnames';
+import table from '#components/table.module.css';
 import Button from '#components/Button.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import { describePartialVolumeDescriptor } from '@utrad-ical/circus-rs';
@@ -35,7 +37,7 @@ const InvestigateJobModal: React.FC<{}> = React.memo(props => {
       <DialogBody>
         <Tabs defaultActiveKey={1}>
           <Tab eventKey={1} title="Overview">
-            <table className="table table-hover">
+            <table className={classnames(table.table, table.hover)}>
               <tbody>
                 <tr>
                   <th>Job Status</th>
@@ -80,7 +82,7 @@ const InvestigateJobModal: React.FC<{}> = React.memo(props => {
           <Tab eventKey={3} title="Files">
             {Array.isArray(attachments) ? (
               <>
-                <table className="table table-hover">
+                <table className={classnames(table.table, table.hover)}>
                   <tbody>
                     {attachments.map((f, i) => (
                       <tr key={i}>
@@ -99,7 +101,7 @@ const InvestigateJobModal: React.FC<{}> = React.memo(props => {
             <pre>{log ?? <LoadingIndicator />}</pre>
           </Tab>
           <Tab eventKey={5} title="Feedback">
-            <table className="table table-hover">
+            <table className={classnames(table.table, table.hover)}>
               <thead>
                 <tr>
                   <th>Type</th>

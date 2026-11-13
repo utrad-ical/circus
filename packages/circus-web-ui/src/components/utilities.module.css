@@ -1,0 +1,23 @@
+/* Small shared helpers: `import u from '#components/utilities.module.css'` */
+.muted {
+  color: var(--muted);
+}
+.danger {
+  color: var(--danger);
+}
+.success {
+  color: var(--success);
+}
+.info {
+  color: var(--theme);
+}
+.textRight {
+  text-align: right;
+}
+.textCenter {
+  text-align: center;
+}
+.plainList {
+  padding-left: 0;
+  list-style: none;
+}

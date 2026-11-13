@@ -1,7 +1,7 @@
+import u from '#components/utilities.module.css';
 import Panel, { PanelBody, PanelFooter } from '#components/Panel.tsx';
 import Button from '#components/Button.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
-import classnames from 'classnames';
 import Icon from '#components/Icon.tsx';
 import Input from '#components/Input.tsx';
 import React, { useEffect, useRef, useState } from 'react';
@@ -99,7 +99,7 @@ const LoginScreen: React.FC<{}> = props => {
   if (serverAlive === undefined) return <LoadingIndicator delay={1000} />;
 
   return (
-    <StyledDiv className={classnames({ 'has-error': error || criticalError })}>
+    <StyledDiv>
       {criticalError && (
         <div className="critical">
           <Icon icon="material-block" />
@@ -109,7 +109,7 @@ const LoginScreen: React.FC<{}> = props => {
       )}
       <Panel variant="primary" className="login-panel">
         <PanelBody>
-          <h1 className="text-center">
+          <h1 className={u.textCenter}>
             <Icon icon="circus-logo" />
             <span hidden>CIRCUS DB</span>
           </h1>
@@ -130,9 +130,9 @@ const LoginScreen: React.FC<{}> = props => {
               onKeyDown={ev => ev.key === 'Enter' && handleLoginClick()}
             />
           </div>
-          {error && <p className="text-danger">{error}</p>}
+          {error && <p className={u.danger}>{error}</p>}
         </PanelBody>
-        <PanelFooter className="text-center">
+        <PanelFooter className={u.textCenter}>
           <Button
             disabled={disabled}
             variant="primary"

@@ -1,3 +1,4 @@
+import u from '#components/utilities.module.css';
 import Panel, {
   PanelHeader,
   PanelBody,
@@ -132,7 +133,7 @@ const MyProfile: React.FC<{}> = props => {
         ) : null}
       </PanelList>
       <PanelBody>
-        <ul className="list-unstyled">
+        <ul className={u.plainList}>
           <li>
             <b>Login ID:</b> {user.loginId}
           </li>

@@ -1,3 +1,4 @@
+import u from '#components/utilities.module.css';
 import Alert from '#components/Alert.tsx';
 import Button from '#components/Button.tsx';
 import Icon from '#components/Icon.tsx';
@@ -132,7 +133,7 @@ const CreateNewJob: React.FC<{}> = props => {
           onChange={setSelectedPlugin}
         />
       </div>
-      <div className="text-right">
+      <div className={u.textRight}>
         {user.globalPrivileges.includes('downloadVolume') && (
           <>
             <Button

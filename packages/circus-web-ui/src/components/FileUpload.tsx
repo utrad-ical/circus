@@ -5,28 +5,11 @@ import ProgressBar from './ProgressBar.tsx';
 import { FileDroppable } from './FileDroppable.tsx';
 import useShowMessage from '#utils/useShowMessage.ts';
 import * as modal from '#components/dialogs.tsx';
-import styled from 'styled-components';
+import classnames from 'classnames';
+import styles from './FileUpload.module.css';
+import table from './table.module.css';
 import { useApi } from '#utils/api.ts';
 import { withCommas } from '#utils/util.ts';
-
-const StyledDiv = styled.div`
-  .upload-buttons {
-    display: flex;
-    gap: 5px;
-  }
-  input[type='file'] {
-    display: none;
-  }
-
-  table.table {
-    margin: 1em;
-    font-size: 80%;
-  }
-
-  .progress-container {
-    margin: 10px 0;
-  }
-`;
 
 const dedupeFiles = (files: File[]) => {
   const map = new Map<string, File>();
@@ -128,7 +111,7 @@ const FileUpload: React.FC<{
 
   return (
     <FileDroppable onDropFile={handleDropFile}>
-      <StyledDiv className="well">
+      <div className={styles.fileUpload}>
         {children}
         <div>
           <input
@@ -180,13 +163,13 @@ const FileUpload: React.FC<{
           </Button>
         </div>
         {uploading && (
-          <div className="progress-container">
-            <div className="text-primary">Uploading:</div>
+          <div className={styles.uploading}>
+            <div>Uploading:</div>
             <ProgressBar value={progress.value} label={progress.label} />
           </div>
         )}
         <p>You can drag and drop files to this box.</p>
-      </StyledDiv>
+      </div>
     </FileDroppable>
   );
 };
@@ -207,11 +190,11 @@ const SummaryTable: React.FC<{
   };
 
   return (
-    <table className="table table-condensed">
+    <table className={classnames(table.table, table.condensed, styles.files)}>
       <thead>
         <tr>
           <th style={{ width: '100%' }}>File</th>
-          <th className="text-right">Size</th>
+          <th className={styles.number}>Size</th>
           <th></th>
         </tr>
       </thead>
@@ -221,7 +204,7 @@ const SummaryTable: React.FC<{
           return (
             <tr key={i}>
               <td>{f.name}</td>
-              <td className="text-right">{withCommas(f.size)}</td>
+              <td className={styles.number}>{withCommas(f.size)}</td>
               <td>
                 <Button
                   icon="material-close"
@@ -246,9 +229,9 @@ const SummaryTable: React.FC<{
       </tbody>
       {files.length > 1 && (
         <tfoot>
-          <tr className="info">
+          <tr className={table.active}>
             <th>Total: {files.length} files</th>
-            <th className="text-right">{withCommas(totalBytes)}</th>
+            <th className={styles.number}>{withCommas(totalBytes)}</th>
             <th />
           </tr>
         </tfoot>

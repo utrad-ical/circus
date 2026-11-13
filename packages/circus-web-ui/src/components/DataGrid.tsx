@@ -1,34 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import classnames from 'classnames';
-import styled from 'styled-components';
-
-const StyledTable = styled.table.attrs((props: any) => ({
-  className: classnames('table table-hover table-condensed data-grid', {
-    'data-grid-row-clickable': !!props.onItemClick
-  })
-}))`
-  tbody tr td {
-    vertical-align: middle;
-  }
-  tbody > tr:last-of-type > td {
-    border-bottom-style: solid;
-    border-bottom-width: 2px;
-  }
-  &.data-grid-row-clickable {
-    tbody tr {
-      cursor: pointer;
-    }
-  }
-  .operation {
-    text-align: right;
-  }
-  .progress {
-    margin: 0;
-  }
-  .feedback-none {
-    color: silver;
-  }
-`;
+import styles from './DataGrid.module.css';
+import table from './table.module.css';
 
 const normalizeColumn = <T extends {}>(
   c: string | DataGridColumnDefinition<T>
@@ -123,7 +96,17 @@ const DataGrid: <T extends {}>(
   }, [allCheckStatus]);
 
   return (
-    <StyledTable className={className}>
+    <table
+      className={classnames(
+        'data-grid',
+        table.table,
+        table.hover,
+        table.condensed,
+        styles.dataGrid,
+        onItemClick && styles.clickable,
+        className
+      )}
+    >
       <thead>
         <tr>
           {itemSelectable && (
@@ -151,7 +134,7 @@ const DataGrid: <T extends {}>(
           return (
             <tr
               key={key}
-              className={classnames({ info: active === item })}
+              className={classnames(active === item && table.active)}
               onClick={() => handleItemClick(i)}
             >
               {itemSelectable && itemPrimaryKey && (
@@ -182,7 +165,7 @@ const DataGrid: <T extends {}>(
           );
         })}
       </tbody>
-    </StyledTable>
+    </table>
   );
 };
 

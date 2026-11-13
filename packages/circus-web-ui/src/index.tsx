@@ -52,7 +52,6 @@ import type { ApiCaller } from '#utils/api.ts';
 import { ApiContext } from '#utils/api.ts';
 import loginManager, { LoginManagerContext } from '#utils/loginManager.ts';
 import './styles/foundation.css';
-import './styles/main.less';
 
 const VolumeLoaderFactoryProvider: React.FC<{}> = ({ children }) => {
   const server = useSelector(state => state.loginUser.data?.dicomImageServer);

@@ -1,10 +1,10 @@
+import Badge from '#components/Badge.tsx';
 import React, { useState, useEffect } from 'react';
 import EditorPage from './EditorPage.tsx';
 import { useApi } from '#utils/api.ts';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import MultiSelect from '#components/MultiSelect.tsx';
 import Select from '#components/Select.tsx';
-import classnames from 'classnames';
 import * as et from '#components/editorTypes.tsx';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
 import type { UserPreferences } from '#store/loginUser.ts';
@@ -112,12 +112,12 @@ const UserAdmin: React.FC<any> = props => {
               const group = groups.find(g => g.groupId === groupId)!;
               const style =
                 group.privileges.indexOf('manageServer') >= 0
-                  ? 'label-danger'
-                  : 'label-default';
+                  ? 'danger'
+                  : 'default';
               return (
-                <span className={classnames('label', style)} key={groupId}>
+                <Badge variant={style} key={groupId}>
                   {group.groupName}
-                </span>
+                </Badge>
               );
             });
           },

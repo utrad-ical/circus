@@ -6,6 +6,10 @@
 
 // Reset and dependencies
 @import 'bootstrap/less/normalize.less';
+// normalize.less makes it a block for old browsers, which hides the marker
+summary {
+  display: list-item;
+}
 @import 'bootstrap/less/print.less';
 @import 'bootstrap/less/glyphicons.less';
 

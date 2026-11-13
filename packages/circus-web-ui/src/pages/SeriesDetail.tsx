@@ -153,14 +153,23 @@ const SeriesDetail: React.FC<{}> = props => {
             </Link>
           </StyledMenu>
           {typeof seriesData.patientInfo === 'object' ? (
-            <Table data={seriesData.patientInfo} title="Patient Info" />
+            <Table
+              data={seriesData.patientInfo}
+              title="Patient Info"
+              defaultExpanded
+            />
           ) : (
             <Panel>
               <PanelHeader>Patient Info</PanelHeader>
               <PanelBody>Personal information is masked.</PanelBody>
             </Panel>
           )}
-          <Table data={seriesData} keys={keys} title="Series Detail" />
+          <Table
+            data={seriesData}
+            keys={keys}
+            title="Series Detail"
+            defaultExpanded
+          />
           <Table data={seriesData.parameters} title="Parameters" />
         </Col>
       </Row>
@@ -178,11 +187,12 @@ const print = (data: any) => {
 const Table: React.FC<{
   data: { [key: string]: any };
   title: string;
+  defaultExpanded?: boolean;
   keys?: string[];
 }> = props => {
   const keys = Array.isArray(props.keys) ? props.keys : Object.keys(props.data);
   return (
-    <Panel>
+    <Panel collapsible defaultExpanded={props.defaultExpanded}>
       <PanelHeader>{props.title}</PanelHeader>
       <table className="table table-condensed">
         <tbody>

@@ -22,6 +22,10 @@
   background-color: var(--surface);
 }
 
+summary.header {
+  cursor: pointer;
+}
+
 .body {
   padding: 15px;
 }

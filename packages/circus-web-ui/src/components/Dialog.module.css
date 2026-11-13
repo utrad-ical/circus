@@ -10,6 +10,9 @@
   &.large {
     width: min(900px, calc(100vw - 2em));
   }
+  &[open] {
+    display: flex;
+  }
   &::backdrop {
     background-color: rgb(0 0 0 / 0.5);
   }
@@ -20,7 +23,8 @@
 .content {
   display: flex;
   flex-direction: column;
-  max-height: inherit;
+  flex: 1;
+  min-height: 0;
 }
 
 .header {

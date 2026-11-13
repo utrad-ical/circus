@@ -124,14 +124,16 @@ interface NodeProps<T> {
   onRemove: () => void;
   // Whether this node can be removed
   removable: boolean;
+  // The root group, which can be empty
+  root?: boolean;
   disabled?: boolean;
 }
 
-const newSingleNode = (keys: Keys): SingleNode => ({
-  keyName: Object.keys(keys)[0],
-  op: '==',
-  value: ''
-});
+const newSingleNode = (keys: Keys): SingleNode => {
+  const keyName = Object.keys(keys)[0];
+  const { type, spec } = keys[keyName];
+  return { keyName, op: '==', value: typeMap[type].convert('', spec) };
+};
 
 const ToolButton: FC<{
   icon: string;
@@ -161,12 +163,12 @@ const ConditionNode = (props: NodeProps<Node>): ReactElement => {
 };
 
 const GroupCondition: FC<NodeProps<GroupNode>> = props => {
-  const { keys, value, onChange, onRemove, removable, disabled } = props;
+  const { keys, value, onChange, onRemove, removable, root, disabled } = props;
   const groupType = '$and' in value ? '$and' : '$or';
   const members: Node[] = '$and' in value ? value.$and : value.$or;
 
   const update = (members: Node[], type = groupType) => {
-    if (members.length) onChange({ [type]: members } as GroupNode);
+    if (members.length || root) onChange({ [type]: members } as GroupNode);
     else onRemove();
   };
 
@@ -203,7 +205,7 @@ const GroupCondition: FC<NodeProps<GroupNode>> = props => {
             value={member}
             onChange={m => handleMemberChange(i, m)}
             onRemove={() => update(members.filter((_, j) => j !== i))}
-            removable={members.length > 1}
+            removable={root || members.length > 1}
             disabled={disabled}
           />
         ))}
@@ -299,6 +301,7 @@ const ConditionEditor: FC<{
         onChange={onChange as (node: Node) => void}
         onRemove={() => onChange({ $and: [] })}
         removable={false}
+        root
         disabled={disabled}
       />
     </div>
@@ -315,6 +318,14 @@ export const conditionToMongoQuery = (
   condition: Node,
   dateFields: string[] = []
 ): object => {
+  const members =
+    '$and' in condition
+      ? condition.$and
+      : '$or' in condition
+        ? condition.$or
+        : null;
+  // MongoDB rejects an empty `$and`/`$or`; an empty group matches everything
+  if (members && !members.length) return {};
   if ('$and' in condition) {
     return {
       $and: condition.$and.map(m => conditionToMongoQuery(m, dateFields))

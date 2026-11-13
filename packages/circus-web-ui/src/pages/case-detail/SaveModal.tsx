@@ -1,7 +1,8 @@
 import Button from '#components/Button.tsx';
 import Icon from '#components/Icon.tsx';
 import DropdownButton from '#components/DropdownButton.tsx';
-import { FormControl, Modal } from '#components/react-bootstrap.ts';
+import { DialogBody, DialogFooter, DialogHeader } from '#components/Dialog.tsx';
+import { FormControl } from '#components/react-bootstrap.ts';
 import MenuItem from '#components/MenuItem.tsx';
 import keycode from 'keycode';
 import type { ExternalLabel } from '#pages/case-detail/labelData.ts';
@@ -50,12 +51,12 @@ const SaveModal: React.FC<{
 
   return (
     <StyledSaveModalDiv>
-      <Modal.Header>Save</Modal.Header>
-      <Modal.Body>
+      <DialogHeader>Save</DialogHeader>
+      <DialogBody>
         <label>Revision message</label>
         <FormControl
           type="text"
-          autoFocus
+          data-autofocus
           value={value}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
@@ -81,20 +82,21 @@ const SaveModal: React.FC<{
             ))}
           </DropdownButton>
         )}
-      </Modal.Body>
-      <Modal.Footer>
+      </DialogBody>
+      <DialogFooter>
         <Button variant="link" onClick={onHide}>
           Cancel
         </Button>
         <Button onClick={() => onOkClick(value)} variant="primary">
           OK
         </Button>
-      </Modal.Footer>
+      </DialogFooter>
     </StyledSaveModalDiv>
   );
 };
 
 const StyledSaveModalDiv = styled.div`
+  display: contents;
   input {
     width: 100%;
   }

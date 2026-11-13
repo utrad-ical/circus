@@ -2,12 +2,12 @@ import Button from '#components/Button.tsx';
 import type { Editor } from '@smikitky/rb-components/lib/editor-types';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import classnames from 'classnames';
-import React, { useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import useTaskDownloadHandler from '#utils/useTaskDownloadHandler.ts';
-import { Modal, ProgressBar } from './react-bootstrap.ts';
+import { DialogBody, DialogFooter, DialogHeader } from './Dialog.tsx';
+import { ProgressBar } from './react-bootstrap.ts';
 
 export type CompressionFormat = 'tgz' | 'zip';
 
@@ -48,18 +48,6 @@ const DownloadModal = <T extends any>(props: {
 
   const downloadTask = useTaskDownloadHandler(taskId!);
 
-  const [modalRoot, setModalRoot] = useState<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const root = document.createElement('div');
-    document.body.appendChild(root);
-    setModalRoot(root);
-
-    return () => {
-      document.body.removeChild(root);
-    };
-  }, []);
-
   const handleOptionsChange = (value: T) => {
     setOptions(value);
   };
@@ -75,38 +63,38 @@ const DownloadModal = <T extends any>(props: {
     downloadTask();
   };
 
-  const dialog = (
-    <Modal.Dialog bsSize="lg">
-      <Modal.Header>
-        <Modal.Title>{caption}</Modal.Title>
-      </Modal.Header>
-      <StyledModalBody>
-        <OptionsEditor value={options} onChange={handleOptionsChange} />
-        <div className="row">
-          <ProgressBar
-            active={taskProgress?.status === 'processing'}
-            bsStyle={taskProgress?.status === 'error' ? 'danger' : 'success'}
-            now={
-              taskProgress
-                ? taskProgress.status === 'processing'
-                  ? Math.max(1, taskProgress.finished ?? 100)
-                  : 100
-                : 0
-            }
-            max={taskProgress?.total ?? 100}
-          />
-        </div>
-        <div
-          className={classnames('message', 'row', {
-            'text-mute': !taskProgress,
-            'text-danger': taskProgress?.status === 'error',
-            'text-success': taskProgress?.status === 'finished'
-          })}
-        >
-          {taskProgress?.message ?? 'Not started'}
-        </div>
-      </StyledModalBody>
-      <Modal.Footer>
+  return (
+    <>
+      <DialogHeader>{caption}</DialogHeader>
+      <DialogBody>
+        <StyledDiv>
+          <OptionsEditor value={options} onChange={handleOptionsChange} />
+          <div className="row">
+            <ProgressBar
+              active={taskProgress?.status === 'processing'}
+              bsStyle={taskProgress?.status === 'error' ? 'danger' : 'success'}
+              now={
+                taskProgress
+                  ? taskProgress.status === 'processing'
+                    ? Math.max(1, taskProgress.finished ?? 100)
+                    : 100
+                  : 0
+              }
+              max={taskProgress?.total ?? 100}
+            />
+          </div>
+          <div
+            className={classnames('message', 'row', {
+              'text-mute': !taskProgress,
+              'text-danger': taskProgress?.status === 'error',
+              'text-success': taskProgress?.status === 'finished'
+            })}
+          >
+            {taskProgress?.message ?? 'Not started'}
+          </div>
+        </StyledDiv>
+      </DialogBody>
+      <DialogFooter>
         <Button onClick={onClose}>{closeTitle}</Button>
         {!taskProgress && (
           <Button variant="primary" onClick={handleStartClick}>
@@ -127,15 +115,12 @@ const DownloadModal = <T extends any>(props: {
             Download
           </Button>
         )}
-      </Modal.Footer>
-    </Modal.Dialog>
+      </DialogFooter>
+    </>
   );
-
-  if (!modalRoot) return <></>;
-  return createPortal(dialog, modalRoot);
 };
 
-const StyledModalBody = styled(Modal.Body)`
+const StyledDiv = styled.div`
   .row {
     margin: 8px 0;
   }

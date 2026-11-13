@@ -1,5 +1,6 @@
 import Button, { type ButtonProps } from '#components/Button.tsx';
 import { ColorPalette } from '#components/ColorPicker.tsx';
+import Dialog from '#components/Dialog.tsx';
 import { alert, prompt } from '#components/dialogs.tsx';
 import Slider from '#components/Slider.tsx';
 import generateUniqueId from '#utils/generateUniqueId.ts';
@@ -393,16 +394,21 @@ const LabelMenu: React.FC<{
           );
         })}
       </SplitButton>
-      {processorState.showModal && (
-        <ProcessorModal
-          onHide={handleHideProcessorModal}
-          onOkClick={executeProcessor(processorState.type)}
-          progress={processorState.progress}
-          {...processors[processorState.type!].settingsModal!}
-          activeLabelIndex={activeLabelIndex}
-          labels={activeSeries.labels}
-        />
-      )}
+      <Dialog
+        open={processorState.showModal}
+        onClose={handleHideProcessorModal}
+      >
+        {processorState.type && (
+          <ProcessorModal
+            onHide={handleHideProcessorModal}
+            onOkClick={executeProcessor(processorState.type)}
+            progress={processorState.progress}
+            {...processors[processorState.type!].settingsModal!}
+            activeLabelIndex={activeLabelIndex}
+            labels={activeSeries.labels}
+          />
+        )}
+      </Dialog>
     </StyledButtonsDiv>
   );
 };

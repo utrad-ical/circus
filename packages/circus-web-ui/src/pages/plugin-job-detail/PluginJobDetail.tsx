@@ -18,7 +18,7 @@ import PieProgress from '#components/PieProgress.tsx';
 import PluginDisplay from '#components/PluginDisplay.tsx';
 import SearchResultsView from '#components/SearchResultsView.tsx';
 import UserDisplay from '#components/UserDisplay.tsx';
-import { Modal } from '#components/react-bootstrap.ts';
+import Dialog from '#components/Dialog.tsx';
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
@@ -453,20 +453,20 @@ const PluginJobDetail: React.FC<{}> = props => {
           </Button>
         </div>
         <CsResultsContext.Provider value={resultsContext!}>
-          <Modal
-            bsSize="lg"
-            show={showInvestigateModal}
-            onHide={() => setShowInvestigateModal(false)}
+          <Dialog
+            size="large"
+            open={showInvestigateModal}
+            onClose={() => setShowInvestigateModal(false)}
           >
             <InvestigateJobModal />
-          </Modal>
-          <Modal
-            bsSize="lg"
-            show={showDeleteFeedbackModal}
-            onHide={() => setShowDeleteFeedbackModal(false)}
+          </Dialog>
+          <Dialog
+            size="large"
+            open={showDeleteFeedbackModal}
+            onClose={() => setShowDeleteFeedbackModal(false)}
           >
             <DeleteFeedbackModal />
-          </Modal>
+          </Dialog>
         </CsResultsContext.Provider>
       </StyledDiv>
     </FullSpanContainer>

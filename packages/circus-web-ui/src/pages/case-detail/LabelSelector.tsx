@@ -7,7 +7,11 @@ import type {
 import { describePartialVolumeDescriptor } from '@utrad-ical/circus-rs';
 import classNames from 'classnames';
 import Icon from '#components/Icon.tsx';
-import { Modal } from '#components/react-bootstrap.ts';
+import Dialog, {
+  DialogBody,
+  DialogFooter,
+  DialogHeader
+} from '#components/Dialog.tsx';
 import * as mr from 'multi-integer-range';
 import React, { useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
@@ -301,24 +305,26 @@ const SeriesInfo: React.FC<{
         icon="material-info"
         onClick={() => setShowModal(true)}
       />
-      <Modal show={showModal} onHide={() => setShowModal(false)} bsSize="lg">
-        <Modal.Header closeButton>Series Information</Modal.Header>
-        <table className="table table-striped">
-          <tbody>
-            {Object.keys(data).map(k => (
-              <tr key={k}>
-                <th>{k}</th>
-                <td>{data[k]}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <Modal.Footer>
+      <Dialog open={showModal} onClose={() => setShowModal(false)} size="large">
+        <DialogHeader>Series Information</DialogHeader>
+        <DialogBody>
+          <table className="table table-striped">
+            <tbody>
+              {Object.keys(data).map(k => (
+                <tr key={k}>
+                  <th>{k}</th>
+                  <td>{data[k]}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </DialogBody>
+        <DialogFooter>
           <Button variant="primary" onClick={() => setShowModal(false)}>
             OK
           </Button>
-        </Modal.Footer>
-      </Modal>
+        </DialogFooter>
+      </Dialog>
     </div>
   );
 });

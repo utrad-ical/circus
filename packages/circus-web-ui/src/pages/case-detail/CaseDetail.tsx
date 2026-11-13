@@ -14,7 +14,7 @@ import ProjectDisplay from '#components/ProjectDisplay.tsx';
 import SearchResultsView from '#components/SearchResultsView.tsx';
 import Tag from '#components/Tag.tsx';
 import TimeDisplay from '#components/TimeDisplay.tsx';
-import { Modal } from '#components/react-bootstrap.ts';
+import Dialog from '#components/Dialog.tsx';
 import { produce } from 'immer';
 import React, {
   useCallback,
@@ -331,29 +331,23 @@ const CaseDetail: React.FC<{}> = () => {
         initEditingDataLayout={initEditingDataLayout}
         updateEditingData={updateEditingData}
       />
-      {exportDialogOpen && (
-        <Modal show onHide={() => {}}>
-          <CaseExportModal
-            caseIds={[
-              { caseId, revisionIndex: caseStore.editingRevisionIndex }
-            ]}
-            onClose={() => setExportDialogOpen(false)}
-            revisions={caseStore.caseData!.revisions}
-          />
-        </Modal>
-      )}
-      {saveDialogOpen && (
-        <Modal show onHide={() => {}}>
-          <SaveModal
-            value={editingData.revision.description}
-            revisionHistory={
-              caseStore.caseData ? caseStore.caseData.revisions : []
-            }
-            onHide={() => setSaveDialogOpen(false)}
-            onOkClick={message => handleSaveDialog(message)}
-          />
-        </Modal>
-      )}
+      <Dialog open={exportDialogOpen} dismissable={false} size="large">
+        <CaseExportModal
+          caseIds={[{ caseId, revisionIndex: caseStore.editingRevisionIndex }]}
+          onClose={() => setExportDialogOpen(false)}
+          revisions={caseStore.caseData!.revisions}
+        />
+      </Dialog>
+      <Dialog open={saveDialogOpen} dismissable={false}>
+        <SaveModal
+          value={editingData.revision.description}
+          revisionHistory={
+            caseStore.caseData ? caseStore.caseData.revisions : []
+          }
+          onHide={() => setSaveDialogOpen(false)}
+          onOkClick={message => handleSaveDialog(message)}
+        />
+      </Dialog>
     </FullSpanContainer>
   );
 };

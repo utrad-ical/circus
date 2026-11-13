@@ -745,9 +745,6 @@ importers:
 
   packages/circus-ui-kit:
     dependencies:
-      '@smikitky/rb-components':
-        specifier: ^7.0.0
-        version: 7.0.0(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(styled-components@5.3.0(react-dom@17.0.2(react@17.0.2))(react-is@16.13.1)(react@17.0.2))
       '@utrad-ical/circus-rs':
         specifier: workspace:*
         version: link:../circus-rs
@@ -803,9 +800,6 @@ importers:
       axios:
         specifier: ^1.7.7
         version: 1.7.7(debug@4.3.5(supports-color@7.2.0))
-      bootstrap:
-        specifier: ^3.4.1
-        version: 3.4.1
       bytes:
         specifier: ^3.1.0
         version: 3.1.2
@@ -821,9 +815,6 @@ importers:
       fflate:
         specifier: ^0.8.3
         version: 0.8.3
-      history:
-        specifier: ^5.3.0
-        version: 5.3.0
       immer:
         specifier: ^10.1.1
         version: 10.1.1
@@ -869,9 +860,6 @@ importers:
       tinycolor2:
         specifier: ^1.4.1
         version: 1.4.2
-      tslib:
-        specifier: ^1.11.2
-        version: 1.11.2
       ulid:
         specifier: ^2.3.0
         version: 2.3.0
@@ -906,9 +894,6 @@ importers:
       '@vitejs/plugin-react':
         specifier: 6.3.0
         version: 6.3.0(vite@8.3.7(@types/node@24.19.2)(less@4.9.1(supports-color@7.2.0))(terser@5.34.1))
-      less:
-        specifier: ^4.9.1
-        version: 4.9.1(supports-color@7.2.0)
       typescript:
         specifier: ~7.0.2
         version: 7.0.2
@@ -1645,13 +1630,6 @@ packages:
     resolution: {integrity: sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ==}
     engines: {node: '>=18'}
 
-  '@smikitky/rb-components@7.0.0':
-    resolution: {integrity: sha512-xij82qEIXrNZjlTDu6/W/Mr1j3cbudxImbgXqhtiFMIbTF9S4fAhMXeL22Rg4K2C+v1nV0jQkAzlRMFP49p2Pg==}
-    peerDependencies:
-      react: '>16.8.0'
-      react-dom: '>16.8.0'
-      styled-components: ^5.1.1
-
   '@tootallnate/quickjs-emscripten@0.23.0':
     resolution: {integrity: sha512-C5Mc6rdnsaJDjO3UpGW/CQTHtCKaYlScZTly4JIu97Jxo/odCiH0ITnDXSJPTOrEKk/ycSZ0AOgTmkDtkOsvIA==}
 
@@ -1777,9 +1755,6 @@ packages:
 
   '@types/range-parser@1.2.4':
     resolution: {integrity: sha512-EEhsLsD6UsDM1yFhAvy0Cjr6VwmpMWqFBCb9w07wVugF7w9nfajxLuVmngTIpgS6svCnm6Vaw+MZhoDCKnOfsw==}
-
-  '@types/react-bootstrap@0.32.26':
-    resolution: {integrity: sha512-IugRlKW82adDmfEm2bgq6l08T6MQX8smlZTX2eguiP0GiL0WRGwc3kYtdBl5BhEpUSGx4wP8Upff2/GtqTOlJw==}
 
   '@types/react-dom@16.9.14':
     resolution: {integrity: sha512-FIX2AVmPTGP30OUJ+0vadeIFJJ07Mh1m+U0rxfgyW34p3rTlXI+nlenvAxNn4BP36YyI9IJ/+UJ7Wu22N1pI7A==}
@@ -2201,11 +2176,6 @@ packages:
 
   bodec@0.1.0:
     resolution: {integrity: sha512-Ylo+MAo5BDUq1KA3f3R/MFhh+g8cnHmo8bz3YPGhI1znrMaf77ol1sfvYJzsw3nTE+Y2GryfDxBaR+AqpAkEHQ==}
-
-  bootstrap@3.4.1:
-    resolution: {integrity: sha512-yN5oZVmRCwe5aKwzRj6736nSmKDX7pLYwsXiCj/EYmo16hODaBiT4En5btW/jhBF/seV+XMx3aYwukYC3A49DA==}
-    engines: {node: '>=6'}
-    deprecated: This version of Bootstrap is no longer supported. Please upgrade to the latest version.
 
   brace-expansion@1.1.11:
     resolution: {integrity: sha512-iCuPHDFgrHX7H2vEI/5xpz07zSHB00TpugqhmYtVmMO6518mCuRMoOYFldEBl0g187ufozdaHgWKcYFb61qGiA==}
@@ -2876,9 +2846,6 @@ packages:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
     engines: {node: '>= 0.4'}
 
-  history@5.3.0:
-    resolution: {integrity: sha512-ZqaKwjjrAYUYfLG+htGaIIZ4nioX2L70ZUMIFysS3xvBsSG4x/n1V6TXV3N8ZYNuFGlDirFg32T7B6WOUPDYcQ==}
-
   hoist-non-react-statics@3.3.2:
     resolution: {integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==}
 
@@ -2972,9 +2939,6 @@ packages:
     engines: {node: '>=18'}
     peerDependencies:
       '@types/node': '>=18'
-
-  invariant@2.2.4:
-    resolution: {integrity: sha512-phJfQVBuaJM5raOpJjSfkiD6BpbCE4Ns//LaXl6wGYtUBY83nWS6Rf9tXm2e8VaK60JEjYldbPif/A2B1C2gNA==}
 
   ip-address@10.7.6:
     resolution: {integrity: sha512-00LYkM6byILa9eQIx6qoaXCM40xTLd56AZ4vyaPW3YTyb49VZYPo5xsiAq4tuQ54GH4R7gVdYScJ1B7B77PuTg==}
@@ -3792,9 +3756,6 @@ packages:
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
-  react-lifecycles-compat@3.0.4:
-    resolution: {integrity: sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==}
-
   react-redux@7.2.4:
     resolution: {integrity: sha512-hOQ5eOSkEJEXdpIKbnRyl04LhaWabkDPV+Ix97wqQX3T3d2NQ8DUblNXXtNMavc7DpswyQM6xfaN4HQDKNY2JA==}
     peerDependencies:
@@ -4327,11 +4288,6 @@ packages:
 
   unconfig-core@7.5.0:
     resolution: {integrity: sha512-Su3FauozOGP44ZmKdHy2oE6LPjk51M/TRRjHv2HNCWiDvfvCoxC2lno6jevMA91MYAdCdwP05QnWdWpSbncX/w==}
-
-  uncontrollable@7.2.1:
-    resolution: {integrity: sha512-svtcfoTADIB0nT9nltgjujTi7BzVmwjZClOmskKu/E8FW9BXzg9os8OLr4f8Dlnk0rYWJIWr4wv9eKUXiQvQwQ==}
-    peerDependencies:
-      react: '>=15.0.0'
 
   undici-types@7.24.6:
     resolution: {integrity: sha512-WRNW+sJgj5OBN4/0JpHFqtqzhpbnV0GuB+OozA9gCL7a993SmU+1JBZCzLNxYsbMfIeDL+lTsphD5jN5N+n0zg==}
@@ -5084,18 +5040,6 @@ snapshots:
 
   '@sindresorhus/merge-streams@4.0.0': {}
 
-  '@smikitky/rb-components@7.0.0(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(styled-components@5.3.0(react-dom@17.0.2(react@17.0.2))(react-is@16.13.1)(react@17.0.2))':
-    dependencies:
-      '@types/react-bootstrap': 0.32.26
-      classnames: 2.3.1
-      keycode: 2.2.0
-      moment: 2.29.1
-      react: 17.0.2
-      react-dom: 17.0.2(react@17.0.2)
-      styled-components: 5.3.0(react-dom@17.0.2(react@17.0.2))(react-is@16.13.1)(react@17.0.2)
-      tinycolor2: 1.4.2
-      uncontrollable: 7.2.1(react@17.0.2)
-
   '@tootallnate/quickjs-emscripten@0.23.0': {}
 
   '@tybys/wasm-util@0.10.4':
@@ -5248,10 +5192,6 @@ snapshots:
   '@types/qs@6.9.7': {}
 
   '@types/range-parser@1.2.4': {}
-
-  '@types/react-bootstrap@0.32.26':
-    dependencies:
-      '@types/react': 16.14.12
 
   '@types/react-dom@16.9.14':
     dependencies:
@@ -5593,8 +5533,6 @@ snapshots:
   bluebird@3.7.2: {}
 
   bodec@0.1.0: {}
-
-  bootstrap@3.4.1: {}
 
   brace-expansion@1.1.11:
     dependencies:
@@ -6234,10 +6172,6 @@ snapshots:
     dependencies:
       function-bind: 1.1.2
 
-  history@5.3.0:
-    dependencies:
-      '@babel/runtime': 7.14.8
-
   hoist-non-react-statics@3.3.2:
     dependencies:
       react-is: 16.13.1
@@ -6341,10 +6275,6 @@ snapshots:
       mute-stream: 2.0.0
       run-async: 3.0.0
       rxjs: 7.8.1
-
-  invariant@2.2.4:
-    dependencies:
-      loose-envify: 1.4.0
 
   ip-address@10.7.6: {}
 
@@ -7190,8 +7120,6 @@ snapshots:
 
   react-is@16.13.1: {}
 
-  react-lifecycles-compat@3.0.4: {}
-
   react-redux@7.2.4(react-dom@17.0.2(react@17.0.2))(react@17.0.2):
     dependencies:
       '@babel/runtime': 7.14.8
@@ -7761,14 +7689,6 @@ snapshots:
     dependencies:
       '@quansync/fs': 1.1.0
       quansync: 1.0.0
-
-  uncontrollable@7.2.1(react@17.0.2):
-    dependencies:
-      '@babel/runtime': 7.14.8
-      '@types/react': 16.14.12
-      invariant: 2.2.4
-      react: 17.0.2
-      react-lifecycles-compat: 3.0.4
 
   undici-types@7.24.6: {}
 

@@ -25,6 +25,7 @@ import type {
   DisplayDefinition,
   FeedbackReport
 } from '../Display.tsx';
+import { MessageBox } from './utils/MessageBox.tsx';
 
 interface LesionCandidate {
   id?: number;
@@ -355,7 +356,7 @@ export const LesionCandidates: Display<
   )
     return null;
 
-  if (error) return <div className="alert alert-danger">{error.message}</div>;
+  if (error) return <MessageBox variant="danger">{error.message}</MessageBox>;
   if (!volumeLoaders) return null;
 
   return (
@@ -373,9 +374,9 @@ export const LesionCandidates: Display<
       </div>
       <div className="entries">
         {visibleCandidates.length === 0 && (
-          <div className="alert alert-info">
+          <MessageBox variant="info">
             There is no candidate to display.
-          </div>
+          </MessageBox>
         )}
         {visibleCandidates.map(cand => {
           const feedbackItem = currentFeedback.find(

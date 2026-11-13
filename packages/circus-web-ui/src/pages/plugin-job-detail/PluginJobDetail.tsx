@@ -1,3 +1,5 @@
+import classnames from 'classnames';
+import u from '#components/utilities.module.css';
 import Alert from '#components/Alert.tsx';
 import Button from '#components/Button.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
@@ -425,12 +427,12 @@ const PluginJobDetail: React.FC<{}> = props => {
         </CsResultsContext.Provider>
         <div className="job-detail-footer">
           {noPermissionMessage && (
-            <span className="regisiter-message text-danger">
+            <span className={classnames('regisiter-message', u.danger)}>
               {noPermissionMessage}
             </span>
           )}
           {feedbackState.message && (
-            <span className="regisiter-message text-success">
+            <span className={classnames('regisiter-message', u.success)}>
               {feedbackState.message}
             </span>
           )}

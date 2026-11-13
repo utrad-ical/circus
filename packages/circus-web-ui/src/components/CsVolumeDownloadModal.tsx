@@ -1,3 +1,4 @@
+import styles from './DownloadModal.module.css';
 import type { Editor } from '#components/editorTypes.tsx';
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
@@ -23,7 +24,7 @@ const CsVolumeDoanloadOptionsEditor: Editor<
       {value.series.length !== 1
         ? `${value.series.length} volumes`
         : `one volume`}
-      <div className="row">
+      <div className={styles.option}>
         Compression format:{' '}
         <Select
           options={compressionFormatOptions}

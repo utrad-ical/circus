@@ -1,3 +1,5 @@
+import classnames from 'classnames';
+import table from '#components/table.module.css';
 import Alert from '#components/Alert.tsx';
 import Panel, { PanelHeader, PanelBody } from '#components/Panel.tsx';
 import Button from '#components/Button.tsx';
@@ -194,7 +196,7 @@ const Table: React.FC<{
   return (
     <Panel collapsible defaultExpanded={props.defaultExpanded}>
       <PanelHeader>{props.title}</PanelHeader>
-      <table className="table table-condensed">
+      <table className={classnames(table.table, table.condensed)}>
         <tbody>
           {keys.map(k => {
             return (

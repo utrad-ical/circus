@@ -1,3 +1,4 @@
+import Badge from '#components/Badge.tsx';
 import React from 'react';
 import Select from '#components/Select.tsx';
 import TimeDisplay from '#components/TimeDisplay.tsx';
@@ -13,7 +14,7 @@ const Item: React.FC<{ value: Revision<ExternalLabel> }> = React.memo(props => {
       <span className="date">
         <TimeDisplay value={revision.date} />
       </span>
-      <span className="status label label-default">{revision.status}</span>
+      <Badge className="status">{revision.status}</Badge>
       <span className="description">{revision.description}</span>
       <span className="creator">
         <UserDisplay userEmail={revision.creator} />

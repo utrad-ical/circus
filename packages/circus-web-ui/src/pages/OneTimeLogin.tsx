@@ -1,3 +1,4 @@
+import Button from '#components/Button.tsx';
 import Alert from '#components/Alert.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import type { FC } from 'react';
@@ -46,15 +47,15 @@ const OneTimeLogin: FC = () => {
   }, [loginManager, pwd, redirect, navigate]);
 
   return (
-    <div className="container">
+    <div className="page-container">
       {error ? (
         <>
           <h1>Error</h1>
           <Alert variant="danger">
             <p>{error}</p>
             <div>
-              <Link to="/" className="btn btn-default">
-                Manual Login
+              <Link to="/">
+                <Button>Manual Login</Button>
               </Link>
             </div>
           </Alert>

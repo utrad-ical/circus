@@ -3,12 +3,15 @@
  *
  * Cascade layers, from the weakest to the strongest:
  * - plugin-displays: CSS of plug-in displays (the host always wins)
- * - bootstrap: Bootstrap 3, until it is removed
  * - base: the design tokens and the base styles of CIRCUS
- * Unlayered styles (CSS Modules of new components, and styled-components
- * and LESS during the migration) are stronger than any layer.
+ * - plugin-compat: Bootstrap classes kept for v1 plug-in displays, which
+ *   override the element styles of base as Bootstrap did
+ * Unlayered styles (CSS Modules, and styled-components during the
+ * migration) are stronger than any layer.
  */
-@layer plugin-displays, bootstrap, base;
+@layer plugin-displays, base, plugin-compat;
 
 @import './tokens.css';
 @import './base.css';
+@import './plugin-compat.css';
+@import './layout.css';

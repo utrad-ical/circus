@@ -1,3 +1,4 @@
+import u from '#components/utilities.module.css';
 import Icon from '#components/Icon.tsx';
 import type { DataGridRenderer } from '#components/DataGrid.tsx';
 import IdDisplay from '#components/IdDisplay.tsx';
@@ -7,7 +8,7 @@ import ProjectDisplay from '#components/ProjectDisplay.tsx';
 import { TagList } from '#components/Tag.tsx';
 import TimeDisplay from '#components/TimeDisplay.tsx';
 import UserDisplay from '#components/UserDisplay.tsx';
-import ProgressBar from '#components/ProgressBar.tsx';
+import statusStyles from './Status.module.css';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -78,12 +79,12 @@ export const Status: DataGridRenderer<any> = props => {
     value: { status }
   } = props;
   if (status === 'processing') {
-    return <ProgressBar label="processing" />;
+    return <span className={statusStyles.processing}>processing</span>;
   }
-  const className = { in_queue: 'text-info', finished: 'text-success' }[
+  const className = { in_queue: u.info, finished: u.success }[
     status as 'in_queue' | 'finished'
   ];
-  return <span className={className || 'text-danger'}>{status}</span>;
+  return <span className={className || u.danger}>{status}</span>;
 };
 
 export const FeedbackRenderer: DataGridRenderer<any> = props => {

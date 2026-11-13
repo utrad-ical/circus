@@ -319,7 +319,7 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
           onMouseUp={handleMouseUp}
         />
         <div>
-          <table className="locations table">
+          <table className="locations">
             <thead>
               <tr>
                 <th>#</th>
@@ -395,5 +395,20 @@ const StyledDiv = styled.div`
   .locator {
     width: 512px;
     height: 512px;
+  }
+  .locations {
+    width: 100%;
+    margin-bottom: 22px;
+    th,
+    td {
+      padding: 8px;
+      vertical-align: top;
+      border-top: 1px solid var(--border, #ddd);
+    }
+    thead th {
+      vertical-align: bottom;
+      border-top: 0;
+      border-bottom: 2px solid var(--border, #ddd);
+    }
   }
 `;

@@ -1,0 +1,42 @@
+/*
+ * Styles of data tables, shared by several components:
+ * `className={classnames(table.table, table.hover)}`
+ */
+.table {
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 22px;
+  > :is(thead, tbody, tfoot) > tr > :is(th, td) {
+    padding: 8px;
+    line-height: 1.428571429;
+    vertical-align: top;
+    border-top: 1px solid var(--border);
+  }
+  > thead > tr > th {
+    vertical-align: bottom;
+    border-bottom: 2px solid var(--border);
+  }
+  > :is(caption + thead, colgroup + thead, thead:first-child)
+    > tr:first-child
+    > :is(th, td) {
+    border-top: 0;
+  }
+  > tbody + tbody {
+    border-top: 2px solid var(--border);
+  }
+  > tbody > tr.active {
+    background-color: color-mix(in oklch, var(--theme) 15%, var(--bg));
+  }
+}
+
+.condensed > :is(thead, tbody, tfoot) > tr > :is(th, td) {
+  padding: 5px;
+}
+
+.hover > tbody > tr:not(.active):hover {
+  background-color: var(--surface);
+}
+
+.striped > tbody > tr:nth-of-type(odd) {
+  background-color: var(--surface);
+}

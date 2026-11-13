@@ -1,0 +1,17 @@
+/* Also used by the option editors of the download dialogs */
+.option {
+  margin: 8px 0;
+}
+
+.message {
+  margin: 8px 0;
+  &.muted {
+    color: var(--muted);
+  }
+  &.danger {
+    color: var(--danger);
+  }
+  &.success {
+    color: var(--success);
+  }
+}

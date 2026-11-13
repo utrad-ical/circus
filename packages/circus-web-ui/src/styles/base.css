@@ -1,10 +1,22 @@
 /*
- * Base styles of the whole page.
- * They replace the corresponding parts of Bootstrap's scaffolding,
- * so removing Bootstrap later will not change the look.
+ * Base styles of the whole page, which took over the defaults that
+ * Bootstrap 3 (normalize, scaffolding, type, forms, tables) used to set.
  */
 @layer base {
+  /* rem-based sizes, including those of plug-in displays, assume 10px */
+  html {
+    font-size: 10px;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  *,
+  ::before,
+  ::after {
+    box-sizing: border-box;
+  }
+
   body {
+    margin: 0;
     font-family:
       'Helvetica Neue', 'Helvetica', 'ヒラギノ角ゴ ProN W3',
       'Hiragino Kaku Gothic ProN', 'メイリオ', Meiryo, sans-serif;
@@ -21,5 +33,188 @@
 
   ::selection {
     background-color: color-mix(in oklch, var(--theme) 30%, transparent);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: inherit;
+    font-weight: 500;
+    line-height: 1.1;
+    color: inherit;
+  }
+  h1,
+  h2,
+  h3 {
+    margin-top: 22px;
+    margin-bottom: 11px;
+  }
+  h4,
+  h5,
+  h6 {
+    margin-top: 11px;
+    margin-bottom: 11px;
+  }
+  h1 {
+    font-size: 41px;
+  }
+  h2 {
+    font-size: 34px;
+  }
+  h3 {
+    font-size: 28px;
+  }
+  h4 {
+    font-size: 20px;
+  }
+  h5 {
+    font-size: 16px;
+  }
+  h6 {
+    font-size: 14px;
+  }
+
+  p {
+    margin: 0 0 11px;
+  }
+  ul,
+  ol {
+    margin-top: 0;
+    margin-bottom: 11px;
+    & ul,
+    & ol {
+      margin-bottom: 0;
+    }
+  }
+  dl {
+    margin-top: 0;
+    margin-bottom: 22px;
+  }
+  dt {
+    font-weight: bold;
+  }
+  dd {
+    margin-left: 0;
+  }
+  small {
+    font-size: 87%;
+  }
+  hr {
+    margin: 22px 0;
+    border: 0;
+    border-top: 1px solid var(--border);
+  }
+  img {
+    vertical-align: middle;
+  }
+  figure {
+    margin: 0;
+  }
+
+  a {
+    color: var(--theme);
+    text-decoration: none;
+    &:hover,
+    &:focus {
+      color: color-mix(in oklch, var(--theme), black 60%);
+      text-decoration: underline;
+    }
+  }
+
+  code,
+  kbd,
+  pre,
+  samp {
+    font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
+  }
+  code {
+    padding: 2px 4px;
+    font-size: 90%;
+    color: #c7254e;
+    background-color: color-mix(in oklch, #c7254e 6%, var(--bg));
+  }
+  pre {
+    display: block;
+    overflow: auto;
+    margin: 0 0 11px;
+    padding: 10.5px;
+    font-size: 15px;
+    line-height: 1.428571429;
+    word-break: break-all;
+    overflow-wrap: break-word;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    & code {
+      padding: 0;
+      font-size: inherit;
+      color: inherit;
+      white-space: pre-wrap;
+      background-color: transparent;
+    }
+  }
+
+  table {
+    border-collapse: collapse;
+    border-spacing: 0;
+  }
+  th {
+    text-align: left;
+  }
+  td,
+  th {
+    padding: 0;
+  }
+  caption {
+    padding: 8px 0;
+    color: var(--muted);
+    text-align: left;
+  }
+
+  label {
+    display: inline-block;
+    max-width: 100%;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  fieldset {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  legend {
+    display: block;
+    width: 100%;
+    margin-bottom: 22px;
+    padding: 0;
+    font-size: 24px;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  button,
+  input,
+  optgroup,
+  select,
+  textarea {
+    margin: 0;
+    color: inherit;
+    font: inherit;
+  }
+  textarea {
+    overflow: auto;
+    background-color: var(--bg);
+  }
+  input[type='checkbox'],
+  input[type='radio'] {
+    margin: 4px 0 0;
+    padding: 0;
+    line-height: normal;
+  }
+  input[type='checkbox'][disabled],
+  input[type='radio'][disabled] {
+    cursor: not-allowed;
   }
 }

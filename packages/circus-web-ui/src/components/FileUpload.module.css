@@ -1,0 +1,31 @@
+.fileUpload {
+  min-height: 20px;
+  margin-bottom: 20px;
+  padding: 19px;
+  border: 1px solid color-mix(in oklch, var(--theme) 20%, var(--bg));
+  background-color: var(--surface);
+  box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.05);
+  :global(.upload-buttons) {
+    display: flex;
+    gap: 5px;
+  }
+  input[type='file'] {
+    display: none;
+  }
+}
+
+.uploading {
+  margin: 10px 0;
+  > :first-child {
+    color: var(--theme);
+  }
+}
+
+.files {
+  margin: 1em;
+  font-size: 80%;
+}
+
+.number {
+  text-align: right;
+}

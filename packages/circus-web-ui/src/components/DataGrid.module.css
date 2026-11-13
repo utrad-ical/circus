@@ -1,0 +1,18 @@
+.dataGrid {
+  > tbody > tr > td {
+    vertical-align: middle;
+  }
+  > tbody > tr:last-of-type > td {
+    border-bottom: 2px solid var(--border);
+  }
+  :global(.operation) {
+    text-align: right;
+  }
+  :global(.feedback-none) {
+    color: var(--muted);
+  }
+}
+
+.clickable > tbody > tr {
+  cursor: pointer;
+}

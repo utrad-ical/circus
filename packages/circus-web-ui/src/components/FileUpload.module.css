@@ -1,6 +1,9 @@
+.droppable {
+  margin-bottom: 20px;
+}
+
 .fileUpload {
   min-height: 20px;
-  margin-bottom: 20px;
   padding: 19px;
   border: 1px solid color-mix(in oklch, var(--theme) 20%, var(--bg));
   background-color: var(--surface);

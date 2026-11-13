@@ -110,7 +110,7 @@ const FileUpload: React.FC<{
   };
 
   return (
-    <FileDroppable onDropFile={handleDropFile}>
+    <FileDroppable onDropFile={handleDropFile} className={styles.droppable}>
       <div className={styles.fileUpload}>
         {children}
         <div>

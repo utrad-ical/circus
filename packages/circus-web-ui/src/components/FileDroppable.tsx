@@ -7,8 +7,9 @@ import styles from './FileDroppable.module.css';
  */
 export const FileDroppable: React.FC<{
   onDropFile: (files: FileList) => void;
+  className?: string;
 }> = props => {
-  const { onDropFile, children } = props;
+  const { onDropFile, className, children } = props;
   const [active, setActive] = useState(false);
 
   const dragEnter = (event: React.DragEvent) => {
@@ -33,7 +34,11 @@ export const FileDroppable: React.FC<{
 
   return (
     <div
-      className={classnames(styles.fileDroppable, active && styles.active)}
+      className={classnames(
+        styles.fileDroppable,
+        active && styles.active,
+        className
+      )}
       onDragEnter={dragEnter}
       onDragOver={dragOver}
       onDrop={drop}

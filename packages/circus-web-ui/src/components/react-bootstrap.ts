@@ -2,7 +2,6 @@
 // used in our project. This should reduce the number of import lines
 // in other components while keeping the size of the bundle small.
 
-
 export { default as ButtonGroup } from 'react-bootstrap/lib/ButtonGroup';
 export { default as ButtonToolbar } from 'react-bootstrap/lib/ButtonToolbar';
 
@@ -20,6 +19,5 @@ export { default as Col } from 'react-bootstrap/lib/Col';
 export { default as Pagination } from 'react-bootstrap/lib/Pagination';
 
 export { default as ProgressBar } from 'react-bootstrap/lib/ProgressBar';
-
 
 export { default as Well } from 'react-bootstrap/lib/Well';

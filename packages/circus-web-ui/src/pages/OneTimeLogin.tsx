@@ -1,3 +1,4 @@
+import Alert from '#components/Alert.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
@@ -49,14 +50,14 @@ const OneTimeLogin: FC = () => {
       {error ? (
         <>
           <h1>Error</h1>
-          <div className="alert alert-danger">
+          <Alert variant="danger">
             <p>{error}</p>
             <div>
               <Link to="/" className="btn btn-default">
                 Manual Login
               </Link>
             </div>
-          </div>
+          </Alert>
         </>
       ) : (
         <LoadingIndicator delay={500} />

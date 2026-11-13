@@ -1,3 +1,4 @@
+import Alert from '#components/Alert.tsx';
 import Panel, {
   PanelHeader,
   PanelBody,
@@ -321,9 +322,9 @@ const Editor: React.FC<{
         {errorMessage && (
           <>
             <hr />
-            <div className="alert alert-danger">
+            <Alert variant="danger">
               <strong>Error:</strong> {errorMessage}
-            </div>
+            </Alert>
           </>
         )}
       </PanelBody>

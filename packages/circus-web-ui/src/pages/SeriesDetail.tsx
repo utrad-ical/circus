@@ -1,3 +1,4 @@
+import Alert from '#components/Alert.tsx';
 import Panel, { PanelHeader, PanelBody } from '#components/Panel.tsx';
 import Button from '#components/Button.tsx';
 import Icon from '#components/Icon.tsx';
@@ -104,7 +105,7 @@ const SeriesDetail: React.FC<{}> = props => {
         <h1>
           <Icon icon="circus-series" /> Series Detail
         </h1>
-        <div className="alert alert-danger">{message}</div>
+        <Alert variant="danger">{message}</Alert>
       </div>
     );
   }

@@ -1,3 +1,4 @@
+import Alert from '#components/Alert.tsx';
 import Panel, { PanelList, PanelListItem } from '#components/Panel.tsx';
 import Button from '#components/Button.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
@@ -22,11 +23,11 @@ const AccessToken: React.FC<{ accessToken: string }> = props => {
   const { accessToken } = props;
   return (
     <>
-      <div className="alert alert-warning">
+      <Alert variant="warning">
         Your access token: <b>{accessToken}</b>
         &ensp;
         <CopyToClipboardButton string={accessToken} />
-      </div>
+      </Alert>
       <div>
         Copy and save this token <strong>now</strong>, you cannot show this
         again!
@@ -84,9 +85,7 @@ const TokenManagement: React.FC<{}> = props => {
         Tokens are bound to your user account.
       </p>
       {data === undefined && <LoadingIndicator delay={300} />}
-      {data instanceof Error && (
-        <div className="alert alert-danger">Load error</div>
-      )}
+      {data instanceof Error && <Alert variant="danger">Load error</Alert>}
 
       <Panel>
         <PanelList>

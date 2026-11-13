@@ -1,3 +1,4 @@
+import Alert from '#components/Alert.tsx';
 import Button from '#components/Button.tsx';
 import React, { useState, useRef } from 'react';
 import { ProgressBar } from './react-bootstrap.ts';
@@ -156,17 +157,17 @@ const FileUpload: React.FC<{
                 </Button>
               </div>
               {files.length > (uploadFileMax ?? Infinity) && (
-                <div className="alert alert-danger">
+                <Alert variant="danger">
                   You cannot upload more than {uploadFileMax} files at the same
                   time. Use a zipped file.
-                </div>
+                </Alert>
               )}
               {totalBytes > (uploadFileSizeMaxBytes ?? Infinity) && (
-                <div className="alert alert-danger">
+                <Alert variant="danger">
                   You cannot upload more than{' '}
                   {withCommas(uploadFileSizeMaxBytes!)} bytes of data at the
                   same time.
-                </div>
+                </Alert>
               )}
             </>
           )}

@@ -1,3 +1,4 @@
+import Alert from '#components/Alert.tsx';
 import React from 'react';
 
 export default class ErrorBoundary extends React.Component<
@@ -18,7 +19,7 @@ export default class ErrorBoundary extends React.Component<
     if (this.state.error) {
       const error = this.state.error;
       return (
-        <div className="alert alert-danger">
+        <Alert variant="danger">
           An error occurred while rendering UI. Please reload the page.
           {import.meta.env.DEV && (
             <pre>
@@ -26,7 +27,7 @@ export default class ErrorBoundary extends React.Component<
               {'stack' in error && error.stack}
             </pre>
           )}
-        </div>
+        </Alert>
       );
     }
     return this.props.children;

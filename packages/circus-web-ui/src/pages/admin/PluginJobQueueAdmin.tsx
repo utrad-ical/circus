@@ -1,3 +1,4 @@
+import Alert from '#components/Alert.tsx';
 import React, { useEffect } from 'react';
 import AdminContainer from './AdminContainer.tsx';
 import SearchResultsView from '#components/SearchResultsView.tsx';
@@ -19,7 +20,7 @@ const columns: DataGridColumnDefinition[] = [
 const DataView: React.FC<{ value: any }> = props => {
   const { value } = props;
   if (!value.length) {
-    return <div className="alert alert-info">No items in global queue.</div>;
+    return <Alert variant="info">No items in global queue.</Alert>;
   }
   return <DataGrid columns={columns} itemPrimaryKey="jobId" value={value} />;
 };

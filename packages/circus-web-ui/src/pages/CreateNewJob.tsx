@@ -1,3 +1,4 @@
+import Alert from '#components/Alert.tsx';
 import Button from '#components/Button.tsx';
 import Icon from '#components/Icon.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
@@ -104,9 +105,7 @@ const CreateNewJob: React.FC<{}> = props => {
   }
 
   if (!accessiblePlugins.length) {
-    return (
-      <div className="alert alert-danger">There is no plug-in installed.</div>
-    );
+    return <Alert variant="danger">There is no plug-in installed.</Alert>;
   }
 
   const canCreate = !busy && selectedPlugin && selectedSeries.length > 0;

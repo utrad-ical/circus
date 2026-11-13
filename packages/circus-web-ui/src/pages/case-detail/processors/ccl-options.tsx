@@ -1,6 +1,6 @@
+import Input from '#components/Input.tsx';
 import type { Editor } from './processor-types.ts';
 import Select from '#components/Select.tsx';
-import { FormControl } from '#components/react-bootstrap.ts';
 import React from 'react';
 import type { CclOptions } from './ccl-processor.ts';
 
@@ -59,15 +59,19 @@ export const OptionsEditor: Editor<CclOptions> = props => {
           numericalValue
         />
       </div>
-      <div className="maximum-number-of-tentative-label form-inline">
-        Maximum number of tentative labels&nbsp;
-        <FormControl
+      <label
+        className="maximum-number-of-tentative-label"
+        style={{ display: 'flex', alignItems: 'center', gap: '0.5em' }}
+      >
+        Maximum number of tentative labels
+        <Input
           type="number"
+          style={{ width: '6em' }}
           value={value.bufferSize}
           name="bufferSize"
           onChange={onMaximumComponentsChange}
         />
-      </div>
+      </label>
     </>
   );
 };

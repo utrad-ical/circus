@@ -1,8 +1,8 @@
+import Input from '#components/Input.tsx';
 import Button from '#components/Button.tsx';
 import Icon from '#components/Icon.tsx';
 import DropdownButton from '#components/DropdownButton.tsx';
 import { DialogBody, DialogFooter, DialogHeader } from '#components/Dialog.tsx';
-import { FormControl } from '#components/react-bootstrap.ts';
 import MenuItem from '#components/MenuItem.tsx';
 import keycode from 'keycode';
 import type { ExternalLabel } from '#pages/case-detail/labelData.ts';
@@ -27,7 +27,7 @@ const SaveModal: React.FC<{
   const handleChange = (event: any) => {
     setValue(event.target.value);
   };
-  const handleKeyDown = (event: React.KeyboardEvent<FormControl>) => {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.keyCode == keycode.codes.enter) {
       onOkClick(value);
     }
@@ -54,8 +54,7 @@ const SaveModal: React.FC<{
       <DialogHeader>Save</DialogHeader>
       <DialogBody>
         <label>Revision message</label>
-        <FormControl
-          type="text"
+        <Input
           data-autofocus
           value={value}
           onChange={handleChange}

@@ -81,8 +81,9 @@ export const dateRangeToMongoQuery = (
 ): { $and: any[] } | null => {
   const result: any = { $and: [] };
   const from = normalizeRelative(condition.from);
-  if (from) result.$and.push({ [key]: { $gte: { $date: from } } });
+  if (from)
+    result.$and.push({ [key]: { $gte: { $date: from.toISOString() } } });
   const to = normalizeRelative(condition.to, true);
-  if (to) result.$and.push({ [key]: { $lt: { $date: to } } });
+  if (to) result.$and.push({ [key]: { $lt: { $date: to.toISOString() } } });
   return from || to ? result : null;
 };

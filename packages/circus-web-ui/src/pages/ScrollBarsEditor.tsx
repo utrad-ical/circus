@@ -1,5 +1,5 @@
 import Select from '#components/Select.tsx';
-import type * as et from '@smikitky/rb-components/lib/editor-types';
+import type * as et from '#components/editorTypes.tsx';
 import type { ScrollBarsSettings } from '#store/loginUser.ts';
 import React from 'react';
 import styled from 'styled-components';

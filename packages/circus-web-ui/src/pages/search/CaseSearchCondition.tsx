@@ -4,12 +4,11 @@ import DateRangePicker, {
   dateRangeToMongoQuery
 } from '#components/DateRangePicker.tsx';
 import { modalities } from '../../modalities.ts';
-import * as et from '@smikitky/rb-components/lib/editor-types';
+import * as et from '#components/editorTypes.tsx';
 import ConditionFrame from './ConditionFrame.tsx';
 import { escapeRegExp } from '#utils/util.ts';
-import { ControlLabel } from '#components/react-bootstrap.ts';
 import ProjectSelectorMultiple from '#components/ProjectSelectorMultiple.tsx';
-import { conditionToMongoQuery } from '@smikitky/rb-components/lib/ConditionEditor';
+import { conditionToMongoQuery } from '#components/ConditionEditor.tsx';
 import SearchPanel from '#pages/search/SearchPanel.tsx';
 import useLoginUser from '#utils/useLoginUser.ts';
 import type { Condition as BaseCondition } from './ConditionFrame.tsx';
@@ -58,12 +57,10 @@ const conditionToFilter = (condition: Condition) => {
       tabFilter = basicConditionToMongoQuery(condition.basic);
       break;
     case 'advanced':
-      tabFilter = conditionToMongoQuery(
-        condition.advanced,
-        ['createdAt', 'updatedAt'],
-        true,
-        false
-      );
+      tabFilter = conditionToMongoQuery(condition.advanced, [
+        'createdAt',
+        'updatedAt'
+      ]);
       break;
     default:
       throw new Error('Unknown conditoin type.');
@@ -164,7 +161,7 @@ const ConditionEditor: React.FC<{
   return (
     <>
       <div style={{ marginBottom: '10px' }}>
-        <ControlLabel>Project:&ensp;</ControlLabel>
+        <label>Project:&ensp;</label>
         <ProjectSelectorMultiple
           projects={accessibleProjects}
           noneText="(All projects)"

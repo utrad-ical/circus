@@ -1,6 +1,7 @@
+import Input from '#components/Input.tsx';
 import React from 'react';
 import Select from '#components/Select.tsx';
-import * as et from '@smikitky/rb-components/lib/editor-types';
+import * as et from '#components/editorTypes.tsx';
 import type {
   Schema,
   PropSchema
@@ -138,8 +139,7 @@ const SchemaEntryEditor: React.FC<{
   return (
     <StyledSpan>
       <div className="attribute-schema-key">
-        <input
-          className="form-control"
+        <Input
           placeholder="Attribute key"
           value={key}
           onChange={handleKeyChange}

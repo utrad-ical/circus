@@ -3,9 +3,9 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useApi } from '#utils/api.ts';
 import useShowMessage from '#utils/useShowMessage.ts';
 import AdminContainer from './AdminContainer.tsx';
-import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
-import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
-import * as et from '@smikitky/rb-components/lib/editor-types';
+import type { PropertyEditorProperties } from '#components/PropertyEditor.tsx';
+import PropertyEditor from '#components/PropertyEditor.tsx';
+import * as et from '#components/editorTypes.tsx';
 import Select from '#components/Select.tsx';
 
 interface Settings {
@@ -13,10 +13,7 @@ interface Settings {
   defaultDomain: string;
 }
 
-const arrayOfStringsEditor = et.arrayOf(
-  et.text({ style: { width: '200px', display: 'inline' } }),
-  ''
-);
+const arrayOfStringsEditor = et.arrayOf(et.text(), '');
 
 const GeneralAdmin: React.FC<{}> = props => {
   const [settings, setSettings] = useState<Settings>({

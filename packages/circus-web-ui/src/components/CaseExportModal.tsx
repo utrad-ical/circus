@@ -1,4 +1,4 @@
-import type { Editor } from '@smikitky/rb-components/lib/editor-types';
+import type { Editor } from '#components/editorTypes.tsx';
 import Select from '#components/Select.tsx';
 import { produce } from 'immer';
 import type { ExternalLabel } from '#pages/case-detail/labelData.ts';

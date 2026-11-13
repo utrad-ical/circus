@@ -1,10 +1,10 @@
+import Input from '#components/Input.tsx';
 import Alert from '#components/Alert.tsx';
 import Panel, { PanelList, PanelListItem } from '#components/Panel.tsx';
 import Button from '#components/Button.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import { confirm } from '#components/dialogs.tsx';
 import Icon from '#components/Icon.tsx';
-import { FormControl } from '#components/react-bootstrap.ts';
 import TimeDisplay from '#components/TimeDisplay.tsx';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
@@ -127,14 +127,11 @@ const TokenManagement: React.FC<{}> = props => {
       <hr />
       <h1>Add new token</h1>
       <NewTokenForm>
-        <FormControl
-          type="text"
+        <Input
           placeholder="Description of the new token"
           value={description}
-          onChange={(ev: React.BaseSyntheticEvent) =>
-            setDescription(ev.target.value)
-          }
-        ></FormControl>
+          onChange={ev => setDescription(ev.target.value)}
+        />
         <Button
           variant="primary"
           disabled={description.length <= 0}

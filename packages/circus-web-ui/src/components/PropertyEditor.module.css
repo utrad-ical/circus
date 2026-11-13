@@ -1,0 +1,47 @@
+/* The caption column is as wide as the widest caption */
+.editor {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 1em;
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.heading {
+  grid-column: 1 / -1;
+  margin: 1em 0 0.5em;
+  font-size: 120%;
+  font-weight: bold;
+}
+
+.row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  align-items: baseline;
+  row-gap: 0.25em;
+  padding: 0.5em 0;
+}
+
+.caption {
+  margin: 0;
+  text-align: end;
+  font-weight: bold;
+  @media (max-width: 768px) {
+    text-align: start;
+  }
+}
+
+.value {
+  min-width: 0;
+}
+
+.invalid {
+  background-color: color-mix(in oklch, var(--danger) 15%, var(--bg));
+}
+
+.complaint {
+  margin-top: 0.25em;
+  color: var(--danger);
+}

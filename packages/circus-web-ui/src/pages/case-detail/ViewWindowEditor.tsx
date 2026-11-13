@@ -1,9 +1,9 @@
 import Button from '#components/Button.tsx';
 import React, { useState, useMemo } from 'react';
 import { DialogBody, DialogFooter, DialogHeader } from '#components/Dialog.tsx';
-import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
-import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
-import * as et from '@smikitky/rb-components/lib/editor-types';
+import type { PropertyEditorProperties } from '#components/PropertyEditor.tsx';
+import PropertyEditor from '#components/PropertyEditor.tsx';
+import * as et from '#components/editorTypes.tsx';
 
 export interface ViewWindow {
   level: number;

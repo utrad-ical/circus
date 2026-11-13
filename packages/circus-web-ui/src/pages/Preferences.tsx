@@ -1,13 +1,13 @@
+import Input from '#components/Input.tsx';
 import Panel, { PanelHeader, PanelBody } from '#components/Panel.tsx';
 import { selectEditor } from '#components/Select.tsx';
 import Button from '#components/Button.tsx';
-import * as et from '@smikitky/rb-components/lib/editor-types';
-import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
-import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
+import * as et from '#components/editorTypes.tsx';
+import type { PropertyEditorProperties } from '#components/PropertyEditor.tsx';
+import PropertyEditor from '#components/PropertyEditor.tsx';
 import Icon from '#components/Icon.tsx';
 import LabelColorsEditor from '#components/LabelColorsEditor.tsx';
 import { labeledSlider } from '#components/LabeledSlider.tsx';
-import { FormControl } from '#components/react-bootstrap.ts';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { SearchPreset, UserPreferences } from '#store/loginUser.ts';
 import { useApi } from '#utils/api.ts';
@@ -25,14 +25,14 @@ const PresetDeleteEditor: et.Editor<SearchPreset[] | undefined> = props => {
   };
 
   if (!Array.isArray(value) || !value.length) {
-    return <div className="form-control-static text-muted">(no presets)</div>;
+    return <div className="text-muted">(no presets)</div>;
   }
 
   return (
     <ul className="list-unstyled">
       {value.map(preset => {
         return (
-          <li key={preset.name} className="form-control-static">
+          <li key={preset.name}>
             {preset.name}{' '}
             <Button
               size="xsmall"
@@ -78,15 +78,17 @@ const TemplateEditor: et.Editor<string[] | undefined> = props => {
 
   return (
     <>
-      <span className="revision-message-template form-inline">
-        <label>New Template&nbsp; </label>
-        <FormControl
+      <span
+        className="revision-message-template"
+        style={{ display: 'flex', alignItems: 'center', gap: '0.5em' }}
+      >
+        <label style={{ whiteSpace: 'nowrap' }}>New Template</label>
+        <Input
           type="text"
           autoFocus
           value={newTemplate}
           onChange={(ev: any) => setNewTemplate(ev.target.value)}
         />
-        &nbsp;
         <Button
           variant="primary"
           disabled={canNotAdd()}
@@ -96,12 +98,12 @@ const TemplateEditor: et.Editor<string[] | undefined> = props => {
         </Button>
       </span>
       {!Array.isArray(value) || !value.length ? (
-        <div className="form-control-static text-muted">(no templates)</div>
+        <div className="text-muted">(no templates)</div>
       ) : (
         <ul className="list-unstyled">
           {value.map(message => {
             return (
-              <li key={message} className="form-control-static">
+              <li key={message}>
                 {message}{' '}
                 <Button
                   size="xsmall"

@@ -1,6 +1,6 @@
 import Button from '#components/Button.tsx';
 import { ColorPalette } from '#components/ColorPicker.tsx';
-import type * as et from '@smikitky/rb-components/lib/editor-types';
+import type * as et from '#components/editorTypes.tsx';
 import Select from '#components/Select.tsx';
 import React, { useState } from 'react';
 import styled from 'styled-components';

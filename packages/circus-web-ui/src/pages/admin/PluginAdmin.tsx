@@ -5,9 +5,9 @@ import BodyPartIcon from '#components/BodyPartIcon.tsx';
 import IconEditor from './IconEditor.tsx';
 import CopyToClipboardButton from '#components/CopyToClipboardButton.tsx';
 import JsonEditor from './JsonEditor.tsx';
-import * as et from '@smikitky/rb-components/lib/editor-types';
-import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
-import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
+import * as et from '#components/editorTypes.tsx';
+import type { PropertyEditorProperties } from '#components/PropertyEditor.tsx';
+import PropertyEditor from '#components/PropertyEditor.tsx';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
 
 type PluginType = 'CAD' | 'CAD+remote';

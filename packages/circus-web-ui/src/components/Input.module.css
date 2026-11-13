@@ -1,0 +1,25 @@
+.input {
+  --padding-block: 0.375em;
+  width: 100%;
+  min-width: 0;
+  padding: var(--padding-block) 0.75em;
+  border: 1px solid var(--border);
+  background-color: var(--bg);
+  color: var(--text);
+  font: inherit;
+  line-height: 1.43;
+  vertical-align: middle;
+  &::placeholder {
+    color: var(--muted);
+  }
+  &:disabled {
+    background-color: var(--surface);
+    cursor: not-allowed;
+  }
+}
+
+.small {
+  --padding-block: 0.35em;
+  padding-inline: 0.7em;
+  font-size: 0.875em;
+}

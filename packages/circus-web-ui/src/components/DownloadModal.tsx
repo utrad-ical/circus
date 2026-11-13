@@ -1,5 +1,5 @@
 import Button from '#components/Button.tsx';
-import type { Editor } from '@smikitky/rb-components/lib/editor-types';
+import type { Editor } from '#components/editorTypes.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import classnames from 'classnames';
 import React, { useState } from 'react';

@@ -1,0 +1,36 @@
+/* "processing": a segment keeps sliding behind the text */
+.processing {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  padding: 0.1em 0.6em;
+  border-radius: 0.25em;
+  background-color: color-mix(in oklch, var(--theme) 12%, var(--bg));
+  color: var(--theme);
+  font-weight: bold;
+  isolation: isolate;
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    z-index: -1;
+    width: 40%;
+    background-color: color-mix(in oklch, var(--theme) 28%, var(--bg));
+    animation: slide 1.5s ease-in-out infinite;
+  }
+}
+
+@keyframes slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .processing::before {
+    animation-duration: 4s;
+  }
+}

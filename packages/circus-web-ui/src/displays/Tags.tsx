@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { Button } from '../../ui/Button.tsx';
-import Tooltip from '../../ui/Tooltip.tsx';
-import { useCsResults } from '../CsResultsContext.ts';
-import type { Display } from '../Display.tsx';
+import { Button } from './Button.tsx';
+import Tooltip from '#components/Tooltip.tsx';
+import { useCsResults } from '@utrad-ical/circus-ui-kit';
+import type { Display } from '@utrad-ical/circus-ui-kit';
 import {
   Field,
   FieldLabel,
@@ -234,7 +234,7 @@ export const Tags: Display<TagsOptions, string[]> = props => {
         <div className="array">
           {tags.map((tag, index) =>
             (personalVoteDetails?.get(tag) ?? []).length > 0 ? (
-              <Tooltip text={tooltipText(tag)} key={tag}>
+              <Tooltip content={tooltipText(tag)} key={tag}>
                 <div key={index} className="array-item">
                   <div>{tag}</div>
                   {editable ? (

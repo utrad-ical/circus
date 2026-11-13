@@ -1,8 +1,8 @@
 import type { RefObject } from 'react';
 import React, { useEffect, useRef, createRef, useState } from 'react';
-import get from 'lodash.get';
-import { useCsResults } from '../CsResultsContext.ts';
-import type { Display } from '../Display.tsx';
+import get from 'lodash/get';
+import { useCsResults } from '@utrad-ical/circus-ui-kit';
+import type { Display } from '@utrad-ical/circus-ui-kit';
 import { useErrorMessage } from './utils/useErrorMessage.tsx';
 import classnames from 'classnames';
 import styled from 'styled-components';

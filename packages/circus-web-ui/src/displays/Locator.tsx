@@ -1,6 +1,6 @@
 import * as rs from '@utrad-ical/circus-rs';
-import { useVolumeLoaders } from '../useVolumeLoader.tsx';
-import get from 'lodash.get';
+import { useVolumeLoaders } from '@utrad-ical/circus-ui-kit';
+import get from 'lodash/get';
 import React, {
   useCallback,
   useEffect,
@@ -9,11 +9,11 @@ import React, {
   useState
 } from 'react';
 import styled from 'styled-components';
-import { Button } from '../../ui/Button.tsx';
-import { createStateChanger, ImageViewer } from '../../ui/ImageViewer.tsx';
-import type { FeedbackEntry } from '../CsResultsContext.ts';
-import { useCsResults } from '../CsResultsContext.ts';
-import type { Display } from '../Display.tsx';
+import { Button } from './Button.tsx';
+import { createStateChanger, ImageViewer } from '@utrad-ical/circus-ui-kit';
+import type { FeedbackEntry } from '@utrad-ical/circus-ui-kit';
+import { useCsResults } from '@utrad-ical/circus-ui-kit';
+import type { Display } from '@utrad-ical/circus-ui-kit';
 import { defaultDataPath, normalizeCandidates } from './LesionCandidates.tsx';
 
 type IntegrationOptions = 'off' | 'snapped';

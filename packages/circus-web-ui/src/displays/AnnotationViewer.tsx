@@ -13,12 +13,12 @@ import {
 } from '@utrad-ical/circus-rs';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import type { StateChangerFunc } from '../ui/ImageViewer.tsx';
-import { ImageViewer } from '../ui/ImageViewer.tsx';
-import { CsResultsContext } from './CsResultsContext.ts';
-import type { ColorDefinition } from './displays/utils/color.ts';
-import { normalizeColor } from './displays/utils/color.ts';
-import { useVolumeLoaders } from './useVolumeLoader.tsx';
+import type { StateChangerFunc } from '@utrad-ical/circus-ui-kit';
+import { ImageViewer } from '@utrad-ical/circus-ui-kit';
+import { CsResultsContext } from '@utrad-ical/circus-ui-kit';
+import type { ColorDefinition } from './utils/color.ts';
+import { normalizeColor } from './utils/color.ts';
+import { useVolumeLoaders } from '@utrad-ical/circus-ui-kit';
 
 type ToolName = 'pager' | 'zoom' | 'pan';
 

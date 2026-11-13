@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { useCsResults } from '../CsResultsContext.ts';
-import type { Display } from '../Display.tsx';
-import { Button } from '../../ui/Button.tsx';
-import Tooltip from '../../ui/Tooltip.tsx';
+import { useCsResults } from '@utrad-ical/circus-ui-kit';
+import type { Display } from '@utrad-ical/circus-ui-kit';
+import { Button } from './Button.tsx';
+import Tooltip from '#components/Tooltip.tsx';
 
 interface ChoiceItem {
   value: number | string;
@@ -144,7 +144,7 @@ const ToggleButtons: ChoiceUI = props => {
     <ToggleButtonsContainer>
       {choices.map(choice =>
         (opinions?.get(choice.value) ?? []).length > 0 ? (
-          <Tooltip text={tooltipText(choice.value)} key={choice.value}>
+          <Tooltip content={tooltipText(choice.value)} key={choice.value}>
             <Button
               onClick={() => onSelect(choice.value)}
               disabled={disabled}

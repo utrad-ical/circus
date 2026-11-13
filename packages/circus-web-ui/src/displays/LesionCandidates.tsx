@@ -6,8 +6,8 @@ import {
   WebGlRawVolumeMprImageSource
 } from '@utrad-ical/circus-rs';
 import classnames from 'classnames';
-import { useVolumeLoaders } from '../useVolumeLoader.tsx';
-import get from 'lodash.get';
+import { useVolumeLoaders } from '@utrad-ical/circus-ui-kit';
+import get from 'lodash/get';
 import React, {
   useCallback,
   useEffect,
@@ -16,15 +16,15 @@ import React, {
   useState
 } from 'react';
 import styled from 'styled-components';
-import { Button } from '../../ui/Button.tsx';
-import type { StateChangerFunc } from '../../ui/ImageViewer.tsx';
-import { createStateChanger, ImageViewer } from '../../ui/ImageViewer.tsx';
-import { useCsResults } from '../CsResultsContext.ts';
+import { Button } from './Button.tsx';
+import type { StateChangerFunc } from '@utrad-ical/circus-ui-kit';
+import { createStateChanger, ImageViewer } from '@utrad-ical/circus-ui-kit';
+import { useCsResults } from '@utrad-ical/circus-ui-kit';
 import type {
   Display,
   DisplayDefinition,
   FeedbackReport
-} from '../Display.tsx';
+} from '@utrad-ical/circus-ui-kit';
 import { MessageBox } from './utils/MessageBox.tsx';
 
 interface LesionCandidate {

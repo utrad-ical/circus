@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useCsResults } from '../CsResultsContext.ts';
-import type { Display } from '../Display.tsx';
+import { useCsResults } from '@utrad-ical/circus-ui-kit';
+import type { Display } from '@utrad-ical/circus-ui-kit';
 import { Field, FieldLabel, TextInput } from './utils/formField.tsx';
 import { useErrorMessage } from './utils/useErrorMessage.tsx';
 

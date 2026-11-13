@@ -11,14 +11,16 @@ import {
   VoxelCloud,
   WebGlRawVolumeMprImageSource
 } from '@utrad-ical/circus-rs';
+import classnames from 'classnames';
+import type { CSSProperties } from 'react';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import styled from 'styled-components';
-import type { StateChangerFunc } from '../ui/ImageViewer.tsx';
-import { ImageViewer } from '../ui/ImageViewer.tsx';
-import { CsResultsContext } from './CsResultsContext.ts';
-import type { ColorDefinition } from './displays/utils/color.ts';
-import { normalizeColor } from './displays/utils/color.ts';
-import { useVolumeLoaders } from './useVolumeLoader.tsx';
+import type { StateChangerFunc } from '@utrad-ical/circus-ui-kit';
+import { ImageViewer } from '@utrad-ical/circus-ui-kit';
+import { CsResultsContext } from '@utrad-ical/circus-ui-kit';
+import type { ColorDefinition } from './utils/color.ts';
+import { normalizeColor } from './utils/color.ts';
+import { useVolumeLoaders } from '@utrad-ical/circus-ui-kit';
+import styles from './AnnotationViewer.module.css';
 
 type ToolName = 'pager' | 'zoom' | 'pan';
 
@@ -110,20 +112,21 @@ export const AnnotationViewer: React.FC<{
   if (!composition) return null;
 
   return (
-    <StyledDiv className="annotation-viewer" width={width} height={height}>
+    <div
+      className={classnames('annotation-viewer', styles.root)}
+      style={
+        {
+          '--annotation-viewer-width': `${width ?? 512}px`,
+          '--annotation-viewer-height': `${height ?? 512}px`
+        } as CSSProperties
+      }
+    >
       <ImageViewer
         tool={tools[toolName] ?? tools.pager}
         composition={composition}
         initialStateSetter={initialStateSetter}
       />
       ;
-    </StyledDiv>
+    </div>
   );
 };
-
-const StyledDiv = styled.div`
-  .image-viewer {
-    width: ${(props: any) => `${props.width ?? 512}px`};
-    height: ${(props: any) => `${props.height ?? 512}px`};
-  }
-`;

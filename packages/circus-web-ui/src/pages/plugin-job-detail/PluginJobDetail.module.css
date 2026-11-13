@@ -1,0 +1,35 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+
+  .header {
+    flex: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    border-bottom: 1px solid silver;
+    align-items: center;
+    > * {
+      padding: 5px 10px;
+    }
+  }
+  .feedbackModeSwitch {
+    flex: 1 0 auto;
+  }
+  /* Rendered by MainDisplay */
+  :global(.job-detail-main) {
+    min-height: 0;
+    flex: 1 1 0;
+    overflow-y: scroll;
+  }
+  .footer {
+    flex: none;
+    padding: 10px;
+    border-top: 1px solid silver;
+    text-align: right;
+    .registerMessage {
+      margin-right: 1em;
+    }
+  }
+}

@@ -1,10 +1,10 @@
 import { gunzipSync } from 'fflate';
-import get from 'lodash.get';
+import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
-import type { AnnotationDef } from '../AnnotationViewer.tsx';
-import { AnnotationViewer } from '../AnnotationViewer.tsx';
-import { useCsResults } from '../CsResultsContext.ts';
-import type { Display } from '../Display.tsx';
+import type { AnnotationDef } from './AnnotationViewer.tsx';
+import { AnnotationViewer } from './AnnotationViewer.tsx';
+import { useCsResults } from '@utrad-ical/circus-ui-kit';
+import type { Display } from '@utrad-ical/circus-ui-kit';
 import type { ColorDefinition } from './utils/color.ts';
 import { useErrorMessage } from './utils/useErrorMessage.tsx';
 

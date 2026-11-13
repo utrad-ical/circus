@@ -1,9 +1,20 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
-import { useCsResults } from '../CsResultsContext.ts';
-import type { Display } from '../Display.tsx';
-import { Button } from '../../ui/Button.tsx';
-import Tooltip from '../../ui/Tooltip.tsx';
+import classNames from 'classnames';
+import React, { type CSSProperties, useEffect, useMemo, useState } from 'react';
+import { useCsResults } from '@utrad-ical/circus-ui-kit';
+import type { Display } from '@utrad-ical/circus-ui-kit';
+import Button from '#components/Button.tsx';
+import Tooltip from '#components/Tooltip.tsx';
+import styles from './Choice.module.css';
+
+// A selected button is filled with the color of the choice
+const colorProps = (color: string | undefined, selected: boolean) => ({
+  size: 'small' as const,
+  variant: selected ? ('primary' as const) : ('default' as const),
+  pressed: selected,
+  style: (color
+    ? { [selected ? '--button-color' : 'color']: color }
+    : {}) as CSSProperties
+});
 
 interface ChoiceItem {
   value: number | string;
@@ -141,19 +152,24 @@ const ToggleButtons: ChoiceUI = props => {
   };
 
   return (
-    <ToggleButtonsContainer>
+    <div className={styles.toggleButtons}>
       {choices.map(choice =>
         (opinions?.get(choice.value) ?? []).length > 0 ? (
-          <Tooltip text={tooltipText(choice.value)} key={choice.value}>
+          <Tooltip content={tooltipText(choice.value)} key={choice.value}>
             <Button
               onClick={() => onSelect(choice.value)}
               disabled={disabled}
-              color={choice.color}
-              selected={choice.value === selected}
-              className="button-with-tooltip"
-              style={disabled ? { pointerEvents: 'none' } : {}}
+              {...colorProps(choice.color, choice.value === selected)}
+              className={classNames(
+                'button-with-tooltip',
+                styles.buttonWithTooltip
+              )}
+              style={{
+                ...colorProps(choice.color, choice.value === selected).style,
+                ...(disabled ? { pointerEvents: 'none' } : {})
+              }}
             >
-              <span className="opinions">
+              <span className={classNames('opinions', styles.opinions)}>
                 {opinions?.get(choice.value)?.length}
               </span>
 
@@ -165,35 +181,15 @@ const ToggleButtons: ChoiceUI = props => {
             key={choice.value}
             onClick={() => onSelect(choice.value)}
             disabled={disabled}
-            color={choice.color}
-            selected={choice.value === selected}
+            {...colorProps(choice.color, choice.value === selected)}
           >
             {choice.caption}
           </Button>
         )
       )}
-    </ToggleButtonsContainer>
+    </div>
   );
 };
-
-const ToggleButtonsContainer = styled.div`
-  display: flex;
-  > * {
-    flex: 1 1 auto;
-  }
-  gap: 2px;
-  .opinions {
-    border: 1px solid gray;
-    background-color: rgba(0, 0, 0, 0.3);
-    padding: 2px 4px;
-    border-radius: 5px;
-    font-size: 80%;
-    margin-right: 3px;
-  }
-  .button-with-tooltip {
-    width: 100%;
-  }
-`;
 
 const Select: ChoiceUI = props => {
   const { choices, onSelect, opinions, selected, disabled } = props;

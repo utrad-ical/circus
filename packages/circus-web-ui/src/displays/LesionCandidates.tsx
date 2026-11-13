@@ -6,8 +6,8 @@ import {
   WebGlRawVolumeMprImageSource
 } from '@utrad-ical/circus-rs';
 import classnames from 'classnames';
-import { useVolumeLoaders } from '../useVolumeLoader.tsx';
-import get from 'lodash.get';
+import { useVolumeLoaders } from '@utrad-ical/circus-ui-kit';
+import get from 'lodash/get';
 import React, {
   useCallback,
   useEffect,
@@ -15,17 +15,17 @@ import React, {
   useRef,
   useState
 } from 'react';
-import styled from 'styled-components';
-import { Button } from '../../ui/Button.tsx';
-import type { StateChangerFunc } from '../../ui/ImageViewer.tsx';
-import { createStateChanger, ImageViewer } from '../../ui/ImageViewer.tsx';
-import { useCsResults } from '../CsResultsContext.ts';
+import Button from '#components/Button.tsx';
+import type { StateChangerFunc } from '@utrad-ical/circus-ui-kit';
+import { createStateChanger, ImageViewer } from '@utrad-ical/circus-ui-kit';
+import { useCsResults } from '@utrad-ical/circus-ui-kit';
 import type {
   Display,
   DisplayDefinition,
   FeedbackReport
-} from '../Display.tsx';
+} from '@utrad-ical/circus-ui-kit';
 import { MessageBox } from './utils/MessageBox.tsx';
+import styles from './LesionCandidates.module.css';
 
 interface LesionCandidate {
   id?: number;
@@ -210,7 +210,7 @@ const Candidate: React.FC<{
           <div>Confidence: {item.confidence}</div>
         </div>
         <div>
-          <Button onClick={handleCenterizeClick} size="xs">
+          <Button onClick={handleCenterizeClick} size="xsmall">
             Center
           </Button>
         </div>
@@ -292,9 +292,9 @@ export const LesionCandidates: Display<
 
   const toolsRef = useRef<{ name: string; icon: string; tool: rs.Tool }[]>();
   toolsRef.current ??= [
-    { name: 'pager', icon: 'rs-pager', tool: rs.toolFactory('pager') },
-    { name: 'zoom', icon: 'rs-zoom', tool: rs.toolFactory('zoom') },
-    { name: 'hand', icon: 'rs-hand', tool: rs.toolFactory('hand') }
+    { name: 'pager', icon: 'circus-pager', tool: rs.toolFactory('pager') },
+    { name: 'zoom', icon: 'circus-zoom', tool: rs.toolFactory('zoom') },
+    { name: 'hand', icon: 'circus-hand', tool: rs.toolFactory('hand') }
   ];
   const tools = toolsRef.current;
 
@@ -348,7 +348,7 @@ export const LesionCandidates: Display<
       setFeedbackListener(() => FeedbackListener); // assign function as state
     };
     load();
-  }, [feedbackListener]);
+  }, [feedbackListener, loadDisplay]);
 
   if (
     Object.keys(imgSrcMap).length < 1 ||
@@ -360,12 +360,14 @@ export const LesionCandidates: Display<
   if (!volumeLoaders) return null;
 
   return (
-    <StyledDiv>
+    <div className={styles.lesionCandidates}>
       <div className="tools">
         {tools.map(t => (
           <Button
             key={t.name}
-            size="sm"
+            size="small"
+            variant={t.name === toolName ? 'primary' : 'default'}
+            pressed={t.name === toolName}
             className={classnames('tool', { active: t.name === toolName })}
             icon={t.icon}
             onClick={() => setToolName(t.name)}
@@ -419,43 +421,6 @@ export const LesionCandidates: Display<
           );
         })}
       </div>
-    </StyledDiv>
+    </div>
   );
 };
-
-const StyledDiv = styled.div`
-  .tools {
-    margin-bottom: 5px;
-    .tool {
-      &.active {
-        background-color: var(--circus-brand-primary);
-      }
-    }
-  }
-  .entries {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 7px;
-    justify-content: space-between;
-    .lesion-candidate {
-      max-width: 600px;
-      border: 1px solid silver;
-      .header {
-        padding: 3px;
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-      }
-      .attributes {
-        font-size: 80%;
-      }
-      .image-viewer {
-        width: 100%;
-        height: 300px;
-      }
-    }
-    .feedback-listener {
-      padding: 3px;
-    }
-  }
-`;

@@ -1,0 +1,29 @@
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(var(--gallery-columns), auto);
+  grid-gap: 10px;
+  padding-bottom: 10px;
+
+  .item {
+    display: flex;
+  }
+  .image {
+    align-self: flex-start;
+  }
+  .right {
+    flex-direction: row;
+  }
+  .left {
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+  }
+  .top {
+    flex-direction: column-reverse;
+  }
+  .bottom {
+    flex-direction: column;
+  }
+  .labels {
+    padding: 0.5rem;
+  }
+}

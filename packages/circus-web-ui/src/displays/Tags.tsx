@@ -1,9 +1,9 @@
+import classNames from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
-import { Button } from '../../ui/Button.tsx';
-import Tooltip from '../../ui/Tooltip.tsx';
-import { useCsResults } from '../CsResultsContext.ts';
-import type { Display } from '../Display.tsx';
+import Button from '#components/Button.tsx';
+import Tooltip from '#components/Tooltip.tsx';
+import { useCsResults } from '@utrad-ical/circus-ui-kit';
+import type { Display } from '@utrad-ical/circus-ui-kit';
 import {
   Field,
   FieldLabel,
@@ -11,6 +11,7 @@ import {
   TextInput
 } from './utils/formField.tsx';
 import { useErrorMessage } from './utils/useErrorMessage.tsx';
+import styles from './Tags.module.css';
 
 interface TagsOptions {
   label?: string;
@@ -228,14 +229,17 @@ export const Tags: Display<TagsOptions, string[]> = props => {
   if (error) return error;
 
   return (
-    <StyledField>
+    <Field className={styles.field}>
       {label && <FieldLabel as="div">{label}</FieldLabel>}
-      <div className="tags">
-        <div className="array">
+      <div className={classNames('tags', styles.tags)}>
+        <div className={classNames('array', styles.array)}>
           {tags.map((tag, index) =>
             (personalVoteDetails?.get(tag) ?? []).length > 0 ? (
-              <Tooltip text={tooltipText(tag)} key={tag}>
-                <div key={index} className="array-item">
+              <Tooltip content={tooltipText(tag)} key={tag}>
+                <div
+                  key={index}
+                  className={classNames('array-item', styles.arrayItem)}
+                >
                   <div>{tag}</div>
                   {editable ? (
                     <a onClick={() => handleTagRemove(index)}>&times;</a>
@@ -245,7 +249,10 @@ export const Tags: Display<TagsOptions, string[]> = props => {
                 </div>
               </Tooltip>
             ) : (
-              <div key={index} className="array-item">
+              <div
+                key={index}
+                className={classNames('array-item', styles.arrayItem)}
+              >
                 <div>{tag}</div>
                 {editable ? (
                   <a onClick={() => handleTagRemove(index)}>&times;</a>
@@ -256,7 +263,7 @@ export const Tags: Display<TagsOptions, string[]> = props => {
             )
           )}
         </div>
-        <div className="chooseTags">
+        <div className={classNames('chooseTags', styles.chooseTags)}>
           {predefinedTags.length > 0 && (
             <SelectInput
               className="fromPreset"
@@ -277,7 +284,7 @@ export const Tags: Display<TagsOptions, string[]> = props => {
             </SelectInput>
           )}
           {acceptFreeText && (
-            <div className="fromFreeText">
+            <div className={classNames('fromFreeText', styles.fromFreeText)}>
               {freeTextLabel && <label>{freeTextLabel}</label>}
               <TextInput
                 type="text"
@@ -289,55 +296,15 @@ export const Tags: Display<TagsOptions, string[]> = props => {
               <Button onClick={() => handleAddFreeText()} disabled={!editable}>
                 Add
               </Button>
-              <div className="warningMessage">{warningMessage ?? ''}</div>
+              <div
+                className={classNames('warningMessage', styles.warningMessage)}
+              >
+                {warningMessage ?? ''}
+              </div>
             </div>
           )}
         </div>
       </div>
-    </StyledField>
+    </Field>
   );
 };
-
-const StyledField = styled(Field)`
-  .tags {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-  .array {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    .array-item {
-      display: flex;
-      align-items: center;
-      a {
-        font-weight: bold;
-        text-decoration: none;
-        margin-left: 0.25rem;
-        font-size: 1.5em;
-        :hover {
-          cursor: pointer;
-        }
-      }
-    }
-  }
-  .chooseTags {
-    display: flex;
-  }
-  .fromFreeText {
-    display: grid;
-    align-items: center;
-    grid-template-columns: auto 1fr auto auto;
-    margin-left: 1rem;
-
-    .warningMessage {
-      color: red;
-      margin-left: 1rem;
-    }
-    label {
-      margin-right: 0.5rem;
-    }
-  }
-`;

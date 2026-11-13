@@ -1,5 +1,6 @@
 import type { Display } from '@utrad-ical/circus-ui-kit';
 import * as uiKit from '@utrad-ical/circus-ui-kit';
+import * as displays from '../../displays/index.ts';
 import {
   Choice,
   Dump,
@@ -10,7 +11,7 @@ import {
   VolumeOverlay,
   Gallery,
   Tags
-} from '@utrad-ical/circus-ui-kit';
+} from '../../displays/index.ts';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -39,8 +40,12 @@ const sharedModules: { [name: string]: { version: string; module: unknown } } =
   {
     react: { version: React.version, module: React },
     'react-dom': { version: ReactDOM.version, module: ReactDOM },
-    // The ui-kit API version that existing plug-ins were built against
-    '@utrad-ical/circus-ui-kit': { version: '0.3.0', module: uiKit }
+    // The ui-kit API version that existing plug-ins were built against,
+    // with the built-in displays and Button that have moved to Web UI
+    '@utrad-ical/circus-ui-kit': {
+      version: '0.3.0',
+      module: { ...uiKit, ...displays }
+    }
   };
 
 interface Container {

@@ -1,21 +1,16 @@
-import styled from 'styled-components';
-
-// Form parts of the built-in displays, colored with the host's design tokens
-
-export const Field = styled.div`
+.field {
   margin-bottom: 15px;
-`;
+}
 
-export const FieldLabel = styled.label`
+.fieldLabel {
   display: block;
   font-weight: bold;
-  > input {
+  & > input {
     margin-top: 5px;
   }
-`;
+}
 
-// Can be placed inside `FieldLabel`
-export const TextInput = styled.input`
+.textInput {
   display: block;
   width: 100%;
   min-width: 0;
@@ -33,9 +28,9 @@ export const TextInput = styled.input`
   &[aria-invalid='true'] {
     border-color: var(--danger, #c00);
   }
-`;
+}
 
-export const SelectInput = styled.select`
+.selectInput {
   padding: 0.375em 0.5em;
   border: 1px solid var(--border, silver);
   background-color: var(--bg, white);
@@ -49,4 +44,4 @@ export const SelectInput = styled.select`
   &[aria-invalid='true'] {
     border-color: var(--danger, #c00);
   }
-`;
+}

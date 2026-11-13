@@ -1,10 +1,20 @@
 import classNames from 'classnames';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { type CSSProperties, useEffect, useMemo, useState } from 'react';
 import { useCsResults } from '@utrad-ical/circus-ui-kit';
 import type { Display } from '@utrad-ical/circus-ui-kit';
-import { Button } from './Button.tsx';
+import Button from '#components/Button.tsx';
 import Tooltip from '#components/Tooltip.tsx';
 import styles from './Choice.module.css';
+
+// A selected button is filled with the color of the choice
+const colorProps = (color: string | undefined, selected: boolean) => ({
+  size: 'small' as const,
+  variant: selected ? ('primary' as const) : ('default' as const),
+  pressed: selected,
+  style: (color
+    ? { [selected ? '--button-color' : 'color']: color }
+    : {}) as CSSProperties
+});
 
 interface ChoiceItem {
   value: number | string;
@@ -149,13 +159,15 @@ const ToggleButtons: ChoiceUI = props => {
             <Button
               onClick={() => onSelect(choice.value)}
               disabled={disabled}
-              color={choice.color}
-              selected={choice.value === selected}
+              {...colorProps(choice.color, choice.value === selected)}
               className={classNames(
                 'button-with-tooltip',
                 styles.buttonWithTooltip
               )}
-              style={disabled ? { pointerEvents: 'none' } : {}}
+              style={{
+                ...colorProps(choice.color, choice.value === selected).style,
+                ...(disabled ? { pointerEvents: 'none' } : {})
+              }}
             >
               <span className={classNames('opinions', styles.opinions)}>
                 {opinions?.get(choice.value)?.length}
@@ -169,8 +181,7 @@ const ToggleButtons: ChoiceUI = props => {
             key={choice.value}
             onClick={() => onSelect(choice.value)}
             disabled={disabled}
-            color={choice.color}
-            selected={choice.value === selected}
+            {...colorProps(choice.color, choice.value === selected)}
           >
             {choice.caption}
           </Button>

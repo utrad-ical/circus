@@ -1,13 +1,14 @@
 import classNames from 'classnames';
 import React, { forwardRef } from 'react';
 import buttonIcons from './buttonIcons.ts';
-import styles from './Button.module.css';
+import styles from './LegacyButton.module.css';
 
 type Size = 'sm' | 'lg' | 'xs';
 
 /**
- * This is a styled button that renders according to the CIRCUS theme.
- * You can optionally pass a background color and an icon.
+ * The `Button` that ui-kit used to export, kept only for compatibility
+ * with v1 plug-ins, which import it from `@utrad-ical/circus-ui-kit`.
+ * Do not use it in Web UI; use `components/Button.tsx` instead.
  */
 export const Button: React.FC<{
   color?: string;

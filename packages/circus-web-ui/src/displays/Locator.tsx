@@ -9,7 +9,7 @@ import React, {
   useRef,
   useState
 } from 'react';
-import { Button } from './Button.tsx';
+import Button from '#components/Button.tsx';
 import { createStateChanger, ImageViewer } from '@utrad-ical/circus-ui-kit';
 import type { FeedbackEntry } from '@utrad-ical/circus-ui-kit';
 import { useCsResults } from '@utrad-ical/circus-ui-kit';
@@ -299,7 +299,11 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
     return (
       <div>
         Input Locations <Button onClick={handleYesClick}>Yes</Button>
-        <Button onClick={handleNoClick} selected={noConfirmed}>
+        <Button
+          onClick={handleNoClick}
+          variant={noConfirmed ? 'primary' : 'default'}
+          pressed={noConfirmed}
+        >
           No
         </Button>
       </div>
@@ -355,7 +359,7 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
                   )}
                   <td>
                     <Button
-                      size="xs"
+                      size="xsmall"
                       icon="circus-focus"
                       onClick={() => handleReveal(i)}
                     >
@@ -363,7 +367,7 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
                     </Button>
                     {editable && (
                       <Button
-                        size="xs"
+                        size="xsmall"
                         icon="material-close"
                         onClick={() => handleRemovePoint(i)}
                       />

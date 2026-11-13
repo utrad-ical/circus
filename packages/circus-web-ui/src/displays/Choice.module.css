@@ -3,6 +3,11 @@
   gap: 2px;
   & > * {
     flex: 1 1 auto;
+    min-width: 0;
+  }
+  /* Stronger than the padding of Button.module.css */
+  & > button {
+    padding-inline: 0.3em;
   }
   .opinions {
     border: 1px solid gray;

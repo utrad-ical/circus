@@ -15,7 +15,7 @@ import React, {
   useRef,
   useState
 } from 'react';
-import { Button } from './Button.tsx';
+import Button from '#components/Button.tsx';
 import type { StateChangerFunc } from '@utrad-ical/circus-ui-kit';
 import { createStateChanger, ImageViewer } from '@utrad-ical/circus-ui-kit';
 import { useCsResults } from '@utrad-ical/circus-ui-kit';
@@ -210,7 +210,7 @@ const Candidate: React.FC<{
           <div>Confidence: {item.confidence}</div>
         </div>
         <div>
-          <Button onClick={handleCenterizeClick} size="xs">
+          <Button onClick={handleCenterizeClick} size="xsmall">
             Center
           </Button>
         </div>
@@ -292,9 +292,9 @@ export const LesionCandidates: Display<
 
   const toolsRef = useRef<{ name: string; icon: string; tool: rs.Tool }[]>();
   toolsRef.current ??= [
-    { name: 'pager', icon: 'rs-pager', tool: rs.toolFactory('pager') },
-    { name: 'zoom', icon: 'rs-zoom', tool: rs.toolFactory('zoom') },
-    { name: 'hand', icon: 'rs-hand', tool: rs.toolFactory('hand') }
+    { name: 'pager', icon: 'circus-pager', tool: rs.toolFactory('pager') },
+    { name: 'zoom', icon: 'circus-zoom', tool: rs.toolFactory('zoom') },
+    { name: 'hand', icon: 'circus-hand', tool: rs.toolFactory('hand') }
   ];
   const tools = toolsRef.current;
 
@@ -365,7 +365,9 @@ export const LesionCandidates: Display<
         {tools.map(t => (
           <Button
             key={t.name}
-            size="sm"
+            size="small"
+            variant={t.name === toolName ? 'primary' : 'default'}
+            pressed={t.name === toolName}
             className={classnames('tool', { active: t.name === toolName })}
             icon={t.icon}
             onClick={() => setToolName(t.name)}

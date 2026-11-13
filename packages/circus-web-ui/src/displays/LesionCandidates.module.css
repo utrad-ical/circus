@@ -2,11 +2,6 @@
 .lesionCandidates {
   :global(.tools) {
     margin-bottom: 5px;
-    :global(.tool) {
-      &:global(.active) {
-        background-color: var(--circus-brand-primary);
-      }
-    }
   }
   :global(.entries) {
     display: grid;

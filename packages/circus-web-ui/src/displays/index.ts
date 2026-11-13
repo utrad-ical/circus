@@ -8,4 +8,4 @@ export * from './Numeric.tsx';
 export * from './Tags.tsx';
 export * from './Text.tsx';
 export * from './VolumeOverlay.tsx';
-export * from './Button.tsx';
+export * from './LegacyButton.tsx';

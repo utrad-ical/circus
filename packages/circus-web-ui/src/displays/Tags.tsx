@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Button } from './Button.tsx';
+import Button from '#components/Button.tsx';
 import Tooltip from '#components/Tooltip.tsx';
 import { useCsResults } from '@utrad-ical/circus-ui-kit';
 import type { Display } from '@utrad-ical/circus-ui-kit';

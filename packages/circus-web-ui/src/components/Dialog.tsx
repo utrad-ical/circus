@@ -104,7 +104,8 @@ export const DialogHeader: FC<{ children: ReactNode }> = props => {
       {close && (
         <Button
           variant="link"
-          size="small"
+          size="xsmall"
+          className={styles.close}
           icon="material-close"
           title="Close"
           onClick={close}

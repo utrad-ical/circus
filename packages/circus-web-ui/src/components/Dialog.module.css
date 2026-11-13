@@ -27,11 +27,16 @@
   display: flex;
   align-items: center;
   gap: 0.5em;
-  padding: 15px;
+  padding: 8px 10px 8px 15px;
   border-bottom: 1px solid var(--border);
+  background-color: var(--theme);
+  color: var(--theme-text);
   font-weight: bold;
   > :first-child {
     flex: 1;
+  }
+  .close {
+    color: inherit;
   }
 }
 
@@ -44,6 +49,6 @@
   display: flex;
   justify-content: flex-end;
   gap: 5px;
-  padding: 15px;
+  padding: 10px 15px;
   border-top: 1px solid var(--border);
 }

@@ -1,6 +1,6 @@
-import styled from 'styled-components';
 import classnames from 'classnames';
 import React, { useState } from 'react';
+import styles from './JsonEditor.module.css';
 
 const JsonEditor: React.FC<{
   value: any;
@@ -22,8 +22,8 @@ const JsonEditor: React.FC<{
   };
 
   return (
-    <StyledTextArea
-      className={classnames({ 'has-error': hasError })}
+    <textarea
+      className={classnames(styles.textArea, hasError && styles.hasError)}
       value={input}
       onChange={handleChange}
     />
@@ -31,11 +31,3 @@ const JsonEditor: React.FC<{
 };
 
 export default JsonEditor;
-
-const StyledTextArea = styled.textarea`
-  &.has-error {
-    background-color: pink;
-  }
-  width: 100%;
-  min-height: 200px;
-`;

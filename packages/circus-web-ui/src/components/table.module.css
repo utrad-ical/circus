@@ -29,6 +29,10 @@
   }
 }
 
+.middle > tbody > tr > td {
+  vertical-align: middle;
+}
+
 .condensed > :is(thead, tbody, tfoot) > tr > :is(th, td) {
   padding: 5px;
 }

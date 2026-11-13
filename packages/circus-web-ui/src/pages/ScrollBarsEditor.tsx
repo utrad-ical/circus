@@ -2,7 +2,7 @@ import Select from '#components/Select.tsx';
 import type * as et from '#components/editorTypes.tsx';
 import type { ScrollBarsSettings } from '#store/loginUser.ts';
 import React from 'react';
-import styled from 'styled-components';
+import styles from './ScrollBarsEditor.module.css';
 
 const ScrollbarEditor: et.Editor<ScrollBarsSettings | undefined> = props => {
   const {
@@ -11,7 +11,7 @@ const ScrollbarEditor: et.Editor<ScrollBarsSettings | undefined> = props => {
   } = props;
 
   return (
-    <StyledDiv>
+    <div className={styles.root}>
       <span>Visibility</span>
       <Select
         size="small"
@@ -46,14 +46,8 @@ const ScrollbarEditor: et.Editor<ScrollBarsSettings | undefined> = props => {
           />
         </>
       )}
-    </StyledDiv>
+    </div>
   );
 };
 
 export default ScrollbarEditor;
-
-const StyledDiv = styled.div`
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-`;

@@ -1,0 +1,20 @@
+.tag {
+  display: inline-block;
+  text-align: center;
+  padding: 0 5px;
+  border-radius: 5px;
+  border-style: solid;
+  border-width: 1px;
+  font-weight: bold;
+  min-width: 70px;
+  background-color: var(--tag-background-color);
+  color: var(--tag-color);
+  border-color: var(--tag-border-color);
+}
+
+.tagList {
+  .tag {
+    margin-left: 2px;
+    margin-right: 2px;
+  }
+}

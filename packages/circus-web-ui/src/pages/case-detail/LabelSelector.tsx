@@ -15,7 +15,6 @@ import Dialog, {
 } from '#components/Dialog.tsx';
 import * as mr from 'multi-integer-range';
 import React, { useMemo, useRef, useState } from 'react';
-import styled from 'styled-components';
 import type Series from '#types/Series.ts';
 import { newViewerCellItem, performLayout } from './caseStore.ts';
 import type { InternalLabel } from './labelData.ts';
@@ -23,6 +22,7 @@ import LabelDisplay from './LabelDisplay.tsx';
 import type { EditingData, EditingDataUpdater } from './revisionData.ts';
 import { seriesColors } from './revisionData.ts';
 import type { ViewerMode } from './ViewerGrid.tsx';
+import styles from './LabelSelector.module.css';
 
 const LabelSelector: React.FC<{
   editingData: EditingData;
@@ -55,7 +55,7 @@ const LabelSelector: React.FC<{
 
   return (
     <>
-      <StyledSeriesUl>
+      <ul className={styles.seriesList}>
         {revision.series.map((series, seriesIndex) => (
           <SeriesItem
             key={`${seriesIndex}:${series.seriesUid}`}
@@ -70,7 +70,7 @@ const LabelSelector: React.FC<{
             onShowInfo={() => setInfoSeriesIndex(seriesIndex)}
           />
         ))}
-      </StyledSeriesUl>
+      </ul>
       <Dialog
         open={infoSeriesIndex !== null}
         onClose={() => setInfoSeriesIndex(null)}
@@ -87,24 +87,6 @@ const LabelSelector: React.FC<{
     </>
   );
 };
-
-const StyledSeriesUl = styled.ul`
-  padding: 0;
-  border-top: 1px solid var(--circus-border);
-
-  ul.case-label-list {
-    margin: 0;
-    padding-left: 10px;
-    &.active {
-      background-color: var(--circus-active-background);
-    }
-  }
-
-  .no-labels {
-    list-style-type: none;
-    color: gray;
-  }
-`;
 
 export default LabelSelector;
 
@@ -202,8 +184,8 @@ const SeriesItem: React.FC<{
     : '#000000';
 
   return (
-    <StyledSeriesLi
-      className={classNames({
+    <li
+      className={classNames(styles.series, {
         active: seriesIndex === editingData.activeSeriesIndex
       })}
       onClick={handleSeriesClick}
@@ -211,13 +193,15 @@ const SeriesItem: React.FC<{
       onDragStart={handleDragStart}
       draggable
     >
-      <span className="series-head">
+      <span className={styles.seriesHead}>
         <div>
           <Icon icon="circus-series" />
-          {shown && <div className="box" style={{ backgroundColor: color }} />}
+          {shown && (
+            <div className={styles.box} style={{ backgroundColor: color }} />
+          )}
           Series #{seriesIndex}
           {volumeLoadingProgress < 1 && (
-            <span className="series-loading">
+            <span className={styles.seriesLoading}>
               <LoadingIndicator delay={300} /> loading...
               {(volumeLoadingProgress * 100).toFixed(1)}%
             </span>
@@ -227,7 +211,7 @@ const SeriesItem: React.FC<{
           <Button variant="link" icon="material-info" onClick={onShowInfo} />
         </div>
       </span>
-      <ul className="case-label-list">
+      <ul className={classNames('case-label-list', styles.caseLabelList)}>
         {series.labels.map((label, labelIndex) => (
           <Label
             key={label.temporaryKey}
@@ -241,40 +225,13 @@ const SeriesItem: React.FC<{
             onClick={handleLabelClick}
           />
         ))}
-        {!series.labels.length && <li className="no-labels">No labels</li>}
+        {!series.labels.length && (
+          <li className={styles.noLabels}>No labels</li>
+        )}
       </ul>
-    </StyledSeriesLi>
+    </li>
   );
 };
-
-const StyledSeriesLi = styled.li`
-  cursor: pointer;
-  margin-top: 10px;
-  padding-left: 10px;
-  list-style-type: none;
-  .series-head {
-    display: flex;
-    justify-content: space-between;
-  }
-  .series-head .circus-icon {
-    font-size: 130%;
-  }
-  &.active .series-head {
-    font-weight: bold;
-  }
-  .series-loading {
-    padding-left: 15px;
-    color: gray;
-    font-weight: normal;
-  }
-  .box {
-    display: inline-box;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    margin-right: 5px;
-  }
-`;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -514,12 +471,12 @@ export const Label: React.FC<{
   }, [label]);
 
   return (
-    <StyledLabelLi
+    <li
       ref={liRef}
-      className={classNames({
+      className={classNames(styles.label, {
         active: label === activeLabel,
-        'dragging-top': isDraggingOver === 'top',
-        'dragging-bottom': isDraggingOver === 'bottom'
+        [styles.draggingTop]: isDraggingOver === 'top',
+        [styles.draggingBottom]: isDraggingOver === 'bottom'
       })}
       onClick={handleClick}
       onDoubleClick={(ev: React.MouseEvent) => ev.stopPropagation()}
@@ -545,32 +502,6 @@ export const Label: React.FC<{
         }
         hintText={hint}
       />
-    </StyledLabelLi>
+    </li>
   );
 };
-
-const StyledLabelLi = styled.li`
-  list-style-type: none;
-  border-bottom: 1px solid var(--circus-border);
-  height: 30px;
-  > .circus-label {
-    width: 100%;
-    overflow: hidden;
-  }
-  &:hover {
-    background-color: var(--circus-secondary-background);
-  }
-  &.active {
-    background-color: var(--circus-active-background);
-    font-weight: bold;
-    .hint {
-      color: white;
-    }
-  }
-  &.dragging-top {
-    border-top: 3px solid gray;
-  }
-  &.dragging-bottom {
-    border-bottom: 3px solid gray;
-  }
-`;

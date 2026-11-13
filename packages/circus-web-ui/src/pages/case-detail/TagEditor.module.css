@@ -1,0 +1,11 @@
+.tagList {
+  list-style: none;
+  padding: 9px 14px;
+  margin: 0;
+  li {
+    padding: 3px 0;
+  }
+  input {
+    margin: 0 5px;
+  }
+}

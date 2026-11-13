@@ -31,9 +31,9 @@ import React, {
   useMemo,
   useRef
 } from 'react';
-import styled from 'styled-components';
 import type { EditingData, EditingDataUpdater } from './revisionData.ts';
 import { seriesColors } from './revisionData.ts';
+import styles from './ViewerGrid.module.css';
 
 export type ViewerMode = '2d' | '3d';
 export interface ViewerDef {
@@ -145,13 +145,16 @@ const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
   const viewerLabel = viewerMode === '3d' ? orientation : '2d';
 
   return (
-    <HeaderDiv
-      className={classnames({ active, 'selected-series': selectedSeries })}
+    <div
+      className={classnames(styles.header, {
+        active,
+        'selected-series': selectedSeries
+      })}
       onClick={handleClick}
     >
       <span>
         {multipleSeriesShown && (
-          <div className="box" style={{ backgroundColor: color }} />
+          <div className={styles.box} style={{ backgroundColor: color }} />
         )}
         Series #{seriesIndex} {viewerLabel}
       </span>
@@ -194,39 +197,9 @@ const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
           disabled={Object.keys(editingData.layout.positions).length <= 1}
         />
       </span>
-    </HeaderDiv>
+    </div>
   );
 });
-
-const HeaderDiv = styled.div`
-  &.selected-series {
-    background-color: #666666;
-  }
-
-  &.active {
-    background-color: #555500;
-  }
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 27px;
-  font-size: 15px;
-  line-height: 25px;
-  color: white;
-  padding: 0 3px;
-  background-color: #333333;
-  border: 1px solid #888888;
-  cursor: pointer;
-
-  .box {
-    display: inline-block;
-    width: 15px;
-    height: 15px;
-    border-radius: 50%;
-    margin-right: 3px;
-  }
-`;
 
 const celestialRotate = toolFactory('celestialRotate');
 
@@ -318,10 +291,10 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
   }, [orientation, localStateChanger, key]);
 
   return (
-    <StyledImageViewer
+    <ImageViewer
       id={key}
       key={key}
-      className={`viewer-${orientation}`}
+      className={classnames(`viewer-${orientation}`, styles.imageViewer)}
       composition={composition}
       tool={celestialRotateMode ? celestialRotate : tool}
       initialStateSetter={combinedInitialStateSetter}
@@ -334,10 +307,6 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
     />
   );
 };
-
-const StyledImageViewer = styled(ImageViewer)`
-  overflow: hidden;
-`;
 
 const orientationInitialStateSetters: {
   [orientatin: string]: ReturnType<typeof setOrthogonalOrientation>;

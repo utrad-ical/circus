@@ -1,0 +1,41 @@
+.collapser {
+  .header {
+    display: block;
+    text-decoration: none;
+    user-select: none;
+    color: white;
+    padding: 2px 5px;
+    background-color: var(--circus-brand-primary);
+    font-weight: bold;
+    cursor: pointer;
+    &:hover {
+      background-color: var(--circus-brand-primary-dark);
+    }
+    .triangle {
+      transition: transform 0.1s linear;
+    }
+  }
+
+  .body {
+    padding: 15px;
+    :global(.property-editor) {
+      margin: 0 15px;
+    }
+  }
+
+  &.open {
+    .triangle {
+      transform: rotate(90deg);
+    }
+  }
+
+  &.framed {
+    border: 1px solid var(--circus-brand-primary-dark);
+  }
+
+  &.noPadding {
+    .body {
+      padding: 0;
+    }
+  }
+}

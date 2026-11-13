@@ -1,0 +1,67 @@
+.toolBar {
+  flex: none;
+  background-color: #333;
+  button:not([role='menuitem']) {
+    height: 40px;
+    min-height: 0;
+    padding: 0 7px;
+    font-size: 170%;
+  }
+  .lineWidth {
+    font-size: 60%;
+  }
+  .checkmark {
+    display: inline-block;
+    width: 25px;
+  }
+}
+
+.wandOption {
+  margin-left: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  label {
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+  }
+
+  input {
+    font-size: 100%;
+    height: 28.4px;
+    padding: 1px 2px;
+    color: black;
+  }
+
+  .wandThresholdInput {
+    width: 4em;
+  }
+
+  .wandMaxDistanceInput {
+    width: 4em;
+  }
+
+  .wandBaseValueInput {
+    width: 4em;
+  }
+
+  .wandModeSelect > button {
+    font-size: 100%;
+    height: 28.4px;
+    min-height: 0;
+    padding: 1px 2px;
+  }
+}
+
+.shortcutBox {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  kbd {
+    background-color: inherit;
+    color: inherit;
+    border: none;
+  }
+}

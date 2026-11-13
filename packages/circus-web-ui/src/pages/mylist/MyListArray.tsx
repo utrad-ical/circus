@@ -3,7 +3,7 @@ import Icon from '#components/Icon.tsx';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import type { MyList } from '#store/loginUser.ts';
-import styled from 'styled-components';
+import styles from './MyListArray.module.css';
 
 const MyListArray: React.FC<{
   value: MyList[];
@@ -14,13 +14,13 @@ const MyListArray: React.FC<{
   const { value, toUrl, onRenameClick, onDeleteClick } = props;
 
   return (
-    <StyledUl>
+    <ul className={styles.root}>
       {value.map(list => (
         <li key={list.myListId}>
           <Link to={toUrl(list.myListId)}>
             <Icon size="xxl" icon="material-folder_open" />
-            <span className="name">{list.name}</span>
-            <div className="menu">
+            <span className={styles.name}>{list.name}</span>
+            <div className={styles.menu}>
               <Button
                 size="xsmall"
                 variant="primary"
@@ -46,41 +46,8 @@ const MyListArray: React.FC<{
           </Link>
         </li>
       ))}
-    </StyledUl>
+    </ul>
   );
 };
-
-const StyledUl = styled.ul`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, 200px);
-  gap: 8px;
-  padding: 0;
-  margin: 15 0;
-  > li {
-    list-style-type: none;
-    border: 1px solid silver;
-    background: var(--circus-secondary-background);
-    min-height: 200px;
-    > a {
-      display: flex;
-      flex-flow: column;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-      height: 100%;
-      &:hover {
-        text-decoration: none;
-        color: var(--circus-highlight-color);
-      }
-      .name {
-        margin-top: 5px;
-        font-size: 120%;
-      }
-      .menu {
-        margin-top: 15px;
-      }
-    }
-  }
-`;
 
 export default MyListArray;

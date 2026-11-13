@@ -1,3 +1,4 @@
+import classnames from 'classnames';
 import Button from '#components/Button.tsx';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
 import DataGrid from '#components/DataGrid.tsx';
@@ -8,13 +9,13 @@ import SearchResultsView, {
 import TimeDisplay from '#components/TimeDisplay.tsx';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components';
 import { useApi } from '#utils/api.ts';
 import { newSearch } from '../store/searches.ts';
 import type Task from '#types/Task.ts';
 import useTaskDismisser from '#utils/useTaskDismisser.ts';
 import { capitalize } from '#utils/util.ts';
 import useTaskDownloadHandler from '#utils/useTaskDownloadHandler.ts';
+import styles from './TaskList.module.css';
 
 const sortOptions = makeSortOptions({
   createdAt: 'task create time',
@@ -109,44 +110,14 @@ const columns: DataGridColumnDefinition<Task>[] = [
 const DataView: React.FC<{ value: Task[] }> = props => {
   const { value } = props;
   return (
-    <StyledDataGrid
-      className="task-search-result"
+    <DataGrid
+      className={classnames('task-search-result', styles.grid)}
       columns={columns}
       itemPrimaryKey="taskId"
       value={value}
     />
   );
 };
-
-const StyledDataGrid = styled(DataGrid)`
-  .status {
-    .error {
-      color: red;
-      font-weight: bold;
-    }
-    .processing {
-      color: blue;
-      font-weight: bold;
-    }
-    .finished {
-      color: green;
-    }
-  }
-  .message {
-    .error {
-      color: red;
-    }
-    .processing {
-      color: blue;
-    }
-  }
-  .download {
-    text-align: center;
-  }
-  .dismiss {
-    text-align: right;
-  }
-`;
 
 const DebugTaskLauncher: React.FC = props => {
   const api = useApi();

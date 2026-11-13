@@ -1,0 +1,36 @@
+.selectSpec {
+  li {
+    display: flex;
+  }
+}
+
+.row {
+  &.legend {
+    font-weight: bolder;
+  }
+  width: 95%;
+  display: inline-flex;
+  flex-direction: row;
+  .key {
+    width: 25%;
+    margin-right: 3px;
+  }
+  .required {
+    width: 15%;
+    margin-right: 3px;
+    text-align: center;
+    input {
+      height: 30px;
+    }
+  }
+  .type {
+    width: 20%;
+    margin-right: 3px;
+  }
+  .spec {
+    flex-grow: 1;
+    input {
+      display: inline;
+    }
+  }
+}

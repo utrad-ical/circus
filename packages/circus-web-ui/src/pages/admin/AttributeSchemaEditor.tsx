@@ -1,30 +1,25 @@
+import classnames from 'classnames';
 import Input from '#components/Input.tsx';
 import React from 'react';
 import Select from '#components/Select.tsx';
 import * as et from '#components/editorTypes.tsx';
 import type { Schema, PropSchema } from '#components/JsonSchemaEditor.tsx';
-import styled from 'styled-components';
+import styles from './AttributeSchemaEditor.module.css';
 
 const TextArrayEditor = et.arrayOf(et.text(), () => '');
-
-const SelectSpecEditorDiv = styled.div`
-  li {
-    display: flex;
-  }
-`;
 
 const SelectSpecEditor: React.FC<{
   value: { enum: string[] };
   onChange: (value: { enum: string[] }) => void;
 }> = props => {
   return (
-    <SelectSpecEditorDiv>
+    <div className={styles.selectSpec}>
       Options:
       <TextArrayEditor
         value={props.value.enum}
         onChange={(v: string[]) => props.onChange({ enum: v })}
       />
-    </SelectSpecEditorDiv>
+    </div>
   );
 };
 
@@ -45,37 +40,6 @@ interface SchemaEntryEditorValue {
   schema: PropSchema;
   required: boolean;
 }
-
-const StyledSpan = styled.span`
-  &.legend {
-    font-weight: bolder;
-  }
-  width: 95%;
-  display: inline-flex;
-  flex-direction: row;
-  .attribute-schema-key {
-    width: 25%;
-    margin-right: 3px;
-  }
-  .attribute-schema-required {
-    width: 15%;
-    margin-right: 3px;
-    text-align: center;
-    input {
-      height: 30px;
-    }
-  }
-  .attribute-schema-type {
-    width: 20%;
-    margin-right: 3px;
-  }
-  .attribute-schema-spec {
-    flex-grow: 1;
-    input {
-      display: inline;
-    }
-  }
-`;
 
 const SchemaEntryEditor: React.FC<{
   value: SchemaEntryEditorValue;
@@ -134,15 +98,15 @@ const SchemaEntryEditor: React.FC<{
   };
 
   return (
-    <StyledSpan>
-      <div className="attribute-schema-key">
+    <span className={styles.row}>
+      <div className={styles.key}>
         <Input
           placeholder="Attribute key"
           value={key}
           onChange={handleKeyChange}
         />
       </div>
-      <div className="attribute-schema-required">
+      <div className={styles.required}>
         <input
           type="checkbox"
           checked={required}
@@ -150,7 +114,7 @@ const SchemaEntryEditor: React.FC<{
           title="Required"
         />
       </div>
-      <div className="attribute-schema-type">
+      <div className={styles.type}>
         <Select
           block
           options={typeOptions}
@@ -158,10 +122,10 @@ const SchemaEntryEditor: React.FC<{
           onChange={handleTypeChange}
         />
       </div>
-      <div className="attribute-schema-spec">
+      <div className={styles.spec}>
         <SpecEditor value={schema} onChange={handleSpecChange} />
       </div>
-    </StyledSpan>
+    </span>
   );
 };
 
@@ -205,12 +169,12 @@ const AttributeSchemaEditor: React.FC<{
 
   return (
     <div>
-      <StyledSpan className="legend">
-        <div className="attribute-schema-key">Key</div>
-        <div className="attribute-schema-required">Required</div>
-        <div className="attribute-schema-type">Type</div>
-        <div className="attribute-schema-spec">Spec</div>
-      </StyledSpan>
+      <span className={classnames(styles.row, styles.legend)}>
+        <div className={styles.key}>Key</div>
+        <div className={styles.required}>Required</div>
+        <div className={styles.type}>Type</div>
+        <div className={styles.spec}>Spec</div>
+      </span>
       <ArrayOfAttributeSchema value={items} onChange={handleChange} />
     </div>
   );

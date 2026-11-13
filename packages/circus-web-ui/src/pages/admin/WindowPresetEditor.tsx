@@ -1,21 +1,12 @@
 import Input from '#components/Input.tsx';
 import React from 'react';
-import styled from 'styled-components';
+import styles from './WindowPresetEditor.module.css';
 
 interface WindowAndLabel {
   label: string;
   level: number;
   width: number;
 }
-
-const StyledSpan = styled.span`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25em;
-  input[type='number'] {
-    width: 7em;
-  }
-`;
 
 /**
  * Renderes a 'window preset' editor with 'label', 'level' and 'width' fields.
@@ -39,7 +30,7 @@ const WindowPresetEditor: React.FC<{
   };
 
   return (
-    <StyledSpan>
+    <span className={styles.root}>
       <Input
         value={value.label}
         placeholder="label"
@@ -62,7 +53,7 @@ const WindowPresetEditor: React.FC<{
         name="width"
         onChange={handleChange}
       />
-    </StyledSpan>
+    </span>
   );
 };
 

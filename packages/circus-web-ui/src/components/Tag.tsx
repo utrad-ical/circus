@@ -1,31 +1,8 @@
+import classnames from 'classnames';
 import React from 'react';
 import tinycolor from 'tinycolor2';
-import styled from 'styled-components';
 import useLoginUser from '#utils/useLoginUser.ts';
-
-const StyledSpan = styled.span`
-  display: inline-block;
-  text-align: center;
-  padding: 0 5px;
-  border-radius: 5px;
-  border-style: solid;
-  border-width: 1px;
-  font-weight: bold;
-  min-width: 70px;
-  background-color: ${(props: any) => {
-    return tinycolor(props.color || '#f00').toHexString();
-  }};
-  color: ${(props: any) => {
-    return tinycolor
-      .mostReadable(props.color || '#f00', ['#000', '#fff'])
-      .toHexString();
-  }};
-  border-color: ${(props: any) => {
-    return tinycolor(props.color || '#f00')
-      .darken()
-      .toHexString();
-  }};
-`;
+import styles from './Tag.module.css';
 
 /**
  * Displays a tag with a color and a name.
@@ -34,10 +11,18 @@ export const PhysicalTag: React.FC<{
   name: string;
   color: string;
 }> = React.memo(props => {
+  const color = props.color || '#f00';
+  const style = {
+    '--tag-background-color': tinycolor(color).toHexString(),
+    '--tag-color': tinycolor
+      .mostReadable(color, ['#000', '#fff'])
+      .toHexString(),
+    '--tag-border-color': tinycolor(color).darken().toHexString()
+  } as React.CSSProperties;
   return (
-    <StyledSpan className="tag" color={props.color}>
+    <span className={classnames('tag', styles.tag)} style={style}>
       {props.name}
-    </StyledSpan>
+    </span>
   );
 });
 
@@ -59,13 +44,6 @@ const Tag: React.FC<{
   return <PhysicalTag color={color} name={tag} />;
 });
 
-const StyledTagListSpan = styled.span`
-  .tag {
-    margin-left: 2px;
-    margin-right: 2px;
-  }
-`;
-
 export const TagList: React.FC<{
   projectId: string;
   tags: string[];
@@ -74,7 +52,7 @@ export const TagList: React.FC<{
   const { projectId, tags } = props;
   const project = user.accessibleProjects.find(p => p.projectId === projectId);
   return (
-    <StyledTagListSpan>
+    <span className={styles.tagList}>
       {tags.map(tag => {
         const color = project
           ? (project.project.tags.find(t => t.name === tag)?.color ??
@@ -82,7 +60,7 @@ export const TagList: React.FC<{
           : defaultTagColor;
         return <PhysicalTag key={tag} name={tag} color={color} />;
       })}
-    </StyledTagListSpan>
+    </span>
   );
 });
 

@@ -1,49 +1,7 @@
 import React, { useState } from 'react';
 import classnames from 'classnames';
-import styled from 'styled-components';
 import Icon from '#components/Icon.tsx';
-
-const StyledDiv = styled.div`
-  .collapser-header {
-    display: block;
-    text-decoration: none;
-    user-select: none;
-    color: white;
-    padding: 2px 5px;
-    background-color: var(--circus-brand-primary);
-    font-weight: bold;
-    cursor: pointer;
-    &:hover {
-      background-color: var(--circus-brand-primary-dark);
-    }
-    .triangle {
-      transition: transform 0.1s linear;
-    }
-  }
-
-  .collapser-body {
-    padding: 15px;
-    .property-editor {
-      margin: 0 15px;
-    }
-  }
-
-  &.open {
-    .triangle {
-      transform: rotate(90deg);
-    }
-  }
-
-  &.framed {
-    border: 1px solid var(--circus-brand-primary-dark);
-  }
-
-  &.no-padding {
-    .collapser-body {
-      padding: 0;
-    }
-  }
-`;
+import styles from './Collapser.module.css';
 
 interface Props {
   onToggleClick?: () => void;
@@ -61,20 +19,32 @@ export const ControlledCollapser: React.FC<
   const { open, onToggleClick, title, children, className, framed, noPadding } =
     props;
   return (
-    <StyledDiv
+    <div
       className={classnames(
         'collapser',
-        { framed, 'no-padding': noPadding, open },
+        styles.collapser,
+        {
+          [styles.framed]: framed,
+          [styles.noPadding]: noPadding,
+          [styles.open]: open
+        },
         className
       )}
     >
-      <a className="collapser-header" onClick={onToggleClick}>
+      <a
+        className={classnames('collapser-header', styles.header)}
+        onClick={onToggleClick}
+      >
         {title}
         &ensp;
-        <Icon className="triangle" icon="material-arrow_right" />
+        <Icon className={styles.triangle} icon="material-arrow_right" />
       </a>
-      {open && <div className="collapser-body">{children}</div>}
-    </StyledDiv>
+      {open && (
+        <div className={classnames('collapser-body', styles.body)}>
+          {children}
+        </div>
+      )}
+    </div>
   );
 };
 

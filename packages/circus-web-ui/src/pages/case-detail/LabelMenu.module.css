@@ -1,0 +1,21 @@
+.buttons {
+  display: flex;
+  margin: 3px 10px;
+  .spacer {
+    flex-grow: 1;
+  }
+}
+
+.colorEditorButton {
+  min-width: 50px;
+}
+
+.appearancePopover {
+  .alphaPane {
+    display: flex;
+    align-items: center;
+  }
+  .alphaSlider {
+    width: 85px;
+  }
+}

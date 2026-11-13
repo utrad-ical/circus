@@ -24,6 +24,14 @@
   padding: 0.5em 0;
 }
 
+/* A textarea has no usable baseline, so align its row to the top */
+.row:has(textarea) {
+  align-items: start;
+  > .caption {
+    padding-top: 3px;
+  }
+}
+
 .caption {
   margin: 0;
   text-align: end;

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useLayoutEffect } from 'react';
-import styled from 'styled-components';
+import classnames from 'classnames';
 import { produce } from 'immer';
+import styles from './GridContainer.module.css';
 
 export const defaultDragDataMimeType = 'text/grid-container-drop';
 
@@ -502,21 +503,26 @@ const GridContainer = <T extends { key: string }>(
   };
 
   return (
-    <StyledDiv
+    <div
       ref={containerRef}
-      layout={layout}
+      style={
+        {
+          '--grid-template-columns': `repeat(${layout.columns}, ${100 / layout.columns}%)`,
+          '--grid-template-rows': `repeat(${layout.rows}, ${100 / layout.rows}%)`
+        } as React.CSSProperties
+      }
       onDragOver={handleDragOver}
       onDrop={handleDrop}
       onDragLeave={handleDragLeave}
       onDragEnd={handleDragEnd}
-      className={className}
+      className={classnames(styles.gridContainer, className)}
     >
       {Object.keys(layout.positions).map(key => {
         const item = items.find(item => item.key === key);
         if (!item) throw new Error('No such grid item: ' + key);
         return (
           <div
-            className="grid-container-cell"
+            className={styles.cell}
             key={key}
             style={
               key in layout.positions
@@ -524,21 +530,17 @@ const GridContainer = <T extends { key: string }>(
                 : {}
             }
           >
-            <div
-              className="grid-container-header"
-              draggable
-              onDragStart={ev => handleDragStart(key, ev)}
-            >
+            <div draggable onDragStart={ev => handleDragStart(key, ev)}>
               <RenderHeading value={item} />
             </div>
-            <div className="grid-container-item">
+            <div className={styles.item}>
               <RenderItem value={item} />
             </div>
           </div>
         );
       })}
       <div
-        className="grid-container-cell-drop-indicator"
+        className={styles.cellDropIndicator}
         style={
           dropDestination?.type === 'cell'
             ? {
@@ -548,54 +550,10 @@ const GridContainer = <T extends { key: string }>(
             : {}
         }
       />
-      <div
-        className="grid-container-line-drop-indicator"
-        style={gridLineStyle}
-      />
-    </StyledDiv>
+      <div className={styles.lineDropIndicator} style={gridLineStyle} />
+    </div>
   );
 };
-
-const StyledDiv = styled.div`
-  border: 1px solid black;
-  display: grid;
-  position: relative;
-  width: 100%;
-  height: 100%;
-  grid-template-columns: ${(props: any) =>
-    `repeat(${props.layout.columns}, ${100 / props.layout.columns}%)`};
-  grid-template-rows: ${(props: any) =>
-    `repeat(${props.layout.rows}, ${100 / props.layout.rows}%)`};
-  overflow: hidden;
-
-  .grid-container-cell {
-    display: grid;
-    grid-template-rows: auto 1fr;
-    overflow: hidden;
-  }
-
-  .grid-container-item {
-    display: contents;
-  }
-
-  .grid-container-cell-drop-indicator {
-    pointer-events: none;
-    display: none;
-    position: absolute;
-    background: #88888888;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-  }
-
-  .grid-container-line-drop-indicator {
-    pointer-events: none;
-    display: none;
-    position: absolute;
-    background: #8888ff88;
-  }
-`;
 
 export default GridContainer;
 

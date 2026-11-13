@@ -3,55 +3,8 @@ import type { Editor } from './processor-types.ts';
 import type { Structure } from '@utrad-ical/circus-rs';
 import classnames from 'classnames';
 import React, { useState } from 'react';
-import styled from 'styled-components';
 import type { ErosionDilationOptions } from './ed-processor.ts';
-
-const StyledDiv = styled.div`
-  line-height: 1;
-  .structure-shape {
-    display: flex;
-    flex-flow: row wrap;
-    gap: 10px;
-    input {
-      width: 5em;
-    }
-  }
-  .slice-number {
-    width: 5em;
-  }
-  .square {
-    background: var(--circus-background);
-    color: var(--circus-background-text);
-    border: 1px solid var(--circus-border);
-    height: 30px;
-    width: 30px;
-    font-size: 20px;
-    line-height: 30px;
-    margin-right: -1px;
-    margin-top: -1px;
-    padding: 0;
-    text-align: center;
-    &:focus {
-      outline: none;
-      background: var(--circus-secondary-background);
-    }
-    &.active {
-      background: var(--circus-brand-primary);
-      &:focus {
-        background: var(--circus-brand-primary-dark);
-      }
-    }
-    &.center {
-      background: var(--circus-highlight-color);
-    }
-  }
-  .structure-caption {
-    margin-top: 5px;
-  }
-  .structure-title {
-    margin-bottom: 5px;
-  }
-`;
+import styles from './ed-options.module.css';
 
 const Square: React.FC<{
   isCenter: boolean;
@@ -60,9 +13,9 @@ const Square: React.FC<{
 }> = props => {
   return (
     <button
-      className={classnames('square', {
-        center: props.isCenter,
-        active: props.value === 1
+      className={classnames(styles.square, {
+        [styles.center]: props.isCenter,
+        [styles.active]: props.value === 1
       })}
       disabled={props.isCenter}
       onClick={props.onClick}
@@ -209,8 +162,8 @@ export const OptionsEditor: Editor<ErosionDilationOptions> = props => {
   };
 
   return (
-    <StyledDiv>
-      <div className="structure-shape">
+    <div className={styles.options}>
+      <div className={styles.structureShape}>
         <label>
           Width:&ensp;
           <Input
@@ -240,12 +193,12 @@ export const OptionsEditor: Editor<ErosionDilationOptions> = props => {
         </label>
       </div>
       <div>
-        <div className="structure-title">
+        <div className={styles.structureTitle}>
           Structuring element &emsp;(
           <label>
             Slice number =&nbsp;
             <Input
-              className="slice-number"
+              className={styles.sliceNumber}
               type="number"
               value={sliceNumber}
               name="sliceNumber"
@@ -260,13 +213,13 @@ export const OptionsEditor: Editor<ErosionDilationOptions> = props => {
           onChange={onStructureChange}
         />
 
-        <div className="structure-caption">
+        <div className={styles.structureCaption}>
           <Square value={1} onClick={() => {}} isCenter={true} />
           &nbsp;: origin
         </div>
         <br />
       </div>
-    </StyledDiv>
+    </div>
   );
 };
 

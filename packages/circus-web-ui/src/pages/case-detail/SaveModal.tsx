@@ -8,8 +8,8 @@ import keycode from 'keycode';
 import type { ExternalLabel } from '#pages/case-detail/labelData.ts';
 import type { Revision } from '#pages/case-detail/revisionData.ts';
 import React, { Fragment, useState } from 'react';
-import styled from 'styled-components';
 import useLoginUser from '#utils/useLoginUser.ts';
+import styles from './SaveModal.module.css';
 
 interface Template {
   title: string;
@@ -50,7 +50,7 @@ const SaveModal: React.FC<{
     });
 
   return (
-    <StyledSaveModalDiv>
+    <div className={styles.saveModal}>
       <DialogHeader>Save</DialogHeader>
       <DialogBody>
         <label>Revision message</label>
@@ -90,18 +90,8 @@ const SaveModal: React.FC<{
           OK
         </Button>
       </DialogFooter>
-    </StyledSaveModalDiv>
+    </div>
   );
 };
-
-const StyledSaveModalDiv = styled.div`
-  display: contents;
-  input {
-    width: 100%;
-  }
-  #revision-templates-dropdown {
-    margin-top: 10px;
-  }
-`;
 
 export default SaveModal;

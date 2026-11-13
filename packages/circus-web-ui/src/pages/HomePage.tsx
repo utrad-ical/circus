@@ -10,47 +10,13 @@ import { Link } from 'react-router-dom';
 import ProjectDisplay from '#components/ProjectDisplay.tsx';
 import Icon from '#components/Icon.tsx';
 import TimeDisplay from '#components/TimeDisplay.tsx';
-import styled from 'styled-components';
 import styles from './HomePage.module.css';
 import useLoginUser from '#utils/useLoginUser.ts';
-
-const HomeMenu = styled.ul`
-  margin: 20px 0;
-  padding: 0;
-  word-break: normal;
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: space-around;
-  align-items: flex-start;
-  > li {
-    display: block;
-    text-align: center;
-    width: 250px;
-    div.img > svg {
-      font-size: 200px;
-      vertical-align: bottom;
-    }
-    > a {
-      display: block;
-      border-radius: 10px;
-      background-color: var(--circus-background);
-      text-decoration: none;
-      font-size: 24px;
-      font-weight: bolder;
-      padding: 16px 0;
-      color: var(--circus-brand-primary);
-      &:hover {
-        color: var(--circus-highlight-color);
-        background-color: var(--circus-secondary-background);
-      }
-    }
-  }
-`;
 
 const HomePage: React.FC<{}> = props => (
   <div>
     <h1>Welcome to CIRCUS!</h1>
-    <HomeMenu>
+    <ul className={styles.menu}>
       <Menu
         link="/import-series"
         icon="series-import"
@@ -75,7 +41,7 @@ const HomePage: React.FC<{}> = props => (
         title="Plug-in Job Search"
         description="Search and view CAD results."
       />
-    </HomeMenu>
+    </ul>
     <Profile />
   </div>
 );
@@ -175,7 +141,7 @@ const Menu: React.FC<{
   return (
     <li>
       <Link to={link}>
-        <div className="img">
+        <div className={styles.img}>
           <Icon icon={`circus-${icon}`} />
         </div>
         <p>{title}</p>

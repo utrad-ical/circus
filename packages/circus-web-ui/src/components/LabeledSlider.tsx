@@ -2,7 +2,7 @@ import type * as et from '#components/editorTypes.tsx';
 import type { SliderProps } from '#components/Slider.tsx';
 import Slider from '#components/Slider.tsx';
 import React from 'react';
-import styled from 'styled-components';
+import styles from './LabeledSlider.module.css';
 
 const LabeledSlider: React.FC<
   SliderProps & {
@@ -13,23 +13,14 @@ const LabeledSlider: React.FC<
 > = props => {
   const { label = value => String(value), ...sliderProps } = props;
   return (
-    <StyledDiv>
-      <Slider {...sliderProps} className="slider" />
+    <div className={styles.labeledSlider}>
+      <Slider {...sliderProps} className={styles.slider} />
       <div>{label(props.value)}</div>
-    </StyledDiv>
+    </div>
   );
 };
 
 export default LabeledSlider;
-
-const StyledDiv = styled.div`
-  display: flex;
-  gap: 15px;
-  align-items: center;
-  > .slider {
-    width: 150px;
-  }
-`;
 
 export const labeledSlider = (options: {
   min: number;

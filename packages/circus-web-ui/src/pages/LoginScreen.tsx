@@ -6,36 +6,9 @@ import Icon from '#components/Icon.tsx';
 import Input from '#components/Input.tsx';
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
 import { useLoginManager } from '#utils/loginManager.ts';
 import useLoginUser from '#utils/useLoginUser.ts';
-
-const StyledDiv = styled.div`
-  width: 100%;
-  max-width: 400px;
-  margin: 0 auto;
-  .login-panel {
-    box-shadow: 3px 3px 30px silver;
-  }
-  margin-top: 3em;
-  h1 {
-    text-shadow: 2px 2px 3px silver;
-    font-size: 36px;
-    border: none;
-  }
-  .login-input {
-    margin: 1em 0;
-    background-color: #d0e6e4;
-    border-radius: 7px;
-  }
-  .critical {
-    background-color: red;
-    color: white;
-    margin-bottom: 10px;
-    padding: 15px;
-    border-radius: 7px;
-  }
-`;
+import styles from './LoginScreen.module.css';
 
 const LoginScreen: React.FC<{}> = props => {
   const [serverAlive, setServerAlive] = useState<boolean | undefined>();
@@ -99,15 +72,15 @@ const LoginScreen: React.FC<{}> = props => {
   if (serverAlive === undefined) return <LoadingIndicator delay={1000} />;
 
   return (
-    <StyledDiv>
+    <div className={styles.root}>
       {criticalError && (
-        <div className="critical">
+        <div className={styles.critical}>
           <Icon icon="material-block" />
           &nbsp; The CIRCUS API server does not seem to be responding. Please
           consult the administrator.
         </div>
       )}
-      <Panel variant="primary" className="login-panel">
+      <Panel variant="primary" className={styles.panel}>
         <PanelBody>
           <h1 className={u.textCenter}>
             <Icon icon="circus-logo" />
@@ -115,14 +88,14 @@ const LoginScreen: React.FC<{}> = props => {
           </h1>
           <div>
             <Input
-              className="login-input"
+              className={styles.input}
               placeholder="User ID or E-mail"
               autoFocus
               value={input.id}
               onChange={ev => handleChange('id', ev.target.value)}
             />
             <Input
-              className="login-input"
+              className={styles.input}
               placeholder="Password"
               type="password"
               value={input.password}
@@ -144,7 +117,7 @@ const LoginScreen: React.FC<{}> = props => {
           </Button>
         </PanelFooter>
       </Panel>
-    </StyledDiv>
+    </div>
   );
 };
 

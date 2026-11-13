@@ -1,0 +1,16 @@
+.patientInfoBox {
+  .masked {
+    color: silver;
+    line-height: 2.2;
+  }
+  .sub {
+    font-size: 80%;
+    color: gray;
+  }
+  .patientId {
+    font-style: italic;
+  }
+  .patientName {
+    font-weight: bold;
+  }
+}

@@ -1,0 +1,29 @@
+.grid {
+  :global(.status) {
+    :global(.error) {
+      color: red;
+      font-weight: bold;
+    }
+    :global(.processing) {
+      color: blue;
+      font-weight: bold;
+    }
+    :global(.finished) {
+      color: green;
+    }
+  }
+  :global(.message) {
+    :global(.error) {
+      color: red;
+    }
+    :global(.processing) {
+      color: blue;
+    }
+  }
+  :global(.download) {
+    text-align: center;
+  }
+  :global(.dismiss) {
+    text-align: right;
+  }
+}

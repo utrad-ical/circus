@@ -1,8 +1,8 @@
 import React from 'react';
 import MultiSelect from '#components/MultiSelect.tsx';
 import BodyPartIcon from './BodyPartIcon.tsx';
-import styled from 'styled-components';
 import type Plugin from '#types/Plugin.ts';
+import styles from './PluginSelectorMultiple.module.css';
 
 const Renderer: React.FC<{
   renderAs: 'select' | 'list';
@@ -21,14 +21,6 @@ const Renderer: React.FC<{
   );
 };
 
-const StyledMultiSelect = styled(MultiSelect)`
-  ul {
-    white-space: nowrap;
-    max-width: 400px;
-    overflow: scroll;
-  }
-`;
-
 const PluginSelectorMultiple: React.FC<{
   plugins: { pluginId: string; plugin: Plugin }[];
   noneText?: string;
@@ -43,7 +35,14 @@ const PluginSelectorMultiple: React.FC<{
       plugin: p.plugin
     };
   });
-  return <StyledMultiSelect {...rest} options={options} renderer={Renderer} />;
+  return (
+    <MultiSelect
+      {...rest}
+      className={styles.pluginSelectorMultiple}
+      options={options}
+      renderer={Renderer}
+    />
+  );
 };
 
 export default PluginSelectorMultiple;

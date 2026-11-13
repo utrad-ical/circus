@@ -7,11 +7,11 @@ import { confirm } from '#components/dialogs.tsx';
 import Icon from '#components/Icon.tsx';
 import TimeDisplay from '#components/TimeDisplay.tsx';
 import React, { useCallback, useState } from 'react';
-import styled from 'styled-components';
 import { useApi } from '#utils/api.ts';
 import useLoadData from '#utils/useLoadData.ts';
 import type { CancelToken } from '../utils/cancelToken.ts';
 import CopyToClipboardButton from '#components/CopyToClipboardButton.tsx';
+import styles from './TokenManagement.module.css';
 
 interface Token {
   tokenId: string;
@@ -91,12 +91,13 @@ const TokenManagement: React.FC<{}> = props => {
         <PanelList>
           {Array.isArray(data) &&
             data.map((token, i) => (
-              <StyledListGroupItem
+              <PanelListItem
                 key={token.tokenId}
+                className={styles.item}
                 variant={accessTokens[token.tokenId] ? 'info' : undefined}
               >
                 <div>
-                  <div className="description">
+                  <div className={styles.description}>
                     <Icon icon="material-bookmark" />
                     &ensp;
                     {token.description}
@@ -115,7 +116,7 @@ const TokenManagement: React.FC<{}> = props => {
                 >
                   Remove
                 </Button>
-              </StyledListGroupItem>
+              </PanelListItem>
             ))}
           {Array.isArray(data) && data.length === 0 && (
             <PanelListItem>
@@ -126,7 +127,7 @@ const TokenManagement: React.FC<{}> = props => {
       </Panel>
       <hr />
       <h1>Add new token</h1>
-      <NewTokenForm>
+      <div className={styles.newTokenForm}>
         <Input
           placeholder="Description of the new token"
           value={description}
@@ -140,23 +141,9 @@ const TokenManagement: React.FC<{}> = props => {
         >
           Create
         </Button>
-      </NewTokenForm>
+      </div>
     </div>
   );
 };
-
-const NewTokenForm = styled.div`
-  display: flex;
-`;
-
-const StyledListGroupItem = styled(PanelListItem)`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  .description {
-    font-weight: bold;
-    font-size: 110%;
-  }
-`;
 
 export default TokenManagement;

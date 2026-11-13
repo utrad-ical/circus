@@ -1,7 +1,4 @@
 .dataGrid {
-  > tbody > tr > td {
-    vertical-align: middle;
-  }
   > tbody > tr:last-of-type > td {
     border-bottom: 2px solid var(--border);
   }

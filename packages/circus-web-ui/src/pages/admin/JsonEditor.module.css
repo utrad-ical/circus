@@ -1,0 +1,7 @@
+.textArea {
+  &.hasError {
+    background-color: pink;
+  }
+  width: 100%;
+  min-height: 200px;
+}

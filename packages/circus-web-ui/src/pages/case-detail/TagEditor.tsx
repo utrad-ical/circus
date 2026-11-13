@@ -3,7 +3,7 @@ import PopoverButton from '#components/PopoverButton.tsx';
 import React, { useState, useMemo } from 'react';
 import { PhysicalTag } from '#components/Tag.tsx';
 import type Project from '#types/Project.ts';
-import styled from 'styled-components';
+import styles from './TagEditor.module.css';
 
 const TagEditor: React.FC<{
   projectData: Project;
@@ -37,7 +37,7 @@ const TagEditor: React.FC<{
       onOpen={() => setEditingValue(value)}
       onClose={handleExited}
     >
-      <StyledUl>
+      <ul className={styles.tagList}>
         {projectData.tags.map(tag => {
           return (
             <li key={tag.name}>
@@ -54,21 +54,9 @@ const TagEditor: React.FC<{
             </li>
           );
         })}
-      </StyledUl>
+      </ul>
     </PopoverButton>
   );
 };
-
-const StyledUl = styled.ul`
-  list-style: none;
-  padding: 9px 14px;
-  margin: 0;
-  li {
-    padding: 3px 0;
-  }
-  input {
-    margin: 0 5px;
-  }
-`;
 
 export default TagEditor;

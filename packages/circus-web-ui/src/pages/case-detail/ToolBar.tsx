@@ -16,7 +16,6 @@ import type {
   ToolOptionSetter
 } from '#pages/case-detail/useToolbar.ts';
 import React, { useState } from 'react';
-import styled from 'styled-components';
 import type { WindowPreset } from '#types/Project.ts';
 import useKeyboardShortcut from '#utils/useKeyboardShortcut.ts';
 import type {
@@ -26,6 +25,7 @@ import type {
 import type { LayoutKind } from './caseStore.ts';
 import type { ViewWindow } from './ViewWindowEditor.tsx';
 import ViewWindowEditor from './ViewWindowEditor.tsx';
+import styles from './ToolBar.module.css';
 
 export interface ViewOptions {
   showReferenceLine?: boolean;
@@ -260,7 +260,7 @@ const ToolBar: React.FC<{
 
   return (
     <>
-      <StyledDiv>
+      <div className={styles.toolBar}>
         <ToolButton
           name="pager"
           icon="circus-pager"
@@ -363,7 +363,9 @@ const ToolBar: React.FC<{
         <DropdownButton
           id="line-width-dropdown"
           disabled={!brushEnabled || disabled}
-          title={<span className="line-width">{toolOptions.lineWidth}</span>}
+          title={
+            <span className={styles.lineWidth}>{toolOptions.lineWidth}</span>
+          }
         >
           {widthOptions.map(lineWidth => {
             return (
@@ -379,9 +381,9 @@ const ToolBar: React.FC<{
             );
           })}
           <MenuItem header>
-            <ShortcutBox>
+            <div className={styles.shortcutBox}>
               <kbd>Q</kbd>: Wider,&nbsp;<kbd>A</kbd>: Narrower
-            </ShortcutBox>
+            </div>
           </MenuItem>
         </DropdownButton>
         <ToolButton
@@ -536,11 +538,11 @@ const ToolBar: React.FC<{
           })}
         </DropdownButton>
         {(active === 'wand' || active === 'wandEraser') && (
-          <StyledSpanWandOption>
+          <span className={styles.wandOption}>
             <label>
               Threshold:
               <input
-                className="wand-threshold-input"
+                className={styles.wandThresholdInput}
                 type="number"
                 name="threshold"
                 min="0"
@@ -553,7 +555,7 @@ const ToolBar: React.FC<{
             <label>
               Max distance:
               <input
-                className="wand-max-distance-input"
+                className={styles.wandMaxDistanceInput}
                 type="number"
                 name="maxDistance"
                 min="0"
@@ -567,7 +569,7 @@ const ToolBar: React.FC<{
             <label>
               Mode:
               <Select
-                className="wand-option-shrinkselect"
+                className={styles.wandModeSelect}
                 options={wandModeOptions}
                 value={toolOptions.wandMode}
                 onChange={mode => setToolOption('wandMode', mode)}
@@ -577,9 +579,9 @@ const ToolBar: React.FC<{
               value={toolOptions.wandBaseValue}
               onChange={value => setToolOption('wandBaseValue', value)}
             />
-          </StyledSpanWandOption>
+          </span>
         )}
-      </StyledDiv>
+      </div>
       <Dialog
         open={windowDialogOpen}
         onClose={() => setWindowDialogOpen(false)}
@@ -594,67 +596,10 @@ const ToolBar: React.FC<{
   );
 });
 
-const StyledDiv = styled.div`
-  flex: none;
-  background-color: #333;
-  button:not([role='menuitem']) {
-    height: 40px;
-    min-height: 0;
-    padding: 0 7px;
-    font-size: 170%;
-  }
-  .line-width {
-    font-size: 60%;
-  }
-  .checkmark {
-    display: inline-block;
-    width: 25px;
-  }
-`;
-
-const StyledSpanWandOption = styled.span`
-  margin-left: 10px;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-
-  label {
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-  }
-
-  input {
-    font-size: 100%;
-    height: 28.4px;
-    padding: 1px 2px;
-    color: black;
-  }
-
-  .wand-threshold-input {
-    width: 4em;
-  }
-
-  .wand-max-distance-input {
-    width: 4em;
-  }
-
-  .wand-base-value-input {
-    width: 4em;
-  }
-
-  .wand-option-shrinkselect > button {
-    font-size: 100%;
-    height: 28.4px;
-    min-height: 0;
-    padding: 1px 2px;
-  }
-`;
-
 export default ToolBar;
 
 const CheckMark: React.FC<{ checked: boolean }> = props => (
-  <span className="checkmark">
+  <span className={styles.checkmark}>
     {props.checked && <Icon icon="material-check" />}
   </span>
 );
@@ -705,24 +650,13 @@ const MenuItemWithShortcut: React.FC<
   useKeyboardShortcut(shortcut, props.onClick || (() => {}));
   return (
     <MenuItem {...rest}>
-      <ShortcutBox>
+      <div className={styles.shortcutBox}>
         <span>{children}</span>
         {shortcut && <kbd>{shortcut}</kbd>}
-      </ShortcutBox>
+      </div>
     </MenuItem>
   );
 };
-
-const ShortcutBox = styled.div`
-  flex: 1;
-  display: flex;
-  justify-content: space-between;
-  kbd {
-    background-color: inherit;
-    color: inherit;
-    border: none;
-  }
-`;
 
 const WandBaseValueEditor: Editor<ReferenceValueOption> = props => {
   const { value, onChange } = props;
@@ -742,7 +676,7 @@ const WandBaseValueEditor: Editor<ReferenceValueOption> = props => {
         Reference value:
         {typeof value === 'number' && (
           <input
-            className="wand-base-value-input"
+            className={styles.wandBaseValueInput}
             type="number"
             value={value}
             onChange={onNumberChange}

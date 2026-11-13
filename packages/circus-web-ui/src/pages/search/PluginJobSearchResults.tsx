@@ -1,3 +1,4 @@
+import classnames from 'classnames';
 import Button from '#components/Button.tsx';
 import { confirm } from '#components/dialogs.tsx';
 import type {
@@ -17,7 +18,7 @@ import React, { Fragment } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import * as searches from '#store/searches.ts';
-import styled from 'styled-components';
+import styles from './PluginJobSearchResults.module.css';
 import { useApi } from '#utils/api.ts';
 import useShowMessage from '#utils/useShowMessage.ts';
 import {
@@ -107,19 +108,6 @@ const columns: DataGridColumnDefinition<any>[] = [
   { caption: '', className: 'operation', renderer: Operation }
 ];
 
-const StyledDataGrid = styled(DataGrid)`
-  .progress {
-    height: 33px;
-  }
-  .progress-bar-info {
-    line-height: 33px;
-  }
-  .status {
-    text-align: center;
-    font-weight: bold;
-  }
-`;
-
 const DataView: React.FC<{
   value: any[];
   selected: string[];
@@ -127,8 +115,8 @@ const DataView: React.FC<{
 }> = props => {
   const { value, selected, onSelectionChange } = props;
   return (
-    <StyledDataGrid
-      className="plugin-job-search-result"
+    <DataGrid
+      className={classnames('plugin-job-search-result', styles.grid)}
       columns={columns}
       itemPrimaryKey="jobId"
       value={value}

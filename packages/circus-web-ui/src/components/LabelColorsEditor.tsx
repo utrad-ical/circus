@@ -3,9 +3,9 @@ import { ColorPalette } from '#components/ColorPicker.tsx';
 import type * as et from '#components/editorTypes.tsx';
 import Select from '#components/Select.tsx';
 import React, { useState } from 'react';
-import styled from 'styled-components';
 import { defaultLabelColors } from '../labelColors.ts';
 import type { LabelColorsSettings } from '../store/loginUser.ts';
+import styles from './LabelColorsEditor.module.css';
 
 const LabelColorsEditor: et.Editor<LabelColorsSettings | undefined> = props => {
   const { value, onChange } = props;
@@ -72,7 +72,7 @@ const LabelColorsEditor: et.Editor<LabelColorsSettings | undefined> = props => {
     });
   };
   return (
-    <StyledDiv>
+    <div className={styles.labelColorsEditor}>
       <Select
         size="small"
         options={{ default: 'Default', custom: 'Custom' }}
@@ -117,17 +117,8 @@ const LabelColorsEditor: et.Editor<LabelColorsSettings | undefined> = props => {
           </Button>
         </>
       )}
-    </StyledDiv>
+    </div>
   );
 };
 
 export default LabelColorsEditor;
-
-const StyledDiv = styled.div`
-  display: flex;
-  gap: 5px;
-  align-items: center;
-  [role='listbox'] > [aria-selected='true'] {
-    outline: solid 2px var(--circus-highlight-color);
-  }
-`;

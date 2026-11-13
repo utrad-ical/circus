@@ -1,0 +1,10 @@
+.modality {
+  display: inline-block;
+  min-width: 50px;
+  padding: 0;
+  font-size: 110%;
+  border-radius: 3px;
+  text-align: center;
+  background-color: #777777;
+  color: white;
+}

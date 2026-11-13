@@ -8,3 +8,14 @@
     min-width: 0;
   }
 }
+
+.viewer {
+  background: black;
+  width: 512px;
+  height: 512px;
+}
+
+.menu {
+  text-align: right;
+  margin-bottom: 1em;
+}

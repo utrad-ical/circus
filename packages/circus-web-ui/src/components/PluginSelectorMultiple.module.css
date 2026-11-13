@@ -1,0 +1,7 @@
+.pluginSelectorMultiple {
+  ul {
+    white-space: nowrap;
+    max-width: 400px;
+    overflow: scroll;
+  }
+}

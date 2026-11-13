@@ -5,10 +5,10 @@ import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import AutoReloadSwitch from './AutoReloadSwitch.tsx';
 import Icon from '#components/Icon.tsx';
 import classnames from 'classnames';
-import styled from 'styled-components';
 import { useApi } from '#utils/api.ts';
 import { useSelector, useDispatch } from 'react-redux';
 import * as searches from '#store/searches.ts';
+import styles from './SearchResultsView.module.css';
 
 export const patientInfoSearchOptions: { readonly [key: string]: string } = {
   'patientInfo.patientName': 'patient name',
@@ -30,22 +30,6 @@ const limitOptions = [10, 20, 50, 100, 200].map(String);
 const ItemsPerPageOptionRenderer: React.FC<{ caption: number }> = props => (
   <Fragment>{props.caption} items</Fragment>
 );
-
-const StyledDiv = styled.div`
-  .search-results-header {
-    display: flex;
-    justify-content: space-between;
-    margin: 0.5em 0 0.3em;
-  }
-
-  .search-results-pager {
-    text-align: center;
-  }
-
-  &.busy {
-    opacity: 0.7;
-  }
-`;
 
 /**
  * SearchResults displays the search results along with pager and sort changer.
@@ -126,8 +110,12 @@ const SearchResultsView: React.FC<{
   const pages = Math.ceil(totalItems / limit);
   const showPagenation = pages >= 2 || page >= 2;
   return (
-    <StyledDiv className={classnames({ busy: isFetching })}>
-      <div className="search-results-header">
+    <div
+      className={classnames(styles.searchResultsView, {
+        [styles.busy]: isFetching
+      })}
+    >
+      <div className={styles.header}>
         <div>{children}</div>
         <div>
           {totalItems + ' Result' + (totalItems !== 1 ? 's' : '')}
@@ -168,7 +156,7 @@ const SearchResultsView: React.FC<{
         </div>
       </div>
       {showPagenation && (
-        <div className="search-results-pager">
+        <div className={styles.pager}>
           <Pagination
             pages={pages}
             activePage={page}
@@ -183,7 +171,7 @@ const SearchResultsView: React.FC<{
         active={active}
       />
       {showPagenation && (
-        <div className="search-results-pager">
+        <div className={styles.pager}>
           <Pagination
             pages={pages}
             activePage={page}
@@ -191,7 +179,7 @@ const SearchResultsView: React.FC<{
           />
         </div>
       )}
-    </StyledDiv>
+    </div>
   );
 };
 

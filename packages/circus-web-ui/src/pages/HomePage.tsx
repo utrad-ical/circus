@@ -6,11 +6,11 @@ import Panel, {
 } from '#components/Panel.tsx';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Row, Col } from '#components/react-bootstrap.ts';
 import ProjectDisplay from '#components/ProjectDisplay.tsx';
 import Icon from '#components/Icon.tsx';
 import TimeDisplay from '#components/TimeDisplay.tsx';
 import styled from 'styled-components';
+import styles from './HomePage.module.css';
 import useLoginUser from '#utils/useLoginUser.ts';
 
 const HomeMenu = styled.ul`
@@ -157,14 +157,10 @@ const MyProfile: React.FC<{}> = props => {
 
 const Profile: React.FC<{}> = props => {
   return (
-    <Row>
-      <Col md={7}>
-        <MyProjects />
-      </Col>
-      <Col md={5}>
-        <MyProfile />
-      </Col>
-    </Row>
+    <div className={styles.profile}>
+      <MyProjects />
+      <MyProfile />
+    </div>
   );
 };
 

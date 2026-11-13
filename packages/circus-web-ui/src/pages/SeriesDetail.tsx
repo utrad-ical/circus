@@ -3,7 +3,6 @@ import Panel, { PanelHeader, PanelBody } from '#components/Panel.tsx';
 import Button from '#components/Button.tsx';
 import Icon from '#components/Icon.tsx';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Row, Col } from '#components/react-bootstrap.ts';
 import { useApi } from '#utils/api.ts';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import ImageViewer from '#components/ImageViewer.tsx';
@@ -11,6 +10,7 @@ import * as rs from '@utrad-ical/circus-rs';
 import { toolFactory } from '@utrad-ical/circus-rs';
 import useLoadData from '#utils/useLoadData.ts';
 import styled from 'styled-components';
+import styles from './SeriesDetail.module.css';
 import { Link, useParams } from 'react-router-dom';
 import type { SeriesEntryWithHints } from '@utrad-ical/circus-ui-kit';
 import { useVolumeLoaders } from '@utrad-ical/circus-ui-kit';
@@ -129,16 +129,16 @@ const SeriesDetail: React.FC<{}> = props => {
       <h1>
         <Icon icon="circus-series" /> Series Detail
       </h1>
-      <Row>
-        <Col lg={6}>
+      <div className={styles.columns}>
+        <div>
           <StyledImageViewer
             id="series-detail"
             composition={composition}
             tool={pagerTool}
             initialTool={pagerTool}
           />
-        </Col>
-        <Col lg={6}>
+        </div>
+        <div>
           <StyledMenu>
             <Link to={`/new-case/${seriesUid}`}>
               <Button icon="circus-case" variant="primary">
@@ -171,8 +171,8 @@ const SeriesDetail: React.FC<{}> = props => {
             defaultExpanded
           />
           <Table data={seriesData.parameters} title="Parameters" />
-        </Col>
-      </Row>
+        </div>
+      </div>
     </div>
   );
 };

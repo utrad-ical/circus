@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import Select from '#components/Select.tsx';
-import { Pagination } from '#components/react-bootstrap.ts';
+import Pagination from '#components/Pagination.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import AutoReloadSwitch from './AutoReloadSwitch.tsx';
 import Icon from '#components/Icon.tsx';
@@ -30,55 +30,6 @@ const limitOptions = [10, 20, 50, 100, 200].map(String);
 const ItemsPerPageOptionRenderer: React.FC<{ caption: number }> = props => (
   <Fragment>{props.caption} items</Fragment>
 );
-
-const ResultPagination: React.FC<{
-  onSelect: (selected: number) => void;
-  disabled?: boolean;
-  activePage: number;
-  pages: number;
-}> = props => {
-  const { onSelect, disabled, activePage, pages } = props;
-  const firstItem = Math.max(1, activePage - 2);
-  const lastItem = Math.min(pages, activePage + 2);
-  const pageItems = [];
-  const handleClick = (selected: number) => {
-    if (selected >= 1 && selected <= pages && selected !== activePage) {
-      onSelect(selected);
-    }
-  };
-  for (let i = firstItem; i <= lastItem; i++) pageItems.push(i);
-  return (
-    <div className="search-results-pager">
-      <Pagination disabled={disabled || pages <= 0 || true}>
-        <Pagination.First
-          onClick={() => handleClick(1)}
-          disabled={activePage == 1}
-        />
-        <Pagination.Prev
-          onClick={() => handleClick(activePage - 1)}
-          disabled={activePage == 1}
-        />
-        {pageItems.map(i => (
-          <Pagination.Item
-            key={i}
-            active={i == activePage}
-            onClick={() => handleClick(i)}
-          >
-            {i}
-          </Pagination.Item>
-        ))}
-        <Pagination.Next
-          onClick={() => handleClick(activePage + 1)}
-          disabled={pages <= 0 || activePage == pages}
-        />
-        <Pagination.Last
-          onClick={() => handleClick(pages)}
-          disabled={pages <= 0 || activePage == pages}
-        />
-      </Pagination>
-    </div>
-  );
-};
 
 const StyledDiv = styled.div`
   .search-results-header {
@@ -217,12 +168,13 @@ const SearchResultsView: React.FC<{
         </div>
       </div>
       {showPagenation && (
-        <ResultPagination
-          pages={pages}
-          activePage={page}
-          onSelect={handlePageClick}
-          disabled={isFetching}
-        />
+        <div className="search-results-pager">
+          <Pagination
+            pages={pages}
+            activePage={page}
+            onSelect={handlePageClick}
+          />
+        </div>
       )}
       <DataView
         value={items}
@@ -231,12 +183,13 @@ const SearchResultsView: React.FC<{
         active={active}
       />
       {showPagenation && (
-        <ResultPagination
-          pages={pages}
-          activePage={page}
-          onSelect={handlePageClick}
-          disabled={isFetching}
-        />
+        <div className="search-results-pager">
+          <Pagination
+            pages={pages}
+            activePage={page}
+            onSelect={handlePageClick}
+          />
+        </div>
       )}
     </StyledDiv>
   );

@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import ControlLabel from 'react-bootstrap/lib/ControlLabel';
-import FormControl from 'react-bootstrap/lib/FormControl';
-import FormGroup from 'react-bootstrap/lib/FormGroup';
 import { useCsResults } from '../CsResultsContext.ts';
 import type { Display } from '../Display.tsx';
+import { Field, FieldLabel, TextInput } from './utils/formField.tsx';
 import { useErrorMessage } from './utils/useErrorMessage.tsx';
 
 interface TextOptions {
@@ -78,18 +76,20 @@ export const Text: Display<TextOptions, string> = props => {
   if (error) return error;
 
   return (
-    <FormGroup validationState={invalidMessage ? 'error' : undefined}>
-      {label && <ControlLabel>{label}</ControlLabel>}
-      <FormControl
-        type="text"
-        disabled={!editable}
-        value={currentFeedback}
-        title={invalidMessage}
-        onChange={(ev: React.BaseSyntheticEvent) =>
-          setCurrentFeedback(ev.target.value)
-        }
-      />
-      <FormControl.Feedback />
-    </FormGroup>
+    <Field>
+      <FieldLabel>
+        {label}
+        <TextInput
+          type="text"
+          disabled={!editable}
+          value={currentFeedback}
+          title={invalidMessage}
+          aria-invalid={!!invalidMessage}
+          onChange={(ev: React.ChangeEvent<HTMLInputElement>) =>
+            setCurrentFeedback(ev.target.value)
+          }
+        />
+      </FieldLabel>
+    </Field>
   );
 };

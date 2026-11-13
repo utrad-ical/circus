@@ -1,4 +1,4 @@
-import type * as et from '@smikitky/rb-components/lib/editor-types';
+import type * as et from '#components/editorTypes.tsx';
 import type { SliderProps } from '#components/Slider.tsx';
 import Slider from '#components/Slider.tsx';
 import React from 'react';

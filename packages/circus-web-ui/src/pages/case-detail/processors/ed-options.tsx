@@ -1,7 +1,7 @@
+import Input from '#components/Input.tsx';
 import type { Editor } from './processor-types.ts';
 import type { Structure } from '@utrad-ical/circus-rs';
 import classnames from 'classnames';
-import { FormControl } from '#components/react-bootstrap.ts';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import type { ErosionDilationOptions } from './ed-processor.ts';
@@ -210,10 +210,10 @@ export const OptionsEditor: Editor<ErosionDilationOptions> = props => {
 
   return (
     <StyledDiv>
-      <div className="structure-shape form-inline">
+      <div className="structure-shape">
         <label>
           Width:&ensp;
-          <FormControl
+          <Input
             type="number"
             value={value.width}
             name="width"
@@ -222,7 +222,7 @@ export const OptionsEditor: Editor<ErosionDilationOptions> = props => {
         </label>
         <label>
           Height:&ensp;
-          <FormControl
+          <Input
             type="number"
             value={value.height}
             name="height"
@@ -231,7 +231,7 @@ export const OptionsEditor: Editor<ErosionDilationOptions> = props => {
         </label>
         <label>
           nSlices:&ensp;
-          <FormControl
+          <Input
             type="number"
             value={value.nSlices}
             name="nSlices"
@@ -240,11 +240,11 @@ export const OptionsEditor: Editor<ErosionDilationOptions> = props => {
         </label>
       </div>
       <div>
-        <div className="structure-title form-inline">
+        <div className="structure-title">
           Structuring element &emsp;(
           <label>
             Slice number =&nbsp;
-            <FormControl
+            <Input
               className="slice-number"
               type="number"
               value={sliceNumber}

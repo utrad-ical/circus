@@ -9,6 +9,7 @@ import React, {
 import Button, { type ButtonVariant } from './Button.tsx';
 import Dialog, { DialogBody, DialogFooter, DialogHeader } from './Dialog.tsx';
 import Icon from './Icon.tsx';
+import Input from './Input.tsx';
 
 // Promise-based dialogs opened by function calls, rendered by `DialogHost`.
 // Use these to ask something and get the result. Place `<Dialog>` instead
@@ -253,10 +254,9 @@ export const prompt = (
         </DialogHeader>
         <DialogBody>
           <label htmlFor="circus-prompt-input">{text}</label>
-          <input
+          <Input
             id="circus-prompt-input"
             type={password ? 'password' : 'text'}
-            className="form-control"
             data-autofocus
             value={input}
             onChange={ev => setInput(ev.target.value)}

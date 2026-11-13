@@ -4,17 +4,17 @@ import { modalities } from '../../modalities.ts';
 import type { Condition } from './ConditionFrame.tsx';
 import ConditionFrame from './ConditionFrame.tsx';
 import { escapeRegExp } from '#utils/util.ts';
-import * as et from '@smikitky/rb-components/lib/editor-types';
+import * as et from '#components/editorTypes.tsx';
 import type { DateRange } from '#components/DateRangePicker.tsx';
 import DateRangePicker, {
   dateRangeToMongoQuery
 } from '#components/DateRangePicker.tsx';
 import AgeMinMax from '#components/AgeMinMax.tsx';
-import { conditionToMongoQuery } from '@smikitky/rb-components/lib/ConditionEditor';
+import { conditionToMongoQuery } from '#components/ConditionEditor.tsx';
 import SearchPanel from '#pages/search/SearchPanel.tsx';
 import { useApi } from '#utils/api.ts';
 import PluginDisplay from '#components/PluginDisplay.tsx';
-import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
+import type { PropertyEditorProperties } from '#components/PropertyEditor.tsx';
 
 const sexOptions: { [key: string]: string } = {
   all: 'All',
@@ -83,12 +83,10 @@ const conditionToFilter = (condition: any) => {
     case 'basic':
       return basicConditionToMongoQuery(condition.basic);
     case 'advanced':
-      return conditionToMongoQuery(
-        condition.advanced,
-        ['createdAt', 'finishedAt'],
-        true,
-        false
-      );
+      return conditionToMongoQuery(condition.advanced, [
+        'createdAt',
+        'finishedAt'
+      ]);
   }
   throw new Error('Unkonwn condition type');
 };

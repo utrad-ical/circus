@@ -1,0 +1,8 @@
+.ageMinMax {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+  > input {
+    width: 5em;
+  }
+}

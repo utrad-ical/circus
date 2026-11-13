@@ -1,4 +1,4 @@
-import type { Editor } from '@smikitky/rb-components/lib/editor-types';
+import type { Editor } from '#components/editorTypes.tsx';
 import classnames from 'classnames';
 import React, { type ComponentType, type FC, Fragment } from 'react';
 import normalizeOptions, {

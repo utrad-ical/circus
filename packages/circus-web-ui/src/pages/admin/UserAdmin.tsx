@@ -5,7 +5,7 @@ import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import MultiSelect from '#components/MultiSelect.tsx';
 import Select from '#components/Select.tsx';
 import classnames from 'classnames';
-import * as et from '@smikitky/rb-components/lib/editor-types';
+import * as et from '#components/editorTypes.tsx';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
 import type { UserPreferences } from '#store/loginUser.ts';
 

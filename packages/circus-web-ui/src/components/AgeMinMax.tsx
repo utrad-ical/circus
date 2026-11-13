@@ -1,26 +1,24 @@
-import React from 'react';
-import { FormControl } from '#components/react-bootstrap.ts';
+import React, { type ChangeEvent, type FC } from 'react';
+import styles from './AgeMinMax.module.css';
+import Input from './Input.tsx';
 
-const AgeMinMax: React.FC<{
+const AgeMinMax: FC<{
   value: { min: number; max: number };
   onChange: (value: { min: number; max: number }) => void;
 }> = props => {
-  const change = (ev: any) => {
-    const newValue = {
-      ...props.value,
-      [ev.target.name]: parseInt(ev.target.value, 10)
-    };
-    props.onChange(newValue);
+  const { value, onChange } = props;
+  const change = (ev: ChangeEvent<HTMLInputElement>) => {
+    onChange({ ...value, [ev.target.name]: parseInt(ev.target.value, 10) });
   };
 
-  const min = props.value ? props.value.min : '';
-  const max = props.value ? props.value.max : '';
+  const min = value ? value.min : '';
+  const max = value ? value.max : '';
 
   return (
-    <span className="age-minmax form-inline">
-      <FormControl type="number" value={min} name="min" onChange={change} />
-      &thinsp;&mdash;&thinsp;
-      <FormControl type="number" value={max} name="max" onChange={change} />
+    <span className={styles.ageMinMax}>
+      <Input type="number" value={min} name="min" onChange={change} />
+      &mdash;
+      <Input type="number" value={max} name="max" onChange={change} />
     </span>
   );
 };

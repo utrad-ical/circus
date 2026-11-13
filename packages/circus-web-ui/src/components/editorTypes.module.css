@@ -1,0 +1,16 @@
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  margin: 0;
+  font-weight: normal;
+  cursor: pointer;
+  > input {
+    margin: 0;
+    accent-color: var(--theme);
+  }
+  &:has(:disabled) {
+    color: var(--muted);
+    cursor: not-allowed;
+  }
+}

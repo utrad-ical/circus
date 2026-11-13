@@ -3,12 +3,12 @@ import React from 'react';
 import { modalities } from '../../modalities.ts';
 import ConditionFrame from './ConditionFrame.tsx';
 import { escapeRegExp } from '#utils/util.ts';
-import * as et from '@smikitky/rb-components/lib/editor-types';
+import * as et from '#components/editorTypes.tsx';
 import DateRangePicker, {
   dateRangeToMongoQuery
 } from '#components/DateRangePicker.tsx';
 import AgeMinMax from '#components/AgeMinMax.tsx';
-import { conditionToMongoQuery } from '@smikitky/rb-components/lib/ConditionEditor';
+import { conditionToMongoQuery } from '#components/ConditionEditor.tsx';
 import SearchPanel from './SearchPanel.tsx';
 import type { Condition } from './ConditionFrame.tsx';
 
@@ -97,9 +97,7 @@ const conditionToFilter = (condition: Condition) => {
         condition.advanced,
         Object.keys(advancedConditionKeys).filter(
           k => advancedConditionKeys[k].type === 'date'
-        ),
-        true,
-        false
+        )
       );
   }
   throw new Error('Unkonwn condition type');

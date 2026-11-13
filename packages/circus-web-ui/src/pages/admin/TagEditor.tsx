@@ -1,3 +1,4 @@
+import Input from '#components/Input.tsx';
 import React from 'react';
 import ColorPicker from '#components/ColorPicker.tsx';
 import { PhysicalTag } from '#components/Tag.tsx';
@@ -27,21 +28,22 @@ const TagEditor: React.FC<{
   };
 
   return (
-    <span className="form-inline">
-      <input
-        className="form-control"
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '1em' }}>
+      <Input
+        style={{ width: 'auto' }}
         value={props.value.name}
         placeholder="Name"
         onChange={ev => change('name', ev.target.value)}
       />
-      &emsp;
       <ColorPicker
         value={props.value.color}
         showColorCode={true}
         onChange={(col: string) => change('color', col)}
       />
-      &emsp; Sample:{' '}
-      <PhysicalTag name={props.value.name} color={props.value.color} />
+      <span>
+        Sample:{' '}
+        <PhysicalTag name={props.value.name} color={props.value.color} />
+      </span>
     </span>
   );
 };

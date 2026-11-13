@@ -1,3 +1,4 @@
+import Input from '#components/Input.tsx';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -8,8 +9,11 @@ interface WindowAndLabel {
 }
 
 const StyledSpan = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
   input[type='number'] {
-    width: 100px;
+    width: 7em;
   }
 `;
 
@@ -35,26 +39,23 @@ const WindowPresetEditor: React.FC<{
   };
 
   return (
-    <StyledSpan className="form-inline">
-      <input
-        className="form-control"
+    <StyledSpan>
+      <Input
         value={value.label}
         placeholder="label"
         name="label"
         onChange={handleChange}
       />
-      &nbsp;L:&nbsp;
-      <input
-        className="form-control"
+      L:
+      <Input
         value={value.level}
         type="number"
         placeholder="window level"
         name="level"
         onChange={handleChange}
       />
-      &nbsp;W:&nbsp;
-      <input
-        className="form-control"
+      W:
+      <Input
         value={value.width}
         type="number"
         placeholder="window width"

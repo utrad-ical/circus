@@ -1,7 +1,7 @@
 import React from 'react';
 import Tabs, { Tab } from '#components/Tabs.tsx';
-import ConditionEditor from '@smikitky/rb-components/lib/ConditionEditor';
-import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
+import ConditionEditor from '#components/ConditionEditor.tsx';
+import PropertyEditor from '#components/PropertyEditor.tsx';
 import styled from 'styled-components';
 
 export interface Condition {
@@ -11,23 +11,14 @@ export interface Condition {
 }
 
 const StyledDiv = styled.div`
+  /* Two pairs of caption and editor in a row */
   .condition-basic-filter {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    > .row {
-      flex: 0 0 50%;
-      @media screen and (max-width: 768px) {
-        & {
-          flex: 0 0 100%;
-        }
-      }
+    grid-template-columns: auto 1fr auto 1fr;
+    > * {
+      grid-column: span 2;
     }
-  }
-
-  .age-minmax.form-inline {
-    input.form-control {
-      width: 80px;
+    @media (max-width: 768px) {
+      grid-template-columns: auto 1fr;
     }
   }
 `;

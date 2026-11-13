@@ -1,7 +1,7 @@
 import { selectEditor } from '#components/Select.tsx';
 import EditorPage from './EditorPage.tsx';
 import React from 'react';
-import * as et from '@smikitky/rb-components/lib/editor-types';
+import * as et from '#components/editorTypes.tsx';
 import WindowPresetEditor from './WindowPresetEditor.tsx';
 import TagEditor, { newTagItem } from './TagEditor.tsx';
 import AttributeSchemaEditor from './AttributeSchemaEditor.tsx';

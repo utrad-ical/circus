@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import BodyPartIcon from '#components/BodyPartIcon.tsx';
-import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
+import PropertyEditor from '#components/PropertyEditor.tsx';
 import Select from '#components/Select.tsx';
 import ColorPicker from '#components/ColorPicker.tsx';
 

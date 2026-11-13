@@ -5,8 +5,8 @@ import Panel, {
   PanelFooter
 } from '#components/Panel.tsx';
 import Button from '#components/Button.tsx';
-import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
-import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
+import type { PropertyEditorProperties } from '#components/PropertyEditor.tsx';
+import PropertyEditor from '#components/PropertyEditor.tsx';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
 import DataGrid from '#components/DataGrid.tsx';
 import Icon from '#components/Icon.tsx';

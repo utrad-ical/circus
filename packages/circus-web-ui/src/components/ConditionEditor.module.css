@@ -1,0 +1,26 @@
+.editor {
+  padding: 0.3em;
+}
+
+.group,
+.single {
+  margin-block: 2px;
+}
+
+.groupHead,
+.single {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.members {
+  margin-left: 10px;
+  padding-left: 10px;
+  border-left: 3px solid var(--border);
+}
+
+.value {
+  flex: 1;
+  min-width: 0;
+}

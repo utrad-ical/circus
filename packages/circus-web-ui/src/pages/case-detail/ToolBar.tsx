@@ -1,5 +1,5 @@
 import Button from '#components/Button.tsx';
-import type { Editor } from '@smikitky/rb-components/lib/editor-types';
+import type { Editor } from '#components/editorTypes.tsx';
 import Select from '#components/Select.tsx';
 import type { ModifierKeyBehaviors } from '@utrad-ical/circus-rs';
 import type { PlaneFigureOption } from '@utrad-ical/circus-rs';

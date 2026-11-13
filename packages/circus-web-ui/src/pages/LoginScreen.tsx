@@ -3,7 +3,7 @@ import Button from '#components/Button.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import classnames from 'classnames';
 import Icon from '#components/Icon.tsx';
-import { FormControl, FormGroup } from '#components/react-bootstrap.ts';
+import Input from '#components/Input.tsx';
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -23,7 +23,7 @@ const StyledDiv = styled.div`
     font-size: 36px;
     border: none;
   }
-  input.form-control {
+  .login-input {
     margin: 1em 0;
     background-color: #d0e6e4;
     border-radius: 7px;
@@ -113,26 +113,23 @@ const LoginScreen: React.FC<{}> = props => {
             <Icon icon="circus-logo" />
             <span hidden>CIRCUS DB</span>
           </h1>
-          <FormGroup>
-            <FormControl
+          <div>
+            <Input
+              className="login-input"
               placeholder="User ID or E-mail"
               autoFocus
-              type="text"
               value={input.id}
-              onChange={(ev: React.BaseSyntheticEvent) =>
-                handleChange('id', ev.target.value)
-              }
+              onChange={ev => handleChange('id', ev.target.value)}
             />
-            <FormControl
+            <Input
+              className="login-input"
               placeholder="Password"
               type="password"
               value={input.password}
-              onChange={(ev: React.BaseSyntheticEvent) =>
-                handleChange('password', ev.target.value)
-              }
+              onChange={ev => handleChange('password', ev.target.value)}
               onKeyDown={ev => ev.key === 'Enter' && handleLoginClick()}
             />
-          </FormGroup>
+          </div>
           {error && <p className="text-danger">{error}</p>}
         </PanelBody>
         <PanelFooter className="text-center">

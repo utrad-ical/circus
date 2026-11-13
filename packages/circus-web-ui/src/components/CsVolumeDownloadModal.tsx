@@ -1,4 +1,4 @@
-import type { Editor } from '@smikitky/rb-components/lib/editor-types';
+import type { Editor } from '#components/editorTypes.tsx';
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { useApi } from '#utils/api.ts';

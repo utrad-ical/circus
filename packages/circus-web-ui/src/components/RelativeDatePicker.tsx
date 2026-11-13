@@ -1,7 +1,8 @@
-import moment from 'moment';
+import { add, format, parse, startOfDay } from 'date-fns';
 import React, { type FC, type ChangeEvent, memo, useState } from 'react';
 import Button, { type ButtonSize } from './Button.tsx';
 import Calendar from './Calendar.tsx';
+import Input from './Input.tsx';
 import PopoverButton from './PopoverButton.tsx';
 import styles from './RelativeDatePicker.module.css';
 
@@ -12,7 +13,7 @@ export type RelativeDate =
 
 type Mode = 'all' | 'absolute' | 'relative';
 
-export const defaultDateFormat = 'YYYY-MM-DD';
+const dateFormat = 'yyyy-MM-dd';
 
 const dateToString = (input: RelativeDate): string => {
   if (typeof input === 'string') return input;
@@ -43,7 +44,7 @@ const RelativeDatePicker: FC<{
   const handleChangeMode = (mode: Mode) => {
     if (mode === 'relative') onChange([0, 'day']);
     else if (mode === 'all') onChange(null);
-    else onChange(moment().format(defaultDateFormat));
+    else onChange(format(new Date(), dateFormat));
     setMode(mode);
   };
 
@@ -76,8 +77,8 @@ const RelativeDatePicker: FC<{
           <div className={styles.switch}>
             {mode === 'relative' ? (
               <div className={styles.relative}>
-                <input
-                  className="form-control input-sm"
+                <Input
+                  size="small"
                   type="number"
                   min={0}
                   value={Array.isArray(value) ? -value[0] : 0}
@@ -99,28 +100,19 @@ const RelativeDatePicker: FC<{
 };
 
 /**
- * @param asMax Returns the end of the day if true, the start of the day if false
- * @param asUtc Returns the UTC if true, the local time if false
+ * Returns the start of the day in the local time,
+ * or the start of the next day if `asMax` is true.
  */
 export const normalizeRelative = (
   dateValue: RelativeDate,
-  asMax: boolean = false,
-  asUtc: boolean = false
-): moment.Moment | null => {
-  const createMoment = (value?: Exclude<RelativeDate, null>) => {
-    if (asUtc) return value ? moment.utc(value) : moment.utc();
-    return value ? moment(value) : moment();
-  };
-  if (typeof dateValue === 'string') {
-    const result = createMoment(dateValue);
-    return asMax ? result.add(1, 'day') : result;
-  } else if (Array.isArray(dateValue)) {
-    const result = createMoment()
-      .startOf('day')
-      .add(dateValue[0], dateValue[1]);
-    return asMax ? result.add(1, 'day') : result;
-  }
-  return null;
+  asMax: boolean = false
+): Date | null => {
+  if (dateValue === null) return null;
+  const date =
+    typeof dateValue === 'string'
+      ? parse(dateValue, dateFormat, new Date())
+      : add(startOfDay(new Date()), { [dateValue[1] + 's']: dateValue[0] });
+  return asMax ? add(date, { days: 1 }) : date;
 };
 
 export default memo(RelativeDatePicker);

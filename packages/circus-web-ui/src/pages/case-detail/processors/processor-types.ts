@@ -36,9 +36,12 @@ export const processorTypes = [
 
 export type ProcessorType = (typeof processorTypes)[number];
 
-export type ProcessorProgress =
-  | { readonly value: number; readonly label: string }
-  | { readonly finished: boolean };
+// Without `value`, the progress is shown as indeterminate
+export type ProcessorProgress = {
+  readonly value?: number;
+  readonly label?: string;
+  readonly finished?: boolean;
+};
 
 interface ProcessorInput {
   editingData: EditingData;

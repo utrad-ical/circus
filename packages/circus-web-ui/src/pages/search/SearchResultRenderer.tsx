@@ -7,7 +7,7 @@ import ProjectDisplay from '#components/ProjectDisplay.tsx';
 import { TagList } from '#components/Tag.tsx';
 import TimeDisplay from '#components/TimeDisplay.tsx';
 import UserDisplay from '#components/UserDisplay.tsx';
-import { ProgressBar } from '#components/react-bootstrap.ts';
+import ProgressBar from '#components/ProgressBar.tsx';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -78,7 +78,7 @@ export const Status: DataGridRenderer<any> = props => {
     value: { status }
   } = props;
   if (status === 'processing') {
-    return <ProgressBar active bsStyle="info" now={100} label="processing" />;
+    return <ProgressBar label="processing" />;
   }
   const className = { in_queue: 'text-info', finished: 'text-success' }[
     status as 'in_queue' | 'finished'

@@ -1,6 +1,6 @@
 import Button from '#components/Button.tsx';
 import { DialogBody, DialogFooter, DialogHeader } from '#components/Dialog.tsx';
-import { ProgressBar } from '#components/react-bootstrap.ts';
+import ProgressBar from '#components/ProgressBar.tsx';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import type { ProcessorProgress, Editor } from './processor-types.ts';
@@ -44,15 +44,8 @@ const ProcessorModal: React.FC<{
             activeLabelIndex={activeLabelIndex}
             labels={labels}
           />
-          {progress && 'value' in progress && (
-            <div>
-              <ProgressBar
-                now={progress.value}
-                label={progress.label}
-                striped
-                active
-              />
-            </div>
+          {progress && !progress.finished && (
+            <ProgressBar value={progress.value} label={progress.label} />
           )}
         </StyledDiv>
       </DialogBody>

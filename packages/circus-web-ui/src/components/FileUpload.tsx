@@ -1,7 +1,7 @@
 import Alert from '#components/Alert.tsx';
 import Button from '#components/Button.tsx';
 import React, { useState, useRef } from 'react';
-import { ProgressBar } from './react-bootstrap.ts';
+import ProgressBar from './ProgressBar.tsx';
 import { FileDroppable } from './FileDroppable.tsx';
 import useShowMessage from '#utils/useShowMessage.ts';
 import * as modal from '#components/dialogs.tsx';
@@ -182,12 +182,7 @@ const FileUpload: React.FC<{
         {uploading && (
           <div className="progress-container">
             <div className="text-primary">Uploading:</div>
-            <ProgressBar
-              now={progress.value}
-              label={progress.label}
-              striped
-              active
-            />
+            <ProgressBar value={progress.value} label={progress.label} />
           </div>
         )}
         <p>You can drag and drop files to this box.</p>

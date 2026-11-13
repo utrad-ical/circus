@@ -7,7 +7,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import useTaskDownloadHandler from '#utils/useTaskDownloadHandler.ts';
 import { DialogBody, DialogFooter, DialogHeader } from './Dialog.tsx';
-import { ProgressBar } from './react-bootstrap.ts';
+import ProgressBar from './ProgressBar.tsx';
 
 export type CompressionFormat = 'tgz' | 'zip';
 
@@ -71,13 +71,18 @@ const DownloadModal = <T extends any>(props: {
           <OptionsEditor value={options} onChange={handleOptionsChange} />
           <div className="row">
             <ProgressBar
-              active={taskProgress?.status === 'processing'}
-              bsStyle={taskProgress?.status === 'error' ? 'danger' : 'success'}
-              now={
+              variant={
+                taskProgress?.status === 'error'
+                  ? 'danger'
+                  : taskProgress?.status === 'finished'
+                    ? 'success'
+                    : undefined
+              }
+              value={
                 taskProgress
                   ? taskProgress.status === 'processing'
-                    ? Math.max(1, taskProgress.finished ?? 100)
-                    : 100
+                    ? taskProgress.finished
+                    : (taskProgress.total ?? 100)
                   : 0
               }
               max={taskProgress?.total ?? 100}

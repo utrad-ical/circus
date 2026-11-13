@@ -18,6 +18,4 @@ export { default as Col } from 'react-bootstrap/lib/Col';
 
 export { default as Pagination } from 'react-bootstrap/lib/Pagination';
 
-export { default as ProgressBar } from 'react-bootstrap/lib/ProgressBar';
-
 export { default as Well } from 'react-bootstrap/lib/Well';

@@ -1,33 +1,6 @@
 // Overrides of Bootstrap's colors with the design tokens (tokens.css)
 
 // BUTTONS
-.btn.btn-primary {
-  background-color: var(--circus-brand-primary);
-  border-color: var(--circus-brand-primary-dark);
-  color: var(--circus-brand-primary-text);
-  &:hover {
-    background-color: var(--circus-brand-primary-dark);
-  }
-  &:active {
-    background-color: var(--circus-brand-primary-darker);
-  }
-  &:disabled {
-    background-color: var(--circus-brand-primary);
-  }
-}
-.open > .dropdown-toggle.btn-primary {
-  background-color: var(--circus-brand-primary);
-  color: var(--circus-brand-primary-text);
-  &:focus {
-    background-color: var(--circus-brand-primary-dark);
-    color: var(--circus-brand-primary-text);
-  }
-  &:hover {
-    background-color: var(--circus-brand-primary-darker);
-    color: var(--circus-brand-primary-text);
-  }
-}
-
 .btn.btn-default {
   background-color: var(--circus-background);
   border-color: var(--circus-border);
@@ -40,36 +13,6 @@
   }
   &:disabled {
     background-color: var(--circus-background);
-  }
-}
-.open > .dropdown-toggle.btn-default {
-  background-color: var(--circus-background);
-  color: var(--circus-background-text);
-  &:focus {
-    background-color: var(--circus-background-dark);
-    color: var(--circus-background-text);
-  }
-  &:hover {
-    background-color: var(--circus-background-darker);
-    color: var(--circus-background-text);
-  }
-}
-
-.btn.btn-link {
-  color: var(--circus-brand-primary);
-}
-
-// DROPDOWNS
-.dropdown-menu {
-  background-color: var(--circus-background);
-  border-color: var(--circus-border);
-  > li > a {
-    color: var(--circus-primary-text);
-    &:hover,
-    &:focus {
-      background-color: var(--circus-secondary-background);
-      color: var(--circus-primary-text);
-    }
   }
 }
 
@@ -100,12 +43,7 @@
   background-color: var(--circus-secondary-background);
 }
 
-// FORM CONTROLS
-.form-control {
-  background-color: var(--circus-background);
-  color: var(--circus-primary-text);
-  border-color: var(--circus-border);
-}
+// TEXTAREA
 textarea {
   background-color: var(--circus-background);
   color: var(--circus-primary-text);
@@ -116,77 +54,7 @@ textarea {
   background-color: var(--circus-secondary-background);
 }
 
-// POPOVER
-.popover {
-  background-color: var(--circus-background);
-  border-color: var(--circus-border);
-  &.top > .arrow {
-    border-top-color: var(--circus-border);
-    &:after {
-      border-top-color: var(--circus-background);
-    }
-  }
-  &.right > .arrow {
-    border-right-color: var(--circus-border);
-    &:after {
-      border-right-color: var(--circus-background);
-    }
-  }
-  &.bottom > .arrow {
-    border-bottom-color: var(--circus-border);
-    &:after {
-      border-bottom-color: var(--circus-background);
-    }
-  }
-  &.left > .arrow {
-    border-left-color: var(--circus-border);
-    &:after {
-      border-left-color: var(--circus-background);
-    }
-  }
-}
-
 // A
 a {
   color: var(--circus-brand-primary);
-}
-
-// MODAL
-.modal-content {
-  background-color: var(--circus-background);
-  border-color: var(--circus-border);
-}
-.close {
-  color: var(--circus-primary-text);
-  opacity: 0.5;
-}
-
-// PAGINATION
-.pagination {
-  > li {
-    > a,
-    > span {
-      background-color: var(--circus-background);
-      color: var(--circus-primary-text);
-      border-color: var(--circus-border);
-      &:hover,
-      &:focus {
-        color: var(--circus-primary-text);
-        background-color: var(--circus-secondary-background);
-        border-color: var(--circus-border);
-      }
-    }
-  }
-  > .disabled {
-    > span,
-    > span:hover,
-    > span:focus,
-    > a,
-    > a:hover,
-    > a:focus {
-      color: var(--circus-border);
-      background-color: var(--circus-background);
-      border-color: var(--circus-border);
-    }
-  }
 }

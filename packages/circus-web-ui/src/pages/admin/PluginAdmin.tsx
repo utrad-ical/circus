@@ -200,7 +200,7 @@ const editorProperties: {
       caption: 'Run Configuration',
       editor: RunConfigurationEditor
     },
-    { key: 'displayStrategy', caption: 'Display Stratgy', editor: JsonEditor }
+    { key: 'displayStrategy', caption: 'Display Strategy', editor: JsonEditor }
   ],
   'CAD+remote': [
     {
@@ -217,7 +217,7 @@ const editorProperties: {
       caption: 'Run Configuration',
       editor: RemoteRunConfigurationEditor
     },
-    { key: 'displayStrategy', caption: 'Display Stratgy', editor: JsonEditor }
+    { key: 'displayStrategy', caption: 'Display Strategy', editor: JsonEditor }
   ]
 };
 

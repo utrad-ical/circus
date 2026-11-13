@@ -1,3 +1,4 @@
+import u from '#components/utilities.module.css';
 import Button from '#components/Button.tsx';
 import { confirm } from '#components/dialogs.tsx';
 import CaseExportModal from '#components/CaseExportModal.tsx';
@@ -64,7 +65,7 @@ const columns: DataGridColumnDefinition<any>[] = [
   { caption: 'Case ID', className: 'caseId', renderer: CaseId },
   { caption: 'Create/Update', className: 'created-at', renderer: Times() },
   { caption: 'Tags', className: 'tags', renderer: Tags },
-  { caption: '', className: 'operation', renderer: Operation }
+  { caption: '', className: u.textRight, renderer: Operation }
 ];
 
 const DataView: React.FC<{

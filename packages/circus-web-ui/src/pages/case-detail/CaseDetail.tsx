@@ -27,7 +27,6 @@ import { useDispatch } from 'react-redux';
 import { Link, useBlocker, useParams } from 'react-router-dom';
 import { showMessage } from '#store/messages.ts';
 import { newSearch } from '#store/searches.ts';
-import styled from 'styled-components';
 import type Series from '#types/Series.ts';
 import { useApi } from '#utils/api.ts';
 import useKeyboardShortcut from '#utils/useKeyboardShortcut.ts';
@@ -43,6 +42,7 @@ import type {
   EditingDataUpdater
 } from './revisionData.ts';
 import { externalRevisionToInternal, saveRevision } from './revisionData.ts';
+import styles from './CaseDetail.module.css';
 
 const pageTransitionMessage = `Are you sure you want to leave?\nIf you leave before saving, your changes will be lost.`;
 
@@ -271,7 +271,7 @@ const CaseDetail: React.FC<{}> = () => {
 
   return (
     <FullSpanContainer>
-      <CaseInfoCollapser title="Case Info">
+      <Collapser title="Case Info" className={styles.caseInfo}>
         {activeRelevantCases ? (
           <DropdownButton
             id="casemenu"
@@ -291,8 +291,8 @@ const CaseDetail: React.FC<{}> = () => {
           withDescription
           size="xl"
         />
-        <div className="spacer" />
-        <div className="tag-list">
+        <div className={styles.spacer} />
+        <div className={styles.tagList}>
           <b>Tags:</b>
           {tags.map((t: string | number | undefined) => (
             <Tag
@@ -313,7 +313,7 @@ const CaseDetail: React.FC<{}> = () => {
           <br />
           (Create: <TimeDisplay value={caseData.createdAt} />)
         </div>
-      </CaseInfoCollapser>
+      </Collapser>
       <MenuBar
         caseStore={caseStore}
         onCommand={handleMenuBarCommand}
@@ -352,27 +352,6 @@ const CaseDetail: React.FC<{}> = () => {
   );
 };
 
-const CaseInfoCollapser = styled(Collapser)`
-  .collapser-body {
-    padding: 3px;
-    display: flex;
-    > * {
-      margin: 0 10px;
-    }
-    flex-flow: row wrap;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .spacer {
-    flex-grow: 1;
-  }
-  .tag-list {
-    > .tag {
-      margin-left: 3px;
-    }
-  }
-`;
-
 export default CaseDetail;
 
 type MenuBarCommand = 'undo' | 'redo' | 'revert' | 'save' | 'exportMhd';
@@ -402,8 +381,8 @@ const MenuBar: React.FC<{
   ) : null;
 
   return (
-    <StyledMenuBarDiv>
-      <div className="left">
+    <div className={styles.menuBar}>
+      <div className={styles.left}>
         Revision:&ensp;
         <RevisionSelector
           revisions={caseStore.caseData!.revisions}
@@ -418,7 +397,7 @@ const MenuBar: React.FC<{
           </>
         )}
       </div>
-      <div className="right">
+      <div className={styles.right}>
         {unsavedAlertMessage}
         <Button
           icon="material-skip_previous"
@@ -466,26 +445,9 @@ const MenuBar: React.FC<{
           </MenuItem>
         </DropdownButton>
       </div>
-    </StyledMenuBarDiv>
+    </div>
   );
 });
-
-const StyledMenuBarDiv = styled.div`
-  border-bottom: 1px solid var(--circus-border);
-  border-top: 1px solid var(--circus-border);
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: space-between;
-  flex: none;
-  .left {
-    padding: 3px;
-  }
-  .right {
-    flex: 1000;
-    text-align: right;
-    padding: 3px;
-  }
-`;
 
 const RelevantCases: React.FC<{
   currentCaseId: string;

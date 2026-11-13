@@ -1,0 +1,43 @@
+.taskNotifier {
+  > ul {
+    max-height: 500px;
+    overflow-y: auto;
+  }
+  &.inProgress > a svg {
+    color: yellow;
+  }
+}
+
+.taskDisplay {
+  color: black;
+  width: 300px;
+  border-bottom: 2px;
+  line-height: 1;
+  &:hover {
+    color: white;
+    background: var(--circus-brand-primary);
+  }
+  &.error {
+    .message {
+      color: red;
+    }
+  }
+  .main {
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+  }
+  .info {
+    flex-grow: 1;
+  }
+  .info {
+    padding: 5px 5px 0 5px;
+  }
+  .message {
+    padding: 2px 7px;
+    font-size: 80%;
+  }
+  .progressbar [role='progressbar'] {
+    height: 4px;
+  }
+}

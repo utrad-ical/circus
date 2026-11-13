@@ -1,0 +1,6 @@
+.fileDroppable {
+  border: 2px solid transparent;
+  &.active {
+    border-color: orange;
+  }
+}

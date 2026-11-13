@@ -10,7 +10,7 @@ import TimeDisplay from '#components/TimeDisplay.tsx';
 import UserDisplay from '#components/UserDisplay.tsx';
 import statusStyles from './Status.module.css';
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
+import styles from './SearchResultRenderer.module.css';
 
 export const PatientInfo: DataGridRenderer<any> = props => {
   const {
@@ -105,25 +105,14 @@ export const FeedbackRenderer: DataGridRenderer<any> = props => {
         </span>
       )}
       {consensual > 0 && <Icon icon="material-crown" />}
-      {!personals && !consensual && <span className="feedback-none">none</span>}
+      {!personals && !consensual && <span className={u.muted}>none</span>}
     </span>
   );
 };
 
-const ModalitySpan = styled.span`
-  display: inline-block;
-  min-width: 50px;
-  padding: 0;
-  font-size: 110%;
-  border-radius: 3px;
-  text-align: center;
-  background-color: #777777;
-  color: white;
-`;
-
 export const Modality: DataGridRenderer<any> = props => {
   const series = props.value;
-  return <ModalitySpan>{series.modality}</ModalitySpan>;
+  return <span className={styles.modality}>{series.modality}</span>;
 };
 
 export const UidDisplay: React.FC<{

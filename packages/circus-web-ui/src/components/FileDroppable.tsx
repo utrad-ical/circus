@@ -1,20 +1,15 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
-
-const StyledDiv = styled.div`
-  border: 2px solid transparent;
-  &.active {
-    border-color: orange;
-  }
-`;
+import classnames from 'classnames';
+import styles from './FileDroppable.module.css';
 
 /**
  * Simple div which accepts file drop.
  */
 export const FileDroppable: React.FC<{
   onDropFile: (files: FileList) => void;
+  className?: string;
 }> = props => {
-  const { onDropFile, children } = props;
+  const { onDropFile, className, children } = props;
   const [active, setActive] = useState(false);
 
   const dragEnter = (event: React.DragEvent) => {
@@ -38,8 +33,12 @@ export const FileDroppable: React.FC<{
   };
 
   return (
-    <StyledDiv
-      className={active ? 'active' : ''}
+    <div
+      className={classnames(
+        styles.fileDroppable,
+        active && styles.active,
+        className
+      )}
       onDragEnter={dragEnter}
       onDragOver={dragOver}
       onDrop={drop}
@@ -47,6 +46,6 @@ export const FileDroppable: React.FC<{
       onDragEnd={dragLeaveEnd}
     >
       {children}
-    </StyledDiv>
+    </div>
   );
 };

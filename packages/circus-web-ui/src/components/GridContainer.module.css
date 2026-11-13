@@ -1,0 +1,38 @@
+.gridContainer {
+  border: 1px solid black;
+  display: grid;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  grid-template-columns: var(--grid-template-columns);
+  grid-template-rows: var(--grid-template-rows);
+  overflow: hidden;
+
+  .cell {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    overflow: hidden;
+  }
+
+  .item {
+    display: contents;
+  }
+
+  .cellDropIndicator {
+    pointer-events: none;
+    display: none;
+    position: absolute;
+    background: #88888888;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  .lineDropIndicator {
+    pointer-events: none;
+    display: none;
+    position: absolute;
+    background: #8888ff88;
+  }
+}

@@ -1,23 +1,9 @@
+import classnames from 'classnames';
 import React from 'react';
 import type { CircusIconDefinition } from './BodyPartIcon.tsx';
 import BodyPartIcon from './BodyPartIcon.tsx';
-import styled from 'styled-components';
 import Tooltip from './Tooltip.tsx';
-
-const StyledSpan = styled.span`
-  display: inline-block;
-  .name {
-    display: inline-block;
-    vertical-align: middle;
-    margin-left: 5px;
-  }
-  .title {
-    font-weight: bolder;
-  }
-  .description {
-    font-size: 90%;
-  }
-`;
+import styles from './IconDisplay.module.css';
 
 const IconDisplay: React.FC<{
   size?: string;
@@ -29,13 +15,15 @@ const IconDisplay: React.FC<{
   const { size, icon, title, description, toolTip } = props;
 
   const content = (
-    <StyledSpan className="icon-display">
+    <span className={classnames('icon-display', styles.iconDisplay)}>
       <BodyPartIcon icon={icon} size={size} />
-      <div className="name">
-        {title && <div className="title">{title}</div>}
-        {description && <div className="description"> {description}</div>}
+      <div className={styles.name}>
+        {title && <div className={styles.title}>{title}</div>}
+        {description && (
+          <div className={styles.description}> {description}</div>
+        )}
       </div>
-    </StyledSpan>
+    </span>
   );
 
   return toolTip ? <Tooltip content={toolTip}>{content}</Tooltip> : content;

@@ -1,0 +1,11 @@
+.root {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  max-width: 400px;
+  gap: 10px;
+  top: 50px;
+  right: 25px;
+  z-index: 2000;
+}

@@ -1,5 +1,5 @@
 .badge {
-  --badge-color: var(--muted);
+  --badge-color: light-dark(#666666, #999999);
   display: inline-block;
   margin-inline: 1px;
   padding: 0.2em 0.6em 0.3em;

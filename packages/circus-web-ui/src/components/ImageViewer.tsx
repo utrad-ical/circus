@@ -90,7 +90,7 @@ const ImageViewer: React.FC<{
   composition?: rs.Composition;
   stateChanger?: StateChanger<any>;
   tool?: ToolBaseClass;
-  initialStateSetter: InitialStateSetterFunc<any>;
+  initialStateSetter?: InitialStateSetterFunc<any>;
   id?: string | number;
   onCreateViewer?: (viewer: rs.Viewer, id?: string | number) => void;
   onDestroyViewer?: (viewer: rs.Viewer) => void;

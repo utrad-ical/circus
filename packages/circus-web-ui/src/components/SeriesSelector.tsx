@@ -13,11 +13,11 @@ import * as mr from 'multi-integer-range';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { newSearch } from '#store/searches.ts';
-import styled from 'styled-components';
 import type Series from '#types/Series.ts';
 import { useApi } from '#utils/api.ts';
 import { UidDisplay } from '../pages/search/SearchResultRenderer.tsx';
 import PartialVolumeDescriptorEditor from './PartialVolumeDescriptorEditor.tsx';
+import styles from './SeriesSelector.module.css';
 import TimeDisplay from './TimeDisplay.tsx';
 
 const PartialVolumeRenderer: React.FC<{
@@ -262,7 +262,9 @@ const SeriesSelector: React.FC<{
     {
       key: 'seriesUid',
       caption: 'Series UID',
-      renderer: ({ value }) => <SeriesUidSpan>{value.seriesUid}</SeriesUidSpan>
+      renderer: ({ value }) => (
+        <span className={styles.seriesUid}>{value.seriesUid}</span>
+      )
     },
     {
       key: 'seriesDate',
@@ -311,7 +313,7 @@ const SeriesSelector: React.FC<{
       <PanelHeader>Series</PanelHeader>
       <PanelBody>
         <DataGrid columns={columns} value={value} />
-        <SelectAdditionalSeriesDiv>
+        <div className={styles.selectAdditionalSeries}>
           {!alwaysShowRelevantSeries && (
             <Button
               icon={
@@ -340,36 +342,19 @@ const SeriesSelector: React.FC<{
               />
             </>
           )}
-        </SelectAdditionalSeriesDiv>
+        </div>
         {showRelevantSeries &&
           primarySeries &&
           (seriesSearchTarget === 'studyUid' || primarySeries.patientInfo ? (
             <RelevantSeries onSeriesRegister={handleSeriesRegister} />
           ) : (
-            <WarninMessageSpan>
+            <span className={styles.warningMessage}>
               You don&rsquo;t have permission to access personal information.
-            </WarninMessageSpan>
+            </span>
           ))}
       </PanelBody>
     </Panel>
   );
 };
-
-const SeriesUidSpan = styled.span`
-  font-size: 80%;
-  word-break: break-all;
-`;
-
-const WarninMessageSpan = styled.span`
-  display: block;
-  text-align: center;
-  margin: 1em;
-`;
-
-const SelectAdditionalSeriesDiv = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5em;
-`;
 
 export default SeriesSelector;

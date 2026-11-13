@@ -1,0 +1,12 @@
+.root {
+  /* Two pairs of caption and editor in a row */
+  .basicFilter {
+    grid-template-columns: auto 1fr auto 1fr;
+    > * {
+      grid-column: span 2;
+    }
+    @media (max-width: 768px) {
+      grid-template-columns: auto 1fr;
+    }
+  }
+}

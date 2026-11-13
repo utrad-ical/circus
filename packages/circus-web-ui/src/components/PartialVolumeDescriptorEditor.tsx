@@ -10,7 +10,7 @@ import {
 import { DialogBody, DialogFooter } from '#components/Dialog.tsx';
 import * as mr from 'multi-integer-range';
 import React, { useMemo, useState } from 'react';
-import styled from 'styled-components';
+import styles from './PartialVolumeDescriptorEditor.module.css';
 
 const PartialVolumeDescriptorEditor: React.FC<{
   onResolve: (
@@ -76,7 +76,7 @@ const PartialVolumeDescriptorEditor: React.FC<{
           onChange={setDescriptor}
         />
         <hr />
-        <PreviewDiv>
+        <div className={styles.preview}>
           <span>
             <b>Preview:</b> {describePartialVolumeDescriptor(descriptor)}
           </span>
@@ -87,7 +87,7 @@ const PartialVolumeDescriptorEditor: React.FC<{
           >
             Flip start/end
           </Button>
-        </PreviewDiv>
+        </div>
       </DialogBody>
       <DialogFooter>
         <Button variant="link" onClick={() => onResolve(null)}>
@@ -107,11 +107,5 @@ const PartialVolumeDescriptorEditor: React.FC<{
     </>
   );
 };
-
-const PreviewDiv = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
 
 export default PartialVolumeDescriptorEditor;

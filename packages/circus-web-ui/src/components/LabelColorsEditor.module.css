@@ -1,0 +1,8 @@
+.labelColorsEditor {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  [role='listbox'] > [aria-selected='true'] {
+    outline: solid 2px var(--circus-highlight-color);
+  }
+}

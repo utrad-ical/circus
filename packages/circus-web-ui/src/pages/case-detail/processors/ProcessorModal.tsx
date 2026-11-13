@@ -2,9 +2,9 @@ import Button from '#components/Button.tsx';
 import { DialogBody, DialogFooter, DialogHeader } from '#components/Dialog.tsx';
 import ProgressBar from '#components/ProgressBar.tsx';
 import React, { useState } from 'react';
-import styled from 'styled-components';
 import type { ProcessorProgress, Editor } from './processor-types.ts';
 import type { InternalLabel } from '../labelData.ts';
+import styles from './ProcessorModal.module.css';
 
 const ProcessorModal: React.FC<{
   title: string;
@@ -37,7 +37,7 @@ const ProcessorModal: React.FC<{
     <>
       <DialogHeader>{title}</DialogHeader>
       <DialogBody>
-        <StyledDiv>
+        <div className={styles.options}>
           <OptionsEditor
             value={options}
             onChange={setOptions}
@@ -47,7 +47,7 @@ const ProcessorModal: React.FC<{
           {progress && !progress.finished && (
             <ProgressBar value={progress.value} label={progress.label} />
           )}
-        </StyledDiv>
+        </div>
       </DialogBody>
       <DialogFooter>
         <Button variant="link" onClick={onHide}>
@@ -60,11 +60,5 @@ const ProcessorModal: React.FC<{
     </>
   );
 };
-
-const StyledDiv = styled.div`
-  display: flex;
-  flex-flow: column;
-  gap: 15px;
-`;
 
 export default ProcessorModal;

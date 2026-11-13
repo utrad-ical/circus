@@ -2,7 +2,7 @@ import Button from '#components/Button.tsx';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import AdminContainer from './AdminContainer.tsx';
-import styled from 'styled-components';
+import styles from './AdminIndex.module.css';
 
 const Btn: React.FC<{
   to: string;
@@ -16,20 +16,6 @@ const Btn: React.FC<{
   </Link>
 );
 
-const Row = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  > a {
-    display: block;
-    margin-bottom: 20px;
-    margin-right: 10px;
-    flex: 0 0 320px;
-    > button {
-      width: 100%;
-    }
-  }
-`;
-
 const AdminIndex: React.FC = () => {
   return (
     <AdminContainer
@@ -37,37 +23,37 @@ const AdminIndex: React.FC = () => {
       icon="circus-administration"
       className="admin-index"
     >
-      <Row>
+      <div className={styles.row}>
         <Btn
           to="general"
           link="Server Configuration"
           glyph="material-grid_view"
         />
-      </Row>
-      <Row>
+      </div>
+      <div className={styles.row}>
         <Btn to="group" link="Groups" glyph="material-groups" />
         <Btn to="user" link="Users" glyph="material-person" />
-      </Row>
+      </div>
       <h3>CIRCUS DB</h3>
-      <Row>
+      <div className={styles.row}>
         <Btn to="project" link="Projects" glyph="material-school" />
-      </Row>
+      </div>
       <h3>CIRCUS CS</h3>
-      <Row>
+      <div className={styles.row}>
         <Btn
           to="plugin-job-manager"
           link="Job Manager"
           glyph="material-list_alt"
         />
         <Btn to="plugins" link="CAD Plug-ins" glyph="circus-app" />
-      </Row>
-      <Row>
+      </div>
+      <div className={styles.row}>
         <Btn
           to="plugin-job-queue"
           link="Job Queue"
           glyph="material-pending_actions"
         />
-      </Row>
+      </div>
     </AdminContainer>
   );
 };

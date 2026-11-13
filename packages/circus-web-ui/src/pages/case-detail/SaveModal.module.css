@@ -1,0 +1,9 @@
+.saveModal {
+  display: contents;
+  input {
+    width: 100%;
+  }
+  .templates {
+    margin-top: 10px;
+  }
+}

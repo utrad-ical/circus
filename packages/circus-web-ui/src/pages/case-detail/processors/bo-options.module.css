@@ -1,0 +1,15 @@
+.operationType {
+  > .symbol {
+    display: inline-block;
+    width: 20px;
+    font-weight: bolder;
+    text-align: center;
+  }
+}
+
+.options {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 5px;
+}

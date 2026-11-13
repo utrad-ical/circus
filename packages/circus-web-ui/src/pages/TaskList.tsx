@@ -8,13 +8,13 @@ import SearchResultsView, {
 import TimeDisplay from '#components/TimeDisplay.tsx';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components';
 import { useApi } from '#utils/api.ts';
 import { newSearch } from '../store/searches.ts';
 import type Task from '#types/Task.ts';
 import useTaskDismisser from '#utils/useTaskDismisser.ts';
 import { capitalize } from '#utils/util.ts';
 import useTaskDownloadHandler from '#utils/useTaskDownloadHandler.ts';
+import styles from './TaskList.module.css';
 
 const sortOptions = makeSortOptions({
   createdAt: 'task create time',
@@ -29,7 +29,12 @@ const StatusRenderer: React.FC<{ value: Task }> = ({ value }) => {
   // Takes the real-time task progress into consideration
   const progress = useTaskProgress(value.taskId);
   const status = progress?.status ?? value.status;
-  return <span className={status}>{capitalize(status)}</span>;
+  const className = {
+    error: styles.statusError,
+    processing: styles.statusProcessing,
+    finished: styles.statusFinished
+  }[status];
+  return <span className={className}>{capitalize(status)}</span>;
 };
 
 const MessageRenderer: React.FC<{ value: Task }> = ({ value }) => {
@@ -43,8 +48,13 @@ const MessageRenderer: React.FC<{ value: Task }> = ({ value }) => {
     typeof progress?.total === 'number'
       ? `(${progress.finished}/${progress.total})`
       : '';
+  const className = {
+    error: styles.messageError,
+    processing: styles.messageProcessing,
+    finished: undefined
+  }[status];
   return (
-    <span className={status}>
+    <span className={className}>
       {number && <>{number} </>}
       {message}
     </span>
@@ -71,6 +81,7 @@ const columns: DataGridColumnDefinition<Task>[] = [
   {
     caption: 'Download',
     key: 'download',
+    className: styles.center,
     renderer: function DownloadLink({ value }) {
       const { status, taskId, downloadFileType } = value;
       const handleClick = useTaskDownloadHandler(taskId);
@@ -89,6 +100,7 @@ const columns: DataGridColumnDefinition<Task>[] = [
   {
     caption: 'Dismiss',
     key: 'dismiss',
+    className: styles.right,
     renderer: (({ value }) => {
       const dismissTask = useTaskDismisser();
       return (
@@ -109,7 +121,7 @@ const columns: DataGridColumnDefinition<Task>[] = [
 const DataView: React.FC<{ value: Task[] }> = props => {
   const { value } = props;
   return (
-    <StyledDataGrid
+    <DataGrid
       className="task-search-result"
       columns={columns}
       itemPrimaryKey="taskId"
@@ -117,36 +129,6 @@ const DataView: React.FC<{ value: Task[] }> = props => {
     />
   );
 };
-
-const StyledDataGrid = styled(DataGrid)`
-  .status {
-    .error {
-      color: red;
-      font-weight: bold;
-    }
-    .processing {
-      color: blue;
-      font-weight: bold;
-    }
-    .finished {
-      color: green;
-    }
-  }
-  .message {
-    .error {
-      color: red;
-    }
-    .processing {
-      color: blue;
-    }
-  }
-  .download {
-    text-align: center;
-  }
-  .dismiss {
-    text-align: right;
-  }
-`;
 
 const DebugTaskLauncher: React.FC = props => {
   const api = useApi();

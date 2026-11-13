@@ -16,16 +16,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import type { SearchResource } from '#store/searches.ts';
 import { newSearch } from '#store/searches.ts';
-import styled from 'styled-components';
+import styles from './EditorPage.module.css';
 import { useApi } from '#utils/api.ts';
 import { useLoginManager } from '#utils/loginManager.ts';
 import AdminContainer from './AdminContainer.tsx';
-
-const StyledSubTitle = styled.div`
-  font-weight: bold;
-  font-size: 110%;
-  margin: 10px 0;
-`;
 
 type Subtitle = { icon?: string; title: string };
 
@@ -288,7 +282,7 @@ const Editor: React.FC<{
           subtitles.map((subtitle, i) => (
             <React.Fragment key={i}>
               {i > 0 && <hr />}
-              <StyledSubTitle>
+              <div className={styles.subTitle}>
                 {subtitle.icon && (
                   <>
                     <Icon icon={subtitle.icon} />
@@ -296,7 +290,7 @@ const Editor: React.FC<{
                   </>
                 )}
                 {subtitle.title}
-              </StyledSubTitle>
+              </div>
               <PropertyEditor
                 value={currentData}
                 complaints={complaints}

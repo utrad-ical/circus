@@ -1,0 +1,38 @@
+.caseInfo {
+  /* Stronger than the padding in Collapser.module.css, whatever the load order */
+  &:global(.collapser) :global(.collapser-body) {
+    padding: 3px;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+    align-items: center;
+    > * {
+      margin: 0 10px;
+    }
+  }
+  .spacer {
+    flex-grow: 1;
+  }
+  .tagList {
+    > :global(.tag) {
+      margin-left: 3px;
+    }
+  }
+}
+
+.menuBar {
+  border-bottom: 1px solid var(--circus-border);
+  border-top: 1px solid var(--circus-border);
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  flex: none;
+  .left {
+    padding: 3px;
+  }
+  .right {
+    flex: 1000;
+    text-align: right;
+    padding: 3px;
+  }
+}

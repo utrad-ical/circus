@@ -23,7 +23,3 @@
 .xxl {
   font-size: 6em;
 }
-
-.icon:global(.text-link) {
-  cursor: pointer;
-}

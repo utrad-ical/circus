@@ -2,7 +2,7 @@ import React from 'react';
 import { dismissMessage } from '#store/messages.ts';
 import Alert, { type AlertVariant } from '#components/Alert.tsx';
 import { useSelector, useDispatch } from 'react-redux';
-import styled from 'styled-components';
+import styles from './MessageBox.module.css';
 
 const MessageBox: React.FC<{}> = React.memo(props => {
   const messages = useSelector(state => state.messages);
@@ -10,7 +10,7 @@ const MessageBox: React.FC<{}> = React.memo(props => {
 
   if (!messages.length) return null;
   return (
-    <StyledDiv>
+    <div className={styles.root}>
       {messages.map(m => {
         return (
           <Alert
@@ -22,20 +22,8 @@ const MessageBox: React.FC<{}> = React.memo(props => {
           </Alert>
         );
       })}
-    </StyledDiv>
+    </div>
   );
 });
-
-const StyledDiv = styled.div`
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  width: 90%;
-  max-width: 400px;
-  gap: 10px;
-  top: 50px;
-  right: 25px;
-  z-index: 2000;
-`;
 
 export default MessageBox;

@@ -3,19 +3,20 @@ import React from 'react';
 import Select from '#components/Select.tsx';
 import TimeDisplay from '#components/TimeDisplay.tsx';
 import UserDisplay from '#components/UserDisplay.tsx';
-import styled from 'styled-components';
+import type { SelectOptions } from '#utils/normalizeOptions.ts';
 import type { Revision } from './revisionData.ts';
 import type { ExternalLabel } from './labelData.ts';
+import styles from './RevisionSelector.module.css';
 
 const Item: React.FC<{ value: Revision<ExternalLabel> }> = React.memo(props => {
   const revision = props.value;
   return (
-    <span className="revision-selector-item">
+    <span className={styles.item}>
       <span className="date">
         <TimeDisplay value={revision.date} />
       </span>
       <Badge className="status">{revision.status}</Badge>
-      <span className="description">{revision.description}</span>
+      <span className={styles.description}>{revision.description}</span>
       <span className="creator">
         <UserDisplay userEmail={revision.creator} />
       </span>
@@ -47,22 +48,15 @@ const RevisionSelector: React.FC<{
     });
   const sel = `rev${selected}`;
   return (
-    <StyledShrinkSelect
-      options={opts}
+    <Select
+      className={styles.revisionSelect}
+      // Captions are elements, which Select renders as they are
+      options={opts as SelectOptions}
       value={sel}
       onChange={handleSelect}
       disabled={disabled}
     />
   );
 });
-
-const StyledShrinkSelect = styled(Select)`
-  .revision-selector-item > span {
-    margin: 0 3px;
-  }
-  .description {
-    font-weight: bold;
-  }
-`;
 
 export default RevisionSelector;

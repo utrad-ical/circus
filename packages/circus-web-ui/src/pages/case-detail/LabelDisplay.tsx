@@ -1,10 +1,11 @@
+import classNames from 'classnames';
 import Icon from '#components/Icon.tsx';
 import type { DragEventHandler, MouseEventHandler } from 'react';
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
 import { mostReadable } from 'tinycolor2';
 import type { InternalLabel } from './labelData.ts';
 import { labelTypes } from './labelData.ts';
+import styles from './LabelDisplay.module.css';
 
 const LabelDisplay: React.FC<{
   label: InternalLabel;
@@ -33,9 +34,9 @@ const LabelDisplay: React.FC<{
   );
 
   return (
-    <StyledLabelDiv className="circus-label">
+    <div className={classNames('circus-label', styles.labelDisplay)}>
       <div
-        className="color-preview"
+        className={styles.colorPreview}
         onClick={onColorClick}
         draggable={colorDraggable}
         onDragStart={onColorDragStart}
@@ -49,49 +50,17 @@ const LabelDisplay: React.FC<{
           <Icon icon="material-visibility_off" />
         ) : null}
       </div>
-      <div className="caption">
+      <div className={styles.caption}>
         <Icon icon={labelTypes[label.type].icon} />
-        {label.name ?? <span className="no-name">Label</span>}
+        {label.name ?? <span className={styles.noName}>Label</span>}
         {hintText && (
-          <span className="hint" title={hintText}>
+          <span className={classNames('hint', styles.hint)} title={hintText}>
             {hintText}
           </span>
         )}
       </div>
-    </StyledLabelDiv>
+    </div>
   );
 };
 
 export default LabelDisplay;
-
-const StyledLabelDiv = styled.div`
-  height: 28px;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  > .color-preview {
-    width: 25px;
-    min-width: 25px;
-    display: block;
-    height: 20px;
-    text-align: center;
-    border: 1px solid var(--circus-border);
-  }
-  > .caption {
-    white-space: nowrap;
-    flex-grow: 1;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    > .circus-icon {
-      font-size: 130%;
-    }
-    .no-name {
-      color: gray;
-    }
-    .hint {
-      opacity: 0.7;
-      font-size: 80%;
-    }
-  }
-`;

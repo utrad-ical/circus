@@ -1,0 +1,13 @@
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  > a {
+    display: block;
+    margin-bottom: 20px;
+    margin-right: 10px;
+    flex: 0 0 320px;
+    > button {
+      width: 100%;
+    }
+  }
+}

@@ -11,22 +11,10 @@ import ImageViewer from '#components/ImageViewer.tsx';
 import * as rs from '@utrad-ical/circus-rs';
 import { toolFactory } from '@utrad-ical/circus-rs';
 import useLoadData from '#utils/useLoadData.ts';
-import styled from 'styled-components';
 import styles from './SeriesDetail.module.css';
 import { Link, useParams } from 'react-router-dom';
 import type { SeriesEntryWithHints } from '@utrad-ical/circus-ui-kit';
 import { useVolumeLoaders } from '@utrad-ical/circus-ui-kit';
-
-const StyledImageViewer = styled(ImageViewer)`
-  background: black;
-  width: 512px;
-  height: 512px;
-`;
-
-const StyledMenu = styled.div`
-  text-align: right;
-  margin-bottom: 1em;
-`;
 
 const SeriesDetail: React.FC<{}> = props => {
   const seriesUid = useParams<{ uid: string }>().uid;
@@ -133,15 +121,15 @@ const SeriesDetail: React.FC<{}> = props => {
       </h1>
       <div className={styles.columns}>
         <div>
-          <StyledImageViewer
+          <ImageViewer
+            className={styles.viewer}
             id="series-detail"
-            composition={composition}
+            composition={composition ?? undefined}
             tool={pagerTool}
-            initialTool={pagerTool}
           />
         </div>
         <div>
-          <StyledMenu>
+          <div className={styles.menu}>
             <Link to={`/new-case/${seriesUid}`}>
               <Button icon="circus-case" variant="primary">
                 New Case
@@ -153,7 +141,7 @@ const SeriesDetail: React.FC<{}> = props => {
                 New Job
               </Button>
             </Link>
-          </StyledMenu>
+          </div>
           {typeof seriesData.patientInfo === 'object' ? (
             <Table
               data={seriesData.patientInfo}

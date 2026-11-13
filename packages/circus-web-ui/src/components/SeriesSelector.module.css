@@ -1,0 +1,16 @@
+.seriesUid {
+  font-size: 80%;
+  word-break: break-all;
+}
+
+.warningMessage {
+  display: block;
+  text-align: center;
+  margin: 1em;
+}
+
+.selectAdditionalSeries {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}

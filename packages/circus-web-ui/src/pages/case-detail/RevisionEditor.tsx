@@ -29,7 +29,6 @@ import React, {
   useRef,
   useState
 } from 'react';
-import styled from 'styled-components';
 import type Project from '#types/Project.ts';
 import type Series from '#types/Series.ts';
 import { useApi } from '#utils/api.ts';
@@ -62,6 +61,7 @@ import type { ViewOptions } from './ToolBar.tsx';
 import ToolBar, { zDimmedThresholdOptions } from './ToolBar.tsx';
 import ViewerGrid from './ViewerGrid.tsx';
 import type { ViewWindow } from './ViewWindowEditor.tsx';
+import styles from './RevisionEditor.module.css';
 
 const useCompositions = (
   series: {
@@ -967,7 +967,11 @@ const RevisionEditor: React.FC<{
   if (!activeSeries) return null;
 
   return (
-    <StyledDiv className={classNames('case-revision-data', { busy })}>
+    <div
+      className={classNames('case-revision-data', styles.revisionEditor, {
+        [styles.busy]: busy
+      })}
+    >
       <SideContainer>
         <Collapser title="Series / Labels" className="labels" noPadding>
           <LabelMenu
@@ -988,7 +992,7 @@ const RevisionEditor: React.FC<{
             multipleSeriesShown={multipleSeriesShown}
             metadata={metadata}
           />
-          <div className="add-series-pane">
+          <div className={styles.addSeriesPane}>
             <Button
               size="xsmall"
               icon="material-add"
@@ -1002,10 +1006,15 @@ const RevisionEditor: React.FC<{
           {activeLabel &&
             Object.keys(projectData.labelAttributesSchema.properties || {})
               .length > 0 && (
-              <div className="label-attributes">
+              <div
+                className={classNames(
+                  'label-attributes',
+                  styles.labelAttributes
+                )}
+              >
                 <b>Attributes for</b>:{' '}
                 <Icon icon={labelTypes[activeLabel.type].icon} />{' '}
-                <span className="label-name">{activeLabel.name}</span>
+                <span className={styles.labelName}>{activeLabel.name}</span>
                 <JsonSchemaEditor
                   key={activeLabel.temporaryKey + ':' + refreshCounter}
                   schema={projectData.labelAttributesSchema}
@@ -1040,7 +1049,7 @@ const RevisionEditor: React.FC<{
           </Collapser>
         )}
       </SideContainer>
-      <div className="case-revision-main">
+      <div className={classNames('case-revision-main', styles.main)}>
         <ToolBar
           active={activeToolName}
           onChangeTool={setActiveTool}
@@ -1085,41 +1094,8 @@ const RevisionEditor: React.FC<{
           initialValue={editingData.revision.series}
         />
       </Dialog>
-    </StyledDiv>
+    </div>
   );
 };
-
-const StyledDiv = styled.div`
-  height: 0px; // recalculated by flexbox
-  flex: 1 1 0;
-  display: flex;
-  flex-direction: row;
-
-  .case-revision-main {
-    // tool bar and viewer grid
-    height: 100%;
-    width: 0px;
-    flex: 1 0 0;
-    display: flex;
-    flex-direction: column;
-    background-color: #333333;
-  }
-
-  &.busy {
-    opacity: 0.5;
-  }
-  .add-series-pane {
-    margin: 15px;
-    text-align: right;
-  }
-
-  .label-attributes {
-    margin: 15px;
-    .label-name {
-      overflow: visible;
-      word-break: break-all;
-    }
-  }
-`;
 
 export default RevisionEditor;

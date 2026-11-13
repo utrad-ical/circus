@@ -1,6 +1,5 @@
 import Select from '#components/Select.tsx';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
 import LabelDisplay from '../LabelDisplay.tsx';
 import type {
   BooleanOperationsOptions,
@@ -8,6 +7,7 @@ import type {
 } from './booleanOperationsProcessor.ts';
 import { booleanOperationTypes } from './booleanOperationsProcessor.ts';
 import type { Editor } from './processor-types.ts';
+import styles from './bo-options.module.css';
 
 const RenderOperationType: React.FC<{
   caption: BooleanOperationType;
@@ -19,20 +19,12 @@ const RenderOperationType: React.FC<{
     intersect: ['∩', 'Intersect']
   };
   return (
-    <StyledSpan>
-      <span className="symbol">{map[caption][0]}</span> ({map[caption][1]})
-    </StyledSpan>
+    <span className={styles.operationType}>
+      <span className={styles.symbol}>{map[caption][0]}</span> (
+      {map[caption][1]})
+    </span>
   );
 };
-
-const StyledSpan = styled.span`
-  > .symbol {
-    display: inline-block;
-    width: 20px;
-    font-weight: bolder;
-    text-align: center;
-  }
-`;
 
 export const initialOptions: BooleanOperationsOptions = {
   operation: 'add',
@@ -70,7 +62,7 @@ export const OptionsEditor: Editor<BooleanOperationsOptions> = props => {
   );
 
   return (
-    <StyledDiv>
+    <div className={styles.options}>
       <div>Label1:</div>
       <LabelDisplay label={labels[activeLabelIndex]} />
       <div>Operation:</div>
@@ -89,13 +81,6 @@ export const OptionsEditor: Editor<BooleanOperationsOptions> = props => {
         onChange={handleSelectLabel2}
         renderer={RenderLabel}
       />
-    </StyledDiv>
+    </div>
   );
 };
-
-const StyledDiv = styled.div`
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 5px;
-`;

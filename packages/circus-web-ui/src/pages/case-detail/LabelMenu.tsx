@@ -12,13 +12,13 @@ import MenuItem from '#components/MenuItem.tsx';
 import PopoverButton from '#components/PopoverButton.tsx';
 import SplitButton from '#components/SplitButton.tsx';
 import React, { useState } from 'react';
-import styled from 'styled-components';
 import useKeyboardShortcut from '#utils/useKeyboardShortcut.ts';
 import useLocalPreference from '#utils/useLocalPreference.ts';
 import useLoginUser from '#utils/useLoginUser.ts';
 import { defaultLabelColors } from '../../labelColors.ts';
 import * as c from './caseStore.ts';
 import createCurrentLabelsUpdator from './createCurrentLabelsUpdator.ts';
+import styles from './LabelMenu.module.css';
 import type {
   InternalLabel,
   InternalLabelData,
@@ -303,7 +303,7 @@ const LabelMenu: React.FC<{
   };
 
   return (
-    <StyledButtonsDiv>
+    <div className={styles.buttons}>
       <AppearanceEditor
         appearance={
           activeLabel
@@ -330,7 +330,7 @@ const LabelMenu: React.FC<{
       >
         All
       </Button>
-      <div className="spacer" />
+      <div className={styles.spacer} />
       {activeLabel && labelTypes[activeLabel.type].canConvertTo && (
         <Button
           size="xsmall"
@@ -409,29 +409,13 @@ const LabelMenu: React.FC<{
           />
         )}
       </Dialog>
-    </StyledButtonsDiv>
+    </div>
   );
 };
-
-const StyledButtonsDiv = styled.div`
-  display: flex;
-  margin: 3px 10px;
-  .spacer {
-    flex-grow: 1;
-  }
-`;
 
 export default LabelMenu;
 
 ////////////////////////////////////////////////////////////////////////////////
-
-const ColorEditorButton = styled(Button)`
-  min-width: 50px;
-`;
-
-const ColorEditorPopoverButton = styled(PopoverButton)`
-  min-width: 50px;
-`;
 
 const AppearanceEditor: React.FC<{
   appearance: LabelAppearance | undefined;
@@ -443,18 +427,22 @@ const AppearanceEditor: React.FC<{
   const { appearance, hidden, disabled, onChange, labelColors } = props;
   if (disabled || !appearance) {
     return (
-      <ColorEditorButton size="xsmall" style={{ backgroundColor: '#eeeeee' }}>
+      <Button
+        className={styles.colorEditorButton}
+        size="xsmall"
+        style={{ backgroundColor: '#eeeeee' }}
+      >
         -
-      </ColorEditorButton>
+      </Button>
     );
   }
 
   return (
-    <ColorEditorPopoverButton
+    <PopoverButton
       title={`${appearance.alpha * 100}%`}
       size="xsmall"
       noCaret
-      className="color-editor-button"
+      className={`color-editor-button ${styles.colorEditorButton}`}
       style={{
         backgroundColor: appearance.color,
         color: `contrast-color(${appearance.color})`
@@ -467,7 +455,7 @@ const AppearanceEditor: React.FC<{
         onChange={onChange}
         labelColors={labelColors}
       />
-    </ColorEditorPopoverButton>
+    </PopoverButton>
   );
 };
 
@@ -481,13 +469,13 @@ const AppearancePopover: React.FC<{
   const { color, alpha } = appearance;
 
   return (
-    <StyledAppearancePopoverDiv>
+    <div className={styles.appearancePopover}>
       <ColorPalette
         value={color}
         onChange={(color: string) => onChange({ color, alpha }, hidden)}
         colors={labelColors}
       />
-      <div className="alpha-pane">
+      <div className={styles.alphaPane}>
         <Button
           icon={hidden ? 'material-visibility_off' : 'material-visibility'}
           variant="link"
@@ -495,7 +483,7 @@ const AppearancePopover: React.FC<{
           onClick={() => onChange(appearance, !hidden)}
         />
         <Slider
-          className="alpha-slider"
+          className={styles.alphaSlider}
           min={0}
           max={100}
           step={10}
@@ -503,19 +491,9 @@ const AppearancePopover: React.FC<{
           onChange={(v: number) => onChange({ color, alpha: v / 100 }, hidden)}
         />
       </div>
-    </StyledAppearancePopoverDiv>
+    </div>
   );
 };
-
-const StyledAppearancePopoverDiv = styled.div`
-  .alpha-pane {
-    display: flex;
-    align-items: center;
-  }
-  .alpha-slider {
-    width: 85px;
-  }
-`;
 
 const ShortcutIconButton: React.FC<
   { shortcut: string } & ButtonProps

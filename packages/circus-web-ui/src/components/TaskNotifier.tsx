@@ -4,7 +4,6 @@ import moment from 'moment';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { newSearch, updateSearch } from '#store/searches.ts';
-import styled from 'styled-components';
 import type Task from '#types/Task.ts';
 import { useApi } from '#utils/api.ts';
 import useTaskDismisser from '#utils/useTaskDismisser.ts';
@@ -12,6 +11,7 @@ import useTaskDownloadHandler from '#utils/useTaskDownloadHandler.ts';
 import type { TaskProgress } from '../store/taskProgress.ts';
 import NavMenu from './NavMenu.tsx';
 import ProgressBar from './ProgressBar.tsx';
+import styles from './TaskNotifier.module.css';
 
 const TaskNotifier: React.FC<{}> = props => {
   const api = useApi();
@@ -65,12 +65,14 @@ const TaskNotifier: React.FC<{}> = props => {
   };
 
   return (
-    <StyledNavMenu
+    <NavMenu
       name=""
       icon="material-notifications"
       link="/task-list"
       align="end"
-      className={classNames({ 'in-progress': inProgress })}
+      className={classNames(styles.taskNotifier, {
+        [styles.inProgress]: inProgress
+      })}
     >
       {tasks.map(task => {
         const progress = taskProgress[task.taskId];
@@ -83,19 +85,9 @@ const TaskNotifier: React.FC<{}> = props => {
           />
         );
       })}
-    </StyledNavMenu>
+    </NavMenu>
   );
 };
-
-const StyledNavMenu = styled(NavMenu)`
-  > ul {
-    max-height: 500px;
-    overflow-y: auto;
-  }
-  &.in-progress > a svg {
-    color: yellow;
-  }
-`;
 
 const TaskDisplay: React.FC<{
   task: Task;
@@ -119,11 +111,15 @@ const TaskDisplay: React.FC<{
         : `Error (${moment(task.endedAt).fromNow()})`);
 
   return (
-    <StyledTaskDisplay className={status}>
-      <div className="task-main">
-        <div className="task-info">
-          <div className="task-name">{task.name}</div>
-          <div className="task-message">{message}</div>
+    <div
+      className={classNames(styles.taskDisplay, {
+        [styles.error]: status === 'error'
+      })}
+    >
+      <div className={styles.main}>
+        <div className={styles.info}>
+          <div>{task.name}</div>
+          <div className={styles.message}>{message}</div>
         </div>
         {task.downloadFileType && task.status === 'finished' && (
           <Button
@@ -142,7 +138,7 @@ const TaskDisplay: React.FC<{
         />
       </div>
       <ProgressBar
-        className="task-progressbar"
+        className={styles.progressbar}
         variant={
           status === 'error'
             ? 'danger'
@@ -155,42 +151,8 @@ const TaskDisplay: React.FC<{
         }
         max={status === 'processing' && counted ? progress!.total : 1}
       />
-    </StyledTaskDisplay>
+    </div>
   );
 };
-
-const StyledTaskDisplay = styled.div`
-  color: black;
-  width: 300px;
-  border-bottom: 2px;
-  line-height: 1;
-  &:hover {
-    color: white;
-    background: var(--circus-brand-primary);
-  }
-  &.error {
-    .task-message {
-      color: red;
-    }
-  }
-  .task-main {
-    display: flex;
-    flex-flow: row;
-    align-items: center;
-  }
-  .task-info {
-    flex-grow: 1;
-  }
-  .task-info {
-    padding: 5px 5px 0 5px;
-  }
-  .task-message {
-    padding: 2px 7px;
-    font-size: 80%;
-  }
-  .task-progressbar [role='progressbar'] {
-    height: 4px;
-  }
-`;
 
 export default TaskNotifier;

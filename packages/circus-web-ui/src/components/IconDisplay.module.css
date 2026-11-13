@@ -1,0 +1,14 @@
+.iconDisplay {
+  display: inline-block;
+  .name {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 5px;
+  }
+  .title {
+    font-weight: bolder;
+  }
+  .description {
+    font-size: 90%;
+  }
+}

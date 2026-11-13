@@ -1,8 +1,8 @@
 import React from 'react';
 import MultiSelect from '#components/MultiSelect.tsx';
 import BodyPartIcon from './BodyPartIcon.tsx';
-import styled from 'styled-components';
 import type Project from '#types/Project.ts';
+import styles from './ProjectSelectorMultiple.module.css';
 
 const Renderer: React.FC<{
   renderAs: 'select' | 'list';
@@ -19,14 +19,6 @@ const Renderer: React.FC<{
   );
 };
 
-const StyledMultiSelect = styled(MultiSelect)`
-  ul {
-    white-space: nowrap;
-    max-width: 400px;
-    overflow: hidden;
-  }
-`;
-
 const ProjectSelectorMultiple: React.FC<{
   projects: { projectId: string; project: Project }[];
   noneText?: string;
@@ -41,7 +33,14 @@ const ProjectSelectorMultiple: React.FC<{
       project: p.project
     };
   });
-  return <StyledMultiSelect {...rest} options={options} renderer={Renderer} />;
+  return (
+    <MultiSelect
+      {...rest}
+      className={styles.projectSelectorMultiple}
+      options={options}
+      renderer={Renderer}
+    />
+  );
 };
 
 export default ProjectSelectorMultiple;

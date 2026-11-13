@@ -1,0 +1,25 @@
+.statusError {
+  color: red;
+  font-weight: bold;
+}
+.statusProcessing {
+  color: blue;
+  font-weight: bold;
+}
+.statusFinished {
+  color: green;
+}
+
+.messageError {
+  color: red;
+}
+.messageProcessing {
+  color: blue;
+}
+
+.center {
+  text-align: center;
+}
+.right {
+  text-align: right;
+}

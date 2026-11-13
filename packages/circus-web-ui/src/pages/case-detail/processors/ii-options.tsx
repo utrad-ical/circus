@@ -2,7 +2,7 @@ import type { Editor } from './processor-types.ts';
 import Select from '#components/Select.tsx';
 import React from 'react';
 import type { IntersliceInterpolationOptions } from './ii-processor.ts';
-import styled from 'styled-components';
+import styles from './ii-options.module.css';
 
 const orientationOptions = {
   Axial: 'Axial',
@@ -23,7 +23,7 @@ export const initialOptions: IntersliceInterpolationOptions = {
 export const OptionsEditor: Editor<IntersliceInterpolationOptions> = props => {
   const { value, onChange } = props;
   return (
-    <StyledDiv>
+    <div className={styles.options}>
       Orientation
       <Select
         size="small"
@@ -38,13 +38,6 @@ export const OptionsEditor: Editor<IntersliceInterpolationOptions> = props => {
         value={value.mode}
         onChange={v => onChange({ ...value, mode: v })}
       />
-    </StyledDiv>
+    </div>
   );
 };
-
-const StyledDiv = styled.div`
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 5px;
-`;

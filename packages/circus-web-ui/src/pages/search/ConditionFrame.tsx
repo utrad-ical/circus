@@ -2,26 +2,13 @@ import React from 'react';
 import Tabs, { Tab } from '#components/Tabs.tsx';
 import ConditionEditor from '#components/ConditionEditor.tsx';
 import PropertyEditor from '#components/PropertyEditor.tsx';
-import styled from 'styled-components';
+import styles from './ConditionFrame.module.css';
 
 export interface Condition {
   type: 'basic' | 'advanced';
   basic: any;
   advanced: any;
 }
-
-const StyledDiv = styled.div`
-  /* Two pairs of caption and editor in a row */
-  .condition-basic-filter {
-    grid-template-columns: auto 1fr auto 1fr;
-    > * {
-      grid-column: span 2;
-    }
-    @media (max-width: 768px) {
-      grid-template-columns: auto 1fr;
-    }
-  }
-`;
 
 const ConditionFrame: <T extends Condition>(props: {
   condition: T;
@@ -52,14 +39,14 @@ const ConditionFrame: <T extends Condition>(props: {
   const activeKey = condition.type === 'advanced' ? 2 : 1;
 
   return (
-    <StyledDiv>
+    <div className={styles.root}>
       <Tabs
         activeKey={activeKey}
         onSelect={key => handleChangeType(key as number)}
       >
         <Tab eventKey={1} title="Basic">
           <PropertyEditor
-            className="condition-basic-filter"
+            className={styles.basicFilter}
             properties={basicConditionProperties}
             value={condition.basic}
             onChange={handleBasicFilterChange}
@@ -73,7 +60,7 @@ const ConditionFrame: <T extends Condition>(props: {
           />
         </Tab>
       </Tabs>
-    </StyledDiv>
+    </div>
   );
 };
 

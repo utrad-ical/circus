@@ -1,24 +1,7 @@
 import React, { Fragment } from 'react';
 import Icon from '#components/Icon.tsx';
-import styled from 'styled-components';
 import type PatientInfo from '#types/PatientInfo.ts';
-
-const StyledDiv = styled.div`
-  .masked {
-    color: silver;
-    line-height: 2.2;
-  }
-  .sub {
-    font-size: 80%;
-    color: gray;
-  }
-  .patient-id {
-    font-style: italic;
-  }
-  .patient-name {
-    font-weight: bold;
-  }
-`;
+import styles from './PatientInfoBox.module.css';
 
 const PatientInfoBox: React.FC<{
   value: PatientInfo | undefined;
@@ -26,25 +9,25 @@ const PatientInfoBox: React.FC<{
   const { value: pt } = props;
   if (!pt) {
     return (
-      <StyledDiv>
-        <div className="masked">
-          <span className="patient-name">
+      <div className={styles.patientInfoBox}>
+        <div className={styles.masked}>
+          <span className={styles.patientName}>
             <Icon icon="material-lock" />
             &ensp;(masked)
           </span>
         </div>
-      </StyledDiv>
+      </div>
     );
   }
   return (
-    <StyledDiv>
+    <div className={styles.patientInfoBox}>
       <div className="main">
-        <span className="patient-name">{pt.patientName}</span>&ensp;
+        <span className={styles.patientName}>{pt.patientName}</span>&ensp;
         <span className="patient-age">{pt.age}</span>
         <span className="patient-sex">{pt.sex}</span>
       </div>
-      <div className="sub">
-        <span className="patient-id">{pt.patientId}</span>
+      <div className={styles.sub}>
+        <span className={styles.patientId}>{pt.patientId}</span>
         {pt.birthDate && (
           <Fragment>
             &ensp;<span className="patient-birthdate">DOB: {pt.birthDate}</span>
@@ -61,7 +44,7 @@ const PatientInfoBox: React.FC<{
           </Fragment>
         )}
       </div>
-    </StyledDiv>
+    </div>
   );
 };
 

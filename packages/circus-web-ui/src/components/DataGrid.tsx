@@ -102,6 +102,7 @@ const DataGrid: <T extends {}>(
         table.table,
         table.hover,
         table.condensed,
+        table.middle,
         styles.dataGrid,
         onItemClick && styles.clickable,
         className

@@ -1,5 +1,4 @@
 .badge {
-  /* Darker than --muted (#777), which is on the edge and gets black text */
   --badge-color: light-dark(#666666, #999999);
   display: inline-block;
   margin-inline: 1px;

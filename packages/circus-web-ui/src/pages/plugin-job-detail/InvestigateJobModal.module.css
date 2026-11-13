@@ -1,0 +1,5 @@
+.seriesEntries {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 3px;
+}

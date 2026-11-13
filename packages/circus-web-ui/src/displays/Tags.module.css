@@ -1,0 +1,43 @@
+.field {
+  .tags {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .array {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    .arrayItem {
+      display: flex;
+      align-items: center;
+      a {
+        font-weight: bold;
+        text-decoration: none;
+        margin-left: 0.25rem;
+        font-size: 1.5em;
+        &:hover {
+          cursor: pointer;
+        }
+      }
+    }
+  }
+  .chooseTags {
+    display: flex;
+  }
+  .fromFreeText {
+    display: grid;
+    align-items: center;
+    grid-template-columns: auto 1fr auto auto;
+    margin-left: 1rem;
+
+    .warningMessage {
+      color: red;
+      margin-left: 1rem;
+    }
+    label {
+      margin-right: 0.5rem;
+    }
+  }
+}

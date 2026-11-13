@@ -1,11 +1,11 @@
-import type { RefObject } from 'react';
+import type { CSSProperties, RefObject } from 'react';
 import React, { useEffect, useRef, createRef, useState } from 'react';
 import get from 'lodash/get';
 import { useCsResults } from '@utrad-ical/circus-ui-kit';
 import type { Display } from '@utrad-ical/circus-ui-kit';
 import { useErrorMessage } from './utils/useErrorMessage.tsx';
 import classnames from 'classnames';
-import styled from 'styled-components';
+import styles from './Gallery.module.css';
 
 export type GalleryLabelPosition = 'left' | 'right' | 'top' | 'bottom';
 
@@ -125,14 +125,23 @@ export const Gallery: Display<GalleryOptions, void> = props => {
         const targetImageInfo = imageInfo.slice(startId, startId + count);
 
         return (
-          <StyledImageDiv key={`colum ${i}`} columns={count}>
+          <div
+            key={`colum ${i}`}
+            className={styles.gallery}
+            style={{ '--gallery-columns': count } as CSSProperties}
+          >
             {Object.values(targetImageInfo).map((info, i) => (
               <div
                 key={i + startId}
-                className={classnames('item', info.labelPosition ?? 'bottom')}
+                className={classnames(
+                  'item',
+                  styles.item,
+                  info.labelPosition ?? 'bottom',
+                  styles[info.labelPosition ?? 'bottom']
+                )}
               >
                 <img
-                  className="image"
+                  className={classnames('image', styles.image)}
                   ref={imgRefs.current[i + startId]}
                   alt={`Image ${info.fileName}`}
                   style={{
@@ -140,46 +149,16 @@ export const Gallery: Display<GalleryOptions, void> = props => {
                     maxHeight: info.maxHeight ?? 'initial'
                   }}
                 />
-                <div className="labels">
+                <div className={classnames('labels', styles.labels)}>
                   {labels[i + startId]?.map((label, labelInd) => (
                     <div key={labelInd}>{label}</div>
                   ))}
                 </div>
               </div>
             ))}
-          </StyledImageDiv>
+          </div>
         );
       })}
     </>
   );
 };
-
-const StyledImageDiv = styled.div`
-  display: grid;
-  grid-template-columns: repeat(${(props: any) => props.columns}, auto);
-  grid-gap: 10px;
-  padding-bottom: 10px;
-
-  .item {
-    display: flex;
-  }
-  .image {
-    align-self: flex-start;
-  }
-  .right {
-    flex-direction: row;
-  }
-  .left {
-    flex-direction: row-reverse;
-    justify-content: flex-end;
-  }
-  .top {
-    flex-direction: column-reverse;
-  }
-  .bottom {
-    flex-direction: column;
-  }
-  .labels {
-    padding: 0.5rem;
-  }
-`;

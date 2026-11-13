@@ -1,7 +1,8 @@
 import React from 'react';
+import type { CSSProperties } from 'react';
 import { useCsResults } from '@utrad-ical/circus-ui-kit';
 import type { Display } from '@utrad-ical/circus-ui-kit';
-import styled from 'styled-components';
+import styles from './Dump.module.css';
 
 interface DumpOptions {
   /**
@@ -23,12 +24,11 @@ export const Dump: Display<DumpOptions, void> = props => {
   const { results } = job;
 
   return (
-    <StyledPre maxHeight={maxHeight}>
+    <pre
+      className={styles.pre}
+      style={{ '--dump-max-height': `${maxHeight}px` } as CSSProperties}
+    >
       {JSON.stringify(results, null, '  ')}
-    </StyledPre>
+    </pre>
   );
 };
-
-const StyledPre = styled.pre`
-  max-height: ${(props: any) => `${props.maxHeight}px`};
-`;

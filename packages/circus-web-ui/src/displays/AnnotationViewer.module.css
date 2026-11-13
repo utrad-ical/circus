@@ -1,0 +1,6 @@
+.root {
+  :global(.image-viewer) {
+    width: var(--annotation-viewer-width);
+    height: var(--annotation-viewer-height);
+  }
+}

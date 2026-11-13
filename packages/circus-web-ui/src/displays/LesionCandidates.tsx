@@ -15,7 +15,6 @@ import React, {
   useRef,
   useState
 } from 'react';
-import styled from 'styled-components';
 import { Button } from './Button.tsx';
 import type { StateChangerFunc } from '@utrad-ical/circus-ui-kit';
 import { createStateChanger, ImageViewer } from '@utrad-ical/circus-ui-kit';
@@ -26,6 +25,7 @@ import type {
   FeedbackReport
 } from '@utrad-ical/circus-ui-kit';
 import { MessageBox } from './utils/MessageBox.tsx';
+import styles from './LesionCandidates.module.css';
 
 interface LesionCandidate {
   id?: number;
@@ -348,7 +348,7 @@ export const LesionCandidates: Display<
       setFeedbackListener(() => FeedbackListener); // assign function as state
     };
     load();
-  }, [feedbackListener]);
+  }, [feedbackListener, loadDisplay]);
 
   if (
     Object.keys(imgSrcMap).length < 1 ||
@@ -360,7 +360,7 @@ export const LesionCandidates: Display<
   if (!volumeLoaders) return null;
 
   return (
-    <StyledDiv>
+    <div className={styles.lesionCandidates}>
       <div className="tools">
         {tools.map(t => (
           <Button
@@ -419,43 +419,6 @@ export const LesionCandidates: Display<
           );
         })}
       </div>
-    </StyledDiv>
+    </div>
   );
 };
-
-const StyledDiv = styled.div`
-  .tools {
-    margin-bottom: 5px;
-    .tool {
-      &.active {
-        background-color: var(--circus-brand-primary);
-      }
-    }
-  }
-  .entries {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 7px;
-    justify-content: space-between;
-    .lesion-candidate {
-      max-width: 600px;
-      border: 1px solid silver;
-      .header {
-        padding: 3px;
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-      }
-      .attributes {
-        font-size: 80%;
-      }
-      .image-viewer {
-        width: 100%;
-        height: 300px;
-      }
-    }
-    .feedback-listener {
-      padding: 3px;
-    }
-  }
-`;

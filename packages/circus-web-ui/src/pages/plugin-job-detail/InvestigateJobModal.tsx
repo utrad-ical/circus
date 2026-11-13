@@ -11,7 +11,7 @@ import type { SeriesEntry } from '#components/SeriesSelector.tsx';
 import TimeDisplay from '#components/TimeDisplay.tsx';
 import UserDisplay from '#components/UserDisplay.tsx';
 import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
+import styles from './InvestigateJobModal.module.css';
 
 const InvestigateJobModal: React.FC<{}> = React.memo(props => {
   const { job, loadAttachment } = useCsResults();
@@ -137,7 +137,7 @@ const InvestigateJobModal: React.FC<{}> = React.memo(props => {
 const SeriesEntries: React.FC<{ value: SeriesEntry[] }> = props => {
   const { value } = props;
   return (
-    <SeriesEntriesGridDiv>
+    <div className={styles.seriesEntries}>
       {value.map((s, i) => (
         <React.Fragment key={i}>
           <div>#{i}</div>
@@ -150,16 +150,9 @@ const SeriesEntries: React.FC<{ value: SeriesEntry[] }> = props => {
           </div>
         </React.Fragment>
       ))}
-    </SeriesEntriesGridDiv>
+    </div>
   );
 };
-
-const SeriesEntriesGridDiv = styled.div`
-  display: grid;
-  grid-template-columns: auto auto;
-  gap: 3px;
-`;
-
 const FeedbackContent: React.FC<{ value: any }> = props => {
   const { value } = props;
   const [show, setShow] = useState(false);

@@ -1,34 +1,19 @@
+import classnames from 'classnames';
 import React from 'react';
-import styled from 'styled-components';
+import styles from './Section.module.css';
 
 const Section: React.FC<{
   title: string | React.ReactElement<any>;
 }> = props => {
   const { title, children } = props;
   return (
-    <StyledSection>
-      <div className="section-header">{title}</div>
-      <div className="section-content">{children}</div>
-    </StyledSection>
+    <section className={styles.root}>
+      <div className={classnames('section-header', styles.header)}>{title}</div>
+      <div className={classnames('section-content', styles.content)}>
+        {children}
+      </div>
+    </section>
   );
 };
 
 export default Section;
-
-const StyledSection = styled.section`
-  margin-top: 15px;
-  :first-child {
-    margin-top: 0px;
-  }
-  .section-header {
-    background-color: var(--circus-brand-primary);
-    color: white;
-    height: 30px;
-    padding: 0 10px;
-    line-height: 30px;
-    font-weight: bold;
-  }
-  .section-content {
-    padding: 10px;
-  }
-`;

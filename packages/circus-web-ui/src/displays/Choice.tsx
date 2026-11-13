@@ -1,9 +1,10 @@
+import classNames from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
 import { useCsResults } from '@utrad-ical/circus-ui-kit';
 import type { Display } from '@utrad-ical/circus-ui-kit';
 import { Button } from './Button.tsx';
 import Tooltip from '#components/Tooltip.tsx';
+import styles from './Choice.module.css';
 
 interface ChoiceItem {
   value: number | string;
@@ -141,7 +142,7 @@ const ToggleButtons: ChoiceUI = props => {
   };
 
   return (
-    <ToggleButtonsContainer>
+    <div className={styles.toggleButtons}>
       {choices.map(choice =>
         (opinions?.get(choice.value) ?? []).length > 0 ? (
           <Tooltip content={tooltipText(choice.value)} key={choice.value}>
@@ -150,10 +151,13 @@ const ToggleButtons: ChoiceUI = props => {
               disabled={disabled}
               color={choice.color}
               selected={choice.value === selected}
-              className="button-with-tooltip"
+              className={classNames(
+                'button-with-tooltip',
+                styles.buttonWithTooltip
+              )}
               style={disabled ? { pointerEvents: 'none' } : {}}
             >
-              <span className="opinions">
+              <span className={classNames('opinions', styles.opinions)}>
                 {opinions?.get(choice.value)?.length}
               </span>
 
@@ -172,28 +176,9 @@ const ToggleButtons: ChoiceUI = props => {
           </Button>
         )
       )}
-    </ToggleButtonsContainer>
+    </div>
   );
 };
-
-const ToggleButtonsContainer = styled.div`
-  display: flex;
-  > * {
-    flex: 1 1 auto;
-  }
-  gap: 2px;
-  .opinions {
-    border: 1px solid gray;
-    background-color: rgba(0, 0, 0, 0.3);
-    padding: 2px 4px;
-    border-radius: 5px;
-    font-size: 80%;
-    margin-right: 3px;
-  }
-  .button-with-tooltip {
-    width: 100%;
-  }
-`;
 
 const Select: ChoiceUI = props => {
   const { choices, onSelect, opinions, selected, disabled } = props;

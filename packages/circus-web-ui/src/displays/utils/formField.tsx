@@ -1,52 +1,42 @@
-import styled from 'styled-components';
+import classNames from 'classnames';
+import React from 'react';
+import type {
+  HTMLAttributes,
+  InputHTMLAttributes,
+  ReactNode,
+  SelectHTMLAttributes
+} from 'react';
+import styles from './formField.module.css';
 
 // Form parts of the built-in displays, colored with the host's design tokens
 
-export const Field = styled.div`
-  margin-bottom: 15px;
-`;
+export const Field = (props: HTMLAttributes<HTMLDivElement>) => {
+  const { className, ...rest } = props;
+  return <div className={classNames(styles.field, className)} {...rest} />;
+};
 
-export const FieldLabel = styled.label`
-  display: block;
-  font-weight: bold;
-  > input {
-    margin-top: 5px;
-  }
-`;
+export const FieldLabel = (props: {
+  as?: 'label' | 'div';
+  className?: string;
+  children?: ReactNode;
+}) => {
+  const { as: Tag = 'label', className, children } = props;
+  return (
+    <Tag className={classNames(styles.fieldLabel, className)}>{children}</Tag>
+  );
+};
 
 // Can be placed inside `FieldLabel`
-export const TextInput = styled.input`
-  display: block;
-  width: 100%;
-  min-width: 0;
-  padding: 0.375em 0.75em;
-  border: 1px solid var(--border, silver);
-  background-color: var(--bg, white);
-  color: var(--text, black);
-  font: inherit;
-  font-weight: normal;
-  line-height: 1.43;
-  &:disabled {
-    background-color: var(--surface, #eee);
-    cursor: not-allowed;
-  }
-  &[aria-invalid='true'] {
-    border-color: var(--danger, #c00);
-  }
-`;
+export const TextInput = (props: InputHTMLAttributes<HTMLInputElement>) => {
+  const { className, ...rest } = props;
+  return (
+    <input className={classNames(styles.textInput, className)} {...rest} />
+  );
+};
 
-export const SelectInput = styled.select`
-  padding: 0.375em 0.5em;
-  border: 1px solid var(--border, silver);
-  background-color: var(--bg, white);
-  color: var(--text, black);
-  font: inherit;
-  line-height: 1.43;
-  &:disabled {
-    background-color: var(--surface, #eee);
-    cursor: not-allowed;
-  }
-  &[aria-invalid='true'] {
-    border-color: var(--danger, #c00);
-  }
-`;
+export const SelectInput = (props: SelectHTMLAttributes<HTMLSelectElement>) => {
+  const { className, ...rest } = props;
+  return (
+    <select className={classNames(styles.selectInput, className)} {...rest} />
+  );
+};

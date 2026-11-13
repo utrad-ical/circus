@@ -5,8 +5,8 @@
  * - base: the design tokens and the base styles of CIRCUS
  * - plugin-compat: Bootstrap classes kept for v1 plug-in displays, which
  *   override the element styles of base as Bootstrap did
- * Unlayered styles (CSS Modules, styled-components, and the CSS of plug-in
- * displays) are stronger than any layer, so plug-ins can override base.
+ * Unlayered styles (CSS Modules and the CSS of plug-in displays) are
+ * stronger than any layer, so plug-ins can override base.
  */
 @layer base, plugin-compat;
 

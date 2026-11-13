@@ -1,0 +1,37 @@
+.button {
+  padding: 6px 7px;
+  border: 1px solid gray;
+  background-color: var(--circus-background, 'transparent');
+  color: var(--button-color, var(--circus-background-text));
+  font-size: inherit;
+  vertical-align: middle;
+  /* :where() keeps the specificity of a single class */
+  &:where(.sm) {
+    padding: 5px 5px;
+    font-size: 12px;
+  }
+  &:where(.xs) {
+    padding: 1px 3px;
+    font-size: 12px;
+  }
+  &:global(.selected) {
+    background-color: var(--button-color, var(--circus-brand-primary));
+    color: var(--circus-background, 'white');
+  }
+  &:hover {
+    filter: brightness(80%);
+  }
+  &:disabled {
+    filter: none;
+    opacity: 0.5;
+  }
+}
+
+.icon {
+  svg {
+    width: 1em;
+    height: 1em;
+    fill: currentColor;
+    vertical-align: -0.125em;
+  }
+}

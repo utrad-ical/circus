@@ -1,5 +1,6 @@
 import * as rs from '@utrad-ical/circus-rs';
 import { useVolumeLoaders } from '@utrad-ical/circus-ui-kit';
+import classnames from 'classnames';
 import get from 'lodash/get';
 import React, {
   useCallback,
@@ -8,13 +9,13 @@ import React, {
   useRef,
   useState
 } from 'react';
-import styled from 'styled-components';
 import { Button } from './Button.tsx';
 import { createStateChanger, ImageViewer } from '@utrad-ical/circus-ui-kit';
 import type { FeedbackEntry } from '@utrad-ical/circus-ui-kit';
 import { useCsResults } from '@utrad-ical/circus-ui-kit';
 import type { Display } from '@utrad-ical/circus-ui-kit';
 import { defaultDataPath, normalizeCandidates } from './LesionCandidates.tsx';
+import styles from './Locator.module.css';
 
 type IntegrationOptions = 'off' | 'snapped';
 
@@ -289,7 +290,7 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
         state,
         results.metadata.displayOptions[volumeId ?? 0]
       ),
-    [volumeId, job]
+    [volumeId, results]
   );
 
   if (!editable && currentFeedback.length === 0) return <div>No Input</div>;
@@ -308,10 +309,10 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
   if (!composition) return null;
 
   return (
-    <StyledDiv>
-      <div className="side">
+    <div className={styles.root}>
+      <div className={classnames('side', styles.side)}>
         <ImageViewer
-          className="locator"
+          className={classnames('locator', styles.locator)}
           initialStateSetter={initialStateSetter}
           tool={tools[editable ? 'point' : 'pager']}
           stateChanger={stateChanger}
@@ -319,7 +320,7 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
           onMouseUp={handleMouseUp}
         />
         <div>
-          <table className="locations">
+          <table className={classnames('locations', styles.locations)}>
             <thead>
               <tr>
                 <th>#</th>
@@ -379,36 +380,6 @@ export const Locator: Display<LocatorOptions, LocatorFeedback> = props => {
           )}
         </div>
       </div>
-    </StyledDiv>
+    </div>
   );
 };
-
-const StyledDiv = styled.div`
-  margin-top: 10px;
-  .side {
-    display: flex;
-    flex-direction: row;
-    > *:first-child {
-      margin-right: 10px;
-    }
-  }
-  .locator {
-    width: 512px;
-    height: 512px;
-  }
-  .locations {
-    width: 100%;
-    margin-bottom: 22px;
-    th,
-    td {
-      padding: 8px;
-      vertical-align: top;
-      border-top: 1px solid var(--border, #ddd);
-    }
-    thead th {
-      vertical-align: bottom;
-      border-top: 0;
-      border-bottom: 2px solid var(--border, #ddd);
-    }
-  }
-`;

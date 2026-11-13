@@ -1,0 +1,17 @@
+.root {
+  margin-top: 15px;
+  &:first-child {
+    margin-top: 0px;
+  }
+  .header {
+    background-color: var(--circus-brand-primary);
+    color: white;
+    height: 30px;
+    padding: 0 10px;
+    line-height: 30px;
+    font-weight: bold;
+  }
+  .content {
+    padding: 10px;
+  }
+}

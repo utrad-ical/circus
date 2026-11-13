@@ -122,6 +122,12 @@
       }
     },
     {
+      "files": ["packages/circus-web-ui/src/displays/**/*.tsx"],
+      "rules": {
+        "react/exhaustive-deps": "off"
+      }
+    },
+    {
       "files": ["**/*.d.ts"],
       "rules": {
         "no-redeclare": "off"

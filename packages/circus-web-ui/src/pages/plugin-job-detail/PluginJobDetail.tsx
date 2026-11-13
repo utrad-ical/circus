@@ -26,7 +26,6 @@ import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
 import { newSearch } from '#store/searches.ts';
-import styled from 'styled-components';
 import { useApi } from '#utils/api.ts';
 import type { CancelToken } from '#utils/cancelToken.ts';
 import useLoadData from '#utils/useLoadData.ts';
@@ -44,41 +43,7 @@ import MainDisplay from './MainDisplay.tsx';
 import PersonalConsensualSwitch from './PersonalConsensualSwitch.tsx';
 import loadDisplay from './loadDisplay.ts';
 import useFeedback, { actions } from './useFeedback.tsx';
-
-const StyledDiv = styled.div`
-  display: flex;
-  flex-direction: column;
-  flex: 1 0 auto;
-
-  .job-detail-header {
-    flex: none;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    border-bottom: 1px solid silver;
-    align-items: center;
-    > * {
-      padding: 5px 10px;
-    }
-  }
-  .feedback-mode-switch {
-    flex: 1 0 auto;
-  }
-  .job-detail-main {
-    min-height: 0;
-    flex: 1 1 0;
-    overflow-y: scroll;
-  }
-  .job-detail-footer {
-    flex: none;
-    padding: 10px;
-    border-top: 1px solid silver;
-    text-align: right;
-    .regisiter-message {
-      margin-right: 1em;
-    }
-  }
-`;
+import styles from './PluginJobDetail.module.css';
 
 const Menu: React.FC<{
   onMenuSelect: (selected: any) => void;
@@ -380,8 +345,8 @@ const PluginJobDetail: React.FC<{}> = props => {
 
   return (
     <FullSpanContainer>
-      <StyledDiv>
-        <div className="job-detail-header">
+      <div className={styles.root}>
+        <div className={classnames('job-detail-header', styles.header)}>
           {seriesData[primarySeriesUid].patientInfo ? (
             <DropdownButton
               id="jobmenu"
@@ -399,7 +364,12 @@ const PluginJobDetail: React.FC<{}> = props => {
           ) : (
             <PatientInfoBox value={seriesData[primarySeriesUid].patientInfo} />
           )}
-          <div className="feedback-mode-switch">
+          <div
+            className={classnames(
+              'feedback-mode-switch',
+              styles.feedbackModeSwitch
+            )}
+          >
             <PersonalConsensualSwitch
               feedbackState={feedbackState}
               consensualEntered={job.feedbacks.some(f => f.isConsensual)}
@@ -425,14 +395,26 @@ const PluginJobDetail: React.FC<{}> = props => {
             onFeedbackChange={handleFeedbackChange}
           />
         </CsResultsContext.Provider>
-        <div className="job-detail-footer">
+        <div className={classnames('job-detail-footer', styles.footer)}>
           {noPermissionMessage && (
-            <span className={classnames('regisiter-message', u.danger)}>
+            <span
+              className={classnames(
+                'regisiter-message',
+                styles.registerMessage,
+                u.danger
+              )}
+            >
               {noPermissionMessage}
             </span>
           )}
           {feedbackState.message && (
-            <span className={classnames('regisiter-message', u.success)}>
+            <span
+              className={classnames(
+                'regisiter-message',
+                styles.registerMessage,
+                u.success
+              )}
+            >
               {feedbackState.message}
             </span>
           )}
@@ -471,7 +453,7 @@ const PluginJobDetail: React.FC<{}> = props => {
             <DeleteFeedbackModal />
           </Dialog>
         </CsResultsContext.Provider>
-      </StyledDiv>
+      </div>
     </FullSpanContainer>
   );
 };

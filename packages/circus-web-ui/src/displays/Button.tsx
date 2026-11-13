@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import React, { forwardRef } from 'react';
-import styled from 'styled-components';
 import buttonIcons from './buttonIcons.ts';
+import styles from './Button.module.css';
 
 type Size = 'sm' | 'lg' | 'xs';
 
@@ -32,60 +32,26 @@ export const Button: React.FC<{
   } = props;
 
   const iconSvg = icon ? buttonIcons[icon] : undefined;
+  const buttonStyle = color
+    ? ({ ...style, '--button-color': color } as React.CSSProperties)
+    : style;
   return (
-    <StyledButton
-      ref={ref}
-      color={color}
-      size={size}
+    <button
+      ref={ref as React.Ref<HTMLButtonElement>}
       onClick={onClick}
       disabled={disabled}
-      style={style}
-      className={classNames(className, { selected })}
+      style={buttonStyle}
+      className={classNames(styles.button, size && styles[size], className, {
+        selected
+      })}
     >
-      {iconSvg && <IconSpan dangerouslySetInnerHTML={{ __html: iconSvg }} />}
+      {iconSvg && (
+        <span
+          className={styles.icon}
+          dangerouslySetInnerHTML={{ __html: iconSvg }}
+        />
+      )}
       {children}
-    </StyledButton>
+    </button>
   );
 });
-
-const paddings: { [size: string]: string } = {
-  xs: '1px 3px',
-  sm: '5px 5px',
-  default: '6px 7px'
-};
-
-const fontSizes: { [size: string]: string } = {
-  xs: '12px',
-  sm: '12px',
-  default: 'inherit'
-};
-
-const StyledButton = styled.button`
-  padding: ${(props: any) => paddings[props.size] ?? paddings.default};
-  border: 1px solid gray;
-  background-color: var(--circus-background, 'transparent');
-  color: ${(props: any) => props.color ?? 'var(--circus-background-text)'};
-  font-size: ${(props: any) => fontSizes[props.size] ?? fontSizes.default};
-  vertical-align: middle;
-  &.selected {
-    background-color: ${(props: any) =>
-      props.color ?? 'var(--circus-brand-primary)'};
-    color: var(--circus-background, 'white');
-  }
-  &:hover {
-    filter: brightness(80%);
-  }
-  &:disabled {
-    filter: none;
-    opacity: 0.5;
-  }
-`;
-
-const IconSpan = styled.span`
-  svg {
-    width: 1em;
-    height: 1em;
-    fill: currentColor;
-    vertical-align: -0.125em;
-  }
-`;

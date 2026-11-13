@@ -2,10 +2,7 @@ import Input from '#components/Input.tsx';
 import React from 'react';
 import Select from '#components/Select.tsx';
 import * as et from '#components/editorTypes.tsx';
-import type {
-  Schema,
-  PropSchema
-} from '@smikitky/rb-components/lib/JsonSchemaEditor';
+import type { Schema, PropSchema } from '#components/JsonSchemaEditor.tsx';
 import styled from 'styled-components';
 
 const TextArrayEditor = et.arrayOf(et.text(), () => '');

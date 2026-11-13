@@ -13,13 +13,6 @@ export default defineConfig({
     // Minimum versions to support contrast-color() and anchor positioning
     cssTarget: ['chrome147', 'edge147', 'firefox147', 'safari26']
   },
-  optimizeDeps: {
-    // rb-components is published as .tsx sources, which Vite does not
-    // pre-bundle by itself; its CommonJS dependencies (e.g., `invariant`,
-    // `react-bootstrap/lib/*`) would then be served as-is and fail to load
-    extensions: ['.ts', '.tsx'],
-    include: ['@smikitky/rb-components/lib/*.tsx']
-  },
   worker: {
     format: 'es'
   },

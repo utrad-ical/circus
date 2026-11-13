@@ -1,8 +1,12 @@
+import Panel, {
+  PanelHeader,
+  PanelBody,
+  PanelFooter
+} from '#components/Panel.tsx';
 import Button from '#components/Button.tsx';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useApi } from '#utils/api.ts';
 import AdminContainer from './AdminContainer.tsx';
-import { Panel } from '#components/react-bootstrap.ts';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 
 const PluginJobManagerAdmin: React.FC<{}> = props => {
@@ -48,10 +52,10 @@ const PluginJobManagerAdmin: React.FC<{}> = props => {
 
   return (
     <AdminContainer title="Plugin Job Manager" icon="material-grid_view">
-      <Panel bsStyle="primary">
-        <Panel.Heading>Status</Panel.Heading>
-        <Panel.Body>{busy ? <LoadingIndicator /> : status}</Panel.Body>
-        <Panel.Footer>
+      <Panel variant="primary">
+        <PanelHeader>Status</PanelHeader>
+        <PanelBody>{busy ? <LoadingIndicator /> : status}</PanelBody>
+        <PanelFooter>
           <Button
             icon="material-play_arrow"
             size="large"
@@ -78,7 +82,7 @@ const PluginJobManagerAdmin: React.FC<{}> = props => {
           >
             Refresh Status
           </Button>
-        </Panel.Footer>
+        </PanelFooter>
       </Panel>
     </AdminContainer>
   );

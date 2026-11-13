@@ -1,3 +1,4 @@
+import Alert from '#components/Alert.tsx';
 import Button from '#components/Button.tsx';
 import Icon from '#components/Icon.tsx';
 import MultiTagSelect from '#components/MultiTagSelect.tsx';
@@ -61,9 +62,7 @@ const CreateNewCase: React.FC<{}> = props => {
 
   if (!writableProjects.length) {
     return (
-      <div className="alert alert-danger">
-        You do not belong to any writable project.
-      </div>
+      <Alert variant="danger">You do not belong to any writable project.</Alert>
     );
   }
 

@@ -1,0 +1,26 @@
+.list {
+  display: flex;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+}
+
+.tab {
+  margin-bottom: -1px;
+  padding: 10px 15px;
+  border: 1px solid transparent;
+  border-radius: 4px 4px 0 0;
+  background: none;
+  color: var(--theme);
+  &:hover {
+    background-color: var(--surface);
+  }
+  &[aria-selected='true'] {
+    border-color: var(--border) var(--border) var(--bg);
+    background-color: var(--bg);
+    color: var(--text);
+  }
+}
+
+.panel {
+  padding-top: 10px;
+}

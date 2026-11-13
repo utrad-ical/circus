@@ -1,3 +1,4 @@
+import Alert from '#components/Alert.tsx';
 import Button from '#components/Button.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import type {
@@ -338,11 +339,11 @@ const PluginJobDetail: React.FC<{}> = props => {
   }
 
   if (jobData instanceof Error) {
-    return <div className="alert alert-danger">{jobData.message}</div>;
+    return <Alert variant="danger">{jobData.message}</Alert>;
   }
 
   if (!jobId) {
-    return <div className="alert alert-danger">No job ID specified.</div>;
+    return <Alert variant="danger">No job ID specified.</Alert>;
   }
 
   const { job, seriesData, pluginData } = jobData;

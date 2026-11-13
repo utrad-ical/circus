@@ -1,3 +1,9 @@
+import Alert from '#components/Alert.tsx';
+import Panel, {
+  PanelHeader,
+  PanelBody,
+  PanelFooter
+} from '#components/Panel.tsx';
 import Button from '#components/Button.tsx';
 import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
 import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
@@ -5,7 +11,6 @@ import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
 import DataGrid from '#components/DataGrid.tsx';
 import Icon from '#components/Icon.tsx';
 import SearchResultsView from '#components/SearchResultsView.tsx';
-import { Panel } from '#components/react-bootstrap.ts';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import type { SearchResource } from '#store/searches.ts';
@@ -274,8 +279,8 @@ const Editor: React.FC<{
     );
 
   return (
-    <Panel bsStyle="primary">
-      <Panel.Heading>
+    <Panel variant="primary">
+      <PanelHeader>
         {target ? (
           <span>
             Updating: <strong>{target}</strong>
@@ -283,8 +288,8 @@ const Editor: React.FC<{
         ) : (
           'Creating new item'
         )}
-      </Panel.Heading>
-      <Panel.Body>
+      </PanelHeader>
+      <PanelBody>
         {subtitles ? (
           subtitles.map((subtitle, i) => (
             <React.Fragment key={i}>
@@ -317,20 +322,20 @@ const Editor: React.FC<{
         {errorMessage && (
           <>
             <hr />
-            <div className="alert alert-danger">
+            <Alert variant="danger">
               <strong>Error:</strong> {errorMessage}
-            </div>
+            </Alert>
           </>
         )}
-      </Panel.Body>
-      <Panel.Footer className="text-center">
+      </PanelBody>
+      <PanelFooter className="text-center">
         <Button variant="link" onClick={onCancelClick}>
           Cancel
         </Button>
         <Button variant="primary" onClick={handleSave}>
           Save
         </Button>
-      </Panel.Footer>
+      </PanelFooter>
     </Panel>
   );
 };

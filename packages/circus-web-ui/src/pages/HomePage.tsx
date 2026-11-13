@@ -1,12 +1,12 @@
+import Panel, {
+  PanelHeader,
+  PanelBody,
+  PanelList,
+  PanelListItem
+} from '#components/Panel.tsx';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Panel,
-  Row,
-  Col,
-  ListGroup,
-  ListGroupItem
-} from '#components/react-bootstrap.ts';
+import { Row, Col } from '#components/react-bootstrap.ts';
 import ProjectDisplay from '#components/ProjectDisplay.tsx';
 import Icon from '#components/Icon.tsx';
 import TimeDisplay from '#components/TimeDisplay.tsx';
@@ -89,13 +89,13 @@ const role2str = (role: string) => {
 const MyProjects: React.FC<{}> = props => {
   const user = useLoginUser()!;
   return (
-    <Panel bsStyle="primary">
-      <Panel.Heading>
+    <Panel variant="primary">
+      <PanelHeader>
         <Icon icon="material-school" /> My Projects
-      </Panel.Heading>
-      <ListGroup>
+      </PanelHeader>
+      <PanelList>
         {user.accessibleProjects.map(p => (
-          <ListGroupItem key={p.project.projectId}>
+          <PanelListItem key={p.project.projectId}>
             <div>
               <ProjectDisplay
                 projectId={p.projectId}
@@ -105,9 +105,9 @@ const MyProjects: React.FC<{}> = props => {
               />
             </div>
             <small>({p.roles.map(role2str).join(', ')})</small>
-          </ListGroupItem>
+          </PanelListItem>
         ))}
-      </ListGroup>
+      </PanelList>
     </Panel>
   );
 };
@@ -115,23 +115,23 @@ const MyProjects: React.FC<{}> = props => {
 const MyProfile: React.FC<{}> = props => {
   const user = useLoginUser()!;
   return (
-    <Panel bsStyle="primary" className="home-profile">
-      <Panel.Heading>
+    <Panel variant="primary">
+      <PanelHeader>
         <Icon icon="material-person" /> Profile
-      </Panel.Heading>
-      <ListGroup>
-        <ListGroupItem>
+      </PanelHeader>
+      <PanelList>
+        <PanelListItem>
           You are logged in as: <b>{user.description}</b>
-        </ListGroupItem>
+        </PanelListItem>
         {user.globalPrivileges.indexOf('manageServer') > -1 ? (
-          <ListGroupItem bsStyle="danger">
+          <PanelListItem variant="danger">
             <Icon icon="material-warning" />
             <strong>You have administrative privilege on CIRCUS DB!</strong>
             &ensp; Use this account only when you do administrative tasks.
-          </ListGroupItem>
+          </PanelListItem>
         ) : null}
-      </ListGroup>
-      <Panel.Body>
+      </PanelList>
+      <PanelBody>
         <ul className="list-unstyled">
           <li>
             <b>Login ID:</b> {user.loginId}
@@ -150,7 +150,7 @@ const MyProfile: React.FC<{}> = props => {
             <b>Domains:</b> {user.domains.join(', ')}
           </li>
         </ul>
-      </Panel.Body>
+      </PanelBody>
     </Panel>
   );
 };

@@ -1,3 +1,4 @@
+import Alert from '#components/Alert.tsx';
 import React from 'react';
 import Icon from '#components/Icon.tsx';
 import useLoginUser from '#utils/useLoginUser.ts';
@@ -14,9 +15,9 @@ const AdminContainer: React.FC<{
 
   if (!isAdmin) {
     return (
-      <div className="alert alert-danger">
+      <Alert variant="danger">
         You do not have privilege to access the administration pages.
-      </div>
+      </Alert>
     );
   }
 

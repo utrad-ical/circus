@@ -1,3 +1,4 @@
+import Alert from '#components/Alert.tsx';
 import Button from '#components/Button.tsx';
 import React, { Fragment, useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -78,7 +79,7 @@ const Application: React.FC<{}> = props => {
         <div className="full-container">
           <MessageBox />
           {notLoggedIn && (
-            <div className="alert alert-danger">
+            <Alert variant="danger">
               You are not logged in, or your session has been expired.
               <br />
               Please log in first.
@@ -87,7 +88,7 @@ const Application: React.FC<{}> = props => {
                   <Button>Login</Button>
                 </Link>
               </div>
-            </div>
+            </Alert>
           )}
         </div>
         <div className="container">{pageContentVisible && props.children}</div>

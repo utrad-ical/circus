@@ -1,0 +1,33 @@
+.alert {
+  --alert-color: var(--theme);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 15px;
+  border: 1px solid color-mix(in oklch, var(--alert-color) 40%, var(--bg));
+  background-color: color-mix(in oklch, var(--alert-color) 15%, var(--bg));
+  color: var(--text);
+  animation: fade-in 0.5s linear;
+  &.success {
+    --alert-color: var(--success);
+  }
+  &.warning {
+    --alert-color: var(--warning);
+  }
+  &.danger {
+    --alert-color: var(--danger);
+  }
+  .close {
+    color: inherit;
+  }
+}
+
+.content {
+  flex: 1;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}

@@ -1,7 +1,9 @@
+import Alert from '#components/Alert.tsx';
+import Panel, { PanelHeader, PanelBody } from '#components/Panel.tsx';
 import Button from '#components/Button.tsx';
 import Icon from '#components/Icon.tsx';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Row, Col, Panel } from '#components/react-bootstrap.ts';
+import { Row, Col } from '#components/react-bootstrap.ts';
 import { useApi } from '#utils/api.ts';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import ImageViewer from '#components/ImageViewer.tsx';
@@ -103,7 +105,7 @@ const SeriesDetail: React.FC<{}> = props => {
         <h1>
           <Icon icon="circus-series" /> Series Detail
         </h1>
-        <div className="alert alert-danger">{message}</div>
+        <Alert variant="danger">{message}</Alert>
       </div>
     );
   }
@@ -157,9 +159,9 @@ const SeriesDetail: React.FC<{}> = props => {
               defaultExpanded
             />
           ) : (
-            <Panel defaultExpanded>
-              <Panel.Heading>Patient Info</Panel.Heading>
-              <Panel.Body>Personal information is masked.</Panel.Body>
+            <Panel>
+              <PanelHeader>Patient Info</PanelHeader>
+              <PanelBody>Personal information is masked.</PanelBody>
             </Panel>
           )}
           <Table
@@ -190,24 +192,22 @@ const Table: React.FC<{
 }> = props => {
   const keys = Array.isArray(props.keys) ? props.keys : Object.keys(props.data);
   return (
-    <Panel defaultExpanded={props.defaultExpanded}>
-      <Panel.Heading>{props.title}</Panel.Heading>
-      <Panel.Collapse>
-        <table className="table table-condensed">
-          <tbody>
-            {keys.map(k => {
-              return (
-                <tr key={k}>
-                  <th>{k}</th>
-                  <td style={{ wordBreak: 'break-all' }}>
-                    {print(props.data[k])}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </Panel.Collapse>
+    <Panel collapsible defaultExpanded={props.defaultExpanded}>
+      <PanelHeader>{props.title}</PanelHeader>
+      <table className="table table-condensed">
+        <tbody>
+          {keys.map(k => {
+            return (
+              <tr key={k}>
+                <th>{k}</th>
+                <td style={{ wordBreak: 'break-all' }}>
+                  {print(props.data[k])}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </Panel>
   );
 };

@@ -1,3 +1,4 @@
+import Alert from '#components/Alert.tsx';
 import Button from '#components/Button.tsx';
 import { confirm, prompt } from '#components/dialogs.tsx';
 import Icon from '#components/Icon.tsx';
@@ -93,9 +94,9 @@ const MyListHome: React.FC<{
         onDeleteClick={handleDelete}
       />
       {lists.length === 0 && (
-        <div className="alert alert-info">
+        <Alert variant="info">
           You have no my list for this resource type.
-        </div>
+        </Alert>
       )}
       <Button variant="primary" icon="material-add" onClick={handleCreateNew}>
         Create new my list

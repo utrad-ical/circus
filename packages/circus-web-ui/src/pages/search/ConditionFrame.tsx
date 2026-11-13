@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tabs, Tab } from '#components/react-bootstrap.ts';
+import Tabs, { Tab } from '#components/Tabs.tsx';
 import ConditionEditor from '@smikitky/rb-components/lib/ConditionEditor';
 import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
 import styled from 'styled-components';
@@ -63,10 +63,8 @@ const ConditionFrame: <T extends Condition>(props: {
   return (
     <StyledDiv>
       <Tabs
-        animation={false}
-        id="search-condition-tabs"
         activeKey={activeKey}
-        onSelect={(eventKey: any) => handleChangeType(eventKey as number)}
+        onSelect={key => handleChangeType(key as number)}
       >
         <Tab eventKey={1} title="Basic">
           <PropertyEditor

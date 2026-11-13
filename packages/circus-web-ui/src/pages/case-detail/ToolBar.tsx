@@ -8,7 +8,7 @@ import type { InterpolationMode } from '@utrad-ical/circus-rs';
 import Icon from '#components/Icon.tsx';
 import DropdownButton from '#components/DropdownButton.tsx';
 import MenuItem, { type MenuItemProps } from '#components/MenuItem.tsx';
-import { Modal } from '#components/react-bootstrap.ts';
+import Dialog from '#components/Dialog.tsx';
 import Tooltip from '#components/Tooltip.tsx';
 import SplitButton from '#components/SplitButton.tsx';
 import type {
@@ -259,328 +259,338 @@ const ToolBar: React.FC<{
   };
 
   return (
-    <StyledDiv>
-      <ToolButton
-        name="pager"
-        icon="circus-pager"
-        changeTool={onChangeTool}
-        active={active}
-        shortcut="P"
-        disabled={disabled}
-      />
-      <ToolButton
-        name="zoom"
-        icon="circus-zoom"
-        changeTool={onChangeTool}
-        active={active}
-        shortcut="Z"
-        disabled={disabled}
-      >
-        {instantZoomLevels.map(({ label, level, shortcut }) => (
-          <MenuItemWithShortcut
-            key={label}
-            onClick={() => onMagnify(level)}
-            shortcut={shortcut}
-          >
-            {label}
-          </MenuItemWithShortcut>
-        ))}
-      </ToolButton>
-      <ToolButton
-        name="hand"
-        icon="circus-hand"
-        changeTool={onChangeTool}
-        active={active}
-        shortcut="H"
-        disabled={disabled}
-      />
-      <ToolButton
-        name="window"
-        icon="circus-window"
-        changeTool={onChangeTool}
-        active={active}
-        shortcut="W"
-        disabled={!windowEnabled || disabled}
-      >
-        {windowPresets.map((p: WindowPreset, i: number) =>
-          i < 9 ? (
-            <MenuItemWithShortcut
-              key={i + 1}
-              eventKey={i + 1}
-              shortcut={String(i + 1)}
-              onClick={() => handleApplyWindow(p)}
-            >
-              <b>{p.label}</b> {`(L: ${p.level} / W: ${p.width})`}
-            </MenuItemWithShortcut>
-          ) : (
-            <MenuItem
-              key={i + 1}
-              eventKey={i + 1}
-              onClick={() => handleApplyWindow(p)}
-            >
-              <b>{p.label}</b> {`(L: ${p.level} / W: ${p.width})`}
-            </MenuItem>
-          )
-        )}
-        <MenuItem key={99999} eventKey={99999} onClick={handleApplyWindow}>
-          Manual
-        </MenuItem>
-        <MenuItem divider />
-        <MenuItem header>Target</MenuItem>
-        {windowPropagationScopeOptions.map(l => {
-          return (
-            <MenuItem
-              key={l.key}
-              eventKey={l.key}
-              onSelect={handleToggleWindowPropagationScope}
-            >
-              <CheckMark
-                checked={viewOptions.windowPropagationScope === l.key}
-              />
-              {l.caption}
-            </MenuItem>
-          );
-        })}
-      </ToolButton>
-      &thinsp;
-      <ToolButton
-        name="brush"
-        icon="circus-brush"
-        changeTool={onChangeTool}
-        active={active}
-        shortcut="B"
-        disabled={!brushEnabled || disabled}
-      />
-      <ToolButton
-        name="eraser"
-        icon="circus-eraser"
-        changeTool={onChangeTool}
-        active={active}
-        shortcut="E"
-        disabled={!brushEnabled || disabled}
-      />
-      <DropdownButton
-        id="line-width-dropdown"
-        disabled={!brushEnabled || disabled}
-        title={<span className="line-width">{toolOptions.lineWidth}</span>}
-      >
-        {widthOptions.map(lineWidth => {
-          return (
-            <MenuItem
-              key={lineWidth}
-              eventKey={lineWidth}
-              onSelect={lineWidth =>
-                setToolOption('lineWidth', Number(lineWidth))
-              }
-            >
-              {lineWidth}
-            </MenuItem>
-          );
-        })}
-        <MenuItem header>
-          <ShortcutBox>
-            <kbd>Q</kbd>: Wider,&nbsp;<kbd>A</kbd>: Narrower
-          </ShortcutBox>
-        </MenuItem>
-      </DropdownButton>
-      <ToolButton
-        name="bucket"
-        icon="circus-bucket"
-        changeTool={onChangeTool}
-        active={active}
-        shortcut="Shift+B"
-        disabled={!brushEnabled || disabled}
-      />
-      <ToolButton
-        name="bucketEraser"
-        icon="circus-bucket-erase"
-        changeTool={onChangeTool}
-        active={active}
-        shortcut="Shift+E"
-        disabled={!brushEnabled || disabled}
-      />
-      <ToolButton
-        name="wand"
-        icon="circus-wand"
-        changeTool={onChangeTool}
-        active={active}
-        shortcut="M"
-        disabled={!brushEnabled || !wandEnabled || disabled}
-      />
-      <ToolButton
-        name="wandEraser"
-        icon="circus-wand-eraser"
-        changeTool={onChangeTool}
-        active={active}
-        shortcut="Shift+M"
-        disabled={!brushEnabled || !wandEnabled || disabled}
-      />
-      &thinsp;
-      <DropdownButton
-        id="layout-dropdown"
-        disabled={!layoutEnabled || disabled}
-        title={<Icon icon="circus-layout-four" />}
-      >
-        {layoutOptions.map(l => {
-          return (
-            <MenuItemWithShortcut
-              key={l.key}
-              eventKey={l.key}
-              shortcut={l.shortcut}
-              onClick={() => onChangeLayoutKind(l.key)}
-            >
-              <Icon icon={l.icon} />
-              {l.caption}
-            </MenuItemWithShortcut>
-          );
-        })}
-      </DropdownButton>
-      &thinsp;
-      <DropdownButton
-        id="view-options-dropdown"
-        disabled={disabled}
-        title={<Icon icon="circus-tool" />}
-      >
-        <MenuItemWithShortcut shortcut=";" onClick={handleToggleReferenceLine}>
-          <CheckMark checked={!!viewOptions.showReferenceLine} />
-          Show reference line
-        </MenuItemWithShortcut>
-        <MenuItemWithShortcut
-          shortcut="F"
-          onClick={handleToggleInterpolationMode}
+    <>
+      <StyledDiv>
+        <ToolButton
+          name="pager"
+          icon="circus-pager"
+          changeTool={onChangeTool}
+          active={active}
+          shortcut="P"
+          disabled={disabled}
+        />
+        <ToolButton
+          name="zoom"
+          icon="circus-zoom"
+          changeTool={onChangeTool}
+          active={active}
+          shortcut="Z"
+          disabled={disabled}
         >
-          <CheckMark checked={viewOptions.interpolationMode === 'trilinear'} />
-          Trilinear filtering
-        </MenuItemWithShortcut>
-        <MenuItem divider />
-        <MenuItem header>Scroll bars visibility</MenuItem>
-        {scrollbarVisibilityOptions.map(l => {
-          return (
-            <MenuItem
-              key={l.key}
-              eventKey={l.key}
-              onSelect={handleToggleScrollbar('visibility')}
+          {instantZoomLevels.map(({ label, level, shortcut }) => (
+            <MenuItemWithShortcut
+              key={label}
+              onClick={() => onMagnify(level)}
+              shortcut={shortcut}
             >
-              <CheckMark
-                checked={viewOptions.scrollbar?.visibility === l.key}
-              />
-              {l.caption}
-            </MenuItem>
-          );
-        })}
-        {viewOptions.scrollbar?.visibility &&
-          viewOptions.scrollbar.visibility !== 'none' && (
-            <>
-              <MenuItem header>Scroll bars size</MenuItem>
-              {scrollbarSizeOptions.map(l => {
-                return (
-                  <MenuItem
-                    key={l.key}
-                    eventKey={l.key}
-                    onSelect={handleToggleScrollbar('size')}
-                  >
-                    <CheckMark
-                      checked={viewOptions.scrollbar?.size === l.key}
-                    />
-                    {l.caption}
-                  </MenuItem>
-                );
-              })}
-              <MenuItem header>Scroll bars position</MenuItem>
-              {scrollbarPositionOptions.map(l => {
-                return (
-                  <MenuItem
-                    key={l.key}
-                    eventKey={l.key}
-                    onSelect={handleToggleScrollbar('position')}
-                  >
-                    <CheckMark
-                      checked={viewOptions.scrollbar?.position === l.key}
-                    />
-                    {l.caption}
-                  </MenuItem>
-                );
-              })}
-            </>
+              {label}
+            </MenuItemWithShortcut>
+          ))}
+        </ToolButton>
+        <ToolButton
+          name="hand"
+          icon="circus-hand"
+          changeTool={onChangeTool}
+          active={active}
+          shortcut="H"
+          disabled={disabled}
+        />
+        <ToolButton
+          name="window"
+          icon="circus-window"
+          changeTool={onChangeTool}
+          active={active}
+          shortcut="W"
+          disabled={!windowEnabled || disabled}
+        >
+          {windowPresets.map((p: WindowPreset, i: number) =>
+            i < 9 ? (
+              <MenuItemWithShortcut
+                key={i + 1}
+                eventKey={i + 1}
+                shortcut={String(i + 1)}
+                onClick={() => handleApplyWindow(p)}
+              >
+                <b>{p.label}</b> {`(L: ${p.level} / W: ${p.width})`}
+              </MenuItemWithShortcut>
+            ) : (
+              <MenuItem
+                key={i + 1}
+                eventKey={i + 1}
+                onClick={() => handleApplyWindow(p)}
+              >
+                <b>{p.label}</b> {`(L: ${p.level} / W: ${p.width})`}
+              </MenuItem>
+            )
           )}
-        <MenuItem divider />
-        <MenuItem header>Shape resizing behavior</MenuItem>
-        <MenuItem onClick={handleToggleLockMaintainAspectRatio}>
-          <CheckMark checked={modifierKeyBehaviors.lockMaintainAspectRatio} />
-          Lock Shift + Drag to maintain aspect ratio
-        </MenuItem>
-        <MenuItem onClick={handleToggleLockFixCenterOfGravity}>
-          <CheckMark checked={modifierKeyBehaviors.lockFixCenterOfGravity} />
-          Lock Ctrl + Drag to fix center of gravity
-        </MenuItem>
-        <MenuItem header>Number of slices for 2D shape</MenuItem>
-        {zDimmedThresholdOptions.map(l => {
-          return (
-            <MenuItem
-              key={l.key}
-              eventKey={l.key}
-              onSelect={handleChangeZDimmedThreshold}
-            >
-              <CheckMark
-                checked={planeFigureOption.zDimmedThreshold === l.value}
+          <MenuItem key={99999} eventKey={99999} onClick={handleApplyWindow}>
+            Manual
+          </MenuItem>
+          <MenuItem divider />
+          <MenuItem header>Target</MenuItem>
+          {windowPropagationScopeOptions.map(l => {
+            return (
+              <MenuItem
+                key={l.key}
+                eventKey={l.key}
+                onSelect={handleToggleWindowPropagationScope}
+              >
+                <CheckMark
+                  checked={viewOptions.windowPropagationScope === l.key}
+                />
+                {l.caption}
+              </MenuItem>
+            );
+          })}
+        </ToolButton>
+        &thinsp;
+        <ToolButton
+          name="brush"
+          icon="circus-brush"
+          changeTool={onChangeTool}
+          active={active}
+          shortcut="B"
+          disabled={!brushEnabled || disabled}
+        />
+        <ToolButton
+          name="eraser"
+          icon="circus-eraser"
+          changeTool={onChangeTool}
+          active={active}
+          shortcut="E"
+          disabled={!brushEnabled || disabled}
+        />
+        <DropdownButton
+          id="line-width-dropdown"
+          disabled={!brushEnabled || disabled}
+          title={<span className="line-width">{toolOptions.lineWidth}</span>}
+        >
+          {widthOptions.map(lineWidth => {
+            return (
+              <MenuItem
+                key={lineWidth}
+                eventKey={lineWidth}
+                onSelect={lineWidth =>
+                  setToolOption('lineWidth', Number(lineWidth))
+                }
+              >
+                {lineWidth}
+              </MenuItem>
+            );
+          })}
+          <MenuItem header>
+            <ShortcutBox>
+              <kbd>Q</kbd>: Wider,&nbsp;<kbd>A</kbd>: Narrower
+            </ShortcutBox>
+          </MenuItem>
+        </DropdownButton>
+        <ToolButton
+          name="bucket"
+          icon="circus-bucket"
+          changeTool={onChangeTool}
+          active={active}
+          shortcut="Shift+B"
+          disabled={!brushEnabled || disabled}
+        />
+        <ToolButton
+          name="bucketEraser"
+          icon="circus-bucket-erase"
+          changeTool={onChangeTool}
+          active={active}
+          shortcut="Shift+E"
+          disabled={!brushEnabled || disabled}
+        />
+        <ToolButton
+          name="wand"
+          icon="circus-wand"
+          changeTool={onChangeTool}
+          active={active}
+          shortcut="M"
+          disabled={!brushEnabled || !wandEnabled || disabled}
+        />
+        <ToolButton
+          name="wandEraser"
+          icon="circus-wand-eraser"
+          changeTool={onChangeTool}
+          active={active}
+          shortcut="Shift+M"
+          disabled={!brushEnabled || !wandEnabled || disabled}
+        />
+        &thinsp;
+        <DropdownButton
+          id="layout-dropdown"
+          disabled={!layoutEnabled || disabled}
+          title={<Icon icon="circus-layout-four" />}
+        >
+          {layoutOptions.map(l => {
+            return (
+              <MenuItemWithShortcut
+                key={l.key}
+                eventKey={l.key}
+                shortcut={l.shortcut}
+                onClick={() => onChangeLayoutKind(l.key)}
+              >
+                <Icon icon={l.icon} />
+                {l.caption}
+              </MenuItemWithShortcut>
+            );
+          })}
+        </DropdownButton>
+        &thinsp;
+        <DropdownButton
+          id="view-options-dropdown"
+          disabled={disabled}
+          title={<Icon icon="circus-tool" />}
+        >
+          <MenuItemWithShortcut
+            shortcut=";"
+            onClick={handleToggleReferenceLine}
+          >
+            <CheckMark checked={!!viewOptions.showReferenceLine} />
+            Show reference line
+          </MenuItemWithShortcut>
+          <MenuItemWithShortcut
+            shortcut="F"
+            onClick={handleToggleInterpolationMode}
+          >
+            <CheckMark
+              checked={viewOptions.interpolationMode === 'trilinear'}
+            />
+            Trilinear filtering
+          </MenuItemWithShortcut>
+          <MenuItem divider />
+          <MenuItem header>Scroll bars visibility</MenuItem>
+          {scrollbarVisibilityOptions.map(l => {
+            return (
+              <MenuItem
+                key={l.key}
+                eventKey={l.key}
+                onSelect={handleToggleScrollbar('visibility')}
+              >
+                <CheckMark
+                  checked={viewOptions.scrollbar?.visibility === l.key}
+                />
+                {l.caption}
+              </MenuItem>
+            );
+          })}
+          {viewOptions.scrollbar?.visibility &&
+            viewOptions.scrollbar.visibility !== 'none' && (
+              <>
+                <MenuItem header>Scroll bars size</MenuItem>
+                {scrollbarSizeOptions.map(l => {
+                  return (
+                    <MenuItem
+                      key={l.key}
+                      eventKey={l.key}
+                      onSelect={handleToggleScrollbar('size')}
+                    >
+                      <CheckMark
+                        checked={viewOptions.scrollbar?.size === l.key}
+                      />
+                      {l.caption}
+                    </MenuItem>
+                  );
+                })}
+                <MenuItem header>Scroll bars position</MenuItem>
+                {scrollbarPositionOptions.map(l => {
+                  return (
+                    <MenuItem
+                      key={l.key}
+                      eventKey={l.key}
+                      onSelect={handleToggleScrollbar('position')}
+                    >
+                      <CheckMark
+                        checked={viewOptions.scrollbar?.position === l.key}
+                      />
+                      {l.caption}
+                    </MenuItem>
+                  );
+                })}
+              </>
+            )}
+          <MenuItem divider />
+          <MenuItem header>Shape resizing behavior</MenuItem>
+          <MenuItem onClick={handleToggleLockMaintainAspectRatio}>
+            <CheckMark checked={modifierKeyBehaviors.lockMaintainAspectRatio} />
+            Lock Shift + Drag to maintain aspect ratio
+          </MenuItem>
+          <MenuItem onClick={handleToggleLockFixCenterOfGravity}>
+            <CheckMark checked={modifierKeyBehaviors.lockFixCenterOfGravity} />
+            Lock Ctrl + Drag to fix center of gravity
+          </MenuItem>
+          <MenuItem header>Number of slices for 2D shape</MenuItem>
+          {zDimmedThresholdOptions.map(l => {
+            return (
+              <MenuItem
+                key={l.key}
+                eventKey={l.key}
+                onSelect={handleChangeZDimmedThreshold}
+              >
+                <CheckMark
+                  checked={planeFigureOption.zDimmedThreshold === l.value}
+                />
+                {l.caption}
+              </MenuItem>
+            );
+          })}
+        </DropdownButton>
+        {(active === 'wand' || active === 'wandEraser') && (
+          <StyledSpanWandOption>
+            <label>
+              Threshold:
+              <input
+                className="wand-threshold-input"
+                type="number"
+                name="threshold"
+                min="0"
+                value={toolOptions.wandThreshold}
+                onChange={ev =>
+                  setToolOption('wandThreshold', ev.target.valueAsNumber)
+                }
               />
-              {l.caption}
-            </MenuItem>
-          );
-        })}
-      </DropdownButton>
-      {(active === 'wand' || active === 'wandEraser') && (
-        <StyledSpanWandOption>
-          <label>
-            Threshold:
-            <input
-              className="wand-threshold-input"
-              type="number"
-              name="threshold"
-              min="0"
-              value={toolOptions.wandThreshold}
-              onChange={ev =>
-                setToolOption('wandThreshold', ev.target.valueAsNumber)
-              }
+            </label>
+            <label>
+              Max distance:
+              <input
+                className="wand-max-distance-input"
+                type="number"
+                name="maxDistance"
+                min="0"
+                placeholder="mm"
+                value={toolOptions.wandMaxDistance}
+                onChange={ev =>
+                  setToolOption('wandMaxDistance', ev.target.valueAsNumber)
+                }
+              />
+            </label>
+            <label>
+              Mode:
+              <Select
+                className="wand-option-shrinkselect"
+                options={wandModeOptions}
+                value={toolOptions.wandMode}
+                onChange={mode => setToolOption('wandMode', mode)}
+              />{' '}
+            </label>
+            <WandBaseValueEditor
+              value={toolOptions.wandBaseValue}
+              onChange={value => setToolOption('wandBaseValue', value)}
             />
-          </label>
-          <label>
-            Max distance:
-            <input
-              className="wand-max-distance-input"
-              type="number"
-              name="maxDistance"
-              min="0"
-              placeholder="mm"
-              value={toolOptions.wandMaxDistance}
-              onChange={ev =>
-                setToolOption('wandMaxDistance', ev.target.valueAsNumber)
-              }
-            />
-          </label>
-          <label>
-            Mode:
-            <Select
-              className="wand-option-shrinkselect"
-              options={wandModeOptions}
-              value={toolOptions.wandMode}
-              onChange={mode => setToolOption('wandMode', mode)}
-            />{' '}
-          </label>
-          <WandBaseValueEditor
-            value={toolOptions.wandBaseValue}
-            onChange={value => setToolOption('wandBaseValue', value)}
-          />
-        </StyledSpanWandOption>
-      )}
-      <Modal show={windowDialogOpen} onHide={() => setWindowDialogOpen(false)}>
+          </StyledSpanWandOption>
+        )}
+      </StyledDiv>
+      <Dialog
+        open={windowDialogOpen}
+        onClose={() => setWindowDialogOpen(false)}
+      >
         <ViewWindowEditor
           initialValue={currentWindow}
           onHide={() => setWindowDialogOpen(false)}
           onOkClick={handleApplyWindow}
         />
-      </Modal>
-    </StyledDiv>
+      </Dialog>
+    </>
   );
 });
 

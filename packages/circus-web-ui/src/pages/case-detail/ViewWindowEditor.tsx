@@ -1,6 +1,6 @@
 import Button from '#components/Button.tsx';
 import React, { useState, useMemo } from 'react';
-import { Modal } from '#components/react-bootstrap.ts';
+import { DialogBody, DialogFooter, DialogHeader } from '#components/Dialog.tsx';
 import type { PropertyEditorProperties } from '@smikitky/rb-components/lib/PropertyEditor';
 import PropertyEditor from '@smikitky/rb-components/lib/PropertyEditor';
 import * as et from '@smikitky/rb-components/lib/editor-types';
@@ -29,23 +29,23 @@ const ViewWindowEditor: React.FC<{
 
   return (
     <>
-      <Modal.Header>Set window level and window width</Modal.Header>
-      <Modal.Body>
+      <DialogHeader>Set window level and window width</DialogHeader>
+      <DialogBody>
         <PropertyEditor
           properties={properties}
           value={window}
           onChange={setWindow}
         />
         <hr />
-      </Modal.Body>
-      <Modal.Footer>
+      </DialogBody>
+      <DialogFooter>
         <Button variant="link" onClick={onHide}>
           Cancel
         </Button>
         <Button onClick={() => onOkClick(window)} variant="primary">
           OK
         </Button>
-      </Modal.Footer>
+      </DialogFooter>
     </>
   );
 };

@@ -3,7 +3,8 @@ import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import { describePartialVolumeDescriptor } from '@utrad-ical/circus-rs';
 import { useCsResults } from '@utrad-ical/circus-ui-kit';
 import Icon from '#components/Icon.tsx';
-import { Modal, Tab, Tabs } from '#components/react-bootstrap.ts';
+import { DialogBody, DialogHeader } from '#components/Dialog.tsx';
+import { Tab, Tabs } from '#components/react-bootstrap.ts';
 import type { SeriesEntry } from '#components/SeriesSelector.tsx';
 import TimeDisplay from '#components/TimeDisplay.tsx';
 import UserDisplay from '#components/UserDisplay.tsx';
@@ -28,10 +29,10 @@ const InvestigateJobModal: React.FC<{}> = React.memo(props => {
 
   return (
     <>
-      <Modal.Header>
+      <DialogHeader>
         <Icon icon="material-search" /> Investigate Job
-      </Modal.Header>
-      <Modal.Body>
+      </DialogHeader>
+      <DialogBody>
         <Tabs id="investigate-job-tabs" defaultActiveKey={1}>
           <Tab eventKey={1} title="Overview">
             <table className="table table-hover">
@@ -126,7 +127,7 @@ const InvestigateJobModal: React.FC<{}> = React.memo(props => {
             </table>
           </Tab>
         </Tabs>
-      </Modal.Body>
+      </DialogBody>
     </>
   );
 });

@@ -4,6 +4,7 @@ import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import { confirm } from '#components/dialogs.tsx';
 import Select from '#components/Select.tsx';
 import CsVolumeDownloadModal from '#components/CsVolumeDownloadModal.tsx';
+import Dialog from '#components/Dialog.tsx';
 import PluginDisplay from '#components/PluginDisplay.tsx';
 import type { SeriesEntry } from '#components/SeriesSelector.tsx';
 import SeriesSelector from '#components/SeriesSelector.tsx';
@@ -154,12 +155,12 @@ const CreateNewJob: React.FC<{}> = props => {
           Register Job
         </Button>
       </div>
-      {showVolumeDownloadModal && (
+      <Dialog open={showVolumeDownloadModal} dismissable={false} size="large">
         <CsVolumeDownloadModal
           series={selectedSeries}
           onClose={() => setShowVolumeDownloadModal(false)}
         />
-      )}
+      </Dialog>
     </div>
   );
 };

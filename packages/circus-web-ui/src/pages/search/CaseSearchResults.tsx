@@ -3,6 +3,7 @@ import { confirm } from '#components/dialogs.tsx';
 import CaseExportModal from '#components/CaseExportModal.tsx';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
 import DataGrid from '#components/DataGrid.tsx';
+import Dialog from '#components/Dialog.tsx';
 import DropdownButton from '#components/DropdownButton.tsx';
 import Icon from '#components/Icon.tsx';
 import MenuItem from '#components/MenuItem.tsx';
@@ -211,12 +212,12 @@ const CaseSearchResultsView: React.FC<{
           </DropdownButton>
         </>
       )}
-      {showExportModal && (
+      <Dialog open={showExportModal} dismissable={false} size="large">
         <CaseExportModal
           caseIds={selected}
           onClose={() => setShowExportModal(false)}
         />
-      )}
+      </Dialog>
       {selected.length > 0 && <> {selected.length} selected</>}
     </SearchResultsView>
   );

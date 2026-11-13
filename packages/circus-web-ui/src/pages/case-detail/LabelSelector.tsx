@@ -7,7 +7,11 @@ import type {
 import { describePartialVolumeDescriptor } from '@utrad-ical/circus-rs';
 import classNames from 'classnames';
 import Icon from '#components/Icon.tsx';
-import { Modal } from '#components/react-bootstrap.ts';
+import Dialog, {
+  DialogBody,
+  DialogFooter,
+  DialogHeader
+} from '#components/Dialog.tsx';
 import * as mr from 'multi-integer-range';
 import React, { useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
@@ -43,24 +47,43 @@ const LabelSelector: React.FC<{
   const activeLabel =
     activeLabelIndex >= 0 ? activeSeries.labels[activeLabelIndex] : null;
   const activeSeriesMetadata = metadata[activeSeriesIndex];
+  // Shown outside the draggable series items
+  const [infoSeriesIndex, setInfoSeriesIndex] = useState<number | null>(null);
+  const infoSeries =
+    infoSeriesIndex !== null ? revision.series[infoSeriesIndex] : undefined;
 
   return (
-    <StyledSeriesUl>
-      {revision.series.map((series, seriesIndex) => (
-        <SeriesItem
-          key={`${seriesIndex}:${series.seriesUid}`}
-          seriesInfo={seriesData[series.seriesUid]}
-          volumeLoadingProgress={volumeLoadingProgresses[seriesIndex]}
-          editingData={editingData}
-          updateEditingData={updateEditingData}
-          seriesIndex={seriesIndex}
-          activeLabel={activeLabel}
-          disabled={disabled}
-          multipleSeriesShown={multipleSeriesShown}
-          metadata={activeSeriesMetadata}
-        />
-      ))}
-    </StyledSeriesUl>
+    <>
+      <StyledSeriesUl>
+        {revision.series.map((series, seriesIndex) => (
+          <SeriesItem
+            key={`${seriesIndex}:${series.seriesUid}`}
+            volumeLoadingProgress={volumeLoadingProgresses[seriesIndex]}
+            editingData={editingData}
+            updateEditingData={updateEditingData}
+            seriesIndex={seriesIndex}
+            activeLabel={activeLabel}
+            disabled={disabled}
+            multipleSeriesShown={multipleSeriesShown}
+            metadata={activeSeriesMetadata}
+            onShowInfo={() => setInfoSeriesIndex(seriesIndex)}
+          />
+        ))}
+      </StyledSeriesUl>
+      <Dialog
+        open={infoSeriesIndex !== null}
+        onClose={() => setInfoSeriesIndex(null)}
+        size="large"
+      >
+        {infoSeries && (
+          <SeriesInfo
+            series={seriesData[infoSeries.seriesUid]}
+            pvd={infoSeries.partialVolumeDescriptor}
+            onClose={() => setInfoSeriesIndex(null)}
+          />
+        )}
+      </Dialog>
+    </>
   );
 };
 
@@ -89,24 +112,24 @@ export default LabelSelector;
 const SeriesItem: React.FC<{
   editingData: EditingData;
   updateEditingData: EditingDataUpdater;
-  seriesInfo: Series;
   volumeLoadingProgress: number;
   seriesIndex: number;
   activeLabel: InternalLabel | null;
   disabled?: boolean;
   multipleSeriesShown: boolean;
   metadata: DicomVolumeMetadata | undefined;
+  onShowInfo: () => void;
 }> = props => {
   const {
     seriesIndex,
     editingData,
     updateEditingData,
-    seriesInfo,
     volumeLoadingProgress,
     activeLabel,
     disabled,
     multipleSeriesShown,
-    metadata
+    metadata,
+    onShowInfo
   } = props;
   const series = editingData.revision.series[seriesIndex];
 
@@ -200,10 +223,7 @@ const SeriesItem: React.FC<{
           )}
         </div>
         <div onClick={ev => ev.stopPropagation()}>
-          <SeriesInfo
-            series={seriesInfo}
-            pvd={series.partialVolumeDescriptor}
-          />
+          <Button variant="link" icon="material-info" onClick={onShowInfo} />
         </div>
       </span>
       <ul className="case-label-list">
@@ -260,9 +280,9 @@ const StyledSeriesLi = styled.li`
 const SeriesInfo: React.FC<{
   series: Series;
   pvd: PartialVolumeDescriptor;
-}> = React.memo(props => {
-  const { series, pvd } = props;
-  const [showModal, setShowModal] = useState(false);
+  onClose: () => void;
+}> = props => {
+  const { series, pvd, onClose } = props;
 
   const images = mr.initialize(series.images);
   const noPvd =
@@ -295,14 +315,9 @@ const SeriesInfo: React.FC<{
   };
 
   return (
-    <div>
-      <Button
-        variant="link"
-        icon="material-info"
-        onClick={() => setShowModal(true)}
-      />
-      <Modal show={showModal} onHide={() => setShowModal(false)} bsSize="lg">
-        <Modal.Header closeButton>Series Information</Modal.Header>
+    <>
+      <DialogHeader>Series Information</DialogHeader>
+      <DialogBody>
         <table className="table table-striped">
           <tbody>
             {Object.keys(data).map(k => (
@@ -313,15 +328,15 @@ const SeriesInfo: React.FC<{
             ))}
           </tbody>
         </table>
-        <Modal.Footer>
-          <Button variant="primary" onClick={() => setShowModal(false)}>
-            OK
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </div>
+      </DialogBody>
+      <DialogFooter>
+        <Button variant="primary" onClick={onClose}>
+          OK
+        </Button>
+      </DialogFooter>
+    </>
   );
-});
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 

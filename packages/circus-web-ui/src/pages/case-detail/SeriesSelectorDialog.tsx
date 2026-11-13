@@ -1,5 +1,5 @@
 import Button from '#components/Button.tsx';
-import { Modal } from '#components/react-bootstrap.ts';
+import { DialogBody, DialogFooter, DialogHeader } from '#components/Dialog.tsx';
 import type { SeriesEntry } from '#components/SeriesSelector.tsx';
 import SeriesSelector from '#components/SeriesSelector.tsx';
 import { produce } from 'immer';
@@ -50,8 +50,8 @@ const SeriesSelectorDialog: React.FC<{
 
   return (
     <>
-      <Modal.Header>Select Series</Modal.Header>
-      <Modal.Body>
+      <DialogHeader>Select Series</DialogHeader>
+      <DialogBody>
         <SeriesSelector
           value={entries}
           onChange={setEntries}
@@ -59,15 +59,15 @@ const SeriesSelectorDialog: React.FC<{
           onRemoving={handleRemovingOrEditing}
           onPvdEditing={handleRemovingOrEditing}
         />
-      </Modal.Body>
-      <Modal.Footer>
+      </DialogBody>
+      <DialogFooter>
         <Button variant="link" onClick={() => onResolve(null)}>
           Cancel
         </Button>
         <Button onClick={handleResolve} variant="primary">
           OK
         </Button>
-      </Modal.Footer>
+      </DialogFooter>
     </>
   );
 };

@@ -4,7 +4,7 @@ import { useCsResults } from '@utrad-ical/circus-ui-kit';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
 import DataGrid from '#components/DataGrid.tsx';
 import Icon from '#components/Icon.tsx';
-import { Modal } from '#components/react-bootstrap.ts';
+import { DialogBody, DialogHeader } from '#components/Dialog.tsx';
 import TimeDisplay from '#components/TimeDisplay.tsx';
 import UserDisplay from '#components/UserDisplay.tsx';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -75,10 +75,10 @@ const DeleteFeedbackModal: React.FC<{}> = () => {
 
   return (
     <>
-      <Modal.Header>
+      <DialogHeader>
         <Icon icon="material-close" /> Delete Feedback
-      </Modal.Header>
-      <Modal.Body>
+      </DialogHeader>
+      <DialogBody>
         {feedbacks.length > 0 ? (
           <>
             <div className="text-danger">
@@ -101,7 +101,7 @@ const DeleteFeedbackModal: React.FC<{}> = () => {
             </div>
           </>
         )}
-      </Modal.Body>
+      </DialogBody>
     </>
   );
 };

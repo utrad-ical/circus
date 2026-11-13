@@ -10,7 +10,9 @@ import Button, { type ButtonVariant } from './Button.tsx';
 import Dialog, { DialogBody, DialogFooter, DialogHeader } from './Dialog.tsx';
 import Icon from './Icon.tsx';
 
-// Promise-based dialogs opened by function calls, rendered by `DialogHost`
+// Promise-based dialogs opened by function calls, rendered by `DialogHost`.
+// Use these to ask something and get the result. Place `<Dialog>` instead
+// if the content follows changing props or needs a page-level context.
 
 export type DialogContentProps<T> = {
   onResolve: (value: T) => void;

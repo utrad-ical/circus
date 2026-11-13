@@ -36,7 +36,7 @@ import { useApi } from '#utils/api.ts';
 import isTouchDevice from '#utils/isTouchDevice.ts';
 import useEffectEvent from '#utils/useEffectEvent.ts';
 import { useUserPreferences } from '#utils/useLoginUser.ts';
-import { Modal } from '../../components/react-bootstrap.ts';
+import Dialog from '#components/Dialog.tsx';
 import type {
   ScrollBarsSettings,
   WindowPropagationScope
@@ -1079,14 +1079,12 @@ const RevisionEditor: React.FC<{
           />
         )}
       </div>
-      {seriesDialogOpen && (
-        <Modal show bsSize="lg" onHide={() => {}}>
-          <SeriesSelectorDialog
-            onResolve={handleSeriesDialogResolve}
-            initialValue={editingData.revision.series}
-          />
-        </Modal>
-      )}
+      <Dialog open={seriesDialogOpen} dismissable={false} size="large">
+        <SeriesSelectorDialog
+          onResolve={handleSeriesDialogResolve}
+          initialValue={editingData.revision.series}
+        />
+      </Dialog>
     </StyledDiv>
   );
 };

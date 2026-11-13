@@ -1,5 +1,6 @@
 import Button from '#components/Button.tsx';
-import { Modal, ProgressBar } from '#components/react-bootstrap.ts';
+import { DialogBody, DialogFooter, DialogHeader } from '#components/Dialog.tsx';
+import { ProgressBar } from '#components/react-bootstrap.ts';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import type { ProcessorProgress, Editor } from './processor-types.ts';
@@ -33,9 +34,9 @@ const ProcessorModal: React.FC<{
   const [options, setOptions] = useState(initialOptions);
 
   return (
-    <Modal show={true} onHide={onHide}>
-      <Modal.Header>{title}</Modal.Header>
-      <Modal.Body>
+    <>
+      <DialogHeader>{title}</DialogHeader>
+      <DialogBody>
         <StyledDiv>
           <OptionsEditor
             value={options}
@@ -54,16 +55,16 @@ const ProcessorModal: React.FC<{
             </div>
           )}
         </StyledDiv>
-      </Modal.Body>
-      <Modal.Footer>
+      </DialogBody>
+      <DialogFooter>
         <Button variant="link" onClick={onHide}>
           Cancel
         </Button>
         <Button onClick={handleOkClick} variant="primary">
           OK
         </Button>
-      </Modal.Footer>
-    </Modal>
+      </DialogFooter>
+    </>
   );
 };
 

@@ -147,8 +147,8 @@ const Header: React.FC<{ value: ViewerDef }> = React.memo(props => {
   return (
     <div
       className={classnames(styles.header, {
-        active,
-        'selected-series': selectedSeries
+        [styles.active]: active,
+        [styles.selectedSeries]: selectedSeries
       })}
       onClick={handleClick}
     >
@@ -294,7 +294,7 @@ const Content: React.FC<{ value: ViewerDef }> = props => {
     <ImageViewer
       id={key}
       key={key}
-      className={classnames(`viewer-${orientation}`, styles.imageViewer)}
+      className={styles.imageViewer}
       composition={composition}
       tool={celestialRotateMode ? celestialRotate : tool}
       initialStateSetter={combinedInitialStateSetter}

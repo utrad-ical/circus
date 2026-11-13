@@ -21,7 +21,6 @@ export const ControlledCollapser: React.FC<
   return (
     <div
       className={classnames(
-        'collapser',
         styles.collapser,
         {
           [styles.framed]: framed,
@@ -31,19 +30,12 @@ export const ControlledCollapser: React.FC<
         className
       )}
     >
-      <a
-        className={classnames('collapser-header', styles.header)}
-        onClick={onToggleClick}
-      >
+      <a className={styles.header} onClick={onToggleClick}>
         {title}
         &ensp;
         <Icon className={styles.triangle} icon="material-arrow_right" />
       </a>
-      {open && (
-        <div className={classnames('collapser-body', styles.body)}>
-          {children}
-        </div>
-      )}
+      {open && <div className={styles.body}>{children}</div>}
     </div>
   );
 };

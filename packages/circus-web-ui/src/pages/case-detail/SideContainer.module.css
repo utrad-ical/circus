@@ -31,8 +31,8 @@
     overflow-y: auto;
     flex: 1 1 auto;
     min-height: 1px;
-  }
-  :global(.collapser) {
-    margin-bottom: 1px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
   }
 }

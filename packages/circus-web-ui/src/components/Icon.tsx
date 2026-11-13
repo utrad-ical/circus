@@ -25,8 +25,6 @@ const Icon: FC<{
       className={classnames(
         styles.icon,
         size !== 'md' && styles[size],
-        // Some styles still select CIRCUS icons by this class
-        icon.startsWith('circus-') && 'circus-icon',
         className
       )}
     >

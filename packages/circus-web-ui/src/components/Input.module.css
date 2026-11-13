@@ -16,6 +16,10 @@
     background-color: var(--surface);
     cursor: not-allowed;
   }
+  &[aria-invalid='true'] {
+    border-color: var(--danger);
+    background-color: color-mix(in oklch, var(--danger) 10%, var(--bg));
+  }
 }
 
 .small {

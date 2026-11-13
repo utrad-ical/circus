@@ -1,5 +1,5 @@
 import type { CircusIconDefinition } from '#components/BodyPartIcon.tsx';
-import type { Schema } from '@smikitky/rb-components/lib/JsonSchemaEditor';
+import type { Schema } from '#components/JsonSchemaEditor.tsx';
 import type CaseTag from './CaseTag.ts';
 
 export type ProjectRoles =

@@ -18,7 +18,7 @@ import classNames from 'classnames';
 import Collapser from '#components/Collapser.tsx';
 import Icon from '#components/Icon.tsx';
 import { createStateChanger } from '#components/ImageViewer.tsx';
-import StyledJsonSchemaEditor from '#components/StyledJsonSchemaEditor.tsx';
+import JsonSchemaEditor from '#components/JsonSchemaEditor.tsx';
 import { produce } from 'immer';
 import { debounce } from 'lodash';
 import useToolbar from '#pages/case-detail/useToolbar.ts';
@@ -1006,7 +1006,7 @@ const RevisionEditor: React.FC<{
                 <b>Attributes for</b>:{' '}
                 <Icon icon={labelTypes[activeLabel.type].icon} />{' '}
                 <span className="label-name">{activeLabel.name}</span>
-                <StyledJsonSchemaEditor
+                <JsonSchemaEditor
                   key={activeLabel.temporaryKey + ':' + refreshCounter}
                   schema={projectData.labelAttributesSchema}
                   value={activeLabel.attributes || {}}
@@ -1027,7 +1027,7 @@ const RevisionEditor: React.FC<{
         {Object.keys(projectData.caseAttributesSchema.properties || {}).length >
           0 && (
           <Collapser title="Case Attributes" className="case-attributes">
-            <StyledJsonSchemaEditor
+            <JsonSchemaEditor
               key={refreshCounter}
               schema={projectData.caseAttributesSchema}
               value={revision.attributes}

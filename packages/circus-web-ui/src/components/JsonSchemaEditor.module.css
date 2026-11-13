@@ -1,0 +1,36 @@
+.editor {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 4px 10px;
+}
+
+.key {
+  overflow-wrap: anywhere;
+}
+
+.radios {
+  display: flex;
+  gap: 15px;
+  padding: 2px 4px;
+  border: 1px solid transparent;
+  > label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+    margin: 0;
+    font-weight: normal;
+  }
+  input {
+    margin: 0;
+    accent-color: var(--theme);
+  }
+}
+
+.invalid {
+  &.radios,
+  & button {
+    border-color: var(--danger);
+    background-color: color-mix(in oklch, var(--danger) 10%, var(--bg));
+  }
+}

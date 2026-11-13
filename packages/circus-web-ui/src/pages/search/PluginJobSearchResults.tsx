@@ -1,4 +1,4 @@
-import classnames from 'classnames';
+import u from '#components/utilities.module.css';
 import Button from '#components/Button.tsx';
 import { confirm } from '#components/dialogs.tsx';
 import type {
@@ -103,9 +103,9 @@ const columns: DataGridColumnDefinition<any>[] = [
     className: 'execution-time',
     renderer: Times('createdAt', 'finishedAt')
   },
-  { caption: 'Status', className: 'status', renderer: Status },
+  { caption: 'Status', className: styles.status, renderer: Status },
   { caption: 'FB', className: 'feedback', renderer: FeedbackRenderer },
-  { caption: '', className: 'operation', renderer: Operation }
+  { caption: '', className: u.textRight, renderer: Operation }
 ];
 
 const DataView: React.FC<{
@@ -116,7 +116,7 @@ const DataView: React.FC<{
   const { value, selected, onSelectionChange } = props;
   return (
     <DataGrid
-      className={classnames('plugin-job-search-result', styles.grid)}
+      className="plugin-job-search-result"
       columns={columns}
       itemPrimaryKey="jobId"
       value={value}

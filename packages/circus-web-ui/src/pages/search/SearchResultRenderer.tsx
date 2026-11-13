@@ -105,7 +105,7 @@ export const FeedbackRenderer: DataGridRenderer<any> = props => {
         </span>
       )}
       {consensual > 0 && <Icon icon="material-crown" />}
-      {!personals && !consensual && <span className="feedback-none">none</span>}
+      {!personals && !consensual && <span className={u.muted}>none</span>}
     </span>
   );
 };

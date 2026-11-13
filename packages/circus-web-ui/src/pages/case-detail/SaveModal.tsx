@@ -62,7 +62,7 @@ const SaveModal: React.FC<{
         />
         {templates.length > 0 && (
           <DropdownButton
-            id="revision-templates-dropdown"
+            className={styles.templates}
             title={<Icon icon="material-replay" />}
           >
             {templates.map((template, index) => (

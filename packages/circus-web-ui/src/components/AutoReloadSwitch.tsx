@@ -1,3 +1,4 @@
+import styles from './AutoReloadSwitch.module.css';
 import React, { Fragment, useState } from 'react';
 import type { ButtonSize } from '#components/Button.tsx';
 import Select from '#components/Select.tsx';
@@ -28,8 +29,8 @@ const AutoReloadSwitch: React.FC<{
 
   return (
     <Fragment>
-      <a onClick={onRefresh}>
-        <Icon className="text-link" icon="material-autorenew" />
+      <a className={styles.refresh} onClick={onRefresh}>
+        <Icon icon="material-autorenew" />
       </a>
       &ensp;
       <Select

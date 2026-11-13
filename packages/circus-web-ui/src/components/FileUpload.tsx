@@ -122,7 +122,7 @@ const FileUpload: React.FC<{
           />
           {files.length > 0 && (
             <>
-              <div className="upload-buttons">
+              <div className={styles.uploadButtons}>
                 <Button
                   variant="primary"
                   disabled={!canUpload}

@@ -1,12 +1,4 @@
-.grid {
-  :global(.progress) {
-    height: 33px;
-  }
-  :global(.progress-bar-info) {
-    line-height: 33px;
-  }
-  :global(.status) {
-    text-align: center;
-    font-weight: bold;
-  }
+.status {
+  text-align: center;
+  font-weight: bold;
 }

@@ -3,7 +3,7 @@
   input {
     width: 100%;
   }
-  :global(#revision-templates-dropdown) {
+  .templates {
     margin-top: 10px;
   }
 }

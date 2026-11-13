@@ -1,4 +1,3 @@
-import classnames from 'classnames';
 import Button from '#components/Button.tsx';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
 import DataGrid from '#components/DataGrid.tsx';
@@ -30,7 +29,12 @@ const StatusRenderer: React.FC<{ value: Task }> = ({ value }) => {
   // Takes the real-time task progress into consideration
   const progress = useTaskProgress(value.taskId);
   const status = progress?.status ?? value.status;
-  return <span className={status}>{capitalize(status)}</span>;
+  const className = {
+    error: styles.statusError,
+    processing: styles.statusProcessing,
+    finished: styles.statusFinished
+  }[status];
+  return <span className={className}>{capitalize(status)}</span>;
 };
 
 const MessageRenderer: React.FC<{ value: Task }> = ({ value }) => {
@@ -44,8 +48,13 @@ const MessageRenderer: React.FC<{ value: Task }> = ({ value }) => {
     typeof progress?.total === 'number'
       ? `(${progress.finished}/${progress.total})`
       : '';
+  const className = {
+    error: styles.messageError,
+    processing: styles.messageProcessing,
+    finished: undefined
+  }[status];
   return (
-    <span className={status}>
+    <span className={className}>
       {number && <>{number} </>}
       {message}
     </span>
@@ -72,6 +81,7 @@ const columns: DataGridColumnDefinition<Task>[] = [
   {
     caption: 'Download',
     key: 'download',
+    className: styles.center,
     renderer: function DownloadLink({ value }) {
       const { status, taskId, downloadFileType } = value;
       const handleClick = useTaskDownloadHandler(taskId);
@@ -90,6 +100,7 @@ const columns: DataGridColumnDefinition<Task>[] = [
   {
     caption: 'Dismiss',
     key: 'dismiss',
+    className: styles.right,
     renderer: (({ value }) => {
       const dismissTask = useTaskDismisser();
       return (
@@ -111,7 +122,7 @@ const DataView: React.FC<{ value: Task[] }> = props => {
   const { value } = props;
   return (
     <DataGrid
-      className={classnames('task-search-result', styles.grid)}
+      className="task-search-result"
       columns={columns}
       itemPrimaryKey="taskId"
       value={value}

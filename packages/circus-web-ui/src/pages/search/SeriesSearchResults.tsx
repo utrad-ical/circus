@@ -1,3 +1,4 @@
+import u from '#components/utilities.module.css';
 import { confirm } from '#components/dialogs.tsx';
 import type {
   DataGridColumnDefinition,
@@ -146,7 +147,7 @@ const columns: DataGridColumnDefinition<any>[] = [
     className: 'series-import',
     renderer: Times('seriesDate', 'createdAt')
   },
-  { caption: '', className: 'operation', renderer: Operation }
+  { caption: '', className: u.textRight, renderer: Operation }
 ];
 
 const DataView: React.FC<{

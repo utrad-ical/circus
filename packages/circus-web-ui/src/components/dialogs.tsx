@@ -32,6 +32,7 @@ type Entry = {
   Content: DialogContent<any>;
   dismissable: boolean;
   size?: 'large';
+  open: boolean;
   resolve: (value: any) => void;
   reject: (reason?: any) => void;
 };
@@ -45,7 +46,13 @@ const setEntries = (next: Entry[]) => {
   listeners.forEach(listener => listener());
 };
 
-const remove = (id: number) => setEntries(entries.filter(e => e.id !== id));
+// Closed entries are kept until `DialogHost` has closed their `<dialog>`,
+// so that the browser restores the focus
+const close = (id: number) => {
+  if (!entries.some(e => e.id === id && e.open)) return false;
+  setEntries(entries.map(e => (e.id === id ? { ...e, open: false } : e)));
+  return true;
+};
 
 /**
  * Opens a dialog with arbitrary content and returns the result via Promise.
@@ -65,13 +72,12 @@ export const modal = <T,>(
         Content,
         dismissable: cancelable,
         size,
+        open: true,
         resolve: value => {
-          remove(id);
-          resolve(value);
+          if (close(id)) resolve(value);
         },
         reject: reason => {
-          remove(id);
-          reject(reason);
+          if (close(id)) reject(reason);
         }
       }
     ]);
@@ -93,14 +99,18 @@ export const DialogHost: FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (current.some(e => !e.open)) setEntries(entries.filter(e => e.open));
+  }, [current]);
+
   return (
     <>
       {current.map(entry => {
-        const { id, Content, dismissable, size, resolve, reject } = entry;
+        const { id, Content, dismissable, size, open, resolve, reject } = entry;
         return (
           <Dialog
             key={id}
-            open
+            open={open}
             dismissable={dismissable}
             size={size}
             onClose={() => resolve(null)}

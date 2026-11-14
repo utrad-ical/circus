@@ -1,4 +1,4 @@
-import { input } from '@inquirer/prompts';
+import { input, password } from '@inquirer/prompts';
 import { promises as fs } from 'node:fs';
 import { styleText } from 'node:util';
 import fileExists from '../utils/fileExists.ts';
@@ -41,8 +41,9 @@ const action: CommandAction = ({ rcFilePath }) => {
         return true;
       }
     });
-    const token = await input({
+    const token = await password({
       message: 'API token:',
+      mask: true,
       validate: defaultValidateString
     });
 

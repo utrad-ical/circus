@@ -1,6 +1,6 @@
 import Button from '#components/Button.tsx';
 import classNames from 'classnames';
-import moment from 'moment';
+import { formatDistanceToNow } from 'date-fns';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { newSearch, updateSearch } from '#store/searches.ts';
@@ -105,10 +105,10 @@ const TaskDisplay: React.FC<{
   const message =
     progress?.message ??
     (task.status === 'finished'
-      ? `Finished (${moment(task.endedAt).fromNow()})`
+      ? `Finished (${formatDistanceToNow(task.endedAt, { addSuffix: true })})`
       : task.status === 'processing'
         ? 'In progress'
-        : `Error (${moment(task.endedAt).fromNow()})`);
+        : `Error (${formatDistanceToNow(task.endedAt, { addSuffix: true })})`);
 
   return (
     <div

@@ -1,18 +1,19 @@
 import React, { useReducer } from 'react';
 import type { FeedbackEntry } from '@utrad-ical/circus-ui-kit';
-import moment from 'moment';
+import { formatDistanceToNow, formatISO } from 'date-fns';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import UserDisplay from '#components/UserDisplay.tsx';
 
 const registeredMessage = (feedback: FeedbackEntry<any>) => {
-  const m = moment(feedback.createdAt);
   const modeStr = feedback.isConsensual ? 'Consensual' : 'Personal';
   return (
     <>
       {modeStr} feedback registered by{' '}
       <UserDisplay userEmail={feedback.userEmail} />{' '}
-      <span title={m.format()}>{m.fromNow()}</span>
+      <span title={formatISO(feedback.createdAt)}>
+        {formatDistanceToNow(feedback.createdAt, { addSuffix: true })}
+      </span>
     </>
   );
 };

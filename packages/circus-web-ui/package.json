@@ -35,7 +35,6 @@
     "@types/react-dom": "^16.9.8",
     "@types/react-redux": "^7.1.9",
     "@types/rusha": "^0.8.0",
-    "@types/streamsaver": "^2.0.0",
     "@types/tinycolor2": "^1.4.3",
     "@vitejs/plugin-react": "6.3.0",
     "typescript": "~7.0.2",
@@ -53,9 +52,7 @@
     "events": "^3.3.0",
     "fflate": "^0.8.3",
     "immer": "^10.1.1",
-    "keycode": "^2.2.0",
     "lodash": "^4.17.15",
-    "moment": "^2.24.0",
     "multi-integer-range": "^6.1.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
@@ -64,7 +61,6 @@
     "redux": "^4.1.0",
     "redux-thunk": "^2.3.0",
     "rusha": "^0.8.13",
-    "streamsaver": "^2.0.5",
     "tinycolor2": "^1.4.1",
     "ulid": "^2.3.0"
   }

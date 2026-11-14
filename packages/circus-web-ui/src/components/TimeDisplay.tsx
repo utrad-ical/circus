@@ -1,17 +1,19 @@
 import React from 'react';
-import moment from 'moment';
+import { format, isValid } from 'date-fns';
 
 const TimeDisplay: React.FC<{
   /**
    * ISO Time string.
    */
-  value: string;
+  value: string | null | undefined;
   invalidLabel?: string;
 }> = props => {
   const { value, invalidLabel = '' } = props;
-  const m = moment(value);
-  if (!m.isValid()) return <span>{invalidLabel}</span>;
-  return <span title={value}>{m.format('YYYY-MM-DD HH:mm')}</span>;
+  const date = value ? new Date(value) : undefined;
+  if (!date || !isValid(date)) return <span>{invalidLabel}</span>;
+  return (
+    <span title={value ?? undefined}>{format(date, 'yyyy-MM-dd HH:mm')}</span>
+  );
 };
 
 export default TimeDisplay;

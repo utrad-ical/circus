@@ -4,7 +4,6 @@ import Icon from '#components/Icon.tsx';
 import DropdownButton from '#components/DropdownButton.tsx';
 import { DialogBody, DialogFooter, DialogHeader } from '#components/Dialog.tsx';
 import MenuItem from '#components/MenuItem.tsx';
-import keycode from 'keycode';
 import type { ExternalLabel } from '#pages/case-detail/labelData.ts';
 import type { Revision } from '#pages/case-detail/revisionData.ts';
 import React, { Fragment, useState } from 'react';
@@ -28,7 +27,12 @@ const SaveModal: React.FC<{
     setValue(event.target.value);
   };
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.keyCode == keycode.codes.enter) {
+    if (
+      event.key === 'Enter' &&
+      // Safari reports the IME confirmation with keyCode 229
+      !event.nativeEvent.isComposing &&
+      event.keyCode !== 229
+    ) {
       onOkClick(value);
     }
   };

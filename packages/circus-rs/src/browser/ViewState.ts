@@ -97,6 +97,7 @@ export type TransferFunction = Array<TransferFunctionEntry>;
  */
 interface TransferFunctionEntry {
   readonly position: number;
+  /** `#rgb`, `#rgba`, `#rrggbb` or `#rrggbbaa` */
   readonly color: string;
 }
 

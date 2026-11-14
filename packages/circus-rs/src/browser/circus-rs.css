@@ -1,7 +1,7 @@
 .circus-rs-toolbar {
   margin: 0;
   padding: 0;
-  li {
+  & li {
     margin: 0;
     padding: 0;
     list-style: none;
@@ -9,12 +9,10 @@
   }
 }
 
-@rs-toolbutton-size: 30px;
-
 .circus-rs-toolbutton {
-  font-size: @rs-toolbutton-size;
-  line-height: @rs-toolbutton-size;
-  min-width: @rs-toolbutton-size;
+  font-size: 30px;
+  line-height: 30px;
+  min-width: 30px;
   border: 1px solid gray;
   background: white;
   color: gray;
@@ -25,7 +23,7 @@
     color: white;
     background-color: #333;
   }
-  svg {
+  & svg {
     width: 1em;
     height: 1em;
     fill: currentColor;

@@ -1,14 +1,13 @@
 import type { FunctionService } from '@utrad-ical/circus-lib';
 import { styleText } from 'node:util';
-import moment from 'moment';
+import { format, formatDistanceToNow } from 'date-fns';
 import { table } from 'table';
 import sleep from '../util/sleep.ts';
 import type Command from './Command.ts';
 import type * as circus from '../interface.ts';
 
 const dt = (date: Date) => {
-  const m = moment(date);
-  return m.format('YY-MM-DD HH:mm:ss') + ' (' + m.fromNow() + ')';
+  return `${format(date, 'yy-MM-dd HH:mm:ss')} (${formatDistanceToNow(date, { addSuffix: true })})`;
 };
 
 const monitor: FunctionService<

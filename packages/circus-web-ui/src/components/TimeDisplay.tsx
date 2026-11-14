@@ -1,5 +1,5 @@
 import React from 'react';
-import moment from 'moment';
+import { format, isValid } from 'date-fns';
 
 const TimeDisplay: React.FC<{
   /**
@@ -9,9 +9,9 @@ const TimeDisplay: React.FC<{
   invalidLabel?: string;
 }> = props => {
   const { value, invalidLabel = '' } = props;
-  const m = moment(value);
-  if (!m.isValid()) return <span>{invalidLabel}</span>;
-  return <span title={value}>{m.format('YYYY-MM-DD HH:mm')}</span>;
+  const date = new Date(value);
+  if (!isValid(date)) return <span>{invalidLabel}</span>;
+  return <span title={value}>{format(date, 'yyyy-MM-dd HH:mm')}</span>;
 };
 
 export default TimeDisplay;

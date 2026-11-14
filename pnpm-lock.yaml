@@ -443,6 +443,9 @@ importers:
       argv:
         specifier: 0.0.2
         version: 0.0.2
+      date-fns:
+        specifier: 4.4.0
+        version: 4.4.0
       dicom-parser:
         specifier: ^1.8.7
         version: 1.8.7
@@ -470,9 +473,6 @@ importers:
       minimist:
         specifier: ^1.2.0
         version: 1.2.5
-      moment:
-        specifier: ^2.24.0
-        version: 2.29.1
       mongodb:
         specifier: ^7.8.0
         version: 7.8.0(socks@2.8.10)
@@ -806,15 +806,9 @@ importers:
       immer:
         specifier: ^10.1.1
         version: 10.1.1
-      keycode:
-        specifier: ^2.2.0
-        version: 2.2.0
       lodash:
         specifier: ^4.17.15
         version: 4.17.19
-      moment:
-        specifier: ^2.24.0
-        version: 2.29.1
       multi-integer-range:
         specifier: ^6.1.0
         version: 6.1.0
@@ -839,9 +833,6 @@ importers:
       rusha:
         specifier: ^0.8.13
         version: 0.8.14
-      streamsaver:
-        specifier: ^2.0.5
-        version: 2.0.5
       tinycolor2:
         specifier: ^1.4.1
         version: 1.4.2
@@ -870,9 +861,6 @@ importers:
       '@types/rusha':
         specifier: ^0.8.0
         version: 0.8.0
-      '@types/streamsaver':
-        specifier: ^2.0.0
-        version: 2.0.1
       '@types/tinycolor2':
         specifier: ^1.4.3
         version: 1.4.3
@@ -1725,9 +1713,6 @@ packages:
 
   '@types/split@1.0.0':
     resolution: {integrity: sha512-pm9S1mkr+av0j7D6pFyqhBxXDbnbO9gqj4nb8DtGtCewvj0XhIv089SSwXrjrIizT1UquO8/h83hCut0pa3u8A==}
-
-  '@types/streamsaver@2.0.1':
-    resolution: {integrity: sha512-I49NtT8w6syBI3Zg3ixCyygTHoTVMY0z2TMRcTgccdIsVd2MwlKk7ITLHLsJtgchUHcOd7QEARG9h0ifcA6l2Q==}
 
   '@types/tar-fs@1.16.3':
     resolution: {integrity: sha512-Y+fdeg11tb9J3UNIatNtrTPM1i8U+WLv2mMhZ3W13mtU19stCgrXJ4iXLkTpoF8jqHi3T/qTS8+fQ3IPzXxpuA==}
@@ -2999,9 +2984,6 @@ packages:
   jszip@3.7.1:
     resolution: {integrity: sha512-ghL0tz1XG9ZEmRMcEN2vt7xabrDdqHHeykgARpmZ0BiIctWxM47Vt63ZO2dnp4QYt/xJVLLy5Zv1l/xRdh2byg==}
 
-  keycode@2.2.0:
-    resolution: {integrity: sha512-ps3I9jAdNtRpJrbBvQjpzyFbss/skHqzS+eu4RxKLaEAtFqkjZaB6TZMSivPbLxf4K7VI4SjR0P5mRCX5+Q25A==}
-
   keygrip@1.1.0:
     resolution: {integrity: sha512-iYSchDJ+liQ8iwbSI2QqsQOvqv58eJCEanyJPJi+Khyu8smkcKSFUCbPwzFcL7YVtZ6eONjqRX/38caJ7QjRAQ==}
     engines: {node: '>= 0.6'}
@@ -3939,9 +3921,6 @@ packages:
 
   streaming-json-stringify@3.1.0:
     resolution: {integrity: sha512-axtfs3BDxAsrZ9swD163FBrXZ8dhJJp6kUI6C97TvUZG9RHKfbg9nFbXqEheFNOb3IYMEt2ag9F62sWLFUZ4ug==}
-
-  streamsaver@2.0.5:
-    resolution: {integrity: sha512-KIWtBvi8A6FiFZGNSyuIZRZM6C8AvnWTiCx/TYa7so420vC5sQwcBKkdqInuGWoWMfeWy/P+/cRqMtWVf4RW9w==}
 
   streamsearch@0.1.2:
     resolution: {integrity: sha512-jos8u++JKm0ARcSUTAZXOVC0mSox7Bhn6sBgty73P1f3JGf7yG2clTbBNHUdde/kdvP2FESam+vM6l8jBrNxHA==}
@@ -5074,8 +5053,6 @@ snapshots:
       '@types/node': 24.19.2
       '@types/through': 0.0.30
 
-  '@types/streamsaver@2.0.1': {}
-
   '@types/tar-fs@1.16.3':
     dependencies:
       '@types/node': 24.19.2
@@ -6199,8 +6176,6 @@ snapshots:
       readable-stream: 2.3.7
       set-immediate-shim: 1.0.1
 
-  keycode@2.2.0: {}
-
   keygrip@1.1.0:
     dependencies:
       tsscmp: 1.0.6
@@ -7223,8 +7198,6 @@ snapshots:
     dependencies:
       json-stringify-safe: 5.0.1
       readable-stream: 2.3.7
-
-  streamsaver@2.0.5: {}
 
   streamsearch@0.1.2: {}
 

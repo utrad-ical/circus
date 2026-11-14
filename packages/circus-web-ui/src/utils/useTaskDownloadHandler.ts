@@ -1,28 +1,20 @@
 import { useCallback } from 'react';
 import { useApi } from './api.ts';
-import streamSaver from 'streamsaver';
 
 /**
  * Returns a new mouse event handler that triggers a download from a task.
- * This still does not support large files (> 1GB).
  * @param taskId The task ID.
  */
 const useTaskDownloadHandler = (taskId: string) => {
   const api = useApi();
 
-  const cb = useCallback(async () => {
-    // Authenticated with the session cookie
-    const response = await fetch(api.getBaseUrl() + `tasks/${taskId}/download`);
-    const size = Number(response.headers.get('content-length')) || undefined;
-    const cd = response.headers.get('content-deposition');
-    const fileName = cd?.match(/filename="(.+)"/)?.[1] ?? 'download';
-    const fileStream = streamSaver.createWriteStream(fileName, {
-      size
-    });
-    response.body?.pipeTo(fileStream);
+  return useCallback(() => {
+    // Authenticated with the session cookie; the browser streams the file
+    const a = document.createElement('a');
+    a.href = api.getBaseUrl() + `tasks/${taskId}/download`;
+    a.download = '';
+    a.click();
   }, [api, taskId]);
-
-  return cb;
 };
 
 export default useTaskDownloadHandler;

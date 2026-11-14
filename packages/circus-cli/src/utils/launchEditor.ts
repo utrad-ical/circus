@@ -16,12 +16,11 @@ const launchEditor = async (
     process.env.VISUAL ??
     process.env.EDITOR ??
     (os.platform() === 'win32' ? 'notepad' : 'vi');
-  const tempFile = path.join(
-    os.tmpdir(),
-    `${Math.random().toString(36).slice(-7)}.${ext}`
-  );
-  await fs.writeFile(tempFile, original, 'utf8');
+  // A new directory only the user can access (0700) keeps the content private
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'circus-cli-'));
+  const tempFile = path.join(tempDir, `edit.${ext}`);
   try {
+    await fs.writeFile(tempFile, original, { encoding: 'utf8', mode: 0o600 });
     await new Promise<void>((resolve, reject) => {
       const child = cp.spawn(editor, [tempFile], {
         stdio: 'inherit',
@@ -35,7 +34,7 @@ const launchEditor = async (
     const result = await fs.readFile(tempFile, 'utf8');
     return result;
   } finally {
-    await fs.unlink(tempFile);
+    await fs.rm(tempDir, { recursive: true, force: true });
   }
 };
 

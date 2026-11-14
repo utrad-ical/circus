@@ -20,7 +20,7 @@ import Icon from '#components/Icon.tsx';
 import { createStateChanger } from '#components/ImageViewer.tsx';
 import JsonSchemaEditor from '#components/JsonSchemaEditor.tsx';
 import { produce } from 'immer';
-import { debounce } from 'lodash';
+import { debounce } from 'lodash-es';
 import useToolbar from '#pages/case-detail/useToolbar.ts';
 import React, {
   useCallback,

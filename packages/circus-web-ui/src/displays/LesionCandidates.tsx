@@ -7,7 +7,7 @@ import {
 } from '@utrad-ical/circus-rs';
 import classnames from 'classnames';
 import { useVolumeLoaders } from '@utrad-ical/circus-ui-kit';
-import get from 'lodash/get';
+import { get } from 'lodash-es';
 import React, {
   useCallback,
   useEffect,

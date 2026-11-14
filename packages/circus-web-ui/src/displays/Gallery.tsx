@@ -1,6 +1,6 @@
 import type { CSSProperties, RefObject } from 'react';
 import React, { useEffect, useRef, createRef, useState } from 'react';
-import get from 'lodash/get';
+import { get } from 'lodash-es';
 import { useCsResults } from '@utrad-ical/circus-ui-kit';
 import type { Display } from '@utrad-ical/circus-ui-kit';
 import { useErrorMessage } from './utils/useErrorMessage.tsx';

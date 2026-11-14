@@ -765,7 +765,7 @@ importers:
         specifier: ^1.7.7
         version: 1.7.7(debug@4.3.5(supports-color@7.2.0))
       bytes:
-        specifier: ^3.1.0
+        specifier: ^3.1.2
         version: 3.1.2
       classnames:
         specifier: ^2.3.1
@@ -779,9 +779,9 @@ importers:
       immer:
         specifier: ^10.1.1
         version: 10.1.1
-      lodash:
-        specifier: ^4.17.15
-        version: 4.17.19
+      lodash-es:
+        specifier: ^4.18.1
+        version: 4.18.1
       multi-integer-range:
         specifier: ^6.1.0
         version: 6.1.0
@@ -817,11 +817,11 @@ importers:
         specifier: 0.48.2
         version: 0.48.2
       '@types/bytes':
-        specifier: ^3.1.1
-        version: 3.1.1
-      '@types/lodash':
-        specifier: ^4.14.161
-        version: 4.14.172
+        specifier: ^3.1.6
+        version: 3.1.6
+      '@types/lodash-es':
+        specifier: ^4.17.12
+        version: 4.17.12
       '@types/react':
         specifier: ^16.9.35
         version: 16.14.12
@@ -1552,6 +1552,9 @@ packages:
   '@types/bytes@3.1.1':
     resolution: {integrity: sha512-lOGyCnw+2JVPKU3wIV0srU0NyALwTBJlVSx5DfMQOFuuohA8y9S8orImpuIQikZ0uIQ8gehrRjxgQC1rLRi11w==}
 
+  '@types/bytes@3.1.6':
+    resolution: {integrity: sha512-mZP7MVbCf8q2nBMwll27TyVnObEo9lNuXtQ+XU5EBGiFxtm9qfWm0YL4KTMQBwcVlOZB+th51gFIDYFFBiK7IQ==}
+
   '@types/compression@0.0.33':
     resolution: {integrity: sha512-mCDw1g4Y7UEEkYYu/0qd07JuTD7DT2KGI9fGvaStsNc8T8+RKFUZJHAfGizvymm3OkLo9Hrpf+pRAc6804+mdA==}
 
@@ -1617,6 +1620,9 @@ packages:
 
   '@types/koa__multer@2.0.3':
     resolution: {integrity: sha512-nxVUQIBYxjLSDScxe2YlHL8uJpuPtElEK15Q7D51hD6TwfFKe+7Ji/8Q8ewwzUlFWiuOnFbuXdy/HIjgQiTSHA==}
+
+  '@types/lodash-es@4.17.12':
+    resolution: {integrity: sha512-0NgftHUcV4v34VhXm8QBSftKVXtbkBG3ViCjs6+eJ5a6y6Mi/jiFGPc1sC7QK+9BFhWrURE3EOggmWaSxL9OzQ==}
 
   '@types/lodash@4.14.172':
     resolution: {integrity: sha512-/BHF5HAx3em7/KkzVKm3LrsD6HZAXuXO1AJZQ3cRRBZj4oHZDviWPYu0aEplAqDFNHZPW6d3G7KN+ONcCCC7pw==}
@@ -3106,6 +3112,9 @@ packages:
   listr@0.14.3:
     resolution: {integrity: sha512-RmAl7su35BFd/xoMamRjpIE4j3v+L28o8CT5YhAXQJm1fD+1l9ngXY8JAQRJ+tFK2i5njvi0iRUKV09vPwA0iA==}
     engines: {node: '>=6'}
+
+  lodash-es@4.18.1:
+    resolution: {integrity: sha512-J8xewKD/Gk22OZbhpOVSwcs60zhd95ESDwezOFuA3/099925PdHJ7OFHNTGtajL3AlZkykD32HykiMo+BIBI8A==}
 
   lodash.defaults@4.2.0:
     resolution: {integrity: sha512-qjxPLHd3r5DnsdGacqOMU6pb/avJzdh9tFX2ymgoZE27BmjXrNy/y4LoaiTeAb+O3gL8AfpJGtqfX/ae2leYYQ==}
@@ -4846,6 +4855,8 @@ snapshots:
 
   '@types/bytes@3.1.1': {}
 
+  '@types/bytes@3.1.6': {}
+
   '@types/compression@0.0.33':
     dependencies:
       '@types/express': 4.17.21
@@ -4942,6 +4953,10 @@ snapshots:
   '@types/koa__multer@2.0.3':
     dependencies:
       '@types/koa': 2.13.4
+
+  '@types/lodash-es@4.17.12':
+    dependencies:
+      '@types/lodash': 4.14.172
 
   '@types/lodash@4.14.172': {}
 
@@ -6337,6 +6352,8 @@ snapshots:
     transitivePeerDependencies:
       - zen-observable
       - zenObservable
+
+  lodash-es@4.18.1: {}
 
   lodash.defaults@4.2.0: {}
 

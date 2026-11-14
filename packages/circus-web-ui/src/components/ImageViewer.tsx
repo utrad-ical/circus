@@ -8,7 +8,6 @@ import type { Tool as ToolBaseClass } from '@utrad-ical/circus-rs';
 import { toolFactory } from '@utrad-ical/circus-rs';
 import { setImmediate } from '@utrad-ical/circus-rs';
 import classnames from 'classnames';
-import { EventEmitter } from 'events';
 import React, { useEffect, useRef, useState } from 'react';
 import useEffectEvent from '#utils/useEffectEvent.ts';
 
@@ -71,12 +70,12 @@ export interface StateChanger<T extends rs.ViewState> {
 }
 
 export const createStateChanger = <T extends rs.ViewState = rs.ViewState>() => {
-  const emitter = new EventEmitter();
+  const listeners = new Set<(changeFunc: StateChangerFunc<T>) => void>();
   const changer: StateChanger<T> = changeFunc => {
-    emitter.emit('change', changeFunc);
+    listeners.forEach(cb => cb(changeFunc));
   };
-  changer.on = cb => emitter.on('change', cb);
-  changer.off = cb => emitter.off('change', cb);
+  changer.on = cb => listeners.add(cb);
+  changer.off = cb => listeners.delete(cb);
   return changer;
 };
 
@@ -126,7 +125,7 @@ const ImageViewer: React.FC<{
     const viewer = new rs.Viewer(containerRef.current!);
     onCreateViewer(viewer, id);
     setViewer(viewer);
-    viewer.on('imageReady', () => {
+    viewer.addEventListener('imageReady', () => {
       if (!hasInitialStateSetter) {
         const baseState = composition!.imageSource.initialState(viewer);
         const viewState = savedInitialStateSetter(viewer, baseState, id);
@@ -136,7 +135,6 @@ const ImageViewer: React.FC<{
     });
     return () => {
       onDestroyViewer(viewer);
-      viewer.removeAllListeners();
       viewer.dispose();
     };
   }, [id, onCreateViewer, onDestroyViewer, composition, hasInitialStateSetter]);
@@ -147,9 +145,9 @@ const ImageViewer: React.FC<{
     const handler = () => {
       if (initialStateSet.current) onViewStateChange(viewer, id);
     };
-    viewer.on('stateChange', handler);
+    viewer.addEventListener('stateChange', handler);
     return () => {
-      viewer.off('stateChange', handler);
+      viewer.removeEventListener('stateChange', handler);
     };
   }, [viewer, onViewStateChange, id]);
 

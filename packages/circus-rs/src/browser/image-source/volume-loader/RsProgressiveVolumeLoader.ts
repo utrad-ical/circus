@@ -1,6 +1,6 @@
 import type RsHttpClient from '../../http-client/RsHttpClient.ts';
 import type {
-  ProgressEventEmitter,
+  VolumeLoadControllerEventMap,
   VolumeLoadController
 } from './DicomVolumeLoader.ts';
 import type DicomVolumeLoader from './DicomVolumeLoader.ts';
@@ -21,7 +21,7 @@ import type {
 } from '../../ws/createTransferConnectionFactory.ts';
 import * as mr from 'multi-integer-range';
 import { type RangeInput, toRange } from '../../../common/rangeInput.ts';
-import { EventEmitter } from 'events';
+import TypedEventTarget from '../../TypedEventTarget.ts';
 
 interface RsProgressiveVolumeLoaderOptions {
   rsHttpClient: RsHttpClient;
@@ -83,7 +83,7 @@ export default class RsProgressiveVolumeLoader implements DicomVolumeLoader {
   }
 
   private createLoadController() {
-    const emitter: ProgressEventEmitter = new EventEmitter();
+    const emitter = new TypedEventTarget<VolumeLoadControllerEventMap>();
 
     const setPriority = (imageIndices: RangeInput, priority: number) => {
       this.connected.then(() => {

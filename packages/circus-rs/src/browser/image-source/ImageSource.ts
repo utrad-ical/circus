@@ -1,4 +1,3 @@
-import { EventEmitter } from 'events';
 import type ViewState from '../ViewState.ts';
 import type Viewer from '../viewer/Viewer.ts';
 import type { Vector2D } from '../../common/geometry/index.ts';
@@ -23,7 +22,7 @@ export function isDraft(result: DrawResult): result is DraftDrawResult {
  * ImageSource is an abstract class which represents a
  * 2D or 3D image from any source and draws it onto a given canvas.
  */
-export default abstract class ImageSource extends EventEmitter {
+export default abstract class ImageSource {
   /**
    * Draws an image according to the current view state.
    * @param viewer The Viewer.

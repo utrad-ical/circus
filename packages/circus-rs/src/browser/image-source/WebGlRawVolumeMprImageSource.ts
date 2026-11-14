@@ -3,6 +3,7 @@ import type { MprViewState } from '../ViewState.ts';
 import type ViewState from '../ViewState.ts';
 import type DicomVolume from '../../common/DicomVolume.ts';
 import type DicomVolumeLoader from './volume-loader/DicomVolumeLoader.ts';
+import type { ProgressEventListener } from './volume-loader/DicomVolumeLoader.ts';
 import MprProgram from './gl/MprProgram.ts';
 import MprImageSource from './MprImageSource.ts';
 import {
@@ -109,13 +110,11 @@ export default class WebGlRawVolumeMprImageSource
       const { transfer } = mprProgram.setDicomVolume(this.volume);
 
       loadController.loadedImages().forEach(imageIndex => transfer(imageIndex));
-      const progressListener = ({ imageIndex }: { imageIndex: number }) => {
-        // console.log(`transfer ${imageIndex}`);
-        transfer(imageIndex);
-      };
-      loadController.on('progress', progressListener);
+      const progressListener: ProgressEventListener = event =>
+        transfer(event.detail.imageIndex);
+      loadController.addEventListener('progress', progressListener);
       this.disposeCallbacks.push(() =>
-        loadController.off('progress', progressListener)
+        loadController.removeEventListener('progress', progressListener)
       );
 
       volumeLoader.loadVolume().then(() => (this.fullyLoaded = true));

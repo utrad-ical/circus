@@ -1,4 +1,3 @@
-import { EventEmitter } from 'events';
 import type Annotation from '../annotation/Annotation.ts';
 import type Composition from '../Composition.ts';
 import type {
@@ -11,13 +10,25 @@ import type { Tool } from '../tool/Tool.ts';
 import type ViewState from '../ViewState.ts';
 import defaultLoadingIndicator from './defaultLoadingIndicator.ts';
 import ViewerEvent from './ViewerEvent.ts';
+import TypedEventTarget from '../TypedEventTarget.ts';
 
 /**
  * Viewer is the main component of CIRCUS RS, and wraps a HTML canvas element
  * and displays a specified image along with various annotations.
  * Displayed object is determined by `viewState` and `imageSource`.
  */
-export default class Viewer extends EventEmitter {
+export interface ViewerEventMap {
+  stateChange: { prevState: ViewState | undefined; state: ViewState };
+  requestingStateChange: {
+    prevState: ViewState | undefined;
+    state: ViewState;
+  };
+  imageReady: void;
+  compositionChange: Composition;
+  toolchanged: { before: Tool | undefined; after: Tool | undefined };
+}
+
+export default class Viewer extends TypedEventTarget<ViewerEventMap> {
   public canvas: HTMLCanvasElement;
   private rootDiv: HTMLDivElement;
 
@@ -46,7 +57,7 @@ export default class Viewer extends EventEmitter {
    */
   public backgroundEventTarget: any;
 
-  private boundRender: EventListener;
+  private boundRender: () => void;
   private boundEventHandler: (event: MouseEvent | TouchEvent) => void;
 
   private imageReady: boolean = false;
@@ -71,6 +82,8 @@ export default class Viewer extends EventEmitter {
   private currentRender: Promise<any> | null = null;
 
   private abortController: AbortController;
+
+  private disposed = false;
 
   private isObservingDivSize: boolean = false;
 
@@ -120,7 +133,7 @@ export default class Viewer extends EventEmitter {
     canvas.addEventListener('dblclick', this.boundEventHandler);
     canvas.addEventListener('wheel', this.boundEventHandler);
 
-    this.boundRender = this.render.bind(this);
+    this.boundRender = () => void this.render();
 
     this.loadingIndicator = defaultLoadingIndicator;
 
@@ -334,7 +347,7 @@ export default class Viewer extends EventEmitter {
         this.renderAnnotations();
 
         if (prevState !== drawnState) {
-          this.emit('stateChange', prevState, drawnState);
+          this.emit('stateChange', { prevState, state: drawnState });
         }
 
         return true;
@@ -374,7 +387,10 @@ export default class Viewer extends EventEmitter {
     if (prevRequestingState === viewState) return;
 
     this.requestingViewState = viewState;
-    this.emit('requestingStateChange', prevRequestingState, viewState);
+    this.emit('requestingStateChange', {
+      prevState: prevRequestingState,
+      state: viewState
+    });
 
     this.renderAnnotations();
     this.render();
@@ -396,7 +412,7 @@ export default class Viewer extends EventEmitter {
 
   private detachCurrentComposition(): void {
     if (!this.composition) return;
-    this.composition.removeListener('viewerChange', this.boundRender);
+    this.composition.removeEventListener('viewerChange', this.boundRender);
     this.composition.unregisterViewer(this);
     this.composition = undefined;
   }
@@ -442,7 +458,7 @@ export default class Viewer extends EventEmitter {
         composition.imageSource.getResizeTransformer();
       this.emit('imageReady');
     });
-    this.composition.addListener('viewerChange', this.boundRender);
+    this.composition.addEventListener('viewerChange', this.boundRender);
     this.emit('compositionChange', composition);
   }
 
@@ -465,7 +481,7 @@ export default class Viewer extends EventEmitter {
     if (tool) tool.activate(this);
     this.activeTool = tool;
 
-    this.emit('toolchanged', before, this.activeTool);
+    this.emit('toolchanged', { before, after: this.activeTool });
   }
 
   public getActiveTool(): Tool | undefined {
@@ -493,6 +509,14 @@ export default class Viewer extends EventEmitter {
     this.detachCurrentComposition();
     this.abortController.abort();
     this.stopResizeObserver();
-    this.removeAllListeners();
+    this.disposed = true;
+  }
+
+  // Listeners cannot be removed all at once, so stop notifying after dispose
+  override emit(
+    ...args: Parameters<TypedEventTarget<ViewerEventMap>['emit']>
+  ): void {
+    if (this.disposed) return;
+    super.emit(...args);
   }
 }

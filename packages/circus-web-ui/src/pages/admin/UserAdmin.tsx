@@ -1,7 +1,7 @@
 import Badge from '#components/Badge.tsx';
 import React, { useState, useEffect } from 'react';
 import EditorPage from './EditorPage.tsx';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import MultiSelect from '#components/MultiSelect.tsx';
 import Select from '#components/Select.tsx';
@@ -64,7 +64,6 @@ const UserAdmin: React.FC<any> = props => {
   const [listColumns, setListColumns] = useState<DataGridColumnDefinition[]>(
     []
   );
-  const api = useApi();
 
   useEffect(() => {
     let isMounted = true;
@@ -129,7 +128,7 @@ const UserAdmin: React.FC<any> = props => {
     return () => {
       isMounted = false;
     };
-  }, [api]);
+  }, []);
 
   if (!editorProperties || !listColumns) return <LoadingIndicator />;
   return (

@@ -8,7 +8,7 @@ import {
 import { focusBy } from '@utrad-ical/circus-rs';
 import { gzipSync } from 'fflate';
 import { produce, createDraft, finishDraft } from 'immer';
-import type { ApiCaller } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import { sha1 } from '#utils/util.ts';
 
 type InternalLabelDataMap = {
@@ -243,8 +243,7 @@ export const createNewLabelData = <T extends LabelType>(
  * 2. Loads and assigns an array buffer for each voxel label.
  */
 export const externalLabelToInternal = async (
-  label: ExternalLabel,
-  api: ApiCaller
+  label: ExternalLabel
 ): Promise<InternalLabel> => {
   const temporaryKey = generateUniqueId();
   const internalLabel: InternalLabel = {
@@ -274,8 +273,7 @@ export const externalLabelToInternal = async (
 };
 
 export const internalLabelToExternal = async (
-  label: InternalLabel,
-  api: ApiCaller
+  label: InternalLabel
 ): Promise<ExternalLabel> => {
   const saveVoxels = async (): Promise<ExternalVoxelLabelData> => {
     const data = label.data as InternalVoxelLabelData;

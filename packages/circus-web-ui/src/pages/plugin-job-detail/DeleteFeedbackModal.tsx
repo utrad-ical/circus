@@ -9,13 +9,12 @@ import { DialogBody, DialogHeader } from '#components/Dialog.tsx';
 import TimeDisplay from '#components/TimeDisplay.tsx';
 import UserDisplay from '#components/UserDisplay.tsx';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import * as modal from '#components/dialogs.tsx';
 
 const DeleteFeedbackModal: React.FC<{}> = () => {
   const { job } = useCsResults();
   const { jobId, feedbacks } = job;
-  const api = useApi();
 
   const handleDeleteFb = useCallback(
     async (target: string) => {
@@ -36,7 +35,7 @@ const DeleteFeedbackModal: React.FC<{}> = () => {
         await modal.alert(err.response.data.error);
       }
     },
-    [api, jobId]
+    [jobId]
   );
 
   const hasConsensual = feedbacks.some(f => f.isConsensual);

@@ -6,7 +6,7 @@ import type { ExternalLabel } from '#pages/case-detail/labelData.ts';
 import type { Revision } from '#pages/case-detail/revisionData.ts';
 import RevisionSelector from '#pages/case-detail/RevisionSelector.tsx';
 import React, { useCallback, useMemo } from 'react';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import type { CompressionFormat, LineEnding } from './DownloadModal.tsx';
 import DownloadModal, {
   compressionFormatOptions,
@@ -109,18 +109,14 @@ const CaseExportModal: React.FC<{
   const caption = `Export ${caseIds.length} case${
     caseIds.length !== 1 ? 's' : ''
   }`;
-  const api = useApi();
 
-  const onStart = useCallback(
-    async (options: CaseExportOptions) => {
-      const res = await api(`/cases/export-mhd`, {
-        method: 'post',
-        data: options
-      });
-      return res.taskId;
-    },
-    [api]
-  );
+  const onStart = useCallback(async (options: CaseExportOptions) => {
+    const res = await api(`/cases/export-mhd`, {
+      method: 'post',
+      data: options
+    });
+    return res.taskId;
+  }, []);
 
   const OptionsEditor = useMemo(
     () => createCaseExportOptionsEditor(revisions),

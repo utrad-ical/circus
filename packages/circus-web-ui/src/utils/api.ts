@@ -1,9 +1,8 @@
 import type { AxiosResponse } from 'axios';
 import axios from 'axios';
 import type { CancelToken } from './cancelToken.ts';
-import { dispatch } from '#store/index.ts';
+import { getStore } from '#store/storeAccess.ts';
 import { showMessage } from '#store/messages.ts';
-import { useContext, createContext } from 'react';
 import {
   currentUserEmail,
   expectedUserHeaderName,
@@ -115,7 +114,7 @@ const showErrorMessage = (err: { response: AxiosResponse }) => {
   } else {
     message = 'The server did not respond.';
   }
-  dispatch(
+  getStore().dispatch(
     showMessage(message, 'danger', {
       tag: 'apiResult',
       dismissOnPageChange: true
@@ -123,10 +122,7 @@ const showErrorMessage = (err: { response: AxiosResponse }) => {
   );
 };
 
-export default createApiCaller;
-
-export const ApiContext = createContext<ApiCaller | undefined>(undefined);
-
-export const useApi = () => {
-  return useContext(ApiContext)!;
-};
+/**
+ * The CIRCUS API accessor, authenticated with the session cookie.
+ */
+export const api = createApiCaller('/');

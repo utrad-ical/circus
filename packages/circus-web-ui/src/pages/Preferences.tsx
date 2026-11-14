@@ -11,7 +11,7 @@ import LabelColorsEditor from '#components/LabelColorsEditor.tsx';
 import { labeledSlider } from '#components/LabeledSlider.tsx';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { SearchPreset, UserPreferences } from '#store/loginUser.ts';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import { useUserPreferences } from '#utils/useLoginUser.ts';
 import useShowMessage from '#utils/useShowMessage.ts';
 import type { WindowPropagationScope } from '../store/loginUser.ts';
@@ -232,18 +232,14 @@ const circusDBProperties: PropertyEditorProperties<UserPreferences> = [
 ];
 
 const Preferences: React.FC<{}> = props => {
-  const api = useApi();
   const showMessage = useShowMessage();
   const [preferences, updatePreferences] = useUserPreferences();
   const [settings, setSettings] = useState<UserPreferences | null>(preferences);
-  const loadSettings = useCallback(
-    async (isMounted: boolean) => {
-      const settings = await api('preferences');
-      if (!isMounted) return;
-      setSettings(settings);
-    },
-    [api]
-  );
+  const loadSettings = useCallback(async (isMounted: boolean) => {
+    const settings = await api('preferences');
+    if (!isMounted) return;
+    setSettings(settings);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;

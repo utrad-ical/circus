@@ -1,7 +1,7 @@
 import type { PartialVolumeDescriptor } from '@utrad-ical/circus-rs';
 import type { LayoutInfo } from '#components/GridContainer.tsx';
 import { createDraft, finishDraft } from 'immer';
-import type { ApiCaller } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import asyncMap from '../../utils/asyncMap.ts';
 import type { ExternalLabel, InternalLabel } from './labelData.ts';
 import {
@@ -92,13 +92,12 @@ export interface SeriesEntryWithLabels<
  * to the internal representation with temporary keys and array buffers.
  */
 export const externalRevisionToInternal = async (
-  revision: Revision<ExternalLabel>,
-  api: ApiCaller
+  revision: Revision<ExternalLabel>
 ): Promise<Revision<InternalLabel>> => {
   const draft = createDraft(revision);
   for (const series of draft.series) {
     (series as any).labels = await asyncMap(series.labels, label =>
-      externalLabelToInternal(label, api)
+      externalLabelToInternal(label)
     );
   }
 
@@ -106,11 +105,10 @@ export const externalRevisionToInternal = async (
 };
 
 const internalSeriesToExternal = async (
-  series: SeriesEntryWithLabels<InternalLabel>,
-  api: ApiCaller
+  series: SeriesEntryWithLabels<InternalLabel>
 ): Promise<SeriesEntryWithLabels<ExternalLabel>> => {
   const newLabels = await asyncMap(series.labels, async label =>
-    internalLabelToExternal(label, api)
+    internalLabelToExternal(label)
   );
 
   const draft = createDraft(series);
@@ -124,14 +122,13 @@ const internalSeriesToExternal = async (
 export const saveRevision = async (
   caseId: string,
   revision: Revision,
-  description: string,
-  api: ApiCaller
+  description: string
 ) => {
   const saveData: Partial<Revision<ExternalLabel>> = {
     description,
     attributes: revision.attributes,
     series: await asyncMap(revision.series, async series =>
-      internalSeriesToExternal(series, api)
+      internalSeriesToExternal(series)
     ),
     status: 'approved'
   };

@@ -6,7 +6,7 @@ import { newSearch } from '#store/searches.ts';
 import { useDispatch } from 'react-redux';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
 import DataGrid from '#components/DataGrid.tsx';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 
 const columns: DataGridColumnDefinition[] = [
   { caption: 'Created', key: 'createdAt' },
@@ -26,19 +26,18 @@ const DataView: React.FC<{ value: any }> = props => {
 };
 
 const PluginJobQueueAdmin: React.FC<{}> = props => {
-  const api = useApi();
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(
-      newSearch(api, 'globalJobQueue', {
+      newSearch('globalJobQueue', {
         resource: { endPoint: 'admin/plugin-job-queue', primaryKey: 'jobId' },
         filter: {},
         condition: {},
         sort: '{ createdAt: -1 }'
       })
     );
-  }, [api, dispatch]);
+  }, [dispatch]);
 
   return (
     <AdminContainer title="Plugin Job Queue" icon="material-pending_actions">

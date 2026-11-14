@@ -7,7 +7,7 @@ import { confirm } from '#components/dialogs.tsx';
 import Icon from '#components/Icon.tsx';
 import TimeDisplay from '#components/TimeDisplay.tsx';
 import React, { useCallback, useState } from 'react';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import useLoadData from '#utils/useLoadData.ts';
 import type { CancelToken } from '../utils/cancelToken.ts';
 import CopyToClipboardButton from '#components/CopyToClipboardButton.tsx';
@@ -37,13 +37,9 @@ const AccessToken: React.FC<{ accessToken: string }> = props => {
 };
 
 const TokenManagement: React.FC<{}> = props => {
-  const api = useApi();
-  const load = useCallback(
-    async (cancelToken: CancelToken) => {
-      return (await api('/tokens', { cancelToken })).items as Token[];
-    },
-    [api]
-  );
+  const load = useCallback(async (cancelToken: CancelToken) => {
+    return (await api('/tokens', { cancelToken })).items as Token[];
+  }, []);
   const [data, isLoading, reload] = useLoadData(load);
 
   const [accessTokens, setAccessTokens] = useState<{

@@ -1,9 +1,8 @@
 import { useDispatch } from 'react-redux';
-import { useApi } from './api.ts';
+import { api } from './api.ts';
 import { dismissTask } from '#store/searches.ts';
 
 const useTaskDismisser = () => {
-  const api = useApi();
   const dispatch = useDispatch();
   return async (taskId: string) => {
     await api(`/tasks/${taskId}`, {

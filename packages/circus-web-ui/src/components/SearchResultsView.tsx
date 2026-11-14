@@ -5,7 +5,7 @@ import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import AutoReloadSwitch from './AutoReloadSwitch.tsx';
 import Icon from '#components/Icon.tsx';
 import classnames from 'classnames';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import { useSelector, useDispatch } from 'react-redux';
 import * as searches from '#store/searches.ts';
 import styles from './SearchResultsView.module.css';
@@ -54,8 +54,6 @@ const SearchResultsView: React.FC<{
     refreshable,
     children
   } = props;
-
-  const api = useApi();
   const dispatch = useDispatch();
   const search = useSelector(state => state.searches.searches[name]);
   const dic = useSelector(state => {
@@ -83,22 +81,22 @@ const SearchResultsView: React.FC<{
 
   const handleSortChange = (newSort: string) => {
     if (newSort === sort) return;
-    dispatch(searches.updateSearch(api, name, { sort: newSort }));
+    dispatch(searches.updateSearch(name, { sort: newSort }));
   };
 
   const handlePageClick = (newPage: number) => {
     if (newPage === page) return;
-    dispatch(searches.updateSearch(api, name, { page: newPage }));
+    dispatch(searches.updateSearch(name, { page: newPage }));
   };
 
   const handleLimitChange = (newLimit: number) => {
     if (newLimit === limit) return;
-    dispatch(searches.updateSearch(api, name, { limit: newLimit }));
+    dispatch(searches.updateSearch(name, { limit: newLimit }));
   };
 
   const handleRefresh = () => {
     if (isFetching) return;
-    dispatch(searches.updateSearch(api, name, {}));
+    dispatch(searches.updateSearch(name, {}));
   };
 
   const handleSelectionChange = (id: string, isSelected: boolean) => {

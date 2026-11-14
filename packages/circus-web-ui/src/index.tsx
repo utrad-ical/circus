@@ -48,8 +48,6 @@ import {
   createVolumeLoaderManager,
   VolumeLoaderFactoryContext
 } from '@utrad-ical/circus-ui-kit';
-import type { ApiCaller } from '#utils/api.ts';
-import { ApiContext } from '#utils/api.ts';
 import loginManager, { LoginManagerContext } from '#utils/loginManager.ts';
 import './styles/foundation.css';
 
@@ -119,14 +117,11 @@ const routerOptions = {
 
 const TheApp: React.FC<{}> = () => {
   const [manager, setManager] = useState<ReturnType<typeof loginManager>>();
-  const [api, setApi] = useState<ApiCaller>();
 
   useEffect(() => {
     // The login state is kept in the session cookie;
     // check it by loading the user information
-    const manager = loginManager('/', store.dispatch, api =>
-      setApi(() => api!)
-    );
+    const manager = loginManager('/', store.dispatch);
     setManager(manager);
     manager.refreshUserInfo(true);
   }, []);
@@ -138,14 +133,12 @@ const TheApp: React.FC<{}> = () => {
       path: '/',
       element: (
         <LoginManagerContext.Provider value={manager}>
-          <ApiContext.Provider value={api}>
-            <ReduxStoreProvider store={store}>
-              <VolumeLoaderFactoryProvider>
-                <AppInner manager={manager} />
-                <DialogHost />
-              </VolumeLoaderFactoryProvider>
-            </ReduxStoreProvider>
-          </ApiContext.Provider>
+          <ReduxStoreProvider store={store}>
+            <VolumeLoaderFactoryProvider>
+              <AppInner manager={manager} />
+              <DialogHost />
+            </VolumeLoaderFactoryProvider>
+          </ReduxStoreProvider>
         </LoginManagerContext.Provider>
       ),
       children: [

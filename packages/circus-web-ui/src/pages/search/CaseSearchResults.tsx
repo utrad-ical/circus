@@ -19,7 +19,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation } from 'react-router-dom';
 import * as searches from '#store/searches.ts';
 import { updateSearch } from '#store/searches.ts';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import useLoginUser from '#utils/useLoginUser.ts';
 import {
   CaseId,
@@ -104,7 +104,6 @@ const CaseSearchResultsView: React.FC<{
   const items = useSelector(state => state.searches.items.cases);
   const selected = useMemo(() => search?.selected ?? [], [search]);
   const { accessibleProjects } = useLoginUser()!;
-  const api = useApi();
   const user = useLoginUser();
   const dispatch = useDispatch();
   const [showExportModal, setShowExportModal] = useState(false);
@@ -143,7 +142,7 @@ const CaseSearchResultsView: React.FC<{
         tags: op === 'clear' ? [] : [tag!]
       }
     });
-    dispatch(updateSearch(api, searchName, {}));
+    dispatch(updateSearch(searchName, {}));
   };
 
   const handleExportMhd = () => {

@@ -6,7 +6,7 @@ import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
 import PluginSelectorMultiple from '#components/PluginSelectorMultiple.tsx';
 import ProjectSelectorMultiple from '#components/ProjectSelectorMultiple.tsx';
 import React, { useEffect, useState } from 'react';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import EditorPage from './EditorPage.tsx';
 
 const makeEmptyItem = () => {
@@ -67,7 +67,6 @@ const listColumns: DataGridColumnDefinition<{
 
 const GroupAdmin: React.FC<any> = props => {
   const [editorProperties, setEditorProperties] = useState<any>(null);
-  const api = useApi();
 
   useEffect(() => {
     let isMounted = true;
@@ -184,7 +183,7 @@ const GroupAdmin: React.FC<any> = props => {
     return () => {
       isMounted = false;
     };
-  }, [api]);
+  }, []);
 
   if (!editorProperties) return <LoadingIndicator />;
   return (

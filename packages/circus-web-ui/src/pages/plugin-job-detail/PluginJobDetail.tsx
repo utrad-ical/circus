@@ -26,7 +26,7 @@ import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
 import { newSearch } from '#store/searches.ts';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import type { CancelToken } from '#utils/cancelToken.ts';
 import useLoadData from '#utils/useLoadData.ts';
 import useLoginUser from '#utils/useLoginUser.ts';
@@ -122,7 +122,6 @@ const RelevantJobs: React.FC<{
 };
 
 const PluginJobDetail: React.FC<{}> = props => {
-  const api = useApi();
   const jobId = useParams<any>().jobId;
   const initialMode = useQuery().get('initialmode') ?? '';
 
@@ -183,7 +182,7 @@ const PluginJobDetail: React.FC<{}> = props => {
           };
 
           dispatchForJobSearch(
-            newSearch(api, 'relevantJobs', {
+            newSearch('relevantJobs', {
               resource: { endPoint: 'plugin-jobs', primaryKey: 'jobId' },
               filter,
               condition: {},
@@ -198,7 +197,6 @@ const PluginJobDetail: React.FC<{}> = props => {
       }
     },
     [
-      api,
       initialMode,
       dispatch,
       jobId,
@@ -281,7 +279,6 @@ const PluginJobDetail: React.FC<{}> = props => {
     feedbackState.isConsensual,
     feedbackState.editable,
     insertLog,
-    api,
     memoizedAccessiblePlugins
   ]);
 

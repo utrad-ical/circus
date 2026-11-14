@@ -12,7 +12,7 @@ import type { SeriesEntry } from '#components/SeriesSelector.tsx';
 import SeriesSelector from '#components/SeriesSelector.tsx';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import useLocalPreference from '#utils/useLocalPreference.ts';
 import useLoginUser from '#utils/useLoginUser.ts';
 import useShowMessage from '#utils/useShowMessage.ts';
@@ -26,8 +26,6 @@ const CreateNewJob: React.FC<{}> = props => {
   const [selectedSeries, setSelectedSeries] = useState<SeriesEntry[]>([]);
   const [busy, setBusy] = useState(true);
   const [showVolumeDownloadModal, setShowVolumeDownloadModal] = useState(false);
-
-  const api = useApi();
   const user = useLoginUser();
   const accessiblePlugins = useMemo(
     () =>
@@ -48,7 +46,7 @@ const CreateNewJob: React.FC<{}> = props => {
       setBusy(false);
     };
     load();
-  }, [api, seriesUid]);
+  }, [seriesUid]);
 
   // Pre-select previously-used plug-in
   useEffect(() => {

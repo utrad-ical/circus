@@ -5,7 +5,7 @@ import Panel, { PanelHeader, PanelBody } from '#components/Panel.tsx';
 import Button from '#components/Button.tsx';
 import Icon from '#components/Icon.tsx';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import ImageViewer from '#components/ImageViewer.tsx';
 import * as rs from '@utrad-ical/circus-rs';
@@ -19,7 +19,6 @@ import { useVolumeLoaders } from '@utrad-ical/circus-ui-kit';
 const SeriesDetail: React.FC<{}> = props => {
   const seriesUid = useParams<{ uid: string }>().uid;
   const [composition, setComposition] = useState<rs.Composition | null>(null);
-  const api = useApi();
   const pagerTool = useMemo(() => toolFactory('pager'), []);
 
   const load = useCallback(
@@ -27,7 +26,7 @@ const SeriesDetail: React.FC<{}> = props => {
       const resource = `series/${seriesUid}`;
       return await api(resource, { handleErrors: true }, cancelToken);
     },
-    [api, seriesUid]
+    [seriesUid]
   );
   const [seriesData] = useLoadData<any | Error>(load);
 

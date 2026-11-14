@@ -2,7 +2,7 @@ import Button from '#components/Button.tsx';
 import React, { useState, useCallback, useEffect } from 'react';
 import { ControlledCollapser } from '#components/Collapser.tsx';
 import useLocalPreference from '#utils/useLocalPreference.ts';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLoginManager } from '#utils/loginManager.ts';
 import useLoginUser from '#utils/useLoginUser.ts';
@@ -45,7 +45,6 @@ const SearchPanel: <T extends {}>(props: {
 
   const presetName = useParams<any>().presetName as string | undefined;
   const user = useLoginUser()!;
-  const api = useApi();
   const dispatch = useDispatch();
   const loginManager = useLoginManager();
   const search = useSelector(state => state.searches.searches[searchName]);
@@ -75,7 +74,7 @@ const SearchPanel: <T extends {}>(props: {
 
   const handleSearchClick = useCallback(() => {
     dispatch(
-      searches.newSearch(api, searchName, {
+      searches.newSearch(searchName, {
         resource,
         condition,
         filter: conditionToFilter(condition),
@@ -85,7 +84,6 @@ const SearchPanel: <T extends {}>(props: {
       })
     );
   }, [
-    api,
     condition,
     conditionToFilter,
     defaultSort,
@@ -100,9 +98,9 @@ const SearchPanel: <T extends {}>(props: {
   useEffect(handleSearchClick, []);
 
   const handleSavePresetClick = useCallback(async () => {
-    await dispatch(searches.savePreset(api, searchName, condition));
+    await dispatch(searches.savePreset(searchName, condition));
     loginManager.refreshUserInfo(true);
-  }, [api, condition, dispatch, loginManager, searchName]);
+  }, [condition, dispatch, loginManager, searchName]);
 
   return (
     <StateSavingCollapser title="Search Condition" framed>

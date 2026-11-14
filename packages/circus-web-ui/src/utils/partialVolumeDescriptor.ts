@@ -4,7 +4,7 @@ import { createDraft, finishDraft } from 'immer';
 import * as mr from 'multi-integer-range';
 import type Series from '#types/Series.ts';
 import type { RootState } from '../store/index.ts';
-import type { ApiCaller } from './api.ts';
+import { api } from './api.ts';
 import asyncMap from './asyncMap.ts';
 
 export const defaultPvd = (images: string): PartialVolumeDescriptor => {
@@ -17,7 +17,6 @@ export const defaultPvd = (images: string): PartialVolumeDescriptor => {
 
 export const defaultPvdFromSeries = async (
   seriesUid: string,
-  api: ApiCaller,
   state?: RootState
 ) => {
   const series =
@@ -32,7 +31,6 @@ export const defaultPvdFromSeries = async (
  */
 export const fillPartialVolumeDescriptors = async (
   entries: SeriesEntry[],
-  api: ApiCaller,
   state?: RootState
 ): Promise<SeriesEntry[]> => {
   const draft = createDraft(entries);
@@ -43,7 +41,6 @@ export const fillPartialVolumeDescriptors = async (
     ) {
       entry.partialVolumeDescriptor = await defaultPvdFromSeries(
         entry.seriesUid,
-        api,
         state
       );
     }

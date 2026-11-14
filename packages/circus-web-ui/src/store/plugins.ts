@@ -1,6 +1,6 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
-import type { ApiCaller } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import type { AppThunk } from './index.ts';
 import type Plugin from '../types/Plugin.ts';
 
@@ -25,7 +25,7 @@ export default slice.reducer;
 
 export const { pluginInfoLoading, pluginInfoLoaded } = slice.actions;
 
-export const loadPluginInfo = (api: ApiCaller, pluginId: string): AppThunk => {
+export const loadPluginInfo = (pluginId: string): AppThunk => {
   return async (dispatch, getState) => {
     const state = getState();
     if (state.plugins[pluginId]) return;

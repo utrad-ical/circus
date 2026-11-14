@@ -9,21 +9,8 @@ routes:
   - verb: post
     path: /tokens
     description: Creates a new permanent access token.
-    requestSchema:
-      type: object
-      properties:
-        description:
-          type: string
-          minLength: 1
-          maxLength: 32
-      required: ['description']
-      additionalProperties: false
-    responseSchema:
-      type: object
-      properties:
-        tokenId: { type: string }
-        accessToken: { type: string }
-      required: ['tokenId', 'accessToken']
+    requestSchema: tokenCreate
+    responseSchema: tokenCreated
   - verb: delete
     path: /tokens/:tokenId
     handler: handleDelete

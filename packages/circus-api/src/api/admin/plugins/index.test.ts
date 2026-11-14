@@ -44,6 +44,19 @@ describe('admin/plugins', () => {
     );
   });
 
+  test('should point at the invalid field when updating', async () => {
+    const res = await axios.get('api/admin/plugins');
+    const pluginId = res.data.items[0].pluginId;
+    const res2 = await axios.request({
+      method: 'patch',
+      url: `api/admin/plugins/${pluginId}`,
+      data: { pluginName: 42 }
+    });
+    assert.equal(res2.status, httpStatus.BAD_REQUEST);
+    // The admin editor shows complaints by this path
+    assert.equal(res2.data.validationErrors[0].instancePath, '/pluginName');
+  });
+
   test('should search plugins', async () => {
     const res = await axios.get('api/admin/plugins', {
       params: { filter: JSON.stringify({ type: 'CAD' }) }

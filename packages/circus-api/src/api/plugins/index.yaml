@@ -10,9 +10,4 @@ routes:
     path: /plugins
     handler: handleList
     description: Gets the list of plug-in definitions.
-    responseSchema:
-      type: array
-      item:
-        oneOf:
-          - $ref: plugin
-          - $ref: remotePlugin
+    responseSchema: plugins

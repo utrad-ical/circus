@@ -31,58 +31,17 @@ routes:
     handler: handlePostExportJob
     requiredGlobalPrivilege: downloadVolume
     description: Creates a task to export the specified cases as MHD.
-    requestSchema:
-      properties:
-        caseIds:
-          type: array
-          items:
-            oneOf:
-              - type: string
-              - type: object
-                properties:
-                  caseId:
-                    type: string
-                  revisionIndex:
-                    type: integer
-                    minimum: 0
-          maxItems: 100
-        labelPackType:
-          enum: ['isolated', 'combined']
-        mhdLineEnding:
-          enum: ['lf', 'crlf']
-        compressionFormat:
-          enum: ['tgz', 'zip']
-      required: ['caseIds']
+    requestSchema: caseExportMhd
   - verb: put
     path: /cases/:caseId/tags
     requiredProjectPrivilege: write
-    requestSchema:
-      type: array
-      items:
-        type: string
+    requestSchema: caseTags
     handler: handlePutTags
     description: Updates the tags of the specified case.
   - verb: patch
     path: /cases/tags
     handler: handlePatchTags
-    requestSchema:
-      type: object
-      properties:
-        operation:
-          enum:
-            - add
-            - remove
-            - set
-        tags:
-          type: array
-          items:
-            type: string
-        caseIds:
-          type: array
-          items:
-            type: string
-          minItems: 1
-      required: ['operation', 'tags', 'caseIds']
+    requestSchema: caseTagsPatch
     description: Manages the tags of multiple cases.
   - verb: delete
     path: /cases/:caseId

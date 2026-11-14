@@ -1,17 +1,16 @@
+import testSchemas from '../test/test-schemas.ts';
 import assert from 'node:assert/strict';
 import { describe, it, before } from 'node:test';
-import createValidator from './createValidator.ts';
+import { z } from 'zod';
+import createValidator, { ValidationError } from './createValidator.ts';
 import type { Validator } from './interface.ts';
-import * as path from 'path';
-import Ajv from 'ajv';
-
-const { ValidationError } = Ajv;
+import * as formats from './schemas/formats.ts';
 
 let validator: Validator;
 
 before(async () => {
   validator = await createValidator({
-    schemaRoot: path.join(import.meta.dirname, '../test/test-schemas')
+    schemas: testSchemas
   });
 });
 
@@ -27,18 +26,16 @@ it('should throw with invalid data', async () => {
 
 describe('special formats', () => {
   const testFormat = async (
-    format: string,
+    format: keyof typeof formats,
     valids: string[],
     invalids: string[]
   ) => {
+    const schema = (formats[format] as () => z.ZodType)();
     for (const s of valids) {
-      await validator.validate({ type: 'string', format, $async: true }, s);
+      await validator.validate(schema, s);
     }
     for (const s of invalids) {
-      await assert.rejects(
-        validator.validate({ type: 'string', format, $async: true }, s),
-        ValidationError
-      );
+      await assert.rejects(validator.validate(schema, s), ValidationError);
     }
   };
 
@@ -85,14 +82,6 @@ describe('special formats', () => {
     );
   });
 
-  it('jsonString', async () => {
-    await testFormat(
-      'jsonString',
-      ['"a"', '[1,5]', '{"a":50,"b":["c"]}'],
-      ['{', 'a', '"']
-    );
-  });
-
   it('dockerId', async () => {
     await testFormat(
       'dockerId',
@@ -102,7 +91,11 @@ describe('special formats', () => {
   });
 
   it('semver', async () => {
-    await testFormat('semver', ['1.2.0', '3.1.4-alpha'], ['alpha', '1.2.3.4']);
+    await testFormat(
+      'semverString',
+      ['1.2.0', '3.1.4-alpha'],
+      ['alpha', '1.2.3.4']
+    );
   });
 });
 
@@ -209,14 +202,88 @@ it('should handle searchResult option', async () => {
   );
 });
 
-it('should fill defaults', async () => {
-  const testData = {};
-  const modified = await validator.validate('sample', testData, 'fillDefaults');
-  assert.deepEqual(modified, { intVal: 5, strVal: 'biscuit' });
+it('should handle exclude option', async () => {
+  await validator.validate('sample|exclude intVal', { strVal: 'a' });
+  await assert.rejects(
+    validator.validate('sample|exclude intVal', { intVal: 1 }),
+    ValidationError
+  );
 });
 
-it('should retrieve schema by key', async () => {
-  const schema = await validator.getSchema('sample');
-  assert.equal(typeof schema, 'function');
-  assert.equal(typeof schema.schema, 'object');
+it('should handle addProperty option', async () => {
+  const def = 'sample|addProperty extra date';
+  await validator.validate(def, { extra: { intVal: 1 } });
+  await assert.rejects(
+    validator.validate(def, { extra: { intVal: 'x' } }),
+    ValidationError
+  );
+});
+
+it('should handle alternatives', async () => {
+  await validator.validate('sample/item', { intVal: 1 });
+  await validator.validate('sample/item', { itemId: 1 });
+  await assert.rejects(
+    validator.validate('sample/item', { intVal: 1, itemId: 1 }),
+    ValidationError
+  );
+  // A search result can mix the alternatives
+  const dates = { createdAt: new Date(), updatedAt: new Date() };
+  await validator.validate('sample|searchResult/item|searchResult', {
+    items: [
+      { intVal: 1, ...dates },
+      { itemId: 1, ...dates }
+    ],
+    totalItems: 2,
+    page: 1
+  });
+});
+
+it('should ignore unknown keys only when asked', async () => {
+  const data = { intVal: 1, unknown: 2 };
+  await assert.rejects(validator.validate('sample', data), ValidationError);
+  await validator.validate('sample', data, 'default', {
+    allowUnknownKeys: true
+  });
+  await assert.rejects(
+    validator.validate('sample', { intVal: 'x', unknown: 2 }, 'default', {
+      allowUnknownKeys: true
+    }),
+    ValidationError
+  );
+});
+
+it('should report errors with JSON pointers', async () => {
+  const err = await validator
+    .validate('sample|searchResult', {
+      items: [{ intVal: 'x', createdAt: new Date(), updatedAt: new Date() }],
+      totalItems: 1,
+      page: 1
+    })
+    .catch(e => e);
+  assert.ok(err instanceof ValidationError);
+  assert.equal(err.errors[0].instancePath, '/items/0/intVal');
+});
+
+it('should report the path inside an alternative', async () => {
+  const schema = z.union([
+    z.strictObject({ type: z.literal('a'), a: z.number() }),
+    z.strictObject({ type: z.literal('b'), b: z.number() })
+  ]);
+  const err = await validator
+    .validate(schema, { type: 'b', b: 'x' })
+    .catch(e => e);
+  assert.ok(err instanceof ValidationError);
+  assert.equal(err.errors[0].instancePath, '/b');
+});
+
+it('should escape JSON pointers', async () => {
+  const schema = z.record(z.string(), z.number());
+  const err = await validator.validate(schema, { 'a/b~c': 'x' }).catch(e => e);
+  assert.equal(err.errors[0].instancePath, '/a~1b~0c');
+});
+
+it('should accept NaN numbers and invalid dates', async () => {
+  // These can come from DICOM parsing
+  await validator.validate(formats.num({ min: 0 }), NaN);
+  await validator.validate('date', { dateVal: new Date(NaN) });
 });

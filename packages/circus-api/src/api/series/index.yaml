@@ -29,12 +29,7 @@ routes:
   - verb: get
     path: /series/:seriesUid/orientation
     handler: handleGetOrientation
-    responseSchema:
-      type: object
-      properties:
-        orientation:
-          enum: ['head-first', 'foot-first']
-      additionalProperties: false
+    responseSchema: seriesOrientation
     description: Returns whether series is head-first or foot-first.
   - verb: delete
     path: /series/:seriesUid
@@ -43,17 +38,6 @@ routes:
     path: /series/export-cs-volume
     handler: handlePostExportCsVolume
     requiredGlobalPrivilege: downloadVolume
-    requestSchema:
-      type: object
-      properties:
-        series:
-          type: array
-          items:
-            $ref: seriesEntry
-          minItems: 1
-          maxItems: 10
-        compressionFormat:
-          enum: ['tgz', 'zip']
-      required: ['series']
+    requestSchema: seriesExportCsVolume
     description: >
       Creates a task to export the specified series for use in CIRCUS CS.

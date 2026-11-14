@@ -2,8 +2,8 @@ import type { Validator } from '../interface.ts';
 import type koa from 'koa';
 
 interface Options {
-  requestSchema?: object | string;
-  responseSchema?: object | string;
+  requestSchema?: string;
+  responseSchema?: string;
 }
 
 /**
@@ -13,14 +13,7 @@ const validateInOut: (
   validator: Validator,
   options?: Options
 ) => koa.Middleware = (validator, options = {}) => {
-  let { requestSchema, responseSchema } = options;
-
-  if (requestSchema && typeof requestSchema === 'object') {
-    requestSchema = { ...requestSchema, $async: true };
-  }
-  if (responseSchema && typeof responseSchema === 'object') {
-    responseSchema = { ...responseSchema, $async: true };
-  }
+  const { requestSchema, responseSchema } = options;
 
   return async function validateInOut(ctx, next) {
     if (requestSchema) {

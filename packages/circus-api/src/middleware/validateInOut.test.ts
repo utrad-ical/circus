@@ -1,3 +1,4 @@
+import testSchemas from '../../test/test-schemas.ts';
 import assert from 'node:assert/strict';
 import { test, beforeEach, afterEach } from 'node:test';
 import validateInOut from './validateInOut.ts';
@@ -16,7 +17,7 @@ let testServer: TestServer;
 beforeEach(async () => {
   testServer = await setUpKoaTest(async app => {
     const validator = await createValidator({
-      schemaRoot: path.join(import.meta.dirname, '../../test/test-schemas')
+      schemas: testSchemas
     });
     const router = new Router();
 

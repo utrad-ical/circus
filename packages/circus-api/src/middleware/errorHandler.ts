@@ -1,6 +1,6 @@
-import Ajv from 'ajv';
 import status from 'http-status';
 import type koa from 'koa';
+import { ValidationError } from '../createValidator.ts';
 
 interface Options {
   includeErrorDetails: boolean;
@@ -24,7 +24,7 @@ const errorHandler: (options: Options) => koa.Middleware = ({
       }
     } catch (err: unknown) {
       logger.trace(err);
-      if (err instanceof Ajv.ValidationError) {
+      if (err instanceof ValidationError) {
         // JSON validation error occurred.
         if (err.phase === 'response') {
           // Response validation error.

@@ -1,3 +1,4 @@
+import testSchemas from '../../test/test-schemas.ts';
 import assert from 'node:assert/strict';
 import { describe, test, it, before, after } from 'node:test';
 import type { TestServer } from '../test/util-koa.ts';
@@ -25,7 +26,7 @@ before(async () => {
   await setUpMongoFixture(db, ['items']);
   testServer = await setUpKoaTest(async app => {
     const validator = await createValidator({
-      schemaRoot: path.join(import.meta.dirname, '../../test/test-schemas')
+      schemas: testSchemas
     });
     items = createCollectionAccessor(db, validator, {
       schema: 'item',

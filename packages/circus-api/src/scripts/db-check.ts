@@ -1,9 +1,7 @@
-import Ajv from 'ajv';
-
-const { ValidationError } = Ajv;
 import type { CollectionAccessor } from '../db/createCollectionAccessor.ts';
 import type { Models } from '../interface.ts';
 import type Command from './Command.ts';
+import { ValidationError } from '../createValidator.ts';
 
 export const options = () => {
   return [
@@ -25,27 +23,35 @@ export const command: Command<{ models: Models }> = async (
 ) => {
   return async (options: any) => {
     const { target } = options;
+    let totalErrors = 0;
     for (const key in models) {
       if (Array.isArray(target) && target.indexOf(key) === -1) continue;
       console.log('Validating:', key);
       const model = (models as any)[key] as CollectionAccessor;
-      const cursor = await model.findAsCursor();
+      const cursor = await model.findAsCursor({}, { strict: true });
       let count = 0;
+      let errors = 0;
       while (await cursor.hasNext()) {
         try {
           await cursor.next(); // This will perform the validation
           count++;
         } catch (err) {
-          if (err instanceof ValidationError) {
-            console.error('There was a validation error:');
-            console.error(err.errors);
-            return;
-          } else {
-            throw err;
-          }
+          if (!(err instanceof ValidationError)) throw err;
+          errors++;
+          console.error(`  Validation error (#${count + errors}):`);
+          for (const e of err.errors)
+            console.error(`    ${e.instancePath || '/'} ${e.message}`);
         }
       }
-      console.log(`  Validated: ${count} ${count === 1 ? 'item' : 'items'}.`);
+      totalErrors += errors;
+      console.log(
+        `  Validated: ${count} ${count === 1 ? 'item' : 'items'}` +
+          (errors ? `, ${errors} with errors.` : '.')
+      );
+    }
+    if (totalErrors) {
+      console.error(`Found ${totalErrors} invalid item(s).`);
+      process.exitCode = 1;
     }
   };
 };

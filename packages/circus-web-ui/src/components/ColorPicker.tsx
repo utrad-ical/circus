@@ -1,6 +1,6 @@
 import classnames from 'classnames';
 import React, { type FC, type KeyboardEvent, useRef } from 'react';
-import tinycolor from 'tinycolor2';
+import { getAlpha, toHex6, withAlpha as setAlpha } from '#utils/hexColor.ts';
 import type { ButtonSize } from './Button.tsx';
 import styles from './ColorPicker.module.css';
 import PopoverButton from './PopoverButton.tsx';
@@ -51,16 +51,14 @@ export const ColorPalette: FC<{
   } = props;
   const paletteRef = useRef<HTMLDivElement>(null);
   // Compares colors in the same notation (e.g., lowercase hex)
-  const normalize = (color: string) => tinycolor(color).toHexString();
+  const normalize = (color: string) => toHex6(color).toLowerCase();
   const rgbValue = normalize(value);
-  const alphaValue = withAlpha ? tinycolor(value).getAlpha() : 1;
+  const alphaValue = withAlpha ? getAlpha(value) : 1;
   const selectedIndex = colors.findIndex(c => normalize(c) === rgbValue);
 
   const select = (color: string) => {
     if (disabled) return;
-    onChange?.(
-      withAlpha ? tinycolor(color).setAlpha(alphaValue).toHex8String() : color
-    );
+    onChange?.(withAlpha ? setAlpha(color, alphaValue) : color);
   };
 
   const handleKeyDown = (ev: KeyboardEvent) => {
@@ -118,9 +116,7 @@ export const ColorPalette: FC<{
           min={0}
           max={1}
           step={0.01}
-          onChange={alpha =>
-            onChange?.(tinycolor(value).setAlpha(alpha).toHex8String())
-          }
+          onChange={alpha => onChange?.(setAlpha(value, alpha))}
         />
       )}
     </div>
@@ -154,12 +150,12 @@ const ColorPicker: FC<{
     disabled,
     className
   } = props;
-  const tc = tinycolor(value || '#ffffff');
+  const color = value || '#ffffff';
   const colorStyle = {
-    backgroundColor: tc.toHexString(),
-    color: tinycolor.mostReadable(tc, ['#000', '#fff']).toHexString()
+    backgroundColor: toHex6(color),
+    color: `contrast-color(${toHex6(color)})`
   };
-  const code = withAlpha ? tc.toHex8String() : tc.toHexString();
+  const code = withAlpha ? setAlpha(color, getAlpha(color)) : toHex6(color);
 
   return (
     <PopoverButton

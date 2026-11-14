@@ -1,5 +1,4 @@
 import React from 'react';
-import tinycolor from 'tinycolor2';
 import useLoginUser from '#utils/useLoginUser.ts';
 import styles from './Tag.module.css';
 
@@ -11,13 +10,7 @@ export const PhysicalTag: React.FC<{
   color: string;
 }> = React.memo(props => {
   const color = props.color || '#f00';
-  const style = {
-    '--tag-background-color': tinycolor(color).toHexString(),
-    '--tag-color': tinycolor
-      .mostReadable(color, ['#000', '#fff'])
-      .toHexString(),
-    '--tag-border-color': tinycolor(color).darken().toHexString()
-  } as React.CSSProperties;
+  const style = { '--tag-color': color } as React.CSSProperties;
   return (
     <span className={styles.tag} style={style}>
       {props.name}

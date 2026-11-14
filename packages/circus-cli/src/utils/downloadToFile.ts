@@ -1,7 +1,7 @@
-import { Response } from 'node-fetch';
 import { createWriteStream } from 'node:fs';
-import progress from 'progress-stream';
-import { Spinner } from './createSpinner.ts';
+import { Readable, Transform } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
+import type { Spinner } from './createSpinner.ts';
 
 interface DownloadOptions {
   spinner?: Spinner;
@@ -12,29 +12,39 @@ const downloadToFile = async (
   file: string,
   options: DownloadOptions = {}
 ) => {
-  const length: number | undefined =
-    Number(res.headers.get('Content-Length')) ?? undefined;
+  const { spinner } = options;
+  const length = Number(res.headers.get('Content-Length')) || undefined;
 
-  const spinner = options.spinner;
-  const stream = res.body!;
-  const progressStream = progress({ length, time: 100 });
-  const out = createWriteStream(file);
-
-  progressStream.on('progress', progress => {
-    spinner?.update('Downloading: ' + Math.round(progress.percentage) + '%');
+  let received = 0;
+  let lastUpdate = 0;
+  const progress = new Transform({
+    transform(chunk: Buffer, _encoding, callback) {
+      received += chunk.length;
+      const now = Date.now();
+      if (now - lastUpdate >= 100) {
+        lastUpdate = now;
+        spinner?.update(
+          'Downloading: ' +
+            (length
+              ? Math.round((received / length) * 100) + '%'
+              : Math.round(received / 1024) + ' KiB')
+        );
+      }
+      callback(null, chunk);
+    }
   });
 
-  stream.pipe(progressStream).pipe(out);
-  return new Promise<void>((resolve, reject) => {
-    out.on('finish', () => {
-      spinner?.update('Download complete.');
-      resolve();
-    });
-    out.on('error', err => {
-      spinner?.stop('Download failed.', true);
-      reject(err);
-    });
-  });
+  try {
+    await pipeline(
+      Readable.fromWeb(res.body!),
+      progress,
+      createWriteStream(file)
+    );
+    spinner?.update('Download complete.');
+  } catch (err) {
+    spinner?.stop('Download failed.', true);
+    throw err;
+  }
 };
 
 export default downloadToFile;

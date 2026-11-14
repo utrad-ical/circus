@@ -1,8 +1,8 @@
-import { fetchWithSpinner } from '../utils/createAuthorizedFetch.ts';
-import CommandAction from './CommandAction.ts';
 import { promises as fs } from 'node:fs';
+import { buffer } from 'node:stream/consumers';
+import { fetchWithSpinner } from '../utils/createAuthorizedFetch.ts';
 import sha1 from '../utils/sha1.ts';
-import rawBody from 'raw-body';
+import type { CommandAction } from './CommandAction.ts';
 
 const action: CommandAction = ({ getFetch }) => {
   return async (files: string[]) => {
@@ -23,7 +23,7 @@ const action: CommandAction = ({ getFetch }) => {
     };
 
     if (files.length === 0) {
-      const data = await rawBody(process.stdin, { limit: '20mb' });
+      const data = await buffer(process.stdin);
       await upload(data, 'stdin');
     } else {
       for (const file of files) {

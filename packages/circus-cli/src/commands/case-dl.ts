@@ -1,11 +1,11 @@
 import { promises as fs } from 'node:fs';
 import * as path from 'node:path';
-import pc from 'picocolors';
+import { styleText } from 'node:util';
 import createSpinner from '../utils/createSpinner.ts';
 import downloadToFile from '../utils/downloadToFile.ts';
 import readIds from '../utils/readIds.ts';
-import taskReporter, { TaskEvent } from '../utils/taskReporter.ts';
-import CommandAction from './CommandAction.ts';
+import taskReporter, { type TaskEvent } from '../utils/taskReporter.ts';
+import type { CommandAction } from './CommandAction.ts';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -13,7 +13,7 @@ const action: CommandAction = ({ getFetch }) => {
   return async (args: string[], options) => {
     const fetch = getFetch();
     const outDir = options.outdir ?? process.cwd();
-    const casesPerTask = Number(options.perTask) ?? 10;
+    const casesPerTask: number = options.perTask;
     const ids = await readIds(args, !!options.file);
     console.log(`Downloading ${ids.length} case(s)...`);
 
@@ -28,7 +28,9 @@ const action: CommandAction = ({ getFetch }) => {
 
     try {
       for (let batchIdx = 0; batchIdx < batches; batchIdx++) {
-        console.log(pc.cyan(`\nBatch #${batchIdx + 1} of ${batches}`));
+        console.log(
+          styleText('cyan', `\nBatch #${batchIdx + 1} of ${batches}`)
+        );
         const batch = ids.slice(
           batchIdx * casesPerTask,
           (batchIdx + 1) * casesPerTask

@@ -1,9 +1,9 @@
-import inq from 'inquirer';
+import { input } from '@inquirer/prompts';
 import { promises as fs } from 'node:fs';
-import pc from 'picocolors';
+import { styleText } from 'node:util';
 import fileExists from '../utils/fileExists.ts';
 import { confirm, defaultValidateString } from '../utils/inquiry.ts';
-import CommandAction from './CommandAction.ts';
+import type { CommandAction } from './CommandAction.ts';
 
 interface Options {
   logout?: boolean;
@@ -20,44 +20,40 @@ const action: CommandAction = ({ rcFilePath }) => {
       } else {
         if (await confirm('Are you sure you want to log out?')) {
           await fs.unlink(rcFilePath);
-          console.log(pc.green('Config file deleted successfully'));
+          console.log(styleText('green', 'Config file deleted successfully'));
         }
       }
       return;
     }
 
     if (rcFileExists) {
-      console.log(pc.yellow(`The token file already exists at ${rcFilePath}.`));
+      console.log(
+        styleText('yellow', `The token file already exists at ${rcFilePath}.`)
+      );
       if (!(await confirm('Overwrite existing config file?'))) return;
     }
 
-    const ans = await inq.prompt([
-      {
-        type: 'input',
-        name: 'endpoint',
-        message: 'API endpoint:',
-        validate: (val: string) => {
-          if (!val.endsWith('/'))
-            return 'Input correct API endpoint (must end with a slash).';
-          return true;
-        }
-      },
-      {
-        type: 'input',
-        name: 'token',
-        message: 'API token:',
-        validate: defaultValidateString
+    const endpoint = await input({
+      message: 'API endpoint:',
+      validate: val => {
+        if (!val.endsWith('/'))
+          return 'Input correct API endpoint (must end with a slash).';
+        return true;
       }
-    ]);
+    });
+    const token = await input({
+      message: 'API token:',
+      validate: defaultValidateString
+    });
 
     await fs.writeFile(
       rcFilePath,
       `# CIRCUS API Client config file\n` +
         `# Generated at ${new Date().toISOString()}\n\n` +
-        `CIRCUS_API_ENDPOINT=${ans.endpoint}\n` +
-        `CIRCUS_API_TOKEN=${ans.token}\n`
+        `CIRCUS_API_ENDPOINT=${endpoint}\n` +
+        `CIRCUS_API_TOKEN=${token}\n`
     );
-    console.log(pc.green(`Token saved to ${rcFilePath}.`));
+    console.log(styleText('green', `Token saved to ${rcFilePath}.`));
   };
 };
 

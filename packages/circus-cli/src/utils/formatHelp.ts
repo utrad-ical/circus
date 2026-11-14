@@ -1,4 +1,4 @@
-import pc from 'picocolors';
+import { styleText } from 'node:util';
 
 const formatHelp = (
   strs: TemplateStringsArray,
@@ -16,10 +16,10 @@ const formatHelp = (
     let m: RegExpMatchArray | null;
     if ((m = line.match(/^(\s*)((Hints?|Examples?|Warning):)/))) {
       // Heading
-      return m[1] + pc.bold(pc.cyan(m[2]));
+      return m[1] + styleText(['bold', 'cyan'], m[2]);
     } else if ((m = line.match(/^(\s*)(#.+)/))) {
       // Comment
-      return m[1] + pc.dim(m[2]);
+      return m[1] + styleText('dim', m[2]);
     }
     return line;
   });
@@ -31,7 +31,7 @@ const formatHelp = (
   if (depth > 0 && depth < Infinity)
     result = lines.map(line => line.slice(depth)).join('\n');
 
-  return `\n${pc.dim('-'.repeat(30))}\n` + result;
+  return `\n${styleText('dim', '-'.repeat(30))}\n` + result;
 };
 
 export default formatHelp;

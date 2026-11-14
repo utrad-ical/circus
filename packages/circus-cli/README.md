@@ -1,4 +1,4 @@
-# CIRCUS API Utility
+# CIRCUS CLI
 
 This is an API client to connect to CIRCUS API Server.
 
@@ -25,7 +25,7 @@ This utility also has several specialized commands that can do the following:
 2. Run the following command (NPM should have been installed along with Node itself):
 
    ```
-   npm install -g @utrad-ical/circus-api-util
+   npm install -g @utrad-ical/circus-cli
    ```
 
    This will install the client globally, i.e., somewhere in your PATH.
@@ -35,7 +35,7 @@ This utility also has several specialized commands that can do the following:
 3. Run the following command to store an API token to your machine:
 
    ```
-   circus-api-util auth
+   circus-cli auth
    ```
 
    You will be prompted to enter two values:
@@ -53,7 +53,7 @@ This utility also has several specialized commands that can do the following:
 4. Run the following command to check if the client can connect to a running CIRCUS API server:
 
    ```
-   circus-api-util get login-info
+   circus-cli get login-info
    ```
 
    This displays the basic information about the user associated with the API token. If it fails, return to the previous step and check if the given values are correct.
@@ -61,11 +61,11 @@ This utility also has several specialized commands that can do the following:
 5. You can see the list of commands like this:
 
    ```
-   circus-api-util --help
+   circus-cli --help
    ```
 
    You can see the detailed description of each command like this:
 
    ```
-   circus-api-util help <COMMAND>
+   circus-cli help <COMMAND>
    ```

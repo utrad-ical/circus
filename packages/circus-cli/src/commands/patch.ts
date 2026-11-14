@@ -1,5 +1,5 @@
-import CommandAction from './CommandAction.ts';
-import postAction, { SharedOptions } from './post.ts';
+import type { CommandAction } from './CommandAction.ts';
+import postAction, { type SharedOptions } from './post.ts';
 
 const action: CommandAction = deps => {
   return async (resource: string, options: SharedOptions) => {

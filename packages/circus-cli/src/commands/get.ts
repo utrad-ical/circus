@@ -1,6 +1,8 @@
-import { fetchWithSpinner } from '../utils/createAuthorizedFetch.ts';
-import CommandAction from './CommandAction.ts';
 import stringify from 'json-stringify-pretty-compact';
+import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
+import { fetchWithSpinner } from '../utils/createAuthorizedFetch.ts';
+import type { CommandAction } from './CommandAction.ts';
 
 interface Options {
   pretty: boolean;
@@ -35,15 +37,10 @@ const action: CommandAction = ({ getFetch }) => {
       const json = await res.json();
       process.stdout.write(stringify(json) + '\n');
     } else {
-      const body = res.body!;
-      body.pipe(process.stdout);
-      await new Promise<void>((resolve, reject) => {
-        body.on('error', reject);
-        body.on('end', () => {
-          process.stdout.write('\n');
-          resolve();
-        });
+      await pipeline(Readable.fromWeb(res.body!), process.stdout, {
+        end: false
       });
+      process.stdout.write('\n');
     }
   };
 };

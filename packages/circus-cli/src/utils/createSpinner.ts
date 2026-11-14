@@ -1,4 +1,4 @@
-import pc from 'picocolors';
+import { styleText } from 'node:util';
 
 const isTTY = process.stdout.isTTY && process.stdout.columns > 0;
 const spinnerGlyphs = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
@@ -14,12 +14,15 @@ const createSpinner = (
   { hideInNonTTY = true }: { hideInNonTTY?: boolean } = {}
 ): Spinner => {
   let phase = 0;
-  let timerId: NodeJS.Timer | null = null;
+  let timerId: NodeJS.Timeout | null = null;
   let message = initialMessage;
   let stopped = false;
 
   const newProgressGlyph = () =>
-    pc.cyan(isTTY ? spinnerGlyphs[phase++ % spinnerGlyphs.length] : '>>');
+    styleText(
+      'cyan',
+      isTTY ? spinnerGlyphs[phase++ % spinnerGlyphs.length] : '>>'
+    );
 
   const putLine = (
     message: string,
@@ -55,7 +58,10 @@ const createSpinner = (
     stop: (message = 'Done', isError = false) => {
       if (stopped) return;
       stopped = true;
-      putLine(message, isError ? pc.red('✖') : pc.green('✓'));
+      putLine(
+        message,
+        isError ? styleText('red', '✖') : styleText('green', '✓')
+      );
       if (isTTY) process.stdout.write('\n');
       if (timerId) clearTimeout(timerId);
     }

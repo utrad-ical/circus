@@ -1,10 +1,10 @@
-import fetch from 'node-fetch';
+import type { AuthorizedFetch } from '../utils/createAuthorizedFetch.ts';
 
 interface CommandDeps {
-  getFetch: () => typeof fetch;
+  getFetch: () => AuthorizedFetch;
   rcFilePath: string;
 }
 
-type CommandAction = (deps: CommandDeps) => (...args: any[]) => Promise<void>;
-
-export default CommandAction;
+export type CommandAction = (
+  deps: CommandDeps
+) => (...args: any[]) => Promise<void>;

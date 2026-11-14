@@ -1,5 +1,9 @@
-import fetch, { RequestInfo, RequestInit } from 'node-fetch';
 import createSpinner from './createSpinner.ts';
+
+export type AuthorizedFetch = (
+  resource: string,
+  init?: RequestInit
+) => Promise<Response>;
 
 /**
  * @param token - The token to use for authorization.
@@ -9,23 +13,19 @@ import createSpinner from './createSpinner.ts';
 const createAuthorizedFetch = (
   token: string,
   endpoint: string
-): typeof fetch => {
+): AuthorizedFetch => {
   if (!token.length || !endpoint.length)
     throw new Error('Invalid token or endpoint');
-  return async (resource: RequestInfo, init?: RequestInit) => {
-    if (typeof resource === 'string' && !resource.startsWith('http')) {
+  return async (resource, init) => {
+    if (!resource.startsWith('http')) {
       resource = endpoint + resource;
     }
-    if ('Authorization' in (init?.headers ?? {}))
+    const headers = new Headers(init?.headers);
+    if (headers.has('Authorization'))
       throw new Error('Internal error: Authorization header cannot be set');
+    headers.set('Authorization', `Bearer ${token}`);
     try {
-      const res = await fetch(resource, {
-        ...init,
-        headers: {
-          ...(init?.headers ?? {}),
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const res = await fetch(resource, { ...init, headers });
       if (!res.ok) {
         throw new Error(
           `HTTP error: ${res.status} ${res.statusText}\n` +
@@ -40,7 +40,7 @@ const createAuthorizedFetch = (
         throw new Error(
           `HTTP error: ${err.message}\n` +
             `URL: ${resource}` +
-            ('cause' in err ? `\nCause: ${(err as any).cause}` : '')
+            ('cause' in err ? `\nCause: ${err.cause}` : '')
         );
       } else {
         // error with HTTP status code, e.g. 404, 500.
@@ -51,7 +51,7 @@ const createAuthorizedFetch = (
 };
 
 export const fetchWithSpinner = async (
-  fetchInstance: typeof fetch,
+  fetchInstance: AuthorizedFetch,
   message: string,
   url: string,
   init?: RequestInit

@@ -1,12 +1,12 @@
 import { diff } from 'jest-diff';
 import JSON5 from 'json5';
-import pc from 'picocolors';
+import { isDeepStrictEqual, styleText } from 'node:util';
 import { fetchWithSpinner } from '../utils/createAuthorizedFetch.ts';
 import exec from '../utils/exec.ts';
 import { confirm, promptString } from '../utils/inquiry.ts';
 import launchEditor from '../utils/launchEditor.ts';
 import readIds from '../utils/readIds.ts';
-import CommandAction from './CommandAction.ts';
+import type { CommandAction } from './CommandAction.ts';
 
 interface Options {
   exec: string;
@@ -88,23 +88,25 @@ const action: CommandAction = ({ getFetch }) => {
 
       if (!force) {
         if (allRevs) {
-          console.log(pc.cyan('Processed JSON:'));
+          console.log(styleText('cyan', 'Processed JSON:'));
           console.log(JSON.stringify(newRev, null, 2));
         } else {
-          const diffStr = diff(newRev, withoutMetadata(inputRev), {
-            aAnnotation: 'New revision',
-            bAnnotation: 'Current revision',
-            contextLines: 5,
-            expand: false
-          });
-          if (/Compared values have no visual difference/.test(diffStr!)) {
+          const currentRev = withoutMetadata(inputRev);
+          if (isDeepStrictEqual(newRev, currentRev)) {
             console.log(
-              pc.bgYellow('WARN'),
+              styleText('bgYellow', 'WARN'),
               'No change has been made to the latest revision!'
             );
           } else {
-            console.log(pc.cyan('Diff:'));
-            console.log(diffStr);
+            console.log(styleText('cyan', 'Diff:'));
+            console.log(
+              diff(newRev, currentRev, {
+                aAnnotation: 'New revision',
+                bAnnotation: 'Current revision',
+                contextLines: 5,
+                expand: false
+              })
+            );
           }
         }
         if (!(await confirm('Is this okay?'))) {

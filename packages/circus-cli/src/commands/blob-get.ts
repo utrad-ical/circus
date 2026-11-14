@@ -1,8 +1,9 @@
 import * as fs from 'node:fs';
-import { Writable } from 'node:stream';
-import createSpinner from '../utils/createSpinner.ts';
-import CommandAction from './CommandAction.ts';
 import * as path from 'node:path';
+import { Readable, type Writable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
+import createSpinner from '../utils/createSpinner.ts';
+import type { CommandAction } from './CommandAction.ts';
 
 const action: CommandAction = ({ getFetch }) => {
   return async (hashes: string[], options: { out?: string }) => {
@@ -19,11 +20,8 @@ const action: CommandAction = ({ getFetch }) => {
         : null;
       try {
         const res = await fetch(`blob/${hash}`);
-        const stream = res.body!;
-        await new Promise((resolve, reject) => {
-          dest.on('error', reject);
-          dest.on('close', resolve);
-          stream.pipe(dest);
+        await pipeline(Readable.fromWeb(res.body!), dest, {
+          end: dest !== process.stdout
         });
         spinner?.stop(`Downloaded blob ${hash} to ${out}`);
       } catch (err: any) {

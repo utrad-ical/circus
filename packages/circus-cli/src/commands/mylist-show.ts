@@ -1,9 +1,9 @@
 import easyTable from 'easy-table';
 import { fetchWithSpinner } from '../utils/createAuthorizedFetch.ts';
-import CommandAction from './CommandAction.ts';
+import type { CommandAction } from './CommandAction.ts';
 
 const resourceTypes = ['series', 'clinicalCases', 'pluginJobs'];
-type ResourceType = typeof resourceTypes[number];
+type ResourceType = (typeof resourceTypes)[number];
 
 interface MyList {
   myListId: string;

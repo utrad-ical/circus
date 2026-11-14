@@ -1,6 +1,7 @@
 import EventEmitter from 'node:events';
-import fetchType, { AbortError } from 'node-fetch';
 import * as rl from 'node:readline';
+import { Readable } from 'node:stream';
+import type { AuthorizedFetch } from './createAuthorizedFetch.ts';
 
 interface TaskReporter {
   events: EventEmitter;
@@ -21,12 +22,12 @@ export type TaskEvent =
       message: string;
     };
 
-const taskReporter = (fetch: typeof fetchType): TaskReporter => {
+const taskReporter = (fetch: AuthorizedFetch): TaskReporter => {
   const emitter = new EventEmitter();
   const abortController = new AbortController();
   (async () => {
     const res = await fetch('tasks/report', { signal: abortController.signal });
-    const lines = rl.createInterface({ input: res.body! });
+    const lines = rl.createInterface({ input: Readable.fromWeb(res.body!) });
     let eventType: string | null = null;
     let data: any = null;
     try {
@@ -47,7 +48,7 @@ const taskReporter = (fetch: typeof fetchType): TaskReporter => {
         }
       }
     } catch (err: any) {
-      if (!(err instanceof AbortError)) throw err;
+      if (err.name !== 'AbortError') throw err;
     }
   })();
   return {

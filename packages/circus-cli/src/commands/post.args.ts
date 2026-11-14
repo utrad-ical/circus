@@ -1,4 +1,4 @@
-import { Command } from 'commander';
+import type { Command } from 'commander';
 import formatHelp from '../utils/formatHelp.ts';
 
 export const setSharedOptions = (program: Command) => {

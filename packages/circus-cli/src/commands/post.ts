@@ -1,9 +1,9 @@
 import * as jsyaml from 'js-yaml';
 import JSON5 from 'json5';
 import { Readable } from 'node:stream';
-import rawBody from 'raw-body';
+import { text } from 'node:stream/consumers';
 import { fetchWithSpinner } from '../utils/createAuthorizedFetch.ts';
-import CommandAction from './CommandAction.ts';
+import type { CommandAction } from './CommandAction.ts';
 
 export interface SharedOptions {
   bin?: boolean;
@@ -26,15 +26,13 @@ const action: CommandAction = ({ getFetch }) => {
 
     const body = await (async () => {
       if (bin) {
-        return process.stdin as Readable;
+        return Readable.toWeb(process.stdin) as ReadableStream<Uint8Array>;
       } else {
-        const inputStr = await rawBody(process.stdin, 'utf8');
+        const inputStr = await text(process.stdin);
         const data = yaml ? jsyaml.load(inputStr) : JSON5.parse(inputStr);
         return JSON.stringify(data);
       }
     })();
-
-    console.log({ body });
 
     const method = put ? 'PUT' : patch ? 'PATCH' : 'POST';
     const verbStr = put ? 'Putting to' : patch ? 'Patching to' : 'Posting';
@@ -44,7 +42,13 @@ const action: CommandAction = ({ getFetch }) => {
       fetch,
       `${verbStr} ${resource}`,
       resource,
-      { method, headers: { 'Content-Type': contentType }, body }
+      {
+        method,
+        headers: { 'Content-Type': contentType },
+        body,
+        // Required when the body is a stream
+        duplex: 'half'
+      } as RequestInit
     );
 
     if (res.ok) {

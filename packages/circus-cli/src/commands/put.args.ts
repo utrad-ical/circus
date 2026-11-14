@@ -1,4 +1,4 @@
-import { Command } from 'commander';
+import type { Command } from 'commander';
 import { setSharedHelp, setSharedOptions } from './post.args.ts';
 
 export default (program: Command) => {

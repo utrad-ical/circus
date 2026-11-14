@@ -257,3 +257,28 @@ describe('#newSequentialId', () => {
     assert.equal(v2, 2);
   });
 });
+
+describe('unknown properties in the database', () => {
+  beforeEach(async () => {
+    const now = new Date();
+    await db.collection('months').insertOne({
+      month: 13,
+      name: 'Extra',
+      legacy: true,
+      createdAt: now,
+      updatedAt: now
+    });
+  });
+
+  it('should be ignored when reading', async () => {
+    const result = (await testCollection.findById(13)) as any;
+    assert.equal(result.legacy, true);
+    const cursor = testCollection.findAsCursor({ month: 13 });
+    assert.equal(((await cursor.next()) as any).name, 'Extra');
+  });
+
+  it('should be rejected by a strict cursor', async () => {
+    const cursor = testCollection.findAsCursor({ month: 13 }, { strict: true });
+    await assert.rejects(cursor.next(), ValidationError);
+  });
+});

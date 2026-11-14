@@ -1,5 +1,5 @@
 import * as rs from '../src/browser/index.ts';
-import '../src/browser/circus-rs.less';
+import '../src/browser/circus-rs.css';
 import { toPartialVolumeDescriptor } from './utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {

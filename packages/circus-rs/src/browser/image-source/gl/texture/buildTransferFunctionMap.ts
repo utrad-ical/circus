@@ -1,4 +1,3 @@
-import tinycolor from 'tinycolor2';
 import type { TransferFunction } from '../../../ViewState.ts';
 
 interface RgbaColor {
@@ -7,6 +6,19 @@ interface RgbaColor {
   b: number;
   a: number;
 }
+
+/**
+ * Parses `#rgb`, `#rgba`, `#rrggbb` or `#rrggbbaa`.
+ */
+const parseHexColor = (color: string): RgbaColor => {
+  const hex = color.match(/^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i)?.[1];
+  if (!hex) throw new TypeError(`Invalid color: ${color}`);
+  const digits = hex.length <= 4 ? hex.replace(/./g, d => d + d) : hex;
+  const [r, g, b, a = 255] = digits
+    .match(/../g)!
+    .map(pair => parseInt(pair, 16));
+  return { r, g, b, a: a / 255 };
+};
 
 const mix = function (
   color1: RgbaColor,
@@ -45,11 +57,11 @@ export default function buildTransferFunctionMap(
     const leftStep = gradation[gi];
     const rightStep = gi < numSteps ? gradation[gi + 1] : gradation[gi];
     left = {
-      c: tinycolor(leftStep.color).toRgb(),
+      c: parseHexColor(leftStep.color),
       p: Math.floor(leftStep.position * steps)
     };
     right = {
-      c: tinycolor(rightStep.color).toRgb(),
+      c: parseHexColor(rightStep.color),
       p: Math.ceil(rightStep.position * steps)
     };
   };

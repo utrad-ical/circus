@@ -20,7 +20,7 @@ import setting, {
 // import getRequiredImageZIndexRange from "browser/util/getRequiredImageZIndexRange";
 // import MultiRange from "multi-integer-range";
 import handleRotationBy from '../../src/browser/tool/state/handleRotationBy.ts';
-import '../../src/browser/circus-rs.less';
+import '../../src/browser/circus-rs.css';
 
 document.addEventListener('DOMContentLoaded', function (e) {
   const toolbar = setupToolbar();

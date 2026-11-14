@@ -618,9 +618,6 @@ importers:
       jpeg-lossless-decoder-js:
         specifier: ^2.0.4
         version: 2.0.4
-      json5:
-        specifier: ^0.5.1
-        version: 0.5.1
       koa:
         specifier: ^2.11.0
         version: 2.13.1(supports-color@7.2.0)
@@ -642,9 +639,6 @@ importers:
       lru-cache:
         specifier: ^11.0.0
         version: 11.0.0
-      minimist:
-        specifier: ^1.2.0
-        version: 1.2.5
       multi-integer-range:
         specifier: ^6.1.0
         version: 6.1.0
@@ -657,9 +651,6 @@ importers:
       three:
         specifier: ^0.98.0
         version: 0.98.0
-      tinycolor2:
-        specifier: ^1.4.1
-        version: 1.4.2
       tslib:
         specifier: ^1.11.2
         version: 1.11.2
@@ -697,9 +688,6 @@ importers:
       '@types/koa-router':
         specifier: ^7.4.0
         version: 7.4.4
-      '@types/minimist':
-        specifier: ^1.2.0
-        version: 1.2.2
       '@types/node':
         specifier: ^24.19.2
         version: 24.19.2
@@ -709,9 +697,6 @@ importers:
       '@types/three':
         specifier: ^0.93.31
         version: 0.93.31
-      '@types/tinycolor2':
-        specifier: ^1.4.0
-        version: 1.4.3
       '@types/validator':
         specifier: ^6.3.0
         version: 6.3.0
@@ -724,9 +709,6 @@ importers:
       fs-extra:
         specifier: ^11.2.0
         version: 11.2.0
-      less:
-        specifier: ^4.9.1
-        version: 4.9.1(supports-color@7.2.0)
       tsdown:
         specifier: 0.23.7
         version: 0.23.7(typescript@7.0.2)
@@ -2957,10 +2939,6 @@ packages:
 
   json-stringify-safe@5.0.1:
     resolution: {integrity: sha512-ZClg6AaYvamvYEE82d3Iyd3vSSIjQ+odgjaTzRuO3s7toCdFKczob2i0zCh7JE8kWn17yvAWhUVxvqGwUalsRA==}
-
-  json5@0.5.1:
-    resolution: {integrity: sha512-4xrs1aW+6N5DalkqSVA8fxh458CXvR99WU8WLKmq4v8eWAL86Xo3BVqyd3SkA9wEVjCMqyvvRRkshAdOnBp5rw==}
-    hasBin: true
 
   jsonfile@6.1.0:
     resolution: {integrity: sha512-5dgndWOriYSm5cnYaJNhalLNDKOqFwyDB/rr1E9ZsGciGvKPs8R2xYGCacuf3z6K1YKDz182fd+fY3cn3pMqXQ==}
@@ -5531,6 +5509,7 @@ snapshots:
   copy-anything@3.0.5:
     dependencies:
       is-what: 4.1.16
+    optional: true
 
   copy-to@2.0.1: {}
 
@@ -6100,7 +6079,8 @@ snapshots:
 
   is-unicode-supported@2.1.0: {}
 
-  is-what@4.1.16: {}
+  is-what@4.1.16:
+    optional: true
 
   isarray@0.0.1: {}
 
@@ -6143,8 +6123,6 @@ snapshots:
   json-schema-traverse@1.0.0: {}
 
   json-stringify-safe@5.0.1: {}
-
-  json5@0.5.1: {}
 
   jsonfile@6.1.0:
     dependencies:
@@ -6267,6 +6245,7 @@ snapshots:
       source-map: 0.6.1
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   lie@3.3.0:
     dependencies:
@@ -6675,7 +6654,8 @@ snapshots:
 
   parse-ms@4.0.0: {}
 
-  parse-node-version@1.0.1: {}
+  parse-node-version@1.0.1:
+    optional: true
 
   parseurl@1.3.3: {}
 

@@ -4,7 +4,7 @@
 //
 
 import * as rs from '../src/browser/index.ts';
-import '../src/browser/circus-rs.less';
+import '../src/browser/circus-rs.css';
 import examplesSource from './examples.js?raw';
 import { toPartialVolumeDescriptor } from './utils.js';
 

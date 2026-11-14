@@ -1,0 +1,8 @@
+{
+  "extends": "../../tsconfig.settings.json",
+  "compilerOptions": {
+    // Node.js only; fetch and web streams come from @types/node
+    "lib": ["es2023"]
+  },
+  "include": ["src/**/*"]
+}

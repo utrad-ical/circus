@@ -14,12 +14,14 @@ const action: CommandAction = ({ getFetch }) => {
       throw new Error('Must specify --out when downloading multiple blobs');
     }
 
-    const download = async (hash: string, dest: Writable) => {
+    // The destination is opened only after the request succeeds
+    const download = async (hash: string, openDest: () => Writable) => {
       const spinner = out
         ? createSpinner(`Downloading blob ${hash} to ${out}`)
         : null;
       try {
         const res = await fetch(`blob/${hash}`);
+        const dest = openDest();
         await pipeline(Readable.fromWeb(res.body!), dest, {
           end: dest !== process.stdout
         });
@@ -33,10 +35,12 @@ const action: CommandAction = ({ getFetch }) => {
     if (out) {
       console.log(`Downloading ${hashes.length} blobs to ${out}...`);
       for (const hash of hashes) {
-        await download(hash, fs.createWriteStream(path.resolve(out, hash)));
+        await download(hash, () =>
+          fs.createWriteStream(path.resolve(out, hash))
+        );
       }
     } else {
-      await download(hashes[0], process.stdout);
+      await download(hashes[0], () => process.stdout);
     }
   };
 };

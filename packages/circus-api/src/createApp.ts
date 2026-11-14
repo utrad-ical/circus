@@ -8,7 +8,6 @@ import type {
 import type { VolumeProvider } from '@utrad-ical/circus-rs/server';
 import type { RsWebsocketVolumeConnectionHandlerCreator } from '@utrad-ical/circus-rs/server';
 import { withWebSocketConnectionHandlers } from '@utrad-ical/circus-rs/server';
-import type { ErrorObject } from 'ajv';
 import fs from 'fs-extra';
 import glob from './utils/glob.ts';
 import yaml from 'js-yaml';
@@ -40,6 +39,7 @@ import checkPrivilege from './middleware/auth/checkPrivilege.ts';
 import fixUserMiddleware from './middleware/auth/fixUser.ts';
 import type KoaOAuth2Server from './middleware/auth/KoaOAuth2Server.ts';
 import cors from './middleware/cors.ts';
+import type { ValidationErrorItem } from './createValidator.ts';
 import errorHandler from './middleware/errorHandler.ts';
 import typeCheck from './middleware/typeCheck.ts';
 import validateInOut from './middleware/validateInOut.ts';
@@ -52,8 +52,8 @@ function handlerName(route: Route) {
   return 'handle' + route.verb[0].toUpperCase() + route.verb.substr(1);
 }
 
-const formatValidationErrors = (errors: ErrorObject[]) => {
-  return errors.map(err => `${err.dataPath} ${err.message}`).join('\n');
+const formatValidationErrors = (errors: ValidationErrorItem[]) => {
+  return errors.map(err => `${err.instancePath} ${err.message}`).join('\n');
 };
 
 interface ManifestFile {
@@ -66,8 +66,8 @@ interface Route {
   handler?: string;
   forDebug?: boolean;
   expectedContentType?: string;
-  requestSchema?: string | object;
-  responseSchema?: string | object;
+  requestSchema?: string;
+  responseSchema?: string;
   noAuthentication?: boolean;
 }
 

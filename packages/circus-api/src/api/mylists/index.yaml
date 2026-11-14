@@ -7,10 +7,7 @@ routes:
     handler: handleSearch
     description: >
       Performs search and retrieves a list of the current user's my lists.
-    responseSchema:
-      type: array
-      items:
-        $ref: userMyList
+    responseSchema: myLists
   - verb: get
     path: /mylists/:myListId
     description: Returns information about the specified my list.
@@ -18,42 +15,11 @@ routes:
   - verb: post
     path: /mylists
     description: Creates a new my list.
-    requestSchema:
-      properties:
-        name:
-          type: string
-          minLength: 1
-          maxLength: 64
-        resourceType:
-          enum:
-            - series
-            - clinicalCases
-            - pluginJobs
-        public:
-          type: boolean
-      required: ['name', 'resourceType', 'public']
-    responseSchema:
-      properties:
-        myListId:
-          type: string
-      required: ['myListId']
+    requestSchema: myListCreate
+    responseSchema: myListCreated
   - verb: patch
     path: /mylists/:myListId
-    requestSchema:
-      type: object
-      properties:
-        name:
-          type: string
-          minLength: 1
-          maxLength: 64
-        public:
-          type: boolean
-        editors:
-          type: array
-          items:
-            $ref: myListEditor
-      additionalProperties: false
-      minProperties: 1
+    requestSchema: myListPatch
     handler: handlePatchList
     description: Change name, public status, and editors of the specified my list.
   - verb: delete
@@ -63,23 +29,5 @@ routes:
     path: /mylists/:myListId/items
     handler: handlePatchItems
     description: Adds items to or removes items from the specified my list.
-    requestSchema:
-      type: object
-      properties:
-        operation:
-          enum:
-            - add
-            - remove
-        resourceIds:
-          type: array
-          items:
-            type: string
-          minItems: 1
-          maxItems: 1000
-      required: ['operation', 'resourceIds']
-    responseSchema:
-      type: object
-      properties:
-        changedCount:
-          type: number
-      required: ['changedCount']
+    requestSchema: myListItemsPatch
+    responseSchema: myListItemsPatched

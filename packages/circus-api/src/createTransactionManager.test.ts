@@ -1,3 +1,4 @@
+import testSchemas from '../test/test-schemas.ts';
 import assert from 'node:assert/strict';
 import { describe, test, before, after } from 'node:test';
 import { createTransactionManagerFactory } from './createTransactionManager.ts';
@@ -31,7 +32,7 @@ before(async () => {
   database = (await dbPromise).database;
   db = database.db;
   validator = await createValidator({
-    schemaRoot: import.meta.dirname + '/../test/test-schemas'
+    schemas: testSchemas
   });
   await setUpMongoFixture(db, ['bankAccounts']);
 });

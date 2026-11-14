@@ -9,22 +9,7 @@ routes:
     description: >
       Logs in with a user name and a password, or with a onetime password
       issued via the onetime URL, and sets the session cookie.
-    requestSchema:
-      oneOf:
-        - type: object
-          properties:
-            username:
-              type: string
-            password:
-              type: string
-          required: [username, password]
-          additionalProperties: false
-        - type: object
-          properties:
-            onetime:
-              type: string
-          required: [onetime]
-          additionalProperties: false
+    requestSchema: sessionCreate
   - verb: delete
     path: /session
     noAuthentication: true

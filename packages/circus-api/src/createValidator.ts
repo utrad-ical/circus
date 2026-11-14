@@ -1,351 +1,217 @@
-import Ajv from 'ajv';
-import glob from './utils/glob.ts';
-import fs from 'fs-extra';
-import yaml from 'js-yaml';
-import semver from 'semver';
-import * as path from 'path';
 import type { NoDepFunctionService } from '@utrad-ical/circus-lib';
-import { isDicomUid } from '@utrad-ical/circus-lib';
-import type { Validator } from './interface.ts';
+import { z } from 'zod';
+import type { ValidationMode, Validator } from './interface.ts';
+import { dateField } from './schemas/formats.ts';
+import defaultSchemas from './schemas/index.ts';
 
-interface Schema {
-  $async?: boolean;
-  $id?: string;
-  oneOf?: any[];
-  properties?: object;
-  additionalProperties?: boolean;
-  [key: string]: any;
+export interface ValidationErrorItem {
+  /** JSON Pointer to the invalid value, e.g., '/domains/0' */
+  instancePath: string;
+  message: string;
+  code: string;
 }
 
-const loadSchemaFiles = async (
-  schemaRoot: string
-): Promise<{ [name: string]: Schema }> => {
-  // Search all the schema YAML files under the root directory
-  const schemaFiles = await glob(path.join(schemaRoot, '*.yaml'));
-  const schemas: { [name: string]: Schema } = {};
-  for (const schemaFile of schemaFiles) {
-    const basename = path.basename(schemaFile, '.yaml');
-    const schemaData = yaml.safeLoad(
-      await fs.readFile(schemaFile, 'utf8')
-    ) as Schema;
+/**
+ * Thrown when the data does not match the schema.
+ */
+export class ValidationError extends Error {
+  errors: ValidationErrorItem[];
+  /** Set by validateInOut */
+  phase?: 'request' | 'response';
 
-    if (typeof schemaData !== 'object' || schemaData === null) {
-      throw new TypeError(
-        `Schema file "${basename}" does not contain a valid schema object`
-      );
-    }
-
-    if (schemaData.$async !== true || schemaData.$id) {
-      throw new TypeError(
-        `Schemas "${basename}" must be async and have no $id field`
-      );
-    }
-    if (
-      !schemaData.oneOf &&
-      (!schemaData.properties || schemaData.additionalProperties !== false)
-    ) {
-      throw new TypeError(
-        `Schema "${basename}" must have properties.additionalProperties set to false`
-      );
-    }
-    schemas[basename] = schemaData;
+  constructor(errors: ValidationErrorItem[]) {
+    super(
+      'Validation failed: ' +
+        errors.map(e => `${e.instancePath || '/'} ${e.message}`).join(', ')
+    );
+    this.name = 'ValidationError';
+    this.errors = errors;
   }
-  return schemas;
-};
+}
 
-// Some custom formats
-const intOrRange = '((0|[1-9][0-9]*)|(0|[1-9][0-9]*)-(0|[1-9][0-9]*))';
-
-const customFormats: {
-  [formatName: string]: ((s: string) => boolean) | RegExp;
-} = {
-  dicomUid: s => isDicomUid(s, false),
-  multiIntegerRange: new RegExp(`^${intOrRange}(,${intOrRange})*$`),
-  color: /^#[0-9a-f]{6}$/,
-  kebab: /^([a-z0-9]+-)*[a-z0-9]+$/,
-  sha1hex: /^[a-f0-9]{40}$/,
-  jsonString: s => {
-    try {
-      JSON.parse(s);
-      return true;
-    } catch (err) {
-      return false;
-    }
-  },
-  dockerId: s => /^[a-z0-9]{64}$/.test(s),
-  remoteCadId: s => /^rmt-[a-z0-9]{64}$/.test(s),
-  semver: s => semver.valid(s) !== null
-};
-
-const defaultSchemaRoot = path.join(import.meta.dirname, 'schemas');
-
-type SchemaConverter = (schema: any, ...params: string[]) => any;
+type Issue = z.core.$ZodIssue;
 
 /**
- * Creates the validator wrapping AJV instance.
- * This validator knows all the schemas under the 'schemas' directory
- * and can be used throughtout the API server.
+ * Replaces a union error with the issues of its closest alternative,
+ * so that each issue keeps the path to the invalid value.
+ */
+const expandUnions = (issues: Issue[], prefix: PropertyKey[] = []): Issue[] =>
+  issues.flatMap(issue => {
+    const path = [...prefix, ...issue.path];
+    if (issue.code === 'invalid_union' && issue.errors.length) {
+      // Fewest issues first, then fewest unknown keys (more keys matched)
+      const score = (errors: Issue[]) =>
+        errors.length * 1000 +
+        errors.filter(e => e.code === 'unrecognized_keys').length;
+      const closest = issue.errors.reduce((a, b) =>
+        score(b) < score(a) ? b : a
+      );
+      return expandUnions(closest, path);
+    }
+    return [{ ...issue, path } as Issue];
+  });
+
+const escapePointer = (segment: PropertyKey) =>
+  String(segment).replace(/~/g, '~0').replace(/\//g, '~1');
+
+const toErrorItems = (issues: Issue[]): ValidationErrorItem[] =>
+  issues.map(issue => ({
+    instancePath: issue.path.map(p => '/' + escapePointer(p)).join(''),
+    message: issue.message,
+    code: issue.code
+  }));
+
+/**
+ * Returns a copy of the data where invalid `Date`s are replaced with
+ * valid ones, so that encoding (which calls `toISOString`) can check
+ * data that contains them. The old validator accepted invalid `Date`s.
+ */
+const replaceInvalidDates = (data: unknown): unknown => {
+  if (data instanceof Date) return isNaN(data.getTime()) ? new Date(0) : data;
+  if (Array.isArray(data)) return data.map(replaceInvalidDates);
+  if (data !== null && typeof data === 'object')
+    return Object.fromEntries(
+      Object.entries(data).map(([k, v]) => [k, replaceInvalidDates(v)])
+    );
+  return data;
+};
+
+const asObject = (schema: z.ZodType): z.ZodObject => {
+  if (!(schema instanceof z.ZodObject))
+    throw new TypeError('Unsupported schema: an object schema is required');
+  return schema;
+};
+
+const toList = (str = '') =>
+  str
+    .split(',')
+    .map(s => s.trim())
+    .filter(s => s.length);
+
+/** Builds a mask for pick/omit/partial/required from existing keys */
+const maskOf = (schema: z.ZodObject, keys: string[]): any =>
+  Object.fromEntries(keys.filter(k => k in schema.shape).map(k => [k, true]));
+
+const withDates = (schema: z.ZodType) =>
+  asObject(schema).extend({ createdAt: dateField(), updatedAt: dateField() });
+
+const searchResultOf = (items: z.ZodType) =>
+  z.looseObject({
+    items: z.array(items),
+    totalItems: z.number(),
+    page: z.number()
+  });
+
+type Filter = (
+  schema: z.ZodType,
+  args: string[],
+  named: (name: string) => z.ZodType
+) => z.ZodType;
+
+// Filters used in schema definition strings like 'user|exclude password'
+const filters: { [name: string]: Filter } = {
+  allRequired: schema => asObject(schema).required(),
+  allRequiredExcept: (schema, [except]) => {
+    const obj = asObject(schema);
+    const excepts = toList(except);
+    const others = Object.keys(obj.shape).filter(k => !excepts.includes(k));
+    return obj.partial(maskOf(obj, excepts)).required(maskOf(obj, others));
+  },
+  only: (schema, [props]) => {
+    const obj = asObject(schema);
+    return z.strictObject(obj.pick(maskOf(obj, toList(props))).shape);
+  },
+  exclude: (schema, [props]) => {
+    const obj = asObject(schema);
+    return obj.omit(maskOf(obj, toList(props)));
+  },
+  // Without a schema name, the property can hold anything
+  addProperty: (schema, [name, ref], named) =>
+    asObject(schema).extend({
+      [name]: (ref ? named(ref) : z.unknown()).optional()
+    }),
+  searchResult: schema => searchResultOf(withDates(schema)),
+  dbEntry: schema => withDates(asObject(schema).required())
+};
+
+/**
+ * Creates the validator that knows all the schemas under `schemas/`.
+ * A schema is specified by its name, optionally followed by filters
+ * (e.g., 'user|exclude password|dbEntry'). Alternatives are separated by '/'.
  */
 const createValidator: NoDepFunctionService<
   Validator,
-  { schemaRoot: string } | undefined
+  { schemas?: Record<string, z.ZodType> } | undefined
 > = async opts => {
-  const schemaRoot =
-    opts && opts.schemaRoot ? opts.schemaRoot : defaultSchemaRoot;
-  const schemas = await loadSchemaFiles(schemaRoot);
-  if (!Object.keys(schemas).length) console.warn('Schema directory is empty');
+  const schemas = opts?.schemas ?? defaultSchemas;
+  const cache = new Map<string, z.ZodType>();
 
-  const filterSchema = (schemaDef: string | object) => {
-    if (typeof schemaDef === 'object') return [schemaDef];
-    if (typeof schemaDef !== 'string') throw new TypeError('Invalid schema');
+  const named = (name: string) => {
+    const schema = schemas[name];
+    if (!schema) throw new TypeError(`Unregistered schema name: ${name}`);
+    return schema;
+  };
 
-    const schemaParts = schemaDef.split('/').map(part => part.trim());
-    const schemaList = schemaParts.map(part => {
-      const [name, ...filterDefs] = part.split(/\s*\|\s*/);
-      let schema = schemas[name];
-      if (!schema) throw new TypeError(`Unregistered schema name: ${name}`);
-
+  const build = (def: string): z.ZodType => {
+    const parts = def.split('/').map(part => {
+      const [name, ...filterDefs] = part.trim().split(/\s*\|\s*/);
+      let schema = named(name);
+      let searchResultItem: z.ZodType | undefined;
       for (const filterDef of filterDefs) {
         const [filterName, ...args] = filterDef.trim().split(/\s+/);
-        const filter = (
-          {
-            allRequired: allRequiredSchema,
-            allRequiredExcept: allRequiredSchema,
-            only: onlySchema,
-            exclude: excludeSchema,
-            addProperty: addPropertySchema,
-            searchResult: searchResultSchema,
-            dbEntry: dbEntrySchema
-          } as { [name: string]: SchemaConverter }
-        )[filterName];
+        const filter = filters[filterName];
         if (!filter) throw new TypeError(`Unknown filter: ${filterName}`);
-        schema = filter.call(null, schema, ...args);
+        if (filterName === 'searchResult') searchResultItem = withDates(schema);
+        schema = filter(schema, args, named);
       }
-
-      return schema;
+      return { schema, searchResultItem };
     });
-
-    return schemaList;
+    if (parts.length === 1) return parts[0].schema;
+    // 'a|searchResult/b|searchResult' accepts a list mixing a and b
+    if (parts.every(p => p.searchResultItem))
+      return searchResultOf(
+        z.union(parts.map(p => p.searchResultItem!) as [z.ZodType])
+      );
+    return z.union(parts.map(p => p.schema) as [z.ZodType]);
   };
 
-  /**
-   * Takes a JSON schema and returns another JSON schema where
-   * all properties are marked as 'required'.
-   * The input JSON schema must be an object validator at the root level,
-   * and must have a `properties` keyword.
-   */
-  const allRequiredSchema: SchemaConverter = (schema, except = '') => {
-    if (!schema || !schema.properties) {
-      throw new TypeError('Unsupported JSON schema');
+  const getSchema = (def: string | z.ZodType) => {
+    if (typeof def !== 'string') return def;
+    let schema = cache.get(def);
+    if (!schema) {
+      schema = build(def);
+      cache.set(def, schema);
     }
-    const excepts = except.split(',').map(s => s.trim());
-    const props = Object.keys(schema.properties).filter(
-      p => excepts.indexOf(p) < 0
-    );
-    return {
-      ...schema,
-      required: props
-    };
+    return schema;
   };
 
-  /**
-   * Takes a JSON schema and returns its subset JSON schema
-   * which only contains the specified properties.
-   * The input JSON schema must be an object validator at the root level,
-   * and must have a `properties` keyword.
-   */
-  const onlySchema: SchemaConverter = (schema, props: string) => {
-    if (!schema || !schema.properties) {
-      throw new TypeError('Unsupported JSON schema');
-    }
-    const propList = props.split(',').map(s => s.trim());
-    const properties: any = {};
-    propList.forEach(key => {
-      properties[key] = schema.properties[key];
-    });
-    return {
-      ...schema,
-      properties,
-      additionalProperties: false
-    };
-  };
-
-  const excludeSchema: SchemaConverter = (schema, props: string) => {
-    if (!schema || !schema.properties) {
-      throw new TypeError('Unsupported JSON schema');
-    }
-    const propList = props.split(',').map(s => s.trim());
-    const properties = { ...schema.properties };
-    propList.forEach(key => delete properties[key]);
-    return { ...schema, properties };
-  };
-
-  const addPropertySchema: SchemaConverter = (
-    schema,
-    name: string,
-    ref: string
-  ) => {
-    const properties = { ...schema.properties, [name]: { $ref: ref } };
-    return { ...schema, properties };
-  };
-
-  const withDatesSchema: SchemaConverter = schema => {
-    if (!schema || !schema.properties) {
-      throw new TypeError('Unsupported JSON schema');
-    }
-    return {
-      ...schema,
-      properties: {
-        ...schema.properties,
-        createdAt: { date: true },
-        updatedAt: { date: true }
-      },
-      required: [...(schema.required || []), 'createdAt', 'updatedAt']
-    };
-  };
-
-  const searchResultSchema: SchemaConverter = schema => {
-    return {
-      $async: true,
-      type: 'object',
-      properties: {
-        items: {
-          type: 'array',
-          items: withDatesSchema(schema)
-        },
-        totalItems: { type: 'number' },
-        page: { type: 'number' }
-      },
-      required: ['items', 'totalItems', 'page']
-    };
-  };
-
-  const dbEntrySchema: SchemaConverter = schema => {
-    return withDatesSchema(allRequiredSchema(schema));
-  };
-
-  const sharedOpts = {
-    allErrors: true,
-    async: 'es7',
-    format: 'full',
-    formats: customFormats
-  };
-
-  const toDate: Ajv.SchemaValidateFunction = (
-    schema,
+  const validate: Validator['validate'] = async (
+    def,
     data,
-    parentSchema,
-    path,
-    parentData,
-    parentDataProperty
+    mode: ValidationMode = 'default',
+    options = {}
   ) => {
-    const isoRegex =
-      /(\d{4})-?(\d{2})-?(\d{2})([T ](\d{2})(:?(\d{2})(:?(\d{2}(\.\d+)?))?)?(Z|([+-])(\d{2}):?(\d{2})?)?)?/;
-    if (isoRegex.test(data)) {
-      (parentData as any)[parentDataProperty!] = new Date(data);
-      return true;
-    } else {
-      return false;
-    }
-  };
-
-  const fromDate: Ajv.SchemaValidateFunction = (
-    schema,
-    data,
-    parentSchema,
-    path,
-    parentData,
-    parentDataProperty
-  ) => {
-    if (data instanceof Date) {
-      (parentData as any)[parentDataProperty!] = data.toISOString();
-      return true;
-    } else {
-      return false;
-    }
-  };
-
-  function checkDate(schema: any, data: any) {
-    return data instanceof Date;
-  }
-
-  // We will keep several Avj instances with different options/keywords/etc
-  // because Ajv does not allow changing options after `new Ajv()`.
-
-  // The most plain validator
-  const validator = new Ajv({ ...sharedOpts, schemas });
-  validator.addKeyword('date', { validate: checkDate });
-
-  // Convers ISO date strings into Date objects
-  const toDateValidator = new Ajv({ ...sharedOpts, schemas });
-  toDateValidator.addKeyword('date', { validate: toDate, modifying: true });
-
-  // Convers Date objects into ISO date strings
-  const fromDateValidator = new Ajv({ ...sharedOpts, schemas });
-  fromDateValidator.addKeyword('date', { validate: fromDate, modifying: true });
-
-  // Fills defaults
-  const fillDefaultsValidator = new Ajv({
-    ...sharedOpts,
-    useDefaults: true,
-    schemas
-  });
-
-  // We return an object that wraps the two Ajv instances.
-  return {
-    validate: async (schema: any, data: any, mode = 'default') => {
-      const isOr = typeof schema === 'string' ? schema.includes('/') : false;
-      const schemasToValidate = filterSchema(schema);
-      const validators: { [mode: string]: Ajv.Ajv } = {
-        default: validator,
-        toDate: toDateValidator,
-        fromDate: fromDateValidator,
-        fillDefaults: fillDefaultsValidator
-      };
-      const validatorToUse = validators[mode];
-
-      let validationError: any = null;
-
-      if (data.items && isOr) {
-        for (let index = 0; index < data.items.length; index++) {
-          const item = data.items[index];
-
-          for (const schemaToValidate of schemasToValidate) {
-            try {
-              const clonedData = structuredClone({ ...data, items: [item] });
-              const validatedData = await validatorToUse.validate(
-                schemaToValidate,
-                clonedData
-              );
-              data.items[index] = validatedData.items[0];
-              validationError = null;
-              break;
-            } catch (err) {
-              validationError = err;
-            }
-          }
-
-          if (validationError) throw validationError;
-        }
-        return data;
-      }
-
-      for (const schemaToValidate of schemasToValidate) {
-        try {
-          const clonedData = structuredClone(data);
-          return await validatorToUse.validate(schemaToValidate, clonedData);
-        } catch (err) {
-          validationError = err;
-        }
-      }
-      if (validationError) throw validationError;
+    const schema = getSchema(def);
+    // Parsing converts ISO strings into Dates;
+    // encoding checks Dates and converts them into ISO strings
+    const result =
+      mode === 'toDate'
+        ? z.safeDecode(schema, data)
+        : z.safeEncode(
+            schema,
+            mode === 'default' ? replaceInvalidDates(data) : data
+          );
+    if (!result.success) {
+      const issues = expandUnions(result.error.issues).filter(
+        i => !(options.allowUnknownKeys && i.code === 'unrecognized_keys')
+      );
+      if (issues.length) throw new ValidationError(toErrorItems(issues));
       return data;
-    },
-    getSchema: (key: string) => {
-      return validator.getSchema(key);
-    },
-    filterSchema
-  } as Validator;
+    }
+    return mode === 'default' ? data : result.data;
+  };
+
+  return { validate };
 };
 
 export default createValidator;

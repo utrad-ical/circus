@@ -4,7 +4,7 @@ import errorHandler from './errorHandler.ts';
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import Router from 'koa-router';
-import Ajv from 'ajv';
+import { ValidationError } from '../createValidator.ts';
 import type { TestServer } from '../test/util-koa.ts';
 import { setUpKoaTest } from '../test/util-koa.ts';
 import { createNullLogger } from '@utrad-ical/circus-lib';
@@ -19,26 +19,20 @@ before(async () => {
       ctx.body = 'Hello';
     });
 
+    const validationError = (phase: 'request' | 'response') => {
+      const err = new ValidationError([
+        { instancePath: '', message: 'Expected number', code: 'invalid_type' }
+      ]);
+      err.phase = phase;
+      return err;
+    };
+
     router.get('/invalid-on-request', async ctx => {
-      const ajv = new Ajv();
-      const schema = { $async: true, type: 'number' };
-      try {
-        await ajv.validate(schema, 'hi'); // validation fails
-      } catch (err: any) {
-        err.phase = 'request';
-        throw err;
-      }
+      throw validationError('request');
     });
 
     router.get('/invalid-on-response', async ctx => {
-      const ajv = new Ajv();
-      const schema = { $async: true, type: 'number' };
-      try {
-        await ajv.validate(schema, 'hi'); // validation fails
-      } catch (err: any) {
-        err.phase = 'response';
-        throw err;
-      }
+      throw validationError('response');
     });
 
     router.get('/server-side-error', async ctx => {

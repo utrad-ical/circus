@@ -1,12 +1,26 @@
+import type { z } from 'zod';
 import type { readDicomTags } from './utils/createDicomTagReader.ts';
 import type { Disposable } from '@utrad-ical/circus-lib';
 import type { CollectionAccessor } from './db/createCollectionAccessor.ts';
 import type * as mongo from 'mongodb';
 
+/**
+ * - `default`: checks the data as stored in the server (with `Date`s)
+ * - `toDate`: checks a request and converts ISO date strings into `Date`s
+ * - `fromDate`: checks a response and converts `Date`s into ISO strings
+ */
+export type ValidationMode = 'default' | 'toDate' | 'fromDate';
+
 export interface Validator {
-  validate: (schema: any, data: any, mode?: string) => Promise<any>;
-  getSchema: (key: string) => any;
-  filterSchema: (schemaDef: string | object) => any;
+  validate: (
+    schema: string | z.ZodType,
+    data: any,
+    mode?: ValidationMode,
+    options?: {
+      /** Ignores unknown properties (used when reading the DB) */
+      allowUnknownKeys?: boolean;
+    }
+  ) => Promise<any>;
 }
 
 export interface DicomImporter {

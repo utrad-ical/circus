@@ -6,8 +6,7 @@ routes:
     requiredGlobalPrivilege: manageServer
     handler: handleSearch
     description: Retrieves the list of server parameters.
-    responseSchema:
-      type: object
+    responseSchema: serverParams
   - verb: get
     path: /admin/server-params/:key
     requiredGlobalPrivilege: manageServer
@@ -21,6 +20,5 @@ routes:
     path: /admin/server-params
     requiredGlobalPrivilege: manageServer
     handler: handlePutAll
-    requestSchema:
-      type: object
+    requestSchema: serverParams
     description: Bulk-updates server parameters.

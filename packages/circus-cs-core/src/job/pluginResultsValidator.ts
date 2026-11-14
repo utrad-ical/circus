@@ -1,10 +1,6 @@
-import Ajv from 'ajv';
 import path from 'path';
 import fs from 'fs-extra';
-
-import resultsSchema from '../schemas/results.json' with { type: 'json' };
-
-const lesionCandAjv = new Ajv({ allErrors: true }).compile(resultsSchema);
+import { resultsSchema } from '../schemas/results.ts';
 
 /**
  * Performs the validation.
@@ -22,12 +18,12 @@ export default async function pluginResultsValidator(
     );
     const rawResults = JSON.parse(jsonStr);
 
-    const isValid = lesionCandAjv(rawResults);
-    if (!isValid)
+    const result = resultsSchema.safeParse(rawResults);
+    if (!result.success)
       throw new Error(
         'Schema validation error for results.json file.\n' +
-          lesionCandAjv
-            .errors!.map(e => `${e.dataPath} ${e.message}`)
+          result.error.issues
+            .map(i => `/${i.path.join('/')} ${i.message}`)
             .join('\n')
       );
 

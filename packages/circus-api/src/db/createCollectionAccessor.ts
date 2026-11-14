@@ -6,12 +6,14 @@ type CursorOptions = {
   sort?: object;
   limit?: number;
   skip?: number;
+  /** Also rejects unknown properties (they are ignored by default) */
+  strict?: boolean;
 };
 
 type WithDates<T> = T & { createdAt: Date; updatedAt: Date };
 
 interface Options<T> {
-  schema: object | string;
+  schema: string;
   collectionName: string;
   primaryKey: keyof T;
   session?: mongo.ClientSession;
@@ -138,7 +140,7 @@ const createCollectionAccessor = <T = any>(
    * The `_id` field will not be included.
    */
   const findAsCursor = (query: object = {}, options: CursorOptions = {}) => {
-    const { sort, limit, skip } = options;
+    const { sort, limit, skip, strict } = options;
     let cursor = collection.find(query, { ...sessionOpts }).project({ _id: 0 });
     if (sort) cursor = cursor.sort(sort as mongo.Sort);
     if (skip) cursor = cursor.skip(skip);
@@ -146,7 +148,9 @@ const createCollectionAccessor = <T = any>(
     return {
       next: async () => {
         const next = await cursor.next();
-        await validator.validate(dbEntrySchema, next);
+        await validator.validate(dbEntrySchema, next, 'default', {
+          allowUnknownKeys: !strict
+        });
         return next;
       },
       hasNext: () => cursor.hasNext(),
@@ -206,7 +210,9 @@ const createCollectionAccessor = <T = any>(
       .toArray();
     const result = docs[0];
     if (result !== undefined) {
-      await validator.validate(dbEntrySchema, result);
+      await validator.validate(dbEntrySchema, result, 'default', {
+        allowUnknownKeys: true
+      });
     }
     return result;
   };

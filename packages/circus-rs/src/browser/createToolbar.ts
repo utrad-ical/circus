@@ -103,7 +103,8 @@ export default function createToolbar(
   });
 
   const bindViewer = (viewer: Viewer) => {
-    viewer.on('toolchanged', (before: Tool | null, after: Tool | null) => {
+    viewer.addEventListener('toolchanged', event => {
+      const { after } = event.detail;
       const toolName = (after && tool2name.get(after)) || '';
       component.setActiveToolName(toolName);
     });

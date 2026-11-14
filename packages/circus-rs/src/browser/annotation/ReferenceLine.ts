@@ -1,7 +1,7 @@
 import { Vector2, Vector3 } from 'three';
 import type ViewerEventTarget from '../interface/ViewerEventTarget.ts';
 import { convertViewerPointToVolumePoint } from '../tool/tool-util.ts';
-import Viewer from '../viewer/Viewer.ts';
+import Viewer, { type ViewerEventMap } from '../viewer/Viewer.ts';
 import type ViewerEvent from '../viewer/ViewerEvent.ts';
 import type { MprViewState } from '../ViewState.ts';
 import type ViewState from '../ViewState.ts';
@@ -52,12 +52,15 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
     this.handleViewerRequestingStateChange =
       this.handleViewerRequestingStateChange.bind(this);
     this.getReferenceLineOnScreen = this.getReferenceLineOnScreen.bind(this);
-    viewer.on('requestingStateChange', this.handleViewerRequestingStateChange);
+    viewer.addEventListener(
+      'requestingStateChange',
+      this.handleViewerRequestingStateChange
+    );
   }
 
   public dispose(): void {
     if (this.targetViewer) {
-      this.targetViewer.removeListener(
+      this.targetViewer.removeEventListener(
         'requestingStateChange',
         this.handleViewerRequestingStateChange
       );
@@ -65,9 +68,9 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
   }
 
   private handleViewerRequestingStateChange(
-    state: ViewState,
-    requestingState: ViewState
+    event: CustomEvent<ViewerEventMap['requestingStateChange']>
   ): void {
+    const { prevState: state, state: requestingState } = event.detail;
     if (
       !isValidViewState(state) ||
       !isValidViewState(requestingState) ||

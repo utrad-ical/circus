@@ -120,7 +120,8 @@ const useCompositions = (
         ...results.slice(volId + 1)
       ]);
 
-      const progressListener: ProgressEventListener = ({ finished, total }) => {
+      const progressListener: ProgressEventListener = event => {
+        const { finished, total } = event.detail;
         setResults(results =>
           produce(results, draft => {
             draft[volId].progress = (finished || 0) / (total || 1);
@@ -128,9 +129,10 @@ const useCompositions = (
         );
       };
 
-      volumeLoader.loadController?.on('progress', progressListener);
-      abortController.signal.addEventListener('abort', () =>
-        volumeLoader.loadController?.off('progress', progressListener)
+      volumeLoader.loadController?.addEventListener(
+        'progress',
+        progressListener,
+        { signal: abortController.signal }
       );
 
       await volumeLoader.loadVolume();
@@ -508,12 +510,26 @@ const RevisionEditor: React.FC<{
       'window' in viewState &&
       viewState.window &&
       setCurrentWindow(viewState.window);
+    const listenerController = new AbortController();
     compositions.forEach((entry, seriesIndex) => {
       const composition = entry.composition;
       if (!composition) return;
 
-      composition.on('annotationChange', annotation =>
-        handleAnnotationChange(annotation)
+      composition.addEventListener(
+        'annotationChange',
+        event => {
+          const annotation = event.detail;
+          if (
+            annotation instanceof rs.VoxelCloud ||
+            annotation instanceof rs.SolidFigure ||
+            annotation instanceof rs.PlaneFigure ||
+            annotation instanceof rs.Point ||
+            annotation instanceof rs.Ruler
+          ) {
+            handleAnnotationChange(annotation);
+          }
+        },
+        { signal: listenerController.signal }
       );
 
       const activeLabel =
@@ -594,11 +610,7 @@ const RevisionEditor: React.FC<{
 
       composition.annotationUpdated();
     });
-    return () => {
-      compositions.forEach(entry =>
-        entry.composition?.removeAllListeners('annotationChange')
-      );
-    };
+    return () => listenerController.abort();
   }, [
     compositions,
     editingData,

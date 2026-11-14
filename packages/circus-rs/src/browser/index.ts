@@ -5,6 +5,8 @@
 import 'tslib';
 
 export { default as Viewer } from './viewer/Viewer.ts';
+export type { ViewerEventMap } from './viewer/Viewer.ts';
+export type { default as TypedEventTarget } from './TypedEventTarget.ts';
 export { default as ViewerEvent } from './viewer/ViewerEvent.ts';
 export type { default as ViewerEventTarget } from './interface/ViewerEventTarget.ts';
 export type { default as LoadingIndicator } from './interface/LoadingIndicator.ts';
@@ -20,6 +22,7 @@ export type {
 } from './ViewState.ts';
 export type { ViewWindow } from '../common/ViewWindow.ts';
 export { default as Composition } from './Composition.ts';
+export type { CompositionEventMap } from './Composition.ts';
 
 export type { default as Annotation } from './annotation/Annotation.ts';
 export type { default as ModifierKeyBehaviors } from './annotation/ModifierKeyBehaviors.ts';
@@ -71,7 +74,9 @@ export type {
   default as DicomVolumeLoader,
   DicomVolumeMetadata,
   ProgressEventListener,
-  VolumeLoadController
+  ProgressInfo,
+  VolumeLoadController,
+  VolumeLoadControllerEventMap
 } from './image-source/volume-loader/DicomVolumeLoader.ts';
 export type { RangeInput } from '../common/rangeInput.ts';
 export { default as MockVolumeLoader } from './image-source/volume-loader/MockVolumeLoader.ts';

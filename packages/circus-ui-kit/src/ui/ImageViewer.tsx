@@ -78,7 +78,7 @@ export const ImageViewer: React.FC<{
         const newViewer = new Viewer(viewerDivRef.current!);
         newViewer.setComposition(composition);
         if (typeof initialStateSetter === 'function') {
-          newViewer.on('imageReady', () => {
+          newViewer.addEventListener('imageReady', () => {
             const baseState = composition.imageSource.initialState(newViewer);
             const viewState = initialStateSetter(baseState, newViewer, id);
             newViewer.setState(viewState);

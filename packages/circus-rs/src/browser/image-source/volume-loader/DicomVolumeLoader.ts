@@ -2,8 +2,7 @@ import type DicomVolume from '../../../common/DicomVolume.ts';
 import type { ViewWindow } from '../../../common/ViewWindow.ts';
 import type { PixelFormat } from '../../../volume/PixelFormat.ts';
 import type { RangeInput } from '../../../common/rangeInput.ts';
-import type { EventEmitter } from 'events';
-import type { StrictEventEmitter } from 'strict-event-emitter-types';
+import type TypedEventTarget from '../../TypedEventTarget.ts';
 
 export interface DicomVolumeMetadata {
   dicomWindow?: ViewWindow;
@@ -20,30 +19,20 @@ export default interface DicomVolumeLoader {
   loadVolume(): Promise<DicomVolume>;
 }
 
-interface ProgressInfo {
+export interface ProgressInfo {
   target: DicomVolumeLoader;
   imageIndex: number;
   finished?: number;
   total?: number;
 }
-export type ProgressEventListener = (info: ProgressInfo) => void;
+export type ProgressEventListener = (event: CustomEvent<ProgressInfo>) => void;
 
-interface AbortInfo {
-  target: DicomVolumeLoader;
-}
-export type AbortEventListener = (info: AbortInfo) => void;
-
-interface ProgressEvents {
-  progress: ProgressEventListener;
-  abort: AbortEventListener;
+export interface VolumeLoadControllerEventMap {
+  progress: ProgressInfo;
+  abort: { target: DicomVolumeLoader };
 }
 
-export type ProgressEventEmitter = StrictEventEmitter<
-  EventEmitter,
-  ProgressEvents
->;
-
-export interface VolumeLoadController extends ProgressEventEmitter {
+export interface VolumeLoadController extends TypedEventTarget<VolumeLoadControllerEventMap> {
   getVolume(): DicomVolume | null;
   setPriority(imageIndices: RangeInput, priority: number): void;
   loadedImages(): number[];

@@ -606,9 +606,6 @@ importers:
       dicom-parser:
         specifier: ^1.8.4
         version: 1.8.7
-      events:
-        specifier: ^3.3.0
-        version: 3.3.0
       extend:
         specifier: ^3.0.2
         version: 3.0.2
@@ -654,9 +651,6 @@ importers:
       pngjs:
         specifier: ^3.4.0
         version: 3.4.0
-      strict-event-emitter-types:
-        specifier: ^2.0.0
-        version: 2.0.0
       tarn:
         specifier: ^3.0.1
         version: 3.0.1
@@ -797,9 +791,6 @@ importers:
       date-fns:
         specifier: 4.4.0
         version: 4.4.0
-      events:
-        specifier: ^3.3.0
-        version: 3.3.0
       fflate:
         specifier: ^0.8.3
         version: 0.8.3
@@ -2535,10 +2526,6 @@ packages:
 
   eventemitter2@6.4.9:
     resolution: {integrity: sha512-JEPTiaOt9f04oa6NOkc4aH+nVp5I3wEjpHbIPqfgCdD5v5bUzy7xQqwcVO2aDQgOWhI28da57HksMrzK9HlRxg==}
-
-  events@3.3.0:
-    resolution: {integrity: sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==}
-    engines: {node: '>=0.8.x'}
 
   execa@9.5.0:
     resolution: {integrity: sha512-t7vvYt+oKnMbF3O+S5+HkylsPrsUatwJSe4Cv+4017R0MCySjECxnVJ2eyDXVD/Xpj5H29YzyYn6eEpugG7GJA==}
@@ -5744,8 +5731,6 @@ snapshots:
   eventemitter2@5.0.1: {}
 
   eventemitter2@6.4.9: {}
-
-  events@3.3.0: {}
 
   execa@9.5.0:
     dependencies:

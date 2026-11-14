@@ -1,4 +1,3 @@
-import { EventEmitter } from 'events';
 import type ViewerEvent from '../../browser/viewer/ViewerEvent.ts';
 import type ViewerEventTarget from '../interface/ViewerEventTarget.ts';
 import { sign } from './tool-util.ts';
@@ -16,14 +15,10 @@ export interface Tool extends ViewerEventTarget {
  * A tool determines how a viewer intersects with various UI events.
  * An active tool will change the active view state of each viewer.
  */
-export default class ToolBaseClass<T extends ToolOptions = {}>
-  extends EventEmitter
-  implements Tool
-{
+export default class ToolBaseClass<T extends ToolOptions = {}> implements Tool {
   protected options: T = {} as T;
 
   constructor() {
-    super();
     this.wheelHandler = createPagerWheelHandler();
   }
 

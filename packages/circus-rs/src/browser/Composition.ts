@@ -1,13 +1,20 @@
-import { EventEmitter } from 'events';
 import type Annotation from '../browser/annotation/Annotation.ts';
 import type ImageSource from '../browser/image-source/ImageSource.ts';
 import Viewer from './viewer/Viewer.ts';
+import TypedEventTarget from './TypedEventTarget.ts';
 
 /**
  * A composition is a combination of one imageSource and
  * an arbitrary number of annotations.
  */
-export default class Composition extends EventEmitter {
+export interface CompositionEventMap {
+  viewerChange: void;
+  annotationsModify: void;
+  annotationChanging: Annotation;
+  annotationChange: Annotation;
+}
+
+export default class Composition extends TypedEventTarget<CompositionEventMap> {
   /**
    * The image source that is associated with this composition.
    * Do not modify this directly: Use the accessor methods instead.

@@ -1,12 +1,12 @@
 import type { RouteMiddleware } from '../../../typings/middlewares.ts';
 import generateUniqueId from '../../../utils/generateUniqueId.ts';
 import status from 'http-status';
+import { randomInt } from 'node:crypto';
 
-const randomStr = (length: number = 32) => {
-  let result = '';
-  while (result.length < length) result += Math.random().toString(36).slice(2);
-  return result.slice(0, length);
-};
+const chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+
+const randomStr = (length: number = 32) =>
+  Array.from({ length }, () => chars[randomInt(chars.length)]).join('');
 
 export const handlePost: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {

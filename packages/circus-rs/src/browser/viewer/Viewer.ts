@@ -83,6 +83,8 @@ export default class Viewer extends TypedEventTarget<ViewerEventMap> {
 
   private abortController: AbortController;
 
+  private disposed = false;
+
   private isObservingDivSize: boolean = false;
 
   /**
@@ -507,5 +509,14 @@ export default class Viewer extends TypedEventTarget<ViewerEventMap> {
     this.detachCurrentComposition();
     this.abortController.abort();
     this.stopResizeObserver();
+    this.disposed = true;
+  }
+
+  // Listeners cannot be removed all at once, so stop notifying after dispose
+  override emit(
+    ...args: Parameters<TypedEventTarget<ViewerEventMap>['emit']>
+  ): void {
+    if (this.disposed) return;
+    super.emit(...args);
   }
 }

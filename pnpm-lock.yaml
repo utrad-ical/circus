@@ -729,11 +729,11 @@ importers:
         version: 2.3.1
     devDependencies:
       '@types/react':
-        specifier: ^16.14.12
-        version: 16.14.12
+        specifier: ^17.0.93
+        version: 17.0.93
       '@types/react-dom':
-        specifier: ^16.9.14
-        version: 16.9.14
+        specifier: ^17.0.26
+        version: 17.0.26(@types/react@17.0.93)
       react:
         specifier: ^17.0.2
         version: 17.0.2
@@ -820,11 +820,11 @@ importers:
         specifier: ^4.17.12
         version: 4.17.12
       '@types/react':
-        specifier: ^16.9.35
-        version: 16.14.12
+        specifier: ^17.0.93
+        version: 17.0.93
       '@types/react-dom':
-        specifier: ^16.9.8
-        version: 16.9.14
+        specifier: ^17.0.26
+        version: 17.0.26(@types/react@17.0.93)
       '@types/react-redux':
         specifier: ^7.1.9
         version: 7.1.18
@@ -1657,14 +1657,16 @@ packages:
   '@types/range-parser@1.2.4':
     resolution: {integrity: sha512-EEhsLsD6UsDM1yFhAvy0Cjr6VwmpMWqFBCb9w07wVugF7w9nfajxLuVmngTIpgS6svCnm6Vaw+MZhoDCKnOfsw==}
 
-  '@types/react-dom@16.9.14':
-    resolution: {integrity: sha512-FIX2AVmPTGP30OUJ+0vadeIFJJ07Mh1m+U0rxfgyW34p3rTlXI+nlenvAxNn4BP36YyI9IJ/+UJ7Wu22N1pI7A==}
+  '@types/react-dom@17.0.26':
+    resolution: {integrity: sha512-Z+2VcYXJwOqQ79HreLU/1fyQ88eXSSFh6I3JdrEHQIfYSI0kCQpTGvOrbE6jFGGYXKsHuwY9tBa/w5Uo6KzrEg==}
+    peerDependencies:
+      '@types/react': ^17.0.0
 
   '@types/react-redux@7.1.18':
     resolution: {integrity: sha512-9iwAsPyJ9DLTRH+OFeIrm9cAbIj1i2ANL3sKQFATqnPWRbg+jEFXyZOKHiQK/N86pNRXbb4HRxAxo0SIX1XwzQ==}
 
-  '@types/react@16.14.12':
-    resolution: {integrity: sha512-7nOJgNsRbARhZhvwPm7cnzahtzEi5VJ9OvcQk8ExEEb1t+zaFklwLVkJz7G1kfxX4X/mDa/icTmzE0vTmqsqBg==}
+  '@types/react@17.0.93':
+    resolution: {integrity: sha512-KM4Ty/ZTLZupiYxZVAlP+InNJS3De6uBMdq0ePa6/04+eG9Y7ftnWfst1xTLQ5rwAhgHwQ4momt/O4KepdGBTw==}
 
   '@types/rusha@0.8.0':
     resolution: {integrity: sha512-t+rdR1Ptj6/gIUBW4wVDjUj29sE9Sd5TnHCQhbMiFAdeuh9niJuEMuVd4X+rxyfNEqkF+X4vfiAMxrjQgG2klg==}
@@ -2288,8 +2290,8 @@ packages:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
 
-  csstype@3.0.8:
-    resolution: {integrity: sha512-jXKhWqXPmlUeoQnF/EhTtTl4C9SnrxSH/jZUih3jmO6lBKr99rP3/+FmrMj4EFpOXzMtXHAZkd3x0E6h6Fgflw==}
+  csstype@3.2.3:
+    resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
 
   culvert@0.1.2:
     resolution: {integrity: sha512-yi1x3EAWKjQTreYWeSd98431AV+IEE0qoDyOoaHJ7KJ21gv6HtBXHVLX74opVSGqcR8/AbjJBHAHpcOy2bj5Gg==}
@@ -4891,7 +4893,7 @@ snapshots:
 
   '@types/hoist-non-react-statics@3.3.1':
     dependencies:
-      '@types/react': 16.14.12
+      '@types/react': 17.0.93
       hoist-non-react-statics: 3.3.2
 
   '@types/http-assert@1.5.2': {}
@@ -4978,22 +4980,22 @@ snapshots:
 
   '@types/range-parser@1.2.4': {}
 
-  '@types/react-dom@16.9.14':
+  '@types/react-dom@17.0.26(@types/react@17.0.93)':
     dependencies:
-      '@types/react': 16.14.12
+      '@types/react': 17.0.93
 
   '@types/react-redux@7.1.18':
     dependencies:
       '@types/hoist-non-react-statics': 3.3.1
-      '@types/react': 16.14.12
+      '@types/react': 17.0.93
       hoist-non-react-statics: 3.3.2
       redux: 4.1.1
 
-  '@types/react@16.14.12':
+  '@types/react@17.0.93':
     dependencies:
       '@types/prop-types': 15.7.4
       '@types/scheduler': 0.16.2
-      csstype: 3.0.8
+      csstype: 3.2.3
 
   '@types/rusha@0.8.0':
     dependencies:
@@ -5542,7 +5544,7 @@ snapshots:
       shebang-command: 2.0.0
       which: 2.0.2
 
-  csstype@3.0.8: {}
+  csstype@3.2.3: {}
 
   culvert@0.1.2: {}
 

@@ -16,8 +16,9 @@ const action: CommandAction = ({ getFetch }) => {
     if (queries.length) {
       const queryStr = queries
         .map(q => {
-          const [key, value] = q.split('=', 2);
-          return `${key}=${encodeURIComponent(value)}`;
+          const i = q.indexOf('=');
+          if (i < 0) throw new Error(`Invalid query (must be key=value): ${q}`);
+          return `${q.slice(0, i)}=${encodeURIComponent(q.slice(i + 1))}`;
         })
         .join('&');
       resource += (resource.includes('?') ? '&' : '?') + queryStr;

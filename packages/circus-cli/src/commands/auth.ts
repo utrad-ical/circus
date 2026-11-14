@@ -51,8 +51,11 @@ const action: CommandAction = ({ rcFilePath }) => {
       `# CIRCUS API Client config file\n` +
         `# Generated at ${new Date().toISOString()}\n\n` +
         `CIRCUS_API_ENDPOINT=${endpoint}\n` +
-        `CIRCUS_API_TOKEN=${token}\n`
+        `CIRCUS_API_TOKEN=${token}\n`,
+      { mode: 0o600 }
     );
+    // `mode` applies only when the file is created
+    await fs.chmod(rcFilePath, 0o600);
     console.log(styleText('green', `Token saved to ${rcFilePath}.`));
   };
 };

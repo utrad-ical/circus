@@ -51,27 +51,40 @@ const action: CommandAction = ({ getFetch }) => {
           const taskId = ((await res1.json()) as { taskId: string }).taskId;
           spinner.update('Waiting for export task to complete...');
 
-          // Wait for the task to complete.
+          // Wait for the task to complete. Events may have been sent before
+          // the task ID is known, so the stored status is also checked.
           await new Promise<void>((resolve, reject) => {
+            const done = (error?: string) => {
+              taskReports.events.off('event', handler);
+              clearInterval(timer);
+              if (error === undefined) resolve();
+              else reject(new Error('Task did not complete: ' + error));
+            };
             const handler = (event: TaskEvent) => {
               if (event.taskId !== taskId) return;
-              switch (event.type) {
-                case 'finish':
-                  taskReports.events.off('event', handler);
-                  resolve();
-                  break;
-                case 'progress':
-                  spinner.update(
-                    `Waiting for export task to complete: ${event.message}`
-                  );
-                  break;
-                case 'error':
-                  taskReports.events.off('event', handler);
-                  reject('Task did not complete: ' + event.message);
-                  break;
+              if (event.type === 'progress') {
+                spinner.update(
+                  `Waiting for export task to complete: ${event.message}`
+                );
+              } else {
+                done(event.type === 'error' ? event.message : undefined);
+              }
+            };
+            const checkStatus = async () => {
+              try {
+                const task = (await (
+                  await fetch(`tasks/${taskId}`)
+                ).json()) as { status: string; errorMessage?: string };
+                if (task.status === 'finished') done();
+                else if (task.status === 'error')
+                  done(task.errorMessage ?? 'Unknown error');
+              } catch (err: any) {
+                done(err.message);
               }
             };
             taskReports.events.on('event', handler);
+            const timer = setInterval(checkStatus, 3000);
+            checkStatus();
           });
           spinner.update('Task completed. Downloading...');
           await delay(500);

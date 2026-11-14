@@ -16,8 +16,13 @@ const createAuthorizedFetch = (
 ): AuthorizedFetch => {
   if (!token.length || !endpoint.length)
     throw new Error('Invalid token or endpoint');
+  const { origin } = new URL(endpoint);
   return async (resource, init) => {
-    if (!resource.startsWith('http')) {
+    if (/^[a-z][a-z0-9+.-]*:/i.test(resource)) {
+      // Never send the token to other hosts
+      if (new URL(resource).origin !== origin)
+        throw new Error(`The URL must be on the API server (${origin}).`);
+    } else {
       resource = endpoint + resource;
     }
     const headers = new Headers(init?.headers);

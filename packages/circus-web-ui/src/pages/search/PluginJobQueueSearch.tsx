@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import Icon from '#components/Icon.tsx';
 import { newSearch } from '#store/searches.ts';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import { useDispatch } from 'react-redux';
 import SearchResultsView, {
   makeSortOptions
@@ -37,19 +37,18 @@ const PluginJobQueueSearchResults: React.FC<{}> = props => {
 };
 
 const PluginJobQueueSearch: React.FC<{}> = props => {
-  const api = useApi();
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(
-      newSearch(api, 'pluingJobQueue', {
+      newSearch('pluingJobQueue', {
         resource: { endPoint: 'plugin-job-queue', primaryKey: 'jobId' },
         condition: {},
         filter: {},
         sort: '{"jobId":-1}'
       })
     );
-  }, [api, dispatch]);
+  }, [dispatch]);
 
   return (
     <div>

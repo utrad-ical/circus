@@ -2,7 +2,7 @@ import Icon from '#components/Icon.tsx';
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import * as s from '#store/searches.ts';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import useLoginUser from '#utils/useLoginUser.ts';
 import MyListHome from './MyListHome.tsx';
 
@@ -30,7 +30,6 @@ const MyListPage: React.FC<{
   const user = useLoginUser()!;
   const list = user.myLists?.find(l => l.myListId === myListId);
   const dispatch = useDispatch();
-  const api = useApi();
 
   useEffect(() => {
     if (!myListId) return;
@@ -40,8 +39,8 @@ const MyListPage: React.FC<{
       condition: {},
       sort: JSON.stringify({ createdAt: -1 })
     };
-    dispatch(s.newSearch(api, searchName, params, true));
-  }, [api, dispatch, myListId, resource, searchName]);
+    dispatch(s.newSearch(searchName, params, true));
+  }, [dispatch, myListId, resource, searchName]);
 
   if (!myListId) {
     return (

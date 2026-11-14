@@ -1,4 +1,4 @@
-import { store } from '#store/index.ts';
+import { getStore } from '#store/storeAccess.ts';
 import { showMessage } from '#store/messages.ts';
 
 /**
@@ -15,14 +15,14 @@ const sessionUserChangedHeaderName = 'x-circus-session-user-changed';
 
 /** Returns the user this tab believes it is logged in as */
 export const currentUserEmail = (): string | undefined =>
-  store.getState().loginUser.data?.userEmail;
+  getStore().getState().loginUser.data?.userEmail;
 
 export const isSessionUserChangedError = (err: any) =>
   err?.response?.status === 409 &&
   !!err.response.headers?.[sessionUserChangedHeaderName];
 
 export const showSessionUserChangedMessage = () => {
-  store.dispatch(
+  getStore().dispatch(
     showMessage(
       'The login user of this browser has changed in another tab or window. ' +
         'Please reload this page.',

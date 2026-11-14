@@ -18,7 +18,7 @@ import React, { Fragment } from 'react';
 import { useSelector } from 'react-redux';
 import { dispatch } from '#store/index.ts';
 import { showMessage } from '#store/messages.ts';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import { useLoginManager } from '#utils/loginManager.ts';
 import {
   Modality,
@@ -29,7 +29,6 @@ import {
 
 const Operation: DataGridRenderer<any> = props => {
   const { value: series } = props;
-  const api = useApi();
   const loginmanager = useLoginManager();
 
   const handleDelete = async (seriesUid: string, series: any) => {

@@ -2,7 +2,7 @@ import styles from './DownloadModal.module.css';
 import type { Editor } from '#components/editorTypes.tsx';
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import fillPartialVolumeDescriptors from '#utils/partialVolumeDescriptor.ts';
 import type { CompressionFormat } from './DownloadModal.tsx';
 import DownloadModal, { compressionFormatOptions } from './DownloadModal.tsx';
@@ -42,7 +42,6 @@ const CsVolumeDownloadModal: React.FC<{
 }> = props => {
   const { onClose, series } = props;
   const caption = `Download volume for plug-in`;
-  const api = useApi();
   const appState = useSelector(state => state);
 
   const onStart = useCallback(
@@ -50,17 +49,13 @@ const CsVolumeDownloadModal: React.FC<{
       const res = await api('/series/export-cs-volume', {
         method: 'post',
         data: {
-          series: await fillPartialVolumeDescriptors(
-            options.series,
-            api,
-            appState
-          ),
+          series: await fillPartialVolumeDescriptors(options.series, appState),
           compressionFormat: options.compressionFormat
         }
       });
       return res.taskId;
     },
-    [api, appState]
+    [appState]
   );
 
   return (

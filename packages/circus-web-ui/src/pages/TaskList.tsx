@@ -8,7 +8,7 @@ import SearchResultsView, {
 import TimeDisplay from '#components/TimeDisplay.tsx';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import { newSearch } from '../store/searches.ts';
 import type Task from '#types/Task.ts';
 import useTaskDismisser from '#utils/useTaskDismisser.ts';
@@ -131,8 +131,6 @@ const DataView: React.FC<{ value: Task[] }> = props => {
 };
 
 const DebugTaskLauncher: React.FC = props => {
-  const api = useApi();
-
   const handleClick = () => {
     api('/tasks/debug-task', {
       method: 'post',
@@ -152,18 +150,17 @@ const DebugTaskLauncher: React.FC = props => {
 const TaskList: React.FC<{}> = props => {
   const [showDismissed, setShowDismissed] = useState(false);
   const dispatch = useDispatch();
-  const api = useApi();
 
   useEffect(() => {
     dispatch(
-      newSearch(api, 'task', {
+      newSearch('task', {
         resource: { endPoint: 'tasks', primaryKey: 'taskId' },
         filter: showDismissed ? {} : { dismissed: false },
         condition: { showDismissed },
         sort: '{"createdAt":-1}'
       })
     );
-  }, [api, dispatch, showDismissed]);
+  }, [dispatch, showDismissed]);
 
   return (
     <div>

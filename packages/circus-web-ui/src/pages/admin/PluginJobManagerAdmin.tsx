@@ -5,25 +5,21 @@ import Panel, {
 } from '#components/Panel.tsx';
 import Button from '#components/Button.tsx';
 import React, { useState, useEffect, useCallback } from 'react';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import AdminContainer from './AdminContainer.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 
 const PluginJobManagerAdmin: React.FC<{}> = props => {
   const [busy, setBusy] = useState(true);
   const [status, setStatus] = useState<any>(null);
-  const api = useApi();
 
-  const refresh = useCallback(
-    async (isMounted: boolean) => {
-      setBusy(true);
-      const result = await api('admin/plugin-job-manager');
-      if (!isMounted) return;
-      setBusy(false);
-      setStatus(result.status);
-    },
-    [api]
-  );
+  const refresh = useCallback(async (isMounted: boolean) => {
+    setBusy(true);
+    const result = await api('admin/plugin-job-manager');
+    if (!isMounted) return;
+    setBusy(false);
+    setStatus(result.status);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;

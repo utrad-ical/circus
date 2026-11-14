@@ -2,7 +2,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import { confirm, prompt } from '#components/dialogs.tsx';
 import type { AppDispatch, AppThunk } from '#store/index.ts';
-import type { ApiCaller } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import type Series from '#types/Series.ts';
 import type Task from '#types/Task.ts';
 
@@ -179,7 +179,6 @@ export default slice.reducer;
 // internal
 const executeQuery = async (
   dispatch: AppDispatch,
-  api: ApiCaller,
   searchName: string,
   params: SearchParams
 ) => {
@@ -200,7 +199,6 @@ const executeQuery = async (
 };
 
 export const newSearch = (
-  api: ApiCaller,
   searchName: string,
   params: NewSearchParams,
   clearPrevious?: boolean
@@ -214,12 +212,11 @@ export const newSearch = (
     if (state.searches.searches[searchName]) {
       dispatch(changeSelection({ searchName, ids: [] }));
     }
-    await executeQuery(dispatch, api, searchName, theParams);
+    await executeQuery(dispatch, searchName, theParams);
   };
 };
 
 export const updateSearch = (
-  api: ApiCaller,
   searchName: string,
   partialParams: Partial<SearchParams>,
   onExecutePostProcess?: (search: SearchResult) => void
@@ -230,7 +227,7 @@ export const updateSearch = (
     if (!search) throw new Error('There is no previous search.');
     if (search.isFetching) throw new Error('Previous search has not finished.');
     const newParams = { ...search.params, ...partialParams };
-    await executeQuery(dispatch, api, searchName, newParams);
+    await executeQuery(dispatch, searchName, newParams);
 
     if (onExecutePostProcess) {
       state = getState();
@@ -240,11 +237,7 @@ export const updateSearch = (
   };
 };
 
-export const savePreset = (
-  api: ApiCaller,
-  searchName: string,
-  condition: any
-): AppThunk => {
+export const savePreset = (searchName: string, condition: any): AppThunk => {
   return async (dispatch, getState) => {
     const state = getState();
     const user = state.loginUser.data!;

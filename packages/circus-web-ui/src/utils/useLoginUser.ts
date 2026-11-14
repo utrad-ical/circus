@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { UserPreferences } from '#store/loginUser.ts';
 import { userPreferencesUpdated } from '#store/loginUser.ts';
-import { useApi } from './api.ts';
+import { api } from './api.ts';
 
 /**
  * A React cutsom hook to fetch login user from redux store.
@@ -15,7 +15,6 @@ export const useUserPreferences = (): [
   (updates: Partial<UserPreferences>) => Promise<void>
 ] => {
   const preferences = useSelector(state => state.loginUser.data?.preferences!);
-  const api = useApi();
   const dispatch = useDispatch();
   const updatePreferences = useCallback(
     async (updates: Partial<UserPreferences>) => {
@@ -25,7 +24,7 @@ export const useUserPreferences = (): [
         data: updates
       });
     },
-    [api, dispatch]
+    [dispatch]
   );
 
   return [preferences, updatePreferences];

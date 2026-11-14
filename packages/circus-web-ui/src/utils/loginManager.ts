@@ -1,7 +1,6 @@
 import axios from 'axios';
 import React, { useContext } from 'react';
-import type { ApiCaller } from './api.ts';
-import createApiCaller, { csrfHeaders } from './api.ts';
+import { api, csrfHeaders } from './api.ts';
 import {
   broadcastSessionChange,
   isSessionUserChangedError
@@ -16,16 +15,8 @@ import * as searchActions from '#store/searches.ts';
  * so it is shared by all tabs and is not visible from JavaScript.
  * @param apiServer API server root string
  * @param dispatch The redux store's dispatch object
- * @param onApiChange Notification callback
  */
-const loginManager = (
-  apiServer: string,
-  dispatch: Dispatch,
-  onApiChange: (api: ApiCaller | null) => void
-) => {
-  const api = createApiCaller(apiServer);
-  onApiChange(api);
-
+const loginManager = (apiServer: string, dispatch: Dispatch) => {
   const checkServerIsLive = async () => {
     try {
       const res = await axios.request({

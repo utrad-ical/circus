@@ -1,6 +1,6 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
-import type { ApiCaller } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import type { AppThunk } from './index.ts';
 
 export interface Users {
@@ -30,7 +30,7 @@ export default slice.reducer;
 
 export const { userInfoLoading, userInfoLoaded } = slice.actions;
 
-export const loadUserInfo = (api: ApiCaller, userEmail: string): AppThunk => {
+export const loadUserInfo = (userEmail: string): AppThunk => {
   return async (dispatch, getState) => {
     const state = getState();
     if (state.users[userEmail]) return;

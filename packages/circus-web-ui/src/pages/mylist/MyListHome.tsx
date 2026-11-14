@@ -6,7 +6,7 @@ import MyListArray from './MyListArray.tsx';
 import React from 'react';
 import { dispatch } from '#store/index.ts';
 import { showMessage } from '#store/messages.ts';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import { useLoginManager } from '#utils/loginManager.ts';
 import useLoginUser from '#utils/useLoginUser.ts';
 
@@ -17,7 +17,6 @@ const MyListHome: React.FC<{
 }> = props => {
   const { title, resourceType, toUrl } = props;
   const user = useLoginUser()!;
-  const api = useApi();
   const loginmanager = useLoginManager();
 
   const lists = user.myLists.filter(list => list.resourceType === resourceType);

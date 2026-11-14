@@ -3,7 +3,7 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import { showMessage } from '#store/messages.ts';
 import { updateSearch } from '#store/searches.ts';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import useLoginUser from '#utils/useLoginUser.ts';
 import type { SearchResult } from '../store/searches.ts';
 import { selectionStatusChanged } from '../store/searches.ts';
@@ -20,7 +20,6 @@ const MyListDropdown: React.FC<{
 
   const user = useLoginUser()!;
   const dispatch = useDispatch();
-  const api = useApi();
 
   const handleAddRemove = async (
     operation: 'add' | 'remove',
@@ -52,8 +51,8 @@ const MyListDropdown: React.FC<{
 
     dispatch(showMessage(message, 'info', { short: true }));
     operation === 'remove' && searchName === 'myCaseList'
-      ? dispatch(updateSearch(api, searchName, {}, onExecutePostProcess))
-      : dispatch(updateSearch(api, searchName, {}));
+      ? dispatch(updateSearch(searchName, {}, onExecutePostProcess))
+      : dispatch(updateSearch(searchName, {}));
   };
 
   const myLists = user.myLists.filter(

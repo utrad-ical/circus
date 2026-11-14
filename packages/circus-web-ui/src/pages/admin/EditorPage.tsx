@@ -17,7 +17,7 @@ import { useDispatch } from 'react-redux';
 import type { SearchResource } from '#store/searches.ts';
 import { newSearch } from '#store/searches.ts';
 import styles from './EditorPage.module.css';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import { useLoginManager } from '#utils/loginManager.ts';
 import AdminContainer from './AdminContainer.tsx';
 
@@ -46,7 +46,6 @@ const EditorPage: React.FC<{
     undefined
   );
   const loginManager = useLoginManager();
-  const api = useApi();
   const dispatch = useDispatch();
 
   const {
@@ -66,7 +65,7 @@ const EditorPage: React.FC<{
 
   const loadItems = useCallback(async () => {
     dispatch(
-      newSearch(api, searchName, {
+      newSearch(searchName, {
         filter,
         condition: {},
         sort: '{}',
@@ -76,14 +75,7 @@ const EditorPage: React.FC<{
         }
       })
     );
-  }, [
-    api,
-    dispatch,
-    resource.endPoint,
-    resource.primaryKey,
-    searchName,
-    filter
-  ]);
+  }, [dispatch, resource.endPoint, resource.primaryKey, searchName, filter]);
 
   const handleEditStart = useCallback(
     (index, item) => {

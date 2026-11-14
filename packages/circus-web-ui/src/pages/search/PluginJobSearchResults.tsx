@@ -19,7 +19,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import * as searches from '#store/searches.ts';
 import styles from './PluginJobSearchResults.module.css';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import useShowMessage from '#utils/useShowMessage.ts';
 import {
   Executer,
@@ -35,7 +35,6 @@ const Operation: DataGridRenderer<any> = props => {
   const { value: job } = props;
   const dispatch = useDispatch();
   const location = useLocation();
-  const api = useApi();
   const showMessage = useShowMessage();
   const searchName =
     location.pathname.indexOf('/browse/plugin-jobs/mylist') === 0
@@ -60,7 +59,7 @@ const Operation: DataGridRenderer<any> = props => {
       data: { status: selection === 'cancel' ? 'cancelled' : 'invalidated' }
     });
     showMessage(`Job ${selection}ed successfully.`, 'success', { short: true });
-    dispatch(searches.updateSearch(api, searchName, {}));
+    dispatch(searches.updateSearch(searchName, {}));
   };
 
   return (

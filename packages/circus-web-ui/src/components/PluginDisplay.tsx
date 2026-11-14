@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import IconDisplay from './IconDisplay.tsx';
 import { loadPluginInfo } from '#store/plugins.ts';
 import { useSelector, useDispatch } from 'react-redux';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 
 const PluginDisplay: React.FC<{
   pluginId: string;
@@ -11,11 +11,10 @@ const PluginDisplay: React.FC<{
   const { pluginId, size } = props;
   const plugin = useSelector(state => state.plugins[pluginId]);
   const dispatch = useDispatch();
-  const api = useApi();
 
   useEffect(() => {
-    if (!plugin) dispatch(loadPluginInfo(api, pluginId));
-  }, [api, dispatch, plugin, pluginId]);
+    if (!plugin) dispatch(loadPluginInfo(pluginId));
+  }, [dispatch, plugin, pluginId]);
 
   if (!plugin || plugin === 'loading') return null;
 

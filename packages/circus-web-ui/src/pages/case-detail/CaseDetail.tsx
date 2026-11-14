@@ -28,7 +28,7 @@ import { Link, useBlocker, useParams } from 'react-router-dom';
 import { showMessage } from '#store/messages.ts';
 import { newSearch } from '#store/searches.ts';
 import type Series from '#types/Series.ts';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import useKeyboardShortcut from '#utils/useKeyboardShortcut.ts';
 import useLoginUser from '#utils/useLoginUser.ts';
 import { Project, Tags, Times } from '../search/SearchResultRenderer.tsx';
@@ -52,7 +52,6 @@ const CaseDetail: React.FC<{}> = () => {
     caseStoreReducer,
     caseStoreReducer(undefined as any, { type: 'dummy' }) // gets initial state
   );
-  const api = useApi();
   const dispatch = useDispatch();
 
   const { busy, caseData, seriesData, projectData, refreshCounter } = caseStore;
@@ -140,7 +139,7 @@ const CaseDetail: React.FC<{}> = () => {
     return () => {
       isMounted = false;
     };
-  }, [accessibleProjects, api, caseId]); // should not re-render after mount
+  }, [accessibleProjects, caseId]); // should not re-render after mount
 
   const [f, forceLoadRevision] = useReducer(x => x + 1, 0);
   useEffect(() => {
@@ -149,11 +148,11 @@ const CaseDetail: React.FC<{}> = () => {
       if (!caseStore.caseData || caseStore.editingRevisionIndex < 0) return;
       const revision =
         caseStore.caseData.revisions[caseStore.editingRevisionIndex];
-      const data = await externalRevisionToInternal(revision, api);
+      const data = await externalRevisionToInternal(revision);
       caseDispatch(c.loadRevision({ revision: data }));
     };
     loadRevisionData();
-  }, [api, caseStore.caseData, caseStore.editingRevisionIndex, f]);
+  }, [caseStore.caseData, caseStore.editingRevisionIndex, f]);
 
   useEffect(() => {
     if (
@@ -168,14 +167,14 @@ const CaseDetail: React.FC<{}> = () => {
     };
 
     dispatch(
-      newSearch(api, 'relevantCases', {
+      newSearch('relevantCases', {
         resource: { endPoint: 'cases', primaryKey: 'caseId' },
         filter,
         condition: {},
         sort: '{"updatedAt":-1}'
       })
     );
-  }, [api, dispatch, caseStore.patientInfo, activeRelevantCases]);
+  }, [dispatch, caseStore.patientInfo, activeRelevantCases]);
 
   const updateEditingData = useCallback<EditingDataUpdater>(
     (updater, tag) => {
@@ -219,7 +218,7 @@ const CaseDetail: React.FC<{}> = () => {
     const revision = editingData.revision;
     setSaveDialogOpen(false);
     try {
-      await saveRevision(caseId, revision, message, api);
+      await saveRevision(caseId, revision, message);
       dispatch(
         showMessage('Successfully registered a revision.', 'success', {
           short: true

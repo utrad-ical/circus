@@ -9,6 +9,7 @@ import plugins from './plugins.ts';
 import searches from './searches.ts';
 import taskProgress from './taskProgress.ts';
 import users from './users.ts';
+import { setStore } from './storeAccess.ts';
 
 const reducer = combineReducers({
   searches,
@@ -33,6 +34,7 @@ export const store = configureStore({
       }
     })
 });
+setStore(store);
 export const dispatch = store.dispatch;
 
 export type RootState = ReturnType<typeof reducer>;

@@ -14,7 +14,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { newSearch } from '#store/searches.ts';
 import type Series from '#types/Series.ts';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import { UidDisplay } from '../pages/search/SearchResultRenderer.tsx';
 import PartialVolumeDescriptorEditor from './PartialVolumeDescriptorEditor.tsx';
 import styles from './SeriesSelector.module.css';
@@ -112,7 +112,6 @@ const SeriesSelector: React.FC<{
   const [showRelevantSeries, setShowRelevantSeries] = useState(
     !!alwaysShowRelevantSeries
   );
-  const api = useApi();
   const dispatch = useDispatch();
   const searchedSeries = useSelector(
     state => state.searches.items.series ?? {}
@@ -151,7 +150,7 @@ const SeriesSelector: React.FC<{
       }
     };
     value.forEach(value => loadSeriesData(value.seriesUid));
-  }, [api, searchedSeries, seriesData, value]);
+  }, [searchedSeries, seriesData, value]);
 
   useEffect(() => {
     if (!showRelevantSeries || !primarySeries) return;
@@ -167,14 +166,14 @@ const SeriesSelector: React.FC<{
             studyUid: primarySeries.studyUid
           };
     dispatch(
-      newSearch(api, 'relevantSeries', {
+      newSearch('relevantSeries', {
         resource: { endPoint: 'series', primaryKey: 'seriesUid' },
         filter,
         condition: {},
         sort: '{"seriesDate":-1}'
       })
     );
-  }, [api, dispatch, primarySeries, showRelevantSeries, seriesSearchTarget]);
+  }, [dispatch, primarySeries, showRelevantSeries, seriesSearchTarget]);
 
   const handleAddSeriesClick = () => {
     setShowRelevantSeries(s => !s);

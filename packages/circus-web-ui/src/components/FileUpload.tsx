@@ -8,7 +8,7 @@ import * as modal from '#components/dialogs.tsx';
 import classnames from 'classnames';
 import styles from './FileUpload.module.css';
 import table from './table.module.css';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import { withCommas } from '#utils/util.ts';
 
 const dedupeFiles = (files: File[]) => {
@@ -44,7 +44,6 @@ const FileUpload: React.FC<{
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState({ value: 0, label: '' });
   const fileInput = useRef<HTMLInputElement>(null);
-  const api = useApi();
   const showMessage = useShowMessage();
 
   const handleDropFile = (newFiles: FileList) => {

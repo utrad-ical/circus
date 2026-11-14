@@ -5,7 +5,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { newSearch, updateSearch } from '#store/searches.ts';
 import type Task from '#types/Task.ts';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import useTaskDismisser from '#utils/useTaskDismisser.ts';
 import useTaskDownloadHandler from '#utils/useTaskDownloadHandler.ts';
 import type { TaskProgress } from '../store/taskProgress.ts';
@@ -14,7 +14,6 @@ import ProgressBar from './ProgressBar.tsx';
 import styles from './TaskNotifier.module.css';
 
 const TaskNotifier: React.FC<{}> = props => {
-  const api = useApi();
   const dismissTask = useTaskDismisser();
   const dispatch = useDispatch();
 
@@ -30,14 +29,14 @@ const TaskNotifier: React.FC<{}> = props => {
 
   useEffect(() => {
     dispatch(
-      newSearch(api, 'undismissedTasks', {
+      newSearch('undismissedTasks', {
         filter: { dismissed: false },
         condition: { dismissed: false },
         resource: { endPoint: 'tasks', primaryKey: 'taskId' },
         sort: '{"createdAt":-1}'
       })
     );
-  }, [api, dispatch]);
+  }, [dispatch]);
 
   useEffect(() => {
     if (
@@ -49,7 +48,7 @@ const TaskNotifier: React.FC<{}> = props => {
       )
     ) {
       // A new task has been registered
-      dispatch(updateSearch(api, 'undismissedTasks', {}));
+      dispatch(updateSearch('undismissedTasks', {}));
     }
   });
 
@@ -61,7 +60,7 @@ const TaskNotifier: React.FC<{}> = props => {
 
   const handleDismissClick = async (taskId: string) => {
     await dismissTask(taskId);
-    dispatch(updateSearch(api, 'undismissedTasks', {}));
+    dispatch(updateSearch('undismissedTasks', {}));
   };
 
   return (

@@ -8,7 +8,7 @@ import type { SeriesEntry } from '#components/SeriesSelector.tsx';
 import SeriesSelector from '#components/SeriesSelector.tsx';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import useLoginUser from '#utils/useLoginUser.ts';
 
 const CreateNewCase: React.FC<{}> = props => {
@@ -25,7 +25,6 @@ const CreateNewCase: React.FC<{}> = props => {
   );
   const [selectedSeries, setSelectedSeries] = useState<SeriesEntry[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const api = useApi();
   const seriesUid = useParams<any>().seriesUid as string;
   const navigate = useNavigate();
 
@@ -34,7 +33,7 @@ const CreateNewCase: React.FC<{}> = props => {
       setSelectedSeries([{ seriesUid, partialVolumeDescriptor: 'auto' }]);
     };
     load();
-  }, [api, seriesUid]);
+  }, [seriesUid]);
 
   const handleProjectSelect = (projectId: string) => {
     const prj = user.accessibleProjects.find(p => p.projectId === projectId)!;

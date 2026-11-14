@@ -1,15 +1,14 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import { loadUserInfo } from '#store/users.ts';
 
 const useUserInfo = (userEmail: string) => {
   const user = useSelector(state => state.users[userEmail]);
   const dispatch = useDispatch();
-  const api = useApi();
   useEffect(() => {
-    if (!user) dispatch(loadUserInfo(api, userEmail));
-  }, [api, dispatch, user, userEmail]);
+    if (!user) dispatch(loadUserInfo(userEmail));
+  }, [dispatch, user, userEmail]);
   return !user || user === 'loading' ? undefined : user;
 };
 

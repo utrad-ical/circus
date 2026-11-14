@@ -31,7 +31,7 @@ import React, {
 } from 'react';
 import type Project from '#types/Project.ts';
 import type Series from '#types/Series.ts';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import isTouchDevice from '#utils/isTouchDevice.ts';
 import useEffectEvent from '#utils/useEffectEvent.ts';
 import { useUserPreferences } from '#utils/useLoginUser.ts';
@@ -181,7 +181,6 @@ const RevisionEditor: React.FC<{
     refreshCounter,
     busy
   } = props;
-  const api = useApi();
   const viewersRef = useRef<{ [key: string]: Viewer }>();
   viewersRef.current ??= {};
   const viewers = viewersRef.current;

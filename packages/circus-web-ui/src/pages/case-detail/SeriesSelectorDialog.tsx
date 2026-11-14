@@ -5,7 +5,7 @@ import SeriesSelector from '#components/SeriesSelector.tsx';
 import { produce } from 'immer';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import fillPartialVolumeDescriptors from '#utils/partialVolumeDescriptor.ts';
 import type { SeriesEntryWithLabels } from './revisionData.ts';
 
@@ -15,7 +15,6 @@ const SeriesSelectorDialog: React.FC<{
 }> = props => {
   const { onResolve, initialValue } = props;
   const [entries, setEntries] = useState<SeriesEntry[]>(initialValue);
-  const api = useApi();
   const appState = useSelector(state => state);
 
   const handleRemovingOrEditing = async (index: number) => {
@@ -42,7 +41,6 @@ const SeriesSelectorDialog: React.FC<{
     // fill empty PVDs
     const pvdFilled = (await fillPartialVolumeDescriptors(
       labelAdded,
-      api,
       appState
     )) as SeriesEntryWithLabels[];
     onResolve(pvdFilled);

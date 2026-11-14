@@ -1,7 +1,7 @@
 import u from '#components/utilities.module.css';
 import Button from '#components/Button.tsx';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useApi } from '#utils/api.ts';
+import { api } from '#utils/api.ts';
 import useShowMessage from '#utils/useShowMessage.ts';
 import AdminContainer from './AdminContainer.tsx';
 import type { PropertyEditorProperties } from '#components/PropertyEditor.tsx';
@@ -22,18 +22,14 @@ const GeneralAdmin: React.FC<{}> = props => {
     defaultDomain: ''
   });
   const [complaints, setComplaints] = useState({});
-  const api = useApi();
   const showMessage = useShowMessage();
 
-  const loadSettings = useCallback(
-    async (isMounted: boolean) => {
-      const data = (await api('admin/server-params')) as Settings;
-      if (!isMounted) return;
-      setSettings(data);
-      setComplaints({});
-    },
-    [api]
-  );
+  const loadSettings = useCallback(async (isMounted: boolean) => {
+    const data = (await api('admin/server-params')) as Settings;
+    if (!isMounted) return;
+    setSettings(data);
+    setComplaints({});
+  }, []);
 
   useEffect(() => {
     let isMounted = true;

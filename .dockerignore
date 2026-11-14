@@ -12,6 +12,7 @@ attic
 **/*.tgz
 
 # Build outputs (rebuilt inside the build stage)
+packages/circus-cli/dist
 packages/circus-lib/dist
 packages/circus-rs/dist
 packages/circus-ui-kit/dist

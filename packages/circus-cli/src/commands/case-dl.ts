@@ -7,8 +7,6 @@ import readIds from '../utils/readIds.ts';
 import taskReporter, { type TaskEvent } from '../utils/taskReporter.ts';
 import type { CommandAction } from './CommandAction.ts';
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
 const action: CommandAction = ({ getFetch }) => {
   return async (args: string[], options) => {
     const fetch = getFetch();
@@ -51,8 +49,10 @@ const action: CommandAction = ({ getFetch }) => {
           const taskId = ((await res1.json()) as { taskId: string }).taskId;
           spinner.update('Waiting for export task to complete...');
 
-          // Wait for the task to complete. Events may have been sent before
-          // the task ID is known, so the stored status is also checked.
+          // Wait until the stored status becomes `finished` (the download
+          // needs it). Events may have been sent before the task ID is known,
+          // and `finish` is sent before the status is stored, so the status
+          // is polled, and more often once `finish` is received.
           await new Promise<void>((resolve, reject) => {
             const done = (error?: string) => {
               taskReports.events.off('event', handler);
@@ -66,8 +66,12 @@ const action: CommandAction = ({ getFetch }) => {
                 spinner.update(
                   `Waiting for export task to complete: ${event.message}`
                 );
+              } else if (event.type === 'error') {
+                done(event.message);
               } else {
-                done(event.type === 'error' ? event.message : undefined);
+                clearInterval(timer);
+                timer = setInterval(checkStatus, 200);
+                checkStatus();
               }
             };
             const checkStatus = async () => {
@@ -83,11 +87,10 @@ const action: CommandAction = ({ getFetch }) => {
               }
             };
             taskReports.events.on('event', handler);
-            const timer = setInterval(checkStatus, 3000);
+            let timer = setInterval(checkStatus, 3000);
             checkStatus();
           });
           spinner.update('Task completed. Downloading...');
-          await delay(500);
 
           const res3 = await fetch(`tasks/${taskId}/download`);
           await downloadToFile(

@@ -41,7 +41,8 @@ const action: CommandAction = ({ getFetch }) => {
       await pipeline(Readable.fromWeb(res.body!), process.stdout, {
         end: false
       });
-      process.stdout.write('\n');
+      // Keep piped or redirected output byte-for-byte
+      if (process.stdout.isTTY) process.stdout.write('\n');
     }
   };
 };

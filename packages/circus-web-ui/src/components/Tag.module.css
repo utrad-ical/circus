@@ -7,9 +7,9 @@
   border-width: 1px;
   font-weight: bold;
   min-width: 70px;
-  background-color: var(--tag-background-color);
-  color: var(--tag-color);
-  border-color: var(--tag-border-color);
+  background-color: var(--tag-color);
+  color: contrast-color(var(--tag-color));
+  border-color: oklch(from var(--tag-color) calc(l - 0.06) c h);
 }
 
 .tagList {

@@ -23,6 +23,9 @@ export const setUpKoaTestWith = (koa: Koa) => {
   const host = 'localhost';
   return new Promise<TestServer>((resolve, reject) => {
     const httpd = koa.listen(port, host);
+    // Test servers are recreated on the same port, so a kept-alive
+    // connection to an old server must not be reused
+    httpd.on('request', (req, res) => res.setHeader('Connection', 'close'));
     const tearDown = () => {
       return new Promise<void>((resolve, reject) => {
         httpd.close(err => (err ? reject(err) : resolve()));

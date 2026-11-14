@@ -1,8 +1,8 @@
-import { diff } from 'jest-diff';
 import JSON5 from 'json5';
 import { isDeepStrictEqual, styleText } from 'node:util';
 import { fetchWithSpinner } from '../utils/createAuthorizedFetch.ts';
 import exec from '../utils/exec.ts';
+import formatJsonDiff from '../utils/formatJsonDiff.ts';
 import { confirm, promptString } from '../utils/inquiry.ts';
 import launchEditor from '../utils/launchEditor.ts';
 import readIds from '../utils/readIds.ts';
@@ -100,11 +100,9 @@ const action: CommandAction = ({ getFetch }) => {
           } else {
             console.log(styleText('cyan', 'Diff:'));
             console.log(
-              diff(newRev, currentRev, {
-                aAnnotation: 'New revision',
-                bAnnotation: 'Current revision',
-                contextLines: 5,
-                expand: false
+              formatJsonDiff(currentRev, newRev, {
+                before: 'Current revision',
+                after: 'New revision'
               })
             );
           }

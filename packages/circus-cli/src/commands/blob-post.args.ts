@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import formatHelp from '../utils/formatHelp.js';
+import formatHelp from '../utils/formatHelp.ts';
 
 export default (program: Command) => {
   return program
@@ -15,10 +15,10 @@ export default (program: Command) => {
 
         Examples:
           # Upload one file via stdin
-          circus-api-util blob-post < blob.bin
+          circus-cli blob-post < blob.bin
 
           # Upload three files
-          circus-api-util blob-post blob1.bin blob2.bin blob3.bin
+          circus-cli blob-post blob1.bin blob2.bin blob3.bin
       `
     );
 };

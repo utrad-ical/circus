@@ -1,7 +1,7 @@
-import { fetchWithSpinner } from '../utils/createAuthorizedFetch.js';
-import CommandAction from './CommandAction.js';
+import { fetchWithSpinner } from '../utils/createAuthorizedFetch.ts';
+import CommandAction from './CommandAction.ts';
 import { promises as fs } from 'node:fs';
-import sha1 from '../utils/sha1.js';
+import sha1 from '../utils/sha1.ts';
 import rawBody from 'raw-body';
 
 const action: CommandAction = ({ getFetch }) => {

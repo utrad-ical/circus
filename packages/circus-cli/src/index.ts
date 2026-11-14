@@ -8,8 +8,8 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import * as url from 'node:url';
 import pc from 'picocolors';
-import CommandAction from './commands/CommandAction.js';
-import createAuthorizedFetch from './utils/createAuthorizedFetch.js';
+import CommandAction from './commands/CommandAction.ts';
+import createAuthorizedFetch from './utils/createAuthorizedFetch.ts';
 
 const getVersion = async () => {
   const packageJsonPath = path.resolve(
@@ -48,7 +48,7 @@ const main = async () => {
 
   const program = new Command();
   program
-    .name('circus-api-util')
+    .name('circus-cli')
     .description('CLI for CIRCUS API Server')
     .version(await getVersion())
     .configureHelp({

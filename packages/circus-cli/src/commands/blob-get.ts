@@ -1,7 +1,7 @@
 import * as fs from 'node:fs';
 import { Writable } from 'node:stream';
-import createSpinner from '../utils/createSpinner.js';
-import CommandAction from './CommandAction.js';
+import createSpinner from '../utils/createSpinner.ts';
+import CommandAction from './CommandAction.ts';
 import * as path from 'node:path';
 
 const action: CommandAction = ({ getFetch }) => {

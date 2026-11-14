@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { setSharedHelp, setSharedOptions } from './post.args.js';
+import { setSharedHelp, setSharedOptions } from './post.args.ts';
 
 export default (program: Command) => {
   const p = program.command('patch').description('Patch data to CIRCUS API');

@@ -1,5 +1,5 @@
 import fetch, { RequestInfo, RequestInit } from 'node-fetch';
-import createSpinner from './createSpinner.js';
+import createSpinner from './createSpinner.ts';
 
 /**
  * @param token - The token to use for authorization.

@@ -1,6 +1,6 @@
 import easyTable from 'easy-table';
-import { fetchWithSpinner } from '../utils/createAuthorizedFetch.js';
-import CommandAction from './CommandAction.js';
+import { fetchWithSpinner } from '../utils/createAuthorizedFetch.ts';
+import CommandAction from './CommandAction.ts';
 
 const resourceTypes = ['series', 'clinicalCases', 'pluginJobs'];
 type ResourceType = typeof resourceTypes[number];

@@ -1,5 +1,5 @@
-import { fetchWithSpinner } from '../utils/createAuthorizedFetch.js';
-import CommandAction from './CommandAction.js';
+import { fetchWithSpinner } from '../utils/createAuthorizedFetch.ts';
+import CommandAction from './CommandAction.ts';
 import stringify from 'json-stringify-pretty-compact';
 
 interface Options {

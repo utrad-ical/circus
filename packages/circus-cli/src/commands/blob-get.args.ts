@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import formatHelp from '../utils/formatHelp.js';
+import formatHelp from '../utils/formatHelp.ts';
 
 export default (program: Command) => {
   return program
@@ -15,10 +15,10 @@ export default (program: Command) => {
 
         Examples:
           # Download two blobs to current dir
-          circus-api-util blob-get --out=. a2b4c6e8f 28a33f46
+          circus-cli blob-get --out=. a2b4c6e8f 28a33f46
 
           # Download one blob as data.bin
-          circus-api-util blob-get a2b4c6e8f > data.bin
+          circus-cli blob-get a2b4c6e8f > data.bin
       `
     );
 };

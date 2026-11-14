@@ -1,12 +1,12 @@
 import { diff } from 'jest-diff';
 import JSON5 from 'json5';
 import pc from 'picocolors';
-import { fetchWithSpinner } from '../utils/createAuthorizedFetch.js';
-import exec from '../utils/exec.js';
-import { confirm, promptString } from '../utils/inquiry.js';
-import launchEditor from '../utils/launchEditor.js';
-import readIds from '../utils/readIds.js';
-import CommandAction from './CommandAction.js';
+import { fetchWithSpinner } from '../utils/createAuthorizedFetch.ts';
+import exec from '../utils/exec.ts';
+import { confirm, promptString } from '../utils/inquiry.ts';
+import launchEditor from '../utils/launchEditor.ts';
+import readIds from '../utils/readIds.ts';
+import CommandAction from './CommandAction.ts';
 
 interface Options {
   exec: string;

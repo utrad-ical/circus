@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import formatHelp from '../utils/formatHelp.js';
+import formatHelp from '../utils/formatHelp.ts';
 
 export default (program: Command) => {
   return program
@@ -13,7 +13,7 @@ export default (program: Command) => {
         Hint:
           After retreiving the myListId with this command, you can get the list of resource IDs like so:
 
-          circus-api-util get mylists/<myListId> | jq -r .resourceIds[]
+          circus-cli get mylists/<myListId> | jq -r .resourceIds[]
       `
     );
 };

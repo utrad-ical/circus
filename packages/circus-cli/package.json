@@ -1,20 +1,34 @@
 {
-  "name": "@utrad-ical/circus-api-util",
-  "version": "0.10.0",
-  "description": "CIRCUS API Client",
-  "main": "lib/index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rimraf dist && tsc"
-  },
+  "name": "@utrad-ical/circus-cli",
+  "version": "2.0.0-alpha.2",
+  "type": "module",
+  "description": "CIRCUS command-line client",
   "bin": {
-    "circus-api-util": "./dist/index.js"
+    "circus-cli": "./src/index.ts"
+  },
+  "publishConfig": {
+    "access": "public",
+    "bin": {
+      "circus-cli": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "prepublishOnly": "pnpm run build",
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/utrad-ical/circus.git",
+    "directory": "packages/circus-cli"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=22.12.0"
   },
-  "type": "module",
-  "keywords": [],
+  "keywords": [
+    "cli",
+    "circus"
+  ],
   "author": "Soichiro Miki <smiki-tky@umin.ac.jp>",
   "license": "MIT",
   "dependencies": {
@@ -34,14 +48,12 @@
   "devDependencies": {
     "@types/inquirer": "^8.2.1",
     "@types/js-yaml": "^4.0.5",
-    "@types/node": "^18.6.1",
+    "@types/node": "^24.19.2",
     "@types/progress-stream": "^2.0.2",
-    "rimraf": "^3.0.2",
-    "typescript": "^4.7.4"
+    "tsdown": "0.23.7",
+    "typescript": "~7.0.2"
   },
-  "prettier": {
-    "singleQuote": true,
-    "trailingComma": "none",
-    "arrowParens": "avoid"
-  }
+  "files": [
+    "dist"
+  ]
 }

@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import formatHelp from '../utils/formatHelp.js';
+import formatHelp from '../utils/formatHelp.ts';
 
 export const setSharedOptions = (program: Command) => {
   return program
@@ -42,11 +42,11 @@ export default (program: Command) => {
 
         Examples:
           # Starts the plug-in job manager (requires admin privilege)
-          echo '{"status":"running"}' | circus-api-util put admin/plugin-job-manager/switch
+          echo '{"status":"running"}' | circus-cli put admin/plugin-job-manager/switch
 
           # Creates a new mylist
           echo '{"name":"favs", "resourceType":"series", "public":false}' > req.json
-          circus-api-util post mylists < req.json
+          circus-cli post mylists < req.json
       `
     );
 };

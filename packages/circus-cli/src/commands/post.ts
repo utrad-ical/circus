@@ -2,8 +2,8 @@ import * as jsyaml from 'js-yaml';
 import JSON5 from 'json5';
 import { Readable } from 'node:stream';
 import rawBody from 'raw-body';
-import { fetchWithSpinner } from '../utils/createAuthorizedFetch.js';
-import CommandAction from './CommandAction.js';
+import { fetchWithSpinner } from '../utils/createAuthorizedFetch.ts';
+import CommandAction from './CommandAction.ts';
 
 export interface SharedOptions {
   bin?: boolean;

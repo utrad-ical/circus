@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import formatHelp from '../utils/formatHelp.js';
+import formatHelp from '../utils/formatHelp.ts';
 
 export default (program: Command) => {
   return program
@@ -49,17 +49,17 @@ export default (program: Command) => {
 
         Examples:
           # Remove all labels from all series
-          circus-api-util case-addrev \
+          circus-cli case-addrev \
             -e "jq '.series[].labels = []'" \
             -d "Remove all labels" a2b4c6e8f
 
           # Change case attributes for cases specified in file
-          circus-api-util case-addrev \
+          circus-cli case-addrev \
             -e "jq '.attributes.smoker = true'" \
             -f ./case-ids.txt
 
           # Use VSCode to edit a revision, also setting the description in the editor
-          EDITOR="code --wait" circus-api-util case-addrev -D a2b4c6e8f
+          EDITOR="code --wait" circus-cli case-addrev -D a2b4c6e8f
         `
     );
 };

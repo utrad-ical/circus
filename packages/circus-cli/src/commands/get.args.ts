@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import formatHelp from '../utils/formatHelp.js';
+import formatHelp from '../utils/formatHelp.ts';
 
 export default (program: Command) => {
   return program
@@ -23,16 +23,16 @@ export default (program: Command) => {
 
         Examples:
           # Fetch current user's preferences
-          circus-api-util get preferences
+          circus-cli get preferences
 
           # Fetch a case and picks the latest revision's creator using jq
-          circus-api-util get cases/a2b4c6e8f | jq .revisions[-1].creator
+          circus-cli get cases/a2b4c6e8f | jq .revisions[-1].creator
 
           # List IDs of resources (series, case, job) in a mylist
-          circus-api-util get mylists/shsez5qf | jq -r .resourceIds[]
+          circus-cli get mylists/shsez5qf | jq -r .resourceIds[]
 
           # Perform search (get the most recently uploaded series of a male patient)
-          circus-api-util get series \
+          circus-cli get series \
             -q 'filter={"patientInfo.sex":"M"}' \
             -q 'sort={"createdAt":-1}' \
             -q limit=1

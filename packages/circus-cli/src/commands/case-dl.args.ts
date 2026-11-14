@@ -1,6 +1,6 @@
 import { Command } from 'commander';
-import { int } from '../utils/commander-utils.js';
-import formatHelp from '../utils/formatHelp.js';
+import { int } from '../utils/commander-utils.ts';
+import formatHelp from '../utils/formatHelp.ts';
 
 export default (program: Command) => {
   return program
@@ -32,10 +32,10 @@ export default (program: Command) => {
 
         Examples:
           # Download one case
-          circus-api-util case-dl -o ~/data a2b4c6e8f
+          circus-cli case-dl -o ~/data a2b4c6e8f
 
           # Download cases whose IDs are in a file
-          circus-api-util case-dl --file case-ids.txt
+          circus-cli case-dl --file case-ids.txt
       `
     );
 };

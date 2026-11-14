@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import formatHelp from '../utils/formatHelp.js';
+import formatHelp from '../utils/formatHelp.ts';
 
 export default (program: Command) => {
   return program
@@ -19,10 +19,10 @@ export default (program: Command) => {
 
         Examples:
           # Set up the endpoint and token
-          circus-api-util auth
+          circus-cli auth
 
           # Remove token file
-          circus-api-util auth --logout
+          circus-cli auth --logout
       `
     );
 };

@@ -1,9 +1,9 @@
 import inq from 'inquirer';
 import { promises as fs } from 'node:fs';
 import pc from 'picocolors';
-import fileExists from '../utils/fileExists.js';
-import { confirm, defaultValidateString } from '../utils/inquiry.js';
-import CommandAction from './CommandAction.js';
+import fileExists from '../utils/fileExists.ts';
+import { confirm, defaultValidateString } from '../utils/inquiry.ts';
+import CommandAction from './CommandAction.ts';
 
 interface Options {
   logout?: boolean;

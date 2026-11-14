@@ -1,7 +1,7 @@
 import { Response } from 'node-fetch';
 import { createWriteStream } from 'node:fs';
 import progress from 'progress-stream';
-import { Spinner } from './createSpinner.js';
+import { Spinner } from './createSpinner.ts';
 
 interface DownloadOptions {
   spinner?: Spinner;

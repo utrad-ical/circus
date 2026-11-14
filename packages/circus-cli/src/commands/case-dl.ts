@@ -1,11 +1,11 @@
 import { promises as fs } from 'node:fs';
 import * as path from 'node:path';
 import pc from 'picocolors';
-import createSpinner from '../utils/createSpinner.js';
-import downloadToFile from '../utils/downloadToFile.js';
-import readIds from '../utils/readIds.js';
-import taskReporter, { TaskEvent } from '../utils/taskReporter.js';
-import CommandAction from './CommandAction.js';
+import createSpinner from '../utils/createSpinner.ts';
+import downloadToFile from '../utils/downloadToFile.ts';
+import readIds from '../utils/readIds.ts';
+import taskReporter, { TaskEvent } from '../utils/taskReporter.ts';
+import CommandAction from './CommandAction.ts';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 

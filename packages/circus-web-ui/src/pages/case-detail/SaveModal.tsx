@@ -27,7 +27,12 @@ const SaveModal: React.FC<{
     setValue(event.target.value);
   };
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
+    if (
+      event.key === 'Enter' &&
+      // Safari reports the IME confirmation with keyCode 229
+      !event.nativeEvent.isComposing &&
+      event.keyCode !== 229
+    ) {
       onOkClick(value);
     }
   };

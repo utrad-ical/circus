@@ -5,13 +5,15 @@ const TimeDisplay: React.FC<{
   /**
    * ISO Time string.
    */
-  value: string;
+  value: string | null | undefined;
   invalidLabel?: string;
 }> = props => {
   const { value, invalidLabel = '' } = props;
-  const date = new Date(value);
-  if (!isValid(date)) return <span>{invalidLabel}</span>;
-  return <span title={value}>{format(date, 'yyyy-MM-dd HH:mm')}</span>;
+  const date = value ? new Date(value) : undefined;
+  if (!date || !isValid(date)) return <span>{invalidLabel}</span>;
+  return (
+    <span title={value ?? undefined}>{format(date, 'yyyy-MM-dd HH:mm')}</span>
+  );
 };
 
 export default TimeDisplay;

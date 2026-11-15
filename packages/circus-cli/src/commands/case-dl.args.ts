@@ -8,6 +8,10 @@ export default (program: Command) => {
     .description('Download CIRCUS DB cases in MHD format')
     .option('-o, --outdir <dir>', 'output directory (default: CWD)')
     .option('-f, --file', 'read list of case IDs from file')
+    .option(
+      '--full-original-volume',
+      'export all the images of the original series as they are'
+    )
     .option('-c, --combined', 'export combined label files')
     .option('-l, --crlf', 'use CRLF instead of LF for line endings')
     .option('-z, --zip', 'use zip compression instead of tgz')
@@ -29,6 +33,11 @@ export default (program: Command) => {
 
         One archive file may contain the data of more than one case.
         Use the "-p (--per-task)" option to control the number of cases downloaded as a batch.
+
+        By default, each volume is the one used in the case, which the labels fit.
+        With "--full-original-volume", each volume has all the images of the original series,
+        and the labels are not converted ("originalSeriesMeta" in data.json
+        has the image numbers of the series).
 
         Examples:
           # Download one case

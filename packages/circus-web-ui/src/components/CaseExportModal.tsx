@@ -1,11 +1,10 @@
 import styles from './DownloadModal.module.css';
 import type { Editor } from '#components/editorTypes.tsx';
 import Select from '#components/Select.tsx';
-import { produce } from 'immer';
 import type { ExternalLabel } from '#pages/case-detail/labelData.ts';
 import type { Revision } from '#pages/case-detail/revisionData.ts';
 import RevisionSelector from '#pages/case-detail/RevisionSelector.tsx';
-import React, { useCallback, useMemo } from 'react';
+import React, { type FC, useCallback, useMemo } from 'react';
 import { api } from '#utils/api.ts';
 import type { CompressionFormat, LineEnding } from './DownloadModal.tsx';
 import DownloadModal, {
@@ -15,14 +14,21 @@ import DownloadModal, {
 
 type LabelPackTypeOptions = 'isolated' | 'combined';
 
-type ExportTarget = string | { caseId: string; revisionIndex: number };
+type VolumeOptions = 'default' | 'fullOriginal';
 
 interface CaseExportOptions {
-  caseIds: ExportTarget[];
+  /** Only when exporting a case */
+  revisionIndex?: number;
+  volume: VolumeOptions;
   mhdLineEnding: LineEnding;
   labelPackType: LabelPackTypeOptions;
   compressionFormat: CompressionFormat;
 }
+
+const volumeOptions: { [type in VolumeOptions]: string } = {
+  default: 'Default',
+  fullOriginal: 'Full original volume'
+};
 
 const labelPackTypeOptions: { [type in LabelPackTypeOptions]: string } = {
   isolated: 'Isolated (one raw file per label)',
@@ -35,15 +41,7 @@ const createCaseExportOptionsEditor: (
   const { value, onChange } = props;
 
   const handleRevSelectorChange = (revisionIndex: number) => {
-    onChange(
-      produce(value, draft => {
-        const caseId =
-          typeof draft.caseIds[0] === 'string'
-            ? draft.caseIds[0]
-            : draft.caseIds[0].caseId;
-        draft.caseIds[0] = { caseId, revisionIndex };
-      })
-    );
+    onChange({ ...value, revisionIndex });
   };
 
   const RevSelector = useMemo<Editor<number>>(
@@ -67,7 +65,7 @@ const createCaseExportOptionsEditor: (
         <div className={styles.option}>
           Target revision:{' '}
           <RevSelector
-            value={(value.caseIds[0] as any).revisionIndex}
+            value={value.revisionIndex!}
             onChange={handleRevSelectorChange}
           />
         </div>
@@ -96,27 +94,44 @@ const createCaseExportOptionsEditor: (
           onChange={v => onChange({ ...value, compressionFormat: v })}
         />
       </div>
+      <div className={styles.option}>
+        Volume:{' '}
+        <Select
+          options={volumeOptions}
+          value={value.volume}
+          onChange={v => onChange({ ...value, volume: v })}
+        />
+      </div>
     </div>
   );
 };
 
-const CaseExportModal: React.FC<{
-  caseIds: ExportTarget[];
+const CaseExportModal: FC<{
+  caseIds: string[];
   onClose: () => void;
+  /** The revision selected first; used with `revisions` */
+  revisionIndex?: number;
   revisions?: Revision<ExternalLabel>[];
 }> = props => {
-  const { onClose, caseIds, revisions } = props;
+  const { onClose, caseIds, revisionIndex, revisions } = props;
   const caption = `Export ${caseIds.length} case${
     caseIds.length !== 1 ? 's' : ''
   }`;
 
-  const onStart = useCallback(async (options: CaseExportOptions) => {
-    const res = await api(`/cases/export-mhd`, {
-      method: 'post',
-      data: options
-    });
-    return res.taskId;
-  }, []);
+  const onStart = useCallback(
+    async (options: CaseExportOptions) => {
+      const { revisionIndex, volume, ...rest } = options;
+      const params = new URLSearchParams({
+        caseIds: caseIds.join(','),
+        ...rest
+      });
+      if (revisionIndex !== undefined)
+        params.set('revisionIndex', String(revisionIndex));
+      if (volume === 'fullOriginal') params.set('fullOriginalVolume', '1');
+      return { url: api.getBaseUrl() + 'cases/export-mhd?' + params };
+    },
+    [caseIds]
+  );
 
   const OptionsEditor = useMemo(
     () => createCaseExportOptionsEditor(revisions),
@@ -129,7 +144,8 @@ const CaseExportModal: React.FC<{
       caption={caption}
       onStart={onStart}
       initialOptions={{
-        caseIds,
+        revisionIndex: revisions ? revisionIndex : undefined,
+        volume: 'default',
         mhdLineEnding: 'lf',
         labelPackType: 'isolated',
         compressionFormat: 'tgz'

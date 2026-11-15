@@ -17,6 +17,14 @@ routes:
     requestSchema: clinicalCaseCreate
     description: Creates a new case.
   - verb: get
+    path: /cases/export-mhd
+    handler: handleGetExportMhd
+    requiredGlobalPrivilege: downloadVolume
+    description: >
+      Exports the specified cases as MHD in a zip or tar.gz archive.
+      Must come before /cases/:caseId.
+      The query is validated by the handler with caseExportMhdQuery.
+  - verb: get
     path: /cases/:caseId
     requiredProjectPrivilege: read
     description: Returns information about the specified case.
@@ -26,12 +34,6 @@ routes:
     requestSchema: revision|allRequiredExcept date,creator
     handler: handlePostRevision
     description: Creates a new revision in the specified case.
-  - verb: post
-    path: /cases/export-mhd
-    handler: handlePostExportJob
-    requiredGlobalPrivilege: downloadVolume
-    description: Creates a task to export the specified cases as MHD.
-    requestSchema: caseExportMhd
   - verb: put
     path: /cases/:caseId/tags
     requiredProjectPrivilege: write

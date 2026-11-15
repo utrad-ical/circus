@@ -1,10 +1,7 @@
 import status from 'http-status';
-import type {
-  CaseExportTarget,
-  CompressionFormat,
-  LabelPackType,
-  LineEndingType
-} from '../../case/createMhdPacker.ts';
+import { Readable } from 'node:stream';
+import type { PreparedExport } from '../../case/createMhdPacker.ts';
+import { ValidationError } from '../../createValidator.ts';
 import makeNewCase from '../../case/makeNewCase.ts';
 import type {
   CircusContext,
@@ -246,63 +243,70 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handlePostExportJob: RouteMiddleware = ({
-  taskManager,
+export const handleGetExportMhd: RouteMiddleware = ({
   mhdPacker,
-  models
+  progressManager,
+  validator
 }) => {
-  return async (ctx, next) => {
-    const userEmail = ctx.user.userEmail;
-    const caseIds: CaseExportTarget[] = ctx.request.body.caseIds;
-    const labelPackType: LabelPackType =
-      ctx.request.body.labelPackType === 'combined' ? 'combined' : 'isolated';
-    const mhdLineEnding: LineEndingType =
-      ctx.request.body.mhdLineEnding === 'crlf' ? 'crlf' : 'lf';
-    const compressionFormat: CompressionFormat =
-      ctx.request.body.compressionFormat === 'zip' ? 'zip' : 'tgz';
-
-    const ids = Array.from(
-      new Set(caseIds.map(i => (typeof i === 'string' ? i : i.caseId))).values()
-    );
-
-    // check read privileges
-    const cursor = models.clinicalCase.findAsCursor({ caseId: { $in: ids } });
-    const pidSet = new Set<string>();
-    let count = 0;
-    while (await cursor.hasNext()) {
-      const c = await cursor.next();
-      count++;
-      pidSet.add(c.projectId);
-    }
-
-    if (count !== ids.length) {
-      ctx.throw(status.BAD_REQUEST, 'Some cases do not exist.');
-    }
-
-    const projectIds = Array.from(pidSet.values());
-    const { accessibleProjects } = ctx.userPrivileges;
-    for (const projectId of projectIds) {
-      const project = accessibleProjects.find(p => p.projectId === projectId);
-      if (!project || project.roles.indexOf('read') < 0) {
-        ctx.throw(
-          status.UNAUTHORIZED,
-          'You do not have enough read privilege for some cases.'
+  return async ctx => {
+    // Errors before the download, including invalid queries,
+    // are also shown in the progress
+    const { progressId } = ctx.request.query;
+    const reporter =
+      typeof progressId === 'string'
+        ? progressManager.claim(progressId, ctx.user.userEmail)
+        : undefined;
+    let query: any;
+    let prepared: PreparedExport;
+    try {
+      try {
+        query = await validator.validate(
+          'caseExportMhdQuery',
+          ctx.request.query,
+          'toDate'
         );
+      } catch (err: any) {
+        err.phase = 'request';
+        throw err;
       }
+      const caseIds: string[] = Array.from(new Set(query.caseIds));
+      prepared = await mhdPacker.prepare(
+        caseIds.map(caseId => ({ caseId, revisionIndex: query.revisionIndex })),
+        !!query.fullOriginalVolume
+      );
+      const { accessibleProjects } = ctx.userPrivileges;
+      for (const { caseData } of prepared.cases) {
+        const project = accessibleProjects.find(
+          p => p.projectId === caseData.projectId
+        );
+        if (!project || !project.roles.includes('read')) {
+          ctx.throw(
+            status.UNAUTHORIZED,
+            'You do not have enough read privilege for some cases.'
+          );
+        }
+      }
+    } catch (err: any) {
+      reporter?.fail(
+        err.expose || err instanceof ValidationError
+          ? err.message
+          : 'An internal error occurred.'
+      );
+      throw err;
     }
 
-    const target = caseIds.length === 1 ? 'a case' : `${caseIds.length} cases`;
-    const { emitter, downloadFileStream } = await taskManager.register(ctx, {
-      name: `Export ${target} as MHD`,
-      userEmail,
-      downloadFileType:
-        compressionFormat === 'tgz' ? 'application/x-tgz' : 'application/zip'
-    });
-    mhdPacker.packAsMhd(emitter, downloadFileStream!, caseIds, {
-      labelPackType,
-      mhdLineEnding,
-      compressionFormat
-    });
+    const stream = mhdPacker.pack(
+      prepared,
+      { ...query, fullOriginalVolume: !!query.fullOriginalVolume },
+      reporter
+    );
+    const zip = query.compressionFormat === 'zip';
+    ctx.attachment(zip ? 'case-export.zip' : 'case-export.tar.gz');
+    ctx.type = zip ? 'application/zip' : 'application/gzip';
+    const body = Readable.fromWeb(stream as any);
+    // Koa leaves the response open when the stream fails after the headers
+    body.once('error', () => ctx.res.destroy());
+    ctx.body = body;
   };
 };
 

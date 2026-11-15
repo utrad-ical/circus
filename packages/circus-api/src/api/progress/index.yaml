@@ -1,0 +1,14 @@
+name: Progress
+description: >
+  Reports the progress of long-running requests such as downloads.
+  Issue a progress ID first, pass it to the request,
+  and subscribe to its server-sent events.
+routes:
+  - verb: post
+    path: /progress
+    handler: handlePost
+    description: Issues a new progress ID for the current user.
+  - verb: get
+    path: /progress/:progressId
+    handler: handleGet
+    description: Reports the progress of the specified ID using server-sent events.

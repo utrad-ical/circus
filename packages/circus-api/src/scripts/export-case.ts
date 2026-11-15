@@ -1,15 +1,10 @@
-import type { DicomFileRepository } from '@utrad-ical/circus-lib';
 import { styleText } from 'node:util';
 import fs from 'fs-extra';
 import path from 'path';
-import type { Writable } from 'stream';
-import type { Models } from '../interface.ts';
+import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 import type Command from './Command.ts';
-import type Storage from '../storage/Storage.ts';
-import type { VolumeProvider } from '@utrad-ical/circus-rs/server';
 import type { MhdPacker } from '../case/createMhdPacker.ts';
-import { EventEmitter } from 'events';
-import type { TaskEventEmitter } from '../createTaskManager.ts';
 
 export const help = () => {
   return (
@@ -46,32 +41,9 @@ export const options = () => {
   ];
 };
 
-const waitForStream = (stream: Writable) => {
-  return new Promise<void>((resolve, reject) => {
-    const off = () => {
-      stream.off('close', handleClose);
-      stream.off('error', handleError);
-    };
-    const handleClose = () => {
-      off();
-      resolve();
-    };
-    const handleError = (err: Error) => {
-      off();
-      reject(err);
-    };
-    stream.on('close', handleClose);
-    stream.on('error', handleError);
-  });
-};
-
 export const command: Command<{
-  models: Models;
-  dicomFileRepository: DicomFileRepository;
-  blobStorage: Storage;
-  volumeProvider: VolumeProvider;
   mhdPacker: MhdPacker;
-}> = async (opts, { models, blobStorage, volumeProvider, mhdPacker }) => {
+}> = async (opts, { mhdPacker }) => {
   return async (options: any) => {
     const {
       out: outDir = path.join(process.cwd(), 'case-exports'),
@@ -92,18 +64,19 @@ export const command: Command<{
     for (const caseId of caseIds) {
       try {
         console.log(styleText('cyan', 'Exporting'), caseId);
-        const stream = fs.createWriteStream(
-          path.join(outDir, `${caseId}.${zip ? 'zip' : 'tar.gz'}`)
-        );
-        const emitter: TaskEventEmitter = new EventEmitter();
-        emitter.on('progress', message => console.log(message));
-        emitter.on('error', message => console.log('Error:', message));
-        mhdPacker.packAsMhd(emitter, stream, [caseId], {
+        const prepared = await mhdPacker.prepare([{ caseId }], false);
+        const stream = mhdPacker.pack(prepared, {
+          fullOriginalVolume: false,
           compressionFormat: zip ? 'zip' : 'tgz',
           labelPackType: type,
           mhdLineEnding: 'lf'
         });
-        await waitForStream(stream);
+        await pipeline(
+          Readable.fromWeb(stream as any),
+          fs.createWriteStream(
+            path.join(outDir, `${caseId}.${zip ? 'zip' : 'tar.gz'}`)
+          )
+        );
         console.log(styleText('green', 'Exported '), caseId);
       } catch (err: any) {
         if (continueOnError) {
@@ -117,10 +90,4 @@ export const command: Command<{
   };
 };
 
-command.dependencies = [
-  'models',
-  'dicomFileRepository',
-  'volumeProvider',
-  'blobStorage',
-  'mhdPacker'
-];
+command.dependencies = ['mhdPacker'];

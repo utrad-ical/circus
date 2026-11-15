@@ -3,6 +3,11 @@ import { describe, test, before, after, beforeEach } from 'node:test';
 import { setUpMongoFixture } from '../../test/util-mongo.ts';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
+import fs from 'node:fs';
+import path from 'node:path';
+import type { Readable } from 'node:stream';
+import { readArchive } from '../../test/util-archive.ts';
+import { readFromStreamTillEnd } from '../../test/util-stream.ts';
 
 let apiTest: ApiTest, ax: typeof apiTest.axiosInstances;
 before(async () => {
@@ -592,5 +597,172 @@ describe('delete', () => {
     } catch (err) {
       console.log(err);
     }
+  });
+});
+
+describe('export-mhd', () => {
+  const seriesUid = '333.444.555.666.777'; // images: 1-10
+  const exportCase = (caseId: string, projectId: string) => {
+    const revision = {
+      creator: 'bob@example.com',
+      date: new Date(),
+      description: 'Created',
+      attributes: {},
+      status: 'draft',
+      series: [
+        {
+          seriesUid,
+          partialVolumeDescriptor: { start: 3, end: 7, delta: 1 },
+          labels: []
+        }
+      ]
+    };
+    return {
+      caseId,
+      projectId,
+      latestRevision: revision,
+      revisions: [revision],
+      tags: [],
+      domains: [],
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  };
+
+  before(async () => {
+    await apiTest.database.db
+      .collection('clinicalCases')
+      .insertMany([
+        exportCase('export-a', '8883fdef6f5144f50eb2a83cd34baa44'),
+        exportCase('export-b', 'another-project')
+      ]);
+    const series = await apiTest.dicomFileRepository.getSeries(seriesUid);
+    for (let i = 1; i <= 10; i++) {
+      const file = path.join(
+        import.meta.dirname,
+        `../../../test/dicom/head-first${String(i).padStart(3, '0')}.dcm`
+      );
+      await series.save(i, new Uint8Array(fs.readFileSync(file)).buffer);
+    }
+  });
+
+  after(async () => {
+    await apiTest.database.db
+      .collection('clinicalCases')
+      .deleteMany({ caseId: { $in: ['export-a', 'export-b'] } });
+    await apiTest.dicomFileRepository.deleteSeries(seriesUid);
+  });
+
+  const download = (params: object, user: keyof typeof ax = 'bob') =>
+    ax[user].get('api/cases/export-mhd', {
+      params,
+      responseType: 'arraybuffer'
+    });
+
+  const dimSize = (mhd?: Uint8Array) =>
+    /DimSize = (.*)/.exec(new TextDecoder().decode(mhd))![1];
+
+  test('exports the partial volume as zip', async () => {
+    const res = await download({
+      caseIds: 'export-a',
+      compressionFormat: 'zip'
+    });
+    assert.equal(res.status, 200);
+    assert.equal(res.headers['content-type'], 'application/zip');
+    assert.match(
+      res.headers['content-disposition'],
+      /attachment; filename="case-export.zip"/
+    );
+    const files = await readArchive('zip', new Blob([res.data]).stream());
+    const json = JSON.parse(
+      new TextDecoder().decode(files.get('export-a/data.json'))
+    );
+    assert.deepEqual(json.originalSeriesMeta, {
+      [seriesUid]: { images: '1-10' }
+    });
+    assert.match(dimSize(files.get('export-a/vol000.mhd')), / 5$/);
+  });
+
+  test('exports the whole series as tar.gz', async () => {
+    const res = await download({ caseIds: 'export-a', fullOriginalVolume: 1 });
+    assert.equal(res.status, 200);
+    assert.equal(res.headers['content-type'], 'application/gzip');
+    const files = await readArchive('tgz', new Blob([res.data]).stream());
+    assert.match(dimSize(files.get('export-a/vol000.mhd')), / 10$/);
+  });
+
+  test('reports the progress', async () => {
+    const issued = await ax.bob.post('api/progress', {});
+    const { progressId } = issued.data;
+    const sse = await ax.bob.get(`api/progress/${progressId}`, {
+      responseType: 'stream'
+    });
+    const events = readFromStreamTillEnd(sse.data as Readable);
+    const res = await download({ caseIds: 'export-a', progressId });
+    assert.equal(res.status, 200);
+    assert.match(
+      await events,
+      /event: finish\ndata: \{"message":"Packed 1 case\(s\)."\}/
+    );
+  });
+
+  test('reports an error before the download in the progress', async () => {
+    const issued = await ax.bob.post('api/progress', {});
+    const { progressId } = issued.data;
+    const res = await download({ caseIds: 'export-a,export-b', progressId });
+    assert.equal(res.status, 401);
+    const sse = await ax.bob.get(`api/progress/${progressId}`, {
+      responseType: 'stream'
+    });
+    assert.match(
+      await readFromStreamTillEnd(sse.data as Readable),
+      /event: error\ndata: \{"message":"You do not have enough read privilege/
+    );
+  });
+
+  test('reports an invalid query in the progress', async () => {
+    const issued = await ax.bob.post('api/progress', {});
+    const { progressId } = issued.data;
+    const caseIds = Array.from({ length: 101 }, (_, i) => `c${i}`).join(',');
+    const res = await download({ caseIds, progressId });
+    assert.equal(res.status, 400);
+    const sse = await ax.bob.get(`api/progress/${progressId}`, {
+      responseType: 'stream'
+    });
+    assert.match(
+      await readFromStreamTillEnd(sse.data as Readable),
+      /event: error\ndata: \{"message":"Validation failed: \/caseIds /
+    );
+  });
+
+  test('rejects invalid queries', async () => {
+    const caseIds = Array.from({ length: 101 }, (_, i) => `c${i}`).join(',');
+    for (const params of [
+      { caseIds },
+      { caseIds: 'export-a,export-b', revisionIndex: 0 },
+      { caseIds: 'export-a', fullOriginalVolume: 'true' },
+      { caseIds: 'export-a', unknown: 1 },
+      { caseIds: 'nonexistent' },
+      { caseIds: 'export-a', revisionIndex: 1 }
+    ]) {
+      const res = await download(params);
+      assert.equal(res.status, 400, JSON.stringify(params));
+    }
+  });
+
+  test('rejects users without enough privileges', async () => {
+    const res1 = await download({ caseIds: 'export-a' }, 'alice');
+    assert.equal(res1.status, 401); // no downloadVolume
+    const res2 = await download({ caseIds: 'export-a,export-b' });
+    assert.equal(res2.status, 401); // cannot read the project
+  });
+
+  test("rejects someone else's progress ID", async () => {
+    const issued = await ax.carol.post('api/progress', {});
+    const res = await download({
+      caseIds: 'export-a',
+      progressId: issued.data.progressId
+    });
+    assert.equal(res.status, 400);
   });
 });

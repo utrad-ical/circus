@@ -19,22 +19,27 @@ export const onetimeUrlCreate = z.strictObject({ user: z.string() });
 
 export const serverParams = z.record(z.string(), z.unknown());
 
-export const caseExportMhd = z.looseObject({
-  caseIds: z
-    .array(
-      z.union([
-        z.string(),
-        z.looseObject({
-          caseId: z.string().optional(),
-          revisionIndex: z.int().min(0).optional()
-        })
-      ])
-    )
-    .max(100),
-  labelPackType: z.enum(['isolated', 'combined']).optional(),
-  mhdLineEnding: z.enum(['lf', 'crlf']).optional(),
-  compressionFormat: z.enum(['tgz', 'zip']).optional()
-});
+export const caseExportMhdQuery = z
+  .strictObject({
+    caseIds: z
+      .string()
+      .transform(s => s.split(','))
+      .pipe(z.array(z.string().min(1)).min(1).max(100)),
+    revisionIndex: z
+      .string()
+      .regex(/^(0|[1-9][0-9]*)$/)
+      .transform(Number)
+      .optional(),
+    volume: z.enum(['pvd', 'series']).default('pvd'),
+    labelPackType: z.enum(['isolated', 'combined']).default('isolated'),
+    mhdLineEnding: z.enum(['lf', 'crlf']).default('lf'),
+    compressionFormat: z.enum(['tgz', 'zip']).default('tgz'),
+    progressId: z.string().optional()
+  })
+  .refine(q => q.revisionIndex === undefined || q.caseIds.length === 1, {
+    message: 'revisionIndex requires exactly one case ID.',
+    path: ['revisionIndex']
+  });
 
 export const caseTags = z.array(z.string());
 

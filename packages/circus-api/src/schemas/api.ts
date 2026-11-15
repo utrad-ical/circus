@@ -26,6 +26,12 @@ export const api = z.strictObject({
         .optional()
         .describe('Loaded only when the server runs in the debug mode.'),
       expectedContentType: z.string().optional(),
+      querySchema: z
+        .string()
+        .optional()
+        .describe(
+          'Schema name of the URL query; the result is in `ctx.state.query`.'
+        ),
       requestSchema: z
         .string()
         .optional()

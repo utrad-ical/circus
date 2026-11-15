@@ -31,6 +31,11 @@ import createOauthServer from '../middleware/auth/createOauthServer.ts';
 import createDefaultAuthProvider from '../middleware/auth/authProvider/DefaultAuthProvider.ts';
 import type { Database } from '../interface.ts';
 import createTransactionManager from '../createTransactionManager.ts';
+import createMhdPacker from '../case/createMhdPacker.ts';
+import {
+  type DicomExtractorWorker,
+  dicomImageExtractor
+} from '@utrad-ical/circus-rs/server';
 import * as ws from 'ws';
 
 /**
@@ -153,6 +158,13 @@ export const setUpAppForRoutesTest = async (
 
   const progressManager = await createProgressManager({});
 
+  // Extracts in the main thread
+  const extract = dicomImageExtractor();
+  const dicomExtractorWorker = Object.assign(
+    async (buffer: ArrayBuffer) => extract(buffer),
+    { dispose: async () => {} }
+  ) as DicomExtractorWorker;
+
   const dicomVoxelDumper: DicomVoxelDumper = {
     dump: (series: any, archiver: Archiver) => {
       const events = new EventEmitter();
@@ -197,7 +209,13 @@ export const setUpAppForRoutesTest = async (
       dicomTagReader,
       dicomImporter,
       core: csCore,
-      mhdPacker: null as any, // dummy
+      mhdPacker: await createMhdPacker(undefined, {
+        models,
+        dicomFileRepository,
+        dicomExtractorWorker,
+        blobStorage,
+        apiLogger
+      }),
       // Dummy RS routes; a real router is needed because koa-router runs
       // the middleware registered with `use()` only for matched routes
       rsSeriesRoutes: (() => {

@@ -4,6 +4,7 @@ import { styleText } from 'node:util';
 import createSpinner from '../utils/createSpinner.ts';
 import downloadToFile from '../utils/downloadToFile.ts';
 import readIds from '../utils/readIds.ts';
+import watchProgress from '../utils/watchProgress.ts';
 import type { CommandAction } from './CommandAction.ts';
 
 const action: CommandAction = ({ getFetch }) => {
@@ -29,6 +30,18 @@ const action: CommandAction = ({ getFetch }) => {
       );
       console.log(`Case IDs to download: ${batch.join(', ')}`);
       const spinner = createSpinner('Downloading...');
+      let status: string | undefined;
+      const watcher = await watchProgress(fetch, event => {
+        // `finish` means packed; the rest may still be on the way
+        if (event.type === 'finish') status = '100% packed';
+        else if (event.type === 'error' || !event.total) status = event.message;
+        else {
+          const percent = Math.floor(
+            ((event.finished ?? 0) / event.total) * 100
+          );
+          status = `${percent}% ${event.message}`;
+        }
+      });
       try {
         const params = new URLSearchParams({
           caseIds: batch.join(','),
@@ -37,6 +50,7 @@ const action: CommandAction = ({ getFetch }) => {
           compressionFormat: options.zip ? 'zip' : 'tgz'
         });
         if (options.fullOriginalVolume) params.set('fullOriginalVolume', '1');
+        if (watcher.progressId) params.set('progressId', watcher.progressId);
         const res = await fetch(`cases/export-mhd?${params}`);
         await downloadToFile(
           res,
@@ -46,11 +60,13 @@ const action: CommandAction = ({ getFetch }) => {
               options.zip ? 'zip' : 'tgz'
             }`
           ),
-          { spinner }
+          { spinner, label: () => status }
         );
       } catch (err: any) {
         spinner.stop('Download failed', true);
         throw err;
+      } finally {
+        watcher.stop();
       }
       spinner.stop('Download complete.');
     }

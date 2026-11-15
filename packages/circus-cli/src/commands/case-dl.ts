@@ -30,13 +30,14 @@ const action: CommandAction = ({ getFetch }) => {
       );
       console.log(`Case IDs to download: ${batch.join(', ')}`);
       const spinner = createSpinner('Downloading...');
-      let status: string | undefined;
+      let packed: string | undefined;
+      let detail = '';
       const watcher = await watchProgress(fetch, event => {
-        const { message, finished = 0, total } = event;
-        status =
-          event.type === 'progress' && total
-            ? `${Math.floor((finished / total) * 100)}% ${message}`
-            : message;
+        const { type, message, finished = 0, total } = event;
+        if (type === 'finish') packed = '100%';
+        else if (type === 'progress' && total)
+          packed = `${Math.floor((finished / total) * 100)}%`;
+        detail = type === 'finish' ? '' : message;
       });
       try {
         const params = new URLSearchParams({
@@ -56,7 +57,14 @@ const action: CommandAction = ({ getFetch }) => {
               options.zip ? 'zip' : 'tgz'
             }`
           ),
-          { spinner, label: () => status }
+          {
+            spinner,
+            label: size =>
+              packed
+                ? `Packed: ${packed}, received: ${size}` +
+                  (detail ? ` | ${detail}` : '')
+                : undefined
+          }
         );
       } catch (err: any) {
         spinner.stop('Download failed', true);

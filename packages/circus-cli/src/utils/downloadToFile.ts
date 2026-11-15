@@ -5,8 +5,8 @@ import type { Spinner } from './createSpinner.ts';
 
 interface DownloadOptions {
   spinner?: Spinner;
-  /** Returns the text shown before the received size */
-  label?: () => string | undefined;
+  /** Returns the text to show with the received size, if any */
+  label?: (size: string) => string | undefined;
 }
 
 const downloadToFile = async (
@@ -28,10 +28,7 @@ const downloadToFile = async (
         const size = length
           ? Math.round((received / length) * 100) + '%'
           : Math.round(received / 1024) + ' KiB';
-        const text = label?.();
-        spinner?.update(
-          text ? `${text}, ${size} received` : `Downloading: ${size}`
-        );
+        spinner?.update(label?.(size) ?? `Downloading: ${size}`);
       }
       callback(null, chunk);
     }

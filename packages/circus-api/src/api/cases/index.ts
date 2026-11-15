@@ -1,6 +1,7 @@
 import status from 'http-status';
 import { Readable } from 'node:stream';
 import type { PreparedExport } from '../../case/createMhdPacker.ts';
+import { ValidationError } from '../../createValidator.ts';
 import makeNewCase from '../../case/makeNewCase.ts';
 import type {
   CircusContext,
@@ -244,16 +245,30 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
 
 export const handleGetExportMhd: RouteMiddleware = ({
   mhdPacker,
-  progressManager
+  progressManager,
+  validator
 }) => {
   return async ctx => {
-    const query = ctx.state.query;
-    // Errors before the download are also shown in the progress
-    const reporter = query.progressId
-      ? progressManager.claim(query.progressId, ctx.user.userEmail)
-      : undefined;
+    // Errors before the download, including invalid queries,
+    // are also shown in the progress
+    const { progressId } = ctx.request.query;
+    const reporter =
+      typeof progressId === 'string'
+        ? progressManager.claim(progressId, ctx.user.userEmail)
+        : undefined;
+    let query: any;
     let prepared: PreparedExport;
     try {
+      try {
+        query = await validator.validate(
+          'caseExportMhdQuery',
+          ctx.request.query,
+          'toDate'
+        );
+      } catch (err: any) {
+        err.phase = 'request';
+        throw err;
+      }
       const caseIds: string[] = Array.from(new Set(query.caseIds));
       prepared = await mhdPacker.prepare(
         caseIds.map(caseId => ({ caseId, revisionIndex: query.revisionIndex })),
@@ -272,7 +287,11 @@ export const handleGetExportMhd: RouteMiddleware = ({
         }
       }
     } catch (err: any) {
-      reporter?.fail(err.expose ? err.message : 'An internal error occurred.');
+      reporter?.fail(
+        err.expose || err instanceof ValidationError
+          ? err.message
+          : 'An internal error occurred.'
+      );
       throw err;
     }
 

@@ -720,6 +720,21 @@ describe('export-mhd', () => {
     );
   });
 
+  test('reports an invalid query in the progress', async () => {
+    const issued = await ax.bob.post('api/progress', {});
+    const { progressId } = issued.data;
+    const caseIds = Array.from({ length: 101 }, (_, i) => `c${i}`).join(',');
+    const res = await download({ caseIds, progressId });
+    assert.equal(res.status, 400);
+    const sse = await ax.bob.get(`api/progress/${progressId}`, {
+      responseType: 'stream'
+    });
+    assert.match(
+      await readFromStreamTillEnd(sse.data as Readable),
+      /event: error\ndata: \{"message":"Validation failed: \/caseIds /
+    );
+  });
+
   test('rejects invalid queries', async () => {
     const caseIds = Array.from({ length: 101 }, (_, i) => `c${i}`).join(',');
     for (const params of [

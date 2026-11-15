@@ -67,7 +67,6 @@ interface Route {
   handler?: string;
   forDebug?: boolean;
   expectedContentType?: string;
-  querySchema?: string;
   requestSchema?: string;
   responseSchema?: string;
   noAuthentication?: boolean;
@@ -110,7 +109,6 @@ async function prepareApiRouter(
         typeCheck(route.expectedContentType),
         checkPrivilege(deps, route),
         validateInOut(validator, {
-          querySchema: route.querySchema,
           requestSchema: route.requestSchema,
           responseSchema: route.responseSchema
         }),

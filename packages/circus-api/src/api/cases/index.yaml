@@ -23,7 +23,7 @@ routes:
     description: >
       Exports the specified cases as MHD in a zip or tar.gz archive.
       Must come before /cases/:caseId.
-    querySchema: caseExportMhdQuery
+      The query is validated by the handler with caseExportMhdQuery.
   - verb: get
     path: /cases/:caseId
     requiredProjectPrivilege: read

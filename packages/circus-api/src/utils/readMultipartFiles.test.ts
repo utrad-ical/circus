@@ -51,14 +51,14 @@ describe('readMultipartFiles', () => {
   test('reads files in order with their relative paths', async () => {
     readBytes = undefined;
     const fd = new FormData();
-    fd.append('files', new Blob(['alpha']), 'dir/a.dcm');
+    fd.append('files', new Blob(['alpha']), 'dir/画像 "1".dcm');
     fd.append('note', 'ignored');
     fd.append('files', new Blob(['x'.repeat(200_000)]), 'b.zip');
     fd.append('files', new Blob(['']), 'c');
     const res = await post(fd);
     assert.equal(res.status, 200);
     assert.deepEqual(JSON.parse(res.body), [
-      'dir/a.dcm:alpha',
+      'dir/画像 "1".dcm:alpha',
       `b.zip:${'x'.repeat(200_000)}`,
       'c:'
     ]);

@@ -8,6 +8,12 @@ export interface UploadedFile {
   stream: ReadableStream<Uint8Array>;
 }
 
+// Clients escape these in a file name (see the HTML spec of form data)
+const decodeFilename = (name: string) =>
+  name.replace(/%(22|0D|0A)/g, (_, hex) =>
+    String.fromCharCode(parseInt(hex, 16))
+  );
+
 /**
  * Wraps a busboy file stream. Canceling it drains the rest
  * instead of destroying it, so that busboy can move on to the next part.
@@ -59,7 +65,9 @@ export default async function* readMultipartFiles(
   };
   let current: Readable | undefined;
 
-  busboy.on('file', (_field, file, filename) => push({ file, filename }));
+  busboy.on('file', (_field, file, filename) =>
+    push({ file, filename: decodeFilename(filename) })
+  );
   busboy.on('finish', () => push(null));
   busboy.on('error', err =>
     push(err instanceof Error ? err : new Error(String(err)))

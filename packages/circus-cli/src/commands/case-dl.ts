@@ -4,7 +4,6 @@ import { styleText } from 'node:util';
 import createSpinner from '../utils/createSpinner.ts';
 import downloadToFile from '../utils/downloadToFile.ts';
 import readIds from '../utils/readIds.ts';
-import taskReporter, { type TaskEvent } from '../utils/taskReporter.ts';
 import type { CommandAction } from './CommandAction.ts';
 
 const action: CommandAction = ({ getFetch }) => {
@@ -19,105 +18,41 @@ const action: CommandAction = ({ getFetch }) => {
 
     const batches = Math.ceil(ids.length / casesPerTask);
     if (batches > 1) {
-      console.log(`Tasks were split into ${batches} batches.`);
+      console.log(`Split into ${batches} batches.`);
     }
 
-    const taskReports = taskReporter(fetch);
-
-    try {
-      for (let batchIdx = 0; batchIdx < batches; batchIdx++) {
-        console.log(
-          styleText('cyan', `\nBatch #${batchIdx + 1} of ${batches}`)
+    for (let batchIdx = 0; batchIdx < batches; batchIdx++) {
+      console.log(styleText('cyan', `\nBatch #${batchIdx + 1} of ${batches}`));
+      const batch = ids.slice(
+        batchIdx * casesPerTask,
+        (batchIdx + 1) * casesPerTask
+      );
+      console.log(`Case IDs to download: ${batch.join(', ')}`);
+      const spinner = createSpinner('Downloading...');
+      try {
+        const params = new URLSearchParams({
+          caseIds: batch.join(','),
+          volume: options.entireSeries ? 'series' : 'pvd',
+          labelPackType: options.combined ? 'combined' : 'isolated',
+          mhdLineEnding: options.crlf ? 'crlf' : 'lf',
+          compressionFormat: options.zip ? 'zip' : 'tgz'
+        });
+        const res = await fetch(`cases/export-mhd?${params}`);
+        await downloadToFile(
+          res,
+          path.join(
+            outDir,
+            `batch-${String(batchIdx + 1).padStart(3, '0')}.${
+              options.zip ? 'zip' : 'tgz'
+            }`
+          ),
+          { spinner }
         );
-        const batch = ids.slice(
-          batchIdx * casesPerTask,
-          (batchIdx + 1) * casesPerTask
-        );
-        console.log(`Case IDs to download: ${batch.join(', ')}`);
-        const spinner = createSpinner('Registering an export task...');
-        try {
-          const res1 = await fetch('cases/export-mhd', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              caseIds: batch,
-              labelPackType: options.combined ? 'combined' : 'isolated',
-              mhdLineEnding: options.crlf ? 'crlf' : 'lf',
-              compressionFormat: options.zip ? 'zip' : 'tgz'
-            })
-          });
-          const taskId = ((await res1.json()) as { taskId: string }).taskId;
-          spinner.update('Waiting for export task to complete...');
-
-          // Wait until the stored status becomes `finished` (the download
-          // needs it). Events may have been sent before the task ID is known,
-          // and `finish` is sent before the status is stored, so the status
-          // is polled, and more often once `finish` is received.
-          await new Promise<void>((resolve, reject) => {
-            const done = (error?: string) => {
-              taskReports.events.off('event', handler);
-              clearInterval(timer);
-              if (error === undefined) resolve();
-              else reject(new Error('Task did not complete: ' + error));
-            };
-            const handler = (event: TaskEvent) => {
-              if (event.taskId !== taskId) return;
-              if (event.type === 'progress') {
-                spinner.update(
-                  `Waiting for export task to complete: ${event.message}`
-                );
-              } else if (event.type === 'error') {
-                done(event.message);
-              } else {
-                clearInterval(timer);
-                timer = setInterval(checkStatus, 200);
-                checkStatus();
-              }
-            };
-            const checkStatus = async () => {
-              try {
-                const task = (await (
-                  await fetch(`tasks/${taskId}`)
-                ).json()) as { status: string; errorMessage?: string };
-                if (task.status === 'finished') done();
-                else if (task.status === 'error')
-                  done(task.errorMessage ?? 'Unknown error');
-              } catch (err: any) {
-                done(err.message);
-              }
-            };
-            taskReports.events.on('event', handler);
-            let timer = setInterval(checkStatus, 3000);
-            checkStatus();
-          });
-          spinner.update('Task completed. Downloading...');
-
-          const res3 = await fetch(`tasks/${taskId}/download`);
-          await downloadToFile(
-            res3,
-            path.join(
-              outDir,
-              `batch-${String(batchIdx + 1).padStart(3, '0')}.${
-                options.zip ? 'zip' : 'tgz'
-              }`
-            ),
-            { spinner }
-          );
-
-          spinner.update('Marking the task as finished...');
-          await fetch(`tasks/${taskId}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ dismissed: true })
-          });
-        } catch (err: any) {
-          spinner.stop('Task failed', true);
-          throw err;
-        }
-        spinner.stop('Download complete.');
+      } catch (err: any) {
+        spinner.stop('Download failed', true);
+        throw err;
       }
-    } finally {
-      taskReports.stop();
+      spinner.stop('Download complete.');
     }
   };
 };

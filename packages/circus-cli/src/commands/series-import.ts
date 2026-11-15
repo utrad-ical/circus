@@ -1,8 +1,7 @@
 import { promises as fs, createReadStream } from 'node:fs';
 import * as path from 'node:path';
-import { pipeline, Readable } from 'node:stream';
+import { Readable } from 'node:stream';
 import { styleText } from 'node:util';
-import zlib from 'node:zlib';
 import { select } from '@inquirer/prompts';
 import { createTarPacker } from 'modern-tar';
 import type { AuthorizedFetch } from '../utils/createAuthorizedFetch.ts';
@@ -69,7 +68,7 @@ const collectFiles = async (
 /**
  * Packs the files into a tar.gz while reading it.
  */
-const packFiles = (files: LocalFile[]): AsyncIterable<Uint8Array> => {
+const packFiles = (files: LocalFile[]): ReadableStream<Uint8Array> => {
   const { readable, controller } = createTarPacker();
   (async () => {
     for (const { file, name, size } of files) {
@@ -80,12 +79,7 @@ const packFiles = (files: LocalFile[]): AsyncIterable<Uint8Array> => {
     }
     controller.finalize();
   })().catch(err => controller.error(err));
-  // zlib waits for the reader, unlike CompressionStream of Node
-  return pipeline(
-    Readable.fromWeb(readable as any),
-    zlib.createGzip(),
-    () => {}
-  );
+  return readable.pipeThrough(new CompressionStream('gzip'));
 };
 
 const toParts = (files: LocalFile[]): MultipartFile[] => {

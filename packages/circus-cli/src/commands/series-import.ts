@@ -45,13 +45,22 @@ const isArchive = async (file: string) => {
   }
 };
 
+/**
+ * Collects the files in a directory recursively.
+ * Symbolic links to directories are followed only when given directly.
+ */
 const collectFiles = async (
   file: string,
   name: string,
-  result: LocalFile[]
+  result: LocalFile[],
+  isArgument = false
 ) => {
   const stat = await fs.stat(file);
   if (stat.isDirectory()) {
+    if (!isArgument && (await fs.lstat(file)).isSymbolicLink()) {
+      console.log(`Skipping ${name} (a symbolic link to a directory)`);
+      return;
+    }
     for (const entry of (await fs.readdir(file)).sort()) {
       await collectFiles(path.join(file, entry), `${name}/${entry}`, result);
     }
@@ -132,7 +141,7 @@ const action: CommandAction = ({ getFetch }) => {
 
     const files: LocalFile[] = [];
     for (const arg of args) {
-      await collectFiles(arg, path.basename(path.resolve(arg)), files);
+      await collectFiles(arg, path.basename(path.resolve(arg)), files, true);
     }
     if (!files.length) throw new Error('No files to upload.');
     const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
@@ -217,7 +226,7 @@ const action: CommandAction = ({ getFetch }) => {
           (skipped.length ? `, skipped ${skipped.length}` : '') +
           (errors.length ? `, failed ${errors.length}` : '') +
           '.',
-        errors.length > 0
+        errors.length > 0 || !imported
       );
       total.imported += imported;
       total.skipped.push(...skipped);

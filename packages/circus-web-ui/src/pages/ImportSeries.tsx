@@ -29,12 +29,17 @@ const ImportResult: FC<{ summary: ImportSummary }> = props => {
     <div>
       <Alert
         variant={
-          errors.length ? 'danger' : skipped.length ? 'warning' : 'success'
+          errors.length || !imported
+            ? 'danger'
+            : skipped.length
+              ? 'warning'
+              : 'success'
         }
       >
         Imported {imported} file(s).
         {skipped.length > 0 && <> Skipped {skipped.length} file(s).</>}
         {errors.length > 0 && <> Failed to import {errors.length} file(s).</>}
+        {!imported && !errors.length && <> No DICOM file was found.</>}
       </Alert>
       {rows.length > 0 && (
         <table

@@ -265,6 +265,9 @@ importers:
       dotenv:
         specifier: ^16.0.3
         version: 16.0.3
+      fflate:
+        specifier: ^0.8.3
+        version: 0.8.3
       fs-extra:
         specifier: ^9.0.0
         version: 9.1.0

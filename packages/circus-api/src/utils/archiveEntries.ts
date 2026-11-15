@@ -1,4 +1,4 @@
-import { ZipReaderStream } from '@zip.js/zip.js';
+import { Unzip, UnzipInflate } from 'fflate';
 import { createTarDecoder } from 'modern-tar';
 
 export interface ArchiveEntry {
@@ -69,29 +69,105 @@ const isZip = (head: Uint8Array) =>
 
 const isGzip = (head: Uint8Array) => head[0] === 0x1f && head[1] === 0x8b;
 
+const concat = (chunks: Uint8Array[], length: number) => {
+  const result = new Uint8Array(length);
+  chunks.reduce((offset, c) => (result.set(c, offset), offset + c.length), 0);
+  return result;
+};
+
+// The record (22 bytes) and a comment of up to 65535 bytes
+const maxEndOfDirectoryLength = 22 + 65535;
+
+const hasEndOfDirectory = (tail: Uint8Array) => {
+  for (let i = tail.length - 22; i >= 0; i--) {
+    if (
+      tail[i] === 0x50 &&
+      tail[i + 1] === 0x4b &&
+      tail[i + 2] === 0x05 &&
+      tail[i + 3] === 0x06
+    )
+      return true;
+  }
+  return false;
+};
+
+// fflate cannot tell where such an entry ends
+const unreadableZipMessage =
+  'This zip file cannot be read while uploading. ' +
+  'Create it again as a tar.gz file or a compressed zip file.';
+
+/**
+ * Reads a zip file from the beginning, using its local headers.
+ * Each entry is buffered, which is fine for DICOM files.
+ */
 async function* zipEntries(
   stream: ReadableStream<Uint8Array>,
   name: string,
   maxEntryBytes: number
 ): AsyncGenerator<ArchiveEntry> {
-  const entries = stream.pipeThrough(
-    new ZipReaderStream({ useWebWorkers: false })
-  );
-  const reader = entries.getReader();
+  type Result = { name: string; data?: Uint8Array; error?: string };
+  const results: Result[] = [];
+  let fatal: string | undefined;
+  const unzip = new Unzip(file => {
+    if (file.name.endsWith('/')) return; // directory
+    const entryName = `${name}/${file.name}`;
+    // Stored, and the size comes after the data
+    if (file.compression === 0 && file.size === undefined) {
+      fatal ??= unreadableZipMessage;
+      return;
+    }
+    let chunks: Uint8Array[] = [];
+    let length = 0;
+    file.ondata = (err, chunk, final) => {
+      if (err) {
+        results.push({ name: entryName, error: err.message });
+        return;
+      }
+      length += chunk.length;
+      if (length <= maxEntryBytes) chunks.push(chunk);
+      else chunks = [];
+      if (!final) return;
+      results.push(
+        length > maxEntryBytes
+          ? {
+              name: entryName,
+              error: `The file exceeds the size limit (${maxEntryBytes} bytes).`
+            }
+          : { name: entryName, data: concat(chunks, length) }
+      );
+    };
+    try {
+      file.start();
+    } catch (err: any) {
+      results.push({ name: entryName, error: err.message });
+    }
+  });
+  unzip.register(UnzipInflate);
+
+  // fflate silently ignores a zip file cut in a header,
+  // so check that the end of central directory record exists
+  let tail = new Uint8Array(0);
+  const reader = stream.getReader();
   try {
     while (true) {
-      const { done, value: entry } = await reader.read();
+      const { done, value } = await reader.read();
+      if (value) tail = concat([tail, value], tail.length + value.length);
+      tail = tail.subarray(-maxEndOfDirectoryLength);
+      unzip.push(value ?? new Uint8Array(0), done);
+      if (fatal) throw new Error(fatal);
+      if (done && !hasEndOfDirectory(tail))
+        throw new Error('The zip file is incomplete.');
+      while (results.length) {
+        const { name, data, error } = results.shift()!;
+        yield {
+          name,
+          bytes: async () => {
+            if (error) throw new Error(error);
+            return data!;
+          }
+        };
+      }
       if (done) return;
-      if (entry.directory || !entry.readable) continue;
-      let read = false;
-      yield {
-        name: `${name}/${entry.filename}`,
-        bytes: () => {
-          read = true;
-          return readAll(entry.readable!, maxEntryBytes);
-        }
-      };
-      if (!read) await entry.readable.cancel();
     }
   } finally {
     await reader.cancel().catch(() => {});

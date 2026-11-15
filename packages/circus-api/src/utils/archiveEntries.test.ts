@@ -8,11 +8,11 @@ const text = (s: string) => new TextEncoder().encode(s);
 
 const files = { 'a.txt': text('alpha'), 'dir/b.txt': text('bravo') };
 
-const makeZip = async (level: number) => {
+const makeZip = async (level: number, dataDescriptor = true) => {
   const writer = new ZipWriter(new Uint8ArrayWriter(), {
     useWebWorkers: false,
     level,
-    dataDescriptor: true
+    dataDescriptor
   });
   for (const [name, data] of Object.entries(files))
     await writer.add(name, new Uint8ArrayReader(data));
@@ -62,12 +62,18 @@ describe('archiveEntries', () => {
   });
 
   test('reads a zip file, compressed or stored', async () => {
-    for (const level of [0, 5]) {
-      assert.deepEqual(await readEntries(await makeZip(level), 'a.zip'), {
+    for (const zip of [await makeZip(5), await makeZip(0, false)]) {
+      assert.deepEqual(await readEntries(zip, 'a.zip'), {
         'a.zip/a.txt': 'alpha',
         'a.zip/dir/b.txt': 'bravo'
       });
     }
+  });
+
+  test('rejects a stored zip entry with its size after the data', async () => {
+    await assert.rejects(readEntries(await makeZip(0, true), 'a.zip'), {
+      message: /cannot be read while uploading/
+    });
   });
 
   test('reads a tar.gz file', async () => {
@@ -89,9 +95,14 @@ describe('archiveEntries', () => {
   });
 
   test('rejects an entry over the size limit', async () => {
+    const error = 'Error: The file exceeds the size limit (4 bytes).';
     assert.deepEqual(await readEntries(await makeTgz(), 'a.tgz', 4), {
-      'a.tgz/a.txt': 'Error: The file exceeds the size limit (4 bytes).',
-      'a.tgz/dir/b.txt': 'Error: The file exceeds the size limit (4 bytes).'
+      'a.tgz/a.txt': error,
+      'a.tgz/dir/b.txt': error
+    });
+    assert.deepEqual(await readEntries(await makeZip(5), 'a.zip', 4), {
+      'a.zip/a.txt': error,
+      'a.zip/dir/b.txt': error
     });
   });
 

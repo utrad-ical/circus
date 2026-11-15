@@ -1,4 +1,3 @@
-import multer from '@koa/multer';
 import type { CsCore, DicomVoxelDumper } from '@utrad-ical/circus-cs-core';
 import type {
   DicomFileRepository,
@@ -258,11 +257,6 @@ export const createApp: FunctionService<
           onerror: (err, ctx) =>
             ctx.throw(400, 'Invalid JSON as request body.\n' + err.message)
         }),
-        multer({
-          storage: multer.memoryStorage(),
-          limits: { fileSize: deps.uploadFileSizeMaxBytes }
-        }).array('files'),
-
         apiRouter.routes() as any as Middleware
       ])
     )

@@ -9,7 +9,8 @@ import {
   afterEach
 } from 'node:test';
 import type { AxiosInstance } from 'axios';
-import FormData from 'form-data';
+import { packTar } from 'modern-tar';
+import type { Readable } from 'node:stream';
 import fs from 'fs-extra';
 import path from 'path';
 import tarfs from 'tar-fs';
@@ -17,7 +18,7 @@ import zlib from 'zlib';
 import { setUpMongoFixture } from '../../test/util-mongo.ts';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
-import delay from '../../utils/delay.ts';
+import { readFromStreamTillEnd } from '../../test/util-stream.ts';
 
 let apiTest: ApiTest, ax: typeof apiTest.axiosInstances;
 
@@ -131,91 +132,167 @@ describe('getOrientation', () => {
 });
 
 describe('Upload', () => {
-  const file = path.join(
-    import.meta.dirname,
-    '../../../test/dicom/CT-MONO2-16-brain.dcm'
-  );
-  const seriesUid =
+  const dicomDir = path.join(import.meta.dirname, '../../../test/dicom');
+  const brain = path.join(dicomDir, 'CT-MONO2-16-brain.dcm');
+  const brainUid =
     '2.16.840.1.113662.2.1.2519.21582.2990505.2105152.2381633.20';
 
   beforeEach(async () => {
     await setUpMongoFixture(apiTest.database.db, ['series']);
   });
 
-  describe('with a task', () => {
-    const uploadTest = async (
-      file: string,
-      axios: AxiosInstance = apiTest.axiosInstances.dave,
-      domain = 'sirius.org'
-    ) => {
-      const formData = new FormData();
-      const fileData = await fs.readFile(file);
-      formData.append('files', fileData, { filename: file });
-      const res = await axios.request({
-        method: 'post',
-        url: `api/series/domain/${domain}`,
-        headers: formData.getHeaders(),
-        data: formData
-      });
-      if (res.status === 503) {
-        console.warn(
-          'Upload request returned with 503: Is dicom_utility installed?'
-        );
-      }
-      return res;
+  const file = async (p: string) =>
+    new Blob([new Uint8Array(await fs.readFile(p))]);
+
+  // A file that looks like DICOM but is broken
+  const brokenDicom = () => {
+    const data = new Uint8Array(200).fill(0xff);
+    data.set(new TextEncoder().encode('DICM'), 128);
+    return new Blob([data]);
+  };
+
+  // Minimal DICOMDIR, with only the meta header
+  const dicomDirFile = () => {
+    const element = (el: number, value: string) => {
+      if (value.length % 2) value += '\0';
+      const buf = new Uint8Array(8 + value.length);
+      const view = new DataView(buf.buffer);
+      view.setUint16(0, 2, true);
+      view.setUint16(2, el, true);
+      buf.set(new TextEncoder().encode('UI'), 4);
+      view.setUint16(6, value.length, true);
+      buf.set(new TextEncoder().encode(value), 8);
+      return buf;
     };
+    return new Blob([
+      new Uint8Array(128),
+      'DICM',
+      element(0x0002, '1.2.840.10008.1.3.10'),
+      element(0x0010, '1.2.840.10008.1.2.1')
+    ]);
+  };
 
-    test('upload signle DICOM file', async () => {
-      const res = await uploadTest(file);
-      if (res.status === 503) return;
-      assert.equal(res.status, 201);
-      assert.equal(res.data?.taskId.length, 26);
-      const taskId = res.data.taskId;
-      while (apiTest.taskManager.isTaskInProgress(taskId)) {
-        await delay(10);
-      }
-      const doc = await apiTest.database.db.collection('series').findOne({
-        seriesUid
-      });
-      assert.equal(doc?.images, '8');
-    });
+  const upload = async (
+    files: [Blob, string][],
+    opts: { axios?: AxiosInstance; url?: string } = {}
+  ) => {
+    const {
+      axios = apiTest.axiosInstances.dave,
+      url = 'api/series/domain/sirius.org'
+    } = opts;
+    const fd = new FormData();
+    for (const [blob, name] of files) fd.append('files', blob, name);
+    return await axios.post(url, fd);
+  };
 
-    test('upload zipped DICOM files', async () => {
-      const file = path.join(
-        import.meta.dirname,
-        '../../../test/dicom/test.zip'
-      );
-      const res = await uploadTest(file);
-      if (res.status === 503) return;
-      assert.equal(res.status, 201);
-      assert.equal(res.data?.taskId.length, 26);
-    });
+  const imagesOf = async (seriesUid: string) =>
+    (await apiTest.database.db.collection('series').findOne({ seriesUid }))
+      ?.images;
 
-    test('reject series upload into innaccessible domain', async () => {
-      const res = await uploadTest(file, apiTest.axiosInstances.bob);
-      if (res.status === 503) return;
-      assert.equal(res.status, 403);
-      assert.match(res.data.error, /You cannot upload to this domain/);
-    });
+  test('imports a DICOM file', async () => {
+    const res = await upload([[await file(brain), 'brain.dcm']]);
+    assert.equal(res.status, 201);
+    assert.deepEqual(res.data, { imported: 1, skipped: [], errors: [] });
+    assert.equal(await imagesOf(brainUid), '8');
   });
 
-  describe('without a task', () => {
-    test('should upload signle DICOM file', async () => {
-      const formData = new FormData();
-      const fileData = await fs.readFile(file);
-      formData.append('files', fileData, { filename: file });
-      const res = await apiTest.axiosInstances.dave.request({
-        method: 'post',
-        url: `api/series/domain/sirius.org/single`,
-        headers: formData.getHeaders(),
-        data: formData
-      });
-      assert.equal(res.status, 201);
-      const doc = await apiTest.database.db.collection('series').findOne({
-        seriesUid
-      });
-      assert.equal(doc?.images, '8');
+  test('imports archives and files in one request', async () => {
+    const tar = await packTar(
+      await Promise.all(
+        [1, 2, 3].map(async i => {
+          const body = await fs.readFile(
+            path.join(dicomDir, `head-first00${i}.dcm`)
+          );
+          return {
+            header: { name: `d/${i}.dcm`, size: body.length, type: 'file' },
+            body: new Uint8Array(body)
+          } as const;
+        })
+      )
+    );
+    const tgz = await new Response(
+      new Blob([tar]).stream().pipeThrough(new CompressionStream('gzip'))
+    ).blob();
+    const res = await upload([
+      [await file(path.join(dicomDir, 'test.zip')), 'test.zip'],
+      [tgz, 'head.tar.gz'],
+      [new Blob(['hello']), 'dir/readme.txt'],
+      [dicomDirFile(), 'cd/DICOMDIR']
+    ]);
+    assert.equal(res.status, 201);
+    assert.deepEqual(res.data, {
+      imported: 4,
+      skipped: [
+        { file: 'dir/readme.txt', reason: 'Not a DICOM file' },
+        { file: 'cd/DICOMDIR', reason: 'DICOMDIR' }
+      ],
+      errors: []
     });
+    assert.equal(await imagesOf(brainUid), '8');
+  });
+
+  test('continues after a broken file and returns 422', async () => {
+    const res = await upload([
+      [brokenDicom(), 'broken.dcm'],
+      [new Blob(['PK\x03\x04broken']), 'broken.zip'],
+      [await file(brain), 'brain.dcm']
+    ]);
+    assert.equal(res.status, 422);
+    assert.equal(res.data.imported, 1);
+    assert.deepEqual(
+      res.data.errors.map((e: any) => e.file),
+      ['broken.dcm', 'broken.zip']
+    );
+    assert.match(res.data.errors[1].reason, /^Invalid archive/);
+    assert.equal(await imagesOf(brainUid), '8');
+  });
+
+  test('returns 400 when there is no DICOM file', async () => {
+    const res = await upload([[new Blob(['hello']), 'a.txt']]);
+    assert.equal(res.status, 400);
+    assert.deepEqual(res.data.skipped, [
+      { file: 'a.txt', reason: 'Not a DICOM file' }
+    ]);
+  });
+
+  test('accepts the legacy single-file URL', async () => {
+    const res = await upload([[await file(brain), 'brain.dcm']], {
+      url: 'api/series/domain/sirius.org/single'
+    });
+    assert.equal(res.status, 201);
+    assert.equal(await imagesOf(brainUid), '8');
+  });
+
+  test('rejects upload into an inaccessible domain', async () => {
+    const res = await upload([[await file(brain), 'brain.dcm']], {
+      axios: apiTest.axiosInstances.bob
+    });
+    assert.equal(res.status, 403);
+    assert.match(res.data.error, /You cannot upload to this domain/);
+  });
+
+  test('reports the progress with the log', async () => {
+    const { dave } = apiTest.axiosInstances;
+    const progressId = (await dave.post('api/progress', {})).data.progressId;
+    const sse = await dave.get(`api/progress/${progressId}`, {
+      responseType: 'stream'
+    });
+    const events = readFromStreamTillEnd(sse.data as Readable);
+    const res = await upload(
+      [
+        [await file(brain), 'brain.dcm'],
+        [brokenDicom(), 'broken.dcm']
+      ],
+      { url: `api/series/domain/sirius.org?progressId=${progressId}` }
+    );
+    assert.equal(res.status, 422);
+    const text = await events;
+    assert.match(text, /event: log\ndata: .*"Imported brain.dcm"/);
+    assert.match(text, /"level":"error","message":"Failed broken.dcm: /);
+    assert.match(
+      text,
+      /event: finish\ndata: {"message":"Imported 1 file\(s\), failed 1."}/
+    );
   });
 });
 

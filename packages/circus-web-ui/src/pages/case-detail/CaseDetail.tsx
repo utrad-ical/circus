@@ -334,7 +334,8 @@ const CaseDetail: React.FC<{}> = () => {
       />
       <Dialog open={exportDialogOpen} dismissable={false} size="large">
         <CaseExportModal
-          caseIds={[{ caseId, revisionIndex: caseStore.editingRevisionIndex }]}
+          caseIds={[caseId]}
+          revisionIndex={caseStore.editingRevisionIndex}
           onClose={() => setExportDialogOpen(false)}
           revisions={caseStore.caseData!.revisions}
         />

@@ -16,6 +16,7 @@ import type { CsCore, DicomVoxelDumper } from '@utrad-ical/circus-cs-core';
 import type { Logger, DicomFileRepository } from '@utrad-ical/circus-lib';
 import type { TaskManager } from '../createTaskManager.ts';
 import type { MhdPacker } from '../case/createMhdPacker.ts';
+import type { ProgressManager } from '../createProgressManager.ts';
 import type { SeriesOrientationResolver } from '../utils/createSeriesOrientationResolver.ts';
 
 export interface Deps {
@@ -34,6 +35,7 @@ export interface Deps {
   uploadFileSizeMaxBytes: number;
   dicomImageServerUrl: string;
   taskManager: TaskManager;
+  progressManager: ProgressManager;
   mhdPacker: MhdPacker;
   dicomVoxelDumper: DicomVoxelDumper;
   transactionManager: TransactionManager;

@@ -20,6 +20,7 @@ import type { DicomUtilityRunner } from './utils/createDicomUtilityRunner.ts';
 import createDicomUtilityRunner from './utils/createDicomUtilityRunner.ts';
 import type { TaskManager } from './createTaskManager.ts';
 import type { MhdPacker } from './case/createMhdPacker.ts';
+import type { ProgressManager } from './createProgressManager.ts';
 import type KoaOAuth2Server from './middleware/auth/KoaOAuth2Server.ts';
 import type { SeriesOrientationResolver } from './utils/createSeriesOrientationResolver.ts';
 
@@ -35,6 +36,7 @@ export type Services = CsCoreServices &
     dicomTagReader: DicomTagReader;
     dicomUtilityRunner: DicomUtilityRunner;
     taskManager: TaskManager;
+    progressManager: ProgressManager;
     mhdPacker: MhdPacker;
     oauthServer: KoaOAuth2Server;
     authProvider: AuthProvider;
@@ -87,6 +89,10 @@ const createServiceLoader = async (config: any) => {
   loader.registerModule(
     'taskManager',
     path.join(import.meta.dirname, 'createTaskManager')
+  );
+  loader.registerModule(
+    'progressManager',
+    path.join(import.meta.dirname, 'createProgressManager')
   );
   loader.registerModule(
     'mhdPacker',

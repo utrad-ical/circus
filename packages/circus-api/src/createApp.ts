@@ -27,6 +27,7 @@ import querystring from 'querystring';
 import type * as ws from 'ws';
 import type { MhdPacker } from './case/createMhdPacker.ts';
 import type { TaskManager } from './createTaskManager.ts';
+import type { ProgressManager } from './createProgressManager.ts';
 import type {
   Database,
   DicomImporter,
@@ -152,6 +153,7 @@ export const createApp: FunctionService<
     dicomTagReader: DicomTagReader;
     dicomImporter: DicomImporter;
     taskManager: TaskManager;
+    progressManager: ProgressManager;
     mhdPacker: MhdPacker;
     dicomVoxelDumper: DicomVoxelDumper;
     oauthServer: KoaOAuth2Server;
@@ -178,6 +180,7 @@ export const createApp: FunctionService<
     dicomFileRepository,
     dicomTagReader,
     taskManager,
+    progressManager,
     mhdPacker,
     dicomVoxelDumper,
     oauthServer,
@@ -214,6 +217,7 @@ export const createApp: FunctionService<
     uploadFileSizeMaxBytes,
     dicomImageServerUrl,
     taskManager,
+    progressManager,
     mhdPacker,
     dicomVoxelDumper,
     transactionManager,
@@ -331,6 +335,7 @@ createApp.dependencies = [
   'dicomTagReader',
   'dicomImporter',
   'taskManager',
+  'progressManager',
   'mhdPacker',
   'dicomVoxelDumper',
   'oauthServer',

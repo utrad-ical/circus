@@ -1,20 +1,30 @@
-import Alert from '#components/Alert.tsx';
 import Button from '#components/Button.tsx';
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ProgressBar from './ProgressBar.tsx';
-import { FileDroppable } from './FileDroppable.tsx';
+import { FileDroppable, type FileWithPath } from './FileDroppable.tsx';
+import LogPane from './LogPane.tsx';
 import useShowMessage from '#utils/useShowMessage.ts';
 import * as modal from '#components/dialogs.tsx';
 import classnames from 'classnames';
 import styles from './FileUpload.module.css';
 import table from './table.module.css';
 import { api } from '#utils/api.ts';
+import useProgress from '#utils/useProgress.ts';
 import { withCommas } from '#utils/util.ts';
 
-const dedupeFiles = (files: File[]) => {
-  const map = new Map<string, File>();
-  files.forEach(f => !map.has(f.name) && map.set(f.name, f));
+const dedupeFiles = (files: FileWithPath[]) => {
+  const map = new Map<string, FileWithPath>();
+  files.forEach(f => !map.has(f.path) && map.set(f.path, f));
   return Array.from(map.values());
+};
+
+const fromInput = (input: HTMLInputElement): FileWithPath[] => {
+  const files = Array.from(input.files ?? []).map(file => ({
+    file,
+    path: file.webkitRelativePath || file.name
+  }));
+  input.value = ''; // allows selecting the same files again
+  return files;
 };
 
 /**
@@ -25,10 +35,16 @@ const dedupeFiles = (files: File[]) => {
 const FileUpload: React.FC<{
   url: string;
   onBeforeUpload?: (fd: FormData) => void;
+  /**
+   * Called with the response body,
+   * which may be of 400 or 422 (e.g., some files failed)
+   */
   onUploaded?: (res: any) => void;
   multiple?: boolean;
-  uploadFileMax?: number;
-  uploadFileSizeMaxBytes?: number;
+  /** Allows selecting and dropping folders */
+  allowFolders?: boolean;
+  /** Shows the progress and the log of the server (see `/api/progress`) */
+  withProgress?: boolean;
 }> = props => {
   const {
     url,
@@ -36,44 +52,41 @@ const FileUpload: React.FC<{
     onUploaded,
     children,
     multiple,
-    uploadFileMax,
-    uploadFileSizeMaxBytes
+    allowFolders,
+    withProgress
   } = props;
 
-  const [files, setFiles] = useState<File[]>([]);
+  const [files, setFiles] = useState<FileWithPath[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [progress, setProgress] = useState({ value: 0, label: '' });
+  const [uploadPercent, setUploadPercent] = useState(0);
+  const [progressId, setProgressId] = useState<string | null>(null);
+  const progress = useProgress(progressId);
   const fileInput = useRef<HTMLInputElement>(null);
+  const folderInput = useRef<HTMLInputElement>(null);
   const showMessage = useShowMessage();
 
-  const handleDropFile = (newFiles: FileList) => {
-    setFiles(dedupeFiles([...files, ...Array.from(newFiles)]));
-  };
+  useEffect(() => {
+    if (folderInput.current) folderInput.current.webkitdirectory = true;
+  }, [allowFolders]);
 
-  const handleFileSelect = () => {
-    setFiles(dedupeFiles([...files, ...Array.from(fileInput.current!.files!)]));
+  useEffect(() => {
+    if (!uploading) return;
+    // Leaving the page stops the upload
+    const handler = (event: BeforeUnloadEvent) => event.preventDefault();
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [uploading]);
+
+  const addFiles = (newFiles: FileWithPath[]) => {
+    const dropped = multiple ? newFiles : newFiles.slice(0, 1);
+    setFiles(multiple ? dedupeFiles([...files, ...dropped]) : dropped);
   };
 
   const handleUploadProgress = (event: ProgressEvent) => {
-    const bytesSent = event.loaded;
-    const bytesTotal = event.total;
-    const percent = Math.floor((bytesSent * 100) / bytesTotal);
-    setProgress({
-      value: percent,
-      label:
-        bytesSent === bytesTotal
-          ? 'Upload done. Waiting for import...'
-          : `${percent}% Uploaded.`
-    });
+    setUploadPercent(Math.floor((event.loaded * 100) / event.total));
   };
 
-  const totalBytes = files.reduce((sum, f) => (sum += f.size), 0);
-
-  const canUpload =
-    !uploading &&
-    files.length > 0 &&
-    !(files.length > (uploadFileMax ?? Infinity)) &&
-    !(totalBytes > (uploadFileSizeMaxBytes ?? Infinity));
+  const totalBytes = files.reduce((sum, f) => sum + f.file.size, 0);
 
   const handleUploadClick = async () => {
     if (!files.length) return;
@@ -86,30 +99,59 @@ const FileUpload: React.FC<{
     if (!confirmed) return;
 
     const fd = new FormData();
-    files.forEach(f => fd.append('files', f));
+    files.forEach(f => fd.append('files', f.file, f.path));
 
     // Allow the component user to access the FormData and modify it
     typeof onBeforeUpload === 'function' && onBeforeUpload(fd);
 
+    setUploading(true);
+    setUploadPercent(0);
     try {
-      setUploading(true);
-      const res = await api(url, {
+      let target = url;
+      if (withProgress) {
+        const { progressId } = await api('progress', {
+          method: 'post',
+          data: {}
+        });
+        setProgressId(progressId);
+        target +=
+          (url.includes('?') ? '&' : '?') +
+          `progressId=${encodeURIComponent(progressId)}`;
+      }
+      const res = await api(target, {
         method: 'post',
         data: fd,
-        onUploadProgress: handleUploadProgress
+        onUploadProgress: handleUploadProgress,
+        handleErrors: [400, 422]
       });
       setFiles([]);
-      setUploading(false);
       typeof onUploaded === 'function' && onUploaded(res);
     } catch (err: any) {
+      const status = err.response?.status;
+      if (status === 400 || status === 422) {
+        setFiles([]);
+        typeof onUploaded === 'function' && onUploaded(err.response.data);
+      } else {
+        showMessage(`Upload failed (Error ${status ?? 'network'})`, 'danger');
+      }
+    } finally {
       setUploading(false);
-      showMessage(`Upload failed (Error ${err.status})`, 'danger');
-      throw err;
     }
   };
 
+  const uploadLabel =
+    (uploadPercent < 100 ? `${uploadPercent}% uploaded` : 'Uploaded') +
+    (progress?.message ? ` | ${progress.message}` : '');
+
   return (
-    <FileDroppable onDropFile={handleDropFile} className={styles.droppable}>
+    <FileDroppable
+      onDropFiles={files =>
+        addFiles(
+          allowFolders ? files : files.filter(f => !f.path.includes('/'))
+        )
+      }
+      className={styles.droppable}
+    >
       <div className={styles.fileUpload}>
         {children}
         <div>
@@ -117,57 +159,65 @@ const FileUpload: React.FC<{
             ref={fileInput}
             type="file"
             multiple={!!multiple}
-            onChange={handleFileSelect}
+            onChange={() => addFiles(fromInput(fileInput.current!))}
           />
+          {allowFolders && (
+            <input
+              ref={folderInput}
+              type="file"
+              onChange={() => addFiles(fromInput(folderInput.current!))}
+            />
+          )}
           {files.length > 0 && (
-            <>
-              <div className={styles.uploadButtons}>
-                <Button
-                  variant="primary"
-                  disabled={!canUpload}
-                  onClick={handleUploadClick}
-                  icon="material-arrow_circle_up"
-                >
-                  Upload
-                </Button>
-                <Button
-                  variant="link"
-                  disabled={uploading}
-                  onClick={() => setFiles([])}
-                >
-                  Reset
-                </Button>
-              </div>
-              {files.length > (uploadFileMax ?? Infinity) && (
-                <Alert variant="danger">
-                  You cannot upload more than {uploadFileMax} files at the same
-                  time. Use a zipped file.
-                </Alert>
-              )}
-              {totalBytes > (uploadFileSizeMaxBytes ?? Infinity) && (
-                <Alert variant="danger">
-                  You cannot upload more than{' '}
-                  {withCommas(uploadFileSizeMaxBytes!)} bytes of data at the
-                  same time.
-                </Alert>
-              )}
-            </>
+            <div className={styles.uploadButtons}>
+              <Button
+                variant="primary"
+                disabled={uploading}
+                onClick={handleUploadClick}
+                icon="material-arrow_circle_up"
+              >
+                Upload
+              </Button>
+              <Button
+                variant="link"
+                disabled={uploading}
+                onClick={() => setFiles([])}
+              >
+                Reset
+              </Button>
+            </div>
           )}
           <SummaryTable files={files} onChange={setFiles} />
-          <Button
-            onClick={() => fileInput.current!.click()}
-            icon="material-add"
-          >
-            {files.length > 0 ? 'Add More file' : 'Select File'}
-          </Button>
+          <div className={styles.selectButtons}>
+            <Button
+              disabled={uploading}
+              onClick={() => fileInput.current!.click()}
+              icon="material-add"
+            >
+              {files.length > 0 ? 'Add Files' : 'Select Files'}
+            </Button>
+            {allowFolders && (
+              <Button
+                disabled={uploading}
+                onClick={() => folderInput.current!.click()}
+                icon="material-folder_open"
+              >
+                {files.length > 0 ? 'Add Folder' : 'Select Folder'}
+              </Button>
+            )}
+          </div>
         </div>
         {uploading && (
           <div className={styles.uploading}>
             <div>Uploading:</div>
-            <ProgressBar value={progress.value} label={progress.label} />
+            <ProgressBar value={uploadPercent} label={uploadLabel} />
           </div>
         )}
-        <p>You can drag and drop files to this box.</p>
+        {withProgress && progress && <LogPane lines={progress.logs ?? []} />}
+        <p>
+          You can drag and drop {allowFolders ? 'files or folders' : 'files'} to
+          this box.
+        </p>
       </div>
     </FileDroppable>
   );
@@ -176,13 +226,13 @@ const FileUpload: React.FC<{
 export default FileUpload;
 
 const SummaryTable: React.FC<{
-  files: File[];
-  onChange: (files: File[]) => void;
+  files: FileWithPath[];
+  onChange: (files: FileWithPath[]) => void;
   showMax?: number;
 }> = props => {
   const { files, onChange, showMax = 10 } = props;
   if (files.length < 1) return null;
-  const totalBytes = files.reduce((sum, f) => (sum += f.size), 0);
+  const totalBytes = files.reduce((sum, f) => sum + f.file.size, 0);
 
   const handleDelete = (index: number) => {
     onChange(files.filter((f, i) => i !== index));
@@ -202,8 +252,8 @@ const SummaryTable: React.FC<{
           if (i >= showMax) return null;
           return (
             <tr key={i}>
-              <td>{f.name}</td>
-              <td className={styles.number}>{withCommas(f.size)}</td>
+              <td>{f.path}</td>
+              <td className={styles.number}>{withCommas(f.file.size)}</td>
               <td>
                 <Button
                   icon="material-close"

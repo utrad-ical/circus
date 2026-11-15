@@ -1,0 +1,9 @@
+.result {
+  font-size: 85%;
+  td:first-child {
+    word-break: break-all;
+  }
+  .error td:last-child {
+    color: var(--danger);
+  }
+}

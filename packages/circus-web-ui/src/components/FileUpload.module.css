@@ -32,3 +32,8 @@
 .number {
   text-align: right;
 }
+
+.selectButtons {
+  display: flex;
+  gap: 5px;
+}

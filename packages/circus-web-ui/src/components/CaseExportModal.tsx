@@ -71,14 +71,6 @@ const createCaseExportOptionsEditor: (
         </div>
       )}
       <div className={styles.option}>
-        Volume:{' '}
-        <Select
-          options={volumeOptions}
-          value={value.volume}
-          onChange={v => onChange({ ...value, volume: v })}
-        />
-      </div>
-      <div className={styles.option}>
         Voxel labels:{' '}
         <Select
           options={labelPackTypeOptions}
@@ -100,6 +92,14 @@ const createCaseExportOptionsEditor: (
           options={compressionFormatOptions}
           value={value.compressionFormat}
           onChange={v => onChange({ ...value, compressionFormat: v })}
+        />
+      </div>
+      <div className={styles.option}>
+        Volume:{' '}
+        <Select
+          options={volumeOptions}
+          value={value.volume}
+          onChange={v => onChange({ ...value, volume: v })}
         />
       </div>
     </div>

@@ -32,15 +32,11 @@ const action: CommandAction = ({ getFetch }) => {
       const spinner = createSpinner('Downloading...');
       let status: string | undefined;
       const watcher = await watchProgress(fetch, event => {
-        // `finish` means packed; the rest may still be on the way
-        if (event.type === 'finish') status = '100% packed';
-        else if (event.type === 'error' || !event.total) status = event.message;
-        else {
-          const percent = Math.floor(
-            ((event.finished ?? 0) / event.total) * 100
-          );
-          status = `${percent}% ${event.message}`;
-        }
+        const { message, finished = 0, total } = event;
+        status =
+          event.type === 'progress' && total
+            ? `${Math.floor((finished / total) * 100)}% ${message}`
+            : message;
       });
       try {
         const params = new URLSearchParams({

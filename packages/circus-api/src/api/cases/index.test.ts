@@ -702,7 +702,7 @@ describe('export-mhd', () => {
     assert.equal(res.status, 200);
     assert.match(
       await events,
-      /event: finish\ndata: \{"message":"Exported 1 case\(s\)."\}/
+      /event: finish\ndata: \{"message":"Packed 1 case\(s\)."\}/
     );
   });
 

@@ -319,7 +319,7 @@ const createMhdPacker: FunctionService<
       try {
         for (const c of prepared.cases) await putCase(c);
         await writer.close();
-        reporter?.finish(`Exported ${prepared.cases.length} case(s).`);
+        reporter?.finish(`Packed ${prepared.cases.length} case(s).`);
       } catch (err: any) {
         if (canceled) {
           reporter?.fail('The download was canceled.');

@@ -32,10 +32,14 @@ const createAuthorizedFetch = (
     try {
       const res = await fetch(resource, { ...init, headers });
       if (!res.ok) {
-        throw new Error(
-          `HTTP error: ${res.status} ${res.statusText}\n` +
-            `URL: ${res.url}\n` +
-            `Error content: ${await res.text()}`
+        const body = await res.text();
+        throw Object.assign(
+          new Error(
+            `HTTP error: ${res.status} ${res.statusText}\n` +
+              `URL: ${res.url}\n` +
+              `Error content: ${body}`
+          ),
+          { status: res.status, body }
         );
       }
       return res;

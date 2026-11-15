@@ -452,6 +452,9 @@ importers:
       json5:
         specifier: ^2.2.3
         version: 2.2.3
+      modern-tar:
+        specifier: ^0.8.6
+        version: 0.8.6
     devDependencies:
       '@types/js-yaml':
         specifier: ^4.0.9

@@ -14,7 +14,7 @@ import DownloadModal, {
 
 type LabelPackTypeOptions = 'isolated' | 'combined';
 
-type VolumeOptions = 'default' | 'original';
+type VolumeOptions = 'default' | 'fullOriginal';
 
 interface CaseExportOptions {
   /** Only when exporting a case */
@@ -27,7 +27,7 @@ interface CaseExportOptions {
 
 const volumeOptions: { [type in VolumeOptions]: string } = {
   default: 'Default',
-  original: 'Entire volume (original series)'
+  fullOriginal: 'Full original volume'
 };
 
 const labelPackTypeOptions: { [type in LabelPackTypeOptions]: string } = {
@@ -120,14 +120,14 @@ const CaseExportModal: FC<{
 
   const onStart = useCallback(
     async (options: CaseExportOptions) => {
-      const { revisionIndex, ...rest } = options;
+      const { revisionIndex, volume, ...rest } = options;
       const params = new URLSearchParams({
         caseIds: caseIds.join(','),
-        ...rest,
-        ...(revisionIndex !== undefined
-          ? { revisionIndex: String(revisionIndex) }
-          : {})
+        ...rest
       });
+      if (revisionIndex !== undefined)
+        params.set('revisionIndex', String(revisionIndex));
+      if (volume === 'fullOriginal') params.set('fullOriginalVolume', '1');
       return { url: api.getBaseUrl() + 'cases/export-mhd?' + params };
     },
     [caseIds]

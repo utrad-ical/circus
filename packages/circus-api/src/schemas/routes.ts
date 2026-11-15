@@ -30,7 +30,10 @@ export const caseExportMhdQuery = z
       .regex(/^(0|[1-9][0-9]*)$/)
       .transform(Number)
       .optional(),
-    volume: z.enum(['default', 'original']).default('default'),
+    fullOriginalVolume: z
+      .literal('1')
+      .transform(() => true)
+      .optional(),
     labelPackType: z.enum(['isolated', 'combined']).default('isolated'),
     mhdLineEnding: z.enum(['lf', 'crlf']).default('lf'),
     compressionFormat: z.enum(['tgz', 'zip']).default('tgz'),

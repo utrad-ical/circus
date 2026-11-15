@@ -257,7 +257,7 @@ export const handleGetExportMhd: RouteMiddleware = ({
       const caseIds: string[] = Array.from(new Set(query.caseIds));
       prepared = await mhdPacker.prepare(
         caseIds.map(caseId => ({ caseId, revisionIndex: query.revisionIndex })),
-        query.volume
+        !!query.fullOriginalVolume
       );
       const { accessibleProjects } = ctx.userPrivileges;
       for (const { caseData } of prepared.cases) {
@@ -276,7 +276,11 @@ export const handleGetExportMhd: RouteMiddleware = ({
       throw err;
     }
 
-    const stream = mhdPacker.pack(prepared, query, reporter);
+    const stream = mhdPacker.pack(
+      prepared,
+      { ...query, fullOriginalVolume: !!query.fullOriginalVolume },
+      reporter
+    );
     const zip = query.compressionFormat === 'zip';
     ctx.attachment(zip ? 'case-export.zip' : 'case-export.tar.gz');
     ctx.type = zip ? 'application/zip' : 'application/gzip';

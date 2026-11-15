@@ -32,11 +32,11 @@ const action: CommandAction = ({ getFetch }) => {
       try {
         const params = new URLSearchParams({
           caseIds: batch.join(','),
-          volume: options.entireVolume ? 'original' : 'default',
           labelPackType: options.combined ? 'combined' : 'isolated',
           mhdLineEnding: options.crlf ? 'crlf' : 'lf',
           compressionFormat: options.zip ? 'zip' : 'tgz'
         });
+        if (options.fullOriginalVolume) params.set('fullOriginalVolume', '1');
         const res = await fetch(`cases/export-mhd?${params}`);
         await downloadToFile(
           res,

@@ -9,8 +9,8 @@ export default (program: Command) => {
     .option('-o, --outdir <dir>', 'output directory (default: CWD)')
     .option('-f, --file', 'read list of case IDs from file')
     .option(
-      '-e, --entire-volume',
-      'export the entire volume of the original series'
+      '--full-original-volume',
+      'export all the images of the original series as they are'
     )
     .option('-c, --combined', 'export combined label files')
     .option('-l, --crlf', 'use CRLF instead of LF for line endings')
@@ -35,7 +35,7 @@ export default (program: Command) => {
         Use the "-p (--per-task)" option to control the number of cases downloaded as a batch.
 
         By default, each volume is the one used in the case, which the labels fit.
-        With "-e (--entire-volume)", each volume has all the images of the original series,
+        With "--full-original-volume", each volume has all the images of the original series,
         and the labels are not converted ("originalSeriesMeta" in data.json
         has the image numbers of the series).
 

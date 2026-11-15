@@ -31,17 +31,15 @@ export interface CaseExportTarget {
   revisionIndex?: number;
 }
 
-/**
- * `default` exports the volume of the partial volume descriptor;
- * `original` exports all the images of the series as they are.
- * Labels are always in the partial volume.
- */
-export type VolumeRange = 'default' | 'original';
 export type LabelPackType = 'isolated' | 'combined';
 export type LineEndingType = 'lf' | 'crlf';
 
 export interface PackOptions {
-  volume: VolumeRange;
+  /**
+   * Exports all the images of the series as they are,
+   * instead of the partial volume. Labels are always in the partial volume.
+   */
+  fullOriginalVolume: boolean;
   labelPackType: LabelPackType;
   mhdLineEnding: LineEndingType;
   compressionFormat: ArchiveFormat;
@@ -79,7 +77,7 @@ export interface MhdPacker {
    */
   prepare: (
     targets: CaseExportTarget[],
-    volume: VolumeRange
+    fullOriginalVolume: boolean
   ) => Promise<PreparedExport>;
   /**
    * Packs the cases into an archive.
@@ -124,7 +122,7 @@ const createMhdPacker: FunctionService<
 
   const prepareSeries = async (
     entry: any,
-    volume: VolumeRange,
+    fullOriginalVolume: boolean,
     originalSeriesMeta: PreparedCase['originalSeriesMeta']
   ) => {
     const seriesData = await models.series.findById(entry.seriesUid);
@@ -148,11 +146,11 @@ const createMhdPacker: FunctionService<
     };
     return {
       prepared,
-      slices: volume === 'default' ? pvdLength : mr.length(images)
+      slices: fullOriginalVolume ? mr.length(images) : pvdLength
     };
   };
 
-  const prepare: MhdPacker['prepare'] = async (targets, volume) => {
+  const prepare: MhdPacker['prepare'] = async (targets, fullOriginalVolume) => {
     const cases: PreparedCase[] = [];
     let totalSlices = 0;
     for (const { caseId, revisionIndex } of targets) {
@@ -168,7 +166,7 @@ const createMhdPacker: FunctionService<
       for (const entry of revision.series) {
         const { prepared, slices } = await prepareSeries(
           entry,
-          volume,
+          fullOriginalVolume,
           originalSeriesMeta
         );
         series.push(prepared);
@@ -263,7 +261,7 @@ const createMhdPacker: FunctionService<
         const { metadata, slices } = await openSeriesVolume(
           deps,
           series.seriesUid,
-          options.volume === 'default' ? series.pvd : undefined
+          options.fullOriginalVolume ? undefined : series.pvd
         );
         const { dimension, pixelFormat, elementSpacing } = metadata;
         const baseName = `${caseId}/vol${pad(volId)}`;
@@ -299,14 +297,13 @@ const createMhdPacker: FunctionService<
           )
         );
         // The labels stay in the partial volume
-        const labelSpacing: Vector3D =
-          options.volume === 'default'
-            ? elementSpacing
-            : [
-                elementSpacing[0],
-                elementSpacing[1],
-                elementSpacing[2] * Math.abs(series.pvd.delta)
-              ];
+        const labelSpacing: Vector3D = options.fullOriginalVolume
+          ? [
+              elementSpacing[0],
+              elementSpacing[1],
+              elementSpacing[2] * Math.abs(series.pvd.delta)
+            ]
+          : elementSpacing;
         await putLabels(
           writer,
           baseName + '-label',

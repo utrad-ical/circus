@@ -118,7 +118,7 @@ const createUncachedVolumeProvider: FunctionService<
       const primaryMetadata = imageMetadata.get(primaryImageNo)!;
 
       if (primaryMetadata.pitch) {
-        // The pitch value can be negative (represents the direction of stacking)
+        // (0018,0088) must not be negative, but some devices write negative values
         return Math.abs(primaryMetadata.pitch);
       } else if (count > 1) {
         const secondaryImageNo = mr.at(imageRange, 1)!;

@@ -684,7 +684,7 @@ describe('export-mhd', () => {
   });
 
   test('exports the whole series as tar.gz', async () => {
-    const res = await download({ caseIds: 'export-a', volume: 'series' });
+    const res = await download({ caseIds: 'export-a', volume: 'original' });
     assert.equal(res.status, 200);
     assert.equal(res.headers['content-type'], 'application/gzip');
     const files = await readArchive('tgz', new Blob([res.data]).stream());
@@ -725,7 +725,7 @@ describe('export-mhd', () => {
     for (const params of [
       { caseIds },
       { caseIds: 'export-a,export-b', revisionIndex: 0 },
-      { caseIds: 'export-a', volume: 'all' },
+      { caseIds: 'export-a', volume: 'pvd' },
       { caseIds: 'export-a', unknown: 1 },
       { caseIds: 'nonexistent' },
       { caseIds: 'export-a', revisionIndex: 1 }

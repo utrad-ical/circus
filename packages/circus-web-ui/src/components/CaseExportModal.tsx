@@ -14,7 +14,7 @@ import DownloadModal, {
 
 type LabelPackTypeOptions = 'isolated' | 'combined';
 
-type VolumeOptions = 'pvd' | 'series';
+type VolumeOptions = 'default' | 'original';
 
 interface CaseExportOptions {
   /** Only when exporting a case */
@@ -26,8 +26,8 @@ interface CaseExportOptions {
 }
 
 const volumeOptions: { [type in VolumeOptions]: string } = {
-  pvd: 'Partial volume (as in the case)',
-  series: 'Entire series (labels stay in the partial volume)'
+  default: 'Default',
+  original: 'Entire volume (original series)'
 };
 
 const labelPackTypeOptions: { [type in LabelPackTypeOptions]: string } = {
@@ -145,7 +145,7 @@ const CaseExportModal: FC<{
       onStart={onStart}
       initialOptions={{
         revisionIndex: revisions ? revisionIndex : undefined,
-        volume: 'pvd',
+        volume: 'default',
         mhdLineEnding: 'lf',
         labelPackType: 'isolated',
         compressionFormat: 'tgz'

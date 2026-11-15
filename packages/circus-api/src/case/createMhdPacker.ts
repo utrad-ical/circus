@@ -32,11 +32,11 @@ export interface CaseExportTarget {
 }
 
 /**
- * `pvd` exports the volume of the partial volume descriptor;
- * `series` exports all the images of the series as they are.
+ * `default` exports the volume of the partial volume descriptor;
+ * `original` exports all the images of the series as they are.
  * Labels are always in the partial volume.
  */
-export type VolumeRange = 'pvd' | 'series';
+export type VolumeRange = 'default' | 'original';
 export type LabelPackType = 'isolated' | 'combined';
 export type LineEndingType = 'lf' | 'crlf';
 
@@ -137,7 +137,7 @@ const createMhdPacker: FunctionService<
       !isValidPartialVolumeDescriptor(pvd) ||
       !mr.has(images, mr.normalize(partialVolumeDescriptorToArray(pvd)))
     )
-      throw badRequest(`Invalid partial volume of ${entry.seriesUid}.`);
+      throw badRequest(`Invalid image range of ${entry.seriesUid}.`);
     originalSeriesMeta[entry.seriesUid] = { images: seriesData.images };
     const pvdLength = partialVolumeDescriptorToArray(pvd).length;
     const prepared: PreparedSeries = {
@@ -148,7 +148,7 @@ const createMhdPacker: FunctionService<
     };
     return {
       prepared,
-      slices: volume === 'pvd' ? pvdLength : mr.length(images)
+      slices: volume === 'default' ? pvdLength : mr.length(images)
     };
   };
 
@@ -263,7 +263,7 @@ const createMhdPacker: FunctionService<
         const { metadata, slices } = await openSeriesVolume(
           deps,
           series.seriesUid,
-          options.volume === 'pvd' ? series.pvd : undefined
+          options.volume === 'default' ? series.pvd : undefined
         );
         const { dimension, pixelFormat, elementSpacing } = metadata;
         const baseName = `${caseId}/vol${pad(volId)}`;
@@ -300,7 +300,7 @@ const createMhdPacker: FunctionService<
         );
         // The labels stay in the partial volume
         const labelSpacing: Vector3D =
-          options.volume === 'pvd'
+          options.volume === 'default'
             ? elementSpacing
             : [
                 elementSpacing[0],

@@ -32,7 +32,7 @@ const action: CommandAction = ({ getFetch }) => {
       try {
         const params = new URLSearchParams({
           caseIds: batch.join(','),
-          volume: options.entireSeries ? 'series' : 'pvd',
+          volume: options.entireVolume ? 'original' : 'default',
           labelPackType: options.combined ? 'combined' : 'isolated',
           mhdLineEnding: options.crlf ? 'crlf' : 'lf',
           compressionFormat: options.zip ? 'zip' : 'tgz'

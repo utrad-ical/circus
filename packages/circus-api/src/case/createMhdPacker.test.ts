@@ -79,7 +79,7 @@ const setUp = async (
 };
 
 const defaultOptions: PackOptions = {
-  volume: 'pvd',
+  volume: 'default',
   labelPackType: 'isolated',
   mhdLineEnding: 'lf',
   compressionFormat: 'zip'
@@ -154,7 +154,7 @@ describe('createMhdPacker', () => {
     const { packer } = await setUp({ start: 2, end: 6, delta: 2 }, [
       voxelLabel([0, 0, 1])
     ]);
-    const files = await exportCase(packer, { volume: 'series' });
+    const files = await exportCase(packer, { volume: 'original' });
     assert.equal(files.get(`${caseId}/vol000.raw`)!.length, 2 * 2 * 6);
     assert.equal(dimSize(files.get(`${caseId}/vol000.mhd`)), '2 2 6');
     assert.match(
@@ -210,16 +210,16 @@ describe('createMhdPacker', () => {
 
   test('rejects invalid targets before packing', async () => {
     const { packer } = await setUp({ start: 5, end: 8, delta: 1 });
-    await assert.rejects(packer.prepare([{ caseId: 'none' }], 'pvd'), {
+    await assert.rejects(packer.prepare([{ caseId: 'none' }], 'default'), {
       status: 400
     });
     await assert.rejects(
-      packer.prepare([{ caseId, revisionIndex: 1 }], 'pvd'),
+      packer.prepare([{ caseId, revisionIndex: 1 }], 'default'),
       { status: 400 }
     );
-    await assert.rejects(packer.prepare([{ caseId }], 'pvd'), {
+    await assert.rejects(packer.prepare([{ caseId }], 'default'), {
       status: 400,
-      message: /partial volume/
+      message: /Invalid image range/
     });
   });
 

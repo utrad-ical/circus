@@ -64,9 +64,9 @@ export const command: Command<{
     for (const caseId of caseIds) {
       try {
         console.log(styleText('cyan', 'Exporting'), caseId);
-        const prepared = await mhdPacker.prepare([{ caseId }], 'pvd');
+        const prepared = await mhdPacker.prepare([{ caseId }], 'default');
         const stream = mhdPacker.pack(prepared, {
-          volume: 'pvd',
+          volume: 'default',
           compressionFormat: zip ? 'zip' : 'tgz',
           labelPackType: type,
           mhdLineEnding: 'lf'

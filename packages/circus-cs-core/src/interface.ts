@@ -206,7 +206,8 @@ export interface DicomVoxelDumper {
   /**
    * @param series The list of series to export.
    * @returns The tar stream, which reads the series as it is consumed,
-   *   and the events (`volume`) emitted when each series starts.
+   *   and the events: `volume` (index) when each series starts,
+   *   and `slice` (index, slice number, number of slices) for each slice.
    */
   dump: (
     series: SeriesEntry[],

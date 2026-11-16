@@ -427,41 +427,114 @@ describe('search by my list', () => {
 });
 
 describe('Export CS volume', () => {
-  beforeEach(async () => {
-    await fs.emptyDir(apiTest.downloadFileDirectory);
-  });
+  const download = (params: object, user: keyof typeof ax = 'bob') =>
+    ax[user].get('api/series/export-cs-volume', {
+      params,
+      responseType: 'arraybuffer'
+    });
 
-  afterEach(async () => {
-    await fs.remove(apiTest.downloadFileDirectory);
-  });
+  const readSeries = (files: Map<string, Uint8Array>) =>
+    JSON.parse(new TextDecoder().decode(files.get('series.json')));
 
   for (const compressionFormat of ['tgz', 'zip'] as const) {
-    test(`export as ${compressionFormat}`, async () => {
-      const res = await ax.bob.post('api/series/export-cs-volume', {
-        series: [
-          {
-            seriesUid: '222.333.444.555.666',
-            partialVolumeDescriptor: { start: 1, end: 2, delta: 1 }
-          }
-        ],
+    test(`exports as ${compressionFormat}`, async () => {
+      const res = await download({
+        series: '111.222.333.444.777:1:5:2,222.222.333.444.777',
         compressionFormat
       });
-      assert.equal(res.status, 201);
-      const taskId = res.data.taskId;
-
-      while (apiTest.taskManager.isTaskInProgress(taskId)) {
-        await new Promise(resolve => setTimeout(resolve, 10));
-      }
-
-      const data = await fs.readFile(
-        path.join(apiTest.downloadFileDirectory, taskId)
+      assert.equal(res.status, 200);
+      assert.equal(
+        res.headers['content-type'],
+        compressionFormat === 'zip' ? 'application/zip' : 'application/gzip'
+      );
+      assert.match(
+        res.headers['content-disposition'],
+        compressionFormat === 'zip'
+          ? /filename="111.222.333.444.777.zip"/
+          : /filename="111.222.333.444.777.tar.gz"/
       );
       const files = await readArchive(
         compressionFormat,
-        new Blob([new Uint8Array(data)]).stream()
+        new Blob([res.data]).stream()
       );
-      assert.deepEqual([...files.keys()], ['dummy.txt']);
       assert.equal(new TextDecoder().decode(files.get('dummy.txt')), 'abc');
+      // The first range of the series without the range
+      assert.deepEqual(readSeries(files), [
+        {
+          seriesUid: '111.222.333.444.777',
+          partialVolumeDescriptor: { start: 1, end: 5, delta: 2 }
+        },
+        {
+          seriesUid: '222.222.333.444.777',
+          partialVolumeDescriptor: { start: 1, end: 236, delta: 1 }
+        }
+      ]);
     });
   }
+
+  test('reports the progress', async () => {
+    const issued = await ax.bob.post('api/progress', {});
+    const { progressId } = issued.data;
+    const sse = await ax.bob.get(`api/progress/${progressId}`, {
+      responseType: 'stream'
+    });
+    const events = readFromStreamTillEnd(sse.data as Readable);
+    const res = await download({ series: '111.222.333.444.777', progressId });
+    assert.equal(res.status, 200);
+    assert.match(
+      await events,
+      /event: finish\ndata: \{"message":"Exported 1 volume\(s\)."\}/
+    );
+  });
+
+  test('reports an error before the download in the progress', async () => {
+    const issued = await ax.bob.post('api/progress', {});
+    const { progressId } = issued.data;
+    const res = await download({ series: '111.222.333.444.555', progressId });
+    assert.equal(res.status, 403);
+    const sse = await ax.bob.get(`api/progress/${progressId}`, {
+      responseType: 'stream'
+    });
+    assert.match(
+      await readFromStreamTillEnd(sse.data as Readable),
+      /event: error\ndata: \{"message":"You do not have privilege/
+    );
+  });
+
+  test('rejects series in an inaccessible domain', async () => {
+    const res = await download({
+      series: '111.222.333.444.777,111.222.333.444.555'
+    });
+    assert.equal(res.status, 403);
+  });
+
+  test('rejects a nonexistent series', async () => {
+    const res = await download({ series: '9.9.9.9' });
+    assert.equal(res.status, 404);
+  });
+
+  test('rejects invalid queries', async () => {
+    const tooMany = Array(11).fill('111.222.333.444.777').join(',');
+    for (const params of [
+      {},
+      { series: '' },
+      { series: '111.222.333.444.777:1:2' },
+      { series: '111.222.333.444.777:1:5:0' },
+      { series: '111.222.333.444.777:1:x:1' },
+      { series: '111.222.333.444.777:1:300:1' }, // out of the series
+      { series: '111.222.333.444.777:1:1000000000:1' }, // huge
+      { series: '111.222.333.444.777:5:1:1' }, // wrong direction
+      { series: tooMany },
+      { series: '111.222.333.444.777', compressionFormat: 'rar' },
+      { series: '111.222.333.444.777', unknown: 1 }
+    ]) {
+      const res = await download(params);
+      assert.equal(res.status, 400, JSON.stringify(params));
+    }
+  });
+
+  test('rejects users without the privilege', async () => {
+    const res = await download({ series: '111.222.333.444.555' }, 'frank');
+    assert.equal(res.status, 401);
+  });
 });

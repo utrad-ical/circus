@@ -73,12 +73,15 @@ describe('dump', () => {
   test('exports mhd, raw and json of each series', async () => {
     const { repository } = createRepository('1,5');
     const dumper = await createDumper(repository);
-    const { stream } = dumper.dump([entry(1, 5, 4), entry(1, 1)]);
+    const volumes: number[] = [];
+    const { stream, events } = dumper.dump([entry(1, 5, 4), entry(1, 1)]);
+    events.on('volume', (i: number) => volumes.push(i));
     const entries = await readEntries(stream);
     assert.deepEqual(
       [...entries.keys()],
       ['0.mhd', '0.raw', '0.json', '1.mhd', '1.raw', '1.json']
     );
+    assert.deepEqual(volumes, [0, 1]);
     assert.equal(entries.get('0.raw')!.byteLength, 512 * 512 * 2 * 2);
     assert.equal(entries.get('1.raw')!.byteLength, 512 * 512 * 2);
     const mhd = new TextDecoder().decode(entries.get('0.mhd'));

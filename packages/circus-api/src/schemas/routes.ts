@@ -6,7 +6,6 @@ import { pluginJobFeedback } from './pluginJobFeedback.ts';
 import { pluginJobSeries } from './pluginJobSeries.ts';
 import { preferences } from './preferences.ts';
 import { remotePlugin } from './remotePlugin.ts';
-import { seriesEntry } from './seriesEntry.ts';
 import { userMyList } from './userMyList.ts';
 
 // Request and response schemas used by a single route.
@@ -108,9 +107,33 @@ export const seriesOrientation = z.strictObject({
   orientation: z.enum(['head-first', 'foot-first']).optional()
 });
 
-export const seriesExportCsVolume = z.looseObject({
-  series: z.array(seriesEntry).min(1).max(10),
-  compressionFormat: z.enum(['tgz', 'zip']).optional()
+const int = z
+  .string()
+  .regex(/^-?(0|[1-9][0-9]*)$/)
+  .transform(Number);
+
+// `uid` or `uid:start:end:delta`
+const csVolumeSeries = z
+  .string()
+  .transform(s => s.split(':'))
+  .pipe(
+    z.union([
+      z.tuple([z.string().min(1)]),
+      z.tuple([z.string().min(1), int, int, int])
+    ])
+  )
+  .transform(([seriesUid, start, end, delta]) =>
+    start === undefined ? { seriesUid } : { seriesUid, start, end, delta }
+  )
+  .refine(s => s.delta !== 0, { message: 'delta must not be 0.' });
+
+export const seriesExportCsVolumeQuery = z.strictObject({
+  series: z
+    .string()
+    .transform(s => s.split(','))
+    .pipe(z.array(csVolumeSeries).min(1).max(10)),
+  compressionFormat: z.enum(['tgz', 'zip']).default('tgz'),
+  progressId: z.string().optional()
 });
 
 export const sessionCreate = z.union([

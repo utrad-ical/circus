@@ -18,8 +18,8 @@ import blobPost from './commands/blob-post.ts';
 import blobPostArgs from './commands/blob-post.args.ts';
 import caseAddrev from './commands/case-addrev.ts';
 import caseAddrevArgs from './commands/case-addrev.args.ts';
-import caseDl from './commands/case-dl.ts';
-import caseDlArgs from './commands/case-dl.args.ts';
+import caseExport from './commands/case-export.ts';
+import caseExportArgs from './commands/case-export.args.ts';
 import get from './commands/get.ts';
 import getArgs from './commands/get.args.ts';
 import mylistShow from './commands/mylist-show.ts';
@@ -32,6 +32,8 @@ import put from './commands/put.ts';
 import putArgs from './commands/put.args.ts';
 import seriesImport from './commands/series-import.ts';
 import seriesImportArgs from './commands/series-import.args.ts';
+import seriesExport from './commands/series-export.ts';
+import seriesExportArgs from './commands/series-export.args.ts';
 
 const commands: [(program: Command) => Command, CommandAction][] = [
   [authArgs, auth],
@@ -40,8 +42,9 @@ const commands: [(program: Command) => Command, CommandAction][] = [
   [putArgs, put],
   [patchArgs, patch],
   [caseAddrevArgs, caseAddrev],
-  [caseDlArgs, caseDl],
+  [caseExportArgs, caseExport],
   [seriesImportArgs, seriesImport],
+  [seriesExportArgs, seriesExport],
   [blobPostArgs, blobPost],
   [blobGetArgs, blobGet],
   [mylistShowArgs, mylistShow]

@@ -4,7 +4,7 @@ import formatHelp from '../utils/formatHelp.ts';
 
 export default (program: Command) => {
   return program
-    .command('case-dl')
+    .command('case-export')
     .description('Download CIRCUS DB cases in MHD format')
     .option('-o, --outdir <dir>', 'output directory (default: CWD)')
     .option('-f, --file', 'read list of case IDs from file')
@@ -41,10 +41,10 @@ export default (program: Command) => {
 
         Examples:
           # Download one case
-          circus-cli case-dl -o ~/data a2b4c6e8f
+          circus-cli case-export -o ~/data a2b4c6e8f
 
           # Download cases whose IDs are in a file
-          circus-cli case-dl --file case-ids.txt
+          circus-cli case-export --file case-ids.txt
       `
     );
 };

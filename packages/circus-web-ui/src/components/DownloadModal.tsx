@@ -1,3 +1,4 @@
+import styles from './DownloadModal.module.css';
 import Button from '#components/Button.tsx';
 import type { Editor } from '#components/editorTypes.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
@@ -38,12 +39,15 @@ const DownloadModal = <T extends any>(props: {
   initialOptions: T;
   optionsEditor: Editor<T>;
   onStart: (options: T) => Promise<DownloadStart>;
+  /** Whether the download can start with the options */
+  canStart?: (options: T) => boolean;
   caption: React.ReactChild;
 }): React.ReactElement => {
   const {
     onClose,
     caption,
     onStart,
+    canStart,
     optionsEditor: OptionsEditor,
     initialOptions
   } = props;
@@ -93,13 +97,20 @@ const DownloadModal = <T extends any>(props: {
     <>
       <DialogHeader>{caption}</DialogHeader>
       <DialogBody>
-        <OptionsEditor value={options} onChange={handleOptionsChange} />
+        {/* The options cannot be changed after the download starts */}
+        <fieldset className={styles.options} disabled={!!progress}>
+          <OptionsEditor value={options} onChange={handleOptionsChange} />
+        </fieldset>
         <ProgressView progress={progress} />
       </DialogBody>
       <DialogFooter>
         <Button onClick={onClose}>{closeTitle}</Button>
         {!progress && (
-          <Button variant="primary" onClick={handleStartClick}>
+          <Button
+            variant="primary"
+            onClick={handleStartClick}
+            disabled={canStart && !canStart(options)}
+          >
             Start download
           </Button>
         )}

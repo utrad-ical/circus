@@ -1,12 +1,12 @@
 import styles from './DownloadModal.module.css';
 import type { Editor } from '#components/editorTypes.tsx';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { api } from '#utils/api.ts';
 import fillPartialVolumeDescriptors from '#utils/partialVolumeDescriptor.ts';
 import type { CompressionFormat } from './DownloadModal.tsx';
 import DownloadModal, { compressionFormatOptions } from './DownloadModal.tsx';
-import type { SeriesEntry } from './SeriesSelector.tsx';
+import SeriesSelector, { type SeriesEntry } from './SeriesSelector.tsx';
 import Select from '#components/Select.tsx';
 
 interface CsVolumeDownloadOptions {
@@ -14,35 +14,53 @@ interface CsVolumeDownloadOptions {
   compressionFormat: CompressionFormat;
 }
 
-const CsVolumeDownloadOptionsEditor: Editor<
-  CsVolumeDownloadOptions
-> = props => {
-  const { value, onChange } = props;
-  return (
-    <div>
-      Exporting{' '}
-      {value.series.length !== 1
-        ? `${value.series.length} volumes`
-        : `one volume`}
-      <div className={styles.option}>
-        Compression format:{' '}
-        <Select
-          options={compressionFormatOptions}
-          value={value.compressionFormat}
-          onChange={v => onChange({ ...value, compressionFormat: v })}
-        />
+const createOptionsEditor = (
+  editableSeries: boolean
+): Editor<CsVolumeDownloadOptions> => {
+  const CsVolumeDownloadOptionsEditor: Editor<
+    CsVolumeDownloadOptions
+  > = props => {
+    const { value, onChange } = props;
+    return (
+      <div>
+        Exporting{' '}
+        {value.series.length !== 1
+          ? `${value.series.length} volumes`
+          : `one volume`}
+        <div className={styles.option}>
+          Compression format:{' '}
+          <Select
+            options={compressionFormatOptions}
+            value={value.compressionFormat}
+            onChange={v => onChange({ ...value, compressionFormat: v })}
+          />
+        </div>
+        {editableSeries && (
+          <SeriesSelector
+            value={value.series}
+            onChange={series => onChange({ ...value, series })}
+            collapsible
+          />
+        )}
       </div>
-    </div>
-  );
+    );
+  };
+  return CsVolumeDownloadOptionsEditor;
 };
 
 const CsVolumeDownloadModal: React.FC<{
   series: SeriesEntry[];
   onClose: () => void;
+  /** Lets the user add series and change them */
+  editableSeries?: boolean;
 }> = props => {
-  const { onClose, series } = props;
+  const { onClose, series, editableSeries = false } = props;
   const caption = `Download volume for plug-in`;
   const appState = useSelector(state => state);
+  const OptionsEditor = useMemo(
+    () => createOptionsEditor(editableSeries),
+    [editableSeries]
+  );
 
   const onStart = useCallback(
     async (options: CsVolumeDownloadOptions) => {
@@ -72,7 +90,8 @@ const CsVolumeDownloadModal: React.FC<{
       caption={caption}
       onStart={onStart}
       initialOptions={{ series, compressionFormat: 'tgz' }}
-      optionsEditor={CsVolumeDownloadOptionsEditor}
+      optionsEditor={OptionsEditor}
+      canStart={options => options.series.length > 0}
     />
   );
 };

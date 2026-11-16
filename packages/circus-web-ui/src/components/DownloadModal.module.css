@@ -2,3 +2,10 @@
 .option {
   margin: 8px 0;
 }
+
+.options {
+  margin: 0;
+  padding: 0;
+  border: none;
+  min-width: 0;
+}

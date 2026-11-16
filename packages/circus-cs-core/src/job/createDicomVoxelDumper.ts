@@ -213,6 +213,7 @@ const createDicomVoxelDumper: FunctionService<
 
   const dumpOneSeries = async (
     controller: TarPackController,
+    events: EventEmitter,
     series: SeriesEntry,
     volId: number,
     options?: DicomVoxelDumperOptions
@@ -250,7 +251,16 @@ const createDicomVoxelDumper: FunctionService<
       dimension[1] *
       dimension[2] *
       pixelFormatInfo(pixelFormat).bpp;
-    await addEntry(controller, `${volId}.raw`, slices, rawSize);
+    let sliceCount = 0;
+    const counted = slices.pipeThrough(
+      new TransformStream<Uint8Array, Uint8Array>({
+        transform: (chunk, c) => {
+          c.enqueue(chunk);
+          events.emit('slice', volId, ++sliceCount, dimension[2]);
+        }
+      })
+    );
+    await addEntry(controller, `${volId}.raw`, counted, rawSize);
     const json = JSON.stringify(extractCommonValues(seriesTagData), null, 2);
     await addEntry(controller, `${volId}.json`, json);
   };
@@ -264,7 +274,7 @@ const createDicomVoxelDumper: FunctionService<
         await Promise.resolve();
         for (let i = 0; i < series.length; i++) {
           events.emit('volume', i);
-          await dumpOneSeries(controller, series[i], i, options);
+          await dumpOneSeries(controller, events, series[i], i, options);
         }
         controller.finalize();
       } catch (err) {

@@ -74,14 +74,19 @@ describe('dump', () => {
     const { repository } = createRepository('1,5');
     const dumper = await createDumper(repository);
     const volumes: number[] = [];
+    const slices: string[] = [];
     const { stream, events } = dumper.dump([entry(1, 5, 4), entry(1, 1)]);
     events.on('volume', (i: number) => volumes.push(i));
+    events.on('slice', (i: number, n: number, of: number) =>
+      slices.push(`${i}:${n}/${of}`)
+    );
     const entries = await readEntries(stream);
     assert.deepEqual(
       [...entries.keys()],
       ['0.mhd', '0.raw', '0.json', '1.mhd', '1.raw', '1.json']
     );
     assert.deepEqual(volumes, [0, 1]);
+    assert.deepEqual(slices, ['0:1/2', '0:2/2', '1:1/1']);
     assert.equal(entries.get('0.raw')!.byteLength, 512 * 512 * 2 * 2);
     assert.equal(entries.get('1.raw')!.byteLength, 512 * 512 * 2);
     const mhd = new TextDecoder().decode(entries.get('0.mhd'));

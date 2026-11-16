@@ -41,8 +41,7 @@ const action: CommandAction = ({ getFetch }) => {
     const spinner = createSpinner('Downloading...');
     let detail = '';
     const watcher = await watchProgress(fetch, event => {
-      if (event.type === 'progress' && event.total)
-        detail = `Volume ${(event.finished ?? 0) + 1}/${event.total}`;
+      if (event.type === 'progress') detail = event.message;
     });
     try {
       const params = new URLSearchParams({

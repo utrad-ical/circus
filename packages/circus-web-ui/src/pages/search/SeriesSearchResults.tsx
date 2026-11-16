@@ -1,10 +1,11 @@
 import u from '#components/utilities.module.css';
-import { confirm } from '#components/dialogs.tsx';
+import { confirm, modal } from '#components/dialogs.tsx';
 import type {
   DataGridColumnDefinition,
   DataGridRenderer
 } from '#components/DataGrid.tsx';
 import DataGrid from '#components/DataGrid.tsx';
+import CsVolumeDownloadModal from '#components/CsVolumeDownloadModal.tsx';
 import DropdownButton from '#components/DropdownButton.tsx';
 import Icon from '#components/Icon.tsx';
 import MenuItem from '#components/MenuItem.tsx';
@@ -20,6 +21,7 @@ import { dispatch } from '#store/index.ts';
 import { showMessage } from '#store/messages.ts';
 import { api } from '#utils/api.ts';
 import { useLoginManager } from '#utils/loginManager.ts';
+import useLoginUser from '#utils/useLoginUser.ts';
 import {
   Modality,
   PatientInfo,
@@ -30,6 +32,23 @@ import {
 const Operation: DataGridRenderer<any> = props => {
   const { value: series } = props;
   const loginmanager = useLoginManager();
+  const user = useLoginUser()!;
+  const canDownload = user.globalPrivileges.includes('downloadVolume');
+
+  // Opened at the top level, not inside the row
+  const handleDownload = () =>
+    modal(
+      ({ onResolve }) => (
+        <CsVolumeDownloadModal
+          series={[
+            { seriesUid: series.seriesUid, partialVolumeDescriptor: 'auto' }
+          ]}
+          editableSeries
+          onClose={() => onResolve(null)}
+        />
+      ),
+      { cancelable: false, size: 'large' }
+    );
 
   const handleDelete = async (seriesUid: string, series: any) => {
     const ans = await confirm(
@@ -105,6 +124,13 @@ const Operation: DataGridRenderer<any> = props => {
         </MenuItem>
         <MenuItem
           eventKey="2"
+          onSelect={handleDownload}
+          disabled={!canDownload}
+        >
+          Download
+        </MenuItem>
+        <MenuItem
+          eventKey="3"
           onClick={() => {
             handleDelete(series.seriesUid, series);
           }}

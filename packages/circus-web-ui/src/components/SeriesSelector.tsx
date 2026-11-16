@@ -98,13 +98,16 @@ const SeriesSelector: React.FC<{
   onRemoving?: (index: number) => Promise<boolean>;
   onPvdEditing?: (index: number) => Promise<boolean>;
   alwaysShowRelevantSeries?: boolean;
+  /** Shows the panel closed, to be opened only when needed */
+  collapsible?: boolean;
 }> = props => {
   const {
     value,
     onChange,
     onRemoving,
     onPvdEditing,
-    alwaysShowRelevantSeries
+    alwaysShowRelevantSeries,
+    collapsible
   } = props;
   const [seriesSearchTarget, setSeriesSearchTarget] = useState<
     'studyUid' | 'patientId'
@@ -308,8 +311,8 @@ const SeriesSelector: React.FC<{
   ];
 
   return (
-    <Panel>
-      <PanelHeader>Series</PanelHeader>
+    <Panel collapsible={collapsible}>
+      <PanelHeader>Series{collapsible && ` (${value.length})`}</PanelHeader>
       <PanelBody>
         <DataGrid columns={columns} value={value} />
         <div className={styles.selectAdditionalSeries}>

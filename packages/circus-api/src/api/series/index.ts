@@ -354,9 +354,19 @@ export const handleGetExportCsVolume: RouteMiddleware = ({
     }
 
     const count = entries.length;
+    const totalSlices = entries.reduce(
+      (sum, { partialVolumeDescriptor: { start, end, delta } }) =>
+        sum + (end - start) / delta + 1,
+      0
+    );
+    let finishedSlices = 0;
     const { stream: tar, events } = dicomVoxelDumper.dump(entries);
-    events.on('volume', (i: number) =>
-      reporter?.report(`Exporting volume #${i + 1}`, i, count)
+    events.on('slice', (i: number, slice: number, slices: number) =>
+      reporter?.report(
+        `Exporting volume #${i + 1} (${slice}/${slices})`,
+        ++finishedSlices,
+        totalSlices
+      )
     );
     const zip = query.compressionFormat === 'zip';
     const archive = zip

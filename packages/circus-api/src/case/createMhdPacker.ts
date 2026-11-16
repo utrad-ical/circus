@@ -8,6 +8,7 @@ import {
   type PartialVolumeDescriptor,
   type Vector3D,
   RawData,
+  determineSliceSpacing,
   generateMhdHeader,
   isValidPartialVolumeDescriptor,
   openSeriesVolume,
@@ -238,20 +239,26 @@ const createMhdPacker: FunctionService<
   };
 
   /**
-   * Determines the spacing of the partial volume, reading only its first
-   * two slices. A single slice keeps the spacing of the whole series.
+   * Determines the spacing of the partial volume from its first two slices.
+   * A single slice without the spacing tag keeps that of the whole series.
    */
   const partialVolumeSpacing = async (
     series: PreparedSeries,
     seriesSpacing: Vector3D
-  ) => {
-    const { metadata, slices } = await openSeriesVolume(
-      deps,
-      series.seriesUid,
-      series.pvd
-    );
-    await slices.cancel();
-    return metadata.dimension[2] > 1 ? metadata.elementSpacing : seriesSpacing;
+  ): Promise<Vector3D> => {
+    const { load } = await deps.dicomFileRepository.getSeries(series.seriesUid);
+    const metadataOf = async (imageNo: number) =>
+      (await deps.dicomExtractorWorker(await load(imageNo))).metadata;
+    const [first, second] = partialVolumeDescriptorToArray(series.pvd);
+    const firstMeta = await metadataOf(first);
+    if (second === undefined && !firstMeta.pitch) return seriesSpacing;
+    const secondMeta =
+      second === undefined ? undefined : await metadataOf(second);
+    return [
+      seriesSpacing[0],
+      seriesSpacing[1],
+      determineSliceSpacing(firstMeta, secondMeta)
+    ];
   };
 
   const pack: MhdPacker['pack'] = (prepared, options, reporter) => {

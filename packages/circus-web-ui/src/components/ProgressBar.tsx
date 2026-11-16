@@ -29,7 +29,10 @@ const ProgressBar: FC<{
           ratio === undefined && styles.indeterminate
         )}
       >
+        {/* Recreated when switching to a determinate bar,
+            so that the width does not animate from the moving segment */}
         <div
+          key={ratio === undefined ? 'indeterminate' : 'determinate'}
           className={styles.fill}
           style={ratio === undefined ? undefined : { width: `${ratio * 100}%` }}
         />

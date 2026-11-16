@@ -328,8 +328,14 @@ export const handleGetExportCsVolume: RouteMiddleware = ({
           start === undefined
             ? { start: images[0][0], end: images[0][1], delta: 1 }
             : { start, end: end!, delta: delta! };
+        // Checks the bounds before expanding the range into an array
+        const inBounds = (pvd: PartialVolumeDescriptor) =>
+          Math.min(pvd.start, pvd.end) >= mr.min(images)! &&
+          Math.max(pvd.start, pvd.end) <= mr.max(images)! &&
+          (pvd.end - pvd.start) / pvd.delta + 1 <= mr.length(images);
         if (
           !isValidPartialVolumeDescriptor(pvd) ||
+          !inBounds(pvd) ||
           !mr.has(images, mr.normalize(partialVolumeDescriptorToArray(pvd)))
         )
           throw exposedError(

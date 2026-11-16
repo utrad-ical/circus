@@ -522,6 +522,7 @@ describe('Export CS volume', () => {
       { series: '111.222.333.444.777:1:5:0' },
       { series: '111.222.333.444.777:1:x:1' },
       { series: '111.222.333.444.777:1:300:1' }, // out of the series
+      { series: '111.222.333.444.777:1:1000000000:1' }, // huge
       { series: '111.222.333.444.777:5:1:1' }, // wrong direction
       { series: tooMany },
       { series: '111.222.333.444.777', compressionFormat: 'rar' },

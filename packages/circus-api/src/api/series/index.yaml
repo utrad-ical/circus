@@ -25,8 +25,8 @@ routes:
   - verb: post
     path: /series/domain/:domain/single
     expectedContentType: multipart/form-data
-    handler: handlePost
-    description: Same as `/series/domain/:domain`, kept for compatibility.
+    handler: handlePostSingle
+    description: Same as `/series/domain/:domain`, with an empty 201 response for compatibility.
   - verb: get
     path: /series/export-cs-volume
     handler: handleGetExportCsVolume

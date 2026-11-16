@@ -259,7 +259,16 @@ describe('Upload', () => {
       url: 'api/series/domain/sirius.org/single'
     });
     assert.equal(res.status, 201);
+    assert.equal(res.data, '');
     assert.equal(await imagesOf(brainUid), '8');
+  });
+
+  test('returns error details from the legacy single-file URL', async () => {
+    const res = await upload([[brokenDicom(), 'broken.dcm']], {
+      url: 'api/series/domain/sirius.org/single'
+    });
+    assert.equal(res.status, 422);
+    assert.equal(res.data.errors[0].file, 'broken.dcm');
   });
 
   test('rejects upload into an inaccessible domain', async () => {

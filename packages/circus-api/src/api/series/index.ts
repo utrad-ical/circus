@@ -153,6 +153,18 @@ export const handlePost: RouteMiddleware = ({
   };
 };
 
+export const handlePostSingle: RouteMiddleware = deps => {
+  const post = handlePost(deps);
+  return async (ctx, next) => {
+    await post(ctx, next);
+    if (ctx.status === status.CREATED) {
+      // Legacy storage servers expect curl's output to start with the status.
+      ctx.body = null;
+      ctx.status = status.CREATED;
+    }
+  };
+};
+
 export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
     const customFilter = extractFilter(ctx);

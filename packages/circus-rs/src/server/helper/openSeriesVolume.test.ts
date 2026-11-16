@@ -86,7 +86,7 @@ describe('openSeriesVolume', () => {
     assert.deepEqual(await readAll(slices), [5, 3, 1]);
   });
 
-  test('multiplies the spacing tag by the delta', async () => {
+  test('uses the spacing tag as is for a partial volume', async () => {
     const dicomFileRepository = await prepareRepository([1, 2, 3, 4, 5]);
     const dicomExtractorWorker = fakeExtractor(() => ({ pitch: 2 }));
     const { metadata } = await openSeriesVolume(
@@ -94,7 +94,7 @@ describe('openSeriesVolume', () => {
       uid,
       { start: 1, end: 5, delta: 2 }
     );
-    assert.equal(metadata.elementSpacing[2], 4);
+    assert.equal(metadata.elementSpacing[2], 2);
   });
 
   test('rejects a partial volume not in the series', async () => {
@@ -184,29 +184,21 @@ describe('openSeriesVolume', () => {
 
 describe('determineSliceSpacing', () => {
   const meta = (m: Partial<DicomMetadata>) => m as DicomMetadata;
-  const cases: [
-    string,
-    DicomMetadata,
-    DicomMetadata | undefined,
-    number,
-    number
-  ][] = [
-    ['tag', meta({ pitch: 2.5 }), meta({}), 1, 2.5],
-    ['negative tag', meta({ pitch: -2.5 }), meta({}), 1, 2.5],
-    ['tag with delta', meta({ pitch: 2.5 }), meta({}), -2, 5],
+  const cases: [string, DicomMetadata, DicomMetadata | undefined, number][] = [
+    ['tag', meta({ pitch: 2.5 }), meta({}), 2.5],
+    ['negative tag', meta({ pitch: -2.5 }), meta({}), 2.5],
     [
       'slice location',
       meta({ sliceLocation: 10 }),
       meta({ sliceLocation: 7 }),
-      1,
       3
     ],
-    ['one slice', meta({ sliceLocation: 10 }), undefined, 1, 1],
-    ['no location', meta({}), meta({}), 1, 1]
+    ['one slice', meta({ sliceLocation: 10 }), undefined, 1],
+    ['no location', meta({}), meta({}), 1]
   ];
-  for (const [name, first, second, delta, expected] of cases) {
+  for (const [name, first, second, expected] of cases) {
     test(name, () => {
-      assert.equal(determineSliceSpacing(first, second, delta), expected);
+      assert.equal(determineSliceSpacing(first, second), expected);
     });
   }
 });

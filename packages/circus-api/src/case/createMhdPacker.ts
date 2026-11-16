@@ -8,6 +8,7 @@ import {
   type PartialVolumeDescriptor,
   type Vector3D,
   RawData,
+  determineSliceSpacing,
   generateMhdHeader,
   isValidPartialVolumeDescriptor,
   openSeriesVolume,
@@ -237,6 +238,29 @@ const createMhdPacker: FunctionService<
     }
   };
 
+  /**
+   * Determines the spacing of the partial volume from its first two slices.
+   * A single slice without the spacing tag keeps that of the whole series.
+   */
+  const partialVolumeSpacing = async (
+    series: PreparedSeries,
+    seriesSpacing: Vector3D
+  ): Promise<Vector3D> => {
+    const { load } = await deps.dicomFileRepository.getSeries(series.seriesUid);
+    const metadataOf = async (imageNo: number) =>
+      (await deps.dicomExtractorWorker(await load(imageNo))).metadata;
+    const [first, second] = partialVolumeDescriptorToArray(series.pvd);
+    const firstMeta = await metadataOf(first);
+    if (second === undefined && !firstMeta.pitch) return seriesSpacing;
+    const secondMeta =
+      second === undefined ? undefined : await metadataOf(second);
+    return [
+      seriesSpacing[0],
+      seriesSpacing[1],
+      determineSliceSpacing(firstMeta, secondMeta)
+    ];
+  };
+
   const pack: MhdPacker['pack'] = (prepared, options, reporter) => {
     const writer = createArchiveWriter(options.compressionFormat);
     let finished = 0;
@@ -297,12 +321,8 @@ const createMhdPacker: FunctionService<
           )
         );
         // The labels stay in the partial volume
-        const labelSpacing: Vector3D = options.fullOriginalVolume
-          ? [
-              elementSpacing[0],
-              elementSpacing[1],
-              elementSpacing[2] * Math.abs(series.pvd.delta)
-            ]
+        const labelSpacing = options.fullOriginalVolume
+          ? await partialVolumeSpacing(series, elementSpacing)
           : elementSpacing;
         await putLabels(
           writer,

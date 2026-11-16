@@ -97,6 +97,24 @@ describe('openSeriesVolume', () => {
     assert.equal(metadata.elementSpacing[2], 2);
   });
 
+  test('passes the DICOM file of each slice as it is read', async () => {
+    const dicomFileRepository = await prepareRepository([1, 2, 3, 4, 5]);
+    const dicomExtractorWorker = fakeExtractor();
+    const called: number[] = [];
+    const { slices } = await openSeriesVolume(
+      { dicomFileRepository, dicomExtractorWorker },
+      uid,
+      { start: 5, end: 1, delta: -1 },
+      (imageNo, dicom) => {
+        assert.equal(new Int32Array(dicom)[0], imageNo);
+        called.push(imageNo);
+      }
+    );
+    assert.deepEqual(called, [5, 4]); // the first two are read on opening
+    assert.deepEqual(await readAll(slices), [5, 4, 3, 2, 1]);
+    assert.deepEqual(called, [5, 4, 3, 2, 1]);
+  });
+
   test('rejects a partial volume not in the series', async () => {
     const dicomFileRepository = await prepareRepository([1, 2, 3]);
     const dicomExtractorWorker = fakeExtractor();

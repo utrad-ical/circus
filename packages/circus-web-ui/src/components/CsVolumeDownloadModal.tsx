@@ -1,4 +1,5 @@
 import styles from './DownloadModal.module.css';
+import u from '#components/utilities.module.css';
 import type { Editor } from '#components/editorTypes.tsx';
 import React, { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
@@ -8,6 +9,9 @@ import type { CompressionFormat } from './DownloadModal.tsx';
 import DownloadModal, { compressionFormatOptions } from './DownloadModal.tsx';
 import SeriesSelector, { type SeriesEntry } from './SeriesSelector.tsx';
 import Select from '#components/Select.tsx';
+
+// The limit of the API
+const maxSeries = 10;
 
 interface CsVolumeDownloadOptions {
   series: SeriesEntry[];
@@ -27,6 +31,12 @@ const createOptionsEditor = (
         {value.series.length !== 1
           ? `${value.series.length} volumes`
           : `one volume`}
+        {value.series.length > maxSeries && (
+          <span className={u.danger}>
+            {' '}
+            (up to {maxSeries} volumes can be exported)
+          </span>
+        )}
         <div className={styles.option}>
           Compression format:{' '}
           <Select
@@ -91,7 +101,9 @@ const CsVolumeDownloadModal: React.FC<{
       onStart={onStart}
       initialOptions={{ series, compressionFormat: 'tgz' }}
       optionsEditor={OptionsEditor}
-      canStart={options => options.series.length > 0}
+      canStart={options =>
+        options.series.length > 0 && options.series.length <= maxSeries
+      }
     />
   );
 };

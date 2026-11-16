@@ -3,15 +3,82 @@ import Select from '#components/Select.tsx';
 import useShowMessage from '#utils/useShowMessage.ts';
 import FileUpload from '#components/FileUpload.tsx';
 import Alert from '#components/Alert.tsx';
-import React, { useState, useMemo } from 'react';
+import table from '#components/table.module.css';
+import classnames from 'classnames';
+import React, { useState, type FC } from 'react';
 import useLocalPreference from '#utils/useLocalPreference.ts';
 import useLoginUser from '#utils/useLoginUser.ts';
-import bytes from 'bytes';
+import styles from './ImportSeries.module.css';
 
-const ImportSeries: React.FC<{}> = props => {
+interface ImportSummary {
+  imported: number;
+  skipped: { file: string; reason: string }[];
+  errors: { file: string; reason: string }[];
+}
+
+const maxRows = 100;
+
+const ImportResult: FC<{ summary: ImportSummary }> = props => {
+  const { summary } = props;
+  const { imported, skipped, errors } = summary;
+  const rows = [
+    ...errors.map(e => ({ ...e, error: true })),
+    ...skipped.map(s => ({ ...s, error: false }))
+  ];
+  return (
+    <div>
+      <Alert
+        variant={
+          errors.length || !imported
+            ? 'danger'
+            : skipped.length
+              ? 'warning'
+              : 'success'
+        }
+      >
+        Imported {imported} file(s).
+        {skipped.length > 0 && <> Skipped {skipped.length} file(s).</>}
+        {errors.length > 0 && <> Failed to import {errors.length} file(s).</>}
+        {!imported && !errors.length && <> No DICOM file was found.</>}
+      </Alert>
+      {rows.length > 0 && (
+        <table
+          className={classnames(table.table, table.condensed, styles.result)}
+        >
+          <thead>
+            <tr>
+              <th>File</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.slice(0, maxRows).map((row, i) => (
+              <tr key={i} className={row.error ? styles.error : undefined}>
+                <td>{row.file}</td>
+                <td>{row.reason}</td>
+              </tr>
+            ))}
+            {rows.length > maxRows && (
+              <tr>
+                <td colSpan={2}>
+                  <i>
+                    And <b>{rows.length - maxRows}</b> more file(s)
+                  </i>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+};
+
+const ImportSeries: FC<{}> = props => {
   const loginUser = useLoginUser()!;
   const showMessage = useShowMessage();
   const domains = loginUser.domains || [];
+  const [summary, setSummary] = useState<ImportSummary>();
 
   const [domainPreference, setDomainPreference] = useLocalPreference<
     string | null
@@ -24,11 +91,6 @@ const ImportSeries: React.FC<{}> = props => {
       (domains.length ? domains[0] : null)
   );
 
-  const maxBytes = useMemo(
-    () => bytes(loginUser.uploadFileSizeMaxBytes),
-    [loginUser.uploadFileSizeMaxBytes]
-  );
-
   if (!Array.isArray(domains) || domains.length === 0) {
     return (
       <Alert variant="warning">
@@ -37,11 +99,13 @@ const ImportSeries: React.FC<{}> = props => {
     );
   }
 
-  const handleUploaded = async (res: any) => {
-    const taskId = res.taskId;
-    showMessage('Import process has been started. See tasks page.', 'success', {
-      short: true
-    });
+  const handleUploaded = (res: any) => {
+    if (typeof res?.imported === 'number') {
+      setSummary(res);
+    } else {
+      setSummary(undefined);
+      showMessage(res?.error ?? 'Upload failed.', 'danger');
+    }
   };
 
   return (
@@ -50,14 +114,13 @@ const ImportSeries: React.FC<{}> = props => {
         <Icon icon="circus-series-import" /> Series Import
       </h1>
       <p>
-        Choose DICOM files to upload. (Maximum size: {maxBytes}, up to{' '}
-        {loginUser.uploadFileMax} files).
+        Choose DICOM files or folders to upload. Zip and tar.gz archives of
+        DICOM files are also supported.
       </p>
-      <p>Zipped DICOM files are also supported.</p>
       <FileUpload
         multiple={true}
-        uploadFileMax={loginUser.uploadFileMax}
-        uploadFileSizeMaxBytes={loginUser.uploadFileSizeMaxBytes}
+        allowFolders={true}
+        withProgress={true}
         url={`series/domain/${encodeURIComponent(uploadDomain || '')}`}
         onUploaded={handleUploaded}
       >
@@ -71,6 +134,7 @@ const ImportSeries: React.FC<{}> = props => {
         </div>
         <hr />
       </FileUpload>
+      {summary && <ImportResult summary={summary} />}
     </div>
   );
 };

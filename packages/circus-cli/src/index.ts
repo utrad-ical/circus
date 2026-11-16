@@ -30,6 +30,8 @@ import post from './commands/post.ts';
 import postArgs from './commands/post.args.ts';
 import put from './commands/put.ts';
 import putArgs from './commands/put.args.ts';
+import seriesImport from './commands/series-import.ts';
+import seriesImportArgs from './commands/series-import.args.ts';
 
 const commands: [(program: Command) => Command, CommandAction][] = [
   [authArgs, auth],
@@ -39,6 +41,7 @@ const commands: [(program: Command) => Command, CommandAction][] = [
   [patchArgs, patch],
   [caseAddrevArgs, caseAddrev],
   [caseDlArgs, caseDl],
+  [seriesImportArgs, seriesImport],
   [blobPostArgs, blobPost],
   [blobGetArgs, blobGet],
   [mylistShowArgs, mylistShow]

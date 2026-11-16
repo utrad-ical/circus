@@ -2,16 +2,22 @@ import * as rl from 'node:readline';
 import { Readable } from 'node:stream';
 import type { AuthorizedFetch } from './createAuthorizedFetch.ts';
 
-export interface ProgressEvent {
-  type: 'progress' | 'finish' | 'error';
-  message: string;
-  finished?: number;
-  total?: number;
-}
+export type LogLevel = 'info' | 'warn' | 'error';
+
+export type ProgressEvent =
+  | {
+      type: 'progress' | 'finish' | 'error';
+      message: string;
+      finished?: number;
+      total?: number;
+    }
+  | { type: 'log'; lines: { level: LogLevel; message: string }[] };
 
 interface ProgressWatcher {
   /** Pass this to the request; undefined if it could not be issued */
   progressId?: string;
+  /** Waits for the end of the events, up to `timeoutMs` */
+  wait: (timeoutMs: number) => Promise<void>;
   stop: () => void;
 }
 
@@ -25,6 +31,7 @@ const watchProgress = async (
 ): Promise<ProgressWatcher> => {
   const abortController = new AbortController();
   const stop = () => abortController.abort();
+  const noWait = async () => {};
   let progressId: string;
   try {
     const res = await fetch('progress', {
@@ -34,9 +41,9 @@ const watchProgress = async (
     });
     progressId = ((await res.json()) as { progressId: string }).progressId;
   } catch {
-    return { stop };
+    return { stop, wait: noWait };
   }
-  (async () => {
+  const ended = (async () => {
     const res = await fetch(`progress/${progressId}`, {
       signal: abortController.signal
     });
@@ -53,7 +60,12 @@ const watchProgress = async (
       }
     }
   })().catch(() => {});
-  return { progressId, stop };
+  const wait = (timeoutMs: number) =>
+    Promise.race([
+      ended,
+      new Promise<void>(r => setTimeout(r, timeoutMs).unref())
+    ]);
+  return { progressId, wait, stop };
 };
 
 export default watchProgress;

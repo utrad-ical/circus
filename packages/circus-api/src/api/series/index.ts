@@ -7,8 +7,10 @@ import type {
   RouteMiddleware
 } from '../../typings/middlewares.ts';
 import checkFilter from '../../utils/checkFilter.ts';
-import { fileOrArchiveIterator } from '../../utils/directoryIterator.ts';
-import isLikeDicom from '../../utils/isLikeDicom.ts';
+import readMultipartFiles from '../../utils/readMultipartFiles.ts';
+import importUploadedFiles, {
+  type ImportSummary
+} from './importUploadedFiles.ts';
 import {
   extractFilter,
   isPatientInfoInFilter,
@@ -100,83 +102,47 @@ const checkDomain = (ctx: CircusContext) => {
   return domain;
 };
 
-export const handlePost: RouteMiddleware = ({ dicomImporter, taskManager }) => {
-  return async (ctx, next) => {
-    if (!dicomImporter) ctx.throw(status.SERVICE_UNAVAILABLE);
-    const domain = checkDomain(ctx);
-
-    const { emitter } = await taskManager.register(ctx, {
-      name: 'Series import',
-      userEmail: ctx.user.userEmail
-    });
-
-    const sentFiles = ctx.request.files;
-
-    // The following code will keep running after this middleware returns
-    (async () => {
-      let fileCount = 0;
-      let dicomCount = 0;
-      try {
-        for (const file of sentFiles) {
-          for await (const entry of fileOrArchiveIterator(
-            file.buffer.buffer as ArrayBuffer,
-            file.filename
-          )) {
-            if (entry.type === 'error') throw new Error(entry.message);
-            if (!isLikeDicom(entry.buffer)) continue;
-            await dicomImporter.importDicom(
-              Buffer.from(entry.buffer) as unknown as ArrayBuffer,
-              domain
-            );
-            dicomCount++;
-            emitter.emit('progress', `Imported ${dicomCount} entities...`);
-          }
-          fileCount++;
-        }
-        emitter.emit(
-          'finish',
-          `Imported ${dicomCount} entities from ${fileCount} files.`
-        );
-      } catch (err) {
-        emitter.emit(
-          'error',
-          `Error while processing file #${fileCount + 1}, entity #${
-            dicomCount + 1
-          }`
-        );
-      }
-    })();
-  };
-};
-
-export const handlePostSingle: RouteMiddleware = ({ dicomImporter }) => {
-  return async (ctx, next) => {
-    if (!dicomImporter) ctx.throw(status.SERVICE_UNAVAILABLE);
-    const domain = checkDomain(ctx);
-
-    if (ctx.request.files.length !== 1) {
-      ctx.throw(status.BAD_REQUEST, 'Only one file is allowed.');
-    }
-
-    const { buffer } = ctx.request.files[0];
-    const arrayBuffer = Buffer.from(buffer).buffer;
-    if (!isLikeDicom(arrayBuffer)) {
-      ctx.throw(
-        status.BAD_REQUEST,
-        'The file is not a DICOM file. You cannot use archived files.'
-      );
-    }
+export const handlePost: RouteMiddleware = ({
+  dicomImporter,
+  progressManager,
+  logger,
+  uploadFileSizeMaxBytes
+}) => {
+  return async ctx => {
+    const { progressId } = ctx.request.query;
+    const reporter =
+      typeof progressId === 'string'
+        ? progressManager.claim(progressId, ctx.user.userEmail)
+        : undefined;
+    let summary: ImportSummary;
     try {
-      await dicomImporter.importDicom(arrayBuffer, domain);
+      if (!dicomImporter) ctx.throw(status.SERVICE_UNAVAILABLE);
+      const domain = checkDomain(ctx);
+      summary = await importUploadedFiles(readMultipartFiles(ctx.req), {
+        domain,
+        maxEntryBytes: uploadFileSizeMaxBytes,
+        dicomImporter,
+        apiLogger: logger,
+        userEmail: ctx.user.userEmail,
+        reporter
+      });
     } catch (err: any) {
-      ctx.throw(
-        status.INTERNAL_SERVER_ERROR,
-        'Error while importing a DICOM file. ' +
-          'This may mean the uploaded file is broken.'
-      );
+      reporter?.fail(err.expose ? err.message : 'The upload was interrupted.');
+      throw err;
     }
-    ctx.body = null;
-    ctx.status = status.CREATED; // 201
+    const { imported, skipped, errors } = summary;
+    reporter?.finish(
+      `Imported ${imported} file(s)` +
+        (skipped.length ? `, skipped ${skipped.length}` : '') +
+        (errors.length ? `, failed ${errors.length}` : '') +
+        '.'
+    );
+    ctx.status = errors.length
+      ? status.UNPROCESSABLE_ENTITY // 422
+      : imported
+        ? status.CREATED // 201
+        : status.BAD_REQUEST; // 400, no DICOM files
+    ctx.body = summary;
   };
 };
 

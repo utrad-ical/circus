@@ -1,0 +1,26 @@
+.logPane {
+  max-height: calc(5lh + 8px);
+  overflow-y: auto;
+  margin: 8px 0;
+  padding: 4px 8px;
+  border: 1px solid color-mix(in oklch, var(--theme) 20%, var(--bg));
+  background-color: var(--bg);
+  font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
+  font-size: 85%;
+  line-height: 1.4;
+}
+
+.line {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  &.info {
+    color: var(--muted);
+  }
+  &.warn {
+    color: var(--warning);
+  }
+  &.error {
+    color: var(--danger);
+  }
+}

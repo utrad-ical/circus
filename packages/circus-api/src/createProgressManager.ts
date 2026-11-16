@@ -11,6 +11,8 @@ import type { CircusContext } from './typings/middlewares.ts';
  */
 export interface ProgressReporter {
   report: (message: string, finished?: number, total?: number) => void;
+  /** Adds a line to the log, e.g., the result of each file */
+  log: (level: LogLevel, message: string) => void;
   finish: (message: string) => void;
   fail: (message: string) => void;
 }
@@ -35,14 +37,24 @@ export interface ProgressManager {
   respond: (ctx: CircusContext, progressId: string, userEmail: string) => void;
 }
 
+export type LogLevel = 'info' | 'warn' | 'error';
+
+export interface LogLine {
+  level: LogLevel;
+  message: string;
+}
+
 export type ProgressEvent =
   | { type: 'progress'; message: string; finished?: number; total?: number }
+  | { type: 'log'; lines: LogLine[] }
   | { type: 'finish' | 'error'; message: string };
 
 interface Entry {
   userEmail: string;
   claimed: boolean;
   last?: ProgressEvent;
+  /** Recent log lines, for late subscribers */
+  logs: LogLine[];
   events: EventEmitter;
   timer?: NodeJS.Timeout;
 }
@@ -54,6 +66,8 @@ interface Options {
   finishedTtlMs?: number;
   throttleMs?: number;
   keepAliveMs?: number;
+  /** How many log lines are kept for late subscribers */
+  maxLogLines?: number;
 }
 
 const isTerminal = (event?: ProgressEvent) =>
@@ -67,7 +81,8 @@ const createProgressManager: NoDepFunctionService<
     unclaimedTtlMs = 10 * 60 * 1000,
     finishedTtlMs = 60 * 1000,
     throttleMs = 150,
-    keepAliveMs = 10 * 1000
+    keepAliveMs = 10 * 1000,
+    maxLogLines = 100
   } = opts;
   const entries = new Map<string, Entry>();
 
@@ -82,6 +97,7 @@ const createProgressManager: NoDepFunctionService<
     const entry: Entry = {
       userEmail,
       claimed: false,
+      logs: [],
       events: new EventEmitter()
     };
     entries.set(progressId, entry);
@@ -101,7 +117,11 @@ const createProgressManager: NoDepFunctionService<
 
     const emit = (event: ProgressEvent) => {
       if (isTerminal(entry.last)) return;
-      entry.last = event;
+      if (event.type === 'log') {
+        entry.logs = [...entry.logs, ...event.lines].slice(-maxLogLines);
+      } else {
+        entry.last = event;
+      }
       entry.events.emit('event', event);
       if (isTerminal(event)) expireAfter(progressId, entry, finishedTtlMs);
     };
@@ -110,16 +130,29 @@ const createProgressManager: NoDepFunctionService<
         emit({ type: 'progress', message, finished, total }),
       throttleMs
     );
+    // Lines are sent together, but never dropped
+    let pending: LogLine[] = [];
+    const flushLogs = () => {
+      if (!pending.length) return;
+      emit({ type: 'log', lines: pending });
+      pending = [];
+    };
+    const throttledFlushLogs = _.throttle(flushLogs, throttleMs);
+    const end = (event: ProgressEvent) => {
+      report.cancel();
+      throttledFlushLogs.cancel();
+      flushLogs();
+      emit(event);
+    };
     return {
       report,
-      finish: message => {
-        report.cancel();
-        emit({ type: 'finish', message });
+      log: (level, message) => {
+        if (isTerminal(entry.last)) return;
+        pending.push({ level, message });
+        throttledFlushLogs();
       },
-      fail: message => {
-        report.cancel();
-        emit({ type: 'error', message });
-      }
+      finish: message => end({ type: 'finish', message }),
+      fail: message => end({ type: 'error', message })
     };
   };
 
@@ -145,6 +178,7 @@ const createProgressManager: NoDepFunctionService<
       if (isTerminal(event)) stream.end();
     };
 
+    if (entry!.logs.length) write({ type: 'log', lines: entry!.logs });
     if (entry!.last) write(entry!.last);
     if (isTerminal(entry!.last)) return;
 

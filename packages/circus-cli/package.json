@@ -23,7 +23,7 @@
     "directory": "packages/circus-cli"
   },
   "engines": {
-    "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
+    "node": "^24.19.0 || >=26.4.0"
   },
   "keywords": [
     "cli",
@@ -38,7 +38,8 @@
     "easy-table": "^1.2.0",
     "js-yaml": "^4.3.2",
     "json-stringify-pretty-compact": "^4.0.0",
-    "json5": "^2.2.3"
+    "json5": "^2.2.3",
+    "modern-tar": "^0.8.6"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",

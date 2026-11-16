@@ -223,9 +223,9 @@ importers:
 
   packages/circus-api:
     dependencies:
-      '@koa/multer':
-        specifier: ^2.0.2
-        version: 2.0.2(multer@1.4.2)
+      '@fastify/busboy':
+        specifier: ^3.2.5
+        version: 3.2.5
       '@utrad-ical/circus-cs-core':
         specifier: workspace:*
         version: link:../circus-cs-core
@@ -265,6 +265,9 @@ importers:
       dotenv:
         specifier: ^16.0.3
         version: 16.0.3
+      fflate:
+        specifier: ^0.8.3
+        version: 0.8.3
       fs-extra:
         specifier: ^9.0.0
         version: 9.1.0
@@ -319,9 +322,6 @@ importers:
       mongodb:
         specifier: ^7.8.0
         version: 7.8.0(socks@2.8.10)
-      multer:
-        specifier: ^1.4.2
-        version: 1.4.2
       multi-integer-range:
         specifier: ^6.1.0
         version: 6.1.0
@@ -389,9 +389,6 @@ importers:
       '@types/koa-router':
         specifier: ^7.4.4
         version: 7.4.4
-      '@types/koa__multer':
-        specifier: ^2.0.1
-        version: 2.0.3
       '@types/lodash':
         specifier: ^4.14.161
         version: 4.14.172
@@ -455,6 +452,9 @@ importers:
       json5:
         specifier: ^2.2.3
         version: 2.2.3
+      modern-tar:
+        specifier: ^0.8.6
+        version: 0.8.6
     devDependencies:
       '@types/js-yaml':
         specifier: ^4.0.9
@@ -935,6 +935,9 @@ packages:
   '@emnapi/wasi-threads@2.2.0':
     resolution: {integrity: sha512-JP7OYH38Q7+pyTAe14raZHLQIK7BDKbdwji+Xi3pcd/6QkJYQH3SX4wu6EplGrGJWRepoNzedfm0G3B9Z4e9Rw==}
 
+  '@fastify/busboy@3.2.5':
+    resolution: {integrity: sha512-y8MTAeBlEQUNVnskmZQwpseZN3EgCksQNOULlfxWY6o6VEqh01+oExMgbM7gN6YLQ8pNDYeweNPKJRt8jQm2ZQ==}
+
   '@inquirer/ansi@2.1.0':
     resolution: {integrity: sha512-63GU5AD9KhNbWM0jlhHoMJTEFck2upFOPxHlnCKf3xYTV3rjTUUQfodihmTnfYQzMLS29oy8lK/gA1eJgu4bhA==}
     engines: {node: ^22.22.2 || ^24.15.0 || >=26.0.0}
@@ -1177,12 +1180,6 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
-
-  '@koa/multer@2.0.2':
-    resolution: {integrity: sha512-cWZUbpRNcLjLWDQ6QTWMX3ucXS+xHpJh7ngrBnsywhL7XygU5M090dDeiC9Sq1jM7IwKn9WkFZA1LyPU0q89qA==}
-    engines: {node: '>= 6'}
-    peerDependencies:
-      multer: '*'
 
   '@material-symbols/svg-600@0.48.2':
     resolution: {integrity: sha512-MU5Gy9QFrnDUonrpQ0prEJiQgGoM4mZZi89WwZn1b8KaL3FSi9iq3eVIH1fgnnunkmpTbbX4IF93J0l05VMhTQ==}
@@ -1792,9 +1789,6 @@ packages:
   '@types/koa@2.13.4':
     resolution: {integrity: sha512-dfHYMfU+z/vKtQB7NUrthdAEiSvnLebvBjwHtfFmpZmB7em2N3WVQdHgnFq+xvyVgxW5jKDmjWfLD3lw4g4uTw==}
 
-  '@types/koa__multer@2.0.3':
-    resolution: {integrity: sha512-nxVUQIBYxjLSDScxe2YlHL8uJpuPtElEK15Q7D51hD6TwfFKe+7Ji/8Q8ewwzUlFWiuOnFbuXdy/HIjgQiTSHA==}
-
   '@types/lodash-es@4.17.12':
     resolution: {integrity: sha512-0NgftHUcV4v34VhXm8QBSftKVXtbkBG3ViCjs6+eJ5a6y6Mi/jiFGPc1sC7QK+9BFhWrURE3EOggmWaSxL9OzQ==}
 
@@ -2152,9 +2146,6 @@ packages:
     resolution: {integrity: sha512-P43ePfOAIupkguHUycrc4qJ9kz8ZiuOUijaETwX7THt0Y/GNK7v0aa8rY816xWjZ7rJdA5XdMcpVFTKMq+RvWg==}
     engines: {node: '>= 8'}
 
-  append-field@1.0.0:
-    resolution: {integrity: sha512-klpgFSWLW1ZEs8svjfb7g4qWY0YS5imI82dTg+QahUvJ8YqAY0P10Uk8tTyh9ZGuYEZEMaeJYCF5BFuX552hsw==}
-
   archiver-utils@2.1.0:
     resolution: {integrity: sha512-bEL/yUb/fNNiNTuUz979Z0Yg5L+LzLxGJz8x79lYmR54fmTIb6ob/hNQgkQnIUDWIFjZVQwl9Xs356I6BAMHfw==}
     engines: {node: '>= 6'}
@@ -2278,10 +2269,6 @@ packages:
 
   buffer@5.7.1:
     resolution: {integrity: sha512-EHcyIPBQ4BSGlvjB16k5KgAJ27CIsHY/2JBmCRReo48y9rQ3MaUzWX3KVlBa4U7MyX02HdVj0K7C3WaB3ju7FQ==}
-
-  busboy@0.2.14:
-    resolution: {integrity: sha512-InWFDomvlkEj+xWLBfU3AvnbVYqeTWmQopiW0tWWEy5yehYm2YkGEc59sUmw/4ty5Zj/b0WHGs1LgecuBSBGrg==}
-    engines: {node: '>=0.8.0'}
 
   bytes@2.5.0:
     resolution: {integrity: sha512-hkQtlCqf2f67v+GDlR9DImH1Bu/DxA/yNR7EmnbxCgxYgm4u7rLTJw8LYJdttHOl+H+++Fv0SQF7PgXAtqkfVg==}
@@ -2584,10 +2571,6 @@ packages:
   detect-libc@2.1.2:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
-
-  dicer@0.2.5:
-    resolution: {integrity: sha512-FDvbtnq7dzlPz0wyYlOExifDEZcu8h+rErEXgfxqmLfRfC/kJidEFh4+effJRO3P0xmfqyPbSMG0LveNRfTKVg==}
-    engines: {node: '>=0.8.0'}
 
   dicom-data-dictionary@0.3.1:
     resolution: {integrity: sha512-AUmCtSYSgzfpVlyCjhVd7Da26aj151nSYjEO9b00dB8wkpfflfe6uCxfrveLjXIET2WrkoGM5CzA3Tb2p8cg+A==}
@@ -3512,11 +3495,6 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
-  multer@1.4.2:
-    resolution: {integrity: sha512-xY8pX7V+ybyUpbYMxtjM9KAiD9ixtg5/JkeKUTD6xilfDv0vzzOFcCp4Ljb1UU3tSOM3VTZtKo63OmzOrGi3Cg==}
-    engines: {node: '>= 0.10.0'}
-    deprecated: Multer 1.x is affected by CVE-2022-24434. This is fixed in v1.4.4-lts.1 which drops support for versions of Node.js before 6. Please upgrade to at least Node.js 6 and version 1.4.4-lts.1 of Multer. If you need support for older versions of Node.js, we are open to accepting patches that would fix the CVE on the main 1.x release line, whilst maintaining compatibility with Node.js 0.10.
-
   multi-integer-range@6.1.0:
     resolution: {integrity: sha512-mF7W7eexW5nx547ntv2JI4ynnuUTYchf4/cY7KLXP1oidROhhPWOz8348C09IZUfLwwP8T2OprYmGQF7+xKP9A==}
 
@@ -3876,9 +3854,6 @@ packages:
   readable-stream@1.0.34:
     resolution: {integrity: sha512-ok1qVCJuRkNmvebYikljxJA/UEsKwLl2nI1OmaqAu4/UE+h0wKCHok4XkL/gvi39OacXvw59RJUOFUkDib2rHg==}
 
-  readable-stream@1.1.14:
-    resolution: {integrity: sha512-+MeVjFf4L44XUkhM1eYbD8fyEsxcV81pqMSR5gblfcLCHfZvbrqy4/qYHE+/R5HoBUT11WV5O08Cr1n3YXkWVQ==}
-
   readable-stream@2.3.7:
     resolution: {integrity: sha512-Ebho8K4jIbHAxnuxi7o42OrZgF/ZTNcsZj6nRKyUmkhLFq8CHItp/fy6hQZuZmP/n3yZ9VBUbp4zz/mX8hmYPw==}
 
@@ -4117,10 +4092,6 @@ packages:
 
   streaming-json-stringify@3.1.0:
     resolution: {integrity: sha512-axtfs3BDxAsrZ9swD163FBrXZ8dhJJp6kUI6C97TvUZG9RHKfbg9nFbXqEheFNOb3IYMEt2ag9F62sWLFUZ4ug==}
-
-  streamsearch@0.1.2:
-    resolution: {integrity: sha512-jos8u++JKm0ARcSUTAZXOVC0mSox7Bhn6sBgty73P1f3JGf7yG2clTbBNHUdde/kdvP2FESam+vM6l8jBrNxHA==}
-    engines: {node: '>=0.8.0'}
 
   strict-event-emitter-types@2.0.0:
     resolution: {integrity: sha512-Nk/brWYpD85WlOgzw5h173aci0Teyv8YdIAEtV+N88nDB0dLlazZyJMIsN6eo1/AR61l+p6CJTG1JIyFaoNEEA==}
@@ -4590,6 +4561,8 @@ snapshots:
       tslib: 2.8.1
     optional: true
 
+  '@fastify/busboy@3.2.5': {}
+
   '@inquirer/ansi@2.1.0': {}
 
   '@inquirer/checkbox@4.0.1(@types/node@24.19.2)':
@@ -4855,10 +4828,6 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.0
       '@jridgewell/sourcemap-codec': 1.4.14
     optional: true
-
-  '@koa/multer@2.0.2(multer@1.4.2)':
-    dependencies:
-      multer: 1.4.2
 
   '@material-symbols/svg-600@0.48.2': {}
 
@@ -5293,10 +5262,6 @@ snapshots:
       '@types/koa-compose': 3.2.5
       '@types/node': 24.19.2
 
-  '@types/koa__multer@2.0.3':
-    dependencies:
-      '@types/koa': 2.13.4
-
   '@types/lodash-es@4.17.12':
     dependencies:
       '@types/lodash': 4.14.172
@@ -5559,8 +5524,6 @@ snapshots:
       normalize-path: 3.0.0
       picomatch: 2.3.1
 
-  append-field@1.0.0: {}
-
   archiver-utils@2.1.0:
     dependencies:
       glob: 7.1.6
@@ -5685,11 +5648,6 @@ snapshots:
     dependencies:
       base64-js: 1.5.1
       ieee754: 1.2.1
-
-  busboy@0.2.14:
-    dependencies:
-      dicer: 0.2.5
-      readable-stream: 1.1.14
 
   bytes@2.5.0: {}
 
@@ -5978,11 +5936,6 @@ snapshots:
   destroy@1.2.0: {}
 
   detect-libc@2.1.2: {}
-
-  dicer@0.2.5:
-    dependencies:
-      readable-stream: 1.1.14
-      streamsearch: 0.1.2
 
   dicom-data-dictionary@0.3.1: {}
 
@@ -6858,17 +6811,6 @@ snapshots:
 
   ms@2.1.3: {}
 
-  multer@1.4.2:
-    dependencies:
-      append-field: 1.0.0
-      busboy: 0.2.14
-      concat-stream: 1.6.2
-      mkdirp: 0.5.5
-      object-assign: 4.1.1
-      on-finished: 2.4.1
-      type-is: 1.6.18
-      xtend: 4.0.2
-
   multi-integer-range@6.1.0: {}
 
   mute-stream@0.0.8: {}
@@ -7297,13 +7239,6 @@ snapshots:
       isarray: 0.0.1
       string_decoder: 0.10.31
 
-  readable-stream@1.1.14:
-    dependencies:
-      core-util-is: 1.0.2
-      inherits: 2.0.4
-      isarray: 0.0.1
-      string_decoder: 0.10.31
-
   readable-stream@2.3.7:
     dependencies:
       core-util-is: 1.0.2
@@ -7558,8 +7493,6 @@ snapshots:
     dependencies:
       json-stringify-safe: 5.0.1
       readable-stream: 2.3.7
-
-  streamsearch@0.1.2: {}
 
   strict-event-emitter-types@2.0.0: {}
 

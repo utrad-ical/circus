@@ -15,8 +15,7 @@ export const handleGet: RouteMiddleware = () => {
 export const handleGetFull: RouteMiddleware = ({
   database,
   models,
-  dicomImageServerUrl,
-  uploadFileSizeMaxBytes
+  dicomImageServerUrl
 }) => {
   return async (ctx, next) => {
     const user = { ...ctx.user };
@@ -62,9 +61,7 @@ export const handleGetFull: RouteMiddleware = ({
       groups,
       defaultDomain,
       sharedMyLists,
-      dicomImageServer: dicomImageServerUrl,
-      uploadFileMax: 30,
-      uploadFileSizeMaxBytes
+      dicomImageServer: dicomImageServerUrl
     };
   };
 };

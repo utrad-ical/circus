@@ -16,7 +16,7 @@ export default (program: Command) => {
     .option('-l, --crlf', 'use CRLF instead of LF for line endings')
     .option('-z, --zip', 'use zip compression instead of tgz')
     .option(
-      '-p, --per-task <num>',
+      '-b, --batch-size <num>',
       'number of cases downloaded as a batch',
       int({ min: 1, max: 100 }),
       10
@@ -29,10 +29,10 @@ export default (program: Command) => {
       'after',
       formatHelp`
         This command lets you download CIRCUS DB cases in MHD format.
-        The downloaded cases are stored in the output directory with names like "batch-1.tgz".
+        The downloaded cases are stored in the output directory with names like "batch-001.tgz".
 
         One archive file may contain the data of more than one case.
-        Use the "-p (--per-task)" option to control the number of cases downloaded as a batch.
+        Use the "-b (--batch-size)" option to control the number of cases downloaded as a batch.
 
         By default, each volume is the one used in the case, which the labels fit.
         With "--full-original-volume", each volume has all the images of the original series,

@@ -29,6 +29,7 @@ const defaults: Configuration = {
       // as the web UI is recommended, so that the session cookie is sent
       dicomImageServerUrl: '/rs',
       debug: false,
+      // Maximum size of each uploaded DICOM file (not of an archive)
       uploadFileSizeMaxBytes: 200 * 1024 * 1024
     }
   },

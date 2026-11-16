@@ -61,6 +61,43 @@ describe('progress', () => {
     );
   });
 
+  test('sends log lines together, before the end', async () => {
+    const progressId = await issue();
+    const res = await subscribe(progressId);
+    const data = readFromStreamTillEnd(res.data as Readable);
+    const reporter = apiTest.progressManager.claim(
+      progressId,
+      'alice@example.com'
+    );
+    reporter.log('info', 'A');
+    reporter.log('warn', 'B'); // sent with C after the interval
+    reporter.log('error', 'C');
+    reporter.finish('Done');
+    assert.equal(
+      await data,
+      '\n' +
+        'event: log\ndata: {"lines":[{"level":"info","message":"A"}]}\n\n' +
+        'event: log\ndata: {"lines":[{"level":"warn","message":"B"},{"level":"error","message":"C"}]}\n\n' +
+        'event: finish\ndata: {"message":"Done"}\n\n'
+    );
+  });
+
+  test('replays recent log lines to a late subscriber', async () => {
+    const progressId = await issue();
+    const reporter = apiTest.progressManager.claim(
+      progressId,
+      'alice@example.com'
+    );
+    for (let i = 1; i <= 105; i++) reporter.log('info', `#${i}`);
+    reporter.finish('Done');
+    const res = await subscribe(progressId);
+    const text = await readFromStreamTillEnd(res.data as Readable);
+    const lines = JSON.parse(/event: log\ndata: (.*)\n/.exec(text)![1]).lines;
+    assert.equal(lines.length, 100);
+    assert.equal(lines[0].message, '#6');
+    assert.match(text, /event: finish/);
+  });
+
   test('keeps the connection before the request starts', async () => {
     const progressId = await issue();
     const res = await subscribe(progressId);

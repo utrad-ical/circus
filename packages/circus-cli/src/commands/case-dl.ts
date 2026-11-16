@@ -11,28 +11,26 @@ const action: CommandAction = ({ getFetch }) => {
   return async (args: string[], options) => {
     const fetch = getFetch();
     const outDir = options.outdir ?? process.cwd();
-    const casesPerTask: number = options.perTask;
+    const batchSize: number = options.batchSize;
     const ids = await readIds(args, !!options.file);
     console.log(`Downloading ${ids.length} case(s)...`);
 
     await fs.mkdir(outDir, { recursive: true });
 
-    const batches = Math.ceil(ids.length / casesPerTask);
+    const batches = Math.ceil(ids.length / batchSize);
     if (batches > 1) {
       console.log(`Split into ${batches} batches.`);
     }
 
     for (let batchIdx = 0; batchIdx < batches; batchIdx++) {
       console.log(styleText('cyan', `\nBatch #${batchIdx + 1} of ${batches}`));
-      const batch = ids.slice(
-        batchIdx * casesPerTask,
-        (batchIdx + 1) * casesPerTask
-      );
+      const batch = ids.slice(batchIdx * batchSize, (batchIdx + 1) * batchSize);
       console.log(`Case IDs to download: ${batch.join(', ')}`);
       const spinner = createSpinner('Downloading...');
       let packed: string | undefined;
       let detail = '';
       const watcher = await watchProgress(fetch, event => {
+        if (event.type === 'log') return;
         const { type, message, finished = 0, total } = event;
         if (type === 'finish') packed = '100%';
         else if (type === 'progress' && total)

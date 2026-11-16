@@ -17,12 +17,16 @@ routes:
   - verb: post
     path: /series/domain/:domain
     expectedContentType: multipart/form-data
-    description: Uploads one or more DICOM files, creating a task.
+    description: >
+      Uploads DICOM files, or zip/tar.gz archives of them, and imports them
+      while receiving. Responds with the summary: 201 if all imported,
+      422 if some failed, 400 if none was a DICOM file.
+      Pass `progressId` to report the progress.
   - verb: post
     path: /series/domain/:domain/single
     expectedContentType: multipart/form-data
-    handler: handlePostSingle
-    description: Uploads one DICOM file without creating a task.
+    handler: handlePost
+    description: Same as `/series/domain/:domain`, kept for compatibility.
   - verb: get
     path: /series/:seriesUid
     description: Returns information about the specified series.

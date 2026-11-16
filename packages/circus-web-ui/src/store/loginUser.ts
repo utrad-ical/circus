@@ -74,8 +74,6 @@ export interface LoginUser {
     lastLoginTime: string;
     loginEnabled: boolean;
     loginId: string;
-    uploadFileMax: number;
-    uploadFileSizeMaxBytes: number;
     userEmail: string;
     myLists: MyList[];
     preferences: UserPreferences;

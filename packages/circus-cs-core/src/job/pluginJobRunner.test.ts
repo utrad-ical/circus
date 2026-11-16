@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, test, mock } from 'node:test';
-import Archiver from 'archiver';
+import { packTar } from 'modern-tar';
 import { EventEmitter } from 'events';
 import memory from 'memory-streams';
 import path from 'path';
@@ -51,11 +51,22 @@ const generatePluginJobRunnerTest = async (
 
   const dicomVoxelDumper: circus.DicomVoxelDumper = {
     dump: () => {
-      const stream = Archiver('tar');
-      stream.append('', { name: '0.mhd' });
-      stream.append(Buffer.alloc(10), { name: '0.raw' });
-      stream.append('{}', { name: '0.json' });
-      stream.finalize();
+      const file = (name: string, body: string | Uint8Array) => ({
+        header: { name, size: body.length, type: 'file' as const },
+        body
+      });
+      const stream = new ReadableStream<Uint8Array>({
+        start: async controller => {
+          controller.enqueue(
+            await packTar([
+              file('0.mhd', ''),
+              file('0.raw', new Uint8Array(10)),
+              file('0.json', '{}')
+            ])
+          );
+          controller.close();
+        }
+      });
       return { stream, events: new EventEmitter() };
     }
   };

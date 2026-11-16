@@ -65,6 +65,8 @@ const httpError = (status: number, message: string) =>
  * Opens a series as a volume whose slices are read one by one on demand.
  * Unlike `volumeProvider`, nothing is cached.
  * @param pvd The partial volume to read; all the images if omitted.
+ * @param onSlice Called with the DICOM file of each slice when it is read,
+ *   in the order of the slices.
  */
 const openSeriesVolume = async (
   deps: {
@@ -72,7 +74,8 @@ const openSeriesVolume = async (
     dicomExtractorWorker: DicomExtractorWorker;
   },
   seriesUid: string,
-  pvd?: PartialVolumeDescriptor
+  pvd?: PartialVolumeDescriptor,
+  onSlice?: (imageNo: number, dicom: ArrayBuffer) => void | Promise<void>
 ): Promise<SeriesVolume> => {
   const { dicomFileRepository, dicomExtractorWorker } = deps;
   const { load, images } = await dicomFileRepository.getSeries(seriesUid);
@@ -87,9 +90,9 @@ const openSeriesVolume = async (
     throw httpError(400, 'The partial volume has images not in the series.');
 
   const extract = async (imageNo: number) => {
-    const { metadata, pixelData } = await dicomExtractorWorker(
-      await load(imageNo)
-    );
+    const dicom = await load(imageNo);
+    await onSlice?.(imageNo, dicom);
+    const { metadata, pixelData } = await dicomExtractorWorker(dicom);
     return { metadata, pixelData: new Uint8Array(pixelData!) };
   };
 

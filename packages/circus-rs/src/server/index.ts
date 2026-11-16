@@ -17,6 +17,9 @@ export {
   default as openSeriesVolume,
   determineSliceSpacing
 } from './helper/openSeriesVolume.ts';
-export type { DicomExtractorWorker } from './helper/extractor-worker/createDicomExtractorWorker.ts';
+export {
+  default as createDicomExtractorWorker,
+  type DicomExtractorWorker
+} from './helper/extractor-worker/createDicomExtractorWorker.ts';
 export type { RsWebsocketVolumeConnectionHandlerCreator } from './ws/createWebsocketVolumeConnectionHandlerCreator.ts';
 export { default as withWebSocketConnectionHandlers } from './ws/withWebSocketConnectionHandlers.ts';

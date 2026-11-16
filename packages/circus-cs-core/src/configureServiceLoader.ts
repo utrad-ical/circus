@@ -3,6 +3,10 @@ import type {
   Logger,
   ServiceLoader
 } from '@utrad-ical/circus-lib';
+import {
+  createDicomExtractorWorker,
+  type DicomExtractorWorker
+} from '@utrad-ical/circus-rs/server';
 import path from 'path';
 import createDaemonController from './daemon/createDaemonController.ts';
 import type { PluginJobRegisterer } from './job/registerer/createPluginJobRegisterer.ts';
@@ -28,6 +32,7 @@ export interface Services {
   core: circus.CsCore;
   configGetter: circus.Configuration;
   dicomVoxelDumper: circus.DicomVoxelDumper;
+  dicomExtractorWorker: DicomExtractorWorker;
   [key: string]: any; // This allows to add services outside this file
 }
 
@@ -78,6 +83,8 @@ export default function configureServiceLoader(
     '<circus-lib>/dicom-file-repository',
     'StaticDicomFileRepository'
   );
+  // The API server registers the same one via circus-rs
+  serviceLoader.register('dicomExtractorWorker', createDicomExtractorWorker);
 
   // Misc 'singleton' modules
   serviceLoader.registerModule(

@@ -8,6 +8,7 @@ import tarfs from 'tar-fs';
 import type { DicomFileRepository } from '@utrad-ical/circus-lib';
 import type * as circus from '../interface.ts';
 import createDicomVoxelDumper from '../job/createDicomVoxelDumper.ts';
+import type { DicomExtractorWorker } from '@utrad-ical/circus-rs/server';
 import createTmpDicomFileRepository, {
   createJobSeries
 } from './util/tmpDicomFileRepository.ts';
@@ -23,9 +24,15 @@ const runPlugin: FunctionService<
     dockerRunner: DockerRunner;
     dicomFileRepository: DicomFileRepository;
     pluginDefinitionAccessor: circus.PluginDefinitionAccessor;
+    dicomExtractorWorker: DicomExtractorWorker;
   }
 > = async (options, deps) => {
-  const { dockerRunner, pluginDefinitionAccessor, dicomFileRepository } = deps;
+  const {
+    dockerRunner,
+    pluginDefinitionAccessor,
+    dicomFileRepository,
+    dicomExtractorWorker
+  } = deps;
   return async (commandName, args) => {
     const {
       _: [pluginId, ...seriesUidOrDirectories],
@@ -76,7 +83,7 @@ const runPlugin: FunctionService<
 
     const dicomVoxelDumper = await createDicomVoxelDumper(
       {},
-      { dicomFileRepository: repo }
+      { dicomFileRepository: repo, dicomExtractorWorker }
     );
 
     const series = await createJobSeries(!!d, repo, seriesUidOrDirectories);
@@ -97,6 +104,7 @@ const runPlugin: FunctionService<
 runPlugin.dependencies = [
   'dockerRunner',
   'dicomFileRepository',
+  'dicomExtractorWorker',
   'pluginDefinitionAccessor'
 ];
 

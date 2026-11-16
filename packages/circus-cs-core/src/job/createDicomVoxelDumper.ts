@@ -2,11 +2,10 @@ import type {
   DicomFileRepository,
   FunctionService
 } from '@utrad-ical/circus-lib';
-import type { DicomImageData } from '@utrad-ical/circus-rs/server';
+import type { DicomExtractorWorker } from '@utrad-ical/circus-rs/server';
 import {
-  dicomImageExtractor,
   generateMhdHeader,
-  partialVolumeDescriptorToArray,
+  openSeriesVolume,
   pixelFormatInfo
 } from '@utrad-ical/circus-rs/server';
 import parser from 'dicom-parser';
@@ -19,7 +18,7 @@ import type {
   DicomVoxelDumperOptions
 } from '../interface.ts';
 import { EventEmitter } from 'events';
-import type { Archiver } from 'archiver';
+import { createTarPacker, type TarPackController } from 'modern-tar';
 
 type KeyValues = { [key: string]: any };
 
@@ -75,6 +74,8 @@ const returnNumberOrNumberList = (
 };
 
 interface Options {}
+
+const encoder = new TextEncoder();
 
 export const stringifyUN = (data: ArrayBuffer | Uint8Array, tag: string) => {
   const arr = new Uint8Array(data);
@@ -186,106 +187,98 @@ const dataSetToObject = (
 
 const createDicomVoxelDumper: FunctionService<
   DicomVoxelDumper,
-  { dicomFileRepository: DicomFileRepository },
+  {
+    dicomFileRepository: DicomFileRepository;
+    dicomExtractorWorker: DicomExtractorWorker;
+  },
   Options
-> = async (opt, { dicomFileRepository }) => {
-  const dumpOneSeries = async (
-    series: SeriesEntry,
-    volId: number,
-    archiver: Archiver,
-    options?: DicomVoxelDumperOptions
+> = async (opt, deps) => {
+  const addEntry = async (
+    controller: TarPackController,
+    name: string,
+    data: string | ReadableStream<Uint8Array>,
+    size?: number
   ) => {
-    const seriesTagData = [];
-    const seriesAccessor = await dicomFileRepository.getSeries(
-      series.seriesUid
-    );
-    const partialImages = partialVolumeDescriptorToArray(
-      series.partialVolumeDescriptor
-    );
-    const neededPrivateTags = options?.neededPrivateTags ?? [];
-
-    let rawBuffer: Uint8Array | undefined = undefined;
-    let firstSlice: DicomImageData | undefined = undefined,
-      secondSlice: DicomImageData | undefined = undefined;
-    let bytesPerSlice: number;
-    const pixelExtractor = dicomImageExtractor();
-
-    for (let i = 0; i < partialImages.length; i++) {
-      const buffer = await seriesAccessor.load(partialImages[i]);
-      const rootDataset: parser.DataSet = parser.parseDicom(
-        new Uint8Array(buffer)
-      );
-      // Process DICOM tags
-      const specificCharacterSet = rootDataset.string('x00080005');
-      const encConverter = await prepareEncConverter(specificCharacterSet);
-      seriesTagData.push(
-        dataSetToObject(rootDataset, encConverter, neededPrivateTags)
-      );
-      // Process pixel data
-      const slice = pixelExtractor(buffer);
-      if (i === 0) {
-        firstSlice = slice;
-        const pfi = pixelFormatInfo(slice.metadata.pixelFormat);
-        bytesPerSlice = Math.ceil(
-          slice.metadata.columns * slice.metadata.rows * pfi.bpp
-        );
-        rawBuffer = new Uint8Array(bytesPerSlice * partialImages.length);
-      } else if (i === 1) {
-        secondSlice = slice;
-      }
-      rawBuffer!.set(new Uint8Array(slice.pixelData!), i * bytesPerSlice!);
-    }
-    const result = extractCommonValues(seriesTagData);
-    const json = JSON.stringify(result, null, 2);
-
-    const firstSliceMetadata = firstSlice!.metadata;
-    const mhd = generateMhdHeader(
-      firstSliceMetadata.pixelFormat,
-      [
-        firstSliceMetadata.columns,
-        firstSliceMetadata.rows,
-        partialImages.length
-      ],
-      [
-        firstSliceMetadata.pixelSpacing[0],
-        firstSliceMetadata.pixelSpacing[1],
-        firstSliceMetadata.pitch ??
-          (firstSlice && secondSlice
-            ? Math.abs(
-                firstSlice.metadata.sliceLocation! -
-                  secondSlice.metadata.sliceLocation!
-              )
-            : 1)
-      ],
-      `${volId}.raw`,
-      'lf'
-    );
-
-    const buffer = Buffer.from(rawBuffer!.buffer);
-    archiver.append(mhd, { name: `${volId}.mhd` });
-    archiver.append(buffer, { name: `${volId}.raw` });
-    archiver.append(json, { name: `${volId}.json` });
+    const bytes = typeof data === 'string' ? encoder.encode(data) : undefined;
+    const entry = controller.add({
+      name,
+      size: bytes ? bytes.byteLength : size!,
+      type: 'file',
+      mode: 0o644,
+      mtime: new Date()
+    });
+    if (bytes) await new Blob([bytes]).stream().pipeTo(entry);
+    else await (data as ReadableStream<Uint8Array>).pipeTo(entry);
   };
 
-  const dump = (
-    series: SeriesEntry[],
-    archiver: Archiver,
+  const dumpOneSeries = async (
+    controller: TarPackController,
+    series: SeriesEntry,
+    volId: number,
     options?: DicomVoxelDumperOptions
   ) => {
-    const events = new EventEmitter();
-    (async () => {
-      for (let i = 0; i < series.length; i++) {
-        events.emit('volume', i);
-        await dumpOneSeries(series[i], i, archiver, options);
+    const neededPrivateTags = options?.neededPrivateTags ?? [];
+    const seriesTagData: object[] = [];
+    const { metadata, slices } = await openSeriesVolume(
+      deps,
+      series.seriesUid,
+      series.partialVolumeDescriptor,
+      async (_, dicom) => {
+        const dataSet = parser.parseDicom(new Uint8Array(dicom));
+        const encConverter = await prepareEncConverter(
+          dataSet.string('x00080005')
+        );
+        seriesTagData.push(
+          dataSetToObject(dataSet, encConverter, neededPrivateTags)
+        );
       }
-      archiver.finalize();
+    );
+    const { dimension, pixelFormat, elementSpacing } = metadata;
+    await addEntry(
+      controller,
+      `${volId}.mhd`,
+      generateMhdHeader(
+        pixelFormat,
+        dimension,
+        elementSpacing,
+        `${volId}.raw`,
+        'lf'
+      )
+    );
+    const rawSize =
+      dimension[0] *
+      dimension[1] *
+      dimension[2] *
+      pixelFormatInfo(pixelFormat).bpp;
+    await addEntry(controller, `${volId}.raw`, slices, rawSize);
+    const json = JSON.stringify(extractCommonValues(seriesTagData), null, 2);
+    await addEntry(controller, `${volId}.json`, json);
+  };
+
+  const dump = (series: SeriesEntry[], options?: DicomVoxelDumperOptions) => {
+    const events = new EventEmitter();
+    const { readable, controller } = createTarPacker();
+    (async () => {
+      try {
+        for (let i = 0; i < series.length; i++) {
+          events.emit('volume', i);
+          await dumpOneSeries(controller, series[i], i, options);
+        }
+        controller.finalize();
+      } catch (err) {
+        // No effect if the reader has already canceled the stream
+        controller.error(err);
+      }
     })();
-    return { stream: archiver, events };
+    return { stream: readable, events };
   };
 
   return { dump };
 };
 
-createDicomVoxelDumper.dependencies = ['dicomFileRepository'];
+createDicomVoxelDumper.dependencies = [
+  'dicomFileRepository',
+  'dicomExtractorWorker'
+];
 
 export default createDicomVoxelDumper;

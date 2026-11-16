@@ -13,6 +13,9 @@ const uid = '1.2.3';
 const caseId = 'my-case-id';
 const hash = 'a'.repeat(40);
 
+// The spacing tag (0018,0088) of the fake slices
+let pitch: number | undefined;
+
 // A fake "DICOM file" is just the image number;
 // the fake extractor makes a 2x2 uint8 slice filled with it
 const dicomExtractorWorker = Object.assign(
@@ -26,7 +29,8 @@ const dicomExtractorWorker = Object.assign(
         pixelSpacing: [0.5, 0.5],
         pixelFormat: 'uint8',
         rescale: { slope: 1, intercept: 0 },
-        sliceLocation: imageNo * 2
+        sliceLocation: imageNo * 2,
+        pitch
       },
       pixelData: new Uint8Array(4).fill(imageNo).buffer
     };
@@ -168,6 +172,24 @@ describe('createMhdPacker', () => {
       [...files.get(`${caseId}/vol000-label000.raw`)!],
       [0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0]
     );
+  });
+
+  test('uses the spacing tag as is for a partial volume', async () => {
+    pitch = 3;
+    try {
+      const { packer } = await setUp({ start: 2, end: 6, delta: 2 }, [
+        voxelLabel([0, 0, 1])
+      ]);
+      const files = await exportCase(packer);
+      const spacing = /ElementSpacing = 0.5 0.5 3\b/;
+      assert.match(text(files.get(`${caseId}/vol000.mhd`)), spacing);
+      assert.match(text(files.get(`${caseId}/vol000-label000.mhd`)), spacing);
+      const full = await exportCase(packer, { fullOriginalVolume: true });
+      assert.match(text(full.get(`${caseId}/vol000.mhd`)), spacing);
+      assert.match(text(full.get(`${caseId}/vol000-label000.mhd`)), spacing);
+    } finally {
+      pitch = undefined;
+    }
   });
 
   test('uses the first range of the series without a partial volume', async () => {

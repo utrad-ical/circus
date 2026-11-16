@@ -237,6 +237,17 @@ const createMhdPacker: FunctionService<
     }
   };
 
+  /** Reads only the first two slices to determine the spacing */
+  const partialVolumeSpacing = async (series: PreparedSeries) => {
+    const { metadata, slices } = await openSeriesVolume(
+      deps,
+      series.seriesUid,
+      series.pvd
+    );
+    await slices.cancel();
+    return metadata.elementSpacing;
+  };
+
   const pack: MhdPacker['pack'] = (prepared, options, reporter) => {
     const writer = createArchiveWriter(options.compressionFormat);
     let finished = 0;
@@ -297,12 +308,8 @@ const createMhdPacker: FunctionService<
           )
         );
         // The labels stay in the partial volume
-        const labelSpacing: Vector3D = options.fullOriginalVolume
-          ? [
-              elementSpacing[0],
-              elementSpacing[1],
-              elementSpacing[2] * Math.abs(series.pvd.delta)
-            ]
+        const labelSpacing = options.fullOriginalVolume
+          ? await partialVolumeSpacing(series)
           : elementSpacing;
         await putLabels(
           writer,

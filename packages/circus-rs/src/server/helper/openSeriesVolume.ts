@@ -24,17 +24,17 @@ export interface SeriesVolume {
 }
 
 /**
- * Determines the slice spacing of a volume from its first two slices.
- * @param delta The step between the image numbers of adjacent slices.
+ * Determines the slice spacing of a volume from its first two slices,
+ * in the same way as the viewer (`determinePitch` of the volume provider).
+ * The spacing tag is used as is even for a partial volume, which is
+ * mostly used to pick up one of interleaved series.
  */
 export const determineSliceSpacing = (
   first: DicomMetadata,
-  second: DicomMetadata | undefined,
-  delta: number
+  second: DicomMetadata | undefined
 ): number => {
   // (0018,0088) must not be negative, but some devices write negative values
-  if (first.pitch) return Math.abs(first.pitch) * Math.abs(delta);
-  // The two slices are already `delta` apart
+  if (first.pitch) return Math.abs(first.pitch);
   if (
     second &&
     typeof first.sliceLocation === 'number' &&
@@ -133,7 +133,7 @@ const openSeriesVolume = async (
       elementSpacing: [
         pixelSpacing[0],
         pixelSpacing[1],
-        determineSliceSpacing(first.metadata, second?.metadata, pvd?.delta ?? 1)
+        determineSliceSpacing(first.metadata, second?.metadata)
       ],
       imageNumbers
     },

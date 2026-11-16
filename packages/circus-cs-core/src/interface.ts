@@ -2,7 +2,6 @@
 // You can use them like `circus.PluginJobRequest` without `import`-ing.
 
 import type { PartialVolumeDescriptor } from '@utrad-ical/circus-rs/server';
-import type { Archiver } from 'archiver';
 import type { EventEmitter } from 'events';
 import type { Readable } from 'stream';
 import type { RemoteCadDefinition } from './util/remote-job.ts';
@@ -201,17 +200,16 @@ export interface DicomVoxelDumperOptions {
 
 /**
  * DicomVoxelDumper builds DICOM volumes for CIRCUS CS plug-ins.
- * It exports a set of files via the passed archiver.
+ * It exports `0.mhd`, `0.raw`, `0.json`, `1.mhd`, ... as an uncompressed tar.
  */
 export interface DicomVoxelDumper {
   /**
    * @param series The list of series to export.
-   * @param archiver The archiver instance (can be configured to
-   * create a zip file, a tar+gz file or an uncompressed tar)
+   * @returns The tar stream, which reads the series as it is consumed,
+   *   and the events (`volume`) emitted when each series starts.
    */
   dump: (
     series: SeriesEntry[],
-    archiver: Archiver,
     options?: DicomVoxelDumperOptions
-  ) => { stream: Archiver; events: EventEmitter };
+  ) => { stream: ReadableStream<Uint8Array>; events: EventEmitter };
 }

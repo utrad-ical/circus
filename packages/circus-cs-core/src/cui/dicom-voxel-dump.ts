@@ -2,6 +2,7 @@ import type { FunctionService } from '@utrad-ical/circus-lib';
 import type Command from './Command.ts';
 import type { DicomFileRepository } from '@utrad-ical/circus-lib';
 import createDicomVoxelDumper from '../job/createDicomVoxelDumper.ts';
+import type { DicomExtractorWorker } from '@utrad-ical/circus-rs/server';
 import buildDicomVolumes from '../job/buildDicomVolumes.ts';
 import createTmpDicomFileRepository, {
   createJobSeries
@@ -12,9 +13,12 @@ import createTmpDicomFileRepository, {
  */
 const dicomVoxelDump: FunctionService<
   Command,
-  { dicomFileRepository: DicomFileRepository }
+  {
+    dicomFileRepository: DicomFileRepository;
+    dicomExtractorWorker: DicomExtractorWorker;
+  }
 > = async (options, deps) => {
-  const { dicomFileRepository } = deps;
+  const { dicomFileRepository, dicomExtractorWorker } = deps;
   return async (commandName, args) => {
     const {
       _: seriesUidOrDirectories,
@@ -39,7 +43,7 @@ const dicomVoxelDump: FunctionService<
 
     const dicomVoxelDumper = await createDicomVoxelDumper(
       {},
-      { dicomFileRepository: repo }
+      { dicomFileRepository: repo, dicomExtractorWorker }
     );
 
     const series = await createJobSeries(!!d, repo, seriesUidOrDirectories);
@@ -54,6 +58,6 @@ const dicomVoxelDump: FunctionService<
   };
 };
 
-dicomVoxelDump.dependencies = ['dicomFileRepository'];
+dicomVoxelDump.dependencies = ['dicomFileRepository', 'dicomExtractorWorker'];
 
 export default dicomVoxelDump;

@@ -25,7 +25,7 @@ import createProgressManager, {
   type ProgressManager
 } from '../createProgressManager.ts';
 import type { DicomVoxelDumper } from '@utrad-ical/circus-cs-core';
-import type { Archiver } from 'archiver';
+import { packTar } from 'modern-tar';
 import { EventEmitter } from 'events';
 import createOauthServer from '../middleware/auth/createOauthServer.ts';
 import createDefaultAuthProvider from '../middleware/auth/authProvider/DefaultAuthProvider.ts';
@@ -166,14 +166,21 @@ export const setUpAppForRoutesTest = async (
   ) as DicomExtractorWorker;
 
   const dicomVoxelDumper: DicomVoxelDumper = {
-    dump: (series: any, archiver: Archiver) => {
-      const events = new EventEmitter();
-      (async () => {
-        archiver.append('abc', { name: 'dummy.txt' });
-        events.emit('volume', 0);
-        archiver.finalize();
-      })();
-      return { stream: archiver, events };
+    dump: () => {
+      const stream = new ReadableStream<Uint8Array>({
+        start: async controller => {
+          controller.enqueue(
+            await packTar([
+              {
+                header: { name: 'dummy.txt', size: 3, type: 'file' },
+                body: 'abc'
+              }
+            ])
+          );
+          controller.close();
+        }
+      });
+      return { stream, events: new EventEmitter() };
     }
   };
 

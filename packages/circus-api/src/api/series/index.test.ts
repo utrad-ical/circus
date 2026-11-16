@@ -13,12 +13,11 @@ import { packTar } from 'modern-tar';
 import type { Readable } from 'node:stream';
 import fs from 'fs-extra';
 import path from 'path';
-import tarfs from 'tar-fs';
-import zlib from 'zlib';
 import { setUpMongoFixture } from '../../test/util-mongo.ts';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import { readFromStreamTillEnd } from '../../test/util-stream.ts';
+import { readArchive } from '../../test/util-archive.ts';
 
 let apiTest: ApiTest, ax: typeof apiTest.axiosInstances;
 
@@ -436,35 +435,33 @@ describe('Export CS volume', () => {
     await fs.remove(apiTest.downloadFileDirectory);
   });
 
-  test('export', async () => {
-    const res = await ax.bob.post('api/series/export-cs-volume', {
-      series: [
-        {
-          seriesUid: '222.333.444.555.666',
-          partialVolumeDescriptor: { start: 1, end: 2, delta: 1 }
-        }
-      ],
-      compressionFormat: 'tgz'
+  for (const compressionFormat of ['tgz', 'zip'] as const) {
+    test(`export as ${compressionFormat}`, async () => {
+      const res = await ax.bob.post('api/series/export-cs-volume', {
+        series: [
+          {
+            seriesUid: '222.333.444.555.666',
+            partialVolumeDescriptor: { start: 1, end: 2, delta: 1 }
+          }
+        ],
+        compressionFormat
+      });
+      assert.equal(res.status, 201);
+      const taskId = res.data.taskId;
+
+      while (apiTest.taskManager.isTaskInProgress(taskId)) {
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+
+      const data = await fs.readFile(
+        path.join(apiTest.downloadFileDirectory, taskId)
+      );
+      const files = await readArchive(
+        compressionFormat,
+        new Blob([new Uint8Array(data)]).stream()
+      );
+      assert.deepEqual([...files.keys()], ['dummy.txt']);
+      assert.equal(new TextDecoder().decode(files.get('dummy.txt')), 'abc');
     });
-    assert.equal(res.status, 201);
-    const taskId = res.data.taskId;
-
-    while (apiTest.taskManager.isTaskInProgress(taskId)) {
-      await new Promise(resolve => setTimeout(resolve, 10));
-    }
-
-    const file = fs.createReadStream(
-      path.join(apiTest.downloadFileDirectory, taskId)
-    );
-    const unzip = zlib.createGunzip();
-    const tarStream = tarfs.extract(apiTest.downloadFileDirectory);
-    file.pipe(unzip).pipe(tarStream);
-    await new Promise<void>(resolve => tarStream.on('finish', resolve));
-
-    const textContent = await fs.readFile(
-      path.join(apiTest.downloadFileDirectory, 'dummy.txt'),
-      'utf8'
-    );
-    assert.equal(textContent, 'abc');
-  });
+  }
 });

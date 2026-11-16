@@ -1,5 +1,5 @@
-import archiver from 'archiver';
-import type { Writable } from 'stream';
+import { Readable, type Writable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 import tarfs from 'tar-fs';
 import type { DicomVoxelDumper, SeriesEntry } from '../interface.ts';
 
@@ -16,21 +16,16 @@ const buildDicomVolumes = (
   destDir: string,
   logStream: Writable
 ) => {
-  const pack = archiver('tar', { gzip: false });
-  const { stream } = dicomVoxelDumper.dump(seriesEntries, pack);
+  const { stream } = dicomVoxelDumper.dump(seriesEntries);
   logStream.write(`  Performing voxel dump...\n`);
-  return new Promise<void>((resolve, reject) => {
-    const extract = tarfs.extract(destDir, {
-      dmode: 0o555, // all dirs should be readable
-      fmode: 0o444 // all files should be readable
-    });
-    stream.pipe(extract);
-    extract.on('entry', (header, stream, next) => {
-      logStream.write(`  Writing file: ${header.name}\n`);
-    });
-    extract.on('finish', resolve);
-    extract.on('error', reject);
+  const extract = tarfs.extract(destDir, {
+    dmode: 0o555, // all dirs should be readable
+    fmode: 0o444 // all files should be readable
   });
+  extract.on('entry', header => {
+    logStream.write(`  Writing file: ${header.name}\n`);
+  });
+  return pipeline(Readable.fromWeb(stream as any), extract);
 };
 
 export default buildDicomVolumes;

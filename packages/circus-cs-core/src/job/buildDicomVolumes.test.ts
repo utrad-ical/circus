@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
+import { createDicomExtractorWorker } from '@utrad-ical/circus-rs/server';
 import path from 'path';
 import fs from 'fs-extra';
 import buildDicomVolumes from './buildDicomVolumes.ts';
@@ -27,9 +28,10 @@ const mockDicomFileRepository: DicomFileRepository = {
 
 describe('buildDicomVolume', () => {
   test('craetes raw volume file', async () => {
+    const dicomExtractorWorker = await createDicomExtractorWorker({});
     const dicomVoxelDumper = await createDicomVoxelDumper(
       {},
-      { dicomFileRepository: mockDicomFileRepository }
+      { dicomFileRepository: mockDicomFileRepository, dicomExtractorWorker }
     );
     const logStream = new PassThrough();
     const tmpDestDir = path.resolve(
@@ -54,6 +56,7 @@ describe('buildDicomVolume', () => {
       assert.ok(files.includes('0.raw'));
       assert.ok(files.includes('0.json'));
     } finally {
+      await dicomExtractorWorker.dispose();
       await fs.remove(tmpDestDir);
     }
   });

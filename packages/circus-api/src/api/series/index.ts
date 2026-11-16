@@ -1,13 +1,14 @@
 import * as mr from 'multi-integer-range';
 import type { PartialVolumeDescriptor } from '@utrad-ical/circus-rs/server';
-import archiver from 'archiver';
 import status from 'http-status';
+import { Readable } from 'node:stream';
 import type {
   CircusContext,
   RouteMiddleware
 } from '../../typings/middlewares.ts';
 import checkFilter from '../../utils/checkFilter.ts';
 import readMultipartFiles from '../../utils/readMultipartFiles.ts';
+import tarToZip from '../../utils/tarToZip.ts';
 import importUploadedFiles, {
   type ImportSummary
 } from './importUploadedFiles.ts';
@@ -278,14 +279,21 @@ interface ExportRequest {
 
 export const handlePostExportCsVolume: RouteMiddleware = ({
   taskManager,
-  dicomVoxelDumper
+  dicomVoxelDumper,
+  logger
 }) => {
   return async (ctx, next) => {
     const request: ExportRequest = ctx.request.body;
     const zipMode = request.compressionFormat === 'zip';
-    const pack = zipMode ? archiver('zip') : archiver('tar', { gzip: true });
-
-    const { stream, events } = dicomVoxelDumper.dump(request.series, pack);
+    const { stream: tar, events } = dicomVoxelDumper.dump(request.series);
+    const archive = zipMode
+      ? tarToZip(tar)
+      : tar.pipeThrough(
+          new CompressionStream('gzip') as TransformStream<
+            Uint8Array,
+            Uint8Array
+          >
+        );
 
     const downloadFileType = zipMode ? 'application/zip' : 'application/x-tgz';
     const { emitter, downloadFileStream } = await taskManager.register(ctx, {
@@ -295,7 +303,16 @@ export const handlePostExportCsVolume: RouteMiddleware = ({
     });
 
     emitter.emit('progress', 'Processing volume #0');
-    stream.pipe(downloadFileStream!);
+    const source = Readable.fromWeb(archive as any);
+    source.on('error', err => {
+      logger.error(`CS volume export error: ${err.message}`);
+      emitter.emit(
+        'error',
+        'An internal error occurred while exporting the volume.'
+      );
+      downloadFileStream!.destroy();
+    });
+    source.pipe(downloadFileStream!);
 
     events.on('volume', (i: number) => {
       emitter.emit(

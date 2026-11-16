@@ -21,7 +21,6 @@
     "@utrad-ical/circus-lib": "workspace:*",
     "@utrad-ical/circus-rs": "workspace:*",
     "@zip.js/zip.js": "^2.25.0",
-    "archiver": "^5.3.0",
     "axios": "^1.7.7",
     "bson": "^7.3.4",
     "bytes": "^3.1.0",
@@ -64,7 +63,6 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@types/archiver": "^5.1.0",
     "@types/bytes": "^3.1.0",
     "@types/fs-extra": "^8.1.0",
     "@types/js-yaml": "^3.12.7",

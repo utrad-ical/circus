@@ -165,16 +165,19 @@ export const setUpAppForRoutesTest = async (
     { dispose: async () => {} }
   ) as DicomExtractorWorker;
 
+  // Writes the received series as `series.json`
   const dicomVoxelDumper: DicomVoxelDumper = {
-    dump: () => {
+    dump: series => {
+      const file = (name: string, body: string) => ({
+        header: { name, size: Buffer.byteLength(body), type: 'file' as const },
+        body
+      });
       const stream = new ReadableStream<Uint8Array>({
         start: async controller => {
           controller.enqueue(
             await packTar([
-              {
-                header: { name: 'dummy.txt', size: 3, type: 'file' },
-                body: 'abc'
-              }
+              file('dummy.txt', 'abc'),
+              file('series.json', JSON.stringify(series))
             ])
           );
           controller.close();

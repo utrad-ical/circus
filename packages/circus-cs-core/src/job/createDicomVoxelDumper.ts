@@ -260,6 +260,8 @@ const createDicomVoxelDumper: FunctionService<
     const { readable, controller } = createTarPacker();
     (async () => {
       try {
+        // Lets the caller listen to the first event
+        await Promise.resolve();
         for (let i = 0; i < series.length; i++) {
           events.emit('volume', i);
           await dumpOneSeries(controller, series[i], i, options);

@@ -14,7 +14,7 @@ interface CsVolumeDownloadOptions {
   compressionFormat: CompressionFormat;
 }
 
-const CsVolumeDoanloadOptionsEditor: Editor<
+const CsVolumeDownloadOptionsEditor: Editor<
   CsVolumeDownloadOptions
 > = props => {
   const { value, onChange } = props;
@@ -46,14 +46,22 @@ const CsVolumeDownloadModal: React.FC<{
 
   const onStart = useCallback(
     async (options: CsVolumeDownloadOptions) => {
-      const res = await api('/series/export-cs-volume', {
-        method: 'post',
-        data: {
-          series: await fillPartialVolumeDescriptors(options.series, appState),
-          compressionFormat: options.compressionFormat
-        }
+      const series = await fillPartialVolumeDescriptors(
+        options.series,
+        appState
+      );
+      const params = new URLSearchParams({
+        // `uid:start:end:delta`
+        series: series
+          .map(({ seriesUid, partialVolumeDescriptor: pvd }) =>
+            pvd && pvd !== 'auto'
+              ? [seriesUid, pvd.start, pvd.end, pvd.delta].join(':')
+              : seriesUid
+          )
+          .join(','),
+        compressionFormat: options.compressionFormat
       });
-      return res.taskId;
+      return { url: api.getBaseUrl() + 'series/export-cs-volume?' + params };
     },
     [appState]
   );
@@ -64,7 +72,7 @@ const CsVolumeDownloadModal: React.FC<{
       caption={caption}
       onStart={onStart}
       initialOptions={{ series, compressionFormat: 'tgz' }}
-      optionsEditor={CsVolumeDoanloadOptionsEditor}
+      optionsEditor={CsVolumeDownloadOptionsEditor}
     />
   );
 };

@@ -1,11 +1,17 @@
 import * as mr from 'multi-integer-range';
-import type { PartialVolumeDescriptor } from '@utrad-ical/circus-rs/server';
+import {
+  type PartialVolumeDescriptor,
+  isValidPartialVolumeDescriptor,
+  partialVolumeDescriptorToArray
+} from '@utrad-ical/circus-rs/server';
+import type { SeriesEntry } from '@utrad-ical/circus-cs-core';
 import status from 'http-status';
 import { Readable } from 'node:stream';
 import type {
   CircusContext,
   RouteMiddleware
 } from '../../typings/middlewares.ts';
+import { ValidationError } from '../../createValidator.ts';
 import checkFilter from '../../utils/checkFilter.ts';
 import readMultipartFiles from '../../utils/readMultipartFiles.ts';
 import tarToZip from '../../utils/tarToZip.ts';
@@ -269,24 +275,85 @@ export const handleDelete: RouteMiddleware = ({
   };
 };
 
-interface ExportRequest {
-  series: {
-    seriesUid: string;
-    partialVolumeDescriptor: PartialVolumeDescriptor;
-  }[];
+interface CsVolumeQuery {
+  series: { seriesUid: string; start?: number; end?: number; delta?: number }[];
   compressionFormat: 'tgz' | 'zip';
 }
 
-export const handlePostExportCsVolume: RouteMiddleware = ({
-  taskManager,
+const exposedError = (statusCode: number, message: string) =>
+  Object.assign(new Error(message), { status: statusCode, expose: true });
+
+export const handleGetExportCsVolume: RouteMiddleware = ({
+  models,
   dicomVoxelDumper,
+  progressManager,
+  validator,
   logger
 }) => {
-  return async (ctx, next) => {
-    const request: ExportRequest = ctx.request.body;
-    const zipMode = request.compressionFormat === 'zip';
-    const { stream: tar, events } = dicomVoxelDumper.dump(request.series);
-    const archive = zipMode
+  return async ctx => {
+    // Errors before the download, including invalid queries,
+    // are also shown in the progress
+    const { progressId } = ctx.request.query;
+    const reporter =
+      typeof progressId === 'string'
+        ? progressManager.claim(progressId, ctx.user.userEmail)
+        : undefined;
+    let query: CsVolumeQuery;
+    const entries: SeriesEntry[] = [];
+    try {
+      try {
+        query = await validator.validate(
+          'seriesExportCsVolumeQuery',
+          ctx.request.query,
+          'toDate'
+        );
+      } catch (err: any) {
+        err.phase = 'request';
+        throw err;
+      }
+      for (const { seriesUid, start, end, delta } of query.series) {
+        const series = await models.series.findById(seriesUid);
+        if (!series)
+          throw exposedError(
+            status.NOT_FOUND,
+            `Series ${seriesUid} not found.`
+          );
+        if (!ctx.userPrivileges.domains.includes(series.domain))
+          throw exposedError(
+            status.FORBIDDEN,
+            'You do not have privilege to access this series.'
+          );
+        const images = mr.parse(series.images);
+        const pvd: PartialVolumeDescriptor =
+          start === undefined
+            ? { start: images[0][0], end: images[0][1], delta: 1 }
+            : { start, end: end!, delta: delta! };
+        if (
+          !isValidPartialVolumeDescriptor(pvd) ||
+          !mr.has(images, mr.normalize(partialVolumeDescriptorToArray(pvd)))
+        )
+          throw exposedError(
+            status.BAD_REQUEST,
+            `The image range of series ${seriesUid} is invalid.`
+          );
+        entries.push({ seriesUid, partialVolumeDescriptor: pvd });
+      }
+    } catch (err: any) {
+      reporter?.fail(
+        err.expose || err instanceof ValidationError
+          ? err.message
+          : 'An internal error occurred.'
+      );
+      throw err;
+    }
+
+    const count = entries.length;
+    const { stream: tar, events } = dicomVoxelDumper.dump(entries);
+    events.on('volume', (i: number) =>
+      reporter?.report(`Exporting volume #${i + 1}`, i, count)
+    );
+    const zip = query.compressionFormat === 'zip';
+    const archive = zip
       ? tarToZip(tar)
       : tar.pipeThrough(
           new CompressionStream('gzip') as TransformStream<
@@ -294,36 +361,39 @@ export const handlePostExportCsVolume: RouteMiddleware = ({
             Uint8Array
           >
         );
+    const reader = archive.getReader();
+    const stream = new ReadableStream<Uint8Array>(
+      {
+        pull: async controller => {
+          try {
+            const { done, value } = await reader.read();
+            if (done) {
+              controller.close();
+              reporter?.finish(`Exported ${count} volume(s).`);
+            } else controller.enqueue(value);
+          } catch (err: any) {
+            logger.error(`CS volume export error: ${err?.message}`);
+            reporter?.fail(
+              'An internal error occurred while exporting the volume.'
+            );
+            controller.error(err);
+          }
+        },
+        cancel: async reason => {
+          reporter?.fail('The download was canceled.');
+          await reader.cancel(reason);
+        }
+      },
+      { highWaterMark: 0 }
+    );
 
-    const downloadFileType = zipMode ? 'application/zip' : 'application/x-tgz';
-    const { emitter, downloadFileStream } = await taskManager.register(ctx, {
-      name: 'Export DICOM data',
-      userEmail: ctx.user.userEmail,
-      downloadFileType
-    });
-
-    emitter.emit('progress', 'Processing volume #0');
-    const source = Readable.fromWeb(archive as any);
-    source.on('error', err => {
-      logger.error(`CS volume export error: ${err.message}`);
-      emitter.emit(
-        'error',
-        'An internal error occurred while exporting the volume.'
-      );
-      downloadFileStream!.destroy();
-    });
-    source.pipe(downloadFileStream!);
-
-    events.on('volume', (i: number) => {
-      emitter.emit(
-        'progress',
-        `Processing volume #${i + 1}`,
-        i,
-        request.series.length
-      );
-    });
-    downloadFileStream!.on('close', () => {
-      emitter.emit('finish', 'exported');
-    });
+    // Named after the primary series
+    const baseName = entries[0].seriesUid;
+    ctx.attachment(baseName + (zip ? '.zip' : '.tar.gz'));
+    ctx.type = zip ? 'application/zip' : 'application/gzip';
+    const body = Readable.fromWeb(stream as any);
+    // Koa leaves the response open when the stream fails after the headers
+    body.once('error', () => ctx.res.destroy());
+    ctx.body = body;
   };
 };

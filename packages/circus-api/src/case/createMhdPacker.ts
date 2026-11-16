@@ -237,15 +237,21 @@ const createMhdPacker: FunctionService<
     }
   };
 
-  /** Reads only the first two slices to determine the spacing */
-  const partialVolumeSpacing = async (series: PreparedSeries) => {
+  /**
+   * Determines the spacing of the partial volume, reading only its first
+   * two slices. A single slice keeps the spacing of the whole series.
+   */
+  const partialVolumeSpacing = async (
+    series: PreparedSeries,
+    seriesSpacing: Vector3D
+  ) => {
     const { metadata, slices } = await openSeriesVolume(
       deps,
       series.seriesUid,
       series.pvd
     );
     await slices.cancel();
-    return metadata.elementSpacing;
+    return metadata.dimension[2] > 1 ? metadata.elementSpacing : seriesSpacing;
   };
 
   const pack: MhdPacker['pack'] = (prepared, options, reporter) => {
@@ -309,7 +315,7 @@ const createMhdPacker: FunctionService<
         );
         // The labels stay in the partial volume
         const labelSpacing = options.fullOriginalVolume
-          ? await partialVolumeSpacing(series)
+          ? await partialVolumeSpacing(series, elementSpacing)
           : elementSpacing;
         await putLabels(
           writer,

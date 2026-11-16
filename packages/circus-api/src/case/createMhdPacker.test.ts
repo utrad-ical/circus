@@ -192,6 +192,17 @@ describe('createMhdPacker', () => {
     }
   });
 
+  test('keeps the series spacing for the labels in a single slice', async () => {
+    const { packer } = await setUp({ start: 3, end: 3, delta: 1 }, [
+      voxelLabel([0, 0, 0])
+    ]);
+    const files = await exportCase(packer, { fullOriginalVolume: true });
+    assert.match(
+      text(files.get(`${caseId}/vol000-label000.mhd`)),
+      /ElementSpacing = 0.5 0.5 2\b/
+    );
+  });
+
   test('uses the first range of the series without a partial volume', async () => {
     const { packer } = await setUp(undefined);
     const files = await exportCase(packer);

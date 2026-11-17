@@ -25,6 +25,15 @@ test('Create / search / delete token', async () => {
     items: [{ description: 'stella' }]
   });
 
-  const res3 = await axios.delete(`/api/tokens/${tokenId}`);
-  assert.equal(res3.status, httpStatus.NO_CONTENT);
+  // Others cannot delete it
+  const res3 = await apiTest.axiosInstances.bob.delete(
+    `/api/tokens/${tokenId}`
+  );
+  assert.equal(res3.status, httpStatus.NOT_FOUND);
+
+  const res4 = await axios.delete(`/api/tokens/${tokenId}`);
+  assert.equal(res4.status, httpStatus.NO_CONTENT);
+
+  const res5 = await axios.delete(`/api/tokens/${tokenId}`);
+  assert.equal(res5.status, httpStatus.NOT_FOUND);
 });

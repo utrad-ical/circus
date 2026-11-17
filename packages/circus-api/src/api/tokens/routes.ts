@@ -1,5 +1,5 @@
 import { defineRoute, defineRouteGroup, route } from '../../defineRoute.ts';
-import { searchResult } from '../../schemas/derive.ts';
+import { searchResultOf } from '../../schemas/derive.ts';
 import { handleDelete, handleGet, handlePost } from './index.ts';
 import {
   permanentToken,
@@ -11,10 +11,10 @@ export const getTokens = defineRoute({
   verb: 'get',
   path: '/tokens',
   description: 'Retrieves the list of permanent access tokens.',
-  response: searchResult(permanentToken)
+  response: searchResultOf(permanentToken)
 });
 
-export const postTokens = defineRoute({
+export const postToken = defineRoute({
   verb: 'post',
   path: '/tokens',
   description: 'Creates a new permanent access token.',
@@ -22,7 +22,7 @@ export const postTokens = defineRoute({
   response: tokenCreated
 });
 
-export const deleteTokensTokenId = defineRoute({
+export const deleteToken = defineRoute({
   verb: 'delete',
   path: '/tokens/:tokenId',
   description: 'Deletes the specified permanent access token.'
@@ -33,7 +33,7 @@ export default defineRouteGroup({
   description: 'Retreive information about permanent API tokens.',
   routes: [
     route(getTokens, handleGet),
-    route(postTokens, handlePost),
-    route(deleteTokensTokenId, handleDelete)
+    route(postToken, handlePost),
+    route(deleteToken, handleDelete)
   ]
 });

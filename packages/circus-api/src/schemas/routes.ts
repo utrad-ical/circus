@@ -145,7 +145,7 @@ export const tokenCreate = z.strictObject({
   description: z.string().min(1).max(32)
 });
 
-export const tokenCreated = z.looseObject({
+export const tokenCreated = z.strictObject({
   tokenId: z.string(),
   accessToken: z.string()
 });

@@ -94,6 +94,7 @@ const generatePluginJobRunnerTest = async (
 
   assert.equal(resultsPacked, true);
   const log = logStream.toString();
+  assert.ok(log.includes('The plug-in exited with code 0.'));
   assert.ok(log.includes('Plug-in execution done.'));
 };
 
@@ -108,10 +109,16 @@ describe('pluginJobRunner00', () => {
   );
 
   test(
-    'Fails when the plug-in exits with a nonzero code',
+    'Logs the nonzero exit code of the plug-in',
     { timeout: 20000 },
     async () => {
-      const jobReporter = { report: mock.fn(), logStream: async () => {} };
+      const log = new memory.WritableStream();
+      const jobReporter = {
+        report: mock.fn(),
+        logStream: async (jobId: string, stream: Readable) => {
+          stream.pipe(log);
+        }
+      };
       const runner = await pluginJobRunner(
         { workingDirectory },
         {
@@ -144,12 +151,8 @@ describe('pluginJobRunner00', () => {
           { seriesUid, partialVolumeDescriptor: { start: 1, end: 1, delta: 1 } }
         ]
       });
-      assert.equal(ok, false);
-      const last = jobReporter.report.mock.calls.at(-1)!.arguments;
-      assert.deepEqual(last.slice(1), [
-        'failed',
-        'The plug-in exited with code 5.'
-      ]);
+      assert.equal(ok, false); // No results.json
+      assert.ok(log.toString().includes('The plug-in exited with code 5.'));
     }
   );
 

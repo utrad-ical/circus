@@ -7,9 +7,7 @@ import type {
 import type { VolumeProvider } from '@utrad-ical/circus-rs/server';
 import type { RsWebsocketVolumeConnectionHandlerCreator } from '@utrad-ical/circus-rs/server';
 import { withWebSocketConnectionHandlers } from '@utrad-ical/circus-rs/server';
-import fs from 'fs-extra';
 import glob from './utils/glob.ts';
-import yaml from 'js-yaml';
 import type { Middleware } from 'koa';
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
@@ -38,7 +36,7 @@ import checkPrivilege from './middleware/auth/checkPrivilege.ts';
 import fixUserMiddleware from './middleware/auth/fixUser.ts';
 import type KoaOAuth2Server from './middleware/auth/KoaOAuth2Server.ts';
 import cors from './middleware/cors.ts';
-import type { ValidationErrorItem } from './createValidator.ts';
+import type { RouteGroup } from './defineRoute.ts';
 import errorHandler from './middleware/errorHandler.ts';
 import typeCheck from './middleware/typeCheck.ts';
 import validateInOut from './middleware/validateInOut.ts';
@@ -46,32 +44,8 @@ import type Storage from './storage/Storage.ts';
 import type { Deps } from './typings/middlewares.ts';
 import type { SeriesOrientationResolver } from './utils/createSeriesOrientationResolver.ts';
 
-function handlerName(route: Route) {
-  if (route.handler) return route.handler;
-  return 'handle' + route.verb[0].toUpperCase() + route.verb.substr(1);
-}
-
-const formatValidationErrors = (errors: ValidationErrorItem[]) => {
-  return errors.map(err => `${err.instancePath} ${err.message}`).join('\n');
-};
-
-interface ManifestFile {
-  routes: Route[];
-}
-
-interface Route {
-  verb: string;
-  path: string;
-  handler?: string;
-  forDebug?: boolean;
-  expectedContentType?: string;
-  requestSchema?: string;
-  responseSchema?: string;
-  noAuthentication?: boolean;
-}
-
 async function prepareApiRouter(
-  apiDir: string,
+  pattern: string,
   deps: Deps,
   debug: boolean,
   authMiddleware: Middleware
@@ -79,40 +53,22 @@ async function prepareApiRouter(
   const router = new Router();
   const validator = deps.validator;
 
-  const manifestFiles = await glob(apiDir);
-  for (const manifestFile of manifestFiles) {
-    const data = yaml.safeLoad(
-      await fs.readFile(manifestFile, 'utf8')
-    ) as ManifestFile;
-    try {
-      await validator.validate('api', data);
-    } catch (err: any) {
-      throw new TypeError(
-        `Meta schema error at ${manifestFile}.\n` +
-          formatValidationErrors(err.errors)
-      );
-    }
-    const dir = path.dirname(manifestFile);
-    for (const route of data.routes) {
+  const routeFiles = await glob(pattern);
+  for (const routeFile of routeFiles) {
+    const { routes } = ((await import(routeFile)) as { default: RouteGroup })
+      .default;
+    for (const route of routes) {
       if (route.forDebug && !debug) continue;
-      const module = await import(path.join(dir, 'index.ts'));
-      const mainHandler = module[handlerName(route)];
-      if (typeof mainHandler !== 'function') {
-        throw new Error(
-          `middleware ${handlerName(route)} for ${manifestFile} not found`
-        );
-      }
       const middlewareStack = compose([
         ...(route.noAuthentication ? [] : [authMiddleware]),
         typeCheck(route.expectedContentType),
         checkPrivilege(deps, route),
         validateInOut(validator, {
-          requestSchema: route.requestSchema,
-          responseSchema: route.responseSchema
+          requestSchema: route.request,
+          responseSchema: route.response
         }),
-        mainHandler(deps) // The processing function itself
+        route.handler(deps) // The processing function itself
       ]);
-      // console.log(`  Register ${route.verb.toUpperCase()} on ${route.path}`);
       (router as any)[route.verb](route.path, middlewareStack);
     }
   }
@@ -132,7 +88,7 @@ interface CreateAppOptions {
 
 /**
  * Builds a Koa app and sets up the router.
- * Register each API endpoints to the router according YAML manifest files.
+ * Registers the API routes defined in `routes.ts` of each directory under `api`.
  */
 export const createApp: FunctionService<
   Koa,
@@ -222,7 +178,7 @@ export const createApp: FunctionService<
       oauthServer.verifyUser(username, password)
   };
 
-  const apiDir = path.resolve(import.meta.dirname, 'api/**/*.yaml');
+  const apiDir = path.resolve(import.meta.dirname, 'api/**/routes.ts');
 
   // Accepts either a Bearer token (API clients) or the session cookie (web UI)
   const authMiddleware = fixUser

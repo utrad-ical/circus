@@ -1,8 +1,0 @@
-name: One Time URL
-description: Manages one time url.
-routes:
-  - verb: post
-    path: /admin/onetime-urls
-    requestSchema: onetimeUrlCreate
-    requiredGlobalPrivilege: issueOnetime
-    description: Creates a new one time url.

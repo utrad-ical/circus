@@ -8,6 +8,7 @@
     "package.json",
     "package-lock.json",
     "*glyphs.less",
-    "*glyphs.css"
+    "*glyphs.css",
+    "packages/circus-api/api-reference.json"
   ]
 }

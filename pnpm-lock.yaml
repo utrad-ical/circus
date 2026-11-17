@@ -283,9 +283,6 @@ importers:
       jconv:
         specifier: ^0.1.5
         version: 0.1.5
-      js-yaml:
-        specifier: ^3.13.1
-        version: 3.13.1
       jszip:
         specifier: ^3.2.2
         version: 3.7.1
@@ -410,6 +407,9 @@ importers:
       form-data:
         specifier: ^3.0.0
         version: 3.0.1
+      js-yaml:
+        specifier: ^3.13.1
+        version: 3.13.1
       tar-fs:
         specifier: ^2.1.1
         version: 2.1.1

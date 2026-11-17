@@ -4,6 +4,8 @@ import type Command from './Command.ts';
 import type { Validator } from '../interface.ts';
 import type { DockerRunner } from '@utrad-ical/circus-cs-core';
 import { ValidationError } from '../createValidator.ts';
+import { allRequiredExcept, only } from '../schemas/derive.ts';
+import { plugin } from '../schemas/plugin.ts';
 
 export const help = () => {
   return (
@@ -51,9 +53,17 @@ export const command: Command<{
 
     try {
       await validator.validate(
-        'plugin' +
-          '|only type,pluginName,version,description,icon,displayStrategy' +
-          '|allRequiredExcept icon,displayStrategy',
+        allRequiredExcept(
+          only(plugin, [
+            'type',
+            'pluginName',
+            'version',
+            'description',
+            'icon',
+            'displayStrategy'
+          ]),
+          ['icon', 'displayStrategy']
+        ),
         manifest
       );
     } catch (err) {

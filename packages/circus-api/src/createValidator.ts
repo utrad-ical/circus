@@ -1,8 +1,6 @@
 import type { NoDepFunctionService } from '@utrad-ical/circus-lib';
 import { z } from 'zod';
 import type { ValidationMode, Validator } from './interface.ts';
-import { dateField } from './schemas/formats.ts';
-import defaultSchemas from './schemas/index.ts';
 
 export interface ValidationErrorItem {
   /** JSON Pointer to the invalid value, e.g., '/domains/0' */
@@ -76,122 +74,16 @@ const replaceInvalidDates = (data: unknown): unknown => {
   return data;
 };
 
-const asObject = (schema: z.ZodType): z.ZodObject => {
-  if (!(schema instanceof z.ZodObject))
-    throw new TypeError('Unsupported schema: an object schema is required');
-  return schema;
-};
-
-const toList = (str = '') =>
-  str
-    .split(',')
-    .map(s => s.trim())
-    .filter(s => s.length);
-
-/** Builds a mask for pick/omit/partial/required from existing keys */
-const maskOf = (schema: z.ZodObject, keys: string[]): any =>
-  Object.fromEntries(keys.filter(k => k in schema.shape).map(k => [k, true]));
-
-const withDates = (schema: z.ZodType) =>
-  asObject(schema).extend({ createdAt: dateField(), updatedAt: dateField() });
-
-const searchResultOf = (items: z.ZodType) =>
-  z.looseObject({
-    items: z.array(items),
-    totalItems: z.number(),
-    page: z.number()
-  });
-
-type Filter = (
-  schema: z.ZodType,
-  args: string[],
-  named: (name: string) => z.ZodType
-) => z.ZodType;
-
-// Filters used in schema definition strings like 'user|exclude password'
-const filters: { [name: string]: Filter } = {
-  allRequired: schema => asObject(schema).required(),
-  allRequiredExcept: (schema, [except]) => {
-    const obj = asObject(schema);
-    const excepts = toList(except);
-    const others = Object.keys(obj.shape).filter(k => !excepts.includes(k));
-    return obj.partial(maskOf(obj, excepts)).required(maskOf(obj, others));
-  },
-  only: (schema, [props]) => {
-    const obj = asObject(schema);
-    return z.strictObject(obj.pick(maskOf(obj, toList(props))).shape);
-  },
-  exclude: (schema, [props]) => {
-    const obj = asObject(schema);
-    return obj.omit(maskOf(obj, toList(props)));
-  },
-  // Without a schema name, the property can hold anything
-  addProperty: (schema, [name, ref], named) =>
-    asObject(schema).extend({
-      [name]: (ref ? named(ref) : z.unknown()).optional()
-    }),
-  searchResult: schema => searchResultOf(withDates(schema)),
-  dbEntry: schema => withDates(asObject(schema).required())
-};
-
 /**
- * Creates the validator that knows all the schemas under `schemas/`.
- * A schema is specified by its name, optionally followed by filters
- * (e.g., 'user|exclude password|dbEntry'). Alternatives are separated by '/'.
+ * Creates the validator, which checks data against a Zod schema.
  */
-const createValidator: NoDepFunctionService<
-  Validator,
-  { schemas?: Record<string, z.ZodType> } | undefined
-> = async opts => {
-  const schemas = opts?.schemas ?? defaultSchemas;
-  const cache = new Map<string, z.ZodType>();
-
-  const named = (name: string) => {
-    const schema = schemas[name];
-    if (!schema) throw new TypeError(`Unregistered schema name: ${name}`);
-    return schema;
-  };
-
-  const build = (def: string): z.ZodType => {
-    const parts = def.split('/').map(part => {
-      const [name, ...filterDefs] = part.trim().split(/\s*\|\s*/);
-      let schema = named(name);
-      let searchResultItem: z.ZodType | undefined;
-      for (const filterDef of filterDefs) {
-        const [filterName, ...args] = filterDef.trim().split(/\s+/);
-        const filter = filters[filterName];
-        if (!filter) throw new TypeError(`Unknown filter: ${filterName}`);
-        if (filterName === 'searchResult') searchResultItem = withDates(schema);
-        schema = filter(schema, args, named);
-      }
-      return { schema, searchResultItem };
-    });
-    if (parts.length === 1) return parts[0].schema;
-    // 'a|searchResult/b|searchResult' accepts a list mixing a and b
-    if (parts.every(p => p.searchResultItem))
-      return searchResultOf(
-        z.union(parts.map(p => p.searchResultItem!) as [z.ZodType])
-      );
-    return z.union(parts.map(p => p.schema) as [z.ZodType]);
-  };
-
-  const getSchema = (def: string | z.ZodType) => {
-    if (typeof def !== 'string') return def;
-    let schema = cache.get(def);
-    if (!schema) {
-      schema = build(def);
-      cache.set(def, schema);
-    }
-    return schema;
-  };
-
+const createValidator: NoDepFunctionService<Validator> = async () => {
   const validate: Validator['validate'] = async (
-    def,
+    schema,
     data,
     mode: ValidationMode = 'default',
     options = {}
   ) => {
-    const schema = getSchema(def);
     // Parsing converts ISO strings into Dates;
     // encoding checks Dates and converts them into ISO strings
     const result =

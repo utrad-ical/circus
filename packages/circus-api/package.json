@@ -7,7 +7,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "dev": "node --watch server.ts",
-    "circus": "node circus.ts"
+    "circus": "node circus.ts",
+    "api-reference": "node scripts/make-api-reference.ts"
   },
   "repository": {
     "type": "git",
@@ -36,7 +37,6 @@
     "iconv-lite": "^0.5.1",
     "inquirer": "^12.0.1",
     "jconv": "^0.1.5",
-    "js-yaml": "^3.13.1",
     "jszip": "^3.2.2",
     "koa": "^2.11.0",
     "koa-bodyparser": "^4.2.1",
@@ -80,6 +80,7 @@
     "@types/tar-stream": "^1.6.3",
     "@types/ws": "^8.5.12",
     "form-data": "^3.0.0",
+    "js-yaml": "^3.13.1",
     "tar-fs": "^2.1.1",
     "typescript": "~7.0.2",
     "ws": "^8.18.0"

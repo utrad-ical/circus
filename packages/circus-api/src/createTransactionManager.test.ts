@@ -17,7 +17,7 @@ const createTransactionManager = createTransactionManagerFactory(((
 ) => {
   return {
     bankAccounts: createCollectionAccessor(database.db, validator, {
-      schema: 'bankAccounts',
+      schema: testSchemas.bankAccounts,
       collectionName: 'bankAccounts',
       primaryKey: 'userId',
       session
@@ -31,9 +31,7 @@ const dbPromise = usingMongo();
 before(async () => {
   database = (await dbPromise).database;
   db = database.db;
-  validator = await createValidator({
-    schemas: testSchemas
-  });
+  validator = await createValidator(undefined);
   await setUpMongoFixture(db, ['bankAccounts']);
 });
 

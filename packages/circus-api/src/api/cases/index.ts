@@ -2,6 +2,7 @@ import status from 'http-status';
 import { Readable } from 'node:stream';
 import type { PreparedExport } from '../../case/createMhdPacker.ts';
 import { ValidationError } from '../../createValidator.ts';
+import { caseExportMhdQuery } from '../../schemas/routes.ts';
 import makeNewCase from '../../case/makeNewCase.ts';
 import type {
   CircusContext,
@@ -261,7 +262,7 @@ export const handleGetExportMhd: RouteMiddleware = ({
     try {
       try {
         query = await validator.validate(
-          'caseExportMhdQuery',
+          caseExportMhdQuery,
           ctx.request.query,
           'toDate'
         );

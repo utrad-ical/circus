@@ -1,4 +1,4 @@
-import testSchemas from '../../test/test-schemas.ts';
+import t from '../../test/test-schemas.ts';
 import assert from 'node:assert/strict';
 import { test, beforeEach, afterEach } from 'node:test';
 import validateInOut from './validateInOut.ts';
@@ -16,9 +16,7 @@ let testServer: TestServer;
 
 beforeEach(async () => {
   testServer = await setUpKoaTest(async app => {
-    const validator = await createValidator({
-      schemas: testSchemas
-    });
+    const validator = await createValidator(undefined);
     const router = new Router();
 
     router.post(
@@ -29,13 +27,13 @@ beforeEach(async () => {
     router.post(
       '/in-check',
       validateInOut(validator, {
-        requestSchema: 'date|allRequired'
+        requestSchema: t.date.required()
       }),
       async ctx => (ctx.body = { foo: ctx.request.body.dateVal.toISOString() })
     );
     router.post(
       '/out-check',
-      validateInOut(validator, { responseSchema: 'date' }),
+      validateInOut(validator, { responseSchema: t.date }),
       async ctx => (ctx.body = ctx.request.body)
     );
 

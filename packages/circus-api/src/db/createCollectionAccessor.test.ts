@@ -20,11 +20,9 @@ const dbPromise = usingMongo();
 before(async () => {
   db = (await dbPromise).database.db;
   disposeMongo = (await dbPromise).dispose;
-  const validator = await createValidator({
-    schemas: testSchemas
-  });
+  const validator = await createValidator(undefined);
   testCollection = await createCollectionAccessor<MonthData>(db, validator, {
-    schema: 'months',
+    schema: testSchemas.months,
     collectionName: 'months',
     primaryKey: 'month'
   });
@@ -176,12 +174,10 @@ describe('#findById', () => {
     let sessionCollection: CollectionAccessor<MonthData>;
 
     before(async () => {
-      const validator = await createValidator({
-        schemas: testSchemas
-      });
+      const validator = await createValidator(undefined);
       session = (await dbPromise).database.connection.startSession();
       sessionCollection = createCollectionAccessor<MonthData>(db, validator, {
-        schema: 'months',
+        schema: testSchemas.months,
         collectionName: 'months',
         primaryKey: 'month',
         session

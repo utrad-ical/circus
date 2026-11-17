@@ -1,9 +1,10 @@
 import type { Validator } from '../interface.ts';
 import type koa from 'koa';
+import type { z } from 'zod';
 
 interface Options {
-  requestSchema?: string;
-  responseSchema?: string;
+  requestSchema?: z.ZodType;
+  responseSchema?: z.ZodType;
 }
 
 /**

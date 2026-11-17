@@ -1,3 +1,5 @@
+import type { z } from 'zod';
+import * as s from '../schemas/index.ts';
 import createCollectionAccessor from './createCollectionAccessor.ts';
 import type {
   Database,
@@ -20,27 +22,31 @@ export const makeModels = (
   session?: ClientSession
 ) => {
   const modelDefinitions: {
-    [key in keyof ModelEntries]: { schema: string; col: string; pk: string };
+    [key in keyof ModelEntries]: {
+      schema: z.ZodType | z.ZodType[];
+      col: string;
+      pk: string;
+    };
   } = {
-    user: { schema: 'user', col: 'users', pk: 'userEmail' },
-    group: { schema: 'group', col: 'groups', pk: 'groupId' },
-    project: { schema: 'project', col: 'projects', pk: 'projectId' },
-    series: { schema: 'series', col: 'series', pk: 'seriesUid' },
+    user: { schema: s.user, col: 'users', pk: 'userEmail' },
+    group: { schema: s.group, col: 'groups', pk: 'groupId' },
+    project: { schema: s.project, col: 'projects', pk: 'projectId' },
+    series: { schema: s.series, col: 'series', pk: 'seriesUid' },
     clinicalCase: {
-      schema: 'clinicalCase',
+      schema: s.clinicalCase,
       col: 'clinicalCases',
       pk: 'caseId'
     },
-    serverParam: { schema: 'serverParam', col: 'serverParams', pk: 'key' },
-    token: { schema: 'token', col: 'tokens', pk: 'accessToken' },
+    serverParam: { schema: s.serverParam, col: 'serverParams', pk: 'key' },
+    token: { schema: s.token, col: 'tokens', pk: 'accessToken' },
     plugin: {
-      schema: 'plugin/remotePlugin',
+      schema: [s.plugin, s.remotePlugin],
       col: 'pluginDefinitions',
       pk: 'pluginId'
     },
-    pluginJob: { schema: 'pluginJob', col: 'pluginJobs', pk: 'jobId' },
-    myList: { schema: 'myList', col: 'myLists', pk: 'myListId' },
-    onetimeUrl: { schema: 'onetimeUrl', col: 'onetimeUrls', pk: 'onetimeUrlId' }
+    pluginJob: { schema: s.pluginJob, col: 'pluginJobs', pk: 'jobId' },
+    myList: { schema: s.myList, col: 'myLists', pk: 'myListId' },
+    onetimeUrl: { schema: s.onetimeUrl, col: 'onetimeUrls', pk: 'onetimeUrlId' }
   };
   const models: any = {};
   (Object.keys(modelDefinitions) as (keyof ModelEntries)[]).forEach(k => {

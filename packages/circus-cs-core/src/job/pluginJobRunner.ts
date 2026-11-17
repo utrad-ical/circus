@@ -169,7 +169,9 @@ const pluginJobRunner: FunctionService<
           logStream,
           { end: false } // Keeps the logStream open
         );
-        await promise;
+        const exitCode = await promise;
+        // Only logged for now; a failed plug-in fails at the post process
+        writeLog(`The plug-in exited with code ${exitCode}.\n`);
       } else {
         writeLog('Executing the plug-in (Remote CAD)...\n\n');
         const runConfiguration = plugin.runConfiguration;

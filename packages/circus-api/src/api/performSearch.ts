@@ -2,6 +2,8 @@ import status from 'http-status';
 import type { CollectionAccessor } from '../db/createCollectionAccessor.ts';
 import type { CircusContext } from '../typings/middlewares.ts';
 import { EJSON } from 'bson';
+import type { z } from 'zod';
+import { validate, ValidationError } from '../createValidator.ts';
 
 interface SearchQuery {
   sort: object;
@@ -23,16 +25,27 @@ export const isPatientInfoInFilter = (filter: { [key: string]: any }) => {
   return Object.keys(filter).some(key => checkKeyVal(key, filter[key]));
 };
 
-export const extractFilter = (ctx: CircusContext) => {
+/**
+ * Parses the `filter` query (EJSON) and checks it with the schema
+ * built by `mongoFilter()`.
+ */
+export const extractFilter = (ctx: CircusContext, schema: z.ZodType) => {
   const urlQuery = ctx.request.query;
+  let filter: object;
   try {
-    return urlQuery.filter
+    filter = urlQuery.filter
       ? (EJSON.parse(
           Array.isArray(urlQuery.filter) ? urlQuery.filter[0] : urlQuery.filter
         ) as object)
       : {};
   } catch (err) {
     ctx.throw(status.BAD_REQUEST, 'Invalid JSON was passed as a filter string');
+  }
+  try {
+    return validate(schema, filter, 'check') as { [key: string]: any };
+  } catch (err: any) {
+    if (err instanceof ValidationError) err.phase = 'request';
+    throw err;
   }
 };
 

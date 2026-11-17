@@ -33,7 +33,7 @@ export const makeModels = (
     user: { schema: s.userDoc, col: 'users', pk: 'userEmail' },
     group: { schema: s.groupDoc, col: 'groups', pk: 'groupId' },
     project: { schema: s.projectDoc, col: 'projects', pk: 'projectId' },
-    series: { schema: dbEntry(s.series), col: 'series', pk: 'seriesUid' },
+    series: { schema: s.seriesDoc, col: 'series', pk: 'seriesUid' },
     clinicalCase: {
       schema: dbEntry(s.clinicalCase),
       col: 'clinicalCases',

@@ -83,7 +83,10 @@ const createDicomImporter: FunctionService<
             domain,
             storageId: 0
           };
-          await models.series.insert(doc);
+          // The schema checks the values read from the tags (e.g., `sex`)
+          await models.series.insert(
+            doc as Parameters<typeof models.series.insert>[0]
+          );
         }
       });
       apiLogger.trace(`Import complete: ${seriesUid} #${instanceNumber}`);

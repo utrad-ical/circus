@@ -60,7 +60,8 @@ export type CircusContext = ParameterizedContext<any, CustomCtxMembers>;
 
 export type CircusMiddeware = koa.Middleware<any, CustomCtxMembers>;
 
-type OutputOf<S> = S extends z.ZodType ? z.output<S> : never;
+/** The output type of the schema, or `unknown` without a schema */
+type OutputOf<S> = S extends z.ZodType ? z.output<S> : unknown;
 
 /**
  * The context of a route handler, where the request body and the response
@@ -73,6 +74,7 @@ export type RouteContext<R extends RouteDefinition> = Omit<
   request: Omit<CircusContext['request'], 'body'> & {
     body: OutputOf<R['request']>;
   };
+  /** A route that returns a stream or a file has no response schema */
   body: OutputOf<R['response']> | null;
 };
 

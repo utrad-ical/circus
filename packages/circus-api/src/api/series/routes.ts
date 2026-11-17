@@ -1,5 +1,5 @@
 import { defineRoute, defineRouteGroup, route } from '../../defineRoute.ts';
-import { searchResult } from '../../schemas/derive.ts';
+import { searchResultOf } from '../../schemas/derive.ts';
 import {
   handleDelete,
   handleGet,
@@ -9,39 +9,45 @@ import {
   handlePostSingle,
   handleSearch
 } from './index.ts';
-import { series, seriesOrientation } from '../../schemas/index.ts';
+import {
+  seriesForUser,
+  seriesImportSummary,
+  seriesOrientation
+} from '../../schemas/index.ts';
 
-export const getSeries = defineRoute({
+export const searchSeries = defineRoute({
   verb: 'get',
   path: '/series',
   description: 'Retrieves the list of DICOM series.',
-  response: searchResult(series)
+  response: searchResultOf(seriesForUser)
 });
 
-export const getSeriesListMyListId = defineRoute({
+export const searchSeriesInMyList = defineRoute({
   verb: 'get',
   path: '/series/list/:myListId',
   description: 'Performs search based on a my list ID.',
-  response: searchResult(series)
+  response: searchResultOf(seriesForUser)
 });
 
-export const postSeriesDomainDomain = defineRoute({
+export const importSeries = defineRoute({
   verb: 'post',
   path: '/series/domain/:domain',
   description:
     'Uploads DICOM files, or zip/tar.gz archives of them, and imports them while receiving. Responds with the summary: 201 if all imported, 422 if some failed, 400 if none was a DICOM file. Pass `progressId` to report the progress.',
-  expectedContentType: 'multipart/form-data'
+  expectedContentType: 'multipart/form-data',
+  response: seriesImportSummary
 });
 
-export const postSeriesDomainDomainSingle = defineRoute({
+export const importSeriesSingle = defineRoute({
   verb: 'post',
   path: '/series/domain/:domain/single',
   description:
     'Same as `/series/domain/:domain`, with an empty 201 response for compatibility.',
-  expectedContentType: 'multipart/form-data'
+  expectedContentType: 'multipart/form-data',
+  response: seriesImportSummary.nullable()
 });
 
-export const getSeriesExportCsVolume = defineRoute({
+export const exportCsVolume = defineRoute({
   verb: 'get',
   path: '/series/export-cs-volume',
   description:
@@ -49,20 +55,21 @@ export const getSeriesExportCsVolume = defineRoute({
   requiredGlobalPrivilege: 'downloadVolume'
 });
 
-export const getSeriesSeriesUid = defineRoute({
+export const getSeries = defineRoute({
   verb: 'get',
   path: '/series/:seriesUid',
-  description: 'Returns information about the specified series.'
+  description: 'Returns information about the specified series.',
+  response: seriesForUser
 });
 
-export const getSeriesSeriesUidOrientation = defineRoute({
+export const getSeriesOrientation = defineRoute({
   verb: 'get',
   path: '/series/:seriesUid/orientation',
   description: 'Returns whether series is head-first or foot-first.',
   response: seriesOrientation
 });
 
-export const deleteSeriesSeriesUid = defineRoute({
+export const deleteSeries = defineRoute({
   verb: 'delete',
   path: '/series/:seriesUid',
   description: 'Deletes the specified series.'
@@ -73,13 +80,13 @@ export default defineRouteGroup({
   description:
     'Operates DICOM series. This handles series information stored in the database. Actual image data (voxel values, window, etc.) are not contained.',
   routes: [
-    route(getSeries, handleSearch),
-    route(getSeriesListMyListId, handleSearch),
-    route(postSeriesDomainDomain, handlePost),
-    route(postSeriesDomainDomainSingle, handlePostSingle),
-    route(getSeriesExportCsVolume, handleGetExportCsVolume),
-    route(getSeriesSeriesUid, handleGet),
-    route(getSeriesSeriesUidOrientation, handleGetOrientation),
-    route(deleteSeriesSeriesUid, handleDelete)
+    route(searchSeries, handleSearch),
+    route(searchSeriesInMyList, handleSearch),
+    route(importSeries, handlePost),
+    route(importSeriesSingle, handlePostSingle),
+    route(exportCsVolume, handleGetExportCsVolume),
+    route(getSeries, handleGet),
+    route(getSeriesOrientation, handleGetOrientation),
+    route(deleteSeries, handleDelete)
   ]
 });

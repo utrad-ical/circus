@@ -13,7 +13,9 @@ import type {
 } from '../../typings/middlewares.ts';
 import { ValidationError } from '../../createValidator.ts';
 import { seriesExportCsVolumeQuery } from '../../schemas/routes.ts';
-import checkFilter from '../../utils/checkFilter.ts';
+import { fieldsOf, mongoFilter } from '../../schemas/mongoFilter.ts';
+import { seriesDoc } from '../../schemas/series.ts';
+import type * as routes from './routes.ts';
 import readMultipartFiles from '../../utils/readMultipartFiles.ts';
 import tarToZip from '../../utils/tarToZip.ts';
 import importUploadedFiles, {
@@ -25,19 +27,21 @@ import {
   performAggregationSearch
 } from '../performSearch.ts';
 
+/** Removes the patient info unless the user can and wants to see it */
 const maskPatientInfo = (ctx: CircusContext) => {
-  return (series: any) => {
-    const show =
-      ctx.userPrivileges.globalPrivileges.includes('personalInfoView') &&
-      ctx.user.preferences.personalInfoView;
-    if (!show) {
-      delete series.patientInfo;
-    }
-    return series;
+  const show =
+    ctx.userPrivileges.globalPrivileges.includes('personalInfoView') &&
+    ctx.user.preferences.personalInfoView;
+  return <T extends { patientInfo?: unknown }>(series: T) => {
+    if (show) return series;
+    const { patientInfo, ...rest } = series;
+    return rest;
   };
 };
 
-export const handleGet: RouteMiddleware = ({ models }) => {
+export const handleGet: RouteMiddleware<typeof routes.getSeries> = ({
+  models
+}) => {
   return async (ctx, next) => {
     const uid = ctx.params.seriesUid;
     const series = await models.series.findByIdOrFail(uid);
@@ -51,10 +55,9 @@ export const handleGet: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handleGetOrientation: RouteMiddleware = ({
-  models,
-  seriesOrientationResolver
-}) => {
+export const handleGetOrientation: RouteMiddleware<
+  typeof routes.getSeriesOrientation
+> = ({ models, seriesOrientationResolver }) => {
   return async (ctx, next) => {
     const uid = ctx.params.seriesUid;
     const series = await models.series.findByIdOrFail(uid);
@@ -110,7 +113,7 @@ const checkDomain = (ctx: CircusContext) => {
   return domain;
 };
 
-export const handlePost: RouteMiddleware = ({
+export const handlePost: RouteMiddleware<typeof routes.importSeries> = ({
   dicomImporter,
   progressManager,
   logger,
@@ -154,7 +157,9 @@ export const handlePost: RouteMiddleware = ({
   };
 };
 
-export const handlePostSingle: RouteMiddleware = deps => {
+export const handlePostSingle: RouteMiddleware<
+  typeof routes.importSeriesSingle
+> = deps => {
   const post = handlePost(deps);
   return async (ctx, next) => {
     await post(ctx, next);
@@ -166,23 +171,26 @@ export const handlePostSingle: RouteMiddleware = deps => {
   };
 };
 
-export const handleSearch: RouteMiddleware = ({ models }) => {
+const seriesFilter = mongoFilter(
+  fieldsOf(seriesDoc, [
+    'modality',
+    'seriesUid',
+    'studyUid',
+    'seriesDescription',
+    'patientInfo.patientId',
+    'patientInfo.patientName',
+    'patientInfo.age',
+    'patientInfo.sex',
+    'seriesDate',
+    'createdAt'
+  ])
+);
+
+export const handleSearch: RouteMiddleware<typeof routes.searchSeries> = ({
+  models
+}) => {
   return async (ctx, next) => {
-    const customFilter = extractFilter(ctx);
-    const fields = [
-      'modality',
-      'seriesUid',
-      'studyUid',
-      'seriesDescription',
-      'patientInfo.patientId',
-      'patientInfo.patientName',
-      'patientInfo.age',
-      'patientInfo.sex',
-      'seriesDate',
-      'createdAt'
-    ];
-    if (!checkFilter(customFilter!, fields))
-      ctx.throw(status.BAD_REQUEST, 'Bad filter.');
+    const customFilter = extractFilter(ctx, seriesFilter);
 
     const canViewPersonalInfo =
       ctx.userPrivileges.globalPrivileges.includes('personalInfoView');
@@ -196,7 +204,7 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
     const domainFilter = {
       domain: { $in: ctx.userPrivileges.domains }
     };
-    const filter = { $and: [customFilter!, domainFilter] };
+    const filter = { $and: [customFilter, domainFilter] };
 
     const myListId = ctx.params.myListId;
     const user = ctx.user;
@@ -253,7 +261,7 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handleDelete: RouteMiddleware = ({
+export const handleDelete: RouteMiddleware<typeof routes.deleteSeries> = ({
   transactionManager,
   dicomFileRepository
 }) => {
@@ -296,13 +304,9 @@ interface CsVolumeQuery {
 const exposedError = (statusCode: number, message: string) =>
   Object.assign(new Error(message), { status: statusCode, expose: true });
 
-export const handleGetExportCsVolume: RouteMiddleware = ({
-  models,
-  dicomVoxelDumper,
-  progressManager,
-  validator,
-  logger
-}) => {
+export const handleGetExportCsVolume: RouteMiddleware<
+  typeof routes.exportCsVolume
+> = ({ models, dicomVoxelDumper, progressManager, validator, logger }) => {
   return async ctx => {
     // Errors before the download, including invalid queries,
     // are also shown in the progress

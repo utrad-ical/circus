@@ -32,7 +32,9 @@ const validateInOut: (
     await next();
     if (responseSchema) {
       try {
+        const status = ctx.status; // Setting a null body changes it to 204
         ctx.body = await validator.validate(responseSchema, ctx.body, 'encode');
+        ctx.status = status;
       } catch (err: any) {
         err.phase = 'response';
         throw err;

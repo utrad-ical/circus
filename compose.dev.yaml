@@ -1,0 +1,31 @@
+# Overrides for compose.yaml for development.
+# To enable this, put `COMPOSE_FILE=compose.yaml:compose.dev.yaml` in `.env`.
+#
+# Alternatively, specify both files on the command line, e.g.
+#   docker compose -f compose.yaml -f compose.dev.yaml up -d
+#
+# This builds the images from the source, and exposes MongoDB and the API
+# server on the host so that the API server, tests and tools on the host can
+# use them. MongoDB has no authentication; do not use this in production.
+
+services:
+  mongo:
+    ports:
+      - ${CIRCUS_MONGO_PORT:-127.0.0.1:27017}:27017
+
+  api:
+    build:
+      context: .
+      target: api
+    ports:
+      - ${CIRCUS_API_PORT:-127.0.0.1:8080}:8080
+
+  web:
+    build:
+      context: .
+      target: web
+    environment:
+      # Set to e.g. host.docker.internal:8080 to use an API server on the host
+      CIRCUS_API_UPSTREAM: ${CIRCUS_API_UPSTREAM:-api:8080}
+    extra_hosts:
+      - host.docker.internal:host-gateway

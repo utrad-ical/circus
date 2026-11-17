@@ -21,13 +21,21 @@ CIRCUS consists of the following containers:
 | `api`   | `ghcr.io/utrad-ical/circus-api` | API server, CIRCUS RS, and CS job manager                |
 | `web`   | `ghcr.io/utrad-ical/circus-web` | Web UI served by Caddy, proxying `/api`, `/login`, `/rs` |
 
-Each service belongs to a profile of the same name, so you can start any combination of them
-(e.g., run only `mongo` in Docker while developing the API server locally).
 See [`compose.yaml`](./compose.yaml) for the available environment variables.
 
+[`compose.yaml`](./compose.yaml) is the minimal setup to run CIRCUS.
+Only the web UI (port 80) is published on the host; MongoDB, which has no authentication, and the API server are reachable only from the other containers.
+
+Put the version of the images in `.env` next to `compose.yaml`:
+
 ```bash
-# Build the images locally and start everything
-COMPOSE_PROFILES=mongo,api,web docker compose up -d --build
+CIRCUS_TAG=<version>
+```
+
+Then:
+
+```bash
+docker compose up -d
 
 # Initialize (or upgrade) the database. The API server exits until the
 # database is migrated, so this runs in a one-off container
@@ -77,6 +85,27 @@ pnpm run typecheck
 ```
 
 ### Development Server
+
+For development, use [`compose.dev.yaml`](./compose.dev.yaml) together with `compose.yaml`.
+It builds the images from the source, and publishes MongoDB (`127.0.0.1:27017`) and the API server (`127.0.0.1:8080`) on the host.
+To use both files without `-f`, put these lines in `.env`:
+
+```bash
+COMPOSE_FILE=compose.yaml:compose.dev.yaml
+# The tag of the images built from the source
+CIRCUS_TAG=dev
+```
+
+Start only MongoDB in Docker, as the API server and the web UI run on the host, and initialize the database:
+
+```bash
+docker compose up -d mongo
+pnpm circus migrate
+```
+
+To build and run everything in Docker instead, use `docker compose up -d --build`.
+
+Start the development server:
 
 ```bash
 pnpm dev

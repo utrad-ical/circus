@@ -128,7 +128,7 @@ const CaseExportModal: FC<{
       if (revisionIndex !== undefined)
         params.set('revisionIndex', String(revisionIndex));
       if (volume === 'fullOriginal') params.set('fullOriginalVolume', '1');
-      return { url: api.getBaseUrl() + 'cases/export-mhd?' + params };
+      return api.getBaseUrl() + 'cases/export-mhd?' + params;
     },
     [caseIds]
   );

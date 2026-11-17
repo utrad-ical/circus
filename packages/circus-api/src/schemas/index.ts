@@ -30,7 +30,6 @@ import { series } from './series.ts';
 import { seriesEntry } from './seriesEntry.ts';
 import { seriesEntryWithAutoPvd } from './seriesEntryWithAutoPvd.ts';
 import { serverParam } from './serverParam.ts';
-import { task } from './task.ts';
 import { token } from './token.ts';
 import { user } from './user.ts';
 import { userMyList } from './userMyList.ts';
@@ -72,7 +71,6 @@ const schemas: Record<string, z.ZodType> = {
   seriesEntry,
   seriesEntryWithAutoPvd,
   serverParam,
-  task,
   token,
   user,
   userMyList,

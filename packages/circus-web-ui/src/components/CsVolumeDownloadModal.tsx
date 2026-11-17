@@ -89,7 +89,7 @@ const CsVolumeDownloadModal: React.FC<{
           .join(','),
         compressionFormat: options.compressionFormat
       });
-      return { url: api.getBaseUrl() + 'series/export-cs-volume?' + params };
+      return api.getBaseUrl() + 'series/export-cs-volume?' + params;
     },
     [appState]
   );

@@ -19,8 +19,6 @@ import type { DicomFileRepository } from '@utrad-ical/circus-lib';
 import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib';
 import createDicomTagReader from '../utils/createDicomTagReader.ts';
 import createDicomUtilityRunner from '../utils/createDicomUtilityRunner.ts';
-import type { TaskManager } from '../createTaskManager.ts';
-import createTaskManager from '../createTaskManager.ts';
 import createProgressManager, {
   type ProgressManager
 } from '../createProgressManager.ts';
@@ -93,9 +91,7 @@ export interface ApiTest {
    * The members of `axiosInstances` are configured to use this by default.
    */
   url: string;
-  taskManager: TaskManager;
   progressManager: ProgressManager;
-  downloadFileDirectory: string;
 }
 
 export const setUpAppForRoutesTest = async (
@@ -112,7 +108,6 @@ export const setUpAppForRoutesTest = async (
     'users',
     'serverParams',
     'tokens',
-    'tasks',
     'pluginJobs',
     'pluginDefinitions',
     'myLists',
@@ -142,18 +137,6 @@ export const setUpAppForRoutesTest = async (
       dicomTagReader,
       transactionManager
     }
-  );
-
-  const downloadFileDirectory = path.join(
-    import.meta.dirname,
-    '../../test/download-test'
-  );
-  const taskManager = await createTaskManager(
-    {
-      downloadFileDirectory,
-      timeoutMs: 3600 * 1000
-    },
-    { models, apiLogger }
   );
 
   const progressManager = await createProgressManager({});
@@ -236,7 +219,6 @@ export const setUpAppForRoutesTest = async (
         return router.routes() as any;
       })(),
       volumeProvider: null as any, // dummy
-      taskManager,
       progressManager,
       dicomVoxelDumper,
       oauthServer: await createOauthServer(
@@ -295,9 +277,7 @@ export const setUpAppForRoutesTest = async (
     tearDown,
     url: testServer.url,
     dicomFileRepository,
-    taskManager,
-    progressManager,
-    downloadFileDirectory
+    progressManager
   } as ApiTest;
 };
 

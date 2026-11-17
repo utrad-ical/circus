@@ -54,14 +54,6 @@ const defaults: Configuration = {
       dockerImage: dicomUtilityRunnerDockerImage
     }
   },
-  taskManager: {
-    options: {
-      downloadFileDirectory: '/var/circus/data/downloads',
-      timeoutMs: 60 * 60 * 1000, // 1 hour
-      deleteDownloadFilesAfterMs: 7 * 24 * 60 * 60 * 1000, // 1 week
-      checkDownloadFilesIntervalMs: 24 * 60 * 60 * 1000 // 1 day
-    }
-  },
   dicomExtractorWorker: {
     options: {
       // Controls the number of maximum threds to parse DICOM files.

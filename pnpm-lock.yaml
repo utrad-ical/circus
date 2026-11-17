@@ -340,9 +340,6 @@ importers:
       split:
         specifier: ^1.0.1
         version: 1.0.1
-      strict-event-emitter-types:
-        specifier: ^2.0.0
-        version: 2.0.0
       tar-stream:
         specifier: ^2.2.0
         version: 2.2.0
@@ -4023,9 +4020,6 @@ packages:
   streaming-json-stringify@3.1.0:
     resolution: {integrity: sha512-axtfs3BDxAsrZ9swD163FBrXZ8dhJJp6kUI6C97TvUZG9RHKfbg9nFbXqEheFNOb3IYMEt2ag9F62sWLFUZ4ug==}
 
-  strict-event-emitter-types@2.0.0:
-    resolution: {integrity: sha512-Nk/brWYpD85WlOgzw5h173aci0Teyv8YdIAEtV+N88nDB0dLlazZyJMIsN6eo1/AR61l+p6CJTG1JIyFaoNEEA==}
-
   string-width@1.0.2:
     resolution: {integrity: sha512-0XsVpQLnVCXHJfyEs8tC0zpTVIr5PKKsQtkT29IwupnPTjtPmQ3xT/4yCREF9hYkV/3M3kzcUTSAZT6a6h81tw==}
     engines: {node: '>=0.10.0'}
@@ -7344,8 +7338,6 @@ snapshots:
     dependencies:
       json-stringify-safe: 5.0.1
       readable-stream: 2.3.7
-
-  strict-event-emitter-types@2.0.0: {}
 
   string-width@1.0.2:
     dependencies:

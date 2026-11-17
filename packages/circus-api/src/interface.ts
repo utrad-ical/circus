@@ -39,7 +39,6 @@ export interface ModelEntries {
   clinicalCase: any;
   serverParam: any;
   token: any;
-  task: any;
   plugin: any;
   pluginJob: any;
   myList: any;

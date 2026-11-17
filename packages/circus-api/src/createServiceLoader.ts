@@ -18,7 +18,6 @@ import type Storage from './storage/Storage.ts';
 import type Koa from 'koa';
 import type { DicomUtilityRunner } from './utils/createDicomUtilityRunner.ts';
 import createDicomUtilityRunner from './utils/createDicomUtilityRunner.ts';
-import type { TaskManager } from './createTaskManager.ts';
 import type { MhdPacker } from './case/createMhdPacker.ts';
 import type { ProgressManager } from './createProgressManager.ts';
 import type KoaOAuth2Server from './middleware/auth/KoaOAuth2Server.ts';
@@ -35,7 +34,6 @@ export type Services = CsCoreServices &
     blobStorage: Storage;
     dicomTagReader: DicomTagReader;
     dicomUtilityRunner: DicomUtilityRunner;
-    taskManager: TaskManager;
     progressManager: ProgressManager;
     mhdPacker: MhdPacker;
     oauthServer: KoaOAuth2Server;
@@ -85,10 +83,6 @@ const createServiceLoader = async (config: any) => {
     'blobStorage',
     path.join(import.meta.dirname, 'storage'),
     'MemoryStorage'
-  );
-  loader.registerModule(
-    'taskManager',
-    path.join(import.meta.dirname, 'createTaskManager')
   );
   loader.registerModule(
     'progressManager',

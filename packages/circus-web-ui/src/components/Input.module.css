@@ -16,7 +16,11 @@
     background-color: var(--surface);
     cursor: not-allowed;
   }
-  &[aria-invalid='true'] {
+  /* :user-invalid applies after leaving the box; a number box shows
+     text such as "-" while typing */
+  &[aria-invalid='true'],
+  &:user-invalid,
+  &[type='number']:focus:invalid {
     border-color: var(--danger);
     background-color: color-mix(in oklch, var(--danger) 10%, var(--bg));
   }

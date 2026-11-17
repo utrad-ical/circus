@@ -1,15 +1,20 @@
 import type { RouteMiddleware } from '../../../typings/middlewares.ts';
+import type * as routes from './routes.ts';
 
-export const handleSearch: RouteMiddleware = ({ models }) => {
+export const handleSearch: RouteMiddleware<typeof routes.getServerParams> = ({
+  models
+}) => {
   return async (ctx, next) => {
     const params = await models.serverParam.findAll();
-    const results: any = {};
+    const results: { [key: string]: unknown } = {};
     params.forEach(p => (results[p.key] = p.value));
     ctx.body = results;
   };
 };
 
-export const handleGet: RouteMiddleware = ({ models }) => {
+export const handleGet: RouteMiddleware<typeof routes.getServerParam> = ({
+  models
+}) => {
   return async (ctx, next) => {
     const key = ctx.params.key;
     const param = await models.serverParam.findByIdOrFail(key);
@@ -17,7 +22,9 @@ export const handleGet: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handlePutOne: RouteMiddleware = ({ models }) => {
+export const handlePutOne: RouteMiddleware<typeof routes.putServerParam> = ({
+  models
+}) => {
   return async (ctx, next) => {
     const key = ctx.params.key;
     const value = ctx.request.body;
@@ -26,7 +33,9 @@ export const handlePutOne: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handlePutAll: RouteMiddleware = ({ models }) => {
+export const handlePutAll: RouteMiddleware<typeof routes.putServerParams> = ({
+  models
+}) => {
   return async (ctx, next) => {
     const values = ctx.request.body;
     for (const key in values) {

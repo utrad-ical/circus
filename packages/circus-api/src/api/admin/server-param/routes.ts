@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { defineRoute, defineRouteGroup, route } from '../../../defineRoute.ts';
 import {
   handleGet,
@@ -7,7 +8,7 @@ import {
 } from './index.ts';
 import { serverParams } from '../../../schemas/index.ts';
 
-export const getAdminServerParams = defineRoute({
+export const getServerParams = defineRoute({
   verb: 'get',
   path: '/admin/server-params',
   description: 'Retrieves the list of server parameters.',
@@ -15,21 +16,23 @@ export const getAdminServerParams = defineRoute({
   response: serverParams
 });
 
-export const getAdminServerParamsKey = defineRoute({
+export const getServerParam = defineRoute({
   verb: 'get',
   path: '/admin/server-params/:key',
   description: 'Retrieves the specified server parameter.',
-  requiredGlobalPrivilege: 'manageServer'
+  requiredGlobalPrivilege: 'manageServer',
+  response: z.unknown()
 });
 
-export const putAdminServerParamsKey = defineRoute({
+export const putServerParam = defineRoute({
   verb: 'put',
   path: '/admin/server-params/:key',
   description: 'Updates the specified server parameter.',
-  requiredGlobalPrivilege: 'manageServer'
+  requiredGlobalPrivilege: 'manageServer',
+  request: z.unknown()
 });
 
-export const putAdminServerParams = defineRoute({
+export const putServerParams = defineRoute({
   verb: 'put',
   path: '/admin/server-params',
   description: 'Bulk-updates server parameters.',
@@ -39,11 +42,11 @@ export const putAdminServerParams = defineRoute({
 
 export default defineRouteGroup({
   name: 'Server Parameter',
-  description: 'Manages login users.',
+  description: 'Manages server parameters.',
   routes: [
-    route(getAdminServerParams, handleSearch),
-    route(getAdminServerParamsKey, handleGet),
-    route(putAdminServerParamsKey, handlePutOne),
-    route(putAdminServerParams, handlePutAll)
+    route(getServerParams, handleSearch),
+    route(getServerParam, handleGet),
+    route(putServerParam, handlePutOne),
+    route(putServerParams, handlePutAll)
   ]
 });

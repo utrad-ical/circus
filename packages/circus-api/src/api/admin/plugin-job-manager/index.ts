@@ -1,14 +1,19 @@
 import status from 'http-status';
 import type { RouteMiddleware } from '../../../typings/middlewares.ts';
+import type * as routes from './routes.ts';
 
-export const handleGet: RouteMiddleware = ({ cs }) => {
+export const handleGet: RouteMiddleware<typeof routes.getPluginJobManager> = ({
+  cs
+}) => {
   return async (ctx, next) => {
     const status = await cs.daemon.status();
     ctx.body = { status };
   };
 };
 
-export const handlePut: RouteMiddleware = ({ cs }) => {
+export const handlePut: RouteMiddleware<
+  typeof routes.switchPluginJobManager
+> = ({ cs }) => {
   return async (ctx, next) => {
     const currentStatus = await cs.daemon.status();
     const newStatus = ctx.request.body.status;

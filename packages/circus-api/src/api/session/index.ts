@@ -1,12 +1,16 @@
 import status from 'http-status';
 import type { RouteMiddleware } from '../../typings/middlewares.ts';
+import type * as routes from './routes.ts';
 import {
   checkCsrfHeader,
   endSession,
   startSession
 } from '../../middleware/auth/session.ts';
 
-export const handlePost: RouteMiddleware = ({ models, verifyUser }) => {
+export const handlePost: RouteMiddleware<typeof routes.postSession> = ({
+  models,
+  verifyUser
+}) => {
   return async (ctx, next) => {
     // Prevents other sites from logging the user in as someone else
     checkCsrfHeader(ctx);
@@ -28,7 +32,9 @@ export const handlePost: RouteMiddleware = ({ models, verifyUser }) => {
   };
 };
 
-export const handleDelete: RouteMiddleware = ({ models }) => {
+export const handleDelete: RouteMiddleware<typeof routes.deleteSession> = ({
+  models
+}) => {
   return async (ctx, next) => {
     checkCsrfHeader(ctx);
     await endSession(ctx, models);

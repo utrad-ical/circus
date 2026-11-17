@@ -1,8 +1,11 @@
 import status from 'http-status';
 import type { RouteMiddleware } from '../../typings/middlewares.ts';
+import type * as routes from './routes.ts';
 import { checkCsrfHeader, endSession } from '../../middleware/auth/session.ts';
 
-export const handleGet: RouteMiddleware = ({ models }) => {
+export const handleGet: RouteMiddleware<typeof routes.getLogout> = ({
+  models
+}) => {
   return async (ctx, next) => {
     if (!ctx.user) {
       ctx.throw(status.UNAUTHORIZED);

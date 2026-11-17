@@ -1,8 +1,24 @@
-import type { RouteMiddleware } from '../../typings/middlewares.ts';
 import type { QueueState } from '@utrad-ical/circus-cs-core';
+import type { RouteMiddleware } from '../../typings/middlewares.ts';
+import type * as routes from './routes.ts';
 
-export const handleGet: RouteMiddleware = ({ cs, models }) => {
-  return async (ctx, next) => {
+const parseQueryParam = (
+  param: string | string[] | undefined,
+  defaultValue: number
+): number => {
+  if (Array.isArray(param)) return parseInt(param[0], 10);
+  if (typeof param === 'string') return parseInt(param, 10);
+  return defaultValue;
+};
+
+/**
+ * Creates the handler that returns the jobs in the queue,
+ * only of the current user if `onlyMine` is set.
+ */
+export const createQueueHandler =
+  (onlyMine: boolean): RouteMiddleware<typeof routes.getQueue> =>
+  ({ cs, models }) =>
+  async (ctx, next) => {
     const urlQuery = ctx.request.query;
     const limit = parseQueryParam(urlQuery.limit, 20);
     const page = parseQueryParam(urlQuery.page, 1);
@@ -15,33 +31,28 @@ export const handleGet: RouteMiddleware = ({ cs, models }) => {
         ? (stateParam as QueueState | 'all')
         : undefined;
 
-    const allQueueItems = (await cs.job.list(state)) as any[]; //TODO: Fix type
-    const myQueueItems = allQueueItems.filter(
-      job => job.userEmail === ctx.user.userEmail
-    );
+    const queueItems = await cs.job.list(state);
+    // A queue item does not have the user, so the user's jobs are read
+    // from the DB; the global queue is paged first
+    const ids = queueItems.map(i => i.jobId);
+    const pageIds = onlyMine
+      ? ids
+      : ids.slice(limit * (page - 1), limit * page);
+    const docs = await models.pluginJob.findAll({
+      jobId: { $in: pageIds },
+      ...(onlyMine ? { userEmail: ctx.user.userEmail } : {})
+    });
+    const byId = new Map(docs.map(job => [job.jobId, job]));
+    // Keep the order of the queue
+    const jobs = pageIds.flatMap(id => byId.get(id) ?? []);
 
-    const items = await Promise.all(
-      myQueueItems
-        .slice(limit * (page - 1), limit * page)
-        .map(i => models.pluginJob.findByIdOrFail(i.jobId))
-    );
-
-    ctx.body = {
-      items,
-      page,
-      totalItems: myQueueItems.length
-    };
+    ctx.body = onlyMine
+      ? {
+          items: jobs.slice(limit * (page - 1), limit * page),
+          page,
+          totalItems: jobs.length
+        }
+      : { items: jobs, page, totalItems: ids.length };
   };
-};
 
-const parseQueryParam = (
-  param: string | string[] | undefined,
-  defaultValue: number
-): number => {
-  if (Array.isArray(param)) {
-    return parseInt(param[0], 10);
-  } else if (typeof param === 'string') {
-    return parseInt(param, 10);
-  }
-  return defaultValue;
-};
+export const handleGet = createQueueHandler(true);

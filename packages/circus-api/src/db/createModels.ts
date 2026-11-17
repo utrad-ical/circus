@@ -50,7 +50,7 @@ export const makeModels = (
       col: 'pluginDefinitions',
       pk: 'pluginId'
     },
-    pluginJob: { schema: dbEntry(s.pluginJob), col: 'pluginJobs', pk: 'jobId' },
+    pluginJob: { schema: s.pluginJobDoc, col: 'pluginJobs', pk: 'jobId' },
     myList: { schema: dbEntry(s.myList), col: 'myLists', pk: 'myListId' },
     onetimeUrl: {
       schema: s.onetimeUrlDoc,

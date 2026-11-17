@@ -1,5 +1,6 @@
 import { defineRoute, defineRouteGroup, route } from '../../defineRoute.ts';
-import { dbEntry, only, searchResult } from '../../schemas/derive.ts';
+import { z } from 'zod';
+import { searchResultOf } from '../../schemas/derive.ts';
 import {
   handleDeleteFeedback,
   handleGet,
@@ -12,17 +13,18 @@ import {
   handleSearch
 } from './index.ts';
 import {
-  patientInfo,
-  pluginJob,
   pluginJobCreate,
   pluginJobCreated,
-  pluginJobFeedback,
+  pluginJobDoc,
+  pluginJobFeedbackCreate,
   pluginJobFeedbacks,
   pluginJobPatch,
   pluginJobSearchResult
 } from '../../schemas/index.ts';
 
-export const postPluginJobs = defineRoute({
+const feedbackCreated = z.strictObject({ feedbackId: z.string() });
+
+export const postPluginJob = defineRoute({
   verb: 'post',
   path: '/plugin-jobs',
   description: 'Creates a new plug-in job.',
@@ -30,7 +32,7 @@ export const postPluginJobs = defineRoute({
   response: pluginJobCreated
 });
 
-export const patchPluginJobsJobId = defineRoute({
+export const patchPluginJob = defineRoute({
   verb: 'patch',
   path: '/plugin-jobs/:jobId',
   description: 'Cancels or invalidates an existing plug-in job.',
@@ -39,42 +41,39 @@ export const patchPluginJobsJobId = defineRoute({
   request: pluginJobPatch
 });
 
-export const getPluginJobs = defineRoute({
+export const searchPluginJobs = defineRoute({
   verb: 'get',
   path: '/plugin-jobs',
   description: 'Performs search for the plug-in job.',
-  response: searchResult(
-    pluginJobSearchResult.extend({ patientInfo: patientInfo.optional() })
-  )
+  response: searchResultOf(pluginJobSearchResult)
 });
 
-export const getPluginJobsListMyListId = defineRoute({
+export const searchPluginJobsInMyList = defineRoute({
   verb: 'get',
   path: '/plugin-jobs/list/:myListId',
   description: 'Performs search based on a my list ID.',
-  response: searchResult(
-    pluginJobSearchResult.extend({ patientInfo: patientInfo.optional() })
-  )
+  response: searchResultOf(pluginJobSearchResult)
 });
 
-export const getPluginJobsJobId = defineRoute({
+export const getPluginJob = defineRoute({
   verb: 'get',
   path: '/plugin-jobs/:jobId',
   description: 'Returns the detail of the specified plug-in job.',
   requiredPluginPrivilege: 'readPlugin',
   requiredSeriesDomainCheck: true,
-  response: dbEntry(pluginJob)
+  response: pluginJobDoc
 });
 
-export const getPluginJobsJobIdAttachment = defineRoute({
+export const getAttachmentList = defineRoute({
   verb: 'get',
   path: '/plugin-jobs/:jobId/attachment',
   description: 'Return the list of attachments from the plug-in.',
   requiredPluginPrivilege: 'readPlugin',
-  requiredSeriesDomainCheck: true
+  requiredSeriesDomainCheck: true,
+  response: z.array(z.string())
 });
 
-export const getPluginJobsJobIdAttachmentPath = defineRoute({
+export const getAttachment = defineRoute({
   verb: 'get',
   path: '/plugin-jobs/:jobId/attachment/:path+',
   description: 'Returns the specified file output from the plug-in.',
@@ -82,27 +81,29 @@ export const getPluginJobsJobIdAttachmentPath = defineRoute({
   requiredSeriesDomainCheck: true
 });
 
-export const postPluginJobsJobIdFeedbackConsensual = defineRoute({
+export const postConsensualFeedback = defineRoute({
   verb: 'post',
   path: '/plugin-jobs/:jobId/feedback/consensual',
   description:
     'Creates a new consensual feedback entry for the specified plug-in job.',
   requiredPluginPrivilege: 'inputConsensualFeedback',
   requiredSeriesDomainCheck: true,
-  request: only(pluginJobFeedback, ['data', 'actionLog'])
+  request: pluginJobFeedbackCreate,
+  response: feedbackCreated
 });
 
-export const postPluginJobsJobIdFeedbackPersonal = defineRoute({
+export const postPersonalFeedback = defineRoute({
   verb: 'post',
   path: '/plugin-jobs/:jobId/feedback/personal',
   description:
     'Creates a new personal feedback entry for the specified plug-in job.',
   requiredPluginPrivilege: 'inputPersonalFeedback',
   requiredSeriesDomainCheck: true,
-  request: only(pluginJobFeedback, ['data', 'actionLog'])
+  request: pluginJobFeedbackCreate,
+  response: feedbackCreated
 });
 
-export const getPluginJobsJobIdFeedback = defineRoute({
+export const getFeedbacks = defineRoute({
   verb: 'get',
   path: '/plugin-jobs/:jobId/feedback',
   description: 'Lists feedback entries for the specified plug-in job.',
@@ -111,7 +112,7 @@ export const getPluginJobsJobIdFeedback = defineRoute({
   response: pluginJobFeedbacks
 });
 
-export const deletePluginJobsJobIdFeedbackFeedbackId = defineRoute({
+export const deleteFeedback = defineRoute({
   verb: 'delete',
   path: '/plugin-jobs/:jobId/feedback/:feedbackId',
   description: 'Removes feedback items.',
@@ -123,16 +124,16 @@ export default defineRouteGroup({
   name: 'Plugin Jobs',
   description: 'Creates and manages CIRCUS CS plug-in jobs.',
   routes: [
-    route(postPluginJobs, handlePost),
-    route(patchPluginJobsJobId, handlePatch),
-    route(getPluginJobs, handleSearch),
-    route(getPluginJobsListMyListId, handleSearch),
-    route(getPluginJobsJobId, handleGet),
-    route(getPluginJobsJobIdAttachment, handleGetAttachmentList),
-    route(getPluginJobsJobIdAttachmentPath, handleGetAttachment),
-    route(postPluginJobsJobIdFeedbackConsensual, handlePostFeedback),
-    route(postPluginJobsJobIdFeedbackPersonal, handlePostFeedback),
-    route(getPluginJobsJobIdFeedback, handleGetFeedback),
-    route(deletePluginJobsJobIdFeedbackFeedbackId, handleDeleteFeedback)
+    route(postPluginJob, handlePost),
+    route(patchPluginJob, handlePatch),
+    route(searchPluginJobs, handleSearch),
+    route(searchPluginJobsInMyList, handleSearch),
+    route(getPluginJob, handleGet),
+    route(getAttachmentList, handleGetAttachmentList),
+    route(getAttachment, handleGetAttachment),
+    route(postConsensualFeedback, handlePostFeedback),
+    route(postPersonalFeedback, handlePostFeedback),
+    route(getFeedbacks, handleGetFeedback),
+    route(deleteFeedback, handleDeleteFeedback)
   ]
 });

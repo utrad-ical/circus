@@ -17,11 +17,16 @@ export { partialVolumeDescriptor } from './partialVolumeDescriptor.ts';
 export { patientInfo } from './patientInfo.ts';
 export { permanentToken } from './permanentToken.ts';
 export { plugin } from './plugin.ts';
-export { pluginJob } from './pluginJob.ts';
-export { pluginJobFeedback } from './pluginJobFeedback.ts';
+export {
+  pluginJobDoc,
+  pluginJobSearchResult,
+  pluginJobStatus
+} from './pluginJob.ts';
+export {
+  pluginJobFeedback,
+  pluginJobFeedbackCreate
+} from './pluginJobFeedback.ts';
 export { pluginJobManager } from './pluginJobManager.ts';
-export { pluginJobQueue } from './pluginJobQueue.ts';
-export { pluginJobSearchResult } from './pluginJobSearchResult.ts';
 export { pluginJobSeries } from './pluginJobSeries.ts';
 export { preferences } from './preferences.ts';
 export { projectCreate, projectDoc, projectPatch } from './project.ts';

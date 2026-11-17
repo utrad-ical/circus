@@ -8,7 +8,8 @@ import type {
   CircusContext,
   RouteMiddleware
 } from '../../typings/middlewares.ts';
-import { pluginJob } from '../../schemas/pluginJob.ts';
+import { pluginJobDoc } from '../../schemas/pluginJob.ts';
+import type * as routes from './routes.ts';
 import { dateField } from '../../schemas/formats.ts';
 import { fieldsOf, mongoFilter } from '../../schemas/mongoFilter.ts';
 import { seriesDoc } from '../../schemas/series.ts';
@@ -22,19 +23,23 @@ import {
 } from '../performSearch.ts';
 import type { Filter } from 'mongodb';
 
+/**
+ * Takes the patient info and the domain of the first series joined in a
+ * search result, and removes the patient info unless the user can see it.
+ */
 const maskPatientInfo = (ctx: CircusContext) => {
-  return (pluginJobData: any) => {
-    const canView =
-      ctx.userPrivileges.globalPrivileges.includes('personalInfoView');
-    const wantToView = ctx.user.preferences.personalInfoView;
-    if (!canView || !wantToView || pluginJobData.patientInfo === null) {
-      delete pluginJobData.patientInfo;
-    }
-    if (Array.isArray(pluginJobData.patientInfo)) {
-      pluginJobData.patientInfo = pluginJobData.patientInfo[0];
-    }
-    pluginJobData.domain = pluginJobData.domain[0];
-    return pluginJobData;
+  const show =
+    ctx.userPrivileges.globalPrivileges.includes('personalInfoView') &&
+    ctx.user.preferences.personalInfoView;
+  return (job: any) => {
+    const { patientInfo, domain, ...rest } = job;
+    // `patientInfo` is null if the user cannot see it for the plug-in
+    const info = Array.isArray(patientInfo) ? patientInfo[0] : patientInfo;
+    return {
+      ...rest,
+      domain: domain[0],
+      ...(show && info ? { patientInfo: info } : {})
+    };
   };
 };
 
@@ -42,21 +47,13 @@ export interface PluginJobSeriesRequest extends AutoPvdSeriesEntry {
   requiredPrivateTags?: string;
 }
 
-interface RawPluginJobRequest {
-  priority?: number;
-  pluginId: string;
-  series: PluginJobSeriesRequest[];
-  force?: boolean;
-}
-
-export const handlePost: RouteMiddleware = ({
+export const handlePost: RouteMiddleware<typeof routes.postPluginJob> = ({
   transactionManager,
   cs,
   seriesOrientationResolver
 }) => {
   return async (ctx, next) => {
-    const { priority, pluginId, series, force } = ctx.request
-      .body as RawPluginJobRequest;
+    const { priority, pluginId, series, force } = ctx.request.body;
     await transactionManager.withTransaction(async models => {
       const resolvedSeries = await resolveAutoPvdOfSeries(
         series,
@@ -80,10 +77,13 @@ export const handlePost: RouteMiddleware = ({
 /**
  * Cancels or invalidates a job.
  */
-export const handlePatch: RouteMiddleware = ({ transactionManager, cs }) => {
+export const handlePatch: RouteMiddleware<typeof routes.patchPluginJob> = ({
+  transactionManager,
+  cs
+}) => {
   return async (ctx, next) => {
     const jobId = ctx.params.jobId;
-    const newStatus = ctx.request.body.status as 'cancelled' | 'invalidated';
+    const newStatus = ctx.request.body.status;
     await transactionManager.withTransaction(async models => {
       const jobDoc = await models.pluginJob.findByIdOrFail(jobId);
       const pluginId = jobDoc.pluginId;
@@ -124,7 +124,7 @@ export const handlePatch: RouteMiddleware = ({ transactionManager, cs }) => {
 };
 
 const pluginJobFilter = mongoFilter({
-  ...fieldsOf(pluginJob, ['pluginId', 'jobId', 'status', 'finishedAt']),
+  ...fieldsOf(pluginJobDoc, ['pluginId', 'jobId', 'status', 'finishedAt']),
   ...fieldsOf(seriesDoc, [
     'patientInfo.patientId',
     'patientInfo.patientName',
@@ -198,7 +198,9 @@ export const extractPatientIdNameFilter = (
   return includeFixedValue ? { $and: patientInfoFilters } : null;
 };
 
-export const handleSearch: RouteMiddleware = ({ models }) => {
+export const handleSearch: RouteMiddleware<typeof routes.searchPluginJobs> = ({
+  models
+}) => {
   return async (ctx, next) => {
     const customFilter = extractFilter(ctx, pluginJobFilter);
 
@@ -363,7 +365,9 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handleGet: RouteMiddleware = ({ models }) => {
+export const handleGet: RouteMiddleware<typeof routes.getPluginJob> = ({
+  models
+}) => {
   return async (ctx, next) => {
     const jobId = ctx.params.jobId;
     const job = await models.pluginJob.findByIdOrFail(jobId);
@@ -371,10 +375,9 @@ export const handleGet: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handleGetAttachmentList: RouteMiddleware = ({
-  models,
-  pluginResultsPath
-}) => {
+export const handleGetAttachmentList: RouteMiddleware<
+  typeof routes.getAttachmentList
+> = ({ models, pluginResultsPath }) => {
   return async (ctx, next) => {
     const jobId = ctx.params.jobId;
     const baseDir = path.resolve(pluginResultsPath, jobId);
@@ -385,10 +388,9 @@ export const handleGetAttachmentList: RouteMiddleware = ({
   };
 };
 
-export const handleGetAttachment: RouteMiddleware = ({
-  models,
-  pluginResultsPath
-}) => {
+export const handleGetAttachment: RouteMiddleware<
+  typeof routes.getAttachment
+> = ({ models, pluginResultsPath }) => {
   return async (ctx, next) => {
     const jobId = ctx.params.jobId;
     const filePath = ctx.params.path;
@@ -416,13 +418,15 @@ export const handleGetAttachment: RouteMiddleware = ({
   };
 };
 
-export const handlePostFeedback: RouteMiddleware = ({ models }) => {
+export const handlePostFeedback: RouteMiddleware<
+  typeof routes.postPersonalFeedback
+> = ({ models }) => {
   return async (ctx, next) => {
     const jobId = ctx.params.jobId;
     const job = await models.pluginJob.findByIdOrFail(jobId);
     const isConsensual = ctx.request.url.split('/')[4] === 'consensual';
 
-    const feedbacks = job.feedbacks as any[]; // TODO: Fix typing
+    const feedbacks = job.feedbacks;
     if (feedbacks.find(f => f.isConsensual)) {
       ctx.throw(
         status.BAD_REQUEST,
@@ -458,7 +462,9 @@ export const handlePostFeedback: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handleGetFeedback: RouteMiddleware = ({ models }) => {
+export const handleGetFeedback: RouteMiddleware<typeof routes.getFeedbacks> = ({
+  models
+}) => {
   return async (ctx, next) => {
     const jobId = ctx.params.jobId;
     const job = await models.pluginJob.findByIdOrFail(jobId);
@@ -466,9 +472,9 @@ export const handleGetFeedback: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handleDeleteFeedback: RouteMiddleware = ({
-  transactionManager
-}) => {
+export const handleDeleteFeedback: RouteMiddleware<
+  typeof routes.deleteFeedback
+> = ({ transactionManager }) => {
   return async (ctx, next) => {
     await transactionManager.withTransaction(async models => {
       const { jobId, feedbackId } = ctx.params;

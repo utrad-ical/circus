@@ -22,6 +22,8 @@ export class ValidationError extends Error {
   issues: ValidationIssue[];
   /** Set by validateInOut */
   phase?: 'request' | 'response';
+  /** The primary key of the invalid document, set by the models */
+  documentId?: unknown;
 
   constructor(issues: ValidationIssue[]) {
     super(

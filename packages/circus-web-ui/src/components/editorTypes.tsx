@@ -1,4 +1,5 @@
 import React, { type FC } from 'react';
+import NumberInput from './NumberInput.tsx';
 import ArrayEditor from './ArrayEditor.tsx';
 import styles from './editorTypes.module.css';
 import Input, { type InputProps } from './Input.tsx';
@@ -44,8 +45,25 @@ export const text = (options: InputOptions = {}) =>
 export const password = (options: InputOptions = {}) =>
   input<string>('password', options, s => s);
 
-export const number = (options: InputOptions = {}) =>
-  input<number>('number', options, parseFloat);
+/**
+ * An editor of a number. An empty box means `undefined`.
+ */
+export const number = (
+  options: InputOptions = {}
+): Editor<number | undefined> => {
+  const NumberEditor: Editor<number | undefined> = props => {
+    const { value, onChange, disabled } = props;
+    return (
+      <NumberInput
+        {...options}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+      />
+    );
+  };
+  return NumberEditor;
+};
 
 export const checkbox = (options: { label?: string } = {}): Editor<boolean> => {
   const CheckboxEditor: Editor<boolean> = props => {

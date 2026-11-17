@@ -23,9 +23,14 @@ const ViewWindowEditor: React.FC<{
   const properties = useMemo(() => {
     return [
       { key: 'level', caption: 'Window level', editor: et.number() },
-      { key: 'width', caption: 'Window width', editor: et.number() }
+      { key: 'width', caption: 'Window width', editor: et.number({ min: 0 }) }
     ] as PropertyEditorProperties<ViewWindow>;
   }, []);
+
+  const isValid =
+    Number.isFinite(window.level) &&
+    Number.isFinite(window.width) &&
+    window.width > 0;
 
   return (
     <>
@@ -42,7 +47,11 @@ const ViewWindowEditor: React.FC<{
         <Button variant="link" onClick={onHide}>
           Cancel
         </Button>
-        <Button onClick={() => onOkClick(window)} variant="primary">
+        <Button
+          onClick={() => onOkClick(window)}
+          variant="primary"
+          disabled={!isValid}
+        >
           OK
         </Button>
       </DialogFooter>

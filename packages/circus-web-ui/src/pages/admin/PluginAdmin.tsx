@@ -89,14 +89,14 @@ const listColumns: Record<PluginType, DataGridColumnDefinition[]> = {
 
 interface RunConfiguration {
   gpus: string;
-  timeout: number;
+  timeout?: number;
 }
 
 interface Parameters {
   endpoint: string;
   authentication: string;
-  maxConcurrency: number;
-  timeout: number;
+  maxConcurrency?: number;
+  timeout?: number;
   env: Record<string, string>;
 }
 

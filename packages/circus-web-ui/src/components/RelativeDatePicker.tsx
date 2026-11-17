@@ -1,8 +1,8 @@
 import { add, format, parse, startOfDay } from 'date-fns';
-import React, { type FC, type ChangeEvent, memo, useState } from 'react';
+import React, { type FC, memo, useState } from 'react';
 import Button, { type ButtonSize } from './Button.tsx';
 import Calendar from './Calendar.tsx';
-import Input from './Input.tsx';
+import NumberInput from './NumberInput.tsx';
 import PopoverButton from './PopoverButton.tsx';
 import styles from './RelativeDatePicker.module.css';
 
@@ -48,10 +48,6 @@ const RelativeDatePicker: FC<{
     setMode(mode);
   };
 
-  const handleRelativeValueChange = (ev: ChangeEvent<HTMLInputElement>) => {
-    onChange([-Number(ev.target.value), 'day']);
-  };
-
   return (
     <PopoverButton
       title={dateToString(value)}
@@ -77,12 +73,12 @@ const RelativeDatePicker: FC<{
           <div className={styles.switch}>
             {mode === 'relative' ? (
               <div className={styles.relative}>
-                <Input
+                <NumberInput
                   size="small"
-                  type="number"
                   min={0}
                   value={Array.isArray(value) ? -value[0] : 0}
-                  onChange={handleRelativeValueChange}
+                  // Clearing the box keeps the previous value
+                  onChange={v => v !== undefined && onChange([-v, 'day'])}
                 />
                 &ensp;days ago
               </div>

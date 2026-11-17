@@ -18,6 +18,7 @@ import type {
 import React, { useState } from 'react';
 import type { WindowPreset } from '#types/Project.ts';
 import useKeyboardShortcut from '#utils/useKeyboardShortcut.ts';
+import NumberInput from '#components/NumberInput.tsx';
 import type {
   ScrollBarsSettings,
   WindowPropagationScope
@@ -541,28 +542,29 @@ const ToolBar: React.FC<{
           <span className={styles.wandOption}>
             <label>
               Threshold:
-              <input
+              <NumberInput
+                size="small"
                 className={styles.wandThresholdInput}
-                type="number"
                 name="threshold"
-                min="0"
+                min={0}
                 value={toolOptions.wandThreshold}
-                onChange={ev =>
-                  setToolOption('wandThreshold', ev.target.valueAsNumber)
+                // Clearing the box keeps the previous value
+                onChange={v =>
+                  v !== undefined && setToolOption('wandThreshold', v)
                 }
               />
             </label>
             <label>
               Max distance:
-              <input
+              <NumberInput
+                size="small"
                 className={styles.wandMaxDistanceInput}
-                type="number"
                 name="maxDistance"
-                min="0"
+                min={0}
                 placeholder="mm"
                 value={toolOptions.wandMaxDistance}
-                onChange={ev =>
-                  setToolOption('wandMaxDistance', ev.target.valueAsNumber)
+                onChange={v =>
+                  v !== undefined && setToolOption('wandMaxDistance', v)
                 }
               />
             </label>
@@ -666,20 +668,16 @@ const WandBaseValueEditor: Editor<ReferenceValueOption> = props => {
     onChange(isAuto ? 'clickPoint' : 0);
   };
 
-  const onNumberChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(Number(ev.target.value));
-  };
-
   return (
     <>
       <label>
         Reference value:
         {typeof value === 'number' && (
-          <input
+          <NumberInput
+            size="small"
             className={styles.wandBaseValueInput}
-            type="number"
             value={value}
-            onChange={onNumberChange}
+            onChange={v => v !== undefined && onChange(v)}
           />
         )}
         <label>

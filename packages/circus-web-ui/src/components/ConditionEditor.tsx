@@ -8,6 +8,7 @@ import Button from './Button.tsx';
 import styles from './ConditionEditor.module.css';
 import DatePicker from './DatePicker.tsx';
 import Input from './Input.tsx';
+import NumberInput from './NumberInput.tsx';
 import { normalizeRelative } from './RelativeDatePicker.tsx';
 import Select from './Select.tsx';
 
@@ -60,10 +61,10 @@ const typeMap: {
   number: {
     operators: { '==': '=', '>': '>', '<': '<', '>=': '>=', '<=': '<=' },
     control: props => (
-      <Input
-        type="number"
+      <NumberInput
         value={props.value}
-        onChange={ev => props.onChange(parseFloat(ev.target.value))}
+        // Clearing the box keeps the previous value
+        onChange={v => v !== undefined && props.onChange(v)}
         disabled={props.disabled}
       />
     ),

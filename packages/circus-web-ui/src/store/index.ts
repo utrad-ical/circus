@@ -7,7 +7,6 @@ import loginUser from './loginUser.ts';
 import messages from './messages.ts';
 import plugins from './plugins.ts';
 import searches from './searches.ts';
-import taskProgress from './taskProgress.ts';
 import users from './users.ts';
 import { setStore } from './storeAccess.ts';
 
@@ -16,8 +15,7 @@ const reducer = combineReducers({
   loginUser,
   messages,
   plugins,
-  users,
-  taskProgress
+  users
 });
 
 export const store = configureStore({

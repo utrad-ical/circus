@@ -3,12 +3,8 @@ import Button from '#components/Button.tsx';
 import type { Editor } from '#components/editorTypes.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { api } from '#utils/api.ts';
 import useProgress from '#utils/useProgress.ts';
-import useTaskDownloadHandler, {
-  downloadUrl
-} from '#utils/useTaskDownloadHandler.ts';
 import { DialogBody, DialogFooter, DialogHeader } from './Dialog.tsx';
 import ProgressView from './ProgressView.tsx';
 
@@ -29,16 +25,25 @@ export const lineEndingOptions: { [type in LineEnding]: string } = {
 };
 
 /**
- * What `onStart` returns: a task ID (deprecated) or the URL to download.
- * The URL gets `progressId` to report the progress.
+ * Lets the browser download the URL.
+ * Authenticated with the session cookie; the browser streams the file.
  */
-export type DownloadStart = string | { url: string };
+const downloadUrl = (url: string) => {
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '';
+  a.click();
+};
 
 const DownloadModal = <T extends any>(props: {
   onClose: () => void;
   initialOptions: T;
   optionsEditor: Editor<T>;
-  onStart: (options: T) => Promise<DownloadStart>;
+  /**
+   * Returns the URL to download.
+   * The URL gets `progressId` to report the progress.
+   */
+  onStart: (options: T) => Promise<string>;
   /** Whether the download can start with the options */
   canStart?: (options: T) => boolean;
   caption: React.ReactChild;
@@ -53,44 +58,28 @@ const DownloadModal = <T extends any>(props: {
   } = props;
   const [closeTitle, setCloseTitle] = useState('Cancel');
   const [options, setOptions] = useState(initialOptions);
-  const [taskId, setTaskId] = useState<string | null>(null);
   const [progressId, setProgressId] = useState<string | null>(null);
-  const taskProgress = useSelector(state =>
-    taskId ? state.taskProgress[taskId] : undefined
-  );
-  const streamProgress = useProgress(progressId);
-  const progress = taskId ? taskProgress : streamProgress;
-
-  const downloadTask = useTaskDownloadHandler(taskId!);
+  const progress = useProgress(progressId);
 
   useEffect(() => {
-    if (progressId && progress?.status === 'finished') setCloseTitle('Close');
-  }, [progressId, progress?.status]);
+    if (progress?.status === 'finished') setCloseTitle('Close');
+  }, [progress?.status]);
 
   const handleOptionsChange = (value: T) => {
     setOptions(value);
   };
 
   const handleStartClick = async () => {
-    const start = await onStart(options);
+    const startUrl = await onStart(options);
     setCloseTitle('Dismiss');
-    if (typeof start === 'string') {
-      setTaskId(start);
-      return;
-    }
     const { progressId } = await api('progress', {
       method: 'post',
       data: {}
     });
     setProgressId(progressId);
-    const url = new URL(start.url, window.location.href);
+    const url = new URL(startUrl, window.location.href);
     url.searchParams.set('progressId', progressId);
     downloadUrl(url.href);
-  };
-
-  const handleDownloadClick = () => {
-    setCloseTitle('Close');
-    downloadTask();
   };
 
   return (
@@ -117,15 +106,6 @@ const DownloadModal = <T extends any>(props: {
         {progress?.status === 'processing' && (
           <Button variant="primary" disabled>
             <LoadingIndicator /> Please wait...
-          </Button>
-        )}
-        {taskId && progress?.status === 'finished' && (
-          <Button
-            variant="primary"
-            onClick={handleDownloadClick}
-            icon="material-arrow_circle_down"
-          >
-            Download
           </Button>
         )}
       </DialogFooter>

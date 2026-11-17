@@ -35,7 +35,6 @@ import CaseSearch from '#pages/search/CaseSearch.tsx';
 import PluginJobSearch from '#pages/search/PluginJobSearch.tsx';
 import SeriesSearch from '#pages/search/SeriesSearch.tsx';
 import SeriesDetail from '#pages/SeriesDetail.tsx';
-import TaskList from '#pages/TaskList.tsx';
 import TokenManagement from '#pages/TokenManagement.tsx';
 
 import { Provider as ReduxStoreProvider, useSelector } from 'react-redux';
@@ -209,7 +208,6 @@ const TheApp: React.FC<{}> = () => {
             { path: 'series/:uid', element: <SeriesDetail /> },
             { path: 'case/:caseId', element: <CaseDetail /> },
             { path: 'plugin-job/:jobId', element: <PluginJobDetail /> },
-            { path: 'task-list', element: <TaskList /> },
             { path: 'preference', element: <Preferences /> },
             { path: 'tokens', element: <TokenManagement /> }
           ]

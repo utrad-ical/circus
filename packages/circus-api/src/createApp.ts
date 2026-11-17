@@ -25,7 +25,6 @@ import * as path from 'path';
 import querystring from 'querystring';
 import type * as ws from 'ws';
 import type { MhdPacker } from './case/createMhdPacker.ts';
-import type { TaskManager } from './createTaskManager.ts';
 import type { ProgressManager } from './createProgressManager.ts';
 import type {
   Database,
@@ -151,7 +150,6 @@ export const createApp: FunctionService<
     dicomFileRepository: DicomFileRepository;
     dicomTagReader: DicomTagReader;
     dicomImporter: DicomImporter;
-    taskManager: TaskManager;
     progressManager: ProgressManager;
     mhdPacker: MhdPacker;
     dicomVoxelDumper: DicomVoxelDumper;
@@ -178,7 +176,6 @@ export const createApp: FunctionService<
     dicomImporter,
     dicomFileRepository,
     dicomTagReader,
-    taskManager,
     progressManager,
     mhdPacker,
     dicomVoxelDumper,
@@ -215,7 +212,6 @@ export const createApp: FunctionService<
     volumeProvider,
     uploadFileSizeMaxBytes,
     dicomImageServerUrl,
-    taskManager,
     progressManager,
     mhdPacker,
     dicomVoxelDumper,
@@ -328,7 +324,6 @@ createApp.dependencies = [
   'dicomFileRepository',
   'dicomTagReader',
   'dicomImporter',
-  'taskManager',
   'progressManager',
   'mhdPacker',
   'dicomVoxelDumper',

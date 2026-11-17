@@ -33,7 +33,6 @@ export const makeModels = (
     },
     serverParam: { schema: 'serverParam', col: 'serverParams', pk: 'key' },
     token: { schema: 'token', col: 'tokens', pk: 'accessToken' },
-    task: { schema: 'task', col: 'tasks', pk: 'taskId' },
     plugin: {
       schema: 'plugin/remotePlugin',
       col: 'pluginDefinitions',

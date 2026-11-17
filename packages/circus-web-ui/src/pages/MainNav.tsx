@@ -1,7 +1,6 @@
 import classnames from 'classnames';
 import Icon from '#components/Icon.tsx';
 import NavMenu, { NavMenuHeader, NavSubMenu } from '#components/NavMenu.tsx';
-import TaskNotifier from '#components/TaskNotifier.tsx';
 import React, { type FC, type MouseEvent } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -211,11 +210,6 @@ const MainNav: FC<{}> = props => {
               external
             />
             <NavSubMenu
-              icon="material-lists"
-              name="Task List"
-              link="/task-list"
-            />
-            <NavSubMenu
               icon="circus-preference"
               name="Preference"
               link="/preference"
@@ -271,7 +265,6 @@ const MainNav: FC<{}> = props => {
       </nav>
       <nav>
         <ul className={styles.menu}>
-          <TaskNotifier />
           <li className={styles.userInfo}>{loginUserName}</li>
           <NavMenu name="Logout" onClick={onLogout} />
         </ul>

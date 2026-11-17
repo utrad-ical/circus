@@ -1,61 +1,11 @@
 import Alert from '#components/Alert.tsx';
 import Button from '#components/Button.tsx';
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import MessageBox from './MessageBox.tsx';
 import ErrorBoundary from '#components/ErrorBoundary.tsx';
 import MainNav from './MainNav.tsx';
-import { useDispatch, useSelector } from 'react-redux';
-import useLoginUser from '#utils/useLoginUser.ts';
-import fetchEventSource from '#utils/fetchEventSource.ts';
-import { taskUpdate, taskFinish, taskError } from '../store/taskProgress.ts';
-
-const useTaskProgress = () => {
-  const dispatch = useDispatch();
-  const userEmail = useLoginUser()?.userEmail;
-  // Listens to the SSE and updates the redux store
-  // during the lifecycle of this component.
-  // The request is authenticated with the session cookie.
-  useEffect(() => {
-    const abortController = new AbortController();
-    const load = async () => {
-      if (!userEmail) return;
-      const generator = fetchEventSource('/api/tasks/report', {
-        signal: abortController.signal
-      });
-      for await (const event of generator) {
-        switch (event.type) {
-          case 'progress':
-            dispatch(
-              taskUpdate({
-                taskId: event.taskId,
-                updates: {
-                  finished: event.finished,
-                  total: event.total,
-                  message: event.message
-                }
-              })
-            );
-            break;
-          case 'finish':
-            dispatch(
-              taskFinish({ taskId: event.taskId, message: event.message })
-            );
-            break;
-          case 'error':
-            dispatch(
-              taskError({ taskId: event.taskId, message: event.message })
-            );
-            break;
-        }
-      }
-    };
-    load();
-    return () => {
-      abortController.abort();
-    };
-  }, [dispatch, userEmail]);
-};
+import { useSelector } from 'react-redux';
 
 /**
  * The main application container.
@@ -68,9 +18,6 @@ const Application: React.FC<{}> = props => {
 
   const pageContentVisible = !isUserFetching && isLoggedIn;
   const notLoggedIn = !isUserFetching && !isLoggedIn;
-
-  // Listens to the task progress reporter while the application is active
-  useTaskProgress();
 
   return (
     <Fragment>

@@ -4,7 +4,6 @@ import { confirm, prompt } from '#components/dialogs.tsx';
 import type { AppDispatch, AppThunk } from '#store/index.ts';
 import { api } from '#utils/api.ts';
 import type Series from '#types/Series.ts';
-import type Task from '#types/Task.ts';
 
 export interface SearchResource {
   endPoint: string;
@@ -41,7 +40,6 @@ export interface SearchState {
   };
   items: {
     series: SearchedResource<Series>;
-    tasks: SearchedResource<Task>;
     [resourceName: string]: SearchedResource<any>;
   };
   nextPreviousList: string[];
@@ -59,7 +57,7 @@ export interface SearchResult {
 
 const initialState: SearchState = {
   searches: {},
-  items: { series: {}, tasks: {} },
+  items: { series: {} },
   nextPreviousList: []
 };
 
@@ -146,11 +144,6 @@ const slice = createSlice({
       const searchName = action.payload;
       delete state.searches[searchName];
     },
-    dismissTask: (state, action: PayloadAction<string>) => {
-      const taskId = action.payload;
-      if (!state.items.tasks || !state.items.tasks[taskId]) return;
-      state.items.tasks[taskId].dismissed = true;
-    },
     setNextPreviousList: (state, action: PayloadAction<string[]>) => {
       state.nextPreviousList = action.payload;
     }
@@ -170,7 +163,6 @@ export const {
   reset,
   selectionStatusChanged,
   deleteSearch,
-  dismissTask,
   setNextPreviousList
 } = slice.actions;
 

@@ -1,6 +1,10 @@
 import { z } from 'zod';
+import { dateField } from './formats.ts';
 
-export const serverParam = z.strictObject({
-  key: z.string().optional(),
-  value: z.unknown().optional() // Any JSON data
+/** A server parameter in the database */
+export const serverParamDoc = z.strictObject({
+  key: z.string(),
+  value: z.unknown().describe('Any JSON data.'),
+  createdAt: dateField(),
+  updatedAt: dateField()
 });

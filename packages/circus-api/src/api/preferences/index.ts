@@ -1,7 +1,8 @@
 import { defaultPreferences } from '../../utils/preferenceUtils.ts';
 import type { RouteMiddleware } from '../../typings/middlewares.ts';
+import type * as routes from './routes.ts';
 
-export const handleGet: RouteMiddleware = () => {
+export const handleGet: RouteMiddleware<typeof routes.getPreferences> = () => {
   return async (ctx, next) => {
     ctx.body = {
       ...defaultPreferences(),
@@ -10,7 +11,9 @@ export const handleGet: RouteMiddleware = () => {
   };
 };
 
-export const handlePatch: RouteMiddleware = ({ models }) => {
+export const handlePatch: RouteMiddleware<typeof routes.patchPreferences> = ({
+  models
+}) => {
   return async (ctx, next) => {
     const updates = ctx.request.body;
     await models.user.modifyOne(ctx.user.userEmail, {

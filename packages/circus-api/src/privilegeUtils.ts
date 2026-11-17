@@ -1,5 +1,11 @@
 import type { z } from 'zod';
-import type { globalPrivilege } from './schemas/group.ts';
+import {
+  csRoleNames,
+  dbRoleNames,
+  type globalPrivilege
+} from './schemas/group.ts';
+
+export { csRoleNames, dbRoleNames };
 import * as mr from 'multi-integer-range';
 import type { Models } from './interface.ts';
 import type { SeriesEntry } from './typings/circus.ts';
@@ -8,13 +14,6 @@ import {
   partialVolumeDescriptorToArray
 } from '@utrad-ical/circus-rs/server';
 
-export const dbRoleNames = [
-  'read',
-  'write',
-  'viewPersonalInfo',
-  'moderate',
-  'addSeries'
-] as const;
 type DbRoleName = (typeof dbRoleNames)[number];
 
 interface ProjectPrivilege {
@@ -23,15 +22,6 @@ interface ProjectPrivilege {
   project: any;
 }
 
-export const csRoleNames = [
-  'readPlugin',
-  'executePlugin',
-  'manageJobs',
-  'inputPersonalFeedback',
-  'inputConsensualFeedback',
-  'manageFeedback',
-  'viewPersonalInfo'
-] as const;
 type CsRoleName = (typeof csRoleNames)[number];
 
 interface PluginPrivilege {

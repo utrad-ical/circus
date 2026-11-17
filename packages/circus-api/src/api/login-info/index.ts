@@ -1,8 +1,7 @@
 import type { RouteMiddleware } from '../../typings/middlewares.ts';
+import type * as routes from './routes.ts';
 
-// import status from 'http-status';
-
-export const handleGet: RouteMiddleware = () => {
+export const handleGet: RouteMiddleware<typeof routes.getLoginInfo> = () => {
   return async (ctx, next) => {
     const user = ctx.user;
     ctx.body = {
@@ -12,14 +11,13 @@ export const handleGet: RouteMiddleware = () => {
   };
 };
 
-export const handleGetFull: RouteMiddleware = ({
+export const handleGetFull: RouteMiddleware<typeof routes.getLoginInfoFull> = ({
   database,
   models,
   dicomImageServerUrl
 }) => {
   return async (ctx, next) => {
-    const user = { ...ctx.user };
-    delete user.password;
+    const { password, ...user } = ctx.user;
     const groups = (
       await models.group.findAll({
         groupId: { $in: user.groups }
@@ -29,7 +27,8 @@ export const handleGetFull: RouteMiddleware = ({
       await models.serverParam.findById('defaultDomain')
     )?.value;
     const defaultDomain =
-      ctx.userPrivileges.domains.indexOf(defaultDomainValue) >= 0
+      typeof defaultDomainValue === 'string' &&
+      ctx.userPrivileges.domains.includes(defaultDomainValue)
         ? defaultDomainValue
         : null;
 
@@ -41,7 +40,7 @@ export const handleGetFull: RouteMiddleware = ({
           $match: {
             $or: [
               { 'myLists.editors.userEmail': user.userEmail },
-              { 'myLists.editors.groupId': { $in: [user.groups] } }
+              { 'myLists.editors.groupId': { $in: user.groups } }
             ]
           }
         },

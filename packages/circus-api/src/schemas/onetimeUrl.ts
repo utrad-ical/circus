@@ -1,10 +1,14 @@
 import { z } from 'zod';
+import { dateField } from './formats.ts';
 
-export const onetimeUrl = z
+/** A one-time URL in the database */
+export const onetimeUrlDoc = z
   .strictObject({
-    onetimeUrlId: z.string().optional(),
-    userEmail: z.string().optional(),
-    onetimeString: z.string().optional()
+    onetimeUrlId: z.string(),
+    userEmail: z.string(),
+    onetimeString: z.string(),
+    createdAt: dateField(),
+    updatedAt: dateField()
   })
   .describe(
     'One-time URL that enables a user to log in without a login ID and a password.'

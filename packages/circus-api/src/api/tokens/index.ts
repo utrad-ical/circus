@@ -1,9 +1,12 @@
 import generatePermanentToken from '../../utils/generatePermanentToken.ts';
 import httpStatus from 'http-status';
 import type { RouteMiddleware } from '../../typings/middlewares.ts';
+import type * as routes from './routes.ts';
 import status from 'http-status';
 
-export const handleGet: RouteMiddleware = ({ models }) => {
+export const handleGet: RouteMiddleware<typeof routes.getTokens> = ({
+  models
+}) => {
   return async (ctx, next) => {
     const results = await models.token.findAll({
       userId: ctx.user.userEmail,
@@ -22,7 +25,9 @@ export const handleGet: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handlePost: RouteMiddleware = ({ models }) => {
+export const handlePost: RouteMiddleware<typeof routes.postToken> = ({
+  models
+}) => {
   return async (ctx, next) => {
     const { description } = ctx.request.body;
     const results = await models.token.findAll({
@@ -48,12 +53,16 @@ export const handlePost: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handleDelete: RouteMiddleware = ({ models }) => {
+export const handleDelete: RouteMiddleware<typeof routes.deleteToken> = ({
+  models
+}) => {
   return async (ctx, next) => {
-    const permanentTokenId = ctx.params.tokenId;
-    const token = await models.token.findAll({ permanentTokenId });
-    if (!token) ctx.throw(httpStatus.NOT_FOUND);
-    await models.token.deleteOne({ permanentTokenId });
+    // Only the owner can delete the token
+    const result = await models.token.deleteOne({
+      permanentTokenId: ctx.params.tokenId,
+      userId: ctx.user.userEmail
+    });
+    if (!result.deletedCount) ctx.throw(httpStatus.NOT_FOUND);
     ctx.body = null;
   };
 };

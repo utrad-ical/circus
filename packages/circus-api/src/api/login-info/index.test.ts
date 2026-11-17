@@ -28,3 +28,19 @@ test('full', async () => {
   });
   assert.equal(res.data.sharedMyLists.length, 1);
 });
+
+test('full: my lists shared with a group', async () => {
+  // Shares Dave's case list with the group of Bob (2)
+  await apiTest.database.db
+    .collection('users')
+    .updateOne(
+      { 'myLists.myListId': '01ezab6xqfac7hvm5s09yw1g1j' },
+      { $set: { 'myLists.$.editors': [{ type: 'group', groupId: 2 }] } }
+    );
+  const res = await axios.get('api/login-info/full');
+  assert.ok(
+    res.data.sharedMyLists.some(
+      (l: any) => l.sharedMyList.myListId === '01ezab6xqfac7hvm5s09yw1g1j'
+    )
+  );
+});

@@ -3,7 +3,7 @@ import type { Database, Models } from '../interface.ts';
 import type Command from './Command.ts';
 import type { Validator } from '../interface.ts';
 import type { DockerRunner } from '@utrad-ical/circus-cs-core';
-import { ValidationError } from '../createValidator.ts';
+import { formatPath, ValidationError } from '../createValidator.ts';
 import { allRequiredExcept, only } from '../schemas/derive.ts';
 import { plugin } from '../schemas/plugin.ts';
 
@@ -70,7 +70,7 @@ export const command: Command<{
       if (err instanceof ValidationError) {
         const message =
           'Manifest file validation failed.\n\n' +
-          err.errors.map(e => `${e.instancePath} ${e.message}`).join('\n');
+          err.issues.map(i => `${formatPath(i.path)}: ${i.message}`).join('\n');
         throw new Error(message);
       } else {
         throw err;

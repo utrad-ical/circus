@@ -40,8 +40,8 @@ const errorHandler: (options: Options) => koa.Middleware = ({
           // not fulfill some JSON schema.
           ctx.status = status.BAD_REQUEST;
           ctx.body = {
-            error: 'Request data is not correct.',
-            validationErrors: err.errors
+            error: 'Validation failed.',
+            issues: err.issues.map(({ path, message }) => ({ path, message }))
           };
         } else {
           ctx.status = status.INTERNAL_SERVER_ERROR;

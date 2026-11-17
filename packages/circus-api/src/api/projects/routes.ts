@@ -1,19 +1,17 @@
-import { defineRoute, defineRouteGroup } from '../../defineRoute.ts';
-import { dbEntry } from '../../schemas/derive.ts';
+import { defineRoute, defineRouteGroup, route } from '../../defineRoute.ts';
 import { handleGet } from './index.ts';
-import { project } from '../../schemas/index.ts';
+import { projectDoc } from '../../schemas/index.ts';
 
-export const getProjectsProjectId = defineRoute({
+export const getProject = defineRoute({
   verb: 'get',
   path: '/projects/:projectId',
-  handler: handleGet,
   description: 'Returns the project data structure.',
   requiredProjectPrivilege: 'read',
-  response: dbEntry(project)
+  response: projectDoc
 });
 
 export default defineRouteGroup({
   name: 'Projects',
   description: 'Fetches the project data structure.',
-  routes: [getProjectsProjectId]
+  routes: [route(getProject, handleGet)]
 });

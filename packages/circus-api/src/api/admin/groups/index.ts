@@ -1,9 +1,12 @@
 import status from 'http-status';
 import { globalPrivileges } from '../../../privilegeUtils.ts';
 import type { RouteMiddleware } from '../../../typings/middlewares.ts';
+import type * as routes from './routes.ts';
 import performSearch from '../../performSearch.ts';
 
-export const handleSearch: RouteMiddleware = ({ models }) => {
+export const handleSearch: RouteMiddleware<typeof routes.getGroups> = ({
+  models
+}) => {
   return async (ctx, next) => {
     await performSearch(models.group, {}, ctx, {
       defaultSort: { groupId: 1 },
@@ -12,7 +15,9 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handleGet: RouteMiddleware = ({ models }) => {
+export const handleGet: RouteMiddleware<typeof routes.getGroup> = ({
+  models
+}) => {
   return async (ctx, next) => {
     const groupId = parseInt(ctx.params.groupId);
     const group = await models.group.findByIdOrFail(groupId);
@@ -56,7 +61,9 @@ const checkPermissionsConsistency = (permissions: any) => {
   }
 };
 
-export const handlePatch: RouteMiddleware = ({ models }) => {
+export const handlePatch: RouteMiddleware<typeof routes.patchGroup> = ({
+  models
+}) => {
   return async (ctx, next) => {
     try {
       checkPermissionsConsistency(ctx.request.body);
@@ -69,12 +76,11 @@ export const handlePatch: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handlePost: RouteMiddleware = ({ models }) => {
+export const handlePost: RouteMiddleware<typeof routes.postGroup> = ({
+  models
+}) => {
   return async (ctx, next) => {
     const groupId = await models.group.newSequentialId();
-    if ('groupId' in ctx.request.body) {
-      ctx.throw(status.BAD_REQUEST, 'Group ID cannot be specified');
-    }
     const inserting = { ...ctx.request.body, groupId };
     await models.group.insert(inserting);
     ctx.body = { groupId };
@@ -82,7 +88,9 @@ export const handlePost: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const listGlobalPrivileges: RouteMiddleware = () => {
+export const listGlobalPrivileges: RouteMiddleware<
+  typeof routes.getGlobalPrivileges
+> = () => {
   return async (ctx, next) => {
     ctx.body = globalPrivileges();
   };

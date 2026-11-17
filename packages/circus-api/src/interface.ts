@@ -3,13 +3,16 @@ import type { readDicomTags } from './utils/createDicomTagReader.ts';
 import type { Disposable } from '@utrad-ical/circus-lib';
 import type { CollectionAccessor } from './db/createCollectionAccessor.ts';
 import type * as mongo from 'mongodb';
+import type { groupDoc } from './schemas/group.ts';
+import type { projectDoc } from './schemas/project.ts';
+import type { userDoc } from './schemas/user.ts';
 
 /**
- * - `default`: checks the data as stored in the server (with `Date`s)
- * - `toDate`: checks a request and converts ISO date strings into `Date`s
- * - `fromDate`: checks a response and converts `Date`s into ISO strings
+ * - `decode`: converts JSON (e.g., ISO strings) into data (e.g., `Date`s)
+ * - `encode`: converts data into JSON
+ * - `check`: checks data (e.g., from the database) without converting it
  */
-export type ValidationMode = 'default' | 'toDate' | 'fromDate';
+export type ValidationMode = 'check' | 'decode' | 'encode';
 
 export interface Validator {
   validate: (
@@ -31,10 +34,13 @@ export type DicomTagReader = (
   data: ArrayBuffer
 ) => ReturnType<typeof readDicomTags>;
 
+/** A document without `createdAt` and `updatedAt`, which the models add */
+type DocOf<S extends z.ZodType> = Omit<z.output<S>, 'createdAt' | 'updatedAt'>;
+
 export interface ModelEntries {
-  user: any;
-  group: any;
-  project: any;
+  user: DocOf<typeof userDoc>;
+  group: DocOf<typeof groupDoc>;
+  project: DocOf<typeof projectDoc>;
   series: any;
   clinicalCase: any;
   serverParam: any;

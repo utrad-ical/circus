@@ -2,28 +2,34 @@ import type { NoDepFunctionService } from '@utrad-ical/circus-lib';
 import { z } from 'zod';
 import type { ValidationMode, Validator } from './interface.ts';
 
-export interface ValidationErrorItem {
-  /** JSON Pointer to the invalid value, e.g., '/domains/0' */
-  instancePath: string;
+export interface ValidationIssue {
+  /** The path to the invalid value, e.g., `['domains', 0]` */
+  path: (string | number)[];
   message: string;
   code: string;
 }
+
+/** Formats a path like `domains[0].name` */
+export const formatPath = (path: (string | number)[]) =>
+  path
+    .map((p, i) => (typeof p === 'number' ? `[${p}]` : i ? `.${p}` : p))
+    .join('') || '(root)';
 
 /**
  * Thrown when the data does not match the schema.
  */
 export class ValidationError extends Error {
-  errors: ValidationErrorItem[];
+  issues: ValidationIssue[];
   /** Set by validateInOut */
   phase?: 'request' | 'response';
 
-  constructor(errors: ValidationErrorItem[]) {
+  constructor(issues: ValidationIssue[]) {
     super(
       'Validation failed: ' +
-        errors.map(e => `${e.instancePath || '/'} ${e.message}`).join(', ')
+        issues.map(i => `${formatPath(i.path)}: ${i.message}`).join(', ')
     );
     this.name = 'ValidationError';
-    this.errors = errors;
+    this.issues = issues;
   }
 }
 
@@ -49,15 +55,18 @@ const expandUnions = (issues: Issue[], prefix: PropertyKey[] = []): Issue[] =>
     return [{ ...issue, path } as Issue];
   });
 
-const escapePointer = (segment: PropertyKey) =>
-  String(segment).replace(/~/g, '~0').replace(/\//g, '~1');
-
-const toErrorItems = (issues: Issue[]): ValidationErrorItem[] =>
-  issues.map(issue => ({
-    instancePath: issue.path.map(p => '/' + escapePointer(p)).join(''),
-    message: issue.message,
-    code: issue.code
-  }));
+const toValidationIssues = (issues: Issue[]): ValidationIssue[] =>
+  issues.flatMap((issue): ValidationIssue[] => {
+    const path = issue.path.map(p => (typeof p === 'number' ? p : String(p)));
+    // Points to each unknown key itself
+    if (issue.code === 'unrecognized_keys')
+      return issue.keys.map(key => ({
+        path: [...path, key],
+        message: 'Unrecognized key',
+        code: issue.code
+      }));
+    return [{ path, message: issue.message, code: issue.code }];
+  });
 
 /**
  * Returns a copy of the data where invalid `Date`s are replaced with
@@ -81,26 +90,24 @@ const createValidator: NoDepFunctionService<Validator> = async () => {
   const validate: Validator['validate'] = async (
     schema,
     data,
-    mode: ValidationMode = 'default',
+    mode: ValidationMode = 'check',
     options = {}
   ) => {
-    // Parsing converts ISO strings into Dates;
-    // encoding checks Dates and converts them into ISO strings
     const result =
-      mode === 'toDate'
+      mode === 'decode'
         ? z.safeDecode(schema, data)
         : z.safeEncode(
             schema,
-            mode === 'default' ? replaceInvalidDates(data) : data
+            mode === 'check' ? replaceInvalidDates(data) : data
           );
     if (!result.success) {
       const issues = expandUnions(result.error.issues).filter(
         i => !(options.allowUnknownKeys && i.code === 'unrecognized_keys')
       );
-      if (issues.length) throw new ValidationError(toErrorItems(issues));
+      if (issues.length) throw new ValidationError(toValidationIssues(issues));
       return data;
     }
-    return mode === 'default' ? data : result.data;
+    return mode === 'check' ? data : result.data;
   };
 
   return { validate };

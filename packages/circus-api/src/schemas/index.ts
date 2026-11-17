@@ -3,7 +3,7 @@
 export { clinicalCase } from './clinicalCase.ts';
 export { clinicalCaseCreate } from './clinicalCaseCreate.ts';
 export { clinicalCaseSearchResult } from './clinicalCaseSearchResult.ts';
-export { group } from './group.ts';
+export { globalPrivilege, groupCreate, groupDoc, groupPatch } from './group.ts';
 export { icon } from './icon.ts';
 export { jsonSchemaSubset } from './jsonSchemaSubset.ts';
 export { label } from './label.ts';
@@ -21,7 +21,7 @@ export { pluginJobQueue } from './pluginJobQueue.ts';
 export { pluginJobSearchResult } from './pluginJobSearchResult.ts';
 export { pluginJobSeries } from './pluginJobSeries.ts';
 export { preferences } from './preferences.ts';
-export { project } from './project.ts';
+export { projectCreate, projectDoc, projectPatch } from './project.ts';
 export { remotePlugin } from './remotePlugin.ts';
 export { revision } from './revision.ts';
 export { revisionSeriesEntry } from './revisionSeriesEntry.ts';
@@ -31,6 +31,12 @@ export { seriesEntry } from './seriesEntry.ts';
 export { seriesEntryWithAutoPvd } from './seriesEntryWithAutoPvd.ts';
 export { serverParam } from './serverParam.ts';
 export { token } from './token.ts';
-export { user } from './user.ts';
+export {
+  userCreate,
+  userDoc,
+  userForAdmin,
+  userPatch,
+  userPublic
+} from './user.ts';
 export { userMyList } from './userMyList.ts';
 export * from './routes.ts';

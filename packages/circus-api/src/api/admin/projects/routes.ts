@@ -1,55 +1,52 @@
-import { defineRoute, defineRouteGroup } from '../../../defineRoute.ts';
+import { defineRoute, defineRouteGroup, route } from '../../../defineRoute.ts';
+import { searchResultOf } from '../../../schemas/derive.ts';
 import {
-  allRequiredExcept,
-  dbEntry,
-  searchResult
-} from '../../../schemas/derive.ts';
+  projectCreate,
+  projectDoc,
+  projectPatch
+} from '../../../schemas/index.ts';
 import { handleGet, handlePatch, handlePost, handleSearch } from './index.ts';
-import { project } from '../../../schemas/index.ts';
 
-export const getAdminProjects = defineRoute({
+export const getProjects = defineRoute({
   verb: 'get',
   path: '/admin/projects',
-  handler: handleSearch,
   description: 'Retrieves the list of projects.',
   requiredGlobalPrivilege: 'manageServer',
-  response: searchResult(project)
+  response: searchResultOf(projectDoc)
 });
 
-export const getAdminProjectsProjectId = defineRoute({
+export const getProject = defineRoute({
   verb: 'get',
   path: '/admin/projects/:projectId',
-  handler: handleGet,
   description: 'Retrieves the specified project.',
   requiredGlobalPrivilege: 'manageServer',
-  response: dbEntry(project)
+  response: projectDoc
 });
 
-export const patchAdminProjectsProjectId = defineRoute({
+export const patchProject = defineRoute({
   verb: 'patch',
   path: '/admin/projects/:projectId',
-  handler: handlePatch,
   description: 'Updates the specified project.',
   requiredGlobalPrivilege: 'manageServer',
-  request: project
+  request: projectPatch
 });
 
-export const postAdminProjects = defineRoute({
+export const postProject = defineRoute({
   verb: 'post',
   path: '/admin/projects',
-  handler: handlePost,
   description: 'Creates a new project.',
   requiredGlobalPrivilege: 'manageServer',
-  request: allRequiredExcept(project, ['projectId'])
+  request: projectCreate,
+  response: projectDoc.pick({ projectId: true })
 });
 
 export default defineRouteGroup({
   name: 'Project Administration',
   description: 'Manages projects.',
   routes: [
-    getAdminProjects,
-    getAdminProjectsProjectId,
-    patchAdminProjectsProjectId,
-    postAdminProjects
+    route(getProjects, handleSearch),
+    route(getProject, handleGet),
+    route(patchProject, handlePatch),
+    route(postProject, handlePost)
   ]
 });

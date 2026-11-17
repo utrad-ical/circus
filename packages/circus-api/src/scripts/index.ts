@@ -57,7 +57,7 @@ const main = async () => {
     } catch (err: any) {
       console.error(styleText('red', 'ERROR:'));
       console.error(err.message);
-      err.errors && console.error(err.errors);
+      err.issues && console.error(err.issues);
       err.stack && console.error(err.stack);
     }
   } else if (commandName === 'help') {

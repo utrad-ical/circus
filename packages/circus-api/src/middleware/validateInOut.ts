@@ -22,7 +22,7 @@ const validateInOut: (
         ctx.request.body = await validator.validate(
           requestSchema,
           ctx.request.body,
-          'toDate'
+          'decode'
         );
       } catch (err: any) {
         err.phase = 'request';
@@ -32,11 +32,7 @@ const validateInOut: (
     await next();
     if (responseSchema) {
       try {
-        ctx.body = await validator.validate(
-          responseSchema,
-          ctx.body,
-          'fromDate'
-        );
+        ctx.body = await validator.validate(responseSchema, ctx.body, 'encode');
       } catch (err: any) {
         err.phase = 'response';
         throw err;

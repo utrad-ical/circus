@@ -264,7 +264,7 @@ export const handleGetExportMhd: RouteMiddleware = ({
         query = await validator.validate(
           caseExportMhdQuery,
           ctx.request.query,
-          'toDate'
+          'decode'
         );
       } catch (err: any) {
         err.phase = 'request';

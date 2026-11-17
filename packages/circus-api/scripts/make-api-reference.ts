@@ -6,7 +6,7 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { z } from 'zod';
-import type { RouteDefinition, RouteGroup } from '../src/defineRoute.ts';
+import type { BoundRoute, RouteGroup } from '../src/defineRoute.ts';
 import glob from '../src/utils/glob.ts';
 
 const root = path.join(import.meta.dirname, '..');
@@ -18,7 +18,7 @@ const outFile = path.join(root, 'api-reference.json');
 const toJsonSchema = (schema: z.ZodType) =>
   z.toJSONSchema(schema, { io: 'input', unrepresentable: 'any' });
 
-const toEntry = (route: RouteDefinition) => {
+const toEntry = (route: BoundRoute) => {
   const { handler, request, response, ...rest } = route;
   return {
     ...rest,

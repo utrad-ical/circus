@@ -106,17 +106,17 @@ describe('special formats', () => {
   });
 });
 
-it('should work with toDate mode', async () => {
+it('should work with decode mode', async () => {
   const testData = { intVal: 3, dateVal: '2112-09-03T00:00:00.000Z' };
-  const result = await validator.validate(t.date, testData, 'toDate');
+  const result = await validator.validate(t.date, testData, 'decode');
   assert.ok(result.dateVal instanceof Date);
   assert.equal(result.dateVal.toISOString(), '2112-09-03T00:00:00.000Z');
 });
 
-it('should work with fromDate mode', async () => {
+it('should work with encode mode', async () => {
   const iso = '2011-11-28T00:11:22.000Z';
   const testData = { intVal: 3, dateVal: new Date(iso) };
-  const result = await validator.validate(t.date, testData, 'fromDate');
+  const result = await validator.validate(t.date, testData, 'encode');
   assert.equal(result.dateVal, iso);
 });
 
@@ -251,18 +251,18 @@ it('should handle alternatives', async () => {
 it('should ignore unknown keys only when asked', async () => {
   const data = { intVal: 1, unknown: 2 };
   await assert.rejects(validator.validate(t.sample, data), ValidationError);
-  await validator.validate(t.sample, data, 'default', {
+  await validator.validate(t.sample, data, 'check', {
     allowUnknownKeys: true
   });
   await assert.rejects(
-    validator.validate(t.sample, { intVal: 'x', unknown: 2 }, 'default', {
+    validator.validate(t.sample, { intVal: 'x', unknown: 2 }, 'check', {
       allowUnknownKeys: true
     }),
     ValidationError
   );
 });
 
-it('should report errors with JSON pointers', async () => {
+it('should report errors with paths', async () => {
   const err = await validator
     .validate(searchResult(t.sample), {
       items: [{ intVal: 'x', createdAt: new Date(), updatedAt: new Date() }],
@@ -271,7 +271,8 @@ it('should report errors with JSON pointers', async () => {
     })
     .catch(e => e);
   assert.ok(err instanceof ValidationError);
-  assert.equal(err.errors[0].instancePath, '/items/0/intVal');
+  assert.deepEqual(err.issues[0].path, ['items', 0, 'intVal']);
+  assert.match(err.message, /items\[0\]\.intVal: /);
 });
 
 it('should report the path inside an alternative', async () => {
@@ -283,13 +284,7 @@ it('should report the path inside an alternative', async () => {
     .validate(schema, { type: 'b', b: 'x' })
     .catch(e => e);
   assert.ok(err instanceof ValidationError);
-  assert.equal(err.errors[0].instancePath, '/b');
-});
-
-it('should escape JSON pointers', async () => {
-  const schema = z.record(z.string(), z.number());
-  const err = await validator.validate(schema, { 'a/b~c': 'x' }).catch(e => e);
-  assert.equal(err.errors[0].instancePath, '/a~1b~0c');
+  assert.deepEqual(err.issues[0].path, ['b']);
 });
 
 it('should accept NaN numbers and invalid dates', async () => {

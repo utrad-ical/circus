@@ -4,12 +4,12 @@ import type { RouteMiddleware } from './typings/middlewares.ts';
 type OneOrMore = string | string[];
 
 /**
- * An API route. The handler is defined in `index.ts` in the same directory.
+ * The metadata of an API route.
+ * It is bound to its handler in `defineRouteGroup()` with `route()`.
  */
 export interface RouteDefinition {
   verb: 'get' | 'put' | 'post' | 'patch' | 'delete';
   path: string;
-  handler: RouteMiddleware;
   description?: string;
   requiredGlobalPrivilege?: OneOrMore;
   requiredProjectPrivilege?: OneOrMore;
@@ -25,15 +25,26 @@ export interface RouteDefinition {
   noAuthentication?: true;
 }
 
+/** A route bound to its handler */
+export interface BoundRoute extends RouteDefinition {
+  handler: RouteMiddleware<any>;
+}
+
 /**
  * The routes defined in `routes.ts` of each directory under `api/`.
  */
 export interface RouteGroup {
   name: string;
   description?: string;
-  routes: RouteDefinition[];
+  routes: BoundRoute[];
 }
 
 export const defineRoute = <T extends RouteDefinition>(route: T): T => route;
+
+/** Binds a route to its handler, which is typed with the route */
+export const route = <R extends RouteDefinition>(
+  definition: R,
+  handler: RouteMiddleware<R>
+): BoundRoute => ({ ...definition, handler });
 
 export const defineRouteGroup = (group: RouteGroup): RouteGroup => group;

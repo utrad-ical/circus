@@ -1,9 +1,12 @@
-import { defineRoute, defineRouteGroup } from '../../../defineRoute.ts';
+import { z } from 'zod';
+import { defineRoute, defineRouteGroup, route } from '../../../defineRoute.ts';
+import { searchResultOf } from '../../../schemas/derive.ts';
 import {
-  allRequiredExcept,
-  dbEntry,
-  searchResult
-} from '../../../schemas/derive.ts';
+  globalPrivilege,
+  groupCreate,
+  groupDoc,
+  groupPatch
+} from '../../../schemas/index.ts';
 import {
   handleGet,
   handlePatch,
@@ -11,59 +14,58 @@ import {
   handleSearch,
   listGlobalPrivileges
 } from './index.ts';
-import { group } from '../../../schemas/index.ts';
 
-export const getAdminGroups = defineRoute({
+export const getGroups = defineRoute({
   verb: 'get',
   path: '/admin/groups',
-  handler: handleSearch,
   description: 'Retrieves the list of groups',
   requiredGlobalPrivilege: 'manageServer',
-  response: searchResult(group)
+  response: searchResultOf(groupDoc)
 });
 
-export const getAdminGroupsGroupId = defineRoute({
+export const getGroup = defineRoute({
   verb: 'get',
   path: '/admin/groups/:groupId',
-  handler: handleGet,
   description: 'Retrieves the specified group.',
   requiredGlobalPrivilege: 'manageServer',
-  response: dbEntry(group)
+  response: groupDoc
 });
 
-export const patchAdminGroupsGroupId = defineRoute({
+export const patchGroup = defineRoute({
   verb: 'patch',
   path: '/admin/groups/:groupId',
-  handler: handlePatch,
   description: 'Updates the specified group.',
   requiredGlobalPrivilege: 'manageServer',
-  request: group
+  request: groupPatch
 });
 
-export const postAdminGroups = defineRoute({
+export const postGroup = defineRoute({
   verb: 'post',
   path: '/admin/groups',
-  handler: handlePost,
   description: 'Creates a new group.',
   requiredGlobalPrivilege: 'manageServer',
-  request: allRequiredExcept(group, ['groupId'])
+  request: groupCreate,
+  response: z.strictObject({ groupId: z.int() })
 });
 
-export const getAdminGlobalPrivileges = defineRoute({
+export const getGlobalPrivileges = defineRoute({
   verb: 'get',
   path: '/admin/global-privileges',
-  handler: listGlobalPrivileges,
-  requiredGlobalPrivilege: 'manageServer'
+  description: 'Retrieves the list of global privileges.',
+  requiredGlobalPrivilege: 'manageServer',
+  response: z.array(
+    z.strictObject({ privilege: globalPrivilege, caption: z.string() })
+  )
 });
 
 export default defineRouteGroup({
   name: 'Group Administration',
   description: 'Manages user groups.',
   routes: [
-    getAdminGroups,
-    getAdminGroupsGroupId,
-    patchAdminGroupsGroupId,
-    postAdminGroups,
-    getAdminGlobalPrivileges
+    route(getGroups, handleSearch),
+    route(getGroup, handleGet),
+    route(patchGroup, handlePatch),
+    route(postGroup, handlePost),
+    route(getGlobalPrivileges, listGlobalPrivileges)
   ]
 });

@@ -21,7 +21,7 @@ before(async () => {
 
     const validationError = (phase: 'request' | 'response') => {
       const err = new ValidationError([
-        { instancePath: '', message: 'Expected number', code: 'invalid_type' }
+        { path: ['a'], message: 'Expected number', code: 'invalid_type' }
       ]);
       err.phase = phase;
       return err;
@@ -71,7 +71,10 @@ test('should return 404 for nonexistent path', async () => {
 test('should return 400 for request validation error', async () => {
   const res = await ax.get('invalid-on-request');
   assert.equal(res.status, 400);
-  assert.match(res.data.error, /request data is not correct/i);
+  assert.equal(res.data.error, 'Validation failed.');
+  assert.deepEqual(res.data.issues, [
+    { path: ['a'], message: 'Expected number' }
+  ]);
 });
 
 test('should return 500 for server-side validation error', async () => {

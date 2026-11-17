@@ -41,7 +41,7 @@ export const command: Command<{ database: Database; models: Models }> = async (
       } catch (err: any) {
         console.error(styleText('red', `Error: ${name}`));
         console.error(err.message);
-        if (err.errors) console.error(err.errors);
+        if (err.issues) console.error(err.issues);
         break;
       }
       console.log('The database is now up to date.');

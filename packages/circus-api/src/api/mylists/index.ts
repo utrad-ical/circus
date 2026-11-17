@@ -1,3 +1,5 @@
+import type { z } from 'zod';
+import type { myListEditor } from '../../schemas/myListEditor.ts';
 import type { Models } from '../../interface.ts';
 import type {
   CircusContext,
@@ -11,17 +13,7 @@ export interface MyListItem {
   createdAt: Date;
 }
 
-interface EditUser {
-  type: 'user';
-  userEmail: string;
-}
-
-interface EditGroup {
-  type: 'group';
-  groupId: string;
-}
-
-type EditorEntry = EditUser | EditGroup;
+type EditorEntry = z.output<typeof myListEditor>;
 
 export const handleSearch: RouteMiddleware = () => {
   return async (ctx, next) => {
@@ -39,7 +31,8 @@ const getList = async (
   const owner = result[0];
   await models.user.findById(owner.userEmail, { withLock: true });
 
-  const list = owner.myLists.find((list: any) => list.myListId === myListId);
+  const list = owner.myLists.find(list => list.myListId === myListId);
+  if (!list) ctx.throw(404, 'This my list does not exist');
   const itemReadable = owner.userEmail === ctx.user.userEmail || list.public;
   const itemEditable =
     list.editors.some(

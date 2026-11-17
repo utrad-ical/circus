@@ -57,7 +57,7 @@ test('reports every invalid document and exits with 1', async () => {
   const output = await run();
   assert.equal(process.exitCode, 1);
   // Both collections are checked even after the first error
-  assert.match(output, /\/ Unrecognized key/);
-  assert.match(output, /\/groupName /);
+  assert.match(output, /unknownField: Unrecognized key/);
+  assert.match(output, /groupName: Invalid input/);
   assert.match(output, /Found 2 invalid item\(s\)/);
 });

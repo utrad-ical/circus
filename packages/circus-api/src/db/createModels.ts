@@ -40,11 +40,11 @@ export const makeModels = (
       pk: 'caseId'
     },
     serverParam: {
-      schema: dbEntry(s.serverParam),
+      schema: s.serverParamDoc,
       col: 'serverParams',
       pk: 'key'
     },
-    token: { schema: dbEntry(s.token), col: 'tokens', pk: 'accessToken' },
+    token: { schema: s.tokenDoc, col: 'tokens', pk: 'accessToken' },
     plugin: {
       schema: z.union([dbEntry(s.plugin), dbEntry(s.remotePlugin)]),
       col: 'pluginDefinitions',
@@ -53,7 +53,7 @@ export const makeModels = (
     pluginJob: { schema: dbEntry(s.pluginJob), col: 'pluginJobs', pk: 'jobId' },
     myList: { schema: dbEntry(s.myList), col: 'myLists', pk: 'myListId' },
     onetimeUrl: {
-      schema: dbEntry(s.onetimeUrl),
+      schema: s.onetimeUrlDoc,
       col: 'onetimeUrls',
       pk: 'onetimeUrlId'
     }

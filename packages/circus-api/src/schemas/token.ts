@@ -1,15 +1,21 @@
 import { z } from 'zod';
 import { dateField } from './formats.ts';
 
-export const token = z
+/** An OAuth2 token in the database */
+export const tokenDoc = z
   .strictObject({
-    accessToken: z.string().optional(),
-    accessTokenExpiresAt: dateField().optional(),
-    clientId: z.string().optional(),
-    refreshToken: z.string().optional(),
-    refreshTokenExpiresAt: dateField().optional(),
-    userId: z.string().optional(),
-    permanentTokenId: z.string().nullable().optional(),
-    permanentTokenDescription: z.string().max(1024).nullable().optional()
+    accessToken: z.string(),
+    accessTokenExpiresAt: dateField(),
+    clientId: z.string(),
+    refreshToken: z.string(),
+    refreshTokenExpiresAt: dateField(),
+    userId: z.string(),
+    permanentTokenId: z
+      .string()
+      .nullable()
+      .describe('Set for a permanent token issued via the API.'),
+    permanentTokenDescription: z.string().max(1024).nullable(),
+    createdAt: dateField(),
+    updatedAt: dateField()
   })
   .describe('Represents an OAuth2 token.');

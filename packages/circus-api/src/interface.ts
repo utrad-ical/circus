@@ -5,7 +5,10 @@ import type { CollectionAccessor } from './db/createCollectionAccessor.ts';
 import type * as mongo from 'mongodb';
 import type { groupDoc } from './schemas/group.ts';
 import type { projectDoc } from './schemas/project.ts';
+import type { onetimeUrlDoc } from './schemas/onetimeUrl.ts';
 import type { seriesDoc } from './schemas/series.ts';
+import type { serverParamDoc } from './schemas/serverParam.ts';
+import type { tokenDoc } from './schemas/token.ts';
 import type { userDoc } from './schemas/user.ts';
 
 /**
@@ -44,12 +47,12 @@ export interface ModelEntries {
   project: DocOf<typeof projectDoc>;
   series: DocOf<typeof seriesDoc>;
   clinicalCase: any;
-  serverParam: any;
-  token: any;
+  serverParam: DocOf<typeof serverParamDoc>;
+  token: DocOf<typeof tokenDoc>;
   plugin: any;
   pluginJob: any;
   myList: any;
-  onetimeUrl: any;
+  onetimeUrl: DocOf<typeof onetimeUrlDoc>;
 }
 
 export type Models = {

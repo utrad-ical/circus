@@ -9,7 +9,7 @@ export { jsonSchemaSubset } from './jsonSchemaSubset.ts';
 export { label } from './label.ts';
 export { myList } from './myList.ts';
 export { myListEditor } from './myListEditor.ts';
-export { onetimeUrl } from './onetimeUrl.ts';
+export { onetimeUrlDoc } from './onetimeUrl.ts';
 export { partialVolumeDescriptor } from './partialVolumeDescriptor.ts';
 export { patientInfo } from './patientInfo.ts';
 export { permanentToken } from './permanentToken.ts';
@@ -29,8 +29,8 @@ export { schemaEntry } from './schemaEntry.ts';
 export { seriesDoc, seriesForUser, seriesImportSummary } from './series.ts';
 export { seriesEntry } from './seriesEntry.ts';
 export { seriesEntryWithAutoPvd } from './seriesEntryWithAutoPvd.ts';
-export { serverParam } from './serverParam.ts';
-export { token } from './token.ts';
+export { serverParamDoc } from './serverParam.ts';
+export { tokenDoc } from './token.ts';
 export {
   userCreate,
   userDoc,

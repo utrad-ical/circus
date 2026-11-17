@@ -15,6 +15,16 @@ export const options = () => {
       names: ['target', 't'],
       help: 'Checks only this collection.',
       type: 'arrayOfString'
+    },
+    {
+      names: ['documents-only'],
+      help: 'Checks only the documents with their schemas.',
+      type: 'bool'
+    },
+    {
+      names: ['attributes-only'],
+      help: 'Checks only the attributes of cases with the project schemas.',
+      type: 'bool'
     }
   ];
 };
@@ -129,12 +139,12 @@ export const command: Command<{ models: Models }> = async (
   { models }
 ) => {
   return async (options: any) => {
-    const { target } = options;
+    const { target, documents_only, attributes_only } = options;
     const isTarget = (key: string) =>
       !Array.isArray(target) || target.includes(key);
     const reporter = createReporter('red');
     for (const key in models) {
-      if (!isTarget(key)) continue;
+      if (!isTarget(key) || attributes_only) continue;
       console.log(styleText('bold', `Validating: ${key}`));
       const model = (models as any)[key] as CollectionAccessor;
       const cursor = await model.findAsCursor({}, { strict: true });
@@ -163,7 +173,8 @@ export const command: Command<{ models: Models }> = async (
         )
       );
     }
-    if (isTarget('clinicalCase')) await checkCaseAttributes(models);
+    if (isTarget('clinicalCase') && !documents_only)
+      await checkCaseAttributes(models);
     if (reporter.documents) {
       console.error(
         styleText('bold', 'Summary (the number of items with each issue):')

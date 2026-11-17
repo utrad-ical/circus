@@ -21,12 +21,12 @@ afterEach(() => {
   mock.restoreAll();
 });
 
-const run = async (target = ['user', 'group']) => {
+const run = async (target = ['user', 'group'], options = {}) => {
   const output: string[] = [];
   const capture = (...args: unknown[]) => output.push(args.join(' '));
   mock.method(console, 'log', capture);
   mock.method(console, 'error', capture);
-  await commandFunc({ target });
+  await commandFunc({ target, ...options });
   return output.join('\n');
 };
 
@@ -83,4 +83,13 @@ test('warns about attributes against the project schemas', async () => {
     output,
     /clinicalCase latestRevision\.attributes\.smoker: Invalid input/
   );
+});
+
+test('checks only documents or only attributes', async () => {
+  const documents = await run(['clinicalCase'], { documents_only: true });
+  assert.match(documents, /Validating: clinicalCase/);
+  assert.doesNotMatch(documents, /Checking the attributes/);
+  const attributes = await run(['clinicalCase'], { attributes_only: true });
+  assert.doesNotMatch(attributes, /Validating: clinicalCase/);
+  assert.match(attributes, /Checking the attributes/);
 });

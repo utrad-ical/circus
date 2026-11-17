@@ -1,8 +1,24 @@
-import type { RouteMiddleware } from '../../typings/middlewares.ts';
 import type { QueueState } from '@utrad-ical/circus-cs-core';
+import type { RouteMiddleware } from '../../typings/middlewares.ts';
+import type * as routes from './routes.ts';
 
-export const handleGet: RouteMiddleware = ({ cs, models }) => {
-  return async (ctx, next) => {
+const parseQueryParam = (
+  param: string | string[] | undefined,
+  defaultValue: number
+): number => {
+  if (Array.isArray(param)) return parseInt(param[0], 10);
+  if (typeof param === 'string') return parseInt(param, 10);
+  return defaultValue;
+};
+
+/**
+ * Creates the handler that returns the jobs in the queue,
+ * only of the current user if `onlyMine` is set.
+ */
+export const createQueueHandler =
+  (onlyMine: boolean): RouteMiddleware<typeof routes.getQueue> =>
+  ({ cs, models }) =>
+  async (ctx, next) => {
     const urlQuery = ctx.request.query;
     const limit = parseQueryParam(urlQuery.limit, 20);
     const page = parseQueryParam(urlQuery.page, 1);
@@ -15,33 +31,20 @@ export const handleGet: RouteMiddleware = ({ cs, models }) => {
         ? (stateParam as QueueState | 'all')
         : undefined;
 
-    const allQueueItems = (await cs.job.list(state)) as any[]; //TODO: Fix type
-    const myQueueItems = allQueueItems.filter(
-      job => job.userEmail === ctx.user.userEmail
+    // A queue item does not have the user, so read the jobs first
+    const queueItems = await cs.job.list(state);
+    const jobs = await Promise.all(
+      queueItems.map(i => models.pluginJob.findByIdOrFail(i.jobId))
     );
-
-    const items = await Promise.all(
-      myQueueItems
-        .slice(limit * (page - 1), limit * page)
-        .map(i => models.pluginJob.findByIdOrFail(i.jobId))
-    );
+    const myJobs = onlyMine
+      ? jobs.filter(job => job.userEmail === ctx.user.userEmail)
+      : jobs;
 
     ctx.body = {
-      items,
+      items: myJobs.slice(limit * (page - 1), limit * page),
       page,
-      totalItems: myQueueItems.length
+      totalItems: myJobs.length
     };
   };
-};
 
-const parseQueryParam = (
-  param: string | string[] | undefined,
-  defaultValue: number
-): number => {
-  if (Array.isArray(param)) {
-    return parseInt(param[0], 10);
-  } else if (typeof param === 'string') {
-    return parseInt(param, 10);
-  }
-  return defaultValue;
-};
+export const handleGet = createQueueHandler(true);

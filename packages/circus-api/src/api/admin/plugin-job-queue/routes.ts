@@ -1,18 +1,18 @@
 import { defineRoute, defineRouteGroup, route } from '../../../defineRoute.ts';
-import { searchResult } from '../../../schemas/derive.ts';
+import { searchResultOf } from '../../../schemas/derive.ts';
 import { handleGet } from './index.ts';
-import { pluginJob } from '../../../schemas/index.ts';
+import { pluginJobDoc } from '../../../schemas/index.ts';
 
-export const getAdminPluginJobQueue = defineRoute({
+export const getQueue = defineRoute({
   verb: 'get',
   path: '/admin/plugin-job-queue',
   description: 'Returns plugin job queue.',
   requiredGlobalPrivilege: 'manageServer',
-  response: searchResult(pluginJob)
+  response: searchResultOf(pluginJobDoc)
 });
 
 export default defineRouteGroup({
   name: 'Plugin Job Queue Administration',
   description: 'Returns job queue.',
-  routes: [route(getAdminPluginJobQueue, handleGet)]
+  routes: [route(getQueue, handleGet)]
 });

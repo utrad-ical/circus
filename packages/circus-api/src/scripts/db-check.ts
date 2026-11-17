@@ -1,5 +1,6 @@
 import type { CollectionAccessor } from '../db/createCollectionAccessor.ts';
 import type { Models } from '../interface.ts';
+import { styleText } from 'node:util';
 import type Command from './Command.ts';
 import { formatPath, ValidationError } from '../createValidator.ts';
 
@@ -24,9 +25,12 @@ export const command: Command<{ models: Models }> = async (
   return async (options: any) => {
     const { target } = options;
     let totalErrors = 0;
+    // The number of documents with each issue, e.g., 'clinicalCase
+    // revisions[*].series[*].labels[*].attributes: Invalid input'
+    const summary = new Map<string, number>();
     for (const key in models) {
       if (Array.isArray(target) && target.indexOf(key) === -1) continue;
-      console.log('Validating:', key);
+      console.log(styleText('bold', `Validating: ${key}`));
       const model = (models as any)[key] as CollectionAccessor;
       const cursor = await model.findAsCursor({}, { strict: true });
       let count = 0;
@@ -38,19 +42,40 @@ export const command: Command<{ models: Models }> = async (
         } catch (err) {
           if (!(err instanceof ValidationError)) throw err;
           errors++;
-          console.error(`  Validation error (#${count + errors}):`);
-          for (const i of err.issues)
-            console.error(`    ${formatPath(i.path)}: ${i.message}`);
+          console.error(
+            styleText(
+              'red',
+              `  Validation error (#${count + errors}, ${String(err.documentId)}):`
+            )
+          );
+          const kinds = new Set<string>();
+          for (const i of err.issues) {
+            console.error(
+              `    ${styleText('yellow', formatPath(i.path))}: ${i.message}`
+            );
+            const path = formatPath(i.path).replace(/\[\d+\]/g, '[*]');
+            kinds.add(`${key} ${path}: ${i.message}`);
+          }
+          for (const kind of kinds)
+            summary.set(kind, (summary.get(kind) ?? 0) + 1);
         }
       }
       totalErrors += errors;
       console.log(
-        `  Validated: ${count} ${count === 1 ? 'item' : 'items'}` +
-          (errors ? `, ${errors} with errors.` : '.')
+        styleText(
+          errors ? 'red' : 'green',
+          `  Validated: ${count} ${count === 1 ? 'item' : 'items'}` +
+            (errors ? `, ${errors} with errors.` : '.')
+        )
       );
     }
     if (totalErrors) {
-      console.error(`Found ${totalErrors} invalid item(s).`);
+      console.error(
+        styleText('bold', 'Summary (the number of items with each issue):')
+      );
+      for (const [kind, n] of summary)
+        console.error(`  ${styleText('red', String(n))}\t${kind}`);
+      console.error(styleText('red', `Found ${totalErrors} invalid item(s).`));
       process.exitCode = 1;
     }
   };

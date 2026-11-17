@@ -43,13 +43,20 @@ export const caseExportMhdQuery = z
     path: ['revisionIndex']
   });
 
-export const caseTags = z.array(z.string());
+const caseTag = z.string().max(32);
 
-export const caseTagsPatch = z.looseObject({
-  operation: z.enum(['add', 'remove', 'set']),
-  tags: z.array(z.string()),
-  caseIds: z.array(z.string()).min(1)
-});
+export const caseTags = z.array(caseTag);
+
+export const caseTagsPatch = z
+  .strictObject({
+    operation: z.enum(['add', 'remove', 'set']),
+    tags: z.array(caseTag).max(10),
+    caseIds: z.array(z.string()).min(1).max(1000)
+  })
+  .refine(
+    p => p.operation === 'set' || p.tags.length > 0,
+    'You must specify at least one tag.'
+  );
 
 export const myLists = z.array(userMyList);
 

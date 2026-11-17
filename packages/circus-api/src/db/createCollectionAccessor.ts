@@ -1,6 +1,7 @@
 import status from 'http-status';
 import * as mongo from 'mongodb';
 import type { Validator } from '../interface.ts';
+import { ValidationError } from '../createValidator.ts';
 import type { z } from 'zod';
 
 type CursorOptions = {
@@ -153,9 +154,15 @@ const createCollectionAccessor = <T = any>(
     return {
       next: async () => {
         const next = await cursor.next();
-        await validator.validate(dbEntrySchema, next, 'check', {
-          allowUnknownKeys: !strict
-        });
+        try {
+          await validator.validate(dbEntrySchema, next, 'check', {
+            allowUnknownKeys: !strict
+          });
+        } catch (err) {
+          if (err instanceof ValidationError && next)
+            err.documentId = (next as any)[primaryKey];
+          throw err;
+        }
         return next;
       },
       hasNext: () => cursor.hasNext(),

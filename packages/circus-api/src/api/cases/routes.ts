@@ -1,5 +1,6 @@
+import { z } from 'zod';
 import { defineRoute, defineRouteGroup, route } from '../../defineRoute.ts';
-import { allRequiredExcept, searchResult } from '../../schemas/derive.ts';
+import { searchResultOf } from '../../schemas/derive.ts';
 import {
   handleDelete,
   handleGet,
@@ -14,32 +15,34 @@ import {
   caseTags,
   caseTagsPatch,
   clinicalCaseCreate,
-  clinicalCaseSearchResult,
-  revision
+  caseDetail,
+  caseSearchResult,
+  revisionCreate
 } from '../../schemas/index.ts';
 
-export const getCases = defineRoute({
+export const searchCases = defineRoute({
   verb: 'get',
   path: '/cases',
   description: 'Performs search and retrieves a list of cases.',
-  response: searchResult(clinicalCaseSearchResult)
+  response: searchResultOf(caseSearchResult)
 });
 
-export const getCasesListMyListId = defineRoute({
+export const searchCasesInMyList = defineRoute({
   verb: 'get',
   path: '/cases/list/:myListId',
   description: 'Peforms search based on a my list ID.',
-  response: searchResult(clinicalCaseSearchResult)
+  response: searchResultOf(caseSearchResult)
 });
 
-export const postCases = defineRoute({
+export const postCase = defineRoute({
   verb: 'post',
   path: '/cases',
   description: 'Creates a new case.',
-  request: clinicalCaseCreate
+  request: clinicalCaseCreate,
+  response: z.strictObject({ caseId: z.string() })
 });
 
-export const getCasesExportMhd = defineRoute({
+export const exportMhd = defineRoute({
   verb: 'get',
   path: '/cases/export-mhd',
   description:
@@ -47,22 +50,23 @@ export const getCasesExportMhd = defineRoute({
   requiredGlobalPrivilege: 'downloadVolume'
 });
 
-export const getCasesCaseId = defineRoute({
+export const getCase = defineRoute({
   verb: 'get',
   path: '/cases/:caseId',
   description: 'Returns information about the specified case.',
-  requiredProjectPrivilege: 'read'
+  requiredProjectPrivilege: 'read',
+  response: caseDetail
 });
 
-export const postCasesCaseIdRevision = defineRoute({
+export const postRevision = defineRoute({
   verb: 'post',
   path: '/cases/:caseId/revision',
   description: 'Creates a new revision in the specified case.',
   requiredProjectPrivilege: 'write',
-  request: allRequiredExcept(revision, ['date', 'creator'])
+  request: revisionCreate
 });
 
-export const putCasesCaseIdTags = defineRoute({
+export const putTags = defineRoute({
   verb: 'put',
   path: '/cases/:caseId/tags',
   description: 'Updates the tags of the specified case.',
@@ -70,14 +74,14 @@ export const putCasesCaseIdTags = defineRoute({
   request: caseTags
 });
 
-export const patchCasesTags = defineRoute({
+export const patchTags = defineRoute({
   verb: 'patch',
   path: '/cases/tags',
   description: 'Manages the tags of multiple cases.',
   request: caseTagsPatch
 });
 
-export const deleteCasesCaseId = defineRoute({
+export const deleteCase = defineRoute({
   verb: 'delete',
   path: '/cases/:caseId',
   description: 'Deletes the specified case.',
@@ -88,14 +92,14 @@ export default defineRouteGroup({
   name: 'Cases',
   description: 'Manages CIRCUS DB cases.',
   routes: [
-    route(getCases, handleSearch),
-    route(getCasesListMyListId, handleSearch),
-    route(postCases, handlePost),
-    route(getCasesExportMhd, handleGetExportMhd),
-    route(getCasesCaseId, handleGet),
-    route(postCasesCaseIdRevision, handlePostRevision),
-    route(putCasesCaseIdTags, handlePutTags),
-    route(patchCasesTags, handlePatchTags),
-    route(deleteCasesCaseId, handleDelete)
+    route(searchCases, handleSearch),
+    route(searchCasesInMyList, handleSearch),
+    route(postCase, handlePost),
+    route(exportMhd, handleGetExportMhd),
+    route(getCase, handleGet),
+    route(postRevision, handlePostRevision),
+    route(putTags, handlePutTags),
+    route(patchTags, handlePatchTags),
+    route(deleteCase, handleDelete)
   ]
 });

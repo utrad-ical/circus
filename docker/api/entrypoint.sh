@@ -13,7 +13,7 @@ if [ -z "${LOCAL_HOST_IP:-}" ]; then
 fi
 
 # Directories under the data directory used by the default configuration
-for dir in dicom labels plugin-results plugin-cache cs-tmp downloads logs; do
+for dir in dicom labels plugin-results plugin-cache cs-tmp logs; do
   mkdir -p "/var/circus/data/$dir"
 done
 

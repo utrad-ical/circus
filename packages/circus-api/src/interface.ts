@@ -13,7 +13,7 @@ export type ValidationMode = 'default' | 'toDate' | 'fromDate';
 
 export interface Validator {
   validate: (
-    schema: string | z.ZodType,
+    schema: z.ZodType,
     data: any,
     mode?: ValidationMode,
     options?: {

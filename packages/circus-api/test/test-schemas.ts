@@ -8,7 +8,7 @@ import {
 /**
  * Schemas used only in tests.
  */
-const testSchemas: Record<string, z.ZodType> = {
+const testSchemas = {
   sample: z.strictObject({
     intVal: z.number().optional(),
     strVal: z.string().optional(),

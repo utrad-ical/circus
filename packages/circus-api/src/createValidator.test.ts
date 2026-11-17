@@ -1,27 +1,34 @@
-import testSchemas from '../test/test-schemas.ts';
+import t from '../test/test-schemas.ts';
 import assert from 'node:assert/strict';
 import { describe, it, before } from 'node:test';
 import { z } from 'zod';
 import createValidator, { ValidationError } from './createValidator.ts';
 import type { Validator } from './interface.ts';
 import * as formats from './schemas/formats.ts';
+import {
+  allRequiredExcept,
+  dbEntry,
+  exclude,
+  only,
+  searchResult,
+  searchResultOf,
+  withDates
+} from './schemas/derive.ts';
 
 let validator: Validator;
 
 before(async () => {
-  validator = await createValidator({
-    schemas: testSchemas
-  });
+  validator = await createValidator(undefined);
 });
 
 it('should validate correct partial data', async () => {
   const testData = { intVal: 10, strVal: 'foo' };
-  await validator.validate('sample', testData); // shoudl not throw error
+  await validator.validate(t.sample, testData); // shoudl not throw error
 });
 
 it('should throw with invalid data', async () => {
   const testData = { intVal: 10, strVal: 500 };
-  await assert.rejects(validator.validate('sample', testData), ValidationError);
+  await assert.rejects(validator.validate(t.sample, testData), ValidationError);
 });
 
 describe('special formats', () => {
@@ -101,7 +108,7 @@ describe('special formats', () => {
 
 it('should work with toDate mode', async () => {
   const testData = { intVal: 3, dateVal: '2112-09-03T00:00:00.000Z' };
-  const result = await validator.validate('date', testData, 'toDate');
+  const result = await validator.validate(t.date, testData, 'toDate');
   assert.ok(result.dateVal instanceof Date);
   assert.equal(result.dateVal.toISOString(), '2112-09-03T00:00:00.000Z');
 });
@@ -109,7 +116,7 @@ it('should work with toDate mode', async () => {
 it('should work with fromDate mode', async () => {
   const iso = '2011-11-28T00:11:22.000Z';
   const testData = { intVal: 3, dateVal: new Date(iso) };
-  const result = await validator.validate('date', testData, 'fromDate');
+  const result = await validator.validate(t.date, testData, 'fromDate');
   assert.equal(result.dateVal, iso);
 });
 
@@ -120,37 +127,37 @@ it('should handle allRequired option', async () => {
     dicomUid: '1.2.3',
     multiRange: '1'
   };
-  await validator.validate('sample|allRequired', testData);
+  await validator.validate(t.sample.required(), testData);
   delete testData.intVal;
   assert.rejects(
-    validator.validate('sample|allRequired', testData),
+    validator.validate(t.sample.required(), testData),
     ValidationError
   );
 });
 
 it('should handle allRequiredExcept option', async () => {
   const testData: any = { intVal: 0, strVal: 'bar', multiRange: '1' };
-  await validator.validate('sample|allRequiredExcept dicomUid', testData);
+  await validator.validate(allRequiredExcept(t.sample, ['dicomUid']), testData);
   delete testData.intVal;
   await assert.rejects(
-    validator.validate('sample|allRequiredExcept dicomUid', testData),
+    validator.validate(allRequiredExcept(t.sample, ['dicomUid']), testData),
     ValidationError
   );
   await validator.validate(
-    'sample|allRequiredExcept dicomUid,intVal',
+    allRequiredExcept(t.sample, ['dicomUid', 'intVal']),
     testData
   );
 });
 
 it('should handle only option', async () => {
   const testData = { dicomUid: '1.2.3' };
-  await validator.validate('sample|only dicomUid', testData);
+  await validator.validate(only(t.sample, ['dicomUid']), testData);
   await assert.rejects(
-    validator.validate('sample|only dicomUid', { dicomUid: false }),
+    validator.validate(only(t.sample, ['dicomUid']), { dicomUid: false }),
     ValidationError
   );
   await assert.rejects(
-    validator.validate('sample|only intVal', testData),
+    validator.validate(only(t.sample, ['intVal']), testData),
     ValidationError
   );
 });
@@ -164,17 +171,17 @@ it('should handle dbEntry option', async () => {
     createdAt: new Date(),
     updatedAt: new Date()
   };
-  await validator.validate('sample|dbEntry', goodData);
+  await validator.validate(dbEntry(t.sample), goodData);
 
   const badData1 = { ...goodData, intVal: 'string' };
   await assert.rejects(
-    validator.validate('sample|dbEntry', badData1),
+    validator.validate(dbEntry(t.sample), badData1),
     ValidationError
   );
 
   const badData2 = { ...goodData, createdAt: '2010-01-01' };
   await assert.rejects(
-    validator.validate('sample|dbEntry', badData2),
+    validator.validate(dbEntry(t.sample), badData2),
     ValidationError
   );
 });
@@ -187,31 +194,31 @@ it('should handle searchResult option', async () => {
     updatedAt: new Date()
   };
   const goodData = { items: [goodItem, goodItem], totalItems: 2, page: 1 };
-  await validator.validate('sample|searchResult', goodData);
+  await validator.validate(searchResult(t.sample), goodData);
 
   const badData1 = { items: [goodItem, goodItem], totalItems: 2 };
   await assert.rejects(
-    validator.validate('sample|searchResult', badData1),
+    validator.validate(searchResult(t.sample), badData1),
     ValidationError
   );
 
   const badData2 = { items: [goodItem, 'foo'], totalItems: 2, page: 1 };
   await assert.rejects(
-    validator.validate('sample|searchResult', badData2),
+    validator.validate(searchResult(t.sample), badData2),
     ValidationError
   );
 });
 
 it('should handle exclude option', async () => {
-  await validator.validate('sample|exclude intVal', { strVal: 'a' });
+  await validator.validate(exclude(t.sample, ['intVal']), { strVal: 'a' });
   await assert.rejects(
-    validator.validate('sample|exclude intVal', { intVal: 1 }),
+    validator.validate(exclude(t.sample, ['intVal']), { intVal: 1 }),
     ValidationError
   );
 });
 
 it('should handle addProperty option', async () => {
-  const def = 'sample|addProperty extra date';
+  const def = t.sample.extend({ extra: t.date.optional() });
   await validator.validate(def, { extra: { intVal: 1 } });
   await assert.rejects(
     validator.validate(def, { extra: { intVal: 'x' } }),
@@ -220,32 +227,35 @@ it('should handle addProperty option', async () => {
 });
 
 it('should handle alternatives', async () => {
-  await validator.validate('sample/item', { intVal: 1 });
-  await validator.validate('sample/item', { itemId: 1 });
+  await validator.validate(z.union([t.sample, t.item]), { intVal: 1 });
+  await validator.validate(z.union([t.sample, t.item]), { itemId: 1 });
   await assert.rejects(
-    validator.validate('sample/item', { intVal: 1, itemId: 1 }),
+    validator.validate(z.union([t.sample, t.item]), { intVal: 1, itemId: 1 }),
     ValidationError
   );
   // A search result can mix the alternatives
   const dates = { createdAt: new Date(), updatedAt: new Date() };
-  await validator.validate('sample|searchResult/item|searchResult', {
-    items: [
-      { intVal: 1, ...dates },
-      { itemId: 1, ...dates }
-    ],
-    totalItems: 2,
-    page: 1
-  });
+  await validator.validate(
+    searchResultOf(z.union([withDates(t.sample), withDates(t.item)])),
+    {
+      items: [
+        { intVal: 1, ...dates },
+        { itemId: 1, ...dates }
+      ],
+      totalItems: 2,
+      page: 1
+    }
+  );
 });
 
 it('should ignore unknown keys only when asked', async () => {
   const data = { intVal: 1, unknown: 2 };
-  await assert.rejects(validator.validate('sample', data), ValidationError);
-  await validator.validate('sample', data, 'default', {
+  await assert.rejects(validator.validate(t.sample, data), ValidationError);
+  await validator.validate(t.sample, data, 'default', {
     allowUnknownKeys: true
   });
   await assert.rejects(
-    validator.validate('sample', { intVal: 'x', unknown: 2 }, 'default', {
+    validator.validate(t.sample, { intVal: 'x', unknown: 2 }, 'default', {
       allowUnknownKeys: true
     }),
     ValidationError
@@ -254,7 +264,7 @@ it('should ignore unknown keys only when asked', async () => {
 
 it('should report errors with JSON pointers', async () => {
   const err = await validator
-    .validate('sample|searchResult', {
+    .validate(searchResult(t.sample), {
       items: [{ intVal: 'x', createdAt: new Date(), updatedAt: new Date() }],
       totalItems: 1,
       page: 1
@@ -285,5 +295,5 @@ it('should escape JSON pointers', async () => {
 it('should accept NaN numbers and invalid dates', async () => {
   // These can come from DICOM parsing
   await validator.validate(formats.num({ min: 0 }), NaN);
-  await validator.validate('date', { dateVal: new Date(NaN) });
+  await validator.validate(t.date, { dateVal: new Date(NaN) });
 });

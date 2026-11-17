@@ -12,6 +12,7 @@ import type {
   RouteMiddleware
 } from '../../typings/middlewares.ts';
 import { ValidationError } from '../../createValidator.ts';
+import { seriesExportCsVolumeQuery } from '../../schemas/routes.ts';
 import checkFilter from '../../utils/checkFilter.ts';
 import readMultipartFiles from '../../utils/readMultipartFiles.ts';
 import tarToZip from '../../utils/tarToZip.ts';
@@ -315,7 +316,7 @@ export const handleGetExportCsVolume: RouteMiddleware = ({
     try {
       try {
         query = await validator.validate(
-          'seriesExportCsVolumeQuery',
+          seriesExportCsVolumeQuery,
           ctx.request.query,
           'toDate'
         );

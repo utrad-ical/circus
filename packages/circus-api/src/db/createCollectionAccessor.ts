@@ -1,6 +1,8 @@
 import status from 'http-status';
 import * as mongo from 'mongodb';
 import type { Validator } from '../interface.ts';
+import { z } from 'zod';
+import { dbEntry } from '../schemas/derive.ts';
 
 type CursorOptions = {
   sort?: object;
@@ -13,7 +15,8 @@ type CursorOptions = {
 type WithDates<T> = T & { createdAt: Date; updatedAt: Date };
 
 interface Options<T> {
-  schema: string;
+  /** The schema of the documents, or the alternatives of it */
+  schema: z.ZodType | z.ZodType[];
   collectionName: string;
   primaryKey: keyof T;
   session?: mongo.ClientSession;
@@ -67,13 +70,9 @@ const createCollectionAccessor = <T = any>(
   const sessionOpts = session ? { session } : {};
   const collection = db.collection<WithDates<T>>(collectionName);
 
-  const dbEntrySchema =
-    typeof schema === 'string'
-      ? schema
-          .split('/')
-          .map(s => `${s}|dbEntry`)
-          .join('/')
-      : schema;
+  const dbEntrySchema = Array.isArray(schema)
+    ? z.union(schema.map(dbEntry) as z.ZodType[] as [z.ZodType])
+    : dbEntry(schema);
 
   /**
    * Inserts a single document after validation succeeds.

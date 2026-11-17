@@ -1,8 +1,0 @@
-name: Logout
-description: >
-  Forces the user to log-out by invalidating the access token.
-routes:
-  - verb: get
-    path: /logout
-    description: >
-      Forces the user to log-out by invalidating the access token.

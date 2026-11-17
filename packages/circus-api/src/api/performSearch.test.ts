@@ -25,11 +25,9 @@ before(async () => {
   disposeMongo = (await dbPromise).dispose;
   await setUpMongoFixture(db, ['items']);
   testServer = await setUpKoaTest(async app => {
-    const validator = await createValidator({
-      schemas: testSchemas
-    });
+    const validator = await createValidator(undefined);
     items = createCollectionAccessor(db, validator, {
-      schema: 'item',
+      schema: testSchemas.item,
       collectionName: 'items',
       primaryKey: 'itemId'
     });

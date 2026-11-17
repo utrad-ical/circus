@@ -1,7 +1,15 @@
 import React, { useEffect } from 'react';
+import DataGrid, {
+  type DataGridColumnDefinition
+} from '#components/DataGrid.tsx';
 import Icon from '#components/Icon.tsx';
+import {
+  JobId,
+  PluginRenderer,
+  Status,
+  Times
+} from './SearchResultRenderer.tsx';
 import { newSearch } from '#store/searches.ts';
-import { api } from '#utils/api.ts';
 import { useDispatch } from 'react-redux';
 import SearchResultsView, {
   makeSortOptions
@@ -11,18 +19,19 @@ const sortOptions = makeSortOptions({
   jobId: 'job id'
 });
 
+const columns: DataGridColumnDefinition<any>[] = [
+  { caption: 'Plugin', renderer: PluginRenderer() },
+  { caption: 'Job ID', renderer: JobId },
+  { caption: 'Registered', renderer: Times('createdAt') },
+  { caption: 'Status', renderer: Status }
+];
+
 const DataView: React.FC<{ value: any[] }> = props => {
   const { value } = props;
   if (!value.length) {
     return <div>No plug-in job in execution queue.</div>;
   }
-  return (
-    <ul>
-      {value.map(item => (
-        <li key={item.jobId}>{item}</li>
-      ))}
-    </ul>
-  );
+  return <DataGrid columns={columns} itemPrimaryKey="jobId" value={value} />;
 };
 
 const PluginJobQueueSearchResults: React.FC<{}> = props => {

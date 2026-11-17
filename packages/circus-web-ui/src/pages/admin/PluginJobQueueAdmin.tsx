@@ -6,15 +6,20 @@ import { newSearch } from '#store/searches.ts';
 import { useDispatch } from 'react-redux';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
 import DataGrid from '#components/DataGrid.tsx';
-import { api } from '#utils/api.ts';
+import {
+  Executer,
+  JobId,
+  PluginRenderer,
+  Status,
+  Times
+} from '#pages/search/SearchResultRenderer.tsx';
 
 const columns: DataGridColumnDefinition[] = [
-  { caption: 'Created', key: 'createdAt' },
-  {
-    caption: 'Data',
-    className: 'data',
-    renderer: props => <>{JSON.stringify(props.value)}</>
-  }
+  { caption: 'Plugin', renderer: PluginRenderer() },
+  { caption: 'Job ID', renderer: JobId },
+  { caption: 'Executed by', renderer: Executer },
+  { caption: 'Registered', renderer: Times('createdAt') },
+  { caption: 'Status', renderer: Status }
 ];
 
 const DataView: React.FC<{ value: any }> = props => {

@@ -48,6 +48,28 @@ describe('attributesSchemaOf', () => {
     assert.ok(!isValid({ smoker: true, grade: 4 }));
   });
 
+  test('options with the other keywords', () => {
+    const s = attributesSchemaOf({
+      properties: {
+        grade: { type: 'number', enum: [1, 2], minimum: 2 },
+        text: { type: 'string', enum: [1, 'a'] }
+      }
+    });
+    assert.ok(s.safeParse({ grade: 2, text: 'a' }).success);
+    assert.ok(!s.safeParse({ grade: 1 }).success);
+    assert.ok(!s.safeParse({ text: 1 }).success);
+  });
+
+  test('required attributes not in the properties', () => {
+    const s = attributesSchemaOf({ properties: {}, required: ['smoker'] });
+    assert.ok(s.safeParse({ smoker: 'anything' }).success);
+    assert.ok(!s.safeParse({}).success);
+    // An untyped attribute
+    const t = attributesSchemaOf({ properties: { a: {} }, required: ['a'] });
+    assert.ok(t.safeParse({ a: 1 }).success);
+    assert.ok(!t.safeParse({}).success);
+  });
+
   test('unknown attributes are allowed', () => {
     assert.ok(isValid({ smoker: true, removedAttribute: 'anything' }));
   });

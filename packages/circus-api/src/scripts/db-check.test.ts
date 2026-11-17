@@ -81,7 +81,7 @@ test('warns about attributes against the project schemas', async () => {
   assert.match(output, /with warnings/);
   assert.match(
     output,
-    /clinicalCase latestRevision\.attributes\.smoker: Invalid input/
+    /clinicalCase latestRevision\.attributes\.smoker: Required/
   );
 });
 

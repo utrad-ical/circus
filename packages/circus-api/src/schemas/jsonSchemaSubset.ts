@@ -39,8 +39,8 @@ export const jsonSchemaSubset = z.strictObject({
   required: z.array(z.string()).optional()
 });
 
-const valueSchemaOf = (attr: z.output<typeof attributeSchema>): z.ZodType => {
-  if (attr.enum) return z.literal(attr.enum);
+/** Builds the schema of a value from the keywords other than `enum` */
+const typedSchemaOf = (attr: z.output<typeof attributeSchema>): z.ZodType => {
   switch (attr.type) {
     case 'string': {
       let s = z.string();
@@ -65,6 +65,20 @@ const valueSchemaOf = (attr: z.output<typeof attributeSchema>): z.ZodType => {
   }
 };
 
+// All the keywords apply together, as in JSON Schema
+const valueSchemaOf = (attr: z.output<typeof attributeSchema>): z.ZodType => {
+  const typed = typedSchemaOf(attr);
+  const options = attr.enum;
+  if (!options) return typed;
+  return typed.refine(
+    v => options.includes(v as string | number),
+    `Expected one of: ${options.join(', ')}`
+  );
+};
+
+/** Any value, but it must exist */
+const present = () => z.custom(v => v !== undefined, { message: 'Required' });
+
 /**
  * Builds the Zod schema to check attribute values with the schema
  * defined in a project. Unknown attributes are allowed, as in JSON Schema
@@ -73,13 +87,20 @@ const valueSchemaOf = (attr: z.output<typeof attributeSchema>): z.ZodType => {
 export const attributesSchemaOf = (
   schema: z.output<typeof jsonSchemaSubset>
 ) => {
+  const properties = schema.properties ?? {};
   const required = schema.required ?? [];
-  return z.looseObject(
-    Object.fromEntries(
-      Object.entries(schema.properties ?? {}).map(([key, attr]) => {
+  return z.looseObject({
+    // A required attribute may not be defined in `properties`
+    ...Object.fromEntries(required.map(key => [key, present()])),
+    ...Object.fromEntries(
+      Object.entries(properties).map(([key, attr]) => {
         const value = valueSchemaOf(attr);
-        return [key, required.includes(key) ? value : value.optional()];
+        // `present()` also rejects a missing value of an untyped attribute
+        return [
+          key,
+          required.includes(key) ? present().pipe(value) : value.optional()
+        ];
       })
     )
-  );
+  });
 };

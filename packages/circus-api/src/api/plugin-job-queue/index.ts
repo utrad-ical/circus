@@ -31,20 +31,28 @@ export const createQueueHandler =
         ? (stateParam as QueueState | 'all')
         : undefined;
 
-    // A queue item does not have the user, so read the jobs first
     const queueItems = await cs.job.list(state);
-    const jobs = await Promise.all(
-      queueItems.map(i => models.pluginJob.findByIdOrFail(i.jobId))
-    );
-    const myJobs = onlyMine
-      ? jobs.filter(job => job.userEmail === ctx.user.userEmail)
-      : jobs;
+    // A queue item does not have the user, so the user's jobs are read
+    // from the DB; the global queue is paged first
+    const ids = queueItems.map(i => i.jobId);
+    const pageIds = onlyMine
+      ? ids
+      : ids.slice(limit * (page - 1), limit * page);
+    const docs = await models.pluginJob.findAll({
+      jobId: { $in: pageIds },
+      ...(onlyMine ? { userEmail: ctx.user.userEmail } : {})
+    });
+    const byId = new Map(docs.map(job => [job.jobId, job]));
+    // Keep the order of the queue
+    const jobs = pageIds.flatMap(id => byId.get(id) ?? []);
 
-    ctx.body = {
-      items: myJobs.slice(limit * (page - 1), limit * page),
-      page,
-      totalItems: myJobs.length
-    };
+    ctx.body = onlyMine
+      ? {
+          items: jobs.slice(limit * (page - 1), limit * page),
+          page,
+          totalItems: jobs.length
+        }
+      : { items: jobs, page, totalItems: ids.length };
   };
 
 export const handleGet = createQueueHandler(true);

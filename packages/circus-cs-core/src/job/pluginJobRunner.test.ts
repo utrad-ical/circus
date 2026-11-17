@@ -107,6 +107,52 @@ describe('pluginJobRunner00', () => {
     })
   );
 
+  test(
+    'Fails when the plug-in exits with a nonzero code',
+    { timeout: 20000 },
+    async () => {
+      const jobReporter = { report: mock.fn(), logStream: async () => {} };
+      const runner = await pluginJobRunner(
+        { workingDirectory },
+        {
+          jobReporter: jobReporter as any,
+          dockerRunner: new DockerRunner(),
+          pluginDefinitionAccessor: {
+            get: async () => ({
+              pluginId: 'circus-mock-error',
+              pluginName: 'Error',
+              version: '1.0',
+              type: 'CAD'
+            })
+          } as any,
+          dicomVoxelDumper: {
+            dump: () => ({
+              stream: new ReadableStream({
+                start: async controller => {
+                  controller.enqueue(await packTar([]));
+                  controller.close();
+                }
+              }),
+              events: new EventEmitter()
+            })
+          }
+        }
+      );
+      const ok = await runner.run('67890', {
+        pluginId: 'circus-mock-error',
+        series: [
+          { seriesUid, partialVolumeDescriptor: { start: 1, end: 1, delta: 1 } }
+        ]
+      });
+      assert.equal(ok, false);
+      const last = jobReporter.report.mock.calls.at(-1)!.arguments;
+      assert.deepEqual(last.slice(1), [
+        'failed',
+        'The plug-in exited with code 5.'
+      ]);
+    }
+  );
+
   // Skipping this test because it needs a remote server to be up
   test.skip('Remote CAD run', { timeout: 20000 }, async () =>
     generatePluginJobRunnerTest('54321', {

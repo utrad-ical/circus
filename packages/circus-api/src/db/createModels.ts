@@ -1,4 +1,5 @@
-import type { z } from 'zod';
+import { z } from 'zod';
+import { dbEntry } from '../schemas/derive.ts';
 import * as s from '../schemas/index.ts';
 import createCollectionAccessor from './createCollectionAccessor.ts';
 import type {
@@ -23,35 +24,45 @@ export const makeModels = (
 ) => {
   const modelDefinitions: {
     [key in keyof ModelEntries]: {
-      schema: z.ZodType | z.ZodType[];
+      /** The schema of the documents in the database */
+      schema: z.ZodType;
       col: string;
       pk: string;
     };
   } = {
-    user: { schema: s.user, col: 'users', pk: 'userEmail' },
-    group: { schema: s.group, col: 'groups', pk: 'groupId' },
-    project: { schema: s.project, col: 'projects', pk: 'projectId' },
-    series: { schema: s.series, col: 'series', pk: 'seriesUid' },
+    user: { schema: s.userDoc, col: 'users', pk: 'userEmail' },
+    group: { schema: s.groupDoc, col: 'groups', pk: 'groupId' },
+    project: { schema: s.projectDoc, col: 'projects', pk: 'projectId' },
+    series: { schema: dbEntry(s.series), col: 'series', pk: 'seriesUid' },
     clinicalCase: {
-      schema: s.clinicalCase,
+      schema: dbEntry(s.clinicalCase),
       col: 'clinicalCases',
       pk: 'caseId'
     },
-    serverParam: { schema: s.serverParam, col: 'serverParams', pk: 'key' },
-    token: { schema: s.token, col: 'tokens', pk: 'accessToken' },
+    serverParam: {
+      schema: dbEntry(s.serverParam),
+      col: 'serverParams',
+      pk: 'key'
+    },
+    token: { schema: dbEntry(s.token), col: 'tokens', pk: 'accessToken' },
     plugin: {
-      schema: [s.plugin, s.remotePlugin],
+      schema: z.union([dbEntry(s.plugin), dbEntry(s.remotePlugin)]),
       col: 'pluginDefinitions',
       pk: 'pluginId'
     },
-    pluginJob: { schema: s.pluginJob, col: 'pluginJobs', pk: 'jobId' },
-    myList: { schema: s.myList, col: 'myLists', pk: 'myListId' },
-    onetimeUrl: { schema: s.onetimeUrl, col: 'onetimeUrls', pk: 'onetimeUrlId' }
+    pluginJob: { schema: dbEntry(s.pluginJob), col: 'pluginJobs', pk: 'jobId' },
+    myList: { schema: dbEntry(s.myList), col: 'myLists', pk: 'myListId' },
+    onetimeUrl: {
+      schema: dbEntry(s.onetimeUrl),
+      col: 'onetimeUrls',
+      pk: 'onetimeUrlId'
+    }
   };
   const models: any = {};
   (Object.keys(modelDefinitions) as (keyof ModelEntries)[]).forEach(k => {
     const def = modelDefinitions[k];
     models[k] = createCollectionAccessor(database.db, validator, {
+      name: k,
       schema: def.schema,
       collectionName: def.col,
       primaryKey: def.pk,

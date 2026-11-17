@@ -45,7 +45,7 @@ export const setUpMongoFixture = async (
       try {
         await col.insertMany(data);
       } catch (err: any) {
-        console.log(err.errors);
+        console.log(err.issues);
         throw err;
       }
       if (['groups'].indexOf(colName) >= 0) {

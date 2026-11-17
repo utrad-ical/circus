@@ -64,7 +64,7 @@ it('should return error for invalid user update', async () => {
     data: { userEmail: 'alice.new.mail@example.com' }
   });
   assert.equal(res2.status, 400);
-  assert.match(res2.data.error, /primary key/);
+  assert.deepEqual(res2.data.issues[0].path, ['userEmail']);
 });
 
 test('should create a user', async () => {

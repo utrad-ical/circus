@@ -136,9 +136,7 @@ const EditorPage: React.FC<{
       loginManager.refreshUserInfo(true); // Full user data refresh
     } catch (err: any) {
       setErrorMessage(err.response?.data?.error || err.message);
-      setComplaints(
-        complaintsFromValidationErrors(err.response?.data?.validationErrors)
-      );
+      setComplaints(complaintsFromIssues(err.response?.data?.issues));
     }
   };
 
@@ -198,22 +196,19 @@ const pickProperties = (item: any, properties: any[]): any => {
 };
 
 /**
- * Converts the validation errors returned by the API server
- * (`validationErrors` in a 400 response) into a map from
+ * Converts the validation issues returned by the API server
+ * (`issues` in a 400 response) into a map from
  * a property name to its error message.
- * Errors not tied to a property (e.g., a missing required property)
+ * Issues not tied to a property (e.g., an unknown property)
  * are omitted; they are shown via the error message.
  */
-const complaintsFromValidationErrors = (
-  errors: unknown
-): { [key: string]: string } => {
+const complaintsFromIssues = (issues: unknown): { [key: string]: string } => {
   const result: { [key: string]: string } = {};
-  if (!Array.isArray(errors)) return result;
-  for (const e of errors) {
-    // `dataPath` (Ajv 6) looks like '.domains' or '.privileges[0]'
-    const path: string = e?.instancePath ?? e?.dataPath ?? '';
-    const key = path.replace(/^[./]/, '').split(/[./[]/)[0];
-    if (key && !(key in result)) result[key] = String(e.message);
+  if (!Array.isArray(issues)) return result;
+  for (const issue of issues) {
+    const key = issue?.path?.[0];
+    if (typeof key === 'string' && !(key in result))
+      result[key] = String(issue.message);
   }
   return result;
 };

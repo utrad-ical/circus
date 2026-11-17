@@ -1,6 +1,8 @@
 import type createDockerFileExtractor from '../utils/dockerFileExtractor.ts';
 import type { ParameterizedContext } from 'koa';
 import type koa from 'koa';
+import type { z } from 'zod';
+import type { RouteDefinition } from '../defineRoute.ts';
 import type {
   Validator,
   DicomTagReader,
@@ -58,4 +60,29 @@ export type CircusContext = ParameterizedContext<any, CustomCtxMembers>;
 
 export type CircusMiddeware = koa.Middleware<any, CustomCtxMembers>;
 
-export type RouteMiddleware = (deps: Deps) => CircusMiddeware;
+type OutputOf<S> = S extends z.ZodType ? z.output<S> : never;
+
+/**
+ * The context of a route handler, where the request body and the response
+ * body are typed with the schemas of the route.
+ */
+export type RouteContext<R extends RouteDefinition> = Omit<
+  CircusContext,
+  'request' | 'body'
+> & {
+  request: Omit<CircusContext['request'], 'body'> & {
+    body: OutputOf<R['request']>;
+  };
+  body: OutputOf<R['response']> | null;
+};
+
+/**
+ * A route handler. Pass the route definition to type the request
+ * and the response, e.g., `RouteMiddleware<typeof getGroup>`.
+ */
+export type RouteMiddleware<R extends RouteDefinition | undefined = undefined> =
+  (
+    deps: Deps
+  ) => R extends RouteDefinition
+    ? (ctx: RouteContext<R>, next: koa.Next) => Promise<void>
+    : CircusMiddeware;

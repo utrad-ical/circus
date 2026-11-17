@@ -1,3 +1,4 @@
+import { dbEntry } from '../schemas/derive.ts';
 import testSchemas from '../../test/test-schemas.ts';
 import assert from 'node:assert/strict';
 import { describe, test, it, before, after, beforeEach } from 'node:test';
@@ -22,7 +23,8 @@ before(async () => {
   disposeMongo = (await dbPromise).dispose;
   const validator = await createValidator(undefined);
   testCollection = await createCollectionAccessor<MonthData>(db, validator, {
-    schema: testSchemas.months,
+    name: 'months',
+    schema: dbEntry(testSchemas.months),
     collectionName: 'months',
     primaryKey: 'month'
   });
@@ -177,7 +179,8 @@ describe('#findById', () => {
       const validator = await createValidator(undefined);
       session = (await dbPromise).database.connection.startSession();
       sessionCollection = createCollectionAccessor<MonthData>(db, validator, {
-        schema: testSchemas.months,
+        name: 'months',
+        schema: dbEntry(testSchemas.months),
         collectionName: 'months',
         primaryKey: 'month',
         session
@@ -223,17 +226,13 @@ describe('#modifyOne', () => {
 
   it('should throw an error with invalid data', async () => {
     await assert.rejects(
-      testCollection.modifyOne(3, { name: 5 }),
+      testCollection.modifyOne(3, { name: 5 } as any),
       ValidationError
     );
   });
 
   it('should throw if not found', async () => {
-    await assert.rejects(
-      testCollection.modifyOne(13, {
-        $set: { name: 'Pon' }
-      })
-    );
+    await assert.rejects(testCollection.modifyOne(13, { name: 'Pon' }));
   });
 });
 

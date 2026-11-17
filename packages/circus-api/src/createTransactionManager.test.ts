@@ -1,3 +1,4 @@
+import { dbEntry } from './schemas/derive.ts';
 import testSchemas from '../test/test-schemas.ts';
 import assert from 'node:assert/strict';
 import { describe, test, before, after } from 'node:test';
@@ -17,7 +18,8 @@ const createTransactionManager = createTransactionManagerFactory(((
 ) => {
   return {
     bankAccounts: createCollectionAccessor(database.db, validator, {
-      schema: testSchemas.bankAccounts,
+      name: 'bankAccounts',
+      schema: dbEntry(testSchemas.bankAccounts),
       collectionName: 'bankAccounts',
       primaryKey: 'userId',
       session

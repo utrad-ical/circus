@@ -1,16 +1,18 @@
 import status from 'http-status';
-import performSearch from '../../performSearch.ts';
 import nodepass from 'node-php-password';
 import type { RouteMiddleware } from '../../../typings/middlewares.ts';
 import { defaultPreferences } from '../../../utils/preferenceUtils.ts';
+import performSearch from '../../performSearch.ts';
+import type * as routes from './routes.ts';
 
-const removePassword = (input: any) => {
-  const output = { ...input };
-  delete output.password;
-  return output;
+const removePassword = <T extends { password: string }>(user: T) => {
+  const { password, ...rest } = user;
+  return rest;
 };
 
-export const handleSearch: RouteMiddleware = ({ models }) => {
+export const handleSearch: RouteMiddleware<typeof routes.getUsers> = ({
+  models
+}) => {
   return async (ctx, next) => {
     await performSearch(models.user, {}, ctx, {
       transform: removePassword,
@@ -19,49 +21,42 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handleGet: RouteMiddleware = ({ models }) => {
+export const handleGet: RouteMiddleware<typeof routes.getUser> = ({
+  models
+}) => {
   return async (ctx, next) => {
-    const user = removePassword(
-      await models.user.findByIdOrFail(ctx.params.userEmail)
-    );
-    ctx.body = user;
+    const user = await models.user.findByIdOrFail(ctx.params.userEmail);
+    ctx.body = removePassword(user);
   };
 };
 
-export const handlePatch: RouteMiddleware = ({ models }) => {
+export const handlePatch: RouteMiddleware<typeof routes.patchUser> = ({
+  models
+}) => {
   return async (ctx, next) => {
-    const userEmail = ctx.params.userEmail;
-    const updating = { ...ctx.request.body };
-    if ('lastLoginIp' in updating || 'lastLoginTime' in updating) {
-      ctx.throw(status.BAD_REQUEST);
-    }
-    if (ctx.request.body.password) {
-      updating.password = nodepass.hash(ctx.request.body.password);
-    }
-    await models.user.modifyOne(userEmail, updating);
+    const { password, ...updating } = ctx.request.body;
+    await models.user.modifyOne(ctx.params.userEmail, {
+      ...updating,
+      ...(password ? { password: nodepass.hash(password) } : {})
+    });
     ctx.body = null;
   };
 };
 
-export const handlePost: RouteMiddleware = ({ models }) => {
+export const handlePost: RouteMiddleware<typeof routes.postUser> = ({
+  models
+}) => {
   return async (ctx, next) => {
-    const body = ctx.request.body;
-    if ('lastLoginIp' in body || 'lastLoginTime' in body) {
-      ctx.throw(status.BAD_REQUEST);
-    }
-    const inserting = {
-      ...ctx.request.body,
-      preferences: {
-        ...defaultPreferences(),
-        ...(ctx.request.body.preferences ?? {})
-      },
+    const { password, preferences, ...rest } = ctx.request.body;
+    await models.user.insert({
+      ...rest,
+      preferences: { ...defaultPreferences(), ...preferences },
       myLists: [],
-      password: nodepass.hash(ctx.request.body.password),
+      password: nodepass.hash(password),
       lastLoginTime: new Date(0),
       lastLoginIp: ''
-    };
-    await models.user.insert(inserting);
-    ctx.body = { userEmail: ctx.request.body.userEmail };
+    });
+    ctx.body = { userEmail: rest.userEmail };
     ctx.status = status.CREATED;
   };
 };

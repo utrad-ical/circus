@@ -1,3 +1,5 @@
+import type { z } from 'zod';
+import type { globalPrivilege } from './schemas/group.ts';
 import * as mr from 'multi-integer-range';
 import type { Models } from './interface.ts';
 import type { SeriesEntry } from './typings/circus.ts';
@@ -157,7 +159,10 @@ export const fetchAndLockAccessibleSeries = async (
   return seriesData;
 };
 
-export const globalPrivileges = () => [
+export const globalPrivileges = (): {
+  privilege: z.output<typeof globalPrivilege>;
+  caption: string;
+}[] => [
   { privilege: 'createProject', caption: 'Create Project' },
   { privilege: 'deleteProject', caption: 'Delete Project' },
   { privilege: 'manageServer', caption: 'Manage Server' },

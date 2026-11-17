@@ -54,7 +54,7 @@ describe('admin/plugins', () => {
     });
     assert.equal(res2.status, httpStatus.BAD_REQUEST);
     // The admin editor shows complaints by this path
-    assert.equal(res2.data.validationErrors[0].instancePath, '/pluginName');
+    assert.deepEqual(res2.data.issues[0].path, ['pluginName']);
   });
 
   test('should search plugins', async () => {

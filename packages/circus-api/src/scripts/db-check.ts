@@ -1,7 +1,7 @@
 import type { CollectionAccessor } from '../db/createCollectionAccessor.ts';
 import type { Models } from '../interface.ts';
 import type Command from './Command.ts';
-import { ValidationError } from '../createValidator.ts';
+import { formatPath, ValidationError } from '../createValidator.ts';
 
 export const options = () => {
   return [
@@ -39,8 +39,8 @@ export const command: Command<{ models: Models }> = async (
           if (!(err instanceof ValidationError)) throw err;
           errors++;
           console.error(`  Validation error (#${count + errors}):`);
-          for (const e of err.errors)
-            console.error(`    ${e.instancePath || '/'} ${e.message}`);
+          for (const i of err.issues)
+            console.error(`    ${formatPath(i.path)}: ${i.message}`);
         }
       }
       totalErrors += errors;

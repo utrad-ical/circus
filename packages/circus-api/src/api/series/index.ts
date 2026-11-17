@@ -318,7 +318,7 @@ export const handleGetExportCsVolume: RouteMiddleware = ({
         query = await validator.validate(
           seriesExportCsVolumeQuery,
           ctx.request.query,
-          'toDate'
+          'decode'
         );
       } catch (err: any) {
         err.phase = 'request';

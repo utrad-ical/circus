@@ -731,7 +731,7 @@ describe('export-mhd', () => {
     });
     assert.match(
       await readFromStreamTillEnd(sse.data as Readable),
-      /event: error\ndata: \{"message":"Validation failed: \/caseIds /
+      /event: error\ndata: \{"message":"Validation failed: caseIds: /
     );
   });
 

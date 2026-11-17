@@ -86,7 +86,7 @@ it('should return error for invalid group update', async () => {
     data: { groupId: 45 }
   });
   assert.equal(res2.status, 400);
-  assert.match(res2.data.error, /primary key/);
+  assert.deepEqual(res2.data.issues[0].path, ['groupId']);
 
   const res3 = await axios.request({
     method: 'post',
@@ -94,7 +94,7 @@ it('should return error for invalid group update', async () => {
     data: { ...basicGroupData, groupId: 77 }
   });
   assert.equal(res3.status, 400);
-  assert.match(res3.data.error, /Group ID cannot be specified/);
+  assert.deepEqual(res3.data.issues[0].path, ['groupId']);
 });
 
 const permissionsDependencies = {

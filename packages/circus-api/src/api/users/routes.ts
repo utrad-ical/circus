@@ -1,19 +1,17 @@
-import { defineRoute, defineRouteGroup } from '../../defineRoute.ts';
-import { dbEntry, only } from '../../schemas/derive.ts';
+import { defineRoute, defineRouteGroup, route } from '../../defineRoute.ts';
 import { handleGet } from './index.ts';
-import { user } from '../../schemas/index.ts';
+import { userPublic } from '../../schemas/index.ts';
 
-export const getUsersUserEmail = defineRoute({
+export const getUser = defineRoute({
   verb: 'get',
   path: '/users/:userEmail',
-  handler: handleGet,
   description:
     'Gets the information about the specified user. This endpoint is available to all users, but returns only minimum information about the user.',
-  response: dbEntry(only(user, ['userEmail', 'loginId', 'description']))
+  response: userPublic
 });
 
 export default defineRouteGroup({
   name: 'Users',
   description: 'Fetches minimum information about users.',
-  routes: [getUsersUserEmail]
+  routes: [route(getUser, handleGet)]
 });

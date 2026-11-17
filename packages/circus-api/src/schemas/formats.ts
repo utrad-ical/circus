@@ -50,8 +50,9 @@ export const num = (range: Range = {}) =>
  */
 export const anyObject = () => z.record(z.string(), z.unknown());
 
+// A date, optionally with time and offset (e.g., '2020-01-31T12:34:56.789Z')
 const isoDateRegex =
-  /(\d{4})-?(\d{2})-?(\d{2})([T ](\d{2})(:?(\d{2})(:?(\d{2}(\.\d+)?))?)?(Z|([+-])(\d{2}):?(\d{2})?)?)?/;
+  /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:?\d{2})?)?$/;
 
 /**
  * A date, which is a `Date` in the server and an ISO string in JSON.
@@ -60,7 +61,10 @@ const isoDateRegex =
  */
 export const dateField = () =>
   z.codec(
-    z.string().regex(isoDateRegex),
+    z
+      .string()
+      .regex(isoDateRegex)
+      .refine(s => !isNaN(new Date(s).getTime()), 'Invalid date'),
     // Any Date passes, including an invalid one (as before)
     z.custom<Date>(v => v instanceof Date, 'Expected a Date'),
     {

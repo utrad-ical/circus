@@ -1,8 +1,7 @@
 import status from 'http-status';
 import * as mongo from 'mongodb';
 import type { Validator } from '../interface.ts';
-import { z } from 'zod';
-import { dbEntry } from '../schemas/derive.ts';
+import type { z } from 'zod';
 
 type CursorOptions = {
   sort?: object;
@@ -15,8 +14,10 @@ type CursorOptions = {
 type WithDates<T> = T & { createdAt: Date; updatedAt: Date };
 
 interface Options<T> {
-  /** The schema of the documents, or the alternatives of it */
-  schema: z.ZodType | z.ZodType[];
+  /** The name of the documents used in error messages, e.g., 'series' */
+  name: string;
+  /** The schema of the documents, including `createdAt` and `updatedAt` */
+  schema: z.ZodType;
   collectionName: string;
   primaryKey: keyof T;
   session?: mongo.ClientSession;
@@ -52,7 +53,7 @@ export interface CollectionAccessor<T = any> {
   upsert: (id: string | number, data: Partial<T>) => Promise<any>;
   aggregate: (pipeline: object[]) => Promise<any[]>;
   insertMany: (data: T[]) => Promise<any>;
-  modifyOne: (id: string | number, updates: object) => Promise<any>;
+  modifyOne: (id: string | number, updates: Partial<T>) => Promise<any>;
   unsafe_updateMany: (filter: any, update: any) => Promise<any>;
   newSequentialId: () => Promise<number>;
   collectionName: () => string;
@@ -66,13 +67,15 @@ const createCollectionAccessor = <T = any>(
   validator: Validator,
   opts: Options<T>
 ) => {
-  const { schema, collectionName, primaryKey, session } = opts;
+  const {
+    name,
+    schema: dbEntrySchema,
+    collectionName,
+    primaryKey,
+    session
+  } = opts;
   const sessionOpts = session ? { session } : {};
   const collection = db.collection<WithDates<T>>(collectionName);
-
-  const dbEntrySchema = Array.isArray(schema)
-    ? z.union(schema.map(dbEntry) as z.ZodType[] as [z.ZodType])
-    : dbEntry(schema);
 
   /**
    * Inserts a single document after validation succeeds.
@@ -147,7 +150,7 @@ const createCollectionAccessor = <T = any>(
     return {
       next: async () => {
         const next = await cursor.next();
-        await validator.validate(dbEntrySchema, next, 'default', {
+        await validator.validate(dbEntrySchema, next, 'check', {
           allowUnknownKeys: !strict
         });
         return next;
@@ -209,7 +212,7 @@ const createCollectionAccessor = <T = any>(
       .toArray();
     const result = docs[0];
     if (result !== undefined) {
-      await validator.validate(dbEntrySchema, result, 'default', {
+      await validator.validate(dbEntrySchema, result, 'check', {
         allowUnknownKeys: true
       });
     }
@@ -217,7 +220,7 @@ const createCollectionAccessor = <T = any>(
   };
 
   const throw404 = () => {
-    const err = new Error(`The requested ${schema} was not found.`);
+    const err = new Error(`The requested ${name} was not found.`);
     err.status = 404;
     err.expose = true;
     throw err;
@@ -236,7 +239,7 @@ const createCollectionAccessor = <T = any>(
   /**
    * Modifies the document by the primary key.
    */
-  const modifyOne = async (id: string | number, updates: object) => {
+  const modifyOne = async (id: string | number, updates: Partial<T>) => {
     const key = primaryKey ? (primaryKey as string) : '_id';
     const date = new Date();
     if (key in updates) {

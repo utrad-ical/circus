@@ -1,3 +1,4 @@
+import { dbEntry } from '../schemas/derive.ts';
 import testSchemas from '../../test/test-schemas.ts';
 import assert from 'node:assert/strict';
 import { describe, test, it, before, after } from 'node:test';
@@ -27,7 +28,8 @@ before(async () => {
   testServer = await setUpKoaTest(async app => {
     const validator = await createValidator(undefined);
     items = createCollectionAccessor(db, validator, {
-      schema: testSchemas.item,
+      name: 'item',
+      schema: dbEntry(testSchemas.item),
       collectionName: 'items',
       primaryKey: 'itemId'
     });
@@ -39,7 +41,7 @@ before(async () => {
           defaultSort: { price: -1 }
         });
       } catch (err: any) {
-        console.error(err.errors);
+        console.error(err.issues);
         throw err;
       }
     });

@@ -1,6 +1,7 @@
 import classnames from 'classnames';
 import Input from '#components/Input.tsx';
-import React from 'react';
+import React, { useState } from 'react';
+import Alert from '#components/Alert.tsx';
 import Select from '#components/Select.tsx';
 import * as et from '#components/editorTypes.tsx';
 import type { Schema, PropSchema } from '#components/JsonSchemaEditor.tsx';
@@ -149,6 +150,9 @@ const AttributeSchemaEditor: React.FC<{
   onChange: (value: Schema) => void;
 }> = props => {
   const { value, onChange } = props;
+  // The editor is created for each item, so this is the saved schema
+  const [initialValue] = useState(value);
+  const changed = JSON.stringify(initialValue) !== JSON.stringify(value);
 
   const handleChange = (val: SchemaEntryEditorValue[]) => {
     const newValue: Schema = {
@@ -176,6 +180,15 @@ const AttributeSchemaEditor: React.FC<{
         <div className={styles.spec}>Spec</div>
       </span>
       <ArrayOfAttributeSchema value={items} onChange={handleChange} />
+      {changed && (
+        <Alert variant="warning">
+          Changing the attributes may make the values of existing cases or
+          labels invalid (such cases cannot be saved until they are fixed), or
+          hide them (the values of removed or renamed attributes are kept but
+          not shown). After saving, run <code>circus db-check</code> to check
+          the existing values.
+        </Alert>
+      )}
     </div>
   );
 };

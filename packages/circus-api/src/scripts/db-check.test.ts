@@ -12,7 +12,7 @@ let db: mongo.Db;
 beforeEach(async () => {
   const { database, models } = await modelsPromise;
   db = database.db;
-  await setUpMongoFixture(db, ['users', 'groups']);
+  await setUpMongoFixture(db, ['users', 'groups', 'projects', 'clinicalCases']);
   commandFunc = await command(null, { models });
 });
 
@@ -21,12 +21,12 @@ afterEach(() => {
   mock.restoreAll();
 });
 
-const run = async () => {
+const run = async (target = ['user', 'group'], options = {}) => {
   const output: string[] = [];
   const capture = (...args: unknown[]) => output.push(args.join(' '));
   mock.method(console, 'log', capture);
   mock.method(console, 'error', capture);
-  await commandFunc({ target: ['user', 'group'] });
+  await commandFunc({ target, ...options });
   return output.join('\n');
 };
 
@@ -60,4 +60,36 @@ test('reports every invalid document and exits with 1', async () => {
   assert.match(output, /unknownField: Unrecognized key/);
   assert.match(output, /groupName: Invalid input/);
   assert.match(output, /Found 2 invalid item\(s\)/);
+});
+
+test('warns about attributes against the project schemas', async () => {
+  await db.collection('projects').updateOne(
+    { projectId: '8883fdef6f5144f50eb2a83cd34baa44' },
+    {
+      $set: {
+        caseAttributesSchema: {
+          type: 'object',
+          properties: { smoker: { type: 'boolean' } },
+          required: ['smoker']
+        }
+      }
+    }
+  );
+  const output = await run(['clinicalCase']);
+  // Only a warning
+  assert.equal(process.exitCode, undefined);
+  assert.match(output, /with warnings/);
+  assert.match(
+    output,
+    /clinicalCase latestRevision\.attributes\.smoker: Required/
+  );
+});
+
+test('checks only documents or only attributes', async () => {
+  const documents = await run(['clinicalCase'], { documents_only: true });
+  assert.match(documents, /Validating: clinicalCase/);
+  assert.doesNotMatch(documents, /Checking the attributes/);
+  const attributes = await run(['clinicalCase'], { attributes_only: true });
+  assert.doesNotMatch(attributes, /Validating: clinicalCase/);
+  assert.match(attributes, /Checking the attributes/);
 });

@@ -367,6 +367,76 @@ describe('add revision', () => {
     assert.equal(res.status, 400);
   });
 
+  test('check attributes with the project schemas', async () => {
+    const projects = apiTest.database.db.collection('projects');
+    const projectId = '8883fdef6f5144f50eb2a83cd34baa44';
+    await projects.updateOne(
+      { projectId },
+      {
+        $set: {
+          caseAttributesSchema: {
+            type: 'object',
+            properties: { smoker: { type: 'boolean' } },
+            required: ['smoker']
+          },
+          labelAttributesSchema: {
+            type: 'object',
+            properties: { location: { enum: ['MCA', 'ACA'] } }
+          }
+        }
+      }
+    );
+    try {
+      const post = (attributes: object, labelAttributes: object) =>
+        ax.bob.post(`api/cases/${cid}/revision`, {
+          description: 'Attributes',
+          attributes,
+          status: 'draft',
+          series: [
+            {
+              seriesUid: '111.222.333.444.777',
+              partialVolumeDescriptor: { start: 1, end: 1, delta: 1 },
+              labels: [
+                {
+                  type: 'point',
+                  name: 'p',
+                  attributes: labelAttributes,
+                  data: { color: '#ff0000', alpha: 1, location: [1, 2, 3] }
+                }
+              ]
+            }
+          ]
+        });
+      const res1 = await post({}, { location: 'ICA' });
+      assert.equal(res1.status, 400);
+      assert.deepEqual(
+        res1.data.issues.map((i: any) => i.path),
+        [
+          ['attributes', 'smoker'],
+          ['series', 0, 'labels', 0, 'attributes', 'location']
+        ]
+      );
+      const res2 = await post({ smoker: true, other: 1 }, { location: 'MCA' });
+      assert.equal(res2.status, 201);
+      // A new case does not need the required attributes
+      const res3 = await ax.bob.post('api/cases', {
+        projectId,
+        series: [
+          {
+            seriesUid: '111.222.333.444.777',
+            partialVolumeDescriptor: { start: 1, end: 1, delta: 1 }
+          }
+        ]
+      });
+      assert.equal(res3.status, 201);
+    } finally {
+      await projects.updateOne(
+        { projectId },
+        { $set: { caseAttributesSchema: {}, labelAttributesSchema: {} } }
+      );
+    }
+  });
+
   test('reject a revision with invalid labels', async () => {
     const post = (series: any) =>
       ax.bob.post(`api/cases/${cid}/revision`, {

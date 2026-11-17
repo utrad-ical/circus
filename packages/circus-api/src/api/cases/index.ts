@@ -3,6 +3,7 @@ import { Readable } from 'node:stream';
 import type { PreparedExport } from '../../case/createMhdPacker.ts';
 import { ValidationError } from '../../createValidator.ts';
 import { caseExportMhdQuery } from '../../schemas/routes.ts';
+import checkRevisionAttributes from '../../case/checkRevisionAttributes.ts';
 import makeNewCase from '../../case/makeNewCase.ts';
 import type {
   CircusContext,
@@ -75,6 +76,13 @@ export const handlePostRevision: RouteMiddleware<
 > = ({ models, blobStorage }) => {
   return async (ctx, next) => {
     const aCase = ctx.case;
+    const issues = checkRevisionAttributes(ctx.project, ctx.request.body);
+    if (issues.length) {
+      const err = new ValidationError(issues);
+      err.phase = 'request';
+      throw err;
+    }
+
     const blobIds = ctx.request.body.series.flatMap(s =>
       s.labels.flatMap(l =>
         l.type === 'voxel' && l.data.voxels !== null ? [l.data.voxels] : []

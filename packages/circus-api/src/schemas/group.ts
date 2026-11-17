@@ -3,6 +3,26 @@ import { dateField } from './formats.ts';
 
 const ids = (description: string) => z.array(z.string()).describe(description);
 
+/** The roles of a group in a project */
+export const dbRoleNames = [
+  'read',
+  'write',
+  'viewPersonalInfo',
+  'moderate',
+  'addSeries'
+] as const;
+
+/** The roles of a group for a plug-in */
+export const csRoleNames = [
+  'readPlugin',
+  'executePlugin',
+  'manageJobs',
+  'inputPersonalFeedback',
+  'inputConsensualFeedback',
+  'manageFeedback',
+  'viewPersonalInfo'
+] as const;
+
 export const globalPrivilege = z.enum([
   'createProject',
   'deleteProject',

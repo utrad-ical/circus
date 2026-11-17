@@ -90,7 +90,7 @@ export const pluginJobCreate = z.strictObject({
   force: z.literal(true).optional()
 });
 
-export const pluginJobCreated = z.looseObject({ jobId: z.string() });
+export const pluginJobCreated = z.strictObject({ jobId: z.string() });
 
 export const pluginJobPatch = z.strictObject({
   status: z.enum(['cancelled', 'invalidated'])

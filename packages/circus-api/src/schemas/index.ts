@@ -26,7 +26,7 @@ export { remotePlugin } from './remotePlugin.ts';
 export { revision } from './revision.ts';
 export { revisionSeriesEntry } from './revisionSeriesEntry.ts';
 export { schemaEntry } from './schemaEntry.ts';
-export { series } from './series.ts';
+export { seriesDoc, seriesForUser, seriesImportSummary } from './series.ts';
 export { seriesEntry } from './seriesEntry.ts';
 export { seriesEntryWithAutoPvd } from './seriesEntryWithAutoPvd.ts';
 export { serverParam } from './serverParam.ts';

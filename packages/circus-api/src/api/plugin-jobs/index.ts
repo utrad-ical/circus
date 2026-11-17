@@ -8,7 +8,10 @@ import type {
   CircusContext,
   RouteMiddleware
 } from '../../typings/middlewares.ts';
-import checkFilter from '../../utils/checkFilter.ts';
+import { pluginJob } from '../../schemas/pluginJob.ts';
+import { dateField } from '../../schemas/formats.ts';
+import { fieldsOf, mongoFilter } from '../../schemas/mongoFilter.ts';
+import { seriesDoc } from '../../schemas/series.ts';
 import generateUniqueId from '../../utils/generateUniqueId.ts';
 import type { AutoPvdSeriesEntry } from '../../utils/resolveAutoPvdOfSeries.ts';
 import resolveAutoPvdOfSeries from '../../utils/resolveAutoPvdOfSeries.ts';
@@ -120,22 +123,21 @@ export const handlePatch: RouteMiddleware = ({ transactionManager, cs }) => {
   };
 };
 
-const searchableFields = [
-  'pluginId',
-  'jobId',
-  'status',
-  'patientInfo.patientId',
-  'patientInfo.patientName',
-  'patientInfo.age',
-  'patientInfo.sex',
-  'seriesUid',
-  'studyUid',
-  'seriesDate',
-  'modality',
-  'createdAt',
-  'updatedAt',
-  'finishedAt'
-];
+const pluginJobFilter = mongoFilter({
+  ...fieldsOf(pluginJob, ['pluginId', 'jobId', 'status', 'finishedAt']),
+  ...fieldsOf(seriesDoc, [
+    'patientInfo.patientId',
+    'patientInfo.patientName',
+    'patientInfo.age',
+    'patientInfo.sex',
+    'seriesUid',
+    'studyUid',
+    'seriesDate',
+    'modality'
+  ]),
+  createdAt: dateField(),
+  updatedAt: dateField()
+});
 
 type CustomFilter<T = any> = Filter<T>;
 
@@ -198,9 +200,7 @@ export const extractPatientIdNameFilter = (
 
 export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
-    const customFilter = extractFilter(ctx);
-    if (!checkFilter(customFilter!, searchableFields))
-      ctx.throw(status.BAD_REQUEST, 'Bad filter.');
+    const customFilter = extractFilter(ctx, pluginJobFilter);
 
     const canViewPersonalInfo =
       ctx.userPrivileges.globalPrivileges.includes('personalInfoView');
@@ -229,7 +229,7 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
       pluginId: { $in: accessiblePluginIds }
     };
     const filter = {
-      $and: [customFilter!, domainFilter]
+      $and: [customFilter, domainFilter]
     };
 
     const canViewPersonalInfoPluginIds = ctx.userPrivileges.accessiblePlugins

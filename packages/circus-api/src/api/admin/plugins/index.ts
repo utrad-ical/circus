@@ -1,7 +1,8 @@
 import performSearch from '../../performSearch.ts';
 import type { RouteMiddleware } from '../../../typings/middlewares.ts';
 import { extractFilter } from '../../performSearch.ts';
-import checkFilter from '../../../utils/checkFilter.ts';
+import { z } from 'zod';
+import { mongoFilter } from '../../../schemas/mongoFilter.ts';
 import crypto from 'crypto';
 import httpStatus from 'http-status';
 
@@ -22,13 +23,11 @@ export const handlePatch: RouteMiddleware = ({ models }) => {
   };
 };
 
-const searchableFields = ['type'];
+const pluginFilter = mongoFilter({ type: z.enum(['CAD', 'CAD+remote']) });
 
 export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
-    const filter = extractFilter(ctx);
-    if (!checkFilter(filter!, searchableFields))
-      ctx.throw(httpStatus.BAD_REQUEST, 'Bad filter.');
+    const filter = extractFilter(ctx, pluginFilter);
 
     await performSearch(models.plugin, filter, ctx, {
       defaultSort: { pluginId: 1 },

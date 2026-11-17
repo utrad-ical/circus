@@ -1,3 +1,5 @@
+import type { z } from 'zod';
+import type { seriesImportSummary } from '../../schemas/series.ts';
 import type { Logger } from '@utrad-ical/circus-lib';
 import parser from 'dicom-parser';
 import type { ProgressReporter } from '../../createProgressManager.ts';
@@ -6,11 +8,7 @@ import archiveEntries from '../../utils/archiveEntries.ts';
 import isLikeDicom from '../../utils/isLikeDicom.ts';
 import type { UploadedFile } from '../../utils/readMultipartFiles.ts';
 
-export interface ImportSummary {
-  imported: number;
-  skipped: { file: string; reason: string }[];
-  errors: { file: string; reason: string }[];
-}
+export type ImportSummary = z.output<typeof seriesImportSummary>;
 
 const mediaStorageDirectory = '1.2.840.10008.1.3.10';
 

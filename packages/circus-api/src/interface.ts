@@ -5,6 +5,7 @@ import type { CollectionAccessor } from './db/createCollectionAccessor.ts';
 import type * as mongo from 'mongodb';
 import type { groupDoc } from './schemas/group.ts';
 import type { projectDoc } from './schemas/project.ts';
+import type { seriesDoc } from './schemas/series.ts';
 import type { userDoc } from './schemas/user.ts';
 
 /**
@@ -41,7 +42,7 @@ export interface ModelEntries {
   user: DocOf<typeof userDoc>;
   group: DocOf<typeof groupDoc>;
   project: DocOf<typeof projectDoc>;
-  series: any;
+  series: DocOf<typeof seriesDoc>;
   clinicalCase: any;
   serverParam: any;
   token: any;

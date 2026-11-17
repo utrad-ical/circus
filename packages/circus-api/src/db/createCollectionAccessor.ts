@@ -53,7 +53,10 @@ export interface CollectionAccessor<T = any> {
   upsert: (id: string | number, data: Partial<T>) => Promise<any>;
   aggregate: (pipeline: object[]) => Promise<any[]>;
   insertMany: (data: T[]) => Promise<any>;
-  modifyOne: (id: string | number, updates: Partial<T>) => Promise<any>;
+  modifyOne: (
+    id: string | number,
+    updates: Partial<WithDates<T>>
+  ) => Promise<any>;
   unsafe_updateMany: (filter: any, update: any) => Promise<any>;
   newSequentialId: () => Promise<number>;
   collectionName: () => string;
@@ -239,7 +242,10 @@ const createCollectionAccessor = <T = any>(
   /**
    * Modifies the document by the primary key.
    */
-  const modifyOne = async (id: string | number, updates: Partial<T>) => {
+  const modifyOne = async (
+    id: string | number,
+    updates: Partial<WithDates<T>>
+  ) => {
     const key = primaryKey ? (primaryKey as string) : '_id';
     const date = new Date();
     if (key in updates) {

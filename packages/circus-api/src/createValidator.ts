@@ -76,7 +76,12 @@ const toValidationIssues = (issues: Issue[]): ValidationIssue[] =>
 const replaceInvalidDates = (data: unknown): unknown => {
   if (data instanceof Date) return isNaN(data.getTime()) ? new Date(0) : data;
   if (Array.isArray(data)) return data.map(replaceInvalidDates);
-  if (data !== null && typeof data === 'object')
+  // Only plain objects (not, e.g., a BSONRegExp in a search filter)
+  if (
+    typeof data === 'object' &&
+    data !== null &&
+    Object.getPrototypeOf(data) === Object.prototype
+  )
     return Object.fromEntries(
       Object.entries(data).map(([k, v]) => [k, replaceInvalidDates(v)])
     );
@@ -84,33 +89,38 @@ const replaceInvalidDates = (data: unknown): unknown => {
 };
 
 /**
- * Creates the validator, which checks data against a Zod schema.
+ * Checks data against a Zod schema, and converts it according to the mode.
+ * Throws a `ValidationError` if the data is invalid.
  */
-const createValidator: NoDepFunctionService<Validator> = async () => {
-  const validate: Validator['validate'] = async (
-    schema,
-    data,
-    mode: ValidationMode = 'check',
-    options = {}
-  ) => {
-    const result =
-      mode === 'decode'
-        ? z.safeDecode(schema, data)
-        : z.safeEncode(
-            schema,
-            mode === 'check' ? replaceInvalidDates(data) : data
-          );
-    if (!result.success) {
-      const issues = expandUnions(result.error.issues).filter(
-        i => !(options.allowUnknownKeys && i.code === 'unrecognized_keys')
-      );
-      if (issues.length) throw new ValidationError(toValidationIssues(issues));
-      return data;
-    }
-    return mode === 'check' ? data : result.data;
-  };
-
-  return { validate };
+export const validate = (
+  schema: z.ZodType,
+  data: unknown,
+  mode: ValidationMode = 'check',
+  options: { allowUnknownKeys?: boolean } = {}
+): any => {
+  const result =
+    mode === 'decode'
+      ? z.safeDecode(schema, data)
+      : z.safeEncode(
+          schema,
+          mode === 'check' ? replaceInvalidDates(data) : data
+        );
+  if (!result.success) {
+    const issues = expandUnions(result.error.issues).filter(
+      i => !(options.allowUnknownKeys && i.code === 'unrecognized_keys')
+    );
+    if (issues.length) throw new ValidationError(toValidationIssues(issues));
+    return data;
+  }
+  return mode === 'check' ? data : result.data;
 };
+
+/**
+ * Creates the validator service, which checks data against a Zod schema.
+ */
+const createValidator: NoDepFunctionService<Validator> = async () => ({
+  validate: async (schema, data, mode, options) =>
+    validate(schema, data, mode, options)
+});
 
 export default createValidator;

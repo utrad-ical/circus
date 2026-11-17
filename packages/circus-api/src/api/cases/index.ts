@@ -8,7 +8,11 @@ import type {
   CircusContext,
   RouteMiddleware
 } from '../../typings/middlewares.ts';
-import checkFilter from '../../utils/checkFilter.ts';
+import { z } from 'zod';
+import { clinicalCase } from '../../schemas/clinicalCase.ts';
+import { dateField } from '../../schemas/formats.ts';
+import { fieldsOf, mongoFilter } from '../../schemas/mongoFilter.ts';
+import { seriesDoc } from '../../schemas/series.ts';
 import resolveAutoPvdOfSeries from '../../utils/resolveAutoPvdOfSeries.ts';
 import {
   extractFilter,
@@ -113,23 +117,21 @@ export const handlePostRevision: RouteMiddleware = ({
   };
 };
 
-const searchableFields = [
-  'projectId',
-  'caseId',
-  'patientInfo.patientId',
-  'patientInfo.patientName',
-  'patientInfo.age',
-  'patientInfo.sex',
-  'tags',
-  'createdAt',
-  'updatedAt'
-];
+const caseFilter = mongoFilter({
+  ...fieldsOf(clinicalCase, ['projectId', 'caseId', 'tags']),
+  ...fieldsOf(seriesDoc, [
+    'patientInfo.patientId',
+    'patientInfo.patientName',
+    'patientInfo.age',
+    'patientInfo.sex'
+  ]),
+  createdAt: dateField(),
+  updatedAt: dateField()
+});
 
 export const handleSearch: RouteMiddleware = ({ models }) => {
   return async (ctx, next) => {
-    const customFilter = extractFilter(ctx);
-    if (!checkFilter(customFilter!, searchableFields))
-      ctx.throw(status.BAD_REQUEST, 'Bad filter.');
+    const customFilter = extractFilter(ctx, caseFilter);
 
     const canViewPersonalInfo =
       ctx.userPrivileges.globalPrivileges.includes('personalInfoView');
@@ -155,7 +157,7 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
     };
 
     const filter = {
-      $and: [customFilter!, accessibleProjectFilter /* domainFilter */]
+      $and: [customFilter, accessibleProjectFilter /* domainFilter */]
     };
 
     const myListId = ctx.params.myListId;

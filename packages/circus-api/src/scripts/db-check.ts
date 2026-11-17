@@ -71,6 +71,26 @@ const createReporter = (color: 'red' | 'yellow') => {
 };
 
 /**
+ * Shows the progress like `1022/10105 checked` on a terminal,
+ * which is cleared before other output.
+ */
+const createProgress = (total: number) => {
+  const tty = process.stdout.isTTY;
+  let last = 0;
+  return {
+    update: (done: number) => {
+      const now = Date.now();
+      if (!tty || (now - last < 100 && done < total)) return;
+      last = now;
+      process.stdout.write(`\r  ${done}/${total} checked`);
+    },
+    clear: () => {
+      if (tty) process.stdout.write('\r\x1b[K');
+    }
+  };
+};
+
+/**
  * Checks the attributes of the latest revisions of the cases with the
  * current schemas of their projects. A mismatch is a warning, because
  * the project schemas may have changed after the cases were saved;
@@ -99,8 +119,11 @@ const checkCaseAttributes = async (models: Models) => {
   }
   const reporter = createReporter('yellow');
   let count = 0;
+  let done = 0;
   const cursor = models.clinicalCase.findAsCursor();
+  const progress = createProgress(await cursor.count());
   while (await cursor.hasNext()) {
+    progress.update(done++);
     let aCase;
     try {
       aCase = await cursor.next();
@@ -116,9 +139,12 @@ const checkCaseAttributes = async (models: Models) => {
           path: ['latestRevision', ...i.path]
         }))
       : [{ path: ['projectId'], message: 'No such project', code: 'custom' }];
-    if (issues.length)
+    if (issues.length) {
+      progress.clear();
       reporter.add('Warning', aCase.caseId, issues, 'clinicalCase');
+    }
   }
+  progress.clear();
   console.log(
     styleText(
       reporter.documents ? 'yellow' : 'green',
@@ -148,15 +174,18 @@ export const command: Command<{ models: Models }> = async (
       console.log(styleText('bold', `Validating: ${key}`));
       const model = (models as any)[key] as CollectionAccessor;
       const cursor = await model.findAsCursor({}, { strict: true });
+      const progress = createProgress(await cursor.count());
       let count = 0;
       let errors = 0;
       while (await cursor.hasNext()) {
+        progress.update(count + errors);
         try {
           await cursor.next(); // This will perform the validation
           count++;
         } catch (err) {
           if (!(err instanceof ValidationError)) throw err;
           errors++;
+          progress.clear();
           reporter.add(
             `Validation error (#${count + errors})`,
             err.documentId,
@@ -165,6 +194,7 @@ export const command: Command<{ models: Models }> = async (
           );
         }
       }
+      progress.clear();
       console.log(
         styleText(
           errors ? 'red' : 'green',

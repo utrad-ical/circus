@@ -1,7 +1,7 @@
-import Input from '#components/Input.tsx';
 import type { Editor } from './processor-types.ts';
 import Select from '#components/Select.tsx';
 import React from 'react';
+import NumberInput from '#components/NumberInput.tsx';
 import type { HoleFillingOptions } from './hf-processor.ts';
 
 const neighborsOptions2D = {
@@ -34,14 +34,6 @@ export const initialOptions: HoleFillingOptions = {
 
 export const OptionsEditor: Editor<HoleFillingOptions> = props => {
   const { value, onChange } = props;
-
-  const onMaximumComponentsChange = (ev: any) => {
-    if (ev.target.value < 1 || 2 ** 16 <= ev.target.value) return;
-    onChange({
-      ...value,
-      bufferSize: Number(ev.target.value)
-    });
-  };
 
   return (
     <>
@@ -100,12 +92,17 @@ export const OptionsEditor: Editor<HoleFillingOptions> = props => {
         style={{ display: 'flex', alignItems: 'center', gap: '0.5em' }}
       >
         Maximum number of tentative labels
-        <Input
-          type="number"
+        <NumberInput
           style={{ width: '6em' }}
-          value={value.bufferSize}
           name="bufferSize"
-          onChange={onMaximumComponentsChange}
+          min={1}
+          max={2 ** 16 - 1}
+          value={value.bufferSize}
+          // Values out of the range (and an empty box) keep the previous value
+          onChange={v => {
+            if (v === undefined || v < 1 || 2 ** 16 <= v) return;
+            onChange({ ...value, bufferSize: v });
+          }}
         />
       </label>
     </>

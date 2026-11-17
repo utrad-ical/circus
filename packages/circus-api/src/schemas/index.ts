@@ -1,8 +1,11 @@
 // All the schemas used by the API routes and the models
 
-export { clinicalCase } from './clinicalCase.ts';
-export { clinicalCaseCreate } from './clinicalCaseCreate.ts';
-export { clinicalCaseSearchResult } from './clinicalCaseSearchResult.ts';
+export {
+  caseDetail,
+  caseSearchResult,
+  clinicalCaseCreate,
+  clinicalCaseDoc
+} from './clinicalCase.ts';
 export { globalPrivilege, groupCreate, groupDoc, groupPatch } from './group.ts';
 export { icon } from './icon.ts';
 export { jsonSchemaSubset } from './jsonSchemaSubset.ts';
@@ -23,7 +26,7 @@ export { pluginJobSeries } from './pluginJobSeries.ts';
 export { preferences } from './preferences.ts';
 export { projectCreate, projectDoc, projectPatch } from './project.ts';
 export { remotePlugin } from './remotePlugin.ts';
-export { revision } from './revision.ts';
+export { revision, revisionCreate } from './revision.ts';
 export { revisionSeriesEntry } from './revisionSeriesEntry.ts';
 export { schemaEntry } from './schemaEntry.ts';
 export { seriesDoc, seriesForUser, seriesImportSummary } from './series.ts';

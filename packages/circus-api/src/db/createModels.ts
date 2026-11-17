@@ -35,7 +35,7 @@ export const makeModels = (
     project: { schema: s.projectDoc, col: 'projects', pk: 'projectId' },
     series: { schema: s.seriesDoc, col: 'series', pk: 'seriesUid' },
     clinicalCase: {
-      schema: dbEntry(s.clinicalCase),
+      schema: s.clinicalCaseDoc,
       col: 'clinicalCases',
       pk: 'caseId'
     },

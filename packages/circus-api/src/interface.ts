@@ -3,6 +3,7 @@ import type { readDicomTags } from './utils/createDicomTagReader.ts';
 import type { Disposable } from '@utrad-ical/circus-lib';
 import type { CollectionAccessor } from './db/createCollectionAccessor.ts';
 import type * as mongo from 'mongodb';
+import type { clinicalCaseDoc } from './schemas/clinicalCase.ts';
 import type { groupDoc } from './schemas/group.ts';
 import type { projectDoc } from './schemas/project.ts';
 import type { onetimeUrlDoc } from './schemas/onetimeUrl.ts';
@@ -46,7 +47,7 @@ export interface ModelEntries {
   group: DocOf<typeof groupDoc>;
   project: DocOf<typeof projectDoc>;
   series: DocOf<typeof seriesDoc>;
-  clinicalCase: any;
+  clinicalCase: DocOf<typeof clinicalCaseDoc>;
   serverParam: DocOf<typeof serverParamDoc>;
   token: DocOf<typeof tokenDoc>;
   plugin: any;

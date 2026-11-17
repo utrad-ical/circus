@@ -8,8 +8,9 @@ import type {
   CircusContext,
   RouteMiddleware
 } from '../../typings/middlewares.ts';
+import type * as routes from './routes.ts';
 import { z } from 'zod';
-import { clinicalCase } from '../../schemas/clinicalCase.ts';
+import { clinicalCaseDoc } from '../../schemas/clinicalCase.ts';
 import { dateField } from '../../schemas/formats.ts';
 import { fieldsOf, mongoFilter } from '../../schemas/mongoFilter.ts';
 import { seriesDoc } from '../../schemas/series.ts';
@@ -20,29 +21,29 @@ import {
   performAggregationSearch
 } from '../performSearch.ts';
 
-const maxTagLength = 32;
-
+/**
+ * Removes the patient info joined in a search result
+ * unless the user can and wants to see it.
+ */
 const maskPatientInfo = (ctx: CircusContext) => {
-  return (caseData: any) => {
-    const canViewPersonalInfo =
-      ctx.userPrivileges.globalPrivileges.includes('personalInfoView');
-    const wantToView = ctx.user.preferences.personalInfoView;
-    if (!canViewPersonalInfo || !wantToView || caseData.patientInfo === null) {
-      delete caseData.patientInfo;
-    }
-    return caseData;
+  const show =
+    ctx.userPrivileges.globalPrivileges.includes('personalInfoView') &&
+    ctx.user.preferences.personalInfoView;
+  return <T extends { patientInfo?: unknown }>(caseData: T) => {
+    if (show && caseData.patientInfo !== null) return caseData;
+    const { patientInfo, ...rest } = caseData;
+    return rest;
   };
 };
 
-export const handleGet: RouteMiddleware = () => {
+export const handleGet: RouteMiddleware<typeof routes.getCase> = () => {
   return async (ctx, next) => {
-    const aCase = ctx.case;
-    delete aCase.latestRevision; // Remove redundant data
-    ctx.body = maskPatientInfo(ctx)(aCase);
+    const { latestRevision, ...aCase } = ctx.case; // Redundant data
+    ctx.body = aCase;
   };
 };
 
-export const handlePost: RouteMiddleware = ({
+export const handlePost: RouteMiddleware<typeof routes.postCase> = ({
   transactionManager,
   seriesOrientationResolver
 }) => {
@@ -69,28 +70,16 @@ export const handlePost: RouteMiddleware = ({
   };
 };
 
-export const handlePostRevision: RouteMiddleware = ({
-  models,
-  blobStorage
-}) => {
+export const handlePostRevision: RouteMiddleware<
+  typeof routes.postRevision
+> = ({ models, blobStorage }) => {
   return async (ctx, next) => {
     const aCase = ctx.case;
-    const rev = ctx.request.body;
-
-    if (rev.date) {
-      ctx.throw(status.BAD_REQUEST, 'You cannot specify revision date.');
-    }
-    if (rev.creator) {
-      ctx.throw(status.BAD_REQUEST, 'You cannot specify revision creator.');
-    }
-
-    const blobIds: string[] = rev.series
-      .map((s: any) => {
-        return s.labels
-          .filter((l: any) => l.type === 'voxel' && l.data.voxels !== null)
-          .map((l: any) => l.data.voxels);
-      })
-      .flat();
+    const blobIds = ctx.request.body.series.flatMap(s =>
+      s.labels.flatMap(l =>
+        l.type === 'voxel' && l.data.voxels !== null ? [l.data.voxels] : []
+      )
+    );
     const missingBlobIds = (
       await Promise.all(
         blobIds.map(async id => (!(await blobStorage.exists(id)) ? id : null))
@@ -105,8 +94,11 @@ export const handlePostRevision: RouteMiddleware = ({
       );
     }
 
-    rev.date = new Date();
-    rev.creator = ctx.user.userEmail;
+    const rev = {
+      ...ctx.request.body,
+      date: new Date(),
+      creator: ctx.user.userEmail
+    };
 
     await models.clinicalCase.modifyOne(aCase.caseId, {
       latestRevision: rev,
@@ -118,7 +110,7 @@ export const handlePostRevision: RouteMiddleware = ({
 };
 
 const caseFilter = mongoFilter({
-  ...fieldsOf(clinicalCase, ['projectId', 'caseId', 'tags']),
+  ...fieldsOf(clinicalCaseDoc, ['projectId', 'caseId', 'tags']),
   ...fieldsOf(seriesDoc, [
     'patientInfo.patientId',
     'patientInfo.patientName',
@@ -129,7 +121,9 @@ const caseFilter = mongoFilter({
   updatedAt: dateField()
 });
 
-export const handleSearch: RouteMiddleware = ({ models }) => {
+export const handleSearch: RouteMiddleware<typeof routes.searchCases> = ({
+  models
+}) => {
   return async (ctx, next) => {
     const customFilter = extractFilter(ctx, caseFilter);
 
@@ -246,7 +240,7 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handleGetExportMhd: RouteMiddleware = ({
+export const handleGetExportMhd: RouteMiddleware<typeof routes.exportMhd> = ({
   mhdPacker,
   progressManager,
   validator
@@ -313,31 +307,22 @@ export const handleGetExportMhd: RouteMiddleware = ({
   };
 };
 
-export const handlePutTags: RouteMiddleware = ({ models }) => {
+export const handlePutTags: RouteMiddleware<typeof routes.putTags> = ({
+  models
+}) => {
   return async (ctx, next) => {
-    const aCase = ctx.case;
-    const tags: string[] = ctx.request.body;
-    if (tags.some(t => t.length > maxTagLength))
-      ctx.throw(status.BAD_REQUEST, 'Tag length is too large');
-    await models.clinicalCase.modifyOne(aCase.caseId, { tags });
+    await models.clinicalCase.modifyOne(ctx.case.caseId, {
+      tags: ctx.request.body
+    });
     ctx.body = null; // No Content
   };
 };
 
-export const handlePatchTags: RouteMiddleware = ({ models }) => {
+export const handlePatchTags: RouteMiddleware<typeof routes.patchTags> = ({
+  models
+}) => {
   return async (ctx, next) => {
-    const { operation, tags, caseIds } = ctx.request.body as {
-      operation: 'add' | 'remove' | 'set';
-      tags: string[];
-      caseIds: string[];
-    };
-    if (caseIds.length > 1000)
-      ctx.throw(status.BAD_REQUEST, 'Too many case IDs');
-    if (tags.length > 10) ctx.throw(status.BAD_REQUEST, 'Too many tags.');
-    if (operation !== 'set' && tags.length === 0)
-      ctx.throw(status.BAD_REQUEST, 'You must specify at least one tag.');
-    if (tags.some(t => t.length > maxTagLength))
-      ctx.throw(status.BAD_REQUEST, 'The specified tag is too long.');
+    const { operation, tags, caseIds } = ctx.request.body;
 
     // first, ensure we have write access to all cases
     const writableProjectIds = ctx.userPrivileges.accessibleProjects
@@ -367,7 +352,9 @@ export const handlePatchTags: RouteMiddleware = ({ models }) => {
   };
 };
 
-export const handleDelete: RouteMiddleware = ({ transactionManager }) => {
+export const handleDelete: RouteMiddleware<typeof routes.deleteCase> = ({
+  transactionManager
+}) => {
   return async (ctx, next) => {
     const caseId = ctx.params.caseId;
     const urlQuery = ctx.request.query;

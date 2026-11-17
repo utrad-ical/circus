@@ -224,7 +224,13 @@ describe('add revision', () => {
         description: 'Add something',
         attributes: {},
         status: 'for-review',
-        series: []
+        series: [
+          {
+            seriesUid: '111.222.333.444.777',
+            partialVolumeDescriptor: { start: 1, end: 1, delta: 1 },
+            labels: []
+          }
+        ]
       }
     });
     assert.equal(res.status, 201);
@@ -243,6 +249,7 @@ describe('add revision', () => {
         series: [
           {
             seriesUid: '111.222.333.444.777',
+            partialVolumeDescriptor: { start: 1, end: 1, delta: 1 },
             labels: [
               {
                 type: 'voxel',
@@ -340,6 +347,7 @@ describe('add revision', () => {
         series: [
           {
             seriesUid: '111.222.333.444.777',
+            partialVolumeDescriptor: { start: 1, end: 1, delta: 1 },
             labels: [
               {
                 type: 'rectangle',
@@ -359,6 +367,44 @@ describe('add revision', () => {
     assert.equal(res.status, 400);
   });
 
+  test('reject a revision with invalid labels', async () => {
+    const post = (series: any) =>
+      ax.bob.post(`api/cases/${cid}/revision`, {
+        description: 'Invalid',
+        attributes: {},
+        status: 'draft',
+        series
+      });
+    const entry = (labels: any[]) => ({
+      seriesUid: '111.222.333.444.777',
+      partialVolumeDescriptor: { start: 1, end: 1, delta: 1 },
+      labels
+    });
+    const voxel = (data: object) => ({
+      type: 'voxel',
+      data: { color: '#ff0000', alpha: 1, ...data }
+    });
+    // No series
+    assert.equal((await post([])).status, 400);
+    // A voxel hash without the location
+    const res = await post([
+      entry([voxel({ voxels: '5a616841a4fdd6066ee5c7e2d3118e0963ec1fc6' })])
+    ]);
+    assert.equal(res.status, 400);
+    assert.deepEqual(res.data.issues[0].path.slice(0, 5), [
+      'series',
+      0,
+      'labels',
+      0,
+      'data'
+    ]);
+    // An unknown property in data
+    assert.equal(
+      (await post([entry([voxel({ voxels: null, extra: 1 })])])).status,
+      400
+    );
+  });
+
   test('reject revision addition with nonexistent voxel', async () => {
     const res = await ax.bob.request({
       url: `api/cases/${cid}/revision`,
@@ -370,6 +416,7 @@ describe('add revision', () => {
         series: [
           {
             seriesUid: '111.222.333.444.777',
+            partialVolumeDescriptor: { start: 1, end: 1, delta: 1 },
             labels: [
               {
                 type: 'voxel',
@@ -378,8 +425,8 @@ describe('add revision', () => {
                   voxels: '7777777777fdd6066ee5c7e2d3118e0963ec1fc6',
                   color: '#00ff00',
                   alpha: 0,
-                  min: [1, 3, 5],
-                  max: [7, 11, 13]
+                  origin: [1, 3, 5],
+                  size: [7, 11, 13]
                 }
               }
             ]

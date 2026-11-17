@@ -10,8 +10,8 @@ export const jsonSchemaSubset = z.strictObject({
         type: z.enum(['number', 'integer', 'string', 'boolean']).optional(),
         maximum: num().optional(),
         minimum: num().optional(),
-        maximumExclusive: num().optional(),
-        minimumExclusive: num().optional(),
+        exclusiveMaximum: num().optional(),
+        exclusiveMinimum: num().optional(),
         minLength: z.int().optional(),
         maxLength: z.int().optional(),
         enum: z.array(z.string()).optional()

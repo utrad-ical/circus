@@ -1,4 +1,4 @@
-import { isAxiosError } from 'axios';
+import { ApiHttpError } from '#utils/apiHttpError.ts';
 import type { Series } from '@utrad-ical/circus-api-schema';
 import classnames from 'classnames';
 import table from '#components/table.module.css';
@@ -24,9 +24,9 @@ const SeriesDetail: React.FC<{}> = props => {
   const pagerTool = useMemo(() => toolFactory('pager'), []);
 
   const load = useCallback(
-    async cancelToken => {
+    async (signal: AbortSignal) => {
       const resource = `series/${seriesUid}`;
-      return await api<Series>(resource, { handleErrors: true }, cancelToken);
+      return await api<Series>(resource, { handleErrors: true }, signal);
     },
     [seriesUid]
   );
@@ -89,7 +89,7 @@ const SeriesDetail: React.FC<{}> = props => {
 
   if (seriesData instanceof Error) {
     const message =
-      isAxiosError(seriesData) && seriesData.response?.status === 403
+      seriesData instanceof ApiHttpError && seriesData.response.status === 403
         ? `You do not have access to series ${seriesUid}.`
         : seriesData.message;
     return (

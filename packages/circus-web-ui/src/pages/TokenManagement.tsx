@@ -15,7 +15,6 @@ import TimeDisplay from '#components/TimeDisplay.tsx';
 import React, { useCallback, useState } from 'react';
 import { api } from '#utils/api.ts';
 import useLoadData from '#utils/useLoadData.ts';
-import type { CancelToken } from '../utils/cancelToken.ts';
 import CopyToClipboardButton from '#components/CopyToClipboardButton.tsx';
 import styles from './TokenManagement.module.css';
 
@@ -37,11 +36,11 @@ const AccessToken: React.FC<{ accessToken: string }> = props => {
 };
 
 const TokenManagement: React.FC<{}> = props => {
-  const load = useCallback(async (cancelToken: CancelToken) => {
+  const load = useCallback(async (signal: AbortSignal) => {
     const { items } = await api<SearchResponse<PermanentToken>>(
       '/tokens',
       {},
-      cancelToken
+      signal
     );
     return items;
   }, []);

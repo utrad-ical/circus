@@ -32,7 +32,6 @@ import { useDispatch } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
 import { newSearch } from '#store/searches.ts';
 import { api } from '#utils/api.ts';
-import type { CancelToken } from '#utils/cancelToken.ts';
 import useLoadData from '#utils/useLoadData.ts';
 import useLoginUser from '#utils/useLoginUser.ts';
 import useQuery from '#utils/useQuery.ts';
@@ -147,14 +146,14 @@ const PluginJobDetail: React.FC<{}> = props => {
   const dispatchForJobSearch = useDispatch();
 
   const loadJob = useCallback(
-    async (token: CancelToken) => {
+    async (signal: AbortSignal) => {
       setBusy(true);
       try {
-        const job = await api<PluginJob>(`plugin-jobs/${jobId}`, {}, token);
+        const job = await api<PluginJob>(`plugin-jobs/${jobId}`, {}, signal);
         const pluginData = await api<Plugin>(
           `plugins/${job.pluginId}`,
           {},
-          token
+          signal
         );
         const seriesData: Record<string, Series> = {};
         const viewPersonalInfoFlag = memoizedAccessiblePlugins
@@ -166,7 +165,7 @@ const PluginJobDetail: React.FC<{}> = props => {
           seriesData[seriesUid] = await api<Series>(
             `series/${seriesUid}`,
             {},
-            token
+            signal
           );
           if (!viewPersonalInfoFlag) {
             delete seriesData[seriesUid].patientInfo;
@@ -200,7 +199,7 @@ const PluginJobDetail: React.FC<{}> = props => {
 
         return { job, pluginData, seriesData };
       } finally {
-        if (!token.cancelled) setBusy(false);
+        if (!signal.aborted) setBusy(false);
       }
     },
     [

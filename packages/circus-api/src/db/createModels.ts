@@ -46,7 +46,7 @@ export const makeModels = (
     },
     token: { schema: s.tokenDoc, col: 'tokens', pk: 'accessToken' },
     plugin: {
-      schema: z.union([dbEntry(s.plugin), dbEntry(s.remotePlugin)]),
+      schema: s.pluginDoc,
       col: 'pluginDefinitions',
       pk: 'pluginId'
     },

@@ -1,14 +1,12 @@
-import { z } from 'zod';
 import { defineRoute, defineRouteGroup, route } from '../../defineRoute.ts';
-import { dbEntry } from '../../schemas/derive.ts';
 import { handleGet, handleList } from './index.ts';
-import { plugin, plugins, remotePlugin } from '../../schemas/index.ts';
+import { pluginDoc, plugins } from '../../schemas/index.ts';
 
-export const getPluginsPluginId = defineRoute({
+export const getPlugin = defineRoute({
   verb: 'get',
   path: '/plugins/:pluginId',
   description: 'Gets the specified plug-in definition.',
-  response: z.union([dbEntry(plugin), dbEntry(remotePlugin)])
+  response: pluginDoc
 });
 
 export const getPlugins = defineRoute({
@@ -21,5 +19,5 @@ export const getPlugins = defineRoute({
 export default defineRouteGroup({
   name: 'Plugins',
   description: 'Fetches information about CIRCUS CS Plug-ins.',
-  routes: [route(getPluginsPluginId, handleGet), route(getPlugins, handleList)]
+  routes: [route(getPlugin, handleGet), route(getPlugins, handleList)]
 });

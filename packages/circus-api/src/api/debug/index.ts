@@ -1,13 +1,14 @@
 import { PassThrough } from 'stream';
 import delay from '../../utils/delay.ts';
 import type { RouteMiddleware } from '../../typings/middlewares.ts';
+import type * as routes from './routes.ts';
 
 import packageJson from '../../../package.json' with { type: 'json' };
 
 const version = packageJson.version;
 const upSince = new Date().toISOString();
 
-export const handleGet: RouteMiddleware = () => {
+export const handleGet: RouteMiddleware<typeof routes.getStatus> = () => {
   return async (ctx, next) => {
     ctx.body = {
       status: 'running',
@@ -22,13 +23,15 @@ export const handleGet: RouteMiddleware = () => {
   };
 };
 
-export const handleEcho: RouteMiddleware = () => {
+export const handleEcho: RouteMiddleware<typeof routes.postEcho> = () => {
   return async (ctx, next) => {
     ctx.body = ctx.request.body;
   };
 };
 
-export const handleDummyProgress: RouteMiddleware = () => {
+export const handleDummyProgress: RouteMiddleware<
+  typeof routes.getDummyProgress
+> = () => {
   return async (ctx, next) => {
     const stream = new PassThrough();
     ctx.body = stream;

@@ -1,21 +1,13 @@
-import performSearch from '../../performSearch.ts';
-import type { RouteMiddleware } from '../../../typings/middlewares.ts';
-import { extractFilter } from '../../performSearch.ts';
-import { z } from 'zod';
-import { mongoFilter } from '../../../schemas/mongoFilter.ts';
-import crypto from 'crypto';
 import httpStatus from 'http-status';
+import { z } from 'zod';
+import performSearch, { extractFilter } from '../../performSearch.ts';
+import { mongoFilter } from '../../../schemas/mongoFilter.ts';
+import type { RouteMiddleware } from '../../../typings/middlewares.ts';
+import type * as routes from './routes.ts';
 
-export const handleGet: RouteMiddleware = ({ models }) => {
-  return async (ctx, next) => {
-    await performSearch(models.plugin, {}, ctx, {
-      defaultSort: { createdAt: -1 },
-      allowUnlimited: true
-    });
-  };
-};
-
-export const handlePatch: RouteMiddleware = ({ models }) => {
+export const handlePatch: RouteMiddleware<typeof routes.patchPlugin> = ({
+  models
+}) => {
   return async (ctx, next) => {
     const pluginId = ctx.params.pluginId;
     await models.plugin.modifyOne(pluginId, ctx.request.body);
@@ -23,12 +15,13 @@ export const handlePatch: RouteMiddleware = ({ models }) => {
   };
 };
 
-const pluginFilter = mongoFilter({ type: z.enum(['CAD', 'CAD+remote']) });
+const pluginFilter = mongoFilter({ type: z.enum(['CAD']) });
 
-export const handleSearch: RouteMiddleware = ({ models }) => {
+export const handleSearch: RouteMiddleware<typeof routes.searchPlugins> = ({
+  models
+}) => {
   return async (ctx, next) => {
     const filter = extractFilter(ctx, pluginFilter);
-
     await performSearch(models.plugin, filter, ctx, {
       defaultSort: { pluginId: 1 },
       allowUnlimited: true
@@ -36,36 +29,11 @@ export const handleSearch: RouteMiddleware = ({ models }) => {
   };
 };
 
-const generateRemoteCadPluginId = (
-  adapter: string,
-  pluginName: string,
-  version: string
-): string => {
-  const input = `${adapter}:${pluginName}:${version}`;
-  return `rmt-${crypto.createHash('sha256').update(input).digest('hex')}`;
-};
-
-export const handlePost: RouteMiddleware = ({ models }) => {
+export const handlePost: RouteMiddleware<typeof routes.postPlugin> = ({
+  models
+}) => {
   return async (ctx, next) => {
-    const values = ctx.request.body;
-    const { type, pluginName, version, runConfiguration } = values;
-    if (!type) ctx.throw(httpStatus.BAD_REQUEST, 'type is required.');
-    if (type === 'CAD+remote') {
-      values.pluginId = generateRemoteCadPluginId(
-        runConfiguration.adapter,
-        pluginName,
-        version
-      );
-      const existing = await models.plugin.findById(values.pluginId);
-      if (existing) {
-        ctx.throw(
-          httpStatus.BAD_REQUEST,
-          'The combination of adaptor, pluginName, and version must be unique.'
-        );
-      }
-    }
-
-    await models.plugin.insert(values);
+    await models.plugin.insert(ctx.request.body);
     ctx.status = httpStatus.CREATED;
   };
 };

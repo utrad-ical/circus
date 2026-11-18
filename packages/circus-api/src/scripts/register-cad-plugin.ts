@@ -82,7 +82,7 @@ export const command: Command<{
     }
 
     const doc = {
-      type: 'CAD',
+      type: 'CAD' as const,
       pluginId,
       pluginName: manifest.pluginName,
       version: manifest.version,

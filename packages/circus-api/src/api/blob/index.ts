@@ -2,6 +2,7 @@ import status from 'http-status';
 import rawBody from 'raw-body';
 import { createHash } from 'crypto';
 import type { RouteMiddleware } from '../../typings/middlewares.ts';
+import type * as routes from './routes.ts';
 import { createGunzip } from 'zlib';
 
 const sha1 = (buf: Buffer) => {
@@ -10,7 +11,9 @@ const sha1 = (buf: Buffer) => {
   return sha1.digest('hex');
 };
 
-export const handleGet: RouteMiddleware = ({ blobStorage }) => {
+export const handleGet: RouteMiddleware<typeof routes.getBlobHash> = ({
+  blobStorage
+}) => {
   return async (ctx, next) => {
     const hash = ctx.params.hash;
     try {
@@ -23,7 +26,9 @@ export const handleGet: RouteMiddleware = ({ blobStorage }) => {
   };
 };
 
-export const handlePut: RouteMiddleware = ({ blobStorage }) => {
+export const handlePut: RouteMiddleware<typeof routes.putBlobHash> = ({
+  blobStorage
+}) => {
   return async (ctx, next) => {
     const incoming = /^(x-)?gzip$/.test(
       ctx.req.headers['content-encoding'] ?? ''

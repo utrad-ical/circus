@@ -1,11 +1,5 @@
-// We use cosmiconfig to manage settings.
-// DO NOT DIRECTLY EDIT THIS FILE!!!
-
-// Instead, make a configuration file
-// named 'circus.config.js' (or any other file cosmiconfig recognizes)
-// and specify the settings. Items in your setting file
-// will be merged recursively.
-
+import { defaultMongoUrl } from '@utrad-ical/circus-cs-core/default-config';
+import { isContainerMode } from '@utrad-ical/circus-lib/config';
 import os from 'os';
 
 export interface Configuration {
@@ -27,14 +21,15 @@ const defaults: Configuration = {
       pluginCachePath: '/var/circus/data/plugin-cache',
       // URL of CIRCUS RS as seen from the browser. A path on the same origin
       // as the web UI is recommended, so that the session cookie is sent
-      dicomImageServerUrl: '/rs',
+      dicomImageServerUrl:
+        (isContainerMode && process.env.DICOM_IMAGE_SERVER_URL) || '/rs',
       debug: false,
       // Maximum size of each uploaded DICOM file (not of an archive)
       uploadFileSizeMaxBytes: 200 * 1024 * 1024
     }
   },
   database: {
-    options: { mongoUrl: 'mongodb://localhost:27017/circus-api' }
+    options: { mongoUrl: defaultMongoUrl }
   },
   blobStorage: {
     type: 'LocalStorage',

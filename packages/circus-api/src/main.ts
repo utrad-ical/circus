@@ -3,10 +3,11 @@
 import { once } from 'node:events';
 import { createStdoutLogger } from '@utrad-ical/circus-lib';
 import type { Logger } from '@utrad-ical/circus-lib';
+import { ConfigLoadError } from '@utrad-ical/circus-lib/config';
 import dashdash from 'dashdash';
 import merge from 'merge';
 import type * as mongo from 'mongodb';
-import config from './config/index.ts';
+import loadApiConfig from './config/index.ts';
 import createServiceLoader from './createServiceLoader.ts';
 import scanMigrationFiles from './utils/scanMigrationFiles.ts';
 
@@ -80,15 +81,14 @@ const getLatestDbSchemaRevision = async () => {
 };
 
 const main = async () => {
-  const patchedConfig = merge({}, config);
-  Object.keys(parsedArgs).forEach(k => {
-    if ((parsedArgs as any)[k] !== undefined) {
-      patchedConfig.apiServer.options[k] = (parsedArgs as any)[k];
-    }
-  });
-
   let startupLogger: Logger | undefined;
   try {
+    const patchedConfig = merge({}, await loadApiConfig());
+    Object.keys(parsedArgs).forEach(k => {
+      if ((parsedArgs as any)[k] !== undefined) {
+        patchedConfig.apiServer.options[k] = (parsedArgs as any)[k];
+      }
+    });
     const loader = await createServiceLoader(patchedConfig);
     const logger = await loader.get('logger');
     startupLogger = logger;
@@ -136,7 +136,9 @@ const main = async () => {
   } catch (err) {
     (startupLogger ?? createStdoutLogger('api')).error(
       { err },
-      'CIRCUS API server failed to start'
+      err instanceof ConfigLoadError
+        ? err.message
+        : 'CIRCUS API server failed to start'
     );
     process.exit(1);
   }

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { test, before } from 'node:test';
+import { test, before, after } from 'node:test';
 import createDicomTagReader, {
   extractAge,
   parseDate,
@@ -9,11 +9,18 @@ import fs from 'fs-extra';
 import path from 'path';
 
 let content: Buffer;
+const originalTimeZone = process.env.TZ;
 
 before(async () => {
+  process.env.TZ = 'UTC';
   content = await fs.readFile(
     path.join(import.meta.dirname, '../../test/dicom/CT-MONO2-16-brain.dcm')
   );
+});
+
+after(() => {
+  if (originalTimeZone === undefined) delete process.env.TZ;
+  else process.env.TZ = originalTimeZone;
 });
 
 test('default', async () => {
@@ -28,6 +35,39 @@ test('with defaultTzOffset', async () => {
   const reader = await createDicomTagReader({ defaultTzOffset: 540 });
   const result = await reader(content as unknown as ArrayBuffer);
   assert.deepEqual(result.seriesDate, new Date('1999-05-05T01:52:34.530Z'));
+});
+
+test('uses the process time zone when the DICOM file has no offset', async () => {
+  process.env.TZ = 'America/New_York';
+  try {
+    const result = await readDicomTags(content as unknown as ArrayBuffer);
+    assert.deepEqual(result.seriesDate, new Date('1999-05-05T14:52:34.530Z'));
+    assert.deepEqual(
+      parseDate('20260115', '100000'),
+      new Date('2026-01-15T15:00:00Z')
+    );
+    const utc = await readDicomTags(content as unknown as ArrayBuffer, {
+      defaultTzOffset: 0
+    });
+    assert.deepEqual(utc.seriesDate, new Date('1999-05-05T10:52:34.530Z'));
+  } finally {
+    process.env.TZ = 'UTC';
+  }
+});
+
+test('uses the DICOM offset ahead of the configured default', async () => {
+  // Timezone Offset From UTC, encoded as an explicit VR little-endian SH tag.
+  const header = Buffer.from([0x08, 0, 0x01, 0x02, 0x53, 0x48, 0x06, 0]);
+  for (const [offset, time] of [
+    ['+0900', '1999-05-05T01:52:34.530Z'],
+    ['-0330', '1999-05-05T14:22:34.530Z']
+  ]) {
+    const data = Buffer.concat([content, header, Buffer.from(offset + ' ')]);
+    const result = await readDicomTags(data as unknown as ArrayBuffer, {
+      defaultTzOffset: 180
+    });
+    assert.deepEqual(result.seriesDate, new Date(time));
+  }
 });
 
 test('parseDate', () => {

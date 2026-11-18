@@ -7,9 +7,7 @@ const csDefault = fileURLToPath(
   import.meta.resolve('@utrad-ical/circus-cs-core/default-config')
 );
 
-const config = loadConfig([
-  csDefault, // CS Core Defaults
-  path.join(import.meta.dirname, 'default') // API server defaults
-]);
+const loadApiConfig = () =>
+  loadConfig([csDefault, path.join(import.meta.dirname, 'default.ts')]);
 
-export default config;
+export default loadApiConfig;

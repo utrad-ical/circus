@@ -1,10 +1,11 @@
 import minimist from 'minimist';
 import { styleText } from 'node:util';
-import config from '../config/index.ts';
+import loadCsConfig from '../config/index.ts';
 import path from 'path';
 import configureServiceLoader from '../configureServiceLoader.ts';
 import type Command from './Command.ts';
 import { ServiceLoader } from '@utrad-ical/circus-lib';
+import { ConfigLoadError } from '@utrad-ical/circus-lib/config';
 
 const commands: { [key: string]: any } = {
   register: {
@@ -69,17 +70,19 @@ async function boot(commandName: string | undefined, args: any) {
     return;
   }
 
-  const loader = configureServiceLoader(new ServiceLoader(config));
-  const module: string = commands[commandName].module || commandName;
-  loader.registerModule('command', path.join(import.meta.dirname, module));
-
   try {
+    const loader = configureServiceLoader(
+      new ServiceLoader(await loadCsConfig())
+    );
+    const module: string = commands[commandName].module || commandName;
+    loader.registerModule('command', path.join(import.meta.dirname, module));
+
     const callFunc = (await loader.get('command')) as Command;
     await callFunc(commandName, args);
     await loader.dispose();
   } catch (e) {
     console.log(styleText('red', 'Error:'));
-    console.error(e);
+    console.error(e instanceof ConfigLoadError ? e.message : e);
     process.exit(1);
   }
 }

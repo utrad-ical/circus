@@ -1,20 +1,25 @@
+import { isContainerMode } from '@utrad-ical/circus-lib/config';
 import path from 'path';
 import os from 'os';
 import type * as circus from '../interface.ts';
 
-// We use cosmiconfig to manage settings.
-// DO NOT DIRECTLY EDIT THIS FILE!!!
+export const defaultMongoUrl = isContainerMode
+  ? 'mongodb://mongo/circus-api'
+  : 'mongodb://localhost:27017/circus-api';
 
-// Instead, make a configuration file
-// named 'circus.config.js' (or any other file cosmiconfig recognizes)
-// and specify the settings. Items in your setting file
-// will be merged recursively.
+const doodHostWorkingPath = isContainerMode
+  ? process.env.DOOD_HOST_WORKING_PATH
+  : undefined;
 
 const defaults: circus.Configuration = {
   jobRunner: {
     options: {
-      workingDirectory: path.join(os.tmpdir(), 'circus-cs'),
-      doodHostWorkingDirectory: undefined,
+      workingDirectory: isContainerMode
+        ? '/var/circus/data/cs-tmp'
+        : path.join(os.tmpdir(), 'circus-cs'),
+      doodHostWorkingDirectory: doodHostWorkingPath
+        ? path.join(doodHostWorkingPath, 'cs-tmp')
+        : undefined,
       removeTemporaryDirectory: true
     }
   },
@@ -22,7 +27,7 @@ const defaults: circus.Configuration = {
   queue: {
     type: 'MongoQueue',
     options: {
-      mongoUrl: 'mongodb://localhost:27017/circus-api',
+      mongoUrl: defaultMongoUrl,
       collectionName: 'pluginJobQueue'
     }
   },
@@ -30,9 +35,11 @@ const defaults: circus.Configuration = {
   jobReporter: {
     type: 'MongoPluginJobReporter',
     options: {
-      mongoUrl: 'mongodb://localhost:27017/circus-api',
+      mongoUrl: defaultMongoUrl,
       collectionName: 'pluginJobs',
-      resultsDirectory: '/var/circus/plugin-results'
+      resultsDirectory: isContainerMode
+        ? '/var/circus/data/plugin-results'
+        : '/var/circus/plugin-results'
     }
   },
 
@@ -71,7 +78,7 @@ const defaults: circus.Configuration = {
   pluginDefinitionAccessor: {
     type: 'MongoPluginDefinitionAccessor',
     options: {
-      mongoUrl: 'mongodb://localhost:27017/circus-api',
+      mongoUrl: defaultMongoUrl,
       collectionName: 'pluginDefinitions'
     }
   }

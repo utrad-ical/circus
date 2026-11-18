@@ -5,6 +5,7 @@
 .github
 .env
 **/.env
+circus.config.*
 node_modules
 **/node_modules
 coverage

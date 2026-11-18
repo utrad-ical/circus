@@ -14,7 +14,7 @@ const stripUndefined: <T extends object>(input: T) => Partial<T> = input => {
 
 /**
  * Parses DICOM Date/Time.
- * This uses the system's *local* time zone.
+ * Uses the process time zone when the offset is omitted.
  * @param da DICOM 'DA' (Date) string (`YYYYMMDD`).
  * @param tm DICOM 'TM' (Time) string (`HHMMSS.FFFFFF`)
  * @param tzOffset Timezone offset represented in minutes (e.g., UTC+9 = 540)
@@ -22,24 +22,31 @@ const stripUndefined: <T extends object>(input: T) => Partial<T> = input => {
 export const parseDate = (
   da: string | undefined,
   tm?: string,
-  tzOffset: number = 0
+  tzOffset?: number
 ) => {
   // Some DICOM files have nonstandard separators, so we remove them
   if (da === undefined) return undefined;
   da = da.replace(/[-/.]/g, '');
   tm = tm ? tm.replace(/[: ]/g, '') : '000000.000000';
-  const date = new Date();
-  date.setUTCFullYear(
+  const date = new Date(0);
+  const dateParts = [
     Number(da.substring(0, 4)),
     Number(da.substring(4, 6)) - 1, // month is zero-based
     Number(da.substring(6))
+  ] as const;
+  const hour = Number(tm.substring(0, 2));
+  const minute = Number(tm.substring(2, 4));
+  const second = Number(tm.substring(4, 6));
+  const ms = Math.floor(
+    Number((tm.substring(7) + '000000').substring(0, 6)) / 1000
   );
-  date.setUTCHours(
-    Number(tm.substring(0, 2)),
-    Number(tm.substring(2, 4)) - tzOffset,
-    Number(tm.substring(4, 6)),
-    Math.floor(Number((tm.substring(7) + '000000').substring(0, 6)) / 1000)
-  );
+  if (tzOffset === undefined) {
+    date.setFullYear(...dateParts);
+    date.setHours(hour, minute, second, ms);
+  } else {
+    date.setUTCFullYear(...dateParts);
+    date.setUTCHours(hour, minute - tzOffset, second, ms);
+  }
   return date;
 };
 
@@ -94,7 +101,7 @@ export const extractAge = (
         return Math.floor(nnn / 365);
     }
   } else {
-    const birthDate = parseDate(birthDateStr);
+    const birthDate = parseDate(birthDateStr, undefined, 0);
     if (!birthDate || !referenceDate) return undefined;
     return calcAge(birthDate, referenceDate);
   }
@@ -224,16 +231,13 @@ const prepareEncConverter = async (charSet: string | undefined) => {
   throw new Error(`Could not find a encoding ${charSet}`);
 };
 
-const extractTzOffset = (
-  tzOffsetString: string | undefined,
-  defaultTzOffset: number
-) => {
+const extractTzOffset = (tzOffsetString: string | undefined) => {
   if (typeof tzOffsetString !== 'string' || !/^[+-]\d{4}$/.test(tzOffsetString))
-    return defaultTzOffset;
+    return undefined;
   const sign = tzOffsetString[0] === '-' ? -1 : 1;
   const hourOffset = Number(tzOffsetString.substring(1, 3));
   const minuteOffset = Number(tzOffsetString.substring(3));
-  return sign * (hourOffset * 60) * minuteOffset;
+  return sign * (hourOffset * 60 + minuteOffset);
 };
 
 interface Options {
@@ -253,11 +257,8 @@ export const readDicomTags = async (
       else throw err;
     }
   })();
-  const { defaultTzOffset = 0 } = options;
-  const tzOffset = extractTzOffset(
-    dataset.string('x00080201'),
-    defaultTzOffset
-  );
+  const tzOffset =
+    extractTzOffset(dataset.string('x00080201')) ?? options.defaultTzOffset;
 
   const specificCharacterSet = dataset.string('x00080005');
   const encConverter = await prepareEncConverter(specificCharacterSet);

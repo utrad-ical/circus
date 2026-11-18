@@ -1,6 +1,6 @@
 import EditorPage from './EditorPage.tsx';
 import React, { type FC } from 'react';
-import type { CircusIconDefinition } from '#components/BodyPartIcon.tsx';
+import type { Plugin } from '@utrad-ical/circus-api-schema';
 import BodyPartIcon from '#components/BodyPartIcon.tsx';
 import IconEditor from './IconEditor.tsx';
 import CopyToClipboardButton from '#components/CopyToClipboardButton.tsx';
@@ -10,7 +10,7 @@ import type { PropertyEditorProperties } from '#components/PropertyEditor.tsx';
 import PropertyEditor from '#components/PropertyEditor.tsx';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
 
-const listColumns: DataGridColumnDefinition[] = [
+const listColumns: DataGridColumnDefinition<Plugin>[] = [
   {
     key: 'pluginId',
     caption: 'Plug-in ID',
@@ -39,13 +39,14 @@ const listColumns: DataGridColumnDefinition[] = [
   { key: 'description', caption: 'Description' }
 ];
 
-interface RunConfiguration {
-  gpus: string;
-  timeout?: number;
-}
+type RunConfiguration = Plugin['runConfiguration'];
 
 const runConfigurationProperties: PropertyEditorProperties<RunConfiguration> = [
-  { key: 'gpus', caption: 'GPUs', editor: et.text() },
+  {
+    key: 'gpus',
+    caption: 'GPUs',
+    editor: et.text() as et.Editor<RunConfiguration['gpus']>
+  },
   { key: 'timeout', caption: 'Timeout (sec)', editor: et.number({ min: 0 }) }
 ];
 
@@ -60,16 +61,8 @@ const RunConfigurationEditor: et.Editor<RunConfiguration> = props => {
   );
 };
 
-interface PluginEditorProperties {
-  pluginName: string;
-  version: string;
-  icon: CircusIconDefinition;
-  runConfiguration: RunConfiguration;
-  displayStrategy: any;
-}
-
 // The ID and the type cannot be changed
-const editorProperties: PropertyEditorProperties<PluginEditorProperties> = [
+const editorProperties: PropertyEditorProperties<Plugin> = [
   { key: 'pluginName', caption: 'Plug-in Name', editor: et.text() },
   { key: 'version', caption: 'Version', editor: et.text() },
   { key: 'icon', caption: 'Icon', editor: IconEditor },

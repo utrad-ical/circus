@@ -2,11 +2,9 @@ import Input from '#components/Input.tsx';
 import React from 'react';
 import styles from './WindowPresetEditor.module.css';
 
-interface WindowAndLabel {
-  label: string;
-  level: number;
-  width: number;
-}
+import type { Project } from '@utrad-ical/circus-api-schema';
+
+type WindowAndLabel = Project['windowPresets'][number];
 
 /**
  * Renderes a 'window preset' editor with 'label', 'level' and 'width' fields.

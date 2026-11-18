@@ -28,6 +28,7 @@
   "author": "UTRAD ICAL Team",
   "license": "UNLICENSED",
   "devDependencies": {
+    "@utrad-ical/circus-api-schema": "workspace:*",
     "@material-symbols/svg-600": "0.48.2",
     "@types/bytes": "^3.1.6",
     "@types/lodash-es": "^4.17.12",

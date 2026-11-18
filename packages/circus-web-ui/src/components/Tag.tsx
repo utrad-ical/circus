@@ -7,7 +7,7 @@ import styles from './Tag.module.css';
  */
 export const PhysicalTag: React.FC<{
   name: string;
-  color: string;
+  color?: string;
 }> = React.memo(props => {
   const color = props.color || '#f00';
   const style = { '--tag-color': color } as React.CSSProperties;

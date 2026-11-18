@@ -1,4 +1,4 @@
-import type { AxiosResponse } from 'axios';
+import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import axios from 'axios';
 import type { CancelToken } from './cancelToken.ts';
 import { getStore } from '#store/storeAccess.ts';
@@ -10,10 +10,10 @@ import {
   showSessionUserChangedMessage
 } from './sessionUserCheck.ts';
 
-export interface ApiCaller {
-  (command: string, options?: any, cancelToken?: CancelToken): Promise<any>;
-  getBaseUrl: () => string;
-}
+type ApiOptions<Body> = Omit<AxiosRequestConfig<Body>, 'cancelToken'> & {
+  checkUser?: boolean;
+  handleErrors?: boolean | number[];
+};
 
 /**
  * The header required by the API server for requests that may change data
@@ -29,20 +29,19 @@ export const csrfHeaders = { 'X-Requested-With': 'XMLHttpRequest' };
 const createApiCaller = (apiServer: string) => {
   const baseURL = apiServer + 'api/';
 
-  const api: ApiCaller = async (
+  const api = async <Response = unknown, Body = unknown>(
     command: string,
-    options = {},
+    options: ApiOptions<Body> = {},
     cancelToken?: CancelToken
-  ) => {
-    const params: any = { url: command, method: 'get', ...options };
+  ): Promise<Response> => {
+    const { checkUser = true, handleErrors, ...request } = options;
+    const params = { url: command, method: 'get', ...request };
     if (typeof params.data === 'object') {
       if (params.method === 'get') params.method = 'post';
     }
 
     // Unless told not to (i.e., when loading the user just after a login),
     // the server rejects the request if the session user has changed
-    const { checkUser = true } = options;
-    delete params.checkUser;
     const userEmail = checkUser ? currentUserEmail() : undefined;
 
     try {
@@ -59,14 +58,15 @@ const createApiCaller = (apiServer: string) => {
         axiosCancelToken = source.token;
       }
 
-      const res = await axios({
+      const config = {
         baseURL,
         cached: false,
         withCredentials: true,
         ...params,
         headers,
         cancelToken: axiosCancelToken
-      });
+      };
+      const res = await axios<Response>(config);
       return res.data;
     } catch (err: any) {
       // Cancelled on purpose (e.g., by `useLoadData` on re-render)
@@ -77,11 +77,11 @@ const createApiCaller = (apiServer: string) => {
       }
       // By default, all errors are displayed with a minimal message.
       // Set 'handleErrors' option to supress error message for specific error types.
-      let handle = options.handleErrors === true;
+      let handle = handleErrors === true;
       if (
         err.response &&
-        Array.isArray(options.handleErrors) &&
-        options.handleErrors.indexOf(err.response.status) > -1
+        Array.isArray(handleErrors) &&
+        handleErrors.includes(err.response.status)
       ) {
         handle = true;
       }

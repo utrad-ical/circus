@@ -2,11 +2,9 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import { api } from '#utils/api.ts';
 import type { AppThunk } from './index.ts';
-import type Plugin from '../types/Plugin.ts';
+import type { Plugin } from '@utrad-ical/circus-api-schema';
 
-export interface Plugins {
-  [pluginId: string]: 'loading' | Plugin;
-}
+type Plugins = Record<string, 'loading' | Plugin>;
 
 const slice = createSlice({
   name: 'plugins',
@@ -30,7 +28,7 @@ export const loadPluginInfo = (pluginId: string): AppThunk => {
     const state = getState();
     if (state.plugins[pluginId]) return;
     dispatch(pluginInfoLoading(pluginId));
-    const userData = await api(`plugins/${pluginId}`);
-    dispatch(pluginInfoLoaded(userData));
+    const plugin = await api<Plugin>(`plugins/${pluginId}`);
+    dispatch(pluginInfoLoaded(plugin));
   };
 };

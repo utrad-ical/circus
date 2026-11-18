@@ -6,6 +6,11 @@ import {
   isSessionUserChangedError
 } from './sessionUserCheck.ts';
 import type { Dispatch } from 'redux';
+import type {
+  LoginInfo,
+  LoginInfoFull,
+  SessionCreate
+} from '@utrad-ical/circus-api-schema';
 import * as actions from '#store/loginUser.ts';
 import * as searchActions from '#store/searches.ts';
 
@@ -30,9 +35,7 @@ const loginManager = (apiServer: string, dispatch: Dispatch) => {
     }
   };
 
-  const startSession = async (
-    data: { username: string; password: string } | { onetime: string }
-  ) => {
+  const startSession = async (data: SessionCreate) => {
     await axios.post(apiServer + 'api/session', data, {
       headers: csrfHeaders,
       withCredentials: true
@@ -63,20 +66,29 @@ const loginManager = (apiServer: string, dispatch: Dispatch) => {
   const refreshUserInfo = async (full = false): Promise<string | undefined> => {
     dispatch(actions.loginInfoRequest());
     try {
-      const result = await api('login-info' + (full ? '/full' : ''), {
+      const options = {
         handleErrors: [401],
         // Loading the full info (re)establishes the user of this tab
         checkUser: !full
-      });
-      if (typeof result.userEmail !== 'string') {
+      };
+      const result = full
+        ? {
+            full: true as const,
+            user: await api<LoginInfoFull>('login-info/full', options)
+          }
+        : {
+            full: false as const,
+            user: await api<LoginInfo>('login-info', options)
+          };
+      if (typeof result.user.userEmail !== 'string') {
         throw Error('Server did not respond with valid user data');
       }
-      if (full) {
-        dispatch(actions.fullLoginInfoLoaded(result));
+      if (result.full) {
+        dispatch(actions.fullLoginInfoLoaded(result.user));
       } else {
         dispatch(actions.loginInfoConfirmed());
       }
-      return result.userEmail;
+      return result.user.userEmail;
     } catch (err) {
       // Keep the state of this tab; the user is asked to reload the page
       if (isSessionUserChangedError(err)) return;

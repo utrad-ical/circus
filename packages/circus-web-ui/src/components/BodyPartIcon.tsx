@@ -1,20 +1,15 @@
 import React from 'react';
 import Icon from './Icon.tsx';
 import classnames from 'classnames';
+import type { IconDefinition } from '@utrad-ical/circus-api-schema';
 import styles from './BodyPartIcon.module.css';
-
-export interface CircusIconDefinition {
-  glyph: string;
-  color: string;
-  backgroundColor: string;
-}
 
 /**
  * Renderes a body-part icon with the specified color and backgroundColor.
  */
 const BodyPartIcon: React.FC<{
   size?: string;
-  icon: CircusIconDefinition;
+  icon: IconDefinition;
 }> = props => {
   const {
     size,

@@ -5,10 +5,15 @@ import Button from '#components/Button.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import type {
   CsResultsContextType,
-  FeedbackReport,
-  Job,
-  Plugin
+  FeedbackReport
 } from '@utrad-ical/circus-ui-kit';
+import type {
+  Plugin,
+  PluginJob,
+  PluginJobFeedbackCreate,
+  PluginJobSearchItem,
+  Series
+} from '@utrad-ical/circus-api-schema';
 import { CsResultsContext } from '@utrad-ical/circus-ui-kit';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
 import DataGrid from '#components/DataGrid.tsx';
@@ -75,43 +80,44 @@ const RelevantJobs: React.FC<{
 }> = props => {
   const { currentJobId } = props;
 
-  const RelevantJobsDataView: React.FC<any> = React.memo(props => {
-    const { value } = props;
-    const columns: DataGridColumnDefinition<any>[] = [
-      {
-        caption: 'Plugin',
-        className: 'plugin',
-        renderer: PluginRenderer('xs')
-      },
-      {
-        caption: 'Register/Finish',
-        className: 'execution-time',
-        renderer: Times('createdAt', 'finishedAt')
-      },
-      { caption: 'Status', className: 'status', renderer: Status },
-      { caption: 'FB', className: 'feedback', renderer: FeedbackRenderer },
-      {
-        key: 'action',
-        caption: '',
-        renderer: ({ value }) =>
-          currentJobId === value.jobId ? null : (
-            <div className="register">
-              <Link to={`/plugin-job/${value.jobId}`}>
-                <Button
-                  disabled={value.status !== 'finished'}
-                  icon="circus-series"
-                  size="small"
-                  variant="primary"
-                >
-                  View
-                </Button>
-              </Link>
-            </div>
-          )
-      }
-    ];
-    return <DataGrid value={value} columns={columns} />;
-  });
+  const RelevantJobsDataView: React.FC<{ value: PluginJobSearchItem[] }> =
+    React.memo(props => {
+      const { value } = props;
+      const columns: DataGridColumnDefinition<PluginJobSearchItem>[] = [
+        {
+          caption: 'Plugin',
+          className: 'plugin',
+          renderer: PluginRenderer('xs')
+        },
+        {
+          caption: 'Register/Finish',
+          className: 'execution-time',
+          renderer: Times('createdAt', 'finishedAt')
+        },
+        { caption: 'Status', className: 'status', renderer: Status },
+        { caption: 'FB', className: 'feedback', renderer: FeedbackRenderer },
+        {
+          key: 'action',
+          caption: '',
+          renderer: ({ value }) =>
+            currentJobId === value.jobId ? null : (
+              <div className="register">
+                <Link to={`/plugin-job/${value.jobId}`}>
+                  <Button
+                    disabled={value.status !== 'finished'}
+                    icon="circus-series"
+                    size="small"
+                    variant="primary"
+                  >
+                    View
+                  </Button>
+                </Link>
+              </div>
+            )
+        }
+      ];
+      return <DataGrid value={value} columns={columns} />;
+    });
 
   return (
     <div style={{ whiteSpace: 'nowrap', margin: '1em' }}>
@@ -144,20 +150,24 @@ const PluginJobDetail: React.FC<{}> = props => {
     async (token: CancelToken) => {
       setBusy(true);
       try {
-        const job = (await api(`plugin-jobs/${jobId}`, {}, token)) as Job;
-        const pluginData = (await api(
+        const job = await api<PluginJob>(`plugin-jobs/${jobId}`, {}, token);
+        const pluginData = await api<Plugin>(
           `plugins/${job.pluginId}`,
           {},
           token
-        )) as Plugin;
-        const seriesData: { [seriesUid: string]: any } = {};
+        );
+        const seriesData: Record<string, Series> = {};
         const viewPersonalInfoFlag = memoizedAccessiblePlugins
           .filter(p => p.roles.includes('viewPersonalInfo'))
           .some(p => p.pluginId === job.pluginId);
         for (const s of job.series) {
           const seriesUid = s.seriesUid;
           if (seriesUid in seriesData) continue;
-          seriesData[seriesUid] = await api(`series/${seriesUid}`, {}, token);
+          seriesData[seriesUid] = await api<Series>(
+            `series/${seriesUid}`,
+            {},
+            token
+          );
           if (!viewPersonalInfoFlag) {
             delete seriesData[seriesUid].patientInfo;
           }
@@ -172,13 +182,10 @@ const PluginJobDetail: React.FC<{}> = props => {
           })
         );
 
-        if (
-          job.series[0].seriesUid &&
-          seriesData[job.series[0].seriesUid].patientInfo
-        ) {
+        const primarySeries = seriesData[job.series[0].seriesUid];
+        if (primarySeries?.patientInfo) {
           const filter = {
-            'patientInfo.patientId':
-              seriesData[job.series[0].seriesUid].patientInfo.patientId
+            'patientInfo.patientId': primarySeries.patientInfo.patientId
           };
 
           dispatchForJobSearch(
@@ -222,7 +229,7 @@ const PluginJobDetail: React.FC<{}> = props => {
   }, []);
 
   const insertLog = useCallback(
-    (action: string, data?: any) => {
+    (action: string, data?: Record<string, unknown>) => {
       dispatch(
         actions.logEventHappened({
           date: new Date().toISOString(),
@@ -244,7 +251,7 @@ const PluginJobDetail: React.FC<{}> = props => {
       return fetch(url, { signal });
     };
     loadAttachment.list = () =>
-      api(`plugin-jobs/${job.jobId}/attachment`) as Promise<string[]>;
+      api<string[]>(`plugin-jobs/${job.jobId}/attachment`);
 
     const inputtableFeedback = memoizedAccessiblePlugins
       .filter(p =>
@@ -267,8 +274,9 @@ const PluginJobDetail: React.FC<{}> = props => {
     return {
       consensual: feedbackState.isConsensual,
       editable: inputtableFeedback && feedbackState.editable,
-      job,
-      plugin: pluginData,
+      // Published plug-in displays use the legacy ui-kit context types.
+      job: job as CsResultsContextType['job'],
+      plugin: pluginData as CsResultsContextType['plugin'],
       eventLogger: insertLog,
       loadAttachment,
       loadDisplay: loadDisplay(jobData.pluginData.pluginId),
@@ -310,7 +318,7 @@ const PluginJobDetail: React.FC<{}> = props => {
     return <Alert variant="danger">No job ID specified.</Alert>;
   }
 
-  const { job, seriesData, pluginData } = jobData;
+  const { job, seriesData } = jobData;
   const primarySeriesUid = job.series[0].seriesUid;
 
   const handleChangeFeedbackMode = (isConsensual: boolean) => {
@@ -325,13 +333,16 @@ const PluginJobDetail: React.FC<{}> = props => {
     setBusy(true);
     try {
       const mode = feedbackState.isConsensual ? 'consensual' : 'personal';
-      await api(`plugin-jobs/${jobId}/feedback/${mode}`, {
-        method: 'POST',
-        data: {
-          data: feedbackState.currentData,
-          actionLog: feedbackState.actionLog
+      await api<unknown, PluginJobFeedbackCreate>(
+        `plugin-jobs/${jobId}/feedback/${mode}`,
+        {
+          method: 'POST',
+          data: {
+            data: feedbackState.currentData,
+            actionLog: feedbackState.actionLog
+          }
         }
-      });
+      );
       reloadJob();
     } finally {
       setBusy(false);
@@ -383,7 +394,7 @@ const PluginJobDetail: React.FC<{}> = props => {
           <MainDisplay
             key={feedbackState.isConsensual ? 'consensual' : 'personal'}
             initialFeedbackValue={feedbackState.currentData}
-            options={pluginData.displayStrategy}
+            options={resultsContext!.plugin.displayStrategy}
             personalOpinions={
               feedbackState.isConsensual
                 ? feedbackState.feedbacks.filter(fb => !fb.isConsensual)

@@ -1,3 +1,8 @@
+import type {
+  MyListItemsPatch,
+  MyListItemsPatched,
+  MyListResourceType
+} from '@utrad-ical/circus-api-schema';
 import Button from '#components/Button.tsx';
 import React from 'react';
 import { useDispatch } from 'react-redux';
@@ -12,7 +17,7 @@ import Icon from './Icon.tsx';
 import MenuItem from './MenuItem.tsx';
 
 const MyListDropdown: React.FC<{
-  resourceType: string;
+  resourceType: MyListResourceType;
   resourceIds: string[];
   searchName: string; // for refreshing search
 }> = props => {
@@ -22,13 +27,16 @@ const MyListDropdown: React.FC<{
   const dispatch = useDispatch();
 
   const handleAddRemove = async (
-    operation: 'add' | 'remove',
+    operation: MyListItemsPatch['operation'],
     myListId: string
   ) => {
-    const res = await api(`mylists/${myListId}/items`, {
-      method: 'patch',
-      data: { operation, resourceIds }
-    });
+    const res = await api<MyListItemsPatched, MyListItemsPatch>(
+      `mylists/${myListId}/items`,
+      {
+        method: 'patch',
+        data: { operation, resourceIds }
+      }
+    );
     const changedCount = res.changedCount;
     const message = `${changedCount}${
       changedCount === 1 ? ' item was' : ' items were'

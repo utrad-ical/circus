@@ -4,7 +4,10 @@ import React, { useState } from 'react';
 import Alert from '#components/Alert.tsx';
 import Select from '#components/Select.tsx';
 import * as et from '#components/editorTypes.tsx';
-import type { Schema, PropSchema } from '#components/JsonSchemaEditor.tsx';
+import type {
+  AttributeSchema,
+  AttributesSchema
+} from '@utrad-ical/circus-api-schema';
 import styles from './AttributeSchemaEditor.module.css';
 
 const TextArrayEditor = et.arrayOf(et.text(), () => '');
@@ -34,11 +37,11 @@ const typeOptions = {
   select: 'Select'
 };
 
-type SchemaEntryType = 'string' | 'number' | 'integer' | 'boolean';
+type SchemaEntryType = NonNullable<AttributeSchema['type']>;
 
 interface SchemaEntryEditorValue {
   key: string;
-  schema: PropSchema;
+  schema: AttributeSchema;
   required: boolean;
 }
 
@@ -50,7 +53,9 @@ const SchemaEntryEditor: React.FC<{
     value: { key, schema, required },
     onChange
   } = props;
-  const normalizedType = Array.isArray(schema.enum) ? 'select' : schema.type;
+  const normalizedType = Array.isArray(schema.enum)
+    ? 'select'
+    : (schema.type ?? 'string');
 
   const SpecEditor: React.FC<{
     value: any;
@@ -90,7 +95,7 @@ const SchemaEntryEditor: React.FC<{
     onChange({ ...props.value, required });
   };
 
-  const handleSpecChange = (newSpec: PropSchema) => {
+  const handleSpecChange = (newSpec: AttributeSchema) => {
     const newAttribute: SchemaEntryEditorValue = {
       ...props.value,
       schema: newSpec
@@ -146,8 +151,8 @@ export const newAttributeItem = (items: SchemaEntryEditorValue[]) => {
 const ArrayOfAttributeSchema = et.arrayOf(SchemaEntryEditor, newAttributeItem);
 
 const AttributeSchemaEditor: React.FC<{
-  value: Schema;
-  onChange: (value: Schema) => void;
+  value: AttributesSchema;
+  onChange: (value: AttributesSchema) => void;
 }> = props => {
   const { value, onChange } = props;
   // The editor is created for each item, so this is the saved schema
@@ -155,7 +160,8 @@ const AttributeSchemaEditor: React.FC<{
   const changed = JSON.stringify(initialValue) !== JSON.stringify(value);
 
   const handleChange = (val: SchemaEntryEditorValue[]) => {
-    const newValue: Schema = {
+    const newValue: AttributesSchema &
+      Required<Pick<AttributesSchema, 'properties'>> = {
       type: 'object',
       properties: {},
       required: val.filter(v => v.required).map(v => v.key)

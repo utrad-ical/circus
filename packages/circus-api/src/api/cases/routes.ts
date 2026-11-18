@@ -1,4 +1,3 @@
-import { z } from 'zod';
 import { defineRoute, defineRouteGroup, route } from '../../defineRoute.ts';
 import { searchResultOf } from '../../schemas/derive.ts';
 import {
@@ -12,6 +11,7 @@ import {
   handleSearch
 } from './index.ts';
 import {
+  caseCreated,
   caseTags,
   caseTagsPatch,
   clinicalCaseCreate,
@@ -39,7 +39,7 @@ export const postCase = defineRoute({
   path: '/cases',
   description: 'Creates a new case.',
   request: clinicalCaseCreate,
-  response: z.strictObject({ caseId: z.string() })
+  response: caseCreated
 });
 
 export const exportMhd = defineRoute({

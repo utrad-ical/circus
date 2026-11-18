@@ -1,3 +1,7 @@
+import type {
+  PluginJobPatch,
+  PluginJobSearchItem
+} from '@utrad-ical/circus-api-schema';
 import u from '#components/utilities.module.css';
 import Button from '#components/Button.tsx';
 import { confirm } from '#components/dialogs.tsx';
@@ -31,7 +35,7 @@ import {
   Times
 } from './SearchResultRenderer.tsx';
 
-const Operation: DataGridRenderer<any> = props => {
+const Operation: DataGridRenderer<PluginJobSearchItem> = props => {
   const { value: job } = props;
   const dispatch = useDispatch();
   const location = useLocation();
@@ -54,7 +58,7 @@ const Operation: DataGridRenderer<any> = props => {
     if (!(await confirm(`Are you sure you want to ${selection} this job?`))) {
       return;
     }
-    await api(`/plugin-jobs/${job.jobId}`, {
+    await api<unknown, PluginJobPatch>(`/plugin-jobs/${job.jobId}`, {
       method: 'PATCH',
       data: { status: selection === 'cancel' ? 'cancelled' : 'invalidated' }
     });
@@ -92,7 +96,7 @@ const Operation: DataGridRenderer<any> = props => {
   );
 };
 
-const columns: DataGridColumnDefinition<any>[] = [
+const columns: DataGridColumnDefinition<PluginJobSearchItem>[] = [
   { caption: 'Plugin', className: 'plugin', renderer: PluginRenderer() },
   { caption: 'Patient', className: 'patient', renderer: PatientInfo },
   { caption: 'Job ID', className: 'job-id', renderer: JobId },
@@ -108,7 +112,7 @@ const columns: DataGridColumnDefinition<any>[] = [
 ];
 
 const DataView: React.FC<{
-  value: any[];
+  value: PluginJobSearchItem[];
   selected: string[];
   onSelectionChange: (id: string, isSelected: boolean) => void;
 }> = props => {

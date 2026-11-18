@@ -1,9 +1,11 @@
-import type { PartialVolumeDescriptor } from '@utrad-ical/circus-rs';
+import type {
+  CaseRevision,
+  CaseRevisionCreate
+} from '@utrad-ical/circus-api-schema';
 import type { LayoutInfo } from '#components/GridContainer.tsx';
-import { createDraft, finishDraft } from 'immer';
 import { api } from '#utils/api.ts';
 import asyncMap from '../../utils/asyncMap.ts';
-import type { ExternalLabel, InternalLabel } from './labelData.ts';
+import type { InternalLabel } from './labelData.ts';
 import {
   externalLabelToInternal,
   internalLabelToExternal
@@ -15,7 +17,7 @@ import type { ViewerDef } from './ViewerGrid.tsx';
  * and forms the unit for history handling.
  */
 export interface EditingData {
-  revision: Revision<InternalLabel>;
+  revision: Revision;
   /**
    * The index of the active series. Always >= 0.
    */
@@ -68,53 +70,30 @@ export type EditingDataLayoutInitializer = (
   } | void
 ) => void;
 
-export interface Revision<
-  L extends InternalLabel | ExternalLabel = InternalLabel
-> {
-  creator: string;
-  date: string;
-  description: string;
-  attributes: object;
-  series: SeriesEntryWithLabels<L>[];
-  status: string;
-}
+export type Revision = Omit<CaseRevision, 'series'> & {
+  series: SeriesEntryWithLabels[];
+};
 
-export interface SeriesEntryWithLabels<
-  L extends InternalLabel | ExternalLabel = InternalLabel
-> {
-  seriesUid: string;
-  partialVolumeDescriptor: PartialVolumeDescriptor;
-  labels: L[];
-}
+export type SeriesEntryWithLabels = Omit<
+  CaseRevision['series'][number],
+  'labels'
+> & {
+  labels: InternalLabel[];
+};
 
 /**
  * Takes the revision data fetched from the API server and converts them
  * to the internal representation with temporary keys and array buffers.
  */
 export const externalRevisionToInternal = async (
-  revision: Revision<ExternalLabel>
-): Promise<Revision<InternalLabel>> => {
-  const draft = createDraft(revision);
-  for (const series of draft.series) {
-    (series as any).labels = await asyncMap(series.labels, label =>
-      externalLabelToInternal(label)
-    );
-  }
-
-  return finishDraft(draft) as Revision<InternalLabel>;
-};
-
-const internalSeriesToExternal = async (
-  series: SeriesEntryWithLabels<InternalLabel>
-): Promise<SeriesEntryWithLabels<ExternalLabel>> => {
-  const newLabels = await asyncMap(series.labels, async label =>
-    internalLabelToExternal(label)
-  );
-
-  const draft = createDraft(series);
-  draft.labels = newLabels as any;
-  return finishDraft(draft) as SeriesEntryWithLabels<ExternalLabel>;
-};
+  revision: CaseRevision
+): Promise<Revision> => ({
+  ...revision,
+  series: await asyncMap(revision.series, async series => ({
+    ...series,
+    labels: await asyncMap(series.labels, externalLabelToInternal)
+  }))
+});
 
 /**
  * Saves a new revision data on the API server.
@@ -124,16 +103,17 @@ export const saveRevision = async (
   revision: Revision,
   description: string
 ) => {
-  const saveData: Partial<Revision<ExternalLabel>> = {
+  const saveData: CaseRevisionCreate = {
     description,
     attributes: revision.attributes,
-    series: await asyncMap(revision.series, async series =>
-      internalSeriesToExternal(series)
-    ),
+    series: await asyncMap(revision.series, async series => ({
+      ...series,
+      labels: await asyncMap(series.labels, internalLabelToExternal)
+    })),
     status: 'approved'
   };
 
-  await api(`cases/${caseId}/revision`, {
+  await api<unknown, CaseRevisionCreate>(`cases/${caseId}/revision`, {
     method: 'post',
     data: saveData
   });

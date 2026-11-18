@@ -2,7 +2,7 @@ import type { PartialVolumeDescriptor } from '@utrad-ical/circus-rs';
 import type { SeriesEntry } from '#components/SeriesSelector.tsx';
 import { createDraft, finishDraft } from 'immer';
 import * as mr from 'multi-integer-range';
-import type Series from '#types/Series.ts';
+import type { Series } from '@utrad-ical/circus-api-schema';
 import type { RootState } from '../store/index.ts';
 import { api } from './api.ts';
 import asyncMap from './asyncMap.ts';
@@ -21,7 +21,7 @@ export const defaultPvdFromSeries = async (
 ) => {
   const series =
     state?.searches.items.series?.[seriesUid] ||
-    ((await api('series/' + seriesUid)) as Series);
+    (await api<Series>('series/' + seriesUid));
   return defaultPvd(series.images);
 };
 

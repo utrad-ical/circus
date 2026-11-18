@@ -1,8 +1,8 @@
+import type { MyListResourceType } from '@utrad-ical/circus-api-schema';
 import Icon from '#components/Icon.tsx';
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import * as s from '#store/searches.ts';
-import { api } from '#utils/api.ts';
 import useLoginUser from '#utils/useLoginUser.ts';
 import MyListHome from './MyListHome.tsx';
 
@@ -11,7 +11,7 @@ const MyListPage: React.FC<{
   searchName: string;
   title: string;
   resource: s.SearchResource;
-  resourceType: string;
+  resourceType: MyListResourceType;
   toUrl: (myListId: string) => string;
   resultsView: React.ComponentType<{
     searchName: string;

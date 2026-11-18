@@ -1,3 +1,7 @@
+import type {
+  AttributeSchema,
+  AttributesSchema
+} from '@utrad-ical/circus-api-schema';
 import classnames from 'classnames';
 import React, {
   type FC,
@@ -12,33 +16,12 @@ import Input from './Input.tsx';
 import styles from './JsonSchemaEditor.module.css';
 import Select from './Select.tsx';
 
-export interface PropSchema {
-  type: 'string' | 'number' | 'integer' | 'boolean';
-  // For enum
-  enum?: (number | string)[];
-  // For string type
-  pattern?: string;
-  minLength?: number;
-  maxLength?: number;
-  // For number/integer type
-  minimum?: number;
-  maximum?: number;
-  exclusiveMinimum?: number;
-  exclusiveMaximum?: number;
-}
-
-export interface Schema<T extends object = any> {
-  type: 'object';
-  properties: { [key in keyof T]: PropSchema };
-  required?: (keyof T)[];
-}
-
 type PropEdit<T> = FC<{
   value: T;
   onChange: (value: T | undefined) => void;
   disabled?: boolean;
   onValidate: (valid: boolean) => void;
-  schema: PropSchema;
+  schema: AttributeSchema;
   required: boolean;
 }>;
 
@@ -239,7 +222,7 @@ const Prop: PropEdit<any> = props => {
         number: NumberProp,
         integer: NumberProp,
         boolean: BooleanProp
-      }[schema.type];
+      }[schema.type ?? 'string'];
   if (!Editor) throw new TypeError('Unsupported value type');
   return <Editor {...props} />;
 };
@@ -249,16 +232,16 @@ const Prop: PropEdit<any> = props => {
  * `value` is only the initial value; `onChange` is called only with
  * a valid value, and `onValidate` reports the validity.
  */
-const JsonSchemaEditor = <T extends object = any>(props: {
-  value: Partial<T>;
-  schema: Schema<T>;
-  onChange: (value: Partial<T>) => void;
+const JsonSchemaEditor = (props: {
+  value: Record<string, unknown>;
+  schema: AttributesSchema;
+  onChange: (value: Record<string, unknown>) => void;
   onValidate: (valid: boolean) => void;
   disabled?: boolean;
 }): ReactElement | null => {
   const { value, onChange, disabled, onValidate, schema } = props;
   const [current, setCurrent] = useState({ ...value });
-  const valids = useRef<Map<keyof T, boolean>>(new Map()).current;
+  const valids = useRef<Map<string, boolean>>(new Map()).current;
 
   if (
     typeof schema !== 'object' ||
@@ -267,20 +250,20 @@ const JsonSchemaEditor = <T extends object = any>(props: {
   ) {
     throw new TypeError('Invalid or unsupported JSON schema');
   }
-  if (!schema.properties) return null;
+  const { properties, required = [] } = schema;
+  if (!properties) return null;
 
-  const keys = Object.keys(schema.properties) as (keyof T)[];
-  const required = Array.isArray(schema.required) ? schema.required : [];
+  const keys = Object.keys(properties);
 
-  const handleChange = (key: keyof T, val: any) => {
-    const newValue: any = { ...current, [key]: val };
+  const handleChange = (key: string, val: unknown) => {
+    const newValue = { ...current, [key]: val };
     if (val === undefined) delete newValue[key];
     valids.set(key, true);
     setCurrent(newValue);
     if (keys.every(k => valids.get(k) === true)) onChange(newValue);
   };
 
-  const handleValidate = (key: keyof T, valid: boolean) => {
+  const handleValidate = (key: string, valid: boolean) => {
     valids.set(key, valid);
     if (keys.every(k => valids.has(k))) {
       onValidate(keys.every(k => valids.get(k) === true));
@@ -293,7 +276,7 @@ const JsonSchemaEditor = <T extends object = any>(props: {
         <Fragment key={k as string}>
           <span className={styles.key}>{k as string}</span>
           <Prop
-            schema={schema.properties[k]}
+            schema={properties[k]}
             required={required.includes(k)}
             value={current[k]}
             disabled={disabled}

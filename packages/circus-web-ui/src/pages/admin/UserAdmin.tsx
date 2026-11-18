@@ -7,12 +7,18 @@ import MultiSelect from '#components/MultiSelect.tsx';
 import Select from '#components/Select.tsx';
 import * as et from '#components/editorTypes.tsx';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
-import type { UserPreferences } from '#store/loginUser.ts';
+import type {
+  Group,
+  SearchResponse,
+  UserCreate,
+  UserForAdmin,
+  UserPreferences
+} from '@utrad-ical/circus-api-schema';
 
-const makeEmptyItem = () => {
+const makeEmptyItem = (): UserCreate => {
   return {
     userEmail: '',
-    loginID: '',
+    loginId: '',
     description: '',
     password: '',
     groups: [],
@@ -37,7 +43,7 @@ const PreferenceEditor: React.FC<{
           options={{ mode_white: 'White', mode_black: 'Black' }}
           value={props.value.theme}
           onChange={(v: string | number) =>
-            props.onChange({ ...props.value, theme: v as string })
+            props.onChange({ ...props.value, theme: v as Preferences['theme'] })
           }
         />
       </label>
@@ -61,19 +67,17 @@ const PreferenceEditor: React.FC<{
 
 const UserAdmin: React.FC<any> = props => {
   const [editorProperties, setEditorProperties] = useState<any>(null);
-  const [listColumns, setListColumns] = useState<DataGridColumnDefinition[]>(
-    []
-  );
+  const [listColumns, setListColumns] = useState<
+    DataGridColumnDefinition<UserForAdmin>[]
+  >([]);
 
   useEffect(() => {
     let isMounted = true;
     const load = async () => {
-      const groups = (await api('admin/groups?unlimited=1')).items as {
-        groupId: string;
-        groupName: string;
-        privileges: string[];
-      }[];
-      const groupIdMap: any = {};
+      const { items: groups } = await api<SearchResponse<Group>>(
+        'admin/groups?unlimited=1'
+      );
+      const groupIdMap: Record<number, string> = {};
       groups.forEach(g => (groupIdMap[g.groupId] = g.groupName));
       if (!isMounted) return;
       setEditorProperties([
@@ -107,18 +111,22 @@ const UserAdmin: React.FC<any> = props => {
         {
           key: 'groups',
           renderer: ({ value: item }) => {
-            return item.groups.map((groupId: string) => {
-              const group = groups.find(g => g.groupId === groupId)!;
-              const style =
-                group.privileges.indexOf('manageServer') >= 0
-                  ? 'danger'
-                  : 'default';
-              return (
-                <Badge variant={style} key={groupId}>
-                  {group.groupName}
-                </Badge>
-              );
-            });
+            return (
+              <>
+                {item.groups.map(groupId => {
+                  const group = groups.find(g => g.groupId === groupId);
+                  if (!group) return null;
+                  const style = group.privileges.includes('manageServer')
+                    ? 'danger'
+                    : 'default';
+                  return (
+                    <Badge variant={style} key={groupId}>
+                      {group.groupName}
+                    </Badge>
+                  );
+                })}
+              </>
+            );
           },
           caption: 'Groups'
         }

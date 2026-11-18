@@ -2,7 +2,7 @@ import Button from '#components/Button.tsx';
 import Icon from '#components/Icon.tsx';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import type { MyList } from '#store/loginUser.ts';
+import type { MyList } from '@utrad-ical/circus-api-schema';
 import styles from './MyListArray.module.css';
 
 const MyListArray: React.FC<{

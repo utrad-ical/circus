@@ -1,5 +1,6 @@
 import styles from './DownloadModal.module.css';
 import u from '#components/utilities.module.css';
+import type { SeriesExportCsVolumeQuery } from '@utrad-ical/circus-api-schema';
 import type { Editor } from '#components/editorTypes.tsx';
 import React, { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
@@ -88,7 +89,7 @@ const CsVolumeDownloadModal: React.FC<{
           )
           .join(','),
         compressionFormat: options.compressionFormat
-      });
+      } satisfies SeriesExportCsVolumeQuery);
       return api.getBaseUrl() + 'series/export-cs-volume?' + params;
     },
     [appState]

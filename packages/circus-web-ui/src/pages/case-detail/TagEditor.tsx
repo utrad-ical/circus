@@ -1,8 +1,9 @@
+import { namedProjectTags } from '#utils/projectTags.ts';
 import Icon from '#components/Icon.tsx';
 import PopoverButton from '#components/PopoverButton.tsx';
 import React, { useState, useMemo } from 'react';
 import { PhysicalTag } from '#components/Tag.tsx';
-import type Project from '#types/Project.ts';
+import type { Project } from '@utrad-ical/circus-api-schema';
 import styles from './TagEditor.module.css';
 
 const TagEditor: React.FC<{
@@ -38,7 +39,7 @@ const TagEditor: React.FC<{
       onClose={handleExited}
     >
       <ul className={styles.tagList}>
-        {projectData.tags.map(tag => {
+        {namedProjectTags(projectData.tags).map(tag => {
           return (
             <li key={tag.name}>
               <label>

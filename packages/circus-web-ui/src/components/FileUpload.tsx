@@ -1,3 +1,4 @@
+import type { ProgressCreated } from '@utrad-ical/circus-api-schema';
 import Button from '#components/Button.tsx';
 import React, { useEffect, useRef, useState } from 'react';
 import ProgressBar from './ProgressBar.tsx';
@@ -32,20 +33,21 @@ const fromInput = (input: HTMLInputElement): FileWithPath[] => {
  * Upload progress is displayed using a progress bar,
  * and the response can be accessed via a Promise.
  */
-const FileUpload: React.FC<{
+const FileUpload = <Result,>(props: {
   url: string;
   onBeforeUpload?: (fd: FormData) => void;
   /**
    * Called with the response body,
    * which may be of 400 or 422 (e.g., some files failed)
    */
-  onUploaded?: (res: any) => void;
+  onUploaded?: (res: Result) => void;
   multiple?: boolean;
   /** Allows selecting and dropping folders */
   allowFolders?: boolean;
   /** Shows the progress and the log of the server (see `/api/progress`) */
   withProgress?: boolean;
-}> = props => {
+  children?: React.ReactNode;
+}) => {
   const {
     url,
     onBeforeUpload,
@@ -82,8 +84,14 @@ const FileUpload: React.FC<{
     setFiles(multiple ? dedupeFiles([...files, ...dropped]) : dropped);
   };
 
-  const handleUploadProgress = (event: ProgressEvent) => {
-    setUploadPercent(Math.floor((event.loaded * 100) / event.total));
+  const handleUploadProgress = ({
+    loaded,
+    total
+  }: {
+    loaded: number;
+    total?: number;
+  }) => {
+    if (total) setUploadPercent(Math.floor((loaded * 100) / total));
   };
 
   const totalBytes = files.reduce((sum, f) => sum + f.file.size, 0);
@@ -109,7 +117,7 @@ const FileUpload: React.FC<{
     try {
       let target = url;
       if (withProgress) {
-        const { progressId } = await api('progress', {
+        const { progressId } = await api<ProgressCreated>('progress', {
           method: 'post',
           data: {}
         });
@@ -118,7 +126,7 @@ const FileUpload: React.FC<{
           (url.includes('?') ? '&' : '?') +
           `progressId=${encodeURIComponent(progressId)}`;
       }
-      const res = await api(target, {
+      const res = await api<Result, FormData>(target, {
         method: 'post',
         data: fd,
         onUploadProgress: handleUploadProgress,

@@ -1,3 +1,4 @@
+import type { PluginJob } from '@utrad-ical/circus-api-schema';
 import Alert from '#components/Alert.tsx';
 import React, { useEffect } from 'react';
 import AdminContainer from './AdminContainer.tsx';
@@ -14,7 +15,7 @@ import {
   Times
 } from '#pages/search/SearchResultRenderer.tsx';
 
-const columns: DataGridColumnDefinition[] = [
+const columns: DataGridColumnDefinition<PluginJob>[] = [
   { caption: 'Plugin', renderer: PluginRenderer() },
   { caption: 'Job ID', renderer: JobId },
   { caption: 'Executed by', renderer: Executer },
@@ -22,7 +23,7 @@ const columns: DataGridColumnDefinition[] = [
   { caption: 'Status', renderer: Status }
 ];
 
-const DataView: React.FC<{ value: any }> = props => {
+const DataView: React.FC<{ value: PluginJob[] }> = props => {
   const { value } = props;
   if (!value.length) {
     return <Alert variant="info">No items in global queue.</Alert>;

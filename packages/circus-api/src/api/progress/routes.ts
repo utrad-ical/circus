@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { progressCreated } from '@utrad-ical/circus-api-schema';
 import { defineRoute, defineRouteGroup, route } from '../../defineRoute.ts';
 import { handleGet, handlePost } from './index.ts';
 
@@ -6,7 +6,7 @@ export const postProgress = defineRoute({
   verb: 'post',
   path: '/progress',
   description: 'Issues a new progress ID for the current user.',
-  response: z.strictObject({ progressId: z.string() })
+  response: progressCreated
 });
 
 export const getProgress = defineRoute({

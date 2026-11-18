@@ -1,13 +1,13 @@
 import classnames from 'classnames';
 import React from 'react';
-import type { CircusIconDefinition } from './BodyPartIcon.tsx';
+import type { IconDefinition } from '@utrad-ical/circus-api-schema';
 import BodyPartIcon from './BodyPartIcon.tsx';
 import Tooltip from './Tooltip.tsx';
 import styles from './IconDisplay.module.css';
 
 const IconDisplay: React.FC<{
   size?: string;
-  icon: CircusIconDefinition;
+  icon: IconDefinition;
   title: React.ReactNode;
   description?: React.ReactNode;
   toolTip?: React.ReactChild;

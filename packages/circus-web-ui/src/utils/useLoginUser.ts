@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import type { UserPreferences } from '#store/loginUser.ts';
+import type { UserPreferences } from '@utrad-ical/circus-api-schema';
 import { userPreferencesUpdated } from '#store/loginUser.ts';
 import { api } from './api.ts';
 
@@ -12,14 +12,14 @@ const useLoginUser = () => useSelector(state => state.loginUser.data!);
 
 export const useUserPreferences = (): [
   UserPreferences,
-  (updates: Partial<UserPreferences>) => Promise<void>
+  (updates: UserPreferences) => Promise<void>
 ] => {
   const preferences = useSelector(state => state.loginUser.data?.preferences!);
   const dispatch = useDispatch();
   const updatePreferences = useCallback(
-    async (updates: Partial<UserPreferences>) => {
+    async (updates: UserPreferences) => {
       dispatch(userPreferencesUpdated({ updates }));
-      await api('preferences', {
+      await api<unknown, UserPreferences>('preferences', {
         method: 'patch',
         data: updates
       });

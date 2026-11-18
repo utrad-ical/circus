@@ -1,11 +1,14 @@
 import React, { useReducer } from 'react';
-import type { FeedbackEntry } from '@utrad-ical/circus-ui-kit';
+import type {
+  PluginJobFeedback,
+  PluginJobFeedbackCreate
+} from '@utrad-ical/circus-api-schema';
 import { formatDistanceToNow, formatISO } from 'date-fns';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import UserDisplay from '#components/UserDisplay.tsx';
 
-const registeredMessage = (feedback: FeedbackEntry<any>) => {
+const registeredMessage = (feedback: PluginJobFeedback) => {
   const modeStr = feedback.isConsensual ? 'Consensual' : 'Personal';
   return (
     <>
@@ -18,28 +21,15 @@ const registeredMessage = (feedback: FeedbackEntry<any>) => {
   );
 };
 
-interface ActionLogEntry {
-  /**
-   * ISO date representing when this event happened.
-   */
-  date: string;
-  /**
-   * Short description of what happened.
-   */
-  action: string;
-  /**
-   * Optional JSON-serializable data.
-   */
-  data?: any;
-}
+type ActionLogEntry = NonNullable<PluginJobFeedbackCreate['actionLog']>[number];
 
 interface FeedbackState {
   isConsensual: boolean;
-  currentData: { [feedbackKey: string]: any };
+  currentData: unknown;
   actionLog: ActionLogEntry[];
   valid: boolean;
   count: { total: number; finished: number };
-  feedbacks: FeedbackEntry<any>[];
+  feedbacks: PluginJobFeedback[];
   editable: boolean;
   message?: React.ReactNode;
   myUserEmail: string;
@@ -64,7 +54,7 @@ const slice = createSlice({
     reset: (
       state,
       action: PayloadAction<{
-        feedbacks: FeedbackEntry<any>[];
+        feedbacks: PluginJobFeedback[];
         myUserEmail: string;
         preferMode: 'personal' | 'consensual' | null;
       }>
@@ -107,7 +97,10 @@ const slice = createSlice({
       // 3. Otherwise, enter personal mode and show empty feedback
       state.editable = true;
     },
-    validFeedbackEntered: (state, action: PayloadAction<{ value?: any }>) => {
+    validFeedbackEntered: (
+      state,
+      action: PayloadAction<{ value?: unknown }>
+    ) => {
       const { value } = action.payload;
       state.valid = true;
       state.count = { total: 1, finished: 1 };
@@ -139,14 +132,7 @@ const slice = createSlice({
       state.message = myPersonal ? registeredMessage(myPersonal) : '';
       state.actionLog = [];
     },
-    logEventHappened: (
-      state,
-      action: PayloadAction<{
-        date: string;
-        action: string;
-        data?: any;
-      }>
-    ) => {
+    logEventHappened: (state, action: PayloadAction<ActionLogEntry>) => {
       const { date, action: logAction, data } = action.payload;
       const entry: ActionLogEntry = { date, action: logAction };
       if (data) entry.data = data;

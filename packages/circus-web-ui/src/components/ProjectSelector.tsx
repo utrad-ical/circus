@@ -1,7 +1,7 @@
 import React from 'react';
 import Select from '#components/Select.tsx';
 import BodyPartIcon from './BodyPartIcon.tsx';
-import type Project from '#types/Project.ts';
+import type { Project } from '@utrad-ical/circus-api-schema';
 
 const ProjectSelector: React.FC<{
   value: string;

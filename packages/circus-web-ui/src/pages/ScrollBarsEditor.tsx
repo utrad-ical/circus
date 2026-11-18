@@ -1,10 +1,12 @@
 import Select from '#components/Select.tsx';
 import type * as et from '#components/editorTypes.tsx';
-import type { ScrollBarsSettings } from '#store/loginUser.ts';
+import type { UserPreferences } from '@utrad-ical/circus-api-schema';
 import React from 'react';
 import styles from './ScrollBarsEditor.module.css';
 
-const ScrollbarEditor: et.Editor<ScrollBarsSettings | undefined> = props => {
+const ScrollbarEditor: et.Editor<
+  NonNullable<UserPreferences['scrollBarsInfo']> | undefined
+> = props => {
   const {
     value = { size: 'small', position: 'right', visibility: 'none' },
     onChange

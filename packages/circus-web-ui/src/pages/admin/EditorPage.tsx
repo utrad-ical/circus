@@ -14,7 +14,7 @@ import Icon from '#components/Icon.tsx';
 import SearchResultsView from '#components/SearchResultsView.tsx';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import type { SearchResource } from '#store/searches.ts';
+import type { SearchItem, SearchResource } from '#store/searches.ts';
 import { newSearch } from '#store/searches.ts';
 import styles from './EditorPage.module.css';
 import { api } from '#utils/api.ts';
@@ -23,22 +23,24 @@ import AdminContainer from './AdminContainer.tsx';
 
 type Subtitle = { icon?: string; title: string };
 
-const EditorPage: React.FC<{
-  listColumns: DataGridColumnDefinition[];
-  preCommitHook?: (target: any) => Promise<boolean | void>;
+const emptyFilter = {};
+
+const EditorPage = <Item extends SearchItem>(props: {
+  listColumns: DataGridColumnDefinition<Item>[];
   searchName: string;
-  resource: SearchResource;
+  resource: SearchResource & { primaryKey: keyof Item & string };
   title: string;
   subtitles?: Subtitle[];
-  targetName?: (item: any) => string;
+  targetName?: (item: Item) => string;
   icon: string;
-  makeEmptyItem: () => any;
+  makeEmptyItem: () => object;
   editorProperties: PropertyEditorProperties<any>;
   filter?: object;
   enableNewItem?: boolean;
-}> = props => {
-  const [target, setTarget] = useState<any | null>(null);
-  const [editing, setEditing] = useState<any>(null);
+}) => {
+  const [editing, setEditing] = useState<
+    { isNew: false; item: Item } | { isNew: true; item: object } | null
+  >(null);
   const [complaints, setComplaints] = useState<{
     [key: string]: string;
   } | null>(null);
@@ -50,7 +52,6 @@ const EditorPage: React.FC<{
 
   const {
     listColumns,
-    preCommitHook,
     searchName,
     resource,
     title,
@@ -59,7 +60,7 @@ const EditorPage: React.FC<{
     icon,
     makeEmptyItem,
     editorProperties,
-    filter = {},
+    filter = emptyFilter,
     enableNewItem = true
   } = props;
 
@@ -69,30 +70,23 @@ const EditorPage: React.FC<{
         filter,
         condition: {},
         sort: '{}',
-        resource: {
-          endPoint: resource.endPoint,
-          primaryKey: resource.primaryKey
-        }
+        resource
       })
     );
-  }, [dispatch, resource.endPoint, resource.primaryKey, searchName, filter]);
+  }, [dispatch, resource, searchName, filter]);
 
-  const handleEditStart = useCallback(
-    (index, item) => {
-      const makeTargetName = (item: any) => {
-        if (targetName) return targetName(item);
-        return item[resource.primaryKey];
-      };
-      setTarget(makeTargetName(item));
-      setEditing(item);
-      setErrorMessage(undefined);
-      setComplaints({});
-    },
-    [targetName, resource.primaryKey]
-  );
+  const target = editing && !editing.isNew ? editing.item : null;
+  const targetId = target ? String(target[resource.primaryKey]) : null;
+  const targetTitle = target ? (targetName?.(target) ?? targetId) : null;
+
+  const handleEditStart = useCallback((index: number, item: Item) => {
+    setEditing({ isNew: false, item });
+    setErrorMessage(undefined);
+    setComplaints({});
+  }, []);
 
   const grid = useMemo(() => {
-    return (props => (
+    return (props: { value: Item[]; active?: Item }) => (
       <DataGrid
         value={props.value}
         columns={listColumns}
@@ -100,23 +94,18 @@ const EditorPage: React.FC<{
         onItemClick={handleEditStart}
         active={props.active}
       />
-    )) as React.FC<any>;
+    );
   }, [listColumns, handleEditStart, resource.primaryKey]);
 
   useEffect(() => {
     loadItems();
   }, [loadItems]);
 
-  const commitItem = async (item: any) => {
-    if (preCommitHook) {
-      if (!(await preCommitHook(target))) return;
-    }
-
-    const url = target
-      ? resource.endPoint +
-        '/' +
-        encodeURIComponent(editing[resource.primaryKey]) // Update
-      : resource.endPoint; // Create new
+  const commitItem = async (item: Record<string, unknown>) => {
+    const url =
+      targetId === null
+        ? resource.endPoint
+        : resource.endPoint + '/' + encodeURIComponent(targetId);
 
     if (target && resource.primaryKey in item) {
       item = { ...item };
@@ -130,7 +119,6 @@ const EditorPage: React.FC<{
     };
     try {
       await api(url, args);
-      setTarget(null);
       setEditing(null);
       await loadItems();
       loginManager.refreshUserInfo(true); // Full user data refresh
@@ -147,13 +135,16 @@ const EditorPage: React.FC<{
   };
 
   const handleCreateItemClick = () => {
-    setTarget(null);
-    setEditing(makeEmptyItem());
+    setEditing({ isNew: true, item: makeEmptyItem() });
   };
 
   return (
     <AdminContainer title={title} icon={icon} className="admin-editor">
-      <SearchResultsView name={searchName} dataView={grid} active={editing} />
+      <SearchResultsView
+        name={searchName}
+        dataView={grid}
+        active={target ?? undefined}
+      />
       {enableNewItem && (
         <p className={u.textRight}>
           <Button
@@ -168,10 +159,10 @@ const EditorPage: React.FC<{
       )}
       {editing && (
         <Editor
-          key={target}
-          item={editing}
+          key={targetId}
+          item={editing.item}
           complaints={complaints}
-          target={target}
+          target={targetTitle}
           properties={editorProperties}
           excludeProperty={target ? resource.primaryKey : undefined}
           subtitles={subtitles}
@@ -186,11 +177,15 @@ const EditorPage: React.FC<{
 
 export default EditorPage;
 
-const pickProperties = (item: any, properties: any[]): any => {
+const pickProperties = (
+  item: object,
+  properties: any[]
+): Record<string, unknown> => {
   // Remove keys not in the editor property list
-  const result: any = {};
+  const source = item as Record<string, unknown>;
+  const result: Record<string, unknown> = {};
   for (const p of properties.flat()) {
-    result[p.key] = item[p.key];
+    if (typeof p === 'object') result[p.key] = source[p.key];
   }
   return result;
 };
@@ -214,12 +209,12 @@ const complaintsFromIssues = (issues: unknown): { [key: string]: string } => {
 };
 
 const Editor: React.FC<{
-  target: string;
-  properties: any;
-  item: any;
-  complaints: any;
-  onSaveClick: any;
-  onCancelClick: any;
+  target: string | null;
+  properties: PropertyEditorProperties<any>;
+  item: object;
+  complaints: Record<string, string> | null;
+  onSaveClick: (item: Record<string, unknown>) => void;
+  onCancelClick: () => void;
   excludeProperty?: string;
   subtitles?: Subtitle[];
   errorMessage?: string;
@@ -280,7 +275,7 @@ const Editor: React.FC<{
               </div>
               <PropertyEditor
                 value={currentData}
-                complaints={complaints}
+                complaints={complaints ?? undefined}
                 properties={filteredProperties(properties[i])}
                 onChange={setCurrentData}
               />
@@ -289,7 +284,7 @@ const Editor: React.FC<{
         ) : (
           <PropertyEditor
             value={currentData}
-            complaints={complaints}
+            complaints={complaints ?? undefined}
             properties={filteredProperties(properties)}
             onChange={setCurrentData}
           />

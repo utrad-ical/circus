@@ -1,3 +1,5 @@
+import { isAxiosError } from 'axios';
+import type { Series } from '@utrad-ical/circus-api-schema';
 import classnames from 'classnames';
 import table from '#components/table.module.css';
 import Alert from '#components/Alert.tsx';
@@ -24,11 +26,11 @@ const SeriesDetail: React.FC<{}> = props => {
   const load = useCallback(
     async cancelToken => {
       const resource = `series/${seriesUid}`;
-      return await api(resource, { handleErrors: true }, cancelToken);
+      return await api<Series>(resource, { handleErrors: true }, cancelToken);
     },
     [seriesUid]
   );
-  const [seriesData] = useLoadData<any | Error>(load);
+  const [seriesData] = useLoadData(load);
 
   const [seriesEntries, setSeriesEntries] = useState<SeriesEntryWithHints[]>(
     []
@@ -36,7 +38,8 @@ const SeriesDetail: React.FC<{}> = props => {
   const [volumeLoader] = useVolumeLoaders(seriesEntries) ?? [null];
 
   useEffect(() => {
-    const { seriesUid, images } = seriesData || {};
+    const { seriesUid, images } =
+      seriesData instanceof Error ? {} : (seriesData ?? {});
     if (seriesUid && images) {
       const [start, end] = images.split('-').map((i: string) => Number(i)) as [
         number,
@@ -84,9 +87,9 @@ const SeriesDetail: React.FC<{}> = props => {
 
   if (!seriesData) return <LoadingIndicator />;
 
-  if (seriesData.response instanceof Error) {
+  if (seriesData instanceof Error) {
     const message =
-      seriesData.response && seriesData.response.status === 403
+      isAxiosError(seriesData) && seriesData.response?.status === 403
         ? `You do not have access to series ${seriesUid}.`
         : seriesData.message;
     return (

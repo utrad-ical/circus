@@ -1,3 +1,7 @@
+import type {
+  CaseExportMhdQuery,
+  ProgressCreated
+} from '@utrad-ical/circus-api-schema';
 import styles from './DownloadModal.module.css';
 import Button from '#components/Button.tsx';
 import type { Editor } from '#components/editorTypes.tsx';
@@ -8,7 +12,9 @@ import useProgress from '#utils/useProgress.ts';
 import { DialogBody, DialogFooter, DialogHeader } from './Dialog.tsx';
 import ProgressView from './ProgressView.tsx';
 
-export type CompressionFormat = 'tgz' | 'zip';
+export type CompressionFormat = NonNullable<
+  CaseExportMhdQuery['compressionFormat']
+>;
 
 export const compressionFormatOptions: {
   [type in CompressionFormat]: string;
@@ -17,7 +23,7 @@ export const compressionFormatOptions: {
   zip: 'zip'
 };
 
-export type LineEnding = 'lf' | 'crlf';
+export type LineEnding = NonNullable<CaseExportMhdQuery['mhdLineEnding']>;
 
 export const lineEndingOptions: { [type in LineEnding]: string } = {
   lf: 'LF',
@@ -72,7 +78,7 @@ const DownloadModal = <T extends any>(props: {
   const handleStartClick = async () => {
     const startUrl = await onStart(options);
     setCloseTitle('Dismiss');
-    const { progressId } = await api('progress', {
+    const { progressId } = await api<ProgressCreated>('progress', {
       method: 'post',
       data: {}
     });

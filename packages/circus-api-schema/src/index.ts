@@ -53,3 +53,6 @@ export {
 } from './user.ts';
 export { userMyList } from './userMyList.ts';
 export * from './routes.ts';
+
+export { searchResultOf, type SearchResponse } from './searchResult.ts';
+export type * from './types.ts';

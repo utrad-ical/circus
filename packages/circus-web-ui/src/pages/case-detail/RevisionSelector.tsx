@@ -4,11 +4,10 @@ import Select from '#components/Select.tsx';
 import TimeDisplay from '#components/TimeDisplay.tsx';
 import UserDisplay from '#components/UserDisplay.tsx';
 import type { SelectOptions } from '#utils/normalizeOptions.ts';
-import type { Revision } from './revisionData.ts';
-import type { ExternalLabel } from './labelData.ts';
+import type { CaseRevision } from '@utrad-ical/circus-api-schema';
 import styles from './RevisionSelector.module.css';
 
-const Item: React.FC<{ value: Revision<ExternalLabel> }> = React.memo(props => {
+const Item: React.FC<{ value: CaseRevision }> = React.memo(props => {
   const revision = props.value;
   return (
     <span className={styles.item}>
@@ -25,7 +24,7 @@ const Item: React.FC<{ value: Revision<ExternalLabel> }> = React.memo(props => {
 });
 
 const RevisionSelector: React.FC<{
-  revisions: Revision<ExternalLabel>[];
+  revisions: CaseRevision[];
   selected: number;
   onSelect: (index: number) => void;
   disabled?: boolean;

@@ -1,3 +1,4 @@
+import type { PluginJob } from '@utrad-ical/circus-api-schema';
 import React, { useEffect } from 'react';
 import DataGrid, {
   type DataGridColumnDefinition
@@ -19,14 +20,14 @@ const sortOptions = makeSortOptions({
   jobId: 'job id'
 });
 
-const columns: DataGridColumnDefinition<any>[] = [
+const columns: DataGridColumnDefinition<PluginJob>[] = [
   { caption: 'Plugin', renderer: PluginRenderer() },
   { caption: 'Job ID', renderer: JobId },
   { caption: 'Registered', renderer: Times('createdAt') },
   { caption: 'Status', renderer: Status }
 ];
 
-const DataView: React.FC<{ value: any[] }> = props => {
+const DataView: React.FC<{ value: PluginJob[] }> = props => {
   const { value } = props;
   if (!value.length) {
     return <div>No plug-in job in execution queue.</div>;

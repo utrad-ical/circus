@@ -4,15 +4,18 @@ import type * as et from '#components/editorTypes.tsx';
 import Select from '#components/Select.tsx';
 import React, { useState } from 'react';
 import { defaultLabelColors } from '../labelColors.ts';
-import type { LabelColorsSettings } from '../store/loginUser.ts';
+import type { UserPreferences } from '@utrad-ical/circus-api-schema';
 import styles from './LabelColorsEditor.module.css';
 
-const LabelColorsEditor: et.Editor<LabelColorsSettings | undefined> = props => {
+const LabelColorsEditor: et.Editor<
+  NonNullable<UserPreferences['labelColors']> | undefined
+> = props => {
   const { value, onChange } = props;
   const [activeColor, setActiveColor] = useState('');
   const [editingColor, setEditingColor] = useState('#ff0000');
 
   if (value === undefined) return null;
+  const customColors = value.customColors ?? [];
 
   const handleLabelColorsSelect = (colorsType: string) => {
     onChange({ ...value, useDefault: colorsType === 'default' });
@@ -25,41 +28,38 @@ const LabelColorsEditor: et.Editor<LabelColorsSettings | undefined> = props => {
 
   const canNotAdd = () => {
     return (
-      value.useDefault ||
-      value.customColors.some(color => color === editingColor)
+      value.useDefault || customColors.some(color => color === editingColor)
     );
   };
 
   const canNotDelete = () => {
     return (
       value.useDefault ||
-      !value.customColors ||
-      value.customColors.length < 2 ||
-      !value.customColors.some(color => color === activeColor)
+      customColors.length < 2 ||
+      !customColors.some(color => color === activeColor)
     );
   };
 
   const canNotChange = () => {
     return (
       value.useDefault ||
-      !value.customColors ||
-      !value.customColors.some(color => color === activeColor) ||
-      value.customColors.some(color => color === editingColor)
+      !customColors.some(color => color === activeColor) ||
+      customColors.some(color => color === editingColor)
     );
   };
 
   const handleAdd = () => {
     onChange({
       ...value,
-      customColors: [...value.customColors, editingColor]
+      customColors: [...customColors, editingColor]
     });
   };
 
   const handleChange = () => {
-    const pos = value.customColors.findIndex(color => color === activeColor);
+    const pos = customColors.findIndex(color => color === activeColor);
     onChange({
       ...value,
-      customColors: value.customColors.map((color, ind) =>
+      customColors: customColors.map((color, ind) =>
         ind === pos ? editingColor : color
       )
     });
@@ -68,7 +68,7 @@ const LabelColorsEditor: et.Editor<LabelColorsSettings | undefined> = props => {
   const handleDelete = () => {
     onChange({
       ...value,
-      customColors: value.customColors.filter(color => color !== activeColor)
+      customColors: customColors.filter(color => color !== activeColor)
     });
   };
   return (
@@ -81,7 +81,7 @@ const LabelColorsEditor: et.Editor<LabelColorsSettings | undefined> = props => {
       />
       <ColorPalette
         value={activeColor}
-        colors={value.useDefault ? defaultLabelColors : value.customColors}
+        colors={value.useDefault ? defaultLabelColors : customColors}
         onChange={handleColorSelect}
       />
       {!value.useDefault && (

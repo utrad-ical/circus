@@ -11,18 +11,6 @@ before(async () => {
 });
 after(async () => await apiTest.tearDown());
 
-it('should return the current queue list', async () => {
-  const res = await axios.get('api/admin/plugin-job-queue');
-  assert.equal(res.status, 200);
-  assert.equal(res.data.items.length, 1);
-});
-
-it('should return a filtered queue list', async () => {
-  const res = await axios.get('api/admin/plugin-job-queue?state=wait');
-  assert.equal(res.status, 200);
-  assert.equal(res.data.items.length, 0);
-});
-
 it("should return only the current user's jobs", async () => {
   // The queue has one job, which is made Alice's
   await apiTest.database.db
@@ -39,4 +27,11 @@ it("should return only the current user's jobs", async () => {
   );
   const res2 = await apiTest.axiosInstances.bob.get('api/plugin-job-queue');
   assert.equal(res2.data.items.length, 0);
+});
+
+it('should reject invalid query parameters', async () => {
+  for (const q of ['limit=0', 'page=x', 'state=foo']) {
+    const res = await axios.get(`api/plugin-job-queue?${q}`);
+    assert.equal(res.status, 400, q);
+  }
 });

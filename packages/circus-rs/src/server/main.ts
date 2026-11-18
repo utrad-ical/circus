@@ -1,16 +1,19 @@
 import { createStdoutLogger, ServiceLoader } from '@utrad-ical/circus-lib';
 import type { Logger } from '@utrad-ical/circus-lib';
+import { ConfigLoadError } from '@utrad-ical/circus-lib/config';
 import { once } from 'node:events';
-import config from './config.ts';
+import loadRsConfig from './config.ts';
 import type { RsServices } from './configureServiceLoader.ts';
 import configureServiceLoader from './configureServiceLoader.ts';
 
 const main = async () => {
-  const loader = new ServiceLoader<RsServices>(config);
-  configureServiceLoader(loader);
+  let loader: ServiceLoader<RsServices> | undefined;
   let logger: Logger | undefined;
 
   try {
+    const config = await loadRsConfig();
+    loader = new ServiceLoader<RsServices>(config);
+    configureServiceLoader(loader);
     logger = await loader.get('logger');
     logger.info('CIRCUS RS server starting');
     const { port } = config.rsServer.options;
@@ -24,12 +27,17 @@ const main = async () => {
       'CIRCUS RS server listening'
     );
     server.on('close', async () => {
-      await loader.dispose();
+      await loader?.dispose();
     });
   } catch (err) {
     const startupLogger = logger ?? createStdoutLogger('rs');
-    startupLogger.error({ err }, 'CIRCUS RS server failed to start');
-    await loader.dispose();
+    startupLogger.error(
+      { err },
+      err instanceof ConfigLoadError
+        ? err.message
+        : 'CIRCUS RS server failed to start'
+    );
+    await loader?.dispose();
     process.exit(1);
   }
 };

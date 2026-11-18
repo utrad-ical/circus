@@ -4,7 +4,8 @@
  * @module
  */
 import argv from 'argv';
-import config from '../config/index.ts';
+import { ConfigLoadError } from '@utrad-ical/circus-lib/config';
+import loadCsConfig from '../config/index.ts';
 import configureServiceLoader from '../configureServiceLoader.ts';
 import type { LoopRunOptions } from './loopRun.ts';
 import loopRun from './loopRun.ts';
@@ -22,29 +23,23 @@ argv.option([
 
 const main = async () => {
   const { options } = argv.run();
-
-  let ourConfig: circus.Configuration | undefined = undefined;
-  if (options['config-content']) {
-    try {
-      ourConfig = JSON.parse(options['config-content']);
-    } catch (err) {
-      console.error('Parsing of confing-content failed');
-      process.exit(1);
-    }
-  } else {
-    ourConfig = config;
-  }
-
-  const serviceLoader = configureServiceLoader(new ServiceLoader(ourConfig));
+  const configContent = options['config-content'];
 
   let loopRunOptions: LoopRunOptions<circus.PluginJobRequest> | undefined;
   try {
-    loopRunOptions = await createLoopRunOptions(config!, serviceLoader);
+    const config: circus.Configuration = configContent
+      ? JSON.parse(configContent)
+      : await loadCsConfig();
+    const serviceLoader = configureServiceLoader(new ServiceLoader(config));
+    loopRunOptions = await createLoopRunOptions(config, serviceLoader);
     await loopRun<circus.PluginJobRequest>(loopRunOptions, process);
     process.exit(0);
   } catch (err) {
     const logger = loopRunOptions?.logger ?? createStdoutLogger('cs-core');
-    logger.error({ err }, 'CIRCUS CS daemon failed');
+    logger.error(
+      { err },
+      err instanceof ConfigLoadError ? err.message : 'CIRCUS CS daemon failed'
+    );
     process.exit(1);
   }
 };

@@ -45,7 +45,6 @@ COPY --from=docker:27-cli /usr/local/bin/docker /usr/local/bin/docker
 COPY --from=build /var/circus /var/circus
 RUN rm -rf /var/circus/packages/circus-web-ui/dist
 
-COPY docker/api/circus.config.js /var/circus/circus.config.js
 COPY docker/api/entrypoint.sh /usr/local/bin/circus-entrypoint
 # Administration commands (e.g., `docker compose exec api circus migrate`)
 COPY docker/api/circus /usr/local/bin/circus

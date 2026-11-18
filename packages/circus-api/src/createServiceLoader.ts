@@ -47,7 +47,7 @@ const createServiceLoader = async (config: any) => {
   const loader = new ServiceLoader<Services>({
     ...config,
     // Preserve the fallback provider option in existing configurations.
-    verifyUser: config.verifyUser ?? config.oauthServer ?? {}
+    verifyUser: config.auth ?? config.oauthServer ?? {}
   });
   // Register modules related to CS Core
   configureCsCoreServiceLoader(loader as any);

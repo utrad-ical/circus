@@ -3,10 +3,11 @@ import fs from 'fs';
 import path from 'path';
 import glob from '../utils/glob.ts';
 import { styleText } from 'node:util';
+import { ConfigLoadError } from '@utrad-ical/circus-lib/config';
 import type { CommandFunc } from './Command.ts';
 import type Command from './Command.ts';
 import createServiceLoader from '../createServiceLoader.ts';
-import config from '../config/index.ts';
+import loadApiConfig from '../config/index.ts';
 
 const packageFile = path.join(import.meta.dirname, '../../package.json');
 const version = JSON.parse(fs.readFileSync(packageFile, 'utf8')).version;
@@ -45,7 +46,7 @@ const main = async () => {
       const parser = dashdash.createParser({ options });
       const opts = parser.parse(process.argv.slice(1)) as object;
 
-      const loader = await createServiceLoader(config);
+      const loader = await createServiceLoader(await loadApiConfig());
       const commandService = await module.command;
       loader.register('theCommand', commandService);
       const commandFunc = (await loader.get('theCommand')) as CommandFunc;
@@ -57,6 +58,10 @@ const main = async () => {
     } catch (err: any) {
       console.error(styleText('red', 'ERROR:'));
       console.error(err.message);
+      if (err instanceof ConfigLoadError) {
+        process.exitCode = 1;
+        return;
+      }
       err.issues && console.error(err.issues);
       err.stack && console.error(err.stack);
     }

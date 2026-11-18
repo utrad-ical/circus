@@ -1,61 +1,103 @@
-import { cosmiconfigSync } from 'cosmiconfig';
 import merge from 'merge';
-import { createRequire } from 'node:module';
-import { resolveModulePath } from '../ServiceLoader.ts';
+import { existsSync, lstatSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
-const require = createRequire(import.meta.url);
+const containerMode = process.env.CIRCUS_CONTAINER_MODE;
+export const isContainerMode =
+  containerMode === '1' || (containerMode !== '0' && existsSync('/.dockerenv'));
 
-/**
- * Loads a JavaScript config module.
- * Both ES modules (`export default {...}`) and CommonJS modules
- * (`module.exports = {...}`) are supported; Node.js can `require()`
- * ES modules that do not use top-level await.
- */
-const loadModule = (filePath: string) => {
-  const mod = require(resolveModulePath(filePath));
-  return mod && typeof mod === 'object' && 'default' in mod ? mod.default : mod;
+export class ConfigLoadError extends Error {}
+
+// Both the source and built loader sit four levels below the workspace root.
+const workspaceRoot = resolve(import.meta.dirname, '../../../..');
+const workspaceConfigDirectory = existsSync(
+  resolve(workspaceRoot, 'pnpm-workspace.yaml')
+)
+  ? workspaceRoot
+  : undefined;
+const configFileNames = [
+  'circus.config.js',
+  'circus.config.mjs',
+  'circus.config.cjs',
+  'circus.config.mts'
+];
+
+const configFileExists = (filePath: string) => {
+  try {
+    return lstatSync(filePath, { throwIfNoEntry: false }) !== undefined;
+  } catch (cause) {
+    throw new ConfigLoadError(
+      `Could not inspect configuration file ${filePath}`,
+      { cause }
+    );
+  }
 };
 
-/**
- * Synchronously loads "default" configuration files and
- * merges a "custom" configuration fetched via cosmiconfig.
- * @param defaultModules The module paths that contain
- * the default config entries (as the default export).
- * @param configTitle The config file name used by cosmiconfig for searching
- * (e.g, `<configTitle>.config.js`)
- */
-const loadConfig = (
-  defaultModules: string[],
-  configTitle: string = 'circus',
-  options: { searchFrom?: string } = {}
-) => {
-  let result: any = {};
-  for (const path of defaultModules) {
-    const conf = loadModule(path);
-    result = merge.recursive(result, conf);
-  }
-  const explorer = cosmiconfigSync(configTitle, {
-    // cosmiconfig's defaults plus .mjs / .cjs
-    searchPlaces: [
-      'package.json',
-      `.${configTitle}rc`,
-      `.${configTitle}rc.json`,
-      `.${configTitle}rc.yaml`,
-      `.${configTitle}rc.yml`,
-      `.${configTitle}rc.js`,
-      `${configTitle}.config.js`,
-      `${configTitle}.config.mjs`,
-      `${configTitle}.config.cjs`
-    ],
-    loaders: {
-      '.js': loadModule,
-      '.mjs': loadModule,
-      '.cjs': loadModule
+const readConfig = async (filePath: string) => {
+  let config: unknown;
+  try {
+    config = (await import(pathToFileURL(filePath).href)).default;
+  } catch (cause) {
+    const code = (cause as { code?: unknown } | null | undefined)?.code;
+    let reason = 'module load failed';
+    let location = filePath;
+    if (code === 'MODULE_NOT_FOUND' || code === 'ERR_MODULE_NOT_FOUND') {
+      reason = existsSync(filePath)
+        ? 'a dependency was not found'
+        : 'file not found';
+    } else if (cause instanceof SyntaxError) {
+      reason = 'invalid syntax';
+      const firstLine = cause.stack?.split('\n', 1)[0];
+      if (
+        firstLine?.startsWith(`${filePath}:`) &&
+        /^:\d+(?::\d+)?$/.test(firstLine.slice(filePath.length))
+      ) {
+        location = firstLine;
+      }
+    } else if (
+      typeof code === 'string' &&
+      /^[A-Z][A-Z0-9_]{0,39}$/.test(code)
+    ) {
+      reason = code;
     }
-  });
-  const custom = explorer.search(options.searchFrom) || { config: {} };
-  result = merge.recursive(result, custom.config);
-  return result;
+    throw new ConfigLoadError(
+      `Could not load configuration file ${location} (${reason})`,
+      { cause }
+    );
+  }
+  if (typeof config !== 'object' || config === null || Array.isArray(config)) {
+    throw new ConfigLoadError(
+      `Configuration file ${filePath} must export an object`
+    );
+  }
+  return config;
+};
+
+const loadConfig = async (
+  defaultModules: string[],
+  configDirectory = workspaceConfigDirectory
+) => {
+  const configuredPath = process.env.CIRCUS_CONFIG;
+  if (configuredPath === '') {
+    throw new ConfigLoadError(
+      'CIRCUS_CONFIG must specify a configuration file'
+    );
+  }
+  const configPath =
+    configuredPath !== undefined
+      ? resolve(configuredPath)
+      : configDirectory &&
+        configFileNames
+          .map(name => resolve(configDirectory, name))
+          .find(configFileExists);
+  const custom = configPath ? await readConfig(configPath) : {};
+  const defaults = await Promise.all(
+    defaultModules.map(
+      async filePath => (await import(pathToFileURL(filePath).href)).default
+    )
+  );
+  return merge.recursive(true, ...defaults, custom);
 };
 
 export default loadConfig;

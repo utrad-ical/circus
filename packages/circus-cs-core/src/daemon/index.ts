@@ -9,7 +9,7 @@ import configureServiceLoader from '../configureServiceLoader.ts';
 import type { LoopRunOptions } from './loopRun.ts';
 import loopRun from './loopRun.ts';
 import createCancellableTimer from './createCancellableTimer.ts';
-import { ServiceLoader } from '@utrad-ical/circus-lib';
+import { createStdoutLogger, ServiceLoader } from '@utrad-ical/circus-lib';
 import type * as circus from '../interface.ts';
 
 argv.option([
@@ -37,16 +37,14 @@ const main = async () => {
 
   const serviceLoader = configureServiceLoader(new ServiceLoader(ourConfig));
 
-  let loopRunOptions: LoopRunOptions<circus.PluginJobRequest>;
+  let loopRunOptions: LoopRunOptions<circus.PluginJobRequest> | undefined;
   try {
     loopRunOptions = await createLoopRunOptions(config!, serviceLoader);
-    // The following line will be output to stdout (thus pm2's log)
-    console.log('CIRCUS CS Core Daemon started up.');
-    console.log('Logs are output using:', config.csCoreDaemonLogger);
-    await loopRun<circus.PluginJobRequest>(loopRunOptions!, process);
+    await loopRun<circus.PluginJobRequest>(loopRunOptions, process);
     process.exit(0);
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    const logger = loopRunOptions?.logger ?? createStdoutLogger('cs-core');
+    logger.error({ err }, 'CIRCUS CS daemon failed');
     process.exit(1);
   }
 };

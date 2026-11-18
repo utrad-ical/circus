@@ -9,15 +9,16 @@ import type * as circus from '../interface.ts';
 import type { Logger } from '@utrad-ical/circus-lib';
 
 const createMockLogger = (fn: Mock<(...args: any[]) => any>) => {
-  return {
+  const logger: Logger = {
     trace: fn,
     debug: fn,
     info: fn,
     warn: fn,
     error: fn,
     fatal: fn,
-    shutdown: fn
-  } as Logger;
+    child: () => logger
+  };
+  return logger;
 };
 
 const createMockQueueSystem = <T>(
@@ -68,14 +69,6 @@ const createMockQueueSystem = <T>(
   return mockQueueSystem;
 };
 
-class MockContext extends EventEmitter {
-  public pid: number;
-  constructor() {
-    super();
-    this.pid = 0;
-  }
-}
-
 describe('loopRun', () => {
   let _active: boolean = true;
   test('insert a job and list it', async () => {
@@ -94,7 +87,7 @@ describe('loopRun', () => {
       },
       dispose: async () => {}
     };
-    const mockContext = new MockContext();
+    const mockContext = new EventEmitter();
     const loop = loopRun(options, mockContext);
     await sleep(100);
     mockContext.emit('SIGINT');
@@ -103,15 +96,15 @@ describe('loopRun', () => {
     assert.deepEqual(
       fn.mock.calls.map(c => c.arguments),
       [
-        ['CIRCUS CS Job Manager started. pid: 0'],
-        ['Job 1 started.'],
-        ['Job 1 finished.'],
+        ['CIRCUS CS Job Manager started.'],
+        [{ jobId: '1' }, 'Job started'],
+        [{ jobId: '1', succeeded: true }, 'Job completed'],
         ['Job 1 settled.'],
-        ['Job 2 started.'],
-        ['Job 2 failed.'],
+        [{ jobId: '2' }, 'Job started'],
+        [{ jobId: '2', succeeded: false }, 'Job completed'],
         ['Job 2 settled.'],
-        ['Job 3 started.'],
-        ['Job 3 finished.'],
+        [{ jobId: '3' }, 'Job started'],
+        [{ jobId: '3', succeeded: true }, 'Job completed'],
         ['Job 3 settled.'],
         ['Currently the queue is empty.'],
         ['Signal SIGINT'],

@@ -95,7 +95,7 @@ export const createApp: FunctionService<
   {
     database: Database;
     validator: Validator;
-    apiLogger: Logger;
+    logger: Logger;
     models: Models;
     blobStorage: Storage;
     core: CsCore;
@@ -121,7 +121,7 @@ export const createApp: FunctionService<
   {
     database: database,
     validator,
-    apiLogger: logger,
+    logger,
     models,
     blobStorage,
     core,
@@ -227,37 +227,42 @@ export const createApp: FunctionService<
   const server = createServer(
     getRequestListener(app.fetch, { overrideGlobalObjects: false })
   );
-  attachWebSocketHandlers(server, rsWSServer, {
-    '/rs/ws/volume': rsWebsocketVolumeConnectionHandlerCreator({
-      authFunctionProvider: req => {
-        // Returns a function that checks if the user has the
-        // privilege to access the volume.
-        // The session cookie (web UI), or a token in the query string
-        const { token: queryToken } = parseQuery(req.url ?? '/');
-        const token =
-          sessionFromRawRequest(req.headers.cookie) ??
-          (typeof queryToken === 'string' ? queryToken : undefined);
-        if (!token) return async () => false;
-        const accessibleDomains = (async () => {
-          const result = await resolveAccessToken(models, token);
-          return result.ok ? result.userPrivileges.domains : [];
-        })();
-        return async seriesUid => {
-          const domains = await accessibleDomains;
-          const series = await models.series.findById(seriesUid);
-          if (!series) return false;
-          return domains.includes(series.domain);
-        };
-      }
-    })
-  });
+  attachWebSocketHandlers(
+    server,
+    rsWSServer,
+    logger.child({ component: 'rs' }),
+    {
+      '/rs/ws/volume': rsWebsocketVolumeConnectionHandlerCreator({
+        authFunctionProvider: req => {
+          // Returns a function that checks if the user has the
+          // privilege to access the volume.
+          // The session cookie (web UI), or a token in the query string
+          const { token: queryToken } = parseQuery(req.url ?? '/');
+          const token =
+            sessionFromRawRequest(req.headers.cookie) ??
+            (typeof queryToken === 'string' ? queryToken : undefined);
+          if (!token) return async () => false;
+          const accessibleDomains = (async () => {
+            const result = await resolveAccessToken(models, token);
+            return result.ok ? result.userPrivileges.domains : [];
+          })();
+          return async seriesUid => {
+            const domains = await accessibleDomains;
+            const series = await models.series.findById(seriesUid);
+            if (!series) return false;
+            return domains.includes(series.domain);
+          };
+        }
+      })
+    }
+  );
   return server;
 };
 
 createApp.dependencies = [
   'database',
   'validator',
-  'apiLogger',
+  'logger',
   'models',
   'blobStorage',
   'core',

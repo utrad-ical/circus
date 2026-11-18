@@ -3,6 +3,7 @@ import type {
   Logger,
   ServiceLoader
 } from '@utrad-ical/circus-lib';
+import { createLoggerFactory } from '@utrad-ical/circus-lib';
 import {
   createDicomExtractorWorker,
   type DicomExtractorWorker
@@ -43,10 +44,9 @@ export default function configureServiceLoader(
   serviceLoader: ServiceLoader
 ): ServiceLoader<Services> {
   // const serviceLoader = new ServiceLoader<Services>(config as any);
-  serviceLoader.registerDirectory(
+  serviceLoader.registerFactory(
     'csCoreDaemonLogger',
-    '<circus-lib>/logger',
-    'StdoutLogger'
+    createLoggerFactory('csCoreDaemonLogger', 'cs-core')
   );
   serviceLoader.registerFactory('daemonController', async config => {
     // will register as factory

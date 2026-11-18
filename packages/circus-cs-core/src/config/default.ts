@@ -74,13 +74,6 @@ const defaults: circus.Configuration = {
       mongoUrl: 'mongodb://localhost:27017/circus-api',
       collectionName: 'pluginDefinitions'
     }
-  },
-
-  csCoreDaemonLogger: {
-    type: 'FileLogger',
-    options: {
-      fileName: '/var/circus/data/logs/cscore-daemon'
-    }
   }
 };
 

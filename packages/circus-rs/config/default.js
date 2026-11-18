@@ -40,15 +40,6 @@ export default {
     }
   },
 
-  // Logger configurations. By default, we make use of log4js library,
-  // so see the documentation for that project.
-  rsLogger: {
-    type: 'FileLogger',
-    options: {
-      fileName: '/var/circus/data/logs/circus-rs'
-    }
-  },
-
   // Image encoder is used by some request types
   imageEncoder: {
     type: 'PngJsImageEncoder',

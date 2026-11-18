@@ -36,10 +36,6 @@ const defaults: Configuration = {
   database: {
     options: { mongoUrl: 'mongodb://localhost:27017/circus-api' }
   },
-  apiLogger: {
-    type: 'FileLogger',
-    options: { fileName: '/var/circus/data/logs/circus-api' }
-  },
   blobStorage: {
     type: 'LocalStorage',
     options: { dataDir: '/var/circus/data/labels' }

@@ -24,7 +24,7 @@ before(async () => {
     'projects',
     'pluginDefinitions'
   ]);
-  const apiLogger = await createTestLogger();
+  const logger = await createTestLogger();
   const server = await createApp(
     {
       debug: true,
@@ -39,7 +39,7 @@ before(async () => {
       validator,
       database,
       models,
-      apiLogger,
+      logger,
       dicomFileRepository: null as any, // dummy
       dicomTagReader: null as any, // dummy
       seriesOrientationResolver: null as any, // dummy

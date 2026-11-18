@@ -1,10 +1,12 @@
 import type { Server } from 'node:http';
 import type * as ws from 'ws';
+import type { Logger } from '@utrad-ical/circus-lib';
 import type WebSocketConnectionHandler from './connection/WebSocketConnectionHandler.ts';
 
 export const attachWebSocketHandlers = (
   server: Server,
   wss: ws.WebSocketServer,
+  logger: Logger,
   routes: Record<string, WebSocketConnectionHandler>
 ) => {
   server.on('upgrade', (request, socket, head) => {
@@ -20,7 +22,7 @@ export const attachWebSocketHandlers = (
         handler(connection, request);
       });
     } else {
-      console.log(`Reject upgrade to ${pathname}`);
+      logger.warn('Rejected WebSocket upgrade');
       socket.destroy();
     }
   });

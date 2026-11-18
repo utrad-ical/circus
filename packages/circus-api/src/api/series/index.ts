@@ -134,8 +134,7 @@ const importSeries = async (
       domain,
       maxEntryBytes: uploadFileSizeMaxBytes,
       dicomImporter,
-      apiLogger: logger,
-      userEmail: ctx.var.user.userEmail,
+      logger,
       reporter
     });
   } catch (err: any) {
@@ -407,7 +406,7 @@ export const handleGetExportCsVolume: RouteMiddleware<
               reporter?.finish(`Exported ${count} volume(s).`);
             } else controller.enqueue(value);
           } catch (err: any) {
-            logger.error(`CS volume export error: ${err?.message}`);
+            logger.error({ err }, 'CS volume export failed');
             reporter?.fail(
               'An internal error occurred while exporting the volume.'
             );

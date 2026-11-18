@@ -55,6 +55,8 @@ type DocumentOf<K extends keyof Models> = Awaited<
 export interface ApiEnv {
   Bindings: HttpBindings;
   Variables: {
+    requestId: string;
+    requestLogger: Logger;
     query: QueryParameters;
     jsonBody: unknown;
     user: DocumentOf<'user'>;

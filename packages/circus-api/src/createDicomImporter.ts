@@ -24,7 +24,7 @@ const createDicomImporter: FunctionService<
   DicomImporter,
   {
     dicomFileRepository: DicomFileRepository;
-    apiLogger: Logger;
+    logger: Logger;
     dicomTagReader: DicomTagReader;
     dicomUtilityRunner: DicomUtilityRunner;
     transactionManager: TransactionManager;
@@ -33,7 +33,7 @@ const createDicomImporter: FunctionService<
   options: Options,
   {
     dicomFileRepository,
-    apiLogger,
+    logger,
     dicomTagReader,
     dicomUtilityRunner,
     transactionManager
@@ -64,7 +64,7 @@ const createDicomImporter: FunctionService<
       await transactionManager.withTransaction(async models => {
         const series = await models.series.findById(seriesUid);
 
-        apiLogger.trace(`Importing: ${seriesUid} #${instanceNumber}`);
+        logger.trace({ instanceNumber }, 'Importing DICOM instance');
         if (series) {
           // Add image number
           const images = mr.append(
@@ -89,10 +89,9 @@ const createDicomImporter: FunctionService<
           );
         }
       });
-      apiLogger.trace(`Import complete: ${seriesUid} #${instanceNumber}`);
-    } catch (err: any) {
-      apiLogger.error(`Import failure: ${seriesUid} #${instanceNumber}`);
-      apiLogger.error(err);
+      logger.trace({ instanceNumber }, 'DICOM instance imported');
+    } catch (err) {
+      logger.error({ err, instanceNumber }, 'DICOM instance import failed');
       throw err;
     }
   };
@@ -102,7 +101,7 @@ const createDicomImporter: FunctionService<
 
 createDicomImporter.dependencies = [
   'dicomFileRepository',
-  'apiLogger',
+  'logger',
   'dicomTagReader',
   'dicomUtilityRunner',
   'transactionManager'

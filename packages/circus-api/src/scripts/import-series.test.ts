@@ -22,7 +22,7 @@ beforeEach(async () => {
   const { database, validator } = await modelsPromise;
   models = (await modelsPromise).models;
   await setUpMongoFixture(database.db, ['series']);
-  const apiLogger = await createTestLogger();
+  const logger = await createTestLogger();
   dicomFileRepository = new MemoryDicomFileRepository({});
   const dicomTagReader = await createDicomTagReader({});
   const transactionManager = await createTransactionManager(
@@ -33,7 +33,7 @@ beforeEach(async () => {
     {},
     {
       dicomFileRepository,
-      apiLogger,
+      logger,
       dicomTagReader,
       dicomUtilityRunner: null as any, // Dummy
       transactionManager

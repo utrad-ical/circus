@@ -29,7 +29,7 @@ beforeEach(async () => {
   await setUpMongoFixture(database.db, ['series']);
   const dicomTagReader = await createDicomTagReader({});
   dicomFileRepository = new MemoryDicomFileRepository({});
-  const apiLogger = await createTestLogger();
+  const logger = await createTestLogger();
   const dicomUtilityRunner = {
     compress: async (buf: ArrayBuffer) => buf,
     dispose: async () => {}
@@ -42,7 +42,7 @@ beforeEach(async () => {
     {},
     {
       dicomFileRepository,
-      apiLogger,
+      logger,
       dicomTagReader,
       dicomUtilityRunner,
       transactionManager

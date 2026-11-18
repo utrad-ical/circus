@@ -9,7 +9,7 @@ const allowOriginHeader = 'Access-Control-Allow-Origin';
 
 const createApp = async (corsOrigin?: string) => {
   const app = createHonoApp({
-    logger: await createNullLogger(null, {}),
+    logger: createNullLogger(),
     corsOrigin
   });
   app.get('/api/example', ctx => ctx.text('hi'));

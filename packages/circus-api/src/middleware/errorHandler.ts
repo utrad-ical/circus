@@ -7,7 +7,8 @@ import { ValidationError } from '../createValidator.ts';
 interface Options {
   includeErrorDetails: boolean;
   logger: Logger;
-  route?: string;
+  method: string;
+  route: string | null;
 }
 
 export const httpError = (
@@ -25,7 +26,7 @@ export const httpError = (
 
 export const formatError = (
   error: unknown,
-  { includeErrorDetails, logger, route }: Options
+  { includeErrorDetails, logger, method, route }: Options
 ) => {
   if (error instanceof ValidationError) {
     if (error.phase === 'request') {
@@ -41,11 +42,15 @@ export const formatError = (
       error.phase === 'response'
         ? 'Response schema validation error detected.'
         : 'Unexpected validation error.';
-    logger.error(message, {
-      route,
-      phase: error.phase,
-      issueCodes: error.issues.map(({ code }) => code)
-    });
+    logger.error(
+      {
+        method,
+        route,
+        phase: error.phase,
+        issueCodes: error.issues.map(({ code }) => code)
+      },
+      message
+    );
     return { status: 500 as const, body: { error: message } };
   }
 
@@ -54,8 +59,9 @@ export const formatError = (
       ? (error as Error & { status?: ContentfulStatusCode })
       : { status: undefined, message: String(error), stack: undefined };
   if (status) {
-    logger.info('HTTP error with status ' + status);
-    logger.info(error);
+    if (status >= 500) {
+      logger.error({ err: error, method, route, status }, 'HTTP error');
+    }
     return {
       status,
       body: { error: message },
@@ -63,7 +69,7 @@ export const formatError = (
     };
   }
 
-  logger.error(error);
+  logger.error({ err: error, method, route }, 'Unexpected request error');
   return {
     status: 500 as const,
     body: includeErrorDetails

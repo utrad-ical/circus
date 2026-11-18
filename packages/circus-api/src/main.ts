@@ -1,10 +1,11 @@
 // main server bootstrapping
 
-import { styleText } from 'node:util';
+import { once } from 'node:events';
+import { createStdoutLogger } from '@utrad-ical/circus-lib';
+import type { Logger } from '@utrad-ical/circus-lib';
 import dashdash from 'dashdash';
 import merge from 'merge';
 import type * as mongo from 'mongodb';
-import util from 'util';
 import config from './config/index.ts';
 import createServiceLoader from './createServiceLoader.ts';
 import scanMigrationFiles from './utils/scanMigrationFiles.ts';
@@ -57,8 +58,11 @@ const parsedArgs = (() => {
       fixUser: opts.fix_user,
       debug: opts.debug
     };
-  } catch (e: any) {
-    console.log(e.message);
+  } catch (err) {
+    createStdoutLogger('api').error(
+      { err },
+      'Invalid server options. See --help.'
+    );
     process.exit(1);
   }
 })();
@@ -76,9 +80,6 @@ const getLatestDbSchemaRevision = async () => {
 };
 
 const main = async () => {
-  console.log(`[${new Date().toISOString()}] CIRCUS API Server starting up...`);
-
-  // These two options can be modified by a config file
   const patchedConfig = merge({}, config);
   Object.keys(parsedArgs).forEach(k => {
     if ((parsedArgs as any)[k] !== undefined) {
@@ -86,77 +87,59 @@ const main = async () => {
     }
   });
 
-  const loader = await createServiceLoader(patchedConfig);
-  const database = await loader.get('database');
-  const logger = await loader.get('apiLogger');
-  const blobStorage = await loader.get('blobStorage');
-  const dicomFileRepository = await loader.get('dicomFileRepository');
+  let startupLogger: Logger | undefined;
+  try {
+    const loader = await createServiceLoader(patchedConfig);
+    const logger = await loader.get('logger');
+    startupLogger = logger;
+    logger.info('CIRCUS API server starting');
 
-  // Establish db connection (shared throughout app)
+    const database = await loader.get('database');
+    const currentRevision = await getCurrentDbSchemaRevision(database.db);
+    const requiredRevision = await getLatestDbSchemaRevision();
+    if (currentRevision !== requiredRevision) {
+      logger.error(
+        { currentRevision, requiredRevision },
+        'Database schema revision mismatch. Run the database migration script.'
+      );
+      process.exit(1);
+    }
 
-  const currentDbSchemaRevision = await getCurrentDbSchemaRevision(database.db);
-  const latestDbSchemaRevision = await getLatestDbSchemaRevision();
-  if (currentDbSchemaRevision !== latestDbSchemaRevision) {
-    console.warn(
-      styleText(
-        'red',
-        'Warning: DB Schema revision mismatch detected!\n' +
-          `Current revision: ${currentDbSchemaRevision}\n` +
-          `Required revision: ${latestDbSchemaRevision}\n` +
-          'Please run DB migration script.'
-      )
+    const appOptions = patchedConfig.apiServer.options;
+    if (appOptions.fixUser) {
+      logger.warn('CIRCUS API is running with authentication disabled');
+    }
+
+    const server = await loader.get('apiServer');
+    const listening = once(server, 'listening');
+    server.listen(appOptions.port, appOptions.host);
+    await listening;
+    const address = server.address();
+    logger.info(
+      {
+        host: appOptions.host,
+        port: typeof address === 'object' ? address?.port : appOptions.port,
+        labelStorage: patchedConfig.blobStorage?.type ?? 'MemoryStorage',
+        dicomStorage:
+          patchedConfig.dicomFileRepository?.type ??
+          'StaticDicomFileRepository',
+        pluginResultsDir: appOptions.pluginResultsPath,
+        corsOrigin: appOptions.corsOrigin
+      },
+      'CIRCUS API server listening'
+    );
+
+    process.on('SIGINT', () => {
+      logger.info('CIRCUS API server terminating');
+      process.exit(0);
+    });
+  } catch (err) {
+    (startupLogger ?? createStdoutLogger('api')).error(
+      { err },
+      'CIRCUS API server failed to start'
     );
     process.exit(1);
   }
-
-  const appOptions = patchedConfig.apiServer.options;
-
-  if (appOptions.fixUser) {
-    console.warn(styleText('red', 'WARNING: NO AUTHENTICATION MODE!'));
-    console.warn(
-      styleText(
-        'red',
-        `CIRCUS API will start using ${appOptions.fixUser} as the fixed user!`
-      )
-    );
-    logger.warn(
-      `CIRCUS API will start using ${appOptions.fixUser} as the fixed user!`
-    );
-  }
-
-  try {
-    const server = await loader.get('apiServer');
-    server.listen(appOptions.port, appOptions.host, (err?: Error) => {
-      if (err) throw err;
-      const setupInfo: { [key: string]: string | number } = {
-        'Label storage': blobStorage.toString(),
-        'DICOM storage': util.inspect(dicomFileRepository),
-        'Plug-in results dir': appOptions.pluginResultsPath,
-        'CORS origin': appOptions.corsOrigin,
-        'Process ID': process.pid
-      };
-      logger.info('CIRCUS API started.');
-      Object.keys(setupInfo).forEach(k => logger.info(`${k}: ${setupInfo[k]}`));
-      Object.keys(setupInfo).forEach(k => console.log(`${k}: ${setupInfo[k]}`));
-      console.log(
-        styleText(
-          'green',
-          `Server running on ${appOptions.host}:${appOptions.port}`
-        )
-      );
-    });
-  } catch (err) {
-    console.error(styleText('red', 'Error during the server startup.'));
-    console.error(err);
-  }
-
-  process.on('SIGINT', () => {
-    console.log(
-      `[${new Date().toISOString()}] CIRCUS API Server terminating...`
-    );
-    logger.warn('Server terminating...');
-    process.exit(0);
-  });
 };
 
 main();

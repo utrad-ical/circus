@@ -17,12 +17,15 @@ export type SeriesRoutes = (
 const createSeriesRoutes: FunctionService<
   SeriesRoutes,
   {
-    rsLogger: Logger;
+    logger: Logger;
     volumeProvider: VolumeProvider;
     imageEncoder: ImageEncoder;
   }
-> = async (_options, { rsLogger, volumeProvider, imageEncoder }) => {
-  const load = loadFromVolumeProvider({ logger: rsLogger, volumeProvider });
+> = async (_options, { logger, volumeProvider, imageEncoder }) => {
+  const load = loadFromVolumeProvider({
+    logger: logger.child({ component: 'rs' }),
+    volumeProvider
+  });
   return (authorize = (_ctx, next) => next()) => {
     const app = new Hono<RsEnv>();
     app.get('/:sid/metadata', authorize, ...load, ...metadata());
@@ -32,10 +35,6 @@ const createSeriesRoutes: FunctionService<
   };
 };
 
-createSeriesRoutes.dependencies = [
-  'rsLogger',
-  'volumeProvider',
-  'imageEncoder'
-];
+createSeriesRoutes.dependencies = ['logger', 'volumeProvider', 'imageEncoder'];
 
 export default createSeriesRoutes;

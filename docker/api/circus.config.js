@@ -50,10 +50,6 @@ module.exports = {
     type: 'StaticDicomFileRepository',
     options: { dataDir: `${dataDir}/dicom`, useHash: false }
   },
-  csCoreDaemonLogger: {
-    type: 'FileLogger',
-    options: { fileName: `${dataDir}/logs/cscore-daemon` }
-  },
   dicomTagReader: {
     options: {
       defaultTzOffset: 540 // Asia/Tokyo

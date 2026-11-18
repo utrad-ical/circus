@@ -11,7 +11,6 @@ export interface LoopRunOptions<T> {
 }
 
 interface Context {
-  pid: number;
   on(sig: 'SIGINT', callback: () => any): void;
 }
 
@@ -21,7 +20,7 @@ export default async function loopRun<T>(
 ) {
   const { logger, queue, run, cancellableTimer, dispose } = deps;
 
-  logger.info(`CIRCUS CS Job Manager started. pid: ${context.pid}`);
+  logger.info('CIRCUS CS Job Manager started.');
 
   context.on('SIGINT', function () {
     logger.info('Signal SIGINT');
@@ -29,7 +28,7 @@ export default async function loopRun<T>(
     cancellableTimer.cancel();
   });
 
-  const once = messageOnce(logger.info);
+  const once = messageOnce(message => logger.info(message));
   try {
     while (cancellableTimer.isActive()) {
       try {
@@ -42,16 +41,17 @@ export default async function loopRun<T>(
           }
           once.reset();
 
-          logger.info(`Job ${nextJob.jobId} started.`);
+          logger.info({ jobId: nextJob.jobId }, 'Job started');
           const succeed = await run(nextJob.jobId, nextJob.payload);
           logger.info(
-            `Job ${nextJob.jobId} ${succeed ? 'finished' : 'failed'}.`
+            { jobId: nextJob.jobId, succeeded: succeed },
+            'Job completed'
           );
         } finally {
           if (nextJob) await queue.settle(nextJob.jobId);
         }
-      } catch (e: any) {
-        logger.fatal(e.message);
+      } catch (err) {
+        logger.fatal({ err }, 'Job manager loop failed');
       }
       await cancellableTimer.waitForNext();
     }

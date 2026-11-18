@@ -21,7 +21,6 @@ export interface RsServerOptions {
 export interface Configuration {
   rsServer?: { options?: RsServerOptions };
   volumeProvider?: { options?: { cache?: CacheOptions } };
-  rsLogger?: ModuleDefinition;
   dicomFileRepository?: ModuleDefinition;
   imageEncoder?: ModuleDefinition;
 }

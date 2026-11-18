@@ -9,6 +9,7 @@ import {
   parseMessageBuffer
 } from '../../../common/ws/message.ts';
 import type { IncomingMessage } from 'http';
+import type { Logger } from '@utrad-ical/circus-lib';
 
 import createImageTransferAgent from '../image-transfer-agent.ts';
 import type { VolumeProvider } from '../../helper/createVolumeProvider.ts';
@@ -20,10 +21,12 @@ export type AuthFunctionProvider = (req: IncomingMessage) => AuthFunction;
 type Option = {
   authFunctionProvider: AuthFunctionProvider;
   volumeProvider: VolumeProvider;
+  logger: Logger;
 };
 
 const volume: (option: Option) => WebSocketConnectionHandler = ({
   volumeProvider,
+  logger,
   authFunctionProvider
 }) => {
   return (ws, req) => {
@@ -55,7 +58,8 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
 
     const { beginTransfer, getConnection, dispose } = createImageTransferAgent({
       imageDataEmitter,
-      volumeProvider
+      volumeProvider,
+      logger
     });
 
     ws.on('close', () => {
@@ -84,9 +88,7 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
           if (hasAccessRight) {
             await beginTransfer(transferId, seriesUid, partialVolumeDescriptor);
           } else {
-            console.error(
-              `${connectionId}: Attempted to access ${seriesUid} without proper authorization.`
-            );
+            logger.warn({ connectionId }, 'RS WebSocket volume access denied');
           }
           break;
         }

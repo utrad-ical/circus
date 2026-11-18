@@ -1,5 +1,4 @@
-export type { default as Logger } from './Logger.ts';
+export type { default as Logger, LogLevel } from './Logger.ts';
 export { default as createNullLogger } from './NullLogger.ts';
 export { default as createStdoutLogger } from './StdoutLogger.ts';
-export { default as createFileLogger } from './FileLogger.ts';
-export { default as createTextLogger } from './createTextLogger.ts';
+export { createLoggerFactory } from './createLoggerFactory.ts';

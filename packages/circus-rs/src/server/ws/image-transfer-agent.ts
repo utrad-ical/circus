@@ -1,4 +1,5 @@
 import type PartialVolumeDescriptor from '../../volume/PartialVolumeDescriptor.ts';
+import type { Logger } from '@utrad-ical/circus-lib';
 import { partialVolumeDescriptorToArray } from '../../volume/PartialVolumeDescriptor.ts';
 import PriorityIntegerQueue from '../../common/PriorityIntegerQueue.ts';
 import * as mr from 'multi-integer-range';
@@ -35,6 +36,7 @@ type TransferConnection = {
 interface CreateImageTransferAgentOptions {
   imageDataEmitter: ImageDataEmitter;
   volumeProvider: VolumeProvider;
+  logger: Logger;
 }
 
 interface ImageDataEmitter {
@@ -43,7 +45,8 @@ interface ImageDataEmitter {
 
 const createImageTransferAgent = ({
   imageDataEmitter,
-  volumeProvider
+  volumeProvider,
+  logger
 }: CreateImageTransferAgentOptions): ImageTransferAgent => {
   const transferConnections = new Map<string, TransferConnection>();
   const pendingsUntilTransferStarts = new Map<
@@ -79,7 +82,7 @@ const createImageTransferAgent = ({
       try {
         await connection.transferNextImage();
       } catch (err) {
-        console.error(err);
+        logger.error({ err }, 'RS WebSocket image transfer failed');
       }
     }
     setImmediate(next);

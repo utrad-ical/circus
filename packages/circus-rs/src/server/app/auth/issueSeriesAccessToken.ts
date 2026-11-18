@@ -8,7 +8,7 @@ import ipBasedAccessControl from '../middleware/ipBasedAccessControl.ts';
 import type { Authorizer } from '../../helper/createAuthorizer.ts';
 
 type MiddlewareOptions = {
-  rsLogger: Logger;
+  logger: Logger;
   authorizer: Authorizer;
   ipFilter?: string;
 };
@@ -20,7 +20,7 @@ type MiddlewareOptions = {
 export default function issueSeriesAccessToken(
   options: MiddlewareOptions
 ): [MiddlewareHandler<RsEnv>, ...MiddlewareHandler<RsEnv>[], Handler<RsEnv>] {
-  const { rsLogger: logger, authorizer, ipFilter } = options;
+  const { logger, authorizer, ipFilter } = options;
 
   const validator = validate({
     series: ['Series UID', null, s => isDicomUid(s), null]
@@ -41,7 +41,7 @@ export default function issueSeriesAccessToken(
 
   return ipFilter
     ? [
-        ipBasedAccessControl({ rsLogger: logger, allowPattern: ipFilter }),
+        ipBasedAccessControl({ logger, allowPattern: ipFilter }),
         validator,
         main
       ]

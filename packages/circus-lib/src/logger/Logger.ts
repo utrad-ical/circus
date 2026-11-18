@@ -1,16 +1,26 @@
-/**
- * Logger interface.
- */
-export default interface Logger {
-  trace(...args: any[]): void;
-  debug(...args: any[]): void;
-  info(...args: any[]): void;
-  warn(...args: any[]): void;
-  error(...args: any[]): void;
-  fatal(...args: any[]): void;
+export type LogLevel =
+  | 'trace'
+  | 'debug'
+  | 'info'
+  | 'warn'
+  | 'error'
+  | 'fatal'
+  | 'silent';
 
-  /**
-   * Call this before exiting the program.
-   */
-  shutdown: () => Promise<void>;
+interface LogMethod {
+  (message: string): void;
+  (fields: Record<string, unknown>, message: string): void;
+}
+
+export default interface Logger {
+  trace: LogMethod;
+  debug: LogMethod;
+  info: LogMethod;
+  warn: LogMethod;
+  error: LogMethod;
+  fatal: LogMethod;
+  child(
+    fields: Record<string, unknown>,
+    options?: { level?: LogLevel }
+  ): Logger;
 }

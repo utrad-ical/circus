@@ -1,7 +1,6 @@
 import type createDockerFileExtractor from '../utils/dockerFileExtractor.ts';
 import type { Context, MiddlewareHandler } from 'hono';
 import type { HttpBindings } from '@hono/node-server';
-import type { ParsedUrlQuery } from 'node:querystring';
 import type { z } from 'zod';
 import type { RouteDefinition } from '../defineRoute.ts';
 import type {
@@ -21,6 +20,7 @@ import type { MhdPacker } from '../case/createMhdPacker.ts';
 import type { ProgressManager } from '../createProgressManager.ts';
 import type { SeriesOrientationResolver } from '../utils/createSeriesOrientationResolver.ts';
 import type { VerifyUser } from '../middleware/auth/createVerifyUser.ts';
+import type { QueryParameters } from '../utils/parseQuery.ts';
 
 export interface Deps {
   validator: Validator;
@@ -55,7 +55,7 @@ type DocumentOf<K extends keyof Models> = Awaited<
 export interface ApiEnv {
   Bindings: HttpBindings;
   Variables: {
-    query: ParsedUrlQuery;
+    query: QueryParameters;
     jsonBody: unknown;
     user: DocumentOf<'user'>;
     userPrivileges: UserPrivilegeInfo;

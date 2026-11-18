@@ -1,7 +1,6 @@
 import { createServer } from 'node:http';
 import type { Server } from 'node:http';
 import * as path from 'node:path';
-import { parse } from 'node:querystring';
 import { getRequestListener } from '@hono/node-server';
 import { getCookie } from 'hono/cookie';
 import type { CsCore, DicomVoxelDumper } from '@utrad-ical/circus-cs-core';
@@ -49,6 +48,7 @@ import { typeCheck } from './middleware/typeCheck.ts';
 import { respondJson, validateRequest } from './middleware/validateInOut.ts';
 import { createHonoApp } from './createHonoApp.ts';
 import glob from './utils/glob.ts';
+import { parseQuery } from './utils/parseQuery.ts';
 
 async function registerRoutes(
   app: ReturnType<typeof createHonoApp>,
@@ -214,7 +214,7 @@ export const createApp: FunctionService<
             cookie: sessionFromRawRequest(headers.get('Cookie') ?? undefined),
             csrf: headers.get(csrfHeaderName) ?? undefined,
             expectedUser: headers.get(expectedUserHeaderName) ?? undefined,
-            misplacedToken: parse(req.url?.split('?')[1] ?? '').access_token
+            misplacedToken: parseQuery(req.url ?? '/').access_token
           });
       const series = await models.series.findById(seriesUid);
       if (!series) throw httpError(404, 'Series not found.');
@@ -252,7 +252,7 @@ export const createApp: FunctionService<
         // Returns a function that checks if the user has the
         // privilege to access the volume.
         // The session cookie (web UI), or a token in the query string
-        const { token: queryToken } = parse(req.url?.split('?')[1] ?? '');
+        const { token: queryToken } = parseQuery(req.url ?? '/');
         const token =
           sessionFromRawRequest(req.headers.cookie) ??
           (typeof queryToken === 'string' ? queryToken : undefined);

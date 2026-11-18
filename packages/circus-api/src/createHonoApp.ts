@@ -1,10 +1,10 @@
-import { parse } from 'node:querystring';
 import type { Logger } from '@utrad-ical/circus-lib';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { formatError } from './middleware/errorHandler.ts';
 import { readJsonBody } from './middleware/validateInOut.ts';
 import type { ApiEnv } from './typings/middlewares.ts';
+import { parseQuery } from './utils/parseQuery.ts';
 
 export const createHonoApp = ({
   logger,
@@ -18,8 +18,7 @@ export const createHonoApp = ({
   const app = new Hono<ApiEnv>({ strict: false });
   app.use('*', async (ctx, next) => {
     logger.trace('Request', ctx.req.method, ctx.req.path);
-    const { search } = new URL(ctx.req.url);
-    ctx.set('query', parse(search.slice(1)));
+    ctx.set('query', parseQuery(ctx.req.url));
     await next();
     // Hono drops the GET body for HEAD without consuming the stream.
     if (ctx.req.method === 'HEAD') {

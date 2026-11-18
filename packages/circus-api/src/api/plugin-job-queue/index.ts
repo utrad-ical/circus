@@ -1,7 +1,6 @@
 import { httpError } from '../../middleware/errorHandler.ts';
 import type { QueueState } from '@utrad-ical/circus-cs-core';
 import status from 'http-status';
-import type { ParsedUrlQuery } from 'node:querystring';
 import type {
   CircusContext,
   Deps,
@@ -35,7 +34,7 @@ export const listQueuedJobs = async (
   ctx: CircusContext,
   userEmail?: string
 ) => {
-  const query: ParsedUrlQuery = ctx.var.query;
+  const query = ctx.var.query;
   const limit = positiveInt(ctx, query.limit, 20);
   const page = positiveInt(ctx, query.page, 1);
   const state = first(query.state);

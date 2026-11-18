@@ -14,7 +14,7 @@ import type { CollectionAccessor } from '../db/createCollectionAccessor.ts';
 import createCollectionAccessor from '../db/createCollectionAccessor.ts';
 import createValidator from '../createValidator.ts';
 import path from 'path';
-import axios from 'axios';
+import { createTestHttpClient } from '../test/util-http.ts';
 
 let testServer: TestServer, items: CollectionAccessor;
 let disposeMongo: () => Promise<void>;
@@ -70,7 +70,7 @@ describe('performSearch', () => {
     limit,
     page
   }: { query?: any; sort?: any; limit?: any; page?: any } = {}) => {
-    const res = await axios.get(testServer.url, {
+    const res = await createTestHttpClient(testServer.url).get('', {
       params: {
         q: JSON.stringify(query),
         sort: JSON.stringify(sort),

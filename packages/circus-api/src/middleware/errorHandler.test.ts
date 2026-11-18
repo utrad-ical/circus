@@ -1,15 +1,15 @@
 import assert from 'node:assert/strict';
 import { test, before, after } from 'node:test';
 import errorHandler from './errorHandler.ts';
-import type { AxiosInstance } from 'axios';
-import axios from 'axios';
+import type { TestHttpClient } from '../test/util-http.ts';
+import { createTestHttpClient } from '../test/util-http.ts';
 import Router from 'koa-router';
 import { ValidationError } from '../createValidator.ts';
 import type { TestServer } from '../test/util-koa.ts';
 import { setUpKoaTest } from '../test/util-koa.ts';
 import { createNullLogger } from '@utrad-ical/circus-lib';
 
-let testServer: TestServer, ax: AxiosInstance;
+let testServer: TestServer, ax: TestHttpClient;
 
 before(async () => {
   testServer = await setUpKoaTest(async app => {
@@ -51,7 +51,7 @@ before(async () => {
     );
     app.use(router.routes());
   });
-  ax = axios.create({ baseURL: testServer.url, validateStatus: () => true });
+  ax = createTestHttpClient(testServer.url);
 });
 
 after(async () => {
@@ -78,13 +78,13 @@ test('should return 400 for request validation error', async () => {
 });
 
 test('should return 500 for server-side validation error', async () => {
-  const res = await ax('invalid-on-response');
+  const res = await ax.get('invalid-on-response');
   assert.equal(res.status, 500);
   assert.match(res.data.error, /response schema validation error/i);
 });
 
 test('should return 500 for server-side run-time error', async () => {
-  const res = await ax('server-side-error');
+  const res = await ax.get('server-side-error');
   assert.equal(res.status, 500);
   assert.ok('stack' in res.data);
 });

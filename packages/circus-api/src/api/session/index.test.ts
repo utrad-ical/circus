@@ -1,27 +1,27 @@
 import assert from 'node:assert/strict';
 import { test, before, after, describe } from 'node:test';
-import axios from 'axios';
-import type { AxiosInstance, AxiosResponse } from 'axios';
+import { createTestHttpClient } from '../../test/util-http.ts';
+import type { TestHttpClient } from '../../test/util-http.ts';
 import httpStatus from 'http-status';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import { sessionClientId } from '../../middleware/auth/session.ts';
 
-let apiTest: ApiTest, ax: AxiosInstance;
+let apiTest: ApiTest, ax: TestHttpClient;
 
 before(async () => {
   apiTest = await setUpAppForRoutesTest();
   // A plain client without any credentials
-  ax = axios.create({ baseURL: apiTest.url, validateStatus: () => true });
+  ax = createTestHttpClient(apiTest.url);
 });
 after(async () => await apiTest.tearDown());
 
 const csrf = { 'X-Requested-With': 'XMLHttpRequest' };
 
-const sessionCookieOf = (res: AxiosResponse) => {
-  const setCookie = (res.headers['set-cookie'] ?? []).find(c =>
-    c.startsWith('circus-session=')
-  );
+const sessionCookieOf = (res: { headers: Headers }) => {
+  const setCookie = res.headers
+    .getSetCookie()
+    .find(c => c.startsWith('circus-session='));
   return setCookie;
 };
 
@@ -166,7 +166,7 @@ describe('requests with the session cookie', () => {
       headers: { Cookie: cookie, 'X-Circus-User': 'bob@example.com' }
     });
     assert.equal(res2.status, httpStatus.CONFLICT);
-    assert.equal(res2.headers['x-circus-session-user-changed'], '1');
+    assert.equal(res2.headers.get('x-circus-session-user-changed'), '1');
   });
 
   test('are rejected after the session expires', async () => {
@@ -217,7 +217,7 @@ describe('RS', () => {
   });
 
   test('accepts a Bearer token or the session cookie', async () => {
-    const res1 = await apiTest.axiosInstances.alice.get(
+    const res1 = await apiTest.clients.alice.get(
       'rs/series/111.222.333.444.444/metadata'
     );
     assert.equal(res1.status, httpStatus.OK);

@@ -3,12 +3,12 @@ import { describe, it, before, after, beforeEach } from 'node:test';
 import type { ApiTest } from '../../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../../test/util-routes.ts';
 import { setUpMongoFixture } from '../../../test/util-mongo.ts';
-import type { AxiosInstance } from 'axios';
+import type { TestHttpClient } from '../../../test/util-http.ts';
 
-let apiTest: ApiTest, axios: AxiosInstance;
+let apiTest: ApiTest, client: TestHttpClient;
 before(async () => {
   apiTest = await setUpAppForRoutesTest();
-  axios = apiTest.axiosInstances.alice;
+  client = apiTest.clients.alice;
 });
 after(async () => await apiTest.tearDown());
 
@@ -17,31 +17,31 @@ beforeEach(async () => {
 });
 
 it('should return list of groups', async () => {
-  const res = await axios.get('api/admin/groups');
+  const res = await client.get('api/admin/groups');
   assert.ok(res.data.items instanceof Array);
   assert.equal(res.data.items[0].groupName, 'admin');
 });
 
 it('should return a group', async () => {
-  const res = await axios.get('api/admin/groups/1');
+  const res = await client.get('api/admin/groups/1');
   assert.equal(res.data.groupName, 'admin');
 });
 
 it('should return error for nonexistent group', async () => {
-  const res1 = await axios.get('api/admin/groups/7');
+  const res1 = await client.get('api/admin/groups/7');
   assert.equal(res1.status, 404);
-  const res2 = await axios.get('api/admin/groups/bad');
+  const res2 = await client.get('api/admin/groups/bad');
   assert.equal(res2.status, 404);
 });
 
 it('should update a group', async () => {
-  const res1 = await axios.request({
+  const res1 = await client.request({
     method: 'patch',
     url: 'api/admin/groups/1',
     data: { groupName: 'root' }
   });
   assert.equal(res1.status, 204);
-  const res2 = await axios.get('api/admin/groups/1');
+  const res2 = await client.get('api/admin/groups/1');
   assert.equal(res2.data.groupName, 'root');
 });
 
@@ -64,7 +64,7 @@ const basicGroupData = {
 };
 
 it('should add a new group', async () => {
-  const res = await axios.request({
+  const res = await client.request({
     method: 'post',
     url: 'api/admin/groups',
     data: basicGroupData
@@ -73,14 +73,14 @@ it('should add a new group', async () => {
 });
 
 it('should return error for invalid group update', async () => {
-  const res1 = await axios.request({
+  const res1 = await client.request({
     method: 'patch',
     url: 'api/admin/groups/1',
     data: { groupName: 72 }
   });
   assert.equal(res1.status, 400);
 
-  const res2 = await axios.request({
+  const res2 = await client.request({
     method: 'patch',
     url: 'api/admin/groups/1',
     data: { groupId: 45 }
@@ -88,7 +88,7 @@ it('should return error for invalid group update', async () => {
   assert.equal(res2.status, 400);
   assert.deepEqual(res2.data.issues[0].path, ['groupId']);
 
-  const res3 = await axios.request({
+  const res3 = await client.request({
     method: 'post',
     url: 'api/admin/groups',
     data: { ...basicGroupData, groupId: 77 }
@@ -114,7 +114,7 @@ const updateGroupData = async (
   data: typeof basicGroupData,
   expectedStatus: number
 ) => {
-  const res = await axios.request({
+  const res = await client.request({
     method: 'patch',
     url: 'api/admin/groups/1',
     data
@@ -157,7 +157,7 @@ describe('group permission updates', () => {
 });
 
 it('should return global-privileges', async () => {
-  const res = await axios('api/admin/global-privileges');
+  const res = await client.get('api/admin/global-privileges');
   assert.ok(res.data.length > 1);
   assert.equal(
     res.data.every((p: any) => p.privilege && p.caption),

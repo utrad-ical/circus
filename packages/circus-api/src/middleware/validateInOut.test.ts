@@ -5,7 +5,7 @@ import validateInOut from './validateInOut.ts';
 import createValidator from '../createValidator.ts';
 import bodyParser from 'koa-bodyparser';
 import errorHandler from './errorHandler.ts';
-import axios from 'axios';
+import { createTestHttpClient } from '../test/util-http.ts';
 import Router from 'koa-router';
 import * as path from 'path';
 import type { TestServer } from '../test/util-koa.ts';
@@ -13,6 +13,7 @@ import { setUpKoaTest } from '../test/util-koa.ts';
 import { createNullLogger } from '@utrad-ical/circus-lib';
 
 let testServer: TestServer;
+let client: ReturnType<typeof createTestHttpClient>;
 
 beforeEach(async () => {
   testServer = await setUpKoaTest(async app => {
@@ -46,6 +47,7 @@ beforeEach(async () => {
     );
     app.use(router.routes());
   });
+  client = createTestHttpClient(testServer.url);
 });
 
 afterEach(async function () {
@@ -53,8 +55,8 @@ afterEach(async function () {
 });
 
 test('should pass input validation', async function () {
-  const res = await axios.request({
-    url: testServer.url + 'in-check',
+  const res = await client.request({
+    url: 'in-check',
     method: 'post',
     data: { intVal: 5, dateVal: '2015-05-05T00:11:22.000Z' }
   });
@@ -62,29 +64,24 @@ test('should pass input validation', async function () {
 });
 
 test('should fail input validation', async function () {
-  const res = await axios.request({
-    url: testServer.url + 'in-check',
+  const res = await client.request({
+    url: 'in-check',
     method: 'post',
-    data: { intVal: 30, dateVal: 'invalid date' },
-    validateStatus: () => true
+    data: { intVal: 30, dateVal: 'invalid date' }
   });
   assert.equal(res.status, 400);
 });
 
 test('should pass output validation', async function () {
-  await axios.request({
-    url: testServer.url + 'out-check',
-    method: 'post',
-    data: { intVal: 5 }
-  });
+  const res = await client.post('out-check', { intVal: 5 });
+  assert.equal(res.status, 200);
 });
 
 test('should fail output validation', async function () {
-  const res = await axios.request({
-    url: testServer.url + 'out-check',
+  const res = await client.request({
+    url: 'out-check',
     method: 'post',
-    data: { intVal: 'foo' },
-    validateStatus: () => true
+    data: { intVal: 'foo' }
   });
   assert.equal(res.status, 500);
   assert.match(res.data.error, /Response schema validation error/i);

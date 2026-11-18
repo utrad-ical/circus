@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { it, before, after } from 'node:test';
-import type { AxiosInstance } from 'axios';
-import axios from 'axios';
+import type { TestHttpClient } from './test/util-http.ts';
+import { createTestHttpClient } from './test/util-http.ts';
 import type { TestServer } from './test/util-koa.ts';
 import { setUpKoaTestWith } from './test/util-koa.ts';
 import createTestLogger from './test/util-logger.ts';
@@ -9,7 +9,7 @@ import { setUpMongoFixture, usingModels } from './test/util-mongo.ts';
 import createApp from './createApp.ts';
 import * as ws from 'ws';
 
-let testServer: TestServer, ax: AxiosInstance;
+let testServer: TestServer, ax: TestHttpClient;
 
 const modelsPromise = usingModels();
 
@@ -66,7 +66,7 @@ before(async () => {
   );
 
   testServer = await setUpKoaTestWith(koaApp);
-  ax = axios.create({ baseURL: testServer.url, validateStatus: () => true });
+  ax = createTestHttpClient(testServer.url);
 });
 
 after(async () => {
@@ -82,9 +82,8 @@ it('should return 400 for malformed JSON input', async () => {
   const res = await ax.request({
     method: 'post',
     url: 'api/echo',
-    data: {},
-    headers: { 'Content-Type': 'application/json' },
-    transformRequest: [() => '{I+am+not.a.valid-JSON}}']
+    data: '{I+am+not.a.valid-JSON}}',
+    headers: { 'Content-Type': 'application/json' }
   });
   assert.equal(res.status, 400);
 });
@@ -107,6 +106,6 @@ it('should return 400 for huge JSON > 1mb', async () => {
 
 it('should return input data as-is', async () => {
   const data = { a: 10, b: 'test', c: { d: 999, e: 'TEST' } };
-  const res = await axios.post(testServer.url + 'api/echo', data);
+  const res = await ax.post('api/echo', data);
   assert.deepEqual(res.data, data);
 });

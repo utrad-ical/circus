@@ -54,6 +54,15 @@ export const handlePost: RouteMiddleware<typeof routes.postPluginJob> = ({
 }) => {
   return async (ctx, next) => {
     const { priority, pluginId, series, force } = ctx.request.body;
+    // `checkPrivilege` cannot see the plug-in ID in the request body
+    const canExecute = ctx.userPrivileges.accessiblePlugins.some(
+      p => p.pluginId === pluginId && p.roles.includes('executePlugin')
+    );
+    if (!canExecute)
+      ctx.throw(
+        status.UNAUTHORIZED,
+        'You do not have "executePlugin" privilege of this plugin.'
+      );
     await transactionManager.withTransaction(async models => {
       const resolvedSeries = await resolveAutoPvdOfSeries(
         series,
@@ -85,19 +94,17 @@ export const handlePatch: RouteMiddleware<typeof routes.patchPluginJob> = ({
     const jobId = ctx.params.jobId;
     const newStatus = ctx.request.body.status;
     await transactionManager.withTransaction(async models => {
-      const jobDoc = await models.pluginJob.findByIdOrFail(jobId);
-      const pluginId = jobDoc.pluginId;
+      const job = await models.pluginJob.findByIdOrFail(jobId);
 
       if (
         newStatus === 'invalidated' &&
         !ctx.userPrivileges.accessiblePlugins.some(
-          p => p.roles.includes('manageJobs') && p.pluginId === pluginId
+          p => p.roles.includes('manageJobs') && p.pluginId === job.pluginId
         )
       ) {
         ctx.throw(401, `You do not have permission to invalidate this job.`);
       }
 
-      const job = await models.pluginJob.findByIdOrFail(jobId);
       if (
         (newStatus === 'cancelled' && job.status !== 'in_queue') ||
         (newStatus === 'invalidated' && job.status !== 'finished')
@@ -483,7 +490,7 @@ export const handleDeleteFeedback: RouteMiddleware<
       // Throw 404 if feedbackId is not found
       if (
         feedbackId !== 'all' &&
-        !job.feedbacks.find((f: any) => f.feedbackId === feedbackId)
+        !job.feedbacks.find(f => f.feedbackId === feedbackId)
       ) {
         ctx.throw(status.NOT_FOUND, 'Feedback not found.');
       }
@@ -491,9 +498,9 @@ export const handleDeleteFeedback: RouteMiddleware<
       // Throw 400 if deleting personal feedback when consensual feedback exists
       if (
         feedbackId !== 'all' &&
-        job.feedbacks.find((f: any) => f.isConsensual) &&
-        job.feedbacks.find((f: any) => f.feedbackId === feedbackId)
-          ?.isConsensual === false
+        job.feedbacks.find(f => f.isConsensual) &&
+        job.feedbacks.find(f => f.feedbackId === feedbackId)?.isConsensual ===
+          false
       ) {
         ctx.throw(
           status.BAD_REQUEST,
@@ -504,7 +511,7 @@ export const handleDeleteFeedback: RouteMiddleware<
       const newList =
         feedbackId === 'all'
           ? []
-          : job.feedbacks.filter((f: any) => feedbackId !== f.feedbackId); // TODO: fix type
+          : job.feedbacks.filter(f => feedbackId !== f.feedbackId);
       await models.pluginJob.modifyOne(jobId, { feedbacks: newList });
       ctx.body = null;
     });

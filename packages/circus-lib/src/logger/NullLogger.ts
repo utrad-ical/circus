@@ -1,20 +1,17 @@
-import type { FunctionService } from '../ServiceLoader.ts';
 import type Logger from './Logger.ts';
 
-const createNullLogger: FunctionService<Logger> = async (
-  options: {},
-  deps: {}
-) => {
+const createNullLogger = (): Logger => {
   const noop = () => {};
-  return {
+  const logger: Logger = {
     trace: noop,
     debug: noop,
     info: noop,
     warn: noop,
     error: noop,
     fatal: noop,
-    shutdown: () => Promise.resolve()
+    child: () => logger
   };
+  return logger;
 };
 
 export default createNullLogger;

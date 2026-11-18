@@ -7,7 +7,7 @@ import zlib from 'zlib';
 import RsHttpClient from '../browser/http-client/RsHttpClient.ts';
 import { get } from 'node:http';
 import type { Server } from 'node:http';
-import { ServiceLoader } from '@utrad-ical/circus-lib';
+import { createNullLogger, ServiceLoader } from '@utrad-ical/circus-lib';
 import status from 'http-status';
 import type { Configuration } from './Configuration.ts';
 import path from 'path';
@@ -19,7 +19,6 @@ const testConfig = () =>
     rsServer: {
       options: { port, globalIpFilter: '(^|:?)127.0.0.1$|(^|:?)::1$' }
     },
-    rsLogger: { type: 'NullLogger' },
     dicomFileRepository: { type: 'MemoryDicomFileRepository', options: {} },
     imageEncoder: { type: 'PngJsImageEncoder', options: {} },
     volumeProvider: { options: { cache: { memoryThreshold: 2147483648 } } }
@@ -73,6 +72,7 @@ const dicomImage = (file = 'CT-MONO2-16-brain') => {
 const startTestServer = async (config: any) => {
   const loader = new ServiceLoader<RsServices>(config);
   configureServiceLoader(loader);
+  loader.registerFactory('logger', async () => createNullLogger());
 
   // Fill mock images to dicom file repository
   const dicomFileRepository = await loader.get('dicomFileRepository');

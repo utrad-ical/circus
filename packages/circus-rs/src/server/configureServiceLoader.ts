@@ -4,6 +4,7 @@ import type {
   Logger,
   ServiceLoader
 } from '@utrad-ical/circus-lib';
+import { createStdoutLogger } from '@utrad-ical/circus-lib';
 import type { Server } from 'node:http';
 import type { SeriesRoutes } from './app/series/createSeriesRoutes.ts';
 import path from 'path';
@@ -16,7 +17,7 @@ import type { RsWebsocketVolumeConnectionHandlerCreator } from './ws/createWebso
 
 export interface RsServices {
   rsServer: Server & Partial<Disposable>;
-  rsLogger: Logger;
+  logger: Logger;
   counter: Counter;
   dicomFileRepository: DicomFileRepository;
   dicomExtractorWorker: DicomExtractorWorker;
@@ -28,7 +29,7 @@ export interface RsServices {
 }
 
 const configureServiceLoader = (loader: ServiceLoader<any>): void => {
-  loader.registerDirectory('rsLogger', '<circus-lib>/logger', 'NullLogger');
+  loader.registerFactory('logger', async () => createStdoutLogger('rs'));
   loader.registerDirectory(
     'dicomFileRepository',
     '<circus-lib>/dicom-file-repository',

@@ -1,30 +1,34 @@
-import { ServiceLoader } from '@utrad-ical/circus-lib';
+import { createStdoutLogger, ServiceLoader } from '@utrad-ical/circus-lib';
+import type { Logger } from '@utrad-ical/circus-lib';
+import { once } from 'node:events';
 import config from './config.ts';
 import type { RsServices } from './configureServiceLoader.ts';
 import configureServiceLoader from './configureServiceLoader.ts';
 
 const main = async () => {
-  console.log('CIRCUS RS is starting up...');
   const loader = new ServiceLoader<RsServices>(config);
   configureServiceLoader(loader);
-  const { port } = config.rsServer.options;
-  const rsLogger = await loader.get('rsLogger');
-  const app = await loader.get('rsServer');
+  let logger: Logger | undefined;
 
   try {
-    const server = app.listen(port, '0.0.0.0');
-    server.on('listening', () => {
-      const message = `Server running on port ${port}`;
-      rsLogger.info(message);
-      console.log(message);
-    });
+    logger = await loader.get('logger');
+    logger.info('CIRCUS RS server starting');
+    const { port } = config.rsServer.options;
+    const server = await loader.get('rsServer');
+    const listening = once(server, 'listening');
+    server.listen(port, '0.0.0.0');
+    await listening;
+    const address = server.address();
+    logger.info(
+      { port: typeof address === 'object' ? address?.port : port },
+      'CIRCUS RS server listening'
+    );
     server.on('close', async () => {
       await loader.dispose();
     });
-  } catch (e) {
-    console.error('Server failed to start');
-    console.error(e);
-    rsLogger.error(e);
+  } catch (err) {
+    const startupLogger = logger ?? createStdoutLogger('rs');
+    startupLogger.error({ err }, 'CIRCUS RS server failed to start');
     await loader.dispose();
     process.exit(1);
   }

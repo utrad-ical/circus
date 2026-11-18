@@ -116,10 +116,10 @@ const createMhdPacker: FunctionService<
     dicomFileRepository: DicomFileRepository;
     dicomExtractorWorker: DicomExtractorWorker;
     blobStorage: Storage;
-    apiLogger: Logger;
+    logger: Logger;
   }
 > = async (opts, deps) => {
-  const { models, blobStorage, apiLogger } = deps;
+  const { models, blobStorage, logger } = deps;
 
   const prepareSeries = async (
     entry: any,
@@ -345,7 +345,7 @@ const createMhdPacker: FunctionService<
           reporter?.fail('The download was canceled.');
           return;
         }
-        apiLogger.error(`Case export error: ${err?.message}`);
+        logger.error({ err }, 'Case export failed');
         reporter?.fail(
           'An internal error occurred while exporting the case data.'
         );
@@ -378,7 +378,7 @@ createMhdPacker.dependencies = [
   'dicomFileRepository',
   'dicomExtractorWorker',
   'blobStorage',
-  'apiLogger'
+  'logger'
 ];
 
 export default createMhdPacker;

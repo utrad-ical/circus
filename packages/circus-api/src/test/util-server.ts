@@ -14,7 +14,7 @@ export const setUpHonoTest = async (
   options: { debug?: boolean; corsOrigin?: string } = {}
 ) => {
   const app = createHonoApp({
-    logger: await createNullLogger(null, {}),
+    logger: createNullLogger(),
     ...options
   });
   await setUp(app);

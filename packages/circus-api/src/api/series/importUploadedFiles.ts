@@ -32,26 +32,25 @@ const importUploadedFiles = async (
     domain: string;
     maxEntryBytes: number;
     dicomImporter: DicomImporter;
-    apiLogger: Logger;
-    userEmail: string;
+    logger: Logger;
     reporter?: ProgressReporter;
   }
 ): Promise<ImportSummary> => {
-  const { domain, maxEntryBytes, dicomImporter, apiLogger, userEmail } =
-    options;
-  const { reporter } = options;
+  const { domain, maxEntryBytes, dicomImporter, logger, reporter } = options;
   const summary: ImportSummary = { imported: 0, skipped: [], errors: [] };
 
   const skip = (file: string, reason: string) => {
     summary.skipped.push({ file, reason });
     reporter?.log('warn', `Skipped ${file}: ${reason}`);
   };
-  const fail = (file: string, reason: string) => {
+  const fail = (
+    file: string,
+    reason: string,
+    source: 'archive-entry' | 'dicom-import' | 'archive'
+  ) => {
     summary.errors.push({ file, reason });
     reporter?.log('error', `Failed ${file}: ${reason}`);
-    apiLogger.warn(
-      `Upload failure (${userEmail}, domain ${domain}): ${file}: ${reason}`
-    );
+    logger.warn({ source }, 'DICOM upload entry failed');
   };
   const report = () =>
     reporter?.report(
@@ -69,7 +68,7 @@ const importUploadedFiles = async (
         try {
           bytes = await entry.bytes();
         } catch (err: any) {
-          fail(entry.name, err.message);
+          fail(entry.name, err.message, 'archive-entry');
           continue;
         }
         const buffer = bytes.buffer as ArrayBuffer;
@@ -83,21 +82,25 @@ const importUploadedFiles = async (
             summary.imported++;
             reporter?.log('info', `Imported ${entry.name}`);
           } catch (err: any) {
-            fail(entry.name, err.message);
+            fail(entry.name, err.message, 'dicom-import');
           }
         }
         report();
       }
     } catch (err: any) {
       // The archive is broken; the rest of it is skipped
-      fail(filename, `Invalid archive: ${err.message}`);
+      fail(filename, `Invalid archive: ${err.message}`, 'archive');
       await stream.cancel().catch(() => {});
     }
   }
 
-  apiLogger.info(
-    `Upload (${userEmail}, domain ${domain}): imported ${summary.imported}, ` +
-      `skipped ${summary.skipped.length}, failed ${summary.errors.length}`
+  logger.info(
+    {
+      imported: summary.imported,
+      skipped: summary.skipped.length,
+      failed: summary.errors.length
+    },
+    'DICOM upload completed'
   );
   return summary;
 };

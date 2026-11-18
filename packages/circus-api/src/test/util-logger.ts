@@ -1,10 +1,7 @@
-import path from 'path';
-import { createFileLogger } from '@utrad-ical/circus-lib';
-
-const fileName = path.join(import.meta.dirname, '../../store/logs/test');
+import { createNullLogger } from '@utrad-ical/circus-lib';
 
 const createTestLogger = async () => {
-  return await createFileLogger({ fileName }, {});
+  return createNullLogger();
 };
 
 export default createTestLogger;

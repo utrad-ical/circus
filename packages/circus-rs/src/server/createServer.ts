@@ -23,7 +23,7 @@ const createServer: FunctionService<
 > = async (options, deps) => {
   const { authorization, globalIpFilter } = options;
   const {
-    rsLogger,
+    logger,
     counter,
     rsSeriesRoutes,
     rsWebsocketVolumeConnectionHandlerCreator,
@@ -33,7 +33,7 @@ const createServer: FunctionService<
   if (typeof globalIpFilter === 'string') {
     app.use(
       ipBasedAccessControl({
-        rsLogger,
+        logger,
         allowPattern: globalIpFilter,
         plainText: true
       })
@@ -44,7 +44,9 @@ const createServer: FunctionService<
     counter.countUp(ctx.req.path.split('/').at(-1)!);
     await next();
     if (ctx.req.method === 'HEAD') {
-      void ctx.res.body?.cancel().catch(error => rsLogger.error(error));
+      void ctx.res.body
+        ?.cancel()
+        .catch(err => logger.error({ err }, 'Failed to cancel HEAD response'));
     }
   });
   app.use(
@@ -56,7 +58,7 @@ const createServer: FunctionService<
       maxAge: 86400
     })
   );
-  app.onError(errorHandler(rsLogger));
+  app.onError(errorHandler(logger));
   app.notFound(() => {
     throw new HTTPException(404, { message: 'Not Found' });
   });
@@ -69,7 +71,7 @@ const createServer: FunctionService<
     app.get(
       '/token',
       ...issueSeriesAccessToken({
-        rsLogger,
+        logger,
         authorizer,
         ipFilter: authorization?.tokenRequestIpFilter
       })
@@ -78,7 +80,7 @@ const createServer: FunctionService<
   app.route(
     '/series',
     rsSeriesRoutes(
-      authorizer ? checkSeriesAccessToken({ rsLogger, authorizer }) : undefined
+      authorizer ? checkSeriesAccessToken({ logger, authorizer }) : undefined
     )
   );
 
@@ -86,7 +88,7 @@ const createServer: FunctionService<
     getRequestListener(app.fetch, { overrideGlobalObjects: false })
   );
   if (authorizer?.dispose) server.dispose = authorizer.dispose;
-  attachWebSocketHandlers(server, rsWSServer, {
+  attachWebSocketHandlers(server, rsWSServer, logger, {
     '/ws/volume': rsWebsocketVolumeConnectionHandlerCreator({
       authFunctionProvider: () => () =>
         new Promise(resolve => {
@@ -98,7 +100,7 @@ const createServer: FunctionService<
 };
 
 createServer.dependencies = [
-  'rsLogger',
+  'logger',
   'counter',
   'rsSeriesRoutes',
   'rsWSServer',

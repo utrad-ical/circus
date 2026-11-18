@@ -46,7 +46,8 @@ export default function loadVolumeProvider({
     try {
       volumeAccessor = await volumeProvider(series);
     } catch (err) {
-      logger.error(err);
+      const requestLogger = ctx.var.requestLogger ?? logger;
+      requestLogger.error({ err }, 'Failed to load RS volume');
       throw new HTTPException(404, {
         message: 'Series could not be loaded'
       });

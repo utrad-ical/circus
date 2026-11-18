@@ -63,7 +63,7 @@ const setUp = async (
   const blobStorage = await createMemoryStorage(undefined);
   // 2x2x1 binary voxels, all set
   await blobStorage.write(hash, Buffer.from([0xff]));
-  const apiLogger = { error: mock.fn() };
+  const logger = { error: mock.fn() };
   const packer = await createMhdPacker(undefined, {
     models: {
       clinicalCase: {
@@ -77,9 +77,9 @@ const setUp = async (
     dicomFileRepository,
     dicomExtractorWorker,
     blobStorage,
-    apiLogger: apiLogger as any
+    logger: logger as any
   });
-  return { packer, dicomFileRepository, apiLogger };
+  return { packer, dicomFileRepository, logger };
 };
 
 const defaultOptions: PackOptions = {
@@ -273,7 +273,7 @@ describe('createMhdPacker', () => {
   });
 
   test('fails the stream on an error during packing', async () => {
-    const { packer, dicomFileRepository, apiLogger } = await setUp({
+    const { packer, dicomFileRepository, logger } = await setUp({
       start: 1,
       end: 6,
       delta: 1
@@ -282,6 +282,6 @@ describe('createMhdPacker', () => {
     const reporter = { report: mock.fn(), finish: mock.fn(), fail: mock.fn() };
     await assert.rejects(exportCase(packer, {}, reporter));
     assert.equal(reporter.fail.mock.callCount(), 1);
-    assert.equal(apiLogger.error.mock.callCount(), 1);
+    assert.equal(logger.error.mock.callCount(), 1);
   });
 });

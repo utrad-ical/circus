@@ -5,7 +5,7 @@ import type { Authorizer } from '../../helper/createAuthorizer.ts';
 import type { Logger } from '@utrad-ical/circus-lib';
 
 type MiddlewareOptions = {
-  rsLogger: Logger;
+  logger: Logger;
   authorizer: Authorizer;
 };
 
@@ -15,7 +15,7 @@ type MiddlewareOptions = {
 export default function checkSeriesAccessToken(
   options: MiddlewareOptions
 ): MiddlewareHandler<RsEnv> {
-  const { rsLogger, authorizer } = options;
+  const { logger, authorizer } = options;
 
   return async (ctx, next) => {
     function invalid(): never {
@@ -28,19 +28,19 @@ export default function checkSeriesAccessToken(
     const authorization = ctx.req.header('Authorization');
 
     if (!authorization) {
-      rsLogger.warn('Tried to access data without authorization header.');
+      logger.warn('Tried to access data without authorization header.');
       invalid();
     }
 
     const [bearer, token] = authorization.split(' ');
 
     if (typeof bearer !== 'string' || bearer.toLowerCase() !== 'bearer') {
-      rsLogger.warn('Invalid authorization header.');
+      logger.warn('Invalid authorization header.');
       invalid();
     }
 
     if (!(await authorizer.checkToken(token, ctx.req.param('sid')!))) {
-      rsLogger.warn('Invalid access token.');
+      logger.warn('Invalid access token.');
       invalid();
     }
 

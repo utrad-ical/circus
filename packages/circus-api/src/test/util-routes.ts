@@ -133,7 +133,7 @@ export const setUpAppForRoutesTest = async (
     { database: database, validator }
   );
   const csCore = createMockCsCore();
-  const apiLogger = await createTestLogger();
+  const logger = await createTestLogger();
   const dicomTagReader = await createDicomTagReader({});
   const dicomUtilityRunner = await createDicomUtilityRunner({});
   const dicomFileRepository = new MemoryDicomFileRepository({});
@@ -141,7 +141,7 @@ export const setUpAppForRoutesTest = async (
     {},
     {
       dicomFileRepository,
-      apiLogger,
+      logger,
       dicomUtilityRunner,
       dicomTagReader,
       transactionManager
@@ -159,7 +159,7 @@ export const setUpAppForRoutesTest = async (
 
   const rsLoader = new ServiceLoader<RsServices>();
   configureRsServiceLoader(rsLoader);
-  rsLoader.registerFactory('rsLogger', async () => apiLogger);
+  rsLoader.registerFactory('logger', async () => logger);
   rsLoader.registerFactory(
     'dicomFileRepository',
     async () => dicomFileRepository
@@ -217,7 +217,7 @@ export const setUpAppForRoutesTest = async (
     {
       validator,
       database,
-      apiLogger,
+      logger,
       models,
       blobStorage,
       dicomFileRepository,
@@ -229,7 +229,7 @@ export const setUpAppForRoutesTest = async (
         dicomFileRepository,
         dicomExtractorWorker,
         blobStorage,
-        apiLogger
+        logger
       }),
       rsSeriesRoutes: await rsLoader.get('rsSeriesRoutes'),
       volumeProvider,

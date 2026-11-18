@@ -3,12 +3,12 @@ import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import type { Logger } from '@utrad-ical/circus-lib';
 import type { RsEnv } from '../../types.ts';
 
-export default function errorHandler(rsLogger: Logger): ErrorHandler<RsEnv> {
+export default function errorHandler(logger: Logger): ErrorHandler<RsEnv> {
   return (error, ctx) => {
-    rsLogger.error(error.message);
-    if (error.stack) rsLogger.trace(error.stack);
-
     const status = error.status as ContentfulStatusCode | undefined;
+    if (!status || status >= 500) {
+      logger.error({ err: error, status: status ?? 500 }, 'RS request failed');
+    }
     return ctx.json(
       {
         status: 'ng',

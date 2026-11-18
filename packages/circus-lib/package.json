@@ -37,14 +37,11 @@
   "dependencies": {
     "cosmiconfig": "^6.0.0",
     "fs-extra": "^9.0.0",
-    "logform": "^2.2.0",
     "merge": "^1.2.1",
     "multi-integer-range": "^6.1.0",
+    "pino": "^10.4.0",
     "tar-stream": "^2.1.0",
-    "ulid": "^2.3.0",
-    "winston": "^3.2.1",
-    "winston-daily-rotate-file": "^4.4.1",
-    "winston-transport": "^4.4.0"
+    "ulid": "^2.3.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^8.1.0",

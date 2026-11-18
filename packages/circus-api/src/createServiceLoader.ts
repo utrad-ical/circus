@@ -2,8 +2,7 @@ import type { CsCoreServices } from '@utrad-ical/circus-cs-core';
 import { configureCsCoreServiceLoader } from '@utrad-ical/circus-cs-core';
 import type { RsServices } from '@utrad-ical/circus-rs/server';
 import { configureRsServiceLoader } from '@utrad-ical/circus-rs/server';
-import type { Logger } from '@utrad-ical/circus-lib';
-import { ServiceLoader } from '@utrad-ical/circus-lib';
+import { createLoggerFactory, ServiceLoader } from '@utrad-ical/circus-lib';
 import path from 'path';
 import type {
   Database,
@@ -27,7 +26,6 @@ export type Services = CsCoreServices &
   RsServices & {
     apiServer: Server;
     database: Database;
-    apiLogger: Logger;
     validator: Validator;
     models: Models;
     dicomImporter: DicomImporter;
@@ -63,7 +61,19 @@ const createServiceLoader = async (config: any) => {
     'database',
     path.join(import.meta.dirname, 'db/connectDb')
   );
-  loader.registerDirectory('apiLogger', '<circus-lib>/logger', 'NullLogger');
+  const createLogger = createLoggerFactory('apiLogger', 'api');
+  loader.registerFactory('logger', async config => {
+    const logger = await createLogger(config);
+    if (Object.hasOwn(config, 'rsLogger')) {
+      logger
+        .child({}, { level: 'warn' })
+        .warn(
+          { setting: 'rsLogger' },
+          'RS uses the API logger. Remove rsLogger and use apiLogger.options.level.'
+        );
+    }
+    return logger;
+  });
   loader.registerModule(
     'validator',
     path.join(import.meta.dirname, 'createValidator')

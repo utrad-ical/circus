@@ -1,6 +1,4 @@
-import type { Logger } from '@utrad-ical/circus-lib';
-
-export default class DebugLogger implements Logger {
+export default class DebugLogger {
   private appendTo: HTMLElement;
   private lines: { type: string; content: string }[] = [];
 

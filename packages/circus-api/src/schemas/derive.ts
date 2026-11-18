@@ -29,10 +29,6 @@ export const searchResultOf = (items: z.ZodType) =>
 export const searchResult = (schema: z.ZodType) =>
   searchResultOf(withDates(schema));
 
-/** A document in the database: all properties are required */
-export const dbEntry = (schema: z.ZodType) =>
-  withDates(asObject(schema).required());
-
 /** Makes all properties required except the given ones */
 export const allRequiredExcept = (schema: z.ZodType, except: string[]) => {
   const obj = asObject(schema);

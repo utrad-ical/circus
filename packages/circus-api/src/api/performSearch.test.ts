@@ -1,4 +1,4 @@
-import { dbEntry } from '../schemas/derive.ts';
+import { withDates } from '../schemas/derive.ts';
 import testSchemas from '../../test/test-schemas.ts';
 import assert from 'node:assert/strict';
 import { describe, test, it, before, after } from 'node:test';
@@ -29,7 +29,7 @@ before(async () => {
     const validator = await createValidator(undefined);
     items = createCollectionAccessor(db, validator, {
       name: 'item',
-      schema: dbEntry(testSchemas.item),
+      schema: withDates(testSchemas.item.required()),
       collectionName: 'items',
       primaryKey: 'itemId'
     });

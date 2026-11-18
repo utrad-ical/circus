@@ -7,7 +7,6 @@ import type { Validator } from './interface.ts';
 import * as formats from './schemas/formats.ts';
 import {
   allRequiredExcept,
-  dbEntry,
   exclude,
   only,
   searchResult,
@@ -162,7 +161,7 @@ it('should handle only option', async () => {
   );
 });
 
-it('should handle dbEntry option', async () => {
+it('should validate a document with the dates', async () => {
   const goodData = {
     intVal: 0,
     strVal: 'bar',
@@ -171,17 +170,17 @@ it('should handle dbEntry option', async () => {
     createdAt: new Date(),
     updatedAt: new Date()
   };
-  await validator.validate(dbEntry(t.sample), goodData);
+  await validator.validate(withDates(t.sample.required()), goodData);
 
   const badData1 = { ...goodData, intVal: 'string' };
   await assert.rejects(
-    validator.validate(dbEntry(t.sample), badData1),
+    validator.validate(withDates(t.sample.required()), badData1),
     ValidationError
   );
 
   const badData2 = { ...goodData, createdAt: '2010-01-01' };
   await assert.rejects(
-    validator.validate(dbEntry(t.sample), badData2),
+    validator.validate(withDates(t.sample.required()), badData2),
     ValidationError
   );
 });

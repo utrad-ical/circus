@@ -26,16 +26,21 @@ test('full', async () => {
     loginId: 'bob',
     description: 'Bob'
   });
-  assert.equal(res.data.sharedMyLists.length, 1);
+  assert.equal(res.data.myLists.length, 4);
+  assert.deepEqual(
+    res.data.sharedMyLists.map((l: any) => l.owner),
+    ['dave@example.com']
+  );
 });
 
 test('full: my lists shared with a group', async () => {
   // Shares Dave's case list with the group of Bob (2)
+  // (instead of Bob himself)
   await apiTest.database.db
-    .collection('users')
+    .collection('myLists')
     .updateOne(
-      { 'myLists.myListId': '01ezab6xqfac7hvm5s09yw1g1j' },
-      { $set: { 'myLists.$.editors': [{ type: 'group', groupId: 2 }] } }
+      { myListId: '01ezab6xqfac7hvm5s09yw1g1j' },
+      { $set: { editors: [{ type: 'group', groupId: 2 }] } }
     );
   const res = await axios.get('api/login-info/full');
   assert.ok(

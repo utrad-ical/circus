@@ -73,13 +73,9 @@ export type CircusMiddleware = MiddlewareHandler<ApiEnv>;
 /** The decoded value of a route schema. */
 type OutputOf<S> = S extends z.ZodType ? z.output<S> : unknown;
 
-type HonoPath<P extends string> = P extends `${infer Prefix}:${infer Name}+`
-  ? `${Prefix}:${Name}{.+}`
-  : P;
-
 export type RouteContext<R extends RouteDefinition> = Context<
   ApiEnv,
-  HonoPath<R['path']>,
+  R['path'],
   { out: { json: OutputOf<R['request']> } }
 >;
 

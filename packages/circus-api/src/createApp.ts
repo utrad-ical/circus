@@ -63,11 +63,9 @@ async function registerRoutes(
     for (const route of routes) {
       if (route.forDebug && !debug) continue;
       const handler = route.handler(deps);
-      // Koa-style named patterns in the API definitions also feed the API reference.
-      const routePath = route.path.replace(/:(\w+)\+/g, ':$1{.+}');
       app.on(
         route.verb.toUpperCase(),
-        ['/api' + routePath],
+        ['/api' + route.path],
         ...(route.noAuthentication ? [] : [authenticate]),
         typeCheck(route.expectedContentType),
         checkPrivilege(deps, route),

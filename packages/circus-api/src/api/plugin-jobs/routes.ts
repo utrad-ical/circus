@@ -75,7 +75,7 @@ export const getAttachmentList = defineRoute({
 
 export const getAttachment = defineRoute({
   verb: 'get',
-  path: '/plugin-jobs/:jobId/attachment/:path+',
+  path: '/plugin-jobs/:jobId/attachment/:path{.+}',
   description: 'Returns the specified file output from the plug-in.',
   requiredPluginPrivilege: 'readPlugin',
   requiredSeriesDomainCheck: true

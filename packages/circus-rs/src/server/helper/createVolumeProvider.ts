@@ -15,7 +15,7 @@ export type VolumeProvider = (seriesUid: string) => Promise<VolumeAccessor>;
 
 /**
  * VolumeAccessor is a set of data which loadVolumeProvider middleware
- * creates and injects to Koa's context.
+ * creates and injects into the request context.
  */
 export interface VolumeAccessor {
   imageMetadata: Map<number, DicomMetadata>;
@@ -35,7 +35,7 @@ interface OptionsWithoutCache {
 }
 
 /**
- * Creates a priority loader that can be injected to Koa's context.
+ * Creates a priority loader for a DICOM series.
  */
 const createUncachedVolumeProvider: FunctionService<
   VolumeProvider,

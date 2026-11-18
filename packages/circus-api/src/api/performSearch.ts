@@ -175,7 +175,7 @@ export const runAggregation = async (
  * Performs a search using Mongo's aggregation framework.
  * @param model The collection accessor that represents the main collection.
  * @param filter The filter object passed to a `$match` stage.
- * @param ctx The Koa context.
+ * @param ctx The request context containing the search parameters.
  * @param lookupStages Pipeline stages passed before `$match`.
  *   Used to "join" other collections or perform other preprocessing tasks.
  * @param modifyStages Pipeline stages passed after `$limit`, `$sort`, etc.

@@ -1,5 +1,4 @@
-// Extends JavaScript Error object.
-// Koa uses these values.
+// Extends Error with HTTP and validation details.
 interface Error {
   /**
    * Determines whether the error message can be exposed to the client.

@@ -1,36 +1,26 @@
-import koa from 'koa';
-import httpStatus from 'http-status';
-import Router from 'koa-router';
-import koaJson from 'koa-json';
-
+import { createServer as createHttpServer } from 'node:http';
+import { getRequestListener } from '@hono/node-server';
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import { HTTPException } from 'hono/http-exception';
+import { prettyJSON } from 'hono/pretty-json';
+import type { FunctionService } from '@utrad-ical/circus-lib';
 import type { RsServerOptions } from './Configuration.ts';
 import type { RsServices } from './configureServiceLoader.ts';
-
-// middleware
-import cors from './app/middleware/cors.ts';
+import type { RsEnv } from './types.ts';
 import ipBasedAccessControl from './app/middleware/ipBasedAccessControl.ts';
 import errorHandler from './app/middleware/errorHandler.ts';
-import countUp from './app/middleware/countUp.ts';
-
-// basic routes
 import serverStatus from './app/serverStatus.ts';
-
-// authentication
 import issueSeriesAccessToken from './app/auth/issueSeriesAccessToken.ts';
 import checkSeriesAccessToken from './app/auth/checkSeriesAccessToken.ts';
-
-// application
-import type { FunctionService } from '@utrad-ical/circus-lib';
 import createAuthorizer from './helper/createAuthorizer.ts';
-import withWebSocketConnectionHandlers from './ws/withWebSocketConnectionHandlers.ts';
+import { attachWebSocketHandlers } from './ws/attachWebSocketHandlers.ts';
 
-/**
- * Create Koa App.
- */
-const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
-  options,
-  deps
-) => {
+const createServer: FunctionService<
+  RsServices['rsServer'],
+  RsServices,
+  RsServerOptions
+> = async (options, deps) => {
   const { authorization, globalIpFilter } = options;
   const {
     rsLogger,
@@ -39,72 +29,72 @@ const createServer: FunctionService<koa, RsServices, RsServerOptions> = async (
     rsWebsocketVolumeConnectionHandlerCreator,
     rsWSServer
   } = deps;
-
-  // create server process
-  const app = new koa();
-
-  // Set up global IP filter
+  const app = new Hono<RsEnv>({ strict: false });
   if (typeof globalIpFilter === 'string') {
-    app.use(ipBasedAccessControl({ rsLogger, allowPattern: globalIpFilter }));
-  }
-
-  // // Pretty-pring JSON output
-  app.use(koaJson());
-
-  // Adds an error handler which outputs all errors in JSON format
-  app.use(errorHandler({ rsLogger }));
-
-  // Add global CORS handler
-  app.use(cors());
-
-  // Counts the number of requests
-  app.use(countUp({ counter }));
-
-  const router = new Router<any, any>();
-  router.get('/status', serverStatus({ config: options, modules: deps }));
-
-  // authorization
-  if (authorization && authorization.enabled) {
-    const authorizer = createAuthorizer(authorization);
-    router.get(
-      '/token',
-      issueSeriesAccessToken({
+    app.use(
+      ipBasedAccessControl({
         rsLogger,
-        authorizer,
-        ipFilter: authorization.tokenRequestIpFilter
+        allowPattern: globalIpFilter,
+        plainText: true
       })
     );
-    router.use(
-      '/series/:sid',
-      checkSeriesAccessToken({ rsLogger, authorizer })
-    );
-    (app as any).dispose = async () => {
-      await authorizer.dispose!();
-    };
   }
+  app.use(prettyJSON());
+  app.use(async (ctx, next) => {
+    counter.countUp(ctx.req.path.split('/').at(-1)!);
+    await next();
+    if (ctx.req.method === 'HEAD') {
+      void ctx.res.body?.cancel().catch(error => rsLogger.error(error));
+    }
+  });
+  app.use(
+    cors({
+      origin: '*',
+      allowMethods: ['GET'],
+      allowHeaders: ['Authorization'],
+      credentials: true,
+      maxAge: 86400
+    })
+  );
+  app.onError(errorHandler(rsLogger));
+  app.notFound(() => {
+    throw new HTTPException(404, { message: 'Not Found' });
+  });
+  app.get('/status', serverStatus({ config: options, modules: deps }));
 
-  // series
-  router.use('/series/:sid', rsSeriesRoutes);
+  const authorizer = authorization?.enabled
+    ? createAuthorizer(authorization)
+    : undefined;
+  if (authorizer) {
+    app.get(
+      '/token',
+      ...issueSeriesAccessToken({
+        rsLogger,
+        authorizer,
+        ipFilter: authorization?.tokenRequestIpFilter
+      })
+    );
+  }
+  app.route(
+    '/series',
+    rsSeriesRoutes(
+      authorizer ? checkSeriesAccessToken({ rsLogger, authorizer }) : undefined
+    )
+  );
 
-  app.use(router.routes());
-
-  // websocket
-  withWebSocketConnectionHandlers(rsWSServer, {
+  const server: RsServices['rsServer'] = createHttpServer(
+    getRequestListener(app.fetch, { overrideGlobalObjects: false })
+  );
+  if (authorizer?.dispose) server.dispose = authorizer.dispose;
+  attachWebSocketHandlers(server, rsWSServer, {
     '/ws/volume': rsWebsocketVolumeConnectionHandlerCreator({
-      // authFunctionProvider: req => async seriesUid => true
-      authFunctionProvider: req => seriesUid =>
+      authFunctionProvider: () => () =>
         new Promise(resolve => {
           setTimeout(() => resolve(true), 2000);
         })
     })
-  })(app);
-
-  // This is a default handler to catch all unknown requests of all types of verbs
-  app.use(async (ctx: koa.DefaultContext, next: koa.Next) => {
-    ctx.throw(httpStatus.NOT_FOUND);
   });
-
-  return app;
+  return server;
 };
 
 createServer.dependencies = [

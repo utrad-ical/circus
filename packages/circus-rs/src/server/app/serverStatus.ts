@@ -1,4 +1,5 @@
-import type koa from 'koa';
+import type { Handler } from 'hono';
+import type { RsEnv } from '../types.ts';
 import type { RsServices } from '../configureServiceLoader.ts';
 import type { AsyncCachedLoader } from '../../common/asyncMemoize.ts';
 import type { VolumeAccessor } from '../helper/createVolumeProvider.ts';
@@ -11,14 +12,11 @@ const startUpTime: Date = new Date(); // The time this module was loaded
 
 export default function serverStatus(
   options: MiddlewareOptions
-): koa.Middleware {
+): Handler<RsEnv> {
   const { config, modules } = options;
   const { counter, volumeProvider } = modules;
 
-  return async function serverStatus(
-    ctx: koa.DefaultContext,
-    next: koa.Next
-  ): Promise<void> {
+  return ctx => {
     const status: any = {
       status: 'Running',
       process: {
@@ -36,6 +34,6 @@ export default function serverStatus(
       };
     }
 
-    ctx.body = status;
+    return ctx.json(status);
   };
 }

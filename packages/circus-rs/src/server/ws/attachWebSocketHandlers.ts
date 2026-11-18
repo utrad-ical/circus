@@ -1,5 +1,4 @@
 import type { Server } from 'node:http';
-import type Koa from 'koa';
 import type * as ws from 'ws';
 import type WebSocketConnectionHandler from './connection/WebSocketConnectionHandler.ts';
 
@@ -26,19 +25,3 @@ export const attachWebSocketHandlers = (
     }
   });
 };
-
-const withWebSocketConnectionHandlers =
-  (
-    wss: ws.WebSocketServer,
-    routes: Record<string, WebSocketConnectionHandler>
-  ) =>
-  (app: Koa) => {
-    const listen = app.listen;
-    app.listen = ((...args: Parameters<typeof listen>) => {
-      const server = listen.apply(app, args);
-      attachWebSocketHandlers(server, wss, routes);
-      return server;
-    }) as typeof listen;
-  };
-
-export default withWebSocketConnectionHandlers;

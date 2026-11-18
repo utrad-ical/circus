@@ -1,37 +1,34 @@
-import type koa from 'koa';
-import compose from 'koa-compose';
-import compress from 'koa-compress';
-import type { SeriesMiddlewareState } from './createSeriesRoutes.ts';
-import type DicomVolume from '../../../common/DicomVolume.ts';
+import type { Handler } from 'hono';
+import type { RsEnv } from '../../types.ts';
 import createPartialVolume from './createPartialVolume.ts';
 
 const PARTIAL_VOLUME_PRIORITY = 1;
 
-/**
- * Handles 'volume' endpoint which dumps the whole voxel data of the
- * specified series.
- */
-export default function volume(): koa.Middleware {
-  return compose([
-    compress(),
-    async function volume(
-      ctx: koa.DefaultContext,
-      next: koa.Next
-    ): Promise<void> {
-      const state = ctx.state as SeriesMiddlewareState;
+export const volume: Handler<RsEnv> = async ctx => {
+  const { volumeAccessor, partialVolumeDescriptor } = ctx.var;
+  const { images, volume, load } = volumeAccessor;
 
-      if (state.partialVolumeDescriptor) {
-        const partialVolume: DicomVolume = await createPartialVolume(
-          state.volumeAccessor,
-          state.partialVolumeDescriptor,
-          PARTIAL_VOLUME_PRIORITY
-        );
-        ctx.body = Buffer.from(partialVolume.data);
-      } else {
-        const { images, volume, load } = state.volumeAccessor;
-        await load(images);
-        ctx.body = Buffer.from(volume.data);
-      }
+  let data: ArrayBuffer;
+  if (partialVolumeDescriptor) {
+    const partialVolume = await createPartialVolume(
+      volumeAccessor,
+      partialVolumeDescriptor,
+      PARTIAL_VOLUME_PRIORITY
+    );
+    data = partialVolume.data;
+  } else {
+    await load(images);
+    data = volume.data;
+  }
+  const body = new ReadableStream<Uint8Array>({
+    start(controller) {
+      // Keep a view of the volume instead of copying it into the response.
+      controller.enqueue(new Uint8Array(data));
+      controller.close();
     }
-  ]);
-}
+  });
+  return ctx.body(body, 200, {
+    'Content-Type': 'application/octet-stream',
+    'Content-Length': String(data.byteLength)
+  });
+};

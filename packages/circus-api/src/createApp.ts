@@ -3,6 +3,7 @@ import type { Server } from 'node:http';
 import * as path from 'node:path';
 import { getRequestListener } from '@hono/node-server';
 import { getCookie } from 'hono/cookie';
+import type { Context } from 'hono';
 import type { CsCore, DicomVoxelDumper } from '@utrad-ical/circus-cs-core';
 import type {
   DicomFileRepository,
@@ -14,10 +15,7 @@ import type {
   VolumeProvider,
   RsWebsocketVolumeConnectionHandlerCreator
 } from '@utrad-ical/circus-rs/server';
-import {
-  attachWebSocketHandlers,
-  createSeriesRequestListener
-} from '@utrad-ical/circus-rs/server';
+import { attachWebSocketHandlers } from '@utrad-ical/circus-rs/server';
 import type * as ws from 'ws';
 import type { MhdPacker } from './case/createMhdPacker.ts';
 import type { ProgressManager } from './createProgressManager.ts';
@@ -43,7 +41,7 @@ import {
 } from './middleware/auth/session.ts';
 import { getFixedUser } from './middleware/auth/fixUser.ts';
 import checkPrivilege from './middleware/auth/checkPrivilege.ts';
-import { formatError, httpError } from './middleware/errorHandler.ts';
+import { httpError } from './middleware/errorHandler.ts';
 import { typeCheck } from './middleware/typeCheck.ts';
 import { respondJson, validateRequest } from './middleware/validateInOut.ts';
 import { createHonoApp } from './createHonoApp.ts';
@@ -177,45 +175,43 @@ export const createApp: FunctionService<
   };
 
   const app = createHonoApp({ logger, debug, corsOrigin });
-  const authenticate: CircusMiddleware = async (ctx, next) => {
-    const json = ctx.var.jsonBody;
-    const { user, userPrivileges, byCookie } = fixUser
-      ? await getFixedUser(models, fixUser)
-      : await authenticateRequest(models, {
+  const getAuthenticatedUser = (ctx: Context, misplacedToken: unknown) =>
+    fixUser
+      ? getFixedUser(models, fixUser)
+      : authenticateRequest(models, {
           method: ctx.req.method,
           authorization: ctx.req.header('Authorization'),
           cookie: getCookie(ctx, sessionCookieName),
           csrf: ctx.req.header(csrfHeaderName),
           expectedUser: ctx.req.header(expectedUserHeaderName),
-          misplacedToken:
-            ctx.var.query.access_token ||
-            (json &&
-              typeof json === 'object' &&
-              'access_token' in json &&
-              json.access_token)
+          misplacedToken
         });
+  const authenticate: CircusMiddleware = async (ctx, next) => {
+    const json = ctx.var.jsonBody;
+    const misplacedToken =
+      ctx.var.query.access_token ||
+      (json &&
+        typeof json === 'object' &&
+        'access_token' in json &&
+        json.access_token);
+    const { user, userPrivileges, byCookie } = await getAuthenticatedUser(
+      ctx,
+      misplacedToken
+    );
     ctx.set('user', user);
     ctx.set('userPrivileges', userPrivileges);
     ctx.set('authenticatedBySessionCookie', byCookie);
     await next();
   };
   await registerRoutes(app, deps, debug, authenticate);
-
-  const rsRequest = createSeriesRequestListener({
-    path: '/rs/series/:sid',
-    routes: rsSeriesRoutes,
-    authorize: async (req, seriesUid) => {
-      const headers = new Headers(req.headers as Record<string, string>);
-      const { userPrivileges } = fixUser
-        ? await getFixedUser(models, fixUser)
-        : await authenticateRequest(models, {
-            method: req.method ?? 'GET',
-            authorization: headers.get('Authorization') ?? undefined,
-            cookie: sessionFromRawRequest(headers.get('Cookie') ?? undefined),
-            csrf: headers.get(csrfHeaderName) ?? undefined,
-            expectedUser: headers.get(expectedUserHeaderName) ?? undefined,
-            misplacedToken: parseQuery(req.url ?? '/').access_token
-          });
+  app.route(
+    '/rs/series',
+    rsSeriesRoutes(async (ctx, next) => {
+      const { userPrivileges } = await getAuthenticatedUser(
+        ctx,
+        parseQuery(ctx.req.url).access_token
+      );
+      const seriesUid = ctx.req.param('sid')!;
       const series = await models.series.findById(seriesUid);
       if (!series) throw httpError(404, 'Series not found.');
       if (!userPrivileges.domains.includes(series.domain)) {
@@ -224,28 +220,13 @@ export const createApp: FunctionService<
           'You do not have privilege to access this series.'
         );
       }
-    },
-    onError: error => formatError(error, { includeErrorDetails: debug, logger })
-  });
-  const apiRequest = getRequestListener(app.fetch, {
-    overrideGlobalObjects: false
-  });
-  const server = createServer((req, res) => {
-    const pathname = req.url?.split('?', 1)[0];
-    if (pathname === '/rs' || pathname?.startsWith('/rs/')) {
-      if (corsOrigin) {
-        if (corsOrigin !== '*') res.appendHeader('Vary', 'Origin');
-        if (corsOrigin === '*' || corsOrigin === req.headers.origin) {
-          res.setHeader('Access-Control-Allow-Origin', corsOrigin);
-          res.setHeader('Access-Control-Allow-Credentials', 'true');
-        }
-      }
-      logger.trace('Request', req.method, pathname);
-      rsRequest(req, res);
-    } else {
-      apiRequest(req, res);
-    }
-  });
+      await next();
+    })
+  );
+
+  const server = createServer(
+    getRequestListener(app.fetch, { overrideGlobalObjects: false })
+  );
   attachWebSocketHandlers(server, rsWSServer, {
     '/rs/ws/volume': rsWebsocketVolumeConnectionHandlerCreator({
       authFunctionProvider: req => {

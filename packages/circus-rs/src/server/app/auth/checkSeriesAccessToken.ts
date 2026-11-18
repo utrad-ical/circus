@@ -1,5 +1,6 @@
-import type koa from 'koa';
-import httpStatus from 'http-status';
+import type { MiddlewareHandler } from 'hono';
+import { HTTPException } from 'hono/http-exception';
+import type { RsEnv } from '../../types.ts';
 import type { Authorizer } from '../../helper/createAuthorizer.ts';
 import type { Logger } from '@utrad-ical/circus-lib';
 
@@ -9,30 +10,26 @@ type MiddlewareOptions = {
 };
 
 /**
- * Returns a koa middleware function that blocks unauthorized requests
+ * Returns middleware that blocks unauthorized requests
  */
 export default function checkSeriesAccessToken(
   options: MiddlewareOptions
-): koa.Middleware {
+): MiddlewareHandler<RsEnv> {
   const { rsLogger, authorizer } = options;
 
-  return async function (
-    ctx: koa.DefaultContext,
-    next: koa.Next
-  ): Promise<void> {
-    const { request } = ctx;
-
-    function invalid(): void {
-      ctx.response.set('WWW-Authenticate', 'Bearer realm="CircusRS"');
-      ctx.throw(httpStatus.UNAUTHORIZED, 'Access denied');
+  return async (ctx, next) => {
+    function invalid(): never {
+      ctx.header('WWW-Authenticate', 'Bearer realm="CircusRS"');
+      throw new HTTPException(401, {
+        message: 'Access denied'
+      });
     }
 
-    const authorization = request.headers.authorization;
+    const authorization = ctx.req.header('Authorization');
 
-    if (!authorization || typeof authorization !== 'string') {
+    if (!authorization) {
       rsLogger.warn('Tried to access data without authorization header.');
       invalid();
-      return;
     }
 
     const [bearer, token] = authorization.split(' ');
@@ -40,13 +37,11 @@ export default function checkSeriesAccessToken(
     if (typeof bearer !== 'string' || bearer.toLowerCase() !== 'bearer') {
       rsLogger.warn('Invalid authorization header.');
       invalid();
-      return;
     }
 
-    if (!(await authorizer.checkToken(token, ctx.params.sid))) {
+    if (!(await authorizer.checkToken(token, ctx.req.param('sid')!))) {
       rsLogger.warn('Invalid access token.');
       invalid();
-      return;
     }
 
     // authorized!

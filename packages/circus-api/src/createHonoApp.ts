@@ -27,16 +27,15 @@ export const createHonoApp = ({
     }
   });
   if (corsOrigin) {
-    app.use(
-      '/api/*',
-      cors({
-        origin: corsOrigin,
-        allowMethods: ['POST', 'GET', 'PUT', 'OPTIONS', 'PATCH', 'DELETE'],
-        allowHeaders: ['Authorization', 'Content-Type'],
-        credentials: true,
-        maxAge: 86400
-      })
-    );
+    const allowOrigin = cors({
+      origin: corsOrigin,
+      allowMethods: ['POST', 'GET', 'PUT', 'OPTIONS', 'PATCH', 'DELETE'],
+      allowHeaders: ['Authorization', 'Content-Type'],
+      credentials: true,
+      maxAge: 86400
+    });
+    app.use('/api/*', allowOrigin);
+    app.use('/rs/*', allowOrigin);
   }
   app.use('/api/*', readJsonBody);
   app.onError((error, ctx) => {

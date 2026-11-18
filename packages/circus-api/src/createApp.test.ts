@@ -1,3 +1,4 @@
+import { Hono } from 'hono';
 import assert from 'node:assert/strict';
 import { it, before, after } from 'node:test';
 import type { TestHttpClient } from './test/util-http.ts';
@@ -44,7 +45,7 @@ before(async () => {
       seriesOrientationResolver: null as any, // dummy
       blobStorage: null as any, // dummy
       dicomImporter: null as any,
-      rsSeriesRoutes: async () => {},
+      rsSeriesRoutes: () => new Hono(),
       volumeProvider: null as any, // dummy
       progressManager: null as any, // dummy
       mhdPacker: null as any, // dummy
@@ -90,6 +91,22 @@ it('limits RS CORS to the configured origin', async () => {
     headers: { Origin: 'https://other.example.org' }
   });
   assert.equal(denied.headers.get('Access-Control-Allow-Origin'), null);
+
+  const preflight = await ax.request({
+    url: 'rs/series/1.2.3/metadata',
+    method: 'OPTIONS',
+    headers: {
+      Origin: origin,
+      'Access-Control-Request-Method': 'GET',
+      'Access-Control-Request-Headers': 'authorization'
+    }
+  });
+  assert.equal(preflight.status, 204);
+  assert.equal(preflight.headers.get('Access-Control-Allow-Origin'), origin);
+  assert.match(
+    preflight.headers.get('Access-Control-Allow-Headers') ?? '',
+    /authorization/i
+  );
 });
 
 it('should return 404 for the retired token endpoint', async () => {

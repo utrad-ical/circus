@@ -13,7 +13,7 @@ import {
   seriesForUser,
   seriesImportSummary,
   seriesOrientation
-} from '../../schemas/index.ts';
+} from '@utrad-ical/circus-api-schema';
 
 export const searchSeries = defineRoute({
   verb: 'get',

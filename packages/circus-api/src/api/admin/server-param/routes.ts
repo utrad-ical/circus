@@ -6,7 +6,7 @@ import {
   handlePutOne,
   handleSearch
 } from './index.ts';
-import { serverParams } from '../../../schemas/index.ts';
+import { serverParams } from '@utrad-ical/circus-api-schema';
 
 export const getServerParams = defineRoute({
   verb: 'get',

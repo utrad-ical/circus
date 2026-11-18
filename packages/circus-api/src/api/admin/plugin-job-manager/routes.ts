@@ -1,6 +1,6 @@
 import { defineRoute, defineRouteGroup, route } from '../../../defineRoute.ts';
 import { handleGet, handlePut } from './index.ts';
-import { pluginJobManager } from '../../../schemas/index.ts';
+import { pluginJobManager } from '@utrad-ical/circus-api-schema';
 
 export const getPluginJobManager = defineRoute({
   verb: 'get',

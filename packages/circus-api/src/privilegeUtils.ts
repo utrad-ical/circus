@@ -3,7 +3,7 @@ import {
   csRoleNames,
   dbRoleNames,
   type globalPrivilege
-} from './schemas/group.ts';
+} from '@utrad-ical/circus-api-schema';
 
 export { csRoleNames, dbRoleNames };
 import * as mr from 'multi-integer-range';

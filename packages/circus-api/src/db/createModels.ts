@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import * as s from '../schemas/index.ts';
+import * as s from '@utrad-ical/circus-api-schema';
 import createCollectionAccessor from './createCollectionAccessor.ts';
 import type {
   Database,

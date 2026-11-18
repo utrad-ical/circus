@@ -1,6 +1,6 @@
 import { defineRoute, defineRouteGroup, route } from '../../defineRoute.ts';
 import { handleGet, handlePatch } from './index.ts';
-import { preferences, preferencesPatch } from '../../schemas/index.ts';
+import { preferences, preferencesPatch } from '@utrad-ical/circus-api-schema';
 
 export const getPreferences = defineRoute({
   verb: 'get',

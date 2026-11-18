@@ -5,7 +5,7 @@ import type { Validator } from '../interface.ts';
 import type { DockerRunner } from '@utrad-ical/circus-cs-core';
 import { formatPath, ValidationError } from '../createValidator.ts';
 import { allRequiredExcept, only } from '../schemas/derive.ts';
-import { plugin } from '../schemas/plugin.ts';
+import { plugin } from '@utrad-ical/circus-api-schema';
 
 export const help = () => {
   return (

@@ -4,7 +4,7 @@ import { describe, it, before } from 'node:test';
 import { z } from 'zod';
 import createValidator, { ValidationError } from './createValidator.ts';
 import type { Validator } from './interface.ts';
-import * as formats from './schemas/formats.ts';
+import * as formats from '@utrad-ical/circus-api-schema/formats';
 import {
   allRequiredExcept,
   exclude,
@@ -50,10 +50,11 @@ describe('special formats', () => {
       'dicomUid',
       [
         '1.2.840.10008.2000.11111.222.33333',
+        '1.'.repeat(31) + '11',
         // This contains nonstandard component `00`, but we'll accept this
         '11.00.33.4444.333355'
       ],
-      ['11..22']
+      ['11..22', '1.'.repeat(31) + '111']
     );
   });
 

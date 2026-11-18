@@ -9,11 +9,10 @@ import type {
   CircusContext,
   RouteMiddleware
 } from '../../typings/middlewares.ts';
-import { pluginJobDoc } from '../../schemas/pluginJob.ts';
+import { pluginJobDoc, seriesDoc } from '@utrad-ical/circus-api-schema';
+import { dateField } from '@utrad-ical/circus-api-schema/formats';
 import type * as routes from './routes.ts';
-import { dateField } from '../../schemas/formats.ts';
 import { fieldsOf, mongoFilter } from '../../schemas/mongoFilter.ts';
-import { seriesDoc } from '../../schemas/series.ts';
 import generateUniqueId from '../../utils/generateUniqueId.ts';
 import type { AutoPvdSeriesEntry } from '../../utils/resolveAutoPvdOfSeries.ts';
 import resolveAutoPvdOfSeries from '../../utils/resolveAutoPvdOfSeries.ts';

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { defineRoute, defineRouteGroup, route } from '../../../defineRoute.ts';
 import { handlePost } from './index.ts';
-import { onetimeUrlCreate } from '../../../schemas/index.ts';
+import { onetimeUrlCreate } from '@utrad-ical/circus-api-schema';
 
 export const postOnetimeUrl = defineRoute({
   verb: 'post',

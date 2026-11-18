@@ -20,7 +20,7 @@ import {
   pluginJobFeedbacks,
   pluginJobPatch,
   pluginJobSearchResult
-} from '../../schemas/index.ts';
+} from '@utrad-ical/circus-api-schema';
 
 const feedbackCreated = z.strictObject({ feedbackId: z.string() });
 

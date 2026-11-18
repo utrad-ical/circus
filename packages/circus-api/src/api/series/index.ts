@@ -13,9 +13,11 @@ import type {
   RouteMiddleware
 } from '../../typings/middlewares.ts';
 import { ValidationError } from '../../createValidator.ts';
-import { seriesExportCsVolumeQuery } from '../../schemas/routes.ts';
+import {
+  seriesDoc,
+  seriesExportCsVolumeQuery
+} from '@utrad-ical/circus-api-schema';
 import { fieldsOf, mongoFilter } from '../../schemas/mongoFilter.ts';
-import { seriesDoc } from '../../schemas/series.ts';
 import type * as routes from './routes.ts';
 import readMultipartFiles from '../../utils/readMultipartFiles.ts';
 import tarToZip from '../../utils/tarToZip.ts';

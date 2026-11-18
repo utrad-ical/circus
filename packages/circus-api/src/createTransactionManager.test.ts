@@ -74,6 +74,25 @@ describe('createTransactionManager', () => {
     assert.equal(result!.balance, 10010);
   });
 
+  test('ends sessions after successful and failed transactions', async t => {
+    const startSession = t.mock.method(database.connection, 'startSession');
+    const result = await transactionManager.withTransaction(async () => 'ok');
+    assert.equal(result, 'ok');
+
+    const failure = new Error('Transaction failed');
+    await assert.rejects(
+      transactionManager.withTransaction(async () => {
+        throw failure;
+      }),
+      error => error === failure
+    );
+
+    assert.deepEqual(
+      startSession.mock.calls.map(({ result }) => result?.hasEnded),
+      [true, true]
+    );
+  });
+
   // test('not use transacton processing', async () => {
   //   const userId = 2;
   //   const notUseTransactionProcessing = async () => {

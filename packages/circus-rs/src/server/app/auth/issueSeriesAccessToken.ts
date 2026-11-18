@@ -1,8 +1,8 @@
-import type koa from 'koa';
-import compose from 'koa-compose';
+import type { Handler, MiddlewareHandler } from 'hono';
+import { HTTPException } from 'hono/http-exception';
+import type { RsEnv } from '../../types.ts';
 import type { Logger } from '@utrad-ical/circus-lib';
 import { isDicomUid } from '@utrad-ical/circus-lib';
-import httpStatus from 'http-status';
 import validate from '../middleware/validate.ts';
 import ipBasedAccessControl from '../middleware/ipBasedAccessControl.ts';
 import type { Authorizer } from '../../helper/createAuthorizer.ts';
@@ -19,36 +19,31 @@ type MiddlewareOptions = {
  */
 export default function issueSeriesAccessToken(
   options: MiddlewareOptions
-): koa.Middleware {
+): [MiddlewareHandler<RsEnv>, ...MiddlewareHandler<RsEnv>[], Handler<RsEnv>] {
   const { rsLogger: logger, authorizer, ipFilter } = options;
 
   const validator = validate({
     series: ['Series UID', null, s => isDicomUid(s), null]
   });
 
-  const main: koa.Middleware = async function (
-    ctx: koa.DefaultContext,
-    next: koa.Next
-  ): Promise<void> {
-    const series: string = ctx.request.query.series;
+  const main: Handler<RsEnv> = async ctx => {
+    const series = ctx.req.query('series')!;
 
     try {
       const token = await authorizer.issueToken(series);
-      ctx.body = { result: 'OK', token };
+      return ctx.json({ result: 'OK', token });
     } catch (err) {
-      ctx.throw(
-        httpStatus.INTERNAL_SERVER_ERROR,
-        'Internal server error occurred while generating access token'
-      );
+      throw new HTTPException(500, {
+        message: 'Internal server error occurred while generating access token'
+      });
     }
   };
 
-  const middlewares = [validator, main];
-  if (ipFilter) {
-    middlewares.unshift(
-      ipBasedAccessControl({ rsLogger: logger, allowPattern: ipFilter })
-    );
-  }
-
-  return compose(middlewares);
+  return ipFilter
+    ? [
+        ipBasedAccessControl({ rsLogger: logger, allowPattern: ipFilter }),
+        validator,
+        main
+      ]
+    : [validator, main];
 }

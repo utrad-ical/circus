@@ -1,20 +1,25 @@
-import type koa from 'koa';
-import httpStatus from 'http-status';
+import type { MiddlewareHandler } from 'hono';
+import { HTTPException } from 'hono/http-exception';
 import type { ValidatorRules } from '../../../common/Validator.ts';
 import { Validator } from '../../../common/Validator.ts';
+import type { RsEnv } from '../../types.ts';
 
-export default function validate(rules: ValidatorRules): koa.Middleware {
-  return async function (
-    ctx: koa.DefaultContext,
-    next: koa.Next
-  ): Promise<void> {
-    const origQuery = ctx.request.query;
-    const validator = new Validator(rules);
-    const { result, errors } = validator.validate(origQuery);
+export default function validate(
+  rules: ValidatorRules
+): MiddlewareHandler<RsEnv> {
+  const validator = new Validator(rules);
+  return async (ctx, next) => {
+    const query = Object.fromEntries(
+      Object.entries(ctx.req.queries()).map(([key, values]) => [
+        key,
+        values.length === 1 ? values[0] : values
+      ])
+    );
+    const { result, errors } = validator.validate(query);
     if (errors.length) {
-      ctx.throw(httpStatus.BAD_REQUEST, errors.join('\n'));
+      throw new HTTPException(400, { message: errors.join('\n') });
     }
-    ctx.state.query = result;
+    ctx.set('rsQuery', result);
     await next();
   };
 }

@@ -1,10 +1,9 @@
-import type koa from 'koa';
-import compose from 'koa-compose';
+import type { Handler, MiddlewareHandler } from 'hono';
+import type { RsEnv } from '../../types.ts';
 import type { ValidatorRules } from '../../../common/Validator.ts';
 import validate from '../middleware/validate.ts';
 import type { ViewWindow } from '../../../common/ViewWindow.ts';
 import type { PixelFormat } from '../../../volume/PixelFormat.ts';
-import type { SeriesMiddlewareState } from './createSeriesRoutes.ts';
 import * as mr from 'multi-integer-range';
 import type { VolumeAccessor } from '../../helper/createVolumeProvider.ts';
 import { partialVolumeDescriptorToArray } from '../../../volume/PartialVolumeDescriptor.ts';
@@ -26,7 +25,7 @@ interface MetadataResponse {
  * Handles 'metadata' endpoint which gives general information
  * of the specified series.
  */
-export default function metadata(): koa.Middleware {
+export default function metadata(): [MiddlewareHandler<RsEnv>, Handler<RsEnv>] {
   const rules: ValidatorRules = {
     estimateWindow: [
       'estimate window',
@@ -36,9 +35,9 @@ export default function metadata(): koa.Middleware {
     ]
   };
 
-  const metadata: koa.Middleware = async (ctx, next) => {
-    const state = ctx.state as SeriesMiddlewareState;
-    const { estimateWindow = 'none' } = state.query as MetadataQuery;
+  const metadata: Handler<RsEnv> = async ctx => {
+    const state = ctx.var;
+    const { estimateWindow = 'none' } = state.rsQuery as MetadataQuery;
     const { images } = state.volumeAccessor;
 
     // Modify full volume accessor to partial volume accessor
@@ -68,10 +67,10 @@ export default function metadata(): koa.Middleware {
       mode
     };
 
-    ctx.body = body;
+    return ctx.json(body);
   };
 
-  return compose([validate(rules), metadata]);
+  return [validate(rules), metadata];
 }
 
 type VolumeMetadata = {

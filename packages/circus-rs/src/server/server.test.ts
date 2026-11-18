@@ -5,7 +5,8 @@ import configureServiceLoader from './configureServiceLoader.ts';
 import fs from 'fs';
 import zlib from 'zlib';
 import RsHttpClient from '../browser/http-client/RsHttpClient.ts';
-import type { Server } from 'http';
+import { get } from 'node:http';
+import type { Server } from 'node:http';
 import { ServiceLoader } from '@utrad-ical/circus-lib';
 import status from 'http-status';
 import type { Configuration } from './Configuration.ts';
@@ -30,6 +31,22 @@ const request = (path: string, init?: RequestInit) => {
   headers.set('Connection', 'close');
   return fetch(new URL(path, origin), { ...init, headers });
 };
+
+const statusFromOtherIp = (pathname: string) =>
+  new Promise<number | undefined>((resolve, reject) => {
+    get(
+      {
+        hostname: '127.0.0.1',
+        port,
+        path: pathname,
+        localAddress: '127.0.0.2'
+      },
+      response => {
+        response.resume();
+        response.once('end', () => resolve(response.statusCode));
+      }
+    ).once('error', reject);
+  });
 
 const readStatus = async (response: Response) => {
   await response.arrayBuffer();
@@ -65,7 +82,6 @@ const startTestServer = async (config: any) => {
 
   // Start app
   const app = await loader.get('rsServer');
-  app.proxy = true;
   const server = await new Promise<Server>(resolve => {
     const server = app.listen(port);
     server.on('listening', () => resolve(server));
@@ -95,10 +111,7 @@ describe('without auth', () => {
   });
 
   test('globalIpFilter', async () => {
-    const res = await request('/status', {
-      headers: { 'X-Forwarded-For': '127.0.0.11 ' }
-    });
-    assert.equal(await readStatus(res), status.UNAUTHORIZED);
+    assert.equal(await statusFromOtherIp('/status'), status.UNAUTHORIZED);
   });
 
   test('must return 404 for nonexistent route', async () => {
@@ -111,6 +124,7 @@ describe('without auth', () => {
       const res = await request('/series/1.2.3.4.5/metadata', {
         method: 'OPTIONS'
       });
+      assert.equal(res.status, status.NO_CONTENT);
       assert.equal(res.headers.get('access-control-allow-methods'), 'GET');
     });
 
@@ -295,10 +309,7 @@ describe('with authentication', () => {
   let tokenHeader: { Authorization: string };
 
   test('reject token request from invalid IP', async () => {
-    const res = await request('/token', {
-      headers: { 'X-Forwarded-For': '127.0.0.2' }
-    });
-    assert.equal(await readStatus(res), status.UNAUTHORIZED);
+    assert.equal(await statusFromOtherIp('/token'), status.UNAUTHORIZED);
   });
 
   test('issue valid token', async () => {

@@ -1,5 +1,6 @@
-import type koa from 'koa';
-import httpStatus from 'http-status';
+import type { MiddlewareHandler } from 'hono';
+import { HTTPException } from 'hono/http-exception';
+import type { RsEnv } from '../../types.ts';
 import type { Logger } from '@utrad-ical/circus-lib';
 import type PartialVolumeDescriptor from '../../../volume/PartialVolumeDescriptor.ts';
 import { isDicomUid } from '@utrad-ical/circus-lib';
@@ -9,10 +10,8 @@ import type {
   VolumeProvider,
   VolumeAccessor
 } from '../../helper/createVolumeProvider.ts';
-import compose from 'koa-compose';
 import validate from '../middleware/validate.ts';
 import type { ValidatorRules } from '../../../common/Validator.ts';
-import type { SeriesMiddlewareState } from './createSeriesRoutes.ts';
 import * as mr from 'multi-integer-range';
 
 interface LoadStoreOptions {
@@ -21,27 +20,26 @@ interface LoadStoreOptions {
 }
 
 /**
- * Creates a middleware that injects `VolumeAccessor` to Koa's context.
+ * Creates a middleware that injects `VolumeAccessor` to the request context.
  * A VolumeAccessor is bound to a specific series UID
  * provided via the request URL.
  */
 export default function loadVolumeProvider({
   logger,
   volumeProvider
-}: LoadStoreOptions): koa.Middleware {
+}: LoadStoreOptions): [MiddlewareHandler<RsEnv>, MiddlewareHandler<RsEnv>] {
   const rules: ValidatorRules = {
     start: ['Start image no', undefined, 'isInt', 'toInt'],
     end: ['End image no', undefined, 'isInt', 'toInt'],
     delta: ['delta', undefined, 'isInt', 'toInt']
   };
 
-  const main: koa.Middleware = async function (
-    ctx: koa.DefaultContext,
-    next: koa.Next
-  ): Promise<void> {
-    const series = ctx.params.sid;
-    if (!isDicomUid(series)) {
-      ctx.throw(httpStatus.BAD_REQUEST, 'Invalid series UID');
+  const main: MiddlewareHandler<RsEnv> = async (ctx, next) => {
+    const series = ctx.req.param('sid');
+    if (!series || !isDicomUid(series)) {
+      throw new HTTPException(400, {
+        message: 'Invalid series UID'
+      });
     }
 
     let volumeAccessor: VolumeAccessor | undefined = undefined;
@@ -49,30 +47,31 @@ export default function loadVolumeProvider({
       volumeAccessor = await volumeProvider(series);
     } catch (err) {
       logger.error(err);
-      ctx.throw(httpStatus.NOT_FOUND, 'Series could not be loaded');
+      throw new HTTPException(404, {
+        message: 'Series could not be loaded'
+      });
     }
 
     let partialVolumeDescriptor: PartialVolumeDescriptor | undefined;
-    const { images } = volumeAccessor!;
-    const { start, end, delta } = ctx.state.query;
+    const { images } = volumeAccessor;
+    const { start, end, delta } = ctx.var.rsQuery;
     if (start !== undefined || end !== undefined || delta !== undefined) {
       if (
         !isValidPartialVolumeDescriptor({ start, end, delta }) ||
         !mr.has(images, mr.normalize(start)) ||
         !mr.has(images, mr.normalize(end))
       ) {
-        ctx.throw(httpStatus.BAD_REQUEST, 'Volume descriptor is invalid');
+        throw new HTTPException(400, {
+          message: 'Volume descriptor is invalid'
+        });
       }
       partialVolumeDescriptor = { start, end, delta };
     }
 
-    (ctx.state as SeriesMiddlewareState) = {
-      ...ctx.state,
-      partialVolumeDescriptor,
-      volumeAccessor
-    };
+    ctx.set('partialVolumeDescriptor', partialVolumeDescriptor);
+    ctx.set('volumeAccessor', volumeAccessor);
     await next();
   };
 
-  return compose([validate(rules), main]);
+  return [validate(rules), main];
 }

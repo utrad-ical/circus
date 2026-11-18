@@ -1,5 +1,8 @@
-import type koa from 'koa';
-import compose from 'koa-compose';
+import { Readable } from 'node:stream';
+import type { Handler, MiddlewareHandler } from 'hono';
+import { HTTPException } from 'hono/http-exception';
+import { compress } from 'hono/compress';
+import type { RsEnv } from '../../types.ts';
 import {
   isTuple,
   parseTuple,
@@ -7,12 +10,9 @@ import {
 } from '../../../common/ValidatorRules.ts';
 import type { Section } from '../../../common/geometry/Section.ts';
 import { vectorizeSection } from '../../../common/geometry/Section.ts';
-import httpStatus from 'http-status';
-import compress from 'koa-compress';
 import validate from '../middleware/validate.ts';
 import type { ValidatorRules } from '../../../common/Validator.ts';
 import type ImageEncoder from '../../helper/image-encoder/ImageEncoder.ts';
-import type { SeriesMiddlewareState } from './createSeriesRoutes.ts';
 import type RawData from '../../../common/RawData.ts';
 import * as mr from 'multi-integer-range';
 import type PartialVolumeDescriptor from '../../../volume/PartialVolumeDescriptor.ts';
@@ -27,7 +27,13 @@ const SCAN_PRIORITY = 100;
  * Handles 'scan' endpoint which returns MPR image for
  * an arbitrary orientation.
  */
-export default function scan({ imageEncoder }: ScanOptions): koa.Middleware {
+export default function scan({
+  imageEncoder
+}: ScanOptions): [
+  MiddlewareHandler<RsEnv>,
+  MiddlewareHandler<RsEnv>,
+  Handler<RsEnv>
+] {
   const rules: ValidatorRules = {
     'origin!': ['Origin', null, isTuple(3), parseTuple(3)],
     'xAxis!': ['Scan vector X', null, isTuple(3), parseTuple(3)],
@@ -39,28 +45,28 @@ export default function scan({ imageEncoder }: ScanOptions): koa.Middleware {
     format: ['Output type', 'arraybuffer', s => s === 'png', () => 'png']
   };
 
-  const main: koa.Middleware = async function scan(
-    ctx: koa.DefaultContext,
-    next: koa.Next
-  ): Promise<void> {
-    const state = ctx.state as SeriesMiddlewareState;
+  const main: Handler<RsEnv> = async ctx => {
+    const state = ctx.var;
 
     const { ww, wl, origin, xAxis, yAxis, size, interpolation, format } =
-      state.query;
+      state.rsQuery;
 
     const useWindow = typeof ww === 'number' && typeof wl === 'number';
     if (format === 'png' && !useWindow) {
-      ctx.throw(
-        httpStatus.BAD_REQUEST,
-        'Window values are required for PNG output.'
-      );
+      throw new HTTPException(400, {
+        message: 'Window values are required for PNG output.'
+      });
     }
 
     if (size[0] * size[1] > 2048 * 2048) {
-      ctx.throw(httpStatus.BAD_REQUEST, 'Requested image size is too large.');
+      throw new HTTPException(400, {
+        message: 'Requested image size is too large.'
+      });
     }
     if (size[0] <= 0 || size[1] <= 0) {
-      ctx.throw(httpStatus.BAD_REQUEST, 'Invalid image size');
+      throw new HTTPException(400, {
+        message: 'Invalid image size'
+      });
     }
 
     const { images, load } = state.volumeAccessor;
@@ -97,17 +103,24 @@ export default function scan({ imageEncoder }: ScanOptions): koa.Middleware {
           size[0],
           size[1]
         );
-        ctx.body = out;
-        ctx.type = imageEncoder.mimeType();
-      } else {
-        ctx.body = Buffer.from(buf.buffer as ArrayBuffer);
+        return ctx.body(
+          Readable.toWeb(out) as ReadableStream<Uint8Array>,
+          200,
+          {
+            'Content-Type': imageEncoder.mimeType()
+          }
+        );
       }
+      return ctx.body(buf.buffer as ArrayBuffer, 200, {
+        'Content-Type': 'application/octet-stream',
+        'Content-Length': String(buf.byteLength)
+      });
     } finally {
       volume.setPartialVolumeDescriptor(undefined);
     }
   };
 
-  return compose([validate(rules), compress(), main]);
+  return [validate(rules), compress(), main];
 }
 
 function zIndexToImageNo(

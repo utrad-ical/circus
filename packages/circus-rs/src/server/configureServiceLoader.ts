@@ -1,9 +1,11 @@
 import type {
   DicomFileRepository,
+  Disposable,
   Logger,
   ServiceLoader
 } from '@utrad-ical/circus-lib';
-import type Koa from 'koa';
+import type { Server } from 'node:http';
+import type { SeriesRoutes } from './app/series/createSeriesRoutes.ts';
 import path from 'path';
 import type * as ws from 'ws';
 import type { Counter } from './helper/createCounter.ts';
@@ -13,13 +15,13 @@ import type { DicomExtractorWorker } from './helper/extractor-worker/createDicom
 import type { RsWebsocketVolumeConnectionHandlerCreator } from './ws/createWebsocketVolumeConnectionHandlerCreator.ts';
 
 export interface RsServices {
-  rsServer: Koa;
+  rsServer: Server & Partial<Disposable>;
   rsLogger: Logger;
   counter: Counter;
   dicomFileRepository: DicomFileRepository;
   dicomExtractorWorker: DicomExtractorWorker;
   imageEncoder: ImageEncoder;
-  rsSeriesRoutes: Koa.Middleware;
+  rsSeriesRoutes: SeriesRoutes;
   volumeProvider: VolumeProvider;
   rsWSServer: ws.WebSocketServer;
   rsWebsocketVolumeConnectionHandlerCreator: RsWebsocketVolumeConnectionHandlerCreator;

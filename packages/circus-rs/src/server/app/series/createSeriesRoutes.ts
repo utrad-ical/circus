@@ -1,40 +1,35 @@
-import type koa from 'koa';
-import Router from 'koa-router';
-
+import { Hono } from 'hono';
+import type { MiddlewareHandler } from 'hono';
+import { compress } from 'hono/compress';
+import type { FunctionService, Logger } from '@utrad-ical/circus-lib';
 import type ImageEncoder from '../../helper/image-encoder/ImageEncoder.ts';
-import type {
-  VolumeProvider,
-  VolumeAccessor
-} from '../../helper/createVolumeProvider.ts';
-
+import type { VolumeProvider } from '../../helper/createVolumeProvider.ts';
+import type { RsEnv } from '../../types.ts';
 import loadFromVolumeProvider from './loadFromVolumeProvider.ts';
 import metadata from './metadata.ts';
-import volume from './volume.ts';
+import { volume } from './volume.ts';
 import scan from './scan.ts';
-import type { FunctionService, Logger } from '@utrad-ical/circus-lib';
-import type PartialVolumeDescriptor from '../../../volume/PartialVolumeDescriptor.ts';
 
-export interface SeriesMiddlewareState {
-  volumeAccessor: VolumeAccessor;
-  partialVolumeDescriptor?: PartialVolumeDescriptor;
-  query?: any;
-}
+export type SeriesRoutes = (
+  authorize?: MiddlewareHandler<RsEnv>
+) => Hono<RsEnv>;
 
 const createSeriesRoutes: FunctionService<
-  koa.Middleware,
+  SeriesRoutes,
   {
     rsLogger: Logger;
     volumeProvider: VolumeProvider;
     imageEncoder: ImageEncoder;
   }
-> = async (opts, { rsLogger, volumeProvider, imageEncoder }) => {
-  const router = new Router<SeriesMiddlewareState, any>();
+> = async (_options, { rsLogger, volumeProvider, imageEncoder }) => {
   const load = loadFromVolumeProvider({ logger: rsLogger, volumeProvider });
-  router.use('/', load);
-  router.get('/metadata', metadata());
-  router.get('/volume', volume());
-  router.get('/scan', scan({ imageEncoder }));
-  return router.routes() as any as koa.Middleware;
+  return (authorize = (_ctx, next) => next()) => {
+    const app = new Hono<RsEnv>();
+    app.get('/:sid/metadata', authorize, ...load, ...metadata());
+    app.get('/:sid/volume', authorize, ...load, compress(), volume);
+    app.get('/:sid/scan', authorize, ...load, ...scan({ imageEncoder }));
+    return app;
+  };
 };
 
 createSeriesRoutes.dependencies = [

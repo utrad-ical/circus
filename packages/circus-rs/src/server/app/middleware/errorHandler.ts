@@ -1,44 +1,21 @@
-import type koa from 'koa';
+import type { ErrorHandler } from 'hono';
+import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import type { Logger } from '@utrad-ical/circus-lib';
+import type { RsEnv } from '../../types.ts';
 
-type MiddlewareOptions = {
-  rsLogger: Logger;
-};
+export default function errorHandler(rsLogger: Logger): ErrorHandler<RsEnv> {
+  return (error, ctx) => {
+    rsLogger.error(error.message);
+    if (error.stack) rsLogger.trace(error.stack);
 
-/**
- * Global error handler which always output errors in JSON format
- */
-export default function errorHandler(
-  options: MiddlewareOptions
-): koa.Middleware {
-  const { rsLogger: logger } = options;
-  return async function (
-    ctx: koa.DefaultContext,
-    next: koa.Next
-  ): Promise<void> {
-    try {
-      await next();
-    } catch (err: any) {
-      logger.error(err.message);
-      if ('stack' in err) logger.trace(err.stack);
-
-      // Unexpected error, probably due to bugs
-      let status = 500;
-      let message = 'Internal server error.';
-
-      // Exceptions with status code, probably doe to invalid request, etc.
-      if (typeof err.status === 'number') {
-        status = err.status;
-        message = err.message;
-      }
-
-      const out: any = { status: 'ng', message };
-      if (process.env.NODE_ENV !== 'production' && 'stack' in err) {
-        out.stack = err.stack;
-      }
-
-      ctx.status = status;
-      ctx.body = out;
-    }
+    const status = error.status as ContentfulStatusCode | undefined;
+    return ctx.json(
+      {
+        status: 'ng',
+        message: status ? error.message : 'Internal server error.',
+        ...(process.env.NODE_ENV !== 'production' && { stack: error.stack })
+      },
+      status ?? 500
+    );
   };
 }

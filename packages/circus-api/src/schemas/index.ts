@@ -10,7 +10,7 @@ export { globalPrivilege, groupCreate, groupDoc, groupPatch } from './group.ts';
 export { icon } from './icon.ts';
 export { jsonSchemaSubset } from './jsonSchemaSubset.ts';
 export { label } from './label.ts';
-export { myList } from './myList.ts';
+export { myListDoc, myListResourceType } from './myList.ts';
 export { myListEditor } from './myListEditor.ts';
 export { onetimeUrlDoc } from './onetimeUrl.ts';
 export { partialVolumeDescriptor } from './partialVolumeDescriptor.ts';

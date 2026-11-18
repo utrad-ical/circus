@@ -1,5 +1,6 @@
 import type { RouteMiddleware } from '../../typings/middlewares.ts';
 import type * as routes from './routes.ts';
+import { findMyListsOf, toUserMyList } from '../mylists/index.ts';
 
 export const handleGet: RouteMiddleware<typeof routes.getLoginInfo> = () => {
   return async (ctx, next) => {
@@ -12,7 +13,6 @@ export const handleGet: RouteMiddleware<typeof routes.getLoginInfo> = () => {
 };
 
 export const handleGetFull: RouteMiddleware<typeof routes.getLoginInfoFull> = ({
-  database,
   models,
   dicomImageServerUrl
 }) => {
@@ -32,33 +32,28 @@ export const handleGetFull: RouteMiddleware<typeof routes.getLoginInfoFull> = ({
         ? defaultDomainValue
         : null;
 
-    const sharedMyLists = await database.db
-      .collection('users')
-      .aggregate([
-        { $unwind: { path: '$myLists' } },
+    const sharedMyLists = (
+      await models.myList.findAll(
         {
-          $match: {
-            $or: [
-              { 'myLists.editors.userEmail': user.userEmail },
-              { 'myLists.editors.groupId': { $in: user.groups } }
-            ]
-          }
+          $or: [
+            { 'editors.userEmail': user.userEmail },
+            { 'editors.groupId': { $in: user.groups } }
+          ]
         },
-        {
-          $project: {
-            _id: false,
-            owner: '$userEmail',
-            sharedMyList: '$myLists'
-          }
-        }
-      ])
-      .toArray();
+        { sort: { createdAt: 1 } }
+      )
+    ).map(list => ({
+      owner: list.ownerEmail,
+      sharedMyList: toUserMyList(list)
+    }));
+    const myLists = await findMyListsOf(models, user.userEmail);
 
     ctx.body = {
       ...user,
       ...ctx.userPrivileges,
       groups,
       defaultDomain,
+      myLists,
       sharedMyLists,
       dicomImageServer: dicomImageServerUrl
     };

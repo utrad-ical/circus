@@ -1,4 +1,5 @@
 import status from 'http-status';
+import loadMyList from '../../mylist/loadMyList.ts';
 import { Readable } from 'node:stream';
 import type { PreparedExport } from '../../case/createMhdPacker.ts';
 import { ValidationError } from '../../createValidator.ts';
@@ -163,15 +164,14 @@ export const handleSearch: RouteMiddleware<typeof routes.searchCases> = ({
     };
 
     const myListId = ctx.params.myListId;
-    const user = ctx.user;
-
     if (myListId) {
-      const myList = user.myLists.find(
-        (list: any) => myListId === list.myListId
-      );
-      if (!myList) ctx.throw(status.NOT_FOUND, 'This my list does not exist');
-
-      if (myList.resourceType !== 'clinicalCases')
+      const { list, readable } = await loadMyList(ctx, models, myListId);
+      if (!readable)
+        ctx.throw(
+          status.UNAUTHORIZED,
+          'You cannot read the items of this my list.'
+        );
+      if (list.resourceType !== 'clinicalCases')
         ctx.throw(status.BAD_REQUEST, 'This my list is not for cases');
     }
 
@@ -372,12 +372,8 @@ export const handleDelete: RouteMiddleware<typeof routes.deleteCase> = ({
           'items.resourceId': caseId
         });
         for (const targetMyList of targetMyLists) {
-          const newItems = targetMyList.items.filter(
-            (i: any) => i.resourceId !== caseId
-          );
-          await models.myList.modifyOne(targetMyList.myListId, {
-            items: newItems
-          });
+          const items = targetMyList.items.filter(i => i.resourceId !== caseId);
+          await models.myList.modifyOne(targetMyList.myListId, { items });
         }
         await models.clinicalCase.deleteOne({ caseId });
         ctx.body = null;

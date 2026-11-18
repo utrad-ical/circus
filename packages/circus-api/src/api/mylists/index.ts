@@ -1,217 +1,164 @@
-import type { z } from 'zod';
-import type { myListEditor } from '../../schemas/myListEditor.ts';
-import type { Models } from '../../interface.ts';
-import type {
-  CircusContext,
-  RouteMiddleware
-} from '../../typings/middlewares.ts';
-import generateUniqueId from '../../utils/generateUniqueId.ts';
 import status from 'http-status';
+import type { Models } from '../../interface.ts';
 
-export interface MyListItem {
-  resourceId: string;
-  createdAt: Date;
-}
+type MyList = Awaited<ReturnType<Models['myList']['findByIdOrFail']>>;
+import loadMyList from '../../mylist/loadMyList.ts';
+import type { RouteMiddleware } from '../../typings/middlewares.ts';
+import generateUniqueId from '../../utils/generateUniqueId.ts';
+import type * as routes from './routes.ts';
 
-type EditorEntry = z.output<typeof myListEditor>;
-
-export const handleSearch: RouteMiddleware = () => {
-  return async (ctx, next) => {
-    ctx.body = ctx.user.myLists;
-  };
-};
-
-const getList = async (
-  ctx: CircusContext,
-  models: Models,
-  myListId: string
-) => {
-  const result = await models.user.findAll({ 'myLists.myListId': myListId });
-  if (result.length === 0) ctx.throw(404, 'This my list does not exist');
-  const owner = result[0];
-  await models.user.findById(owner.userEmail, { withLock: true });
-
-  const list = owner.myLists.find(list => list.myListId === myListId);
-  if (!list) ctx.throw(404, 'This my list does not exist');
-  const itemReadable = owner.userEmail === ctx.user.userEmail || list.public;
-  const itemEditable =
-    list.editors.some(
-      (editor: any) => editor.userEmail === ctx.user.userEmail
-    ) ||
-    list.editors.some((editor: any) =>
-      ctx.user.groups.some((group: number) => group === editor.groupId)
-    ) ||
-    owner.userEmail === ctx.user.userEmail;
-
-  const doc = await models.myList.findById(myListId, { withLock: true });
-  if (!doc) ctx.throw(404, 'This my list does not exist');
+/** Returns a my list as the API shows it, without the owner and the items */
+export const toUserMyList = (list: MyList) => {
+  const { myListId, resourceType, name, editors, createdAt } = list;
   return {
-    owner,
-    userList: list,
-    list: doc,
-    itemReadable,
-    itemEditable
+    myListId,
+    resourceType,
+    name,
+    public: list.public,
+    editors,
+    createdAt
   };
 };
 
-export const handleGet: RouteMiddleware = ({ transactionManager }) => {
+/** Returns the my lists owned by the user, oldest first */
+export const findMyListsOf = async (models: Models, userEmail: string) =>
+  (
+    await models.myList.findAll(
+      { ownerEmail: userEmail },
+      { sort: { createdAt: 1 } }
+    )
+  ).map(toUserMyList);
+
+export const handleSearch: RouteMiddleware<typeof routes.getMyLists> = ({
+  models
+}) => {
+  return async (ctx, next) => {
+    ctx.body = await findMyListsOf(models, ctx.user.userEmail);
+  };
+};
+
+export const handleGet: RouteMiddleware<typeof routes.getMyList> = ({
+  models
+}) => {
+  return async (ctx, next) => {
+    const { list, readable } = await loadMyList(
+      ctx,
+      models,
+      ctx.params.myListId
+    );
+    if (!readable) ctx.throw(401, 'You cannot read the items of this my list.');
+    ctx.body = {
+      ...toUserMyList(list),
+      resourceIds: list.items.map(item => item.resourceId)
+    };
+  };
+};
+
+export const handlePost: RouteMiddleware<typeof routes.postMyList> = ({
+  models
+}) => {
+  return async (ctx, next) => {
+    const myListId = generateUniqueId();
+    await models.myList.insert({
+      myListId,
+      ownerEmail: ctx.user.userEmail,
+      ...ctx.request.body,
+      editors: [],
+      items: []
+    });
+    ctx.body = { myListId };
+    ctx.status = status.CREATED;
+  };
+};
+
+export const handlePatchList: RouteMiddleware<typeof routes.patchMyList> = ({
+  transactionManager
+}) => {
+  // Changes the attributes of a my list (the name, etc.), not the items
   return async (ctx, next) => {
     await transactionManager.withTransaction(async models => {
-      const myListId = ctx.params.myListId;
-      const { userList, itemReadable, list } = await getList(
+      const { list, isOwner } = await loadMyList(
         ctx,
         models,
-        myListId
+        ctx.params.myListId,
+        { withLock: true }
       );
-      if (!itemReadable)
-        ctx.throw(401, 'You cannot read the items of this my list.');
-      const resourceIds = list.items.map((item: any) => item.resourceId);
-      const userListWithResourceIds = { ...userList, resourceIds };
-      ctx.body = userListWithResourceIds;
-    });
-  };
-};
-
-export const handlePost: RouteMiddleware = ({ transactionManager }) => {
-  return async (ctx, next) => {
-    await transactionManager.withTransaction(async models => {
-      const myListId = generateUniqueId();
-      const userEmail = ctx.user.userEmail;
-      const { name, resourceType, public: isPublic } = ctx.request.body;
-
-      await models.myList.insert({ myListId, items: [] });
-
-      const { myLists } = await models.user.findById(userEmail);
-      const updatedMyLists = [
-        ...myLists,
-        {
-          myListId,
-          resourceType,
-          name,
-          public: isPublic,
-          editors: [],
-          createdAt: new Date()
+      if (!isOwner) ctx.throw(401, 'You cannot edit a my list you do not own');
+      const { editors } = ctx.request.body;
+      for (const editor of editors ?? []) {
+        if (editor.type === 'user') {
+          const doc = await models.user.findById(editor.userEmail);
+          if (!doc) ctx.throw(400, 'Invalid email address is included');
+        } else {
+          const doc = await models.group.findById(editor.groupId);
+          if (!doc) ctx.throw(400, 'Invalid group ID is included');
         }
-      ];
-      await models.user.modifyOne(userEmail, { myLists: updatedMyLists });
-
-      ctx.body = { myListId };
-      ctx.status = status.CREATED;
-    });
-  };
-};
-
-export const handlePatchList: RouteMiddleware = ({ transactionManager }) => {
-  // changes the attributes of a mylist (mylist name, etc), not the items
-  return async (ctx, next) => {
-    await transactionManager.withTransaction(async models => {
-      const userEmail = ctx.user.userEmail;
-      const { userList, owner } = await getList(
-        ctx,
-        models,
-        ctx.params.myListId
-      );
-      if (owner.userEmail !== userEmail)
-        ctx.throw(401, 'You cannot edit a my list you do not own');
-      const userLists = owner.myLists;
-
-      const newName: string | undefined = ctx.request.body.name;
-      if (newName) userList.name = newName;
-
-      const isPublic: boolean | undefined = ctx.request.body.public;
-      if (isPublic !== undefined) userList.public = isPublic;
-
-      const editors: EditorEntry[] | undefined = ctx.request.body.editors;
-      if (Array.isArray(editors)) {
-        for (const editor of editors) {
-          if (editor.type === 'user') {
-            const doc = await models.user.findById(editor.userEmail);
-            if (!doc) ctx.throw(400, 'Invalid email address is included');
-          } else {
-            const doc = await models.group.findById(editor.groupId);
-            if (!doc) ctx.throw(400, 'Invalid group ID is included');
-          }
-        }
-        userList.editors = editors;
       }
-
-      await models.user.modifyOne(userEmail, { myLists: userLists });
+      await models.myList.modifyOne(list.myListId, ctx.request.body);
       ctx.body = null;
     });
   };
 };
 
-export const handleDelete: RouteMiddleware = ({ transactionManager }) => {
+export const handleDelete: RouteMiddleware<typeof routes.deleteMyList> = ({
+  models
+}) => {
   return async (ctx, next) => {
-    await transactionManager.withTransaction(async models => {
-      const myListId = ctx.params.myListId;
-      const userEmail = ctx.user.userEmail;
-      const { owner } = await getList(ctx, models, myListId);
-      if (owner.userEmail !== userEmail)
-        ctx.throw(401, 'You cannot delete a my list you do not own');
-
-      const newLists = owner.myLists.filter(
-        (myList: any) => myList.myListId !== myListId
-      );
-      await models.myList.deleteOne({ myListId });
-      await models.user.modifyOne(userEmail, { myLists: newLists });
-      ctx.body = null;
-    });
+    const { list, isOwner } = await loadMyList(
+      ctx,
+      models,
+      ctx.params.myListId
+    );
+    if (!isOwner) ctx.throw(401, 'You cannot delete a my list you do not own');
+    await models.myList.deleteOne({ myListId: list.myListId });
+    ctx.body = null;
   };
 };
 
-type ListCol = 'series' | 'clinicalCase' | 'pluginJob';
-const collMap: { [key: string]: ListCol } = {
+const collectionOf = {
   series: 'series',
   clinicalCases: 'clinicalCase',
   pluginJobs: 'pluginJob'
-};
+} as const;
 
-export const handlePatchItems: RouteMiddleware = ({ transactionManager }) => {
+export const handlePatchItems: RouteMiddleware<
+  typeof routes.patchMyListItems
+> = ({ transactionManager }) => {
   return async (ctx, next) => {
     await transactionManager.withTransaction(async models => {
-      const myListId = ctx.params.myListId;
-      const resourceIds: string[] = ctx.request.body.resourceIds;
-      const operation: 'add' | 'remove' = ctx.request.body.operation;
+      const { resourceIds, operation } = ctx.request.body;
       const now = new Date();
-      const { userList, list, itemEditable } = await getList(
+      const { list, editable } = await loadMyList(
         ctx,
         models,
-        myListId
+        ctx.params.myListId,
+        { withLock: true }
       );
-      if (!itemEditable)
+      if (!editable)
         ctx.throw(401, 'You cannot edit the items of this my list.');
 
-      const coll = collMap[userList.resourceType];
-      const items = list.items;
+      const coll = collectionOf[list.resourceType];
+      const items = [...list.items];
       let changedCount = 0;
 
       for (const resourceId of resourceIds) {
-        switch (operation) {
-          case 'add':
-            await models[coll].findByIdOrFail(resourceId, { withLock: true });
-            if (
-              items.findIndex((item: any) => item.resourceId === resourceId) < 0
-            ) {
-              items.push({ resourceId, createdAt: now });
-              changedCount++;
-            }
-            break;
-          case 'remove': {
-            const index = items.findIndex(
-              (item: any) => item.resourceId === resourceId
-            );
-            if (index >= 0) {
-              items.splice(index, 1);
-              changedCount++;
-            }
+        const index = items.findIndex(item => item.resourceId === resourceId);
+        if (operation === 'add') {
+          await models[coll].findByIdOrFail(resourceId, { withLock: true });
+          if (index < 0) {
+            items.push({ resourceId, createdAt: now });
+            changedCount++;
           }
+        } else if (index >= 0) {
+          items.splice(index, 1);
+          changedCount++;
         }
       }
 
-      if (operation === 'add' && items.length > 1000)
+      if (items.length > 1000)
         ctx.throw(400, 'The number of items cannot exceed 1000');
-      if (changedCount > 0) await models.myList.modifyOne(myListId, { items });
+      if (changedCount > 0)
+        await models.myList.modifyOne(list.myListId, { items });
       ctx.body = { changedCount };
     });
   };

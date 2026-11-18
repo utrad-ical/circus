@@ -5,6 +5,7 @@ import type { CollectionAccessor } from './db/createCollectionAccessor.ts';
 import type * as mongo from 'mongodb';
 import type { clinicalCaseDoc } from './schemas/clinicalCase.ts';
 import type { groupDoc } from './schemas/group.ts';
+import type { myListDoc } from './schemas/myList.ts';
 import type { pluginDoc } from './schemas/plugin.ts';
 import type { pluginJobDoc } from './schemas/pluginJob.ts';
 import type { projectDoc } from './schemas/project.ts';
@@ -54,7 +55,7 @@ export interface ModelEntries {
   token: DocOf<typeof tokenDoc>;
   plugin: DocOf<typeof pluginDoc>;
   pluginJob: DocOf<typeof pluginJobDoc>;
-  myList: any;
+  myList: DocOf<typeof myListDoc>;
   onetimeUrl: DocOf<typeof onetimeUrlDoc>;
 }
 

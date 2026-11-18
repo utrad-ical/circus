@@ -5,6 +5,7 @@ import { pluginDoc } from './plugin.ts';
 import { pluginJobFeedback } from './pluginJobFeedback.ts';
 import { pluginJobSeries } from './pluginJobSeries.ts';
 import { preferences } from './preferences.ts';
+import { myListResourceType } from './myList.ts';
 import { userMyList } from './userMyList.ts';
 
 // Request and response schemas used by a single route.
@@ -59,13 +60,13 @@ export const caseTagsPatch = z
 
 export const myLists = z.array(userMyList);
 
-export const myListCreate = z.looseObject({
+export const myListCreate = z.strictObject({
   name: z.string().min(1).max(64),
-  resourceType: z.enum(['series', 'clinicalCases', 'pluginJobs']),
+  resourceType: myListResourceType,
   public: z.boolean()
 });
 
-export const myListCreated = z.looseObject({ myListId: z.string() });
+export const myListCreated = z.strictObject({ myListId: z.string() });
 
 export const myListPatch = z
   .strictObject({
@@ -75,12 +76,17 @@ export const myListPatch = z
   })
   .refine(atLeastOneKey, 'At least one property is required');
 
-export const myListItemsPatch = z.looseObject({
+export const myListItemsPatch = z.strictObject({
   operation: z.enum(['add', 'remove']),
   resourceIds: z.array(z.string()).min(1).max(1000)
 });
 
-export const myListItemsPatched = z.looseObject({ changedCount: num() });
+export const myListItemsPatched = z.strictObject({ changedCount: z.int() });
+
+/** A my list with the IDs of its items */
+export const myListWithItems = userMyList.extend({
+  resourceIds: z.array(z.string())
+});
 
 export const pluginJobCreate = z.strictObject({
   pluginId: z.string(),

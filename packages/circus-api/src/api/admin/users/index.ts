@@ -51,7 +51,6 @@ export const handlePost: RouteMiddleware<typeof routes.postUser> = ({
     await models.user.insert({
       ...rest,
       preferences: { ...defaultPreferences(), ...preferences },
-      myLists: [],
       password: nodepass.hash(password),
       lastLoginTime: new Date(0),
       lastLoginIp: ''

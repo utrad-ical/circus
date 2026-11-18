@@ -19,7 +19,11 @@ export const handleGet: RouteMiddleware<typeof routes.getBlobHash> = ({
     const hash = ctx.req.param().hash;
     try {
       const file = await blobStorage.read(hash);
-      return ctx.body(new Uint8Array(file), 200, {
+      const bytes =
+        file.buffer instanceof ArrayBuffer
+          ? new Uint8Array(file.buffer, file.byteOffset, file.byteLength)
+          : new Uint8Array(file);
+      return ctx.body(bytes, 200, {
         'Content-Type': 'application/octet-stream'
       });
     } catch (err) {
@@ -34,7 +38,8 @@ export const handlePut: RouteMiddleware<typeof routes.putBlobHash> = ({
   return async ctx => {
     const body = ctx.req.raw.body;
     if (!body) throw httpError(status.BAD_REQUEST, 'Empty content was sent.');
-    const gzip = /^(x-)?gzip$/.test(ctx.req.header('Content-Encoding') ?? '');
+    const encoding = ctx.req.header('Content-Encoding')?.trim() ?? '';
+    const gzip = /^(x-)?gzip$/i.test(encoding);
     const stream = gzip
       ? body.pipeThrough(new DecompressionStream('gzip'))
       : body;

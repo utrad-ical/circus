@@ -29,13 +29,21 @@ it('should accept uploading and downloading a blob', async () => {
   assert.equal(res2.data, 'star');
 });
 
+it('reads just the bytes of a pooled buffer', async () => {
+  const res = await client.get(
+    'api/blob/5a616841a4fdd6066ee5c7e2d3118e0963ec1fc6'
+  );
+  assert.equal(res.status, 200);
+  assert.equal(res.data, 'dummy');
+});
+
 it('should accept gzipped data', async () => {
   const res = await client.request({
     method: 'put',
     url: 'api/blob/' + sha1,
     headers: {
       'Content-Type': 'application/octet-stream',
-      'Content-Encoding': 'gzip'
+      'Content-Encoding': 'GZIP'
     },
     data: createGzip().end('star')
   });

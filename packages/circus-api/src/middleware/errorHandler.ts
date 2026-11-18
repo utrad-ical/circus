@@ -7,6 +7,7 @@ import { ValidationError } from '../createValidator.ts';
 interface Options {
   includeErrorDetails: boolean;
   logger: Logger;
+  route?: string;
 }
 
 export const httpError = (
@@ -24,7 +25,7 @@ export const httpError = (
 
 export const formatError = (
   error: unknown,
-  { includeErrorDetails, logger }: Options
+  { includeErrorDetails, logger, route }: Options
 ) => {
   if (error instanceof ValidationError) {
     if (error.phase === 'request') {
@@ -36,15 +37,16 @@ export const formatError = (
         }
       };
     }
-    return {
-      status: 500 as const,
-      body: {
-        error:
-          error.phase === 'response'
-            ? 'Response schema validation error detected.'
-            : 'Unexpected validation error.'
-      }
-    };
+    const message =
+      error.phase === 'response'
+        ? 'Response schema validation error detected.'
+        : 'Unexpected validation error.';
+    logger.error(message, {
+      route,
+      phase: error.phase,
+      issueCodes: error.issues.map(({ code }) => code)
+    });
+    return { status: 500 as const, body: { error: message } };
   }
 
   const { status, message, stack } =

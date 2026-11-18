@@ -39,7 +39,8 @@ export const readJsonBody: CircusMiddleware = async (ctx, next) => {
     return;
   }
 
-  const encoding = raw.headers.get('Content-Encoding') || 'identity';
+  const encoding =
+    raw.headers.get('Content-Encoding')?.trim().toLowerCase() || 'identity';
   const headers = new Headers(raw.headers);
   let body = raw.body;
   if (encoding !== 'identity') {

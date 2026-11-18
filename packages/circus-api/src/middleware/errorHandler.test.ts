@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { test, before, after } from 'node:test';
+import { createNullLogger } from '@utrad-ical/circus-lib';
 import { httpError } from './errorHandler.ts';
+import { createHonoApp } from '../createHonoApp.ts';
 import type { TestHttpClient } from '../test/util-http.ts';
 import { createTestHttpClient } from '../test/util-http.ts';
 import { ValidationError } from '../createValidator.ts';
@@ -70,6 +72,39 @@ test('should return 500 for server-side validation error', async () => {
   const res = await ax.get('invalid-on-response');
   assert.equal(res.status, 500);
   assert.match(res.data.error, /response schema validation error/i);
+});
+
+test('logs the route template and issue codes for invalid responses', async () => {
+  const logger = await createNullLogger(null, {});
+  const errors: unknown[][] = [];
+  logger.error = (...args: unknown[]) => {
+    errors.push(args);
+  };
+  const app = createHonoApp({ logger });
+  app.get('/api/examples/:id', () => {
+    const error = new ValidationError([
+      {
+        path: ['dynamic-key'],
+        message: 'Invalid value: example payload',
+        code: 'invalid_type'
+      }
+    ]);
+    error.phase = 'response';
+    throw error;
+  });
+
+  const res = await app.request('/api/examples/example-id');
+  assert.equal(res.status, 500);
+  assert.deepEqual(errors, [
+    [
+      'Response schema validation error detected.',
+      {
+        route: 'GET /api/examples/:id',
+        phase: 'response',
+        issueCodes: ['invalid_type']
+      }
+    ]
+  ]);
 });
 
 test('should return 500 for server-side run-time error', async () => {

@@ -66,7 +66,7 @@ test('decodes gzip-compressed JSON before validation', async () => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Content-Encoding': 'gzip'
+      'Content-Encoding': 'Gzip'
     },
     body: new Uint8Array(gzipSync(exampleJson))
   });

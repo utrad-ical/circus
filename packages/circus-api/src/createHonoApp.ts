@@ -1,6 +1,7 @@
 import type { Logger } from '@utrad-ical/circus-lib';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { routePath } from 'hono/route';
 import { formatError } from './middleware/errorHandler.ts';
 import { readJsonBody } from './middleware/validateInOut.ts';
 import type { ApiEnv } from './typings/middlewares.ts';
@@ -41,7 +42,8 @@ export const createHonoApp = ({
   app.onError((error, ctx) => {
     const { status, body, headers } = formatError(error, {
       includeErrorDetails: debug,
-      logger
+      logger,
+      route: `${ctx.req.method} ${routePath(ctx)}`
     });
     headers?.forEach((value, name) => ctx.header(name, value));
     return ctx.json(body, status);

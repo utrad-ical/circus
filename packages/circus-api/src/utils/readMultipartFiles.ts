@@ -1,6 +1,4 @@
-import { Busboy, type BusboyHeaders } from '@fastify/busboy';
-import type { IncomingMessage } from 'node:http';
-import type { Readable } from 'node:stream';
+import { parseMultipartRequest } from '@remix-run/multipart-parser/future';
 
 export interface UploadedFile {
   /** The file name sent by the client, including its relative path */
@@ -15,93 +13,57 @@ const decodeFilename = (name: string) =>
   );
 
 /**
- * Wraps a busboy file stream. Canceling it drains the rest
- * instead of destroying it, so that busboy can move on to the next part.
- */
-const toWebStream = (file: Readable) => {
-  let canceled = false;
-  return new ReadableStream<Uint8Array>(
-    {
-      start: controller => {
-        file.on('data', (chunk: Buffer) => {
-          if (canceled) return;
-          controller.enqueue(new Uint8Array(chunk));
-          if ((controller.desiredSize ?? 0) <= 0) file.pause();
-        });
-        file.on('end', () => !canceled && controller.close());
-        file.on('error', err => !canceled && controller.error(err));
-        file.pause();
-      },
-      pull: () => {
-        file.resume();
-      },
-      cancel: () => {
-        canceled = true;
-        file.resume();
-      }
-    },
-    { highWaterMark: 1 }
-  );
-};
-
-/**
  * Reads the files in a multipart request one by one, while receiving it.
- * Each file must be read (or canceled) before the next one is received.
  * Fields other than files are ignored.
  */
 export default async function* readMultipartFiles(
-  req: IncomingMessage
+  request: Request
 ): AsyncGenerator<UploadedFile> {
-  const busboy = Busboy({
-    headers: req.headers as BusboyHeaders,
-    preservePath: true
-  });
-  type Item = { file: Readable; filename: string } | Error | null;
-  const queue: Item[] = [];
-  let wake: (() => void) | undefined;
-  const push = (item: Item) => {
-    queue.push(item);
-    wake?.();
-  };
-  let current: Readable | undefined;
-
-  busboy.on('file', (_field, file, filename) =>
-    push({ file, filename: decodeFilename(filename) })
-  );
-  busboy.on('finish', () => push(null));
-  busboy.on('error', err =>
-    push(err instanceof Error ? err : new Error(String(err)))
-  );
-  req.on('close', () => {
-    if (req.complete) return;
-    const err = new Error('The upload was interrupted.');
-    current?.destroy(err);
-    push(err);
-  });
-  req.pipe(busboy);
+  const uploadError = (cause: unknown) =>
+    request.signal.aborted
+      ? new Error('The upload was interrupted.', { cause })
+      : cause;
 
   try {
-    while (true) {
-      if (!queue.length) await new Promise<void>(r => (wake = r));
-      const item = queue.shift()!;
-      if (item === null) return;
-      if (item instanceof Error) throw item;
-      const { file, filename } = item;
-      current = file;
-      const stream = toWebStream(file);
-      yield { filename, stream };
-      // Drain what the consumer left
-      if (!file.readableEnded && !file.destroyed) {
-        await new Promise<void>((resolve, reject) => {
-          file.on('end', resolve);
-          file.on('error', reject);
-          file.removeAllListeners('data');
-          file.resume();
-        });
+    const parts = parseMultipartRequest(request, {
+      maxHeaderSize: 80 * 1024,
+      // The importer limits individual DICOM files, including archive entries.
+      maxFileSize: Infinity,
+      maxTotalSize: Infinity,
+      maxParts: Infinity
+    });
+    for await (const part of parts) {
+      const filename = part.filename;
+      if (filename === undefined) continue;
+
+      // Keep control of the reader so a partly read file can be skipped.
+      let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
+      const stream = new ReadableStream<Uint8Array>(
+        {
+          async pull(controller) {
+            reader ??= part.body.getReader();
+            try {
+              const { done, value } = await reader.read();
+              if (done) controller.close();
+              else controller.enqueue(value);
+            } catch (cause) {
+              throw uploadError(cause);
+            }
+          },
+          cancel: reason => reader?.cancel(reason)
+        },
+        { highWaterMark: 0 }
+      );
+      try {
+        yield { filename: decodeFilename(filename), stream };
+      } finally {
+        if (reader) {
+          await reader.cancel().catch(() => {});
+          reader.releaseLock();
+        }
       }
     }
-  } finally {
-    req.unpipe(busboy);
-    req.resume();
+  } catch (cause) {
+    throw uploadError(cause);
   }
 }

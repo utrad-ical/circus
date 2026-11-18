@@ -17,8 +17,8 @@
   },
   "license": "UNLICENSED",
   "dependencies": {
-    "@fastify/busboy": "^3.2.5",
     "@hono/node-server": "2.1.8",
+    "@remix-run/multipart-parser": "1.1.1",
     "@utrad-ical/circus-api-schema": "workspace:*",
     "@utrad-ical/circus-cs-core": "workspace:*",
     "@utrad-ical/circus-lib": "workspace:*",

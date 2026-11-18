@@ -3,7 +3,7 @@ import { it, before, after } from 'node:test';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import type { TestHttpClient } from '../../test/util-http.ts';
-import { createGzip } from 'zlib';
+import { createGzip, gzipSync } from 'node:zlib';
 
 let apiTest: ApiTest, client: TestHttpClient;
 before(async () => {
@@ -45,6 +45,20 @@ it('should accept gzipped data', async () => {
     url: 'api/blob/' + sha1
   });
   assert.equal(res2.data, 'star');
+});
+
+it('limits gzipped uploads by their decompressed size', async () => {
+  const res = await client.request({
+    method: 'put',
+    url: 'api/blob/' + sha1,
+    headers: {
+      'Content-Type': 'application/octet-stream',
+      'Content-Encoding': 'gzip'
+    },
+    data: gzipSync(Buffer.alloc(20 * 1024 * 1024 + 1))
+  });
+  assert.equal(res.status, 413);
+  assert.deepEqual(res.data, { error: 'request entity too large' });
 });
 
 it('should return 400 on hash mismatch', async () => {

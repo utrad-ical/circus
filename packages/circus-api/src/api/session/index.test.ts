@@ -51,16 +51,30 @@ describe('login', () => {
     assert.match(cookie, /samesite=lax/i);
     // Plain HTTP
     assert.doesNotMatch(cookie, /secure/i);
+    const user = await apiTest.database.db
+      .collection('users')
+      .findOne({ userEmail: 'alice@example.com' });
+    assert.match(user?.lastLoginIp, /^(::1|(::ffff:)?127\.0\.0\.1)$/);
   });
 
   test('sets the Secure attribute behind an HTTPS reverse proxy', async () => {
     const res = await ax.post(
       'api/session',
       { username: 'alice', password: 'aliceSecret' },
-      { headers: { ...csrf, 'X-Forwarded-Proto': 'https' } }
+      {
+        headers: {
+          ...csrf,
+          'X-Forwarded-Proto': 'https, http',
+          'X-Forwarded-For': '192.0.2.10, 192.0.2.20'
+        }
+      }
     );
     assert.equal(res.status, httpStatus.NO_CONTENT);
     assert.match(sessionCookieOf(res)!, /secure/i);
+    const user = await apiTest.database.db
+      .collection('users')
+      .findOne({ userEmail: 'alice@example.com' });
+    assert.equal(user?.lastLoginIp, '192.0.2.10');
   });
 
   test('rejects a wrong password', async () => {

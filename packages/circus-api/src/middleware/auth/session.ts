@@ -1,7 +1,6 @@
 import { randomBytes } from 'node:crypto';
+import { getConnInfo } from '@hono/node-server/conninfo';
 import { getCookie, setCookie } from 'hono/cookie';
-import type { IncomingMessage } from 'node:http';
-import type { TLSSocket } from 'node:tls';
 import type { Models } from '../../interface.ts';
 import type { CircusContext } from '../../typings/middlewares.ts';
 import { httpError } from '../errorHandler.ts';
@@ -16,15 +15,14 @@ export const csrfHeaderName = 'X-Requested-With';
 export const expectedUserHeaderName = 'X-Circus-User';
 export const sessionUserChangedHeaderName = 'X-Circus-Session-User-Changed';
 
-const firstForwarded = (value?: string | string[]) =>
-  (Array.isArray(value) ? value[0] : value)?.split(',', 1)[0].trim();
+const firstForwarded = (value?: string) => value?.split(',', 1)[0].trim();
 
-const cookieOptions = (request: IncomingMessage) => ({
+const cookieOptions = (ctx: CircusContext) => ({
   httpOnly: true,
   sameSite: 'lax' as const,
   secure:
-    (request.socket as TLSSocket).encrypted === true ||
-    firstForwarded(request.headers['x-forwarded-proto']) === 'https',
+    ctx.req.url.startsWith('https:') ||
+    firstForwarded(ctx.req.header('X-Forwarded-Proto')) === 'https',
   path: '/'
 });
 
@@ -58,15 +56,14 @@ export const startSession = async (
     permanentTokenId: null,
     permanentTokenDescription: null
   });
-  const request = ctx.env.incoming;
   await models.user.modifyOne(userEmail, {
     lastLoginTime: new Date(now),
     lastLoginIp:
-      firstForwarded(request.headers['x-forwarded-for']) ??
-      request.socket.remoteAddress ??
+      firstForwarded(ctx.req.header('X-Forwarded-For')) ??
+      getConnInfo(ctx).remote.address ??
       ''
   });
-  setCookie(ctx, sessionCookieName, accessToken, cookieOptions(request));
+  setCookie(ctx, sessionCookieName, accessToken, cookieOptions(ctx));
 };
 
 const revokeSession = async (ctx: CircusContext, models: Models) => {
@@ -79,7 +76,7 @@ const revokeSession = async (ctx: CircusContext, models: Models) => {
 export const endSession = async (ctx: CircusContext, models: Models) => {
   await revokeSession(ctx, models);
   setCookie(ctx, sessionCookieName, '', {
-    ...cookieOptions(ctx.env.incoming),
+    ...cookieOptions(ctx),
     expires: new Date(0)
   });
 };

@@ -1,10 +1,10 @@
 import { httpError } from '../../middleware/errorHandler.ts';
 import status from 'http-status';
-import rawBody from 'raw-body';
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import type { RouteMiddleware } from '../../typings/middlewares.ts';
 import type * as routes from './routes.ts';
-import { createGunzip } from 'zlib';
+
+const maxUploadBytes = 20 * 1024 * 1024;
 
 const sha1 = (buf: Buffer) => {
   const sha1 = createHash('sha1');
@@ -32,12 +32,28 @@ export const handlePut: RouteMiddleware<typeof routes.putBlobHash> = ({
   blobStorage
 }) => {
   return async ctx => {
-    const incoming = /^(x-)?gzip$/.test(
-      ctx.env.incoming.headers['content-encoding'] ?? ''
-    )
-      ? ctx.env.incoming.pipe(createGunzip())
-      : ctx.env.incoming;
-    const file = await rawBody(incoming, { limit: '20mb' });
+    const body = ctx.req.raw.body;
+    if (!body) throw httpError(status.BAD_REQUEST, 'Empty content was sent.');
+    const gzip = /^(x-)?gzip$/.test(ctx.req.header('Content-Encoding') ?? '');
+    const stream = gzip
+      ? body.pipeThrough(new DecompressionStream('gzip'))
+      : body;
+    let bytes = 0;
+    const limit = new TransformStream<Uint8Array, Uint8Array>({
+      transform(chunk, controller) {
+        bytes += chunk.byteLength;
+        if (bytes > maxUploadBytes) {
+          throw httpError(
+            status.REQUEST_ENTITY_TOO_LARGE,
+            'request entity too large'
+          );
+        }
+        controller.enqueue(chunk);
+      }
+    });
+    const file = Buffer.from(
+      await new Response(stream.pipeThrough(limit)).arrayBuffer()
+    );
     const hash = ctx.req.param().hash;
     if (file.length === 0) {
       throw httpError(status.BAD_REQUEST, 'Empty content was sent.');

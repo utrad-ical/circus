@@ -223,12 +223,12 @@ importers:
 
   packages/circus-api:
     dependencies:
-      '@fastify/busboy':
-        specifier: ^3.2.5
-        version: 3.2.5
       '@hono/node-server':
         specifier: 2.1.8
         version: 2.1.8(hono@4.13.19)
+      '@remix-run/multipart-parser':
+        specifier: 1.1.1
+        version: 1.1.1
       '@utrad-ical/circus-api-schema':
         specifier: workspace:*
         version: link:../circus-api-schema
@@ -906,9 +906,6 @@ packages:
   '@emnapi/wasi-threads@2.2.0':
     resolution: {integrity: sha512-JP7OYH38Q7+pyTAe14raZHLQIK7BDKbdwji+Xi3pcd/6QkJYQH3SX4wu6EplGrGJWRepoNzedfm0G3B9Z4e9Rw==}
 
-  '@fastify/busboy@3.2.5':
-    resolution: {integrity: sha512-y8MTAeBlEQUNVnskmZQwpseZN3EgCksQNOULlfxWY6o6VEqh01+oExMgbM7gN6YLQ8pNDYeweNPKJRt8jQm2ZQ==}
-
   '@hono/node-server@2.1.8':
     resolution: {integrity: sha512-jdf7FHh6A1lzjpHHQUgxsg2GeER2vMetnAOfeActzcoli6jamlK+NAwL6Dsr5Fl3BS3tYUQzCdtZjU8Qxv7bEA==}
     engines: {node: '>=20'}
@@ -1452,6 +1449,12 @@ packages:
         optional: true
       react-redux:
         optional: true
+
+  '@remix-run/headers@1.1.0':
+    resolution: {integrity: sha512-Rmzn+WesET0EfVukEHYYKT6RV9HYQb9WGdda3oWedQJXCoHnrXgaQc39DdwZ2rztI05izBAOF1HEHmEpGtjKHQ==}
+
+  '@remix-run/multipart-parser@1.1.1':
+    resolution: {integrity: sha512-ofIL0mdDH73NtiiowYf7yMlI9vv60Xe1jEzuJl2gGLnwScT7ai2wB0osvMmXJmumzxZ237YaMo2drM5hb7ULxg==}
 
   '@remix-run/router@1.21.0':
     resolution: {integrity: sha512-xfSkCAchbdG5PnbrKqFWwia4Bi61nH+wm8wLEqfHDyp7Y3dZzgqS2itV8i4gAq9pC2HsTpwyBC6Ds8VHZ96JlA==}
@@ -4354,8 +4357,6 @@ snapshots:
       tslib: 2.8.1
     optional: true
 
-  '@fastify/busboy@3.2.5': {}
-
   '@hono/node-server@2.1.8(hono@4.13.19)':
     dependencies:
       hono: 4.13.19
@@ -4824,6 +4825,12 @@ snapshots:
     optionalDependencies:
       react: 17.0.2
       react-redux: 7.2.4(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
+
+  '@remix-run/headers@1.1.0': {}
+
+  '@remix-run/multipart-parser@1.1.1':
+    dependencies:
+      '@remix-run/headers': 1.1.0
 
   '@remix-run/router@1.21.0': {}
 

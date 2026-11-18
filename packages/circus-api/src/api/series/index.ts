@@ -130,7 +130,7 @@ const importSeries = async (
   try {
     if (!dicomImporter) throw httpError(status.SERVICE_UNAVAILABLE);
     const domain = checkDomain(ctx);
-    summary = await importUploadedFiles(readMultipartFiles(ctx.env.incoming), {
+    summary = await importUploadedFiles(readMultipartFiles(ctx.req.raw), {
       domain,
       maxEntryBytes: uploadFileSizeMaxBytes,
       dicomImporter,

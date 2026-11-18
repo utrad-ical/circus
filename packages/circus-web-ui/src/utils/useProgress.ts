@@ -1,18 +1,21 @@
+import type {
+  ProgressEvent,
+  ProgressLogLine
+} from '@utrad-ical/circus-api-schema';
 import { useEffect, useState } from 'react';
 import { api } from './api.ts';
 
-export interface LogLine {
-  level: 'info' | 'warn' | 'error';
-  message: string;
-}
+type ProgressEventData<Type extends ProgressEvent['type']> = Omit<
+  Extract<ProgressEvent, { type: Type }>,
+  'type'
+>;
 
-export interface Progress {
+type ProgressFields = Partial<ProgressEventData<'progress'>>;
+
+export interface Progress extends ProgressFields {
   status: 'processing' | 'finished' | 'error';
-  finished?: number;
-  total?: number;
-  message?: string;
   /** Recent log lines, e.g., the result of each file */
-  logs?: LogLine[];
+  logs?: ProgressLogLine[];
 }
 
 const maxLogLines = 100;
@@ -32,14 +35,17 @@ const useProgress = (progressId: string | null): Progress | undefined => {
     setProgress({ status: 'processing', message: 'Starting...', logs: [] });
     // GET with the session cookie; reconnects automatically
     const source = new EventSource(api.getBaseUrl() + `progress/${progressId}`);
-    const parse = (event: Event) => JSON.parse((event as MessageEvent).data);
-    const update = (status: Progress['status'], data: any) =>
+    const parse = <Type extends ProgressEvent['type']>(
+      event: Event
+    ): ProgressEventData<Type> =>
+      JSON.parse((event as MessageEvent<string>).data);
+    const update = (status: Progress['status'], data: ProgressFields) =>
       setProgress(p => ({ ...p, status, ...data }));
     source.addEventListener('progress', event => {
-      update('processing', parse(event));
+      update('processing', parse<'progress'>(event));
     });
     source.addEventListener('log', event => {
-      const { lines } = parse(event) as { lines: LogLine[] };
+      const { lines } = parse<'log'>(event);
       setProgress(p =>
         p
           ? { ...p, logs: [...(p.logs ?? []), ...lines].slice(-maxLogLines) }
@@ -48,13 +54,13 @@ const useProgress = (progressId: string | null): Progress | undefined => {
     });
     source.addEventListener('finish', event => {
       source.close();
-      update('finished', parse(event));
+      update('finished', parse<'finish' | 'error'>(event));
     });
     source.addEventListener('error', event => {
       // A server event, or a connection error that does not reconnect
       if (event instanceof MessageEvent) {
         source.close();
-        update('error', parse(event));
+        update('error', parse<'finish' | 'error'>(event));
       } else if (source.readyState === EventSource.CLOSED) {
         update('error', { message: 'Connection lost.' });
       }

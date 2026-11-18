@@ -74,6 +74,11 @@ it('should return 404 for root path', async () => {
   assert.equal(res.status, 404);
 });
 
+it('matches API paths case-sensitively', async () => {
+  assert.equal((await ax.get('api/status')).status, 200);
+  assert.equal((await ax.get('api/Status')).status, 404);
+});
+
 it('should return 404 for the retired token endpoint', async () => {
   const res = await ax.post(
     '/login',

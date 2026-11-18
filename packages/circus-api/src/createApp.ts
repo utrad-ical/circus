@@ -4,7 +4,6 @@ import * as path from 'node:path';
 import { parse } from 'node:querystring';
 import { getRequestListener } from '@hono/node-server';
 import { getCookie } from 'hono/cookie';
-import { getPathNoStrict } from 'hono/utils/url';
 import type { CsCore, DicomVoxelDumper } from '@utrad-ical/circus-cs-core';
 import type {
   DicomFileRepository,
@@ -52,40 +51,11 @@ import { respondJson, validateRequest } from './middleware/validateInOut.ts';
 import { createHonoApp } from './createHonoApp.ts';
 import glob from './utils/glob.ts';
 
-// Koa matched route literals case-insensitively. Keep parameter values intact.
-const legacyRoutePath = (template: string) => {
-  const segments = template.split('/');
-  const pattern = new RegExp(
-    '^/api' +
-      segments
-        .map(segment => {
-          if (segment.startsWith(':'))
-            return segment.endsWith('+') ? '(.+)' : '([^/]+)';
-          return segment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        })
-        .join('/') +
-      '$',
-    'i'
-  );
-  return (pathname: string) => {
-    const match = pattern.exec(pathname);
-    if (!match) return;
-    let param = 1;
-    return (
-      '/api' +
-      segments
-        .map(segment => (segment.startsWith(':') ? match[param++] : segment))
-        .join('/')
-    );
-  };
-};
-
 async function registerRoutes(
   app: ReturnType<typeof createHonoApp>,
   deps: Deps,
   debug: boolean,
-  authenticate: CircusMiddleware,
-  resolvePaths: Map<string, ReturnType<typeof legacyRoutePath>>
+  authenticate: CircusMiddleware
 ) {
   const apiDir = path.resolve(import.meta.dirname, 'api/**/routes.ts');
   for (const file of await glob(apiDir)) {
@@ -94,9 +64,6 @@ async function registerRoutes(
     for (const route of routes) {
       if (route.forDebug && !debug) continue;
       const handler = route.handler(deps);
-      if (!resolvePaths.has(route.path)) {
-        resolvePaths.set(route.path, legacyRoutePath(route.path));
-      }
       // Koa-style named patterns in the API definitions also feed the API reference.
       const routePath = route.path.replace(/:(\w+)\+/g, ':$1{.+}');
       app.on(
@@ -212,22 +179,7 @@ export const createApp: FunctionService<
     verifyUser
   };
 
-  const resolvePaths = new Map<string, ReturnType<typeof legacyRoutePath>>();
-  const app = createHonoApp({
-    logger,
-    debug,
-    corsOrigin,
-    resolvePath: request => {
-      const pathname = getPathNoStrict(request);
-      if (!pathname.startsWith('/api/') || !/[A-Z]/.test(pathname))
-        return pathname;
-      for (const resolve of resolvePaths.values()) {
-        const canonical = resolve(pathname);
-        if (canonical && canonical !== pathname) return canonical;
-      }
-      return pathname;
-    }
-  });
+  const app = createHonoApp({ logger, debug, corsOrigin });
   const authenticate: CircusMiddleware = async (ctx, next) => {
     const json = ctx.var.jsonBody;
     const { user, userPrivileges, byCookie } = fixUser
@@ -250,7 +202,7 @@ export const createApp: FunctionService<
     ctx.set('authenticatedBySessionCookie', byCookie);
     await next();
   };
-  await registerRoutes(app, deps, debug, authenticate, resolvePaths);
+  await registerRoutes(app, deps, debug, authenticate);
 
   const rsRequest = createSeriesRequestListener({
     path: '/rs/series/:sid',

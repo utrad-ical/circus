@@ -1,7 +1,6 @@
 import { parse } from 'node:querystring';
 import type { Logger } from '@utrad-ical/circus-lib';
 import { Hono } from 'hono';
-import { getPathNoStrict } from 'hono/utils/url';
 import { corsHeaders } from './middleware/cors.ts';
 import { formatError } from './middleware/errorHandler.ts';
 import { readJsonBody } from './middleware/validateInOut.ts';
@@ -10,15 +9,13 @@ import type { ApiEnv } from './typings/middlewares.ts';
 export const createHonoApp = ({
   logger,
   debug = false,
-  corsOrigin,
-  resolvePath = getPathNoStrict
+  corsOrigin
 }: {
   logger: Logger;
   debug?: boolean;
   corsOrigin?: string;
-  resolvePath?: (request: Request) => string;
 }) => {
-  const app = new Hono<ApiEnv>({ getPath: resolvePath });
+  const app = new Hono<ApiEnv>({ strict: false });
   const cors = corsHeaders(corsOrigin);
   app.use('*', async (ctx, next) => {
     for (const [name, value] of Object.entries(cors)) ctx.header(name, value);

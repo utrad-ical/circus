@@ -102,7 +102,7 @@ describe('patch list', () => {
   test('change public status from false to true', async () => {
     const myListId = '01ewetw0chv8v5vxdtjdf6x9rk';
     const res = await ax.bob.request({
-      url: `api/myLists/${myListId}`,
+      url: `api/mylists/${myListId}`,
       method: 'patch',
       data: { public: true }
     });
@@ -158,7 +158,7 @@ describe('patch list', () => {
 
     test('add editors', async () => {
       const res = await ax.bob.request({
-        url: `api/myLists/${myListId}`,
+        url: `api/mylists/${myListId}`,
         method: 'patch',
         data: {
           editors: [
@@ -177,7 +177,7 @@ describe('patch list', () => {
 
     test('throw 400 if invalid E-mail address is included', async () => {
       const res = await ax.bob.request({
-        url: `api/myLists/${myListId}`,
+        url: `api/mylists/${myListId}`,
         method: 'patch',
         data: { editors: [{ type: 'user', userEmail: 'invalid@example.com' }] }
       });
@@ -187,7 +187,7 @@ describe('patch list', () => {
 
     test('throw 400 if invalid group ID is included', async () => {
       const res = await ax.bob.request({
-        url: `api/myLists/${myListId}`,
+        url: `api/mylists/${myListId}`,
         method: 'patch',
         data: { editors: [{ type: 'group', groupId: 999 }] }
       });

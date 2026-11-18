@@ -1,3 +1,4 @@
+import type { Series } from '@utrad-ical/circus-api-schema';
 import u from '#components/utilities.module.css';
 import { confirm, modal } from '#components/dialogs.tsx';
 import type {
@@ -29,7 +30,7 @@ import {
   UidDisplay
 } from './SearchResultRenderer.tsx';
 
-const Operation: DataGridRenderer<any> = props => {
+const Operation: DataGridRenderer<Series> = props => {
   const { value: series } = props;
   const loginmanager = useLoginManager();
   const user = useLoginUser()!;
@@ -50,7 +51,7 @@ const Operation: DataGridRenderer<any> = props => {
       { cancelable: false, size: 'large' }
     );
 
-  const handleDelete = async (seriesUid: string, series: any) => {
+  const handleDelete = async (seriesUid: string, series: Series) => {
     const ans = await confirm(
       <>
         Are you sure you want to delete this series? This cannot be undone.
@@ -142,7 +143,7 @@ const Operation: DataGridRenderer<any> = props => {
   );
 };
 
-const columns: DataGridColumnDefinition<any>[] = [
+const columns: DataGridColumnDefinition<Series>[] = [
   { caption: '', className: 'modality', renderer: Modality },
   { caption: 'Patient', className: 'patient', renderer: PatientInfo },
   { caption: 'Series Desc', key: 'seriesDescription' },
@@ -176,7 +177,7 @@ const columns: DataGridColumnDefinition<any>[] = [
 ];
 
 const DataView: React.FC<{
-  value: any[];
+  value: Series[];
   selected: string[];
   onSelectionChange: (id: string, isSelected: boolean) => void;
 }> = props => {

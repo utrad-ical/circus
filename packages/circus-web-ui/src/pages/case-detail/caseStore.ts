@@ -7,24 +7,15 @@ import type {
 } from '@utrad-ical/circus-rs';
 import type { LayoutInfo } from '#components/GridContainer.tsx';
 import { layoutReducer } from '#components/GridContainer.tsx';
-import type Project from '#types/Project.ts';
-import type Series from '#types/Series.ts';
-import type PatientInfo from '../../types/PatientInfo.ts';
-import type { ExternalLabel } from './labelData.ts';
+import type { Project } from '@utrad-ical/circus-api-schema';
+import type { Series } from '@utrad-ical/circus-api-schema';
+import type { PatientInfo } from '@utrad-ical/circus-api-schema';
+import type { CaseDetail, CaseRevision } from '@utrad-ical/circus-api-schema';
 import type { EditingData, Revision } from './revisionData.ts';
 import type { ViewerDef, ViewerMode } from './ViewerGrid.tsx';
-interface CaseData {
-  caseId: string;
-  revisions: Revision<ExternalLabel>[];
-  projectId: string;
-  createdAt: string;
-  updatedAt: string;
-  tags: string[];
-}
-
 export interface CaseDetailState {
   busy: boolean;
-  caseData: CaseData | null;
+  caseData: CaseDetail | null;
   patientInfo?: PatientInfo;
   editingRevisionIndex: number;
   projectData?: Project;
@@ -152,7 +143,7 @@ const slice = createSlice({
     loadInitialCaseData: (
       s,
       action: PayloadAction<{
-        caseData: any;
+        caseData: CaseDetail;
         patientInfo?: PatientInfo;
         seriesData: { [seriesUid: string]: Series };
         projectData: Project;
@@ -167,7 +158,7 @@ const slice = createSlice({
     loadRevisions: (
       s,
       action: PayloadAction<{
-        revisions: Revision<ExternalLabel>[];
+        revisions: CaseRevision[];
         revisionIndex: number;
       }>
     ) => {

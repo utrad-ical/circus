@@ -1,8 +1,10 @@
 import styles from './DownloadModal.module.css';
 import type { Editor } from '#components/editorTypes.tsx';
 import Select from '#components/Select.tsx';
-import type { ExternalLabel } from '#pages/case-detail/labelData.ts';
-import type { Revision } from '#pages/case-detail/revisionData.ts';
+import type {
+  CaseExportMhdQuery,
+  CaseRevision
+} from '@utrad-ical/circus-api-schema';
 import RevisionSelector from '#pages/case-detail/RevisionSelector.tsx';
 import React, { type FC, useCallback, useMemo } from 'react';
 import { api } from '#utils/api.ts';
@@ -12,7 +14,7 @@ import DownloadModal, {
   lineEndingOptions
 } from './DownloadModal.tsx';
 
-type LabelPackTypeOptions = 'isolated' | 'combined';
+type LabelPackTypeOptions = NonNullable<CaseExportMhdQuery['labelPackType']>;
 
 type VolumeOptions = 'default' | 'fullOriginal';
 
@@ -36,7 +38,7 @@ const labelPackTypeOptions: { [type in LabelPackTypeOptions]: string } = {
 };
 
 const createCaseExportOptionsEditor: (
-  revisions?: Revision<ExternalLabel>[]
+  revisions?: CaseRevision[]
 ) => Editor<CaseExportOptions> = revisions => props => {
   const { value, onChange } = props;
 
@@ -111,7 +113,7 @@ const CaseExportModal: FC<{
   onClose: () => void;
   /** The revision selected first; used with `revisions` */
   revisionIndex?: number;
-  revisions?: Revision<ExternalLabel>[];
+  revisions?: CaseRevision[];
 }> = props => {
   const { onClose, caseIds, revisionIndex, revisions } = props;
   const caption = `Export ${caseIds.length} case${
@@ -123,11 +125,12 @@ const CaseExportModal: FC<{
       const { revisionIndex, volume, ...rest } = options;
       const params = new URLSearchParams({
         caseIds: caseIds.join(','),
-        ...rest
-      });
-      if (revisionIndex !== undefined)
-        params.set('revisionIndex', String(revisionIndex));
-      if (volume === 'fullOriginal') params.set('fullOriginalVolume', '1');
+        ...rest,
+        ...(revisionIndex === undefined
+          ? {}
+          : { revisionIndex: String(revisionIndex) }),
+        ...(volume === 'fullOriginal' ? { fullOriginalVolume: '1' } : {})
+      } satisfies CaseExportMhdQuery);
       return api.getBaseUrl() + 'cases/export-mhd?' + params;
     },
     [caseIds]

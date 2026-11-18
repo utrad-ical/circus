@@ -15,7 +15,7 @@ import Dialog, {
 } from '#components/Dialog.tsx';
 import * as mr from 'multi-integer-range';
 import React, { useMemo, useRef, useState } from 'react';
-import type Series from '#types/Series.ts';
+import type { Series } from '@utrad-ical/circus-api-schema';
 import { newViewerCellItem, performLayout } from './caseStore.ts';
 import type { InternalLabel } from './labelData.ts';
 import LabelDisplay from './LabelDisplay.tsx';
@@ -268,7 +268,7 @@ const SeriesInfo: React.FC<{
     ),
     'Series Instance UID': series.seriesUid,
     'Study Instance UID': series.studyUid,
-    'Series Date': series.seriesDate,
+    'Series Date': series.seriesDate ?? '',
     Model: `${series.modelName} (${series.manufacturer})`
   };
 

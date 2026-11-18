@@ -1,3 +1,4 @@
+import type { SeriesImportSummary } from '@utrad-ical/circus-api-schema';
 import Icon from '#components/Icon.tsx';
 import Select from '#components/Select.tsx';
 import useShowMessage from '#utils/useShowMessage.ts';
@@ -10,15 +11,11 @@ import useLocalPreference from '#utils/useLocalPreference.ts';
 import useLoginUser from '#utils/useLoginUser.ts';
 import styles from './ImportSeries.module.css';
 
-interface ImportSummary {
-  imported: number;
-  skipped: { file: string; reason: string }[];
-  errors: { file: string; reason: string }[];
-}
+type UploadResponse = SeriesImportSummary | { error?: string } | null;
 
 const maxRows = 100;
 
-const ImportResult: FC<{ summary: ImportSummary }> = props => {
+const ImportResult: FC<{ summary: SeriesImportSummary }> = props => {
   const { summary } = props;
   const { imported, skipped, errors } = summary;
   const rows = [
@@ -78,7 +75,7 @@ const ImportSeries: FC<{}> = props => {
   const loginUser = useLoginUser()!;
   const showMessage = useShowMessage();
   const domains = loginUser.domains || [];
-  const [summary, setSummary] = useState<ImportSummary>();
+  const [summary, setSummary] = useState<SeriesImportSummary>();
 
   const [domainPreference, setDomainPreference] = useLocalPreference<
     string | null
@@ -99,12 +96,14 @@ const ImportSeries: FC<{}> = props => {
     );
   }
 
-  const handleUploaded = (res: any) => {
-    if (typeof res?.imported === 'number') {
-      setSummary(res);
+  const handleUploaded = (res: UploadResponse) => {
+    const result = res && typeof res === 'object' ? res : null;
+    if (result && 'imported' in result && typeof result.imported === 'number') {
+      setSummary(result);
     } else {
       setSummary(undefined);
-      showMessage(res?.error ?? 'Upload failed.', 'danger');
+      const error = result && 'error' in result ? result.error : undefined;
+      showMessage(error ?? 'Upload failed.', 'danger');
     }
   };
 

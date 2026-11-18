@@ -29,17 +29,14 @@ import React, {
   useRef,
   useState
 } from 'react';
-import type Project from '#types/Project.ts';
-import type Series from '#types/Series.ts';
+import type { Project } from '@utrad-ical/circus-api-schema';
+import type { Series } from '@utrad-ical/circus-api-schema';
 import { api } from '#utils/api.ts';
 import isTouchDevice from '#utils/isTouchDevice.ts';
 import useEffectEvent from '#utils/useEffectEvent.ts';
 import { useUserPreferences } from '#utils/useLoginUser.ts';
 import Dialog from '#components/Dialog.tsx';
-import type {
-  ScrollBarsSettings,
-  WindowPropagationScope
-} from '../../store/loginUser.ts';
+import type { UserPreferences } from '@utrad-ical/circus-api-schema';
 import * as c from './caseStore.ts';
 import type { InternalLabel, InternalLabelDataOf } from './labelData.ts';
 import {
@@ -210,7 +207,7 @@ const RevisionEditor: React.FC<{
           visibility: 'none',
           size: 'small',
           position: 'right'
-        }) as ScrollBarsSettings,
+        }) as NonNullable<UserPreferences['scrollBarsInfo']>,
     interpolationMode: (preferences.interpolationMode ??
       'nearestNeighbor') as InterpolationMode,
     windowPropagationScope: preferences.windowPropagationScope ?? 'all'
@@ -681,12 +678,10 @@ const RevisionEditor: React.FC<{
         await Promise.all(
           targetSeriesUids.map(async seriesUid => [
             seriesUid,
-            await api('series/' + seriesUid)
+            await api<Series>('series/' + seriesUid)
           ])
         )
-      ) as {
-        [seriesUid: string]: Series;
-      };
+      );
       caseDispatch(
         c.updateSeriesData({
           seriesData: { ...seriesData, ...newSeriesData }
@@ -793,7 +788,9 @@ const RevisionEditor: React.FC<{
         (
           viewer: Viewer,
           id: string,
-          windowPropagationScope: WindowPropagationScope
+          windowPropagationScope: NonNullable<
+            UserPreferences['windowPropagationScope']
+          >
         ) => {
           if (windowPropagationScope === 'viewer') return;
           const viewState = viewer.getState();

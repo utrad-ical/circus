@@ -1,3 +1,4 @@
+import { namedProjectTags } from '#utils/projectTags.ts';
 import { multiSelectEditor } from '#components/MultiSelect.tsx';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import DateRangePicker, {
@@ -131,7 +132,7 @@ const ConditionEditor: React.FC<{
       for (const pid of projectIds) {
         const p = accessibleProjects.find(p => p.projectId === pid);
         if (!p) continue;
-        p.project.tags.forEach(t => {
+        namedProjectTags(p.project.tags).forEach(t => {
           if (tags[t.name]) return;
           tags[t.name] = { caption: t.name, color: t.color };
         });

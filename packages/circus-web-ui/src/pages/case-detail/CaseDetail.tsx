@@ -1,3 +1,7 @@
+import type {
+  CaseDetail as CaseDetailData,
+  CaseTags
+} from '@utrad-ical/circus-api-schema';
 import Button from '#components/Button.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import { alert, confirm } from '#components/dialogs.tsx';
@@ -27,7 +31,7 @@ import { useDispatch } from 'react-redux';
 import { Link, useBlocker, useParams } from 'react-router-dom';
 import { showMessage } from '#store/messages.ts';
 import { newSearch } from '#store/searches.ts';
-import type Series from '#types/Series.ts';
+import type { Series } from '@utrad-ical/circus-api-schema';
 import { api } from '#utils/api.ts';
 import useKeyboardShortcut from '#utils/useKeyboardShortcut.ts';
 import useLoginUser from '#utils/useLoginUser.ts';
@@ -93,7 +97,7 @@ const CaseDetail: React.FC<{}> = () => {
       throw new Error('caseId is missing.');
     }
     const loadCase = async () => {
-      const caseData = await api('cases/' + caseId);
+      const caseData = await api<CaseDetailData>('cases/' + caseId);
       if (!isMounted) return;
       setTags(caseData.tags ?? []);
       const project = accessibleProjects.find(
@@ -107,10 +111,10 @@ const CaseDetail: React.FC<{}> = () => {
         await Promise.all(
           seriesUids.map(async seriesUid => [
             seriesUid,
-            await api('series/' + seriesUid)
+            await api<Series>('series/' + seriesUid)
           ])
         )
-      ) as { [seriesUid: string]: Series };
+      );
 
       const viewPersonalInfoFlag = accessibleProjects
         .filter(p => p.roles.includes('viewPersonalInfo'))
@@ -203,7 +207,7 @@ const CaseDetail: React.FC<{}> = () => {
 
   const handleTagChange = async (value: string[]) => {
     try {
-      await api(`cases/${caseData!.caseId}/tags`, {
+      await api<unknown, CaseTags>(`cases/${caseData!.caseId}/tags`, {
         method: 'put',
         data: value,
         handleErrors: true
@@ -224,7 +228,7 @@ const CaseDetail: React.FC<{}> = () => {
           short: true
         })
       );
-      const caseData = await api('cases/' + caseId);
+      const caseData = await api<CaseDetailData>('cases/' + caseId);
       caseDispatch(
         c.loadRevisions({
           revisions: caseData.revisions,

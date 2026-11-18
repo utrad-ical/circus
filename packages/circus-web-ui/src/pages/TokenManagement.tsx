@@ -1,3 +1,9 @@
+import type {
+  PermanentToken,
+  SearchResponse,
+  TokenCreate,
+  TokenCreated
+} from '@utrad-ical/circus-api-schema';
 import Input from '#components/Input.tsx';
 import Alert from '#components/Alert.tsx';
 import Panel, { PanelList, PanelListItem } from '#components/Panel.tsx';
@@ -12,12 +18,6 @@ import useLoadData from '#utils/useLoadData.ts';
 import type { CancelToken } from '../utils/cancelToken.ts';
 import CopyToClipboardButton from '#components/CopyToClipboardButton.tsx';
 import styles from './TokenManagement.module.css';
-
-interface Token {
-  tokenId: string;
-  description: string;
-  createdAt: string;
-}
 
 const AccessToken: React.FC<{ accessToken: string }> = props => {
   const { accessToken } = props;
@@ -38,7 +38,12 @@ const AccessToken: React.FC<{ accessToken: string }> = props => {
 
 const TokenManagement: React.FC<{}> = props => {
   const load = useCallback(async (cancelToken: CancelToken) => {
-    return (await api('/tokens', { cancelToken })).items as Token[];
+    const { items } = await api<SearchResponse<PermanentToken>>(
+      '/tokens',
+      {},
+      cancelToken
+    );
+    return items;
   }, []);
   const [data, isLoading, reload] = useLoadData(load);
 
@@ -49,7 +54,7 @@ const TokenManagement: React.FC<{}> = props => {
 
   const handleCreate = async () => {
     if (!description.length) return;
-    const res = await api('/tokens', {
+    const res = await api<TokenCreated, TokenCreate>('/tokens', {
       method: 'post',
       data: { description }
     });

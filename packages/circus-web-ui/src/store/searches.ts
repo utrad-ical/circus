@@ -2,14 +2,44 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import { confirm, prompt } from '#components/dialogs.tsx';
 import type { AppDispatch, AppThunk } from '#store/index.ts';
+import type { PresetSearchName } from '#utils/searchPresets.ts';
+import type {
+  CaseSearchItem,
+  Group,
+  Plugin,
+  PluginJob,
+  PluginJobSearchItem,
+  Project,
+  SearchResponse,
+  Series,
+  UserForAdmin,
+  UserPreferences
+} from '@utrad-ical/circus-api-schema';
 import { api } from '#utils/api.ts';
-import type Series from '#types/Series.ts';
-
-export interface SearchResource {
-  endPoint: string;
-  primaryKey: string;
-  resourceType?: string;
+interface SearchItems {
+  series: Series;
+  cases: CaseSearchItem;
+  'plugin-jobs': PluginJobSearchItem;
+  pluginJobs: PluginJobSearchItem;
+  'plugin-job-queue': PluginJob;
+  'admin/plugin-job-queue': PluginJob;
+  'admin/groups': Group;
+  'admin/plugins': Plugin;
+  'admin/projects': Project;
+  'admin/users': UserForAdmin;
 }
+
+type SearchType = keyof SearchItems;
+export type SearchItem = SearchItems[SearchType];
+
+export type SearchResource = {
+  [Type in SearchType]: { primaryKey: keyof SearchItems[Type] & string } & (
+    | { endPoint: Type; resourceType?: undefined }
+    | { endPoint: string; resourceType: Type }
+  );
+}[SearchType];
+
+type SearchCache = { [Type in SearchType]?: Record<string, SearchItems[Type]> };
 
 interface SearchParams {
   resource: SearchResource;
@@ -30,18 +60,11 @@ interface SearchParams {
 type NewSearchParams = Partial<Pick<SearchParams, 'page' | 'limit'>> &
   Omit<SearchParams, 'page' | 'limit'>;
 
-export interface SearchedResource<T> {
-  [id: string]: T;
-}
-
 export interface SearchState {
   searches: {
     [searchName: string]: SearchResult;
   };
-  items: {
-    series: SearchedResource<Series>;
-    [resourceName: string]: SearchedResource<any>;
-  };
+  items: SearchCache;
   nextPreviousList: string[];
 }
 
@@ -120,7 +143,7 @@ const slice = createSlice({
       state,
       action: PayloadAction<{
         searchName: string;
-        data: { items: any[]; page: number; totalItems: number };
+        data: SearchResponse<SearchItem>;
       }>
     ) => {
       const {
@@ -132,13 +155,16 @@ const slice = createSlice({
       const rType = resourceType || endPoint;
       search.isFetching = false;
       search.params.page = page;
-      const items = state.items[rType] ?? {};
-      state.items[rType] = items;
-      rawItems.forEach(i => (items[String(i[primaryKey])] = i));
-      search.results = {
-        indexes: rawItems.map(i => i[primaryKey]),
-        totalItems
-      };
+      // The endpoint and its cache key identify the type of all the rows.
+      const cache: Partial<Record<SearchType, Record<string, SearchItem>>> =
+        state.items;
+      const items = (cache[rType] ??= {});
+      const indexes = rawItems.map(item => {
+        const id = String((item as Record<string, unknown>)[primaryKey]);
+        items[id] = item;
+        return id;
+      });
+      search.results = { indexes, totalItems };
     },
     deleteSearch: (state, action: PayloadAction<string>) => {
       const searchName = action.payload;
@@ -176,14 +202,17 @@ const executeQuery = async (
 ) => {
   try {
     dispatch(startSearch({ searchName, params }));
-    const data = await api(params.resource.endPoint, {
-      params: {
-        filter: JSON.stringify(params.filter),
-        sort: params.sort,
-        page: params.page,
-        limit: params.limit
+    const data = await api<SearchResponse<SearchItem>>(
+      params.resource.endPoint,
+      {
+        params: {
+          filter: JSON.stringify(params.filter),
+          sort: params.sort,
+          page: params.page,
+          limit: params.limit
+        }
       }
-    });
+    );
     dispatch(searchResultLoaded({ searchName, data }));
   } finally {
     dispatch(setBusy({ searchName, isFetching: false }));
@@ -229,14 +258,14 @@ export const updateSearch = (
   };
 };
 
-export const savePreset = (searchName: string, condition: any): AppThunk => {
+export const savePreset = (
+  searchName: PresetSearchName,
+  condition: object
+): AppThunk => {
   return async (dispatch, getState) => {
     const state = getState();
     const user = state.loginUser.data!;
-    const key = (searchName + 'SearchPresets') as
-      | 'seriesSearchPresets'
-      | 'caseSearchPresets'
-      | 'pluginJobSearchPresets';
+    const key = `${searchName}SearchPresets` as const;
     const presets = user.preferences[key];
 
     const presetName = await prompt('Preset name');
@@ -252,7 +281,10 @@ export const savePreset = (searchName: string, condition: any): AppThunk => {
       { name: presetName, condition: JSON.stringify(condition) },
       ...(presets ?? []).filter(preset => preset.name !== presetName)
     ];
-    await api('preferences', { method: 'patch', data: { [key]: newPresets } });
+    await api<unknown, UserPreferences>('preferences', {
+      method: 'patch',
+      data: { [key]: newPresets }
+    });
     dispatch(setBusy({ searchName, isFetching: false }));
   };
 };

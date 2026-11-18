@@ -16,13 +16,11 @@ import type {
   ToolOptionSetter
 } from '#pages/case-detail/useToolbar.ts';
 import React, { useState } from 'react';
-import type { WindowPreset } from '#types/Project.ts';
 import useKeyboardShortcut from '#utils/useKeyboardShortcut.ts';
 import NumberInput from '#components/NumberInput.tsx';
-import type {
-  ScrollBarsSettings,
-  WindowPropagationScope
-} from '../../store/loginUser.ts';
+import type { Project, UserPreferences } from '@utrad-ical/circus-api-schema';
+
+type WindowPreset = Project['windowPresets'][number];
 import type { LayoutKind } from './caseStore.ts';
 import type { ViewWindow } from './ViewWindowEditor.tsx';
 import ViewWindowEditor from './ViewWindowEditor.tsx';
@@ -30,9 +28,11 @@ import styles from './ToolBar.module.css';
 
 export interface ViewOptions {
   showReferenceLine?: boolean;
-  scrollbar?: ScrollBarsSettings;
+  scrollbar?: NonNullable<UserPreferences['scrollBarsInfo']>;
   interpolationMode?: InterpolationMode;
-  windowPropagationScope?: WindowPropagationScope;
+  windowPropagationScope?: NonNullable<
+    UserPreferences['windowPropagationScope']
+  >;
 }
 
 type ScrollbarVisibilityOptions = 'none' | 'always' | 'hover';
@@ -76,7 +76,7 @@ export const zDimmedThresholdOptions: {
 ];
 
 export const windowPropagationScopeOptions: {
-  key: WindowPropagationScope;
+  key: NonNullable<UserPreferences['windowPropagationScope']>;
   caption: string;
 }[] = [
   { key: 'all', caption: 'All' },
@@ -133,7 +133,7 @@ const ToolBar: React.FC<{
   brushEnabled: boolean;
   wandEnabled: boolean;
   windowEnabled: boolean;
-  windowPresets?: WindowPreset[];
+  windowPresets?: Project['windowPresets'];
   currentWindow: ViewWindow;
   onChangeTool: (toolName: string) => void;
   onApplyWindow: (window: any) => void;
@@ -228,7 +228,7 @@ const ToolBar: React.FC<{
       const scrollbar = { ...viewOptions.scrollbar, [option]: selection };
       onChangeViewOptions({
         ...viewOptions,
-        scrollbar: scrollbar as ScrollBarsSettings
+        scrollbar: scrollbar as NonNullable<UserPreferences['scrollBarsInfo']>
       });
     };
 
@@ -245,7 +245,9 @@ const ToolBar: React.FC<{
   const handleToggleWindowPropagationScope = (selection: any) => {
     onChangeViewOptions({
       ...viewOptions,
-      windowPropagationScope: selection as WindowPropagationScope
+      windowPropagationScope: selection as NonNullable<
+        UserPreferences['windowPropagationScope']
+      >
     });
   };
 

@@ -1,3 +1,4 @@
+import type { Project, ProjectCreate } from '@utrad-ical/circus-api-schema';
 import { selectEditor } from '#components/Select.tsx';
 import EditorPage from './EditorPage.tsx';
 import React from 'react';
@@ -17,7 +18,7 @@ const windowPriorityOptions = [
   'auto'
 ];
 
-const listColumns: DataGridColumnDefinition[] = [
+const listColumns: DataGridColumnDefinition<Project>[] = [
   {
     caption: 'Project Name',
     className: 'project-name',
@@ -33,7 +34,7 @@ const listColumns: DataGridColumnDefinition[] = [
   { key: 'projectId', caption: 'Project ID' }
 ];
 
-const makeEmptyItem = () => {
+const makeEmptyItem = (): ProjectCreate => {
   return {
     projectName: 'untitled project',
     description: '',

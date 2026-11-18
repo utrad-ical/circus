@@ -1,3 +1,4 @@
+import type { PluginJobManager } from '@utrad-ical/circus-api-schema';
 import Panel, {
   PanelHeader,
   PanelBody,
@@ -15,7 +16,7 @@ const PluginJobManagerAdmin: React.FC<{}> = props => {
 
   const refresh = useCallback(async (isMounted: boolean) => {
     setBusy(true);
-    const result = await api('admin/plugin-job-manager');
+    const result = await api<PluginJobManager>('admin/plugin-job-manager');
     if (!isMounted) return;
     setBusy(false);
     setStatus(result.status);
@@ -29,10 +30,10 @@ const PluginJobManagerAdmin: React.FC<{}> = props => {
     };
   }, [refresh]);
 
-  const postSwitch = async (mode: string) => {
+  const postSwitch = async (mode: PluginJobManager['status']) => {
     setBusy(true);
     try {
-      await api('admin/plugin-job-manager/switch', {
+      await api<unknown, PluginJobManager>('admin/plugin-job-manager/switch', {
         method: 'put',
         data: { status: mode }
       });

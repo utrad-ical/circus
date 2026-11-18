@@ -13,7 +13,7 @@ import * as mr from 'multi-integer-range';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { newSearch } from '#store/searches.ts';
-import type Series from '#types/Series.ts';
+import type { CaseCreate, Series } from '@utrad-ical/circus-api-schema';
 import { api } from '#utils/api.ts';
 import { UidDisplay } from '../pages/search/SearchResultRenderer.tsx';
 import PartialVolumeDescriptorEditor from './PartialVolumeDescriptorEditor.tsx';
@@ -46,10 +46,10 @@ const RelevantSeries: React.FC<{
 }> = props => {
   const { onSeriesRegister } = props;
 
-  const RelevantSeriesDataView: React.FC<any> = useMemo(
+  const RelevantSeriesDataView: React.FC<{ value: Series[] }> = useMemo(
     () => props => {
       const { value } = props;
-      const columns: DataGridColumnDefinition<any>[] = [
+      const columns: DataGridColumnDefinition<Series>[] = [
         { key: 'modality', caption: 'Modality' },
         { key: 'seriesDescription', caption: 'Series Desc' },
         { key: 'Uid', caption: 'UID', renderer: UidDisplay },
@@ -87,10 +87,7 @@ const RelevantSeries: React.FC<{
   );
 };
 
-export interface SeriesEntry {
-  seriesUid: string;
-  partialVolumeDescriptor: PartialVolumeDescriptor | 'auto';
-}
+export type SeriesEntry = CaseCreate['series'][number];
 
 const SeriesSelector: React.FC<{
   value: SeriesEntry[];
@@ -144,7 +141,7 @@ const SeriesSelector: React.FC<{
             seriesData[seriesUid] = null; // "now loading"
           })
         );
-        const data = (await api('series/' + seriesUid)) as Series;
+        const data = await api<Series>('series/' + seriesUid);
         setSeriesData(
           produce(seriesData, seriesData => {
             seriesData[seriesUid] = data;

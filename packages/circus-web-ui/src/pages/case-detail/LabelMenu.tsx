@@ -79,7 +79,7 @@ const LabelMenu: React.FC<{
     !loginUser.preferences.labelColors ||
     loginUser.preferences.labelColors.useDefault
       ? defaultLabelColors
-      : loginUser.preferences.labelColors.customColors;
+      : (loginUser.preferences.labelColors.customColors ?? defaultLabelColors);
 
   const { revision, activeLabelIndex, activeSeriesIndex } = editingData;
   const activeSeriesMetadata = metadata[activeSeriesIndex];

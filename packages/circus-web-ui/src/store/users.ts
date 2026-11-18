@@ -2,10 +2,9 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import { api } from '#utils/api.ts';
 import type { AppThunk } from './index.ts';
+import type { UserPublic } from '@utrad-ical/circus-api-schema';
 
-export interface Users {
-  [userEmail: string]: 'loading' | { userEmail: string; description: string };
-}
+type Users = Record<string, 'loading' | UserPublic>;
 
 const slice = createSlice({
   name: 'users',
@@ -14,13 +13,7 @@ const slice = createSlice({
     userInfoLoading: (state, action: PayloadAction<string>) => {
       state[action.payload] = 'loading';
     },
-    userInfoLoaded: (
-      state,
-      action: PayloadAction<{
-        userEmail: string;
-        description: string;
-      }>
-    ) => {
+    userInfoLoaded: (state, action: PayloadAction<UserPublic>) => {
       state[action.payload.userEmail] = action.payload;
     }
   }
@@ -35,7 +28,7 @@ export const loadUserInfo = (userEmail: string): AppThunk => {
     const state = getState();
     if (state.users[userEmail]) return;
     dispatch(userInfoLoading(userEmail));
-    const userData = await api(`users/${userEmail}`);
+    const userData = await api<UserPublic>(`users/${userEmail}`);
     dispatch(userInfoLoaded(userData));
   };
 };

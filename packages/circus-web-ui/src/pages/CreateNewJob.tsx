@@ -1,3 +1,4 @@
+import type { PluginJobCreate } from '@utrad-ical/circus-api-schema';
 import u from '#components/utilities.module.css';
 import Alert from '#components/Alert.tsx';
 import Button from '#components/Button.tsx';
@@ -61,11 +62,13 @@ const CreateNewJob: React.FC<{}> = props => {
   }, [defaultPlugin, accessiblePlugins, selectedPlugin]);
 
   const handleCreate = async () => {
+    if (!selectedPlugin) return;
+    const pluginId = selectedPlugin;
     const callApi = async (force = false) => {
-      return await api('plugin-jobs', {
+      return await api<unknown, PluginJobCreate>('plugin-jobs', {
         method: 'post',
         data: {
-          pluginId: selectedPlugin,
+          pluginId,
           series: selectedSeries,
           ...(force ? { force: true } : {})
         },
@@ -73,7 +76,6 @@ const CreateNewJob: React.FC<{}> = props => {
       });
     };
 
-    if (!selectedPlugin) return;
     try {
       try {
         await callApi(false);

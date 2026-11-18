@@ -1,3 +1,7 @@
+import type {
+  CaseSearchItem,
+  CaseTagsPatch
+} from '@utrad-ical/circus-api-schema';
 import u from '#components/utilities.module.css';
 import Button from '#components/Button.tsx';
 import { confirm } from '#components/dialogs.tsx';
@@ -13,6 +17,7 @@ import SearchResultsView, {
   makeSortOptions,
   patientInfoSearchOptions
 } from '#components/SearchResultsView.tsx';
+import { namedProjectTags } from '#utils/projectTags.ts';
 import { PhysicalTag } from '#components/Tag.tsx';
 import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -30,7 +35,7 @@ import {
 } from './SearchResultRenderer.tsx';
 
 const Operation: React.FC<{
-  value: any;
+  value: CaseSearchItem;
 }> = props => {
   const item = props.value;
   const dispatch = useDispatch();
@@ -59,7 +64,7 @@ const Operation: React.FC<{
   );
 };
 
-const columns: DataGridColumnDefinition<any>[] = [
+const columns: DataGridColumnDefinition<CaseSearchItem>[] = [
   { caption: 'Project', className: 'project', renderer: Project() },
   { caption: 'Patient', className: 'patient', renderer: PatientInfo },
   { caption: 'Case ID', className: 'caseId', renderer: CaseId },
@@ -69,7 +74,7 @@ const columns: DataGridColumnDefinition<any>[] = [
 ];
 
 const DataView: React.FC<{
-  value: any[];
+  value: CaseSearchItem[];
   selected: string[];
   onSelectionChange: (id: string, isSelected: boolean) => void;
 }> = props => {
@@ -110,17 +115,19 @@ const CaseSearchResultsView: React.FC<{
 
   const availableTags = useMemo(() => {
     const projectIds = Array.from(
-      new Set(selected.map(caseId => items[caseId].projectId)).values()
+      new Set(
+        selected.flatMap(caseId => items?.[caseId]?.projectId ?? [])
+      ).values()
     );
     return Array.from(
       new Map(
-        projectIds
-          .map(
+        namedProjectTags(
+          projectIds.flatMap(
             pid =>
-              accessibleProjects.find(p => p.projectId === pid)!.project.tags
+              accessibleProjects.find(p => p.projectId === pid)?.project.tags ??
+              []
           )
-          .flat(1)
-          .map(tag => [tag.name, tag])
+        ).map(tag => [tag.name, tag])
       ).values()
     );
   }, [accessibleProjects, items, selected]);
@@ -134,7 +141,7 @@ const CaseSearchResultsView: React.FC<{
       !(await confirm('Do you really want to clear all tags?'))
     )
       return;
-    await api('cases/tags', {
+    await api<unknown, CaseTagsPatch>('cases/tags', {
       method: 'patch',
       data: {
         operation: op === 'clear' ? 'set' : op,
@@ -165,8 +172,8 @@ const CaseSearchResultsView: React.FC<{
             title={<Icon icon="material-sell" />}
           >
             {availableTags.map(tag => {
-              const count = selected.filter(
-                cid => items[cid]!.tags.indexOf(tag.name) >= 0
+              const count = selected.filter(cid =>
+                items?.[cid]?.tags.includes(tag.name)
               ).length;
               return (
                 <MenuItem key={tag.name}>

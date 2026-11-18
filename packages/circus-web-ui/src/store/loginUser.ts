@@ -1,100 +1,20 @@
-import type { ProjectRoles } from '../types/Project.ts';
-import type Project from '../types/Project.ts';
-import type { PluginRoles } from '../types/Plugin.ts';
-import type Plugin from '../types/Plugin.ts';
+import type {
+  LoginInfoFull,
+  UserPreferences
+} from '@utrad-ical/circus-api-schema';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 
-export type GlobalPrivilege =
-  | 'createProject'
-  | 'deleteProject'
-  | 'manageServer'
-  | 'personalInfoView'
-  | 'downloadVolume'
-  | 'issueOnetime';
-
-export interface SearchPreset {
-  name: string;
-  condition: any;
-}
-
-export type LabelColorsSettings = {
-  useDefault: boolean;
-  customColors: string[];
-};
-
-export type ScrollBarsSettings = {
-  size: 'small' | 'large';
-  position: 'right' | 'left' | 'top' | 'bottom';
-  visibility: 'none' | 'always' | 'hover';
-};
-
-export type WindowPropagationScope = 'all' | 'series' | 'viewer';
-
-export interface UserPreferences {
-  seriesSearchPresets?: SearchPreset[];
-  caseSearchPresets?: SearchPreset[];
-  pluginJobSearchPresets?: SearchPreset[];
-  personalInfoView?: boolean;
-  theme?: string;
-  referenceLine?: boolean;
-  initailAlphaForNewLabels?: number;
-  interpolationMode?: string;
-  windowPropagationScope?: WindowPropagationScope;
-  scrollBarsInfo?: ScrollBarsSettings;
-  scrollBars?: string;
-  maintainAspectRatio?: boolean;
-  fixCenterOfGravity?: boolean;
-  dimmedOutlineFor2DLabels?: string;
-  revisionMessageTemplates?: string[];
-  labelColors?: LabelColorsSettings;
-}
-
-export type MyListResourceType = 'series' | 'clinicalCases' | 'jobs';
-
-export interface MyList {
-  myListId: string;
-  resourceType: MyListResourceType;
-  name: string;
-  createdAt: Date;
-}
-
-export interface LoginUser {
+interface LoginUserState {
   isFetching: boolean;
-  data: null | {
-    craetedAt: string;
-    updatedAt: string;
-    description: string;
-    dicomImageServer: string;
-    domains: string[];
-    defaultDomain: string | null;
-    globalPrivileges: GlobalPrivilege[];
-    groups: string[];
-    lastLoginIp: string;
-    lastLoginTime: string;
-    loginEnabled: boolean;
-    loginId: string;
-    userEmail: string;
-    myLists: MyList[];
-    preferences: UserPreferences;
-    accessibleProjects: Array<{
-      projectId: string;
-      project: Project;
-      roles: ProjectRoles[];
-    }>;
-    accessiblePlugins: Array<{
-      pluginId: string;
-      plugin: Plugin;
-      roles: PluginRoles[];
-    }>;
-  };
+  data: LoginInfoFull | null;
 }
 
 const slice = createSlice({
   name: 'loginUser',
-  initialState: { isFetching: false, data: null } as LoginUser,
+  initialState: { isFetching: false, data: null } as LoginUserState,
   reducers: {
-    fullLoginInfoLoaded: (state, action: PayloadAction<any>) => {
+    fullLoginInfoLoaded: (state, action: PayloadAction<LoginInfoFull>) => {
       state.isFetching = false;
       state.data = action.payload;
     },
@@ -111,7 +31,7 @@ const slice = createSlice({
     userPreferencesUpdated: (
       state,
       action: PayloadAction<{
-        updates: Partial<UserPreferences>;
+        updates: UserPreferences;
       }>
     ) => {
       const { updates } = action.payload;

@@ -4,8 +4,7 @@ import Icon from '#components/Icon.tsx';
 import DropdownButton from '#components/DropdownButton.tsx';
 import { DialogBody, DialogFooter, DialogHeader } from '#components/Dialog.tsx';
 import MenuItem from '#components/MenuItem.tsx';
-import type { ExternalLabel } from '#pages/case-detail/labelData.ts';
-import type { Revision } from '#pages/case-detail/revisionData.ts';
+import type { CaseRevision } from '@utrad-ical/circus-api-schema';
 import React, { Fragment, useState } from 'react';
 import useLoginUser from '#utils/useLoginUser.ts';
 import styles from './SaveModal.module.css';
@@ -17,7 +16,7 @@ interface Template {
 
 const SaveModal: React.FC<{
   value: string;
-  revisionHistory: Revision<ExternalLabel>[];
+  revisionHistory: CaseRevision[];
   onHide: () => void;
   onOkClick: (props: any) => void;
 }> = props => {

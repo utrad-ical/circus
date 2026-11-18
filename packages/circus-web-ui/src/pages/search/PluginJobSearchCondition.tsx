@@ -1,3 +1,4 @@
+import type { Plugin } from '@utrad-ical/circus-api-schema';
 import { selectEditor } from '#components/Select.tsx';
 import React, { useState, useEffect, useMemo } from 'react';
 import { modalities } from '../../modalities.ts';
@@ -107,7 +108,7 @@ const ConditionEditor: React.FC<{
     let isMounted = true;
 
     const load = async () => {
-      const data = await api('/plugins');
+      const data = await api<Plugin[]>('/plugins');
       if (!isMounted) return;
       setPlugins(data);
     };

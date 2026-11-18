@@ -2,11 +2,10 @@ import Button from '#components/Button.tsx';
 import React, { useState, useCallback, useEffect } from 'react';
 import { ControlledCollapser } from '#components/Collapser.tsx';
 import useLocalPreference from '#utils/useLocalPreference.ts';
-import { api } from '#utils/api.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLoginManager } from '#utils/loginManager.ts';
 import useLoginUser from '#utils/useLoginUser.ts';
-import type { SearchPreset } from '#store/loginUser.ts';
+import type { PresetSearchName } from '#utils/searchPresets.ts';
 import * as searches from '#store/searches.ts';
 import { useParams } from 'react-router-dom';
 import styles from './SearchPanel.module.css';
@@ -22,18 +21,18 @@ const StateSavingCollapser: React.FC<any> = props => {
   );
 };
 
-const SearchPanel: <T extends {}>(props: {
+const SearchPanel = <T extends object>(props: {
   nullCondition: () => T;
   conditionToFilter: (condition: T) => any;
   conditionEditor: React.ComponentType<{
     value: T;
     onChange: (value: T) => void;
   }>;
-  searchName: string;
+  searchName: PresetSearchName;
   presetName?: string;
   resource: searches.SearchResource;
   defaultSort: string;
-}) => React.ReactElement<any> = props => {
+}) => {
   const {
     searchName,
     resource,
@@ -51,19 +50,24 @@ const SearchPanel: <T extends {}>(props: {
 
   const [condition, setCondition] = useState(() => {
     // Determine initial condition
-    const presetKey = searchName + 'SearchPresets';
+    const presetKey = `${searchName}SearchPresets` as const;
     if (presetName) {
       // Use preset condition
-      const presets =
-        ((user.preferences as any)[presetKey] as SearchPreset[]) ?? [];
-      const matched = presets.find(preset => preset.name === presetName);
-      if (matched) {
-        return JSON.parse(matched.condition);
+      const matched = user.preferences[presetKey]?.find(
+        preset => preset.name === presetName
+      );
+      if (typeof matched?.condition === 'string') {
+        try {
+          const saved: unknown = JSON.parse(matched.condition);
+          if (saved && typeof saved === 'object') return saved as T;
+        } catch {
+          // An invalid saved condition falls back to the search defaults.
+        }
       }
     }
     if (search) {
       // Use the saved condition of the existing search
-      return search.params.condition;
+      return search.params.condition as T;
     }
     return nullCondition();
   });

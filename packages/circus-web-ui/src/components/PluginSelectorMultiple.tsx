@@ -1,7 +1,7 @@
 import React from 'react';
 import MultiSelect from '#components/MultiSelect.tsx';
 import BodyPartIcon from './BodyPartIcon.tsx';
-import type Plugin from '#types/Plugin.ts';
+import type { Plugin } from '@utrad-ical/circus-api-schema';
 import styles from './PluginSelectorMultiple.module.css';
 
 const Renderer: React.FC<{

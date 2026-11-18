@@ -10,14 +10,16 @@ import Icon from '#components/Icon.tsx';
 import LabelColorsEditor from '#components/LabelColorsEditor.tsx';
 import { labeledSlider } from '#components/LabeledSlider.tsx';
 import React, { useCallback, useEffect, useState } from 'react';
-import type { SearchPreset, UserPreferences } from '#store/loginUser.ts';
+import { namedSearchPresets } from '#utils/searchPresets.ts';
 import { api } from '#utils/api.ts';
 import { useUserPreferences } from '#utils/useLoginUser.ts';
 import useShowMessage from '#utils/useShowMessage.ts';
-import type { WindowPropagationScope } from '../store/loginUser.ts';
+import type { UserPreferences } from '@utrad-ical/circus-api-schema';
 import ScrollbarEditor from './ScrollBarsEditor.tsx';
 
-const PresetDeleteEditor: et.Editor<SearchPreset[] | undefined> = props => {
+const PresetDeleteEditor: et.Editor<
+  UserPreferences['caseSearchPresets']
+> = props => {
   const { value = [], onChange } = props;
 
   const handleDeleteClick = (presetName: string) => {
@@ -31,7 +33,7 @@ const PresetDeleteEditor: et.Editor<SearchPreset[] | undefined> = props => {
 
   return (
     <ul className={u.plainList}>
-      {value.map(preset => {
+      {namedSearchPresets(value).map(preset => {
         return (
           <li key={preset.name}>
             {preset.name}{' '}
@@ -130,7 +132,7 @@ const appearanceProperties: PropertyEditorProperties<UserPreferences> = [
     editor: selectEditor({
       mode_white: 'White',
       mode_black: 'Black'
-    }) as et.Editor<string | undefined>
+    }) as et.Editor<UserPreferences['theme']>
   },
   {
     key: 'personalInfoView',
@@ -184,8 +186,8 @@ const circusDBProperties: PropertyEditorProperties<UserPreferences> = [
     caption: 'Interpolation mode',
     editor: selectEditor({
       nearestNeighbor: 'Nearest neighbor',
-      trilinearFiltering: 'Trilinear filtering'
-    }) as et.Editor<string | undefined>
+      trilinear: 'Trilinear filtering'
+    }) as et.Editor<UserPreferences['interpolationMode']>
   },
   {
     key: 'windowPropagationScope',
@@ -194,7 +196,9 @@ const circusDBProperties: PropertyEditorProperties<UserPreferences> = [
       all: 'All',
       series: 'Per series',
       viewer: 'Per viewer'
-    }) as et.Editor<WindowPropagationScope | undefined>
+    }) as et.Editor<
+      NonNullable<UserPreferences['windowPropagationScope']> | undefined
+    >
   },
   {
     key: 'scrollBarsInfo',
@@ -222,7 +226,7 @@ const circusDBProperties: PropertyEditorProperties<UserPreferences> = [
       hide: 'No dimmed outline',
       show: '±2 slices',
       infinity: '±∞ slices'
-    }) as et.Editor<string | undefined>
+    }) as et.Editor<UserPreferences['dimmedOutlineFor2DLabels']>
   },
   {
     key: 'revisionMessageTemplates',
@@ -236,7 +240,7 @@ const Preferences: React.FC<{}> = props => {
   const [preferences, updatePreferences] = useUserPreferences();
   const [settings, setSettings] = useState<UserPreferences | null>(preferences);
   const loadSettings = useCallback(async (isMounted: boolean) => {
-    const settings = await api('preferences');
+    const settings = await api<UserPreferences>('preferences');
     if (!isMounted) return;
     setSettings(settings);
   }, []);

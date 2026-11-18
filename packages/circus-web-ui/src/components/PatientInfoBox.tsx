@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import Icon from '#components/Icon.tsx';
-import type PatientInfo from '#types/PatientInfo.ts';
+import type { PatientInfo } from '@utrad-ical/circus-api-schema';
 import styles from './PatientInfoBox.module.css';
 
 const PatientInfoBox: React.FC<{

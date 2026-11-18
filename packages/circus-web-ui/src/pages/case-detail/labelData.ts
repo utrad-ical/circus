@@ -1,3 +1,4 @@
+import type { CaseLabel } from '@utrad-ical/circus-api-schema';
 import generateUniqueId from '#utils/generateUniqueId.ts';
 import * as rs from '@utrad-ical/circus-rs';
 import type { Section, Vector2D, Vector3D } from '@utrad-ical/circus-rs';
@@ -7,7 +8,7 @@ import {
 } from '@utrad-ical/circus-rs';
 import { focusBy } from '@utrad-ical/circus-rs';
 import { gzipSync } from 'fflate';
-import { produce, createDraft, finishDraft } from 'immer';
+import { produce } from 'immer';
 import { api } from '#utils/api.ts';
 import { sha1 } from '#utils/util.ts';
 
@@ -45,8 +46,7 @@ type InternalVoxelLabelData = LabelAppearance & {
   size?: Vector3D;
 };
 
-type ExternalVoxelLabelData = LabelAppearance &
-  ({ voxels: null } | { voxels: string; origin: Vector3D; size: Vector3D });
+type ExternalVoxelLabelData = Extract<CaseLabel, { type: 'voxel' }>['data'];
 
 type SolidFigureLabelData = LabelAppearance & SolidFigureAnnotationData;
 type SolidFigureAnnotationData = {
@@ -86,7 +86,7 @@ export type InternalLabelData = {
 export type InternalLabelOf<T extends keyof InternalLabelDataMap> = {
   type: T;
   name?: string;
-  attributes: object;
+  attributes: NonNullable<CaseLabel['attributes']>;
   temporaryKey: string;
   hidden: boolean;
   data: InternalLabelDataMap[T];
@@ -98,23 +98,6 @@ export type InternalLabelOf<T extends keyof InternalLabelDataMap> = {
 export type InternalLabel = {
   [T in keyof InternalLabelDataMap]: InternalLabelOf<T>;
 }[keyof InternalLabelDataMap];
-
-/**
- * ExternalLabel resresents the label data
- * transferred from/to the API sever.
- */
-export type ExternalLabel = {
-  name?: string;
-  attributes: object;
-} & (
-  | { type: 'voxel'; data: ExternalVoxelLabelData }
-  | InternalLabelDataOf<'ellipse'>
-  | InternalLabelDataOf<'rectangle'>
-  | InternalLabelDataOf<'ellipsoid'>
-  | InternalLabelDataOf<'cuboid'>
-  | InternalLabelDataOf<'point'>
-  | InternalLabelDataOf<'ruler'>
-);
 
 export const labelTypes: {
   [key in LabelType]: {
@@ -243,21 +226,26 @@ export const createNewLabelData = <T extends LabelType>(
  * 2. Loads and assigns an array buffer for each voxel label.
  */
 export const externalLabelToInternal = async (
-  label: ExternalLabel
+  label: CaseLabel
 ): Promise<InternalLabel> => {
   const temporaryKey = generateUniqueId();
-  const internalLabel: InternalLabel = {
+  const internalLabel = {
     ...label,
+    name: label.name ?? undefined,
+    attributes: label.attributes ?? {},
     temporaryKey,
     hidden: false
-  };
+  } as InternalLabel;
 
   if (label.type === 'voxel' && internalLabel.type === 'voxel') {
     // The condition above is redundant but used to satisfy type check
     if (label.data.voxels) {
-      const volumeArrayBuffer = await api(`blob/${label.data.voxels}`, {
-        responseType: 'arraybuffer'
-      });
+      const volumeArrayBuffer = await api<ArrayBuffer>(
+        `blob/${label.data.voxels}`,
+        {
+          responseType: 'arraybuffer'
+        }
+      );
       return produce(internalLabel, label => {
         label.data.volumeArrayBuffer = volumeArrayBuffer;
       });
@@ -274,7 +262,7 @@ export const externalLabelToInternal = async (
 
 export const internalLabelToExternal = async (
   label: InternalLabel
-): Promise<ExternalLabel> => {
+): Promise<CaseLabel> => {
   const saveVoxels = async (): Promise<ExternalVoxelLabelData> => {
     const data = label.data as InternalVoxelLabelData;
     const shrinkResult = voxelShrinkToMinimum(data);
@@ -304,11 +292,27 @@ export const internalLabelToExternal = async (
     }
   };
 
-  const draft = createDraft(label);
-  if (draft.type === 'voxel') draft.data = await saveVoxels();
-  delete (draft as any).temporaryKey;
-  delete (draft as any).hidden;
-  return finishDraft(draft) as ExternalLabel;
+  const { temporaryKey, hidden, name, ...external } = label;
+  if (external.type === 'voxel') {
+    return { ...external, name, data: await saveVoxels() };
+  }
+  if (external.type === 'ruler') {
+    const { origin, xAxis, yAxis } = external.data.section;
+    const point = ([x, y, z]: number[]): Vector3D => [x, y, z];
+    return {
+      ...external,
+      name,
+      data: {
+        ...external.data,
+        section: {
+          origin: point(origin),
+          xAxis: point(xAxis),
+          yAxis: point(yAxis)
+        }
+      }
+    };
+  }
+  return { ...external, name };
 };
 
 const rgbaColor = (rgb: string, alpha: number): string =>

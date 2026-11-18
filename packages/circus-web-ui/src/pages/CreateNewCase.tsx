@@ -1,3 +1,5 @@
+import { namedProjectTags } from '#utils/projectTags.ts';
+import type { CaseCreate, CaseCreated } from '@utrad-ical/circus-api-schema';
 import u from '#components/utilities.module.css';
 import Alert from '#components/Alert.tsx';
 import Button from '#components/Button.tsx';
@@ -45,7 +47,7 @@ const CreateNewCase: React.FC<{}> = props => {
   };
 
   const handleCreate = async () => {
-    const res = await api('cases', {
+    const res = await api<CaseCreated, CaseCreate>('cases', {
       method: 'post',
       data: {
         projectId: selectedProject,
@@ -67,7 +69,7 @@ const CreateNewCase: React.FC<{}> = props => {
   }
 
   const prj = writableProjects.find(p => p.projectId === selectedProject)!;
-  const tags = prj.project.tags;
+  const tags = namedProjectTags(prj.project.tags);
 
   return (
     <div>

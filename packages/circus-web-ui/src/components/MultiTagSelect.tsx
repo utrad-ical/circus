@@ -1,9 +1,10 @@
 import React from 'react';
 import MultiSelect from '#components/MultiSelect.tsx';
+import type { NamedProjectTag } from '#utils/projectTags.ts';
 import { PhysicalTag } from './Tag.tsx';
 
 const MultiTagSelect: React.FC<{
-  tags: { name: string; color: string }[];
+  tags: NamedProjectTag[];
   value: string[];
   onChange: (value: string[]) => void;
 }> = props => {

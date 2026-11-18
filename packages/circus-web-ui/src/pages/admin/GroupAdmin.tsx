@@ -1,3 +1,11 @@
+import type {
+  GlobalPrivileges,
+  Group,
+  GroupCreate,
+  Plugin,
+  Project,
+  SearchResponse
+} from '@utrad-ical/circus-api-schema';
 import Badge from '#components/Badge.tsx';
 import { multiSelectEditor } from '#components/MultiSelect.tsx';
 import LoadingIndicator from '#components/LoadingIndicator.tsx';
@@ -9,7 +17,7 @@ import React, { useEffect, useState } from 'react';
 import { api } from '#utils/api.ts';
 import EditorPage from './EditorPage.tsx';
 
-const makeEmptyItem = () => {
+const makeEmptyItem = (): GroupCreate => {
   return {
     groupName: 'untitled group',
     privileges: [],
@@ -29,10 +37,7 @@ const makeEmptyItem = () => {
   };
 };
 
-const listColumns: DataGridColumnDefinition<{
-  privileges: string[];
-  domains: string[];
-}>[] = [
+const listColumns: DataGridColumnDefinition<Group>[] = [
   { key: 'groupName', caption: 'Group Name' },
   {
     caption: 'Privileges',
@@ -71,14 +76,14 @@ const GroupAdmin: React.FC<any> = props => {
   useEffect(() => {
     let isMounted = true;
     const didMount = async () => {
-      const domains = await api('admin/server-params/domains');
-      const privList = await api('admin/global-privileges');
+      const domains = await api<string[]>('admin/server-params/domains');
+      const privList = await api<GlobalPrivileges>('admin/global-privileges');
       const privileges: { [name: string]: string } = {};
       for (const p of privList) privileges[p.privilege] = p.caption;
 
-      const projects = (await api('admin/projects?unlimited=1')).items as {
-        projectId: string;
-      }[];
+      const { items: projects } = await api<SearchResponse<Project>>(
+        'admin/projects?unlimited=1'
+      );
       const projectOptions = projects.map(project => ({
         projectId: project.projectId,
         project
@@ -87,9 +92,9 @@ const GroupAdmin: React.FC<any> = props => {
         <ProjectSelectorMultiple projects={projectOptions} {...props} />
       );
 
-      const plugins = (await api('admin/plugins?unlimited=1')).items as {
-        pluginId: string;
-      }[];
+      const { items: plugins } = await api<SearchResponse<Plugin>>(
+        'admin/plugins?unlimited=1'
+      );
       const pluginOptions = plugins.map(plugin => ({
         pluginId: plugin.pluginId,
         plugin

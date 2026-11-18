@@ -881,6 +881,9 @@ importers:
       '@types/rusha':
         specifier: ^0.8.0
         version: 0.8.0
+      '@utrad-ical/circus-api-schema':
+        specifier: workspace:*
+        version: link:../circus-api-schema
       '@vitejs/plugin-react':
         specifier: 6.3.0
         version: 6.3.0(vite@8.3.7(@types/node@24.19.2)(less@4.9.1(supports-color@7.2.0))(terser@5.34.1))

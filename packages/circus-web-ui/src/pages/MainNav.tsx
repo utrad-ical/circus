@@ -4,7 +4,8 @@ import NavMenu, { NavMenuHeader, NavSubMenu } from '#components/NavMenu.tsx';
 import React, { type FC, type MouseEvent } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import type { MyList } from '#store/loginUser.ts';
+import type { MyList, MyListResourceType } from '@utrad-ical/circus-api-schema';
+import { namedSearchPresets } from '#utils/searchPresets.ts';
 import useLoginUser from '#utils/useLoginUser.ts';
 import styles from './MainNav.module.css';
 
@@ -43,7 +44,7 @@ const NextPreviousButtons: FC<{
 
 const MyListMenuItems: FC<{
   myLists: MyList[];
-  resourceType: string;
+  resourceType: MyListResourceType;
   endPoint: string;
 }> = props => {
   const { myLists, resourceType, endPoint } = props;
@@ -116,7 +117,7 @@ const MainNav: FC<{}> = props => {
               name="Series Search"
               link="/browse/series"
             />
-            {seriesSearchPresets.map(preset => (
+            {namedSearchPresets(seriesSearchPresets).map(preset => (
               <NavSubMenu
                 key={preset.name}
                 nested
@@ -151,7 +152,7 @@ const MainNav: FC<{}> = props => {
               name="Case Search"
               link="/browse/case"
             />
-            {caseSearchPresets.map(preset => (
+            {namedSearchPresets(caseSearchPresets).map(preset => (
               <NavSubMenu
                 key={preset.name}
                 nested
@@ -180,7 +181,7 @@ const MainNav: FC<{}> = props => {
               name="Plugin Job Search"
               link="/browse/plugin-jobs"
             />
-            {pluginJobSearchPresets.map(preset => (
+            {namedSearchPresets(pluginJobSearchPresets).map(preset => (
               <NavSubMenu
                 key={preset.name}
                 nested

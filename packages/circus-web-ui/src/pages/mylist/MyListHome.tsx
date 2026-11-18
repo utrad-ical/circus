@@ -1,3 +1,8 @@
+import type {
+  MyListCreate,
+  MyListPatch,
+  MyListResourceType
+} from '@utrad-ical/circus-api-schema';
 import Alert from '#components/Alert.tsx';
 import Button from '#components/Button.tsx';
 import { confirm, prompt } from '#components/dialogs.tsx';
@@ -12,7 +17,7 @@ import useLoginUser from '#utils/useLoginUser.ts';
 
 const MyListHome: React.FC<{
   title: string;
-  resourceType: string;
+  resourceType: MyListResourceType;
   toUrl: (myListId: string) => string;
 }> = props => {
   const { title, resourceType, toUrl } = props;
@@ -24,7 +29,7 @@ const MyListHome: React.FC<{
   const handleCreateNew = async () => {
     const name = await prompt('Enter new list name');
     if (!name) return;
-    await api('/mylists', {
+    await api<unknown, MyListCreate>('/mylists', {
       method: 'post',
       data: { name, resourceType, public: false }
     });
@@ -44,7 +49,7 @@ const MyListHome: React.FC<{
     const list = lists.find(list => myListId === list.myListId)!;
     const name = await prompt('New name', list.name);
     if (name === null || name === list.name) return;
-    await api(`/mylists/${list.myListId}`, {
+    await api<unknown, MyListPatch>(`/mylists/${list.myListId}`, {
       method: 'patch',
       data: { name }
     });

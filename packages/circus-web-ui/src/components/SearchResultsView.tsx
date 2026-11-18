@@ -1,3 +1,5 @@
+import type { ReactNode, ComponentType } from 'react';
+import type { SearchItem } from '#store/searches.ts';
 import React, { Fragment } from 'react';
 import Select from '#components/Select.tsx';
 import Pagination from '#components/Pagination.tsx';
@@ -5,7 +7,6 @@ import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import AutoReloadSwitch from './AutoReloadSwitch.tsx';
 import Icon from '#components/Icon.tsx';
 import classnames from 'classnames';
-import { api } from '#utils/api.ts';
 import { useSelector, useDispatch } from 'react-redux';
 import * as searches from '#store/searches.ts';
 import styles from './SearchResultsView.module.css';
@@ -34,18 +35,19 @@ const ItemsPerPageOptionRenderer: React.FC<{ caption: number }> = props => (
 /**
  * SearchResults displays the search results along with pager and sort changer.
  */
-const SearchResultsView: React.FC<{
+const SearchResultsView = <Item extends SearchItem>(props: {
   name: string;
-  sortOptions?: any;
-  dataView: React.FC<{
-    value: any[];
+  sortOptions?: Record<string, string>;
+  dataView: ComponentType<{
+    value: Item[];
     selected: string[];
     onSelectionChange: (id: string, isSelected: boolean) => void;
-    active: any;
+    active?: Item;
   }>;
-  active?: any;
+  active?: Item;
   refreshable?: boolean;
-}> = props => {
+  children?: ReactNode;
+}) => {
   const {
     name,
     sortOptions,
@@ -76,7 +78,8 @@ const SearchResultsView: React.FC<{
   if (!dic || !results) return null; // Should not happen
 
   const { indexes, totalItems } = results;
-  const items = indexes.map(index => dic[index]);
+  // Each data view is paired with its resource by the calling page.
+  const items = indexes.map(index => dic[index]) as Item[];
   const selected = search.selected;
 
   const handleSortChange = (newSort: string) => {

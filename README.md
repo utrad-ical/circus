@@ -166,3 +166,8 @@ pnpm -F @utrad-ical/circus-web-ui run build
 ```
 
 TypeScript (`tsc`) is used only for type checking (`pnpm run typecheck`).
+
+## Versioning Policy
+
+- `circus-api`, `circus-api-schema`, `circus-cli` and `circus-web-ui` will have the same version and are released simultanously.
+- Others are updated and released separately, and have their own version numbers.

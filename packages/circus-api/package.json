@@ -1,6 +1,6 @@
 {
   "name": "@utrad-ical/circus-api",
-  "version": "0.4.0",
+  "version": "2.0.0-alpha.4",
   "type": "module",
   "description": "CIRCUS JSON API Server",
   "main": "server.ts",

@@ -85,4 +85,8 @@ test('moves my lists from the users into their own documents', async () => {
     i => i.name
   );
   assert.ok(listIndexes.includes('ownerEmail_1'));
+
+  // Running it again (e.g., after a failure halfway) keeps the lists
+  await up(db);
+  assert.equal(await db.collection('myLists').countDocuments(), 2);
 });

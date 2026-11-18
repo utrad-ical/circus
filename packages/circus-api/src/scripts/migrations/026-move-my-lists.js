@@ -10,7 +10,6 @@ export async function up(db) {
   const users = db.collection('users');
   const myLists = db.collection('myLists');
   const now = new Date();
-  const moved = [];
 
   const cursor = users.find({ myLists: { $exists: true } });
   while (await cursor.hasNext()) {
@@ -31,12 +30,12 @@ export async function up(db) {
         },
         { upsert: true }
       );
-      moved.push(list.myListId);
     }
   }
 
-  // Items without a list cannot be shown to anyone
-  await myLists.deleteMany({ myListId: { $nin: moved } });
+  // Items without a list cannot be shown to anyone. The lists moved by
+  // a previous run that failed halfway already have the owner
+  await myLists.deleteMany({ ownerEmail: { $exists: false } });
   await users.updateMany({}, { $unset: { myLists: '' } });
 
   const oldIndexes = [

@@ -7,7 +7,6 @@
   "exports": {
     ".": "./src/index.ts",
     "./config": "./src/config/loadConfig.ts",
-    "./validation": "./src/validation.ts",
     "./package.json": "./package.json"
   },
   "publishConfig": {
@@ -19,10 +18,6 @@
       "./config": {
         "types": "./dist/config/loadConfig.d.ts",
         "default": "./dist/config/loadConfig.js"
-      },
-      "./validation": {
-        "types": "./dist/validation.d.ts",
-        "default": "./dist/validation.js"
       },
       "./package.json": "./package.json"
     }

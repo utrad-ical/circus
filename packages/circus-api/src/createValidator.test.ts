@@ -50,10 +50,11 @@ describe('special formats', () => {
       'dicomUid',
       [
         '1.2.840.10008.2000.11111.222.33333',
+        '1.'.repeat(31) + '11',
         // This contains nonstandard component `00`, but we'll accept this
         '11.00.33.4444.333355'
       ],
-      ['11..22']
+      ['11..22', '1.'.repeat(31) + '111']
     );
   });
 

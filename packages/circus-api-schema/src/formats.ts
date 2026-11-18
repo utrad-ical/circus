@@ -1,11 +1,15 @@
-import { isDicomUid } from '@utrad-ical/circus-lib/validation';
 import semver from 'semver';
 import { z } from 'zod';
 
 // String formats shared by the schemas
 
 export const dicomUid = () =>
-  z.string().refine(s => isDicomUid(s, false), 'Invalid DICOM UID');
+  z
+    .string()
+    .refine(
+      s => s.length <= 64 && /^[0-9]+(\.[0-9]+)+$/.test(s),
+      'Invalid DICOM UID'
+    );
 
 const intOrRange = '((0|[1-9][0-9]*)|(0|[1-9][0-9]*)-(0|[1-9][0-9]*))';
 

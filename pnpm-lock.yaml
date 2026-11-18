@@ -419,9 +419,6 @@ importers:
 
   packages/circus-api-schema:
     dependencies:
-      '@utrad-ical/circus-lib':
-        specifier: workspace:*
-        version: link:../circus-lib
       semver:
         specifier: ^5.7.1
         version: 5.7.1

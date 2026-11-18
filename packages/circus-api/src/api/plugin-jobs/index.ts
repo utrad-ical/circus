@@ -54,6 +54,15 @@ export const handlePost: RouteMiddleware<typeof routes.postPluginJob> = ({
 }) => {
   return async (ctx, next) => {
     const { priority, pluginId, series, force } = ctx.request.body;
+    // `checkPrivilege` cannot see the plug-in ID in the request body
+    const canExecute = ctx.userPrivileges.accessiblePlugins.some(
+      p => p.pluginId === pluginId && p.roles.includes('executePlugin')
+    );
+    if (!canExecute)
+      ctx.throw(
+        status.UNAUTHORIZED,
+        'You do not have "executePlugin" privilege of this plugin.'
+      );
     await transactionManager.withTransaction(async models => {
       const resolvedSeries = await resolveAutoPvdOfSeries(
         series,

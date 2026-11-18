@@ -215,7 +215,8 @@ describe('plugin-job registration', () => {
         ]
       }
     });
-    assert.equal(res.status, 400);
+    assert.equal(res.status, 401);
+    assert.match(res.data.error, /executePlugin/);
   });
 
   test('should reject if series image out of range', async () => {

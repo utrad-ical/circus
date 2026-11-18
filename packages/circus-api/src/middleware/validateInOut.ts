@@ -2,7 +2,6 @@ import { bodyLimit } from 'hono/body-limit';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import { createMiddleware } from 'hono/factory';
 import { HTTPException } from 'hono/http-exception';
-import { validator as honoValidator } from 'hono/validator';
 import type { z } from 'zod';
 import type { Validator } from '../interface.ts';
 import type {
@@ -101,23 +100,19 @@ const validate = async (
 export const validateRequest = <S extends z.ZodType>(
   validator: Validator,
   schema: S
-) => {
-  const decode = (value: unknown) =>
-    validate(validator, schema, value, 'request');
-  const middleware = honoValidator('json', decode);
-  return createMiddleware<ApiEnv, string, { out: { json: z.output<S> } }>(
+) =>
+  createMiddleware<ApiEnv, string, { out: { json: z.output<S> } }>(
     async (ctx, next) => {
-      if (
-        contentType(ctx) === 'application/json' &&
-        ctx.var.jsonBody !== undefined
-      ) {
-        return middleware(ctx, next);
-      }
-      ctx.req.addValidatedData('json', await decode(ctx.var.jsonBody ?? {}));
+      const json = await validate(
+        validator,
+        schema,
+        ctx.var.jsonBody ?? {},
+        'request'
+      );
+      ctx.req.addValidatedData('json', json);
       await next();
     }
   );
-};
 
 export const respondJson = async (
   ctx: CircusContext,

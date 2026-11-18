@@ -2,6 +2,7 @@ import t from '../../test/test-schemas.ts';
 import assert from 'node:assert/strict';
 import { test, beforeEach, afterEach } from 'node:test';
 import { gzipSync } from 'node:zlib';
+import { z } from 'zod';
 import { respondJson, validateRequest } from './validateInOut.ts';
 import createValidator from '../createValidator.ts';
 import { createTestHttpClient } from '../test/util-http.ts';
@@ -21,6 +22,9 @@ beforeEach(async () => {
       '/api/in-check',
       validateRequest(validator, t.date.required()),
       ctx => ctx.json({ foo: ctx.req.valid('json').dateVal.toISOString() })
+    );
+    app.post('/api/parse-once', validateRequest(validator, z.unknown()), ctx =>
+      ctx.json({ reused: ctx.req.valid('json') === ctx.var.jsonBody })
     );
     app.post('/api/out-check', ctx =>
       respondJson(ctx, validator, t.date, ctx.var.jsonBody)
@@ -49,6 +53,12 @@ test('should fail input validation', async function () {
     data: { intVal: 30, dateVal: 'invalid date' }
   });
   assert.equal(res.status, 400);
+});
+
+test('reuses the parsed body for validation', async () => {
+  const res = await client.post('api/parse-once', { value: 1 });
+  assert.equal(res.status, 200);
+  assert.deepEqual(res.data, { reused: true });
 });
 
 test('decodes gzip-compressed JSON before validation', async () => {

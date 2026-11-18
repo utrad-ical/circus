@@ -1,5 +1,5 @@
 import { defineRoute, defineRouteGroup, route } from '../../defineRoute.ts';
-import { loginInfo, loginInfoFull } from '../../schemas/loginInfo.ts';
+import { loginInfo, loginInfoFull } from '@utrad-ical/circus-api-schema';
 import { handleGet, handleGetFull } from './index.ts';
 
 export const getLoginInfo = defineRoute({

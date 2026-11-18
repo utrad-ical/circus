@@ -6,7 +6,7 @@ import {
   groupCreate,
   groupDoc,
   groupPatch
-} from '../../../schemas/index.ts';
+} from '@utrad-ical/circus-api-schema';
 import {
   handleGet,
   handlePatch,

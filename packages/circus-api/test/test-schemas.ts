@@ -3,7 +3,7 @@ import {
   dateField,
   dicomUid,
   multiIntegerRange
-} from '../src/schemas/formats.ts';
+} from '@utrad-ical/circus-api-schema/formats';
 
 /**
  * Schemas used only in tests.

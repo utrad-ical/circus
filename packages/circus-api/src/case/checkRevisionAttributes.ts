@@ -4,10 +4,8 @@ import {
   ValidationError,
   type ValidationIssue
 } from '../createValidator.ts';
-import {
-  attributesSchemaOf,
-  type jsonSchemaSubset
-} from '../schemas/jsonSchemaSubset.ts';
+import type { jsonSchemaSubset } from '@utrad-ical/circus-api-schema';
+import { attributesSchemaOf } from './attributesSchemaOf.ts';
 
 type AttributesSchema = z.output<typeof jsonSchemaSubset>;
 

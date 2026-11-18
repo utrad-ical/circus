@@ -226,6 +226,9 @@ importers:
       '@fastify/busboy':
         specifier: ^3.2.5
         version: 3.2.5
+      '@utrad-ical/circus-api-schema':
+        specifier: workspace:*
+        version: link:../circus-api-schema
       '@utrad-ical/circus-cs-core':
         specifier: workspace:*
         version: link:../circus-cs-core
@@ -331,9 +334,6 @@ importers:
       raw-body:
         specifier: ^2.4.1
         version: 2.5.2
-      semver:
-        specifier: ^5.7.1
-        version: 5.7.1
       split:
         specifier: ^1.0.1
         version: 1.0.1
@@ -389,9 +389,6 @@ importers:
       '@types/oauth2-server':
         specifier: ^3.0.12
         version: 3.0.13
-      '@types/semver':
-        specifier: ^6.2.1
-        version: 6.2.3
       '@types/split':
         specifier: ^1.0.0
         version: 1.0.0
@@ -419,6 +416,28 @@ importers:
       ws:
         specifier: ^8.18.0
         version: 8.18.0
+
+  packages/circus-api-schema:
+    dependencies:
+      '@utrad-ical/circus-lib':
+        specifier: workspace:*
+        version: link:../circus-lib
+      semver:
+        specifier: ^5.7.1
+        version: 5.7.1
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@types/node':
+        specifier: ^24.19.2
+        version: 24.19.2
+      '@types/semver':
+        specifier: ^6.2.1
+        version: 6.2.3
+      typescript:
+        specifier: ~7.0.2
+        version: 7.0.2
 
   packages/circus-cli:
     dependencies:

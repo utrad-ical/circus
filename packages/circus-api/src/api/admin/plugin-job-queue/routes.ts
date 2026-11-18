@@ -1,7 +1,7 @@
 import { defineRoute, defineRouteGroup, route } from '../../../defineRoute.ts';
 import { searchResultOf } from '../../../schemas/derive.ts';
 import { handleGet } from './index.ts';
-import { pluginJobDoc } from '../../../schemas/index.ts';
+import { pluginJobDoc } from '@utrad-ical/circus-api-schema';
 
 export const getQueue = defineRoute({
   verb: 'get',

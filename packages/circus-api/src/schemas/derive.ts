@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { dateField } from './formats.ts';
+import { dateField } from '@utrad-ical/circus-api-schema/formats';
 
 // Helpers to derive schemas from the base ones
 

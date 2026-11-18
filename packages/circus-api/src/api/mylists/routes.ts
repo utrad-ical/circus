@@ -15,7 +15,7 @@ import {
   myListPatch,
   myLists,
   myListWithItems
-} from '../../schemas/index.ts';
+} from '@utrad-ical/circus-api-schema';
 
 export const getMyLists = defineRoute({
   verb: 'get',

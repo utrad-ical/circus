@@ -4,7 +4,7 @@ import { describe, it, before } from 'node:test';
 import { z } from 'zod';
 import createValidator, { ValidationError } from './createValidator.ts';
 import type { Validator } from './interface.ts';
-import * as formats from './schemas/formats.ts';
+import * as formats from '@utrad-ical/circus-api-schema/formats';
 import {
   allRequiredExcept,
   exclude,

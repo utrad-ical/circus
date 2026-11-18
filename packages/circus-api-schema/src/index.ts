@@ -1,15 +1,21 @@
-// All the schemas used by the API routes and the models
-
 export {
   caseDetail,
   caseSearchResult,
   clinicalCaseCreate,
   clinicalCaseDoc
 } from './clinicalCase.ts';
-export { globalPrivilege, groupCreate, groupDoc, groupPatch } from './group.ts';
+export {
+  csRoleNames,
+  dbRoleNames,
+  globalPrivilege,
+  groupCreate,
+  groupDoc,
+  groupPatch
+} from './group.ts';
 export { icon } from './icon.ts';
-export { jsonSchemaSubset } from './jsonSchemaSubset.ts';
+export { attributeSchema, jsonSchemaSubset } from './jsonSchemaSubset.ts';
 export { label } from './label.ts';
+export { loginInfo, loginInfoFull } from './loginInfo.ts';
 export { myListDoc, myListResourceType } from './myList.ts';
 export { myListEditor } from './myListEditor.ts';
 export { onetimeUrlDoc } from './onetimeUrl.ts';

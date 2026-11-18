@@ -3,7 +3,12 @@ import loadMyList from '../../mylist/loadMyList.ts';
 import { Readable } from 'node:stream';
 import type { PreparedExport } from '../../case/createMhdPacker.ts';
 import { ValidationError } from '../../createValidator.ts';
-import { caseExportMhdQuery } from '../../schemas/routes.ts';
+import {
+  caseExportMhdQuery,
+  clinicalCaseDoc,
+  seriesDoc
+} from '@utrad-ical/circus-api-schema';
+import { dateField } from '@utrad-ical/circus-api-schema/formats';
 import checkRevisionAttributes from '../../case/checkRevisionAttributes.ts';
 import makeNewCase from '../../case/makeNewCase.ts';
 import type {
@@ -12,10 +17,7 @@ import type {
 } from '../../typings/middlewares.ts';
 import type * as routes from './routes.ts';
 import { z } from 'zod';
-import { clinicalCaseDoc } from '../../schemas/clinicalCase.ts';
-import { dateField } from '../../schemas/formats.ts';
 import { fieldsOf, mongoFilter } from '../../schemas/mongoFilter.ts';
-import { seriesDoc } from '../../schemas/series.ts';
 import resolveAutoPvdOfSeries from '../../utils/resolveAutoPvdOfSeries.ts';
 import {
   extractFilter,

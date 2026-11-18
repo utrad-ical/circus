@@ -5,7 +5,7 @@ import {
   permanentToken,
   tokenCreate,
   tokenCreated
-} from '../../schemas/index.ts';
+} from '@utrad-ical/circus-api-schema';
 
 export const getTokens = defineRoute({
   verb: 'get',

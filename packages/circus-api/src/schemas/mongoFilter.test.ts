@@ -3,7 +3,7 @@ import { describe, test } from 'node:test';
 import { EJSON } from 'bson';
 import { z } from 'zod';
 import { validate } from '../createValidator.ts';
-import { dateField } from './formats.ts';
+import { dateField } from '@utrad-ical/circus-api-schema/formats';
 import { fieldsOf, mongoFilter } from './mongoFilter.ts';
 
 const person = z.strictObject({

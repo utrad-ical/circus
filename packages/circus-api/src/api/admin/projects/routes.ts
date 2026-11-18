@@ -4,7 +4,7 @@ import {
   projectCreate,
   projectDoc,
   projectPatch
-} from '../../../schemas/index.ts';
+} from '@utrad-ical/circus-api-schema';
 import { handleGet, handlePatch, handlePost, handleSearch } from './index.ts';
 
 export const getProjects = defineRoute({

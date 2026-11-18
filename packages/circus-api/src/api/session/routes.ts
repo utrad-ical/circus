@@ -1,6 +1,6 @@
 import { defineRoute, defineRouteGroup, route } from '../../defineRoute.ts';
 import { handleDelete, handlePost } from './index.ts';
-import { sessionCreate } from '../../schemas/index.ts';
+import { sessionCreate } from '@utrad-ical/circus-api-schema';
 
 export const postSession = defineRoute({
   verb: 'post',

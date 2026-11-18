@@ -1,5 +1,5 @@
 import type { z } from 'zod';
-import type { preferences } from '../schemas/preferences.ts';
+import type { preferences } from '@utrad-ical/circus-api-schema';
 export const defaultPreferences = (): z.output<typeof preferences> => {
   return {
     theme: 'mode_white',

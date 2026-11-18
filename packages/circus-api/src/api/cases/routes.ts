@@ -18,7 +18,7 @@ import {
   caseDetail,
   caseSearchResult,
   revisionCreate
-} from '../../schemas/index.ts';
+} from '@utrad-ical/circus-api-schema';
 
 export const searchCases = defineRoute({
   verb: 'get',

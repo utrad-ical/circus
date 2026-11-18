@@ -1,6 +1,6 @@
 import { defineRoute, defineRouteGroup, route } from '../../defineRoute.ts';
 import { handleGet } from './index.ts';
-import { projectDoc } from '../../schemas/index.ts';
+import { projectDoc } from '@utrad-ical/circus-api-schema';
 
 export const getProject = defineRoute({
   verb: 'get',

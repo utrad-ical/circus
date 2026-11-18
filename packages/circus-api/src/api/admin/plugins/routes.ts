@@ -5,7 +5,7 @@ import {
   pluginCreate,
   pluginDoc,
   pluginPatch
-} from '../../../schemas/index.ts';
+} from '@utrad-ical/circus-api-schema';
 
 export const searchPlugins = defineRoute({
   verb: 'get',

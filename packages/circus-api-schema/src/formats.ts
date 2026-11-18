@@ -1,4 +1,4 @@
-import { isDicomUid } from '@utrad-ical/circus-lib';
+import { isDicomUid } from '@utrad-ical/circus-lib/validation';
 import semver from 'semver';
 import { z } from 'zod';
 

@@ -1,5 +1,5 @@
 import type { z } from 'zod';
-import type { seriesImportSummary } from '../../schemas/series.ts';
+import type { seriesImportSummary } from '@utrad-ical/circus-api-schema';
 import type { Logger } from '@utrad-ical/circus-lib';
 import parser from 'dicom-parser';
 import type { ProgressReporter } from '../../createProgressManager.ts';

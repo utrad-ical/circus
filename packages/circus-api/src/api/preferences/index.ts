@@ -3,22 +3,22 @@ import type { RouteMiddleware } from '../../typings/middlewares.ts';
 import type * as routes from './routes.ts';
 
 export const handleGet: RouteMiddleware<typeof routes.getPreferences> = () => {
-  return async (ctx, next) => {
-    ctx.body = {
+  return async (ctx, json) => {
+    return json({
       ...defaultPreferences(),
-      ...ctx.user.preferences
-    };
+      ...ctx.var.user.preferences
+    });
   };
 };
 
 export const handlePatch: RouteMiddleware<typeof routes.patchPreferences> = ({
   models
 }) => {
-  return async (ctx, next) => {
-    const updates = ctx.request.body;
-    await models.user.modifyOne(ctx.user.userEmail, {
-      preferences: { ...ctx.user.preferences, ...updates }
+  return async ctx => {
+    const updates = ctx.req.valid('json');
+    await models.user.modifyOne(ctx.var.user.userEmail, {
+      preferences: { ...ctx.var.user.preferences, ...updates }
     });
-    ctx.body = null;
+    return ctx.body(null, 204);
   };
 };

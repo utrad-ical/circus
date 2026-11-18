@@ -1,4 +1,6 @@
+import { httpError } from '../../middleware/errorHandler.ts';
 import fs from 'fs';
+import { Readable } from 'node:stream';
 import glob from '../../utils/glob.ts';
 import status from 'http-status';
 import loadMyList from '../../mylist/loadMyList.ts';
@@ -29,8 +31,8 @@ import type { Filter } from 'mongodb';
  */
 const maskPatientInfo = (ctx: CircusContext) => {
   const show =
-    ctx.userPrivileges.globalPrivileges.includes('personalInfoView') &&
-    ctx.user.preferences.personalInfoView;
+    ctx.var.userPrivileges.globalPrivileges.includes('personalInfoView') &&
+    ctx.var.user.preferences.personalInfoView;
   return (job: any) => {
     const { patientInfo, domain, ...rest } = job;
     // `patientInfo` is null if the user cannot see it for the plug-in
@@ -52,34 +54,33 @@ export const handlePost: RouteMiddleware<typeof routes.postPluginJob> = ({
   cs,
   seriesOrientationResolver
 }) => {
-  return async (ctx, next) => {
-    const { priority, pluginId, series, force } = ctx.request.body;
+  return async (ctx, json) => {
+    const { priority, pluginId, series, force } = ctx.req.valid('json');
     // `checkPrivilege` cannot see the plug-in ID in the request body
-    const canExecute = ctx.userPrivileges.accessiblePlugins.some(
+    const canExecute = ctx.var.userPrivileges.accessiblePlugins.some(
       p => p.pluginId === pluginId && p.roles.includes('executePlugin')
     );
     if (!canExecute)
-      ctx.throw(
+      throw httpError(
         status.UNAUTHORIZED,
         'You do not have "executePlugin" privilege of this plugin.'
       );
-    await transactionManager.withTransaction(async models => {
+    const jobId = await transactionManager.withTransaction(async models => {
       const resolvedSeries = await resolveAutoPvdOfSeries(
         series,
         models,
         seriesOrientationResolver
       );
-      const jobId = await makeNewPluginJob(
+      return await makeNewPluginJob(
         models,
         { pluginId, series: resolvedSeries, force },
-        ctx.userPrivileges,
-        ctx.user.userEmail,
+        ctx.var.userPrivileges,
+        ctx.var.user.userEmail,
         cs,
         priority
       );
-      ctx.body = { jobId };
-      ctx.status = status.CREATED;
     });
+    return json({ jobId }, status.CREATED);
   };
 };
 
@@ -90,19 +91,22 @@ export const handlePatch: RouteMiddleware<typeof routes.patchPluginJob> = ({
   transactionManager,
   cs
 }) => {
-  return async (ctx, next) => {
-    const jobId = ctx.params.jobId;
-    const newStatus = ctx.request.body.status;
+  return async ctx => {
+    const jobId = ctx.req.param().jobId;
+    const newStatus = ctx.req.valid('json').status;
     await transactionManager.withTransaction(async models => {
       const job = await models.pluginJob.findByIdOrFail(jobId);
 
       if (
         newStatus === 'invalidated' &&
-        !ctx.userPrivileges.accessiblePlugins.some(
+        !ctx.var.userPrivileges.accessiblePlugins.some(
           p => p.roles.includes('manageJobs') && p.pluginId === job.pluginId
         )
       ) {
-        ctx.throw(401, `You do not have permission to invalidate this job.`);
+        throw httpError(
+          401,
+          `You do not have permission to invalidate this job.`
+        );
       }
 
       if (
@@ -110,7 +114,7 @@ export const handlePatch: RouteMiddleware<typeof routes.patchPluginJob> = ({
         (newStatus === 'invalidated' && job.status !== 'finished')
       ) {
         const verb = newStatus === 'cancelled' ? 'cancel' : 'invalidate';
-        ctx.throw(
+        throw httpError(
           status.UNPROCESSABLE_ENTITY,
           `You cannot ${verb} this job because its status is "${job.status}".`
         );
@@ -118,7 +122,7 @@ export const handlePatch: RouteMiddleware<typeof routes.patchPluginJob> = ({
       if (newStatus === 'cancelled') {
         const deleted = await cs.job.removeFromQueue(jobId);
         if (!deleted) {
-          ctx.throw(
+          throw httpError(
             status.UNPROCESSABLE_ENTITY,
             'You cannot cancel this job because it is already being processed.'
           );
@@ -126,7 +130,7 @@ export const handlePatch: RouteMiddleware<typeof routes.patchPluginJob> = ({
       }
       await models.pluginJob.modifyOne(jobId, { status: newStatus });
     });
-    ctx.status = status.NO_CONTENT;
+    return ctx.body(null, 204);
   };
 };
 
@@ -205,23 +209,23 @@ export const extractPatientIdNameFilter = (
   return includeFixedValue ? { $and: patientInfoFilters } : null;
 };
 
-export const handleSearch: RouteMiddleware<typeof routes.searchPluginJobs> = ({
-  models
-}) => {
-  return async (ctx, next) => {
+export const handleSearch: RouteMiddleware<
+  typeof routes.searchPluginJobs | typeof routes.searchPluginJobsInMyList
+> = ({ models }) => {
+  return async (ctx, json) => {
     const customFilter = extractFilter(ctx, pluginJobFilter);
 
     const canViewPersonalInfo =
-      ctx.userPrivileges.globalPrivileges.includes('personalInfoView');
+      ctx.var.userPrivileges.globalPrivileges.includes('personalInfoView');
 
     if (!canViewPersonalInfo && isPatientInfoInFilter(customFilter))
-      ctx.throw(
+      throw httpError(
         status.BAD_REQUEST,
         'You cannot search using patient information.'
       );
 
     const domainFilter = {
-      domain: { $in: ctx.userPrivileges.domains }
+      domain: { $in: ctx.var.userPrivileges.domains }
     };
 
     const extractedPatientInfoFilter = extractPatientIdNameFilter(customFilter);
@@ -231,7 +235,7 @@ export const handleSearch: RouteMiddleware<typeof routes.searchPluginJobs> = ({
     const targetSeriesUids = targetSeries
       ? targetSeries.map(doc => doc.seriesUid)
       : null;
-    const accessiblePluginIds = ctx.userPrivileges.accessiblePlugins
+    const accessiblePluginIds = ctx.var.userPrivileges.accessiblePlugins
       .filter(p => p.roles.includes('readPlugin'))
       .map(p => p.pluginId);
     const accessiblePluginFilter = {
@@ -241,23 +245,28 @@ export const handleSearch: RouteMiddleware<typeof routes.searchPluginJobs> = ({
       $and: [customFilter, domainFilter]
     };
 
-    const canViewPersonalInfoPluginIds = ctx.userPrivileges.accessiblePlugins
-      .filter(
-        p =>
-          p.roles.includes('readPlugin') && p.roles.includes('viewPersonalInfo')
-      )
-      .map(p => p.pluginId);
+    const canViewPersonalInfoPluginIds =
+      ctx.var.userPrivileges.accessiblePlugins
+        .filter(
+          p =>
+            p.roles.includes('readPlugin') &&
+            p.roles.includes('viewPersonalInfo')
+        )
+        .map(p => p.pluginId);
 
-    const myListId = ctx.params.myListId;
+    const myListId = ctx.req.param('myListId');
     if (myListId) {
       const { list, readable } = await loadMyList(ctx, models, myListId);
       if (!readable)
-        ctx.throw(
+        throw httpError(
           status.UNAUTHORIZED,
           'You cannot read the items of this my list.'
         );
       if (list.resourceType !== 'pluginJobs')
-        ctx.throw(status.BAD_REQUEST, 'This my list is not for plugin jobs');
+        throw httpError(
+          status.BAD_REQUEST,
+          'This my list is not for plugin jobs'
+        );
     }
 
     const baseStage: object[] = [
@@ -323,50 +332,54 @@ export const handleSearch: RouteMiddleware<typeof routes.searchPluginJobs> = ({
     const defaultSort = myListId ? { addedToListAt: -1 } : { createdAt: -1 };
 
     let sortQuery;
-    if (ctx.query.sort) {
+    if (ctx.var.query.sort) {
       try {
         sortQuery = JSON.parse(
-          Array.isArray(ctx.query.sort) ? ctx.query.sort[0] : ctx.query.sort
+          Array.isArray(ctx.var.query.sort)
+            ? ctx.var.query.sort[0]
+            : ctx.var.query.sort
         );
       } catch (e) {
-        ctx.throw(status.BAD_REQUEST, 'Invalid sort parameter.');
+        throw httpError(status.BAD_REQUEST, 'Invalid sort parameter.');
       }
-    } else if (ctx.query.sort !== undefined) {
-      ctx.throw(status.BAD_REQUEST, 'Invalid sort parameter.');
+    } else if (ctx.var.query.sort !== undefined) {
+      throw httpError(status.BAD_REQUEST, 'Invalid sort parameter.');
     }
     if (sortQuery && sortQuery.createdAt) {
       baseStage.unshift({ $sort: sortQuery });
       sortQuery = [];
     }
 
-    await performAggregationSearch(
-      startModel,
-      filter,
-      ctx,
-      lookupStages,
-      [
-        {
-          $project: {
-            _id: false,
-            volId: false,
-            results: false,
-            primarySeries: false,
-            seriesInfo: false,
-            seriesUid: false,
-            studyUid: false,
-            modality: false,
-            seriesDate: false,
-            addedToListAt: false,
-            primarySeriesUid: false
+    return json(
+      await performAggregationSearch(
+        startModel,
+        filter,
+        ctx,
+        lookupStages,
+        [
+          {
+            $project: {
+              _id: false,
+              volId: false,
+              results: false,
+              primarySeries: false,
+              seriesInfo: false,
+              seriesUid: false,
+              studyUid: false,
+              modality: false,
+              seriesDate: false,
+              addedToListAt: false,
+              primarySeriesUid: false
+            }
           }
+        ],
+        {
+          defaultSort,
+          transform: maskPatientInfo(ctx),
+          sort: sortQuery,
+          maxCount: 10000
         }
-      ],
-      {
-        defaultSort,
-        transform: maskPatientInfo(ctx),
-        sort: sortQuery,
-        maxCount: 10000
-      }
+      )
     );
   };
 };
@@ -374,36 +387,36 @@ export const handleSearch: RouteMiddleware<typeof routes.searchPluginJobs> = ({
 export const handleGet: RouteMiddleware<typeof routes.getPluginJob> = ({
   models
 }) => {
-  return async (ctx, next) => {
-    const jobId = ctx.params.jobId;
+  return async (ctx, json) => {
+    const jobId = ctx.req.param().jobId;
     const job = await models.pluginJob.findByIdOrFail(jobId);
-    ctx.body = job;
+    return json(job);
   };
 };
 
 export const handleGetAttachmentList: RouteMiddleware<
   typeof routes.getAttachmentList
 > = ({ models, pluginResultsPath }) => {
-  return async (ctx, next) => {
-    const jobId = ctx.params.jobId;
+  return async (ctx, json) => {
+    const jobId = ctx.req.param().jobId;
     const baseDir = path.resolve(pluginResultsPath, jobId);
     await models.pluginJob.findByIdOrFail(jobId);
     const files = await glob(baseDir + '/**/*');
     const relatives = files.map(p => path.relative(baseDir, p));
-    ctx.body = relatives;
+    return json(relatives);
   };
 };
 
 export const handleGetAttachment: RouteMiddleware<
   typeof routes.getAttachment
 > = ({ models, pluginResultsPath }) => {
-  return async (ctx, next) => {
-    const jobId = ctx.params.jobId;
-    const filePath = ctx.params.path;
+  return async ctx => {
+    const jobId = ctx.req.param().jobId;
+    const filePath = ctx.req.param().path;
     const baseDir = path.resolve(pluginResultsPath, jobId);
     const file = path.resolve(baseDir, filePath);
     if (path.relative(baseDir, file).match(/\.\.(\/|\\)/)) {
-      ctx.throw(status.BAD_REQUEST, 'Invalid path prameter.');
+      throw httpError(status.BAD_REQUEST, 'Invalid path prameter.');
     }
 
     await models.pluginJob.findByIdOrFail(jobId);
@@ -415,75 +428,85 @@ export const handleGetAttachment: RouteMiddleware<
         stream.once('readable', resolve); // file opened
         stream.once('error', reject);
       });
-      ctx.type = mime.getType(file) || 'application/octet-stream';
-      ctx.body = stream;
+      return ctx.body(
+        Readable.toWeb(stream) as ReadableStream<Uint8Array>,
+        200,
+        {
+          'Content-Type': mime.getType(file) || 'application/octet-stream'
+        }
+      );
     } catch (err: any) {
-      if (err.code === 'ENOENT') ctx.throw(status.NOT_FOUND);
+      if (err.code === 'ENOENT') throw httpError(status.NOT_FOUND);
       throw err;
     }
   };
 };
 
-export const handlePostFeedback: RouteMiddleware<
-  typeof routes.postPersonalFeedback
-> = ({ models }) => {
-  return async (ctx, next) => {
-    const jobId = ctx.params.jobId;
-    const job = await models.pluginJob.findByIdOrFail(jobId);
-    const isConsensual = ctx.request.url.split('/')[4] === 'consensual';
+export const handlePostFeedback =
+  (
+    isConsensual: boolean
+  ): RouteMiddleware<
+    typeof routes.postPersonalFeedback | typeof routes.postConsensualFeedback
+  > =>
+  ({ models }) => {
+    return async (ctx, json) => {
+      const jobId = ctx.req.param().jobId;
+      const job = await models.pluginJob.findByIdOrFail(jobId);
 
-    const feedbacks = job.feedbacks;
-    if (feedbacks.find(f => f.isConsensual)) {
-      ctx.throw(
-        status.BAD_REQUEST,
-        'A consensual feedback has been already registered.'
-      );
-    }
+      const feedbacks = job.feedbacks;
+      if (feedbacks.find(f => f.isConsensual)) {
+        throw httpError(
+          status.BAD_REQUEST,
+          'A consensual feedback has been already registered.'
+        );
+      }
 
-    if (
-      !isConsensual &&
-      feedbacks.find(f => !f.isConsensual && f.userEmail === ctx.user.userEmail)
-    ) {
-      ctx.throw(
-        status.BAD_REQUEST,
-        'Personal feedback of this user has been already registered.'
-      );
-    }
+      if (
+        !isConsensual &&
+        feedbacks.find(
+          f => !f.isConsensual && f.userEmail === ctx.var.user.userEmail
+        )
+      ) {
+        throw httpError(
+          status.BAD_REQUEST,
+          'Personal feedback of this user has been already registered.'
+        );
+      }
 
-    const { data, actionLog } = ctx.request.body;
+      const { data, actionLog } = ctx.req.valid('json');
 
-    const feedbackId = generateUniqueId();
-    const item = {
-      feedbackId,
-      userEmail: ctx.user.userEmail,
-      isConsensual,
-      createdAt: new Date(),
-      data,
-      actionLog
+      const feedbackId = generateUniqueId();
+      const item = {
+        feedbackId,
+        userEmail: ctx.var.user.userEmail,
+        isConsensual,
+        createdAt: new Date(),
+        data,
+        actionLog
+      };
+      await models.pluginJob.modifyOne(jobId, {
+        feedbacks: [...job.feedbacks, item]
+      });
+      return json({ feedbackId });
     };
-    await models.pluginJob.modifyOne(jobId, {
-      feedbacks: [...job.feedbacks, item]
-    });
-    ctx.body = { feedbackId };
   };
-};
 
 export const handleGetFeedback: RouteMiddleware<typeof routes.getFeedbacks> = ({
   models
 }) => {
-  return async (ctx, next) => {
-    const jobId = ctx.params.jobId;
+  return async (ctx, json) => {
+    const jobId = ctx.req.param().jobId;
     const job = await models.pluginJob.findByIdOrFail(jobId);
-    ctx.body = job.feedbacks;
+    return json(job.feedbacks);
   };
 };
 
 export const handleDeleteFeedback: RouteMiddleware<
   typeof routes.deleteFeedback
 > = ({ transactionManager }) => {
-  return async (ctx, next) => {
+  return async ctx => {
     await transactionManager.withTransaction(async models => {
-      const { jobId, feedbackId } = ctx.params;
+      const { jobId, feedbackId } = ctx.req.param();
       const job = await models.pluginJob.findByIdOrFail(jobId);
 
       // Throw 404 if feedbackId is not found
@@ -491,7 +514,7 @@ export const handleDeleteFeedback: RouteMiddleware<
         feedbackId !== 'all' &&
         !job.feedbacks.find(f => f.feedbackId === feedbackId)
       ) {
-        ctx.throw(status.NOT_FOUND, 'Feedback not found.');
+        throw httpError(status.NOT_FOUND, 'Feedback not found.');
       }
 
       // Throw 400 if deleting personal feedback when consensual feedback exists
@@ -501,7 +524,7 @@ export const handleDeleteFeedback: RouteMiddleware<
         job.feedbacks.find(f => f.feedbackId === feedbackId)?.isConsensual ===
           false
       ) {
-        ctx.throw(
+        throw httpError(
           status.BAD_REQUEST,
           'Cannot delete personal feedback when consensual feedback exists.'
         );
@@ -512,7 +535,7 @@ export const handleDeleteFeedback: RouteMiddleware<
           ? []
           : job.feedbacks.filter(f => feedbackId !== f.feedbackId);
       await models.pluginJob.modifyOne(jobId, { feedbacks: newList });
-      ctx.body = null;
     });
+    return ctx.body(null, 204);
   };
 };

@@ -1,3 +1,4 @@
+import { httpError } from '../../middleware/errorHandler.ts';
 import * as mr from 'multi-integer-range';
 import {
   type PartialVolumeDescriptor,
@@ -7,9 +8,9 @@ import {
 import type { SeriesEntry } from '@utrad-ical/circus-cs-core';
 import status from 'http-status';
 import loadMyList from '../../mylist/loadMyList.ts';
-import { Readable } from 'node:stream';
 import type {
   CircusContext,
+  Deps,
   RouteMiddleware
 } from '../../typings/middlewares.ts';
 import { ValidationError } from '../../createValidator.ts';
@@ -33,8 +34,8 @@ import {
 /** Removes the patient info unless the user can and wants to see it */
 const maskPatientInfo = (ctx: CircusContext) => {
   const show =
-    ctx.userPrivileges.globalPrivileges.includes('personalInfoView') &&
-    ctx.user.preferences.personalInfoView;
+    ctx.var.userPrivileges.globalPrivileges.includes('personalInfoView') &&
+    ctx.var.user.preferences.personalInfoView;
   return <T extends { patientInfo?: unknown }>(series: T) => {
     if (show) return series;
     const { patientInfo, ...rest } = series;
@@ -45,48 +46,48 @@ const maskPatientInfo = (ctx: CircusContext) => {
 export const handleGet: RouteMiddleware<typeof routes.getSeries> = ({
   models
 }) => {
-  return async (ctx, next) => {
-    const uid = ctx.params.seriesUid;
+  return async (ctx, json) => {
+    const uid = ctx.req.param().seriesUid;
     const series = await models.series.findByIdOrFail(uid);
-    if (ctx.userPrivileges.domains.indexOf(series.domain) < 0) {
-      ctx.throw(
+    if (ctx.var.userPrivileges.domains.indexOf(series.domain) < 0) {
+      throw httpError(
         status.FORBIDDEN,
         'You do not have privilege to access this series.'
       );
     }
-    ctx.body = maskPatientInfo(ctx)(series);
+    return json(maskPatientInfo(ctx)(series));
   };
 };
 
 export const handleGetOrientation: RouteMiddleware<
   typeof routes.getSeriesOrientation
 > = ({ models, seriesOrientationResolver }) => {
-  return async (ctx, next) => {
-    const uid = ctx.params.seriesUid;
+  return async (ctx, json) => {
+    const uid = ctx.req.param().seriesUid;
     const series = await models.series.findByIdOrFail(uid);
     const images = mr.initialize(series.images);
 
     const getInt = (param: any): number | undefined => {
       if (param === undefined) return undefined;
       if (!/^[1-9]\d*$/.test(param))
-        throw ctx.throw(status.BAD_REQUEST, 'Invalid string');
+        throw httpError(status.BAD_REQUEST, 'Invalid string');
       return Number(param);
     };
-    const start = getInt(ctx.request.query.start) ?? mr.min(images)!;
-    const end = getInt(ctx.request.query.end) ?? mr.max(images)!;
+    const start = getInt(ctx.var.query.start) ?? mr.min(images)!;
+    const end = getInt(ctx.var.query.end) ?? mr.max(images)!;
 
     if (
       !mr.has(images, mr.normalize(start)) ||
       !mr.has(images, mr.normalize(end))
     ) {
-      ctx.throw(
+      throw httpError(
         status.BAD_REQUEST,
         'The given start/end number is out of bounds.'
       );
     }
 
-    if (ctx.userPrivileges.domains.indexOf(series.domain) < 0) {
-      ctx.throw(
+    if (ctx.var.userPrivileges.domains.indexOf(series.domain) < 0) {
+      throw httpError(
         status.FORBIDDEN,
         'You do not have privilege to access this series.'
       );
@@ -101,77 +102,74 @@ export const handleGetOrientation: RouteMiddleware<
 
       const resolvedOrientation =
         result.delta >= 1 ? 'head-first' : 'foot-first';
-      ctx.body = { orientation: resolvedOrientation };
+      return json({ orientation: resolvedOrientation });
     } catch (err: any) {
-      ctx.throw(status.INTERNAL_SERVER_ERROR, err);
+      throw httpError(status.INTERNAL_SERVER_ERROR, err);
     }
   };
 };
 
 const checkDomain = (ctx: CircusContext) => {
-  const domain = ctx.params.domain;
-  if (!ctx.userPrivileges.domains.some(d => d === domain)) {
-    ctx.throw(status.FORBIDDEN, 'You cannot upload to this domain.');
+  const domain = ctx.req.param('domain');
+  if (!domain || !ctx.var.userPrivileges.domains.includes(domain)) {
+    throw httpError(status.FORBIDDEN, 'You cannot upload to this domain.');
   }
   return domain;
 };
 
-export const handlePost: RouteMiddleware<typeof routes.importSeries> = ({
-  dicomImporter,
-  progressManager,
-  logger,
-  uploadFileSizeMaxBytes
-}) => {
-  return async ctx => {
-    const { progressId } = ctx.request.query;
-    const reporter =
-      typeof progressId === 'string'
-        ? progressManager.claim(progressId, ctx.user.userEmail)
-        : undefined;
-    let summary: ImportSummary;
-    try {
-      if (!dicomImporter) ctx.throw(status.SERVICE_UNAVAILABLE);
-      const domain = checkDomain(ctx);
-      summary = await importUploadedFiles(readMultipartFiles(ctx.req), {
-        domain,
-        maxEntryBytes: uploadFileSizeMaxBytes,
-        dicomImporter,
-        apiLogger: logger,
-        userEmail: ctx.user.userEmail,
-        reporter
-      });
-    } catch (err: any) {
-      reporter?.fail(err.expose ? err.message : 'The upload was interrupted.');
-      throw err;
-    }
-    const { imported, skipped, errors } = summary;
-    reporter?.finish(
-      `Imported ${imported} file(s)` +
-        (skipped.length ? `, skipped ${skipped.length}` : '') +
-        (errors.length ? `, failed ${errors.length}` : '') +
-        '.'
-    );
-    ctx.status = errors.length
-      ? status.UNPROCESSABLE_ENTITY // 422
-      : imported
-        ? status.CREATED // 201
-        : status.BAD_REQUEST; // 400, no DICOM files
-    ctx.body = summary;
-  };
+const importSeries = async (
+  { dicomImporter, progressManager, logger, uploadFileSizeMaxBytes }: Deps,
+  ctx: CircusContext
+) => {
+  const { progressId } = ctx.var.query;
+  const reporter =
+    typeof progressId === 'string'
+      ? progressManager.claim(progressId, ctx.var.user.userEmail)
+      : undefined;
+  let summary: ImportSummary;
+  try {
+    if (!dicomImporter) throw httpError(status.SERVICE_UNAVAILABLE);
+    const domain = checkDomain(ctx);
+    summary = await importUploadedFiles(readMultipartFiles(ctx.req.raw), {
+      domain,
+      maxEntryBytes: uploadFileSizeMaxBytes,
+      dicomImporter,
+      apiLogger: logger,
+      userEmail: ctx.var.user.userEmail,
+      reporter
+    });
+  } catch (err: any) {
+    reporter?.fail(err.expose ? err.message : 'The upload was interrupted.');
+    throw err;
+  }
+  const { imported, skipped, errors } = summary;
+  reporter?.finish(
+    `Imported ${imported} file(s)` +
+      (skipped.length ? `, skipped ${skipped.length}` : '') +
+      (errors.length ? `, failed ${errors.length}` : '') +
+      '.'
+  );
+  const responseStatus = errors.length
+    ? status.UNPROCESSABLE_ENTITY // 422
+    : imported
+      ? status.CREATED // 201
+      : status.BAD_REQUEST; // 400, no DICOM files
+  return { summary, status: responseStatus };
 };
+
+export const handlePost: RouteMiddleware<typeof routes.importSeries> =
+  deps => async (ctx, json) => {
+    const result = await importSeries(deps, ctx);
+    return json(result.summary, result.status);
+  };
 
 export const handlePostSingle: RouteMiddleware<
   typeof routes.importSeriesSingle
-> = deps => {
-  const post = handlePost(deps);
-  return async (ctx, next) => {
-    await post(ctx, next);
-    if (ctx.status === status.CREATED) {
-      // Legacy storage servers expect curl's output to start with the status.
-      ctx.body = null;
-      ctx.status = status.CREATED;
-    }
-  };
+> = deps => async (ctx, json) => {
+  const result = await importSeries(deps, ctx);
+  // Legacy storage servers expect an empty response on success.
+  if (result.status === status.CREATED) return ctx.body(null, 201);
+  return json(result.summary, result.status);
 };
 
 const seriesFilter = mongoFilter(
@@ -189,36 +187,36 @@ const seriesFilter = mongoFilter(
   ])
 );
 
-export const handleSearch: RouteMiddleware<typeof routes.searchSeries> = ({
-  models
-}) => {
-  return async (ctx, next) => {
+export const handleSearch: RouteMiddleware<
+  typeof routes.searchSeries | typeof routes.searchSeriesInMyList
+> = ({ models }) => {
+  return async (ctx, json) => {
     const customFilter = extractFilter(ctx, seriesFilter);
 
     const canViewPersonalInfo =
-      ctx.userPrivileges.globalPrivileges.includes('personalInfoView');
+      ctx.var.userPrivileges.globalPrivileges.includes('personalInfoView');
 
     if (!canViewPersonalInfo && isPatientInfoInFilter(customFilter))
-      ctx.throw(
+      throw httpError(
         status.BAD_REQUEST,
         'You cannot search using patient information.'
       );
 
     const domainFilter = {
-      domain: { $in: ctx.userPrivileges.domains }
+      domain: { $in: ctx.var.userPrivileges.domains }
     };
     const filter = { $and: [customFilter, domainFilter] };
 
-    const myListId = ctx.params.myListId;
+    const myListId = ctx.req.param('myListId');
     if (myListId) {
       const { list, readable } = await loadMyList(ctx, models, myListId);
       if (!readable)
-        ctx.throw(
+        throw httpError(
           status.UNAUTHORIZED,
           'You cannot read the items of this my list.'
         );
       if (list.resourceType !== 'series')
-        ctx.throw(status.BAD_REQUEST, 'This my list is not for series');
+        throw httpError(status.BAD_REQUEST, 'This my list is not for series');
     }
 
     const searchByMyListStage: object[] = [
@@ -249,16 +247,18 @@ export const handleSearch: RouteMiddleware<typeof routes.searchSeries> = ({
     // Removes patient info according to the preference
     const transform = maskPatientInfo(ctx);
 
-    await performAggregationSearch(
-      startModel,
-      filter,
-      ctx,
-      lookupStages,
-      [{ $project: { _id: false, addedToListAt: false } }],
-      {
-        transform,
-        defaultSort
-      }
+    return json(
+      await performAggregationSearch(
+        startModel,
+        filter,
+        ctx,
+        lookupStages,
+        [{ $project: { _id: false, addedToListAt: false } }],
+        {
+          transform,
+          defaultSort
+        }
+      )
     );
   };
 };
@@ -267,8 +267,8 @@ export const handleDelete: RouteMiddleware<typeof routes.deleteSeries> = ({
   transactionManager,
   dicomFileRepository
 }) => {
-  return async (ctx, next) => {
-    const uid = ctx.params.seriesUid;
+  return async ctx => {
+    const uid = ctx.req.param().seriesUid;
     await transactionManager.withTransaction(async models => {
       await models.series.findByIdOrFail(uid);
 
@@ -276,7 +276,7 @@ export const handleDelete: RouteMiddleware<typeof routes.deleteSeries> = ({
         'series.seriesUid': uid
       });
       if (await pluginJob.hasNext())
-        ctx.throw(
+        throw httpError(
           status.BAD_REQUEST,
           'There is a plug-in job associated with this series.'
         );
@@ -285,16 +285,16 @@ export const handleDelete: RouteMiddleware<typeof routes.deleteSeries> = ({
         'revisions.series.seriesUid': uid
       });
       if (await clinicalCase.hasNext())
-        ctx.throw(
+        throw httpError(
           status.BAD_REQUEST,
           'There is a case associated with this series.'
         );
 
       const result = await models.series.deleteOne({ seriesUid: uid });
-      if (result.deletedCount !== 1) ctx.throw(status.NOT_FOUND);
+      if (result.deletedCount !== 1) throw httpError(status.NOT_FOUND);
     });
     await dicomFileRepository.deleteSeries(uid);
-    ctx.body = null;
+    return ctx.body(null, 204);
   };
 };
 
@@ -312,10 +312,10 @@ export const handleGetExportCsVolume: RouteMiddleware<
   return async ctx => {
     // Errors before the download, including invalid queries,
     // are also shown in the progress
-    const { progressId } = ctx.request.query;
+    const { progressId } = ctx.var.query;
     const reporter =
       typeof progressId === 'string'
-        ? progressManager.claim(progressId, ctx.user.userEmail)
+        ? progressManager.claim(progressId, ctx.var.user.userEmail)
         : undefined;
     let query: CsVolumeQuery;
     const entries: SeriesEntry[] = [];
@@ -323,7 +323,7 @@ export const handleGetExportCsVolume: RouteMiddleware<
       try {
         query = await validator.validate(
           seriesExportCsVolumeQuery,
-          ctx.request.query,
+          ctx.var.query,
           'decode'
         );
       } catch (err: any) {
@@ -337,7 +337,7 @@ export const handleGetExportCsVolume: RouteMiddleware<
             status.NOT_FOUND,
             `Series ${seriesUid} not found.`
           );
-        if (!ctx.userPrivileges.domains.includes(series.domain))
+        if (!ctx.var.userPrivileges.domains.includes(series.domain))
           throw exposedError(
             status.FORBIDDEN,
             'You do not have privilege to access this series.'
@@ -424,11 +424,10 @@ export const handleGetExportCsVolume: RouteMiddleware<
 
     // Named after the primary series
     const baseName = entries[0].seriesUid;
-    ctx.attachment(baseName + (zip ? '.zip' : '.tar.gz'));
-    ctx.type = zip ? 'application/zip' : 'application/gzip';
-    const body = Readable.fromWeb(stream as any);
-    // Koa leaves the response open when the stream fails after the headers
-    body.once('error', () => ctx.res.destroy());
-    ctx.body = body;
+    const filename = baseName + (zip ? '.zip' : '.tar.gz');
+    return ctx.body(stream, 200, {
+      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Content-Type': zip ? 'application/zip' : 'application/gzip'
+    });
   };
 };

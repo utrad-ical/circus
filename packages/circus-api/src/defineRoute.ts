@@ -27,7 +27,7 @@ export interface RouteDefinition {
 
 /** A route bound to its handler */
 export interface BoundRoute extends RouteDefinition {
-  handler: RouteMiddleware<any>;
+  handler: RouteMiddleware<RouteDefinition>;
 }
 
 /**
@@ -39,12 +39,16 @@ export interface RouteGroup {
   routes: BoundRoute[];
 }
 
-export const defineRoute = <T extends RouteDefinition>(route: T): T => route;
+export const defineRoute = <const T extends RouteDefinition>(route: T): T =>
+  route;
 
 /** Binds a route to its handler, which is typed with the route */
 export const route = <R extends RouteDefinition>(
   definition: R,
   handler: RouteMiddleware<R>
-): BoundRoute => ({ ...definition, handler });
+): BoundRoute => ({
+  ...definition,
+  handler: handler as BoundRoute['handler']
+});
 
 export const defineRouteGroup = (group: RouteGroup): RouteGroup => group;

@@ -1,6 +1,6 @@
+import { httpError } from '../../middleware/errorHandler.ts';
 import status from 'http-status';
 import loadMyList from '../../mylist/loadMyList.ts';
-import { Readable } from 'node:stream';
 import type { PreparedExport } from '../../case/createMhdPacker.ts';
 import { ValidationError } from '../../createValidator.ts';
 import {
@@ -31,8 +31,8 @@ import {
  */
 const maskPatientInfo = (ctx: CircusContext) => {
   const show =
-    ctx.userPrivileges.globalPrivileges.includes('personalInfoView') &&
-    ctx.user.preferences.personalInfoView;
+    ctx.var.userPrivileges.globalPrivileges.includes('personalInfoView') &&
+    ctx.var.user.preferences.personalInfoView;
   return <T extends { patientInfo?: unknown }>(caseData: T) => {
     if (show && caseData.patientInfo !== null) return caseData;
     const { patientInfo, ...rest } = caseData;
@@ -41,9 +41,9 @@ const maskPatientInfo = (ctx: CircusContext) => {
 };
 
 export const handleGet: RouteMiddleware<typeof routes.getCase> = () => {
-  return async (ctx, next) => {
-    const { latestRevision, ...aCase } = ctx.case; // Redundant data
-    ctx.body = aCase;
+  return async (ctx, json) => {
+    const { latestRevision, ...aCase } = ctx.var.clinicalCase; // Redundant data
+    return json(aCase);
   };
 };
 
@@ -51,53 +51,56 @@ export const handlePost: RouteMiddleware<typeof routes.postCase> = ({
   transactionManager,
   seriesOrientationResolver
 }) => {
-  return async (ctx, next) => {
-    await transactionManager.withTransaction(async models => {
-      const project = await models.project.findByIdOrFail(
-        ctx.request.body.projectId
-      );
-      const caseId = await makeNewCase(
+  return async (ctx, json) => {
+    const body = ctx.req.valid('json');
+    const caseId = await transactionManager.withTransaction(async models => {
+      const project = await models.project.findByIdOrFail(body.projectId);
+      return await makeNewCase(
         models,
-        ctx.user,
-        ctx.userPrivileges,
+        ctx.var.user,
+        ctx.var.userPrivileges,
         project,
         await resolveAutoPvdOfSeries(
-          ctx.request.body.series,
+          body.series,
           models,
           seriesOrientationResolver
         ),
-        ctx.request.body.tags
+        body.tags
       );
-      ctx.body = { caseId };
-      ctx.status = status.CREATED;
     });
+    return json({ caseId }, status.CREATED);
   };
 };
 
 export const handlePostRevision: RouteMiddleware<
   typeof routes.postRevision
 > = ({ models, blobStorage }) => {
-  return async (ctx, next) => {
-    const aCase = ctx.case;
-    const issues = checkRevisionAttributes(ctx.project, ctx.request.body);
+  return async ctx => {
+    const aCase = ctx.var.clinicalCase;
+    const issues = checkRevisionAttributes(
+      ctx.var.project,
+      ctx.req.valid('json')
+    );
     if (issues.length) {
       const err = new ValidationError(issues);
       err.phase = 'request';
       throw err;
     }
 
-    const blobIds = ctx.request.body.series.flatMap(s =>
-      s.labels.flatMap(l =>
-        l.type === 'voxel' && l.data.voxels !== null ? [l.data.voxels] : []
-      )
-    );
+    const blobIds = ctx.req
+      .valid('json')
+      .series.flatMap(s =>
+        s.labels.flatMap(l =>
+          l.type === 'voxel' && l.data.voxels !== null ? [l.data.voxels] : []
+        )
+      );
     const missingBlobIds = (
       await Promise.all(
         blobIds.map(async id => (!(await blobStorage.exists(id)) ? id : null))
       )
     ).filter(id => id !== null);
     if (missingBlobIds.length) {
-      ctx.throw(
+      throw httpError(
         status.BAD_REQUEST,
         `Some voxel data are missing (${missingBlobIds.join(
           ', '
@@ -106,17 +109,16 @@ export const handlePostRevision: RouteMiddleware<
     }
 
     const rev = {
-      ...ctx.request.body,
+      ...ctx.req.valid('json'),
       date: new Date(),
-      creator: ctx.user.userEmail
+      creator: ctx.var.user.userEmail
     };
 
     await models.clinicalCase.modifyOne(aCase.caseId, {
       latestRevision: rev,
       revisions: [...aCase.revisions, rev]
     });
-    ctx.body = null;
-    ctx.status = status.CREATED;
+    return ctx.body(null, 201);
   };
 };
 
@@ -132,30 +134,31 @@ const caseFilter = mongoFilter({
   updatedAt: dateField()
 });
 
-export const handleSearch: RouteMiddleware<typeof routes.searchCases> = ({
-  models
-}) => {
-  return async (ctx, next) => {
+export const handleSearch: RouteMiddleware<
+  typeof routes.searchCases | typeof routes.searchCasesInMyList
+> = ({ models }) => {
+  return async (ctx, json) => {
     const customFilter = extractFilter(ctx, caseFilter);
 
     const canViewPersonalInfo =
-      ctx.userPrivileges.globalPrivileges.includes('personalInfoView');
+      ctx.var.userPrivileges.globalPrivileges.includes('personalInfoView');
 
     if (!canViewPersonalInfo && isPatientInfoInFilter(customFilter))
-      ctx.throw(
+      throw httpError(
         status.BAD_REQUEST,
         'You cannot search using patient information.'
       );
 
-    const accessibleProjectIds = ctx.userPrivileges.accessibleProjects
+    const accessibleProjectIds = ctx.var.userPrivileges.accessibleProjects
       .filter(p => p.roles.includes('read'))
       .map(p => p.projectId);
 
-    const canViewPersonalInfoProjectIds = ctx.userPrivileges.accessibleProjects
-      .filter(
-        p => p.roles.includes('read') && p.roles.includes('viewPersonalInfo')
-      )
-      .map(p => p.projectId);
+    const canViewPersonalInfoProjectIds =
+      ctx.var.userPrivileges.accessibleProjects
+        .filter(
+          p => p.roles.includes('read') && p.roles.includes('viewPersonalInfo')
+        )
+        .map(p => p.projectId);
 
     const accessibleProjectFilter = {
       projectId: { $in: accessibleProjectIds }
@@ -165,16 +168,16 @@ export const handleSearch: RouteMiddleware<typeof routes.searchCases> = ({
       $and: [customFilter, accessibleProjectFilter /* domainFilter */]
     };
 
-    const myListId = ctx.params.myListId;
+    const myListId = ctx.req.param('myListId');
     if (myListId) {
       const { list, readable } = await loadMyList(ctx, models, myListId);
       if (!readable)
-        ctx.throw(
+        throw httpError(
           status.UNAUTHORIZED,
           'You cannot read the items of this my list.'
         );
       if (list.resourceType !== 'clinicalCases')
-        ctx.throw(status.BAD_REQUEST, 'This my list is not for cases');
+        throw httpError(status.BAD_REQUEST, 'This my list is not for cases');
     }
 
     const baseStage: object[] = [
@@ -229,23 +232,25 @@ export const handleSearch: RouteMiddleware<typeof routes.searchCases> = ({
 
     const defaultSort = myListId ? { addedToListAt: -1 } : { createdAt: -1 };
 
-    await performAggregationSearch(
-      startModel,
-      filter,
-      ctx,
-      lookupStages,
-      [
-        {
-          $project: {
-            _id: false,
-            revisions: false,
-            seriesDetail: false,
-            volId: false,
-            addedToListAt: false
+    return json(
+      await performAggregationSearch(
+        startModel,
+        filter,
+        ctx,
+        lookupStages,
+        [
+          {
+            $project: {
+              _id: false,
+              revisions: false,
+              seriesDetail: false,
+              volId: false,
+              addedToListAt: false
+            }
           }
-        }
-      ],
-      { defaultSort, transform: maskPatientInfo(ctx) }
+        ],
+        { defaultSort, transform: maskPatientInfo(ctx) }
+      )
     );
   };
 };
@@ -258,10 +263,10 @@ export const handleGetExportMhd: RouteMiddleware<typeof routes.exportMhd> = ({
   return async ctx => {
     // Errors before the download, including invalid queries,
     // are also shown in the progress
-    const { progressId } = ctx.request.query;
+    const { progressId } = ctx.var.query;
     const reporter =
       typeof progressId === 'string'
-        ? progressManager.claim(progressId, ctx.user.userEmail)
+        ? progressManager.claim(progressId, ctx.var.user.userEmail)
         : undefined;
     let query: any;
     let prepared: PreparedExport;
@@ -269,7 +274,7 @@ export const handleGetExportMhd: RouteMiddleware<typeof routes.exportMhd> = ({
       try {
         query = await validator.validate(
           caseExportMhdQuery,
-          ctx.request.query,
+          ctx.var.query,
           'decode'
         );
       } catch (err: any) {
@@ -281,13 +286,13 @@ export const handleGetExportMhd: RouteMiddleware<typeof routes.exportMhd> = ({
         caseIds.map(caseId => ({ caseId, revisionIndex: query.revisionIndex })),
         !!query.fullOriginalVolume
       );
-      const { accessibleProjects } = ctx.userPrivileges;
+      const { accessibleProjects } = ctx.var.userPrivileges;
       for (const { caseData } of prepared.cases) {
         const project = accessibleProjects.find(
           p => p.projectId === caseData.projectId
         );
         if (!project || !project.roles.includes('read')) {
-          ctx.throw(
+          throw httpError(
             status.UNAUTHORIZED,
             'You do not have enough read privilege for some cases.'
           );
@@ -308,41 +313,41 @@ export const handleGetExportMhd: RouteMiddleware<typeof routes.exportMhd> = ({
       reporter
     );
     const zip = query.compressionFormat === 'zip';
-    ctx.attachment(zip ? 'case-export.zip' : 'case-export.tar.gz');
-    ctx.type = zip ? 'application/zip' : 'application/gzip';
-    const body = Readable.fromWeb(stream as any);
-    // Koa leaves the response open when the stream fails after the headers
-    body.once('error', () => ctx.res.destroy());
-    ctx.body = body;
+    return ctx.body(stream, 200, {
+      'Content-Disposition': zip
+        ? 'attachment; filename="case-export.zip"'
+        : 'attachment; filename="case-export.tar.gz"',
+      'Content-Type': zip ? 'application/zip' : 'application/gzip'
+    });
   };
 };
 
 export const handlePutTags: RouteMiddleware<typeof routes.putTags> = ({
   models
 }) => {
-  return async (ctx, next) => {
-    await models.clinicalCase.modifyOne(ctx.case.caseId, {
-      tags: ctx.request.body
+  return async ctx => {
+    await models.clinicalCase.modifyOne(ctx.var.clinicalCase.caseId, {
+      tags: ctx.req.valid('json')
     });
-    ctx.body = null; // No Content
+    return ctx.body(null, 204); // No Content
   };
 };
 
 export const handlePatchTags: RouteMiddleware<typeof routes.patchTags> = ({
   models
 }) => {
-  return async (ctx, next) => {
-    const { operation, tags, caseIds } = ctx.request.body;
+  return async ctx => {
+    const { operation, tags, caseIds } = ctx.req.valid('json');
 
     // first, ensure we have write access to all cases
-    const writableProjectIds = ctx.userPrivileges.accessibleProjects
+    const writableProjectIds = ctx.var.userPrivileges.accessibleProjects
       .filter(p => p.roles.indexOf('write') >= 0)
       .map(p => p.projectId);
     for (const caseId of caseIds) {
       const aCase = await models.clinicalCase.findById(caseId);
-      if (!aCase) ctx.throw(status.NOT_FOUND, 'Some case does not exist');
+      if (!aCase) throw httpError(status.NOT_FOUND, 'Some case does not exist');
       if (writableProjectIds.indexOf(aCase.projectId) < 0) {
-        ctx.throw(
+        throw httpError(
           status.UNAUTHORIZED,
           'You do not have write access to some of the specified cases.'
         );
@@ -358,16 +363,16 @@ export const handlePatchTags: RouteMiddleware<typeof routes.patchTags> = ({
       { caseId: { $in: caseIds } },
       updateOp
     );
-    ctx.body = null;
+    return ctx.body(null, 204);
   };
 };
 
 export const handleDelete: RouteMiddleware<typeof routes.deleteCase> = ({
   transactionManager
 }) => {
-  return async (ctx, next) => {
-    const caseId = ctx.params.caseId;
-    const urlQuery = ctx.request.query;
+  return async ctx => {
+    const caseId = ctx.req.param().caseId;
+    const urlQuery = ctx.var.query;
     if (urlQuery.force === '1') {
       await transactionManager.withTransaction(async models => {
         const targetMyLists = await models.myList.findAll({
@@ -378,7 +383,6 @@ export const handleDelete: RouteMiddleware<typeof routes.deleteCase> = ({
           await models.myList.modifyOne(targetMyList.myListId, { items });
         }
         await models.clinicalCase.deleteOne({ caseId });
-        ctx.body = null;
       });
     } else {
       await transactionManager.withTransaction(async models => {
@@ -386,11 +390,11 @@ export const handleDelete: RouteMiddleware<typeof routes.deleteCase> = ({
           .findAsCursor({ 'items.resourceId': caseId })
           .hasNext();
         if (isInMyList) {
-          ctx.throw(403, `This case is in someone's my list.`);
+          throw httpError(403, `This case is in someone's my list.`);
         }
         await models.clinicalCase.deleteOne({ caseId });
-        ctx.body = null;
       });
     }
+    return ctx.body(null, 204);
   };
 };

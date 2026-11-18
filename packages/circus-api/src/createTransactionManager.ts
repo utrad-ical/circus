@@ -27,12 +27,12 @@ export const createTransactionManagerFactory = (
   const service: TransactionManagerService = async (opt = {}, deps) => {
     const { maxCommitTimeMS = 2000 } = opt;
     const { database, validator } = deps;
-    const withTransaction = async (fn: (models: Models) => Promise<void>) => {
+    const withTransaction = async <T>(fn: (models: Models) => Promise<T>) => {
       const session = database.connection.startSession();
-      await session.withTransaction(
+      return await session.withTransaction(
         async session => {
           const models = makeModelsFn(database, validator, session);
-          await fn(models);
+          return await fn(models);
         },
         { maxCommitTimeMS } as any
       );

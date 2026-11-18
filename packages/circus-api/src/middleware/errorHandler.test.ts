@@ -1,56 +1,47 @@
 import assert from 'node:assert/strict';
 import { test, before, after } from 'node:test';
-import errorHandler from './errorHandler.ts';
+import { createNullLogger } from '@utrad-ical/circus-lib';
+import { httpError } from './errorHandler.ts';
+import { createHonoApp } from '../createHonoApp.ts';
 import type { TestHttpClient } from '../test/util-http.ts';
 import { createTestHttpClient } from '../test/util-http.ts';
-import Router from 'koa-router';
 import { ValidationError } from '../createValidator.ts';
-import type { TestServer } from '../test/util-koa.ts';
-import { setUpKoaTest } from '../test/util-koa.ts';
-import { createNullLogger } from '@utrad-ical/circus-lib';
+import type { TestServer } from '../test/util-server.ts';
+import { setUpHonoTest } from '../test/util-server.ts';
 
 let testServer: TestServer, ax: TestHttpClient;
 
 before(async () => {
-  testServer = await setUpKoaTest(async app => {
-    const router = new Router();
+  testServer = await setUpHonoTest(
+    async app => {
+      app.get('/found', ctx => ctx.text('Hello'));
 
-    router.get('/found', async ctx => {
-      ctx.body = 'Hello';
-    });
+      const validationError = (phase: 'request' | 'response') => {
+        const err = new ValidationError([
+          { path: ['a'], message: 'Expected number', code: 'invalid_type' }
+        ]);
+        err.phase = phase;
+        return err;
+      };
 
-    const validationError = (phase: 'request' | 'response') => {
-      const err = new ValidationError([
-        { path: ['a'], message: 'Expected number', code: 'invalid_type' }
-      ]);
-      err.phase = phase;
-      return err;
-    };
+      app.get('/invalid-on-request', () => {
+        throw validationError('request');
+      });
 
-    router.get('/invalid-on-request', async ctx => {
-      throw validationError('request');
-    });
+      app.get('/invalid-on-response', () => {
+        throw validationError('response');
+      });
 
-    router.get('/invalid-on-response', async ctx => {
-      throw validationError('response');
-    });
+      app.get('/server-side-error', async ctx => {
+        return ctx.text((null as any).foo); // intentional run time error
+      });
 
-    router.get('/server-side-error', async ctx => {
-      ctx.body = (null as any).foo; // intentional run time error
-    });
-
-    router.get('/error-403', async ctx => {
-      ctx.throw(403, 'no!');
-    });
-
-    app.use(
-      errorHandler({
-        includeErrorDetails: true,
-        logger: await createNullLogger(null, {})
-      })
-    );
-    app.use(router.routes());
-  });
+      app.get('/error-403', () => {
+        throw httpError(403, 'no!');
+      });
+    },
+    { debug: true }
+  );
   ax = createTestHttpClient(testServer.url);
 });
 
@@ -81,6 +72,39 @@ test('should return 500 for server-side validation error', async () => {
   const res = await ax.get('invalid-on-response');
   assert.equal(res.status, 500);
   assert.match(res.data.error, /response schema validation error/i);
+});
+
+test('logs the route template and issue codes for invalid responses', async () => {
+  const logger = await createNullLogger(null, {});
+  const errors: unknown[][] = [];
+  logger.error = (...args: unknown[]) => {
+    errors.push(args);
+  };
+  const app = createHonoApp({ logger });
+  app.get('/api/examples/:id', () => {
+    const error = new ValidationError([
+      {
+        path: ['dynamic-key'],
+        message: 'Invalid value: example payload',
+        code: 'invalid_type'
+      }
+    ]);
+    error.phase = 'response';
+    throw error;
+  });
+
+  const res = await app.request('/api/examples/example-id');
+  assert.equal(res.status, 500);
+  assert.deepEqual(errors, [
+    [
+      'Response schema validation error detected.',
+      {
+        route: 'GET /api/examples/:id',
+        phase: 'response',
+        issueCodes: ['invalid_type']
+      }
+    ]
+  ]);
 });
 
 test('should return 500 for server-side run-time error', async () => {

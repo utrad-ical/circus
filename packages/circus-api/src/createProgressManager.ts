@@ -8,8 +8,7 @@ import httpStatus from 'http-status';
 import _ from 'lodash';
 import { randomBytes } from 'node:crypto';
 import { EventEmitter } from 'node:events';
-import { PassThrough } from 'node:stream';
-import type { CircusContext } from './typings/middlewares.ts';
+import { httpError } from './middleware/errorHandler.ts';
 
 /**
  * Reports the progress of a long-running request.
@@ -39,7 +38,10 @@ export interface ProgressManager {
    * Responds with the server-sent events of the progress ID.
    * Throws 404 if the ID is unknown or someone else's.
    */
-  respond: (ctx: CircusContext, progressId: string, userEmail: string) => void;
+  subscribe: (
+    progressId: string,
+    userEmail: string
+  ) => ReadableStream<Uint8Array>;
 }
 
 interface Entry {
@@ -149,41 +151,45 @@ const createProgressManager: NoDepFunctionService<
     };
   };
 
-  const respond = (
-    ctx: CircusContext,
-    progressId: string,
-    userEmail: string
-  ) => {
+  const encoder = new TextEncoder();
+  const subscribe = (progressId: string, userEmail: string) => {
     const entry = entries.get(progressId);
-    if (!entry || entry.userEmail !== userEmail)
-      ctx.throw(httpStatus.NOT_FOUND, 'No such progress ID.');
+    if (!entry || entry.userEmail !== userEmail) {
+      throw httpError(httpStatus.NOT_FOUND, 'No such progress ID.');
+    }
 
-    ctx.type = 'text/event-stream';
-    ctx.set('Cache-Control', 'no-cache');
-    ctx.set('X-Accel-Buffering', 'no'); // Disables nginx buffering
-    const stream = new PassThrough();
-    ctx.body = stream;
-    stream.write('\n'); // send first byte to ensure the stream is live
+    let cleanup = () => {};
+    return new ReadableStream<Uint8Array>({
+      start(controller) {
+        const send = (text: string) => controller.enqueue(encoder.encode(text));
+        send('\n'); // Send the first byte before the operation starts.
+        const write = (event: ProgressEvent) => {
+          const { type, ...data } = event;
+          send(`event: ${type}\ndata: ${JSON.stringify(data)}\n\n`);
+          if (isTerminal(event)) {
+            cleanup();
+            controller.close();
+          }
+        };
 
-    const write = (event: ProgressEvent) => {
-      const { type, ...data } = event;
-      stream.write(`event: ${type}\ndata: ${JSON.stringify(data)}\n\n`);
-      if (isTerminal(event)) stream.end();
-    };
+        if (entry.logs.length) write({ type: 'log', lines: entry.logs });
+        if (entry.last) write(entry.last);
+        if (isTerminal(entry.last)) return;
 
-    if (entry!.logs.length) write({ type: 'log', lines: entry!.logs });
-    if (entry!.last) write(entry!.last);
-    if (isTerminal(entry!.last)) return;
-
-    const timerId = setInterval(() => stream.write(':\n'), keepAliveMs);
-    entry!.events.on('event', write);
-    stream.on('close', () => {
-      clearInterval(timerId);
-      entry!.events.off('event', write);
+        const timer = setInterval(() => send(':\n'), keepAliveMs);
+        entry.events.on('event', write);
+        cleanup = () => {
+          clearInterval(timer);
+          entry.events.off('event', write);
+        };
+      },
+      cancel() {
+        cleanup();
+      }
     });
   };
 
-  return { issue, claim, respond };
+  return { issue, claim, subscribe };
 };
 
 export default createProgressManager;

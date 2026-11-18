@@ -125,8 +125,8 @@ const main = async () => {
   }
 
   try {
-    const koaApp = await loader.get('apiServer');
-    koaApp.listen(appOptions.port, appOptions.host, (err?: Error) => {
+    const server = await loader.get('apiServer');
+    server.listen(appOptions.port, appOptions.host, (err?: Error) => {
       if (err) throw err;
       const setupInfo: { [key: string]: string | number } = {
         'Label storage': blobStorage.toString(),

@@ -23,3 +23,5 @@ export {
 } from './helper/extractor-worker/createDicomExtractorWorker.ts';
 export type { RsWebsocketVolumeConnectionHandlerCreator } from './ws/createWebsocketVolumeConnectionHandlerCreator.ts';
 export { default as withWebSocketConnectionHandlers } from './ws/withWebSocketConnectionHandlers.ts';
+export { attachWebSocketHandlers } from './ws/withWebSocketConnectionHandlers.ts';
+export { createSeriesRequestListener } from './createSeriesRequestListener.ts';

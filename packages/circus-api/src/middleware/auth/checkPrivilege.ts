@@ -1,8 +1,10 @@
+import { httpError } from '../errorHandler.ts';
+import type { RouteDefinition } from '../../defineRoute.ts';
 import status from 'http-status';
 import type { Models } from '../../interface.ts';
-import type { CircusMiddeware } from '../../typings/middlewares.ts';
+import type { CircusMiddleware } from '../../typings/middlewares.ts';
 
-const wrap = (data: any) => {
+const wrap = (data?: string | string[]) => {
   if (!data) return undefined;
   return Array.isArray(data) ? data : [data];
 };
@@ -12,16 +14,22 @@ const wrap = (data: any) => {
  */
 const checkPrivilege: (
   deps: { models: Models },
-  route: any
-) => CircusMiddeware = ({ models }, route) => {
+  route: Partial<RouteDefinition>
+) => CircusMiddleware = ({ models }, route) => {
   const requiredGlobalPrivilege = wrap(route.requiredGlobalPrivilege);
   const requiredProjectPrivilege = wrap(route.requiredProjectPrivilege);
   const requiredPluginPrivilege = wrap(route.requiredPluginPrivilege);
-  const requiredSeriesDomainCheck = wrap(route.requiredSeriesDomainCheck);
+  const { requiredSeriesDomainCheck } = route;
 
   return async function checkPrivilege(ctx, next) {
+    const {
+      caseId,
+      projectId: requestedProjectId,
+      jobId,
+      pluginId: requestedPluginId
+    } = ctx.req.param() as Record<string, string | undefined>;
     if (requiredGlobalPrivilege) {
-      const { globalPrivileges } = ctx.userPrivileges;
+      const { globalPrivileges } = ctx.var.userPrivileges;
       const okay = requiredGlobalPrivilege.every(rp =>
         globalPrivileges.some(pp => pp === rp)
       );
@@ -29,7 +37,7 @@ const checkPrivilege: (
         rp => !globalPrivileges.some(pp => pp === rp)
       );
       if (!okay) {
-        ctx.throw(
+        throw httpError(
           status.UNAUTHORIZED,
           `You do not have sufficient privilege to access this resource.${failedPrivileges.join(
             ','
@@ -42,21 +50,21 @@ const checkPrivilege: (
       let projectId: string;
 
       // Check project privilege either via caseId or directly via projectId
-      if (ctx.params.caseId) {
-        const caseId = ctx.params.caseId;
-        ctx.case = await models.clinicalCase.findByIdOrFail(caseId);
-        projectId = ctx.case.projectId;
-      } else if (ctx.params.projectId) {
-        projectId = ctx.params.projectId;
+      if (caseId) {
+        const clinicalCase = await models.clinicalCase.findByIdOrFail(caseId);
+        ctx.set('clinicalCase', clinicalCase);
+        projectId = clinicalCase.projectId;
+      } else if (requestedProjectId) {
+        projectId = requestedProjectId;
       } else {
-        ctx.throw(
+        throw httpError(
           status.BAD_REQUEST,
           'No project or case specified to check project privilege.'
         );
       }
-      ctx.project = await models.project.findById(projectId!);
+      ctx.set('project', await models.project.findById(projectId));
 
-      const { accessibleProjects } = ctx.userPrivileges;
+      const { accessibleProjects } = ctx.var.userPrivileges;
       let ok = true;
       const project = accessibleProjects.find(p => p.projectId === projectId);
       if (project) {
@@ -67,7 +75,7 @@ const checkPrivilege: (
         ok = false;
       }
       if (!ok) {
-        ctx.throw(
+        throw httpError(
           status.UNAUTHORIZED,
           `You do not have "${requiredProjectPrivilege.join(
             ','
@@ -80,22 +88,21 @@ const checkPrivilege: (
       let pluginId: string;
 
       // Check plugin privilege either via jobId or directly via pluginId
-      if (ctx.params.jobId) {
-        const jobId = ctx.params.jobId;
+      if (jobId) {
         const jobDoc = await models.pluginJob.findByIdOrFail(jobId);
-        ctx.job = jobDoc;
+        ctx.set('job', jobDoc);
         pluginId = jobDoc.pluginId;
-      } else if (ctx.params.pluginId) {
-        pluginId = ctx.params.pluginId;
+      } else if (requestedPluginId) {
+        pluginId = requestedPluginId;
       } else {
-        ctx.throw(
+        throw httpError(
           status.BAD_REQUEST,
           'No plugin or job specified to check plugin privilege.'
         );
       }
-      ctx.plugin = await models.plugin.findById(pluginId!);
+      ctx.set('plugin', await models.plugin.findById(pluginId));
 
-      const { accessiblePlugins } = ctx.userPrivileges;
+      const { accessiblePlugins } = ctx.var.userPrivileges;
       let ok = true;
       const plugin = accessiblePlugins.find(p => p.pluginId === pluginId);
       if (plugin) {
@@ -106,7 +113,7 @@ const checkPrivilege: (
         ok = false;
       }
       if (!ok) {
-        ctx.throw(
+        throw httpError(
           status.UNAUTHORIZED,
           `You do not have "${requiredPluginPrivilege.join(
             ','
@@ -116,19 +123,18 @@ const checkPrivilege: (
     }
 
     if (requiredSeriesDomainCheck) {
-      if (!ctx.params.jobId)
-        ctx.throw(
+      if (!jobId)
+        throw httpError(
           status.BAD_REQUEST,
           'No plugin-job specified to check project privilege.'
         );
 
-      const jobId = ctx.params.jobId;
       const jobDoc = await models.pluginJob.findByIdOrFail(jobId);
       // Assign jobDoc to ctx for future reference
-      ctx.job = jobDoc;
+      ctx.set('job', jobDoc);
 
       const jobSeriesUids = jobDoc.series.map((s: any) => s.seriesUid);
-      const { domains: accessibleDomains } = ctx.userPrivileges;
+      const { domains: accessibleDomains } = ctx.var.userPrivileges;
       const jobSeriesDomains = (
         await models.series.aggregate([
           { $match: { seriesUid: { $in: jobSeriesUids } } },
@@ -140,7 +146,7 @@ const checkPrivilege: (
         accessibleDomains.some(d => d === sd)
       );
       if (!domainCheck) {
-        ctx.throw(
+        throw httpError(
           status.UNAUTHORIZED,
           'You do not have privilege to access this plugin-job.'
         );

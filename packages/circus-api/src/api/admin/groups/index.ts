@@ -1,3 +1,4 @@
+import { httpError } from '../../../middleware/errorHandler.ts';
 import status from 'http-status';
 import { globalPrivileges } from '../../../privilegeUtils.ts';
 import type { RouteMiddleware } from '../../../typings/middlewares.ts';
@@ -7,21 +8,23 @@ import performSearch from '../../performSearch.ts';
 export const handleSearch: RouteMiddleware<typeof routes.getGroups> = ({
   models
 }) => {
-  return async (ctx, next) => {
-    await performSearch(models.group, {}, ctx, {
-      defaultSort: { groupId: 1 },
-      allowUnlimited: true
-    });
+  return async (ctx, json) => {
+    return json(
+      await performSearch(models.group, {}, ctx, {
+        defaultSort: { groupId: 1 },
+        allowUnlimited: true
+      })
+    );
   };
 };
 
 export const handleGet: RouteMiddleware<typeof routes.getGroup> = ({
   models
 }) => {
-  return async (ctx, next) => {
-    const groupId = parseInt(ctx.params.groupId);
+  return async (ctx, json) => {
+    const groupId = parseInt(ctx.req.param().groupId);
     const group = await models.group.findByIdOrFail(groupId);
-    ctx.body = group;
+    return json(group);
   };
 };
 
@@ -64,34 +67,33 @@ const checkPermissionsConsistency = (permissions: any) => {
 export const handlePatch: RouteMiddleware<typeof routes.patchGroup> = ({
   models
 }) => {
-  return async (ctx, next) => {
+  return async ctx => {
     try {
-      checkPermissionsConsistency(ctx.request.body);
+      checkPermissionsConsistency(ctx.req.valid('json'));
     } catch (err: any) {
-      ctx.throw(status.BAD_REQUEST, err.message);
+      throw httpError(status.BAD_REQUEST, err.message);
     }
-    const groupId = parseInt(ctx.params.groupId);
-    await models.group.modifyOne(groupId, ctx.request.body);
-    ctx.body = null;
+    const groupId = parseInt(ctx.req.param().groupId);
+    await models.group.modifyOne(groupId, ctx.req.valid('json'));
+    return ctx.body(null, 204);
   };
 };
 
 export const handlePost: RouteMiddleware<typeof routes.postGroup> = ({
   models
 }) => {
-  return async (ctx, next) => {
+  return async (ctx, json) => {
     const groupId = await models.group.newSequentialId();
-    const inserting = { ...ctx.request.body, groupId };
+    const inserting = { ...ctx.req.valid('json'), groupId };
     await models.group.insert(inserting);
-    ctx.body = { groupId };
-    ctx.status = status.CREATED;
+    return json({ groupId }, status.CREATED);
   };
 };
 
 export const listGlobalPrivileges: RouteMiddleware<
   typeof routes.getGlobalPrivileges
 > = () => {
-  return async (ctx, next) => {
-    ctx.body = globalPrivileges();
+  return async (ctx, json) => {
+    return json(globalPrivileges());
   };
 };

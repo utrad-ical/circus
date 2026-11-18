@@ -1,6 +1,6 @@
 import type createDockerFileExtractor from '../utils/dockerFileExtractor.ts';
-import type { ParameterizedContext } from 'koa';
-import type koa from 'koa';
+import type { Context, MiddlewareHandler } from 'hono';
+import type { HttpBindings } from '@hono/node-server';
 import type { z } from 'zod';
 import type { RouteDefinition } from '../defineRoute.ts';
 import type {
@@ -20,6 +20,7 @@ import type { MhdPacker } from '../case/createMhdPacker.ts';
 import type { ProgressManager } from '../createProgressManager.ts';
 import type { SeriesOrientationResolver } from '../utils/createSeriesOrientationResolver.ts';
 import type { VerifyUser } from '../middleware/auth/createVerifyUser.ts';
+import type { QueryParameters } from '../utils/parseQuery.ts';
 
 export interface Deps {
   validator: Validator;
@@ -47,45 +48,46 @@ export interface Deps {
   createDockerFileExtractor?: typeof createDockerFileExtractor;
 }
 
-interface CustomCtxMembers {
-  params: { [key: string]: string };
-  user: any;
-  project: any;
-  plugin: any;
-  case: any;
-  job: any;
-  userPrivileges: UserPrivilegeInfo;
+type DocumentOf<K extends keyof Models> = Awaited<
+  ReturnType<Models[K]['findById']>
+>;
+
+export interface ApiEnv {
+  Bindings: HttpBindings;
+  Variables: {
+    query: QueryParameters;
+    jsonBody: unknown;
+    user: DocumentOf<'user'>;
+    userPrivileges: UserPrivilegeInfo;
+    authenticatedBySessionCookie: boolean;
+    project: DocumentOf<'project'>;
+    plugin: DocumentOf<'plugin'>;
+    clinicalCase: DocumentOf<'clinicalCase'>;
+    job: DocumentOf<'pluginJob'>;
+  };
 }
 
-export type CircusContext = ParameterizedContext<any, CustomCtxMembers>;
+export type CircusContext = Context<ApiEnv>;
+export type CircusMiddleware = MiddlewareHandler<ApiEnv>;
 
-export type CircusMiddeware = koa.Middleware<any, CustomCtxMembers>;
-
-/** The output type of the schema, or `unknown` without a schema */
+/** The decoded value of a route schema. */
 type OutputOf<S> = S extends z.ZodType ? z.output<S> : unknown;
 
-/**
- * The context of a route handler, where the request body and the response
- * body are typed with the schemas of the route.
- */
-export type RouteContext<R extends RouteDefinition> = Omit<
-  CircusContext,
-  'request' | 'body'
-> & {
-  request: Omit<CircusContext['request'], 'body'> & {
-    body: OutputOf<R['request']>;
-  };
-  /** A route that returns a stream or a file has no response schema */
-  body: OutputOf<R['response']> | null;
-};
+export type RouteContext<R extends RouteDefinition> = Context<
+  ApiEnv,
+  R['path'],
+  { out: { json: OutputOf<R['request']> } }
+>;
 
-/**
- * A route handler. Pass the route definition to type the request
- * and the response, e.g., `RouteMiddleware<typeof getGroup>`.
- */
-export type RouteMiddleware<R extends RouteDefinition | undefined = undefined> =
-  (
-    deps: Deps
-  ) => R extends RouteDefinition
-    ? (ctx: RouteContext<R>, next: koa.Next) => Promise<void>
-    : CircusMiddeware;
+type JsonResponse<S> = (
+  body: OutputOf<S>,
+  status?: number
+) => Promise<Response>;
+
+/** A route handler receives its validated input and a schema-aware JSON responder. */
+export type RouteMiddleware<R extends RouteDefinition> = (
+  deps: Deps
+) => (
+  ctx: RouteContext<R>,
+  json: JsonResponse<R['response']>
+) => Promise<Response>;

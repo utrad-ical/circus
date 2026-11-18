@@ -1,6 +1,6 @@
+import { httpError } from '../../middleware/errorHandler.ts';
 import type { QueueState } from '@utrad-ical/circus-cs-core';
 import status from 'http-status';
-import type { ParsedUrlQuery } from 'node:querystring';
 import type {
   CircusContext,
   Deps,
@@ -19,7 +19,7 @@ const positiveInt = (
   const value = first(param);
   if (value === undefined) return defaultValue;
   if (!/^[1-9]\d*$/.test(value))
-    ctx.throw(status.BAD_REQUEST, `Invalid number: ${value}`);
+    throw httpError(status.BAD_REQUEST, `Invalid number: ${value}`);
   return Number(value);
 };
 
@@ -34,12 +34,12 @@ export const listQueuedJobs = async (
   ctx: CircusContext,
   userEmail?: string
 ) => {
-  const query: ParsedUrlQuery = ctx.request.query;
+  const query = ctx.var.query;
   const limit = positiveInt(ctx, query.limit, 20);
   const page = positiveInt(ctx, query.page, 1);
   const state = first(query.state);
   if (state !== undefined && !states.includes(state))
-    ctx.throw(status.BAD_REQUEST, `Invalid state: ${state}`);
+    throw httpError(status.BAD_REQUEST, `Invalid state: ${state}`);
 
   const queueItems = await cs.job.list(state as QueueState | 'all');
   const ids = queueItems.map(i => i.jobId);
@@ -63,7 +63,7 @@ export const listQueuedJobs = async (
 };
 
 export const handleGet: RouteMiddleware<typeof routes.getQueue> = deps => {
-  return async (ctx, next) => {
-    ctx.body = await listQueuedJobs(deps, ctx, ctx.user.userEmail);
+  return async (ctx, json) => {
+    return json(await listQueuedJobs(deps, ctx, ctx.var.user.userEmail));
   };
 };

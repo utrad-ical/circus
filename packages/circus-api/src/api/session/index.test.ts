@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import { test, before, after, describe } from 'node:test';
 import { createTestHttpClient } from '../../test/util-http.ts';
@@ -50,16 +51,30 @@ describe('login', () => {
     assert.match(cookie, /samesite=lax/i);
     // Plain HTTP
     assert.doesNotMatch(cookie, /secure/i);
+    const user = await apiTest.database.db
+      .collection('users')
+      .findOne({ userEmail: 'alice@example.com' });
+    assert.match(user?.lastLoginIp, /^(::1|(::ffff:)?127\.0\.0\.1)$/);
   });
 
   test('sets the Secure attribute behind an HTTPS reverse proxy', async () => {
     const res = await ax.post(
       'api/session',
       { username: 'alice', password: 'aliceSecret' },
-      { headers: { ...csrf, 'X-Forwarded-Proto': 'https' } }
+      {
+        headers: {
+          ...csrf,
+          'X-Forwarded-Proto': 'https, http',
+          'X-Forwarded-For': '192.0.2.10, 192.0.2.20'
+        }
+      }
     );
     assert.equal(res.status, httpStatus.NO_CONTENT);
     assert.match(sessionCookieOf(res)!, /secure/i);
+    const user = await apiTest.database.db
+      .collection('users')
+      .findOne({ userEmail: 'alice@example.com' });
+    assert.equal(user?.lastLoginIp, '192.0.2.10');
   });
 
   test('rejects a wrong password', async () => {
@@ -214,9 +229,22 @@ describe('logout', () => {
 });
 
 describe('RS', () => {
+  before(async () => {
+    const file = await readFile(
+      new URL('../../../test/dicom/CT-MONO2-16-brain.dcm', import.meta.url)
+    );
+    const series = await apiTest.dicomFileRepository.getSeries(
+      '111.222.333.444.444'
+    );
+    await series.save(1, Uint8Array.from(file).buffer);
+  });
+
   test('requires authentication', async () => {
-    const res = await ax.get('rs/series/111.222.333.444.444/metadata');
+    const res = await ax.get('rs/series/111.222.333.444.444/metadata', {
+      headers: { Origin: 'https://other.example.org' }
+    });
     assert.equal(res.status, httpStatus.UNAUTHORIZED);
+    assert.equal(res.headers.get('Access-Control-Allow-Origin'), null);
   });
 
   test('checks the domain of the series', async () => {
@@ -237,7 +265,7 @@ describe('RS', () => {
       'rs/series/111.222.333.444.444/metadata'
     );
     assert.equal(res1.status, httpStatus.OK);
-    assert.deepEqual(res1.data, { dummy: true });
+    assert.equal(res1.data.voxelCount[2], 1);
     const cookie = await loginAsAlice();
     const res2 = await ax.get('rs/series/111.222.333.444.444/metadata', {
       headers: { Cookie: cookie }

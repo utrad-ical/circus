@@ -3,7 +3,7 @@ import { handleGet } from './index.ts';
 
 export const getPluginDisplay = defineRoute({
   verb: 'get',
-  path: '/plugin-displays/:pluginId/:path+',
+  path: '/plugin-displays/:pluginId/:path{.+}',
   description: 'Returns the display using Webpack Module Federation.',
   noAuthentication: true
 });

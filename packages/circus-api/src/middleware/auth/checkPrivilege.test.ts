@@ -2,9 +2,8 @@ import assert from 'node:assert/strict';
 import { describe, it, before, after } from 'node:test';
 import type { TestHttpClient } from '../../test/util-http.ts';
 import { createTestHttpClient } from '../../test/util-http.ts';
-import Router from 'koa-router';
-import type { TestServer } from '../../test/util-koa.ts';
-import { setUpKoaTest } from '../../test/util-koa.ts';
+import type { TestServer } from '../../test/util-server.ts';
+import { setUpHonoTest } from '../../test/util-server.ts';
 import { setUpMongoFixture, usingModels } from '../../test/util-mongo.ts';
 import { determineUserAccessInfo } from '../../privilegeUtils.ts';
 import checkPrivilege from './checkPrivilege.ts';
@@ -24,32 +23,29 @@ before(async () => {
     'pluginDefinitions',
     'series'
   ]);
-  testServer = await setUpKoaTest(async app => {
+  testServer = await setUpHonoTest(async app => {
     app.use(async (ctx, next) => {
-      ctx.user = await models.user.findByIdOrFail(userEmail);
-      ctx.userPrivileges = await determineUserAccessInfo(models, ctx.user);
+      const user = await models.user.findByIdOrFail(userEmail);
+      ctx.set('user', user);
+      ctx.set('userPrivileges', await determineUserAccessInfo(models, user));
       await next();
     });
-    const router = new Router();
-    // app.use(async (ctx, next) => {
-    // 	try { await next(); } catch (err) { console.log(err); throw err; }
-    // });
-    router.get(
+    app.get(
       '/global',
       checkPrivilege({ models }, { requiredGlobalPrivilege: 'manageServer' }),
-      async (ctx, next) => (ctx.body = 'Protected Area')
+      ctx => ctx.text('Protected Area')
     );
-    router.get(
+    app.get(
       '/case/:caseId',
       checkPrivilege({ models }, { requiredProjectPrivilege: 'read' }),
-      async (ctx, next) => (ctx.body = 'Protected Area')
+      ctx => ctx.text('Protected Area')
     );
-    router.get(
+    app.get(
       '/project/:projectId',
       checkPrivilege({ models }, { requiredProjectPrivilege: 'read' }),
-      async (ctx, next) => (ctx.body = 'Protected Area')
+      ctx => ctx.text('Protected Area')
     );
-    router.get(
+    app.get(
       '/plugin-jobs/:jobId',
       checkPrivilege(
         { models },
@@ -58,9 +54,8 @@ before(async () => {
           requiredPluginPrivilege: 'readPlugin'
         }
       ),
-      async (ctx, next) => (ctx.body = 'Protected Area')
+      ctx => ctx.text('Protected Area')
     );
-    app.use(router.routes());
   });
   ax = createTestHttpClient(testServer.url);
 });
@@ -130,6 +125,6 @@ describe('plugin-job privilege checker', () => {
     const res = await ax.get(resource);
     assert.equal(res.status, 401);
     // bob has readPlugin of this plug-in, but not the domain of the series
-    assert.match(res.data, /privilege to access this plugin-job/);
+    assert.match(res.data.error, /privilege to access this plugin-job/);
   });
 });

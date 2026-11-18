@@ -1,3 +1,4 @@
+import { httpError } from '../../middleware/errorHandler.ts';
 import fs from 'fs-extra';
 import httpStatus from 'http-status';
 import path from 'path';
@@ -13,13 +14,13 @@ export const handleGet: RouteMiddleware<typeof routes.getPluginDisplay> = ({
 }) => {
   const reading = new Map<string, Promise<void>>();
 
-  return async (ctx, next) => {
-    const { pluginId, path: requestPath } = ctx.params;
+  return async ctx => {
+    const { pluginId, path: requestPath } = ctx.req.param();
     if (!/^[a-z0-9]+$/.test(pluginId) || /\.\./.test(requestPath)) {
-      throw ctx.throw(httpStatus.NOT_FOUND);
+      throw httpError(httpStatus.NOT_FOUND);
     }
 
-    if (!pluginId) ctx.throw(httpStatus.NOT_FOUND);
+    if (!pluginId) throw httpError(httpStatus.NOT_FOUND);
     const plugin = await models.plugin.findByIdOrFail(pluginId);
     const displaysDir = path.join(pluginCachePath, pluginId, 'displays');
 
@@ -58,14 +59,14 @@ export const handleGet: RouteMiddleware<typeof routes.getPluginDisplay> = ({
             `Plug-in ${plugin.pluginName} (${pluginId}) does not seem to` +
               'contain the specified file for custom displays.'
           );
-          ctx.throw(httpStatus.NOT_FOUND);
+          throw httpError(httpStatus.NOT_FOUND);
         } else throw err;
-        return '';
       }
     };
 
     const content = await read();
-    ctx.type = 'text/javascript';
-    ctx.body = content;
+    return ctx.body(content, 200, {
+      'Content-Type': 'text/javascript; charset=utf-8'
+    });
   };
 };

@@ -1,39 +1,42 @@
+import type { Server } from 'node:http';
 import type Koa from 'koa';
-
 import type * as ws from 'ws';
 import type WebSocketConnectionHandler from './connection/WebSocketConnectionHandler.ts';
+
+export const attachWebSocketHandlers = (
+  server: Server,
+  wss: ws.WebSocketServer,
+  routes: Record<string, WebSocketConnectionHandler>
+) => {
+  server.on('upgrade', (request, socket, head) => {
+    const pathname = request.url?.split('?', 1)[0];
+    const handler =
+      pathname && Object.hasOwn(routes, pathname)
+        ? routes[pathname]
+        : undefined;
+
+    if (request.headers.upgrade?.toLowerCase() === 'websocket' && handler) {
+      wss.handleUpgrade(request, socket, head, connection => {
+        wss.emit('connection', connection, request);
+        handler(connection, request);
+      });
+    } else {
+      console.log(`Reject upgrade to ${pathname}`);
+      socket.destroy();
+    }
+  });
+};
 
 const withWebSocketConnectionHandlers =
   (
     wss: ws.WebSocketServer,
     routes: Record<string, WebSocketConnectionHandler>
   ) =>
-  (app: Koa<Koa.DefaultState, Koa.DefaultContext>) => {
+  (app: Koa) => {
     const listen = app.listen;
     app.listen = ((...args: Parameters<typeof listen>) => {
       const server = listen.apply(app, args);
-
-      wss.on('connection', function connection(ws: ws.WebSocket, request) {
-        const [pathname] = request.url?.split('?') ?? [];
-        if (pathname && pathname in routes) {
-          const handler = routes[pathname];
-          handler(ws, request);
-        }
-      });
-
-      server.on('upgrade', (request, socket, head) => {
-        const [pathname] = request.url?.split('?') ?? [];
-        const { upgrade } = request.headers;
-        if (upgrade === 'websocket' && pathname in routes) {
-          wss.handleUpgrade(request, socket, head, ws => {
-            wss.emit('connection', ws, request);
-          });
-        } else {
-          console.log(`Reject upgrade to ${pathname}`);
-          socket.destroy();
-        }
-      });
-
+      attachWebSocketHandlers(server, wss, routes);
       return server;
     }) as typeof listen;
   };

@@ -246,7 +246,10 @@ export const prompt = (
       if (error === null) onResolve(input);
     };
     const handleKeyDown = (ev: KeyboardEvent) => {
-      if (ev.key === 'Enter') submit();
+      if (ev.key !== 'Enter' || ev.nativeEvent.isComposing) return;
+      // Otherwise the Enter also clicks the button focused after closing
+      ev.preventDefault();
+      submit();
     };
     return (
       <>

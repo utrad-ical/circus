@@ -19,6 +19,7 @@ import type { Logger, DicomFileRepository } from '@utrad-ical/circus-lib';
 import type { MhdPacker } from '../case/createMhdPacker.ts';
 import type { ProgressManager } from '../createProgressManager.ts';
 import type { SeriesOrientationResolver } from '../utils/createSeriesOrientationResolver.ts';
+import type { VerifyUser } from '../middleware/auth/createVerifyUser.ts';
 
 export interface Deps {
   validator: Validator;
@@ -41,7 +42,7 @@ export interface Deps {
   transactionManager: TransactionManager;
   seriesOrientationResolver: SeriesOrientationResolver;
   /** Verifies a user name and a password (or a onetime password) */
-  verifyUser: (username: string, password: string) => Promise<any | null>;
+  verifyUser: VerifyUser;
   /** Replaceable in tests; defaults to the real Docker-based extractor */
   createDockerFileExtractor?: typeof createDockerFileExtractor;
 }

@@ -21,7 +21,6 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api': proxyTarget,
-      '/login': proxyTarget,
       '/rs': { target: proxyTarget, ws: true, changeOrigin: true }
     }
   }

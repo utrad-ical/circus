@@ -115,6 +115,22 @@ describe('login', () => {
   });
 });
 
+test('accepts a onetime password only once under concurrent requests', async () => {
+  const issued = await apiTest.clients.alice.post('/api/admin/onetime-urls', {
+    user: 'alice@example.com'
+  });
+  assert.equal(issued.status, httpStatus.CREATED);
+  const onetime = { onetime: issued.data.onetimeString };
+  const responses = await Promise.all([
+    ax.post('api/session', onetime, { headers: csrf }),
+    ax.post('api/session', onetime, { headers: csrf })
+  ]);
+  assert.deepEqual(responses.map(response => response.status).sort(), [
+    httpStatus.NO_CONTENT,
+    httpStatus.UNAUTHORIZED
+  ]);
+});
+
 describe('requests with the session cookie', () => {
   test('are authenticated', async () => {
     const cookie = await loginAsAlice();

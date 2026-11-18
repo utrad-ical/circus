@@ -14,10 +14,10 @@ import bodyParser from 'koa-bodyparser';
 import compose from 'koa-compose';
 import mount from 'koa-mount';
 import Router from 'koa-router';
-import { fetchUserFromToken } from './middleware/auth/createOauthServer.ts';
+import { resolveAccessToken } from './middleware/auth/resolveAccessToken.ts';
 import {
-  sessionFromRawRequest,
-  withSessionCookie
+  authenticateRequest,
+  sessionFromRawRequest
 } from './middleware/auth/session.ts';
 import * as path from 'path';
 import querystring from 'querystring';
@@ -34,7 +34,6 @@ import type {
 } from './interface.ts';
 import checkPrivilege from './middleware/auth/checkPrivilege.ts';
 import fixUserMiddleware from './middleware/auth/fixUser.ts';
-import type KoaOAuth2Server from './middleware/auth/KoaOAuth2Server.ts';
 import cors from './middleware/cors.ts';
 import type { RouteGroup } from './defineRoute.ts';
 import errorHandler from './middleware/errorHandler.ts';
@@ -109,7 +108,7 @@ export const createApp: FunctionService<
     progressManager: ProgressManager;
     mhdPacker: MhdPacker;
     dicomVoxelDumper: DicomVoxelDumper;
-    oauthServer: KoaOAuth2Server;
+    verifyUser: Deps['verifyUser'];
     transactionManager: TransactionManager;
     seriesOrientationResolver: SeriesOrientationResolver;
     /** Only used by tests */
@@ -135,7 +134,7 @@ export const createApp: FunctionService<
     progressManager,
     mhdPacker,
     dicomVoxelDumper,
-    oauthServer,
+    verifyUser,
     transactionManager,
     seriesOrientationResolver,
     createDockerFileExtractor
@@ -174,8 +173,7 @@ export const createApp: FunctionService<
     transactionManager,
     seriesOrientationResolver,
     createDockerFileExtractor,
-    verifyUser: (username, password) =>
-      oauthServer.verifyUser(username, password)
+    verifyUser
   };
 
   const apiDir = path.resolve(import.meta.dirname, 'api/**/routes.ts');
@@ -183,7 +181,7 @@ export const createApp: FunctionService<
   // Accepts either a Bearer token (API clients) or the session cookie (web UI)
   const authMiddleware = fixUser
     ? fixUserMiddleware(deps, fixUser)
-    : withSessionCookie(models, oauthServer.authenticate());
+    : authenticateRequest(models);
 
   const apiRouter = await prepareApiRouter(apiDir, deps, debug, authMiddleware);
 
@@ -213,7 +211,6 @@ export const createApp: FunctionService<
       ])
     )
   );
-  koa.use(mount('/login', compose([bodyParser(), oauthServer.token()])));
 
   const rs = new Router();
   rs.use(
@@ -245,13 +242,8 @@ export const createApp: FunctionService<
           (typeof queryToken === 'string' ? queryToken : undefined);
         if (!token) return async () => false;
         const accessibleDomains = (async () => {
-          const data = await fetchUserFromToken(token, models);
-          if (
-            !data ||
-            new Date(data.accessTokenExpiresAt).getTime() < new Date().getTime()
-          )
-            return [];
-          return data.user.userPrivileges.domains;
+          const result = await resolveAccessToken(models, token);
+          return result.ok ? result.userPrivileges.domains : [];
         })();
         return async seriesUid => {
           const domains = await accessibleDomains;
@@ -283,7 +275,7 @@ createApp.dependencies = [
   'progressManager',
   'mhdPacker',
   'dicomVoxelDumper',
-  'oauthServer',
+  'verifyUser',
   'transactionManager',
   'seriesOrientationResolver'
 ];

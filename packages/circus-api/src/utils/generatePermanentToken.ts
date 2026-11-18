@@ -1,8 +1,5 @@
 import { randomBytes } from 'node:crypto';
 import type { Models } from '../interface.ts';
-import { OAuthClientId } from '../middleware/auth/createOauthServer.ts';
-
-// 40 hex digits, the same format node-oauth2-server gives
 const generateRandomToken = () => randomBytes(20).toString('hex');
 
 const generatePermanentToken = async (
@@ -19,7 +16,7 @@ const generatePermanentToken = async (
     accessTokenExpiresAt: expiresAt,
     refreshToken,
     refreshTokenExpiresAt: expiresAt,
-    clientId: OAuthClientId,
+    clientId: 'CIRCUS Front UI', // Retain the existing token record format
     userId: userEmail,
     permanentTokenId,
     permanentTokenDescription: description

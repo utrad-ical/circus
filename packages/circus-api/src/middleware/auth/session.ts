@@ -1,17 +1,14 @@
 import { randomBytes } from 'node:crypto';
 import type koa from 'koa';
 import type { Models } from '../../interface.ts';
+import { resolveAccessToken } from './resolveAccessToken.ts';
 
 type Ctx = koa.ParameterizedContext<any, any>;
 
 /**
  * Browser sessions.
  *
- * A browser session is an access token stored in the `tokens` collection,
- * like the ones issued by the OAuth server, but it is delivered as an
- * HttpOnly cookie instead of being handed to the web UI.
- * Requests with the cookie are authenticated by the OAuth server
- * as if they had the token as a Bearer token.
+ * The browser sends its access token in an HttpOnly session cookie.
  */
 
 export const sessionCookieName = 'circus-session';
@@ -96,30 +93,39 @@ export const endSession = async (ctx: Ctx, models: Models) => {
   ctx.cookies.set(sessionCookieName, null, cookieOptions(ctx));
 };
 
-/**
- * Wraps the OAuth authentication middleware so that a request can be
- * authenticated either with a Bearer token (API clients) or with the
- * session cookie (web UI).
- */
-export const withSessionCookie = (
-  models: Models,
-  authenticate: koa.Middleware
-): koa.Middleware => {
+/** Authenticates API clients with a Bearer token and the web UI with its session cookie. */
+export const authenticateRequest = (models: Models): koa.Middleware => {
   return async (ctx, next) => {
+    const authorization = ctx.get('Authorization');
     const cookie = ctx.cookies.get(sessionCookieName);
-    const byCookie = !ctx.get('Authorization') && !!cookie;
-    if (byCookie) {
-      checkCsrfHeader(ctx);
-      ctx.request.headers.authorization = `Bearer ${cookie}`;
-      ctx.state.authenticatedBySessionCookie = true;
+    const byCookie = !authorization && !!cookie;
+    if (byCookie) checkCsrfHeader(ctx);
+
+    if (ctx.query.access_token || ctx.request.body?.access_token) {
+      ctx.throw(
+        400,
+        'Invalid request: send the access token in the Authorization header'
+      );
     }
-    await authenticate(ctx, async () => {
-      if (byCookie) {
-        checkExpectedUser(ctx);
-        await extendSession(ctx, models);
-      }
-      await next();
-    });
+    const bearer = /^Bearer[ \t]+([^\s,]+)$/i.exec(authorization)?.[1];
+    if (authorization && !bearer) {
+      ctx.throw(400, 'Invalid request: malformed authorization header');
+    }
+    const accessToken = bearer ?? cookie;
+    if (!accessToken) {
+      return ctx.throw(401, 'Unauthorized request: no authentication given');
+    }
+    const result = await resolveAccessToken(models, accessToken);
+    if (!result.ok) return ctx.throw(401, result.error);
+
+    ctx.user = result.user;
+    ctx.userPrivileges = result.userPrivileges;
+    if (byCookie) {
+      ctx.state.authenticatedBySessionCookie = true;
+      checkExpectedUser(ctx);
+      await extendSession(models, result.token);
+    }
+    await next();
   };
 };
 
@@ -144,11 +150,13 @@ const checkExpectedUser = (ctx: Ctx) => {
 /**
  * Extends the expiration of the current session (sliding expiration).
  */
-const extendSession = async (ctx: Ctx, models: Models) => {
-  const token = ctx.state.oauth?.token;
-  if (!token || token.client?.id !== sessionClientId) return;
+const extendSession = async (
+  models: Models,
+  token: Awaited<ReturnType<Models['token']['findById']>>
+) => {
+  if (token.clientId !== sessionClientId) return;
   const now = Date.now();
-  const expiresAt = new Date(token.accessTokenExpiresAt).getTime();
+  const expiresAt = token.accessTokenExpiresAt.getTime();
   if (expiresAt - now > sessionLifetimeMs - extensionIntervalMs) return;
   await models.token.modifyOne(token.accessToken, {
     accessTokenExpiresAt: new Date(now + sessionLifetimeMs)

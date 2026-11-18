@@ -21,7 +21,7 @@ RUN pnpm install --frozen-lockfile && \
 
 # ---------------------------------------------------------------------------
 # web -> circus-web
-# Serves the SPA and proxies /api, /login, /rs to the api service
+# Serves the SPA and proxies /api and /rs to the api service
 # ---------------------------------------------------------------------------
 FROM caddy:2 AS web
 

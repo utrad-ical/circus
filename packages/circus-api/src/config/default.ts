@@ -63,11 +63,6 @@ const defaults: Configuration = {
   authProvider: {
     type: 'DefaultAuthProvider'
   },
-  oauthServer: {
-    options: {
-      fallbackToDefault: false
-    }
-  },
   transactionManager: {
     options: {
       maxCommitTimeMS: 10000

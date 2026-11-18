@@ -1,7 +1,7 @@
 import { defineRoute, defineRouteGroup, route } from '../../defineRoute.ts';
 import { handleGet } from './index.ts';
 
-export const getPluginDisplaysPluginIdPath = defineRoute({
+export const getPluginDisplay = defineRoute({
   verb: 'get',
   path: '/plugin-displays/:pluginId/:path+',
   description: 'Returns the display using Webpack Module Federation.',
@@ -11,5 +11,5 @@ export const getPluginDisplaysPluginIdPath = defineRoute({
 export default defineRouteGroup({
   name: 'Plugin Jobs',
   description: 'Dynamically provides CIRCUS CS displays.',
-  routes: [route(getPluginDisplaysPluginIdPath, handleGet)]
+  routes: [route(getPluginDisplay, handleGet)]
 });

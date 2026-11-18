@@ -3,8 +3,9 @@ import httpStatus from 'http-status';
 import path from 'path';
 import createDockerFileExtractor from '../../utils/dockerFileExtractor.ts';
 import type { RouteMiddleware } from '../../typings/middlewares.ts';
+import type * as routes from './routes.ts';
 
-export const handleGet: RouteMiddleware = ({
+export const handleGet: RouteMiddleware<typeof routes.getPluginDisplay> = ({
   pluginCachePath,
   models,
   logger,
@@ -13,10 +14,7 @@ export const handleGet: RouteMiddleware = ({
   const reading = new Map<string, Promise<void>>();
 
   return async (ctx, next) => {
-    const { pluginId, path: requestPath } = ctx.params as {
-      pluginId: string;
-      path: string;
-    };
+    const { pluginId, path: requestPath } = ctx.params;
     if (!/^[a-z0-9]+$/.test(pluginId) || /\.\./.test(requestPath)) {
       throw ctx.throw(httpStatus.NOT_FOUND);
     }
@@ -32,7 +30,7 @@ export const handleGet: RouteMiddleware = ({
         if (err.code === 'ENOENT') {
           logger.info(
             'Trying to extract custom display files from the plug-in ' +
-              `${plugin.name} (ID: ${pluginId}).`
+              `${plugin.pluginName} (ID: ${pluginId}).`
           );
           if (reading.has(pluginId)) {
             await reading.get(pluginId);
@@ -57,7 +55,7 @@ export const handleGet: RouteMiddleware = ({
       } catch (err: any) {
         if (err.code === 'ENOENT') {
           logger.error(
-            `Plug-in ${plugin.name} (${pluginId}) does not seem to` +
+            `Plug-in ${plugin.pluginName} (${pluginId}) does not seem to` +
               'contain the specified file for custom displays.'
           );
           ctx.throw(httpStatus.NOT_FOUND);

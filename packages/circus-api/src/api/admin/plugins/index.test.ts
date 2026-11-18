@@ -44,6 +44,20 @@ describe('admin/plugins', () => {
     );
   });
 
+  test('should not change the ID or the type', async () => {
+    const res = await axios.get('api/admin/plugins');
+    const pluginId = res.data.items[0].pluginId;
+    for (const data of [{ pluginId: 'other' }, { type: 'CAD' }]) {
+      const res2 = await axios.patch(`api/admin/plugins/${pluginId}`, data);
+      assert.equal(res2.status, httpStatus.BAD_REQUEST);
+    }
+  });
+
+  test('should not be listed for a user without manageServer', async () => {
+    const res = await apiTest.axiosInstances.bob.get('api/admin/plugins');
+    assert.equal(res.status, httpStatus.UNAUTHORIZED);
+  });
+
   test('should point at the invalid field when updating', async () => {
     const res = await axios.get('api/admin/plugins');
     const pluginId = res.data.items[0].pluginId;
@@ -81,38 +95,6 @@ describe('admin/plugins', () => {
     const res2 = await axios.get('api/admin/plugins');
     assert.equal(
       res2.data.items.some((p: any) => p.pluginName === 'NEW-PLUGIN'),
-      true
-    );
-  });
-
-  test('should create remote plugin', async () => {
-    const res = await axios.post('api/admin/plugins', {
-      pluginName: 'NEW-REMOTE-PLUGIN',
-      version: '1.0.0',
-      type: 'CAD+remote',
-      description: 'This is a new remote plug-in',
-      runConfiguration: {
-        adapter: 'HttpRemoteCadAdapter',
-        parameters: {
-          endpoint:
-            'https://abcdefg123.execute-api.ap-northeast-1.amazonaws.com/prod/users',
-          authentification: 'aaaaabbbbcccccdddddeeeee',
-          maxConcurrent: 5,
-          timeout: 300,
-          env: [
-            {
-              encryptSecret: 'rsa:111122223333'
-            }
-          ]
-        }
-      },
-      icon: { glyph: 'calc', color: '#ffffff', backgroundColor: '#555555' },
-      displayStrategy: []
-    });
-    assert.equal(res.status, 201);
-    const res2 = await axios.get('api/admin/plugins');
-    assert.equal(
-      res2.data.items.some((p: any) => p.pluginName === 'NEW-REMOTE-PLUGIN'),
       true
     );
   });

@@ -1,9 +1,7 @@
 import { z } from 'zod';
-import { dbEntry } from './derive.ts';
 import { csRoleNames, dbRoleNames } from './group.ts';
-import { plugin } from './plugin.ts';
+import { pluginDoc } from './plugin.ts';
 import { projectDoc } from './project.ts';
-import { remotePlugin } from './remotePlugin.ts';
 import { userForAdmin } from './user.ts';
 import { userMyList } from './userMyList.ts';
 
@@ -25,7 +23,7 @@ export const userPrivileges = z.strictObject({
     z.strictObject({
       pluginId: z.string(),
       roles: z.array(z.enum(csRoleNames)),
-      plugin: z.union([dbEntry(plugin), dbEntry(remotePlugin)])
+      plugin: pluginDoc
     })
   )
 });

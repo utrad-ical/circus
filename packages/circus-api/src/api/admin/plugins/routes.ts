@@ -1,40 +1,43 @@
-import { z } from 'zod';
 import { defineRoute, defineRouteGroup, route } from '../../../defineRoute.ts';
-import { searchResultOf, withDates } from '../../../schemas/derive.ts';
+import { searchResultOf } from '../../../schemas/derive.ts';
 import { handlePatch, handlePost, handleSearch } from './index.ts';
-import { plugin, remotePlugin } from '../../../schemas/index.ts';
+import {
+  pluginCreate,
+  pluginDoc,
+  pluginPatch
+} from '../../../schemas/index.ts';
 
-export const getAdminPlugins = defineRoute({
+export const searchPlugins = defineRoute({
   verb: 'get',
   path: '/admin/plugins',
   description: 'Gets the list of available plug-ins.',
-  response: searchResultOf(
-    z.union([withDates(plugin), withDates(remotePlugin)])
-  )
+  requiredGlobalPrivilege: 'manageServer',
+  response: searchResultOf(pluginDoc)
 });
 
-export const patchAdminPluginsPluginId = defineRoute({
+export const patchPlugin = defineRoute({
   verb: 'patch',
   path: '/admin/plugins/:pluginId',
-  description: 'Updates plugin definition.',
+  description:
+    'Updates plugin definition. The ID and the type cannot be changed.',
   requiredGlobalPrivilege: 'manageServer',
-  request: z.union([plugin, remotePlugin])
+  request: pluginPatch
 });
 
-export const postAdminPlugins = defineRoute({
+export const postPlugin = defineRoute({
   verb: 'post',
   path: '/admin/plugins',
   description: 'Creates a new plug-in.',
   requiredGlobalPrivilege: 'manageServer',
-  request: z.union([plugin, remotePlugin])
+  request: pluginCreate
 });
 
 export default defineRouteGroup({
   name: 'Plugin Administration',
   description: 'Manages CIRCUS CS Plug-ins',
   routes: [
-    route(getAdminPlugins, handleSearch),
-    route(patchAdminPluginsPluginId, handlePatch),
-    route(postAdminPlugins, handlePost)
+    route(searchPlugins, handleSearch),
+    route(patchPlugin, handlePatch),
+    route(postPlugin, handlePost)
   ]
 });

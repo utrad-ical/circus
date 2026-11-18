@@ -16,7 +16,7 @@ export { onetimeUrlDoc } from './onetimeUrl.ts';
 export { partialVolumeDescriptor } from './partialVolumeDescriptor.ts';
 export { patientInfo } from './patientInfo.ts';
 export { permanentToken } from './permanentToken.ts';
-export { plugin } from './plugin.ts';
+export { plugin, pluginCreate, pluginDoc, pluginPatch } from './plugin.ts';
 export {
   pluginJobDoc,
   pluginJobSearchResult,
@@ -30,7 +30,6 @@ export { pluginJobManager } from './pluginJobManager.ts';
 export { pluginJobSeries } from './pluginJobSeries.ts';
 export { preferences } from './preferences.ts';
 export { projectCreate, projectDoc, projectPatch } from './project.ts';
-export { remotePlugin } from './remotePlugin.ts';
 export { revision, revisionCreate } from './revision.ts';
 export { revisionSeriesEntry } from './revisionSeriesEntry.ts';
 export { schemaEntry } from './schemaEntry.ts';

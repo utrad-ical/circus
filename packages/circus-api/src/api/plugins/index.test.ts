@@ -33,11 +33,3 @@ it('should return plugin definition for CAD type specified by pluginId', async (
   assert.equal(res.status, 200);
   assert.equal(res.data.pluginName, 'MOCK-EMPTY');
 });
-
-it('should return plugin definition for CAD+remote type specified by pluginId', async () => {
-  const res = await axios.get(
-    'api/plugins/rmt-d135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2'
-  );
-  assert.equal(res.status, 200);
-  assert.equal(res.data.pluginName, 'MOCK-EMPTY-REMOTE');
-});

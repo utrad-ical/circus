@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { displayStrategy } from './displayStrategy.ts';
-import { dockerId, semverString } from './formats.ts';
+import { dateField, dockerId, semverString } from './formats.ts';
 import { icon } from './icon.ts';
 
 export const plugin = z
@@ -29,3 +29,15 @@ export const plugin = z
     displayStrategy: displayStrategy.optional()
   })
   .describe('Represents a CIRCUS CS plug-in (app).');
+
+/** Registers a plug-in */
+export const pluginCreate = plugin.required();
+
+/** A plug-in in the database */
+export const pluginDoc = pluginCreate.extend({
+  createdAt: dateField(),
+  updatedAt: dateField()
+});
+
+/** Updates a plug-in, whose ID and type cannot be changed */
+export const pluginPatch = plugin.omit({ pluginId: true, type: true });

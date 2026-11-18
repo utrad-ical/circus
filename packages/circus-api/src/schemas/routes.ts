@@ -1,11 +1,10 @@
 import { z } from 'zod';
 import { dateField, num } from './formats.ts';
 import { myListEditor } from './myListEditor.ts';
-import { plugin } from './plugin.ts';
+import { pluginDoc } from './plugin.ts';
 import { pluginJobFeedback } from './pluginJobFeedback.ts';
 import { pluginJobSeries } from './pluginJobSeries.ts';
 import { preferences } from './preferences.ts';
-import { remotePlugin } from './remotePlugin.ts';
 import { userMyList } from './userMyList.ts';
 
 // Request and response schemas used by a single route.
@@ -98,12 +97,7 @@ export const pluginJobPatch = z.strictObject({
 
 export const pluginJobFeedbacks = z.array(pluginJobFeedback);
 
-const withDates = <T extends z.ZodObject>(schema: T) =>
-  schema.extend({ createdAt: dateField(), updatedAt: dateField() });
-
-export const plugins = z.array(
-  z.union([withDates(plugin), withDates(remotePlugin)])
-);
+export const plugins = z.array(pluginDoc);
 
 export const preferencesPatch = preferences.refine(
   atLeastOneKey,

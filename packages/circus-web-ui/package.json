@@ -45,7 +45,6 @@
     "@utrad-ical/circus-icons": "workspace:*",
     "@utrad-ical/circus-rs": "workspace:*",
     "@utrad-ical/circus-ui-kit": "workspace:*",
-    "axios": "^1.7.7",
     "bytes": "^3.1.2",
     "classnames": "^2.3.1",
     "date-fns": "4.4.0",

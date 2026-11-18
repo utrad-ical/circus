@@ -1,7 +1,7 @@
 import { parse } from 'node:querystring';
 import type { Logger } from '@utrad-ical/circus-lib';
 import { Hono } from 'hono';
-import { corsHeaders } from './middleware/cors.ts';
+import { cors } from 'hono/cors';
 import { formatError } from './middleware/errorHandler.ts';
 import { readJsonBody } from './middleware/validateInOut.ts';
 import type { ApiEnv } from './typings/middlewares.ts';
@@ -16,16 +16,8 @@ export const createHonoApp = ({
   corsOrigin?: string;
 }) => {
   const app = new Hono<ApiEnv>({ strict: false });
-  const cors = corsHeaders(corsOrigin);
   app.use('*', async (ctx, next) => {
-    for (const [name, value] of Object.entries(cors)) ctx.header(name, value);
     logger.trace('Request', ctx.req.method, ctx.req.path);
-    if (
-      ctx.req.method === 'OPTIONS' &&
-      (ctx.req.path === '/api' || ctx.req.path.startsWith('/api/'))
-    ) {
-      return ctx.body(null, 200);
-    }
     const { search } = new URL(ctx.req.url);
     ctx.set('query', parse(search.slice(1)));
     await next();
@@ -34,6 +26,18 @@ export const createHonoApp = ({
       void ctx.res.body?.cancel().catch(error => logger.error(error));
     }
   });
+  if (corsOrigin) {
+    app.use(
+      '/api/*',
+      cors({
+        origin: corsOrigin,
+        allowMethods: ['POST', 'GET', 'PUT', 'OPTIONS', 'PATCH', 'DELETE'],
+        allowHeaders: ['Authorization', 'Content-Type'],
+        credentials: true,
+        maxAge: 86400
+      })
+    );
+  }
   app.use('/api/*', readJsonBody);
   app.onError((error, ctx) => {
     const { status, body, headers } = formatError(error, {

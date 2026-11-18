@@ -27,6 +27,7 @@ before(async () => {
   const server = await createApp(
     {
       debug: true,
+      corsOrigin: 'https://tools.example.org',
       fixUser: 'alice@example.com',
       uploadFileSizeMaxBytes: 200 * 1024 * 1024,
       pluginResultsPath: '', // dummy
@@ -77,6 +78,18 @@ it('should return 404 for root path', async () => {
 it('matches API paths case-sensitively', async () => {
   assert.equal((await ax.get('api/status')).status, 200);
   assert.equal((await ax.get('api/Status')).status, 404);
+});
+
+it('limits RS CORS to the configured origin', async () => {
+  const origin = 'https://tools.example.org';
+  const allowed = await ax.get('rs/missing', { headers: { Origin: origin } });
+  assert.equal(allowed.headers.get('Access-Control-Allow-Origin'), origin);
+  assert.equal(allowed.headers.get('Vary'), 'Origin');
+
+  const denied = await ax.get('rs/missing', {
+    headers: { Origin: 'https://other.example.org' }
+  });
+  assert.equal(denied.headers.get('Access-Control-Allow-Origin'), null);
 });
 
 it('should return 404 for the retired token endpoint', async () => {

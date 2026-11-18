@@ -44,7 +44,6 @@ import {
 } from './middleware/auth/session.ts';
 import { getFixedUser } from './middleware/auth/fixUser.ts';
 import checkPrivilege from './middleware/auth/checkPrivilege.ts';
-import { corsHeaders } from './middleware/cors.ts';
 import { formatError, httpError } from './middleware/errorHandler.ts';
 import { typeCheck } from './middleware/typeCheck.ts';
 import { respondJson, validateRequest } from './middleware/validateInOut.ts';
@@ -233,12 +232,16 @@ export const createApp: FunctionService<
   const apiRequest = getRequestListener(app.fetch, {
     overrideGlobalObjects: false
   });
-  const cors = corsHeaders(corsOrigin);
   const server = createServer((req, res) => {
     const pathname = req.url?.split('?', 1)[0];
     if (pathname === '/rs' || pathname?.startsWith('/rs/')) {
-      for (const [name, value] of Object.entries(cors))
-        res.setHeader(name, value);
+      if (corsOrigin) {
+        if (corsOrigin !== '*') res.appendHeader('Vary', 'Origin');
+        if (corsOrigin === '*' || corsOrigin === req.headers.origin) {
+          res.setHeader('Access-Control-Allow-Origin', corsOrigin);
+          res.setHeader('Access-Control-Allow-Credentials', 'true');
+        }
+      }
       logger.trace('Request', req.method, pathname);
       rsRequest(req, res);
     } else {

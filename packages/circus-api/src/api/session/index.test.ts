@@ -226,8 +226,11 @@ describe('RS', () => {
   });
 
   test('requires authentication', async () => {
-    const res = await ax.get('rs/series/111.222.333.444.444/metadata');
+    const res = await ax.get('rs/series/111.222.333.444.444/metadata', {
+      headers: { Origin: 'https://other.example.org' }
+    });
     assert.equal(res.status, httpStatus.UNAUTHORIZED);
+    assert.equal(res.headers.get('Access-Control-Allow-Origin'), null);
   });
 
   test('checks the domain of the series', async () => {

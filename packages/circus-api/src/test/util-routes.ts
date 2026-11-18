@@ -2,12 +2,11 @@ import type { Deps } from '../typings/middlewares.ts';
 import { after } from 'node:test';
 import type { TestHttpClient } from './util-http.ts';
 import { createTestHttpClient } from './util-http.ts';
-import Router from 'koa-router';
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import path from 'path';
 import createApp from '../createApp.ts';
-import { setUpKoaTestWith } from './util-koa.ts';
+import { setUpTestServer } from './util-server.ts';
 import { connectMongo, setUpMongoFixture } from './util-mongo.ts';
 import type * as cscore from '@utrad-ical/circus-cs-core';
 import createTestLogger from './util-logger.ts';
@@ -16,7 +15,10 @@ import createModels from '../db/createModels.ts';
 import createMemoryStorage from '../storage/MemoryStorage.ts';
 import createDicomImporter from '../createDicomImporter.ts';
 import type { DicomFileRepository } from '@utrad-ical/circus-lib';
-import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib';
+import {
+  MemoryDicomFileRepository,
+  ServiceLoader
+} from '@utrad-ical/circus-lib';
 import createDicomTagReader from '../utils/createDicomTagReader.ts';
 import createDicomUtilityRunner from '../utils/createDicomUtilityRunner.ts';
 import createProgressManager, {
@@ -32,6 +34,8 @@ import createTransactionManager from '../createTransactionManager.ts';
 import createMhdPacker from '../case/createMhdPacker.ts';
 import {
   type DicomExtractorWorker,
+  type RsServices,
+  configureRsServiceLoader,
   dicomImageExtractor
 } from '@utrad-ical/circus-rs/server';
 import * as ws from 'ws';
@@ -81,12 +85,12 @@ export interface ApiTest {
   csCore: cscore.CsCore;
   dicomFileRepository: DicomFileRepository;
   /**
-   * Shuts down the test Koa server and the DB connection.
+   * Shuts down the test HTTP server and the DB connection.
    * Make sure to call this on `after()`.
    */
   tearDown: () => Promise<void>;
   /**
-   * The URL of the test Koa endpoint server.
+   * The URL of the test HTTP endpoint server.
    * The members of `clients` are configured to use this by default.
    */
   url: string;
@@ -153,6 +157,19 @@ export const setUpAppForRoutesTest = async (
     { dispose: async () => {} }
   ) as DicomExtractorWorker;
 
+  const rsLoader = new ServiceLoader<RsServices>();
+  configureRsServiceLoader(rsLoader);
+  rsLoader.registerFactory('rsLogger', async () => apiLogger);
+  rsLoader.registerFactory(
+    'dicomFileRepository',
+    async () => dicomFileRepository
+  );
+  rsLoader.registerFactory(
+    'dicomExtractorWorker',
+    async () => dicomExtractorWorker
+  );
+  const volumeProvider = await rsLoader.get('volumeProvider');
+
   // Writes the received series as `series.json`
   const dicomVoxelDumper: DicomVoxelDumper = {
     dump: series => {
@@ -214,16 +231,8 @@ export const setUpAppForRoutesTest = async (
         blobStorage,
         apiLogger
       }),
-      // Dummy RS routes; a real router is needed because koa-router runs
-      // the middleware registered with `use()` only for matched routes
-      rsSeriesRoutes: (() => {
-        const router = new Router();
-        router.get('/metadata', ctx => {
-          ctx.body = { dummy: true };
-        });
-        return router.routes() as any;
-      })(),
-      volumeProvider: null as any, // dummy
+      rsSeriesRoutes: await rsLoader.get('rsSeriesRoutes'),
+      volumeProvider,
       progressManager,
       dicomVoxelDumper,
       verifyUser: await createVerifyUser(
@@ -250,7 +259,7 @@ export const setUpAppForRoutesTest = async (
     }
   );
 
-  const testServer = await setUpKoaTestWith(app);
+  const testServer = await setUpTestServer(app);
 
   // Prepare HTTP clients that kick HTTP requests as these users
   const clientForToken = (token: string) =>

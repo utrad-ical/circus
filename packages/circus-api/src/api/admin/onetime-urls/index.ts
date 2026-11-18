@@ -1,3 +1,4 @@
+import { httpError } from '../../../middleware/errorHandler.ts';
 import type { RouteMiddleware } from '../../../typings/middlewares.ts';
 import type * as routes from './routes.ts';
 import generateUniqueId from '../../../utils/generateUniqueId.ts';
@@ -12,21 +13,20 @@ const randomStr = (length: number = 32) =>
 export const handlePost: RouteMiddleware<typeof routes.postOnetimeUrl> = ({
   models
 }) => {
-  return async (ctx, next) => {
+  return async (ctx, json) => {
     const onetimeUrlId = generateUniqueId();
-    const { user } = ctx.request.body;
+    const { user } = ctx.req.valid('json');
     const onetimeString = randomStr();
 
     const userData = await models.user.findAll({
       $or: [{ userEmail: user }, { loginId: user }]
     });
-    if (userData.length !== 1) ctx.throw(status.NOT_FOUND);
-    if (!userData[0].loginEnabled) ctx.throw(status.BAD_REQUEST);
+    if (userData.length !== 1) throw httpError(status.NOT_FOUND);
+    if (!userData[0].loginEnabled) throw httpError(status.BAD_REQUEST);
 
     const { userEmail } = userData[0];
 
     await models.onetimeUrl.insert({ onetimeUrlId, userEmail, onetimeString });
-    ctx.body = { onetimeString };
-    ctx.status = status.CREATED;
+    return json({ onetimeString }, status.CREATED);
   };
 };

@@ -1,33 +1,23 @@
-import status from 'http-status';
-import type { Middleware } from 'koa';
+import type { CircusMiddleware } from '../typings/middlewares.ts';
+import { httpError } from './errorHandler.ts';
+import { contentType } from './validateInOut.ts';
 
-const typeCheck: (expectedType?: string) => Middleware = (
-  expectedType = 'application/json'
-) => {
-  return async function typeCheck(ctx, next) {
+export const typeCheck =
+  (expectedType = 'application/json'): CircusMiddleware =>
+  async (ctx, next) => {
+    const body = ctx.var.jsonBody;
     if (
-      !/^(POST|PUT|PATCH)$/.test(ctx.request.method) ||
-      ctx.request.body.length === 0
+      /^(POST|PUT|PATCH)$/.test(ctx.req.method) &&
+      !(Array.isArray(body) && body.length === 0)
     ) {
-      await next();
-      return;
-    }
-
-    if (typeof ctx.request.type !== 'string' || ctx.request.type.length === 0) {
-      ctx.throw(status.BAD_REQUEST, 'Content-type is unspecified.');
-      return;
-    }
-
-    const contentType = /^([^;]*)/.exec(ctx.request.type)![1];
-    if (contentType !== expectedType) {
-      ctx.throw(
-        status.UNSUPPORTED_MEDIA_TYPE,
-        'This content-type is unsupported. Expected ' + expectedType
-      );
-      return;
+      const type = contentType(ctx);
+      if (!type) throw httpError(400, 'Content-type is unspecified.');
+      if (type !== expectedType) {
+        throw httpError(
+          415,
+          'This content-type is unsupported. Expected ' + expectedType
+        );
+      }
     }
     await next();
   };
-};
-
-export default typeCheck;

@@ -83,5 +83,5 @@ export interface AuthProvider {
 }
 
 export interface TransactionManager {
-  withTransaction: (fn: (models: Models) => Promise<void>) => Promise<void>;
+  withTransaction: <T>(fn: (models: Models) => Promise<T>) => Promise<T>;
 }

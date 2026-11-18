@@ -1,14 +1,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import cors from './cors.ts';
-import { setUpKoaTest } from '../test/util-koa.ts';
+import { setUpHonoTest } from '../test/util-server.ts';
 
 test('cors', async () => {
-  const testServer = await setUpKoaTest(async app => {
-    app.use(cors('*'));
-    app.use(ctx => {
-      ctx.body = 'hi';
-    });
+  const testServer = await setUpHonoTest(async app => {
+    app.get('/', ctx => ctx.text('hi'));
   });
 
   try {

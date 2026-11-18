@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import { test, before, after, describe } from 'node:test';
 import { createTestHttpClient } from '../../test/util-http.ts';
@@ -214,6 +215,16 @@ describe('logout', () => {
 });
 
 describe('RS', () => {
+  before(async () => {
+    const file = await readFile(
+      new URL('../../../test/dicom/CT-MONO2-16-brain.dcm', import.meta.url)
+    );
+    const series = await apiTest.dicomFileRepository.getSeries(
+      '111.222.333.444.444'
+    );
+    await series.save(1, Uint8Array.from(file).buffer);
+  });
+
   test('requires authentication', async () => {
     const res = await ax.get('rs/series/111.222.333.444.444/metadata');
     assert.equal(res.status, httpStatus.UNAUTHORIZED);
@@ -237,7 +248,7 @@ describe('RS', () => {
       'rs/series/111.222.333.444.444/metadata'
     );
     assert.equal(res1.status, httpStatus.OK);
-    assert.deepEqual(res1.data, { dummy: true });
+    assert.equal(res1.data.voxelCount[2], 1);
     const cookie = await loginAsAlice();
     const res2 = await ax.get('rs/series/111.222.333.444.444/metadata', {
       headers: { Cookie: cookie }

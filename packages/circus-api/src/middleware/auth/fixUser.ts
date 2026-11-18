@@ -1,22 +1,8 @@
 import { determineUserAccessInfo } from '../../privilegeUtils.ts';
-import type { Middleware } from 'koa';
 import type { Models } from '../../interface.ts';
 
-/**
- * This middleware is used in place of token authentication when "fix-user" mode
- * is used for debugging purpose. It injects a fixed user into the `ctx`.
- */
-const fixUser: (deps: { models: Models }, userEmail: string) => Middleware = (
-  { models },
-  userEmail
-) => {
-  return async function fixUser(ctx, next) {
-    const user = await models.user.findByIdOrFail(userEmail);
-    const privileges = await determineUserAccessInfo(models, user);
-    ctx.user = user;
-    ctx.userPrivileges = privileges;
-    await next();
-  };
+export const getFixedUser = async (models: Models, userEmail: string) => {
+  const user = await models.user.findByIdOrFail(userEmail);
+  const userPrivileges = await determineUserAccessInfo(models, user);
+  return { user, userPrivileges, byCookie: false };
 };
-
-export default fixUser;

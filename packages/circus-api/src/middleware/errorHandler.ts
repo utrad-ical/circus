@@ -1,84 +1,71 @@
-import status from 'http-status';
-import type koa from 'koa';
+import { STATUS_CODES } from 'node:http';
+import { HTTPException } from 'hono/http-exception';
+import type { ContentfulStatusCode } from 'hono/utils/http-status';
+import type { Logger } from '@utrad-ical/circus-lib';
 import { ValidationError } from '../createValidator.ts';
 
 interface Options {
   includeErrorDetails: boolean;
-  logger: any;
+  logger: Logger;
 }
 
-/**
- * Creates an error handler middleware that always outputs JSON
- * as a HTTP response regardless of the cause of the error.
- */
-const errorHandler: (options: Options) => koa.Middleware = ({
-  includeErrorDetails = false,
-  logger
-}) => {
-  return async function errorHandler(ctx, next) {
-    try {
-      logger.trace('Request', ctx.request.method, ctx.request.path);
-      await next();
-      if (ctx.status === status.NOT_FOUND) {
-        ctx.throw(status.NOT_FOUND, 'Not found');
-      }
-    } catch (err: unknown) {
-      logger.trace(err);
-      if (err instanceof ValidationError) {
-        // JSON validation error occurred.
-        if (err.phase === 'response') {
-          // Response validation error.
-          // This means there is a bug on the server-side,
-          // or the database is corrupted.
-          ctx.status = status.INTERNAL_SERVER_ERROR;
-          ctx.body = {
-            error: 'Response schema validation error detected.'
-          };
-        } else if (err.phase === 'request') {
-          // Request validation error.
-          // This just means the user has sent wrong data that does
-          // not fulfill some JSON schema.
-          ctx.status = status.BAD_REQUEST;
-          ctx.body = {
-            error: 'Validation failed.',
-            issues: err.issues.map(({ path, message }) => ({ path, message }))
-          };
-        } else {
-          ctx.status = status.INTERNAL_SERVER_ERROR;
-          ctx.body = {
-            error: 'Unexpected validation error.'
-          };
+export const httpError = (
+  status: number,
+  message: string | Error = STATUS_CODES[status] ?? 'HTTP error',
+  headers?: HeadersInit
+) =>
+  Object.assign(
+    new HTTPException(status as ContentfulStatusCode, {
+      message: typeof message === 'string' ? message : message.message,
+      ...(headers && { res: new Response(null, { headers }) })
+    }),
+    { expose: status < 500 }
+  );
+
+export const formatError = (
+  error: unknown,
+  { includeErrorDetails, logger }: Options
+) => {
+  if (error instanceof ValidationError) {
+    if (error.phase === 'request') {
+      return {
+        status: 400 as const,
+        body: {
+          error: 'Validation failed.',
+          issues: error.issues.map(({ path, message }) => ({ path, message }))
         }
-        return;
-      } else {
-        // Other exceptions thrown.
-        const error = err as {
-          status?: number;
-          message?: string;
-          stack?: string;
-        };
-        if (!error.status) {
-          // Exception without `status` means some unexpected
-          // run-time error happened outside of `ctx.throw()`.
-          logger.error(error);
-          ctx.status = status.INTERNAL_SERVER_ERROR;
-          if (includeErrorDetails) {
-            ctx.body = { error: error.message, stack: error.stack };
-          } else {
-            ctx.body = { error: 'Internal server error.' };
-          }
-        } else {
-          // Exception with `status` means `ctx.throw()` was
-          // manually called somewhere in our codebase.
-          // (We have successfully handled an exceptional event!)
-          logger.info('HTTP error with status ' + error.status);
-          logger.info(error);
-          ctx.status = error.status;
-          ctx.body = { error: error.message };
-        }
-      }
+      };
     }
+    return {
+      status: 500 as const,
+      body: {
+        error:
+          error.phase === 'response'
+            ? 'Response schema validation error detected.'
+            : 'Unexpected validation error.'
+      }
+    };
+  }
+
+  const { status, message, stack } =
+    error instanceof Error
+      ? (error as Error & { status?: ContentfulStatusCode })
+      : { status: undefined, message: String(error), stack: undefined };
+  if (status) {
+    logger.info('HTTP error with status ' + status);
+    logger.info(error);
+    return {
+      status,
+      body: { error: message },
+      headers: error instanceof HTTPException ? error.res?.headers : undefined
+    };
+  }
+
+  logger.error(error);
+  return {
+    status: 500 as const,
+    body: includeErrorDetails
+      ? { error: message, stack }
+      : { error: 'Internal server error.' }
   };
 };
-
-export default errorHandler;

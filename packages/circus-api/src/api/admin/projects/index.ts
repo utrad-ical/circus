@@ -7,42 +7,43 @@ import type * as routes from './routes.ts';
 export const handleSearch: RouteMiddleware<typeof routes.getProjects> = ({
   models
 }) => {
-  return async (ctx, next) => {
-    await performSearch(models.project, {}, ctx, {
-      defaultSort: { updatedAt: -1 },
-      allowUnlimited: true
-    });
+  return async (ctx, json) => {
+    return json(
+      await performSearch(models.project, {}, ctx, {
+        defaultSort: { updatedAt: -1 },
+        allowUnlimited: true
+      })
+    );
   };
 };
 
 export const handleGet: RouteMiddleware<typeof routes.getProject> = ({
   models
 }) => {
-  return async (ctx, next) => {
-    const projectId = ctx.params.projectId;
+  return async (ctx, json) => {
+    const projectId = ctx.req.param().projectId;
     const project = await models.project.findByIdOrFail(projectId);
-    ctx.body = project;
+    return json(project);
   };
 };
 
 export const handlePatch: RouteMiddleware<typeof routes.patchProject> = ({
   models
 }) => {
-  return async (ctx, next) => {
-    const projectId = ctx.params.projectId;
-    await models.project.modifyOne(projectId, ctx.request.body);
-    ctx.body = null;
+  return async ctx => {
+    const projectId = ctx.req.param().projectId;
+    await models.project.modifyOne(projectId, ctx.req.valid('json'));
+    return ctx.body(null, 204);
   };
 };
 
 export const handlePost: RouteMiddleware<typeof routes.postProject> = ({
   models
 }) => {
-  return async (ctx, next) => {
+  return async (ctx, json) => {
     const projectId = generateUniqueId();
-    const inserting = { ...ctx.request.body, projectId };
+    const inserting = { ...ctx.req.valid('json'), projectId };
     await models.project.insert(inserting);
-    ctx.body = { projectId };
-    ctx.status = status.CREATED;
+    return json({ projectId }, status.CREATED);
   };
 };

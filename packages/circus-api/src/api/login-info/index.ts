@@ -3,12 +3,12 @@ import type * as routes from './routes.ts';
 import { findMyListsOf, toUserMyList } from '../mylists/index.ts';
 
 export const handleGet: RouteMiddleware<typeof routes.getLoginInfo> = () => {
-  return async (ctx, next) => {
-    const user = ctx.user;
-    ctx.body = {
+  return async (ctx, json) => {
+    const user = ctx.var.user;
+    return json({
       userEmail: user.userEmail,
       loginId: user.loginId
-    };
+    });
   };
 };
 
@@ -16,8 +16,8 @@ export const handleGetFull: RouteMiddleware<typeof routes.getLoginInfoFull> = ({
   models,
   dicomImageServerUrl
 }) => {
-  return async (ctx, next) => {
-    const { password, ...user } = ctx.user;
+  return async (ctx, json) => {
+    const { password, ...user } = ctx.var.user;
     const groups = (
       await models.group.findAll({
         groupId: { $in: user.groups }
@@ -28,7 +28,7 @@ export const handleGetFull: RouteMiddleware<typeof routes.getLoginInfoFull> = ({
     )?.value;
     const defaultDomain =
       typeof defaultDomainValue === 'string' &&
-      ctx.userPrivileges.domains.includes(defaultDomainValue)
+      ctx.var.userPrivileges.domains.includes(defaultDomainValue)
         ? defaultDomainValue
         : null;
 
@@ -48,14 +48,14 @@ export const handleGetFull: RouteMiddleware<typeof routes.getLoginInfoFull> = ({
     }));
     const myLists = await findMyListsOf(models, user.userEmail);
 
-    ctx.body = {
+    return json({
       ...user,
-      ...ctx.userPrivileges,
+      ...ctx.var.userPrivileges,
       groups,
       defaultDomain,
       myLists,
       sharedMyLists,
       dicomImageServer: dicomImageServerUrl
-    };
+    });
   };
 };

@@ -1,3 +1,4 @@
+import { httpError } from '../middleware/errorHandler.ts';
 import status from 'http-status';
 import type { CollectionAccessor } from '../db/createCollectionAccessor.ts';
 import type { CircusContext } from '../typings/middlewares.ts';
@@ -30,7 +31,7 @@ export const isPatientInfoInFilter = (filter: { [key: string]: any }) => {
  * built by `mongoFilter()`.
  */
 export const extractFilter = (ctx: CircusContext, schema: z.ZodType) => {
-  const urlQuery = ctx.request.query;
+  const urlQuery = ctx.var.query;
   let filter: object;
   try {
     filter = urlQuery.filter
@@ -39,7 +40,10 @@ export const extractFilter = (ctx: CircusContext, schema: z.ZodType) => {
         ) as object)
       : {};
   } catch (err) {
-    ctx.throw(status.BAD_REQUEST, 'Invalid JSON was passed as a filter string');
+    throw httpError(
+      status.BAD_REQUEST,
+      'Invalid JSON was passed as a filter string'
+    );
   }
   try {
     return validate(schema, filter, 'check') as { [key: string]: any };
@@ -57,7 +61,7 @@ const extractSearchOptions = (
   defaultSort: object,
   allowUnlimited: boolean
 ) => {
-  const urlQuery = ctx.request.query;
+  const urlQuery = ctx.var.query;
 
   const first = (query: string[] | string) =>
     Array.isArray(query) ? query[0] : query;
@@ -67,17 +71,23 @@ const extractSearchOptions = (
     try {
       sort = JSON.parse(first(urlQuery.sort));
     } catch (err) {
-      ctx.throw(status.BAD_REQUEST, 'Bad sort parameter. Invalid JSON.');
+      throw httpError(status.BAD_REQUEST, 'Bad sort parameter. Invalid JSON.');
     }
     if (typeof sort !== 'object' || sort === null || Array.isArray(sort)) {
-      ctx.throw(status.BAD_REQUEST, 'Bad sort parameter. Non-object passed.');
+      throw httpError(
+        status.BAD_REQUEST,
+        'Bad sort parameter. Non-object passed.'
+      );
     }
     if (Object.keys(sort).length > 5) {
-      ctx.throw(status.BAD_REQUEST, 'Bad sort parameter. Too many sort keys.');
+      throw httpError(
+        status.BAD_REQUEST,
+        'Bad sort parameter. Too many sort keys.'
+      );
     }
     for (const k in sort) {
       if (sort[k] !== 1 && sort[k] !== -1) {
-        ctx.throw(
+        throw httpError(
           status.BAD_REQUEST,
           'Bad sort parameter. Invalid key/value pair.'
         );
@@ -92,7 +102,7 @@ const extractSearchOptions = (
       ? 9999
       : parseInt(first(urlQuery.limit ?? '20'), 10);
   if (limit > 200 && !allowUnlimited) {
-    ctx.throw(
+    throw httpError(
       status.BAD_REQUEST,
       'You cannot query more than 200 items at a time.'
     );
@@ -193,10 +203,10 @@ export const performAggregationSearch = async (
       transform: opts.transform,
       maxCount: opts.maxCount
     });
-    ctx.body = { items, totalItems, page: query.page };
+    return { items, totalItems, page: query.page };
   } catch (err: any) {
     if (err.code === 2) {
-      ctx.throw(status.BAD_REQUEST, 'Invalid query');
+      throw httpError(status.BAD_REQUEST, 'Invalid query');
     } else {
       throw err;
     }
@@ -232,10 +242,10 @@ const performSearch = async (
     });
     const totalItems = await model.findAsCursor(filter).count();
     const results = transform ? rawResults.map(transform) : rawResults;
-    ctx.body = { items: results, totalItems, page };
+    return { items: results, totalItems, page };
   } catch (err: any) {
     if (err.code === 2) {
-      ctx.throw(status.BAD_REQUEST, 'Invalid query');
+      throw httpError(status.BAD_REQUEST, 'Invalid query');
     } else {
       throw err;
     }

@@ -1,8 +1,10 @@
+import { httpError } from '../../middleware/errorHandler.ts';
 import status from 'http-status';
 import type { RouteMiddleware } from '../../typings/middlewares.ts';
 import type * as routes from './routes.ts';
 import {
   checkCsrfHeader,
+  csrfHeaderName,
   endSession,
   startSession
 } from '../../middleware/auth/session.ts';
@@ -11,10 +13,10 @@ export const handlePost: RouteMiddleware<typeof routes.postSession> = ({
   models,
   verifyUser
 }) => {
-  return async (ctx, next) => {
+  return async ctx => {
     // Prevents other sites from logging the user in as someone else
-    checkCsrfHeader(ctx);
-    const body = ctx.request.body;
+    checkCsrfHeader(ctx.req.method, ctx.req.header(csrfHeaderName));
+    const body = ctx.req.valid('json');
     // For a onetime password, pass the same value in both fields.
     const [username, password] =
       'onetime' in body
@@ -22,21 +24,20 @@ export const handlePost: RouteMiddleware<typeof routes.postSession> = ({
         : [body.username, body.password];
     const user = await verifyUser(username, password);
     if (!user || !user.loginEnabled) {
-      return ctx.throw(status.UNAUTHORIZED, 'Invalid credentials.');
+      throw httpError(status.UNAUTHORIZED, 'Invalid credentials.');
     }
     // Replaces the session of another user, if any
-    await endSession(ctx, models);
     await startSession(ctx, models, user.userEmail);
-    ctx.body = null; // No content
+    return ctx.body(null, 204); // No content
   };
 };
 
 export const handleDelete: RouteMiddleware<typeof routes.deleteSession> = ({
   models
 }) => {
-  return async (ctx, next) => {
-    checkCsrfHeader(ctx);
+  return async ctx => {
+    checkCsrfHeader(ctx.req.method, ctx.req.header(csrfHeaderName));
     await endSession(ctx, models);
-    ctx.body = null; // No content
+    return ctx.body(null, 204); // No content
   };
 };

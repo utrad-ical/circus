@@ -2,11 +2,12 @@ import assert from 'node:assert/strict';
 import { it, before, after } from 'node:test';
 import type { TestHttpClient } from './test/util-http.ts';
 import { createTestHttpClient } from './test/util-http.ts';
-import type { TestServer } from './test/util-koa.ts';
-import { setUpKoaTestWith } from './test/util-koa.ts';
+import type { TestServer } from './test/util-server.ts';
+import { setUpTestServer } from './test/util-server.ts';
 import createTestLogger from './test/util-logger.ts';
 import { setUpMongoFixture, usingModels } from './test/util-mongo.ts';
 import createApp from './createApp.ts';
+import { createHonoApp } from './createHonoApp.ts';
 import * as ws from 'ws';
 
 let testServer: TestServer, ax: TestHttpClient;
@@ -23,7 +24,7 @@ before(async () => {
     'pluginDefinitions'
   ]);
   const apiLogger = await createTestLogger();
-  const koaApp = await createApp(
+  const server = await createApp(
     {
       debug: true,
       fixUser: 'alice@example.com',
@@ -60,7 +61,7 @@ before(async () => {
     }
   );
 
-  testServer = await setUpKoaTestWith(koaApp);
+  testServer = await setUpTestServer(server);
   ax = createTestHttpClient(testServer.url);
 });
 
@@ -111,4 +112,23 @@ it('should return input data as-is', async () => {
   const data = { a: 10, b: 'test', c: { d: 999, e: 'TEST' } };
   const res = await ax.post('api/echo', data);
   assert.deepEqual(res.data, data);
+});
+
+it('cancels response streams on HEAD', async () => {
+  const app = createHonoApp({ logger: await createTestLogger() });
+  let cancelled = false;
+  app.get('/api/stream', ctx =>
+    ctx.body(
+      new ReadableStream({
+        cancel() {
+          cancelled = true;
+        }
+      })
+    )
+  );
+
+  const response = await app.request('/api/stream', { method: 'HEAD' });
+  assert.equal(response.status, 200);
+  assert.equal(response.body, null);
+  assert.equal(cancelled, true);
 });

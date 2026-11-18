@@ -15,7 +15,7 @@ import type {
   TransactionManager
 } from './interface.ts';
 import type Storage from './storage/Storage.ts';
-import type Koa from 'koa';
+import type { Server } from 'node:http';
 import type { DicomUtilityRunner } from './utils/createDicomUtilityRunner.ts';
 import createDicomUtilityRunner from './utils/createDicomUtilityRunner.ts';
 import type { MhdPacker } from './case/createMhdPacker.ts';
@@ -25,7 +25,7 @@ import type { SeriesOrientationResolver } from './utils/createSeriesOrientationR
 
 export type Services = CsCoreServices &
   RsServices & {
-    app: Koa;
+    apiServer: Server;
     database: Database;
     apiLogger: Logger;
     validator: Validator;

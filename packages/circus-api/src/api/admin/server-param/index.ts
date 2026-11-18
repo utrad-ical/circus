@@ -4,43 +4,43 @@ import type * as routes from './routes.ts';
 export const handleSearch: RouteMiddleware<typeof routes.getServerParams> = ({
   models
 }) => {
-  return async (ctx, next) => {
+  return async (ctx, json) => {
     const params = await models.serverParam.findAll();
     const results: { [key: string]: unknown } = {};
     params.forEach(p => (results[p.key] = p.value));
-    ctx.body = results;
+    return json(results);
   };
 };
 
 export const handleGet: RouteMiddleware<typeof routes.getServerParam> = ({
   models
 }) => {
-  return async (ctx, next) => {
-    const key = ctx.params.key;
+  return async (ctx, json) => {
+    const key = ctx.req.param().key;
     const param = await models.serverParam.findByIdOrFail(key);
-    ctx.body = param.value;
+    return json(param.value);
   };
 };
 
 export const handlePutOne: RouteMiddleware<typeof routes.putServerParam> = ({
   models
 }) => {
-  return async (ctx, next) => {
-    const key = ctx.params.key;
-    const value = ctx.request.body;
+  return async ctx => {
+    const key = ctx.req.param().key;
+    const value = ctx.req.valid('json');
     await models.serverParam.upsert(key, { value });
-    ctx.body = null; // No Content
+    return ctx.body(null, 204); // No Content
   };
 };
 
 export const handlePutAll: RouteMiddleware<typeof routes.putServerParams> = ({
   models
 }) => {
-  return async (ctx, next) => {
-    const values = ctx.request.body;
+  return async ctx => {
+    const values = ctx.req.valid('json');
     for (const key in values) {
       await models.serverParam.upsert(key, { value: values[key] });
     }
-    ctx.body = null; // No Content
+    return ctx.body(null, 204); // No Content
   };
 };

@@ -1,3 +1,4 @@
+import { httpError } from '../../middleware/errorHandler.ts';
 import status from 'http-status';
 import rawBody from 'raw-body';
 import { createHash } from 'crypto';
@@ -14,14 +15,15 @@ const sha1 = (buf: Buffer) => {
 export const handleGet: RouteMiddleware<typeof routes.getBlobHash> = ({
   blobStorage
 }) => {
-  return async (ctx, next) => {
-    const hash = ctx.params.hash;
+  return async ctx => {
+    const hash = ctx.req.param().hash;
     try {
       const file = await blobStorage.read(hash);
-      ctx.type = 'application/octet-stream';
-      ctx.body = file;
+      return ctx.body(new Uint8Array(file), 200, {
+        'Content-Type': 'application/octet-stream'
+      });
     } catch (err) {
-      ctx.throw(status.NOT_FOUND);
+      throw httpError(status.NOT_FOUND);
     }
   };
 };
@@ -29,22 +31,21 @@ export const handleGet: RouteMiddleware<typeof routes.getBlobHash> = ({
 export const handlePut: RouteMiddleware<typeof routes.putBlobHash> = ({
   blobStorage
 }) => {
-  return async (ctx, next) => {
+  return async ctx => {
     const incoming = /^(x-)?gzip$/.test(
-      ctx.req.headers['content-encoding'] ?? ''
+      ctx.env.incoming.headers['content-encoding'] ?? ''
     )
-      ? ctx.req.pipe(createGunzip())
-      : ctx.req;
+      ? ctx.env.incoming.pipe(createGunzip())
+      : ctx.env.incoming;
     const file = await rawBody(incoming, { limit: '20mb' });
-    const hash = ctx.params.hash;
+    const hash = ctx.req.param().hash;
     if (file.length === 0) {
-      ctx.throw(status.BAD_REQUEST, 'Empty content was sent.');
+      throw httpError(status.BAD_REQUEST, 'Empty content was sent.');
     }
     if (sha1(file) !== hash) {
-      ctx.throw(status.BAD_REQUEST, 'Hash mismatch.');
+      throw httpError(status.BAD_REQUEST, 'Hash mismatch.');
     }
     await blobStorage.write(hash, file);
-    ctx.body = null;
-    ctx.status = status.CREATED;
+    return ctx.body(null, 201);
   };
 };

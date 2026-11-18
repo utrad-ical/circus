@@ -13,41 +13,43 @@ const removePassword = <T extends { password: string }>(user: T) => {
 export const handleSearch: RouteMiddleware<typeof routes.getUsers> = ({
   models
 }) => {
-  return async (ctx, next) => {
-    await performSearch(models.user, {}, ctx, {
-      transform: removePassword,
-      defaultSort: { createdAt: -1 }
-    });
+  return async (ctx, json) => {
+    return json(
+      await performSearch(models.user, {}, ctx, {
+        transform: removePassword,
+        defaultSort: { createdAt: -1 }
+      })
+    );
   };
 };
 
 export const handleGet: RouteMiddleware<typeof routes.getUser> = ({
   models
 }) => {
-  return async (ctx, next) => {
-    const user = await models.user.findByIdOrFail(ctx.params.userEmail);
-    ctx.body = removePassword(user);
+  return async (ctx, json) => {
+    const user = await models.user.findByIdOrFail(ctx.req.param().userEmail);
+    return json(removePassword(user));
   };
 };
 
 export const handlePatch: RouteMiddleware<typeof routes.patchUser> = ({
   models
 }) => {
-  return async (ctx, next) => {
-    const { password, ...updating } = ctx.request.body;
-    await models.user.modifyOne(ctx.params.userEmail, {
+  return async ctx => {
+    const { password, ...updating } = ctx.req.valid('json');
+    await models.user.modifyOne(ctx.req.param().userEmail, {
       ...updating,
       ...(password ? { password: nodepass.hash(password) } : {})
     });
-    ctx.body = null;
+    return ctx.body(null, 204);
   };
 };
 
 export const handlePost: RouteMiddleware<typeof routes.postUser> = ({
   models
 }) => {
-  return async (ctx, next) => {
-    const { password, preferences, ...rest } = ctx.request.body;
+  return async (ctx, json) => {
+    const { password, preferences, ...rest } = ctx.req.valid('json');
     await models.user.insert({
       ...rest,
       preferences: { ...defaultPreferences(), ...preferences },
@@ -55,7 +57,6 @@ export const handlePost: RouteMiddleware<typeof routes.postUser> = ({
       lastLoginTime: new Date(0),
       lastLoginIp: ''
     });
-    ctx.body = { userEmail: rest.userEmail };
-    ctx.status = status.CREATED;
+    return json({ userEmail: rest.userEmail }, status.CREATED);
   };
 };

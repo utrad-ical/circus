@@ -131,8 +131,8 @@ export default defineRouteGroup({
     route(getPluginJob, handleGet),
     route(getAttachmentList, handleGetAttachmentList),
     route(getAttachment, handleGetAttachment),
-    route(postConsensualFeedback, handlePostFeedback),
-    route(postPersonalFeedback, handlePostFeedback),
+    route(postConsensualFeedback, handlePostFeedback(true)),
+    route(postPersonalFeedback, handlePostFeedback(false)),
     route(getFeedbacks, handleGetFeedback),
     route(deleteFeedback, handleDeleteFeedback)
   ]

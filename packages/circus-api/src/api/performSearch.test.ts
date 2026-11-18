@@ -2,8 +2,8 @@ import { withDates } from '../schemas/derive.ts';
 import testSchemas from '../../test/test-schemas.ts';
 import assert from 'node:assert/strict';
 import { describe, test, it, before, after } from 'node:test';
-import type { TestServer } from '../test/util-koa.ts';
-import { setUpKoaTest } from '../test/util-koa.ts';
+import type { TestServer } from '../test/util-server.ts';
+import { setUpHonoTest } from '../test/util-server.ts';
 import { setUpMongoFixture, usingMongo } from '../test/util-mongo.ts';
 
 import performSearch, {
@@ -25,7 +25,7 @@ before(async () => {
   const db = (await dbPromise).database.db;
   disposeMongo = (await dbPromise).dispose;
   await setUpMongoFixture(db, ['items']);
-  testServer = await setUpKoaTest(async app => {
+  testServer = await setUpHonoTest(async app => {
     const validator = await createValidator(undefined);
     items = createCollectionAccessor(db, validator, {
       name: 'item',
@@ -33,13 +33,15 @@ before(async () => {
       collectionName: 'items',
       primaryKey: 'itemId'
     });
-    app.use(async (ctx, next) => {
-      const q = ctx.request.query.q as string;
+    app.get('/', async ctx => {
+      const q = ctx.var.query.q as string;
       const filter = q && q.length ? JSON.parse(q) : {};
       try {
-        await performSearch(items, filter, ctx as any, {
-          defaultSort: { price: -1 }
-        });
+        return ctx.json(
+          await performSearch(items, filter, ctx, {
+            defaultSort: { price: -1 }
+          })
+        );
       } catch (err: any) {
         console.error(err.issues);
         throw err;

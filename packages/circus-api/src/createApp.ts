@@ -1,26 +1,25 @@
+import { createServer } from 'node:http';
+import type { Server } from 'node:http';
+import * as path from 'node:path';
+import { parse } from 'node:querystring';
+import { getRequestListener } from '@hono/node-server';
+import { getCookie } from 'hono/cookie';
+import { getPathNoStrict } from 'hono/utils/url';
 import type { CsCore, DicomVoxelDumper } from '@utrad-ical/circus-cs-core';
 import type {
   DicomFileRepository,
   FunctionService,
   Logger
 } from '@utrad-ical/circus-lib';
-import type { VolumeProvider } from '@utrad-ical/circus-rs/server';
-import type { RsWebsocketVolumeConnectionHandlerCreator } from '@utrad-ical/circus-rs/server';
-import { withWebSocketConnectionHandlers } from '@utrad-ical/circus-rs/server';
-import glob from './utils/glob.ts';
-import type { Middleware } from 'koa';
-import Koa from 'koa';
-import bodyParser from 'koa-bodyparser';
-import compose from 'koa-compose';
-import mount from 'koa-mount';
-import Router from 'koa-router';
-import { resolveAccessToken } from './middleware/auth/resolveAccessToken.ts';
+import type {
+  RsServices,
+  VolumeProvider,
+  RsWebsocketVolumeConnectionHandlerCreator
+} from '@utrad-ical/circus-rs/server';
 import {
-  authenticateRequest,
-  sessionFromRawRequest
-} from './middleware/auth/session.ts';
-import * as path from 'path';
-import querystring from 'querystring';
+  attachWebSocketHandlers,
+  createSeriesRequestListener
+} from '@utrad-ical/circus-rs/server';
 import type * as ws from 'ws';
 import type { MhdPacker } from './case/createMhdPacker.ts';
 import type { ProgressManager } from './createProgressManager.ts';
@@ -32,47 +31,90 @@ import type {
   TransactionManager,
   Validator
 } from './interface.ts';
-import checkPrivilege from './middleware/auth/checkPrivilege.ts';
-import fixUserMiddleware from './middleware/auth/fixUser.ts';
-import cors from './middleware/cors.ts';
 import type { RouteGroup } from './defineRoute.ts';
-import errorHandler from './middleware/errorHandler.ts';
-import typeCheck from './middleware/typeCheck.ts';
-import validateInOut from './middleware/validateInOut.ts';
+import type { CircusMiddleware, Deps } from './typings/middlewares.ts';
 import type Storage from './storage/Storage.ts';
-import type { Deps } from './typings/middlewares.ts';
 import type { SeriesOrientationResolver } from './utils/createSeriesOrientationResolver.ts';
+import { resolveAccessToken } from './middleware/auth/resolveAccessToken.ts';
+import {
+  authenticateRequest,
+  csrfHeaderName,
+  expectedUserHeaderName,
+  sessionCookieName,
+  sessionFromRawRequest
+} from './middleware/auth/session.ts';
+import { getFixedUser } from './middleware/auth/fixUser.ts';
+import checkPrivilege from './middleware/auth/checkPrivilege.ts';
+import { corsHeaders } from './middleware/cors.ts';
+import { formatError, httpError } from './middleware/errorHandler.ts';
+import { typeCheck } from './middleware/typeCheck.ts';
+import { respondJson, validateRequest } from './middleware/validateInOut.ts';
+import { createHonoApp } from './createHonoApp.ts';
+import glob from './utils/glob.ts';
 
-async function prepareApiRouter(
-  pattern: string,
+// Koa matched route literals case-insensitively. Keep parameter values intact.
+const legacyRoutePath = (template: string) => {
+  const segments = template.split('/');
+  const pattern = new RegExp(
+    '^/api' +
+      segments
+        .map(segment => {
+          if (segment.startsWith(':'))
+            return segment.endsWith('+') ? '(.+)' : '([^/]+)';
+          return segment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        })
+        .join('/') +
+      '$',
+    'i'
+  );
+  return (pathname: string) => {
+    const match = pattern.exec(pathname);
+    if (!match) return;
+    let param = 1;
+    return (
+      '/api' +
+      segments
+        .map(segment => (segment.startsWith(':') ? match[param++] : segment))
+        .join('/')
+    );
+  };
+};
+
+async function registerRoutes(
+  app: ReturnType<typeof createHonoApp>,
   deps: Deps,
   debug: boolean,
-  authMiddleware: Middleware
+  authenticate: CircusMiddleware,
+  resolvePaths: Map<string, ReturnType<typeof legacyRoutePath>>
 ) {
-  const router = new Router();
-  const validator = deps.validator;
-
-  const routeFiles = await glob(pattern);
-  for (const routeFile of routeFiles) {
-    const { routes } = ((await import(routeFile)) as { default: RouteGroup })
+  const apiDir = path.resolve(import.meta.dirname, 'api/**/routes.ts');
+  for (const file of await glob(apiDir)) {
+    const { routes } = ((await import(file)) as { default: RouteGroup })
       .default;
     for (const route of routes) {
       if (route.forDebug && !debug) continue;
-      const middlewareStack = compose([
-        ...(route.noAuthentication ? [] : [authMiddleware]),
+      const handler = route.handler(deps);
+      if (!resolvePaths.has(route.path)) {
+        resolvePaths.set(route.path, legacyRoutePath(route.path));
+      }
+      // Koa-style named patterns in the API definitions also feed the API reference.
+      const routePath = route.path.replace(/:(\w+)\+/g, ':$1{.+}');
+      app.on(
+        route.verb.toUpperCase(),
+        ['/api' + routePath],
+        ...(route.noAuthentication ? [] : [authenticate]),
         typeCheck(route.expectedContentType),
         checkPrivilege(deps, route),
-        validateInOut(validator, {
-          requestSchema: route.request,
-          responseSchema: route.response
-        }),
-        route.handler(deps) // The processing function itself
-      ]);
-      (router as any)[route.verb](route.path, middlewareStack);
+        ...(route.request
+          ? [validateRequest(deps.validator, route.request)]
+          : []),
+        ctx =>
+          handler(ctx, (value, status) =>
+            respondJson(ctx, deps.validator, route.response, value, status)
+          )
+      );
     }
   }
-
-  return router;
 }
 
 interface CreateAppOptions {
@@ -85,12 +127,9 @@ interface CreateAppOptions {
   uploadFileSizeMaxBytes: number;
 }
 
-/**
- * Builds a Koa app and sets up the router.
- * Registers the API routes defined in `routes.ts` of each directory under `api`.
- */
+/** Creates the shared Node server for the Hono API and RS. */
 export const createApp: FunctionService<
-  Koa,
+  Server,
   {
     database: Database;
     validator: Validator;
@@ -98,7 +137,7 @@ export const createApp: FunctionService<
     models: Models;
     blobStorage: Storage;
     core: CsCore;
-    rsSeriesRoutes: Koa.Middleware;
+    rsSeriesRoutes: RsServices['rsSeriesRoutes'];
     rsWSServer: ws.WebSocketServer;
     rsWebsocketVolumeConnectionHandlerCreator: RsWebsocketVolumeConnectionHandlerCreator;
     volumeProvider: VolumeProvider;
@@ -149,9 +188,6 @@ export const createApp: FunctionService<
     uploadFileSizeMaxBytes,
     dicomImageServerUrl
   } = options;
-  // The main Koa instance.
-  const koa = new Koa();
-
   const deps: Deps = {
     database,
     validator,
@@ -176,67 +212,94 @@ export const createApp: FunctionService<
     verifyUser
   };
 
-  const apiDir = path.resolve(import.meta.dirname, 'api/**/routes.ts');
-
-  // Accepts either a Bearer token (API clients) or the session cookie (web UI)
-  const authMiddleware = fixUser
-    ? fixUserMiddleware(deps, fixUser)
-    : authenticateRequest(models);
-
-  const apiRouter = await prepareApiRouter(apiDir, deps, debug, authMiddleware);
-
-  // Trust proxy headers such as X-Forwarded-For
-  koa.proxy = true;
-
-  // Register middleware stack to the Koa app.
-  koa.use(errorHandler({ includeErrorDetails: debug, logger }));
-  koa.use(cors(corsOrigin));
-  koa.use(
-    mount(
-      '/api',
-      compose([
-        (async (ctx, next) => {
-          if (ctx.method === 'OPTIONS') {
-            ctx.body = null;
-            ctx.status = 200;
-          } else await next();
-        }) as Middleware,
-        bodyParser({
-          enableTypes: ['json'],
-          jsonLimit: '1mb',
-          onerror: (err, ctx) =>
-            ctx.throw(400, 'Invalid JSON as request body.\n' + err.message)
-        }),
-        apiRouter.routes() as any as Middleware
-      ])
-    )
-  );
-
-  const rs = new Router();
-  rs.use(
-    '/series/:sid',
-    authMiddleware as any,
-    // The user must be able to access the domain of the series
-    (async (ctx: any, next: Koa.Next) => {
-      const series = await models.series.findById(ctx.params.sid);
-      if (!series) ctx.throw(404, 'Series not found.');
-      if (!ctx.userPrivileges.domains.includes(series.domain)) {
-        ctx.throw(403, 'You do not have privilege to access this series.');
+  const resolvePaths = new Map<string, ReturnType<typeof legacyRoutePath>>();
+  const app = createHonoApp({
+    logger,
+    debug,
+    corsOrigin,
+    resolvePath: request => {
+      const pathname = getPathNoStrict(request);
+      if (!pathname.startsWith('/api/') || !/[A-Z]/.test(pathname))
+        return pathname;
+      for (const resolve of resolvePaths.values()) {
+        const canonical = resolve(pathname);
+        if (canonical && canonical !== pathname) return canonical;
       }
-      await next();
-    }) as any,
-    rsSeriesRoutes as any
-  );
-  koa.use(mount('/rs', rs.routes() as any));
-  withWebSocketConnectionHandlers(rsWSServer, {
+      return pathname;
+    }
+  });
+  const authenticate: CircusMiddleware = async (ctx, next) => {
+    const json = ctx.var.jsonBody;
+    const { user, userPrivileges, byCookie } = fixUser
+      ? await getFixedUser(models, fixUser)
+      : await authenticateRequest(models, {
+          method: ctx.req.method,
+          authorization: ctx.req.header('Authorization'),
+          cookie: getCookie(ctx, sessionCookieName),
+          csrf: ctx.req.header(csrfHeaderName),
+          expectedUser: ctx.req.header(expectedUserHeaderName),
+          misplacedToken:
+            ctx.var.query.access_token ||
+            (json &&
+              typeof json === 'object' &&
+              'access_token' in json &&
+              json.access_token)
+        });
+    ctx.set('user', user);
+    ctx.set('userPrivileges', userPrivileges);
+    ctx.set('authenticatedBySessionCookie', byCookie);
+    await next();
+  };
+  await registerRoutes(app, deps, debug, authenticate, resolvePaths);
+
+  const rsRequest = createSeriesRequestListener({
+    path: '/rs/series/:sid',
+    routes: rsSeriesRoutes,
+    authorize: async (req, seriesUid) => {
+      const headers = new Headers(req.headers as Record<string, string>);
+      const { userPrivileges } = fixUser
+        ? await getFixedUser(models, fixUser)
+        : await authenticateRequest(models, {
+            method: req.method ?? 'GET',
+            authorization: headers.get('Authorization') ?? undefined,
+            cookie: sessionFromRawRequest(headers.get('Cookie') ?? undefined),
+            csrf: headers.get(csrfHeaderName) ?? undefined,
+            expectedUser: headers.get(expectedUserHeaderName) ?? undefined,
+            misplacedToken: parse(req.url?.split('?')[1] ?? '').access_token
+          });
+      const series = await models.series.findById(seriesUid);
+      if (!series) throw httpError(404, 'Series not found.');
+      if (!userPrivileges.domains.includes(series.domain)) {
+        throw httpError(
+          403,
+          'You do not have privilege to access this series.'
+        );
+      }
+    },
+    onError: error => formatError(error, { includeErrorDetails: debug, logger })
+  });
+  const apiRequest = getRequestListener(app.fetch, {
+    overrideGlobalObjects: false
+  });
+  const cors = corsHeaders(corsOrigin);
+  const server = createServer((req, res) => {
+    const pathname = req.url?.split('?', 1)[0];
+    if (pathname === '/rs' || pathname?.startsWith('/rs/')) {
+      for (const [name, value] of Object.entries(cors))
+        res.setHeader(name, value);
+      logger.trace('Request', req.method, pathname);
+      rsRequest(req, res);
+    } else {
+      apiRequest(req, res);
+    }
+  });
+  attachWebSocketHandlers(server, rsWSServer, {
     '/rs/ws/volume': rsWebsocketVolumeConnectionHandlerCreator({
       authFunctionProvider: req => {
         // Returns a function that checks if the user has the
         // privilege to access the volume.
         // The session cookie (web UI), or a token in the query string
-        const { token: queryToken } = querystring.decode(
-          req.url?.split('?')[1] ?? ''
-        );
+        const { token: queryToken } = parse(req.url?.split('?')[1] ?? '');
         const token =
           sessionFromRawRequest(req.headers.cookie) ??
           (typeof queryToken === 'string' ? queryToken : undefined);
@@ -253,9 +316,8 @@ export const createApp: FunctionService<
         };
       }
     })
-  })(koa);
-
-  return koa;
+  });
+  return server;
 };
 
 createApp.dependencies = [

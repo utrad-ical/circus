@@ -1,3 +1,4 @@
+import { httpError } from '../middleware/errorHandler.ts';
 import status from 'http-status';
 import type { CircusContext } from '../typings/middlewares.ts';
 import type { Models } from '../interface.ts';
@@ -16,8 +17,8 @@ const loadMyList = async (
   const list = await models.myList.findById(myListId, {
     withLock: options.withLock ?? false
   });
-  if (!list) ctx.throw(status.NOT_FOUND, 'This my list does not exist');
-  const { userEmail, groups } = ctx.user as {
+  if (!list) throw httpError(status.NOT_FOUND, 'This my list does not exist');
+  const { userEmail, groups } = ctx.var.user as {
     userEmail: string;
     groups: number[];
   };

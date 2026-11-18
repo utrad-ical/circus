@@ -20,7 +20,7 @@ import type { DicomUtilityRunner } from './utils/createDicomUtilityRunner.ts';
 import createDicomUtilityRunner from './utils/createDicomUtilityRunner.ts';
 import type { MhdPacker } from './case/createMhdPacker.ts';
 import type { ProgressManager } from './createProgressManager.ts';
-import type KoaOAuth2Server from './middleware/auth/KoaOAuth2Server.ts';
+import type { VerifyUser } from './middleware/auth/createVerifyUser.ts';
 import type { SeriesOrientationResolver } from './utils/createSeriesOrientationResolver.ts';
 
 export type Services = CsCoreServices &
@@ -36,7 +36,7 @@ export type Services = CsCoreServices &
     dicomUtilityRunner: DicomUtilityRunner;
     progressManager: ProgressManager;
     mhdPacker: MhdPacker;
-    oauthServer: KoaOAuth2Server;
+    verifyUser: VerifyUser;
     authProvider: AuthProvider;
     defaultAuthProvider: AuthProvider;
     transactionManager: TransactionManager;
@@ -46,7 +46,11 @@ export type Services = CsCoreServices &
 export type ApiServiceLoader = ServiceLoader<Services>;
 
 const createServiceLoader = async (config: any) => {
-  const loader = new ServiceLoader<Services>(config);
+  const loader = new ServiceLoader<Services>({
+    ...config,
+    // Preserve the fallback provider option in existing configurations.
+    verifyUser: config.verifyUser ?? config.oauthServer ?? {}
+  });
   // Register modules related to CS Core
   configureCsCoreServiceLoader(loader as any);
   configureRsServiceLoader(loader);
@@ -93,8 +97,8 @@ const createServiceLoader = async (config: any) => {
     path.join(import.meta.dirname, 'case/createMhdPacker')
   );
   loader.registerModule(
-    'oauthServer',
-    path.join(import.meta.dirname, 'middleware/auth/createOauthServer')
+    'verifyUser',
+    path.join(import.meta.dirname, 'middleware/auth/createVerifyUser')
   );
   loader.registerDirectory(
     'authProvider',

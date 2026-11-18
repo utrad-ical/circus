@@ -48,12 +48,7 @@ before(async () => {
       mhdPacker: null as any, // dummy
       core: null as any, // dummy
       dicomVoxelDumper: null as any, // dummy
-      oauthServer: {
-        authenticate: () => async (ctx: any, next: any) => {
-          next();
-        },
-        token: () => () => {}
-      } as any,
+      verifyUser: async () => null,
       transactionManager: null as any, // dummy
       rsWSServer: new ws.WebSocketServer({
         noServer: true,
@@ -75,6 +70,14 @@ after(async () => {
 
 it('should return 404 for root path', async () => {
   const res = await ax.get('');
+  assert.equal(res.status, 404);
+});
+
+it('should return 404 for the retired token endpoint', async () => {
+  const res = await ax.post(
+    '/login',
+    new URLSearchParams({ grant_type: 'password' })
+  );
   assert.equal(res.status, 404);
 });
 

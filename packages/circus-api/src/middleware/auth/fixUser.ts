@@ -3,7 +3,7 @@ import type { Middleware } from 'koa';
 import type { Models } from '../../interface.ts';
 
 /**
- * This middleware is used in place of createOauthServer when "fix-user" mode
+ * This middleware is used in place of token authentication when "fix-user" mode
  * is used for debugging purpose. It injects a fixed user into the `ctx`.
  */
 const fixUser: (deps: { models: Models }, userEmail: string) => Middleware = (

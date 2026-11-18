@@ -11,7 +11,7 @@
 :80 {
 	root * /srv
 
-	@backend path /api /api/* /login /login/* /rs /rs/*
+	@backend path /api /api/* /rs /rs/*
 	handle @backend {
 		reverse_proxy {$CIRCUS_API_UPSTREAM:api:8080}
 	}

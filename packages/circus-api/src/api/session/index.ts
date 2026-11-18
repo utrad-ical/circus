@@ -15,15 +15,14 @@ export const handlePost: RouteMiddleware<typeof routes.postSession> = ({
     // Prevents other sites from logging the user in as someone else
     checkCsrfHeader(ctx);
     const body = ctx.request.body;
-    // A onetime password is verified like a password grant
-    // whose user name and password are both the onetime string
+    // For a onetime password, pass the same value in both fields.
     const [username, password] =
       'onetime' in body
         ? [body.onetime, body.onetime]
         : [body.username, body.password];
     const user = await verifyUser(username, password);
     if (!user || !user.loginEnabled) {
-      ctx.throw(status.UNAUTHORIZED, 'Invalid credentials.');
+      return ctx.throw(status.UNAUTHORIZED, 'Invalid credentials.');
     }
     // Replaces the session of another user, if any
     await endSession(ctx, models);

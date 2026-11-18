@@ -25,7 +25,7 @@ import createProgressManager, {
 import type { DicomVoxelDumper } from '@utrad-ical/circus-cs-core';
 import { packTar } from 'modern-tar';
 import { EventEmitter } from 'events';
-import createOauthServer from '../middleware/auth/createOauthServer.ts';
+import createVerifyUser from '../middleware/auth/createVerifyUser.ts';
 import createDefaultAuthProvider from '../middleware/auth/authProvider/DefaultAuthProvider.ts';
 import type { Database } from '../interface.ts';
 import createTransactionManager from '../createTransactionManager.ts';
@@ -94,7 +94,13 @@ export interface ApiTest {
 }
 
 export const setUpAppForRoutesTest = async (
-  overrides: Pick<Deps, 'createDockerFileExtractor'> = {}
+  overrides: Pick<Deps, 'createDockerFileExtractor'> &
+    Partial<
+      Pick<
+        Parameters<typeof createApp>[1],
+        'rsWebsocketVolumeConnectionHandlerCreator'
+      >
+    > = {}
 ) => {
   const database = await connectMongo();
   const db = database.db;
@@ -220,12 +226,11 @@ export const setUpAppForRoutesTest = async (
       volumeProvider: null as any, // dummy
       progressManager,
       dicomVoxelDumper,
-      oauthServer: await createOauthServer(
+      verifyUser: await createVerifyUser(
         {},
         { defaultAuthProvider: authProvider, models, authProvider }
       ),
       transactionManager,
-      ...overrides,
       rsWSServer: new ws.WebSocketServer({
         noServer: true,
         skipUTF8Validation: true
@@ -233,6 +238,7 @@ export const setUpAppForRoutesTest = async (
       rsWebsocketVolumeConnectionHandlerCreator: () => {
         return null as any; // dummy
       },
+      ...overrides,
       seriesOrientationResolver: async (
         seriesUid: string,
         start: number,

@@ -10,6 +10,7 @@ import type { attributeSchema, jsonSchemaSubset } from './jsonSchemaSubset.ts';
 import type { label } from './label.ts';
 import type { loginInfo, loginInfoFull } from './loginInfo.ts';
 import type { myListResourceType } from './myList.ts';
+import type { partialVolumeDescriptor } from './partialVolumeDescriptor.ts';
 import type { patientInfo } from './patientInfo.ts';
 import type { permanentToken } from './permanentToken.ts';
 import type { pluginDoc } from './plugin.ts';
@@ -70,6 +71,7 @@ export type MyListItemsPatch = z.input<typeof myListItemsPatch>;
 export type MyListItemsPatched = z.input<typeof myListItemsPatched>;
 
 export type Series = z.input<typeof seriesForUser>;
+export type PartialVolumeDescriptor = z.input<typeof partialVolumeDescriptor>;
 export type PatientInfo = z.input<typeof patientInfo>;
 export type SeriesImportSummary = z.input<typeof seriesImportSummary>;
 export type SeriesExportCsVolumeQuery = z.input<
@@ -97,6 +99,20 @@ export type PluginJobFeedbackCreate = z.input<typeof pluginJobFeedbackCreate>;
 export type PluginJobManager = z.input<typeof pluginJobManager>;
 
 export type ProgressCreated = z.input<typeof progressCreated>;
+
+export type ProgressLogLevel = 'info' | 'warn' | 'error';
+
+export interface ProgressLogLine {
+  level: ProgressLogLevel;
+  message: string;
+}
+
+/** The `type` is sent as the server-sent event name. */
+export type ProgressEvent =
+  | { type: 'progress'; message: string; finished?: number; total?: number }
+  | { type: 'log'; lines: ProgressLogLine[] }
+  | { type: 'finish' | 'error'; message: string };
+
 export type PermanentToken = z.input<typeof permanentToken>;
 export type TokenCreate = z.input<typeof tokenCreate>;
 export type TokenCreated = z.input<typeof tokenCreated>;

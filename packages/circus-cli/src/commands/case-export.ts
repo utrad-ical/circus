@@ -1,3 +1,4 @@
+import type { CaseExportMhdQuery } from '@utrad-ical/circus-api-schema';
 import { promises as fs } from 'node:fs';
 import * as path from 'node:path';
 import { styleText } from 'node:util';
@@ -31,21 +32,20 @@ const action: CommandAction = ({ getFetch }) => {
       let detail = '';
       const watcher = await watchProgress(fetch, event => {
         if (event.type === 'log') return;
-        const { type, message, finished = 0, total } = event;
-        if (type === 'finish') packed = '100%';
-        else if (type === 'progress' && total)
-          packed = `${Math.floor((finished / total) * 100)}%`;
-        detail = type === 'finish' ? '' : message;
+        if (event.type === 'finish') packed = '100%';
+        else if (event.type === 'progress' && event.total)
+          packed = `${Math.floor(((event.finished ?? 0) / event.total) * 100)}%`;
+        detail = event.type === 'finish' ? '' : event.message;
       });
       try {
         const params = new URLSearchParams({
           caseIds: batch.join(','),
           labelPackType: options.combined ? 'combined' : 'isolated',
           mhdLineEnding: options.crlf ? 'crlf' : 'lf',
-          compressionFormat: options.zip ? 'zip' : 'tgz'
-        });
-        if (options.fullOriginalVolume) params.set('fullOriginalVolume', '1');
-        if (watcher.progressId) params.set('progressId', watcher.progressId);
+          compressionFormat: options.zip ? 'zip' : 'tgz',
+          ...(options.fullOriginalVolume ? { fullOriginalVolume: '1' } : {}),
+          ...(watcher.progressId ? { progressId: watcher.progressId } : {})
+        } satisfies CaseExportMhdQuery);
         const res = await fetch(`cases/export-mhd?${params}`);
         await downloadToFile(
           res,

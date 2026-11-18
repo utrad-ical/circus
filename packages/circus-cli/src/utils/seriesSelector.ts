@@ -1,22 +1,20 @@
+import type {
+  PartialVolumeDescriptor,
+  Series
+} from '@utrad-ical/circus-api-schema';
 import { input, select, Separator } from '@inquirer/prompts';
 import * as mr from 'multi-integer-range';
 import type { AuthorizedFetch } from './createAuthorizedFetch.ts';
 
 /** The images to use, from `start` to `end` stepping by `delta` */
-export interface ImageRange {
-  start: number;
-  end: number;
-  delta: number;
-}
+export type ImageRange = PartialVolumeDescriptor;
 
-export interface SelectedSeries {
-  seriesUid: string;
+type SeriesMetadata = Pick<Series, 'images' | 'modality' | 'seriesDescription'>;
+
+export type SelectedSeries = SeriesMetadata & {
+  seriesUid: Series['seriesUid'];
   range: ImageRange;
-  /** `images` of the series, e.g. '1-132' */
-  images: string;
-  modality?: string;
-  seriesDescription?: string;
-}
+};
 
 export const formatRange = (range: ImageRange) =>
   `${range.start}:${range.end}:${range.delta}`;
@@ -78,11 +76,10 @@ export const fetchSeries = async (
   seriesUid: string,
   rangeText?: string
 ): Promise<SelectedSeries> => {
-  let data: any;
+  let data: SeriesMetadata;
   try {
-    data = await (
-      await fetch(`series/${encodeURIComponent(seriesUid)}`)
-    ).json();
+    const res = await fetch(`series/${encodeURIComponent(seriesUid)}`);
+    data = (await res.json()) as SeriesMetadata;
   } catch (err: any) {
     if (err.status === 404) throw new Error(`Series ${seriesUid} not found.`);
     if (err.status === 403 || err.status === 401)

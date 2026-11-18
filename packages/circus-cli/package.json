@@ -43,6 +43,7 @@
     "multi-integer-range": "^6.1.0"
   },
   "devDependencies": {
+    "@utrad-ical/circus-api-schema": "workspace:*",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.19.2",
     "tsdown": "0.23.7",

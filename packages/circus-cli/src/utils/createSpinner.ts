@@ -1,5 +1,5 @@
+import type { ProgressLogLevel } from '@utrad-ical/circus-api-schema';
 import { styleText } from 'node:util';
-import type { LogLevel } from './watchProgress.ts';
 
 const isTTY = process.stdout.isTTY && process.stdout.columns > 0;
 const spinnerGlyphs = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
@@ -9,7 +9,7 @@ const eraseBelow = '\r\x1b[J';
 export interface Spinner {
   update: (message?: string) => void;
   /** Shows a line in the log pane (or just prints it in non-TTY) */
-  log: (line: string, level?: LogLevel) => void;
+  log: (line: string, level?: ProgressLogLevel) => void;
   stop: (message?: string, isError?: boolean) => void;
 }
 
@@ -45,7 +45,7 @@ const createSpinner = (
   let timerId: NodeJS.Timeout | null = null;
   let message = initialMessage;
   let stopped = false;
-  let pane: { line: string; level: LogLevel }[] = [];
+  let pane: { line: string; level: ProgressLogLevel }[] = [];
 
   const newProgressGlyph = () =>
     styleText(
@@ -82,7 +82,7 @@ const createSpinner = (
     putLine(message);
   };
 
-  const log = (line: string, level: LogLevel = 'info') => {
+  const log = (line: string, level: ProgressLogLevel = 'info') => {
     if (stopped) return;
     if (isTTY && paneLines) {
       pane = [...pane, { line, level }].slice(-paneLines);

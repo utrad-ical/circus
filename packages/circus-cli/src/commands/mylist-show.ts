@@ -1,16 +1,7 @@
+import type { MyList } from '@utrad-ical/circus-api-schema';
 import easyTable from 'easy-table';
 import { fetchWithSpinner } from '../utils/createAuthorizedFetch.ts';
 import type { CommandAction } from './CommandAction.ts';
-
-const resourceTypes = ['series', 'clinicalCases', 'pluginJobs'];
-type ResourceType = (typeof resourceTypes)[number];
-
-interface MyList {
-  myListId: string;
-  resourceType: ResourceType;
-  name: string;
-  createdAt: string;
-}
 
 const action: CommandAction = ({ getFetch }) => {
   return async () => {

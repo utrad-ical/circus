@@ -1,13 +1,13 @@
+import type { ProgressLogLine } from '@utrad-ical/circus-api-schema';
 import classnames from 'classnames';
 import React, { useLayoutEffect, useRef, type FC } from 'react';
-import type { LogLine } from '#utils/useProgress.ts';
 import styles from './LogPane.module.css';
 
 /**
  * Shows log lines in a small box, which follows the latest line
  * unless the user has scrolled up.
  */
-const LogPane: FC<{ lines: LogLine[] }> = props => {
+const LogPane: FC<{ lines: ProgressLogLine[] }> = props => {
   const { lines } = props;
   const ref = useRef<HTMLDivElement>(null);
   const stick = useRef(true);

@@ -1,17 +1,10 @@
+import type {
+  ProgressCreated,
+  ProgressEvent
+} from '@utrad-ical/circus-api-schema';
 import * as rl from 'node:readline';
 import { Readable } from 'node:stream';
 import type { AuthorizedFetch } from './createAuthorizedFetch.ts';
-
-export type LogLevel = 'info' | 'warn' | 'error';
-
-export type ProgressEvent =
-  | {
-      type: 'progress' | 'finish' | 'error';
-      message: string;
-      finished?: number;
-      total?: number;
-    }
-  | { type: 'log'; lines: { level: LogLevel; message: string }[] };
 
 interface ProgressWatcher {
   /** Pass this to the request; undefined if it could not be issued */
@@ -39,7 +32,7 @@ const watchProgress = async (
       headers: { 'Content-Type': 'application/json' },
       body: '{}'
     });
-    progressId = ((await res.json()) as { progressId: string }).progressId;
+    ({ progressId } = (await res.json()) as ProgressCreated);
   } catch {
     return { stop, wait: noWait };
   }
@@ -49,7 +42,7 @@ const watchProgress = async (
     });
     const lines = rl.createInterface({ input: Readable.fromWeb(res.body!) });
     let type: string | null = null;
-    let data: any = null;
+    let data: Record<string, unknown> | null = null;
     for await (const line of lines) {
       if (line.startsWith('event:')) type = line.slice(6).trim();
       if (line.startsWith('data:')) data = JSON.parse(line.slice(5));

@@ -472,6 +472,9 @@ importers:
       '@types/node':
         specifier: ^24.19.2
         version: 24.19.2
+      '@utrad-ical/circus-api-schema':
+        specifier: workspace:*
+        version: link:../circus-api-schema
       tsdown:
         specifier: 0.23.7
         version: 0.23.7(typescript@7.0.2)

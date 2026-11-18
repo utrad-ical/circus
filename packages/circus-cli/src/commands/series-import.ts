@@ -1,3 +1,7 @@
+import type {
+  LoginInfoFull,
+  SeriesImportSummary
+} from '@utrad-ical/circus-api-schema';
 import { promises as fs, createReadStream } from 'node:fs';
 import * as path from 'node:path';
 import { Readable } from 'node:stream';
@@ -17,12 +21,6 @@ interface LocalFile {
   name: string;
   size: number;
   isArchive: boolean;
-}
-
-interface ImportSummary {
-  imported: number;
-  skipped: { file: string; reason: string }[];
-  errors: { file: string; reason: string }[];
 }
 
 // The name of the tar.gz made from loose files, hidden from the output
@@ -115,10 +113,7 @@ const formatBytes = (bytes: number) =>
  */
 const chooseDomain = async (fetch: AuthorizedFetch) => {
   const res = await fetch('login-info/full');
-  const { domains = [], defaultDomain } = (await res.json()) as {
-    domains?: string[];
-    defaultDomain?: string;
-  };
+  const { domains = [], defaultDomain } = (await res.json()) as LoginInfoFull;
   if (!domains.length) throw new Error('You cannot access any domain.');
   if (domains.length === 1) {
     console.log(`Domain: ${domains[0]}`);
@@ -129,7 +124,10 @@ const chooseDomain = async (fetch: AuthorizedFetch) => {
   return await select({
     message: 'Domain:',
     choices: domains.map(value => ({ value })),
-    default: domains.includes(defaultDomain!) ? defaultDomain : undefined
+    default:
+      typeof defaultDomain === 'string' && domains.includes(defaultDomain)
+        ? defaultDomain
+        : undefined
   });
 };
 
@@ -153,7 +151,7 @@ const action: CommandAction = ({ getFetch }) => {
     const batches = Math.ceil(files.length / size);
     if (batches > 1) console.log(`Split into ${batches} batches.`);
 
-    const total: ImportSummary = { imported: 0, skipped: [], errors: [] };
+    const total: SeriesImportSummary = { imported: 0, skipped: [], errors: [] };
     for (let batchIdx = 0; batchIdx < batches; batchIdx++) {
       if (batches > 1) {
         console.log(
@@ -186,7 +184,7 @@ const action: CommandAction = ({ getFetch }) => {
       const params = watcher.progressId
         ? `?progressId=${encodeURIComponent(watcher.progressId)}`
         : '';
-      let summary: ImportSummary;
+      let summary: SeriesImportSummary;
       try {
         const res = await fetch(
           `series/domain/${encodeURIComponent(domain)}${params}`,
@@ -197,14 +195,14 @@ const action: CommandAction = ({ getFetch }) => {
             duplex: 'half'
           } as RequestInit
         );
-        summary = (await res.json()) as ImportSummary;
+        summary = (await res.json()) as SeriesImportSummary;
       } catch (err: any) {
         // 400 (no DICOM files) and 422 (some failed) have the summary
         const parsed =
           err.status === 400 || err.status === 422
             ? (() => {
                 try {
-                  return JSON.parse(err.body);
+                  return JSON.parse(err.body) as SeriesImportSummary;
                 } catch {
                   return undefined;
                 }

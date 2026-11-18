@@ -1,3 +1,4 @@
+import type { SeriesExportCsVolumeQuery } from '@utrad-ical/circus-api-schema';
 import * as path from 'node:path';
 import createSpinner from '../utils/createSpinner.ts';
 import downloadToFile from '../utils/downloadToFile.ts';
@@ -48,9 +49,9 @@ const action: CommandAction = ({ getFetch }) => {
         series: series
           .map(s => `${s.seriesUid}:${formatRange(s.range)}`)
           .join(','),
-        compressionFormat: options.zip ? 'zip' : 'tgz'
-      });
-      if (watcher.progressId) params.set('progressId', watcher.progressId);
+        compressionFormat: options.zip ? 'zip' : 'tgz',
+        ...(watcher.progressId ? { progressId: watcher.progressId } : {})
+      } satisfies SeriesExportCsVolumeQuery);
       const res = await fetch(`series/export-cs-volume?${params}`);
       await downloadToFile(res, file, {
         spinner,

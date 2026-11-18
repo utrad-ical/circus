@@ -1,4 +1,9 @@
 import type { NoDepFunctionService } from '@utrad-ical/circus-lib';
+import type {
+  ProgressEvent,
+  ProgressLogLevel,
+  ProgressLogLine
+} from '@utrad-ical/circus-api-schema';
 import httpStatus from 'http-status';
 import _ from 'lodash';
 import { randomBytes } from 'node:crypto';
@@ -12,7 +17,7 @@ import type { CircusContext } from './typings/middlewares.ts';
 export interface ProgressReporter {
   report: (message: string, finished?: number, total?: number) => void;
   /** Adds a line to the log, e.g., the result of each file */
-  log: (level: LogLevel, message: string) => void;
+  log: (level: ProgressLogLevel, message: string) => void;
   finish: (message: string) => void;
   fail: (message: string) => void;
 }
@@ -37,24 +42,12 @@ export interface ProgressManager {
   respond: (ctx: CircusContext, progressId: string, userEmail: string) => void;
 }
 
-export type LogLevel = 'info' | 'warn' | 'error';
-
-export interface LogLine {
-  level: LogLevel;
-  message: string;
-}
-
-export type ProgressEvent =
-  | { type: 'progress'; message: string; finished?: number; total?: number }
-  | { type: 'log'; lines: LogLine[] }
-  | { type: 'finish' | 'error'; message: string };
-
 interface Entry {
   userEmail: string;
   claimed: boolean;
   last?: ProgressEvent;
   /** Recent log lines, for late subscribers */
-  logs: LogLine[];
+  logs: ProgressLogLine[];
   events: EventEmitter;
   timer?: NodeJS.Timeout;
 }
@@ -131,7 +124,7 @@ const createProgressManager: NoDepFunctionService<
       throttleMs
     );
     // Lines are sent together, but never dropped
-    let pending: LogLine[] = [];
+    let pending: ProgressLogLine[] = [];
     const flushLogs = () => {
       if (!pending.length) return;
       emit({ type: 'log', lines: pending });

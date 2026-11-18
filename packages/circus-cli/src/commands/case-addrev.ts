@@ -1,3 +1,7 @@
+import type {
+  CaseDetail,
+  CaseRevisionCreate
+} from '@utrad-ical/circus-api-schema';
 import JSON5 from 'json5';
 import { isDeepStrictEqual, styleText } from 'node:util';
 import { fetchWithSpinner } from '../utils/createAuthorizedFetch.ts';
@@ -17,7 +21,7 @@ interface Options {
   allRevs: boolean;
 }
 
-const withoutMetadata = (obj: any): any => {
+const withoutMetadata = (obj: CaseRevisionCreate): CaseRevisionCreate => {
   const { series, attributes, status, description } = obj;
   return { series, attributes, status, description };
 };
@@ -49,10 +53,9 @@ const action: CommandAction = ({ getFetch }) => {
         `Retreiving case ${caseId}`,
         `cases/${caseId}`
       );
-      const data = (await res.json()) as any;
-      const inputRev = allRevs
-        ? data.revisions
-        : data.revisions[data.revisions.length - 1];
+      const { revisions } = (await res.json()) as CaseDetail;
+      const latestRevision = revisions[revisions.length - 1];
+      const inputRev = allRevs ? revisions : latestRevision;
 
       const newRevStr = command
         ? await exec(command, JSON.stringify(inputRev), {
@@ -70,7 +73,7 @@ const action: CommandAction = ({ getFetch }) => {
 
       const newRev = (() => {
         try {
-          return withoutMetadata(JSON5.parse(newRevStr));
+          return withoutMetadata(JSON5.parse(newRevStr) as CaseRevisionCreate);
         } catch (err: any) {
           console.error('The filter command returned the following:');
           console.error(newRevStr + '\n');
@@ -81,7 +84,7 @@ const action: CommandAction = ({ getFetch }) => {
       })();
 
       if (typeof desc === 'string' && desc.length > 0) {
-        newRev.description = options.desc;
+        newRev.description = desc;
       } else if (!editDesc) {
         newRev.description = await promptString('Revision description:');
       }
@@ -91,7 +94,7 @@ const action: CommandAction = ({ getFetch }) => {
           console.log(styleText('cyan', 'Processed JSON:'));
           console.log(JSON.stringify(newRev, null, 2));
         } else {
-          const currentRev = withoutMetadata(inputRev);
+          const currentRev = withoutMetadata(latestRevision);
           if (isDeepStrictEqual(newRev, currentRev)) {
             console.log(
               styleText('bgYellow', 'WARN'),

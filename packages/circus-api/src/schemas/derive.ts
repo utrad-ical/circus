@@ -1,7 +1,10 @@
 import { z } from 'zod';
+import { searchResultOf as sharedSearchResultOf } from '@utrad-ical/circus-api-schema';
 import { dateField } from '@utrad-ical/circus-api-schema/formats';
 
 // Helpers to derive schemas from the base ones
+
+export const searchResultOf = (items: z.ZodType) => sharedSearchResultOf(items);
 
 const asObject = (schema: z.ZodType): z.ZodObject => {
   if (!(schema instanceof z.ZodObject))
@@ -16,14 +19,6 @@ const maskOf = (schema: z.ZodObject, keys: string[]): any =>
 /** Adds `createdAt` and `updatedAt` */
 export const withDates = (schema: z.ZodType) =>
   asObject(schema).extend({ createdAt: dateField(), updatedAt: dateField() });
-
-/** The list returned by the search endpoints */
-export const searchResultOf = (items: z.ZodType) =>
-  z.looseObject({
-    items: z.array(items),
-    totalItems: z.number(),
-    page: z.number()
-  });
 
 /** The search result of the items with `createdAt` and `updatedAt` */
 export const searchResult = (schema: z.ZodType) =>

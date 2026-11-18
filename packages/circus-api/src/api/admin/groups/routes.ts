@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { defineRoute, defineRouteGroup, route } from '../../../defineRoute.ts';
 import { searchResultOf } from '../../../schemas/derive.ts';
 import {
-  globalPrivilege,
+  globalPrivileges,
   groupCreate,
   groupDoc,
   groupPatch
@@ -53,9 +53,7 @@ export const getGlobalPrivileges = defineRoute({
   path: '/admin/global-privileges',
   description: 'Retrieves the list of global privileges.',
   requiredGlobalPrivilege: 'manageServer',
-  response: z.array(
-    z.strictObject({ privilege: globalPrivilege, caption: z.string() })
-  )
+  response: globalPrivileges
 });
 
 export default defineRouteGroup({

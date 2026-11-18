@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { dateField, num } from './formats.ts';
+import { globalPrivilege } from './group.ts';
 import { myListEditor } from './myListEditor.ts';
 import { pluginDoc } from './plugin.ts';
 import { pluginJobFeedback } from './pluginJobFeedback.ts';
@@ -44,6 +45,14 @@ export const caseExportMhdQuery = z
   });
 
 const caseTag = z.string().max(32);
+
+export const caseCreated = z.strictObject({ caseId: z.string() });
+
+export const progressCreated = z.strictObject({ progressId: z.string() });
+
+export const globalPrivileges = z.array(
+  z.strictObject({ privilege: globalPrivilege, caption: z.string() })
+);
 
 export const caseTags = z.array(caseTag);
 

@@ -21,11 +21,11 @@ const createDockerFileExtractor = () => ({
   dispose: () => Promise.resolve()
 });
 
-let apiTest: ApiTest, ax: typeof apiTest.axiosInstances;
+let apiTest: ApiTest, ax: typeof apiTest.clients;
 before(async () => {
   await fs.remove(mockPluginDir);
   apiTest = await setUpAppForRoutesTest({ createDockerFileExtractor } as any);
-  ax = apiTest.axiosInstances;
+  ax = apiTest.clients;
 });
 after(async () => {
   await apiTest.tearDown();
@@ -37,6 +37,6 @@ test('returns the module container', async () => {
     `api/plugin-displays/${pluginId}/remoteEntry.js`
   );
   assert.equal(res.status, 200);
-  assert.ok(res.headers['content-type'].includes('text/javascript'));
+  assert.ok(res.headers.get('content-type')?.includes('text/javascript'));
   assert.equal(res.data, 'Hello');
 });

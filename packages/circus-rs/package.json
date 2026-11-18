@@ -42,7 +42,6 @@
   ],
   "dependencies": {
     "@utrad-ical/circus-lib": "workspace:*",
-    "axios": "^1.7.7",
     "dicom-parser": "^1.8.4",
     "extend": "^3.0.2",
     "gl-matrix": "^2.4.0",

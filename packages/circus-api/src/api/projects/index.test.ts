@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict';
 import { test, before, after } from 'node:test';
-import type { AxiosInstance } from 'axios';
+import type { TestHttpClient } from '../../test/util-http.ts';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 
-let apiTest: ApiTest, dave: AxiosInstance;
+let apiTest: ApiTest, dave: TestHttpClient;
 before(async () => {
   apiTest = await setUpAppForRoutesTest();
-  dave = apiTest.axiosInstances.dave;
+  dave = apiTest.clients.dave;
 });
 after(async () => await apiTest.tearDown());
 

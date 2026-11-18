@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test, before, after } from 'node:test';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
-import type { AxiosInstance } from 'axios';
+import type { TestHttpClient } from '../../test/util-http.ts';
 
 let apiTest: ApiTest;
 before(async () => (apiTest = await setUpAppForRoutesTest()));
@@ -23,12 +23,12 @@ test('return unauthorized error for unauthorized user', async () => {
   for (const target of targets) {
     const method = target.indexOf(' ') >= 0 ? target.split(' ')[0] : 'GET';
     const path = target.split(' ').pop();
-    const data = method.match(/GET|PATCH/) ? { a: 10 } : undefined;
+    const data = method === 'PATCH' ? { a: 10 } : undefined;
 
-    const check = async (user: AxiosInstance) => {
+    const check = async (user: TestHttpClient) => {
       const res = await user.request({
         url: `api/admin/${path}`,
-        method: method as any,
+        method,
         data
       });
       assert.equal(res.status, 401);
@@ -36,7 +36,7 @@ test('return unauthorized error for unauthorized user', async () => {
     };
 
     // Check with these users without admin privilege
-    await check(apiTest.axiosInstances.bob);
-    await check(apiTest.axiosInstances.guest);
+    await check(apiTest.clients.bob);
+    await check(apiTest.clients.guest);
   }
 });

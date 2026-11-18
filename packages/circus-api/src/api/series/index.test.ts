@@ -1,3 +1,4 @@
+import type { TestQueryParams } from '../../test/util-http.ts';
 import assert from 'node:assert/strict';
 import {
   describe,
@@ -8,7 +9,7 @@ import {
   beforeEach,
   afterEach
 } from 'node:test';
-import type { AxiosInstance } from 'axios';
+import type { TestHttpClient } from '../../test/util-http.ts';
 import { packTar } from 'modern-tar';
 import type { Readable } from 'node:stream';
 import fs from 'fs-extra';
@@ -19,11 +20,11 @@ import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import { readFromStreamTillEnd } from '../../test/util-stream.ts';
 import { readArchive } from '../../test/util-archive.ts';
 
-let apiTest: ApiTest, ax: typeof apiTest.axiosInstances;
+let apiTest: ApiTest, ax: typeof apiTest.clients;
 
 before(async () => {
   apiTest = await setUpAppForRoutesTest();
-  ax = apiTest.axiosInstances;
+  ax = apiTest.clients;
 });
 
 after(async () => await apiTest.tearDown());
@@ -173,15 +174,15 @@ describe('Upload', () => {
 
   const upload = async (
     files: [Blob, string][],
-    opts: { axios?: AxiosInstance; url?: string } = {}
+    opts: { client?: TestHttpClient; url?: string } = {}
   ) => {
     const {
-      axios = apiTest.axiosInstances.dave,
+      client = apiTest.clients.dave,
       url = 'api/series/domain/sirius.org'
     } = opts;
     const fd = new FormData();
     for (const [blob, name] of files) fd.append('files', blob, name);
-    return await axios.post(url, fd);
+    return await client.post(url, fd);
   };
 
   const imagesOf = async (seriesUid: string) =>
@@ -273,14 +274,14 @@ describe('Upload', () => {
 
   test('rejects upload into an inaccessible domain', async () => {
     const res = await upload([[await file(brain), 'brain.dcm']], {
-      axios: apiTest.axiosInstances.bob
+      client: apiTest.clients.bob
     });
     assert.equal(res.status, 403);
     assert.match(res.data.error, /You cannot upload to this domain/);
   });
 
   test('reports the progress with the log', async () => {
-    const { dave } = apiTest.axiosInstances;
+    const { dave } = apiTest.clients;
     const progressId = (await dave.post('api/progress', {})).data.progressId;
     const sse = await dave.get(`api/progress/${progressId}`, {
       responseType: 'stream'
@@ -436,7 +437,7 @@ describe('search by my list', () => {
 });
 
 describe('Export CS volume', () => {
-  const download = (params: object, user: keyof typeof ax = 'bob') =>
+  const download = (params: TestQueryParams, user: keyof typeof ax = 'bob') =>
     ax[user].get('api/series/export-cs-volume', {
       params,
       responseType: 'arraybuffer'
@@ -453,11 +454,11 @@ describe('Export CS volume', () => {
       });
       assert.equal(res.status, 200);
       assert.equal(
-        res.headers['content-type'],
+        res.headers.get('content-type'),
         compressionFormat === 'zip' ? 'application/zip' : 'application/gzip'
       );
       assert.match(
-        res.headers['content-disposition'],
+        res.headers.get('content-disposition') ?? '',
         compressionFormat === 'zip'
           ? /filename="111.222.333.444.777.zip"/
           : /filename="111.222.333.444.777.tar.gz"/

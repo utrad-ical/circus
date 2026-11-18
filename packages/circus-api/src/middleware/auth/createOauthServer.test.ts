@@ -1,10 +1,9 @@
 import assert from 'node:assert/strict';
 import { it, before, after, beforeEach } from 'node:test';
-import type { AxiosInstance } from 'axios';
-import axios from 'axios';
+import type { TestHttpClient } from '../../test/util-http.ts';
+import { createTestHttpClient } from '../../test/util-http.ts';
 import bodyparser from 'koa-bodyparser';
 import Router from 'koa-router';
-import * as qs from 'querystring';
 import type { TestServer } from '../../test/util-koa.ts';
 import { setUpKoaTest } from '../../test/util-koa.ts';
 import { setUpMongoFixture, usingModels } from '../../test/util-mongo.ts';
@@ -15,7 +14,7 @@ import DefaultAuthProvider from '../auth/authProvider/DefaultAuthProvider.ts';
 import type { Models } from '../../interface.ts';
 import type { Db } from 'mongodb';
 
-let testServer: TestServer, ax: AxiosInstance, db: Db, models: Models;
+let testServer: TestServer, ax: TestHttpClient, db: Db, models: Models;
 
 const modelsPromise = usingModels();
 
@@ -46,7 +45,7 @@ before(async () => {
     );
     app.use(router.routes());
   });
-  ax = axios.create({ baseURL: testServer.url, validateStatus: () => true });
+  ax = createTestHttpClient(testServer.url);
 });
 
 beforeEach(async () => {
@@ -60,14 +59,14 @@ beforeEach(async () => {
 });
 
 after(async () => {
-  testServer.tearDown();
+  await testServer.tearDown();
 });
 
 it('should authenticate a request with valid token', async () => {
   const getTokenResult = await ax.request({
     method: 'post',
     url: 'token',
-    data: qs.stringify({
+    data: new URLSearchParams({
       client_id: 'circus-front',
       client_secret: 'not-a-secret',
       grant_type: 'password',
@@ -86,7 +85,7 @@ it('should authenticate a request with valid token', async () => {
 it('should reject token request with wrong credential', async () => {
   // wrong password
   const res1 = await ax.post('token', {
-    data: qs.stringify({
+    data: new URLSearchParams({
       client_id: 'circus-front',
       client_secret: 'not-a-secret',
       grant_type: 'password',
@@ -98,7 +97,7 @@ it('should reject token request with wrong credential', async () => {
 
   // nonexistent user
   const res2 = await ax.post('token', {
-    data: qs.stringify({
+    data: new URLSearchParams({
       client_id: 'circus-front',
       client_secret: 'not-a-secret',
       grant_type: 'password',
@@ -126,7 +125,7 @@ it('onetime URL', async () => {
   const res = await ax.request({
     method: 'POST',
     url: 'token',
-    data: qs.stringify({
+    data: new URLSearchParams({
       client_id: 'circus-front',
       client_secret: 'not-a-secret',
       grant_type: 'password',

@@ -1,8 +1,7 @@
-import type { AxiosRequestConfig, AxiosResponse } from 'axios';
-import axios from 'axios';
-import type { CancelToken } from './cancelToken.ts';
 import { getStore } from '#store/storeAccess.ts';
 import { showMessage } from '#store/messages.ts';
+import { ApiHttpError } from './apiHttpError.ts';
+import type { ApiResponse } from './apiHttpError.ts';
 import {
   currentUserEmail,
   expectedUserHeaderName,
@@ -10,110 +9,209 @@ import {
   showSessionUserChangedMessage
 } from './sessionUserCheck.ts';
 
-type ApiOptions<Body> = Omit<AxiosRequestConfig<Body>, 'cancelToken'> & {
+type ErrorHandling = boolean | number[];
+
+interface ApiOptions<Body> {
+  method?: string;
+  data?: Body;
+  params?: Record<string, string | number | boolean | null | undefined>;
+  headers?: HeadersInit;
+  responseType?: 'arraybuffer';
   checkUser?: boolean;
-  handleErrors?: boolean | number[];
-};
+  handleErrors?: ErrorHandling;
+}
 
-/**
- * The header required by the API server for requests that may change data
- * (CSRF protection for the session cookie).
- */
-export const csrfHeaders = { 'X-Requested-With': 'XMLHttpRequest' };
+interface UploadOptions {
+  onProgress: (event: ProgressEvent) => void;
+  handleErrors?: ErrorHandling;
+}
 
-/**
- * Creates CIRCUS API accessor.
- * Requests are authenticated with the HttpOnly session cookie,
- * which the browser sends automatically.
- */
-const createApiCaller = (apiServer: string) => {
-  const baseURL = apiServer + 'api/';
+/** The session cookie's CSRF protection requires this header. */
+const csrfHeader = 'X-Requested-With';
 
-  const api = async <Response = unknown, Body = unknown>(
+export const createApiCaller = (apiServer: string) => {
+  const baseUrl = apiServer + 'api/';
+  const requestUrl = (command: string) =>
+    new URL(baseUrl + command.replace(/^\/+/, ''), window.location.href);
+
+  const api = <Result = unknown, Body = unknown>(
     command: string,
     options: ApiOptions<Body> = {},
-    cancelToken?: CancelToken
-  ): Promise<Response> => {
-    const { checkUser = true, handleErrors, ...request } = options;
-    const params = { url: command, method: 'get', ...request };
-    if (typeof params.data === 'object') {
-      if (params.method === 'get') params.method = 'post';
-    }
+    signal?: AbortSignal
+  ): Promise<Result> => {
+    const {
+      checkUser = true,
+      handleErrors,
+      data,
+      params,
+      responseType,
+      method = 'GET'
+    } = options;
 
-    // Unless told not to (i.e., when loading the user just after a login),
-    // the server rejects the request if the session user has changed
-    const userEmail = checkUser ? currentUserEmail() : undefined;
+    return reportApiErrors<Result>(
+      async () => {
+        const url = requestUrl(command);
+        for (const [key, value] of Object.entries(params ?? {})) {
+          if (value != null) url.searchParams.append(key, String(value));
+        }
 
-    try {
-      const headers = {
-        ...csrfHeaders,
-        ...(userEmail ? { [expectedUserHeaderName]: userEmail } : {}),
-        ...(params.headers || {})
-      };
+        const headers = requestHeaders(checkUser, options.headers);
+        const normalizedMethod = method.toUpperCase();
+        const requestMethod =
+          normalizedMethod === 'GET' && typeof data === 'object'
+            ? 'POST'
+            : normalizedMethod;
+        const response = await fetch(url, {
+          method: requestMethod,
+          credentials: 'include',
+          headers,
+          body: requestBody(data, headers),
+          signal
+        });
 
-      let axiosCancelToken = undefined;
-      if (cancelToken) {
-        const source = axios.CancelToken.source();
-        cancelToken.onCancel(() => source.cancel());
-        axiosCancelToken = source.token;
-      }
-
-      const config = {
-        baseURL,
-        cached: false,
-        withCredentials: true,
-        ...params,
-        headers,
-        cancelToken: axiosCancelToken
-      };
-      const res = await axios<Response>(config);
-      return res.data;
-    } catch (err: any) {
-      // Cancelled on purpose (e.g., by `useLoadData` on re-render)
-      if (axios.isCancel(err)) throw err;
-      if (isSessionUserChangedError(err)) {
-        showSessionUserChangedMessage();
-        throw err;
-      }
-      // By default, all errors are displayed with a minimal message.
-      // Set 'handleErrors' option to supress error message for specific error types.
-      let handle = handleErrors === true;
-      if (
-        err.response &&
-        Array.isArray(handleErrors) &&
-        handleErrors.includes(err.response.status)
-      ) {
-        handle = true;
-      }
-      if (!handle) {
-        showErrorMessage(err);
-      }
-      throw err;
-    }
+        return {
+          status: response.status,
+          headers: response.headers,
+          data:
+            responseType === 'arraybuffer'
+              ? await response.arrayBuffer()
+              : parseApiText(await response.text())
+        };
+      },
+      handleErrors,
+      signal
+    );
   };
-  api.getBaseUrl = () => baseURL;
+
+  api.upload = <Result = unknown>(
+    command: string,
+    form: FormData,
+    { onProgress, handleErrors }: UploadOptions
+  ): Promise<Result> =>
+    reportApiErrors<Result>(
+      () =>
+        uploadForm(requestUrl(command), requestHeaders(true), form, onProgress),
+      handleErrors
+    );
+
+  api.getBaseUrl = () => baseUrl;
   return api;
 };
 
-const showErrorMessage = (err: { response: AxiosResponse }) => {
-  let message = '';
+const requestHeaders = (checkUser: boolean, overrides?: HeadersInit) => {
+  const headers = new Headers({ [csrfHeader]: 'XMLHttpRequest' });
+  const userEmail = checkUser ? currentUserEmail() : undefined;
+  if (userEmail) headers.set(expectedUserHeaderName, userEmail);
+  new Headers(overrides).forEach((value, name) => headers.set(name, value));
+  return headers;
+};
 
-  if (err.response && typeof err.response.status === 'number') {
-    const status = err.response.status;
-    const messages: { [status: number]: string } = {
-      400: 'Bad request.',
-      404: 'Not found.',
-      401: 'Authorization error. Please log-in again.',
-      500: 'Internal server error occurred. Please consult the administrator.'
-    };
-    if (status in messages) {
-      message = messages[status];
-    } else {
-      message = `Unknown server error (${status}). Please consult the administrator.`;
-    }
-  } else {
-    message = 'The server did not respond.';
+const requestBody = (data: unknown, headers: Headers): BodyInit | undefined => {
+  if (data == null) return undefined;
+  if (
+    typeof data === 'string' ||
+    data instanceof Blob ||
+    data instanceof FormData ||
+    data instanceof URLSearchParams ||
+    data instanceof ArrayBuffer
+  ) {
+    return data;
   }
+  if (ArrayBuffer.isView(data)) return data as ArrayBufferView<ArrayBuffer>;
+
+  if (!headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+  return JSON.stringify(data);
+};
+
+const parseApiText = (body: string): unknown => {
+  if (!body) return body;
+  try {
+    return JSON.parse(body);
+  } catch {
+    return body;
+  }
+};
+
+const uploadForm = (
+  url: URL,
+  headers: Headers,
+  form: FormData,
+  onProgress: UploadOptions['onProgress']
+) =>
+  new Promise<ApiResponse>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', url);
+    xhr.withCredentials = true;
+    headers.forEach((value, name) => xhr.setRequestHeader(name, value));
+    xhr.upload.onprogress = onProgress;
+    xhr.onerror = () => reject(new Error('Network Error'));
+    xhr.onabort = () =>
+      reject(new DOMException('Request aborted', 'AbortError'));
+    xhr.onload = () => {
+      const responseHeaders = new Headers();
+      for (const line of xhr.getAllResponseHeaders().split('\r\n')) {
+        const colon = line.indexOf(':');
+        if (colon > 0) {
+          responseHeaders.append(line.slice(0, colon), line.slice(colon + 1));
+        }
+      }
+      resolve({
+        status: xhr.status,
+        headers: responseHeaders,
+        data: parseApiText(xhr.responseText)
+      });
+    };
+    xhr.send(form);
+  });
+
+const reportApiErrors = async <Result>(
+  send: () => Promise<ApiResponse>,
+  handleErrors?: ErrorHandling,
+  signal?: AbortSignal
+): Promise<Result> => {
+  try {
+    const response = await send();
+    if (response.status < 200 || response.status >= 300) {
+      throw new ApiHttpError(response);
+    }
+    return response.data as Result;
+  } catch (err) {
+    if (
+      signal?.aborted ||
+      (err instanceof DOMException && err.name === 'AbortError')
+    ) {
+      throw err;
+    }
+    if (isSessionUserChangedError(err)) {
+      showSessionUserChangedMessage();
+    } else {
+      const status =
+        err instanceof ApiHttpError ? err.response.status : undefined;
+      const handled =
+        handleErrors === true ||
+        (Array.isArray(handleErrors) &&
+          status !== undefined &&
+          handleErrors.includes(status));
+      if (!handled) showErrorMessage(status);
+    }
+    throw err;
+  }
+};
+
+const showErrorMessage = (status?: number) => {
+  const messages: Record<number, string> = {
+    400: 'Bad request.',
+    404: 'Not found.',
+    401: 'Authorization error. Please log-in again.',
+    500: 'Internal server error occurred. Please consult the administrator.'
+  };
+  const message =
+    status === undefined
+      ? 'The server did not respond.'
+      : (messages[status] ??
+        `Unknown server error (${status}). Please consult the administrator.`);
   getStore().dispatch(
     showMessage(message, 'danger', {
       tag: 'apiResult',
@@ -122,7 +220,5 @@ const showErrorMessage = (err: { response: AxiosResponse }) => {
   );
 };
 
-/**
- * The CIRCUS API accessor, authenticated with the session cookie.
- */
+/** The CIRCUS API accessor, authenticated with the HttpOnly session cookie. */
 export const api = createApiCaller('/');

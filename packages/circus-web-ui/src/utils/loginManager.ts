@@ -1,6 +1,5 @@
-import axios from 'axios';
 import React, { useContext } from 'react';
-import { api, csrfHeaders } from './api.ts';
+import { createApiCaller } from './api.ts';
 import {
   broadcastSessionChange,
   isSessionUserChangedError
@@ -22,23 +21,24 @@ import * as searchActions from '#store/searches.ts';
  * @param dispatch The redux store's dispatch object
  */
 const loginManager = (apiServer: string, dispatch: Dispatch) => {
+  const api = createApiCaller(apiServer);
+  const sessionOptions = { checkUser: false, handleErrors: true };
+
   const checkServerIsLive = async () => {
     try {
-      const res = await axios.request({
-        method: 'get',
-        url: apiServer + 'api/status',
-        validateStatus: () => true
-      });
+      const res = await fetch(api.getBaseUrl() + 'status');
+      await res.body?.cancel();
       return res.status === 200;
-    } catch (err: any) {
+    } catch {
       return false;
     }
   };
 
   const startSession = async (data: SessionCreate) => {
-    await axios.post(apiServer + 'api/session', data, {
-      headers: csrfHeaders,
-      withCredentials: true
+    await api<unknown, SessionCreate>('session', {
+      ...sessionOptions,
+      method: 'POST',
+      data
     });
     // Learn who we are now, and tell other tabs
     const userEmail = await refreshUserInfo(true);
@@ -98,10 +98,7 @@ const loginManager = (apiServer: string, dispatch: Dispatch) => {
   };
 
   const logout = async () => {
-    await axios.delete(apiServer + 'api/session', {
-      headers: csrfHeaders,
-      withCredentials: true
-    });
+    await api('session', { ...sessionOptions, method: 'DELETE' });
     dispatch(actions.loggedOut());
     dispatch(searchActions.reset());
     broadcastSessionChange(null);

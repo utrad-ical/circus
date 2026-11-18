@@ -1,7 +1,7 @@
 import type { Deps } from '../typings/middlewares.ts';
 import { after } from 'node:test';
-import type { AxiosInstance } from 'axios';
-import axios from 'axios';
+import type { TestHttpClient } from './util-http.ts';
+import { createTestHttpClient } from './util-http.ts';
 import Router from 'koa-router';
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
@@ -44,40 +44,39 @@ export interface ApiTest {
   database: Database;
 
   /**
-   * Holds several `AxiosInstance`s that represent three API
+   * Holds several `TestHttpClient`s that represent API
    * users with different privileges.
-   * Its `baseURL` is configured to point to the test sever,
-   * and its `validateStatus` is configured not to throw on any 4xx/5xx errors.
+   * They target the test server and return 4xx/5xx responses for assertions.
    */
-  axiosInstances: {
+  clients: {
     /**
      * Alice belongs to the "admin" group.
      */
-    alice: AxiosInstance;
+    alice: TestHttpClient;
     /**
      * Bob belongs to the "power user" group.
      */
-    bob: AxiosInstance;
+    bob: TestHttpClient;
     /**
      * Guest belongs to the "guest" group and has no explict privilege.
      */
-    guest: AxiosInstance;
+    guest: TestHttpClient;
     /**
      * Carol belongs to the "power user 2" group.
      */
-    carol: AxiosInstance;
+    carol: TestHttpClient;
     /**
      * Dave belongs to the "admin" and "power user 2" group.
      */
-    dave: AxiosInstance;
+    dave: TestHttpClient;
     /**
      * Eve belongs to the "guest" group.
      */
-    eve: AxiosInstance;
+    eve: TestHttpClient;
     /**
      * Frank belongs to the "unprivileged user" group.
      */
-    frank: AxiosInstance;
+    frank: TestHttpClient;
   };
   csCore: cscore.CsCore;
   dicomFileRepository: DicomFileRepository;
@@ -88,7 +87,7 @@ export interface ApiTest {
   tearDown: () => Promise<void>;
   /**
    * The URL of the test Koa endpoint server.
-   * The members of `axiosInstances` are configured to use this by default.
+   * The members of `clients` are configured to use this by default.
    */
   url: string;
   progressManager: ProgressManager;
@@ -247,32 +246,28 @@ export const setUpAppForRoutesTest = async (
 
   const testServer = await setUpKoaTestWith(app);
 
-  // Prepare axios instances that kick HTTP requests as these users
-  const createAxios = (token: string) =>
-    axios.create({
-      baseURL: testServer.url,
-      headers: { Authorization: `Bearer ${token}` },
-      validateStatus: () => true
-    });
+  // Prepare HTTP clients that kick HTTP requests as these users
+  const clientForToken = (token: string) =>
+    createTestHttpClient(testServer.url, { Authorization: `Bearer ${token}` });
 
-  const axiosInstances = {
-    alice: createAxios('2311aee0435c36ae14c39835539a931a6344714a'),
-    bob: createAxios('8292766837c1901b0a6954f7bda49710316c57da'),
-    guest: createAxios('2c2fbaea8046df924b8b459879b799c111e9b7f1'),
-    carol: createAxios('m47mvv02x2yer00gjroc0za00dger4f455cvedfh'),
-    dave: createAxios('98uijkgfhgty43gccccf54rfdvupiazmvr3nwcko'),
-    eve: createAxios('ft5y1dkymhc2jh9wf0hrx7dpghj8u12hdk27dnls'),
-    frank: createAxios('s10jkttverbemycvpe7bbbbemxcm38cqvrey54hd')
+  const clients = {
+    alice: clientForToken('2311aee0435c36ae14c39835539a931a6344714a'),
+    bob: clientForToken('8292766837c1901b0a6954f7bda49710316c57da'),
+    guest: clientForToken('2c2fbaea8046df924b8b459879b799c111e9b7f1'),
+    carol: clientForToken('m47mvv02x2yer00gjroc0za00dger4f455cvedfh'),
+    dave: clientForToken('98uijkgfhgty43gccccf54rfdvupiazmvr3nwcko'),
+    eve: clientForToken('ft5y1dkymhc2jh9wf0hrx7dpghj8u12hdk27dnls'),
+    frank: clientForToken('s10jkttverbemycvpe7bbbbemxcm38cqvrey54hd')
   };
 
   const tearDown = async () => {
-    testServer.tearDown();
+    await testServer.tearDown();
     await database.dispose();
   };
 
   return {
     database,
-    axiosInstances,
+    clients,
     csCore,
     tearDown,
     url: testServer.url,

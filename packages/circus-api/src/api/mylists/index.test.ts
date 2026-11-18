@@ -5,10 +5,10 @@ import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import type * as mongo from 'mongodb';
 
-let apiTest: ApiTest, ax: typeof apiTest.axiosInstances, db: mongo.Db;
+let apiTest: ApiTest, ax: typeof apiTest.clients, db: mongo.Db;
 before(async () => {
   apiTest = await setUpAppForRoutesTest();
-  ax = apiTest.axiosInstances;
+  ax = apiTest.clients;
   db = apiTest.database.db;
 });
 after(async () => await apiTest.tearDown());

@@ -9,21 +9,21 @@ import {
 } from 'node:test';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
-import type { AxiosInstance } from 'axios';
+import type { TestHttpClient } from '../../test/util-http.ts';
 import { setUpMongoFixture } from '../../test/util-mongo.ts';
 import status from 'http-status';
 import { extractPatientIdNameFilter } from './index.ts';
 
 let apiTest: ApiTest,
-  alice: AxiosInstance,
-  bob: AxiosInstance,
-  guest: AxiosInstance,
-  dave: AxiosInstance,
-  frank: AxiosInstance;
+  alice: TestHttpClient,
+  bob: TestHttpClient,
+  guest: TestHttpClient,
+  dave: TestHttpClient,
+  frank: TestHttpClient;
 
 before(async () => {
   apiTest = await setUpAppForRoutesTest();
-  ({ alice, bob, guest, dave, frank } = apiTest.axiosInstances);
+  ({ alice, bob, guest, dave, frank } = apiTest.clients);
 });
 
 after(async () => await apiTest.tearDown());
@@ -107,10 +107,8 @@ describe('plugin-job search', () => {
   test('should be searchable if patient information is not used', async () => {
     const res = await frank.get('api/plugin-jobs', {
       params: {
-        filter: {
-          pluginId:
-            'd135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2'
-        }
+        'filter[pluginId]':
+          'd135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2'
       }
     });
     assert.equal(res.status, 200);
@@ -472,7 +470,7 @@ describe('download plugin job attachment files', () => {
       'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/attachment/test.txt'
     );
     assert.equal(res.status, 200);
-    assert.ok(res.headers['content-type'].includes('text/plain'));
+    assert.ok(res.headers.get('content-type')?.includes('text/plain'));
     assert.equal(res.data, 'This is a test file');
   });
 

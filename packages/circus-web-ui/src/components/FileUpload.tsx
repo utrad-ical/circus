@@ -10,6 +10,7 @@ import classnames from 'classnames';
 import styles from './FileUpload.module.css';
 import table from './table.module.css';
 import { api } from '#utils/api.ts';
+import { ApiHttpError } from '#utils/apiHttpError.ts';
 import useProgress from '#utils/useProgress.ts';
 import { withCommas } from '#utils/util.ts';
 
@@ -84,13 +85,7 @@ const FileUpload = <Result,>(props: {
     setFiles(multiple ? dedupeFiles([...files, ...dropped]) : dropped);
   };
 
-  const handleUploadProgress = ({
-    loaded,
-    total
-  }: {
-    loaded: number;
-    total?: number;
-  }) => {
+  const handleUploadProgress = ({ loaded, total }: ProgressEvent) => {
     if (total) setUploadPercent(Math.floor((loaded * 100) / total));
   };
 
@@ -126,21 +121,22 @@ const FileUpload = <Result,>(props: {
           (url.includes('?') ? '&' : '?') +
           `progressId=${encodeURIComponent(progressId)}`;
       }
-      const res = await api<Result, FormData>(target, {
-        method: 'post',
-        data: fd,
-        onUploadProgress: handleUploadProgress,
+      const res = await api.upload<Result>(target, fd, {
+        onProgress: handleUploadProgress,
         handleErrors: [400, 422]
       });
       setFiles([]);
       typeof onUploaded === 'function' && onUploaded(res);
-    } catch (err: any) {
-      const status = err.response?.status;
-      if (status === 400 || status === 422) {
+    } catch (err) {
+      const response = err instanceof ApiHttpError ? err.response : undefined;
+      if (response && (response.status === 400 || response.status === 422)) {
         setFiles([]);
-        typeof onUploaded === 'function' && onUploaded(err.response.data);
+        typeof onUploaded === 'function' && onUploaded(response.data as Result);
       } else {
-        showMessage(`Upload failed (Error ${status ?? 'network'})`, 'danger');
+        showMessage(
+          `Upload failed (Error ${response?.status ?? 'network'})`,
+          'danger'
+        );
       }
     } finally {
       setUploading(false);

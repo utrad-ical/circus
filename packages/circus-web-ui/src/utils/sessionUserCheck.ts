@@ -1,5 +1,6 @@
 import { getStore } from '#store/storeAccess.ts';
 import { showMessage } from '#store/messages.ts';
+import { ApiHttpError } from './apiHttpError.ts';
 
 /**
  * The session cookie is shared by all tabs of the browser, so logging in as
@@ -17,9 +18,10 @@ const sessionUserChangedHeaderName = 'x-circus-session-user-changed';
 export const currentUserEmail = (): string | undefined =>
   getStore().getState().loginUser.data?.userEmail;
 
-export const isSessionUserChangedError = (err: any) =>
-  err?.response?.status === 409 &&
-  !!err.response.headers?.[sessionUserChangedHeaderName];
+export const isSessionUserChangedError = (err: unknown) =>
+  err instanceof ApiHttpError &&
+  err.response.status === 409 &&
+  !!err.response.headers.get(sessionUserChangedHeaderName);
 
 export const showSessionUserChangedMessage = () => {
   getStore().dispatch(

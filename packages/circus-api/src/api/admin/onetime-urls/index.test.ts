@@ -3,9 +3,9 @@ import { test, before, after, beforeEach } from 'node:test';
 import type { ApiTest } from '../../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../../test/util-routes.ts';
 import { setUpMongoFixture } from '../../../test/util-mongo.ts';
-import type { AxiosInstance } from 'axios';
+import type { TestHttpClient } from '../../../test/util-http.ts';
 
-let apiTest: ApiTest, axios: AxiosInstance;
+let apiTest: ApiTest, client: TestHttpClient;
 before(async () => {
   apiTest = await setUpAppForRoutesTest();
 });
@@ -13,13 +13,13 @@ before(async () => {
 after(async () => await apiTest.tearDown());
 
 beforeEach(async () => {
-  axios = apiTest.axiosInstances.alice;
+  client = apiTest.clients.alice;
   await setUpMongoFixture(apiTest.database.db, ['onetimeUrls']);
 });
 
 test('create a one time URL', async () => {
   const userEmail = 'bob@example.com';
-  const res = await axios.request({
+  const res = await client.request({
     method: 'post',
     url: `api/admin/onetime-urls`,
     data: { user: userEmail }
@@ -28,9 +28,9 @@ test('create a one time URL', async () => {
 });
 
 test('throw 401 error for unauthorized user', async () => {
-  axios = apiTest.axiosInstances.carol;
+  client = apiTest.clients.carol;
   const userEmail = 'bob@example.com';
-  const res = await axios.request({
+  const res = await client.request({
     method: 'post',
     url: `api/admin/onetime-urls`,
     data: { user: userEmail }
@@ -40,7 +40,7 @@ test('throw 401 error for unauthorized user', async () => {
 
 test('throw 404 error for nonexistent user', async () => {
   const userEmail = 'nonexistentuser@example.com';
-  const res = await axios.request({
+  const res = await client.request({
     method: 'post',
     url: `api/admin/onetime-urls`,
     data: { user: userEmail }
@@ -50,7 +50,7 @@ test('throw 404 error for nonexistent user', async () => {
 
 test('throw 400 error for login disabled user', async () => {
   const userEmail = 'eve@example.com';
-  const res = await axios.request({
+  const res = await client.request({
     method: 'post',
     url: `api/admin/onetime-urls`,
     data: { user: userEmail }

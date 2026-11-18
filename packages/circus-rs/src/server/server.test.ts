@@ -4,7 +4,7 @@ import type { RsServices } from './configureServiceLoader.ts';
 import configureServiceLoader from './configureServiceLoader.ts';
 import fs from 'fs';
 import zlib from 'zlib';
-import _axios from 'axios';
+import RsHttpClient from '../browser/http-client/RsHttpClient.ts';
 import type { Server } from 'http';
 import { ServiceLoader } from '@utrad-ical/circus-lib';
 import status from 'http-status';
@@ -24,10 +24,17 @@ const testConfig = () =>
     volumeProvider: { options: { cache: { memoryThreshold: 2147483648 } } }
   }) as Configuration;
 
-const axios = _axios.create({
-  baseURL: `http://localhost:${port}`,
-  validateStatus: () => true
-});
+const origin = `http://localhost:${port}`;
+const request = (path: string, init?: RequestInit) => {
+  const headers = new Headers(init?.headers);
+  headers.set('Connection', 'close');
+  return fetch(new URL(path, origin), { ...init, headers });
+};
+
+const readStatus = async (response: Response) => {
+  await response.arrayBuffer();
+  return response.status;
+};
 
 const testdir = path.join(import.meta.dirname, '../../test-data/dicom/');
 
@@ -81,166 +88,191 @@ describe('without auth', () => {
   after(() => stopServer());
 
   test('status', async () => {
-    const res = await axios.get('/status');
+    const res = await request('/status');
     assert.equal(res.status, status.OK);
-    assert.ok(res.headers['content-type'].includes('application/json'));
-    assert.partialDeepStrictEqual(res.data, { status: 'Running' });
+    assert.ok(res.headers.get('content-type')?.includes('application/json'));
+    assert.partialDeepStrictEqual(await res.json(), { status: 'Running' });
   });
 
   test('globalIpFilter', async () => {
-    const res = await axios.get('/status', {
+    const res = await request('/status', {
       headers: { 'X-Forwarded-For': '127.0.0.11 ' }
     });
-    assert.equal(res.status, status.UNAUTHORIZED);
+    assert.equal(await readStatus(res), status.UNAUTHORIZED);
   });
 
   test('must return 404 for nonexistent route', async () => {
-    const res = await axios.get('/foobar');
-    assert.equal(res.status, status.NOT_FOUND);
+    const res = await request('/foobar');
+    assert.equal(await readStatus(res), status.NOT_FOUND);
   });
 
   describe('series middleware', () => {
     test('CORS headers', async () => {
-      const res = await axios.request({
-        method: 'options',
-        url: '/series/1.2.3.4.5/metadata'
+      const res = await request('/series/1.2.3.4.5/metadata', {
+        method: 'OPTIONS'
       });
-      assert.equal(res.headers['access-control-allow-methods'], 'GET');
+      assert.equal(res.headers.get('access-control-allow-methods'), 'GET');
     });
 
     // it.skip('must return 404 for nonexistent series');
 
     describe('metadata', () => {
       test('returns no window by default', async () => {
-        const res = await axios.get('/series/1.2.3.4.5/metadata');
+        const res = await request('/series/1.2.3.4.5/metadata');
         assert.equal(res.status, status.OK);
-        assert.equal(res.data.estimatedWindow, undefined);
+        assert.equal((await res.json()).estimatedWindow, undefined);
       });
 
       test('returns no window if window=none', async () => {
-        const res = await axios.get(
+        const res = await request(
           '/series/1.2.3.4.5/metadata?estimateWindow=none'
         );
         assert.equal(res.status, status.OK);
-        assert.equal(res.data.estimatedWindow, undefined);
+        assert.equal((await res.json()).estimatedWindow, undefined);
       });
 
       test('returns estimated window with window=first', async () => {
-        const res = await axios.get(
+        const res = await request(
           '/series/1.2.3.4.5/metadata?estimateWindow=first'
         );
         assert.equal(res.status, status.OK);
-        assert.partialDeepStrictEqual(res.data.estimatedWindow, {
+        assert.partialDeepStrictEqual((await res.json()).estimatedWindow, {
           level: 192,
           width: 2498
         });
       });
 
       test('returns estimated window with window=center', async () => {
-        const res = await axios.get(
+        const res = await request(
           '/series/1.2.3.4.5/metadata?estimateWindow=center'
         );
         assert.equal(res.status, status.OK);
-        assert.partialDeepStrictEqual(res.data.estimatedWindow, {
+        assert.partialDeepStrictEqual((await res.json()).estimatedWindow, {
           level: 192,
           width: 2498
         });
       });
 
       it('returns estimated window with window=full', async () => {
-        const res = await axios.get(
+        const res = await request(
           '/series/1.2.3.4.5/metadata?estimateWindow=full'
         );
         assert.equal(res.status, status.OK);
-        assert.partialDeepStrictEqual(res.data.estimatedWindow, {
+        assert.partialDeepStrictEqual((await res.json()).estimatedWindow, {
           level: 192,
           width: 2498
         });
       });
 
       test('returns partial metadata', async () => {
-        const res = await axios.get(
+        const res = await request(
           '/series/1.2.3.4.5/metadata?start=5&end=15&delta=2'
         );
         assert.equal(res.status, status.OK);
         // 6 slices (5, 7, 9, 11, 13, 15)
-        assert.deepEqual(res.data.voxelCount, [512, 512, 6]);
+        assert.deepEqual((await res.json()).voxelCount, [512, 512, 6]);
       });
     });
 
     describe('volume', () => {
       test('returns raw volume', async () => {
-        const res = await axios.get('/series/1.2.3.4.5/volume');
+        const res = await request('/series/1.2.3.4.5/volume');
         assert.equal(res.status, status.OK);
-        assert.equal(res.headers['content-type'], 'application/octet-stream');
-        assert.equal(res.headers['content-length'], String(512 * 512 * 20 * 2));
+        assert.equal(
+          res.headers.get('content-type'),
+          'application/octet-stream'
+        );
+        assert.equal(
+          res.headers.get('content-length'),
+          String(512 * 512 * 20 * 2)
+        );
+        assert.equal((await res.arrayBuffer()).byteLength, 512 * 512 * 20 * 2);
       });
 
       test('returns partial volume', async () => {
-        const res = await axios.get(
+        const res = await request(
           '/series/1.2.3.4.5/volume?start=5&end=15&delta=2'
         );
         assert.equal(res.status, status.OK);
-        assert.equal(res.headers['content-type'], 'application/octet-stream');
-        assert.equal(res.headers['content-length'], String(512 * 512 * 6 * 2));
+        assert.equal(
+          res.headers.get('content-type'),
+          'application/octet-stream'
+        );
+        assert.equal(
+          res.headers.get('content-length'),
+          String(512 * 512 * 6 * 2)
+        );
+        assert.equal((await res.arrayBuffer()).byteLength, 512 * 512 * 6 * 2);
       });
 
       test('rejects partial volume out of the image range', async () => {
-        const res1 = await axios.get(
+        const res1 = await request(
           '/series/1.2.3.4.5/volume?start=5&end=21&delta=1'
         );
-        assert.equal(res1.status, status.BAD_REQUEST);
-        const res2 = await axios.get(
+        assert.equal(await readStatus(res1), status.BAD_REQUEST);
+        const res2 = await request(
           '/series/1.2.3.4.5/volume?start=25&end=15&delta=-1'
         );
-        assert.equal(res2.status, status.BAD_REQUEST);
+        assert.equal(await readStatus(res2), status.BAD_REQUEST);
       });
     });
 
     describe('scan', () => {
       test('return oblique image in binary format', async () => {
-        const res = await axios.get('/series/1.2.3.4.5/scan', {
-          params: {
-            origin: '200,200,50',
-            xAxis: '512,0,0',
-            yAxis: '0,512,0',
-            size: '50,50'
-          }
-        });
+        const res = await request(
+          '/series/1.2.3.4.5/scan?' +
+            new URLSearchParams({
+              origin: '200,200,50',
+              xAxis: '512,0,0',
+              yAxis: '0,512,0',
+              size: '50,50'
+            })
+        );
         assert.equal(res.status, status.OK);
-        assert.equal(res.headers['content-type'], 'application/octet-stream');
+        assert.equal(
+          res.headers.get('content-type'),
+          'application/octet-stream'
+        );
+        assert.ok((await res.arrayBuffer()).byteLength > 0);
       });
 
       test('return oblique image from partial volume', async () => {
-        const res = await axios.get('/series/1.2.3.4.5/scan', {
-          params: {
-            start: 5,
-            end: 15,
-            delta: 2,
-            origin: '200,200,50',
-            xAxis: '512,0,0',
-            yAxis: '0,512,0',
-            size: '50,50'
-          }
-        });
+        const res = await request(
+          '/series/1.2.3.4.5/scan?' +
+            new URLSearchParams({
+              start: '5',
+              end: '15',
+              delta: '2',
+              origin: '200,200,50',
+              xAxis: '512,0,0',
+              yAxis: '0,512,0',
+              size: '50,50'
+            })
+        );
         assert.equal(res.status, status.OK);
-        assert.equal(res.headers['content-type'], 'application/octet-stream');
+        assert.equal(
+          res.headers.get('content-type'),
+          'application/octet-stream'
+        );
+        assert.ok((await res.arrayBuffer()).byteLength > 0);
       });
 
       it('return oblique image in PNG', async () => {
-        const res = await axios.get('/series/1.2.3.4.5/scan', {
-          params: {
-            origin: '200,200,50',
-            xAxis: '512,0,0',
-            yAxis: '0,512,0',
-            size: '50,50',
-            format: 'png',
-            ww: 50,
-            wl: 50
-          }
-        });
+        const res = await request(
+          '/series/1.2.3.4.5/scan?' +
+            new URLSearchParams({
+              origin: '200,200,50',
+              xAxis: '512,0,0',
+              yAxis: '0,512,0',
+              size: '50,50',
+              format: 'png',
+              ww: '50',
+              wl: '50'
+            })
+        );
         assert.equal(res.status, status.OK);
-        assert.equal(res.headers['content-type'], 'image/png');
+        assert.equal(res.headers.get('content-type'), 'image/png');
+        assert.ok((await res.arrayBuffer()).byteLength > 0);
       });
     });
   });
@@ -259,40 +291,76 @@ describe('with authentication', () => {
   });
   after(() => stopServer());
 
+  let token: string;
   let tokenHeader: { Authorization: string };
 
   test('reject token request from invalid IP', async () => {
-    const res = await axios.get('/token', {
+    const res = await request('/token', {
       headers: { 'X-Forwarded-For': '127.0.0.2' }
     });
-    assert.equal(res.status, status.UNAUTHORIZED);
+    assert.equal(await readStatus(res), status.UNAUTHORIZED);
   });
 
   test('issue valid token', async () => {
-    const res = await axios.get('/token', {
-      params: { series: '1.2.3.4.5' }
-    });
+    const res = await request('/token?series=1.2.3.4.5');
     assert.equal(res.status, status.OK);
-    assert.partialDeepStrictEqual(res.data, { result: 'OK' });
-    tokenHeader = { Authorization: `Bearer ${res.data.token}` };
+    const data = await res.json();
+    assert.partialDeepStrictEqual(data, { result: 'OK' });
+    token = data.token;
+    tokenHeader = { Authorization: `Bearer ${token}` };
   });
 
   test('return error if token not passed', async () => {
-    const res = await axios.get('/series/1.2.3.4.5/metadata');
-    assert.equal(res.status, status.UNAUTHORIZED);
+    const res = await request('/series/1.2.3.4.5/metadata');
+    assert.equal(await readStatus(res), status.UNAUTHORIZED);
   });
 
   test('return error for unmatched token', async () => {
-    const res = await axios.get('/series/8.8.8.8.8/metadata', {
+    const res = await request('/series/8.8.8.8.8/metadata', {
       headers: tokenHeader
     });
-    assert.equal(res.status, status.UNAUTHORIZED);
+    assert.equal(await readStatus(res), status.UNAUTHORIZED);
   });
 
   test('return content for valid token', async () => {
-    const res = await axios.get('/series/1.2.3.4.5/metadata', {
+    const res = await request('/series/1.2.3.4.5/metadata', {
       headers: tokenHeader
     });
-    assert.equal(res.status, status.OK);
+    assert.equal(await readStatus(res), status.OK);
+  });
+
+  test('browser HTTP client uses the bearer token and decodes volume data', async () => {
+    const client = new RsHttpClient(origin, token);
+    const metadata = await client.request('series/1.2.3.4.5/metadata', {
+      start: 5,
+      end: 15,
+      delta: 2,
+      estimateWindow: undefined
+    });
+    assert.deepEqual(metadata.voxelCount, [512, 512, 6]);
+    const volume = await client.request(
+      'series/1.2.3.4.5/volume',
+      {},
+      'arraybuffer'
+    );
+    assert.ok(volume instanceof ArrayBuffer);
+    assert.equal(volume.byteLength, 512 * 512 * 20 * 2);
+
+    await assert.rejects(
+      new RsHttpClient(origin).request('series/1.2.3.4.5/metadata', {}),
+      error => {
+        const { response } = error as { response?: { status: number } };
+        return response?.status === status.UNAUTHORIZED;
+      }
+    );
+  });
+
+  test('browser HTTP client accepts a signal that is already aborted', async () => {
+    const client = new RsHttpClient(origin, token);
+    const signal = AbortSignal.abort();
+    await assert.rejects(
+      client.request('series/1.2.3.4.5/metadata', {}, 'json', signal),
+      { name: 'AbortError' }
+    );
   });
 });

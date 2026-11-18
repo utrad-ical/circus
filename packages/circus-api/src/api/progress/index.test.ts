@@ -15,13 +15,13 @@ before(async () => {
 after(async () => await apiTest.tearDown());
 
 const issue = async () => {
-  const res = await apiTest.axiosInstances.alice.post('api/progress', {});
+  const res = await apiTest.clients.alice.post('api/progress', {});
   assert.equal(res.status, 201);
   return res.data.progressId as string;
 };
 
 const subscribe = (progressId: string) =>
-  apiTest.axiosInstances.alice.get(`api/progress/${progressId}`, {
+  apiTest.clients.alice.get(`api/progress/${progressId}`, {
     responseType: 'stream'
   });
 
@@ -30,7 +30,7 @@ describe('progress', () => {
     const progressId = await issue();
     const res = await subscribe(progressId);
     assert.equal(res.status, 200);
-    assert.match(res.headers['content-type'], /text\/event-stream/);
+    assert.match(res.headers.get('content-type') ?? '', /text\/event-stream/);
     const data = readFromStreamTillEnd(res.data as Readable);
     const reporter = apiTest.progressManager.claim(
       progressId,
@@ -106,11 +106,9 @@ describe('progress', () => {
 
   test('returns 404 for an unknown ID or for other users', async () => {
     const progressId = await issue();
-    const res1 = await apiTest.axiosInstances.alice.get('api/progress/abc');
+    const res1 = await apiTest.clients.alice.get('api/progress/abc');
     assert.equal(res1.status, 404);
-    const res2 = await apiTest.axiosInstances.bob.get(
-      `api/progress/${progressId}`
-    );
+    const res2 = await apiTest.clients.bob.get(`api/progress/${progressId}`);
     assert.equal(res2.status, 404);
   });
 });

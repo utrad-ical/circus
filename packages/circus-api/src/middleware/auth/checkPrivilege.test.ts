@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it, before, after } from 'node:test';
-import type { AxiosInstance } from 'axios';
-import axios from 'axios';
+import type { TestHttpClient } from '../../test/util-http.ts';
+import { createTestHttpClient } from '../../test/util-http.ts';
 import Router from 'koa-router';
 import type { TestServer } from '../../test/util-koa.ts';
 import { setUpKoaTest } from '../../test/util-koa.ts';
@@ -9,7 +9,7 @@ import { setUpMongoFixture, usingModels } from '../../test/util-mongo.ts';
 import { determineUserAccessInfo } from '../../privilegeUtils.ts';
 import checkPrivilege from './checkPrivilege.ts';
 
-let testServer: TestServer, userEmail: string, ax: AxiosInstance;
+let testServer: TestServer, userEmail: string, ax: TestHttpClient;
 
 const modelsPromise = usingModels();
 
@@ -62,7 +62,7 @@ before(async () => {
     );
     app.use(router.routes());
   });
-  ax = axios.create({ baseURL: testServer.url, validateStatus: () => true });
+  ax = createTestHttpClient(testServer.url);
 });
 
 after(async () => {

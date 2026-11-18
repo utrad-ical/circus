@@ -1,3 +1,4 @@
+import type { TestQueryParams } from '../../test/util-http.ts';
 import assert from 'node:assert/strict';
 import { describe, test, before, after, beforeEach } from 'node:test';
 import { setUpMongoFixture } from '../../test/util-mongo.ts';
@@ -9,10 +10,10 @@ import type { Readable } from 'node:stream';
 import { readArchive } from '../../test/util-archive.ts';
 import { readFromStreamTillEnd } from '../../test/util-stream.ts';
 
-let apiTest: ApiTest, ax: typeof apiTest.axiosInstances;
+let apiTest: ApiTest, ax: typeof apiTest.clients;
 before(async () => {
   apiTest = await setUpAppForRoutesTest();
-  ax = apiTest.axiosInstances;
+  ax = apiTest.clients;
 });
 after(async () => await apiTest.tearDown());
 
@@ -780,7 +781,7 @@ describe('export-mhd', () => {
     await apiTest.dicomFileRepository.deleteSeries(seriesUid);
   });
 
-  const download = (params: object, user: keyof typeof ax = 'bob') =>
+  const download = (params: TestQueryParams, user: keyof typeof ax = 'bob') =>
     ax[user].get('api/cases/export-mhd', {
       params,
       responseType: 'arraybuffer'
@@ -795,9 +796,9 @@ describe('export-mhd', () => {
       compressionFormat: 'zip'
     });
     assert.equal(res.status, 200);
-    assert.equal(res.headers['content-type'], 'application/zip');
+    assert.equal(res.headers.get('content-type'), 'application/zip');
     assert.match(
-      res.headers['content-disposition'],
+      res.headers.get('content-disposition') ?? '',
       /attachment; filename="case-export.zip"/
     );
     const files = await readArchive('zip', new Blob([res.data]).stream());
@@ -813,7 +814,7 @@ describe('export-mhd', () => {
   test('exports the whole series as tar.gz', async () => {
     const res = await download({ caseIds: 'export-a', fullOriginalVolume: 1 });
     assert.equal(res.status, 200);
-    assert.equal(res.headers['content-type'], 'application/gzip');
+    assert.equal(res.headers.get('content-type'), 'application/gzip');
     const files = await readArchive('tgz', new Blob([res.data]).stream());
     assert.match(dimSize(files.get('export-a/vol000.mhd')), / 10$/);
   });

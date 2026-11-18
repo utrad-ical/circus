@@ -1,14 +1,13 @@
-import { z } from 'zod';
-import { dateField } from './formats.ts';
-import { myListEditor } from './myListEditor.ts';
+import { myListDoc } from './myList.ts';
 
-export const userMyList = z
-  .strictObject({
-    myListId: z.string(),
-    resourceType: z.enum(['series', 'clinicalCases', 'pluginJobs']),
-    name: z.string().min(1).max(64),
-    public: z.boolean(),
-    editors: z.array(myListEditor),
-    createdAt: dateField()
+/** A my list returned by the API, without the owner and the items */
+export const userMyList = myListDoc
+  .pick({
+    myListId: true,
+    resourceType: true,
+    name: true,
+    public: true,
+    editors: true,
+    createdAt: true
   })
-  .describe("Represents a user's sub-document for my list.");
+  .describe('Represents a my list of a user.');

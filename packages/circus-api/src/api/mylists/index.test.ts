@@ -39,6 +39,21 @@ describe('get one my list', () => {
     assert.equal(res.data.error, 'This my list does not exist');
   });
 
+  test('get a private list of another user as an editor', async () => {
+    const myListId = '01ezab6xqfac7hvm5s09yw1g1j';
+    await db
+      .collection('myLists')
+      .updateOne({ myListId }, { $set: { public: false } });
+    const res = await ax.bob.get(`api/mylists/${myListId}`);
+    assert.equal(res.status, 200);
+    assert.deepEqual(res.data.resourceIds, [
+      'gfdrjivu4w8p57nv95p7n485n3p891ygy6543wedfuyt67oiulkjhtrw312wergr'
+    ]);
+    await db
+      .collection('myLists')
+      .updateOne({ myListId }, { $set: { public: true } });
+  });
+
   test('throw 401 if not granted as editor', async () => {
     const res = await ax.bob.get('api/mylists/01ez9knaakz9tgd2hpyceagj11');
     assert.equal(res.status, 401);
@@ -68,15 +83,8 @@ describe('create new list', () => {
 
 describe('patch list', () => {
   const userEmail = 'bob@example.com';
-  const returnChangedList = async (myListId: string) => {
-    const userData = await apiTest.database.db
-      .collection('users')
-      .findOne({ userEmail });
-    const changedList = userData!.myLists.filter(
-      (myList: any) => myList.myListId === myListId
-    )[0];
-    return changedList;
-  };
+  const returnChangedList = async (myListId: string) =>
+    await apiTest.database.db.collection('myLists').findOne({ myListId });
 
   test('change list name', async () => {
     const myListId = '01ewetw0chv8v5vxdtjdf6x9rk';
@@ -88,7 +96,7 @@ describe('patch list', () => {
     assert.equal(res.status, 204);
 
     const changedList = await returnChangedList(myListId);
-    assert.equal(changedList.name, 'new name');
+    assert.equal(changedList?.name, 'new name');
   });
 
   test('change public status from false to true', async () => {
@@ -101,7 +109,7 @@ describe('patch list', () => {
     assert.equal(res.status, 204);
 
     const changedList = await returnChangedList(myListId);
-    assert.equal(changedList.public, true);
+    assert.equal(changedList?.public, true);
   });
 
   test('throw 401 for my list the user does not own', async () => {
@@ -161,14 +169,10 @@ describe('patch list', () => {
       });
       assert.equal(res.status, 204);
 
-      const userEmail = 'bob@example.com';
-      const userData = await apiTest.database.db
-        .collection('users')
-        .findOne({ userEmail });
-      const newList = userData!.myLists.filter(
-        (myList: any) => myList.myListId === myListId
-      )[0];
-      assert.equal(newList.editors.length, 2);
+      const newList = await apiTest.database.db
+        .collection('myLists')
+        .findOne({ myListId });
+      assert.equal(newList!.editors.length, 2);
     });
 
     test('throw 400 if invalid E-mail address is included', async () => {
@@ -195,7 +199,6 @@ describe('patch list', () => {
 
 describe('delete list', () => {
   test('delete list', async () => {
-    const userEmail = 'bob@example.com';
     const myListId = '01ewetywx9q6s2n5s03y3219ka';
     const res = await ax.bob.request({
       url: `api/mylists/${myListId}`,
@@ -207,14 +210,6 @@ describe('delete list', () => {
       .collection('myLists')
       .findOne({ myListId });
     assert.deepEqual(myList, null);
-
-    const userData = await apiTest.database.db
-      .collection('users')
-      .findOne({ userEmail });
-    const result = userData!.myLists.find(
-      (list: any) => list.myListId === myListId
-    );
-    assert.deepEqual(result, undefined);
   });
 
   test('throw 401 for my list the user does not own', async () => {
@@ -357,10 +352,9 @@ describe('transaction test', () => {
       responses.every(res => res.status === 201),
       true
     );
-    const user = await db
-      .collection('users')
-      .findOne({ userEmail: 'bob@example.com' });
-    assert.equal(user!.myLists.length, 34); // including ones already in fixture
-    // myListsの中に30個データがある
+    const count = await db
+      .collection('myLists')
+      .countDocuments({ ownerEmail: 'bob@example.com' });
+    assert.equal(count, 34); // Including the ones in the fixture
   });
 });

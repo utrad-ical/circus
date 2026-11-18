@@ -1,4 +1,4 @@
-import { dbEntry } from '../schemas/derive.ts';
+import { withDates } from '../schemas/derive.ts';
 import testSchemas from '../../test/test-schemas.ts';
 import assert from 'node:assert/strict';
 import { describe, test, it, before, after, beforeEach } from 'node:test';
@@ -24,7 +24,7 @@ before(async () => {
   const validator = await createValidator(undefined);
   testCollection = await createCollectionAccessor<MonthData>(db, validator, {
     name: 'months',
-    schema: dbEntry(testSchemas.months),
+    schema: withDates(testSchemas.months.required()),
     collectionName: 'months',
     primaryKey: 'month'
   });
@@ -180,7 +180,7 @@ describe('#findById', () => {
       session = (await dbPromise).database.connection.startSession();
       sessionCollection = createCollectionAccessor<MonthData>(db, validator, {
         name: 'months',
-        schema: dbEntry(testSchemas.months),
+        schema: withDates(testSchemas.months.required()),
         collectionName: 'months',
         primaryKey: 'month',
         session

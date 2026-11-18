@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { dbEntry } from '../schemas/derive.ts';
 import * as s from '../schemas/index.ts';
 import createCollectionAccessor from './createCollectionAccessor.ts';
 import type {
@@ -51,7 +50,7 @@ export const makeModels = (
       pk: 'pluginId'
     },
     pluginJob: { schema: s.pluginJobDoc, col: 'pluginJobs', pk: 'jobId' },
-    myList: { schema: dbEntry(s.myList), col: 'myLists', pk: 'myListId' },
+    myList: { schema: s.myListDoc, col: 'myLists', pk: 'myListId' },
     onetimeUrl: {
       schema: s.onetimeUrlDoc,
       col: 'onetimeUrls',

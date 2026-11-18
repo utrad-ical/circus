@@ -1,4 +1,3 @@
-import { z } from 'zod';
 import { defineRoute, defineRouteGroup, route } from '../../defineRoute.ts';
 import {
   handleDelete,
@@ -15,25 +14,26 @@ import {
   myListItemsPatched,
   myListPatch,
   myLists,
-  userMyList
+  myListWithItems
 } from '../../schemas/index.ts';
 
-export const getMylists = defineRoute({
+export const getMyLists = defineRoute({
   verb: 'get',
   path: '/mylists',
-  description:
-    "Performs search and retrieves a list of the current user's my lists.",
+  description: "Returns the current user's my lists.",
   response: myLists
 });
 
-export const getMylistsMyListId = defineRoute({
+export const getMyList = defineRoute({
   verb: 'get',
   path: '/mylists/:myListId',
-  description: 'Returns information about the specified my list.',
-  response: userMyList.extend({ resourceIds: z.unknown().optional() })
+  description:
+    'Returns the specified my list with its items. ' +
+    'Available to the owner and the editors, or anyone if it is public.',
+  response: myListWithItems
 });
 
-export const postMylists = defineRoute({
+export const postMyList = defineRoute({
   verb: 'post',
   path: '/mylists',
   description: 'Creates a new my list.',
@@ -41,24 +41,27 @@ export const postMylists = defineRoute({
   response: myListCreated
 });
 
-export const patchMylistsMyListId = defineRoute({
+export const patchMyList = defineRoute({
   verb: 'patch',
   path: '/mylists/:myListId',
   description:
-    'Change name, public status, and editors of the specified my list.',
+    'Changes the name, the public status and the editors of the specified ' +
+    'my list. Available to the owner.',
   request: myListPatch
 });
 
-export const deleteMylistsMyListId = defineRoute({
+export const deleteMyList = defineRoute({
   verb: 'delete',
   path: '/mylists/:myListId',
-  description: 'Deletes the specified my list.'
+  description: 'Deletes the specified my list. Available to the owner.'
 });
 
-export const patchMylistsMyListIdItems = defineRoute({
+export const patchMyListItems = defineRoute({
   verb: 'patch',
   path: '/mylists/:myListId/items',
-  description: 'Adds items to or removes items from the specified my list.',
+  description:
+    'Adds items to or removes items from the specified my list. ' +
+    'Available to the owner and the editors.',
   request: myListItemsPatch,
   response: myListItemsPatched
 });
@@ -67,11 +70,11 @@ export default defineRouteGroup({
   name: 'My Lists',
   description: 'Manages my lists.',
   routes: [
-    route(getMylists, handleSearch),
-    route(getMylistsMyListId, handleGet),
-    route(postMylists, handlePost),
-    route(patchMylistsMyListId, handlePatchList),
-    route(deleteMylistsMyListId, handleDelete),
-    route(patchMylistsMyListIdItems, handlePatchItems)
+    route(getMyLists, handleSearch),
+    route(getMyList, handleGet),
+    route(postMyList, handlePost),
+    route(patchMyList, handlePatchList),
+    route(deleteMyList, handleDelete),
+    route(patchMyListItems, handlePatchItems)
   ]
 });

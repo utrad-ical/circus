@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { dateField } from './formats.ts';
 import { preferences } from './preferences.ts';
-import { userMyList } from './userMyList.ts';
 
 /** A user in the database */
 export const userDoc = z
@@ -19,7 +18,6 @@ export const userDoc = z
     groups: z
       .array(z.int())
       .describe('The IDs of the groups this user belongs to.'),
-    myLists: z.array(userMyList),
     createdAt: dateField(),
     updatedAt: dateField()
   })

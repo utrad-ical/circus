@@ -1,6 +1,7 @@
 import fs from 'fs';
 import glob from '../../utils/glob.ts';
 import status from 'http-status';
+import loadMyList from '../../mylist/loadMyList.ts';
 import mime from 'mime';
 import path from 'path';
 import makeNewPluginJob from '../../plugin-job/makeNewPluginJob.ts';
@@ -249,15 +250,14 @@ export const handleSearch: RouteMiddleware<typeof routes.searchPluginJobs> = ({
       .map(p => p.pluginId);
 
     const myListId = ctx.params.myListId;
-    const user = ctx.user;
-
     if (myListId) {
-      const myList = user.myLists.find(
-        (list: any) => myListId === list.myListId
-      );
-      if (!myList) ctx.throw(status.NOT_FOUND, 'This my list does not exist');
-
-      if (myList.resourceType !== 'pluginJobs')
+      const { list, readable } = await loadMyList(ctx, models, myListId);
+      if (!readable)
+        ctx.throw(
+          status.UNAUTHORIZED,
+          'You cannot read the items of this my list.'
+        );
+      if (list.resourceType !== 'pluginJobs')
         ctx.throw(status.BAD_REQUEST, 'This my list is not for plugin jobs');
     }
 

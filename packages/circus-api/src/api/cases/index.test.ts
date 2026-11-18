@@ -569,9 +569,19 @@ describe('search by mylist', () => {
     assert.equal(res.status, 404);
   });
 
-  test('returns 404 for my list of another user', async () => {
+  test('returns 401 for a private my list of another user', async () => {
     const res = await ax.bob.get('api/cases/list/01ex36f2n99kjaqvpfrerrsryp');
-    assert.equal(res.status, 404);
+    assert.equal(res.status, 401);
+  });
+
+  test('opens a private my list of another user as an editor', async () => {
+    const myListId = '01ezab6xqfac7hvm5s09yw1g1j';
+    const lists = apiTest.database.db.collection('myLists');
+    await lists.updateOne({ myListId }, { $set: { public: false } });
+    const res = await ax.bob.get(`api/cases/list/${myListId}`);
+    await lists.updateOne({ myListId }, { $set: { public: true } });
+    assert.equal(res.status, 200);
+    assert.equal(res.data.items.length, 1);
   });
 
   test('return 400 for my list for different resource type', async () => {

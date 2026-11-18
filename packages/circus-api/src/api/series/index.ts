@@ -6,6 +6,7 @@ import {
 } from '@utrad-ical/circus-rs/server';
 import type { SeriesEntry } from '@utrad-ical/circus-cs-core';
 import status from 'http-status';
+import loadMyList from '../../mylist/loadMyList.ts';
 import { Readable } from 'node:stream';
 import type {
   CircusContext,
@@ -207,15 +208,14 @@ export const handleSearch: RouteMiddleware<typeof routes.searchSeries> = ({
     const filter = { $and: [customFilter, domainFilter] };
 
     const myListId = ctx.params.myListId;
-    const user = ctx.user;
-
     if (myListId) {
-      const myList = user.myLists.find(
-        (list: any) => myListId === list.myListId
-      );
-      if (!myList) ctx.throw(status.NOT_FOUND, 'This my list does not exist');
-
-      if (myList.resourceType !== 'series')
+      const { list, readable } = await loadMyList(ctx, models, myListId);
+      if (!readable)
+        ctx.throw(
+          status.UNAUTHORIZED,
+          'You cannot read the items of this my list.'
+        );
+      if (list.resourceType !== 'series')
         ctx.throw(status.BAD_REQUEST, 'This my list is not for series');
     }
 

@@ -35,8 +35,9 @@ export const loginInfoFull = userForAdmin
   .extend({
     groups: z.array(z.string()).describe('The names of the groups.'),
     defaultDomain: z.string().nullable(),
-    sharedMyLists: z.array(
-      z.strictObject({ owner: z.string(), sharedMyList: userMyList })
-    ),
+    myLists: z.array(userMyList).describe('The my lists of this user.'),
+    sharedMyLists: z
+      .array(z.strictObject({ owner: z.string(), sharedMyList: userMyList }))
+      .describe('The my lists of other users this user can edit.'),
     dicomImageServer: z.string()
   });

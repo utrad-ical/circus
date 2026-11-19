@@ -21,6 +21,10 @@ export default (program: Command) => {
       int({ min: 1, max: 100 }),
       10
     )
+    .option(
+      '--skip-on-error',
+      'download one case at a time and continue after a failure'
+    )
     .argument(
       '<case-id...>',
       'case ID, or file containing IDs when --file is used'
@@ -30,9 +34,13 @@ export default (program: Command) => {
       formatHelp`
         This command lets you download CIRCUS DB cases in MHD format.
         The downloaded cases are stored in the output directory with names like "batch-001.tgz".
+        Choose an output directory without existing batch archives. The command
+        stops if an output archive already exists.
 
         One archive file may contain the data of more than one case.
         Use the "-b (--batch-size)" option to control the number of cases downloaded as a batch.
+        With "--skip-on-error", the batch size is always 1. The command exits with
+        status 1 if any case failed. Failed cases leave gaps in the archive numbering.
 
         By default, each volume is the one used in the case, which the labels fit.
         With "--full-original-volume", each volume has all the images of the original series,

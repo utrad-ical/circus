@@ -12,10 +12,9 @@ export const setSharedHelp = (program: Command, verb: string) => {
   return program.addHelpText(
     'after',
     formatHelp`
-        This is the same as the "post" command except that it uses the ${verb.toUpperCase()} method instead of POST.
-        It works the same way as when the "--${verb}" option is set for the "post" command.
+        This sends a ${verb.toUpperCase()} request, like "circus-cli api post --${verb}".
 
-        See the help for "post" command for details and examples.
+        Run "circus-cli api post --help" for details and examples.
       `
   );
 };
@@ -42,11 +41,11 @@ export default (program: Command) => {
 
         Examples:
           # Starts the plug-in job manager (requires admin privilege)
-          echo '{"status":"running"}' | circus-cli put admin/plugin-job-manager/switch
+          echo '{"status":"running"}' | circus-cli api put admin/plugin-job-manager/switch
 
           # Creates a new mylist
           echo '{"name":"favs", "resourceType":"series", "public":false}' > req.json
-          circus-cli post mylists < req.json
+          circus-cli api post mylists < req.json
       `
     );
 };

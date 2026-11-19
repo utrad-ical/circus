@@ -62,8 +62,8 @@ const setup = (t: TestContext, jobError?: Error) => {
 
   const program = new Command();
   const deps = { getFetch: () => fetch, rcFilePath: '' };
-  caseCreateArgs(program).action(caseCreate(deps));
-  jobCreateArgs(program).action(jobCreate(deps));
+  caseCreateArgs(program.command('case')).action(caseCreate(deps));
+  jobCreateArgs(program.command('job')).action(jobCreate(deps));
   const run = (...args: string[]) => program.parseAsync(args, { from: 'user' });
   return { log, requests, posts, run };
 };
@@ -71,7 +71,8 @@ const setup = (t: TestContext, jobError?: Error) => {
 test('creates a case with tags and explicit and automatic series ranges', async t => {
   const { log, posts, run } = setup(t);
   await run(
-    'case-create',
+    'case',
+    'create',
     '--project',
     'Study A',
     '--tags',
@@ -108,7 +109,8 @@ test('creates a case with tags and explicit and automatic series ranges', async 
 test('registers a job with priority zero and automatic and explicit series ranges', async t => {
   const { log, posts, run } = setup(t);
   await run(
-    'job-create',
+    'job',
+    'create',
     '--plugin',
     'lung-v2',
     '--priority',
@@ -151,7 +153,7 @@ test('reports a duplicate job without retrying when all arguments are supplied',
   });
   const { posts, run } = setup(t, duplicate);
 
-  await assert.rejects(run('job-create', '--plugin', 'lung-v2', '1.2.3'), {
+  await assert.rejects(run('job', 'create', '--plugin', 'lung-v2', '1.2.3'), {
     message: duplicate.message
   });
   assert.deepEqual(posts, [
@@ -167,7 +169,7 @@ test('reports a duplicate job without retrying when all arguments are supplied',
 
 test('lists executable plug-in IDs when the supplied name is ambiguous', async t => {
   const { requests, run } = setup(t);
-  await assert.rejects(run('job-create', '--plugin', 'Lung CAD', '1.2.3'), {
+  await assert.rejects(run('job', 'create', '--plugin', 'Lung CAD', '1.2.3'), {
     message:
       "Multiple plug-ins match 'Lung CAD'. Use --plugin with one of these IDs.\n  lung-v1\n  lung-v2"
   });
@@ -176,8 +178,11 @@ test('lists executable plug-in IDs when the supplied name is ambiguous', async t
 
 test('rejects malformed series arguments before fetching or prompting', async t => {
   const { requests, run } = setup(t);
-  await assert.rejects(run('case-create', 'ああああ'), /Invalid Series UID/);
-  await assert.rejects(run('case-create', '1.2.3:4'), /Invalid series/);
-  await assert.rejects(run('job-create', '1.2.3:4:10:step'), /Invalid series/);
+  await assert.rejects(run('case', 'create', 'ああああ'), /Invalid Series UID/);
+  await assert.rejects(run('case', 'create', '1.2.3:4'), /Invalid series/);
+  await assert.rejects(
+    run('job', 'create', '1.2.3:4:10:step'),
+    /Invalid series/
+  );
   assert.deepEqual(requests, []);
 });

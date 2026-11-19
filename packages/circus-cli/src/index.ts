@@ -10,8 +10,10 @@ import createAuthorizedFetch, {
   type AuthorizedFetch
 } from './utils/createAuthorizedFetch.ts';
 
-import auth from './commands/auth.ts';
-import authArgs from './commands/auth.args.ts';
+import authLogin from './commands/auth-login.ts';
+import authLoginArgs from './commands/auth-login.args.ts';
+import authLogout from './commands/auth-logout.ts';
+import authLogoutArgs from './commands/auth-logout.args.ts';
 import blobGet from './commands/blob-get.ts';
 import blobGetArgs from './commands/blob-get.args.ts';
 import blobPost from './commands/blob-post.ts';
@@ -39,21 +41,64 @@ import seriesImportArgs from './commands/series-import.args.ts';
 import seriesExport from './commands/series-export.ts';
 import seriesExportArgs from './commands/series-export.args.ts';
 
-const commands: [(program: Command) => Command, CommandAction][] = [
-  [authArgs, auth],
-  [getArgs, get],
-  [postArgs, post],
-  [putArgs, put],
-  [patchArgs, patch],
-  [caseCreateArgs, caseCreate],
-  [caseAddrevArgs, caseAddrev],
-  [caseExportArgs, caseExport],
-  [jobCreateArgs, jobCreate],
-  [seriesImportArgs, seriesImport],
-  [seriesExportArgs, seriesExport],
-  [blobPostArgs, blobPost],
-  [blobGetArgs, blobGet],
-  [mylistShowArgs, mylistShow]
+const commandGroups: {
+  name: string;
+  description: string;
+  commands: [(parent: Command) => Command, CommandAction][];
+}[] = [
+  {
+    name: 'api',
+    description: 'Send requests to CIRCUS API',
+    commands: [
+      [getArgs, get],
+      [postArgs, post],
+      [putArgs, put],
+      [patchArgs, patch]
+    ]
+  },
+  {
+    name: 'auth',
+    description: 'Manage saved API connection settings',
+    commands: [
+      [authLoginArgs, authLogin],
+      [authLogoutArgs, authLogout]
+    ]
+  },
+  {
+    name: 'case',
+    description: 'Create, revise, and export cases',
+    commands: [
+      [caseCreateArgs, caseCreate],
+      [caseAddrevArgs, caseAddrev],
+      [caseExportArgs, caseExport]
+    ]
+  },
+  {
+    name: 'job',
+    description: 'Manage plug-in jobs',
+    commands: [[jobCreateArgs, jobCreate]]
+  },
+  {
+    name: 'series',
+    description: 'Import DICOM data and export series volumes',
+    commands: [
+      [seriesImportArgs, seriesImport],
+      [seriesExportArgs, seriesExport]
+    ]
+  },
+  {
+    name: 'blob',
+    description: 'Download and upload binary data',
+    commands: [
+      [blobGetArgs, blobGet],
+      [blobPostArgs, blobPost]
+    ]
+  },
+  {
+    name: 'mylist',
+    description: 'Work with mylists',
+    commands: [[mylistShowArgs, mylistShow]]
+  }
 ];
 
 const getVersion = () => {
@@ -99,16 +144,21 @@ program
     `(Use ${styleText('yellow', '--help', { stream: process.stderr })} for additional information)`
   );
 
-for (const [configureCommand, action] of commands) {
-  configureCommand(program).action(async (...args) => {
-    try {
-      await action({ getFetch, rcFilePath })(...args);
-    } catch (err: any) {
-      console.error(styleText('bgRed', 'Error', { stream: process.stderr }));
-      console.error(styleText('red', err.message, { stream: process.stderr }));
-      process.exitCode = 1;
-    }
-  });
+for (const { name, description, commands } of commandGroups) {
+  const group = program.command(name).description(description);
+  for (const [configureCommand, action] of commands) {
+    configureCommand(group).action(async (...args) => {
+      try {
+        await action({ getFetch, rcFilePath })(...args);
+      } catch (err: any) {
+        console.error(styleText('bgRed', 'Error', { stream: process.stderr }));
+        console.error(
+          styleText('red', err.message, { stream: process.stderr })
+        );
+        process.exitCode = 1;
+      }
+    });
+  }
 }
 
 await program.parseAsync();

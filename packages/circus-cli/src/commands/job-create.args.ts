@@ -3,7 +3,7 @@ import { int } from '../utils/commander-utils.ts';
 
 export default (program: Command) =>
   program
-    .command('job-create')
+    .command('create')
     .description('Register a plug-in job for one or more series')
     .option('--plugin <id-or-name>', 'plug-in ID or name')
     .option('--priority <integer>', 'job priority (default: 0)', int())

@@ -3,7 +3,7 @@ import formatHelp from '../utils/formatHelp.ts';
 
 export default (program: Command) => {
   return program
-    .command('blob-get')
+    .command('get')
     .description('Download blob(s)')
     .option('-o, --out <dir>', 'output to directory')
     .argument('<hash...>', 'hash of the blob')
@@ -15,10 +15,10 @@ export default (program: Command) => {
 
         Examples:
           # Download two blobs to current dir
-          circus-cli blob-get --out=. a2b4c6e8f 28a33f46
+          circus-cli blob get --out=. a2b4c6e8f 28a33f46
 
           # Download one blob as data.bin
-          circus-cli blob-get a2b4c6e8f > data.bin
+          circus-cli blob get a2b4c6e8f > data.bin
       `
     );
 };

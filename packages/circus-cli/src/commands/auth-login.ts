@@ -5,28 +5,9 @@ import fileExists from '../utils/fileExists.ts';
 import { confirm, defaultValidateString } from '../utils/inquiry.ts';
 import type { CommandAction } from './CommandAction.ts';
 
-interface Options {
-  logout?: boolean;
-}
-
 const action: CommandAction = ({ rcFilePath }) => {
-  return async (options: Options) => {
-    const rcFileExists = await fileExists(rcFilePath);
-    const { logout } = options;
-
-    if (logout) {
-      if (!rcFileExists) {
-        throw new Error('No config file found');
-      } else {
-        if (await confirm('Are you sure you want to log out?')) {
-          await fs.unlink(rcFilePath);
-          console.log(styleText('green', 'Config file deleted successfully'));
-        }
-      }
-      return;
-    }
-
-    if (rcFileExists) {
+  return async () => {
+    if (await fileExists(rcFilePath)) {
       console.log(
         styleText('yellow', `The token file already exists at ${rcFilePath}.`)
       );

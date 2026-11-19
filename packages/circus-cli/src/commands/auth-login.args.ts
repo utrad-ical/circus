@@ -3,9 +3,8 @@ import formatHelp from '../utils/formatHelp.ts';
 
 export default (program: Command) => {
   return program
-    .command('auth')
+    .command('login')
     .description('Set up your API endpoint and token')
-    .option('--logout', 'delete the stored token file')
     .addHelpText(
       'after',
       formatHelp`
@@ -15,14 +14,7 @@ export default (program: Command) => {
 
         You can generate a permanent token via Web UI or via the admin CLI.
 
-        If the "-l (--logout)" flag is set, the token file will be deleted from your home directory.
-
-        Examples:
-          # Set up the endpoint and token
-          circus-cli auth
-
-          # Remove token file
-          circus-cli auth --logout
+        Run "circus-cli auth logout" to remove the saved connection settings.
       `
     );
 };

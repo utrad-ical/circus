@@ -22,7 +22,7 @@ const setup = async (
   const errors = t.mock.method(console, 'error', () => {});
   const requests: string[] = [];
   const program = new Command();
-  caseExportArgs(program).action(
+  caseExportArgs(program.command('case')).action(
     caseExport({
       rcFilePath: '',
       getFetch: () => async resource => {
@@ -37,7 +37,7 @@ const setup = async (
     })
   );
   const run = (...args: string[]) =>
-    program.parseAsync(['case-export', '-o', outDir, ...args], {
+    program.parseAsync(['case', 'export', '-o', outDir, ...args], {
       from: 'user'
     });
   return { outDir, log, errors, requests, run };

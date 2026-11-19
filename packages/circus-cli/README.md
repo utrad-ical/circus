@@ -4,10 +4,10 @@ This is an API client to connect to CIRCUS API Server.
 
 This utility can make a generic authorized API requests using the following commands (although you have to construct a JSON reuqest body manually):
 
-- get
-- post
-- put
-- patch
+- `api get`
+- `api post`
+- `api put`
+- `api patch`
 
 This utility also has several specialized commands that can do the following:
 
@@ -35,7 +35,7 @@ This utility also has several specialized commands that can do the following:
 3. Run the following command to store an API token to your machine:
 
    ```
-   circus-cli auth
+   circus-cli auth login
    ```
 
    You will be prompted to enter two values:
@@ -53,7 +53,7 @@ This utility also has several specialized commands that can do the following:
 4. Run the following command to check if the client can connect to a running CIRCUS API server:
 
    ```
-   circus-cli get login-info
+   circus-cli api get login-info
    ```
 
    This displays the basic information about the user associated with the API token. If it fails, return to the previous step and check if the given values are correct.
@@ -64,8 +64,9 @@ This utility also has several specialized commands that can do the following:
    circus-cli --help
    ```
 
-   You can see the detailed description of each command like this:
+   To list the commands in a group or get help for a specific command, use `--help`:
 
    ```
-   circus-cli help <COMMAND>
+   circus-cli case --help
+   circus-cli case create --help
    ```

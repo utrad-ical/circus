@@ -3,7 +3,7 @@ import formatHelp from '../utils/formatHelp.ts';
 
 export default (program: Command) => {
   return program
-    .command('mylist-show')
+    .command('show')
     .description('Show all mylists')
     .addHelpText(
       'after',
@@ -13,7 +13,7 @@ export default (program: Command) => {
         Hint:
           After retreiving the myListId with this command, you can get the list of resource IDs like so:
 
-          circus-cli get mylists/<myListId> | jq -r .resourceIds[]
+          circus-cli api get mylists/<myListId> | jq -r .resourceIds[]
       `
     );
 };

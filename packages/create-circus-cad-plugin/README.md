@@ -79,11 +79,10 @@ docker build -t [REPOSITORY]:[TAG] .
 docker images --no-trunc
 ```
 
-4. Register the docker image in CIRCUS
+4. Register the Docker image in CIRCUS. Run the command from the directory containing the CIRCUS `compose.yaml` and use the full image ID without the `sha256:` prefix.
 
 ```sh
-cd [directory of circus project]/packages/circus-api
-node circus register-cad-plugin [image ID]
+docker compose exec api circus plugin register <image-id>
 ```
 
 ## Register your CAD in CIRCUS

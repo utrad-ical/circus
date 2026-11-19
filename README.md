@@ -35,18 +35,18 @@ CIRCUS_TAG=<version>
 Then:
 
 ```bash
+docker compose up -d mongo
+
+# Initialize or upgrade the database in a one-off container.
+docker compose run --rm api circus db migrate
 docker compose up -d
 
-# Initialize (or upgrade) the database. The API server exits until the
-# database is migrated, so this runs in a one-off container
-docker compose run --rm api circus migrate
-
 # Register a CAD plug-in (Docker image ID without the "sha256:" prefix)
-docker compose exec api circus register-cad-plugin <PLUGIN_ID>
+docker compose exec api circus plugin register <image-id>
 ```
 
 `circus` is the administration command of the `api` container; run `docker compose exec api circus` to see all the available commands.
-When developing CIRCUS locally, use `pnpm circus` instead (e.g., `pnpm circus migrate`).
+When developing CIRCUS locally, use `pnpm circus` (e.g., `pnpm circus db migrate`).
 
 The default user is `circus` (password: `circus`).
 
@@ -100,7 +100,7 @@ Start only MongoDB in Docker, as the API server and the web UI run on the host, 
 
 ```bash
 docker compose up -d mongo
-pnpm circus migrate
+pnpm circus db migrate
 ```
 
 To build and run everything in Docker instead, use `docker compose up -d --build`.

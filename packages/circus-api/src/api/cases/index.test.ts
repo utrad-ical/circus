@@ -189,7 +189,68 @@ describe('create', () => {
     assert.match(res.data.error, /specified range is invalid/i);
   });
 
-  // TODO: more checks regarding security
+  test('reject creation without write privilege for the project', async () => {
+    const res = await ax.alice.post('api/cases', {
+      projectId: '8883fdef6f5144f50eb2a83cd34baa44',
+      series: [
+        {
+          seriesUid: '111.222.333.444.555',
+          partialVolumeDescriptor: { start: 1, end: 10, delta: 1 }
+        }
+      ],
+      tags: []
+    });
+    assert.equal(res.status, 403);
+    assert.equal(
+      res.data.error,
+      'You do not have write privilege for this project.'
+    );
+  });
+
+  test('reject an image range with a zero step', async () => {
+    const res = await ax.bob.post('api/cases', {
+      projectId: '8883fdef6f5144f50eb2a83cd34baa44',
+      series: [
+        {
+          seriesUid: '111.222.333.444.777',
+          partialVolumeDescriptor: { start: 1, end: 10, delta: 0 }
+        }
+      ],
+      tags: []
+    });
+    assert.equal(res.status, 400);
+    assert.equal(res.data.error, 'Invalid image range.');
+  });
+
+  test('reject creation with a series from an inaccessible domain', async () => {
+    for (const partialVolumeDescriptor of [
+      { start: 1, end: 10, delta: 1 },
+      'auto'
+    ]) {
+      const res = await ax.bob.post('api/cases', {
+        projectId: '8883fdef6f5144f50eb2a83cd34baa44',
+        series: [{ seriesUid: '111.222.333.444.555', partialVolumeDescriptor }],
+        tags: []
+      });
+      assert.equal(res.status, 403);
+      assert.equal(res.data.error, 'You cannot access this series.');
+    }
+  });
+
+  test('reject a missing series with either an explicit or automatic range', async () => {
+    for (const partialVolumeDescriptor of [
+      { start: 1, end: 10, delta: 1 },
+      'auto'
+    ]) {
+      const res = await ax.bob.post('api/cases', {
+        projectId: '8883fdef6f5144f50eb2a83cd34baa44',
+        series: [{ seriesUid: '1.2.999', partialVolumeDescriptor }],
+        tags: []
+      });
+      assert.equal(res.status, 400);
+      assert.equal(res.data.error, 'Nonexistent series.');
+    }
+  });
 });
 
 describe('get one case', () => {

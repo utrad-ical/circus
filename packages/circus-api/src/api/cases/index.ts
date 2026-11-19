@@ -10,7 +10,6 @@ import {
 } from '@utrad-ical/circus-api-schema';
 import { dateField } from '@utrad-ical/circus-api-schema/formats';
 import checkRevisionAttributes from '../../case/checkRevisionAttributes.ts';
-import makeNewCase from '../../case/makeNewCase.ts';
 import type {
   CircusContext,
   RouteMiddleware
@@ -18,7 +17,6 @@ import type {
 import type * as routes from './routes.ts';
 import { z } from 'zod';
 import { fieldsOf, mongoFilter } from '../../schemas/mongoFilter.ts';
-import resolveAutoPvdOfSeries from '../../utils/resolveAutoPvdOfSeries.ts';
 import {
   extractFilter,
   isPatientInfoInFilter,
@@ -44,31 +42,6 @@ export const handleGet: RouteMiddleware<typeof routes.getCase> = () => {
   return async (ctx, json) => {
     const { latestRevision, ...aCase } = ctx.var.clinicalCase; // Redundant data
     return json(aCase);
-  };
-};
-
-export const handlePost: RouteMiddleware<typeof routes.postCase> = ({
-  transactionManager,
-  seriesOrientationResolver
-}) => {
-  return async (ctx, json) => {
-    const body = ctx.req.valid('json');
-    const caseId = await transactionManager.withTransaction(async models => {
-      const project = await models.project.findByIdOrFail(body.projectId);
-      return await makeNewCase(
-        models,
-        ctx.var.user,
-        ctx.var.userPrivileges,
-        project,
-        await resolveAutoPvdOfSeries(
-          body.series,
-          models,
-          seriesOrientationResolver
-        ),
-        body.tags
-      );
-    });
-    return json({ caseId }, status.CREATED);
   };
 };
 

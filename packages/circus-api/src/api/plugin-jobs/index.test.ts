@@ -217,6 +217,21 @@ describe('plugin-job registration', () => {
     assert.match(res.data.error, /executePlugin/);
   });
 
+  test('should reject a job with a series from an inaccessible domain', async () => {
+    for (const partialVolumeDescriptor of [
+      { start: 25, end: 85, delta: 3 },
+      'auto'
+    ]) {
+      const res = await bob.post('api/plugin-jobs', {
+        pluginId:
+          'd135e1fbb368e35f940ae8e6deb171e90273958dc3938de5a8237b73bb42d9c2',
+        series: [{ seriesUid: '111.222.333.444.555', partialVolumeDescriptor }]
+      });
+      assert.equal(res.status, 403);
+      assert.equal(res.data.error, 'You cannot access this series.');
+    }
+  });
+
   test('should reject if series image out of range', async () => {
     // Series image out of range
     const res = await dave.request({

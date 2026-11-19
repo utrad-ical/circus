@@ -1,6 +1,7 @@
 import { defineRoute, defineRouteGroup, route } from '../../defineRoute.ts';
 import { z } from 'zod';
 import { searchResultOf } from '../../schemas/derive.ts';
+import createPluginJob from './createPluginJob.ts';
 import {
   handleDeleteFeedback,
   handleGet,
@@ -8,7 +9,6 @@ import {
   handleGetAttachmentList,
   handleGetFeedback,
   handlePatch,
-  handlePost,
   handlePostFeedback,
   handleSearch
 } from './index.ts';
@@ -124,7 +124,7 @@ export default defineRouteGroup({
   name: 'Plugin Jobs',
   description: 'Creates and manages CIRCUS CS plug-in jobs.',
   routes: [
-    route(postPluginJob, handlePost),
+    route(postPluginJob, createPluginJob),
     route(patchPluginJob, handlePatch),
     route(searchPluginJobs, handleSearch),
     route(searchPluginJobsInMyList, handleSearch),

@@ -18,10 +18,14 @@ import blobPost from './commands/blob-post.ts';
 import blobPostArgs from './commands/blob-post.args.ts';
 import caseAddrev from './commands/case-addrev.ts';
 import caseAddrevArgs from './commands/case-addrev.args.ts';
+import caseCreate from './commands/case-create.ts';
+import caseCreateArgs from './commands/case-create.args.ts';
 import caseExport from './commands/case-export.ts';
 import caseExportArgs from './commands/case-export.args.ts';
 import get from './commands/get.ts';
 import getArgs from './commands/get.args.ts';
+import jobCreate from './commands/job-create.ts';
+import jobCreateArgs from './commands/job-create.args.ts';
 import mylistShow from './commands/mylist-show.ts';
 import mylistShowArgs from './commands/mylist-show.args.ts';
 import patch from './commands/patch.ts';
@@ -41,8 +45,10 @@ const commands: [(program: Command) => Command, CommandAction][] = [
   [postArgs, post],
   [putArgs, put],
   [patchArgs, patch],
+  [caseCreateArgs, caseCreate],
   [caseAddrevArgs, caseAddrev],
   [caseExportArgs, caseExport],
+  [jobCreateArgs, jobCreate],
   [seriesImportArgs, seriesImport],
   [seriesExportArgs, seriesExport],
   [blobPostArgs, blobPost],

@@ -15,7 +15,9 @@ const version = JSON.parse(fs.readFileSync(packageFile, 'utf8')).version;
 const [, , commandName, ...argv] = process.argv;
 const removedCommands = new Map([
   ['export-case', 'case-export'],
-  ['import-series', 'series-import']
+  ['import-series', 'series-import'],
+  ['register-case', 'case-create'],
+  ['register-plugin-job', 'job-create']
 ]);
 
 interface CommandModule {

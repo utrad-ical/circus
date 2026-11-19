@@ -6,7 +6,6 @@ import status from 'http-status';
 import loadMyList from '../../mylist/loadMyList.ts';
 import mime from 'mime';
 import path from 'path';
-import makeNewPluginJob from '../../plugin-job/makeNewPluginJob.ts';
 import type {
   CircusContext,
   RouteMiddleware
@@ -16,8 +15,6 @@ import { dateField } from '@utrad-ical/circus-api-schema/formats';
 import type * as routes from './routes.ts';
 import { fieldsOf, mongoFilter } from '../../schemas/mongoFilter.ts';
 import generateUniqueId from '../../utils/generateUniqueId.ts';
-import type { AutoPvdSeriesEntry } from '../../utils/resolveAutoPvdOfSeries.ts';
-import resolveAutoPvdOfSeries from '../../utils/resolveAutoPvdOfSeries.ts';
 import {
   extractFilter,
   isPatientInfoInFilter,
@@ -42,45 +39,6 @@ const maskPatientInfo = (ctx: CircusContext) => {
       domain: domain[0],
       ...(show && info ? { patientInfo: info } : {})
     };
-  };
-};
-
-export interface PluginJobSeriesRequest extends AutoPvdSeriesEntry {
-  requiredPrivateTags?: string;
-}
-
-export const handlePost: RouteMiddleware<typeof routes.postPluginJob> = ({
-  transactionManager,
-  cs,
-  seriesOrientationResolver
-}) => {
-  return async (ctx, json) => {
-    const { priority, pluginId, series, force } = ctx.req.valid('json');
-    // `checkPrivilege` cannot see the plug-in ID in the request body
-    const canExecute = ctx.var.userPrivileges.accessiblePlugins.some(
-      p => p.pluginId === pluginId && p.roles.includes('executePlugin')
-    );
-    if (!canExecute)
-      throw httpError(
-        status.UNAUTHORIZED,
-        'You do not have "executePlugin" privilege of this plugin.'
-      );
-    const jobId = await transactionManager.withTransaction(async models => {
-      const resolvedSeries = await resolveAutoPvdOfSeries(
-        series,
-        models,
-        seriesOrientationResolver
-      );
-      return await makeNewPluginJob(
-        models,
-        { pluginId, series: resolvedSeries, force },
-        ctx.var.userPrivileges,
-        ctx.var.user.userEmail,
-        cs,
-        priority
-      );
-    });
-    return json({ jobId }, status.CREATED);
   };
 };
 

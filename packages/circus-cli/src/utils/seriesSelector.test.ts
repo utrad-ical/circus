@@ -59,7 +59,16 @@ test('parseSeriesSpec', () => {
     range: '1:31:2'
   });
   assert.throws(() => parseSeriesSpec('1.2.3:1:31'));
-  assert.throws(() => parseSeriesSpec(':1:2:3'));
+  for (const spec of [
+    'ああああ',
+    '1..2',
+    '1.2.',
+    '1',
+    ':1:2:3',
+    `1.${'2'.repeat(63)}`
+  ]) {
+    assert.throws(() => parseSeriesSpec(spec), /Invalid Series UID/);
+  }
 });
 
 test('defaultRange and countImages', () => {
@@ -71,32 +80,57 @@ describe('fetchSeries', () => {
   const fakeFetch = async (resource: string) => {
     if (resource === 'series/1.2.3')
       return Response.json({
-        images: '1-132',
+        images: '1-132,140-149',
         modality: 'MR',
-        seriesDescription: 'T2'
+        seriesDescription: 'T2',
+        studyUid: '1.2'
       });
     throw Object.assign(new Error('HTTP error'), { status: 404 });
   };
 
   test('returns the series with the range', async () => {
-    const series = await fetchSeries(fakeFetch, '1.2.3', '1:31:2');
+    const series = await fetchSeries(
+      fakeFetch,
+      '1.2.3',
+      defaultRange,
+      '1:31:2'
+    );
     assert.deepEqual(series, {
       seriesUid: '1.2.3',
+      studyUid: '1.2',
       range: { start: 1, end: 31, delta: 2 },
-      images: '1-132',
+      images: '1-132,140-149',
       modality: 'MR',
       seriesDescription: 'T2'
     });
-    const whole = await fetchSeries(fakeFetch, '1.2.3');
-    assert.deepEqual(whole.range, { start: 1, end: 132, delta: 1 });
+    const automatic = await fetchSeries(
+      fakeFetch,
+      '1.2.3',
+      () => 'auto' as const
+    );
+    assert.equal(automatic.range, 'auto');
+    const firstRange = await fetchSeries(fakeFetch, '1.2.3', defaultRange);
+    assert.deepEqual(firstRange.range, { start: 1, end: 132, delta: 1 });
   });
 
   test('throws readable errors', async () => {
-    await assert.rejects(fetchSeries(fakeFetch, '9.9.9'), {
+    await assert.rejects(fetchSeries(fakeFetch, '9.9.9', defaultRange), {
       message: 'Series 9.9.9 not found.'
     });
-    await assert.rejects(fetchSeries(fakeFetch, '1.2.3', '1:200:1'), {
-      message: /not within the images/
+    await assert.rejects(
+      fetchSeries(fakeFetch, '1.2.3', defaultRange, '1:200:1'),
+      {
+        message: /not within the images/
+      }
+    );
+  });
+
+  test('rejects an invalid UID before calling the API', async () => {
+    const fetch = async () =>
+      assert.fail('An invalid UID must not be fetched.');
+    await assert.rejects(fetchSeries(fetch, 'ああああ', defaultRange), {
+      message:
+        'Invalid Series UID. Use dot-separated numbers (up to 64 characters).'
     });
   });
 });

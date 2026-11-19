@@ -3,6 +3,7 @@ import * as path from 'node:path';
 import createSpinner from '../utils/createSpinner.ts';
 import downloadToFile from '../utils/downloadToFile.ts';
 import {
+  defaultRange,
   editSeriesList,
   fetchSeries,
   formatRange,
@@ -23,13 +24,14 @@ const action: CommandAction = ({ getFetch }) => {
         throw new Error(`Up to ${maxSeries} series can be downloaded.`);
       for (const arg of args) {
         const { seriesUid, range } = parseSeriesSpec(arg);
-        series.push(await fetchSeries(fetch, seriesUid, range));
+        series.push(await fetchSeries(fetch, seriesUid, defaultRange, range));
       }
     } else {
       if (!process.stdin.isTTY) throw new Error('Specify the series.');
       series = await editSeriesList(fetch, [], {
         submitLabel: 'Start download',
-        max: maxSeries
+        max: maxSeries,
+        getDefaultRange: defaultRange
       });
       if (!series) {
         console.log('Canceled.');
@@ -47,7 +49,7 @@ const action: CommandAction = ({ getFetch }) => {
     try {
       const params = new URLSearchParams({
         series: series
-          .map(s => `${s.seriesUid}:${formatRange(s.range)}`)
+          .map(({ seriesUid, range }) => `${seriesUid}:${formatRange(range)}`)
           .join(','),
         compressionFormat: options.zip ? 'zip' : 'tgz',
         ...(watcher.progressId ? { progressId: watcher.progressId } : {})

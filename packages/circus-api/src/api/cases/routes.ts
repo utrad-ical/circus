@@ -1,11 +1,11 @@
 import { defineRoute, defineRouteGroup, route } from '../../defineRoute.ts';
 import { searchResultOf } from '../../schemas/derive.ts';
+import createCase from './createCase.ts';
 import {
   handleDelete,
   handleGet,
   handleGetExportMhd,
   handlePatchTags,
-  handlePost,
   handlePostRevision,
   handlePutTags,
   handleSearch
@@ -94,7 +94,7 @@ export default defineRouteGroup({
   routes: [
     route(searchCases, handleSearch),
     route(searchCasesInMyList, handleSearch),
-    route(postCase, handlePost),
+    route(postCase, createCase),
     route(exportMhd, handleGetExportMhd),
     route(getCase, handleGet),
     route(postRevision, handlePostRevision),

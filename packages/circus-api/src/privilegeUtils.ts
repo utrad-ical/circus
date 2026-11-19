@@ -7,7 +7,9 @@ import {
 
 export { csRoleNames, dbRoleNames };
 import * as mr from 'multi-integer-range';
+import status from 'http-status';
 import type { Models } from './interface.ts';
+import { httpError } from './middleware/errorHandler.ts';
 import type { SeriesEntry } from './typings/circus.ts';
 import {
   isValidPartialVolumeDescriptor,
@@ -98,6 +100,15 @@ export const determineUserAccessInfo = async (models: Models, user: any) => {
   } as UserPrivilegeInfo;
 };
 
+export const assertSeriesDomainAccess = (
+  userPrivileges: UserPrivilegeInfo,
+  domain: string
+) => {
+  if (!userPrivileges.domains.includes(domain)) {
+    throw httpError(status.FORBIDDEN, 'You cannot access this series.');
+  }
+};
+
 /**
  * Check domain and image range for each series.
  * Each series will be locked so that the relevant series will no be
@@ -111,25 +122,15 @@ export const fetchAndLockAccessibleSeries = async (
 ) => {
   const seriesData: any[] = [];
 
-  const throwError = (statusCode: number, message: string) => {
-    const err = new Error(message);
-    err.expose = true;
-    err.status = statusCode;
-    throw err;
-  };
-
   for (const seriesEntry of series) {
     const { seriesUid, partialVolumeDescriptor } = seriesEntry;
     const item = await models.series.findById(seriesUid, { withLock: true });
     if (!item) {
-      throwError(400, 'Nonexistent series.');
+      throw httpError(status.BAD_REQUEST, 'Nonexistent series.');
     }
+    assertSeriesDomainAccess(userPrivileges, item.domain);
     if (!isValidPartialVolumeDescriptor(partialVolumeDescriptor)) {
-      throwError(
-        400,
-        'Invalid partial volume descriptor: ' +
-          JSON.stringify(partialVolumeDescriptor)
-      );
+      throw httpError(status.BAD_REQUEST, 'Invalid image range.');
     }
     const partialImages = partialVolumeDescriptorToArray(
       partialVolumeDescriptor
@@ -138,12 +139,9 @@ export const fetchAndLockAccessibleSeries = async (
       partialImages.length === 0 ||
       !mr.has(mr.initialize(item.images), mr.normalize(partialImages))
     ) {
-      throwError(400, 'Specified range is invalid.');
+      throw httpError(status.BAD_REQUEST, 'Specified range is invalid.');
     }
     seriesData.push({ ...item, partialVolumeDescriptor });
-    if (userPrivileges.domains.indexOf(item.domain) < 0) {
-      throw new Error('You cannot access this series.');
-    }
   }
 
   return seriesData;

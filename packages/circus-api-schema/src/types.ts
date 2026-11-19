@@ -34,6 +34,7 @@ import type {
   myListItemsPatched,
   myListPatch,
   pluginJobCreate,
+  pluginJobCreated,
   pluginJobPatch,
   progressCreated,
   seriesExportCsVolumeQuery,
@@ -93,6 +94,7 @@ export type Plugin = z.input<typeof pluginDoc>;
 export type PluginJob = z.input<typeof pluginJobDoc>;
 export type PluginJobSearchItem = z.input<typeof pluginJobSearchResult>;
 export type PluginJobCreate = z.input<typeof pluginJobCreate>;
+export type PluginJobCreated = z.input<typeof pluginJobCreated>;
 export type PluginJobPatch = z.input<typeof pluginJobPatch>;
 export type PluginJobFeedback = z.input<typeof pluginJobFeedback>;
 export type PluginJobFeedbackCreate = z.input<typeof pluginJobFeedbackCreate>;

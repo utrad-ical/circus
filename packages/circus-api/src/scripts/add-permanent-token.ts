@@ -10,8 +10,9 @@ interface Options {
 
 export const configure = (program: Command) =>
   program
-    .command('add-permanent-token <userEmailOrName>')
+    .command('issue')
     .description('Grant a permanent API token for a user.')
+    .argument('<user>', 'login ID or email address')
     .option('-d, --description <description>', 'Description of the token.')
     .action(
       (

@@ -46,8 +46,7 @@ export const command: CommandService<{
           { upsert: true }
         );
       } catch (error) {
-        console.error(styleText('red', `Error: ${name}`));
-        printCommandError(error);
+        printCommandError(error, `Migration ${name} failed.`);
         process.exitCode = 1;
         return;
       }

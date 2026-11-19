@@ -48,9 +48,9 @@ test('reports a failed migration without recording the new revision', async t =>
   });
 
   const configPath = await adminCliMongoConfig(t);
-  const result = runAdminCli(['migrate'], configPath);
-  assert.equal(result.status, 1, result.stderr);
-  assert.match(result.stderr, /Error: 026-move-my-lists\.js/);
+  const result = await runAdminCli(['db', 'migrate'], configPath);
+  assert.equal(result.code, 1, result.stderr);
+  assert.match(result.stderr, /Migration 026-move-my-lists\.js failed\./);
   assert.doesNotMatch(result.stdout, /The database is now up to date/);
   const recorded = await db.collection('migration').findOne();
   assert.equal(recorded?.revision, 25);

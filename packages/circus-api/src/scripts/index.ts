@@ -13,10 +13,19 @@ import { configure as registerCadPlugin } from './register-cad-plugin.ts';
 import { configure as ulid } from './ulid.ts';
 
 const removedCommands = new Map([
-  ['export-case', 'case export'],
-  ['import-series', 'series import'],
-  ['register-case', 'case create'],
-  ['register-plugin-job', 'job create']
+  ['export-case', 'circus-cli case export'],
+  ['import-series', 'circus-cli series import'],
+  ['register-case', 'circus-cli case create'],
+  ['register-plugin-job', 'circus-cli job create'],
+  ['db-check', 'circus db check'],
+  ['migrate', 'circus db migrate'],
+  ['refresh-series-parameters', 'circus series refresh-parameters'],
+  ['register-cad-plugin', 'circus plugin register'],
+  ['add-permanent-token', 'circus token issue'],
+  ['clear-token', 'circus token clear'],
+  ['dump-dicom', 'circus util dump-dicom'],
+  ['generate-password-hash', 'circus util hash-password'],
+  ['ulid', 'circus util ulid']
 ]);
 
 const main = async (argv: string[]) => {
@@ -24,7 +33,7 @@ const main = async (argv: string[]) => {
   const replacement = requestedCommand && removedCommands.get(requestedCommand);
   if (replacement) {
     console.error(
-      `'circus ${requestedCommand}' has been removed. Use 'circus-cli ${replacement}'.`
+      `'circus ${requestedCommand}' has been removed. Use '${replacement}'.`
     );
     process.exitCode = 1;
     return;
@@ -36,17 +45,43 @@ const main = async (argv: string[]) => {
   const program = new Command()
     .name('circus')
     .description('CIRCUS server administration')
-    .version(version);
+    .version(version)
+    .configureHelp({
+      styleTitle: str => styleText('cyan', str, { validateStream: false }),
+      styleOptionTerm: str => styleText('bold', str, { validateStream: false }),
+      styleCommandDescription: str =>
+        styleText(['yellow', 'bold'], str, { validateStream: false })
+    })
+    .showHelpAfterError(
+      `(Use ${styleText('yellow', '--help', { stream: process.stderr })} for additional information)`
+    );
 
-  addPermanentToken(program);
-  clearToken(program);
-  dbCheck(program);
-  dumpDicom(program);
-  generatePasswordHash(program);
-  migrate(program);
-  refreshSeriesParameters(program);
-  registerCadPlugin(program);
-  ulid(program);
+  const db = program
+    .command('db')
+    .description('Check and migrate the database');
+  dbCheck(db);
+  migrate(db);
+
+  const series = program
+    .command('series')
+    .description('Maintain stored DICOM series');
+  refreshSeriesParameters(series);
+
+  const plugin = program
+    .command('plugin')
+    .description('Manage installed plug-ins');
+  registerCadPlugin(plugin);
+
+  const token = program.command('token').description('Manage access tokens');
+  addPermanentToken(token);
+  clearToken(token);
+
+  const util = program
+    .command('util')
+    .description('Run local diagnostic and utility commands');
+  dumpDicom(util);
+  generatePasswordHash(util);
+  ulid(util);
 
   if (!argv.length) {
     program.outputHelp();
@@ -58,7 +93,6 @@ const main = async (argv: string[]) => {
 try {
   await main(process.argv.slice(2));
 } catch (error) {
-  console.error(styleText('red', 'ERROR:', { stream: process.stderr }));
   printCommandError(error);
   process.exitCode = 1;
 }

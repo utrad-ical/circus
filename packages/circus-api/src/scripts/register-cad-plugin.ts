@@ -10,10 +10,11 @@ import { plugin } from '@utrad-ical/circus-api-schema';
 
 export const configure = (program: Command) =>
   program
-    .command('register-cad-plugin <DOCKER_IMAGE_ID>')
+    .command('register')
     .description(
       'Register a CAD plug-in from a Docker image containing a manifest.'
     )
+    .argument('<image-id>', 'full Docker image ID')
     .action((pluginId: string) => runCommand(command, pluginId));
 
 export const command: CommandService<

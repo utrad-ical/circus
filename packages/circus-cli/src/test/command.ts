@@ -1,7 +1,4 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import type { TestContext } from 'node:test';
 import { Command } from 'commander';
 import type { CommandAction, CommandDeps } from '../commands/CommandAction.ts';
@@ -38,11 +35,7 @@ export const runCommand = (
   return program.parseAsync([group, command.name(), ...args], { from: 'user' });
 };
 
-export const tempDirectory = async (t: TestContext) => {
-  const directory = await mkdtemp(join(tmpdir(), 'circus-cli-test-'));
-  t.after(() => rm(directory, { recursive: true, force: true }));
-  return directory;
-};
+export { tempDirectory } from '@utrad-ical/circus-lib/test/cli';
 
 export const captureExitCode = (t: TestContext) => {
   const savedExitCode = process.exitCode;

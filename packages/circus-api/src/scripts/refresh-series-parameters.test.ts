@@ -80,21 +80,21 @@ test('reports command and cleanup failures in order and fails on cleanup alone',
     });`
   );
 
-  const both = runAdminCli(['refresh-series-parameters'], configPath);
-  assert.equal(both.status, 1);
+  const both = await runAdminCli(['series', 'refresh-parameters'], configPath);
+  assert.equal(both.code, 1);
   assert.match(
     both.stderr,
-    /^ERROR:\nError: Fixture series read failed\n[\s\S]*\nService cleanup also failed\.\nError: Fixture repository cleanup failed\n/
+    /^Error\nError: Fixture series read failed\n[\s\S]*\nService cleanup also failed\.\nError: Fixture repository cleanup failed\n/
   );
 
-  const cleanupOnly = runAdminCli(
-    ['refresh-series-parameters', '--maxDate', '1900-01-01'],
+  const cleanupOnly = await runAdminCli(
+    ['series', 'refresh-parameters', '--max-date', '1900-01-01'],
     configPath
   );
-  assert.equal(cleanupOnly.status, 1);
+  assert.equal(cleanupOnly.code, 1);
   assert.equal(cleanupOnly.stdout, '');
   assert.match(
     cleanupOnly.stderr,
-    /^ERROR:\nError: Fixture repository cleanup failed\n/
+    /^Error\nError: Fixture repository cleanup failed\n/
   );
 });

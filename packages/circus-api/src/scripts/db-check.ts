@@ -1,4 +1,4 @@
-import { InvalidArgumentError, type Command } from 'commander';
+import { InvalidArgumentError, Option, type Command } from 'commander';
 import type { CollectionAccessor } from '../db/createCollectionAccessor.ts';
 import type { Models } from '../interface.ts';
 import { styleText } from 'node:util';
@@ -18,19 +18,25 @@ interface Options {
 
 export const configure = (program: Command) =>
   program
-    .command('db-check')
+    .command('check')
     .description('Check database integrity.')
-    .option(
-      '-t, --target <model>',
-      'Check only this model, for example user or clinicalCase. May be specified more than once.',
-      (value: string, previous: string[] = []) => [...previous, value]
+    .argument(
+      '[model...]',
+      'models to check, e.g. user or clinicalCase (default: all)'
     )
-    .option('--documents-only', 'Check only documents against their schemas.')
+    .addOption(
+      new Option(
+        '--documents-only',
+        'Check only documents against their schemas.'
+      ).conflicts('attributesOnly')
+    )
     .option(
       '--attributes-only',
       'Check only case attributes against the project schemas.'
     )
-    .action((options: Options) => runCommand(command, options));
+    .action((target: string[], options: Options) =>
+      runCommand(command, { ...options, target })
+    );
 
 /**
  * Collects the issues of documents, and prints them and their summary.
@@ -172,7 +178,12 @@ export const command: CommandService<{ models: Models }, Options> = async (
         `Unknown model name(s): ${names.join(', ')}.\nAvailable model names: ${modelNames.sort().join(', ')}.`
       );
     }
-    const isTarget = (key: string) => !target || target.includes(key);
+    if (attributesOnly && target?.some(name => name !== 'clinicalCase')) {
+      throw new InvalidArgumentError(
+        '--attributes-only checks only clinicalCase. Specify clinicalCase or omit model names.'
+      );
+    }
+    const isTarget = (key: string) => !target?.length || target.includes(key);
     const reporter = createReporter('red');
     for (const key in models) {
       if (!isTarget(key) || attributesOnly) continue;

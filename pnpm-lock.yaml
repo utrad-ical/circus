@@ -421,6 +421,9 @@ importers:
       '@utrad-ical/circus-api-schema':
         specifier: workspace:*
         version: link:../circus-api-schema
+      '@utrad-ical/circus-lib':
+        specifier: workspace:*
+        version: link:../circus-lib
       tsdown:
         specifier: 0.23.7
         version: 0.23.7(typescript@7.0.2)

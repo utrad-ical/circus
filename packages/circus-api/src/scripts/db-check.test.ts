@@ -97,13 +97,13 @@ test('checks only documents or only attributes', async () => {
   assert.match(attributes, /Checking the attributes/);
 });
 
-test('checks each collection selected by a repeated target option', async t => {
+test('checks each collection selected by model names', async t => {
   const configPath = await adminCliMongoConfig(t);
-  const result = runAdminCli(
-    ['db-check', '-t', 'user', '-t', 'group'],
+  const result = await runAdminCli(
+    ['db', 'check', 'user', 'group'],
     configPath
   );
-  assert.equal(result.status, 0, result.stderr);
+  assert.equal(result.code, 0, result.stderr);
   assert.equal(result.stderr, '');
   assert.deepEqual(
     [...result.stdout.matchAll(/^Validating: (\w+)$/gm)]
@@ -115,16 +115,44 @@ test('checks each collection selected by a repeated target option', async t => {
 
 test('rejects unknown model names before scanning any model', async t => {
   const configPath = await adminCliMongoConfig(t);
-  const result = runAdminCli(
-    ['db-check', '-t', 'user', '-t', 'users'],
+  const result = await runAdminCli(
+    ['db', 'check', 'user', 'users'],
     configPath
   );
-  assert.equal(result.status, 1);
+  assert.equal(result.code, 1);
   assert.equal(result.stdout, '');
-  assert.match(result.stderr, /^ERROR:\nUnknown model name\(s\): "users"\./);
+  assert.match(result.stderr, /^Error\nUnknown model name\(s\): "users"\./);
   assert.match(
     result.stderr,
     /^Available model names: .*\bclinicalCase\b.*\buser\b/m
   );
   assert.doesNotMatch(result.stderr, /^ {4}at /m);
+});
+
+test('limits attributes-only checks to clinicalCase', async t => {
+  const configPath = await adminCliMongoConfig(t);
+  const all = await runAdminCli(
+    ['db', 'check', '--attributes-only'],
+    configPath
+  );
+  assert.equal(all.code, 0, all.stderr);
+  assert.match(all.stdout, /Checking the attributes/);
+  assert.doesNotMatch(all.stdout, /^Validating:/m);
+
+  const cases = await runAdminCli(
+    ['db', 'check', 'clinicalCase', '--attributes-only'],
+    configPath
+  );
+  assert.deepEqual(cases, all);
+
+  const wrongModel = await runAdminCli(
+    ['db', 'check', 'user', '--attributes-only'],
+    configPath
+  );
+  assert.equal(wrongModel.code, 1);
+  assert.equal(wrongModel.stdout, '');
+  assert.match(
+    wrongModel.stderr,
+    /--attributes-only checks only clinicalCase\./
+  );
 });

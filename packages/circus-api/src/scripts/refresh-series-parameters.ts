@@ -10,15 +10,15 @@ interface Options {
 
 export const configure = (program: Command) =>
   program
-    .command('refresh-series-parameters')
+    .command('refresh-parameters')
     .description('Scan imported DICOM files and update series parameters.')
     .option(
-      '--maxDate <ISO_DATE>',
+      '--max-date <date>',
       'Update only series created on or before this date.',
       (value: string) => {
         const timestamp = Date.parse(value);
         if (Number.isNaN(timestamp)) {
-          throw new InvalidArgumentError('Enter a valid date for --maxDate.');
+          throw new InvalidArgumentError('Enter a valid date for --max-date.');
         }
         return new Date(timestamp);
       }

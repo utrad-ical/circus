@@ -8,9 +8,9 @@ interface Options {
 
 export const configure = (program: Command) =>
   program
-    .command('clear-token')
-    .description('Remove access tokens.')
-    .option('-a, --all', 'Also delete permanent tokens.')
+    .command('clear')
+    .description('Remove access tokens for all users.')
+    .option('-a, --all', 'Also delete permanent API tokens.')
     .action((options: Options) => runCommand(command, options));
 
 export const command: CommandService<{ models: Models }, Options> = async (

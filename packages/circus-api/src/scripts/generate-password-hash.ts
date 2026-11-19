@@ -5,7 +5,7 @@ import { runCommand, type CommandService } from './Command.ts';
 
 export const configure = (program: Command) =>
   program
-    .command('generate-password-hash')
+    .command('hash-password')
     .description("Generate a hash compatible with PHP's password_hash().")
     .action(() => runCommand(command, undefined));
 

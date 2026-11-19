@@ -43,22 +43,14 @@ This utility also has several specialized commands that can do the following:
    - **API Endpoint**, e.g., "http://111.222.333.444/api/".
    - **API Token**, e.g., "3bac24b0c2f79085c5fceb15c7fffb9565a39062". This can be generated via the web UI.
 
-   These data will be stored in the `.circusapirc` file in your home directory.
+   The command checks that the API is reachable and accepts the token before saving them in `.circusapirc` in your home directory.
 
    **Tip:** Alternatively, you can export the following two environment variables:
 
    - `CIRCUS_API_TOKEN`
    - `CIRCUS_API_ENDPOINT`
 
-4. Run the following command to check if the client can connect to a running CIRCUS API server:
-
-   ```
-   circus-cli api get login-info
-   ```
-
-   This displays the basic information about the user associated with the API token. If it fails, return to the previous step and check if the given values are correct.
-
-5. You can see the list of commands like this:
+4. You can see the list of commands like this:
 
    ```
    circus-cli --help

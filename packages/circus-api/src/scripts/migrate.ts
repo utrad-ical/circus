@@ -1,17 +1,24 @@
+import type { Command } from 'commander';
 import * as path from 'path';
 import { styleText } from 'node:util';
 import type { Database, Models } from '../interface.ts';
 import scanMigrationFiles from '../utils/scanMigrationFiles.ts';
-import type Command from './Command.ts';
+import {
+  printCommandError,
+  runCommand,
+  type CommandService
+} from './Command.ts';
 
-export const help = () => {
-  return 'Performs DB migration.';
-};
+export const configure = (program: Command) =>
+  program
+    .command('migrate')
+    .description('Apply pending database migrations.')
+    .action(() => runCommand(command, undefined));
 
-export const command: Command<{ database: Database; models: Models }> = async (
-  opts,
-  { database, models }
-) => {
+export const command: CommandService<{
+  database: Database;
+  models: Models;
+}> = async (_, { database, models }) => {
   return async () => {
     const migrations = await scanMigrationFiles();
     const migrationCollection = database.db.collection('migration');
@@ -28,24 +35,24 @@ export const command: Command<{ database: Database; models: Models }> = async (
 
     for (let i = currentRevision + 1; i in migrations; i++) {
       const file = migrations[i];
-      const module = await import(file);
       const name = path.basename(file);
       console.log(styleText('green', 'Forwarding...'), name);
       try {
+        const module = await import(file);
         await module.up(database.db, models);
         await migrationCollection.updateOne(
           {},
           { $set: { revision: i, updatedAt: new Date() } },
           { upsert: true }
         );
-      } catch (err: any) {
+      } catch (error) {
         console.error(styleText('red', `Error: ${name}`));
-        console.error(err.message);
-        if (err.issues) console.error(err.issues);
-        break;
+        printCommandError(error);
+        process.exitCode = 1;
+        return;
       }
-      console.log('The database is now up to date.');
     }
+    console.log('The database is now up to date.');
   };
 };
 

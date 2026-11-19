@@ -1,15 +1,15 @@
+import type { Command } from 'commander';
 import inquirer from 'inquirer';
 import password from 'node-php-password';
-import type Command from './Command.ts';
+import { runCommand, type CommandService } from './Command.ts';
 
-export const help = () => {
-  return (
-    "Generates a hash that is compatible with PHP's password_hash().\n" +
-    'Use this to reset/modify the password of a user.'
-  );
-};
+export const configure = (program: Command) =>
+  program
+    .command('generate-password-hash')
+    .description("Generate a hash compatible with PHP's password_hash().")
+    .action(() => runCommand(command, undefined));
 
-export const command: Command<{}> = async () => {
+export const command: CommandService<{}> = async () => {
   return async () => {
     const res = await inquirer.prompt([
       {

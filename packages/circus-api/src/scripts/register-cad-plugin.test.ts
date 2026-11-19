@@ -2,12 +2,11 @@ import assert from 'node:assert/strict';
 import { isDeepStrictEqual } from 'node:util';
 import { test, before, beforeEach, mock } from 'node:test';
 import { setUpMongoFixture, usingModels } from '../test/util-mongo.ts';
-import type { CommandFunc } from './Command.ts';
 import inquirer from 'inquirer';
 import { command } from './register-cad-plugin.ts';
 
 const modelsPromise = usingModels();
-let commandFunc: CommandFunc;
+let commandFunc: Awaited<ReturnType<typeof command>>;
 
 // always say yes to the 'is this okay' prompt
 mock.method(inquirer, 'prompt', async () => ({ ok: true }));
@@ -44,7 +43,7 @@ test('registers a CAD plug-in', async () => {
     description: 'detects everything'
   };
   const spy = mock.method(console, 'log', () => {});
-  await commandFunc({ _args: [pluginId] });
+  await commandFunc(pluginId);
   assert.ok(
     spy.mock.calls
       .map(c => c.arguments)
@@ -58,7 +57,7 @@ test('registers a CAD plug-in', async () => {
   assert.partialDeepStrictEqual(data, { pluginId, version: '1.5.0' });
 
   // Prevents installation of the same plug-in
-  await assert.rejects(commandFunc({ _args: [pluginId] }), {
+  await assert.rejects(commandFunc(pluginId), {
     message: /already installed/
   });
 });
@@ -69,7 +68,7 @@ test('rejects a broken CAD definition file', async () => {
     version: '1.4.x.y',
     description: 'detects everything'
   };
-  await assert.rejects(commandFunc({ _args: [pluginId] }), {
+  await assert.rejects(commandFunc(pluginId), {
     message: /validation failed/
   });
 });

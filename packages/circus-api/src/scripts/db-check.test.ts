@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
 import { afterEach, beforeEach, mock, test } from 'node:test';
 import type * as mongo from 'mongodb';
+import { adminCliMongoConfig, runAdminCli } from '../test/util-admin-cli.ts';
 import { setUpMongoFixture, usingModels } from '../test/util-mongo.ts';
-import type { CommandFunc } from './Command.ts';
 import { command } from './db-check.ts';
 
 const modelsPromise = usingModels();
-let commandFunc: CommandFunc;
+let commandFunc: Awaited<ReturnType<typeof command>>;
 let db: mongo.Db;
 
 beforeEach(async () => {
@@ -21,7 +21,10 @@ afterEach(() => {
   mock.restoreAll();
 });
 
-const run = async (target = ['user', 'group'], options = {}) => {
+const run = async (
+  target = ['user', 'group'],
+  options: Parameters<typeof commandFunc>[0] = {}
+) => {
   const output: string[] = [];
   const capture = (...args: unknown[]) => output.push(args.join(' '));
   mock.method(console, 'log', capture);
@@ -86,10 +89,42 @@ test('warns about attributes against the project schemas', async () => {
 });
 
 test('checks only documents or only attributes', async () => {
-  const documents = await run(['clinicalCase'], { documents_only: true });
+  const documents = await run(['clinicalCase'], { documentsOnly: true });
   assert.match(documents, /Validating: clinicalCase/);
   assert.doesNotMatch(documents, /Checking the attributes/);
-  const attributes = await run(['clinicalCase'], { attributes_only: true });
+  const attributes = await run(['clinicalCase'], { attributesOnly: true });
   assert.doesNotMatch(attributes, /Validating: clinicalCase/);
   assert.match(attributes, /Checking the attributes/);
+});
+
+test('checks each collection selected by a repeated target option', async t => {
+  const configPath = await adminCliMongoConfig(t);
+  const result = runAdminCli(
+    ['db-check', '-t', 'user', '-t', 'group'],
+    configPath
+  );
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(result.stderr, '');
+  assert.deepEqual(
+    [...result.stdout.matchAll(/^Validating: (\w+)$/gm)]
+      .map(match => match[1])
+      .sort(),
+    ['group', 'user']
+  );
+});
+
+test('rejects unknown model names before scanning any model', async t => {
+  const configPath = await adminCliMongoConfig(t);
+  const result = runAdminCli(
+    ['db-check', '-t', 'user', '-t', 'users'],
+    configPath
+  );
+  assert.equal(result.status, 1);
+  assert.equal(result.stdout, '');
+  assert.match(result.stderr, /^ERROR:\nUnknown model name\(s\): "users"\./);
+  assert.match(
+    result.stderr,
+    /^Available model names: .*\bclinicalCase\b.*\buser\b/m
+  );
+  assert.doesNotMatch(result.stderr, /^ {4}at /m);
 });

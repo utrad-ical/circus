@@ -1,11 +1,14 @@
+import type { Command } from 'commander';
 import generateUniqueId from '../utils/generateUniqueId.ts';
-import type Command from './Command.ts';
+import { runCommand, type CommandService } from './Command.ts';
 
-export const help = () => {
-  return 'Generates and prints a new ID.';
-};
+export const configure = (program: Command) =>
+  program
+    .command('ulid')
+    .description('Generate and print a new ID.')
+    .action(() => runCommand(command, undefined));
 
-export const command: Command<{}> = async () => {
+export const command: CommandService<{}> = async () => {
   return async () => {
     console.log(generateUniqueId());
   };

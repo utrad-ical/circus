@@ -1,7 +1,8 @@
+import { InvalidArgumentError, type Command } from 'commander';
 import type { CollectionAccessor } from '../db/createCollectionAccessor.ts';
 import type { Models } from '../interface.ts';
 import { styleText } from 'node:util';
-import type Command from './Command.ts';
+import { runCommand, type CommandService } from './Command.ts';
 import checkRevisionAttributes from '../case/checkRevisionAttributes.ts';
 import {
   formatPath,
@@ -9,29 +10,27 @@ import {
   type ValidationIssue
 } from '../createValidator.ts';
 
-export const options = () => {
-  return [
-    {
-      names: ['target', 't'],
-      help: 'Checks only this collection.',
-      type: 'arrayOfString'
-    },
-    {
-      names: ['documents-only'],
-      help: 'Checks only the documents with their schemas.',
-      type: 'bool'
-    },
-    {
-      names: ['attributes-only'],
-      help: 'Checks only the attributes of cases with the project schemas.',
-      type: 'bool'
-    }
-  ];
-};
+interface Options {
+  target?: string[];
+  documentsOnly?: boolean;
+  attributesOnly?: boolean;
+}
 
-export const help = () => {
-  return 'Performs DB integrity check.\n' + 'Usage: circus db-check';
-};
+export const configure = (program: Command) =>
+  program
+    .command('db-check')
+    .description('Check database integrity.')
+    .option(
+      '-t, --target <model>',
+      'Check only this model, for example user or clinicalCase. May be specified more than once.',
+      (value: string, previous: string[] = []) => [...previous, value]
+    )
+    .option('--documents-only', 'Check only documents against their schemas.')
+    .option(
+      '--attributes-only',
+      'Check only case attributes against the project schemas.'
+    )
+    .action((options: Options) => runCommand(command, options));
 
 /**
  * Collects the issues of documents, and prints them and their summary.
@@ -160,17 +159,23 @@ const checkCaseAttributes = async (models: Models) => {
   }
 };
 
-export const command: Command<{ models: Models }> = async (
-  opts,
+export const command: CommandService<{ models: Models }, Options> = async (
+  _,
   { models }
 ) => {
-  return async (options: any) => {
-    const { target, documents_only, attributes_only } = options;
-    const isTarget = (key: string) =>
-      !Array.isArray(target) || target.includes(key);
+  return async ({ target, documentsOnly, attributesOnly }) => {
+    const modelNames = Object.keys(models);
+    const unknown = target?.filter(name => !modelNames.includes(name));
+    if (unknown?.length) {
+      const names = [...new Set(unknown)].map(name => JSON.stringify(name));
+      throw new InvalidArgumentError(
+        `Unknown model name(s): ${names.join(', ')}.\nAvailable model names: ${modelNames.sort().join(', ')}.`
+      );
+    }
+    const isTarget = (key: string) => !target || target.includes(key);
     const reporter = createReporter('red');
     for (const key in models) {
-      if (!isTarget(key) || attributes_only) continue;
+      if (!isTarget(key) || attributesOnly) continue;
       console.log(styleText('bold', `Validating: ${key}`));
       const model = (models as any)[key] as CollectionAccessor;
       const cursor = await model.findAsCursor({}, { strict: true });
@@ -203,7 +208,7 @@ export const command: Command<{ models: Models }> = async (
         )
       );
     }
-    if (isTarget('clinicalCase') && !documents_only)
+    if (isTarget('clinicalCase') && !documentsOnly)
       await checkCaseAttributes(models);
     if (reporter.documents) {
       console.error(

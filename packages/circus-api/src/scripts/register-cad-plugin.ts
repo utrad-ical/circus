@@ -1,40 +1,34 @@
+import type { Command } from 'commander';
 import inquirer from 'inquirer';
 import type { Database, Models } from '../interface.ts';
-import type Command from './Command.ts';
+import { runCommand, type CommandService } from './Command.ts';
 import type { Validator } from '../interface.ts';
 import type { DockerRunner } from '@utrad-ical/circus-cs-core';
 import { formatPath, ValidationError } from '../createValidator.ts';
 import { allRequiredExcept, only } from '../schemas/derive.ts';
 import { plugin } from '@utrad-ical/circus-api-schema';
 
-export const help = () => {
-  return (
-    'Registers a new CAD plug-in.\n' +
-    'The plug-in must be already loaded as a Docker image,\n' +
-    'and the image must contain a plugin manifest file.\n\n' +
-    'Usage: circus register-cad-plugin DOCKER_IMAGE_ID'
-  );
-};
+export const configure = (program: Command) =>
+  program
+    .command('register-cad-plugin <DOCKER_IMAGE_ID>')
+    .description(
+      'Register a CAD plug-in from a Docker image containing a manifest.'
+    )
+    .action((pluginId: string) => runCommand(command, pluginId));
 
-export const command: Command<{
-  database: Database;
-  validator: Validator;
-  models: Models;
-  dockerRunner: DockerRunner;
-}> = async (opts, { database, validator, models, dockerRunner }) => {
-  return async (options: any) => {
+export const command: CommandService<
+  {
+    database: Database;
+    validator: Validator;
+    models: Models;
+    dockerRunner: DockerRunner;
+  },
+  string
+> = async (_, { database, validator, models, dockerRunner }) => {
+  return async pluginId => {
     await database.db
       .collection('pluginDefinitions')
       .createIndex({ pluginId: 1 }, { unique: true });
-
-    const { _args: imageIds } = options;
-    if (!imageIds.length) {
-      throw new Error('Specify a plugin ID (Docker image hash).');
-    }
-    if (imageIds.length > 1) {
-      throw new Error('You cannot install more than one plug-in at a time.');
-    }
-    const pluginId = imageIds[0];
 
     if (!/^[a-z0-9]{64}$/.test(pluginId)) {
       throw new Error('The plug-in ID must be 64-char hex string.');

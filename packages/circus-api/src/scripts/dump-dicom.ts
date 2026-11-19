@@ -1,23 +1,22 @@
-import type Command from './Command.ts';
+import type { Command } from 'commander';
+import { runCommand, type CommandService } from './Command.ts';
 import fs from 'fs-extra';
 import type { DicomTagReader } from '../interface.ts';
 
-export const help = () => {
-  return (
-    'Dumps the content of the specified DICOM file.\n' +
-    'You can use this to check if a DICOM file is valid\n' +
-    'and loadable to the CIRCUS system.\n\n' +
-    'Usage: circus dump-dicom [file]'
-  );
-};
+export const configure = (program: Command) =>
+  program
+    .command('dump-dicom <file>')
+    .description(
+      'Print the contents of a DICOM file using the CIRCUS tag reader.'
+    )
+    .action((file: string) => runCommand(command, file));
 
-export const command: Command<{
-  dicomTagReader: DicomTagReader;
-}> = async (opts, { dicomTagReader }) => {
-  return async (options: any) => {
-    if (!Array.isArray(options._args) || options._args.length !== 1)
-      throw new Error('Specify one DICOM file.');
-    const buf = await fs.readFile(options._args[0]);
+export const command: CommandService<
+  { dicomTagReader: DicomTagReader },
+  string
+> = async (_, { dicomTagReader }) => {
+  return async file => {
+    const buf = await fs.readFile(file);
     const result = await dicomTagReader(buf.buffer as ArrayBuffer);
     console.log(result);
   };

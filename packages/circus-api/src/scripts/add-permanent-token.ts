@@ -1,33 +1,34 @@
+import type { Command } from 'commander';
 import type { Models } from '../interface.ts';
 import generatePermanentToken from '../utils/generatePermanentToken.ts';
-import type Command from './Command.ts';
+import { runCommand, type CommandService } from './Command.ts';
 
-export const help = () => {
-  return (
-    'Grants permanent access token for the given user.\n' +
-    'Usage: circus add-permanent-token [userEmailOrName]'
-  );
-};
+interface Options {
+  userEmailOrName: string;
+  description?: string;
+}
 
-export const options = () => {
-  return [
-    { names: ['description', 'd'], help: 'Description.', type: 'string' }
-  ];
-};
+export const configure = (program: Command) =>
+  program
+    .command('issue')
+    .description('Grant a permanent API token for a user.')
+    .argument('<user>', 'login ID or email address')
+    .option('-d, --description <description>', 'Description of the token.')
+    .action(
+      (
+        userEmailOrName: string,
+        { description }: Pick<Options, 'description'>
+      ) => runCommand(command, { userEmailOrName, description })
+    );
 
-export const command: Command<{ models: Models }> = async (
-  opts,
+export const command: CommandService<{ models: Models }, Options> = async (
+  _,
   { models }
 ) => {
-  return async (options: any) => {
-    const [userEmailOrName] = options._args;
-    const description =
-      options.description ?? 'A permanent token for API access';
-
-    if (!userEmailOrName) {
-      console.log(help());
-      return;
-    }
+  return async ({
+    userEmailOrName,
+    description = 'A permanent token for API access'
+  }) => {
     const users = await models.user.findAll({
       $or: [{ userEmail: userEmailOrName }, { loginId: userEmailOrName }]
     });

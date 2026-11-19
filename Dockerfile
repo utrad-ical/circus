@@ -46,7 +46,7 @@ COPY --from=build /var/circus /var/circus
 RUN rm -rf /var/circus/packages/circus-web-ui/dist
 
 COPY docker/api/entrypoint.sh /usr/local/bin/circus-entrypoint
-# Administration commands (e.g., `docker compose exec api circus migrate`)
+# Administration commands (e.g., `docker compose run --rm api circus db migrate`)
 COPY docker/api/circus /usr/local/bin/circus
 
 ENV TZ=UTC \

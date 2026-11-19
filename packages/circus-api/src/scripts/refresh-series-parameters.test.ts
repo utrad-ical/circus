@@ -1,13 +1,15 @@
 import assert from 'node:assert/strict';
+import { writeFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
 import { test, before, beforeEach, mock } from 'node:test';
 import { command } from './refresh-series-parameters.ts';
+import { runAdminCli, writeAdminCliConfig } from '../test/util-admin-cli.ts';
 import { setUpMongoFixture, usingModels } from '../test/util-mongo.ts';
 import type { Models, DicomTagReader } from '../interface.ts';
-import type { CommandFunc } from './Command.ts';
 import type { DicomFileRepository } from '@utrad-ical/circus-lib';
 
 const modelsPromise = usingModels();
-let commandFunc: CommandFunc,
+let commandFunc: Awaited<ReturnType<typeof command>>,
   dicomFileRepository: DicomFileRepository,
   models: Models,
   dicomTagReader: DicomTagReader;
@@ -54,9 +56,45 @@ test('refresh series parameters', async () => {
 });
 
 test('refresh series parameters with maxDate', async () => {
-  await commandFunc({ maxDate: '2020-08-30T00:00:00Z' });
+  await commandFunc({ maxDate: new Date('2020-08-30T00:00:00Z') });
   const seriesData = await models.series.findById(seriesUid);
   assert.equal(seriesData.parameters.PhotometricInterpretation, 'MONOCHROME2');
   const seriesData2 = await models.series.findById(overMaxDateSeriesUid);
   assert.equal(seriesData2.parameters.PhotometricInterpretation, undefined);
+});
+
+test('reports command and cleanup failures in order and fails on cleanup alone', async t => {
+  const configPath = await writeAdminCliConfig(
+    t,
+    `import { fileURLToPath } from 'node:url';
+      export default {
+        database: { options: { mongoUrl: process.env.CIRCUS_MONGO_TEST_URL } },
+        dicomFileRepository: { type: fileURLToPath(new URL('./repository.mjs', import.meta.url)) }
+      };`
+  );
+  await writeFile(
+    join(dirname(configPath), 'repository.mjs'),
+    `export default async () => ({
+      async getSeries() { throw new Error('Fixture series read failed'); },
+      async dispose() { throw new Error('Fixture repository cleanup failed'); }
+    });`
+  );
+
+  const both = await runAdminCli(['series', 'refresh-parameters'], configPath);
+  assert.equal(both.code, 1);
+  assert.match(
+    both.stderr,
+    /^Error\nError: Fixture series read failed\n[\s\S]*\nService cleanup also failed\.\nError: Fixture repository cleanup failed\n/
+  );
+
+  const cleanupOnly = await runAdminCli(
+    ['series', 'refresh-parameters', '--max-date', '1900-01-01'],
+    configPath
+  );
+  assert.equal(cleanupOnly.code, 1);
+  assert.equal(cleanupOnly.stdout, '');
+  assert.match(
+    cleanupOnly.stderr,
+    /^Error\nError: Fixture repository cleanup failed\n/
+  );
 });

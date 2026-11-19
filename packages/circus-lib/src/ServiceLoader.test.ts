@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, test, mock } from 'node:test';
+import { setImmediate } from 'node:timers/promises';
 import path from 'path';
 import type { FunctionService, ClassService } from './ServiceLoader.ts';
 import ServiceLoader from './ServiceLoader.ts';
@@ -166,6 +167,44 @@ describe('dispose', () => {
     loader.register('gun', async () => ({ shot: () => 'bang' }));
     loader.get('gun'); // Do not await
     await loader.dispose();
+  });
+
+  test('disposes initialized services when another service fails to initialize', async () => {
+    const dispose = mock.fn(async () => {});
+    const initError = new Error('Lance initialization failed');
+    const loader = new ServiceLoader<Services>();
+    loader.register('gun', async () => ({ shot: () => 'bang', dispose }));
+    loader.register('lance', async () => {
+      throw initError;
+    });
+    await loader.get('gun');
+
+    await assert.rejects(loader.get('lance'), initError);
+    await loader.dispose();
+    assert.equal(dispose.mock.callCount(), 1);
+  });
+
+  test('waits for other services after disposal fails', async () => {
+    const disposeError = new Error('Gun disposal failed');
+    let lanceDisposed = false;
+    const loader = new ServiceLoader<Services>();
+    loader.register('gun', async () => ({
+      shot: () => 'bang',
+      dispose: async () => {
+        throw disposeError;
+      }
+    }));
+    loader.register('lance', async () => ({
+      attack: () => 'thrust',
+      dispose: async () => {
+        await setImmediate();
+        lanceDisposed = true;
+      }
+    }));
+    await Promise.all([loader.get('gun'), loader.get('lance')]);
+
+    await assert.rejects(loader.dispose(), disposeError);
+    assert.equal(lanceDisposed, true);
   });
 });
 

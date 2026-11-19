@@ -74,7 +74,7 @@ const editorProperties: PropertyEditorProperties<Plugin> = [
   { key: 'displayStrategy', caption: 'Display Strategy', editor: JsonEditor }
 ];
 
-// Plug-ins are registered with the CLI (`circus register-cad-plugin`)
+// Plug-ins are registered with the CLI (`circus plugin register`)
 const PluginAdmin: FC<{}> = props => {
   return (
     <EditorPage

@@ -12,7 +12,7 @@ test('dump-dicom', async () => {
     import.meta.dirname,
     '../../test/dicom/CT-MONO2-16-brain.dcm'
   );
-  await commandFunc({ _args: [file] });
+  await commandFunc(file);
   assert.partialDeepStrictEqual(spy.mock.calls[0].arguments[0], {
     modelName: 'PQ5000'
   });

@@ -191,7 +191,7 @@ const AttributeSchemaEditor: React.FC<{
           Changing the attributes may make the values of existing cases or
           labels invalid (such cases cannot be saved until they are fixed), or
           hide them (the values of removed or renamed attributes are kept but
-          not shown). After saving, run <code>circus db-check</code> to check
+          not shown). After saving, run <code>circus db check</code> to check
           the existing values.
         </Alert>
       )}

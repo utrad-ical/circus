@@ -169,11 +169,9 @@ export default class ServiceLoader<T extends object = any> {
       }
     })();
     this.loadedServices[name] = { status: 'loading', promise };
-    promise.then(service => {
-      // invoked before the resolved value is accecced by a service consumer
-      this.loadedServices[name] = { status: 'loaded', service };
-    });
-    return promise;
+    const service = await promise;
+    this.loadedServices[name] = { status: 'loaded', service };
+    return service;
   }
 
   /**
@@ -183,18 +181,27 @@ export default class ServiceLoader<T extends object = any> {
     const disposeTasks = Object.keys(this.loadedServices).map(async k => {
       const item: LoadedService<T, keyof T> =
         this.loadedServices[k as keyof T]!;
-      const disposeService = async (service: any) => {
-        if ('dispose' in service) {
-          await (service as unknown as Disposable).dispose();
-        }
-      };
-      if (item.status === 'loading') {
-        await disposeService(await item.promise);
-      } else {
-        await disposeService(item.service);
+      const service =
+        item.status === 'loading'
+          ? await item.promise.catch(() => undefined)
+          : item.service;
+      if (
+        service &&
+        (typeof service === 'object' || typeof service === 'function') &&
+        'dispose' in service &&
+        typeof service.dispose === 'function'
+      ) {
+        await service.dispose();
       }
     });
-    await Promise.all(disposeTasks);
+    const results = await Promise.allSettled(disposeTasks);
+    const errors = results
+      .filter(result => result.status === 'rejected')
+      .map(result => result.reason);
+    if (errors.length === 1) throw errors[0];
+    if (errors.length > 1) {
+      throw new AggregateError(errors, 'Failed to dispose services');
+    }
   }
 
   private async createFromModule<K extends keyof T>(name: K, path: string) {

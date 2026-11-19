@@ -1,112 +1,98 @@
-import dashdash from 'dashdash';
-import fs from 'fs';
-import path from 'path';
-import glob from '../utils/glob.ts';
+import { Command } from 'commander';
+import { readFileSync } from 'node:fs';
 import { styleText } from 'node:util';
-import { ConfigLoadError } from '@utrad-ical/circus-lib/config';
-import type { CommandFunc } from './Command.ts';
-import type Command from './Command.ts';
-import createServiceLoader from '../createServiceLoader.ts';
-import loadApiConfig from '../config/index.ts';
+import { printCommandError } from './Command.ts';
+import { configure as addPermanentToken } from './add-permanent-token.ts';
+import { configure as clearToken } from './clear-token.ts';
+import { configure as dbCheck } from './db-check.ts';
+import { configure as dumpDicom } from './dump-dicom.ts';
+import { configure as generatePasswordHash } from './generate-password-hash.ts';
+import { configure as migrate } from './migrate.ts';
+import { configure as refreshSeriesParameters } from './refresh-series-parameters.ts';
+import { configure as registerCadPlugin } from './register-cad-plugin.ts';
+import { configure as ulid } from './ulid.ts';
 
-const packageFile = path.join(import.meta.dirname, '../../package.json');
-const version = JSON.parse(fs.readFileSync(packageFile, 'utf8')).version;
-
-const [, , commandName, ...argv] = process.argv;
 const removedCommands = new Map([
-  ['export-case', 'case export'],
-  ['import-series', 'series import'],
-  ['register-case', 'case create'],
-  ['register-plugin-job', 'job create']
+  ['export-case', 'circus-cli case export'],
+  ['import-series', 'circus-cli series import'],
+  ['register-case', 'circus-cli case create'],
+  ['register-plugin-job', 'circus-cli job create'],
+  ['db-check', 'circus db check'],
+  ['migrate', 'circus db migrate'],
+  ['refresh-series-parameters', 'circus series refresh-parameters'],
+  ['register-cad-plugin', 'circus plugin register'],
+  ['add-permanent-token', 'circus token issue'],
+  ['clear-token', 'circus token clear'],
+  ['dump-dicom', 'circus util dump-dicom'],
+  ['generate-password-hash', 'circus util hash-password'],
+  ['ulid', 'circus util ulid']
 ]);
 
-interface CommandModule {
-  options?: () => object[];
-  help: () => string;
-  command: Command<any>;
-}
-
-const importCommand = async (moduleName: string) => {
-  const modulePath = path.join(import.meta.dirname, `${moduleName}.ts`);
-  return (await import(modulePath)) as CommandModule;
-};
-
-const main = async () => {
-  const commandFiles = (
-    await glob(path.join(import.meta.dirname, '*.ts'))
-  ).filter(name => !/(index|Command|test)\.ts$/.test(name));
-  const commands = commandFiles.map(p => path.basename(p, '.ts'));
-
-  const printUsage = () => {
-    console.log('Usage: circus [command]\n');
-    console.log('Available commands:');
-    commands.forEach(command => console.log('  ' + command));
-    console.log('  help [command]');
-  };
-
-  console.log(styleText('yellow', `CIRCUS-API CLI version ${version}\n`));
-  const requestedCommand = commandName === 'help' ? argv[0] : commandName;
+const main = async (argv: string[]) => {
+  const requestedCommand = argv[0] === 'help' ? argv[1] : argv[0];
   const replacement = requestedCommand && removedCommands.get(requestedCommand);
   if (replacement) {
     console.error(
-      `'circus ${requestedCommand}' has been removed. Use 'circus-cli ${replacement}'.`
+      `'circus ${requestedCommand}' has been removed. Use '${replacement}'.`
     );
     process.exitCode = 1;
     return;
   }
 
-  if (commands.indexOf(commandName) >= 0) {
-    const module = await importCommand(commandName);
-    try {
-      const options = module.options ? module.options() : [];
-      const parser = dashdash.createParser({ options });
-      const opts = parser.parse(process.argv.slice(1)) as object;
+  const { version } = JSON.parse(
+    readFileSync(new URL('../../package.json', import.meta.url), 'utf8')
+  );
+  const program = new Command()
+    .name('circus')
+    .description('CIRCUS server administration')
+    .version(version)
+    .configureHelp({
+      styleTitle: str => styleText('cyan', str, { validateStream: false }),
+      styleOptionTerm: str => styleText('bold', str, { validateStream: false }),
+      styleCommandDescription: str =>
+        styleText(['yellow', 'bold'], str, { validateStream: false })
+    })
+    .showHelpAfterError(
+      `(Use ${styleText('yellow', '--help', { stream: process.stderr })} for additional information)`
+    );
 
-      const loader = await createServiceLoader(await loadApiConfig());
-      const commandService = await module.command;
-      loader.register('theCommand', commandService);
-      const commandFunc = (await loader.get('theCommand')) as CommandFunc;
-      try {
-        await commandFunc(opts);
-      } finally {
-        await loader.dispose();
-      }
-    } catch (err: any) {
-      console.error(styleText('red', 'ERROR:'));
-      console.error(err.message);
-      if (err instanceof ConfigLoadError) {
-        process.exitCode = 1;
-        return;
-      }
-      err.issues && console.error(err.issues);
-      err.stack && console.error(err.stack);
-    }
-  } else if (commandName === 'help') {
-    const targetCommand = argv[0];
-    if (commands.indexOf(targetCommand) >= 0) {
-      const module = await importCommand(targetCommand);
-      const options = module.options ? module.options() : [];
-      const parser = dashdash.createParser({ options });
-      const helpText = module.help();
-      console.log(helpText);
-      const optionText =
-        options.length > 0 ? '\nOptions:\n' + parser.help({ indent: 2 }) : '';
-      console.log(optionText);
-    } else {
-      if (targetCommand) {
-        console.error('No help for ' + targetCommand);
-      } else {
-        printUsage();
-      }
-    }
-  } else {
-    if (commandName) {
-      console.error('No command named ' + commandName);
-      process.exit(1);
-    } else {
-      printUsage();
-    }
+  const db = program
+    .command('db')
+    .description('Check and migrate the database');
+  dbCheck(db);
+  migrate(db);
+
+  const series = program
+    .command('series')
+    .description('Maintain stored DICOM series');
+  refreshSeriesParameters(series);
+
+  const plugin = program
+    .command('plugin')
+    .description('Manage installed plug-ins');
+  registerCadPlugin(plugin);
+
+  const token = program.command('token').description('Manage access tokens');
+  addPermanentToken(token);
+  clearToken(token);
+
+  const util = program
+    .command('util')
+    .description('Run local diagnostic and utility commands');
+  dumpDicom(util);
+  generatePasswordHash(util);
+  ulid(util);
+
+  if (!argv.length) {
+    program.outputHelp();
+    return;
   }
+  await program.parseAsync(argv, { from: 'user' });
 };
 
-main();
+try {
+  await main(process.argv.slice(2));
+} catch (error) {
+  printCommandError(error);
+  process.exitCode = 1;
+}

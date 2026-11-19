@@ -12,12 +12,12 @@ mock.method(inquirer, 'prompt', async () => answers.shift());
 test('generate hash', async () => {
   const commandFunc = await command(null, {});
   const spy = mock.method(console, 'log', () => {});
-  await commandFunc({});
+  await commandFunc();
   assert.match(spy.mock.calls[0].arguments[0], /\$2y\$/);
 });
 
 test('error on password mismatch', async () => {
   const commandFunc = await command(null, {});
   mock.method(console, 'log', () => {});
-  await assert.rejects(commandFunc({}), { message: /Password mismatch/ });
+  await assert.rejects(commandFunc(), { message: /Password mismatch/ });
 });

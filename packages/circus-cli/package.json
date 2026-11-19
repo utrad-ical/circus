@@ -45,6 +45,7 @@
   },
   "devDependencies": {
     "@utrad-ical/circus-api-schema": "workspace:*",
+    "@utrad-ical/circus-lib": "workspace:*",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.19.2",
     "tsdown": "0.23.7",

@@ -1,13 +1,11 @@
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
+import { runCli, tempDirectory } from '@utrad-ical/circus-lib/test/cli';
 import { once } from 'node:events';
 import { createServer } from 'node:http';
 import { join } from 'node:path';
 import { text } from 'node:stream/consumers';
 import { test } from 'node:test';
-import { fileURLToPath } from 'node:url';
 import { stripVTControlCharacters, styleText } from 'node:util';
-import { tempDirectory } from '../test/command.ts';
 import { saveCliConnection } from '../utils/cliConfig.ts';
 
 test('sends requests from the real CLI and preserves piped input, output, and exit codes', async t => {
@@ -87,7 +85,7 @@ test('sends requests from the real CLI and preserves piped input, output, and ex
     endpoint,
     token
   });
-  const entry = fileURLToPath(new URL('../index.ts', import.meta.url));
+  const entry = new URL('../index.ts', import.meta.url);
   const env: NodeJS.ProcessEnv = {
     ...process.env,
     XDG_CONFIG_HOME: directory
@@ -96,24 +94,11 @@ test('sends requests from the real CLI and preserves piped input, output, and ex
   delete env.CIRCUS_API_TOKEN;
   delete env.FORCE_COLOR;
 
-  const run = async (
+  const run = (
     args: string[],
     stdin?: string,
     envOverrides?: NodeJS.ProcessEnv
-  ) => {
-    const child = spawn(process.execPath, [entry, ...args], {
-      env: { ...env, ...envOverrides },
-      timeout: 5000
-    });
-    const closed = once(child, 'close');
-    child.stdin.end(stdin);
-    const [stdout, stderr, [code]] = await Promise.all([
-      text(child.stdout),
-      text(child.stderr),
-      closed
-    ]);
-    return { stdout, stderr, code };
-  };
+  ) => runCli(entry, args, { env: { ...env, ...envOverrides }, stdin });
 
   const read = await run([
     'api',

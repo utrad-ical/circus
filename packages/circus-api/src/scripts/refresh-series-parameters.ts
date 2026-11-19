@@ -1,32 +1,40 @@
+import { InvalidArgumentError, type Command } from 'commander';
 import * as mr from 'multi-integer-range';
-import type Command from './Command.ts';
+import { runCommand, type CommandService } from './Command.ts';
 import type { Models, DicomTagReader } from '../interface.ts';
 import type { DicomFileRepository } from '@utrad-ical/circus-lib';
 
-export const options = () => {
-  return [
-    {
-      names: ['maxDate'],
-      help: 'Updates series only before this date.',
-      helpArg: 'ISO_DATE',
-      type: 'string'
-    }
-  ];
-};
+interface Options {
+  maxDate?: Date;
+}
 
-export const help = () => {
-  return 'Scans imported DICOM files and adds parameters to the database.';
-};
+export const configure = (program: Command) =>
+  program
+    .command('refresh-parameters')
+    .description('Scan imported DICOM files and update series parameters.')
+    .option(
+      '--max-date <date>',
+      'Update only series created on or before this date.',
+      (value: string) => {
+        const timestamp = Date.parse(value);
+        if (Number.isNaN(timestamp)) {
+          throw new InvalidArgumentError('Enter a valid date for --max-date.');
+        }
+        return new Date(timestamp);
+      }
+    )
+    .action((options: Options) => runCommand(command, options));
 
-export const command: Command<{
-  models: Models;
-  dicomTagReader: DicomTagReader;
-  dicomFileRepository: DicomFileRepository;
-}> = async (_, { models, dicomTagReader, dicomFileRepository }) => {
-  return async options => {
-    const filter = options.maxDate
-      ? { createdAt: { $lte: new Date(options.maxDate) } }
-      : {};
+export const command: CommandService<
+  {
+    models: Models;
+    dicomTagReader: DicomTagReader;
+    dicomFileRepository: DicomFileRepository;
+  },
+  Options
+> = async (_, { models, dicomTagReader, dicomFileRepository }) => {
+  return async ({ maxDate }) => {
+    const filter = maxDate ? { createdAt: { $lte: maxDate } } : {};
     const cursor = models.series.findAsCursor(filter);
     while (await cursor.hasNext()) {
       const series = await cursor.next();

@@ -5,7 +5,7 @@
 # are reachable only from the other containers.
 # For development, add compose.dev.yaml (see README.md).
 #
-# Initialize/upgrade the database: docker compose run --rm api circus migrate
+# Initialize/upgrade the database: docker compose run --rm api circus db migrate
 
 name: circus
 

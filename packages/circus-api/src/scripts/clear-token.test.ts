@@ -3,10 +3,9 @@ import { isDeepStrictEqual } from 'node:util';
 import { test, beforeEach, mock } from 'node:test';
 import { setUpMongoFixture, usingModels } from '../test/util-mongo.ts';
 import { command } from './clear-token.ts';
-import type { CommandFunc } from './Command.ts';
 
 const modelsPromise = usingModels();
-let commandFunc: CommandFunc;
+let commandFunc: Awaited<ReturnType<typeof command>>;
 
 beforeEach(async () => {
   const { database, models } = await modelsPromise;

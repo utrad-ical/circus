@@ -1,23 +1,23 @@
+import type { Command } from 'commander';
 import type { Models } from '../interface.ts';
-import type Command from './Command.ts';
+import { runCommand, type CommandService } from './Command.ts';
 
-export const options = () => {
-  return [
-    {
-      names: ['all', 'a'],
-      help: 'Also deletes permanent tokens.',
-      type: 'bool'
-    }
-  ];
-};
+interface Options {
+  all?: boolean;
+}
 
-export const help = () => {
-  return 'Removes all access tokens.\n' + 'Usage: circus clear-token';
-};
+export const configure = (program: Command) =>
+  program
+    .command('clear')
+    .description('Remove access tokens for all users.')
+    .option('-a, --all', 'Also delete permanent API tokens.')
+    .action((options: Options) => runCommand(command, options));
 
-export const command: Command<{ models: Models }> = async (opt, { models }) => {
-  return async (options: any) => {
-    const { all } = options;
+export const command: CommandService<{ models: Models }, Options> = async (
+  _,
+  { models }
+) => {
+  return async ({ all }) => {
     const where = all ? {} : { permanentTokenId: null };
     const res = await models.token.deleteMany(where);
     console.log(`Deleted ${res.deletedCount} access token(s).`);

@@ -18,14 +18,33 @@ const runCli = (...args: string[]) => {
   };
 };
 
+const commandNames = (help: string) =>
+  Array.from(help.matchAll(/^ {2}([a-z]+)\b/gm), match => match[1]).filter(
+    name => name !== 'help'
+  );
+
 test('shows group, subcommand, and leaf help', () => {
+  const groups = {
+    api: ['get', 'post', 'put', 'patch'],
+    auth: ['login', 'logout'],
+    case: ['create', 'addrev', 'export'],
+    job: ['create'],
+    series: ['import', 'export'],
+    blob: ['get', 'post'],
+    mylist: ['show']
+  };
   const root = runCli('--help');
   assert.equal(root.status, 0);
-  assert.match(root.stdout, /^\s+case\s+Create, revise, and export cases/m);
+  assert.deepEqual(
+    commandNames(root.stdout).sort(),
+    Object.keys(groups).sort()
+  );
 
-  const group = runCli('case', '--help');
-  assert.equal(group.status, 0);
-  assert.match(group.stdout, /^\s+create \[options\]/m);
+  for (const [name, commands] of Object.entries(groups)) {
+    const group = runCli(name, '--help');
+    assert.equal(group.status, 0);
+    assert.deepEqual(commandNames(group.stdout).sort(), commands.sort(), name);
+  }
 
   const leaf = runCli('case', 'create', '--help');
   assert.equal(leaf.status, 0);

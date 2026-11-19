@@ -7,9 +7,9 @@ interface Options {
   tags?: string;
 }
 
-const action: CommandAction = ({ getFetch }) => {
+const action: CommandAction = deps => {
   return async (args: string[], { project, tags }: Options) => {
-    const input = await getCreationInputs(getFetch, args, {
+    const input = await getCreationInputs(deps, args, {
       target: project,
       option: '--project',
       label: 'Project',

@@ -1,6 +1,5 @@
 import type { LoginInfoFull } from '@utrad-ical/circus-api-schema';
-import { select } from '@inquirer/prompts';
-import type { AuthorizedFetch } from './createAuthorizedFetch.ts';
+import type { CommandDeps, Prompts } from '../commands/CommandAction.ts';
 import {
   editSeriesList,
   fetchSeries,
@@ -22,7 +21,11 @@ interface Options {
   getTargets: (user: LoginInfoFull) => Target[];
 }
 
-const resolveTarget = async (targets: Target[], options: Options) => {
+const resolveTarget = async (
+  targets: Target[],
+  options: Options,
+  select: Prompts['select']
+) => {
   const { target, label, option } = options;
   if (target === undefined) {
     if (!targets.length)
@@ -47,7 +50,11 @@ const resolveTarget = async (targets: Target[], options: Options) => {
 };
 
 const getCreationInputs = async (
-  getFetch: () => AuthorizedFetch,
+  {
+    getFetch,
+    prompts,
+    isInputTTY
+  }: Pick<CommandDeps, 'getFetch' | 'prompts' | 'isInputTTY'>,
   seriesArgs: string[],
   options: Options
 ) => {
@@ -56,14 +63,18 @@ const getCreationInputs = async (
   if (options.target === undefined) missing.push(options.option);
   if (!specs.length) missing.push('at least one series UID');
   const interactive = missing.length > 0;
-  if (interactive && !process.stdin.isTTY) {
+  if (interactive && !isInputTTY) {
     throw new Error(`Specify ${missing.join(' and ')}.`);
   }
 
   const fetch = getFetch();
   const response = await fetch('login-info/full');
   const user = (await response.json()) as LoginInfoFull;
-  const targetId = await resolveTarget(options.getTargets(user), options);
+  const targetId = await resolveTarget(
+    options.getTargets(user),
+    options,
+    prompts.select
+  );
 
   const getDefaultRange = () => 'auto' as const;
   const initial: SelectedSeries<'auto'>[] = [];
@@ -73,6 +84,7 @@ const getCreationInputs = async (
   const selected = interactive
     ? await editSeriesList(fetch, initial, {
         submitLabel: options.submitLabel,
+        prompts,
         getDefaultRange
       })
     : initial;

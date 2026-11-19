@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test, type TestContext } from 'node:test';
-import { Command } from 'commander';
+import { commandDeps, runCommand } from '../test/command.ts';
 import type { AuthorizedFetch } from '../utils/createAuthorizedFetch.ts';
 import caseCreateArgs from './case-create.args.ts';
 import caseCreate from './case-create.ts';
@@ -39,7 +39,11 @@ const user = {
   ]
 };
 
-const setup = (t: TestContext, jobError?: Error) => {
+const setup = (
+  t: TestContext,
+  jobError?: Error,
+  overrides: Parameters<typeof commandDeps>[0] = {}
+) => {
   const log = t.mock.method(console, 'log', () => {});
   const requests: string[] = [];
   const posts: { resource: string; body: unknown }[] = [];
@@ -52,19 +56,22 @@ const setup = (t: TestContext, jobError?: Error) => {
     assert.ok(resource === 'cases' || resource === 'plugin-jobs');
     assert.equal(init?.method, 'POST');
     assert.ok(typeof init.body === 'string');
-    posts.push({ resource, body: JSON.parse(init.body) });
-    if (resource === 'plugin-jobs' && jobError) throw jobError;
+    const body = JSON.parse(init.body);
+    posts.push({ resource, body });
+    if (resource === 'plugin-jobs' && jobError && !body.force) {
+      throw jobError;
+    }
     return Response.json(
       resource === 'cases' ? { caseId: 'new-case' } : { jobId: 'new-job' },
       { status: 201 }
     );
   };
 
-  const program = new Command();
-  const deps = { getFetch: () => fetch, rcFilePath: '' };
-  caseCreateArgs(program.command('case')).action(caseCreate(deps));
-  jobCreateArgs(program.command('job')).action(jobCreate(deps));
-  const run = (...args: string[]) => program.parseAsync(args, { from: 'user' });
+  const deps = commandDeps({ getFetch: () => fetch, ...overrides });
+  const run = (group: 'case' | 'job', ...args: string[]) =>
+    group === 'case'
+      ? runCommand(group, caseCreateArgs, caseCreate, args, deps)
+      : runCommand(group, jobCreateArgs, jobCreate, args, deps);
   return { log, requests, posts, run };
 };
 
@@ -72,7 +79,6 @@ test('creates a case with tags and explicit and automatic series ranges', async 
   const { log, posts, run } = setup(t);
   await run(
     'case',
-    'create',
     '--project',
     'Study A',
     '--tags',
@@ -110,7 +116,6 @@ test('registers a job with priority zero and automatic and explicit series range
   const { log, posts, run } = setup(t);
   await run(
     'job',
-    'create',
     '--plugin',
     'lung-v2',
     '--priority',
@@ -144,17 +149,18 @@ test('registers a job with priority zero and automatic and explicit series range
   );
 });
 
-test('reports a duplicate job without retrying when all arguments are supplied', async t => {
-  const duplicate = Object.assign(new Error('HTTP error: 400 Bad Request'), {
-    status: 400,
-    body: JSON.stringify({
-      error: 'There is a duplicate job that is already registered.'
-    })
-  });
-  const { posts, run } = setup(t, duplicate);
+const duplicateJob = Object.assign(new Error('HTTP error: 400 Bad Request'), {
+  status: 400,
+  body: JSON.stringify({
+    error: 'There is a duplicate job that is already registered.'
+  })
+});
 
-  await assert.rejects(run('job', 'create', '--plugin', 'lung-v2', '1.2.3'), {
-    message: duplicate.message
+test('reports a duplicate job without retrying when all arguments are supplied', async t => {
+  const { posts, run } = setup(t, duplicateJob);
+
+  await assert.rejects(run('job', '--plugin', 'lung-v2', '1.2.3'), {
+    message: duplicateJob.message
   });
   assert.deepEqual(posts, [
     {
@@ -169,7 +175,7 @@ test('reports a duplicate job without retrying when all arguments are supplied',
 
 test('lists executable plug-in IDs when the supplied name is ambiguous', async t => {
   const { requests, run } = setup(t);
-  await assert.rejects(run('job', 'create', '--plugin', 'Lung CAD', '1.2.3'), {
+  await assert.rejects(run('job', '--plugin', 'Lung CAD', '1.2.3'), {
     message:
       "Multiple plug-ins match 'Lung CAD'. Use --plugin with one of these IDs.\n  lung-v1\n  lung-v2"
   });
@@ -178,11 +184,100 @@ test('lists executable plug-in IDs when the supplied name is ambiguous', async t
 
 test('rejects malformed series arguments before fetching or prompting', async t => {
   const { requests, run } = setup(t);
-  await assert.rejects(run('case', 'create', 'ああああ'), /Invalid Series UID/);
-  await assert.rejects(run('case', 'create', '1.2.3:4'), /Invalid series/);
-  await assert.rejects(
-    run('job', 'create', '1.2.3:4:10:step'),
-    /Invalid series/
-  );
+  await assert.rejects(run('case', 'ああああ'), /Invalid Series UID/);
+  await assert.rejects(run('case', '1.2.3:4'), /Invalid series/);
+  await assert.rejects(run('job', '1.2.3:4:10:step'), /Invalid series/);
   assert.deepEqual(requests, []);
 });
+
+test('asks for an image range before submitting an interactively selected series', async t => {
+  const prompts = ['1.2.3', '10:4:-2'];
+  const { posts, run } = setup(t, undefined, {
+    isInputTTY: true,
+    prompts: {
+      input: async ({ message, validate }) => {
+        const answer = prompts.shift();
+        assert.ok(answer);
+        assert.match(
+          message,
+          answer === '1.2.3' ? /Series UID/ : /Image range/
+        );
+        assert.ok(validate);
+        assert.equal(await validate(answer), true);
+        return answer;
+      },
+      select: async ({ default: selection }) => {
+        assert.equal(selection, 'submit');
+        return selection;
+      }
+    }
+  });
+
+  await run('case', '--project', 'study-a');
+
+  assert.deepEqual(prompts, []);
+  assert.deepEqual(posts, [
+    {
+      resource: 'cases',
+      body: {
+        projectId: 'study-a',
+        series: [
+          {
+            seriesUid: '1.2.3',
+            partialVolumeDescriptor: { start: 10, end: 4, delta: -2 }
+          }
+        ]
+      }
+    }
+  ]);
+});
+
+for (const confirmed of [false, true]) {
+  test(
+    confirmed
+      ? 'retries a duplicate job once after confirmation'
+      : 'cancels an interactive duplicate job by default',
+    async t => {
+      const answers = ['1.2.3', 'auto'];
+      const confirm = t.mock.fn(async (options: { default?: boolean }) => {
+        assert.equal(options.default, false);
+        return confirmed;
+      });
+      const { log, posts, run } = setup(t, duplicateJob, {
+        isInputTTY: true,
+        prompts: {
+          input: async ({ default: defaultAnswer, validate }) => {
+            const answer = answers.shift();
+            assert.ok(answer);
+            if (answer === 'auto') assert.equal(defaultAnswer, 'auto');
+            assert.ok(validate);
+            assert.equal(await validate(answer), true);
+            return answer;
+          },
+          select: async ({ default: selection }) => {
+            assert.equal(selection, 'submit');
+            return selection;
+          },
+          confirm
+        }
+      });
+
+      await run('job', '--plugin', 'lung-v2');
+
+      assert.deepEqual(answers, []);
+      assert.equal(confirm.mock.callCount(), 1);
+      const request = {
+        pluginId: 'lung-v2',
+        series: [{ seriesUid: '1.2.3', partialVolumeDescriptor: 'auto' }]
+      };
+      assert.deepEqual(
+        posts.map(({ body }) => body),
+        [request, ...(confirmed ? [{ ...request, force: true }] : [])]
+      );
+      assert.equal(
+        log.mock.calls.at(-1)?.arguments[0],
+        confirmed ? 'new-job' : 'Canceled.'
+      );
+    }
+  );
+}

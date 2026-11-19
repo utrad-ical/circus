@@ -7,7 +7,7 @@ import { isDeepStrictEqual, styleText } from 'node:util';
 import { fetchWithSpinner } from '../utils/createAuthorizedFetch.ts';
 import exec from '../utils/exec.ts';
 import formatJsonDiff from '../utils/formatJsonDiff.ts';
-import { confirm, promptString } from '../utils/inquiry.ts';
+import { defaultValidateString } from '../utils/inquiry.ts';
 import launchEditor from '../utils/launchEditor.ts';
 import readIds from '../utils/readIds.ts';
 import type { CommandAction } from './CommandAction.ts';
@@ -26,7 +26,7 @@ const withoutMetadata = (obj: CaseRevisionCreate): CaseRevisionCreate => {
   return { series, attributes, status, description };
 };
 
-const action: CommandAction = ({ getFetch }) => {
+const action: CommandAction = ({ getFetch, prompts }) => {
   return async (args: string[], options: Options) => {
     const fetch = getFetch();
     const { exec: command, desc, editDesc, force, file, allRevs } = options;
@@ -86,7 +86,10 @@ const action: CommandAction = ({ getFetch }) => {
       if (typeof desc === 'string' && desc.length > 0) {
         newRev.description = desc;
       } else if (!editDesc) {
-        newRev.description = await promptString('Revision description:');
+        newRev.description = await prompts.input({
+          message: 'Revision description:',
+          validate: defaultValidateString
+        });
       }
 
       if (!force) {
@@ -110,7 +113,9 @@ const action: CommandAction = ({ getFetch }) => {
             );
           }
         }
-        if (!(await confirm('Is this okay?'))) {
+        if (
+          !(await prompts.confirm({ message: 'Is this okay?', default: false }))
+        ) {
           console.log('Operation cancelled.');
           return;
         }

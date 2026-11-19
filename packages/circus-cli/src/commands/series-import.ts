@@ -6,13 +6,12 @@ import { promises as fs, createReadStream } from 'node:fs';
 import * as path from 'node:path';
 import { Readable } from 'node:stream';
 import { styleText } from 'node:util';
-import { select } from '@inquirer/prompts';
 import { createTarPacker } from 'modern-tar';
 import type { AuthorizedFetch } from '../utils/createAuthorizedFetch.ts';
 import createSpinner from '../utils/createSpinner.ts';
 import multipartBody, { type MultipartFile } from '../utils/multipartBody.ts';
 import watchProgress from '../utils/watchProgress.ts';
-import type { CommandAction } from './CommandAction.ts';
+import type { CommandAction, CommandDeps } from './CommandAction.ts';
 
 interface LocalFile {
   /** Path on this machine */
@@ -111,7 +110,10 @@ const formatBytes = (bytes: number) =>
 /**
  * Lets the user choose one of the accessible domains.
  */
-const chooseDomain = async (fetch: AuthorizedFetch) => {
+const chooseDomain = async (
+  fetch: AuthorizedFetch,
+  { prompts, isInputTTY }: Pick<CommandDeps, 'prompts' | 'isInputTTY'>
+) => {
   const res = await fetch('login-info/full');
   const { domains = [], defaultDomain } = (await res.json()) as LoginInfoFull;
   if (!domains.length) throw new Error('You cannot access any domain.');
@@ -119,9 +121,8 @@ const chooseDomain = async (fetch: AuthorizedFetch) => {
     console.log(`Domain: ${domains[0]}`);
     return domains[0];
   }
-  if (!process.stdin.isTTY)
-    throw new Error('Specify the domain with "-d (--domain)".');
-  return await select({
+  if (!isInputTTY) throw new Error('Specify the domain with "-d (--domain)".');
+  return await prompts.select({
     message: 'Domain:',
     choices: domains.map(value => ({ value })),
     default:
@@ -131,11 +132,11 @@ const chooseDomain = async (fetch: AuthorizedFetch) => {
   });
 };
 
-const action: CommandAction = ({ getFetch }) => {
+const action: CommandAction = deps => {
   return async (args: string[], options) => {
-    const fetch = getFetch();
+    const fetch = deps.getFetch();
     const { batchSize } = options;
-    const domain: string = options.domain ?? (await chooseDomain(fetch));
+    const domain: string = options.domain ?? (await chooseDomain(fetch, deps));
 
     const files: LocalFile[] = [];
     for (const arg of args) {

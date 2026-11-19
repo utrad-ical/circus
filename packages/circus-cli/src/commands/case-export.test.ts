@@ -1,9 +1,13 @@
 import assert from 'node:assert/strict';
 import { promises as fs } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test, type TestContext } from 'node:test';
-import { Command } from 'commander';
+import {
+  captureExitCode,
+  commandDeps,
+  runCommand,
+  tempDirectory
+} from '../test/command.ts';
 import caseExportArgs from './case-export.args.ts';
 import caseExport from './case-export.ts';
 
@@ -11,35 +15,30 @@ const setup = async (
   t: TestContext,
   download: (ids: string) => Response | Promise<Response>
 ) => {
-  const outDir = await fs.mkdtemp(join(tmpdir(), 'circus-case-export-test-'));
-  const exitCode = process.exitCode;
-  process.exitCode = undefined;
-  t.after(async () => {
-    process.exitCode = exitCode;
-    await fs.rm(outDir, { recursive: true, force: true });
-  });
+  const outDir = await tempDirectory(t);
+  captureExitCode(t);
   const log = t.mock.method(console, 'log', () => {});
   const errors = t.mock.method(console, 'error', () => {});
   const requests: string[] = [];
-  const program = new Command();
-  caseExportArgs(program.command('case')).action(
-    caseExport({
-      rcFilePath: '',
-      getFetch: () => async resource => {
-        if (resource === 'progress') throw new Error('Progress unavailable');
-        const url = new URL(resource, 'https://example.test/');
-        assert.equal(url.pathname, '/cases/export-mhd');
-        const ids = url.searchParams.get('caseIds');
-        assert.ok(ids);
-        requests.push(ids);
-        return download(ids);
-      }
-    })
-  );
+  const deps = commandDeps({
+    getFetch: () => async resource => {
+      if (resource === 'progress') throw new Error('Progress unavailable');
+      const url = new URL(resource, 'https://example.test/');
+      assert.equal(url.pathname, '/cases/export-mhd');
+      const ids = url.searchParams.get('caseIds');
+      assert.ok(ids);
+      requests.push(ids);
+      return download(ids);
+    }
+  });
   const run = (...args: string[]) =>
-    program.parseAsync(['case', 'export', '-o', outDir, ...args], {
-      from: 'user'
-    });
+    runCommand(
+      'case',
+      caseExportArgs,
+      caseExport,
+      ['-o', outDir, ...args],
+      deps
+    );
   return { outDir, log, errors, requests, run };
 };
 

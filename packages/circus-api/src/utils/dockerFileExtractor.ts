@@ -1,7 +1,5 @@
 import cp from 'child_process';
 import type { Readable } from 'stream';
-import { pipeline } from 'stream';
-import tarfs from 'tar-fs';
 import exec from './exec.ts';
 
 /**

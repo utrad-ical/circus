@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
-import { writeFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { join } from 'node:path';
 import { text } from 'node:stream/consumers';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { tempDirectory } from '../test/command.ts';
+import { saveCliConnection } from '../utils/cliConfig.ts';
 
 test('sends requests from the real CLI and preserves piped input, output, and exit codes', async t => {
   const requests: {
@@ -17,6 +17,7 @@ test('sends requests from the real CLI and preserves piped input, output, and ex
     body: string;
   }[] = [];
   const rawJson = '{"fixture":true}\n';
+  const token = 'test-token';
   const server = createServer(async (req, res) => {
     requests.push({
       method: req.method,
@@ -44,36 +45,28 @@ test('sends requests from the real CLI and preserves piped input, output, and ex
   assert.ok(address && typeof address !== 'string');
   const directory = await tempDirectory(t);
   const endpoint = `http://127.0.0.1:${address.port}/api/`;
-  await writeFile(
-    join(directory, '.circusapirc'),
-    `CIRCUS_API_ENDPOINT=${endpoint}\nCIRCUS_API_TOKEN=test-token\n`
-  );
+  await saveCliConnection(join(directory, 'circus-cli', 'config.json'), {
+    endpoint,
+    token
+  });
   const entry = fileURLToPath(new URL('../index.ts', import.meta.url));
-  // Point the subprocess at the test settings without changing the user's environment.
-  const preload =
-    'data:text/javascript,' +
-    encodeURIComponent(`
-    import os from 'node:os';
-    import { syncBuiltinESMExports } from 'node:module';
-    os.homedir = () => process.env.CIRCUS_CLI_TEST_SETTINGS_DIR;
-    syncBuiltinESMExports();
-  `);
   const env: NodeJS.ProcessEnv = {
     ...process.env,
-    CIRCUS_CLI_TEST_SETTINGS_DIR: directory
+    XDG_CONFIG_HOME: directory
   };
   delete env.CIRCUS_API_ENDPOINT;
   delete env.CIRCUS_API_TOKEN;
+  delete env.FORCE_COLOR;
 
-  const run = async (args: string[], stdin?: string) => {
-    const child = spawn(
-      process.execPath,
-      ['--import', preload, entry, 'api', ...args],
-      {
-        env,
-        timeout: 5000
-      }
-    );
+  const run = async (
+    args: string[],
+    stdin?: string,
+    envOverrides?: NodeJS.ProcessEnv
+  ) => {
+    const child = spawn(process.execPath, [entry, ...args], {
+      env: { ...env, ...envOverrides },
+      timeout: 5000
+    });
     const closed = once(child, 'close');
     child.stdin.end(stdin);
     const [stdout, stderr, [code]] = await Promise.all([
@@ -85,6 +78,7 @@ test('sends requests from the real CLI and preserves piped input, output, and ex
   };
 
   const read = await run([
+    'api',
     'get',
     '--no-pretty',
     'fixture',
@@ -95,13 +89,13 @@ test('sends requests from the real CLI and preserves piped input, output, and ex
   assert.equal(read.stdout, rawJson);
 
   for (const method of ['post', 'put', 'patch']) {
-    const result = await run([method, 'fixture'], '{"name":"fixture"}');
+    const result = await run(['api', method, 'fixture'], '{"name":"fixture"}');
     assert.equal(result.code, 0, result.stderr);
     assert.match(result.stdout, /Request finished successfully/);
     assert.match(result.stdout, /"fixture": true/);
   }
 
-  const failure = await run(['get', '--no-pretty', 'unavailable']);
+  const failure = await run(['api', 'get', '--no-pretty', 'unavailable']);
   assert.equal(failure.code, 1);
   assert.equal(failure.stdout, '');
   assert.match(failure.stderr, /HTTP error: 503/);

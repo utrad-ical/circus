@@ -43,12 +43,7 @@ This utility also has several specialized commands that can do the following:
    - **API Endpoint**, e.g., "http://111.222.333.444/api/".
    - **API Token**, e.g., "3bac24b0c2f79085c5fceb15c7fffb9565a39062". This can be generated via the web UI.
 
-   The command checks that the API is reachable and accepts the token before saving them in `.circusapirc` in your home directory.
-
-   **Tip:** Alternatively, you can export the following two environment variables:
-
-   - `CIRCUS_API_TOKEN`
-   - `CIRCUS_API_ENDPOINT`
+   The command checks that the API is reachable and accepts the token before saving the connection.
 
 4. You can see the list of commands like this:
 
@@ -62,3 +57,26 @@ This utility also has several specialized commands that can do the following:
    circus-cli case --help
    circus-cli case create --help
    ```
+
+## Connection settings
+
+`circus-cli auth login` saves the endpoint and token in a JSON configuration file. The file contains one profile named `default`:
+
+```json
+{
+  "formatVersion": 1,
+  "profiles": [
+    {
+      "name": "default",
+      "endpoint": "https://circus.example.org/api/",
+      "token": "your-api-key"
+    }
+  ]
+}
+```
+
+- With an absolute `XDG_CONFIG_HOME`, the file is `$XDG_CONFIG_HOME/circus-cli/config.json`.
+- On Linux and macOS, the default path is `~/.config/circus-cli/config.json`.
+- On Windows, the default path is `%APPDATA%\circus-cli\config.json`. If `APPDATA` is unavailable, the CLI uses `AppData\Roaming\circus-cli\config.json` under your home directory.
+
+Set both `CIRCUS_API_ENDPOINT` and `CIRCUS_API_TOKEN` to use a connection from the environment, for example in scripts. When set, they take precedence over the saved connection. Run `circus-cli auth logout` to delete the saved connection.

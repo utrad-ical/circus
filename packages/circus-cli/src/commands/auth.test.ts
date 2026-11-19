@@ -10,11 +10,16 @@ import logout from './auth-logout.ts';
 
 const endpoint = 'https://example.test/circus/api/';
 const fakeToken = 'test-token';
+const existingConfig =
+  JSON.stringify({
+    formatVersion: 1,
+    profiles: [{ name: 'default', endpoint, token: 'previous-token' }]
+  }) + '\n';
 
 test('validates the endpoint and key before replacing saved settings', async t => {
   t.mock.method(console, 'log', () => {});
-  const rcFilePath = join(await tempDirectory(t), 'config.env');
-  await writeFile(rcFilePath, '# existing settings\n');
+  const configPath = join(await tempDirectory(t), 'config.json');
+  await writeFile(configPath, existingConfig);
   const requests = t.mock.method(
     globalThis,
     'fetch',
@@ -43,7 +48,7 @@ test('validates the endpoint and key before replacing saved settings', async t =
     }
   );
   const deps = commandDeps({
-    rcFilePath,
+    configPath,
     prompts: {
       confirm: async ({ default: answer }) => {
         assert.equal(answer, false);
@@ -72,15 +77,9 @@ test('validates the endpoint and key before replacing saved settings', async t =
           await validate('wrong-token'),
           'The API rejected this token (HTTP 401).'
         );
-        assert.equal(
-          await readFile(rcFilePath, 'utf8'),
-          '# existing settings\n'
-        );
+        assert.equal(await readFile(configPath, 'utf8'), existingConfig);
         assert.equal(await validate(fakeToken), true);
-        assert.equal(
-          await readFile(rcFilePath, 'utf8'),
-          '# existing settings\n'
-        );
+        assert.equal(await readFile(configPath, 'utf8'), existingConfig);
         return fakeToken;
       }
     }
@@ -89,24 +88,26 @@ test('validates the endpoint and key before replacing saved settings', async t =
   await runCommand('auth', loginArgs, login, [], deps);
 
   assert.equal(requests.mock.callCount(), 5);
-  const saved = await readFile(rcFilePath, 'utf8');
-  assert.ok(saved.includes(`CIRCUS_API_ENDPOINT=${endpoint}\n`));
-  assert.ok(saved.includes(`CIRCUS_API_TOKEN=${fakeToken}\n`));
+  const saved = await readFile(configPath, 'utf8');
+  assert.deepEqual(JSON.parse(saved), {
+    formatVersion: 1,
+    profiles: [{ name: 'default', endpoint, token: fakeToken }]
+  });
   if (process.platform !== 'win32') {
-    assert.equal((await stat(rcFilePath)).mode & 0o777, 0o600);
+    assert.equal((await stat(configPath)).mode & 0o777, 0o600);
   }
 });
 
 test('keeps saved settings when login is canceled after a failed endpoint check', async t => {
   t.mock.method(console, 'log', () => {});
-  const rcFilePath = join(await tempDirectory(t), 'config.env');
-  await writeFile(rcFilePath, '# existing settings\n');
+  const configPath = join(await tempDirectory(t), 'config.json');
+  await writeFile(configPath, existingConfig);
   t.mock.method(globalThis, 'fetch', async () => {
     throw new DOMException('Timed out', 'TimeoutError');
   });
   const canceled = new Error('Prompt canceled');
   const deps = commandDeps({
-    rcFilePath,
+    configPath,
     prompts: {
       confirm: async () => true,
       input: async ({ validate }) => {
@@ -124,13 +125,13 @@ test('keeps saved settings when login is canceled after a failed endpoint check'
     runCommand('auth', loginArgs, login, [], deps),
     canceled
   );
-  assert.equal(await readFile(rcFilePath, 'utf8'), '# existing settings\n');
+  assert.equal(await readFile(configPath, 'utf8'), existingConfig);
 });
 
 test('removes saved settings only after logout is confirmed', async t => {
   t.mock.method(console, 'log', () => {});
-  const rcFilePath = join(await tempDirectory(t), 'config.env');
-  await writeFile(rcFilePath, '# existing settings\n');
+  const configPath = join(await tempDirectory(t), 'config.json');
+  await writeFile(configPath, existingConfig);
   const run = (confirmed: boolean) =>
     runCommand(
       'auth',
@@ -138,13 +139,13 @@ test('removes saved settings only after logout is confirmed', async t => {
       logout,
       [],
       commandDeps({
-        rcFilePath,
+        configPath,
         prompts: { confirm: async () => confirmed }
       })
     );
 
   await run(false);
-  assert.equal(await readFile(rcFilePath, 'utf8'), '# existing settings\n');
+  assert.equal(await readFile(configPath, 'utf8'), existingConfig);
   await run(true);
-  await assert.rejects(stat(rcFilePath), { code: 'ENOENT' });
+  await assert.rejects(stat(configPath), { code: 'ENOENT' });
 });

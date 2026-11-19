@@ -15,6 +15,8 @@ import authLogin from './commands/auth-login.ts';
 import authLoginArgs from './commands/auth-login.args.ts';
 import authLogout from './commands/auth-logout.ts';
 import authLogoutArgs from './commands/auth-logout.args.ts';
+import authStatus from './commands/auth-status.ts';
+import authStatusArgs from './commands/auth-status.args.ts';
 import blobGet from './commands/blob-get.ts';
 import blobGetArgs from './commands/blob-get.args.ts';
 import blobPost from './commands/blob-post.ts';
@@ -62,7 +64,8 @@ const commandGroups: {
     description: 'Manage saved API connection settings',
     commands: [
       [authLoginArgs, authLogin],
-      [authLogoutArgs, authLogout]
+      [authLogoutArgs, authLogout],
+      [authStatusArgs, authStatus]
     ]
   },
   {

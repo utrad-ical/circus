@@ -43,7 +43,7 @@ This utility also has several specialized commands that can do the following:
    - **API Endpoint**, e.g., "http://111.222.333.444/api/".
    - **API Token**, e.g., "3bac24b0c2f79085c5fceb15c7fffb9565a39062". This can be generated via the web UI.
 
-   The command checks that the API is reachable and accepts the token before saving the connection.
+   The command checks that the API is reachable and accepts the token before saving the connection. Run `circus-cli auth status` to verify the connection and see which domains, projects, and plug-ins your account can access.
 
 4. You can see the list of commands like this:
 

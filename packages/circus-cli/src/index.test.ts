@@ -26,7 +26,7 @@ const commandNames = (help: string) =>
 test('shows group, subcommand, and leaf help', () => {
   const groups = {
     api: ['get', 'post', 'put', 'patch'],
-    auth: ['login', 'logout'],
+    auth: ['login', 'logout', 'status'],
     case: ['create', 'addrev', 'export'],
     job: ['create'],
     series: ['import', 'export'],

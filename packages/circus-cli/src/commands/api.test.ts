@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import { text } from 'node:stream/consumers';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { stripVTControlCharacters, styleText } from 'node:util';
 import { tempDirectory } from '../test/command.ts';
 import { saveCliConnection } from '../utils/cliConfig.ts';
 
@@ -18,6 +19,8 @@ test('sends requests from the real CLI and preserves piped input, output, and ex
   }[] = [];
   const rawJson = '{"fixture":true}\n';
   const token = 'test-token';
+  const rejectedToken = 'rejected-token';
+  const unexpectedToken = 'unexpected-response-token';
   const server = createServer(async (req, res) => {
     requests.push({
       method: req.method,
@@ -28,6 +31,41 @@ test('sends requests from the real CLI and preserves piped input, output, and ex
     if (req.url === '/api/unavailable') {
       res.writeHead(503, { 'Content-Type': 'application/json' });
       res.end('{"error":"Unavailable"}');
+      return;
+    }
+    if (req.url === '/api/login-info/full') {
+      if (req.headers.authorization === `Bearer ${rejectedToken}`) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ rejectedToken }));
+        return;
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(
+        JSON.stringify(
+          req.headers.authorization === `Bearer ${unexpectedToken}`
+            ? { loginId: 'operator', unexpectedToken }
+            : {
+                loginId: 'operator',
+                userEmail: 'user@example.test',
+                domains: ['research'],
+                accessibleProjects: [
+                  {
+                    projectId: 'project-1',
+                    project: { projectName: 'Training' },
+                    roles: ['read', 'write']
+                  }
+                ],
+                accessiblePlugins: [
+                  {
+                    pluginId: 'plugin-1',
+                    plugin: { pluginName: 'CAD', version: '1.2.3' },
+                    roles: ['execute']
+                  }
+                ],
+                unrelated: token
+              }
+        )
+      );
       return;
     }
     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -114,5 +152,107 @@ test('sends requests from the real CLI and preserves piped input, output, and ex
       ['PATCH', '/api/fixture', 'Bearer test-token', '{"name":"fixture"}'],
       ['GET', '/api/unavailable', 'Bearer test-token', '']
     ]
+  );
+
+  await t.test(
+    'auth status checks the saved connection and supports plain and colored output',
+    async () => {
+      const priorRequests = requests.length;
+      const [result, colored] = await Promise.all([
+        run(['auth', 'status']),
+        run(['auth', 'status'], undefined, {
+          FORCE_COLOR: '1',
+          NO_COLOR: undefined,
+          NODE_DISABLE_COLORS: undefined
+        })
+      ]);
+      assert.equal(result.code, 0, result.stderr);
+      assert.equal(result.stderr, '');
+      assert.equal(colored.code, 0, colored.stderr);
+      assert.equal(colored.stderr, '');
+      assert.equal(
+        result.stdout,
+        [
+          `API endpoint: ${endpoint}`,
+          'Login ID: operator',
+          'Email: user@example.test',
+          'Domains:',
+          '  - research',
+          'Projects:',
+          '  - Training (project-1) — read, write',
+          'Plug-ins:',
+          '  - CAD v1.2.3 (plugin-1) — execute',
+          ''
+        ].join('\n')
+      );
+      assert.equal(stripVTControlCharacters(colored.stdout), result.stdout);
+      assert.ok(
+        colored.stdout.includes(
+          styleText(['bold', 'cyan'], 'Projects:', { validateStream: false })
+        )
+      );
+      assert.ok(
+        colored.stdout.includes(
+          styleText('green', 'read, write', { validateStream: false })
+        )
+      );
+      const expectedRequest = {
+        method: 'GET',
+        url: '/api/login-info/full',
+        authorization: `Bearer ${token}`,
+        body: ''
+      };
+      assert.deepEqual(requests.slice(priorRequests), [
+        expectedRequest,
+        expectedRequest
+      ]);
+    }
+  );
+
+  await t.test(
+    'auth status and logout succeed when there is no saved connection',
+    async () => {
+      const priorRequests = requests.length;
+      const noConfig = { XDG_CONFIG_HOME: join(directory, 'unconfigured') };
+      const [status, logout, request] = await Promise.all([
+        run(['auth', 'status'], undefined, noConfig),
+        run(['auth', 'logout'], undefined, noConfig),
+        run(['api', 'get', 'fixture'], undefined, noConfig)
+      ]);
+      assert.equal(status.code, 0, status.stderr);
+      assert.equal(status.stderr, '');
+      assert.equal(
+        status.stdout,
+        'Not logged in. Run "circus-cli auth login" to save a connection.\n'
+      );
+      assert.equal(logout.code, 0, logout.stderr);
+      assert.equal(logout.stderr, '');
+      assert.equal(logout.stdout, 'No saved connection to remove.\n');
+      assert.equal(request.code, 1);
+      assert.match(
+        request.stderr,
+        /No saved connection found.*Run "circus-cli auth login"/
+      );
+      assert.equal(requests.length, priorRequests);
+    }
+  );
+
+  await t.test(
+    'auth status reports connection errors without printing credentials or response bodies',
+    async () => {
+      for (const [token, expectedError] of [
+        [rejectedToken, /The API rejected this token \(HTTP 401\)/],
+        [unexpectedToken, /Unexpected response from .*\/api\/login-info\/full/]
+      ] as const) {
+        const result = await run(['auth', 'status'], undefined, {
+          CIRCUS_API_ENDPOINT: endpoint,
+          CIRCUS_API_TOKEN: token
+        });
+        assert.equal(result.code, 1);
+        assert.equal(result.stdout, '');
+        assert.match(result.stderr, expectedError);
+        assert.ok(!result.stderr.includes(token));
+      }
+    }
   );
 });

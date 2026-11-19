@@ -2,7 +2,7 @@ import type { z } from 'zod';
 
 export const fetchAuthInfo = async <T>(
   endpoint: string,
-  resource: 'status' | 'login-info',
+  resource: 'status' | 'login-info' | 'login-info/full',
   schema: z.ZodType<T>,
   token?: string
 ): Promise<T> => {

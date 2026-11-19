@@ -11,6 +11,8 @@ const verifyApi = async (
   token?: string
 ): Promise<true | string> => {
   const url = new URL(resource, endpoint);
+  const unexpectedStatus = (status: number) =>
+    `Unexpected response (HTTP ${status}) from ${url}.`;
   try {
     const response = await fetch(url, {
       redirect: 'manual',
@@ -19,13 +21,17 @@ const verifyApi = async (
     });
     if (response.status !== 200) {
       await response.body?.cancel();
+      if (resource === 'status') {
+        return unexpectedStatus(response.status);
+      }
       if (token && (response.status === 401 || response.status === 403)) {
         return `The API rejected this token (HTTP ${response.status}).`;
       }
       return `Request to ${url} returned HTTP ${response.status}.`;
     }
-
-    const body: unknown = await response.json();
+    const body: unknown = await response.json().catch((error: unknown) => {
+      if (!(error instanceof SyntaxError)) throw error;
+    });
     if (body && typeof body === 'object') {
       if (
         resource === 'status' &&
@@ -44,13 +50,15 @@ const verifyApi = async (
         return true;
       }
     }
+    return resource === 'status'
+      ? `${unexpectedStatus(response.status)} This is not a valid API endpoint.`
+      : `Unexpected response from ${url}.`;
   } catch (error) {
     if (error instanceof Error && error.name === 'TimeoutError') {
       return `Request to ${url} timed out.`;
     }
-    if (!(error instanceof SyntaxError)) return `Could not reach ${url}.`;
+    return `Could not reach ${url}.`;
   }
-  return `Unexpected response from ${url}.`;
 };
 
 const action: CommandAction = ({ rcFilePath }) => {

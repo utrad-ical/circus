@@ -4,7 +4,7 @@ import formatHelp from '../utils/formatHelp.ts';
 
 export default (program: Command) => {
   return program
-    .command('series-import')
+    .command('import')
     .description('Import DICOM files into CIRCUS DB')
     .option(
       '-d, --domain <domain>',
@@ -35,10 +35,10 @@ export default (program: Command) => {
 
         Examples:
           # Upload a directory of DICOM files
-          circus-cli series-import -d my.domain ~/dicom/series1
+          circus-cli series import -d my.domain ~/dicom/series1
 
           # Upload zip files, 10 at a time
-          circus-cli series-import -d my.domain -b 10 *.zip
+          circus-cli series import -d my.domain -b 10 *.zip
       `
     );
 };

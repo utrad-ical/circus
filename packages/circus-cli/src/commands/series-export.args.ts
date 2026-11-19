@@ -3,7 +3,7 @@ import formatHelp from '../utils/formatHelp.ts';
 
 export default (program: Command) => {
   return program
-    .command('series-export')
+    .command('export')
     .description('Download series as the input volumes of CIRCUS CS plug-ins')
     .option('-o, --out <file>', 'output file (default: <series UID>.tar.gz)')
     .option('-z, --zip', 'use zip compression instead of tgz')
@@ -21,10 +21,10 @@ export default (program: Command) => {
 
         Examples:
           # Download one series
-          circus-cli series-export 1.2.840.113619.2.55
+          circus-cli series export 1.2.840.113619.2.55
 
           # Download two series, using every other image of the first one
-          circus-cli series-export 1.2.840.113619.2.55:1:31:2 1.2.840.113619.2.56
+          circus-cli series export 1.2.840.113619.2.55:1:31:2 1.2.840.113619.2.56
       `
     );
 };

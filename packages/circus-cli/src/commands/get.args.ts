@@ -23,16 +23,16 @@ export default (program: Command) => {
 
         Examples:
           # Fetch current user's preferences
-          circus-cli get preferences
+          circus-cli api get preferences
 
           # Fetch a case and picks the latest revision's creator using jq
-          circus-cli get cases/a2b4c6e8f | jq .revisions[-1].creator
+          circus-cli api get cases/a2b4c6e8f | jq .revisions[-1].creator
 
           # List IDs of resources (series, case, job) in a mylist
-          circus-cli get mylists/shsez5qf | jq -r .resourceIds[]
+          circus-cli api get mylists/shsez5qf | jq -r .resourceIds[]
 
           # Perform search (get the most recently uploaded series of a male patient)
-          circus-cli get series \
+          circus-cli api get series \
             -q 'filter={"patientInfo.sex":"M"}' \
             -q 'sort={"createdAt":-1}' \
             -q limit=1

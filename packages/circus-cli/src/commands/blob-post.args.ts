@@ -3,7 +3,7 @@ import formatHelp from '../utils/formatHelp.ts';
 
 export default (program: Command) => {
   return program
-    .command('blob-post')
+    .command('post')
     .description('Upload blob(s)')
     .argument('[file...]', 'the files to upload')
     .addHelpText(
@@ -15,10 +15,10 @@ export default (program: Command) => {
 
         Examples:
           # Upload one file via stdin
-          circus-cli blob-post < blob.bin
+          circus-cli blob post < blob.bin
 
           # Upload three files
-          circus-cli blob-post blob1.bin blob2.bin blob3.bin
+          circus-cli blob post blob1.bin blob2.bin blob3.bin
       `
     );
 };

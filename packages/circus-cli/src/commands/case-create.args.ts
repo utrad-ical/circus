@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 
 export default (program: Command) =>
   program
-    .command('case-create')
+    .command('create')
     .description('Create a case from one or more series')
     .option('--project <id-or-name>', 'project ID or name')
     .option('--tags <tags>', 'comma-separated case tags')

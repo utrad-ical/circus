@@ -15,7 +15,7 @@ import type { CommandAction } from './CommandAction.ts';
 
 const maxSeries = 10;
 
-const action: CommandAction = ({ getFetch }) => {
+const action: CommandAction = ({ getFetch, prompts, isInputTTY }) => {
   return async (args: string[], options) => {
     const fetch = getFetch();
     let series: SelectedSeries[] | undefined = [];
@@ -27,10 +27,11 @@ const action: CommandAction = ({ getFetch }) => {
         series.push(await fetchSeries(fetch, seriesUid, defaultRange, range));
       }
     } else {
-      if (!process.stdin.isTTY) throw new Error('Specify the series.');
+      if (!isInputTTY) throw new Error('Specify the series.');
       series = await editSeriesList(fetch, [], {
         submitLabel: 'Start download',
         max: maxSeries,
+        prompts,
         getDefaultRange: defaultRange
       });
       if (!series) {

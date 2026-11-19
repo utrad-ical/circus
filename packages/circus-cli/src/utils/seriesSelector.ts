@@ -2,7 +2,8 @@ import type {
   PartialVolumeDescriptor,
   Series
 } from '@utrad-ical/circus-api-schema';
-import { confirm, input, select, Separator } from '@inquirer/prompts';
+import { Separator } from '@inquirer/prompts';
+import type { Prompts } from '../commands/CommandAction.ts';
 import * as mr from 'multi-integer-range';
 import type { AuthorizedFetch } from './createAuthorizedFetch.ts';
 
@@ -130,7 +131,8 @@ const formatSeries = (s: SelectedSeries<Range>, index: number) => {
 
 const askRange = async <Default extends Range>(
   series: SelectedSeries<Default>,
-  getDefaultRange: GetDefaultRange<Default>
+  getDefaultRange: GetDefaultRange<Default>,
+  input: Prompts['input']
 ): Promise<SelectedSeries<Default>['range']> => {
   const defaultValue = getDefaultRange(series.images);
   const text = await input({
@@ -153,7 +155,8 @@ const askRange = async <Default extends Range>(
 const askSeries = async <Default extends Range>(
   fetch: AuthorizedFetch,
   selected: SelectedSeries<Default>[],
-  getDefaultRange: GetDefaultRange<Default>
+  getDefaultRange: GetDefaultRange<Default>,
+  { input, confirm }: Prompts
 ) => {
   let series: SelectedSeries<Default> | undefined;
   const emptyLabel = selected.length ? 'go back' : 'cancel';
@@ -190,7 +193,7 @@ const askSeries = async <Default extends Range>(
     if (!accepted) return undefined;
   }
   console.log(`  ${describe(series)}, images ${series.images}`);
-  return { ...series, range: await askRange(series, getDefaultRange) };
+  return { ...series, range: await askRange(series, getDefaultRange, input) };
 };
 
 interface EditSeriesOptions<Default extends Range> {
@@ -198,6 +201,7 @@ interface EditSeriesOptions<Default extends Range> {
   submitLabel: string;
   /** The maximum number of series */
   max?: number;
+  prompts: Prompts;
   getDefaultRange: GetDefaultRange<Default>;
 }
 
@@ -210,11 +214,12 @@ export const editSeriesList = async <Default extends Range>(
   initial: SelectedSeries<Default>[],
   options: EditSeriesOptions<Default>
 ): Promise<SelectedSeries<Default>[] | undefined> => {
-  const { submitLabel, max = Infinity, getDefaultRange } = options;
+  const { submitLabel, max = Infinity, getDefaultRange, prompts } = options;
+  const { input, select } = prompts;
   const list = [...initial];
   while (true) {
     if (!list.length) {
-      const series = await askSeries(fetch, list, getDefaultRange);
+      const series = await askSeries(fetch, list, getDefaultRange, prompts);
       if (!series) return undefined;
       list.push(series);
       continue;
@@ -239,7 +244,7 @@ export const editSeriesList = async <Default extends Range>(
     if (action === 'submit') return list;
     if (action === 'cancel') return undefined;
     if (action === 'add') {
-      const series = await askSeries(fetch, list, getDefaultRange);
+      const series = await askSeries(fetch, list, getDefaultRange, prompts);
       if (series) list.push(series);
       continue;
     }
@@ -256,7 +261,7 @@ export const editSeriesList = async <Default extends Range>(
     if (sub === 'range')
       list[action] = {
         ...series,
-        range: await askRange(series, getDefaultRange)
+        range: await askRange(series, getDefaultRange, input)
       };
     if (sub === 'remove') list.splice(action, 1);
   }

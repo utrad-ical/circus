@@ -2,7 +2,6 @@ import type {
   PluginJobCreate,
   PluginJobCreated
 } from '@utrad-ical/circus-api-schema';
-import { confirm } from '@inquirer/prompts';
 import getCreationInputs from '../utils/getCreationInputs.ts';
 import type { CommandAction } from './CommandAction.ts';
 
@@ -31,9 +30,9 @@ const isDuplicateJobError = (error: unknown) => {
   }
 };
 
-const action: CommandAction = ({ getFetch }) => {
+const action: CommandAction = deps => {
   return async (args: string[], { plugin, priority }: Options) => {
-    const input = await getCreationInputs(getFetch, args, {
+    const input = await getCreationInputs(deps, args, {
       target: plugin,
       option: '--plugin',
       label: 'Plug-in',
@@ -63,7 +62,7 @@ const action: CommandAction = ({ getFetch }) => {
       res = await register(request);
     } catch (error) {
       if (!interactive || !isDuplicateJobError(error)) throw error;
-      const confirmed = await confirm({
+      const confirmed = await deps.prompts.confirm({
         message: 'A duplicate job already exists. Register this job anyway?',
         default: false
       });

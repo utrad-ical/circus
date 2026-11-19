@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { confirm, input, password, select } from '@inquirer/prompts';
 import { Command } from 'commander';
 import { existsSync, readFileSync } from 'node:fs';
 import * as os from 'node:os';
@@ -129,6 +130,7 @@ const getFetch = (): AuthorizedFetch => {
   return createAuthorizedFetch(CIRCUS_API_TOKEN, CIRCUS_API_ENDPOINT);
 };
 
+const prompts = { confirm, input, password, select };
 const program = new Command();
 program
   .name('circus-cli')
@@ -149,7 +151,12 @@ for (const { name, description, commands } of commandGroups) {
   for (const [configureCommand, action] of commands) {
     configureCommand(group).action(async (...args) => {
       try {
-        await action({ getFetch, rcFilePath })(...args);
+        await action({
+          getFetch,
+          rcFilePath,
+          prompts,
+          isInputTTY: Boolean(process.stdin.isTTY)
+        })(...args);
       } catch (err: any) {
         console.error(styleText('bgRed', 'Error', { stream: process.stderr }));
         console.error(

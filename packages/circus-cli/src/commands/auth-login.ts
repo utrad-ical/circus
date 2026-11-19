@@ -1,8 +1,7 @@
-import { input, password } from '@inquirer/prompts';
 import { promises as fs } from 'node:fs';
 import { styleText } from 'node:util';
 import fileExists from '../utils/fileExists.ts';
-import { confirm, defaultValidateString } from '../utils/inquiry.ts';
+import { defaultValidateString } from '../utils/inquiry.ts';
 import type { CommandAction } from './CommandAction.ts';
 
 const verifyApi = async (
@@ -61,17 +60,23 @@ const verifyApi = async (
   }
 };
 
-const action: CommandAction = ({ rcFilePath }) => {
+const action: CommandAction = ({ rcFilePath, prompts }) => {
   return async () => {
     if (await fileExists(rcFilePath)) {
       console.log(
         styleText('yellow', `The token file already exists at ${rcFilePath}.`)
       );
-      if (!(await confirm('Overwrite existing config file?'))) return;
+      if (
+        !(await prompts.confirm({
+          message: 'Overwrite existing config file?',
+          default: false
+        }))
+      )
+        return;
     }
 
     const endpoint = new URL(
-      await input({
+      await prompts.input({
         message: 'API endpoint:',
         validate: async value => {
           const url = URL.parse(value);
@@ -91,7 +96,7 @@ const action: CommandAction = ({ rcFilePath }) => {
       })
     );
     console.log(styleText('green', `Connected to ${endpoint}`));
-    const token = await password({
+    const token = await prompts.password({
       message: 'API token:',
       mask: true,
       validate: async value => {

@@ -13,6 +13,10 @@ const packageFile = path.join(import.meta.dirname, '../../package.json');
 const version = JSON.parse(fs.readFileSync(packageFile, 'utf8')).version;
 
 const [, , commandName, ...argv] = process.argv;
+const removedCommands = new Map([
+  ['export-case', 'case-export'],
+  ['import-series', 'series-import']
+]);
 
 interface CommandModule {
   options?: () => object[];
@@ -39,6 +43,16 @@ const main = async () => {
   };
 
   console.log(styleText('yellow', `CIRCUS-API CLI version ${version}\n`));
+  const requestedCommand = commandName === 'help' ? argv[0] : commandName;
+  const replacement = requestedCommand && removedCommands.get(requestedCommand);
+  if (replacement) {
+    console.error(
+      `'circus ${requestedCommand}' has been removed. Use 'circus-cli ${replacement}'.`
+    );
+    process.exitCode = 1;
+    return;
+  }
+
   if (commands.indexOf(commandName) >= 0) {
     const module = await importCommand(commandName);
     try {

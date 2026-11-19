@@ -39,7 +39,6 @@
     "iconv-lite": "^0.5.1",
     "inquirer": "^12.0.1",
     "jconv": "^0.1.5",
-    "jszip": "^3.2.2",
     "lodash": "^4.17.15",
     "merge": "^1.2.1",
     "mime": "^2.4.4",
@@ -48,9 +47,7 @@
     "multi-integer-range": "^6.1.0",
     "node-php-password": "^0.1.2",
     "pify": "^5.0.0",
-    "raw-body": "^2.4.1",
     "split": "^1.0.1",
-    "tar-stream": "^2.2.0",
     "tarn": "^3.0.1",
     "ulid": "^2.3.0",
     "zod": "^4.6.7"
@@ -67,7 +64,9 @@
     "@types/tar-stream": "^1.6.3",
     "@types/ws": "^8.5.12",
     "js-yaml": "^3.13.1",
+    "raw-body": "^2.4.1",
     "tar-fs": "^2.1.1",
+    "tar-stream": "^2.2.0",
     "typescript": "~7.0.2",
     "ws": "^8.18.0"
   }

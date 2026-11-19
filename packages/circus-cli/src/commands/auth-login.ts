@@ -1,70 +1,19 @@
-import { promises as fs } from 'node:fs';
 import { styleText } from 'node:util';
+import { z } from 'zod';
+import { apiEndpoint, saveCliConnection } from '../utils/cliConfig.ts';
+import { fetchAuthInfo } from '../utils/fetchAuthInfo.ts';
 import fileExists from '../utils/fileExists.ts';
 import { defaultValidateString } from '../utils/inquiry.ts';
 import type { CommandAction } from './CommandAction.ts';
 
-const verifyApi = async (
-  endpoint: URL,
-  resource: 'status' | 'login-info',
-  token?: string
-): Promise<true | string> => {
-  const url = new URL(resource, endpoint);
-  const unexpectedStatus = (status: number) =>
-    `Unexpected response (HTTP ${status}) from ${url}.`;
-  try {
-    const response = await fetch(url, {
-      redirect: 'manual',
-      signal: AbortSignal.timeout(5000),
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined
-    });
-    if (response.status !== 200) {
-      await response.body?.cancel();
-      if (resource === 'status') {
-        return unexpectedStatus(response.status);
-      }
-      if (token && (response.status === 401 || response.status === 403)) {
-        return `The API rejected this token (HTTP ${response.status}).`;
-      }
-      return `Request to ${url} returned HTTP ${response.status}.`;
-    }
-    const body: unknown = await response.json().catch((error: unknown) => {
-      if (!(error instanceof SyntaxError)) throw error;
-    });
-    if (body && typeof body === 'object') {
-      if (
-        resource === 'status' &&
-        'status' in body &&
-        body.status === 'running'
-      ) {
-        return true;
-      }
-      if (
-        resource === 'login-info' &&
-        'loginId' in body &&
-        typeof body.loginId === 'string' &&
-        'userEmail' in body &&
-        typeof body.userEmail === 'string'
-      ) {
-        return true;
-      }
-    }
-    return resource === 'status'
-      ? `${unexpectedStatus(response.status)} This is not a valid API endpoint.`
-      : `Unexpected response from ${url}.`;
-  } catch (error) {
-    if (error instanceof Error && error.name === 'TimeoutError') {
-      return `Request to ${url} timed out.`;
-    }
-    return `Could not reach ${url}.`;
-  }
-};
+const status = z.object({ status: z.literal('running') });
+const loginInfo = z.object({ loginId: z.string(), userEmail: z.string() });
 
-const action: CommandAction = ({ rcFilePath, prompts }) => {
+const action: CommandAction = ({ configPath, prompts }) => {
   return async () => {
-    if (await fileExists(rcFilePath)) {
+    if (await fileExists(configPath)) {
       console.log(
-        styleText('yellow', `The token file already exists at ${rcFilePath}.`)
+        styleText('yellow', `The config file already exists at ${configPath}.`)
       );
       if (
         !(await prompts.confirm({
@@ -75,26 +24,21 @@ const action: CommandAction = ({ rcFilePath, prompts }) => {
         return;
     }
 
-    const endpoint = new URL(
-      await prompts.input({
-        message: 'API endpoint:',
-        validate: async value => {
-          const url = URL.parse(value);
-          if (
-            !url ||
-            (url.protocol !== 'http:' && url.protocol !== 'https:') ||
-            !url.href.endsWith('/') ||
-            url.username ||
-            url.password ||
-            url.search ||
-            url.hash
-          ) {
-            return 'Enter an HTTP or HTTPS API endpoint ending with a slash.';
-          }
-          return verifyApi(url, 'status');
+    const input = await prompts.input({
+      message: 'API endpoint:',
+      validate: async value => {
+        const parsed = apiEndpoint.safeParse(value);
+        if (!parsed.success) return parsed.error.issues[0]!.message;
+        try {
+          await fetchAuthInfo(parsed.data, 'status', status);
+          return true;
+        } catch (error) {
+          if (error instanceof Error) return error.message;
+          throw error;
         }
-      })
-    );
+      }
+    });
+    const endpoint = apiEndpoint.parse(input);
     console.log(styleText('green', `Connected to ${endpoint}`));
     const token = await prompts.password({
       message: 'API token:',
@@ -102,21 +46,18 @@ const action: CommandAction = ({ rcFilePath, prompts }) => {
       validate: async value => {
         const valid = defaultValidateString(value);
         if (valid !== true) return valid;
-        return verifyApi(endpoint, 'login-info', value);
+        try {
+          await fetchAuthInfo(endpoint, 'login-info', loginInfo, value);
+          return true;
+        } catch (error) {
+          if (error instanceof Error) return error.message;
+          throw error;
+        }
       }
     });
 
-    await fs.writeFile(
-      rcFilePath,
-      `# CIRCUS API Client config file\n` +
-        `# Generated at ${new Date().toISOString()}\n\n` +
-        `CIRCUS_API_ENDPOINT=${endpoint}\n` +
-        `CIRCUS_API_TOKEN=${token}\n`,
-      { mode: 0o600 }
-    );
-    // `mode` applies only when the file is created
-    await fs.chmod(rcFilePath, 0o600);
-    console.log(styleText('green', `Token saved to ${rcFilePath}.`));
+    await saveCliConnection(configPath, { endpoint, token });
+    console.log(styleText('green', `Token saved to ${configPath}.`));
   };
 };
 

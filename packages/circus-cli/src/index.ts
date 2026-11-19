@@ -2,11 +2,11 @@
 
 import { confirm, input, password, select } from '@inquirer/prompts';
 import { Command } from 'commander';
-import { existsSync, readFileSync } from 'node:fs';
-import * as os from 'node:os';
+import { readFileSync } from 'node:fs';
 import * as path from 'node:path';
 import { styleText } from 'node:util';
 import type { CommandAction } from './commands/CommandAction.ts';
+import { getConfigPath, loadCliConnection } from './utils/cliConfig.ts';
 import createAuthorizedFetch, {
   type AuthorizedFetch
 } from './utils/createAuthorizedFetch.ts';
@@ -15,6 +15,8 @@ import authLogin from './commands/auth-login.ts';
 import authLoginArgs from './commands/auth-login.args.ts';
 import authLogout from './commands/auth-logout.ts';
 import authLogoutArgs from './commands/auth-logout.args.ts';
+import authStatus from './commands/auth-status.ts';
+import authStatusArgs from './commands/auth-status.args.ts';
 import blobGet from './commands/blob-get.ts';
 import blobGetArgs from './commands/blob-get.args.ts';
 import blobPost from './commands/blob-post.ts';
@@ -62,7 +64,8 @@ const commandGroups: {
     description: 'Manage saved API connection settings',
     commands: [
       [authLoginArgs, authLogin],
-      [authLogoutArgs, authLogout]
+      [authLogoutArgs, authLogout],
+      [authStatusArgs, authStatus]
     ]
   },
   {
@@ -107,27 +110,17 @@ const getVersion = () => {
   return JSON.parse(readFileSync(packageJsonPath, 'utf8')).version as string;
 };
 
-const rcFilePath = path.join(os.homedir(), '.circusapirc');
+const configPath = getConfigPath();
 
 const getFetch = (): AuthorizedFetch => {
-  // Existing environment variables take precedence over the file
-  if (existsSync(rcFilePath)) process.loadEnvFile(rcFilePath);
-  const { CIRCUS_API_TOKEN, CIRCUS_API_ENDPOINT } = process.env;
-
-  if (!CIRCUS_API_TOKEN || !CIRCUS_API_ENDPOINT) {
+  const connection = loadCliConnection(configPath);
+  if (!connection) {
     throw new Error(
-      'Connection options have not been configured yet.\n' +
-        'You need to create a .circusapirc file.\n' +
-        'See README.md.'
+      `No saved connection found at ${configPath}. Run "circus-cli auth login" to save a connection.`
     );
   }
-  if (!CIRCUS_API_ENDPOINT.endsWith('/')) {
-    throw new Error(
-      'Connection options are configured incorrectly.\n' +
-        'CIRCUS_API_ENDPOINT must end with a slash.'
-    );
-  }
-  return createAuthorizedFetch(CIRCUS_API_TOKEN, CIRCUS_API_ENDPOINT);
+  const { endpoint, token } = connection;
+  return createAuthorizedFetch(token, endpoint);
 };
 
 const prompts = { confirm, input, password, select };
@@ -153,7 +146,7 @@ for (const { name, description, commands } of commandGroups) {
       try {
         await action({
           getFetch,
-          rcFilePath,
+          configPath,
           prompts,
           isInputTTY: Boolean(process.stdin.isTTY)
         })(...args);

@@ -10,7 +10,7 @@ export interface CommandDeps {
   prompts: Prompts;
   isInputTTY: boolean;
   getFetch: () => AuthorizedFetch;
-  rcFilePath: string;
+  configPath: string;
 }
 
 export type CommandAction = (

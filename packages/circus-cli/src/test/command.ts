@@ -13,7 +13,7 @@ export const commandDeps = (
     prompts?: Partial<CommandDeps['prompts']>;
   } = {}
 ): CommandDeps => ({
-  rcFilePath: '',
+  configPath: '',
   isInputTTY: false,
   getFetch: () => assert.fail('Unexpected API client creation'),
   ...overrides,

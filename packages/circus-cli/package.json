@@ -40,7 +40,8 @@
     "json-stringify-pretty-compact": "^4.0.0",
     "json5": "^2.2.3",
     "modern-tar": "^0.8.6",
-    "multi-integer-range": "^6.1.0"
+    "multi-integer-range": "^6.1.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@utrad-ical/circus-api-schema": "workspace:*",

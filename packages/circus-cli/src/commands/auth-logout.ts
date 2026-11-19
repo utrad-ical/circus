@@ -1,12 +1,15 @@
 import { promises as fs } from 'node:fs';
 import { styleText } from 'node:util';
-import fileExists from '../utils/fileExists.ts';
 import type { CommandAction } from './CommandAction.ts';
 
-const action: CommandAction = ({ rcFilePath, prompts }) => {
+const action: CommandAction = ({ configPath, prompts }) => {
   return async () => {
-    if (!(await fileExists(rcFilePath))) {
-      throw new Error('No config file found');
+    try {
+      await fs.lstat(configPath);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+      console.log('No saved connection to remove.');
+      return;
     }
     if (
       !(await prompts.confirm({
@@ -16,7 +19,7 @@ const action: CommandAction = ({ rcFilePath, prompts }) => {
     )
       return;
 
-    await fs.unlink(rcFilePath);
+    await fs.rm(configPath, { force: true });
     console.log(styleText('green', 'Config file deleted successfully'));
   };
 };

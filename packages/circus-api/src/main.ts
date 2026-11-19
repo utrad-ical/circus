@@ -1,69 +1,56 @@
 // main server bootstrapping
 
 import { once } from 'node:events';
+import { parseArgs } from 'node:util';
 import { createStdoutLogger } from '@utrad-ical/circus-lib';
 import type { Logger } from '@utrad-ical/circus-lib';
 import { ConfigLoadError } from '@utrad-ical/circus-lib/config';
-import dashdash from 'dashdash';
 import merge from 'merge';
 import type * as mongo from 'mongodb';
 import loadApiConfig from './config/index.ts';
 import createServiceLoader from './createServiceLoader.ts';
 import scanMigrationFiles from './utils/scanMigrationFiles.ts';
 
-const options = [
-  {
-    names: ['help', 'h'],
-    type: 'bool',
-    help: 'prints this help and exit'
-  },
-  {
-    names: ['host', 'i'],
-    env: 'IP',
-    type: 'string',
-    helpArg: 'HOST',
-    help: 'IP address to listen to'
-  },
-  {
-    names: ['port', 'p'],
-    env: 'PORT',
-    type: 'number',
-    helpArg: 'PORT',
-    help: 'port'
-  },
-  {
-    names: ['fix-user', 'f'],
-    env: 'CIRCUS_API_FIX_USER',
-    type: 'string',
-    help: 'skips authentication and use this user as the current user'
-  },
-  {
-    names: ['debug', 'd'],
-    type: 'bool',
-    help: 'enables debug mode endpoints'
-  }
-];
-
 const parsedArgs = (() => {
   try {
-    const parser = dashdash.createParser({ options });
-    const opts = parser.parse(process.argv);
-    if (opts.help) {
-      console.log('Usage: node server.ts [OPTIONS]');
-      console.log('Options:\n' + parser.help({ includeEnv: true }));
+    const { values } = parseArgs({
+      options: {
+        help: { type: 'boolean', short: 'h' },
+        host: { type: 'string', short: 'i' },
+        port: { type: 'string', short: 'p' },
+        'fix-user': { type: 'string', short: 'f' },
+        debug: { type: 'boolean', short: 'd' }
+      }
+    });
+    const portValue = values.port ?? process.env.PORT;
+    if (portValue?.trim() === '') {
+      throw new Error(
+        `${values.port === undefined ? 'PORT' : '--port'} cannot be empty.`
+      );
+    }
+    const port = portValue === undefined ? undefined : Number(portValue);
+    if (Number.isNaN(port)) throw new Error('Port must be a number.');
+
+    if (values.help) {
+      console.log(`Usage: node server.ts [OPTIONS]
+
+Options:
+  -h, --help             Show this help and exit
+  -i, --host <HOST>      Address to listen on (env: IP)
+  -p, --port <PORT>      Port to listen on (env: PORT)
+  -f, --fix-user <USER>  Skip authentication and use this user (env: CIRCUS_API_FIX_USER)
+  -d, --debug            Enable debug endpoints`);
       process.exit(0);
     }
     return {
-      host: opts.host,
-      port: opts.port,
-      fixUser: opts.fix_user,
-      debug: opts.debug
+      host: values.host ?? process.env.IP,
+      port,
+      fixUser: values['fix-user'] ?? process.env.CIRCUS_API_FIX_USER,
+      debug: values.debug
     };
   } catch (err) {
-    createStdoutLogger('api').error(
-      { err },
-      'Invalid server options. See --help.'
-    );
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`${message.replace(/\.$/, '')}. See --help.`);
     process.exit(1);
   }
 })();

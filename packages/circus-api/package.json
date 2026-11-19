@@ -60,13 +60,8 @@
     "@types/mime": "^2.0.3",
     "@types/node": "^24.19.2",
     "@types/split": "^1.0.0",
-    "@types/tar-fs": "^1.16.3",
-    "@types/tar-stream": "^1.6.3",
     "@types/ws": "^8.5.12",
     "js-yaml": "^3.13.1",
-    "raw-body": "^2.4.1",
-    "tar-fs": "^2.1.1",
-    "tar-stream": "^2.2.0",
     "typescript": "~7.0.2",
     "ws": "^8.18.0"
   }

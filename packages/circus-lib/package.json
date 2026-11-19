@@ -39,13 +39,11 @@
     "merge": "^1.2.1",
     "multi-integer-range": "^6.1.0",
     "pino": "^10.4.0",
-    "tar-stream": "^2.1.0",
     "ulid": "^2.3.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^8.1.0",
     "@types/node": "^24.19.2",
-    "@types/tar-stream": "^1.6.2",
     "tsdown": "0.23.7",
     "tslib": "^1.11.2",
     "typescript": "~7.0.2"

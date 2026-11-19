@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
+import { buffer } from 'node:stream/consumers';
 import { describe, test } from 'node:test';
 import createDockerFileExtractor from './dockerFileExtractor.ts';
-import tar from 'tar-stream';
-import rawBody from 'raw-body';
+import { unpackTar } from 'modern-tar';
 import path from 'path';
 import fs from 'fs-extra';
 
@@ -12,18 +12,14 @@ test('extract file from hello-world', async () => {
   const extractor = createDockerFileExtractor('hello-world');
   try {
     const stream = await extractor.extract('/hello');
-    const unpack = tar.extract();
-    const result: any[] = [];
-    unpack.on('entry', async (header, stream, next) => {
-      result.push({ header, buffer: await rawBody(stream) });
-      next();
-    });
-    stream.pipe(unpack);
-    await new Promise(resolve => {
-      unpack.on('finish', resolve);
-    });
-    assert.equal(result.length, 1);
-    assert.equal(result[0].buffer.slice(0, 4).toString('hex'), elfSignature);
+    const entries = await unpackTar(await buffer(stream));
+    assert.equal(entries.length, 1);
+    const { data } = entries[0];
+    assert.ok(data);
+    assert.equal(
+      Buffer.from(data.subarray(0, 4)).toString('hex'),
+      elfSignature
+    );
   } finally {
     await extractor.dispose();
   }

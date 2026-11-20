@@ -112,6 +112,25 @@ test('reads IDs from a file and stops at the first failed batch by default', asy
   ]);
 });
 
+test('rejects input files without case IDs before creating the output directory', async t => {
+  const dir = await tempDirectory(t);
+  const list = join(dir, 'cases.txt');
+  const outDir = join(dir, 'output');
+  await fs.writeFile(list, '\n  # No case IDs\n\n');
+
+  await assert.rejects(
+    runCommand(
+      'case',
+      caseExportArgs,
+      caseExport,
+      ['--file', list, '--outdir', outDir],
+      commandDeps()
+    ),
+    /No case IDs found in the input files/
+  );
+  assert.deepEqual(await fs.readdir(dir), ['cases.txt']);
+});
+
 test('rejects an output directory with a previous batch before making requests', async t => {
   const { outDir, requests, run } = await setup(t, ids => new Response(ids));
   const existing = join(outDir, 'batch-099.zip');

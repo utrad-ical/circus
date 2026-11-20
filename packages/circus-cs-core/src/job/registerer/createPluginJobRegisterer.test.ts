@@ -75,7 +75,7 @@ describe('createPluginJobRegisterer', () => {
     });
   });
 
-  test('Invalid plug-in ID throws', async () => {
+  test('rejects an invalid plug-in ID', async () => {
     const wrongPayload: circus.PluginJobRequest = {
       ...defaultPayload,
       pluginId: 'imaginary'
@@ -86,7 +86,7 @@ describe('createPluginJobRegisterer', () => {
     });
   });
 
-  test('Specifying no series throws', async () => {
+  test('rejects a request without series', async () => {
     const wrongPayload: circus.PluginJobRequest = {
       ...defaultPayload,
       series: []
@@ -97,7 +97,7 @@ describe('createPluginJobRegisterer', () => {
     });
   });
 
-  test('Nonexistent series throws', async () => {
+  test('rejects a nonexistent series', async () => {
     const wrongPayload: circus.PluginJobRequest = {
       ...defaultPayload,
       series: [
@@ -113,7 +113,7 @@ describe('createPluginJobRegisterer', () => {
     });
   });
 
-  test('Series with wrong PVD throws', async () => {
+  test('rejects an invalid partial volume descriptor', async () => {
     const check = async (
       partialVolumeDescriptor: PartialVolumeDescriptor,
       expectedMessage: string = 'does not contain enough images'

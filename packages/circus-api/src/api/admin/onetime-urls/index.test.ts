@@ -17,7 +17,7 @@ beforeEach(async () => {
   await setUpMongoFixture(apiTest.database.db, ['onetimeUrls']);
 });
 
-test('create a one time URL', async () => {
+test('creates a one-time URL', async () => {
   const userEmail = 'bob@example.com';
   const res = await client.request({
     method: 'post',
@@ -27,7 +27,7 @@ test('create a one time URL', async () => {
   assert.equal(res.status, 201);
 });
 
-test('throw 401 error for unauthorized user', async () => {
+test('returns 401 for an unauthorized user', async () => {
   client = apiTest.clients.carol;
   const userEmail = 'bob@example.com';
   const res = await client.request({
@@ -38,7 +38,7 @@ test('throw 401 error for unauthorized user', async () => {
   assert.equal(res.status, 401);
 });
 
-test('throw 404 error for nonexistent user', async () => {
+test('returns 404 for a nonexistent user', async () => {
   const userEmail = 'nonexistentuser@example.com';
   const res = await client.request({
     method: 'post',
@@ -48,7 +48,7 @@ test('throw 404 error for nonexistent user', async () => {
   assert.equal(res.status, 404);
 });
 
-test('throw 400 error for login disabled user', async () => {
+test('returns 400 for a user whose login is disabled', async () => {
   const userEmail = 'eve@example.com';
   const res = await client.request({
     method: 'post',

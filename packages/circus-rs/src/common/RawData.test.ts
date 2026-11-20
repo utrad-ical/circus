@@ -4,7 +4,7 @@ import RawData from './RawData.ts';
 import type { PixelFormat } from '../volume/PixelFormat.ts';
 import type { Vector3D } from './geometry/index.ts';
 
-test('create binary data', () => {
+test('creates binary data', () => {
   const raw = new RawData([8, 8, 8], 'binary');
   const array = new Uint8Array(8); // 64 bits in a slice
   array[0] = 0xaa; // 0b10101010
@@ -74,7 +74,7 @@ describe('create binary data (various sizes)', () => {
     });
   };
 
-  test('not affect other images with different depths', () => {
+  test('leaves images with other bit depths unchanged', () => {
     for (let i = 3; i < 9; i++) {
       const size: Vector3D = [i, i, i];
       const [rx, ry, rz] = size;
@@ -185,7 +185,7 @@ describe('create binary data (various sizes)', () => {
     }
   });
 
-  test('shift bits correctly', () => {
+  test('shifts the stored bits into place', () => {
     const size: Vector3D = [6, 6, 6];
     const raw = new RawData(size, 'binary');
 

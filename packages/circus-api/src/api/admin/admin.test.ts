@@ -8,7 +8,7 @@ let apiTest: ApiTest;
 before(async () => (apiTest = await setUpAppForRoutesTest()));
 after(async () => await apiTest.tearDown());
 
-test('return unauthorized error for unauthorized user', async () => {
+test('returns 401 for admin requests without the required privilege', async () => {
   const targets = [
     'groups',
     'groups/1',

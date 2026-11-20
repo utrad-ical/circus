@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { it, before, after, beforeEach } from 'node:test';
+import { test, before, after, beforeEach } from 'node:test';
 import type Storage from './Storage.ts';
 import * as path from 'path';
 import fs from 'fs-extra';
@@ -28,20 +28,20 @@ after(async function () {
   }
 });
 
-it('should throw error for nonexistent root', async function () {
+test('rejects a storage root that does not exist', async function () {
   await assert.rejects(
     createLocalStorage({ root: 'somewhere/over/the/rainbow' })
   );
 });
 
-it('should execute write()', async function () {
+test('writes the content to a path derived from the key', async function () {
   await store.write('xxyyzz', Buffer.from('biscuit'));
   const out = path.join(tmpDir, 'xx', 'xxyyzz.txt');
   assert.equal(await fs.pathExists(out), true);
   assert.equal(await fs.readFile(out, 'utf8'), 'biscuit');
 });
 
-it('should execute read()', async function () {
+test('reads stored content and rejects a missing key', async function () {
   assert.equal(
     Buffer.from(await store.read('aabbcc')).toString('utf8'),
     'coconut'
@@ -49,12 +49,12 @@ it('should execute read()', async function () {
   await assert.rejects(store.read('notafile'));
 });
 
-it('should execute exists()', async function () {
+test('distinguishes existing keys from missing keys', async function () {
   assert.equal(await store.exists('aabbcc'), true);
   assert.equal(await store.exists('xxyyzz'), false);
 });
 
-it('should execute remove()', async function () {
+test('deletes the stored file', async function () {
   assert.equal(
     await fs.pathExists(path.join(tmpDir, 'aa', 'aabbcc.txt')),
     true

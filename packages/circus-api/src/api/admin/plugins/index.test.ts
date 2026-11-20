@@ -18,7 +18,7 @@ describe('admin/plugins', () => {
     await setUpMongoFixture(apiTest.database.db, ['pluginDefinitions']);
   });
 
-  test('should return list of plugins', async () => {
+  test('lists plug-ins', async () => {
     const res = await client.get('api/admin/plugins');
     assert.equal(res.status, 200);
     assert.ok(res.data.items instanceof Array);
@@ -30,7 +30,7 @@ describe('admin/plugins', () => {
     );
   });
 
-  test('should update plugin', async () => {
+  test('updates a plug-in', async () => {
     const res = await client.get('api/admin/plugins');
     const pluginId = res.data.items[0].pluginId;
     const res2 = await client.patch(`api/admin/plugins/${pluginId}`, {
@@ -44,7 +44,7 @@ describe('admin/plugins', () => {
     );
   });
 
-  test('should not change the ID or the type', async () => {
+  test('keeps the plug-in ID and type unchanged', async () => {
     const res = await client.get('api/admin/plugins');
     const pluginId = res.data.items[0].pluginId;
     for (const data of [{ pluginId: 'other' }, { type: 'CAD' }]) {
@@ -53,12 +53,12 @@ describe('admin/plugins', () => {
     }
   });
 
-  test('should not be listed for a user without manageServer', async () => {
+  test('denies access to the plug-in list without the manageServer privilege', async () => {
     const res = await apiTest.clients.bob.get('api/admin/plugins');
     assert.equal(res.status, httpStatus.UNAUTHORIZED);
   });
 
-  test('should point at the invalid field when updating', async () => {
+  test('identifies the invalid field in a plug-in update', async () => {
     const res = await client.get('api/admin/plugins');
     const pluginId = res.data.items[0].pluginId;
     const res2 = await client.request({
@@ -71,7 +71,7 @@ describe('admin/plugins', () => {
     assert.deepEqual(res2.data.issues[0].path, ['pluginName']);
   });
 
-  test('should search plugins', async () => {
+  test('returns plug-ins matching the search filter', async () => {
     const res = await client.get('api/admin/plugins', {
       params: { filter: JSON.stringify({ type: 'CAD' }) }
     });
@@ -79,7 +79,7 @@ describe('admin/plugins', () => {
     assert.equal(res.data.items.length, 3);
   });
 
-  test('should create plugin', async () => {
+  test('creates a plug-in', async () => {
     const res = await client.post('api/admin/plugins', {
       pluginId:
         'aaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbccccccccccccccccdddddddddddddddd',

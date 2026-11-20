@@ -1,7 +1,7 @@
 import { withDates } from '../schemas/derive.ts';
 import testSchemas from '../../test/test-schemas.ts';
 import assert from 'node:assert/strict';
-import { describe, test, it, before, after } from 'node:test';
+import { describe, test, before, after } from 'node:test';
 import type { TestServer } from '../test/util-server.ts';
 import { setUpHonoTest } from '../test/util-server.ts';
 import { setUpMongoFixture, usingMongo } from '../test/util-mongo.ts';
@@ -83,12 +83,12 @@ describe('performSearch', () => {
     return res.data;
   };
 
-  it('should perform search', async () => {
+  test('returns search results', async () => {
     const res = await search({ limit: 100 });
     assert.equal(res.items.length, 30);
   });
 
-  it('should take filter', async () => {
+  test('filters the search results', async () => {
     const res1 = await search({ query: { price: { $gt: 800 } } });
     assert.equal(res1.items.length, 6);
     assert.equal(res1.totalItems, 6);
@@ -98,7 +98,7 @@ describe('performSearch', () => {
     assert.equal(res2.totalItems, 3);
   });
 
-  it('should take sort', async () => {
+  test('sorts the search results', async () => {
     const res1 = await search({ sort: { price: -1 } });
     assert.equal(res1.items[0].name, 'digital firewall');
     const res2 = await search({ sort: { price: 1 } });
@@ -110,7 +110,7 @@ describe('performSearch', () => {
     );
   });
 
-  it('should take paging', async () => {
+  test('returns the requested page of search results', async () => {
     const res1 = await search({ page: 1, limit: 2, sort: { price: -1 } });
     assert.deepEqual(
       res1.items.map((i: any) => i.itemId),

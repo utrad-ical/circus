@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { it, before, after } from 'node:test';
+import { test, before, after } from 'node:test';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import type { TestHttpClient } from '../../test/util-http.ts';
@@ -11,7 +11,7 @@ before(async () => {
 });
 after(async () => await apiTest.tearDown());
 
-it("should return only the current user's jobs", async () => {
+test("returns only the current user's jobs", async () => {
   // The queue has one job, which is made Alice's
   await apiTest.database.db
     .collection('pluginJobs')
@@ -29,7 +29,7 @@ it("should return only the current user's jobs", async () => {
   assert.equal(res2.data.items.length, 0);
 });
 
-it('should reject invalid query parameters', async () => {
+test('rejects invalid query parameters', async () => {
   for (const q of ['limit=0', 'page=x', 'state=foo']) {
     const res = await client.get(`api/plugin-job-queue?${q}`);
     assert.equal(res.status, 400, q);

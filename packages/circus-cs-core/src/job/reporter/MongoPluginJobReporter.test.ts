@@ -44,21 +44,21 @@ describe('pluginJobReporter', () => {
     await fs.remove(path.join(resultsDirectory, jobId));
   });
 
-  test('report processing', async () => {
+  test('reports processing', async () => {
     await reporter.report(jobId, 'processing');
     const check = await collection.findOne({ jobId });
     assert.partialDeepStrictEqual(check, { status: 'processing' });
     assert.ok(check.startedAt);
   });
 
-  test('report finished', async () => {
+  test('reports finished', async () => {
     await reporter.report(jobId, 'finished');
     const check = await collection.findOne({ jobId });
     assert.partialDeepStrictEqual(check, { status: 'finished' });
     assert.ok(check.finishedAt);
   });
 
-  test('report error', async () => {
+  test('reports an error', async () => {
     await reporter.report(jobId, 'failed');
     const check = await collection.findOne({ jobId });
     assert.partialDeepStrictEqual(check, { status: 'failed' });

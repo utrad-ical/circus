@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { test, it, before, after, beforeEach } from 'node:test';
+import { test, before, after, beforeEach } from 'node:test';
 import type { ApiTest } from '../../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../../test/util-routes.ts';
 import { setUpMongoFixture } from '../../../test/util-mongo.ts';
@@ -16,7 +16,7 @@ beforeEach(async () => {
   await setUpMongoFixture(apiTest.database.db, ['users']);
 });
 
-it('should return list of users', async () => {
+test('lists users', async () => {
   const res = await client.get('api/admin/users');
   assert.ok(res.data.items instanceof Array);
   assert.equal(
@@ -29,18 +29,18 @@ it('should return list of users', async () => {
   );
 });
 
-it('should return a user', async () => {
+test('returns a user without the password', async () => {
   const res = await client.get('api/admin/users/alice@example.com');
   assert.equal(res.data.loginId, 'alice');
   assert.ok(!('password' in res.data));
 });
 
-it('should return error for nonexistent user', async () => {
+test('returns 404 for a nonexistent user', async () => {
   const res = await client.get('api/admin/user/john@due.com');
   assert.equal(res.status, 404);
 });
 
-it('should update a user', async () => {
+test('updates a user', async () => {
   await client.request({
     method: 'patch',
     url: 'api/admin/users/alice@example.com',
@@ -50,7 +50,7 @@ it('should update a user', async () => {
   assert.equal(res2.data.loginId, 'anastasia');
 });
 
-it('should return error for invalid user update', async () => {
+test('returns 400 for an invalid user update', async () => {
   const res1 = await client.request({
     method: 'patch',
     url: 'api/admin/users/alice@example.com',
@@ -67,7 +67,7 @@ it('should return error for invalid user update', async () => {
   assert.deepEqual(res2.data.issues[0].path, ['userEmail']);
 });
 
-test('should create a user', async () => {
+test('creates a user', async () => {
   const res = await client.request({
     method: 'post',
     url: 'api/admin/users',
@@ -93,4 +93,4 @@ test('should create a user', async () => {
   assert.equal(res2.data.loginId, 'test');
 });
 
-//  it.skip('should reject unknown field');
+//  test.skip('rejects an unknown field');

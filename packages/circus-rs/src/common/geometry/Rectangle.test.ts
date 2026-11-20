@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
-import { describe, it } from 'node:test';
+import { describe, test } from 'node:test';
 import * as rect from './Rectangle.ts';
 import { Vector2, Box2 } from 'three';
 
 describe('fitRectangle', () => {
-  it('calculates fitting when the aspect ratio of two rects are the same', () => {
+  test('calculates fitting when the aspect ratio of two rects are the same', () => {
     assert.equal(
       rect
         .fitRectangle(new Vector2(3, 3), new Vector2(3, 3))
@@ -25,7 +25,7 @@ describe('fitRectangle', () => {
     );
   });
 
-  it('calculates fitting when the outer rect is wider', () => {
+  test('calculates fitting when the outer rect is wider', () => {
     assert.equal(
       rect
         .fitRectangle(new Vector2(3, 1), new Vector2(1, 1))
@@ -40,7 +40,7 @@ describe('fitRectangle', () => {
     );
   });
 
-  it('calculates fitting when the outer rect is taller', () => {
+  test('calculates fitting when the outer rect is taller', () => {
     assert.equal(
       rect
         .fitRectangle(new Vector2(1, 3), new Vector2(1, 1))

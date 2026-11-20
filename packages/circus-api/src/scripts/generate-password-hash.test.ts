@@ -9,7 +9,7 @@ const answers = [
 ];
 mock.method(inquirer, 'prompt', async () => answers.shift());
 
-test('generate hash', async () => {
+test('generates a password hash', async () => {
   const commandFunc = await command(null, {});
   const spy = mock.method(console, 'log', () => {});
   await commandFunc();

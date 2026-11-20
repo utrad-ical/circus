@@ -3,7 +3,7 @@ import { describe, test } from 'node:test';
 import { Validator } from './Validator.ts';
 
 describe('Validator', () => {
-  test('must process string rule', () => {
+  test('validates values against a string rule', () => {
     const v = new Validator({
       fruit: ['Fruit', null, 'isLength:1:5|contains:a', null]
     });
@@ -11,7 +11,7 @@ describe('Validator', () => {
     assert.equal(v.validate({ fruit: 'banana' }).result, null);
   });
 
-  test('must process regex rule', () => {
+  test('validates values against a regular expression', () => {
     const v = new Validator({
       fruit: ['Fruit', null, /a/, null]
     });
@@ -19,7 +19,7 @@ describe('Validator', () => {
     assert.equal(v.validate({ fruit: 'melon' }).result, null);
   });
 
-  test('must process callback rule', () => {
+  test('validates values with a custom callback', () => {
     const v = new Validator({
       fruit: [
         'Fruit',
@@ -34,12 +34,12 @@ describe('Validator', () => {
     assert.equal(v.validate({ fruit: 'melon' }).result, null);
   });
 
-  test('must pass through input for "null" rule', () => {
+  test('passes input through unchanged with a null rule', () => {
     const v = new Validator({ fruit: ['Fruit', null, null, null] });
     assert.equal(v.validate({ fruit: 'apple' }).result.fruit, 'apple');
   });
 
-  test('must return default value only if key is not set', () => {
+  test('returns the default value only when the key is absent', () => {
     const v = new Validator({ fruit: ['Fruit', 'orange', () => true, null] });
     assert.equal(v.validate({ fruit: 'apple' }).result.fruit, 'apple');
     assert.equal(v.validate({ fruit: '' }).result.fruit, '');
@@ -47,7 +47,7 @@ describe('Validator', () => {
     assert.equal(v.validate({}).result.fruit, 'orange');
   });
 
-  test('must sanitize input value', () => {
+  test('sanitizes the input value', () => {
     const v1 = new Validator({
       fruit: ['Fruit', null, null, 'escape|trim']
     });
@@ -58,7 +58,7 @@ describe('Validator', () => {
     assert.equal(v2.validate({ fruit: 'apple' }).result.fruit, 'APPLE');
   });
 
-  test('must return null result for invalid input', () => {
+  test('returns null for invalid input', () => {
     const v = new Validator({
       fruit: ['Fruit', null, 'isLength:1:5', null]
     });

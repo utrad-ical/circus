@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { describe, test, it, before, after } from 'node:test';
+import { describe, test, before, after } from 'node:test';
 import type { RsServices } from './configureServiceLoader.ts';
 import configureServiceLoader from './configureServiceLoader.ts';
 import fs from 'fs';
@@ -114,7 +114,7 @@ describe('without auth', () => {
     assert.equal(await statusFromOtherIp('/status'), status.UNAUTHORIZED);
   });
 
-  test('must return 404 for nonexistent route', async () => {
+  test('returns 404 for a nonexistent route', async () => {
     const res = await request('/foobar');
     assert.equal(await readStatus(res), status.NOT_FOUND);
   });
@@ -128,7 +128,7 @@ describe('without auth', () => {
       assert.equal(res.headers.get('access-control-allow-methods'), 'GET');
     });
 
-    // it.skip('must return 404 for nonexistent series');
+    // test.skip('returns 404 for a nonexistent series');
 
     describe('metadata', () => {
       test('returns no window by default', async () => {
@@ -167,7 +167,7 @@ describe('without auth', () => {
         });
       });
 
-      it('returns estimated window with window=full', async () => {
+      test('estimates the window when window is set to full', async () => {
         const res = await request(
           '/series/1.2.3.4.5/metadata?estimateWindow=full'
         );
@@ -232,7 +232,7 @@ describe('without auth', () => {
     });
 
     describe('scan', () => {
-      test('return oblique image in binary format', async () => {
+      test('returns an oblique image in binary format', async () => {
         const res = await request(
           '/series/1.2.3.4.5/scan?' +
             new URLSearchParams({
@@ -250,7 +250,7 @@ describe('without auth', () => {
         assert.ok((await res.arrayBuffer()).byteLength > 0);
       });
 
-      test('return oblique image from partial volume', async () => {
+      test('returns an oblique image from a partial volume', async () => {
         const res = await request(
           '/series/1.2.3.4.5/scan?' +
             new URLSearchParams({
@@ -271,7 +271,7 @@ describe('without auth', () => {
         assert.ok((await res.arrayBuffer()).byteLength > 0);
       });
 
-      it('return oblique image in PNG', async () => {
+      test('returns an oblique image as PNG', async () => {
         const res = await request(
           '/series/1.2.3.4.5/scan?' +
             new URLSearchParams({
@@ -308,11 +308,11 @@ describe('with authentication', () => {
   let token: string;
   let tokenHeader: { Authorization: string };
 
-  test('reject token request from invalid IP', async () => {
+  test('rejects token requests from disallowed IP addresses', async () => {
     assert.equal(await statusFromOtherIp('/token'), status.UNAUTHORIZED);
   });
 
-  test('issue valid token', async () => {
+  test('issues a token for the requested series', async () => {
     const res = await request('/token?series=1.2.3.4.5');
     assert.equal(res.status, status.OK);
     const data = await res.json();
@@ -321,19 +321,19 @@ describe('with authentication', () => {
     tokenHeader = { Authorization: `Bearer ${token}` };
   });
 
-  test('return error if token not passed', async () => {
+  test('returns 401 when the token is missing', async () => {
     const res = await request('/series/1.2.3.4.5/metadata');
     assert.equal(await readStatus(res), status.UNAUTHORIZED);
   });
 
-  test('return error for unmatched token', async () => {
+  test('returns 401 when the token is for another series', async () => {
     const res = await request('/series/8.8.8.8.8/metadata', {
       headers: tokenHeader
     });
     assert.equal(await readStatus(res), status.UNAUTHORIZED);
   });
 
-  test('return content for valid token', async () => {
+  test('returns 200 for a valid token', async () => {
     const res = await request('/series/1.2.3.4.5/metadata', {
       headers: tokenHeader
     });

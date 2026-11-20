@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
-import { it } from 'node:test';
+import { test } from 'node:test';
 import * as vr from './ValidatorRules.ts';
 
-it('isTuple', () => {
+test('isTuple', () => {
   const t3 = vr.isTuple(3);
   assert.equal(t3('1,2,3'), true);
   assert.equal(t3('1.1,2.5,-3.8'), true);
@@ -12,7 +12,7 @@ it('isTuple', () => {
   assert.equal(t3(''), false);
 });
 
-it('parseTuple', () => {
+test('parseTuple', () => {
   let p3 = vr.parseTuple(3, true);
   assert.deepEqual(p3('1,3,5'), [1, 3, 5]);
   assert.deepEqual(p3('1,-3,5.7'), [1, -3, 5]);
@@ -21,7 +21,7 @@ it('parseTuple', () => {
   assert.deepEqual(p3('1.3,-3,5.7'), [1.3, -3, 5.7]);
 });
 
-it('parseBoolean', () => {
+test('parseBoolean', () => {
   const b = vr.parseBoolean;
   assert.equal(b('yes'), true);
   assert.equal(b('1'), true);

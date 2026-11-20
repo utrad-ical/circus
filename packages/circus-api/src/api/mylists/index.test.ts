@@ -13,33 +13,33 @@ before(async () => {
 });
 after(async () => await apiTest.tearDown());
 
-test('list all my lists', async () => {
+test('lists all my lists', async () => {
   const res = await ax.bob.get('api/mylists');
   assert.equal(res.status, 200);
   assert.equal(res.data instanceof Array, true);
 });
 
 describe('get one my list', () => {
-  test("get user's own list", async () => {
+  test("returns the user's own list", async () => {
     const res = await ax.bob.get('api/mylists/01ewetw0chv8v5vxdtjdf6x9rk');
     assert.equal(res.status, 200);
     assert.ok('name' in res.data);
     assert.ok('resourceIds' in res.data);
   });
 
-  test("get other user's list if granted as editor", async () => {
+  test("returns another user's list when the requester is an editor", async () => {
     const res = await ax.bob.get('api/mylists/01ezab6xqfac7hvm5s09yw1g1j');
     assert.equal(res.status, 200);
     assert.equal(res.data.name, "Dave's case list");
   });
 
-  test('throw 404 if nonextent my list id', async () => {
+  test('returns 404 for a nonexistent my list', async () => {
     const res = await ax.bob.get('api/mylists/dummy');
     assert.equal(res.status, 404);
     assert.equal(res.data.error, 'This my list does not exist');
   });
 
-  test('get a private list of another user as an editor', async () => {
+  test("returns another user's private list when the requester is an editor", async () => {
     const myListId = '01ezab6xqfac7hvm5s09yw1g1j';
     await db
       .collection('myLists')
@@ -54,14 +54,14 @@ describe('get one my list', () => {
       .updateOne({ myListId }, { $set: { public: true } });
   });
 
-  test('throw 401 if not granted as editor', async () => {
+  test('returns 401 if not granted as editor', async () => {
     const res = await ax.bob.get('api/mylists/01ez9knaakz9tgd2hpyceagj11');
     assert.equal(res.status, 401);
   });
 });
 
 describe('create new list', () => {
-  test('create new list', async () => {
+  test('creates a list', async () => {
     const res = await ax.bob.request({
       url: 'api/mylists',
       method: 'post',
@@ -71,7 +71,7 @@ describe('create new list', () => {
     assert.equal(res.data.myListId.length, 26);
   });
 
-  test('throw 400 when the list name is invalid', async () => {
+  test('returns 400 when the list name is invalid', async () => {
     const res = await ax.bob.request({
       url: 'api/mylists',
       method: 'post',
@@ -86,7 +86,7 @@ describe('patch list', () => {
   const returnChangedList = async (myListId: string) =>
     await apiTest.database.db.collection('myLists').findOne({ myListId });
 
-  test('change list name', async () => {
+  test('renames the list', async () => {
     const myListId = '01ewetw0chv8v5vxdtjdf6x9rk';
     const res = await ax.bob.request({
       url: `api/mylists/${myListId}`,
@@ -99,7 +99,7 @@ describe('patch list', () => {
     assert.equal(changedList?.name, 'new name');
   });
 
-  test('change public status from false to true', async () => {
+  test('makes a private list public', async () => {
     const myListId = '01ewetw0chv8v5vxdtjdf6x9rk';
     const res = await ax.bob.request({
       url: `api/mylists/${myListId}`,
@@ -112,7 +112,7 @@ describe('patch list', () => {
     assert.equal(changedList?.public, true);
   });
 
-  test('throw 401 for my list the user does not own', async () => {
+  test('returns 401 for my list the user does not own', async () => {
     const myListId = '01ex36f2n99kjaqvpfrerrsryp';
     const res = await ax.bob.request({
       url: `api/mylists/${myListId}`,
@@ -122,7 +122,7 @@ describe('patch list', () => {
     assert.equal(res.status, 401);
   });
 
-  test('throw 400 when the new list name is empty text', async () => {
+  test('returns 400 when the new list name is empty', async () => {
     const myListId = '01ewetw0chv8v5vxdtjdf6x9rk';
     const res = await ax.bob.request({
       url: `api/mylists/${myListId}`,
@@ -132,7 +132,7 @@ describe('patch list', () => {
     assert.equal(res.status, 400);
   });
 
-  test('throw 400 when the new list name is too long', async () => {
+  test('returns 400 when the new list name is too long', async () => {
     const myListId = '01ewetw0chv8v5vxdtjdf6x9rk';
     const name = 'a'.repeat(65);
     const res = await ax.bob.request({
@@ -143,7 +143,7 @@ describe('patch list', () => {
     assert.equal(res.status, 400);
   });
 
-  test('throw 404 for nonexistent my list id', async () => {
+  test('returns 404 for a nonexistent my list', async () => {
     const myListId = 'dummyid';
     const res = await ax.bob.request({
       url: `api/mylists/${myListId}`,
@@ -156,7 +156,7 @@ describe('patch list', () => {
   describe('patch list editors', () => {
     const myListId = '01ewetw0chv8v5vxdtjdf6x9rk';
 
-    test('add editors', async () => {
+    test('adds editors', async () => {
       const res = await ax.bob.request({
         url: `api/mylists/${myListId}`,
         method: 'patch',
@@ -175,7 +175,7 @@ describe('patch list', () => {
       assert.equal(newList!.editors.length, 2);
     });
 
-    test('throw 400 if invalid E-mail address is included', async () => {
+    test('returns 400 when an editor email address is invalid', async () => {
       const res = await ax.bob.request({
         url: `api/mylists/${myListId}`,
         method: 'patch',
@@ -185,7 +185,7 @@ describe('patch list', () => {
       assert.equal(res.data.error, 'Invalid email address is included');
     });
 
-    test('throw 400 if invalid group ID is included', async () => {
+    test('returns 400 when an editor group ID is invalid', async () => {
       const res = await ax.bob.request({
         url: `api/mylists/${myListId}`,
         method: 'patch',
@@ -198,7 +198,7 @@ describe('patch list', () => {
 });
 
 describe('delete list', () => {
-  test('delete list', async () => {
+  test('deletes the list', async () => {
     const myListId = '01ewetywx9q6s2n5s03y3219ka';
     const res = await ax.bob.request({
       url: `api/mylists/${myListId}`,
@@ -212,7 +212,7 @@ describe('delete list', () => {
     assert.deepEqual(myList, null);
   });
 
-  test('throw 401 for my list the user does not own', async () => {
+  test('returns 401 for my list the user does not own', async () => {
     const myListId = '01ex36f2n99kjaqvpfrerrsryp';
     const res = await ax.bob.request({
       url: `api/mylists/${myListId}`,
@@ -221,7 +221,7 @@ describe('delete list', () => {
     assert.equal(res.status, 401);
   });
 
-  test('throw 404 for nonexistent my list id', async () => {
+  test('returns 404 for a nonexistent my list', async () => {
     const myListId = 'dummyid';
     const res = await ax.bob.request({
       url: `api/mylists/${myListId}`,
@@ -239,7 +239,7 @@ describe('patch list item', () => {
     await setUpMongoFixture(db, ['myLists']);
   });
 
-  test('insert new item into a mylist', async () => {
+  test('adds an item to a my list', async () => {
     const res = await ax.bob.patch(url, {
       operation: 'add',
       resourceIds: [
@@ -250,7 +250,7 @@ describe('patch list item', () => {
     assert.equal(res.data.changedCount, 1);
   });
 
-  test('inserting an nonexistent item should cause 404 error', async () => {
+  test('returns 404 when adding a nonexistent item', async () => {
     const res = await ax.bob.patch(url, {
       operation: 'add',
       resourceIds: ['this-id-does-not-exist']
@@ -258,7 +258,7 @@ describe('patch list item', () => {
     assert.equal(res.status, 404);
   });
 
-  test('inserting a duplicate item must be ignored', async () => {
+  test('ignores duplicate additions', async () => {
     const res = await ax.bob.patch(url, {
       operation: 'add',
       resourceIds: [
@@ -270,7 +270,7 @@ describe('patch list item', () => {
     assert.equal(res.data.changedCount, 0);
   });
 
-  test('remove item from a mylist', async () => {
+  test('removes an item from a my list', async () => {
     const res = await ax.bob.patch(url, {
       operation: 'remove',
       resourceIds: [
@@ -281,7 +281,7 @@ describe('patch list item', () => {
     assert.equal(res.data.changedCount, 1);
   });
 
-  test('removeing a nonexistent item should cause no effect', async () => {
+  test('leaves the list unchanged when removing an item it does not contain', async () => {
     const res = await ax.bob.patch(url, {
       operation: 'remove',
       resourceIds: [
@@ -293,7 +293,7 @@ describe('patch list item', () => {
     assert.equal(res.data.changedCount, 0);
   });
 
-  test('throw 404 for nonexistent my list id', async () => {
+  test('returns 404 for a nonexistent my list', async () => {
     const res = await ax.bob.patch(`api/mylists/dummyId/items`, {
       operation: 'add',
       resourceIds: [
@@ -304,7 +304,7 @@ describe('patch list item', () => {
   });
 
   describe("patch other user's list", () => {
-    test('insert new item into a mylist of another user', async () => {
+    test("adds an item to another user's list", async () => {
       const res = await ax.bob.patch(
         'api/mylists/01ezab6xqfac7hvm5s09yw1g1j/items',
         {
@@ -318,7 +318,7 @@ describe('patch list item', () => {
       assert.equal(res.data.changedCount, 1);
     });
 
-    test('throw 401 if not granted as editor', async () => {
+    test('returns 401 if not granted as editor', async () => {
       const res = await ax.bob.patch(
         'api/mylists/01ex36f2n99kjaqvpfrerrsryp/items',
         {

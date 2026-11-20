@@ -10,7 +10,7 @@ describe('StaticDicomFileRepository', () => {
     '../../testdata/sample-dicom'
   );
 
-  test('load image', async () => {
+  test('loads an image', async () => {
     const dr = new StaticDicomFileRepository({ dataDir });
     const series = await dr.getSeries('1.2.3.4.5');
     assert.equal(series.images, '1-2,4');
@@ -33,7 +33,7 @@ describe('StaticDicomFileRepository', () => {
     assert.equal(series2.images, '');
   });
 
-  test('return count=0 for nonexistent series', async () => {
+  test('returns a count of zero for a nonexistent series', async () => {
     const dr = new StaticDicomFileRepository({ dataDir });
     const series = await dr.getSeries('2.4.6.8.10');
     assert.equal(series.images, '');

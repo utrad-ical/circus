@@ -15,12 +15,12 @@ describe('StaticPluginDefinitionAccessor', () => {
     );
   });
 
-  test('get the list of plugin definitions', async () => {
+  test('lists plug-in definitions', async () => {
     const defs = await pluginDefs.list();
     assert.equal(defs.length, 7);
   });
 
-  test('get one plugin definition', async () => {
+  test('returns a single plug-in definition', async () => {
     const def = await pluginDefs.get(
       'e3f245078d839ea804e100ada6183edf864624a2859b2a8341a0721378f13f97'
     );

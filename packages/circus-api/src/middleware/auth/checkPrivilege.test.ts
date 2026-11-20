@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { describe, it, before, after } from 'node:test';
+import { describe, test, before, after } from 'node:test';
 import type { TestHttpClient } from '../../test/util-http.ts';
 import { createTestHttpClient } from '../../test/util-http.ts';
 import type { TestServer } from '../../test/util-server.ts';
@@ -65,13 +65,13 @@ after(async () => {
 });
 
 describe('global privilege checker', () => {
-  it('should pass for user with good global privilege', async () => {
+  test('allows access with the required global privilege', async () => {
     userEmail = 'alice@example.com';
     const res = await ax.get('global');
     assert.equal(res.data, 'Protected Area');
   });
 
-  it('should fail for user with bad global privilege', async () => {
+  test('returns 401 without the required global privilege', async () => {
     userEmail = 'bob@example.com';
     const res = await ax.get('global');
     assert.equal(res.status, 401);
@@ -79,7 +79,7 @@ describe('global privilege checker', () => {
 });
 
 describe('project privilege checker', () => {
-  it('should pass for user with good project privilege', async () => {
+  test('allows case access with the required project privilege', async () => {
     const resource =
       'case/faeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715b';
     userEmail = 'bob@example.com';
@@ -87,7 +87,7 @@ describe('project privilege checker', () => {
     assert.equal(res.data, 'Protected Area');
   });
 
-  it('should fail for user without a privilege', async () => {
+  test('returns 401 for a case without the required project privilege', async () => {
     const resource =
       'case/faeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715b';
     userEmail = 'alice@example.com';
@@ -95,14 +95,14 @@ describe('project privilege checker', () => {
     assert.equal(res.status, 401);
   });
 
-  it('should pass for user with good project privilege', async () => {
+  test('allows project access with the required project privilege', async () => {
     const resource = 'project/8883fdef6f5144f50eb2a83cd34baa44';
     userEmail = 'bob@example.com';
     const res = await ax.get(resource);
     assert.equal(res.data, 'Protected Area');
   });
 
-  it('should fail for user without a projectprivilege', async () => {
+  test('returns 401 for a project without the required project privilege', async () => {
     const resource = 'project/8883fdef6f5144f50eb2a83cd34baa44';
     userEmail = 'alice@example.com';
     const res = await ax.get(resource);
@@ -111,7 +111,7 @@ describe('project privilege checker', () => {
 });
 
 describe('plugin-job privilege checker', () => {
-  it('should pass for user with privileges', async () => {
+  test('allows access to a plug-in job with the required privileges', async () => {
     const resource = 'plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa';
     userEmail = 'alice@example.com';
     const res = await ax.get(resource);
@@ -119,7 +119,7 @@ describe('plugin-job privilege checker', () => {
     assert.equal(res.data, 'Protected Area');
   });
 
-  it('should fail for user without a privilege', async () => {
+  test("returns 401 when the user lacks access to the job's series domain", async () => {
     const resource = 'plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa';
     userEmail = 'bob@example.com';
     const res = await ax.get(resource);

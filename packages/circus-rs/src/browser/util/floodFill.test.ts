@@ -26,13 +26,13 @@ const t = (
   assert.equal(filled, expectedFillCount);
 };
 
-test('must flood-fill a closed area correctly', () => {
+test('fills a closed area', () => {
   const pat = '*****\n' + '*   *\n'.repeat(3) + '*****';
   t(pat, [3, 3], '*****\n'.repeat(5), 9);
   t(pat, [0, 0], '     \n'.repeat(5), 16, true);
 });
 
-test('must flood-fill a complexed cloed area', () => {
+test('fills a complex closed area', () => {
   const pat =
     '*******\n' +
     '*     *\n' +
@@ -51,7 +51,7 @@ test('must flood-fill a complexed cloed area', () => {
   t(pat, [6, 6], '       \n'.repeat(7), 31, true);
 });
 
-test('must flood-fill a ring-like closed area', () => {
+test('fills a ring-shaped area', () => {
   const pat =
     '********\n' +
     '*      *\n' +
@@ -101,13 +101,13 @@ test('must flood-fill a ring-like closed area', () => {
   t(pat, [0, 4], outErased, 26, true);
 });
 
-test('must flood-fill an empty area', () => {
+test('fills an empty area', () => {
   const blank = '     \n'.repeat(5);
   t(blank, [3, 3], '*****\n'.repeat(5), 25);
   t(blank, [3, 3], '     \n'.repeat(5), 0, true);
 });
 
-test('must erase a filled area', () => {
+test('erases a filled area', () => {
   const filled = '*****\n'.repeat(5);
   t(filled, [3, 3], '     \n'.repeat(5), 25, true);
 });
@@ -134,7 +134,7 @@ const t_err = (
   });
 };
 
-test('must throw error message if center value is invalid', () => {
+test('throws when the starting pixel value is invalid', () => {
   const pat = '*****\n' + '*   *\n'.repeat(3) + '*****';
   t_err(pat, [50, 50], 'value of center is not contained in the grid');
 });

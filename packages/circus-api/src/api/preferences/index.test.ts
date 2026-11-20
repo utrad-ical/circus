@@ -11,7 +11,7 @@ before(async () => {
 });
 after(async () => await apiTest.tearDown());
 
-test('return the preference of the current user', async () => {
+test("returns the current user's preferences", async () => {
   const res = await client.get('api/preferences');
   assert.equal(res.data.theme, 'mode_white');
 });
@@ -28,7 +28,7 @@ describe('PATCH', () => {
     assert.equal(res2.data.theme, 'mode_black');
   });
 
-  test('reject invalid preference update', async () => {
+  test('rejects an invalid preference update', async () => {
     const res = await client.request({
       url: 'api/preferences',
       method: 'patch',
@@ -37,7 +37,7 @@ describe('PATCH', () => {
     assert.equal(res.status, 400);
   });
 
-  test('reject nonexistent preference key', async () => {
+  test('rejects a nonexistent preference key', async () => {
     const res = await client.request({
       url: 'api/preferences',
       method: 'patch',
@@ -46,7 +46,7 @@ describe('PATCH', () => {
     assert.equal(res.status, 400);
   });
 
-  test('reject empty object', async () => {
+  test('rejects an empty object', async () => {
     const res = await client.request({
       url: 'api/preferences',
       method: 'patch',

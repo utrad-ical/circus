@@ -34,7 +34,7 @@ test('simple creation from function', async () => {
   assert.equal(result.shot(), 'bang');
 });
 
-test('create from module path', async () => {
+test('creates a service from a module path', async () => {
   interface Services {
     food: { eat: () => string };
   }
@@ -102,7 +102,7 @@ describe('create with dependency', () => {
   });
 });
 
-test('create with options', async () => {
+test('creates a service with options', async () => {
   class Fighter {
     public number: any;
     constructor(options: number, deps: {}) {
@@ -120,7 +120,7 @@ test('create with options', async () => {
   assert.equal(result.number, 50);
 });
 
-test('create with factory', async () => {
+test('creates a service with a factory', async () => {
   interface Services {
     fighter: 'abc';
   }
@@ -213,14 +213,14 @@ describe('autoloading with registerDirectory', () => {
     food: { eat: () => string };
   }
 
-  test('load default type', async () => {
+  test('loads a service of the default type', async () => {
     const loader1 = new ServiceLoader<Services>();
     loader1.registerDirectory('food', dir, 'Biscuit');
     const biscuit = await loader1.get('food');
     assert.equal(biscuit.eat(), 'biscuit eaten 2 times');
   });
 
-  test('load custom type with config', async () => {
+  test('loads a configured custom service type', async () => {
     const options = { food: { type: 'Pudding', options: 5 } };
     const loader = new ServiceLoader<Services>(options);
     loader.registerDirectory('food', dir, 'Biscuit');
@@ -228,7 +228,7 @@ describe('autoloading with registerDirectory', () => {
     assert.equal(pudding.eat(), 'pudding eaten 5 times');
   });
 
-  test('load from module using absolute path', async () => {
+  test('loads a service from an absolute module path', async () => {
     const typePath = path.join(dir, 'Pudding');
     const options = { food: { type: typePath, options: 3 } };
     const loader = new ServiceLoader<Services>(options);
@@ -238,7 +238,7 @@ describe('autoloading with registerDirectory', () => {
   });
 });
 
-test('dependencies must not be created more than once', async () => {
+test('creates each shared dependency only once', async () => {
   const fn = mock.fn();
 
   class Gunlancer {

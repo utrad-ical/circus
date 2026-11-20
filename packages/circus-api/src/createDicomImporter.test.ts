@@ -50,7 +50,7 @@ beforeEach(async () => {
   );
 });
 
-test('import a DICOM file', async () => {
+test('imports a DICOM file', async () => {
   const fileContent = await fs.readFile(file);
   const seriesUid =
     '2.16.840.1.113662.2.1.2519.21582.2990505.2105152.2381633.20';

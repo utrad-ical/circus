@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { it, before, after } from 'node:test';
+import { test, before, after } from 'node:test';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import type { TestHttpClient } from '../../test/util-http.ts';
@@ -14,7 +14,7 @@ after(async () => await apiTest.tearDown());
 
 const sha1 = '4e3e01b9af84f54d95f94d24eeb0583332a85268';
 
-it('should accept uploading and downloading a blob', async () => {
+test('round-trips a blob through upload and download', async () => {
   const res = await client.request({
     method: 'put',
     url: 'api/blob/' + sha1,
@@ -29,7 +29,7 @@ it('should accept uploading and downloading a blob', async () => {
   assert.equal(res2.data, 'star');
 });
 
-it('reads just the bytes of a pooled buffer', async () => {
+test('reads just the bytes of a pooled buffer', async () => {
   const res = await client.get(
     'api/blob/5a616841a4fdd6066ee5c7e2d3118e0963ec1fc6'
   );
@@ -37,7 +37,7 @@ it('reads just the bytes of a pooled buffer', async () => {
   assert.equal(res.data, 'dummy');
 });
 
-it('should accept gzipped data', async () => {
+test('accepts a gzip-compressed blob', async () => {
   const res = await client.request({
     method: 'put',
     url: 'api/blob/' + sha1,
@@ -55,7 +55,7 @@ it('should accept gzipped data', async () => {
   assert.equal(res2.data, 'star');
 });
 
-it('limits gzipped uploads by their decompressed size', async () => {
+test('limits gzipped uploads by their decompressed size', async () => {
   const res = await client.request({
     method: 'put',
     url: 'api/blob/' + sha1,
@@ -69,7 +69,7 @@ it('limits gzipped uploads by their decompressed size', async () => {
   assert.deepEqual(res.data, { error: 'request entity too large' });
 });
 
-it('should return 400 on hash mismatch', async () => {
+test('returns 400 on hash mismatch', async () => {
   const res = await client.request({
     method: 'put',
     url: 'api/blob/1111222233334444aaaabbbbcccc',
@@ -79,7 +79,7 @@ it('should return 400 on hash mismatch', async () => {
   assert.equal(res.status, 400);
 });
 
-it('should return 404 for nonexistent hash', async () => {
+test('returns 404 for a nonexistent hash', async () => {
   const res = await client.get('api/blob/aaabbbcccdddeeefff111222333');
   assert.equal(res.status, 404);
 });

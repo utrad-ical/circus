@@ -49,13 +49,13 @@ beforeEach(async () => {
   });
 });
 
-test('refresh series parameters', async () => {
+test('refreshes the stored DICOM parameters', async () => {
   await commandFunc({});
   const seriesData = await models.series.findById(seriesUid);
   assert.equal(seriesData.parameters.PhotometricInterpretation, 'MONOCHROME2');
 });
 
-test('refresh series parameters with maxDate', async () => {
+test('skips series newer than maxDate when refreshing parameters', async () => {
   await commandFunc({ maxDate: new Date('2020-08-30T00:00:00Z') });
   const seriesData = await models.series.findById(seriesUid);
   assert.equal(seriesData.parameters.PhotometricInterpretation, 'MONOCHROME2');

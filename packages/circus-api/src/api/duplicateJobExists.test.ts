@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { it, before } from 'node:test';
+import { test, before } from 'node:test';
 import { usingModels, setUpMongoFixture } from '../test/util-mongo.ts';
 import type { Models } from '../interface.ts';
 import duplicateJobExists from './duplicateJobExists.ts';
@@ -35,33 +35,33 @@ const makeBaseRequest = () => ({
   ]
 });
 
-it('should return true for duplicate plugin job', async () => {
+test('detects a duplicate plug-in job', async () => {
   const result = await duplicateJobExists(models, makeBaseRequest());
   assert.equal(result, true);
 });
 
-it('should return false on different plugin ID', async () => {
+test('treats jobs with different plug-in IDs as distinct', async () => {
   const request = makeBaseRequest();
   request.pluginId = 'mnopqrstuvwx';
   const result = await duplicateJobExists(models, request);
   assert.equal(result, false);
 });
 
-it('should return false on different series length', async () => {
+test('treats jobs with different numbers of series as distinct', async () => {
   const request = makeBaseRequest();
   request.series.pop();
   const result = await duplicateJobExists(models, request);
   assert.equal(result, false);
 });
 
-it('should return false on different series UID', async () => {
+test('treats jobs with different series UIDs as distinct', async () => {
   const request = makeBaseRequest();
   request.series[0].seriesUid = '0.0.0.0.0';
   const result = await duplicateJobExists(models, request);
   assert.equal(result, false);
 });
 
-it('should return true when different only in the order of the elements in partial volume descriptor', async () => {
+test('detects duplicates regardless of partial volume descriptor field order', async () => {
   const request = makeBaseRequest();
   request.series[0].partialVolumeDescriptor = {
     end: 10,
@@ -72,7 +72,7 @@ it('should return true when different only in the order of the elements in parti
   assert.equal(result, true);
 });
 
-it('should return false when status is "invalidated"', async () => {
+test('ignores invalidated jobs when checking for duplicates', async () => {
   const request = {
     pluginId: 'zyxwvutsrqpo',
     series: [
@@ -90,7 +90,7 @@ it('should return false when status is "invalidated"', async () => {
   assert.equal(result, false);
 });
 
-it('should return false when status is "failed"', async () => {
+test('ignores failed jobs when checking for duplicates', async () => {
   const request = {
     pluginId: 'opqrstuvwxyz',
     series: [

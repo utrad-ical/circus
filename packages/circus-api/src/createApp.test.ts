@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import assert from 'node:assert/strict';
-import { it, before, after } from 'node:test';
+import { test, before, after } from 'node:test';
 import type { TestHttpClient } from './test/util-http.ts';
 import { createTestHttpClient } from './test/util-http.ts';
 import type { TestServer } from './test/util-server.ts';
@@ -71,17 +71,17 @@ after(async () => {
   await testServer.tearDown();
 });
 
-it('should return 404 for root path', async () => {
+test('returns 404 for the root path', async () => {
   const res = await ax.get('');
   assert.equal(res.status, 404);
 });
 
-it('matches API paths case-sensitively', async () => {
+test('matches API paths case-sensitively', async () => {
   assert.equal((await ax.get('api/status')).status, 200);
   assert.equal((await ax.get('api/Status')).status, 404);
 });
 
-it('limits RS CORS to the configured origin', async () => {
+test('limits RS CORS to the configured origin', async () => {
   const origin = 'https://tools.example.org';
   const allowed = await ax.get('rs/missing', { headers: { Origin: origin } });
   assert.equal(allowed.headers.get('Access-Control-Allow-Origin'), origin);
@@ -109,7 +109,7 @@ it('limits RS CORS to the configured origin', async () => {
   );
 });
 
-it('should return 404 for the retired token endpoint', async () => {
+test('returns 404 for the retired token endpoint', async () => {
   const res = await ax.post(
     '/login',
     new URLSearchParams({ grant_type: 'password' })
@@ -117,7 +117,7 @@ it('should return 404 for the retired token endpoint', async () => {
   assert.equal(res.status, 404);
 });
 
-it('should return 400 for malformed JSON input', async () => {
+test('returns 400 for malformed JSON input', async () => {
   const res = await ax.request({
     method: 'post',
     url: 'api/echo',
@@ -127,7 +127,7 @@ it('should return 400 for malformed JSON input', async () => {
   assert.equal(res.status, 400);
 });
 
-it('should return 415 if content type is not set to JSON', async () => {
+test('returns 415 when the request content type is not JSON', async () => {
   const res = await ax.request({
     method: 'post',
     url: 'api/echo',
@@ -137,19 +137,19 @@ it('should return 415 if content type is not set to JSON', async () => {
   assert.equal(res.status, 415); // Unsupported media type
 });
 
-it('should return 400 for huge JSON > 1mb', async () => {
+test('returns 400 when the JSON body exceeds 1 MB', async () => {
   const bigData = { foo: 'A'.repeat(1024 * 1024) };
   const res = await ax.post('api/echo', { data: bigData });
   assert.equal(res.status, 400);
 });
 
-it('should return input data as-is', async () => {
+test('returns the input data unchanged', async () => {
   const data = { a: 10, b: 'test', c: { d: 999, e: 'TEST' } };
   const res = await ax.post('api/echo', data);
   assert.deepEqual(res.data, data);
 });
 
-it('cancels response streams on HEAD', async () => {
+test('cancels response streams on HEAD', async () => {
   const app = createHonoApp({ logger: await createTestLogger() });
   let cancelled = false;
   app.get('/api/stream', ctx =>

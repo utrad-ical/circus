@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
-import { describe, test, beforeEach } from 'node:test';
+import { buffer } from 'node:stream/consumers';
+import { describe, test } from 'node:test';
+import { PNG } from 'pngjs';
 import type ImageEncoder from './ImageEncoder.ts';
 
 const encoders = ['PngJsImageEncoder' /*'NodePngImageEncoder'*/];
@@ -15,35 +17,34 @@ for (const enc of encoders) {
 }
 
 describe('ImageEncoder', () => {
-  let originalImage: Buffer;
-
-  beforeEach(() => {
-    originalImage = Buffer.alloc(16 * 16);
-    for (let x = 0; x < 16; x++) {
-      for (let y = 0; y < 16; y++) {
-        originalImage.writeUInt8(x * 16 + y, y * 16 + y);
-      }
-    }
-  });
+  const width = 16;
+  const height = 16;
 
   for (const enc of encoders) {
-    const testName = 'encodes an image as PNG using ' + enc;
+    const testName = `preserves grayscale pixels when encoding PNG with ${enc}`;
     const encModule = encModules.get(enc);
     if (!encModule) {
       test.skip(testName);
       continue;
     }
-    test(testName, (_t, done) => {
-      encModule().then((encoder: ImageEncoder) =>
-        encoder.write(originalImage, 16, 16).then(out => {
-          out.on('finish', () => {
-            const hdr = out.read(8).toString('hex');
-            // The fixed 10-byte PNG header
-            assert.equal(hdr, '89504e470d0a1a0a');
-            done();
-          });
-        })
+    test(testName, async () => {
+      const originalImage = Buffer.from(
+        Array.from({ length: width * height }, (_, i) => i)
       );
+      const encoder: ImageEncoder = await encModule();
+      const out = await encoder.write(originalImage, width, height);
+      const decoded = PNG.sync.read(await buffer(out));
+
+      assert.equal(decoded.width, width);
+      assert.equal(decoded.height, height);
+      for (let i = 0; i < width * height; i++) {
+        const offset = i * 4;
+        assert.deepEqual(
+          [...decoded.data.subarray(offset, offset + 4)],
+          [i, i, i, 255],
+          `pixel ${i}`
+        );
+      }
     });
   }
 });

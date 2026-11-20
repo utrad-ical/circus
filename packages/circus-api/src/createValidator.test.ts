@@ -129,7 +129,7 @@ test('requires every field in a required schema', async () => {
   };
   await validator.validate(t.sample.required(), testData);
   delete testData.intVal;
-  assert.rejects(
+  await assert.rejects(
     validator.validate(t.sample.required(), testData),
     ValidationError
   );

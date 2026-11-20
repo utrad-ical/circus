@@ -10,10 +10,12 @@ import type { CommandAction } from './CommandAction.ts';
 
 const action: CommandAction = ({ getFetch }) => {
   return async (args: string[], options) => {
+    const ids = await readIds(args, !!options.file);
+    if (!ids.length) throw new Error('No case IDs found in the input files.');
+
     const fetch = getFetch();
     const outDir = options.outdir ?? process.cwd();
     const batchSize: number = options.skipOnError ? 1 : options.batchSize;
-    const ids = await readIds(args, !!options.file);
     await fs.mkdir(outDir, { recursive: true });
     const existing = (await fs.readdir(outDir)).find(name =>
       /^batch-\d{3,}\.(tgz|zip)$/i.test(name)

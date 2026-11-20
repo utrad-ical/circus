@@ -28,7 +28,6 @@ const withoutMetadata = (obj: CaseRevisionCreate): CaseRevisionCreate => {
 
 const action: CommandAction = ({ getFetch, prompts }) => {
   return async (args: string[], options: Options) => {
-    const fetch = getFetch();
     const { exec: command, desc, editDesc, force, file, allRevs } = options;
 
     if (force && !desc && !editDesc)
@@ -46,7 +45,10 @@ const action: CommandAction = ({ getFetch, prompts }) => {
       );
 
     const caseIds = await readIds(args, !!file);
+    if (!caseIds.length)
+      throw new Error('No case IDs found in the input files.');
 
+    const fetch = getFetch();
     for (const caseId of caseIds) {
       const res = await fetchWithSpinner(
         fetch,

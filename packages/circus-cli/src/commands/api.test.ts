@@ -26,6 +26,11 @@ test('sends requests from the real CLI and preserves piped input, output, and ex
       authorization: req.headers.authorization,
       body: await text(req)
     });
+    if (req.url === '/api/no-content') {
+      res.writeHead(204);
+      res.end();
+      return;
+    }
     if (req.url === '/api/unavailable') {
       res.writeHead(503, { 'Content-Type': 'application/json' });
       res.end('{"error":"Unavailable"}');
@@ -100,16 +105,13 @@ test('sends requests from the real CLI and preserves piped input, output, and ex
     envOverrides?: NodeJS.ProcessEnv
   ) => runCli(entry, args, { env: { ...env, ...envOverrides }, stdin });
 
-  const read = await run([
-    'api',
-    'get',
-    '--no-pretty',
-    'fixture',
-    '--query',
-    'page=2'
-  ]);
+  const read = await run(['api', 'get', 'fixture', '--query', 'page=2']);
   assert.equal(read.code, 0, read.stderr);
   assert.equal(read.stdout, rawJson);
+
+  const noContent = await run(['api', 'get', 'no-content']);
+  assert.equal(noContent.code, 0, noContent.stderr);
+  assert.equal(noContent.stdout, '');
 
   for (const method of ['post', 'put', 'patch']) {
     const result = await run(['api', method, 'fixture'], '{"name":"fixture"}');
@@ -132,6 +134,7 @@ test('sends requests from the real CLI and preserves piped input, output, and ex
     ]),
     [
       ['GET', '/api/fixture?page=2', 'Bearer test-token', ''],
+      ['GET', '/api/no-content', 'Bearer test-token', ''],
       ['POST', '/api/fixture', 'Bearer test-token', '{"name":"fixture"}'],
       ['PUT', '/api/fixture', 'Bearer test-token', '{"name":"fixture"}'],
       ['PATCH', '/api/fixture', 'Bearer test-token', '{"name":"fixture"}'],

@@ -11,7 +11,8 @@ interface Options {
 
 const action: CommandAction = ({ getFetch }) => {
   return async (resource: string, option: Options) => {
-    const { pretty, query: queries = [] } = option;
+    const { query: queries = [] } = option;
+    const pretty = option.pretty && process.stdout.isTTY;
 
     if (queries.length) {
       const queryStr = queries
@@ -29,16 +30,16 @@ const action: CommandAction = ({ getFetch }) => {
     const res = pretty
       ? await fetchWithSpinner(fetch, `Fetching ${resource}`, resource)
       : await fetch(resource);
+    if (res.body === null) return;
 
     if (
-      process.stdout.isTTY &&
-      res.headers.get('content-type')?.startsWith('application/json') &&
-      pretty
+      pretty &&
+      res.headers.get('content-type')?.startsWith('application/json')
     ) {
       const json = await res.json();
       process.stdout.write(stringify(json) + '\n');
     } else {
-      await pipeline(Readable.fromWeb(res.body!), process.stdout, {
+      await pipeline(Readable.fromWeb(res.body), process.stdout, {
         end: false
       });
       // Keep piped or redirected output byte-for-byte

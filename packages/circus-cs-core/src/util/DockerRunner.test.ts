@@ -31,7 +31,7 @@ if (process.env.SKIP_DOCKER_TESTS) {
     assert.equal(code, 5);
   });
 
-  test('load text file from an image', async () => {
+  test('loads a text file from an image', async () => {
     const result = await runner.loadFromTextFile(
       'circus-mock-succeed',
       '/plugin.json'
@@ -39,7 +39,7 @@ if (process.env.SKIP_DOCKER_TESTS) {
     assert.match(result, /pluginName/);
   });
 
-  test('connect to Docker public API', async () => {
+  test('connects to the Docker Engine API', async () => {
     const rode = new Dockerode();
     const results = await rode.listImages();
     assert.ok(results.length >= 1);

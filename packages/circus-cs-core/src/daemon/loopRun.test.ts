@@ -71,7 +71,7 @@ const createMockQueueSystem = <T>(
 
 describe('loopRun', () => {
   let _active: boolean = true;
-  test('insert a job and list it', async () => {
+  test('processes the queue and shuts down on SIGINT', async () => {
     const fn = mock.fn();
     const queue = createMockQueueSystem<null>(3, fn);
     const options: LoopRunOptions<null> = {

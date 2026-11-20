@@ -28,13 +28,13 @@ describe('Queue system: Mongo', () => {
     await mongoClientPool.dispose();
   });
 
-  test('insert a job and list it', async () => {
+  test('dequeues an enqueued job with its payload', async () => {
     await queue.enqueue('abcde', { a: 5 }, 0);
     const item = await queue.dequeue();
     assert.partialDeepStrictEqual(item, { payload: { a: 5 } });
   });
 
-  test('insert multiple jobs with priority', async () => {
+  test('inserts multiple jobs with priority', async () => {
     await queue.enqueue('first', { a: 5 }, 0);
     await queue.enqueue('third', { a: 7 }, 0);
     await queue.enqueue('second', { a: 8 }, 1);

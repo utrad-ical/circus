@@ -43,7 +43,7 @@ describe('isValidPartialVolumeDescriptor', () => {
     [7, 7, -1, false]
   ];
   for (const [start, end, delta, expected] of cases) {
-    test(`(${start}, ${end}, ${delta}) should be ${expected}`, () => {
+    test(`returns ${expected} for start=${start}, end=${end}, delta=${delta}`, () => {
       assert.equal(
         isValidPartialVolumeDescriptor({ start, end, delta }),
         expected
@@ -67,7 +67,7 @@ describe('rangeHasPartialVolume', () => {
     ['1,3,9', 9, 1, -2, false]
   ];
   for (const [range, start, end, delta, expected] of cases) {
-    test(`'${range}' in (${start}, ${end}, ${delta}) should be ${expected}`, () => {
+    test(`returns ${expected} for range=${range}, start=${start}, end=${end}, delta=${delta}`, () => {
       const images = mr.parse(range);
       assert.equal(
         rangeHasPartialVolume(images, { start, end, delta }),
@@ -76,7 +76,7 @@ describe('rangeHasPartialVolume', () => {
     });
   }
 
-  test('invalid PVD throws', () => {
+  test('throws for an invalid partial volume descriptor', () => {
     assert.throws(
       () =>
         rangeHasPartialVolume(mr.parse('1-100'), {

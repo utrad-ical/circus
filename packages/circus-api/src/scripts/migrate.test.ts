@@ -7,7 +7,7 @@ import { command } from './migrate.ts';
 
 const modelsPromise = usingModels();
 
-test('perform migration from scratch', async () => {
+test('migrates an empty database', async () => {
   const { database, models } = await modelsPromise;
   const { db } = database;
   await deleteAllCollections(db);

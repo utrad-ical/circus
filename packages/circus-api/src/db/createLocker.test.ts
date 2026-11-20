@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { it, before, after } from 'node:test';
+import { test, before, after } from 'node:test';
 import { usingMongo } from '../test/util-mongo.ts';
 import delay from '../utils/delay.ts';
 import createLocker from './createLocker.ts';
@@ -20,14 +20,14 @@ after(async () => {
   await disposeMongo();
 });
 
-it('should perform locking of one resource', async () => {
+test('acquires a lock again after releasing it', async () => {
   for (let i = 0; i <= 2; i++) {
     const id = await locker.lock('orange');
     await locker.unlock(id);
   }
 });
 
-it('should fail on the second lock trial', async () => {
+test('rejects a second lock on the same resource', async () => {
   await assert.rejects(
     (async () => {
       await locker.lock('sapphire');
@@ -37,7 +37,7 @@ it('should fail on the second lock trial', async () => {
   );
 });
 
-it('should not fail with a zombie lock', async () => {
+test('acquires the lock after the previous lock expires', async () => {
   const locker = await createLocker(db, 'locker', 50);
   await locker.lock('passion');
   await delay(100);

@@ -37,7 +37,7 @@ afterEach(async function () {
   await testServer.tearDown();
 });
 
-test('should pass input validation', async function () {
+test('passes a valid date to the request handler', async function () {
   const res = await client.request({
     url: 'api/in-check',
     method: 'post',
@@ -46,7 +46,7 @@ test('should pass input validation', async function () {
   assert.equal(res.data.foo, '2015-05-05T00:11:22.000Z');
 });
 
-test('should fail input validation', async function () {
+test('returns 400 when the request contains an invalid date', async function () {
   const res = await client.request({
     url: 'api/in-check',
     method: 'post',
@@ -108,12 +108,12 @@ test('applies the JSON size limit after decompression', async () => {
   });
 });
 
-test('should pass output validation', async function () {
+test('returns 200 for a response that matches the schema', async function () {
   const res = await client.post('api/out-check', { intVal: 5 });
   assert.equal(res.status, 200);
 });
 
-test('should fail output validation', async function () {
+test('returns 500 when the response fails schema validation', async function () {
   const res = await client.request({
     url: 'api/out-check',
     method: 'post',

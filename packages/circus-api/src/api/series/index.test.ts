@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import {
   describe,
   test,
-  it,
   before,
   after,
   beforeEach,
@@ -29,7 +28,7 @@ before(async () => {
 
 after(async () => await apiTest.tearDown());
 
-it('should perform search', async () => {
+test('returns search results', async () => {
   const res = await ax.dave.request({
     url: 'api/series',
     method: 'get'
@@ -38,7 +37,7 @@ it('should perform search', async () => {
   assert.equal(res.data.items.length, 9);
 });
 
-it('should return single series information', async () => {
+test('returns metadata for a single series', async () => {
   const res = await ax.dave.request({
     url: 'api/series/111.222.333.444.666',
     method: 'get'
@@ -47,7 +46,7 @@ it('should return single series information', async () => {
   assert.equal(res.data.manufacturer, 'Hatsushiba');
 });
 
-it('should reject 403 for unauthorized series', async () => {
+test('returns 403 for a series in an inaccessible domain', async () => {
   const res = await ax.guest.request({
     url: 'api/series/111.222.333.444.777',
     method: 'get'
@@ -55,7 +54,7 @@ it('should reject 403 for unauthorized series', async () => {
   assert.equal(res.status, 403);
 });
 
-test('throw 400 if search using patient information for unprivileged user', async () => {
+test('returns 400 when a user without permission filters by patient information', async () => {
   const res = await ax.frank.request({
     url: 'api/series',
     method: 'get',
@@ -64,7 +63,7 @@ test('throw 400 if search using patient information for unprivileged user', asyn
   assert.equal(res.status, 400);
 });
 
-test('should be searchable if patient information is not used', async () => {
+test('allows searches without a patient-information filter', async () => {
   const res = await ax.frank.request({
     url: 'api/series',
     method: 'get',
@@ -94,7 +93,7 @@ describe('getOrientation', () => {
     assert.deepEqual(res.data, { orientation: 'head-first' });
   });
 
-  test('throw 400 for image out of bounds', async () => {
+  test('returns 400 when the image range is out of bounds', async () => {
     const res = await ax.dave.request({
       url: 'api/series/333.444.555.666.777/orientation',
       method: 'get',
@@ -107,7 +106,7 @@ describe('getOrientation', () => {
     );
   });
 
-  test('throw 403 for unprivileged user', async () => {
+  test('returns 403 when the user lacks access', async () => {
     const res = await ax.guest.request({
       url: 'api/series/333.444.555.666.777/orientation',
       method: 'get',
@@ -120,7 +119,7 @@ describe('getOrientation', () => {
     );
   });
 
-  test('throw 500 for series defined in DB but missing in repository', async () => {
+  test('returns 500 when the series exists in the database but is missing from the repository', async () => {
     const res = await ax.dave.request({
       url: 'api/series/111.222.333.444.555/orientation',
       method: 'get',
@@ -306,7 +305,7 @@ describe('Upload', () => {
 });
 
 describe('Delete', () => {
-  it('should delete single series', async () => {
+  test('deletes a single series', async () => {
     const res = await ax.dave.request({
       url: 'api/series/222.333.444.555.666',
       method: 'delete'
@@ -318,7 +317,7 @@ describe('Delete', () => {
     assert.deepEqual(series, null);
   });
 
-  it('should fail with 404 for nonexistent series', async () => {
+  test('returns 404 for a nonexistent series', async () => {
     const res = await ax.dave.request({
       url: 'api/series/222.222.222.222.222',
       method: 'delete'
@@ -326,7 +325,7 @@ describe('Delete', () => {
     assert.equal(res.status, 404);
   });
 
-  it('should fail with 400 if series is used in a plugin-job', async () => {
+  test('returns 400 when a plug-in job references the series', async () => {
     const res = await ax.dave.request({
       url: 'api/series/111.222.333.444.555',
       method: 'delete'
@@ -334,7 +333,7 @@ describe('Delete', () => {
     assert.equal(res.status, 400);
   });
 
-  it('should fail with 400 if series is used in a clinical-case', async () => {
+  test('returns 400 when a clinical case references the series', async () => {
     const res = await ax.dave.request({
       url: 'api/series/111.222.333.444.888',
       method: 'delete'
@@ -348,7 +347,7 @@ describe('Delete file', () => {
     await setUpMongoFixture(apiTest.database.db, ['series']);
   });
 
-  it('should delete single DICOM file', async () => {
+  test('deletes a single DICOM file', async () => {
     const dicomFileRepository = apiTest.dicomFileRepository;
     const series = await dicomFileRepository.getSeries('222.333.444.555.666');
     const input = new Uint8Array('abcde'.split('').map(c => c.charCodeAt(0)));
@@ -362,7 +361,7 @@ describe('Delete file', () => {
     assert.equal(series2.images, '');
   });
 
-  it('should throw 404 for deletion of nonexistent series', async () => {
+  test('returns 404 when deleting a nonexistent series', async () => {
     const res = await ax.dave.request({
       url: 'api/series/nonexistentSeries',
       method: 'delete'
@@ -378,7 +377,7 @@ describe('search by my list', () => {
     await setUpMongoFixture(apiTest.database.db, ['users']);
   });
 
-  test('search succeeds', async () => {
+  test('returns accessible series from the list', async () => {
     const res = await ax.dave.request({
       url: `api/series/list/${myListId}`,
       method: 'get'
@@ -388,7 +387,7 @@ describe('search by my list', () => {
     assert.equal(res.data.items[0].patientInfo.patientName, 'Koume');
   });
 
-  test('should not return patient info when personalInfoView = false', async () => {
+  test('omits patient information when personalInfoView is disabled', async () => {
     await apiTest.database.db
       .collection('users')
       .updateOne(
@@ -404,7 +403,7 @@ describe('search by my list', () => {
     assert.equal(res.data.items[0].patientInfo, undefined);
   });
 
-  test('can not search when use nonexistent myListId in myList', async () => {
+  test('returns 404 for a nonexistent my list', async () => {
     const nonexistentId = '11111111111111111111111111';
     const res = await ax.dave.request({
       url: `api/series/list/${nonexistentId}`,
@@ -413,7 +412,7 @@ describe('search by my list', () => {
     assert.equal(res.status, 404);
   });
 
-  test('should not return results if domain check fails', async () => {
+  test('returns an empty list when the user lacks domain access', async () => {
     await apiTest.database.db
       .collection('users')
       .updateOne({ userEmail: 'dave@example.com' }, { $set: { groups: [] } });
@@ -425,7 +424,7 @@ describe('search by my list', () => {
     assert.equal(res.data.items.length, 0);
   });
 
-  test('should throw 400 for non-series mylist type', async () => {
+  test('returns 400 when the my list contains a different resource type', async () => {
     const caseMyListId = '01ezab6xqfac7hvm5s09yw1g1j';
     const res = await ax.dave.request({
       url: `api/series/list/${caseMyListId}`,

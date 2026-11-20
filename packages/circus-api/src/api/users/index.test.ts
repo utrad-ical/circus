@@ -16,7 +16,7 @@ beforeEach(async () => {
   await setUpMongoFixture(apiTest.database.db, ['pluginDefinitions']);
 });
 
-test('return user info by userEmail', async () => {
+test('returns user information by email address', async () => {
   const res = await client.get('api/users/alice@example.com');
   assert.equal(res.status, 200);
   assert.partialDeepStrictEqual(res.data, {

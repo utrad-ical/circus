@@ -28,7 +28,7 @@ describe('MongoPluginDefinitionAccesor', () => {
     await mongoClientPool.dispose();
   });
 
-  test('get plugin definition', async () => {
+  test('returns the plug-in definition', async () => {
     const collectionName = 'pluginDefinitions';
     const accessor = await createMongoPluginDefinitionAccessor(
       { collectionName },

@@ -28,7 +28,7 @@ before(async () => {
 });
 after(async () => await apiTest.tearDown());
 
-test('Create / search / delete token', async () => {
+test('creates, lists, and deletes an access token', async () => {
   const res1 = await client.post('/api/tokens', { description: 'stella' });
   assert.equal(res1.status, httpStatus.CREATED);
   const tokenId = res1.data.tokenId;

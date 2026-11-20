@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
-import { describe, test, it } from 'node:test';
+import { describe, test } from 'node:test';
 import { Vector3, Box3 } from 'three';
 import * as box from './Box.ts';
 
 describe('intersectionOfBoxAndPlane', () => {
   const cube = new Box3(new Vector3(0, 0, 0), new Vector3(2, 2, 2));
 
-  it('must return 4 points with box and axial section', () => {
+  test('returns four points for intersecting axial planes and none outside the box', () => {
     const test = (z: number, points: number[][]) => {
       const intersections = box.intersectionOfBoxAndPlane(cube, {
         origin: [0, 0, z],

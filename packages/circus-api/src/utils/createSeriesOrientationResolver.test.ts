@@ -60,7 +60,7 @@ test('foot-first', async () => {
   assert.deepEqual(result, { start: 10, end: 1, delta: -1 });
 });
 
-test('should return head-first if single image series', async () => {
+test('returns head-first for a single-image series', async () => {
   const dicomTagReader = await createDicomTagReader({});
   const series = await dicomFileRepository.getSeries(
     '2.16.840.1.113662.2.1.2519.21582.2990505.2105152.2381633.20'

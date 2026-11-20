@@ -11,7 +11,7 @@ test('count up', async () => {
   assert.equal(counter.getCount('bar'), 0);
 });
 
-test('return set of counters', async () => {
+test('returns the set of counters', async () => {
   const counter = await createCounter({});
   counter.countUp('foo');
   counter.countUp('bar');

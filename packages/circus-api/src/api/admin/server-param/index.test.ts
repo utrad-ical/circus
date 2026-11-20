@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { it, before, after, beforeEach } from 'node:test';
+import { test, before, after, beforeEach } from 'node:test';
 import type { ApiTest } from '../../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../../test/util-routes.ts';
 import { setUpMongoFixture } from '../../../test/util-mongo.ts';
@@ -16,7 +16,7 @@ beforeEach(async () => {
   await setUpMongoFixture(apiTest.database.db, ['serverParams']);
 });
 
-it('should return parameters', async () => {
+test('returns parameters', async () => {
   const res = await client.get('api/admin/server-params');
   assert.deepEqual(res.data, {
     foo: 'bar',
@@ -25,12 +25,12 @@ it('should return parameters', async () => {
   });
 });
 
-it('should return one parameter', async () => {
+test('returns one parameter', async () => {
   const res = await client.get('api/admin/server-params/color');
   assert.deepEqual(res.data, ['green', 'black', 'blue']);
 });
 
-it('should update one parameter', async () => {
+test('updates one parameter', async () => {
   const res = await client.request({
     url: 'api/admin/server-params/color',
     method: 'put',
@@ -41,7 +41,7 @@ it('should update one parameter', async () => {
   assert.deepEqual(res2.data.color, ['orange']);
 });
 
-it('should bulk-update parametes', async () => {
+test('updates several server parameters at once', async () => {
   const res = await client.request({
     url: 'api/admin/server-params',
     method: 'put',

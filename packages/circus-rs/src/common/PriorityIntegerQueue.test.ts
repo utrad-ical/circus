@@ -48,7 +48,7 @@ test('high-priority items precede, LIFO', () => {
   assert.deepEqual(extract(queue), [50, 2, 3, 9, 7, 6, 8, 1, 4, 5, 10]);
 });
 
-test('overwrite low-priority queue items', () => {
+test('overwrites low-priority queue items', () => {
   const queue = new PriorityIntegerQueue();
   queue.append('1-6', 1);
   queue.append('2-4', 3);

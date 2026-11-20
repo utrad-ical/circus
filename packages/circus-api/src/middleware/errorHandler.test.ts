@@ -52,17 +52,17 @@ after(async () => {
   await testServer.tearDown();
 });
 
-test('should return 200 for normal request', async () => {
+test('returns 200 for a valid request', async () => {
   const res = await ax.get('found');
   assert.equal(res.status, 200);
 });
 
-test('should return 404 for nonexistent path', async () => {
+test('returns 404 for a nonexistent path', async () => {
   const res = await ax.get('not-found');
   assert.equal(res.status, 404);
 });
 
-test('should return 400 for request validation error', async () => {
+test('returns 400 when request validation fails', async () => {
   const res = await ax.get('invalid-on-request');
   assert.equal(res.status, 400);
   assert.equal(res.data.error, 'Validation failed.');
@@ -71,7 +71,7 @@ test('should return 400 for request validation error', async () => {
   ]);
 });
 
-test('should return 500 for server-side validation error', async () => {
+test('returns 500 when response validation fails', async () => {
   const res = await ax.get('invalid-on-response');
   assert.equal(res.status, 500);
   assert.match(res.data.error, /response schema validation error/i);
@@ -239,13 +239,13 @@ test('correlates embedded RS volume load failures with the HTTP request', async 
   assert.doesNotMatch(lines.join(''), /Synthetic volume load failure/);
 });
 
-test('should return 500 for server-side run-time error', async () => {
+test('returns 500 when the request handler throws', async () => {
   const res = await ax.get('server-side-error');
   assert.equal(res.status, 500);
   assert.ok('stack' in res.data);
 });
 
-test('should return 403 for server-side access error', async () => {
+test('returns 403 when the handler denies access', async () => {
   const res = await ax.get('error-403');
   assert.equal(res.status, 403);
   assert.match(res.data.error, /no!/);

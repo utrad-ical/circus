@@ -8,7 +8,7 @@ import parser from 'dicom-parser';
 const testDir = path.join(import.meta.dirname, '../../test/dicom');
 const dockerImage = 'circuscad/dicom_utility:2.0.0-beta3';
 
-test('compress DICOM file', async () => {
+test('compresses DICOM files using the lossless transfer syntax', async () => {
   const inBuffer = await fs.readFile(
     path.join(testDir, 'CT-MONO2-16-brain.dcm')
   );
@@ -28,7 +28,7 @@ test('compress DICOM file', async () => {
   }
 });
 
-test('reject if Docker image is invalid', async () => {
+test('rejects an invalid Docker image', async () => {
   const inBuffer = await fs.readFile(
     path.join(testDir, 'CT-MONO2-16-brain.dcm')
   );
@@ -42,7 +42,7 @@ test('reject if Docker image is invalid', async () => {
   await runner.dispose();
 });
 
-test('rejects with broken DICOM file', async () => {
+test('rejects malformed DICOM input', async () => {
   const inBuffer = Buffer.from('abcde'.repeat(1024), 'utf8');
   const runner = await createDicomUtilityRunner({
     maxConcurrency: 3,

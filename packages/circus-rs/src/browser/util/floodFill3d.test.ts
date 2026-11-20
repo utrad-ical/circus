@@ -49,20 +49,19 @@ describe('floodFill3d with binarizer that always returns ture', () => {
         8|----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|
         9|----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|
   `;
-  test('must fill all voxels in specified box if start from the center', () =>
-    runFrom(5, 5, 5));
-  test('must fill all voxels in specified box if start from the min offset', () =>
+  test('fills the box when starting at its center', () => runFrom(5, 5, 5));
+  test('fills the box when starting at its minimum corner', () =>
     runFrom(3, 3, 3));
-  test('must fill all voxels in specified box if start from the max offset', () =>
+  test('fills the box when starting at its maximum corner', () =>
     runFrom(6, 6, 6));
-  test('must not fill nowhere if start from the over the max of the box', () =>
+  test('leaves the volume unchanged when starting beyond the box maximum', () =>
     runFrom(7, 6, 6, false));
-  test('must not fill nowhere if start from the under the min of the box', () =>
+  test('leaves the volume unchanged when starting below the box minimum', () =>
     runFrom(3, 3, 2, false));
 });
 
 describe('floodFill3d with gourd-shaped binarizer', () => {
-  test('must fill correctly', () => {
+  test('fills the gourd-shaped region', () => {
     const expectedResult = `
     x: 0 - 12
          |[0]          |[1]          |[2]          |[3]          |[4]          |[5]          |[6]          |[7]          |[8]          |[9]          |
@@ -102,7 +101,7 @@ describe('floodFill3d with gourd-shaped binarizer', () => {
       expectedResult.replace(/\s+/g, '')
     );
   });
-  test('must not fill anywhere if the start point does not satisfy the condition', () => {
+  test('leaves the volume unchanged when the starting voxel fails the condition', () => {
     const gourdShapedBinarizer = createDualBallShapedBinarizer(
       [3, 3, 3],
       3,
@@ -123,7 +122,7 @@ describe('floodFill3d with gourd-shaped binarizer', () => {
 });
 
 describe('floodFill3d with separated 2 balls binarizer', () => {
-  test('must fill two balls by 2 calls and does not reference each diagonal direction', () => {
+  test('fills two diagonally adjacent regions in separate calls', () => {
     const expectedResult1 = `
     x: 0 - 15
          |[0]             |[1]             |[2]             |[3]             |[4]             |[5]             |[6]             |[7]             |[8]             |[9]             |[10]            |[11]            |[12]            |[13]            |[14]            |[15]            |

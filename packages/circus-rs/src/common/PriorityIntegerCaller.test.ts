@@ -5,7 +5,7 @@ import * as mr from 'multi-integer-range';
 
 const sleep = () => new Promise(resolve => setTimeout(resolve, 10));
 
-test('must support priority according to PriorityIntegerQueue algorithm', async () => {
+test('invokes callbacks in queue priority order', async () => {
   const result: number[] = [];
   const callback = async (index: number) => {
     await sleep();
@@ -32,7 +32,7 @@ test('must support priority according to PriorityIntegerQueue algorithm', async 
   assert.deepEqual(result, [1, 3, 2].concat([4, 5, 7, 6]));
 });
 
-test('must invoke the callback only once for each integer', async () => {
+test('invokes the callback only once for each integer', async () => {
   const result: number[] = [];
   const callback = async (index: number) => {
     await sleep();
@@ -48,7 +48,7 @@ test('must invoke the callback only once for each integer', async () => {
   assert.deepEqual(result, [1, 2]);
 });
 
-test('must handle rejection', async () => {
+test('reports a rejected callback', async () => {
   const result: number[] = [];
   const callback = async (index: number) => {
     await sleep();
@@ -64,7 +64,7 @@ test('must handle rejection', async () => {
   await loader.waitFor('9-10'); // must not throw
 });
 
-test('must accept initial resolved range', async () => {
+test('accepts a range of already resolved integers', async () => {
   const result: number[] = [];
   const callback = async (index: number) => {
     await sleep();
@@ -81,7 +81,7 @@ test('must accept initial resolved range', async () => {
   assert.equal(mr.has(mr.normalize(result), mr.parse('1-4, 9-10')), true);
 });
 
-test('must not call the function for initially resolved integers', async () => {
+test('skips callbacks for initially resolved integers', async () => {
   const called: number[] = [];
   const loader = new PriorityIntegerCaller(
     async (index: number) => {
@@ -98,13 +98,13 @@ test('must not call the function for initially resolved integers', async () => {
   assert.deepEqual(loader.resolvedRange, [[1, 10]]);
 });
 
-test('can call waitFor before appending', (_t, done) => {
+test('resolves waitFor when the integer is appended later', (_t, done) => {
   const loader = new PriorityIntegerCaller(async () => {});
   loader.waitFor('1-10').then(() => done());
   loader.append('1-10');
 });
 
-test('must accept maxConcurrency', async () => {
+test('limits concurrent callbacks to maxConcurrency', async () => {
   const result: number[] = [];
   const callback = async (index: number) => {
     await sleep();

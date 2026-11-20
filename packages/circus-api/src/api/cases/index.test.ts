@@ -20,7 +20,7 @@ after(async () => await apiTest.tearDown());
 const cid = 'faeb503e97f918c882453fd2d789f50f4250267740a0b3fbcc85a529f2d7715b';
 
 describe('search', () => {
-  test('search all', async () => {
+  test('returns all matching cases without a filter', async () => {
     const res = await ax.bob.request({
       url: 'api/cases',
       method: 'get'
@@ -33,7 +33,7 @@ describe('search', () => {
     );
   });
 
-  test('search with patient name', async () => {
+  test('filters cases by patient name', async () => {
     const res = await ax.carol.get('api/cases', {
       params: {
         filter: JSON.stringify({ 'patientInfo.patientName': 'Anzu' })
@@ -44,7 +44,7 @@ describe('search', () => {
     assert.equal(res.data.items[0].patientInfo.patientName, 'Anzu');
   });
 
-  test('search with patient name in regex', async () => {
+  test('filters cases by a regular expression on patient name', async () => {
     const res = await ax.carol.get('api/cases', {
       params: {
         filter: JSON.stringify({ 'patientInfo.patientName': { $regex: '^An' } })
@@ -55,7 +55,7 @@ describe('search', () => {
     assert.equal(res.data.items[0].patientInfo.patientName, 'Anzu');
   });
 
-  test('throw 400 if search using patient information for unprivileged user', async () => {
+  test('returns 400 when a user without permission filters by patient information', async () => {
     // Frank has no global privilege `personalInfoView`.
     const res = await ax.frank.get('api/cases', {
       params: { filter: JSON.stringify({ 'patientInfo.patientName': 'Anzu' }) }
@@ -63,7 +63,7 @@ describe('search', () => {
     assert.equal(res.status, 400);
   });
 
-  test('should be searchable if patient information is not used', async () => {
+  test('allows searches without a patient-information filter', async () => {
     const res = await ax.frank.get('api/cases', {
       params: { filter: JSON.stringify({ caseId: cid }) }
     });
@@ -71,7 +71,7 @@ describe('search', () => {
     assert.equal(res.data.items.length, 1);
   });
 
-  test('search from user with no viewPersonalInfo privilege', async () => {
+  test('omits patient information without the viewPersonalInfo privilege', async () => {
     // Bob has no `viewPersonalInfo` privilege for the default project,
     // so the results from this project will be excluded.
     const res = await ax.bob.get('api/cases', {
@@ -91,7 +91,7 @@ describe('search', () => {
     assert.equal(res.data.items.length, 0);
   });
 
-  test('throw 400 for wrong request', async () => {
+  test('returns 400 for malformed search filters or sort options', async () => {
     const res1 = await ax.alice.get('api/cases', {
       params: { filter: 'invalid-json' }
     });
@@ -113,7 +113,7 @@ describe('search', () => {
 });
 
 describe('create', () => {
-  test('create new case', async () => {
+  test('creates a case', async () => {
     const res = await ax.bob.request({
       url: 'api/cases/',
       method: 'post',
@@ -136,7 +136,7 @@ describe('create', () => {
     assert.equal(res.data.caseId.length, 26);
   });
 
-  test('throw error for different domains in one series', async () => {
+  test('returns 400 when the series belong to different domains', async () => {
     const res = await ax.bob.request({
       url: 'api/cases/',
       method: 'post',
@@ -169,7 +169,7 @@ describe('create', () => {
     );
   });
 
-  test('throw for invalid series image range', async () => {
+  test('returns 400 when the series image range is out of bounds', async () => {
     const res = await ax.bob.request({
       url: 'api/cases/',
       method: 'post',
@@ -189,7 +189,7 @@ describe('create', () => {
     assert.match(res.data.error, /specified range is invalid/i);
   });
 
-  test('reject creation without write privilege for the project', async () => {
+  test('rejects creation without write privilege for the project', async () => {
     const res = await ax.alice.post('api/cases', {
       projectId: '8883fdef6f5144f50eb2a83cd34baa44',
       series: [
@@ -207,7 +207,7 @@ describe('create', () => {
     );
   });
 
-  test('reject an image range with a zero step', async () => {
+  test('rejects an image range with a zero step', async () => {
     const res = await ax.bob.post('api/cases', {
       projectId: '8883fdef6f5144f50eb2a83cd34baa44',
       series: [
@@ -222,7 +222,7 @@ describe('create', () => {
     assert.equal(res.data.error, 'Invalid image range.');
   });
 
-  test('reject creation with a series from an inaccessible domain', async () => {
+  test('rejects creation with a series from an inaccessible domain', async () => {
     for (const partialVolumeDescriptor of [
       { start: 1, end: 10, delta: 1 },
       'auto'
@@ -237,7 +237,7 @@ describe('create', () => {
     }
   });
 
-  test('reject a missing series with either an explicit or automatic range', async () => {
+  test('rejects a missing series with either an explicit or automatic range', async () => {
     for (const partialVolumeDescriptor of [
       { start: 1, end: 10, delta: 1 },
       'auto'
@@ -254,7 +254,7 @@ describe('create', () => {
 });
 
 describe('get one case', () => {
-  test('return single case information', async () => {
+  test('returns details for a single case', async () => {
     const res = await ax.bob.request({
       url: `api/cases/${cid}`,
       method: 'get'
@@ -263,14 +263,14 @@ describe('get one case', () => {
     assert.ok('revisions' in res.data);
   });
 
-  test('return 404 for nonexistent case', async () => {
+  test('returns 404 for a nonexistent case', async () => {
     const res = await ax.bob.request({
       url: 'api/cases/thiscaseisinvalid'
     });
     assert.equal(res.status, 404);
   });
 
-  test('reject revision read access from unauthorized user', async () => {
+  test('rejects revision reads from an unauthorized user', async () => {
     const res = await ax.guest.get(`api/cases/${cid}`);
     assert.equal(res.status, 401);
     assert.match(res.data.error, /read/);
@@ -278,7 +278,7 @@ describe('get one case', () => {
 });
 
 describe('add revision', () => {
-  test('add a revision', async () => {
+  test('adds a revision', async () => {
     const res = await ax.bob.request({
       url: `api/cases/${cid}/revision`,
       method: 'post',
@@ -300,7 +300,7 @@ describe('add revision', () => {
     assert.equal(res2.data.revisions[1].creator, 'bob@example.com');
   });
 
-  test('add a revision with labels', async () => {
+  test('adds a revision with labels', async () => {
     const res = await ax.bob.request({
       url: `api/cases/${cid}/revision`,
       method: 'post',
@@ -398,7 +398,7 @@ describe('add revision', () => {
     assert.equal(res.status, 201);
   });
 
-  test('reject revision addition with invalid labels', async () => {
+  test('rejects a voxel payload labeled as a rectangle', async () => {
     const res = await ax.bob.request({
       url: `api/cases/${cid}/revision`,
       method: 'post',
@@ -429,7 +429,7 @@ describe('add revision', () => {
     assert.equal(res.status, 400);
   });
 
-  test('check attributes with the project schemas', async () => {
+  test('validates attributes against the project schemas', async () => {
     const projects = apiTest.database.db.collection('projects');
     const projectId = '8883fdef6f5144f50eb2a83cd34baa44';
     await projects.updateOne(
@@ -499,7 +499,7 @@ describe('add revision', () => {
     }
   });
 
-  test('reject a revision with invalid labels', async () => {
+  test('rejects revisions with missing series or invalid voxel data', async () => {
     const post = (series: any) =>
       ax.bob.post(`api/cases/${cid}/revision`, {
         description: 'Invalid',
@@ -537,7 +537,7 @@ describe('add revision', () => {
     );
   });
 
-  test('reject revision addition with nonexistent voxel', async () => {
+  test('rejects a revision that references nonexistent voxel data', async () => {
     const res = await ax.bob.request({
       url: `api/cases/${cid}/revision`,
       method: 'post',
@@ -570,7 +570,7 @@ describe('add revision', () => {
     assert.ok(res.data.error.includes('Some voxel data are missing'));
   });
 
-  test('reject revision addition from unauthorized user', async () => {
+  test('rejects new revisions from an unauthorized user', async () => {
     const res = await ax.guest.request({
       url: `api/cases/${cid}/revision`,
       method: 'post',
@@ -582,7 +582,7 @@ describe('add revision', () => {
 });
 
 describe('put tags', () => {
-  test('change tags', async () => {
+  test('changes tags', async () => {
     const res = await ax.bob.put(`api/cases/${cid}/tags`, [
       'XXX',
       'YYY',
@@ -593,14 +593,14 @@ describe('put tags', () => {
     assert.deepEqual(data.tags, ['XXX', 'YYY', 'ZZZ']);
   });
 
-  test('reject invalid tags', async () => {
+  test('rejects invalid tags', async () => {
     const res = await ax.bob.put(`api/cases/${cid}/tags`, [123, 444]);
     assert.equal(res.status, 400);
     const res2 = await ax.bob.put(`api/cases/${cid}/tags`, { some: 'data' });
     assert.equal(res2.status, 400);
   });
 
-  test('reject tag writes from unauthorized user', async () => {
+  test('rejects tag writes from an unauthorized user', async () => {
     const res = await ax.guest.put(`api/cases/${cid}/tags`, []);
     assert.equal(res.status, 401);
     assert.match(res.data.error, /write/);
@@ -626,7 +626,7 @@ describe('search by mylist', () => {
     );
   });
 
-  test('return 404 for nonexistent list id', async () => {
+  test('returns 404 for a nonexistent my list', async () => {
     const res = await ax.bob.get('api/cases/list/dummy');
     assert.equal(res.status, 404);
   });
@@ -646,7 +646,7 @@ describe('search by mylist', () => {
     assert.equal(res.data.items.length, 1);
   });
 
-  test('return 400 for my list for different resource type', async () => {
+  test('returns 400 when the my list contains a different resource type', async () => {
     const res = await ax.bob.get('api/cases/list/01ex36wt9c94s93j0rmk98nsj0');
     assert.equal(res.status, 400);
   });
@@ -657,7 +657,7 @@ describe('patch tags', () => {
     await setUpMongoFixture(apiTest.database.db, ['clinicalCases']);
   });
 
-  test('add tags', async () => {
+  test('adds tags', async () => {
     const res = await ax.bob.patch('api/cases/tags', {
       operation: 'add',
       caseIds: [cid],
@@ -668,7 +668,7 @@ describe('patch tags', () => {
     assert.deepEqual(res2.data.tags, ['happy', 'ufo', 'party']);
   });
 
-  test('remove tags', async () => {
+  test('removes tags', async () => {
     const res = await ax.bob.patch('api/cases/tags', {
       operation: 'remove',
       caseIds: [cid],
@@ -679,7 +679,7 @@ describe('patch tags', () => {
     assert.deepEqual(res2.data.tags, []);
   });
 
-  test('set tags', async () => {
+  test('sets tags', async () => {
     const res = await ax.bob.patch('api/cases/tags', {
       operation: 'set',
       caseIds: [cid],
@@ -690,7 +690,7 @@ describe('patch tags', () => {
     assert.deepEqual(res2.data.tags, ['check']);
   });
 
-  test('throw for bad operation', async () => {
+  test('returns 400 when the tag operation is missing', async () => {
     const res = await ax.bob.patch('api/cases/tags', {
       caseIds: [cid],
       tags: ['check']
@@ -698,7 +698,7 @@ describe('patch tags', () => {
     assert.equal(res.status, 400);
   });
 
-  test('throw 404 for nonexistent case', async () => {
+  test('returns 404 for a nonexistent case', async () => {
     const res = await ax.bob.patch('api/cases/tags', {
       operation: 'remove',
       caseIds: ['thisCaseDoesNotExist'],
@@ -707,7 +707,7 @@ describe('patch tags', () => {
     assert.equal(res.status, 404);
   });
 
-  test('reject add-tags from unauthoried user', async () => {
+  test('rejects tag additions from an unauthorized user', async () => {
     const res = await ax.guest.patch('api/cases/tags', {
       operation: 'add',
       caseIds: [cid],
@@ -725,7 +725,7 @@ describe('delete', () => {
   const caseId =
     'gfdrjivu4w8p57nv95p7n485n3p891ygy6543wedfuyt67oiulkjhtrw312wergr';
 
-  test('delete one case forcibly', async () => {
+  test('forcibly deletes a case', async () => {
     const res = await ax.bob.request({
       url: `api/cases/${caseId}?force=1`,
       method: 'delete'
@@ -741,7 +741,7 @@ describe('delete', () => {
     assert.deepEqual(aCase, null);
   });
 
-  test('throw 401 for unauthorized user', async () => {
+  test('returns 401 for an unauthorized user', async () => {
     const res = await ax.alice.request({
       url: `api/cases/${caseId}`,
       method: 'delete'
@@ -753,7 +753,7 @@ describe('delete', () => {
     );
   });
 
-  test('throw 403 if the case is in some mylist', async () => {
+  test('returns 403 when a my list contains the case', async () => {
     const res = await ax.bob.request({
       url: `api/cases/${caseId}`,
       method: 'delete'
@@ -762,7 +762,7 @@ describe('delete', () => {
     assert.equal(res.data.error, "This case is in someone's my list.");
   });
 
-  test('throw 404 for nonexistent caseId', async () => {
+  test('returns 404 for a nonexistent case', async () => {
     const res = await ax.bob.request({
       url: 'api/cases/nonexistentCaseId',
       method: 'delete'

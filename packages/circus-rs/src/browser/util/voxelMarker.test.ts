@@ -5,7 +5,7 @@ import createMarkedStateDumper from './createMarkedStateDumper.ts';
 import type { VoxelMarker } from './voxelMarker.ts';
 import voxelMarker from './voxelMarker.ts';
 
-test('voxelMarker must work exactly', () => {
+test('matches the reference marker on randomized inputs', () => {
   for (let i = 0; i < 10; i++) {
     const [o, s, markArguments] = randArg();
     const boundary = new Box3(o, o.clone().add(s));

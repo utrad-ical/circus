@@ -277,7 +277,7 @@ describe('RS', () => {
 // Runs last: a successful GET /api/logout deletes all tokens of alice,
 // including the Bearer token used by the other tests
 describe('GET /api/logout', () => {
-  test('GET /api/logout with the cookie requires the CSRF header', async () => {
+  test('requires the CSRF header for GET /api/logout with a session cookie', async () => {
     const cookie = await loginAsAlice();
     const res1 = await ax.get('api/logout', { headers: { Cookie: cookie } });
     assert.equal(res1.status, httpStatus.FORBIDDEN);

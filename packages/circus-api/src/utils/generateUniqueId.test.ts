@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
-import { it } from 'node:test';
+import { test } from 'node:test';
 import generateUniqueId from './generateUniqueId.ts';
 
-it('generateUniqueId', () => {
+test('generates a 26-character lowercase alphanumeric ID', () => {
   const id = generateUniqueId();
   assert.match(id, /^[0-9a-z]{26}$/);
 });

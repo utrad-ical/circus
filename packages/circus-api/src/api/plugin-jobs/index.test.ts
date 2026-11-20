@@ -41,13 +41,13 @@ after(async () => await apiTest.tearDown());
 // 111.222.333.444.777: (236) [vega.org]
 
 describe('plugin-job search', () => {
-  test('List plug-in jobs', async () => {
+  test('lists plug-in jobs', async () => {
     const res = await dave.get('api/plugin-jobs');
     assert.equal(res.status, 200);
     assert.equal(Array.isArray(res.data.items), true);
   });
 
-  test('Filter by patientInfo', async () => {
+  test('filters by patient information', async () => {
     const res = await dave.get('api/plugin-jobs', {
       params: {
         filter: JSON.stringify({ 'patientInfo.patientName': 'Sakura' })
@@ -58,7 +58,7 @@ describe('plugin-job search', () => {
     assert.equal(res.data.items[0].patientInfo.age, 20);
   });
 
-  test('Filter by series info', async () => {
+  test('filters by series information', async () => {
     const res = await dave.get('api/plugin-jobs', {
       params: {
         // filter: JSON.stringify({ modality: 'CR' })
@@ -71,19 +71,19 @@ describe('plugin-job search', () => {
     assert.equal(res.data.items.length, 2);
   });
 
-  test('Filter by power user domain', async () => {
+  test('returns jobs in accessible domains for a power user', async () => {
     const res = await bob.get('api/plugin-jobs');
     assert.equal(res.status, 200);
     assert.equal(res.data.items.length, 2);
   });
 
-  test('Filter by guest domain', async () => {
+  test('returns no jobs for a guest without domain access', async () => {
     const res = await guest.get('api/plugin-jobs');
     assert.equal(res.status, 200);
     assert.equal(res.data.items.length, 0);
   });
 
-  test('throw 400 if search using patient information for unprivileged user', async () => {
+  test('returns 400 when a user without permission filters by patient information', async () => {
     // Frank has no global privilege `personalInfoView`.
     const res = await frank.get('api/plugin-jobs', {
       params: {
@@ -93,7 +93,7 @@ describe('plugin-job search', () => {
     assert.equal(res.status, 400);
   });
 
-  test('should not be able to filter by patientInfo if user has no viewPersonalInfo', async () => {
+  test('returns no matches for a patient-information filter without the plug-in privilege', async () => {
     // Alice has global privilege `personalInfoView` but no viewPersonalInfo for plugins.
     const res = await alice.get('api/plugin-jobs', {
       params: {
@@ -104,7 +104,7 @@ describe('plugin-job search', () => {
     assert.equal(res.data.items.length, 0);
   });
 
-  test('should be searchable if patient information is not used', async () => {
+  test('allows searches without a patient-information filter', async () => {
     const res = await frank.get('api/plugin-jobs', {
       params: {
         'filter[pluginId]':
@@ -122,28 +122,28 @@ describe('search by mylist', () => {
   });
   const myListId = '01ezahm939cbyfk73g3jhw1d0b';
 
-  test('search succeeds', async () => {
+  test('returns accessible plug-in jobs from the list', async () => {
     const res = await dave.get(`api/plugin-jobs/list/${myListId}`);
     assert.equal(res.status, 200);
     assert.equal(res.data.items.length, 1);
     assert.equal(res.data.items[0].patientInfo.patientName, 'Koume');
   });
 
-  test('throw 404 if use nonexistent myListId in my list', async () => {
+  test('returns 404 for a nonexistent my list', async () => {
     const nonexistentMyListId = '11111111111111111111111111';
     const res = await dave.get(`api/plugin-jobs/list/${nonexistentMyListId}`);
     assert.equal(res.status, 404);
     assert.equal(res.data.error, 'This my list does not exist');
   });
 
-  test('should throw 400 for non-plugin-job mylist type', async () => {
+  test('returns 400 when the my list contains a different resource type', async () => {
     const caseMyListId = '01ezab6xqfac7hvm5s09yw1g1j';
     const res = await dave.get(`api/plugin-jobs/list/${caseMyListId}`);
     assert.equal(res.status, 400);
     assert.equal(res.data.error, 'This my list is not for plugin jobs');
   });
 
-  test('should not return results if domain check fails', async () => {
+  test('returns an empty list when the user lacks domain access', async () => {
     await apiTest.database.db
       .collection('users')
       .updateOne({ userEmail: 'dave@example.com' }, { $set: { groups: [] } });
@@ -152,7 +152,7 @@ describe('search by mylist', () => {
     assert.equal(res.data.items.length, 0);
   });
 
-  test('should not return patient info when personalInfoView = false', async () => {
+  test('omits patient information when personalInfoView is disabled', async () => {
     await apiTest.database.db
       .collection('users')
       .updateOne(
@@ -165,7 +165,7 @@ describe('search by mylist', () => {
     assert.equal(res.data.items[0].patientInfo, undefined);
   });
 
-  test('should not return patient info when there is no privileges', async () => {
+  test('omits patient information without the required privilege', async () => {
     await apiTest.database.db
       .collection('groups')
       .updateMany(
@@ -180,7 +180,7 @@ describe('search by mylist', () => {
 });
 
 describe('plugin-job registration', () => {
-  test('should register a new plug-in job if a user has executePlugin', async () => {
+  test('registers a plug-in job for a user with the executePlugin privilege', async () => {
     const res = await dave.request({
       method: 'post',
       url: 'api/plugin-jobs',
@@ -198,7 +198,7 @@ describe('plugin-job registration', () => {
     assert.equal(res.status, 201);
   });
 
-  test('should not register a new plug-in job if a user has no executePlugin', async () => {
+  test('rejects job registration without the executePlugin privilege', async () => {
     const res = await frank.request({
       method: 'post',
       url: 'api/plugin-jobs',
@@ -217,7 +217,7 @@ describe('plugin-job registration', () => {
     assert.match(res.data.error, /executePlugin/);
   });
 
-  test('should reject a job with a series from an inaccessible domain', async () => {
+  test('rejects a job whose series belongs to an inaccessible domain', async () => {
     for (const partialVolumeDescriptor of [
       { start: 25, end: 85, delta: 3 },
       'auto'
@@ -232,7 +232,7 @@ describe('plugin-job registration', () => {
     }
   });
 
-  test('should reject if series image out of range', async () => {
+  test('rejects a job whose image range exceeds the series bounds', async () => {
     // Series image out of range
     const res = await dave.request({
       method: 'post',
@@ -252,7 +252,7 @@ describe('plugin-job registration', () => {
     assert.equal(res.status, 400);
   });
 
-  test('should reject if series lacks PVD', async () => {
+  test('rejects a job whose series is missing a partial volume descriptor', async () => {
     // Lacks partial volume descriptor
     const res = await dave.request({
       method: 'post',
@@ -267,7 +267,7 @@ describe('plugin-job registration', () => {
     assert.equal(res.status, 400);
   });
 
-  test('should register a job with automatic PVD', async () => {
+  test('registers a job with an automatically selected partial volume descriptor', async () => {
     const res = await dave.request({
       method: 'post',
       url: 'api/plugin-jobs',
@@ -285,7 +285,7 @@ describe('plugin-job registration', () => {
     assert.equal(res.status, 201);
   });
 
-  test('should reject for unmatched series domain', async () => {
+  test('rejects a job whose series belong to different domains', async () => {
     const res = await bob.request({
       method: 'post',
       url: 'api/plugin-jobs',
@@ -321,13 +321,13 @@ describe('plugin-job registration', () => {
         }
       ]
     };
-    test('should reject for duplicated job', async () => {
+    test('rejects a duplicate job', async () => {
       const res = await bob.post('api/plugin-jobs', job);
       assert.equal(res.status, 400);
       assert.ok(res.data.error.includes('duplicate'));
     });
 
-    test('should not reject when "force" flag is set', async () => {
+    test('accepts a duplicate job when force is enabled', async () => {
       const res = await bob.post('api/plugin-jobs', { ...job, force: true });
       assert.equal(res.status, 201);
     });
@@ -383,7 +383,7 @@ describe('job invalidation', () => {
   });
 });
 
-test('should return a finished plug-in job', async () => {
+test('returns a finished plug-in job', async () => {
   const res = await dave.request({
     url: 'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa'
   });
@@ -393,7 +393,7 @@ test('should return a finished plug-in job', async () => {
 });
 
 describe('register feedback', () => {
-  test('should register a new feedback entry', async () => {
+  test('registers a new feedback entry', async () => {
     const res = await dave.request({
       url: 'api/plugin-jobs/01dxgwvhwhyjt8hd4srsf9z4te/feedback/personal',
       method: 'post',
@@ -402,7 +402,7 @@ describe('register feedback', () => {
     assert.equal(res.status, status.OK);
   });
 
-  test('should return a list of feedback entries', async () => {
+  test('returns a list of feedback entries', async () => {
     const res = await dave.request({
       url: 'api/plugin-jobs/01dxgwvhwhyjt8hd4srsf9z4te/feedback',
       method: 'get'
@@ -424,7 +424,7 @@ describe('delete feedback', () => {
     await setUpMongoFixture(apiTest.database.db, ['users', 'pluginJobs']);
   });
 
-  test('delete one feedback', async () => {
+  test('deletes a single feedback entry', async () => {
     const res = await alice.delete(
       `api/plugin-jobs/${jobId}/feedback/01grtppnyxbdherkv2krd2n72a`
     );
@@ -432,21 +432,21 @@ describe('delete feedback', () => {
     assert.equal(await getCount(), 2);
   });
 
-  test('should not delete one feedback if a user has no manageFeedback', async () => {
+  test('rejects feedback deletion without the manageFeedback privilege', async () => {
     const res = await frank.delete(
       `api/plugin-jobs/${jobId}/feedback/01grtppnyxbdherkv2krd2n72a`
     );
     assert.equal(res.status, status.UNAUTHORIZED);
   });
 
-  test('return 404 for non-existing feedback', async () => {
+  test('returns 404 for a nonexistent feedback entry', async () => {
     const res = await alice.delete(
       `api/plugin-jobs/${jobId}/feedback/thisfeedbackdoesnotexist`
     );
     assert.equal(res.status, status.NOT_FOUND);
   });
 
-  test('delete all feedback', async () => {
+  test('deletes all feedback', async () => {
     const res = await alice.delete(`api/plugin-jobs/${jobId}/feedback/all`);
     assert.equal(res.status, status.NO_CONTENT);
     assert.equal(await getCount(), 0);
@@ -461,7 +461,7 @@ describe('delete feedback', () => {
 });
 
 describe('get plugin job attachment list', () => {
-  test('return file list', async () => {
+  test('lists attached files', async () => {
     const res = await alice.get(
       'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/attachment'
     );
@@ -471,7 +471,7 @@ describe('get plugin job attachment list', () => {
     assert.ok(res.data.includes('sub/test2.txt'));
   });
 
-  test('reject unauthorized user', async () => {
+  test('rejects an unauthorized user', async () => {
     const res = await guest.get(
       'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/attachment'
     );
@@ -480,7 +480,7 @@ describe('get plugin job attachment list', () => {
 });
 
 describe('download plugin job attachment files', () => {
-  test('return existing file', async () => {
+  test('returns an existing attachment', async () => {
     const res = await alice.get(
       'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/attachment/test.txt'
     );
@@ -489,14 +489,14 @@ describe('download plugin job attachment files', () => {
     assert.equal(res.data, 'This is a test file');
   });
 
-  test('return 404 for nonexistent file', async () => {
+  test('returns 404 for a nonexistent attachment', async () => {
     const res = await alice.get(
       'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/attachment/dummy.txt'
     );
     assert.equal(res.status, 404);
   });
 
-  test('reject unauthorized user', async () => {
+  test('rejects an unauthorized user', async () => {
     const res = await guest.get(
       'api/plugin-jobs/01dxgwv3k0medrvhdag4mpw9wa/attachment/test.txt'
     );
@@ -505,17 +505,17 @@ describe('download plugin job attachment files', () => {
 });
 
 describe('extractPatientIdNameFilter', () => {
-  test('return filter when customFilter contains a fixed value in patientInfo.patientId without $and', () => {
+  test('returns a filter when customFilter contains a fixed value in patientInfo.patientId without $and', () => {
     const customFilter = { 'patientInfo.patientId': '015' };
     assert.deepEqual(extractPatientIdNameFilter(customFilter), customFilter);
   });
 
-  test('return null when customFilter contains a fixed value in status without $and', () => {
+  test('returns null when customFilter contains a fixed value in status without $and', () => {
     const customFilter = { status: 'failed' };
     assert.equal(extractPatientIdNameFilter(customFilter), null);
   });
 
-  test('return null when $and exists but targetFilter does not contain a fixed value', () => {
+  test('returns null when $and exists but targetFilter does not contain a fixed value', () => {
     const customFilter = {
       $and: [
         { 'patientInfo.patientId': { $regex: '^0' } },
@@ -526,16 +526,16 @@ describe('extractPatientIdNameFilter', () => {
     assert.equal(extractPatientIdNameFilter(customFilter), null);
   });
 
-  test('return filter when $and exists and targetFilter contains a fixed value', () => {
+  test('returns a filter when $and exists and targetFilter contains a fixed value', () => {
     const customFilter = { $and: [{ 'patientInfo.patientName': 'sakura' }] };
     assert.deepEqual(extractPatientIdNameFilter(customFilter), customFilter);
   });
 
-  test('return null when customFilter is an empty object', () => {
+  test('returns null when customFilter is an empty object', () => {
     assert.equal(extractPatientIdNameFilter({}), null);
   });
 
-  test('return null when customFilter contains $or condition', () => {
+  test('returns null when customFilter contains $or condition', () => {
     const customFilter = {
       $or: [
         { 'patientInfo.patientName': 'sakura' },
@@ -545,7 +545,7 @@ describe('extractPatientIdNameFilter', () => {
     assert.equal(extractPatientIdNameFilter(customFilter), null);
   });
 
-  test('return filters when multiple conditions are present in $and', () => {
+  test('returns filters when multiple conditions are present in $and', () => {
     const customFilter = {
       $and: [
         { 'patientInfo.patientName': 'sakura' },
@@ -563,7 +563,7 @@ describe('extractPatientIdNameFilter', () => {
     assert.deepEqual(extractPatientIdNameFilter(customFilter), expected);
   });
 
-  test('return filters when $and contains nested $and', () => {
+  test('returns filters when $and contains nested $and', () => {
     const customFilter = {
       $and: [
         { 'patientInfo.patientName': 'sakura' },

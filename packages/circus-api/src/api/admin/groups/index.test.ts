@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { describe, it, before, after, beforeEach } from 'node:test';
+import { describe, test, before, after, beforeEach } from 'node:test';
 import type { ApiTest } from '../../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../../test/util-routes.ts';
 import { setUpMongoFixture } from '../../../test/util-mongo.ts';
@@ -16,25 +16,25 @@ beforeEach(async () => {
   await setUpMongoFixture(apiTest.database.db, ['groups']);
 });
 
-it('should return list of groups', async () => {
+test('lists groups', async () => {
   const res = await client.get('api/admin/groups');
   assert.ok(res.data.items instanceof Array);
   assert.equal(res.data.items[0].groupName, 'admin');
 });
 
-it('should return a group', async () => {
+test('returns a group', async () => {
   const res = await client.get('api/admin/groups/1');
   assert.equal(res.data.groupName, 'admin');
 });
 
-it('should return error for nonexistent group', async () => {
+test('returns 404 for a nonexistent group', async () => {
   const res1 = await client.get('api/admin/groups/7');
   assert.equal(res1.status, 404);
   const res2 = await client.get('api/admin/groups/bad');
   assert.equal(res2.status, 404);
 });
 
-it('should update a group', async () => {
+test('updates a group', async () => {
   const res1 = await client.request({
     method: 'patch',
     url: 'api/admin/groups/1',
@@ -63,7 +63,7 @@ const basicGroupData = {
   viewPersonalInfo: []
 };
 
-it('should add a new group', async () => {
+test('adds a new group', async () => {
   const res = await client.request({
     method: 'post',
     url: 'api/admin/groups',
@@ -72,7 +72,7 @@ it('should add a new group', async () => {
   assert.equal(res.status, 201);
 });
 
-it('should return error for invalid group update', async () => {
+test('returns 400 for an invalid group update', async () => {
   const res1 = await client.request({
     method: 'patch',
     url: 'api/admin/groups/1',
@@ -127,7 +127,7 @@ describe('group permission updates', () => {
     for (const [permission, dependencies] of Object.entries(
       permissionsDependencies
     )) {
-      it(`${permission}: should update successfully when dependencies are met`, async () => {
+      test(`returns 204 when dependencies for ${permission} are met`, async () => {
         const data = {
           ...basicGroupData,
           [permission]: ['sampleId'],
@@ -144,7 +144,7 @@ describe('group permission updates', () => {
 
   describe('failure cases', () => {
     for (const permission of Object.keys(permissionsDependencies)) {
-      it(`${permission}: should fail to update when dependencies are not met`, async () => {
+      test(`returns 400 when dependencies for ${permission} are missing`, async () => {
         const data = {
           ...basicGroupData,
           [permission]: ['sampleId']
@@ -156,7 +156,7 @@ describe('group permission updates', () => {
   });
 });
 
-it('should return global-privileges', async () => {
+test('lists global privileges with captions', async () => {
   const res = await client.get('api/admin/global-privileges');
   assert.ok(res.data.length > 1);
   assert.equal(
@@ -165,4 +165,4 @@ it('should return global-privileges', async () => {
   );
 });
 
-// it.skip('should reject unknown field', () => {});
+// test.skip('rejects an unknown field', () => {});

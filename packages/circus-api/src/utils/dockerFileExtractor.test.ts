@@ -8,7 +8,7 @@ import fs from 'fs-extra';
 
 const elfSignature = '7f454c46';
 
-test('extract file from hello-world', async () => {
+test('extracts a file from the hello-world image', async () => {
   const extractor = createDockerFileExtractor('hello-world');
   try {
     const stream = await extractor.extract('/hello');
@@ -28,7 +28,7 @@ test('extract file from hello-world', async () => {
 const testDir = path.resolve(import.meta.dirname, '../../test');
 
 describe('extractToPath', () => {
-  test('succeed', async () => {
+  test('extracts the file to the destination directory', async () => {
     const extractor = createDockerFileExtractor('hello-world');
     const destFile = path.join(testDir, 'hello');
     try {
@@ -41,7 +41,7 @@ describe('extractToPath', () => {
     }
   });
 
-  test('nonexistent path', async () => {
+  test('rejects a path that does not exist in the image', async () => {
     const extractor = createDockerFileExtractor('hello-world');
     try {
       await assert.rejects(

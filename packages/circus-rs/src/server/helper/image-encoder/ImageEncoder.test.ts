@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { describe, test, it, beforeEach } from 'node:test';
+import { describe, test, beforeEach } from 'node:test';
 import type ImageEncoder from './ImageEncoder.ts';
 
 const encoders = ['PngJsImageEncoder' /*'NodePngImageEncoder'*/];
@@ -27,10 +27,10 @@ describe('ImageEncoder', () => {
   });
 
   for (const enc of encoders) {
-    const testName = 'must encode image to PNG using ' + enc;
+    const testName = 'encodes an image as PNG using ' + enc;
     const encModule = encModules.get(enc);
     if (!encModule) {
-      it.skip(testName);
+      test.skip(testName);
       continue;
     }
     test(testName, (_t, done) => {

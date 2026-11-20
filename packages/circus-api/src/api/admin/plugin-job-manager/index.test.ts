@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { it, before, after } from 'node:test';
+import { test, before, after } from 'node:test';
 import type { ApiTest } from '../../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../../test/util-routes.ts';
 import type { TestHttpClient } from '../../../test/util-http.ts';
@@ -14,14 +14,14 @@ after(async () => await apiTest.tearDown());
 
 const url = 'api/admin/plugin-job-manager';
 
-it('should return the current state of a server', async () => {
+test('returns the current job-manager status', async () => {
   const res = await client.get(url);
   const status = await apiTest.csCore.daemon.status();
   assert.equal(res.status, 200);
   assert.equal(res.data.status, status);
 });
 
-it('should set the state of a server', async () => {
+test('starts and stops the job manager', async () => {
   const res = await client.request({
     method: 'put',
     url: url + '/switch',
@@ -37,7 +37,7 @@ it('should set the state of a server', async () => {
   assert.deepEqual(res2.data, { status: 'stopped' });
 });
 
-it('should throw for invalid status change request', async () => {
+test('returns 400 for an invalid job-manager status', async () => {
   const res = await client.request({
     method: 'put',
     url: url + '/switch',

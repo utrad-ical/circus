@@ -14,7 +14,7 @@ beforeEach(async () => {
   commandFunc = await command(null, { models });
 });
 
-test('delete only non-permanent tokens', async () => {
+test('deletes only non-permanent tokens', async () => {
   const spy = mock.method(console, 'log', () => {});
   await commandFunc({});
   assert.ok(
@@ -26,7 +26,7 @@ test('delete only non-permanent tokens', async () => {
   );
 });
 
-test('delete all tokens including permanent ones', async () => {
+test('deletes all tokens including permanent ones', async () => {
   const spy = mock.method(console, 'log', () => {});
   await commandFunc({ all: true });
   assert.ok(

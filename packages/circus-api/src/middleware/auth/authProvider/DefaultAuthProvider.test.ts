@@ -14,7 +14,7 @@ before(async () => {
 });
 
 describe('defaultAuthProvider', () => {
-  test('OK', async () => {
+  test('authenticates a user with valid credentials', async () => {
     const authProvider = await createDefaultAuthProvider({}, { models });
     assert.partialDeepStrictEqual(
       await authProvider.check('alice@example.com', 'aliceSecret'),
@@ -25,7 +25,7 @@ describe('defaultAuthProvider', () => {
     );
   });
 
-  test('Invalid password', async () => {
+  test('rejects an incorrect password', async () => {
     const authProvider = await createDefaultAuthProvider({}, { models });
     assert.partialDeepStrictEqual(
       await authProvider.check('alice@example.com', 'dummy'),
@@ -33,7 +33,7 @@ describe('defaultAuthProvider', () => {
     );
   });
 
-  test('Invalid user', async () => {
+  test('rejects an unknown user', async () => {
     const authProvider = await createDefaultAuthProvider({}, { models });
     assert.partialDeepStrictEqual(
       await authProvider.check('dummy@example.com', 'dummy'),

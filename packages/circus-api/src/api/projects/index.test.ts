@@ -11,7 +11,7 @@ before(async () => {
 });
 after(async () => await apiTest.tearDown());
 
-test('get project', async () => {
+test('returns a project', async () => {
   const res = await dave.get('api/projects/8883fdef6f5144f50eb2a83cd34baa44');
   assert.equal(res.status, 200);
 });

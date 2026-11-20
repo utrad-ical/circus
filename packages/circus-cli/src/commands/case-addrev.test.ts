@@ -6,6 +6,16 @@ import { commandDeps, runCommand, tempDirectory } from '../test/command.ts';
 import addrevArgs from './case-addrev.args.ts';
 import addrev from './case-addrev.ts';
 
+test('rejects input files without case IDs before creating the API client', async t => {
+  const list = join(await tempDirectory(t), 'case-ids.txt');
+  await writeFile(list, '\n  # No case IDs\n\n');
+
+  await assert.rejects(
+    runCommand('case', addrevArgs, addrev, ['--file', list], commandDeps()),
+    /No case IDs found in the input files/
+  );
+});
+
 for (const confirmed of [false, true]) {
   test(
     confirmed

@@ -72,7 +72,9 @@ export const getSeriesOrientation = defineRoute({
 export const deleteSeries = defineRoute({
   verb: 'delete',
   path: '/series/:seriesUid',
-  description: 'Deletes the specified series.'
+  description:
+    'Deletes the specified series. Requires `manageServer` and access to the domain of the series.',
+  requiredGlobalPrivilege: 'manageServer'
 });
 
 export default defineRouteGroup({

@@ -65,6 +65,8 @@ export default function volumeTextureTransferer(
     const [xoffset, yoffset] = getOriginOfSlice(z);
     const textureIndex = Math.floor(z / maxSliceCount);
     if (textureIndex < textures.length) {
+      // Rows are tightly packed (3 bytes per pixel), not padded to 4 bytes
+      gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
       gl.bindTexture(gl.TEXTURE_2D, textures[textureIndex]);
       gl.texSubImage2D(
         gl.TEXTURE_2D,

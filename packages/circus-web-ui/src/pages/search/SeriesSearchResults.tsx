@@ -35,6 +35,7 @@ const Operation: DataGridRenderer<Series> = props => {
   const loginmanager = useLoginManager();
   const user = useLoginUser()!;
   const canDownload = user.globalPrivileges.includes('downloadVolume');
+  const canDelete = user.globalPrivileges.includes('manageServer');
 
   // Opened at the top level, not inside the row
   const handleDownload = () =>
@@ -130,14 +131,16 @@ const Operation: DataGridRenderer<Series> = props => {
         >
           Download
         </MenuItem>
-        <MenuItem
-          eventKey="3"
-          onClick={() => {
-            handleDelete(series.seriesUid, series);
-          }}
-        >
-          Delete
-        </MenuItem>
+        {canDelete && (
+          <MenuItem
+            eventKey="3"
+            onClick={() => {
+              handleDelete(series.seriesUid, series);
+            }}
+          >
+            Delete
+          </MenuItem>
+        )}
       </DropdownButton>
     </Fragment>
   );

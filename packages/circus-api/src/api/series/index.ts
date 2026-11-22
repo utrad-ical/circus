@@ -269,7 +269,12 @@ export const handleDelete: RouteMiddleware<typeof routes.deleteSeries> = ({
   return async ctx => {
     const uid = ctx.req.param().seriesUid;
     await transactionManager.withTransaction(async models => {
-      await models.series.findByIdOrFail(uid);
+      const series = await models.series.findByIdOrFail(uid);
+      if (!ctx.var.userPrivileges.domains.includes(series.domain))
+        throw httpError(
+          status.FORBIDDEN,
+          'You do not have privilege to access this series.'
+        );
 
       const pluginJob = models.pluginJob.findAsCursor({
         'series.seriesUid': uid

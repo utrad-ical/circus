@@ -317,6 +317,26 @@ describe('Delete', () => {
     assert.deepEqual(series, null);
   });
 
+  test('returns 401 without manageServer', async () => {
+    const res = await ax.frank.request({
+      url: 'api/series/222.333.444.555.666',
+      method: 'delete'
+    });
+    assert.equal(res.status, 401);
+  });
+
+  test('returns 403 for a series outside the domains', async () => {
+    const res = await ax.alice.request({
+      url: 'api/series/222.222.333.444.777',
+      method: 'delete'
+    });
+    assert.equal(res.status, 403);
+    const series = await apiTest.database.db
+      .collection('series')
+      .findOne({ seriesUid: '222.222.333.444.777' });
+    assert.ok(series);
+  });
+
   test('returns 404 for a nonexistent series', async () => {
     const res = await ax.dave.request({
       url: 'api/series/222.222.222.222.222',

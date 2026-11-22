@@ -208,6 +208,8 @@ const pluginJobRunner: FunctionService<
       writeLog('Error happened in plug-in job runner:\n' + e.stack + '\n');
       await jobReporter.report(jobId, 'failed', e.message);
       return false;
+    } finally {
+      logStream.end(); // Closes plugin-log.txt
     }
   };
 

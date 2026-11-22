@@ -21,12 +21,14 @@ const generatePluginJobRunnerTest = async (
 ) => {
   const dockerRunner = new DockerRunner();
   const logStream = new memory.WritableStream();
+  let source: Readable | undefined;
 
   // Mock Job Reporter
   let resultsPacked = false;
   const jobReporter = {
     report: mock.fn(),
     logStream: async (jobId: string, stream: Readable) => {
+      source = stream;
       stream.pipe(logStream);
     },
     packDir: (jobId: string, stream: Readable) => {
@@ -96,6 +98,7 @@ const generatePluginJobRunnerTest = async (
   const log = logStream.toString();
   assert.ok(log.includes('The plug-in exited with code 0.'));
   assert.ok(log.includes('Plug-in execution done.'));
+  assert.equal(source?.writableEnded, true);
 };
 
 describe('pluginJobRunner00', () => {
@@ -113,9 +116,11 @@ describe('pluginJobRunner00', () => {
     { timeout: 20000 },
     async () => {
       const log = new memory.WritableStream();
+      let source: Readable | undefined;
       const jobReporter = {
         report: mock.fn(),
         logStream: async (jobId: string, stream: Readable) => {
+          source = stream;
           stream.pipe(log);
         }
       };
@@ -153,8 +158,55 @@ describe('pluginJobRunner00', () => {
       });
       assert.equal(ok, false); // No results.json
       assert.ok(log.toString().includes('The plug-in exited with code 5.'));
+      assert.equal(source?.writableEnded, true);
     }
   );
+
+  test('Ends the log stream when the job fails', async () => {
+    const log = new memory.WritableStream();
+    let source: Readable | undefined;
+    const jobReporter = {
+      report: mock.fn(),
+      logStream: async (jobId: string, stream: Readable) => {
+        source = stream;
+        stream.pipe(log);
+      }
+    };
+    const runner = await pluginJobRunner(
+      { workingDirectory },
+      {
+        jobReporter: jobReporter as any,
+        pluginDefinitionAccessor: {
+          get: async () => ({
+            pluginId: 'circus-mock-succeed',
+            pluginName: 'Empty',
+            version: '1.0',
+            type: 'CAD'
+          })
+        } as any,
+        dicomVoxelDumper: {
+          dump: () => ({
+            stream: new ReadableStream({
+              start: async controller => {
+                controller.enqueue(await packTar([]));
+                controller.close();
+              }
+            }),
+            events: new EventEmitter()
+          })
+        }
+      }
+    );
+    const ok = await runner.run('13579', {
+      pluginId: 'circus-mock-succeed',
+      series: [
+        { seriesUid, partialVolumeDescriptor: { start: 1, end: 1, delta: 1 } }
+      ]
+    });
+    assert.equal(ok, false);
+    assert.ok(log.toString().includes('DockerRunner is not available'));
+    assert.equal(source?.writableEnded, true);
+  });
 
   // Skipping this test because it needs a remote server to be up
   test.skip('Remote CAD run', { timeout: 20000 }, async () =>

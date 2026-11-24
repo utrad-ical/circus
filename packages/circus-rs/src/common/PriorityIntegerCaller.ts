@@ -31,6 +31,7 @@ export default class PriorityIntegerCaller {
   private maxConcurrency: number;
   private resolved: mr.MIR = [];
   private rejected: mr.MIR = [];
+  private errors = new Map<number, Error>();
 
   private callbacks: Callback[];
 
@@ -92,6 +93,7 @@ export default class PriorityIntegerCaller {
 
   private markAsRejected(integer: number, err: Error): void {
     this.rejected = mr.append(this.rejected, mr.normalize(integer));
+    this.errors.set(integer, err);
     this.processCallbacks();
   }
 
@@ -102,9 +104,12 @@ export default class PriorityIntegerCaller {
       if (mr.has(this.resolved, waiting.range)) {
         waiting.resolve();
       } else if (mr.has(settledRange, waiting.range)) {
+        // Reject with the error of the first failed integer
         const errorRange = mr.intersect(waiting.range, this.rejected);
-        const message = `Rejected with ${mr.stringify(errorRange)}`;
-        waiting.reject(new Error(message));
+        const err = this.errors.get(mr.min(errorRange)!);
+        waiting.reject(
+          err ?? new Error(`Rejected with ${mr.stringify(errorRange)}`)
+        );
       } else {
         remainings.push(waiting);
       }

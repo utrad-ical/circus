@@ -60,7 +60,9 @@ test('reports a rejected callback', async () => {
   await loader.waitFor('1-6');
   assert.equal(mr.has(mr.normalize(result), mr.parse('1-6')), true);
   await loader.waitFor('8'); // must not throw
-  await assert.rejects(loader.waitFor(7), { message: /Rejected with 7/ });
+  await assert.rejects(loader.waitFor(7), {
+    message: /Rejected multiples of 7/
+  });
   await loader.waitFor('9-10'); // must not throw
 });
 

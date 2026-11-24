@@ -119,7 +119,11 @@ export default class WebGlRawVolumeMprImageSource
         loadController.removeEventListener('progress', progressListener)
       );
 
-      volumeLoader.loadVolume().then(() => (this.fullyLoaded = true));
+      // A failure is reported via the load controller
+      volumeLoader
+        .loadVolume()
+        .then(() => (this.fullyLoaded = true))
+        .catch(() => {});
       if (!draftInterval) await volumeLoader.loadVolume();
     })();
   }

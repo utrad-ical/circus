@@ -201,12 +201,18 @@ export default class RsProgressiveVolumeLoader implements DicomVolumeLoader {
         if (finished === total) resolve();
       };
 
+      const errorHandler = (message: string) => {
+        this.loadController.emit('error', { target: this, message });
+        reject(new Error(message));
+      };
+
       this.transferConnection = this.transferConnectionFactory(
         {
           seriesUid: this.seriesUid,
           partialVolumeDescriptor: this.partialVolumeDescriptor
         },
-        handler
+        handler,
+        errorHandler
       );
 
       this.resolveConnected && this.resolveConnected();

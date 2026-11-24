@@ -30,6 +30,15 @@
     color: gray;
     font-weight: normal;
   }
+  .seriesError {
+    display: flex;
+    gap: 5px;
+    align-items: baseline;
+    margin: 4px 10px 6px 0;
+    color: var(--danger);
+    font-size: 0.9em;
+    font-weight: normal;
+  }
   .box {
     display: inline-block;
     width: 18px;

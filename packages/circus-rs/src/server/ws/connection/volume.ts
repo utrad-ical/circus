@@ -6,7 +6,8 @@ import type {
 import {
   createMessageBuffer,
   isImageTransferData,
-  parseMessageBuffer
+  parseMessageBuffer,
+  transferErrorMessageData
 } from '../../../common/ws/message.ts';
 import type { IncomingMessage } from 'http';
 import type { Logger } from '@utrad-ical/circus-lib';
@@ -56,8 +57,17 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
       await untilBufferIsFlushed();
     };
 
+    const errorEmitter = (transferId: string, message: string) =>
+      new Promise<void>((resolve, reject) =>
+        ws.send(
+          createMessageBuffer(transferErrorMessageData(transferId, message)),
+          (e?: Error) => (e ? reject(e) : resolve())
+        )
+      );
+
     const { beginTransfer, getConnection, dispose } = createImageTransferAgent({
       imageDataEmitter,
+      errorEmitter,
       volumeProvider,
       logger
     });
@@ -89,6 +99,10 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
             await beginTransfer(transferId, seriesUid, partialVolumeDescriptor);
           } else {
             logger.warn({ connectionId }, 'RS WebSocket volume access denied');
+            await errorEmitter(
+              transferId,
+              'You do not have access to this series.'
+            );
           }
           break;
         }

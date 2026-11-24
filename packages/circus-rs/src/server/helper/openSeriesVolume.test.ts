@@ -97,6 +97,18 @@ describe('openSeriesVolume', () => {
     assert.equal(metadata.elementSpacing[2], 2);
   });
 
+  test('reads Pixel Spacing as the row spacing (y) and then the column spacing (x)', async () => {
+    const dicomFileRepository = await prepareRepository([1, 2]);
+    const dicomExtractorWorker = fakeExtractor(() => ({
+      pixelSpacing: [0.7, 0.5]
+    }));
+    const { metadata } = await openSeriesVolume(
+      { dicomFileRepository, dicomExtractorWorker },
+      uid
+    );
+    assert.deepEqual(metadata.elementSpacing, [0.5, 0.7, 1.5]);
+  });
+
   test('passes the DICOM file of each slice as it is read', async () => {
     const dicomFileRepository = await prepareRepository([1, 2, 3, 4, 5]);
     const dicomExtractorWorker = fakeExtractor();

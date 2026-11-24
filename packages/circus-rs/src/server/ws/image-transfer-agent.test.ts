@@ -45,6 +45,7 @@ test('stops the loop while all transfers are paused', async () => {
       await blocked;
     },
     volumeProvider: async () => fakeAccessor(100),
+    errorEmitter: async () => {},
     logger
   });
   const connection = (await agent.beginTransfer('t1', 'uid'))!;
@@ -67,6 +68,7 @@ test('does not start a transfer prepared after dispose', async () => {
   const agent = createImageTransferAgent({
     imageDataEmitter: async data => void sent.push(data.imageIndex),
     volumeProvider: () => new Promise(resolve => (provide = resolve)),
+    errorEmitter: async () => {},
     logger
   });
   const begun = agent.beginTransfer('t1', 'uid');
@@ -85,8 +87,80 @@ test('forgets a transfer whose series failed to load', async () => {
     volumeProvider: async () => {
       throw new Error('Not found');
     },
+    errorEmitter: async () => {},
     logger
   });
   await assert.rejects(agent.beginTransfer('t1', 'uid'), /Not found/);
   assert.equal(await agent.getConnection('t1'), null);
+});
+
+test('tells the client why a transfer failed', async () => {
+  const errors: [string, string][] = [];
+  const failingAccessor = (err: Error): VolumeAccessor => ({
+    ...fakeAccessor(3),
+    load: async () => {
+      throw err;
+    }
+  });
+  const run = async (transferId: string, err: Error) => {
+    const agent = createImageTransferAgent({
+      imageDataEmitter: async () => {},
+      errorEmitter: async (id, message) => void errors.push([id, message]),
+      volumeProvider: async () => failingAccessor(err),
+      logger
+    });
+    await agent.beginTransfer(transferId, 'uid');
+    await wait(20);
+    agent.dispose();
+  };
+  await run(
+    't1',
+    Object.assign(new Error('Image #2 is 1x1'), { expose: true })
+  );
+  await run('t2', new Error('ENOENT: /secret/path'));
+  assert.deepEqual(errors, [
+    ['t1', 'Image #2 is 1x1'],
+    ['t2', 'Failed to load the series.']
+  ]);
+});
+
+test('tells the client when a series cannot be loaded', async () => {
+  const errors: string[] = [];
+  const agent = createImageTransferAgent({
+    imageDataEmitter: async () => {},
+    errorEmitter: async (_id, message) => void errors.push(message),
+    volumeProvider: async () => {
+      throw Object.assign(new Error('Series not found.'), { expose: true });
+    },
+    logger
+  });
+  await assert.rejects(agent.beginTransfer('t1', 'uid'));
+  assert.deepEqual(errors, ['Series not found.']);
+});
+
+test('does not leave a failure in a partial volume unhandled', async () => {
+  const unhandled: unknown[] = [];
+  const onUnhandled = (reason: unknown) => unhandled.push(reason);
+  process.on('unhandledRejection', onUnhandled);
+  try {
+    const errors: string[] = [];
+    const agent = createImageTransferAgent({
+      imageDataEmitter: async () => {},
+      errorEmitter: async (_id, message) => void errors.push(message),
+      volumeProvider: async () => ({
+        ...fakeAccessor(3),
+        load: async () => {
+          throw Object.assign(new Error('Broken'), { expose: true });
+        }
+      }),
+      logger
+    });
+    await agent.beginTransfer('t1', 'uid', { start: 1, end: 3, delta: 1 });
+    await wait(20);
+    agent.dispose();
+    assert.deepEqual(errors, ['Broken']);
+    assert.deepEqual(unhandled, []);
+  } finally {
+    process.off('unhandledRejection', onUnhandled);
+  }
 });

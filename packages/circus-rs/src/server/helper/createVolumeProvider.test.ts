@@ -100,7 +100,10 @@ test('rejects an image whose size differs without writing it', async () => {
       { dicomFileRepository, dicomExtractorWorker }
     );
     const accessor = await provider(uid);
-    await assert.rejects(accessor.load(2), /Rejected with 2/);
+    await assert.rejects(
+      accessor.load(2),
+      /Image #2 is 1x2, while the first image is 2x2/
+    );
     await accessor.load(3);
     const slice = new Int16Array(accessor.volume.getSingleImage(1));
     assert.deepEqual([...slice], [0, 0, 0, 0]);
@@ -149,4 +152,33 @@ test('determines if a partial volume is 3D from its own images', async () => {
   const accessor = await provider(uid);
   assert.equal(await accessor.isLike3d(), false);
   assert.equal(await accessor.isLike3d([3, 4, 5]), true);
+});
+
+test('preserves the whole-series 3D check after inspecting a partial volume', async () => {
+  const { dicomFileRepository } = await prepareRepository(3);
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => (release = resolve));
+  const extract = fakeExtractor(imageNo =>
+    imageNo === 3 ? { pixelDataCharacteristics: 'DERIVED' } : {}
+  );
+  const dicomExtractorWorker = Object.assign(
+    async (buffer: ArrayBuffer) => {
+      if (new Int32Array(buffer)[0] === 3) await gate;
+      return extract(buffer);
+    },
+    { dispose: async () => {} }
+  ) as DicomExtractorWorker;
+  const provider = await createVolumeProvider(
+    {},
+    { dicomFileRepository, dicomExtractorWorker }
+  );
+  const accessor = await provider(uid);
+  assert.equal(await accessor.isLike3d(), true);
+  assert.equal(await accessor.isLike3d([1, 2]), true);
+  release();
+  await assert.rejects(accessor.load(3), {
+    message:
+      'Image #3 does not look like a part of the 3D volume that the first images make.',
+    expose: true
+  });
 });

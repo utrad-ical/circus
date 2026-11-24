@@ -104,8 +104,9 @@ async function extractVolumeMetadata(
   return {
     voxelCount: [primaryMetadata.columns, primaryMetadata.rows, count],
     voxelSize: [
-      primaryMetadata.pixelSpacing[0],
+      // Pixel Spacing is in the order of rows (y) and columns (x)
       primaryMetadata.pixelSpacing[1],
+      primaryMetadata.pixelSpacing[0],
       pitch
     ],
     dicomWindow: primaryMetadata.window,

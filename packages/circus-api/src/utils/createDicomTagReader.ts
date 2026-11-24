@@ -195,8 +195,9 @@ export interface Parameters {
 const extractParameters = (dataset: parser.DataSet) => {
   const data: Parameters = {
     TransferSyntaxUID: dataset.string('x00020010'),
-    pixelSpacingX: dataset.floatString('x00280030', 0),
-    pixelSpacingY: dataset.floatString('x00280030', 1),
+    // Pixel Spacing is in the order of rows (y) and columns (x)
+    pixelSpacingX: dataset.floatString('x00280030', 1),
+    pixelSpacingY: dataset.floatString('x00280030', 0),
     imagePositionPatientZ: dataset.floatString('x00200032', 2),
     PixelValueUnits: dataset.string('x00541001') // CS
   };

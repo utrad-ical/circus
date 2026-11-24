@@ -91,7 +91,7 @@ const createUncachedVolumeProvider: FunctionService<
     // Prepare image loader
     const processor = async (imageNo: number) => {
       const buffer = await fetch(imageNo);
-      verifyMetadata(imageMetadata.get(imageNo)!);
+      verifyMetadata(imageNo, imageMetadata.get(imageNo)!);
 
       volume.insertSingleImage(zIndices.get(imageNo)!, buffer);
     };
@@ -172,13 +172,14 @@ const createUncachedVolumeProvider: FunctionService<
       if (!imageNos) {
         const imageOrientationPatient = first.imageOrientationPatient;
         verifyMetadataOf3dImage = like3d
-          ? metadata => {
+          ? (imageNo, metadata) => {
               if (
                 !determineIf3dImageFromMetadata(metadata) ||
                 imageOrientationPatient !== metadata.imageOrientationPatient
               )
-                throw new Error(
-                  'Contains image that do not look like 3d image.'
+                throw userError(
+                  `Image #${imageNo} does not look like a part of the 3D volume ` +
+                    'that the first images make.'
                 );
             }
           : undefined;
@@ -189,24 +190,32 @@ const createUncachedVolumeProvider: FunctionService<
 
     let verifyMetadataOf3dImage:
       | undefined
-      | ((metadata: DicomMetadata) => void) = undefined;
+      | ((imageNo: number, metadata: DicomMetadata) => void) = undefined;
 
-    const verifyMetadata = (metadata: DicomMetadata) => {
+    // The messages are shown to the user
+    const verifyMetadata = (imageNo: number, metadata: DicomMetadata) => {
       // Check: Size
       if (
         primaryMetadata.columns != metadata.columns ||
         primaryMetadata.rows != metadata.rows
       ) {
-        throw new Error('Size is different.');
+        throw userError(
+          `Image #${imageNo} is ${metadata.columns}x${metadata.rows}, ` +
+            `while the first image is ` +
+            `${primaryMetadata.columns}x${primaryMetadata.rows}.`
+        );
       }
 
       // Check: Pixel format
       if (primaryMetadata.pixelFormat != metadata.pixelFormat) {
-        throw new Error('Pixel format is different.');
+        throw userError(
+          `Image #${imageNo} has the pixel format ${metadata.pixelFormat}, ` +
+            `while the first image has ${primaryMetadata.pixelFormat}.`
+        );
       }
 
       // Check: 3D Image
-      if (verifyMetadataOf3dImage) verifyMetadataOf3dImage(metadata);
+      if (verifyMetadataOf3dImage) verifyMetadataOf3dImage(imageNo, metadata);
     };
 
     return {
@@ -220,6 +229,10 @@ const createUncachedVolumeProvider: FunctionService<
     };
   };
 };
+
+/** An error whose message can be shown to the user */
+const userError = (message: string) =>
+  Object.assign(new Error(message), { expose: true });
 
 const determineIf3dImageFromMetadata = (metadata: DicomMetadata) => {
   // Check: The modality is CT, MR or PT.

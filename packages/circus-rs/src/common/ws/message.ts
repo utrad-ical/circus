@@ -46,7 +46,8 @@ const messageDataTypes = [
   'ABORT_TRANSFER',
   'PAUSE_TRANSFER',
   'RESUME_TRANSFER',
-  'TRANSFER_IMAGE'
+  'TRANSFER_IMAGE',
+  'TRANSFER_ERROR'
 ] as const;
 
 export type MessageDataType = (typeof messageDataTypes)[number];
@@ -57,7 +58,8 @@ export type ImageTransferMessageData =
   | ResumeTransferMessageData
   | AbortTransferMessageData
   | SetPriorityMessageData
-  | TransferImageMessage;
+  | TransferImageMessage
+  | TransferErrorMessage;
 
 export type BeginTransferMessageData = {
   messageType: 'BEGIN_TRANSFER';
@@ -92,6 +94,14 @@ export type TransferImageMessage = {
   messageType: 'TRANSFER_IMAGE';
   transferId: string;
   imageIndex: number;
+};
+
+/** Tells the client that the transfer failed and has been aborted */
+export type TransferErrorMessage = {
+  messageType: 'TRANSFER_ERROR';
+  transferId: string;
+  /** A message that can be shown to the user */
+  message: string;
 };
 
 export function isImageTransferData(r: any): r is ImageTransferMessageData {
@@ -146,4 +156,11 @@ export function transferImageMessageData(
   imageIndex: number
 ): TransferImageMessage {
   return { messageType: 'TRANSFER_IMAGE', transferId, imageIndex };
+}
+
+export function transferErrorMessageData(
+  transferId: string,
+  message: string
+): TransferErrorMessage {
+  return { messageType: 'TRANSFER_ERROR', transferId, message };
 }

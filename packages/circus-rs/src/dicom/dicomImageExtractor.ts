@@ -43,6 +43,7 @@ export type DicomMetadata = {
   columns: number;
   rows: number;
   pitch?: number;
+  /** Pixel Spacing (0028,0030) as is: the row spacing (y), then the column spacing (x) */
   pixelSpacing: [number, number];
   pixelFormat: PixelFormat;
   rescale: RescaleParams;
@@ -294,7 +295,9 @@ function extractUncompressedPixels(
   const len = dataset.elements['x7fe00010'].length;
   const pxInfo = pixelFormatInfo(pixelFormat);
   const bpp = pxInfo.bpp;
-  if (len !== bpp * rows * columns) {
+  const expectedLength = bpp * rows * columns;
+  // Data of an odd length is padded to an even length
+  if (len !== expectedLength && len !== expectedLength + (expectedLength % 2)) {
     throw new Error('Unexpected pixel data length.');
   }
 
@@ -363,7 +366,7 @@ function extractLosslessJpegPixels(
     if (val > maxValue) maxValue = val;
   }
 
-  return { pixelData: decompressed, minValue: 0, maxValue: 1000 };
+  return { pixelData: decompressed, minValue, maxValue };
 }
 
 function extractPixels(

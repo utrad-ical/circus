@@ -26,7 +26,6 @@ type Options = {
 export default class PriorityIntegerCaller {
   private fn: InvokedFunction;
   private queue: PriorityIntegerQueue;
-  private inOperation: boolean;
   private processing: number[];
   private maxConcurrency: number;
   private resolved: mr.MIR = [];
@@ -39,7 +38,6 @@ export default class PriorityIntegerCaller {
     const { initialResolved, maxConcurrency = 1 } = options;
     this.fn = fn;
     this.queue = new PriorityIntegerQueue();
-    this.inOperation = false;
     this.processing = [];
     this.callbacks = [];
     this.maxConcurrency = maxConcurrency;
@@ -68,10 +66,7 @@ export default class PriorityIntegerCaller {
 
     if (0 < range.length) {
       this.queue.append(range, priority);
-      if (!this.inOperation) {
-        this.inOperation = true;
-        this.next();
-      }
+      this.next();
     }
   }
 
@@ -82,7 +77,8 @@ export default class PriorityIntegerCaller {
         resolve,
         reject
       });
-      if (!this.inOperation) this.processCallbacks();
+      // The target may have been settled already
+      this.processCallbacks();
     });
   }
 
@@ -117,25 +113,27 @@ export default class PriorityIntegerCaller {
     this.callbacks = remainings;
   }
 
-  private async next(): Promise<void> {
+  /**
+   * Starts as many integers as the concurrency allows.
+   */
+  private next(): void {
     while (this.processing.length < this.maxConcurrency) {
       const { value: target } = this.queue.shift();
-      if (target === undefined) {
-        if (this.processing.length === 0) {
-          this.inOperation = false;
-        }
-        break;
-      } else {
-        this.processing.push(target);
-        try {
-          await this.fn.call(null, target);
-          this.markAsResolved(target);
-        } catch (err: any) {
-          this.markAsRejected(target, err);
-        }
-        this.processing.splice(this.processing.indexOf(target), 1);
-        this.next();
-      }
+      if (target === undefined) break;
+      this.processing.push(target);
+      this.invoke(target);
     }
+  }
+
+  private async invoke(target: number): Promise<void> {
+    try {
+      await this.fn.call(null, target);
+      this.processing.splice(this.processing.indexOf(target), 1);
+      this.markAsResolved(target);
+    } catch (err: any) {
+      this.processing.splice(this.processing.indexOf(target), 1);
+      this.markAsRejected(target, err);
+    }
+    this.next();
   }
 }

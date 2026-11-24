@@ -442,7 +442,8 @@ export default class Viewer extends TypedEventTarget<ViewerEventMap> {
 
     // Loading indicator
     const drawLoadingIndicator = (time: number) => {
-      if (this.viewState) return;
+      if (this.viewState || this.disposed || this.composition !== composition)
+        return;
       const ctx = this.canvas.getContext('2d')!;
       this.loadingIndicator(ctx, time);
       requestAnimationFrame(drawLoadingIndicator);

@@ -56,8 +56,16 @@ const loginManager = (apiServer: string, dispatch: Dispatch) => {
    * Logs in with a onetime password (onetime URL).
    * This replaces the session of the current user, if any.
    */
-  const tryOnetimeLogin = async (onetime: string) => {
-    await startSession({ onetime });
+  const onetimeLogins = new Map<string, Promise<void>>();
+  const tryOnetimeLogin = (onetime: string) => {
+    // A onetime password works only once, so share the request in progress
+    const existing = onetimeLogins.get(onetime);
+    if (existing) return existing;
+    const promise = startSession({ onetime }).finally(() =>
+      onetimeLogins.delete(onetime)
+    );
+    onetimeLogins.set(onetime, promise);
+    return promise;
   };
 
   const loadUserInfo = async (full: boolean): Promise<string | undefined> => {

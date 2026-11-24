@@ -3,7 +3,7 @@ import { test, before, after } from 'node:test';
 import type { ApiTest } from '../../test/util-routes.ts';
 import { setUpAppForRoutesTest } from '../../test/util-routes.ts';
 import path from 'path';
-import fs from 'fs-extra';
+import fs from 'node:fs/promises';
 
 const cachePath = path.join(import.meta.dirname, '../../../test/plugin-cache');
 
@@ -15,7 +15,7 @@ const mockPluginDir = path.join(cachePath, pluginId);
 const createDockerFileExtractor = () => ({
   extractToPath: async () => {
     const displayDir = path.join(mockPluginDir, 'displays');
-    await fs.ensureDir(displayDir);
+    await fs.mkdir(displayDir, { recursive: true });
     await fs.writeFile(path.join(displayDir, 'remoteEntry.js'), 'Hello');
   },
   dispose: () => Promise.resolve()
@@ -23,13 +23,13 @@ const createDockerFileExtractor = () => ({
 
 let apiTest: ApiTest, ax: typeof apiTest.clients;
 before(async () => {
-  await fs.remove(mockPluginDir);
+  await fs.rm(mockPluginDir, { recursive: true, force: true });
   apiTest = await setUpAppForRoutesTest({ createDockerFileExtractor } as any);
   ax = apiTest.clients;
 });
 after(async () => {
   await apiTest.tearDown();
-  await fs.remove(mockPluginDir);
+  await fs.rm(mockPluginDir, { recursive: true, force: true });
 });
 
 test('returns the module container', async () => {

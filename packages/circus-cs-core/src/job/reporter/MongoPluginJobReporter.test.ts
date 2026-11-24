@@ -5,7 +5,7 @@ import createMongoPluginJobReporter from './MongoPluginJobReporter.ts';
 import { testClientPool } from '../../testHelper.ts';
 import type { MongoClientPool } from '../../mongoClientPool.ts';
 import tar from 'tar-stream';
-import fs from 'fs-extra';
+import fs from 'node:fs/promises';
 import path from 'path';
 import type * as circus from '../../interface.ts';
 import { PassThrough } from 'stream';
@@ -41,7 +41,10 @@ describe('pluginJobReporter', () => {
 
   after(async () => {
     await mongoClientPool.dispose();
-    await fs.remove(path.join(resultsDirectory, jobId));
+    await fs.rm(path.join(resultsDirectory, jobId), {
+      recursive: true,
+      force: true
+    });
   });
 
   test('reports processing', async () => {

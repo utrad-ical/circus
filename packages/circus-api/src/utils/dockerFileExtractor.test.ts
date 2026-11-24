@@ -4,7 +4,7 @@ import { describe, test } from 'node:test';
 import createDockerFileExtractor from './dockerFileExtractor.ts';
 import { unpackTar } from 'modern-tar';
 import path from 'path';
-import fs from 'fs-extra';
+import fs from 'node:fs/promises';
 
 const elfSignature = '7f454c46';
 
@@ -36,7 +36,7 @@ describe('extractToPath', () => {
       const buf = await fs.readFile(destFile);
       assert.equal(buf.slice(0, 4).toString('hex'), elfSignature);
     } finally {
-      await fs.remove(destFile);
+      await fs.rm(destFile, { recursive: true, force: true });
       await extractor.dispose();
     }
   });

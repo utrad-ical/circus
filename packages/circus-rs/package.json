@@ -60,14 +60,12 @@
   },
   "devDependencies": {
     "@types/compression": "0.0.33",
-    "@types/fs-extra": "^8.1.2",
     "@types/node": "^24.19.2",
     "@types/pngjs": "^3.4.2",
     "@types/three": "^0.93.31",
     "@types/validator": "^6.3.0",
     "@types/ws": "^8.5.3",
     "@utrad-ical/circus-icons": "workspace:*",
-    "fs-extra": "^11.2.0",
     "tsdown": "0.23.7",
     "typescript": "~7.0.2",
     "vite": "8.3.7"

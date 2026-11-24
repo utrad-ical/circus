@@ -5,7 +5,7 @@ import createDicomTagReader, {
   parseDate,
   readDicomTags
 } from './createDicomTagReader.ts';
-import fs from 'fs-extra';
+import fs from 'node:fs/promises';
 import path from 'path';
 
 let content: Buffer;

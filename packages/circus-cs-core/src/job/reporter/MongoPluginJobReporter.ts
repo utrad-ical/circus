@@ -1,7 +1,8 @@
 import type { FunctionService } from '@utrad-ical/circus-lib';
 import type { MongoClientPool } from '../../mongoClientPool.ts';
 import tarfs from 'tar-fs';
-import fs from 'fs-extra';
+import fs from 'node:fs/promises';
+import { createWriteStream } from 'node:fs';
 import path from 'path';
 import type * as circus from '../../interface.ts';
 import type { Readable } from 'stream';
@@ -74,8 +75,8 @@ const createMongoPluginJobReporter: FunctionService<
     callback?: () => void
   ) => {
     const outFile = path.join(resultsDirectory, jobId, 'plugin-log.txt');
-    await fs.ensureDir(path.dirname(outFile));
-    const fileStream = fs.createWriteStream(outFile, 'utf8');
+    await fs.mkdir(path.dirname(outFile), { recursive: true });
+    const fileStream = createWriteStream(outFile, 'utf8');
     stream.pipe(fileStream);
     if (callback) {
       fileStream.on('finish', () => callback());

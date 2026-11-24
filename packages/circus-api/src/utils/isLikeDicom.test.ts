@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import isLikeDicom from './isLikeDicom.ts';
 import path from 'path';
-import fs from 'fs-extra';
+import fs from 'node:fs/promises';
 
 const testDir = path.join(import.meta.dirname, '../../test/dicom');
 

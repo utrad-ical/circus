@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 import StaticDicomFileRepository from './StaticDicomFileRepository.ts';
 import path from 'path';
-import fs from 'fs-extra';
+import fs from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 
 describe('StaticDicomFileRepository', () => {
   const dataDir = path.resolve(
@@ -28,7 +29,7 @@ describe('StaticDicomFileRepository', () => {
     assert.equal(result, 'abcde');
 
     await dr.deleteSeries('new');
-    assert.equal(await fs.pathExists(newDir), false);
+    assert.equal(existsSync(newDir), false);
     const series2 = await dr.getSeries('new');
     assert.equal(series2.images, '');
   });

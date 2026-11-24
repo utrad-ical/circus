@@ -1,4 +1,4 @@
-import fs from 'fs-extra';
+import fs from 'node:fs/promises';
 import path from 'path';
 import { styleText } from 'node:util';
 import type DockerRunner from '../util/DockerRunner.ts';
@@ -32,10 +32,10 @@ const checkEnv: FunctionService<
           if (typeof pWorkingDir !== 'string') {
             throw new Error('Plugin working directory is not set.');
           }
-          await fs.ensureDir(pWorkingDir);
+          await fs.mkdir(pWorkingDir, { recursive: true });
           const tmpDir = path.join(pWorkingDir, 'env-check-test');
-          await fs.remove(tmpDir);
-          await fs.ensureDir(tmpDir);
+          await fs.rm(tmpDir, { recursive: true, force: true });
+          await fs.mkdir(tmpDir, { recursive: true });
           if (!(await isDirectory(tmpDir)))
             throw new Error('Failed to create job temporary directory.');
           return `Working dir: ${pWorkingDir}`;

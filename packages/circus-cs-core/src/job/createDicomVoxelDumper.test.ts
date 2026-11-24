@@ -5,7 +5,7 @@ import {
   createDicomExtractorWorker,
   type DicomExtractorWorker
 } from '@utrad-ical/circus-rs/server';
-import fs from 'fs-extra';
+import fs from 'node:fs';
 import { unpackTar } from 'modern-tar';
 import path from 'path';
 import type { SeriesEntry } from '../interface.ts';

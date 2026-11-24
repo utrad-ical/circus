@@ -2,7 +2,7 @@ import type { Deps } from '../typings/middlewares.ts';
 import { after } from 'node:test';
 import type { TestHttpClient } from './util-http.ts';
 import { createTestHttpClient } from './util-http.ts';
-import fs from 'fs-extra';
+import fs from 'node:fs';
 import yaml from 'js-yaml';
 import path from 'path';
 import createApp from '../createApp.ts';

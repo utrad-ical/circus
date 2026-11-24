@@ -1,6 +1,6 @@
 import { before, after } from 'node:test';
 import { EJSON } from 'bson';
-import fs from 'fs-extra';
+import fs from 'node:fs/promises';
 import yaml from 'js-yaml';
 import type * as mongo from 'mongodb';
 import * as path from 'path';

@@ -36,14 +36,12 @@
   "author": "Soichiro Miki <smiki-tky@umin.ac.jp>",
   "license": "MIT",
   "dependencies": {
-    "fs-extra": "^9.0.0",
     "merge": "^1.2.1",
     "multi-integer-range": "^6.1.0",
     "pino": "^10.4.0",
     "ulid": "^2.3.0"
   },
   "devDependencies": {
-    "@types/fs-extra": "^8.1.0",
     "@types/node": "^24.19.2",
     "tsdown": "0.23.7",
     "tslib": "^1.11.2",

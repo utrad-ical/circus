@@ -1,5 +1,5 @@
 import { httpError } from '../../middleware/errorHandler.ts';
-import fs from 'fs-extra';
+import fs from 'node:fs/promises';
 import httpStatus from 'http-status';
 import path from 'path';
 import createDockerFileExtractor from '../../utils/dockerFileExtractor.ts';
@@ -39,7 +39,7 @@ export const handleGet: RouteMiddleware<typeof routes.getPluginDisplay> = ({
             const promise = (async () => {
               const extractor = createExtractor(pluginId);
               try {
-                await fs.ensureDir(displaysDir);
+                await fs.mkdir(displaysDir, { recursive: true });
                 await extractor.extractToPath('/displays', displaysDir);
               } finally {
                 await extractor.dispose();

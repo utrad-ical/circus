@@ -28,6 +28,17 @@ describe('dicomImageExtractor', () => {
       metadata.columns * metadata.rows * pxInfo.bpp,
       pixelData.byteLength
     );
+    if (metadata.pixelFormat !== 'rgba8') {
+      // The reported range must be that of the actual pixels
+      const values = new pxInfo.arrayClass(pixelData);
+      let min = Infinity;
+      let max = -Infinity;
+      for (const v of values) {
+        if (v < min) min = v;
+        if (v > max) max = v;
+      }
+      assert.deepEqual([metadata.minValue, metadata.maxValue], [min, max]);
+    }
 
     const doRescale =
       metadata.rescale && typeof metadata.rescale.intercept === 'number';
@@ -172,5 +183,44 @@ describe('dicomImageExtractor', () => {
       columns: 2140,
       rows: 1760
     });
+  });
+
+  test('accepts padded pixel data of an odd length', () => {
+    // A minimal 8-bit 3x3 image (Explicit VR Little Endian)
+    const element = (tag: number[], vr: string, value: Buffer) => {
+      const head = Buffer.alloc(vr === 'OB' ? 12 : 8);
+      head.writeUInt16LE(tag[0], 0);
+      head.writeUInt16LE(tag[1], 2);
+      head.write(vr, 4, 'latin1');
+      if (vr === 'OB') head.writeUInt32LE(value.length, 8);
+      else head.writeUInt16LE(value.length, 6);
+      return Buffer.concat([head, value]);
+    };
+    const us = (n: number) => Buffer.from(new Uint16Array([n]).buffer);
+    const pixels = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 0]); // padded
+    const file = Buffer.concat([
+      Buffer.alloc(128),
+      Buffer.from('DICM', 'latin1'),
+      element([2, 0x10], 'UI', Buffer.from('1.2.840.10008.1.2.1\0', 'latin1')),
+      element([8, 0x60], 'CS', Buffer.from('OT', 'latin1')),
+      element([0x28, 0x02], 'US', us(1)),
+      element([0x28, 0x04], 'CS', Buffer.from('MONOCHROME2 ', 'latin1')),
+      element([0x28, 0x10], 'US', us(3)),
+      element([0x28, 0x11], 'US', us(3)),
+      element([0x28, 0x100], 'US', us(8)),
+      element([0x28, 0x101], 'US', us(8)),
+      element([0x28, 0x102], 'US', us(7)),
+      element([0x28, 0x103], 'US', us(0)),
+      element([0x7fe0, 0x10], 'OB', pixels)
+    ]);
+    const { metadata, pixelData } = dicomImageExtractor()(
+      file.buffer.slice(file.byteOffset, file.byteOffset + file.length)
+    );
+    assert.equal(metadata.pixelFormat, 'uint8');
+    assert.deepEqual(
+      [...new Uint8Array(pixelData!)],
+      [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    );
+    assert.deepEqual([metadata.minValue, metadata.maxValue], [1, 9]);
   });
 });

@@ -18,7 +18,7 @@ interface ImageTransferAgent {
     transferId: string,
     seriesUid: string,
     partialVolumeDescriptor?: PartialVolumeDescriptor
-  ) => Promise<TransferConnection>;
+  ) => Promise<TransferConnection | null>;
   getConnection: (transferId: string) => Promise<TransferConnection | null>;
   dispose: () => void;
 }
@@ -31,6 +31,7 @@ type TransferConnection = {
   abort: () => void;
   pause: () => void;
   resume: () => void;
+  isPaused: () => boolean;
 };
 
 interface CreateImageTransferAgentOptions {
@@ -54,6 +55,7 @@ const createImageTransferAgent = ({
     Promise<TransferConnection | null>
   >();
 
+  let disposed = false;
   let inOperation = false;
   const startOperationIfNecessary = () => {
     if (inOperation) return;
@@ -66,16 +68,17 @@ const createImageTransferAgent = ({
   };
 
   const next = async () => {
-    if (transferConnections.size === 0) return stopOperation();
+    // Stop while there is nothing to send; resume() starts it again
+    const active = Array.from(transferConnections.values()).some(
+      connection => !connection.isPaused()
+    );
+    if (!active) return stopOperation();
 
     const transferIds = Array.from(transferConnections.keys());
     while (0 < transferIds.length) {
       const transferId = transferIds.shift()!;
       const connection = transferConnections.get(transferId);
-      if (!connection) {
-        // console.log(`No handler for tr#${transferId} con#${connectionId}`);
-        continue;
-      }
+      if (!connection || connection.isPaused()) continue;
 
       // await new Promise<void>((resolve) => setTimeout(() => resolve(), 300));
 
@@ -125,8 +128,22 @@ const createImageTransferAgent = ({
     const abort = abortSignal.abort.bind(abortSignal);
 
     const startTime = new Date().getTime();
+    let accessor: VolumeAccessor;
+    try {
+      accessor = await volumeProvider(seriesUid);
+    } catch (err) {
+      resolvePending(null);
+      pendingsUntilTransferStarts.delete(transferId);
+      throw err;
+    }
+    if (disposed) {
+      // The WebSocket was closed while the series was being loaded
+      resolvePending(null);
+      pendingsUntilTransferStarts.delete(transferId);
+      return null;
+    }
     const { queue, fillImageToVolume } = prepare(
-      await volumeProvider(seriesUid),
+      accessor,
       partialVolumeDescriptor
     );
 
@@ -164,7 +181,10 @@ const createImageTransferAgent = ({
 
     let paused = false;
     const pause = () => (paused = true);
-    const resume = () => (paused = false);
+    const resume = () => {
+      paused = false;
+      if (transferConnections.has(transferId)) startOperationIfNecessary();
+    };
 
     const transferConnection: TransferConnection = {
       id: () => transferId,
@@ -173,7 +193,8 @@ const createImageTransferAgent = ({
       setPriority,
       abort,
       pause,
-      resume
+      resume,
+      isPaused: () => paused
     };
 
     transferConnections.set(transferId, transferConnection);
@@ -200,6 +221,7 @@ const createImageTransferAgent = ({
   };
 
   const dispose = () => {
+    disposed = true;
     Array.from(transferConnections.values()).map(connection =>
       connection.abort()
     );

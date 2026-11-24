@@ -121,7 +121,10 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
 
     ws.on('message', (messageBuffer: ArrayBuffer) => {
       const { data } = parseMessageBuffer(messageBuffer);
-      if (isImageTransferData(data)) handleMessageData(data);
+      if (!isImageTransferData(data)) return;
+      handleMessageData(data).catch(err =>
+        logger.error({ err, connectionId }, 'RS WebSocket message failed')
+      );
     });
   };
 };

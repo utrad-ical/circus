@@ -500,7 +500,8 @@ export default class Viewer extends TypedEventTarget<ViewerEventMap> {
 
   public handleResize(): void {
     const transformer = this.viewStateResizeTransformer;
-    const prevState = this.viewState;
+    // Start from the latest request, which may be ahead of the rendered state
+    const prevState = this.getLatestState();
     if (transformer && !!prevState) {
       const div = this.rootDiv;
       const beforeSize = this.getResolution();

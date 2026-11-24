@@ -1,7 +1,7 @@
 import Application from '#pages/Application.tsx';
 import { DialogHost } from '#components/dialogs.tsx';
-import React, { StrictMode, useEffect, useMemo, useRef, useState } from 'react';
-import ReactDOM from 'react-dom';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { createRoot } from 'react-dom/client';
 import {
   createBrowserRouter,
   Outlet,
@@ -37,10 +37,10 @@ import SeriesSearch from '#pages/search/SeriesSearch.tsx';
 import SeriesDetail from '#pages/SeriesDetail.tsx';
 import TokenManagement from '#pages/TokenManagement.tsx';
 
-import { Provider as ReduxStoreProvider, useSelector } from 'react-redux';
+import { Provider as ReduxStoreProvider } from 'react-redux';
 import { dismissMessageOnPageChange } from '#store/messages.ts';
 import PluginJobQueueSearch from './pages/search/PluginJobQueueSearch.tsx';
-import { store } from './store/index.ts';
+import { store, useAppSelector } from './store/index.ts';
 
 import type { VolumeLoaderManager } from '@utrad-ical/circus-ui-kit';
 import {
@@ -50,8 +50,12 @@ import {
 import loginManager, { LoginManagerContext } from '#utils/loginManager.ts';
 import './styles/foundation.css';
 
-const VolumeLoaderFactoryProvider: React.FC<{}> = ({ children }) => {
-  const server = useSelector(state => state.loginUser.data?.dicomImageServer);
+const VolumeLoaderFactoryProvider: React.FC<{
+  children?: React.ReactNode;
+}> = ({ children }) => {
+  const server = useAppSelector(
+    state => state.loginUser.data?.dicomImageServer
+  );
   // The session cookie authenticates both HTTP and WebSocket requests to RS
   const provider = useMemo<VolumeLoaderManager>(
     () => (server ? createVolumeLoaderManager({ server }) : (null as any)),
@@ -223,9 +227,4 @@ const TheApp: React.FC<{}> = () => {
   );
 };
 
-ReactDOM.render(
-  <StrictMode>
-    <TheApp />
-  </StrictMode>,
-  document.getElementById('app')
-);
+createRoot(document.getElementById('app')!).render(<TheApp />);

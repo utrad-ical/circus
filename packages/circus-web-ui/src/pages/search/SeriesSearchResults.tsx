@@ -17,8 +17,7 @@ import SearchResultsView, {
 } from '#components/SearchResultsView.tsx';
 import * as mr from 'multi-integer-range';
 import React, { Fragment } from 'react';
-import { useSelector } from 'react-redux';
-import { dispatch } from '#store/index.ts';
+import { dispatch, useAppSelector } from '#store/index.ts';
 import { showMessage } from '#store/messages.ts';
 import { api } from '#utils/api.ts';
 import { useLoginManager } from '#utils/loginManager.ts';
@@ -211,7 +210,7 @@ const SeriesSearchResults: React.FC<{
   refreshable?: boolean;
 }> = props => {
   const { searchName, refreshable = true } = props;
-  const search = useSelector(state => state.searches.searches[searchName]);
+  const search = useAppSelector(state => state.searches.searches[searchName]);
   const selected = search?.selected ?? [];
 
   return (

@@ -13,7 +13,7 @@ import DataGrid from '#components/DataGrid.tsx';
 import Icon from '#components/Icon.tsx';
 import SearchResultsView from '#components/SearchResultsView.tsx';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from '#store/index.ts';
 import type { SearchItem, SearchResource } from '#store/searches.ts';
 import { newSearch } from '#store/searches.ts';
 import styles from './EditorPage.module.css';
@@ -48,7 +48,7 @@ const EditorPage = <Item extends SearchItem>(props: {
     undefined
   );
   const loginManager = useLoginManager();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const {
     listColumns,

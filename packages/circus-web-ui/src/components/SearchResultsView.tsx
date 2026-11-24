@@ -7,7 +7,7 @@ import LoadingIndicator from '#components/LoadingIndicator.tsx';
 import AutoReloadSwitch from './AutoReloadSwitch.tsx';
 import Icon from '#components/Icon.tsx';
 import classnames from 'classnames';
-import { useSelector, useDispatch } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '#store/index.ts';
 import * as searches from '#store/searches.ts';
 import styles from './SearchResultsView.module.css';
 
@@ -56,9 +56,9 @@ const SearchResultsView = <Item extends SearchItem>(props: {
     refreshable,
     children
   } = props;
-  const dispatch = useDispatch();
-  const search = useSelector(state => state.searches.searches[name]);
-  const dic = useSelector(state => {
+  const dispatch = useAppDispatch();
+  const search = useAppSelector(state => state.searches.searches[name]);
+  const dic = useAppSelector(state => {
     if (!search) return undefined;
     const resourceType =
       search.params.resource.resourceType ?? search.params.resource.endPoint;

@@ -3,7 +3,7 @@ import u from '#components/utilities.module.css';
 import type { SeriesExportCsVolumeQuery } from '@utrad-ical/circus-api-schema';
 import type { Editor } from '#components/editorTypes.tsx';
 import React, { useCallback, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '#store/index.ts';
 import { api } from '#utils/api.ts';
 import fillPartialVolumeDescriptors from '#utils/partialVolumeDescriptor.ts';
 import type { CompressionFormat } from './DownloadModal.tsx';
@@ -67,7 +67,7 @@ const CsVolumeDownloadModal: React.FC<{
 }> = props => {
   const { onClose, series, editableSeries = false } = props;
   const caption = `Download volume for plug-in`;
-  const appState = useSelector(state => state);
+  const appState = useAppSelector(state => state);
   const OptionsEditor = useMemo(
     () => createOptionsEditor(editableSeries),
     [editableSeries]

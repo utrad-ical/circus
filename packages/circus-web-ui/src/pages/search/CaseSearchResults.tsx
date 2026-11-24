@@ -20,7 +20,7 @@ import SearchResultsView, {
 import { namedProjectTags } from '#utils/projectTags.ts';
 import { PhysicalTag } from '#components/Tag.tsx';
 import React, { useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '#store/index.ts';
 import { Link, useLocation } from 'react-router-dom';
 import * as searches from '#store/searches.ts';
 import { updateSearch } from '#store/searches.ts';
@@ -38,12 +38,12 @@ const Operation: React.FC<{
   value: CaseSearchItem;
 }> = props => {
   const item = props.value;
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const searchName =
     useLocation().pathname.indexOf('/browse/case/mylist') === 0
       ? 'myCaseList'
       : 'case';
-  const search = useSelector(state => state.searches.searches[searchName]);
+  const search = useAppSelector(state => state.searches.searches[searchName]);
   const handleClick = () => {
     dispatch(searches.setNextPreviousList(search?.results?.indexes ?? []));
   };
@@ -105,12 +105,12 @@ const CaseSearchResultsView: React.FC<{
   refreshable?: boolean;
 }> = props => {
   const { searchName, refreshable = true } = props;
-  const search = useSelector(state => state.searches.searches[searchName]);
-  const items = useSelector(state => state.searches.items.cases);
+  const search = useAppSelector(state => state.searches.searches[searchName]);
+  const items = useAppSelector(state => state.searches.items.cases);
   const selected = useMemo(() => search?.selected ?? [], [search]);
   const { accessibleProjects } = useLoginUser()!;
   const user = useLoginUser();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [showExportModal, setShowExportModal] = useState(false);
 
   const availableTags = useMemo(() => {

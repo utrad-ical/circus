@@ -9,6 +9,7 @@ interface Props {
   className?: string;
   framed?: boolean;
   noPadding?: boolean;
+  children?: React.ReactNode;
 }
 
 export const ControlledCollapser: React.FC<

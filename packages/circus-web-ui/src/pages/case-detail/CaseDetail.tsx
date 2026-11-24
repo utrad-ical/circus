@@ -27,7 +27,7 @@ import React, {
   useReducer,
   useState
 } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from '#store/index.ts';
 import { Link, useBlocker, useParams } from 'react-router-dom';
 import { showMessage } from '#store/messages.ts';
 import { newSearch } from '#store/searches.ts';
@@ -56,7 +56,7 @@ const CaseDetail: React.FC<{}> = () => {
     caseStoreReducer,
     caseStoreReducer(undefined as any, { type: 'dummy' }) // gets initial state
   );
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const { busy, caseData, seriesData, projectData, refreshCounter } = caseStore;
   const editingData = c.current(caseStore);

@@ -2,7 +2,7 @@ import classnames from 'classnames';
 import Icon from '#components/Icon.tsx';
 import NavMenu, { NavMenuHeader, NavSubMenu } from '#components/NavMenu.tsx';
 import React, { type FC, type MouseEvent } from 'react';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '#store/index.ts';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { MyList, MyListResourceType } from '@utrad-ical/circus-api-schema';
 import { namedSearchPresets } from '#utils/searchPresets.ts';
@@ -73,7 +73,9 @@ const MyListMenuItems: FC<{
 const MainNav: FC<{}> = props => {
   const user = useLoginUser();
   const pathname = useLocation().pathname;
-  let nextPreviousList = useSelector(state => state.searches.nextPreviousList);
+  let nextPreviousList = useAppSelector(
+    state => state.searches.nextPreviousList
+  );
   const navigate = useNavigate();
 
   if (!user) return null;

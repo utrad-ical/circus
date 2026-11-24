@@ -19,6 +19,7 @@ export const Button: React.FC<{
   disabled?: boolean;
   style?: React.CSSProperties;
   onClick?: React.MouseEventHandler;
+  children?: React.ReactNode;
 }> = forwardRef((props, ref) => {
   const {
     color,

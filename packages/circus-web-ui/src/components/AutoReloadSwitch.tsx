@@ -17,6 +17,7 @@ const AutoReloadSwitch: React.FC<{
   options?: any;
   size?: ButtonSize;
   disabled?: boolean;
+  children?: React.ReactNode;
 }> = props => {
   const { onRefresh, options = defaultOptions, children, ...rest } = props;
 

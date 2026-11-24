@@ -5,7 +5,7 @@ import type {
 } from '@utrad-ical/circus-api-schema';
 import Button from '#components/Button.tsx';
 import React from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from '#store/index.ts';
 import { showMessage } from '#store/messages.ts';
 import { updateSearch } from '#store/searches.ts';
 import { api } from '#utils/api.ts';
@@ -24,7 +24,7 @@ const MyListDropdown: React.FC<{
   const { resourceType, resourceIds, searchName } = props;
 
   const user = useLoginUser()!;
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const handleAddRemove = async (
     operation: MyListItemsPatch['operation'],

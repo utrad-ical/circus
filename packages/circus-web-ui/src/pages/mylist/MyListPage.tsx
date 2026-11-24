@@ -1,7 +1,7 @@
 import type { MyListResourceType } from '@utrad-ical/circus-api-schema';
 import Icon from '#components/Icon.tsx';
 import React, { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from '#store/index.ts';
 import * as s from '#store/searches.ts';
 import useLoginUser from '#utils/useLoginUser.ts';
 import MyListHome from './MyListHome.tsx';
@@ -29,7 +29,7 @@ const MyListPage: React.FC<{
   } = props;
   const user = useLoginUser()!;
   const list = user.myLists?.find(l => l.myListId === myListId);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (!myListId) return;

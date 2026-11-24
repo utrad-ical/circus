@@ -1,6 +1,6 @@
 import Button, { type ButtonSize } from '#components/Button.tsx';
 import React from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from '#store/index.ts';
 import { showMessage } from '#store/messages.ts';
 
 /**
@@ -47,7 +47,7 @@ const CopyToClipboardButton: React.FC<{
   size?: ButtonSize;
 }> = props => {
   const { string, size } = props;
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const handleClick = async () => {
     const ok = await copyText(string);

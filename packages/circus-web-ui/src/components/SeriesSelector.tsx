@@ -11,7 +11,7 @@ import SearchResultsView from '#components/SearchResultsView.tsx';
 import { produce } from 'immer';
 import * as mr from 'multi-integer-range';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '#store/index.ts';
 import { newSearch } from '#store/searches.ts';
 import type { CaseCreate, Series } from '@utrad-ical/circus-api-schema';
 import { api } from '#utils/api.ts';
@@ -112,8 +112,8 @@ const SeriesSelector: React.FC<{
   const [showRelevantSeries, setShowRelevantSeries] = useState(
     !!alwaysShowRelevantSeries
   );
-  const dispatch = useDispatch();
-  const searchedSeries = useSelector(
+  const dispatch = useAppDispatch();
+  const searchedSeries = useAppSelector(
     state => state.searches.items.series ?? {}
   );
 

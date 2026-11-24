@@ -1,8 +1,12 @@
-import type { Action } from '@reduxjs/toolkit';
-import { configureStore } from '@reduxjs/toolkit';
-import type { AnyAction, Dispatch } from 'redux';
-import { combineReducers } from 'redux';
-import type { ThunkAction, ThunkDispatch } from 'redux-thunk';
+import type {
+  Action,
+  Dispatch,
+  ThunkAction,
+  ThunkDispatch,
+  UnknownAction
+} from '@reduxjs/toolkit';
+import { combineReducers, configureStore } from '@reduxjs/toolkit';
+import { useDispatch, useSelector } from 'react-redux';
 import loginUser from './loginUser.ts';
 import messages from './messages.ts';
 import plugins from './plugins.ts';
@@ -36,8 +40,11 @@ setStore(store);
 export const dispatch = store.dispatch;
 
 export type RootState = ReturnType<typeof reducer>;
-export type AppDispatch = ThunkDispatch<RootState, unknown, AnyAction> &
-  Dispatch<AnyAction>;
+export type AppDispatch = ThunkDispatch<RootState, unknown, UnknownAction> &
+  Dispatch<UnknownAction>;
+
+export const useAppSelector = useSelector.withTypes<RootState>();
+export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
 
 /**
  * The thunk action type. See the advanced tutorial of Redux Toolkit.

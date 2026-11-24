@@ -1,12 +1,12 @@
 import React from 'react';
 import { dismissMessage } from '#store/messages.ts';
 import Alert, { type AlertVariant } from '#components/Alert.tsx';
-import { useSelector, useDispatch } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '#store/index.ts';
 import styles from './MessageBox.module.css';
 
 const MessageBox: React.FC<{}> = React.memo(props => {
-  const messages = useSelector(state => state.messages);
-  const dispatch = useDispatch();
+  const messages = useAppSelector(state => state.messages);
+  const dispatch = useAppDispatch();
 
   if (!messages.length) return null;
   return (

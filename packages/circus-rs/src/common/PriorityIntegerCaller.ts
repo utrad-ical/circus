@@ -11,6 +11,8 @@ type Callback = {
 type Options = {
   initialResolved?: RangeInput;
   maxConcurrency?: number;
+  /** Takes the integers appended later first among the same priority */
+  lifoForSamePriority?: boolean;
 };
 
 /**
@@ -35,9 +37,13 @@ export default class PriorityIntegerCaller {
   private callbacks: Callback[];
 
   constructor(fn: InvokedFunction, options: Options = {}) {
-    const { initialResolved, maxConcurrency = 1 } = options;
+    const {
+      initialResolved,
+      maxConcurrency = 1,
+      lifoForSamePriority = false
+    } = options;
     this.fn = fn;
-    this.queue = new PriorityIntegerQueue();
+    this.queue = new PriorityIntegerQueue({ lifoForSamePriority });
     this.processing = [];
     this.callbacks = [];
     this.maxConcurrency = maxConcurrency;

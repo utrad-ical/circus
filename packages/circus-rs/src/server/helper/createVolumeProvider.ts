@@ -100,7 +100,9 @@ const createUncachedVolumeProvider: FunctionService<
     };
     const priorityLoader = new PriorityIntegerCaller(processor, {
       initialResolved: topImageNo,
-      maxConcurrency
+      maxConcurrency,
+      // Load the images the viewer requested last first, as the transfer does
+      lifoForSamePriority: true
     });
 
     // start loading immediately

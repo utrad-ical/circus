@@ -4,11 +4,16 @@
  */
 
 import _pm2 from 'pm2';
-import pify from 'pify';
 import escape from 'shell-escape';
+import { promisify } from 'node:util';
 import type * as circus from '../interface.ts';
 
-const pm2: any = pify(_pm2);
+// PM2 methods need `this`
+const pm2: any = Object.fromEntries(
+  (
+    ['connect', 'disconnect', 'describe', 'start', 'delete', 'list'] as const
+  ).map(name => [name, promisify((_pm2[name] as Function).bind(_pm2))])
+);
 
 const startScript = 'daemon.ts';
 

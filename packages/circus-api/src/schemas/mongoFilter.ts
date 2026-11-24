@@ -1,4 +1,4 @@
-import { BSONRegExp } from 'bson';
+import { BSONRegExp } from 'mongodb';
 import { z } from 'zod';
 
 /** Removes optional, nullable, etc. to get the schema of the value itself */

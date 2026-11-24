@@ -244,9 +244,6 @@ importers:
       '@zip.js/zip.js':
         specifier: ^2.25.0
         version: 2.25.0
-      bson:
-        specifier: ^7.3.4
-        version: 7.3.4
       bytes:
         specifier: ^3.1.0
         version: 3.1.2
@@ -310,12 +307,6 @@ importers:
       node-php-password:
         specifier: ^0.1.2
         version: 0.1.2
-      pify:
-        specifier: ^5.0.0
-        version: 5.0.0
-      split:
-        specifier: ^1.0.1
-        version: 1.0.1
       tarn:
         specifier: ^3.0.1
         version: 3.0.1
@@ -344,9 +335,6 @@ importers:
       '@types/node':
         specifier: ^24.19.2
         version: 24.19.2
-      '@types/split':
-        specifier: ^1.0.0
-        version: 1.0.0
       '@types/ws':
         specifier: ^8.5.12
         version: 8.5.12
@@ -481,9 +469,6 @@ importers:
       multi-integer-range:
         specifier: ^6.1.0
         version: 6.1.0
-      pify:
-        specifier: ^5.0.0
-        version: 5.0.0
       pm2:
         specifier: ^5.4.2
         version: 5.4.2(supports-color@7.2.0)
@@ -527,9 +512,6 @@ importers:
       '@types/node':
         specifier: ^24.19.2
         version: 24.19.2
-      '@types/pify':
-        specifier: ^3.0.2
-        version: 3.0.2
       '@types/shell-escape':
         specifier: ^0.2.0
         version: 0.2.0
@@ -1667,9 +1649,6 @@ packages:
   '@types/node@24.19.2':
     resolution: {integrity: sha512-93d49wCWJkCyN87MxLpNN6KXPCwFw7bVUg79mGUV1OS40JGWwVCr8n61DXCSqz7CV6/VfPkb7xec7uP2M+QHWQ==}
 
-  '@types/pify@3.0.2':
-    resolution: {integrity: sha512-a5AKF1/9pCU3HGMkesgY6LsBdXHUY3WU+I2qgpU0J+I8XuJA1aFr59eS84/HP0+dxsyBSNbt+4yGI2adUpHwSg==}
-
   '@types/pngjs@3.4.2':
     resolution: {integrity: sha512-LJVPDraJ5YFEnMHnzxTN4psdWz1M61MtaAAWPn3qnDk5fvs7BAmmQ9pd3KPlrdrvozMyne4ktanD4pg0L7x1Pw==}
 
@@ -1711,9 +1690,6 @@ packages:
   '@types/shell-escape@0.2.0':
     resolution: {integrity: sha512-7kUdtJtUylvyISJbe9FMcvMTjRdP0EvNDO1WbT0lT22k/IPBiPRTpmWaKu5HTWLCGLQRWVHrzVHZktTDvvR23g==}
 
-  '@types/split@1.0.0':
-    resolution: {integrity: sha512-pm9S1mkr+av0j7D6pFyqhBxXDbnbO9gqj4nb8DtGtCewvj0XhIv089SSwXrjrIizT1UquO8/h83hCut0pa3u8A==}
-
   '@types/tar-fs@1.16.3':
     resolution: {integrity: sha512-Y+fdeg11tb9J3UNIatNtrTPM1i8U+WLv2mMhZ3W13mtU19stCgrXJ4iXLkTpoF8jqHi3T/qTS8+fQ3IPzXxpuA==}
 
@@ -1722,9 +1698,6 @@ packages:
 
   '@types/three@0.93.31':
     resolution: {integrity: sha512-lR9eLY3gnrUDAdW4ujITgVTPEv1Oy2yoL3LlfKAnjQuzyjGSR+PvQuXuWmaDCD1IyWhkqbnol1nJwaW0MGe35A==}
-
-  '@types/through@0.0.30':
-    resolution: {integrity: sha512-FvnCJljyxhPM3gkRgWmxmDZyAQSiBQQWLI0A0VFL0K7W1oRUrPJSqNO0NvTnLkBcotdlp3lKvaT0JrnyRDkzOg==}
 
   '@types/validator@6.3.0':
     resolution: {integrity: sha512-fUc+9BEr1WWW8wVRl5I/pyRDGZNe9nH06kOzlGH3eN7N8VVPW/zSrE0Vdca6G2sRCVmIN/XuOenbmldAAyTYaw==}
@@ -3146,10 +3119,6 @@ packages:
     resolution: {integrity: sha512-g0VU+y08pKw5M8EZ2rIGiEBaB8wrQMjYGFfW2QVIfyT8V+fq8YFLkvlz4bz5ljvFDJYNFCWT3PWqcRr2FKO81w==}
     engines: {node: '>=10'}
 
-  pify@5.0.0:
-    resolution: {integrity: sha512-eW/gHNMlxdSP6dmG6uJip6FXN0EQBwm2clYYd8Wul42Cwu/DK8HEftzsapcNdYe2MfLiIwZqsDk2RDEsTE79hA==}
-    engines: {node: '>=10'}
-
   pino-abstract-transport@3.0.0:
     resolution: {integrity: sha512-wlfUczU+n7Hy/Ha5j9a/gZNy7We5+cXp8YL+X+PG8S0KXxw7n/JXA3c46Y0zQznIJ83URJiwy7Lh56WLokNuxg==}
 
@@ -3481,9 +3450,6 @@ packages:
   split2@4.2.0:
     resolution: {integrity: sha512-UcjcJOWknrNkF6PLX83qcHM6KHgVKNkV62Y8a5uYDVv9ydGQVwAHMKqHdJje1VTWpljG0WYpCDhrCdAOYH4TWg==}
     engines: {node: '>= 10.x'}
-
-  split@1.0.1:
-    resolution: {integrity: sha512-mTyOoPbrivtXnwnIxZRFYRrPNtEFKlpB2fvjSnCQUiAA6qAZzqwna5envK4uk6OIeP17CsdF3rSBGYVBsU0Tkg==}
 
   sprintf-js@1.0.3:
     resolution: {integrity: sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==}
@@ -4546,8 +4512,6 @@ snapshots:
     dependencies:
       undici-types: 7.24.6
 
-  '@types/pify@3.0.2': {}
-
   '@types/pngjs@3.4.2':
     dependencies:
       '@types/node': 24.19.2
@@ -4596,11 +4560,6 @@ snapshots:
 
   '@types/shell-escape@0.2.0': {}
 
-  '@types/split@1.0.0':
-    dependencies:
-      '@types/node': 24.19.2
-      '@types/through': 0.0.30
-
   '@types/tar-fs@1.16.3':
     dependencies:
       '@types/node': 24.19.2
@@ -4611,10 +4570,6 @@ snapshots:
       '@types/node': 24.19.2
 
   '@types/three@0.93.31': {}
-
-  '@types/through@0.0.30':
-    dependencies:
-      '@types/node': 24.19.2
 
   '@types/validator@6.3.0': {}
 
@@ -5818,8 +5773,6 @@ snapshots:
     dependencies:
       safe-buffer: 5.2.1
 
-  pify@5.0.0: {}
-
   pino-abstract-transport@3.0.0:
     dependencies:
       split2: 4.2.0
@@ -6243,10 +6196,6 @@ snapshots:
   split-ca@1.0.1: {}
 
   split2@4.2.0: {}
-
-  split@1.0.1:
-    dependencies:
-      through: 2.3.8
 
   sprintf-js@1.0.3: {}
 

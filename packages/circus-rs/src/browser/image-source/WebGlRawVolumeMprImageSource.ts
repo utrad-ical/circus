@@ -50,6 +50,7 @@ export default class WebGlRawVolumeMprImageSource
 
   private setPriority: (imageIndices: RangeInput, priority: number) => void;
   private disposeCallbacks: (() => void)[] = [];
+  private disposed = false;
 
   // For debugging
   public static captureCanvasCallbacks: CaptureCanvasCallback[] = [];
@@ -95,6 +96,7 @@ export default class WebGlRawVolumeMprImageSource
     this.loadSequence = (async () => {
       this.draftInterval = draftInterval;
       this.metadata = await volumeLoader.loadMeta();
+      if (this.disposed) return;
       this.volume = loadController.getVolume()!;
 
       // Assign the length of the longest side of the volume to
@@ -123,6 +125,7 @@ export default class WebGlRawVolumeMprImageSource
   }
 
   public dispose() {
+    this.disposed = true;
     this.disposeCallbacks.forEach(callback => callback());
   }
 

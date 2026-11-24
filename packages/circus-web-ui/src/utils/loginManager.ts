@@ -41,7 +41,7 @@ const loginManager = (apiServer: string, dispatch: Dispatch) => {
       data
     });
     // Learn who we are now, and tell other tabs
-    const userEmail = await refreshUserInfo(true);
+    const userEmail = await loadUserInfo(true);
     if (userEmail) broadcastSessionChange(userEmail);
   };
 
@@ -56,14 +56,19 @@ const loginManager = (apiServer: string, dispatch: Dispatch) => {
    * Logs in with a onetime password (onetime URL).
    * This replaces the session of the current user, if any.
    */
-  const tryOnetimeLogin = async (onetime: string) => {
-    await startSession({ onetime });
+  const onetimeLogins = new Map<string, Promise<void>>();
+  const tryOnetimeLogin = (onetime: string) => {
+    // A onetime password works only once, so share the request in progress
+    const existing = onetimeLogins.get(onetime);
+    if (existing) return existing;
+    const promise = startSession({ onetime }).finally(() =>
+      onetimeLogins.delete(onetime)
+    );
+    onetimeLogins.set(onetime, promise);
+    return promise;
   };
 
-  /**
-   * Loads the user information.
-   */
-  const refreshUserInfo = async (full = false): Promise<string | undefined> => {
+  const loadUserInfo = async (full: boolean): Promise<string | undefined> => {
     dispatch(actions.loginInfoRequest());
     try {
       const options = {
@@ -95,6 +100,20 @@ const loginManager = (apiServer: string, dispatch: Dispatch) => {
       dispatch(actions.loggedOut());
       dispatch(searchActions.reset());
     }
+  };
+
+  const inFlight = new Map<boolean, Promise<string | undefined>>();
+
+  /**
+   * Loads the user information.
+   * Shares the request in progress, such as one from an effect run twice.
+   */
+  const refreshUserInfo = (full = false) => {
+    const existing = inFlight.get(full);
+    if (existing) return existing;
+    const promise = loadUserInfo(full).finally(() => inFlight.delete(full));
+    inFlight.set(full, promise);
+    return promise;
   };
 
   const logout = async () => {

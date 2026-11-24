@@ -1,6 +1,6 @@
 import Application from '#pages/Application.tsx';
 import { DialogHost } from '#components/dialogs.tsx';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { StrictMode, useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   createBrowserRouter,
@@ -118,18 +118,19 @@ const routerOptions = {
   }
 };
 
+// The login state is kept in the session cookie
+const manager = loginManager('/', store.dispatch);
+
 const TheApp: React.FC<{}> = () => {
-  const [manager, setManager] = useState<ReturnType<typeof loginManager>>();
+  const [started, setStarted] = useState(false);
 
   useEffect(() => {
-    // The login state is kept in the session cookie;
-    // check it by loading the user information
-    const manager = loginManager('/', store.dispatch);
-    setManager(manager);
+    // Check the login state by loading the user information
     manager.refreshUserInfo(true);
+    setStarted(true);
   }, []);
 
-  if (!manager) return null;
+  if (!started) return null;
 
   const routes: RouteObject[] = [
     {
@@ -227,4 +228,8 @@ const TheApp: React.FC<{}> = () => {
   );
 };
 
-createRoot(document.getElementById('app')!).render(<TheApp />);
+createRoot(document.getElementById('app')!).render(
+  <StrictMode>
+    <TheApp />
+  </StrictMode>
+);

@@ -98,6 +98,7 @@ export const AnnotationViewer: React.FC<{
     const src = new WebGlRawVolumeMprImageSource({ volumeLoader });
     const composition = new Composition(src);
     setComposition(composition);
+    return () => composition.dispose();
   }, [volumeLoader]);
 
   useEffect(() => {

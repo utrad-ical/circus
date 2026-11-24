@@ -1,6 +1,6 @@
 import Application from '#pages/Application.tsx';
 import { DialogHost } from '#components/dialogs.tsx';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { StrictMode, useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   createBrowserRouter,
@@ -227,4 +227,8 @@ const TheApp: React.FC<{}> = () => {
   );
 };
 
-createRoot(document.getElementById('app')!).render(<TheApp />);
+createRoot(document.getElementById('app')!).render(
+  <StrictMode>
+    <TheApp />
+  </StrictMode>
+);

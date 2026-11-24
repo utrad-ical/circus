@@ -71,6 +71,8 @@ const useCompositions = (
       metadata?: DicomVolumeMetadata;
       composition?: Composition;
       progress: number;
+      /** Why the volume could not be loaded */
+      error?: string;
     }[]
   >(() =>
     series.map(() => ({
@@ -91,55 +93,66 @@ const useCompositions = (
 
       if (!volumeLoader) return;
 
-      const metadata = await volumeLoader.loadMeta();
-      if (abortController.signal.aborted) return;
+      try {
+        const metadata = await volumeLoader.loadMeta();
+        if (abortController.signal.aborted) return;
 
-      const src = (() => {
-        switch (metadata.mode) {
-          case '2d':
-            return new rs.TwoDimensionalImageSource({
-              volumeLoader,
-              maxCacheSize: 10
-            });
-          default:
-            return new rs.WebGlRawVolumeMprImageSource({ volumeLoader });
-        }
-      })();
+        const src = (() => {
+          switch (metadata.mode) {
+            case '2d':
+              return new rs.TwoDimensionalImageSource({
+                volumeLoader,
+                maxCacheSize: 10
+              });
+            default:
+              return new rs.WebGlRawVolumeMprImageSource({ volumeLoader });
+          }
+        })();
 
-      const composition = new Composition(src);
-      abortController.signal.addEventListener('abort', () =>
-        composition.dispose()
-      );
+        const composition = new Composition(src);
+        abortController.signal.addEventListener('abort', () =>
+          composition.dispose()
+        );
 
-      setResults(results => [
-        ...results.slice(0, volId),
-        { ...results[volId], metadata, composition },
-        ...results.slice(volId + 1)
-      ]);
+        setResults(results => [
+          ...results.slice(0, volId),
+          { ...results[volId], metadata, composition },
+          ...results.slice(volId + 1)
+        ]);
 
-      const progressListener: ProgressEventListener = event => {
-        const { finished, total } = event.detail;
+        const progressListener: ProgressEventListener = event => {
+          const { finished, total } = event.detail;
+          setResults(results =>
+            produce(results, draft => {
+              draft[volId].progress = (finished || 0) / (total || 1);
+            })
+          );
+        };
+
+        volumeLoader.loadController?.addEventListener(
+          'progress',
+          progressListener,
+          { signal: abortController.signal }
+        );
+
+        await volumeLoader.loadVolume();
+        if (abortController.signal.aborted) return;
+
         setResults(results =>
           produce(results, draft => {
-            draft[volId].progress = (finished || 0) / (total || 1);
+            draft[volId].progress = 1;
           })
         );
-      };
-
-      volumeLoader.loadController?.addEventListener(
-        'progress',
-        progressListener,
-        { signal: abortController.signal }
-      );
-
-      await volumeLoader.loadVolume();
-      if (abortController.signal.aborted) return;
-
-      setResults(results =>
-        produce(results, draft => {
-          draft[volId].progress = 1;
-        })
-      );
+      } catch (err) {
+        if (abortController.signal.aborted) return;
+        // The message from the image server can be shown to the user
+        const message = err instanceof Error ? err.message : String(err);
+        setResults(results =>
+          produce(results, draft => {
+            draft[volId].error = message;
+          })
+        );
+      }
     });
 
     return () => abortController.abort();
@@ -298,6 +311,7 @@ const RevisionEditor: React.FC<{
   const metadata = compositions.map(entry => entry.metadata);
 
   const volumeLoadingProgresses = compositions.map(entry => entry.progress);
+  const volumeLoadingErrors = compositions.map(entry => entry.error);
   const activeSeriesMetadata =
     compositions[editingData.activeSeriesIndex].metadata;
 
@@ -994,6 +1008,7 @@ const RevisionEditor: React.FC<{
           <LabelSelector
             seriesData={seriesData}
             volumeLoadingProgresses={volumeLoadingProgresses}
+            volumeLoadingErrors={volumeLoadingErrors}
             editingData={editingData}
             updateEditingData={updateEditingData}
             disabled={busy}

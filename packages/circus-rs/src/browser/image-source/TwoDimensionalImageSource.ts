@@ -52,7 +52,8 @@ export default class TwoDimensionalImageSource extends ImageSource {
     this.loadSequence = (async () => {
       this.metadata = await volumeLoader.loadMeta();
       this.volume = volumeLoader.loadController!.getVolume()!;
-      volumeLoader.loadVolume();
+      // A failure is reported via the load controller
+      volumeLoader.loadVolume().catch(() => {});
     })();
     this.cache = new LRU({ maxSize: maxCacheSize });
 

@@ -118,18 +118,19 @@ const routerOptions = {
   }
 };
 
+// The login state is kept in the session cookie
+const manager = loginManager('/', store.dispatch);
+
 const TheApp: React.FC<{}> = () => {
-  const [manager, setManager] = useState<ReturnType<typeof loginManager>>();
+  const [started, setStarted] = useState(false);
 
   useEffect(() => {
-    // The login state is kept in the session cookie;
-    // check it by loading the user information
-    const manager = loginManager('/', store.dispatch);
-    setManager(manager);
+    // Check the login state by loading the user information
     manager.refreshUserInfo(true);
+    setStarted(true);
   }, []);
 
-  if (!manager) return null;
+  if (!started) return null;
 
   const routes: RouteObject[] = [
     {

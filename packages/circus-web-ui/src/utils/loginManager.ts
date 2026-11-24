@@ -41,7 +41,7 @@ const loginManager = (apiServer: string, dispatch: Dispatch) => {
       data
     });
     // Learn who we are now, and tell other tabs
-    const userEmail = await refreshUserInfo(true);
+    const userEmail = await loadUserInfo(true);
     if (userEmail) broadcastSessionChange(userEmail);
   };
 
@@ -60,10 +60,7 @@ const loginManager = (apiServer: string, dispatch: Dispatch) => {
     await startSession({ onetime });
   };
 
-  /**
-   * Loads the user information.
-   */
-  const refreshUserInfo = async (full = false): Promise<string | undefined> => {
+  const loadUserInfo = async (full: boolean): Promise<string | undefined> => {
     dispatch(actions.loginInfoRequest());
     try {
       const options = {
@@ -95,6 +92,20 @@ const loginManager = (apiServer: string, dispatch: Dispatch) => {
       dispatch(actions.loggedOut());
       dispatch(searchActions.reset());
     }
+  };
+
+  const inFlight = new Map<boolean, Promise<string | undefined>>();
+
+  /**
+   * Loads the user information.
+   * Shares the request in progress, such as one from an effect run twice.
+   */
+  const refreshUserInfo = (full = false) => {
+    const existing = inFlight.get(full);
+    if (existing) return existing;
+    const promise = loadUserInfo(full).finally(() => inFlight.delete(full));
+    inFlight.set(full, promise);
+    return promise;
   };
 
   const logout = async () => {

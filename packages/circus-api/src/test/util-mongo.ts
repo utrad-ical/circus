@@ -1,5 +1,5 @@
 import { before, after } from 'node:test';
-import { EJSON } from 'bson';
+import { BSON } from 'mongodb';
 import fs from 'node:fs/promises';
 import yaml from 'js-yaml';
 import type * as mongo from 'mongodb';
@@ -37,7 +37,7 @@ export const setUpMongoFixture = async (
       )
     );
     if (content) {
-      const data: any = EJSON.parse(JSON.stringify(content));
+      const data: any = BSON.EJSON.parse(JSON.stringify(content));
       for (const row of data) {
         if (!row.createdAt) row.createdAt = new Date();
         if (!row.updatedAt) row.updatedAt = new Date();

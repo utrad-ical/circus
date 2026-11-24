@@ -28,6 +28,25 @@ test('compresses DICOM files using the lossless transfer syntax', async () => {
   }
 });
 
+test('reuses a container for the next file', async () => {
+  const inBuffer = await fs.readFile(
+    path.join(testDir, 'CT-MONO2-16-brain.dcm')
+  );
+  const runner = await createDicomUtilityRunner({
+    maxConcurrency: 1,
+    dockerImage
+  });
+  try {
+    for (let i = 0; i < 3; i++) {
+      const outBuffer = await runner.compress(inBuffer.buffer as ArrayBuffer);
+      const dataSet = parser.parseDicom(new Uint8Array(outBuffer));
+      assert.equal(dataSet.string('x00020010'), '1.2.840.10008.1.2.4.70');
+    }
+  } finally {
+    await runner.dispose();
+  }
+});
+
 test('rejects an invalid Docker image', async () => {
   const inBuffer = await fs.readFile(
     path.join(testDir, 'CT-MONO2-16-brain.dcm')

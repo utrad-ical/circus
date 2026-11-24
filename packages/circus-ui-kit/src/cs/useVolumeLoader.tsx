@@ -9,57 +9,30 @@ import { serializeUtilizeOptions } from './createVolumeLoaderManager.tsx';
 export const VolumeLoaderFactoryContext =
   React.createContext<VolumeLoaderManager>(null as any);
 
+/**
+ * Acquires the volume loaders for the given series while mounted.
+ * Returns null until they are ready.
+ */
 export const useVolumeLoaders = (series: SeriesEntryWithHints[]) => {
-  const { acquireVolumeLoader, releaseVolumeLoader, getVolumeLoader } =
-    useContext(VolumeLoaderFactoryContext)!;
+  const manager = useContext(VolumeLoaderFactoryContext)!;
 
-  const [runningLoaders, setRunningLoaders] = useState<Set<string>>(new Set());
-  const [volumeLoaders, setVolumeLoaders] = useState<
-    rs.DicomVolumeLoader[] | null
-  >(null);
+  // Callers may pass a new array on every render, so depend on its content
+  const key = JSON.stringify(series.map(s => serializeUtilizeOptions(s)));
+
+  const [acquired, setAcquired] = useState<{
+    key: string;
+    loaders: rs.DicomVolumeLoader[];
+  } | null>(null);
 
   useEffect(() => {
-    const seriesKeys = series.map(o => serializeUtilizeOptions(o));
-
-    setRunningLoaders(prevLoaders => {
-      const newLoaders = new Set(prevLoaders);
-
-      //release volumeLoaders that is no longer in use
-      Array.from(newLoaders.values())
-        .filter(id => !seriesKeys.some(key => key === id))
-        .forEach(id => {
-          releaseVolumeLoader(id);
-          newLoaders.delete(id);
-        });
-
-      //obtain unacquired volumeLoaders
-      setVolumeLoaders(
-        seriesKeys.map((key, ind) => {
-          if (!newLoaders.has(key)) {
-            acquireVolumeLoader(series[ind]);
-            newLoaders.add(key);
-          }
-          return getVolumeLoader(key);
-        })
-      );
-      return newLoaders;
-    });
-
+    const ids = series.map(s => manager.acquireVolumeLoader(s));
+    setAcquired({ key, loaders: ids.map(id => manager.getVolumeLoader(id)) });
     return () => {
-      setRunningLoaders(prevLoaders => {
-        const newLoaders = new Set(prevLoaders);
-        newLoaders.forEach(id => {
-          releaseVolumeLoader(id);
-          newLoaders.delete(id);
-        });
-        return newLoaders;
-      });
+      // Release after the next effect acquires, so that loaders still in use
+      // are not paused and resumed
+      queueMicrotask(() => ids.forEach(id => manager.releaseVolumeLoader(id)));
     };
-  }, [series]);
+  }, [manager, key]);
 
-  const seriesKeys = series.map(o => serializeUtilizeOptions(o));
-
-  if (seriesKeys.some(key => !runningLoaders.has(key))) return null;
-
-  return volumeLoaders;
+  return acquired?.key === key ? acquired.loaders : null;
 };

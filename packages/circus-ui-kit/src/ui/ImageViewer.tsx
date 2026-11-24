@@ -67,27 +67,26 @@ export const ImageViewer: React.FC<{
   const [viewer, setViewer] = useState<Viewer | null>(null);
 
   useEffect(() => {
-    if (!composition) return;
-    setViewer((viewer: Viewer | null) => {
-      if (viewer) {
-        if (viewer.getComposition() !== composition) {
-          viewer.setComposition(composition);
-        }
-        return viewer;
-      } else {
-        const newViewer = new Viewer(viewerDivRef.current!);
-        newViewer.setComposition(composition);
-        if (typeof initialStateSetter === 'function') {
-          newViewer.addEventListener('imageReady', () => {
-            const baseState = composition.imageSource.initialState(newViewer);
-            const viewState = initialStateSetter(baseState, newViewer, id);
-            newViewer.setState(viewState);
-          });
-        }
-        return newViewer;
-      }
-    });
-  }, [composition, initialStateSetter]);
+    const viewer = new Viewer(viewerDivRef.current!);
+    setViewer(viewer);
+    return () => viewer.dispose();
+  }, []);
+
+  useEffect(() => {
+    if (!viewer || !composition) return;
+    viewer.setComposition(composition);
+  }, [viewer, composition]);
+
+  useEffect(() => {
+    if (!viewer || !composition || typeof initialStateSetter !== 'function')
+      return;
+    const handler = () => {
+      const baseState = composition.imageSource.initialState(viewer);
+      viewer.setState(initialStateSetter(baseState, viewer, id));
+    };
+    viewer.addEventListener('imageReady', handler);
+    return () => viewer.removeEventListener('imageReady', handler);
+  }, [viewer, composition, initialStateSetter]);
 
   useEffect(() => {
     if (!viewer) return;

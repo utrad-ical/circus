@@ -110,3 +110,28 @@ test('rejects an image whose size differs without writing it', async () => {
     process.off('unhandledRejection', onUnhandled);
   }
 });
+
+test('determines the slice spacing of a partial volume from its own images', async () => {
+  const { dicomFileRepository } = await prepareRepository(5);
+  const provider = await createVolumeProvider(
+    {},
+    { dicomFileRepository, dicomExtractorWorker: fakeExtractor() }
+  );
+  const accessor = await provider(uid);
+  assert.equal(await accessor.determinePitch(), 1.5);
+  assert.equal(await accessor.determinePitch([1, 3, 5]), 3);
+  assert.equal(await accessor.determinePitch([5, 4, 3]), 1.5);
+});
+
+test('uses 1 as the slice spacing when it cannot be determined', async () => {
+  const { dicomFileRepository } = await prepareRepository(3);
+  const dicomExtractorWorker = fakeExtractor(() => ({
+    sliceLocation: undefined
+  }));
+  const provider = await createVolumeProvider(
+    {},
+    { dicomFileRepository, dicomExtractorWorker }
+  );
+  const accessor = await provider(uid);
+  assert.equal(await accessor.determinePitch(), 1);
+});

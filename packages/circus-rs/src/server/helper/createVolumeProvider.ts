@@ -10,6 +10,7 @@ import PriorityIntegerCaller from '../../common/PriorityIntegerCaller.ts';
 import type RawData from '../../common/RawData.ts';
 import { type RangeInput, toRange } from '../../common/rangeInput.ts';
 import type { DicomExtractorWorker } from './extractor-worker/createDicomExtractorWorker.ts';
+import { determineSliceSpacing } from './openSeriesVolume.ts';
 
 export type VolumeProvider = (seriesUid: string) => Promise<VolumeAccessor>;
 
@@ -25,7 +26,7 @@ export interface VolumeAccessor {
    * Maps an image number to the corresponding zero-based volume z-index
    */
   zIndices: Map<number, number>;
-  determinePitch: () => Promise<number>;
+  determinePitch: (imageNos?: number[]) => Promise<number>;
   images: mr.MIR;
   isLike3d: () => Promise<boolean>;
 }
@@ -121,20 +122,22 @@ const createUncachedVolumeProvider: FunctionService<
       return metadata;
     };
 
-    const determinePitch = async () => {
-      const count = mr.length(imageRange);
-
-      if (primaryMetadata.pitch) {
-        // (0018,0088) must not be negative, but some devices write negative values
-        return Math.abs(primaryMetadata.pitch);
-      } else if (count > 1) {
-        const secondaryMetadata = await loadMetadata(mr.at(imageRange, 1)!);
-        return Math.abs(
-          secondaryMetadata.sliceLocation! - primaryMetadata.sliceLocation!
-        );
-      } else {
-        return 1;
-      }
+    /**
+     * Determines the slice spacing from the first two of the images,
+     * in the same way as the export (`determineSliceSpacing`).
+     * @param imageNos The images of a partial volume in its order.
+     * Defaults to the whole series.
+     */
+    const determinePitch = async (imageNos?: number[]) => {
+      const [firstNo, secondNo] = imageNos ?? [
+        mr.at(imageRange, 0),
+        mr.at(imageRange, 1)
+      ];
+      const first = await loadMetadata(firstNo!);
+      // The spacing tag of the first image is used as is if present
+      if (first.pitch || secondNo === undefined)
+        return determineSliceSpacing(first, undefined);
+      return determineSliceSpacing(first, await loadMetadata(secondNo));
     };
 
     /**

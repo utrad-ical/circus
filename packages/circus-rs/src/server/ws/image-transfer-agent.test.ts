@@ -184,3 +184,21 @@ test('passes a priority to the loader for all the images at once', async () => {
   assert.ok(loads.some(([nos, p]) => p === 3 && nos.join() === '6,7,8'));
   agent.dispose();
 });
+
+test('waits for acknowledgements when the client sets a window size', async () => {
+  const sent: number[] = [];
+  const agent = createImageTransferAgent({
+    imageDataEmitter: async data => void sent.push(data.imageIndex),
+    errorEmitter: async () => {},
+    volumeProvider: async () => fakeAccessor(10),
+    logger
+  });
+  const connection = (await agent.beginTransfer('t1', 'uid', undefined, 2))!;
+  await wait(20);
+  assert.equal(sent.length, 2);
+  assert.equal(await countImmediates(20), 0); // not spinning while waiting
+  connection.acknowledge();
+  await wait(20);
+  assert.equal(sent.length, 3);
+  agent.dispose();
+});

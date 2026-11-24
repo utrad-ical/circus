@@ -17,7 +17,8 @@ interface ImageTransferAgent {
   beginTransfer: (
     transferId: string,
     seriesUid: string,
-    partialVolumeDescriptor?: PartialVolumeDescriptor
+    partialVolumeDescriptor?: PartialVolumeDescriptor,
+    windowSize?: number
   ) => Promise<TransferConnection | null>;
   getConnection: (transferId: string) => Promise<TransferConnection | null>;
   dispose: () => void;
@@ -31,7 +32,10 @@ type TransferConnection = {
   abort: () => void;
   pause: () => void;
   resume: () => void;
-  isPaused: () => boolean;
+  /** Called when the client has received an image */
+  acknowledge: () => void;
+  /** False while paused or while waiting for acknowledgements */
+  canSend: () => boolean;
 };
 
 interface CreateImageTransferAgentOptions {
@@ -84,8 +88,8 @@ const createImageTransferAgent = ({
 
   const next = async () => {
     // Stop while there is nothing to send; resume() starts it again
-    const active = Array.from(transferConnections.values()).some(
-      connection => !connection.isPaused()
+    const active = Array.from(transferConnections.values()).some(connection =>
+      connection.canSend()
     );
     if (!active) return stopOperation();
 
@@ -93,7 +97,7 @@ const createImageTransferAgent = ({
     while (0 < transferIds.length) {
       const transferId = transferIds.shift()!;
       const connection = transferConnections.get(transferId);
-      if (!connection || connection.isPaused()) continue;
+      if (!connection || !connection.canSend()) continue;
 
       // await new Promise<void>((resolve) => setTimeout(() => resolve(), 300));
 
@@ -106,10 +110,15 @@ const createImageTransferAgent = ({
     setImmediate(next);
   };
 
+  /**
+   * @param windowSize The number of images that may be sent before
+   * the client acknowledges them. Unlimited if omitted (older clients).
+   */
   const beginTransfer = async (
     transferId: string,
     seriesUid: string,
-    partialVolumeDescriptor?: PartialVolumeDescriptor
+    partialVolumeDescriptor?: PartialVolumeDescriptor,
+    windowSize?: number
   ) => {
     if (
       pendingsUntilTransferStarts.has(transferId) ||
@@ -177,7 +186,7 @@ const createImageTransferAgent = ({
     };
 
     const transferNextImage = async () => {
-      if (paused) return;
+      if (!canSend()) return;
       const { value: imageIndex, priority } = queue.shift();
       if (imageIndex !== undefined) {
         let buffer: ArrayBuffer;
@@ -194,6 +203,7 @@ const createImageTransferAgent = ({
         }
         try {
           const data = transferImageMessageData(transferId, imageIndex);
+          unacknowledged++;
           await imageDataEmitter(data, buffer);
         } catch (err) {
           abort();
@@ -209,9 +219,18 @@ const createImageTransferAgent = ({
     };
 
     let paused = false;
+    // Images sent but not acknowledged yet. Without flow control,
+    // the network keeps sending images queued before a priority change
+    let unacknowledged = 0;
+    const canSend = () =>
+      !paused && !(windowSize && unacknowledged >= windowSize);
     const pause = () => (paused = true);
     const resume = () => {
       paused = false;
+      if (transferConnections.has(transferId)) startOperationIfNecessary();
+    };
+    const acknowledge = () => {
+      unacknowledged = Math.max(0, unacknowledged - 1);
       if (transferConnections.has(transferId)) startOperationIfNecessary();
     };
 
@@ -223,7 +242,8 @@ const createImageTransferAgent = ({
       abort,
       pause,
       resume,
-      isPaused: () => paused
+      acknowledge,
+      canSend
     };
 
     transferConnections.set(transferId, transferConnection);

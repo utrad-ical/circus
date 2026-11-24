@@ -47,7 +47,8 @@ const messageDataTypes = [
   'PAUSE_TRANSFER',
   'RESUME_TRANSFER',
   'TRANSFER_IMAGE',
-  'TRANSFER_ERROR'
+  'TRANSFER_ERROR',
+  'IMAGE_RECEIVED'
 ] as const;
 
 export type MessageDataType = (typeof messageDataTypes)[number];
@@ -59,13 +60,25 @@ export type ImageTransferMessageData =
   | AbortTransferMessageData
   | SetPriorityMessageData
   | TransferImageMessage
-  | TransferErrorMessage;
+  | TransferErrorMessage
+  | ImageReceivedMessageData;
 
 export type BeginTransferMessageData = {
   messageType: 'BEGIN_TRANSFER';
   transferId: string;
   seriesUid: string;
   partialVolumeDescriptor?: PartialVolumeDescriptor;
+  /**
+   * The number of images the server may send before the client acknowledges
+   * them with IMAGE_RECEIVED. Unlimited if omitted.
+   */
+  windowSize?: number;
+};
+
+/** Acknowledges an image of the transfer (when `windowSize` is used) */
+export type ImageReceivedMessageData = {
+  messageType: 'IMAGE_RECEIVED';
+  transferId: string;
 };
 
 export type SetPriorityMessageData = {
@@ -115,13 +128,15 @@ export function isImageTransferData(r: any): r is ImageTransferMessageData {
 export function beginTransferMessageData(
   transferId: string,
   seriesUid: string,
-  partialVolumeDescriptor?: PartialVolumeDescriptor
+  partialVolumeDescriptor?: PartialVolumeDescriptor,
+  windowSize?: number
 ): BeginTransferMessageData {
   return {
     messageType: 'BEGIN_TRANSFER',
     transferId,
     seriesUid,
-    partialVolumeDescriptor
+    partialVolumeDescriptor,
+    windowSize
   };
 }
 
@@ -163,4 +178,10 @@ export function transferErrorMessageData(
   message: string
 ): TransferErrorMessage {
   return { messageType: 'TRANSFER_ERROR', transferId, message };
+}
+
+export function imageReceivedMessageData(
+  transferId: string
+): ImageReceivedMessageData {
+  return { messageType: 'IMAGE_RECEIVED', transferId };
 }

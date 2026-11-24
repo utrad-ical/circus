@@ -218,7 +218,8 @@ const SeriesItem: React.FC<{
       </span>
       {volumeLoadingError && (
         <div className={styles.seriesError}>
-          <Icon icon="material-warning" /> {volumeLoadingError}
+          <Icon icon="material-warning" />
+          <span>{volumeLoadingError}</span>
         </div>
       )}
       <ul className={styles.caseLabelList}>

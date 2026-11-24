@@ -15,6 +15,12 @@
   height: 512px;
 }
 
+.viewerError {
+  box-sizing: border-box;
+  width: 512px;
+  margin-top: 10px;
+}
+
 .menu {
   text-align: right;
   margin-bottom: 1em;

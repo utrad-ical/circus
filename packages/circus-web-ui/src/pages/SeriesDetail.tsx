@@ -135,7 +135,11 @@ const SeriesDetail: React.FC<{}> = props => {
             composition={composition ?? undefined}
             tool={pagerTool}
           />
-          {volumeError && <Alert variant="danger">{volumeError}</Alert>}
+          {volumeError && (
+            <Alert variant="danger" className={styles.viewerError}>
+              {volumeError}
+            </Alert>
+          )}
         </div>
         <div>
           <div className={styles.menu}>

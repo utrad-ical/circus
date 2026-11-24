@@ -144,6 +144,7 @@ const Candidate: React.FC<{
   markStyle: MarkStyle;
   tool: Tool;
   displayOptions: any;
+  children?: React.ReactNode;
 }> = props => {
   const { imageSource, item, markStyle, tool, displayOptions, children } =
     props;

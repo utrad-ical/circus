@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import IconDisplay from './IconDisplay.tsx';
 import { loadPluginInfo } from '#store/plugins.ts';
-import { useSelector, useDispatch } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '#store/index.ts';
 import { api } from '#utils/api.ts';
 
 const PluginDisplay: React.FC<{
@@ -9,8 +9,8 @@ const PluginDisplay: React.FC<{
   size?: string;
 }> = props => {
   const { pluginId, size } = props;
-  const plugin = useSelector(state => state.plugins[pluginId]);
-  const dispatch = useDispatch();
+  const plugin = useAppSelector(state => state.plugins[pluginId]);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (!plugin) dispatch(loadPluginInfo(pluginId));

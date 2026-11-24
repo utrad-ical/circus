@@ -19,7 +19,7 @@ import SearchResultsView, {
   patientInfoSearchOptions
 } from '#components/SearchResultsView.tsx';
 import React, { Fragment } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '#store/index.ts';
 import { useLocation, useNavigate } from 'react-router-dom';
 import * as searches from '#store/searches.ts';
 import styles from './PluginJobSearchResults.module.css';
@@ -37,14 +37,14 @@ import {
 
 const Operation: DataGridRenderer<PluginJobSearchItem> = props => {
   const { value: job } = props;
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const location = useLocation();
   const showMessage = useShowMessage();
   const searchName =
     location.pathname.indexOf('/browse/plugin-jobs/mylist') === 0
       ? 'myPluginJobList'
       : 'pluginJob';
-  const search = useSelector(state => state.searches.searches[searchName]);
+  const search = useAppSelector(state => state.searches.searches[searchName]);
   const navigate = useNavigate();
 
   const handleViewClick = () => {
@@ -140,7 +140,7 @@ const PluginSearchResults: React.FC<{
   refreshable?: boolean;
 }> = props => {
   const { searchName, refreshable = true } = props;
-  const search = useSelector(state => state.searches.searches[searchName]);
+  const search = useAppSelector(state => state.searches.searches[searchName]);
   const selected = search?.selected ?? [];
 
   return (

@@ -4,7 +4,7 @@ import useBodyClass from '#utils/useBodyClass.ts';
 /**
  * This adds "full-span-container" body class from within a component.
  */
-const FullSpanContainer: React.FC = props => {
+const FullSpanContainer: React.FC<{ children?: React.ReactNode }> = props => {
   useBodyClass('full-span-container');
   return <Fragment>{props.children}</Fragment>;
 };

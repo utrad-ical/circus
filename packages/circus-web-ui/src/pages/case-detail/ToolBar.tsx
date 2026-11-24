@@ -615,6 +615,7 @@ const ToolButton: React.FC<{
   changeTool: any;
   shortcut?: string;
   disabled?: boolean;
+  children?: React.ReactNode;
 }> = props => {
   const { name, icon, active, changeTool, disabled, shortcut, children } =
     props;

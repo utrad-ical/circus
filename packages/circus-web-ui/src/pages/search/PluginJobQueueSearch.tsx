@@ -11,7 +11,7 @@ import {
   Times
 } from './SearchResultRenderer.tsx';
 import { newSearch } from '#store/searches.ts';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from '#store/index.ts';
 import SearchResultsView, {
   makeSortOptions
 } from '#components/SearchResultsView.tsx';
@@ -47,7 +47,7 @@ const PluginJobQueueSearchResults: React.FC<{}> = props => {
 };
 
 const PluginJobQueueSearch: React.FC<{}> = props => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     dispatch(

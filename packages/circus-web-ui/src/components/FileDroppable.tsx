@@ -39,6 +39,7 @@ const collectFiles = async (
 export const FileDroppable: React.FC<{
   onDropFiles: (files: FileWithPath[]) => void;
   className?: string;
+  children?: React.ReactNode;
 }> = props => {
   const { onDropFiles, className, children } = props;
   const [active, setActive] = useState(false);

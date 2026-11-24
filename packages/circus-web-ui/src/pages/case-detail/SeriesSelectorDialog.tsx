@@ -4,7 +4,7 @@ import type { SeriesEntry } from '#components/SeriesSelector.tsx';
 import SeriesSelector from '#components/SeriesSelector.tsx';
 import { produce } from 'immer';
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '#store/index.ts';
 import { api } from '#utils/api.ts';
 import fillPartialVolumeDescriptors from '#utils/partialVolumeDescriptor.ts';
 import type { SeriesEntryWithLabels } from './revisionData.ts';
@@ -15,7 +15,7 @@ const SeriesSelectorDialog: React.FC<{
 }> = props => {
   const { onResolve, initialValue } = props;
   const [entries, setEntries] = useState<SeriesEntry[]>(initialValue);
-  const appState = useSelector(state => state);
+  const appState = useAppSelector(state => state);
 
   const handleRemovingOrEditing = async (index: number) => {
     if ((entries[index] as SeriesEntryWithLabels).labels?.length) {

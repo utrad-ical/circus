@@ -4,7 +4,7 @@ import {
   broadcastSessionChange,
   isSessionUserChangedError
 } from './sessionUserCheck.ts';
-import type { Dispatch } from 'redux';
+import type { Dispatch } from '@reduxjs/toolkit';
 import type {
   LoginInfo,
   LoginInfoFull,

@@ -28,7 +28,7 @@ import SearchResultsView from '#components/SearchResultsView.tsx';
 import UserDisplay from '#components/UserDisplay.tsx';
 import Dialog from '#components/Dialog.tsx';
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from '#store/index.ts';
 import { Link, useParams } from 'react-router-dom';
 import { newSearch } from '#store/searches.ts';
 import { api } from '#utils/api.ts';
@@ -143,7 +143,7 @@ const PluginJobDetail: React.FC<{}> = props => {
     () => user.accessiblePlugins,
     [user]
   );
-  const dispatchForJobSearch = useDispatch();
+  const dispatchForJobSearch = useAppDispatch();
 
   const loadJob = useCallback(
     async (signal: AbortSignal) => {
@@ -214,7 +214,7 @@ const PluginJobDetail: React.FC<{}> = props => {
 
   const [jobData, , reloadJob] = useLoadData(loadJob);
 
-  const handleMenuSelect = useCallback(async selected => {
+  const handleMenuSelect = useCallback(async (selected: string) => {
     switch (selected) {
       case 'deleteFeedback': {
         setShowDeleteFeedbackModal(true);

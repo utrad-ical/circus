@@ -1,4 +1,4 @@
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from '#store/index.ts';
 import type React from 'react';
 import { showMessage } from '#store/messages.ts';
 
@@ -13,7 +13,7 @@ interface Options {
 }
 
 const useShowMessage = () => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   /**
    * Adds/hides message boxes.
    * By default, message boxes are not closed unless manually dismissed.

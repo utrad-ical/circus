@@ -4,6 +4,7 @@ import styles from './Section.module.css';
 
 const Section: React.FC<{
   title: string | React.ReactElement<any>;
+  children?: React.ReactNode;
 }> = props => {
   const { title, children } = props;
   return (

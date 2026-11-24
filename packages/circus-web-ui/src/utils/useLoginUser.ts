@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '#store/index.ts';
 import type { UserPreferences } from '@utrad-ical/circus-api-schema';
 import { userPreferencesUpdated } from '#store/loginUser.ts';
 import { api } from './api.ts';
@@ -8,14 +8,16 @@ import { api } from './api.ts';
  * A React cutsom hook to fetch login user from redux store.
  * This assumes you are using this hook after a successful login.
  */
-const useLoginUser = () => useSelector(state => state.loginUser.data!);
+const useLoginUser = () => useAppSelector(state => state.loginUser.data!);
 
 export const useUserPreferences = (): [
   UserPreferences,
   (updates: UserPreferences) => Promise<void>
 ] => {
-  const preferences = useSelector(state => state.loginUser.data?.preferences!);
-  const dispatch = useDispatch();
+  const preferences = useAppSelector(
+    state => state.loginUser.data?.preferences!
+  );
+  const dispatch = useAppDispatch();
   const updatePreferences = useCallback(
     async (updates: UserPreferences) => {
       dispatch(userPreferencesUpdated({ updates }));

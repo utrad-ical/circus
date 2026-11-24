@@ -5,16 +5,16 @@ import { Link } from 'react-router-dom';
 import MessageBox from './MessageBox.tsx';
 import ErrorBoundary from '#components/ErrorBoundary.tsx';
 import MainNav from './MainNav.tsx';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '#store/index.ts';
 
 /**
  * The main application container.
  * The navigation bar is always visible, but the main page content is
  * visible only after we confirmed the user is currently logged-in with valid session.
  */
-const Application: React.FC<{}> = props => {
-  const isUserFetching = useSelector(state => state.loginUser.isFetching);
-  const isLoggedIn = useSelector(state => state.loginUser.data !== null);
+const Application: React.FC<{ children?: React.ReactNode }> = props => {
+  const isUserFetching = useAppSelector(state => state.loginUser.isFetching);
+  const isLoggedIn = useAppSelector(state => state.loginUser.data !== null);
 
   const pageContentVisible = !isUserFetching && isLoggedIn;
   const notLoggedIn = !isUserFetching && !isLoggedIn;

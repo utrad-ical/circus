@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import AdminContainer from './AdminContainer.tsx';
 import SearchResultsView from '#components/SearchResultsView.tsx';
 import { newSearch } from '#store/searches.ts';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from '#store/index.ts';
 import type { DataGridColumnDefinition } from '#components/DataGrid.tsx';
 import DataGrid from '#components/DataGrid.tsx';
 import {
@@ -32,7 +32,7 @@ const DataView: React.FC<{ value: PluginJob[] }> = props => {
 };
 
 const PluginJobQueueAdmin: React.FC<{}> = props => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     dispatch(

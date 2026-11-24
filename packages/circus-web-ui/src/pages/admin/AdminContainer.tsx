@@ -7,6 +7,7 @@ const AdminContainer: React.FC<{
   title: string;
   icon: string;
   className?: string;
+  children?: React.ReactNode;
 }> = props => {
   const { title, icon, className } = props;
 

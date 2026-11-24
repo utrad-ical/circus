@@ -2,7 +2,7 @@ import Button from '#components/Button.tsx';
 import React, { useState, useCallback, useEffect } from 'react';
 import { ControlledCollapser } from '#components/Collapser.tsx';
 import useLocalPreference from '#utils/useLocalPreference.ts';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '#store/index.ts';
 import { useLoginManager } from '#utils/loginManager.ts';
 import useLoginUser from '#utils/useLoginUser.ts';
 import type { PresetSearchName } from '#utils/searchPresets.ts';
@@ -44,9 +44,9 @@ const SearchPanel = <T extends object>(props: {
 
   const presetName = useParams<any>().presetName as string | undefined;
   const user = useLoginUser()!;
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const loginManager = useLoginManager();
-  const search = useSelector(state => state.searches.searches[searchName]);
+  const search = useAppSelector(state => state.searches.searches[searchName]);
 
   const [condition, setCondition] = useState(() => {
     // Determine initial condition

@@ -135,3 +135,18 @@ test('uses 1 as the slice spacing when it cannot be determined', async () => {
   const accessor = await provider(uid);
   assert.equal(await accessor.determinePitch(), 1);
 });
+
+test('determines if a partial volume is 3D from its own images', async () => {
+  const { dicomFileRepository } = await prepareRepository(5);
+  // The first two images do not look like a part of a 3D volume
+  const dicomExtractorWorker = fakeExtractor(imageNo =>
+    imageNo <= 2 ? { pixelDataCharacteristics: 'DERIVED' } : {}
+  );
+  const provider = await createVolumeProvider(
+    {},
+    { dicomFileRepository, dicomExtractorWorker }
+  );
+  const accessor = await provider(uid);
+  assert.equal(await accessor.isLike3d(), false);
+  assert.equal(await accessor.isLike3d([3, 4, 5]), true);
+});

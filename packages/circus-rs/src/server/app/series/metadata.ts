@@ -97,7 +97,8 @@ async function extractVolumeMetadata(
   await load(primaryImageNo);
   const primaryMetadata = imageMetadata.get(primaryImageNo)!;
 
-  const mode = (await isLike3d()) ? '3d' : '2d';
+  await isLike3d(); // Enables the check of each image of the series
+  const mode = (await isLike3d(imageNos)) ? '3d' : '2d';
   const pitch = mode === '3d' ? await determinePitch(imageNos) : 1;
 
   return {

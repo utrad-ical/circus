@@ -77,7 +77,8 @@ const createUncachedVolumeProvider: FunctionService<
     // Fetch first data to get columns and rows.
     const topImageNo = mr.min(imageRange)!;
     const topImagePixelData = await fetch(topImageNo);
-    const { columns, rows, pixelFormat } = imageMetadata.get(topImageNo)!;
+    const primaryMetadata = imageMetadata.get(topImageNo)!;
+    const { columns, rows, pixelFormat } = primaryMetadata;
 
     // Create volume
     const volume = new DicomVolume(
@@ -89,8 +90,7 @@ const createUncachedVolumeProvider: FunctionService<
     // Prepare image loader
     const processor = async (imageNo: number) => {
       const buffer = await fetch(imageNo);
-      const metadata = imageMetadata.get(imageNo)!;
-      verifyMetadata(metadata);
+      verifyMetadata(imageMetadata.get(imageNo)!);
 
       volume.insertSingleImage(zIndices.get(imageNo)!, buffer);
     };
@@ -110,20 +110,25 @@ const createUncachedVolumeProvider: FunctionService<
       return priorityLoader.waitFor(range);
     };
 
+    /**
+     * Waits until the metadata of the image is available.
+     * The metadata is kept even if the image fails the verification.
+     */
+    const loadMetadata = async (imageNo: number) => {
+      await loadSeries(imageNo).catch(() => {});
+      const metadata = imageMetadata.get(imageNo);
+      if (!metadata) throw new Error(`Failed to load image #${imageNo}.`);
+      return metadata;
+    };
+
     const determinePitch = async () => {
       const count = mr.length(imageRange);
-
-      const primaryImageNo = mr.at(imageRange, 0)!;
-      await load(primaryImageNo);
-      const primaryMetadata = imageMetadata.get(primaryImageNo)!;
 
       if (primaryMetadata.pitch) {
         // (0018,0088) must not be negative, but some devices write negative values
         return Math.abs(primaryMetadata.pitch);
       } else if (count > 1) {
-        const secondaryImageNo = mr.at(imageRange, 1)!;
-        await load(secondaryImageNo);
-        const secondaryMetadata = imageMetadata.get(secondaryImageNo)!;
+        const secondaryMetadata = await loadMetadata(mr.at(imageRange, 1)!);
         return Math.abs(
           secondaryMetadata.sliceLocation! - primaryMetadata.sliceLocation!
         );
@@ -146,18 +151,13 @@ const createUncachedVolumeProvider: FunctionService<
       const count = mr.length(imageRange);
 
       // primary image
-      const primaryImageNo = mr.at(imageRange, 0)!;
-      await load(primaryImageNo);
-      const primaryMetadata = imageMetadata.get(primaryImageNo)!;
       const checkPrimaryImage = determineIf3dImageFromMetadata(primaryMetadata);
       if (count === 1) {
         return checkPrimaryImage;
       }
 
       // secondary image
-      const secondaryImageNo = mr.at(imageRange, 1)!;
-      await load(secondaryImageNo);
-      const secondaryMetadata = imageMetadata.get(secondaryImageNo)!;
+      const secondaryMetadata = await loadMetadata(mr.at(imageRange, 1)!);
       const checkSecondaryImage =
         determineIf3dImageFromMetadata(secondaryMetadata);
 
@@ -190,12 +190,7 @@ const createUncachedVolumeProvider: FunctionService<
       | undefined
       | ((metadata: DicomMetadata) => void) = undefined;
 
-    const verifyMetadata = async (metadata: DicomMetadata) => {
-      // primary image
-      const primaryImageNo = mr.at(imageRange, 0)!;
-      await load(primaryImageNo);
-      const primaryMetadata = imageMetadata.get(primaryImageNo)!;
-
+    const verifyMetadata = (metadata: DicomMetadata) => {
       // Check: Size
       if (
         primaryMetadata.columns != metadata.columns ||

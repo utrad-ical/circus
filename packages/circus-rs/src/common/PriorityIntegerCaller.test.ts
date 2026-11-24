@@ -117,3 +117,40 @@ test('limits concurrent callbacks to maxConcurrency', async () => {
   await loader.waitFor('1-100');
   assert.ok(new Date().getTime() - start < 300);
 });
+
+test('starts as many callbacks as the concurrency allows at once', async () => {
+  let running = 0;
+  let maxRunning = 0;
+  let release: () => void = () => {};
+  const gate = new Promise<void>(resolve => (release = resolve));
+  const loader = new PriorityIntegerCaller(
+    async () => {
+      running++;
+      maxRunning = Math.max(maxRunning, running);
+      await gate;
+      running--;
+    },
+    { maxConcurrency: 4 }
+  );
+  loader.append('1-10');
+  await sleep();
+  assert.equal(maxRunning, 4);
+  release();
+  await loader.waitFor('1-10');
+});
+
+test('resolves waitFor of settled integers while others are in progress', async () => {
+  let release: () => void = () => {};
+  const gate = new Promise<void>(resolve => (release = resolve));
+  const loader = new PriorityIntegerCaller(
+    async (index: number) => {
+      if (index === 2) await gate;
+    },
+    { maxConcurrency: 2 }
+  );
+  loader.append('1-2');
+  await sleep();
+  await loader.waitFor(1); // must not wait for 2
+  release();
+  await loader.waitFor(2);
+});

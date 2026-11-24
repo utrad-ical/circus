@@ -164,3 +164,41 @@ test('does not leave a failure in a partial volume unhandled', async () => {
     process.off('unhandledRejection', onUnhandled);
   }
 });
+
+test('passes a priority to the loader for all the images at once', async () => {
+  const loads: [number[], number | undefined][] = [];
+  const agent = createImageTransferAgent({
+    imageDataEmitter: async () => {},
+    errorEmitter: async () => {},
+    volumeProvider: async () => ({
+      ...fakeAccessor(10),
+      load: async (range: any, priority?: number) =>
+        void loads.push([[range].flat(), priority])
+    }),
+    logger
+  });
+  const connection = (await agent.beginTransfer('t1', 'uid'))!;
+  connection.pause();
+  connection.setPriority([5, 6, 7], 3);
+  // z indexes 5-7 are images #6-#8
+  assert.ok(loads.some(([nos, p]) => p === 3 && nos.join() === '6,7,8'));
+  agent.dispose();
+});
+
+test('waits for acknowledgements when the client sets a window size', async () => {
+  const sent: number[] = [];
+  const agent = createImageTransferAgent({
+    imageDataEmitter: async data => void sent.push(data.imageIndex),
+    errorEmitter: async () => {},
+    volumeProvider: async () => fakeAccessor(10),
+    logger
+  });
+  const connection = (await agent.beginTransfer('t1', 'uid', undefined, 2))!;
+  await wait(20);
+  assert.equal(sent.length, 2);
+  assert.equal(await countImmediates(20), 0); // not spinning while waiting
+  connection.acknowledge();
+  await wait(20);
+  assert.equal(sent.length, 3);
+  agent.dispose();
+});

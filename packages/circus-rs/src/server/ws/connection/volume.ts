@@ -82,7 +82,8 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
     const handleMessageData = async (data: ImageTransferMessageData) => {
       switch (data.messageType) {
         case 'BEGIN_TRANSFER': {
-          const { transferId, seriesUid, partialVolumeDescriptor } = data;
+          const { transferId, seriesUid, partialVolumeDescriptor, windowSize } =
+            data;
 
           // console.log(`tr#${transferId} BEGIN_TRANSFER / ${seriesUid}`);
           let authenticated: () => void = () => {};
@@ -96,7 +97,14 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
           authenticated();
 
           if (hasAccessRight) {
-            await beginTransfer(transferId, seriesUid, partialVolumeDescriptor);
+            await beginTransfer(
+              transferId,
+              seriesUid,
+              partialVolumeDescriptor,
+              typeof windowSize === 'number' && windowSize > 0
+                ? windowSize
+                : undefined
+            );
           } else {
             logger.warn({ connectionId }, 'RS WebSocket volume access denied');
             await errorEmitter(
@@ -122,6 +130,11 @@ const volume: (option: Option) => WebSocketConnectionHandler = ({
           const { transferId } = data;
           await checkingAccessRights.get(transferId);
           (await getConnection(transferId))?.resume();
+          break;
+        }
+        case 'IMAGE_RECEIVED': {
+          const { transferId } = data;
+          (await getConnection(transferId))?.acknowledge();
           break;
         }
         case 'ABORT_TRANSFER': {

@@ -107,7 +107,7 @@ export const ImageViewer: React.FC<{
     if (stateChanger) {
       const cb = (changer: StateChangerFunc<any>) => {
         if (!viewer) return;
-        const viewState = viewer.getState();
+        const viewState = viewer.getLatestState();
         if (!viewState) return;
         viewer.setState(changer(viewState, viewer, id));
       };

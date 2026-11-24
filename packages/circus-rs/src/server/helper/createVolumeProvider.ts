@@ -1,3 +1,4 @@
+import os from 'node:os';
 import type {
   DicomFileRepository,
   FunctionService
@@ -47,7 +48,9 @@ const createUncachedVolumeProvider: FunctionService<
   OptionsWithoutCache
 > = async (opts, deps) => {
   const { dicomFileRepository, dicomExtractorWorker } = deps;
-  const { maxConcurrency = 32 } = opts;
+  // More concurrency than the DICOM extractor workers (one per CPU by default)
+  // only lines up images in front of them, where their priority is ignored
+  const { maxConcurrency = os.cpus().length } = opts;
   return async (seriesUid): Promise<VolumeAccessor> => {
     const { load, images } = await dicomFileRepository.getSeries(seriesUid);
     const imageRange = mr.parse(images);
@@ -97,7 +100,9 @@ const createUncachedVolumeProvider: FunctionService<
     };
     const priorityLoader = new PriorityIntegerCaller(processor, {
       initialResolved: topImageNo,
-      maxConcurrency
+      maxConcurrency,
+      // Load the images the viewer requested last first, as the transfer does
+      lifoForSamePriority: true
     });
 
     // start loading immediately

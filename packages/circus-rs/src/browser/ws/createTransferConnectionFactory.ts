@@ -7,7 +7,8 @@ import {
   parseMessageBuffer,
   isImageTransferData,
   pauseTransferMessageData,
-  resumeTransferMessageData
+  resumeTransferMessageData,
+  imageReceivedMessageData
 } from '../../common/ws/message.ts';
 import type WebSocketClient from './WebSocketClient.ts';
 
@@ -38,6 +39,13 @@ export interface TransferConnection {
   abort(): void;
 }
 
+/**
+ * The number of images the server may send ahead of acknowledgements.
+ * Without a limit, images queued in the network before a priority change
+ * (e.g., while paging) arrive before the requested ones.
+ */
+const TRANSFER_WINDOW_SIZE = 4;
+
 export const createTransferConnectionFactory = (
   wsClient: WebSocketClient
 ): TransferConnectionFactory => {
@@ -62,6 +70,10 @@ export const createTransferConnectionFactory = (
         if (handlerCollection.has(transferId)) {
           const handler = handlerCollection.get(transferId)!;
           handler(imageIndex, buffer!);
+          // Lets the server send the next image (flow control)
+          wsClient.send(
+            createMessageBuffer(imageReceivedMessageData(transferId))
+          );
         } else {
           // To prevent many stop messages from being sent,
           // stop messages are not sent even in the case of unmanaged reception.
@@ -84,7 +96,8 @@ export const createTransferConnectionFactory = (
     const data = beginTransferMessageData(
       id,
       seriesUid,
-      partialVolumeDescriptor
+      partialVolumeDescriptor,
+      TRANSFER_WINDOW_SIZE
     );
     const message = createMessageBuffer(data);
     wsClient.send(message);

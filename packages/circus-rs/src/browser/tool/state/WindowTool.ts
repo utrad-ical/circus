@@ -35,7 +35,7 @@ export default class WindowTool extends DraggableTool implements Tool {
     super.dragHandler(ev);
     const viewer = ev.viewer;
 
-    const viewState = viewer.getState();
+    const viewState = viewer.getLatestState();
     if (!viewState) throw new Error('View state not initialized');
     if (viewState.type !== 'mpr' && viewState.type !== '2d')
       throw new Error('Unsupported view state');

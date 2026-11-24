@@ -410,6 +410,15 @@ export default class Viewer extends TypedEventTarget<ViewerEventMap> {
     return this.requestingViewState;
   }
 
+  /**
+   * Returns the requesting view state if any, or the rendered one.
+   * Tools that change the view state should start from this,
+   * because the rendered state lags behind while rendering.
+   */
+  public getLatestState(): ViewState | undefined {
+    return this.requestingViewState ?? this.viewState;
+  }
+
   private detachCurrentComposition(): void {
     if (!this.composition) return;
     this.composition.removeEventListener('viewerChange', this.boundRender);
@@ -491,7 +500,8 @@ export default class Viewer extends TypedEventTarget<ViewerEventMap> {
 
   public handleResize(): void {
     const transformer = this.viewStateResizeTransformer;
-    const prevState = this.viewState;
+    // Start from the latest request, which may be ahead of the rendered state
+    const prevState = this.getLatestState();
     if (transformer && !!prevState) {
       const div = this.rootDiv;
       const beforeSize = this.getResolution();

@@ -31,7 +31,6 @@
     "dicom-parser": "^1.8.4",
     "dotenv": "^16.0.3",
     "fflate": "^0.8.3",
-    "generic-pool": "^3.7.1",
     "hono": "^4.13.19",
     "http-status": "^1.4.2",
     "iconv-lite": "^0.5.1",
@@ -50,12 +49,12 @@
   },
   "devDependencies": {
     "@types/bytes": "^3.1.0",
-    "@types/js-yaml": "^3.12.7",
+    "@types/js-yaml": "^4.0.9",
     "@types/lodash": "^4.14.161",
     "@types/mime": "^2.0.3",
     "@types/node": "^24.19.2",
     "@types/ws": "^8.5.12",
-    "js-yaml": "^3.13.1",
+    "js-yaml": "^4.3.2",
     "typescript": "~7.0.2",
     "ws": "^8.18.0"
   }

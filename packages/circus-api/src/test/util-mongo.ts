@@ -30,7 +30,7 @@ export const setUpMongoFixture = async (
   for (const colName of collections) {
     const col = db.collection(colName);
     await col.deleteMany({});
-    const content = yaml.safeLoad(
+    const content = yaml.load(
       await fs.readFile(
         path.join(import.meta.dirname, '../../test/fixture', colName + '.yaml'),
         'utf8'

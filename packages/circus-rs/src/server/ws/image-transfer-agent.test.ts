@@ -164,3 +164,23 @@ test('does not leave a failure in a partial volume unhandled', async () => {
     process.off('unhandledRejection', onUnhandled);
   }
 });
+
+test('passes a priority to the loader for all the images at once', async () => {
+  const loads: [number[], number | undefined][] = [];
+  const agent = createImageTransferAgent({
+    imageDataEmitter: async () => {},
+    errorEmitter: async () => {},
+    volumeProvider: async () => ({
+      ...fakeAccessor(10),
+      load: async (range: any, priority?: number) =>
+        void loads.push([[range].flat(), priority])
+    }),
+    logger
+  });
+  const connection = (await agent.beginTransfer('t1', 'uid'))!;
+  connection.pause();
+  connection.setPriority([5, 6, 7], 3);
+  // z indexes 5-7 are images #6-#8
+  assert.ok(loads.some(([nos, p]) => p === 3 && nos.join() === '6,7,8'));
+  agent.dispose();
+});

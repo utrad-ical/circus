@@ -158,7 +158,7 @@ const createImageTransferAgent = ({
       pendingsUntilTransferStarts.delete(transferId);
       return null;
     }
-    const { queue, fillImageToVolume } = prepare(
+    const { queue, fillImageToVolume, prioritize } = prepare(
       accessor,
       partialVolumeDescriptor
     );
@@ -171,6 +171,8 @@ const createImageTransferAgent = ({
       if (0 < targetRange.length) {
         // console.log(`Set priority ${priority} / ${mr.stringify(targetRange)}`);
         queue.append(targetRange, priority);
+        // Let the loader start all of them now, not one by one as they are sent
+        prioritize(targetRange, priority);
       }
     };
 
@@ -297,7 +299,16 @@ const prepare = (
     return volume.getSingleImage(z);
   };
 
-  return { queue, fillImageToVolume };
+  const prioritize = (zRange: mr.MIR, priority: number) => {
+    const imageNos = mr
+      .flatten(zRange)
+      .map(z => zIndices.get(z))
+      .filter((no): no is number => no !== undefined);
+    // A failure is reported when the image is transferred
+    if (imageNos.length) load(imageNos, priority).catch(() => {});
+  };
+
+  return { queue, fillImageToVolume, prioritize };
 };
 
 export default createImageTransferAgent;

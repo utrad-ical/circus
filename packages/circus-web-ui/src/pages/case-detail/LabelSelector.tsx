@@ -29,6 +29,7 @@ const LabelSelector: React.FC<{
   updateEditingData: EditingDataUpdater;
   seriesData: { [seriesUid: string]: Series };
   volumeLoadingProgresses: number[];
+  volumeLoadingErrors: (string | undefined)[];
   disabled?: boolean;
   multipleSeriesShown: boolean;
   metadata: (DicomVolumeMetadata | undefined)[];
@@ -38,6 +39,7 @@ const LabelSelector: React.FC<{
     updateEditingData,
     seriesData,
     volumeLoadingProgresses,
+    volumeLoadingErrors,
     disabled,
     multipleSeriesShown,
     metadata
@@ -60,6 +62,7 @@ const LabelSelector: React.FC<{
           <SeriesItem
             key={`${seriesIndex}:${series.seriesUid}`}
             volumeLoadingProgress={volumeLoadingProgresses[seriesIndex]}
+            volumeLoadingError={volumeLoadingErrors[seriesIndex]}
             editingData={editingData}
             updateEditingData={updateEditingData}
             seriesIndex={seriesIndex}
@@ -96,6 +99,7 @@ const SeriesItem: React.FC<{
   editingData: EditingData;
   updateEditingData: EditingDataUpdater;
   volumeLoadingProgress: number;
+  volumeLoadingError: string | undefined;
   seriesIndex: number;
   activeLabel: InternalLabel | null;
   disabled?: boolean;
@@ -108,6 +112,7 @@ const SeriesItem: React.FC<{
     editingData,
     updateEditingData,
     volumeLoadingProgress,
+    volumeLoadingError,
     activeLabel,
     disabled,
     multipleSeriesShown,
@@ -200,7 +205,7 @@ const SeriesItem: React.FC<{
             <div className={styles.box} style={{ backgroundColor: color }} />
           )}
           Series #{seriesIndex}
-          {volumeLoadingProgress < 1 && (
+          {!volumeLoadingError && volumeLoadingProgress < 1 && (
             <span className={styles.seriesLoading}>
               <LoadingIndicator delay={300} /> loading...
               {(volumeLoadingProgress * 100).toFixed(1)}%
@@ -211,6 +216,11 @@ const SeriesItem: React.FC<{
           <Button variant="link" icon="material-info" onClick={onShowInfo} />
         </div>
       </span>
+      {volumeLoadingError && (
+        <div className={styles.seriesError}>
+          <Icon icon="material-warning" /> {volumeLoadingError}
+        </div>
+      )}
       <ul className={styles.caseLabelList}>
         {series.labels.map((label, labelIndex) => (
           <Label

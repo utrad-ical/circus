@@ -36,6 +36,7 @@ const SeriesDetail: React.FC<{}> = props => {
     []
   );
   const [volumeLoader] = useVolumeLoaders(seriesEntries) ?? [null];
+  const [volumeError, setVolumeError] = useState<string>();
 
   useEffect(() => {
     const { seriesUid, images } =
@@ -63,6 +64,7 @@ const SeriesDetail: React.FC<{}> = props => {
     const abortController = new AbortController();
 
     let composition: rs.Composition | undefined = undefined;
+    setVolumeError(undefined);
     (async () => {
       const { mode } = await volumeLoader.loadMeta();
       if (abortController.signal.aborted) return;
@@ -77,7 +79,11 @@ const SeriesDetail: React.FC<{}> = props => {
 
       composition = new rs.Composition(src);
       setComposition(composition);
-    })();
+      await volumeLoader.loadVolume();
+    })().catch(err => {
+      // The message from the image server can be shown to the user
+      if (!abortController.signal.aborted) setVolumeError(err.message);
+    });
 
     return () => {
       abortController.abort();
@@ -129,6 +135,7 @@ const SeriesDetail: React.FC<{}> = props => {
             composition={composition ?? undefined}
             tool={pagerTool}
           />
+          {volumeError && <Alert variant="danger">{volumeError}</Alert>}
         </div>
         <div>
           <div className={styles.menu}>

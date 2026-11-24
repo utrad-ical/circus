@@ -30,6 +30,10 @@
     color: gray;
     font-weight: normal;
   }
+  .seriesError {
+    margin: 2px 0 4px;
+    color: var(--danger);
+  }
   .box {
     display: inline-block;
     width: 18px;

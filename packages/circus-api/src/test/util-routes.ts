@@ -293,7 +293,7 @@ export const setUpAppForRoutesTest = async (
 
 const createMockCsCore = () => {
   let status: 'running' | 'stopped' = 'stopped';
-  const pluginDefinitions = yaml.safeLoad(
+  const pluginDefinitions = yaml.load(
     fs.readFileSync(
       path.join(
         import.meta.dirname,

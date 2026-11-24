@@ -36,6 +36,8 @@ type TransferConnection = {
 
 interface CreateImageTransferAgentOptions {
   imageDataEmitter: ImageDataEmitter;
+  /** Tells the client that a transfer failed */
+  errorEmitter: (transferId: string, message: string) => Promise<void>;
   volumeProvider: VolumeProvider;
   logger: Logger;
 }
@@ -46,10 +48,23 @@ interface ImageDataEmitter {
 
 const createImageTransferAgent = ({
   imageDataEmitter,
+  errorEmitter,
   volumeProvider,
   logger
 }: CreateImageTransferAgentOptions): ImageTransferAgent => {
   const transferConnections = new Map<string, TransferConnection>();
+
+  const notifyError = async (transferId: string, err: unknown) => {
+    // Do not show internal details such as file paths
+    const message = (err as any)?.expose
+      ? (err as Error).message
+      : 'Failed to load the series.';
+    try {
+      await errorEmitter(transferId, message);
+    } catch {
+      // The connection may have been closed
+    }
+  };
   const pendingsUntilTransferStarts = new Map<
     string,
     Promise<TransferConnection | null>
@@ -134,6 +149,7 @@ const createImageTransferAgent = ({
     } catch (err) {
       resolvePending(null);
       pendingsUntilTransferStarts.delete(transferId);
+      if (!disposed) await notifyError(transferId, err);
       throw err;
     }
     if (disposed) {
@@ -162,9 +178,20 @@ const createImageTransferAgent = ({
       if (paused) return;
       const { value: imageIndex, priority } = queue.shift();
       if (imageIndex !== undefined) {
+        let buffer: ArrayBuffer;
+        try {
+          buffer = await fillImageToVolume(imageIndex, priority);
+        } catch (err) {
+          abort();
+          await notifyError(transferId, err);
+          throw new Error(
+            `Failed to load image#${imageIndex} for tr#${transferId}: ${
+              (err as Error).message
+            }`
+          );
+        }
         try {
           const data = transferImageMessageData(transferId, imageIndex);
-          const buffer = await fillImageToVolume(imageIndex, priority);
           await imageDataEmitter(data, buffer);
         } catch (err) {
           abort();
@@ -247,7 +274,8 @@ const prepare = (
     partialImages.forEach((v, i) => zIndices.set(i, v));
     // It has already started loading by volumeProvider.
     // So set higher priority to the images in partial volume.
-    load(partialImages, PARTIAL_VOLUME_PRIORITY);
+    // A failure is reported when the image is transferred
+    load(partialImages, PARTIAL_VOLUME_PRIORITY).catch(() => {});
   } else {
     // Set zIndices for the entire volume.
     // It has already started loading by volumeProvider.

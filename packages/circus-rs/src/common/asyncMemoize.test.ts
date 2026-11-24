@@ -70,3 +70,14 @@ test('does not keep an entry whose size cannot be calculated', async () => {
   assert.equal(await memoized('a'), 'value');
   assert.equal(calls, 2);
 });
+
+test('turns a synchronous throw into a rejection', async () => {
+  const memoized = asyncMemoize(
+    ((key: string) => {
+      throw new Error(`bad key ${key}`);
+    }) as (key: string) => Promise<string>,
+    { maxSize: 100 }
+  );
+  await assert.rejects(memoized('a'), /bad key a/);
+  assert.equal(memoized.getCount(), 0);
+});

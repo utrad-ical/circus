@@ -37,7 +37,8 @@ export default function asyncMemoize<T>(
 
     // Register the promise before it settles so that concurrent calls share it.
     // The size is known only after it resolves.
-    const promise = func(key);
+    // A synchronous throw from func also becomes a rejection
+    const promise = (async () => func(key))();
     cache.set(key, { value: promise, size: 1 });
     promise.then(
       result => {

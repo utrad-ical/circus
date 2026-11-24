@@ -109,3 +109,15 @@ test('extractParameters', async () => {
   assert.equal(dicomTags.parameters.SliceLocation, 280); //DS
   assert.equal(dicomTags.parameters.BitsAllocated, 16); //US
 });
+
+test('reads Pixel Spacing as the row spacing (y) and then the column spacing (x)', async () => {
+  // Replace the value of the same length
+  const original = Buffer.from('0.46875\\0.46875', 'latin1');
+  const index = content.indexOf(original);
+  assert.ok(index > 0);
+  const modified = Buffer.from(content);
+  modified.write('0.36875\\0.46875', index, 'latin1');
+  const dicomTags = await readDicomTags(modified as unknown as ArrayBuffer);
+  assert.equal(dicomTags.parameters.pixelSpacingX, 0.46875);
+  assert.equal(dicomTags.parameters.pixelSpacingY, 0.36875);
+});

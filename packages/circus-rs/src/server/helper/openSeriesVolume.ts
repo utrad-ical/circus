@@ -134,8 +134,9 @@ const openSeriesVolume = async (
       dimension: [columns, rows, imageNumbers.length],
       pixelFormat,
       elementSpacing: [
-        pixelSpacing[0],
+        // Pixel Spacing is in the order of rows (y) and columns (x)
         pixelSpacing[1],
+        pixelSpacing[0],
         determineSliceSpacing(first.metadata, second?.metadata)
       ],
       imageNumbers

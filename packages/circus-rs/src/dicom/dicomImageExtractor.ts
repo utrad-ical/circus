@@ -43,6 +43,7 @@ export type DicomMetadata = {
   columns: number;
   rows: number;
   pitch?: number;
+  /** Pixel Spacing (0028,0030) as is: the row spacing (y), then the column spacing (x) */
   pixelSpacing: [number, number];
   pixelFormat: PixelFormat;
   rescale: RescaleParams;

@@ -59,6 +59,7 @@ export const VolumeOverlay: Display<VolumeOverlayOptions, void> = props => {
   const [annotationDefs, setAnnotationDefs] = useState<AnnotationDef[]>([]);
 
   useEffect(() => {
+    let cancelled = false;
     const load = async () => {
       const allVolumes = get(results, dataPath) as VolumeOverlayEntry[];
       if (!Array.isArray(allVolumes))
@@ -93,9 +94,14 @@ export const VolumeOverlay: Display<VolumeOverlayOptions, void> = props => {
         size: v.size,
         volume: buffers[i]
       }));
-      setAnnotationDefs(annotationDefs);
+      if (!cancelled) setAnnotationDefs(annotationDefs);
     };
-    load().catch(err => setError(err.message));
+    load().catch(err => {
+      if (!cancelled) setError(err.message);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (error) return error;

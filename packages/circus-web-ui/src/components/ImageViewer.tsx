@@ -176,10 +176,14 @@ const ImageViewer: React.FC<{
     if (!viewer || !composition) return;
     if (viewer.getComposition() === composition) return;
     // Ensure borowser rendering at least once.
-    setImmediate(() => viewer.setComposition(composition));
+    let cancelled = false;
+    setImmediate(() => {
+      if (!cancelled) viewer.setComposition(composition);
+    });
     initialStateSet.current = false;
     return () => {
-      viewer.clearComposition;
+      cancelled = true;
+      viewer.clearComposition();
     };
   }, [viewer, composition]);
 

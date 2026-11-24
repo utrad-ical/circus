@@ -156,13 +156,17 @@ const Candidate: React.FC<{
     [imageSource]
   );
 
+  // The image source is shared among candidates and owned by the parent
   useEffect(() => {
+    let cancelled = false;
+    let annotation: PlaneFigure | undefined;
     const addAnnotation = async () => {
       await imageSource.ready();
+      if (cancelled) return;
       const metadata = imageSource.metadata!;
       // Add an circle annotation to this composition
       const r = markStyle.radius ?? defaultMarkStyle.radius;
-      const annotation = new PlaneFigure();
+      annotation = new PlaneFigure();
       annotation.color = markStyle.color ?? defaultMarkStyle.color;
       annotation.dimmedColor =
         markStyle.dimmedColor ?? defaultMarkStyle.dimmedColor;
@@ -180,7 +184,8 @@ const Candidate: React.FC<{
     };
     addAnnotation();
     return () => {
-      composition.dispose();
+      cancelled = true;
+      if (annotation) composition.removeAnnotation(annotation);
     };
   }, [composition, imageSource]);
 
@@ -285,10 +290,11 @@ export const LesionCandidates: Display<
 
   useEffect(() => {
     if (!volumeLoaders) return;
-    volumeLoaders.forEach((volumeLoader, volumeId) => {
-      const src = new WebGlRawVolumeMprImageSource({ volumeLoader });
-      setImgSrcMap(map => ({ ...map, [volumeId]: src }));
-    });
+    const sources = volumeLoaders.map(
+      volumeLoader => new WebGlRawVolumeMprImageSource({ volumeLoader })
+    );
+    setImgSrcMap({ ...sources });
+    return () => sources.forEach(src => src.dispose());
   }, [volumeLoaders]);
 
   const toolsRef = useRef<{ name: string; icon: string; tool: rs.Tool }[]>();
@@ -300,18 +306,6 @@ export const LesionCandidates: Display<
   const tools = toolsRef.current;
 
   const [toolName, setToolName] = useState('pager');
-
-  const imageSourceForVolumeId = (
-    volumeId: number,
-    volumeLoaders: rs.DicomVolumeLoader[]
-  ) => {
-    if (imgSrcMap[volumeId]) return imgSrcMap[volumeId];
-    const volumeLoader = volumeLoaders[volumeId]!;
-    volumeLoader.loadController?.resume();
-    const imageSource = new WebGlRawVolumeMprImageSource({ volumeLoader });
-    setImgSrcMap(map => ({ ...map, [volumeId]: imageSource }));
-    return imageSource;
-  };
 
   const handleFeedbackChange = (id: number, status: FeedbackReport<any>) => {
     if (status.valid) {
@@ -398,10 +392,7 @@ export const LesionCandidates: Display<
               item={cand}
               markStyle={markStyle}
               tool={tool}
-              imageSource={imageSourceForVolumeId(
-                cand.volumeId ?? 0,
-                volumeLoaders
-              )}
+              imageSource={imgSrcMap[cand.volumeId ?? 0]}
               displayOptions={
                 results.metadata.displayOptions[cand.volumeId ?? 0]
               }

@@ -46,20 +46,16 @@ const getImageSubtype = (fileName: string) => {
   return extToMIME.get(ext);
 };
 
+/** Loads an attachment as an object URL, which the caller must revoke */
 const loadImage = async (
   file: string,
-  element: RefObject<HTMLImageElement>,
   mimeType: string | undefined,
   loadAttachment: any
 ) => {
   const res = await loadAttachment(file);
-  if (res.status === 200) {
-    const img = await res.arrayBuffer();
-    const view = new Uint8Array(img);
-    const blob = new Blob([view], { type: mimeType });
-    const url = URL.createObjectURL(blob);
-    element.current!.src = url;
-  }
+  if (res.status !== 200) return undefined;
+  const blob = new Blob([await res.arrayBuffer()], { type: mimeType });
+  return URL.createObjectURL(blob);
 };
 
 const getTargetLabels = (
@@ -94,6 +90,8 @@ export const Gallery: Display<GalleryOptions, void> = props => {
 
   useEffect(() => {
     if (!job || !imgRefs.current) return;
+    let cancelled = false;
+    const urls: string[] = [];
 
     imageInfo.forEach(async ({ fileName, labelData }, idx) => {
       const mimeType = getImageSubtype(fileName);
@@ -102,13 +100,22 @@ export const Gallery: Display<GalleryOptions, void> = props => {
         return;
       }
 
-      loadImage(fileName, imgRefs.current[idx], mimeType, loadAttachment);
+      loadImage(fileName, mimeType, loadAttachment).then(url => {
+        if (!url) return;
+        if (cancelled) return URL.revokeObjectURL(url);
+        urls.push(url);
+        imgRefs.current[idx].current!.src = url;
+      });
 
       const targetLabels = getTargetLabels(labelData, results);
       if (targetLabels.length > 0) {
         setLabels(prevState => ({ ...prevState, [idx]: targetLabels }));
       }
     });
+    return () => {
+      cancelled = true;
+      urls.forEach(url => URL.revokeObjectURL(url));
+    };
   }, [job, loadAttachment]);
 
   if (error) return error;

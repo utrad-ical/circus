@@ -31,17 +31,30 @@ export default function asyncMemoize<T>(
     sizeCalculation: entry => entry.size
   });
 
-  const memoized: AsyncLoader<T> = async (key: string) => {
-    if (cache.has(key)) {
-      return cache.get(key)!.value;
-    }
+  const memoized: AsyncLoader<T> = (key: string) => {
+    const hit = cache.get(key);
+    if (hit) return hit.value;
 
-    const promise = func(key);
-    const size = options.length
-      ? await promise.then(result => options.length!(result, key))
-      : 0;
-
-    cache.set(key, { value: promise, size });
+    // Register the promise before it settles so that concurrent calls share it.
+    // The size is known only after it resolves.
+    // A synchronous throw from func also becomes a rejection
+    const promise = (async () => func(key))();
+    cache.set(key, { value: promise, size: 1 });
+    promise.then(
+      result => {
+        if (cache.peek(key)?.value !== promise) return;
+        try {
+          const size = options.length ? options.length(result, key) : 1;
+          cache.set(key, { value: promise, size });
+        } catch {
+          // Do not keep an entry whose size is unknown
+          cache.delete(key);
+        }
+      },
+      () => {
+        if (cache.peek(key)?.value === promise) cache.delete(key);
+      }
+    );
     return promise;
   };
 

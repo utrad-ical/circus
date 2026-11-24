@@ -87,12 +87,16 @@ export class WebSocketClientImpl implements WebSocketClient {
     if (this.connecting) return this.connecting;
 
     return (this.connecting = (async () => {
-      const ws = await this.createSocket();
-      ws.addEventListener('message', this.handleMessage);
-      ws.addEventListener('error', this.handleError);
-      this.connecting = null;
-      this.ws = ws;
-      return ws;
+      try {
+        const ws = await this.createSocket();
+        ws.addEventListener('message', this.handleMessage);
+        ws.addEventListener('error', this.handleError);
+        this.ws = ws;
+        return ws;
+      } finally {
+        // Let the next call try again even if this one failed
+        this.connecting = null;
+      }
     })());
   }
 

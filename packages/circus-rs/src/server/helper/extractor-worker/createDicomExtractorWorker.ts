@@ -31,35 +31,58 @@ const createDicomExtractorWorker: NoDepFunctionService<
   const { maxConcurrency = os.cpus().length } = options;
   let destroyed = false;
 
+  // Workers that failed; the pool destroys them instead of reusing
+  const broken = new WeakSet<Worker>();
+
   const pool = new Pool({
     create: () => new Worker(workerMain),
     destroy: async (worker: Worker) => await worker.terminate(),
+    validate: (worker: Worker) => !broken.has(worker),
     min: 1, // always keep at least one thread
     max: maxConcurrency,
     propagateCreateError: true
   });
 
-  const extract = (input: ArrayBuffer) => {
-    if (destroyed) return Promise.reject('Worker pool has been destroyed');
-    return new Promise<DicomImageData>((resolve, reject) => {
-      pool.acquire().promise.then(worker => {
-        // Each request has its own channel, because the parent port also
-        // carries messages from Node itself (e.g., `{ 'watch:import': [...] }`
-        // reported to the parent when running with `node --watch`)
-        const { port1, port2 } = new MessageChannel();
-        port1.once('message', (result: DicomImageData | string) => {
-          port1.close();
-          pool.release(worker);
-          if (typeof result === 'string') {
-            // string result means an error
-            reject(new Error(result));
-          } else {
-            resolve(result);
-          }
-        });
-        worker.postMessage({ input, port: port2 }, [port2]);
+  const run = (worker: Worker, input: ArrayBuffer) =>
+    new Promise<DicomImageData>((resolve, reject) => {
+      // Each request has its own channel, because the parent port also
+      // carries messages from Node itself (e.g., `{ 'watch:import': [...] }`
+      // reported to the parent when running with `node --watch`)
+      const { port1, port2 } = new MessageChannel();
+      const finish = () => {
+        port1.close();
+        worker.off('error', handleError);
+        worker.off('exit', handleExit);
+        pool.release(worker);
+      };
+      const handleError = (err: Error) => {
+        broken.add(worker);
+        finish();
+        reject(err);
+      };
+      const handleExit = (code: number) => {
+        broken.add(worker);
+        finish();
+        reject(new Error(`DICOM extractor worker exited with code ${code}`));
+      };
+      port1.once('message', (result: DicomImageData | string) => {
+        finish();
+        if (typeof result === 'string') {
+          // string result means an error
+          reject(new Error(result));
+        } else {
+          resolve(result);
+        }
       });
+      worker.once('error', handleError);
+      worker.once('exit', handleExit);
+      worker.postMessage({ input, port: port2 }, [port2]);
     });
+
+  const extract = async (input: ArrayBuffer) => {
+    if (destroyed) throw new Error('Worker pool has been destroyed');
+    const worker = await pool.acquire().promise;
+    return await run(worker, input);
   };
 
   extract.dispose = async () => {

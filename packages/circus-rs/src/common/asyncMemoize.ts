@@ -42,8 +42,13 @@ export default function asyncMemoize<T>(
     promise.then(
       result => {
         if (cache.peek(key)?.value !== promise) return;
-        const size = options.length ? options.length(result, key) : 1;
-        cache.set(key, { value: promise, size });
+        try {
+          const size = options.length ? options.length(result, key) : 1;
+          cache.set(key, { value: promise, size });
+        } catch {
+          // Do not keep an entry whose size is unknown
+          cache.delete(key);
+        }
       },
       () => {
         if (cache.peek(key)?.value === promise) cache.delete(key);

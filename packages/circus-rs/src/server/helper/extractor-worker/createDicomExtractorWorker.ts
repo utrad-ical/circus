@@ -31,11 +31,13 @@ const createDicomExtractorWorker: NoDepFunctionService<
   const { maxConcurrency = os.cpus().length } = options;
   let destroyed = false;
 
+  // Workers that failed; the pool destroys them instead of reusing
+  const broken = new WeakSet<Worker>();
+
   const pool = new Pool({
     create: () => new Worker(workerMain),
     destroy: async (worker: Worker) => await worker.terminate(),
-    // A worker that has exited has the thread ID -1
-    validate: (worker: Worker) => worker.threadId !== -1,
+    validate: (worker: Worker) => !broken.has(worker),
     min: 1, // always keep at least one thread
     max: maxConcurrency,
     propagateCreateError: true
@@ -54,10 +56,12 @@ const createDicomExtractorWorker: NoDepFunctionService<
         pool.release(worker);
       };
       const handleError = (err: Error) => {
+        broken.add(worker);
         finish();
         reject(err);
       };
       const handleExit = (code: number) => {
+        broken.add(worker);
         finish();
         reject(new Error(`DICOM extractor worker exited with code ${code}`));
       };

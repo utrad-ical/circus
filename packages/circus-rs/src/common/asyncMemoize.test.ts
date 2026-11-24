@@ -49,3 +49,24 @@ test('evicts entries by the size known after resolution', async () => {
   await tick();
   assert.equal(memoized.getCount(), 2);
 });
+
+test('does not keep an entry whose size cannot be calculated', async () => {
+  let calls = 0;
+  const memoized = asyncMemoize(
+    async () => {
+      calls++;
+      return 'value';
+    },
+    {
+      maxSize: 100,
+      length: () => {
+        throw new Error('bad size');
+      }
+    }
+  );
+  assert.equal(await memoized('a'), 'value');
+  await tick();
+  assert.equal(memoized.getCount(), 0);
+  assert.equal(await memoized('a'), 'value');
+  assert.equal(calls, 2);
+});

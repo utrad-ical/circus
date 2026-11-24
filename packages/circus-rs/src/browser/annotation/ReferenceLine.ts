@@ -93,8 +93,7 @@ export default class ReferenceLine implements Annotation, ViewerEventTarget {
       screenViewer.getResolution()
     );
 
-    const targetState =
-      this.targetViewer.getRequestingState() || this.targetViewer.getState();
+    const targetState = this.targetViewer.getLatestState();
     if (!isValidViewState(screenState) || !isValidViewState(targetState))
       return;
 

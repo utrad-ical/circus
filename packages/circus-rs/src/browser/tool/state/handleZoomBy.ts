@@ -48,7 +48,7 @@ export default function handleZoomBy(
     );
   };
 
-  const prevState = viewer.getState();
+  const prevState = viewer.getLatestState();
   if (!prevState) return;
 
   switch (prevState.type) {

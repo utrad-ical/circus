@@ -51,7 +51,7 @@ export default function handleMoveBy(
     );
   };
 
-  const prevState = viewer.getState();
+  const prevState = viewer.getLatestState();
   if (!prevState) return;
 
   switch (prevState.type) {

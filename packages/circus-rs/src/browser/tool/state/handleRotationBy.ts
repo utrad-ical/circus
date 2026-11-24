@@ -6,7 +6,7 @@ export default function handleRotationBy(
   dhDeg: number,
   dvDeg: number
 ) {
-  const prevState = viewer.getState();
+  const prevState = viewer.getLatestState();
   if (!prevState) return;
 
   switch (prevState.type) {

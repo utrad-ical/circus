@@ -410,6 +410,15 @@ export default class Viewer extends TypedEventTarget<ViewerEventMap> {
     return this.requestingViewState;
   }
 
+  /**
+   * Returns the requesting view state if any, or the rendered one.
+   * Tools that change the view state should start from this,
+   * because the rendered state lags behind while rendering.
+   */
+  public getLatestState(): ViewState | undefined {
+    return this.requestingViewState ?? this.viewState;
+  }
+
   private detachCurrentComposition(): void {
     if (!this.composition) return;
     this.composition.removeEventListener('viewerChange', this.boundRender);

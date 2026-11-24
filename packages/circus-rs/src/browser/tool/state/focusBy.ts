@@ -15,7 +15,7 @@ export default function focusBy(
 ) {
   if (!focusPoint) return;
 
-  const prevState = viewer.getState();
+  const prevState = viewer.getLatestState();
   if (!prevState) return;
 
   const resolution = new Vector2().fromArray(viewer.getResolution());

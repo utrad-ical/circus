@@ -9,7 +9,7 @@ import type Viewer from '../../viewer/Viewer.ts';
 import type ViewState from '../../ViewState.ts';
 
 export default function handlePageBy(viewer: Viewer, step: number): void {
-  const prevState = viewer.getState();
+  const prevState = viewer.getLatestState();
   if (!prevState) return;
 
   const resolution = viewer.getResolution();

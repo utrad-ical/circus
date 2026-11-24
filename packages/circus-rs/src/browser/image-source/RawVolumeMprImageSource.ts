@@ -46,7 +46,11 @@ export default class RawVolumeMprImageSource
     this.loadSequence = (async () => {
       this.draftInterval = draftInterval;
       this.metadata = await volumeLoader.loadMeta();
-      volumeLoader.loadVolume().then(() => (this.fullyLoaded = true));
+      // A failure is reported via the load controller
+      volumeLoader
+        .loadVolume()
+        .then(() => (this.fullyLoaded = true))
+        .catch(() => {});
       this.volume = volumeLoader.loadController!.getVolume()!;
       if (!draftInterval) await volumeLoader.loadVolume();
     })();

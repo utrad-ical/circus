@@ -30,6 +30,8 @@ export type ProgressEventListener = (event: CustomEvent<ProgressInfo>) => void;
 export interface VolumeLoadControllerEventMap {
   progress: ProgressInfo;
   abort: { target: DicomVolumeLoader };
+  /** The loading failed; `message` can be shown to the user */
+  error: { target: DicomVolumeLoader; message: string };
 }
 
 export interface VolumeLoadController extends TypedEventTarget<VolumeLoadControllerEventMap> {

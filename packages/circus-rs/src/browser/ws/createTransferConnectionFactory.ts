@@ -18,13 +18,17 @@ interface VolumeSpecifier {
 
 export type TransferConnectionFactory = (
   volumeSpecifier: VolumeSpecifier,
-  handler: TransferredImageHandler
+  handler: TransferredImageHandler,
+  errorHandler?: TransferErrorHandler
 ) => TransferConnection;
 
 type TransferredImageHandler = (
   imageIndex: number,
   buffer: ArrayBuffer
 ) => void;
+
+/** Called when the server aborted the transfer, with a message for the user */
+type TransferErrorHandler = (message: string) => void;
 
 export interface TransferConnection {
   readonly id: string;
@@ -38,6 +42,7 @@ export const createTransferConnectionFactory = (
   wsClient: WebSocketClient
 ): TransferConnectionFactory => {
   const handlerCollection = new Map<string, TransferredImageHandler>();
+  const errorHandlerCollection = new Map<string, TransferErrorHandler>();
 
   wsClient.addMessageEventListener(e => {
     const { data: message } = e;
@@ -46,7 +51,13 @@ export const createTransferConnectionFactory = (
     const { data, buffer } = parseMessageBuffer(message);
 
     if (isImageTransferData(data)) {
-      if (data.messageType === 'TRANSFER_IMAGE') {
+      if (data.messageType === 'TRANSFER_ERROR') {
+        const { transferId, message } = data;
+        const errorHandler = errorHandlerCollection.get(transferId);
+        handlerCollection.delete(transferId);
+        errorHandlerCollection.delete(transferId);
+        errorHandler?.(message);
+      } else if (data.messageType === 'TRANSFER_IMAGE') {
         const { transferId, imageIndex } = data;
         if (handlerCollection.has(transferId)) {
           const handler = handlerCollection.get(transferId)!;
@@ -66,7 +77,7 @@ export const createTransferConnectionFactory = (
   });
 
   let lastTransferId = 0;
-  return (volumeSpecifier, handler): TransferConnection => {
+  return (volumeSpecifier, handler, errorHandler): TransferConnection => {
     const { seriesUid, partialVolumeDescriptor } = volumeSpecifier;
     const id = (++lastTransferId).toString();
 
@@ -78,6 +89,7 @@ export const createTransferConnectionFactory = (
     const message = createMessageBuffer(data);
     wsClient.send(message);
     handlerCollection.set(id, handler);
+    if (errorHandler) errorHandlerCollection.set(id, errorHandler);
 
     const setPriority = (imageIndices: number[], priority: number) => {
       const data = setPriorityMessageData(id, imageIndices, priority);
@@ -92,6 +104,7 @@ export const createTransferConnectionFactory = (
         wsClient.send(message);
       }
       handlerCollection.delete(id);
+      errorHandlerCollection.delete(id);
     };
 
     const pause = () => {

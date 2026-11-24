@@ -1,5 +1,5 @@
 import path from 'path';
-import fs from 'fs-extra';
+import fs from 'node:fs/promises';
 import { resultsSchema } from '../schemas/results.ts';
 
 /**

@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import { test, before, after, beforeEach } from 'node:test';
 import type Storage from './Storage.ts';
 import * as path from 'path';
-import fs from 'fs-extra';
+import fs from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import createLocalStorage from './LocalStorage.ts';
 
 let store: Storage;
@@ -10,7 +11,8 @@ let store: Storage;
 const tmpDir = path.join(import.meta.dirname, 'tmp-dir');
 
 before(async function () {
-  await fs.emptyDir(tmpDir);
+  await fs.rm(tmpDir, { recursive: true, force: true });
+  await fs.mkdir(tmpDir, { recursive: true });
   store = await createLocalStorage({
     dataDir: tmpDir,
     nameToPath: (p: string) => path.join(p.substr(0, 2), p + '.txt')
@@ -18,13 +20,15 @@ before(async function () {
 });
 
 beforeEach(async function () {
-  await fs.emptyDir(tmpDir);
-  await fs.outputFile(path.join(tmpDir, 'aa', 'aabbcc.txt'), 'coconut');
+  await fs.rm(tmpDir, { recursive: true, force: true });
+  await fs.mkdir(tmpDir, { recursive: true });
+  await fs.mkdir(path.join(tmpDir, 'aa'));
+  await fs.writeFile(path.join(tmpDir, 'aa', 'aabbcc.txt'), 'coconut');
 });
 
 after(async function () {
   if (tmpDir) {
-    await fs.remove(tmpDir);
+    await fs.rm(tmpDir, { recursive: true, force: true });
   }
 });
 
@@ -37,7 +41,7 @@ test('rejects a storage root that does not exist', async function () {
 test('writes the content to a path derived from the key', async function () {
   await store.write('xxyyzz', Buffer.from('biscuit'));
   const out = path.join(tmpDir, 'xx', 'xxyyzz.txt');
-  assert.equal(await fs.pathExists(out), true);
+  assert.equal(existsSync(out), true);
   assert.equal(await fs.readFile(out, 'utf8'), 'biscuit');
 });
 
@@ -55,13 +59,7 @@ test('distinguishes existing keys from missing keys', async function () {
 });
 
 test('deletes the stored file', async function () {
-  assert.equal(
-    await fs.pathExists(path.join(tmpDir, 'aa', 'aabbcc.txt')),
-    true
-  );
+  assert.equal(existsSync(path.join(tmpDir, 'aa', 'aabbcc.txt')), true);
   await store.remove('aabbcc');
-  assert.equal(
-    await fs.pathExists(path.join(tmpDir, 'aa', 'aabbcc.txt')),
-    false
-  );
+  assert.equal(existsSync(path.join(tmpDir, 'aa', 'aabbcc.txt')), false);
 });

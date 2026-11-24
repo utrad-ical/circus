@@ -5,7 +5,7 @@ import type { DicomFileRepository } from '@utrad-ical/circus-lib';
 import { MemoryDicomFileRepository } from '@utrad-ical/circus-lib';
 import type { SeriesOrientationResolver } from './createSeriesOrientationResolver.ts';
 import createSeriesOrientationResolver from './createSeriesOrientationResolver.ts';
-import fs from 'fs-extra';
+import fs from 'node:fs/promises';
 import path from 'path';
 import type { DicomTagReader } from '../interface.ts';
 

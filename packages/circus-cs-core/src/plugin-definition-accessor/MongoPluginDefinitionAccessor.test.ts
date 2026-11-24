@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, test, before, after } from 'node:test';
 import path from 'path';
-import fs from 'fs-extra';
+import fs from 'node:fs/promises';
 import { testClientPool } from '../testHelper.ts';
 import createMongoPluginDefinitionAccessor from './MongoPluginDefinitionAccessor.ts';
 import type { MongoClientPool } from '../mongoClientPool.ts';

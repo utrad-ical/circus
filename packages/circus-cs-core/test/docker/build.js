@@ -1,7 +1,7 @@
 import cp from 'node:child_process';
 import path from 'node:path';
 import { styleText } from 'node:util';
-import fs from 'fs-extra';
+import fs from 'node:fs/promises';
 
 // Builds mock docker images into the local machine.
 
@@ -9,7 +9,7 @@ const build = async target => {
   console.log('\n' + styleText('yellow', `Building circus-mock-${target}`));
 
   const tmpDir = path.resolve(import.meta.dirname, 'tmp');
-  await fs.ensureDir(tmpDir);
+  await fs.mkdir(tmpDir, { recursive: true });
 
   const dockerFile = unindent(`
     FROM node:12-alpine
@@ -25,12 +25,12 @@ const build = async target => {
     version: '1.0.0'
   });
   await fs.writeFile(path.join(tmpDir, 'plugin.json'), pluginDefinitionFile);
-  await fs.copy(
+  await fs.cp(
     path.join(import.meta.dirname, '..', 'results'),
     path.join(tmpDir, 'results'),
     { recursive: true }
   );
-  await fs.copy(
+  await fs.cp(
     path.join(import.meta.dirname, 'main.js'),
     path.join(tmpDir, 'main.js')
   );
@@ -46,7 +46,7 @@ const build = async target => {
       process.exitCode = 1;
     }
   } finally {
-    await fs.remove(tmpDir);
+    await fs.rm(tmpDir, { recursive: true, force: true });
   }
 };
 

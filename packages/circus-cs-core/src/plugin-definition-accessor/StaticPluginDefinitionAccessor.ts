@@ -1,5 +1,5 @@
 import path from 'path';
-import fs from 'fs-extra';
+import fs from 'node:fs/promises';
 import type { FunctionService } from '@utrad-ical/circus-lib';
 import type * as circus from '../interface.ts';
 

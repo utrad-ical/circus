@@ -7,7 +7,7 @@ import createDicomImporter from './createDicomImporter.ts';
 import type { DicomImporter, Models } from './interface.ts';
 import createTestLogger from './test/util-logger.ts';
 import createDicomTagReader from './utils/createDicomTagReader.ts';
-import fs from 'fs-extra';
+import fs from 'node:fs/promises';
 import createTransactionManager from './createTransactionManager.ts';
 
 const modelsPromise = usingModels();

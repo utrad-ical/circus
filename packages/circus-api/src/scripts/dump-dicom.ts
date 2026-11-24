@@ -1,6 +1,6 @@
 import type { Command } from 'commander';
 import { runCommand, type CommandService } from './Command.ts';
-import fs from 'fs-extra';
+import fs from 'node:fs/promises';
 import type { DicomTagReader } from '../interface.ts';
 
 export const configure = (program: Command) =>

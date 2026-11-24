@@ -1,5 +1,5 @@
 import type { FunctionService } from '@utrad-ical/circus-lib';
-import fs from 'fs-extra';
+import fs from 'node:fs/promises';
 import path from 'path';
 import type stream from 'stream';
 import { PassThrough } from 'stream';
@@ -87,11 +87,11 @@ const pluginJobRunner: FunctionService<
   ) => {
     // Prepare working directories
     logStream.write('  Preparing working directories...\n');
-    await fs.ensureDir(baseDir(jobId));
+    await fs.mkdir(baseDir(jobId), { recursive: true });
     await Promise.all([
-      fs.ensureDir(workDir(jobId, 'in')),
-      fs.ensureDir(workDir(jobId, 'out')),
-      fs.ensureDir(workDir(jobId, 'dicom'))
+      fs.mkdir(workDir(jobId, 'in'), { recursive: true }),
+      fs.mkdir(workDir(jobId, 'out'), { recursive: true }),
+      fs.mkdir(workDir(jobId, 'dicom'), { recursive: true })
     ]);
     // Fetches DICOM data from DicomFileRepository and builds raw volume
     const inDir = workDir(jobId, 'in');
@@ -126,7 +126,8 @@ const pluginJobRunner: FunctionService<
     await jobReporter.packDir(jobId, stream);
 
     // And removes the job temp directory altogether
-    if (removeTemporaryDirectory) await fs.remove(baseDir(jobId));
+    if (removeTemporaryDirectory)
+      await fs.rm(baseDir(jobId), { recursive: true, force: true });
   };
 
   /**

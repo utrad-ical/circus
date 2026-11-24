@@ -1,7 +1,7 @@
 import type { SeriesAccessor } from './DicomFileRepository.ts';
 import type DicomFileRepository from './DicomFileRepository.ts';
 import path from 'path';
-import fs from 'fs-extra';
+import fs from 'node:fs/promises';
 import crypto from 'crypto';
 import * as mr from 'multi-integer-range';
 import type { ConcurrencyGate } from '../concurrencyGate.ts';
@@ -80,7 +80,7 @@ export default class StaticDicomFileRepository implements DicomFileRepository {
     const save = async (image: number, buffer: ArrayBuffer) => {
       const fileName = pad8(image) + '.dcm';
       const filePath = path.join(dir, fileName);
-      await fs.ensureDir(dir);
+      await fs.mkdir(dir, { recursive: true });
       await this.concurrencyGate.use(() =>
         fs.writeFile(filePath, Buffer.from(buffer))
       );
@@ -97,6 +97,6 @@ export default class StaticDicomFileRepository implements DicomFileRepository {
 
   public async deleteSeries(seriesUid: string): Promise<void> {
     const dir = this.determineDir(seriesUid);
-    await fs.remove(dir);
+    await fs.rm(dir, { recursive: true, force: true });
   }
 }

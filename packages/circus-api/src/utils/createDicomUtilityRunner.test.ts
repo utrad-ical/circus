@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import createDicomUtilityRunner from './createDicomUtilityRunner.ts';
-import fs from 'fs-extra';
+import fs from 'node:fs/promises';
 import path from 'path';
 import parser from 'dicom-parser';
 

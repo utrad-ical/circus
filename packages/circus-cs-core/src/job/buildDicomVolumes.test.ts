@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 import { createDicomExtractorWorker } from '@utrad-ical/circus-rs/server';
 import path from 'path';
-import fs from 'fs-extra';
+import fs from 'node:fs/promises';
 import buildDicomVolumes from './buildDicomVolumes.ts';
 import type { DicomFileRepository } from '@utrad-ical/circus-lib';
 import createDicomVoxelDumper from './createDicomVoxelDumper.ts';
@@ -38,7 +38,8 @@ describe('buildDicomVolume', () => {
       import.meta.dirname,
       '../../test/build-dicom-test'
     );
-    await fs.emptyDir(tmpDestDir);
+    await fs.rm(tmpDestDir, { recursive: true, force: true });
+    await fs.mkdir(tmpDestDir, { recursive: true });
     try {
       await buildDicomVolumes(
         dicomVoxelDumper,
@@ -57,7 +58,7 @@ describe('buildDicomVolume', () => {
       assert.ok(files.includes('0.json'));
     } finally {
       await dicomExtractorWorker.dispose();
-      await fs.remove(tmpDestDir);
+      await fs.rm(tmpDestDir, { recursive: true, force: true });
     }
   });
 });

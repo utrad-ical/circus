@@ -31,7 +31,6 @@
     "dicom-parser": "^1.8.4",
     "dotenv": "^16.0.3",
     "fflate": "^0.8.3",
-    "fs-extra": "^9.0.0",
     "generic-pool": "^3.7.1",
     "hono": "^4.13.19",
     "http-status": "^1.4.2",
@@ -51,7 +50,6 @@
   },
   "devDependencies": {
     "@types/bytes": "^3.1.0",
-    "@types/fs-extra": "^8.1.0",
     "@types/js-yaml": "^3.12.7",
     "@types/lodash": "^4.14.161",
     "@types/mime": "^2.0.3",

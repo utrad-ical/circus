@@ -11,7 +11,7 @@ import {
 import type { TestHttpClient } from '../../test/util-http.ts';
 import { packTar } from 'modern-tar';
 import type { Readable } from 'node:stream';
-import fs from 'fs-extra';
+import fs from 'node:fs/promises';
 import path from 'path';
 import { setUpMongoFixture } from '../../test/util-mongo.ts';
 import type { ApiTest } from '../../test/util-routes.ts';

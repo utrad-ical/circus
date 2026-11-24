@@ -51,7 +51,7 @@ export default function metadata(): [MiddlewareHandler<RsEnv>, Handler<RsEnv>] {
     };
 
     const { voxelCount, voxelSize, dicomWindow, pixelFormat, mode } =
-      await extractVolumeMetadata(volumeAccessor);
+      await extractVolumeMetadata(volumeAccessor, loadImages);
 
     const estimatedWindow =
       estimateWindow === 'none'
@@ -81,8 +81,12 @@ type VolumeMetadata = {
   mode: '3d' | '2d';
 };
 
+/**
+ * @param imageNos The images of the (partial) volume in its order
+ */
 async function extractVolumeMetadata(
-  volumeAccessor: VolumeAccessor
+  volumeAccessor: VolumeAccessor,
+  imageNos: number[]
 ): Promise<VolumeMetadata> {
   const { imageMetadata, load, images, determinePitch, isLike3d } =
     volumeAccessor;
@@ -93,8 +97,9 @@ async function extractVolumeMetadata(
   await load(primaryImageNo);
   const primaryMetadata = imageMetadata.get(primaryImageNo)!;
 
-  const mode = (await isLike3d()) ? '3d' : '2d';
-  const pitch = mode === '3d' ? await determinePitch() : 1;
+  await isLike3d(); // Enables the check of each image of the series
+  const mode = (await isLike3d(imageNos)) ? '3d' : '2d';
+  const pitch = mode === '3d' ? await determinePitch(imageNos) : 1;
 
   return {
     voxelCount: [primaryMetadata.columns, primaryMetadata.rows, count],

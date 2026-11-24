@@ -10,6 +10,7 @@ import PriorityIntegerCaller from '../../common/PriorityIntegerCaller.ts';
 import type RawData from '../../common/RawData.ts';
 import { type RangeInput, toRange } from '../../common/rangeInput.ts';
 import type { DicomExtractorWorker } from './extractor-worker/createDicomExtractorWorker.ts';
+import { determineSliceSpacing } from './openSeriesVolume.ts';
 
 export type VolumeProvider = (seriesUid: string) => Promise<VolumeAccessor>;
 
@@ -25,9 +26,9 @@ export interface VolumeAccessor {
    * Maps an image number to the corresponding zero-based volume z-index
    */
   zIndices: Map<number, number>;
-  determinePitch: () => Promise<number>;
+  determinePitch: (imageNos?: number[]) => Promise<number>;
   images: mr.MIR;
-  isLike3d: () => Promise<boolean>;
+  isLike3d: (imageNos?: number[]) => Promise<boolean>;
 }
 
 interface OptionsWithoutCache {
@@ -121,70 +122,68 @@ const createUncachedVolumeProvider: FunctionService<
       return metadata;
     };
 
-    const determinePitch = async () => {
-      const count = mr.length(imageRange);
-
-      if (primaryMetadata.pitch) {
-        // (0018,0088) must not be negative, but some devices write negative values
-        return Math.abs(primaryMetadata.pitch);
-      } else if (count > 1) {
-        const secondaryMetadata = await loadMetadata(mr.at(imageRange, 1)!);
-        return Math.abs(
-          secondaryMetadata.sliceLocation! - primaryMetadata.sliceLocation!
-        );
-      } else {
-        return 1;
-      }
+    /**
+     * Determines the slice spacing from the first two of the images,
+     * in the same way as the export (`determineSliceSpacing`).
+     * @param imageNos The images of a partial volume in its order.
+     * Defaults to the whole series.
+     */
+    const determinePitch = async (imageNos?: number[]) => {
+      const [firstNo, secondNo] = imageNos ?? [
+        mr.at(imageRange, 0),
+        mr.at(imageRange, 1)
+      ];
+      const first = await loadMetadata(firstNo!);
+      // The spacing tag of the first image is used as is if present
+      if (first.pitch || secondNo === undefined)
+        return determineSliceSpacing(first, undefined);
+      return determineSliceSpacing(first, await loadMetadata(secondNo));
     };
 
     /**
-     * Determines if the image is a "3D-like image" and returns it.
-     * If the first two images in the subseries satisfy all of the following,
+     * Determines if the images are "3D-like images" and returns it.
+     * If the first two images satisfy all of the following,
      * it will determine that they are "3D-like images" and return true.
      * - The modality is CT, MR or PT.
      * - Pixel format is monochrome.
      * - The orientation of the image written in the DICOM tag is the same for the first and the second image.
      * - DICOM tag does not have a flag that the image is a reconstructed image.
+     * @param imageNos The images of a partial volume in its order.
+     * Defaults to the whole series, which also enables the check of
+     * each image of the series. A partial volume does not change the check,
+     * because the series is shared with other partial volumes.
      * @returns True for "3D-like images"
      */
-    const isLike3d = async () => {
-      const count = mr.length(imageRange);
+    const isLike3d = async (imageNos?: number[]) => {
+      const [firstNo, secondNo] = imageNos ?? [
+        mr.at(imageRange, 0),
+        mr.at(imageRange, 1)
+      ];
+      const first = await loadMetadata(firstNo!);
+      const checkFirstImage = determineIf3dImageFromMetadata(first);
+      if (secondNo === undefined) return checkFirstImage;
 
-      // primary image
-      const checkPrimaryImage = determineIf3dImageFromMetadata(primaryMetadata);
-      if (count === 1) {
-        return checkPrimaryImage;
-      }
-
-      // secondary image
-      const secondaryMetadata = await loadMetadata(mr.at(imageRange, 1)!);
-      const checkSecondaryImage =
-        determineIf3dImageFromMetadata(secondaryMetadata);
-
-      const checkImageOrientationPatient =
-        primaryMetadata.imageOrientationPatient ===
-        secondaryMetadata.imageOrientationPatient;
-
-      // check
+      const second = await loadMetadata(secondNo);
       const like3d =
-        checkPrimaryImage &&
-        checkSecondaryImage &&
-        checkImageOrientationPatient;
+        checkFirstImage &&
+        determineIf3dImageFromMetadata(second) &&
+        first.imageOrientationPatient === second.imageOrientationPatient;
 
-      const imageOrientationPatient = primaryMetadata.imageOrientationPatient;
-
-      verifyMetadataOf3dImage = like3d
-        ? (imageNo, metadata) => {
-            if (
-              !determineIf3dImageFromMetadata(metadata) ||
-              imageOrientationPatient !== metadata.imageOrientationPatient
-            )
-              throw userError(
-                `Image #${imageNo} does not look like a part of the 3D volume ` +
-                  'that the first images make.'
-              );
-          }
-        : undefined;
+      if (!imageNos) {
+        const imageOrientationPatient = first.imageOrientationPatient;
+        verifyMetadataOf3dImage = like3d
+          ? (imageNo, metadata) => {
+              if (
+                !determineIf3dImageFromMetadata(metadata) ||
+                imageOrientationPatient !== metadata.imageOrientationPatient
+              )
+                throw userError(
+                  `Image #${imageNo} does not look like a part of the 3D volume ` +
+                    'that the first images make.'
+                );
+            }
+          : undefined;
+      }
 
       return like3d;
     };

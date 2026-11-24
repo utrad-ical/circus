@@ -2,7 +2,7 @@ import { httpError } from '../middleware/errorHandler.ts';
 import status from 'http-status';
 import type { CollectionAccessor } from '../db/createCollectionAccessor.ts';
 import type { CircusContext } from '../typings/middlewares.ts';
-import { EJSON } from 'bson';
+import { BSON } from 'mongodb';
 import type { z } from 'zod';
 import { validate, ValidationError } from '../createValidator.ts';
 
@@ -35,7 +35,7 @@ export const extractFilter = (ctx: CircusContext, schema: z.ZodType) => {
   let filter: object;
   try {
     filter = urlQuery.filter
-      ? (EJSON.parse(
+      ? (BSON.EJSON.parse(
           Array.isArray(urlQuery.filter) ? urlQuery.filter[0] : urlQuery.filter
         ) as object)
       : {};

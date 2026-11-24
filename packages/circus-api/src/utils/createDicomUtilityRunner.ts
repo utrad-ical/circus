@@ -1,7 +1,7 @@
 import { Pool } from 'tarn';
 import type { ChildProcessWithoutNullStreams } from 'child_process';
 import cp from 'child_process';
-import split from 'split';
+import readline from 'node:readline';
 import type { NoDepFunctionService } from '@utrad-ical/circus-lib';
 import { dicomUtilityRunnerDockerImage } from '../config/default.ts';
 
@@ -14,6 +14,19 @@ export interface DicomUtilityRunner {
   compress: (buf: ArrayBuffer) => Promise<ArrayBuffer>;
   dispose: () => Promise<void>;
 }
+
+/**
+ * Calls `onLine` for each line of the stream until the returned function
+ * is called, which detaches it from the stream.
+ */
+const readLines = (
+  stream: NodeJS.ReadableStream,
+  onLine: (line: string) => void
+) => {
+  const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
+  rl.on('line', onLine);
+  return () => rl.close();
+};
 
 const createDicomUtilityRunner: NoDepFunctionService<
   DicomUtilityRunner
@@ -36,24 +49,24 @@ const createDicomUtilityRunner: NoDepFunctionService<
           '-i'
         ]);
         const errorHandler = (err: Error) => {
-          childProcess.stdout.unpipe();
+          closeStdout();
           reject(err);
         };
         childProcess.on('error', errorHandler);
         childProcess.on('close', () => finishedMap.set(childProcess, true));
-        childProcess.stderr.pipe(split()).on('data', (line: string) => {
+        const closeStderr = readLines(childProcess.stderr, line => {
           childProcess.kill();
           reject(new Error(line));
         });
-        childProcess.stdout.pipe(split()).on('data', (line: string) => {
+        const closeStdout = readLines(childProcess.stdout, line => {
           if (line !== 'Ready') {
             // Sends SIGTERM, which is the default of `kill` command
             childProcess.kill();
             reject(new Error('Container did not return "Ready."'));
             return;
           }
-          childProcess.stdout.unpipe();
-          childProcess.stderr.unpipe();
+          closeStdout();
+          closeStderr();
           childProcess.removeListener('error', errorHandler);
           resolve(childProcess);
         });
@@ -89,8 +102,8 @@ const createDicomUtilityRunner: NoDepFunctionService<
         childProcess.stdin.removeListener('error', errorHandler);
         childProcess.stdout.removeListener('error', errorHandler);
         childProcess.stderr.removeListener('error', errorHandler);
-        childProcess.stdout.unpipe();
-        childProcess.stderr.unpipe();
+        closeStdout();
+        closeStderr();
         pool.release(childProcess);
       };
       childProcess.on('error', errorHandler);
@@ -98,13 +111,13 @@ const createDicomUtilityRunner: NoDepFunctionService<
       childProcess.stderr.on('error', errorHandler);
       childProcess.stdin.on('error', errorHandler);
 
-      childProcess.stderr.pipe(split()).on('data', line => {
+      const closeStderr = readLines(childProcess.stderr, line => {
         if (!line.length) return;
         reject(new Error(line));
       });
 
       let count = 0;
-      childProcess.stdout.pipe(split()).on('data', (line: string) => {
+      const closeStdout = readLines(childProcess.stdout, line => {
         switch (count++) {
           case 0:
             if (line !== 'OK') {

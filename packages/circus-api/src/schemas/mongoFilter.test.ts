@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { EJSON } from 'bson';
+import { BSON } from 'mongodb';
 import { z } from 'zod';
 import { validate } from '../createValidator.ts';
 import { dateField } from '@utrad-ical/circus-api-schema/formats';
@@ -28,7 +28,7 @@ const isValid = (data: unknown) => {
   }
 };
 
-const ejson = (text: string) => EJSON.parse(text);
+const ejson = (text: string) => BSON.EJSON.parse(text);
 
 describe('mongoFilter', () => {
   test('values and operators', () => {

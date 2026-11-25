@@ -1,0 +1,16 @@
+{
+  "name": "@utrad-ical/circus-e2e",
+  "private": true,
+  "type": "module",
+  "description": "End-to-end tests of the CIRCUS web UI",
+  "scripts": {
+    "e2e": "playwright test",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^24.19.2",
+    "mongodb": "^7.8.0",
+    "typescript": "~7.0.2"
+  }
+}
